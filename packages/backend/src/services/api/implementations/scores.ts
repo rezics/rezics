@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
 
 import { Database } from "../../database/index.ts";
@@ -242,31 +242,29 @@ export const ScoresHandlers = HttpApiBuilder.group(
       newFields: Record<string, number> | null,
     ) =>
       Effect.gen(function* () {
-        const existing = yield* Effect.orDie(
+        const existing = yield* 
           database
             .select()
             .from(ScoreAggregate)
             .where(and(eq(ScoreAggregate.unitId, unitId), eq(ScoreAggregate.realm, realm)))
-            .limit(1),
-        );
+            .limit(1);
         const row = existing[0];
 
         // Deletion case: removing the last entry / 删除情形：移除最后一个条目
         if (newValue === null && row) {
           const nextCount = row.totalCount - 1;
           if (nextCount <= 0) {
-            yield* Effect.orDie(
+            yield* 
               database
                 .delete(ScoreAggregate)
-                .where(and(eq(ScoreAggregate.unitId, unitId), eq(ScoreAggregate.realm, realm))),
-            );
+                .where(and(eq(ScoreAggregate.unitId, unitId), eq(ScoreAggregate.realm, realm)));
             return;
           }
 
           const distribution = applyDistributionDelta(row.distribution as Distribution, oldValue, null);
           const fields = applyFieldsDelta(row.fields as FieldsAggregate | null, oldFields, null);
 
-          yield* Effect.orDie(
+          yield* 
             database
               .update(ScoreAggregate)
               .set({
@@ -276,8 +274,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
                 fields: fields ?? undefined,
                 updatedAt: new Date(),
               })
-              .where(and(eq(ScoreAggregate.unitId, unitId), eq(ScoreAggregate.realm, realm))),
-          );
+              .where(and(eq(ScoreAggregate.unitId, unitId), eq(ScoreAggregate.realm, realm)));
           return;
         }
 
@@ -293,7 +290,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
               )
             : null;
 
-          yield* Effect.orDie(
+          yield* 
             database.insert(ScoreAggregate).values({
               unitId,
               realm,
@@ -302,8 +299,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
               distribution,
               fields: fields ?? undefined,
               updatedAt: new Date(),
-            }),
-          );
+            });
           return;
         }
 
@@ -315,7 +311,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
           const distribution = applyDistributionDelta(row.distribution as Distribution, oldValue, newValue);
           const fields = applyFieldsDelta(row.fields as FieldsAggregate | null, oldFields, newFields);
 
-          yield* Effect.orDie(
+          yield* 
             database
               .update(ScoreAggregate)
               .set({
@@ -325,8 +321,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
                 fields: fields ?? undefined,
                 updatedAt: new Date(),
               })
-              .where(and(eq(ScoreAggregate.unitId, unitId), eq(ScoreAggregate.realm, realm))),
-          );
+              .where(and(eq(ScoreAggregate.unitId, unitId), eq(ScoreAggregate.realm, realm)));
         }
       });
 
@@ -338,7 +333,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
 
           // Validate score range / 校验评分范围
           if (!isValidScore(payload.value)) {
-            return yield* Effect.die(`Score value must be an integer between ${SCORE_MIN} and ${SCORE_MAX}`);
+            return yield* new HttpApiError.InternalServerError();
           }
 
           const entryFields = (payload.fields as Record<string, number>) ?? null;
@@ -346,25 +341,24 @@ export const ScoresHandlers = HttpApiBuilder.group(
 
           // Validate fields against realm field registry / 根据 realm 字段注册表校验各字段
           if (newFields) {
-            const realmFields = yield* Effect.orDie(
+            const realmFields = yield* 
               database
                 .select({ key: ScoreRealmField.key })
                 .from(ScoreRealmField)
-                .where(eq(ScoreRealmField.realm, payload.realm)),
-            );
+                .where(eq(ScoreRealmField.realm, payload.realm));
             const allowedKeys = new Set(realmFields.map((f) => f.key));
             if (allowedKeys.size === 0) {
-              return yield* Effect.die("Fields submitted for a realm with no registered fields");
+              return yield* new HttpApiError.InternalServerError();
             }
             for (const [key, val] of Object.entries(newFields)) {
               if (!allowedKeys.has(key) || !isValidScore(val)) {
-                return yield* Effect.die(`Invalid field key or value: ${key}`);
+                return yield* new HttpApiError.InternalServerError();
               }
             }
           }
 
           // Look up existing entry for delta computation / 查询已有条目以计算增量
-          const existingRows = yield* Effect.orDie(
+          const existingRows = yield* 
             database
               .select()
               .from(ScoreEntry)
@@ -375,14 +369,13 @@ export const ScoresHandlers = HttpApiBuilder.group(
                   eq(ScoreEntry.realm, payload.realm),
                 ),
               )
-              .limit(1),
-          );
+              .limit(1);
           const existing = existingRows[0];
           const oldValue = existing?.value ?? null;
           const oldFields = (existing?.fields as Record<string, number>) ?? null;
 
           // Upsert the score entry / 写入或更新评分条目
-          const entryRows = yield* Effect.orDie(
+          const entryRows = yield* 
             database
               .insert(ScoreEntry)
               .values({
@@ -401,8 +394,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
                   updatedAt: new Date(),
                 },
               })
-              .returning(),
-          );
+              .returning();
           const entry = entryRows[0]!;
 
           // Update the aggregate / 更新聚合
@@ -417,43 +409,40 @@ export const ScoresHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
 
-          const rows = yield* Effect.orDie(database.select().from(ScoreEntry).where(eq(ScoreEntry.id, params.id)).limit(1));
+          const rows = yield* database.select().from(ScoreEntry).where(eq(ScoreEntry.id, params.id)).limit(1);
           const entry = rows[0];
           if (!entry) return yield* new ScoreNotFound();
 
           // Check for linked posts (reviews/remarks) / 检查关联的 post（评论/短评）
-          const linkedPosts = yield* Effect.orDie(
-            database.select({ unitId: Post.unitId }).from(Post).where(eq(Post.scoreEntryId, params.id)),
-          );
+          const linkedPosts = yield* 
+            database.select({ unitId: Post.unitId }).from(Post).where(eq(Post.scoreEntryId, params.id));
 
           if (linkedPosts.length > 0) {
             // Check if user is admin / 检查用户是否为管理员
-            const userRows = yield* Effect.orDie(
+            const userRows = yield* 
               database
                 .select({ permission: User.permission })
                 .from(User)
                 .where(eq(User.unitId, user.id))
-                .limit(1),
-            );
+                .limit(1);
             const perm = userRows[0]?.permission as { role?: string } | null;
             const isAdmin = perm?.role === "ADMIN" || perm?.role === "ROOT";
 
             if (!isAdmin) return yield* new ScoreConflict();
 
             // Admin: delete linked posts first / 管理员：先删除关联的 post
-            yield* Effect.orDie(database.delete(Post).where(eq(Post.scoreEntryId, params.id)));
-            yield* Effect.orDie(
+            yield* database.delete(Post).where(eq(Post.scoreEntryId, params.id));
+            yield* 
               database.delete(Unit).where(
                 inArray(
                   Unit.id,
                   linkedPosts.map((p) => p.unitId),
                 ),
-              ),
-            );
+              );
           }
 
           // Delete the entry / 删除条目
-          yield* Effect.orDie(database.delete(ScoreEntry).where(eq(ScoreEntry.id, params.id)));
+          yield* database.delete(ScoreEntry).where(eq(ScoreEntry.id, params.id));
 
           // Update the aggregate / 更新聚合
           const oldFields = (entry.fields as Record<string, number>) ?? null;
@@ -464,9 +453,8 @@ export const ScoresHandlers = HttpApiBuilder.group(
       // ── Aggregates by unit / 某个 unit 的所有 realm 聚合数据 ────
       .handle("aggregatesByUnit", ({ params }) =>
         Effect.gen(function* () {
-          const rows = yield* Effect.orDie(
-            database.select().from(ScoreAggregate).where(eq(ScoreAggregate.unitId, params.unitId)),
-          );
+          const rows = yield* 
+            database.select().from(ScoreAggregate).where(eq(ScoreAggregate.unitId, params.unitId));
           return rows.map(aggregateToDTO);
         }),
       )
@@ -474,12 +462,11 @@ export const ScoresHandlers = HttpApiBuilder.group(
       // ── User scores for a unit / 用户对某个 unit 的评分条目 ─────
       .handle("userScores", ({ params }) =>
         Effect.gen(function* () {
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select()
               .from(ScoreEntry)
-              .where(and(eq(ScoreEntry.userId, params.userId), eq(ScoreEntry.unitId, params.unitId))),
-          );
+              .where(and(eq(ScoreEntry.userId, params.userId), eq(ScoreEntry.unitId, params.unitId)));
           return rows.map(entryToDTO);
         }),
       )
@@ -490,41 +477,38 @@ export const ScoresHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
 
           // Admin check / 管理员检查
-          const userRows = yield* Effect.orDie(
+          const userRows = yield* 
             database
               .select({ permission: User.permission })
               .from(User)
               .where(eq(User.unitId, user.id))
-              .limit(1),
-          );
+              .limit(1);
           const perm = userRows[0]?.permission as { role?: string } | null;
           const isAdmin = perm?.role === "ADMIN" || perm?.role === "ROOT";
           if (!isAdmin) return yield* new ScoreForbidden();
 
           // Fetch all entries for the unit+realm / 获取该 unit+realm 的所有条目
-          const entries = yield* Effect.orDie(
+          const entries = yield* 
             database
               .select()
               .from(ScoreEntry)
-              .where(and(eq(ScoreEntry.unitId, payload.unitId), eq(ScoreEntry.realm, payload.realm))),
-          );
+              .where(and(eq(ScoreEntry.unitId, payload.unitId), eq(ScoreEntry.realm, payload.realm)));
 
           // No entries: delete aggregate and return null / 无条目：删除聚合并返回 null
           if (entries.length === 0) {
-            yield* Effect.orDie(
+            yield* 
               database
                 .delete(ScoreAggregate)
                 .where(
                   and(eq(ScoreAggregate.unitId, payload.unitId), eq(ScoreAggregate.realm, payload.realm)),
-                ),
-            );
+                );
             return null;
           }
 
           // Recompute from scratch / 从头重新计算
           const computed = computeAggregateFromEntries(entries);
 
-          const aggRows = yield* Effect.orDie(
+          const aggRows = yield* 
             database
               .insert(ScoreAggregate)
               .values({
@@ -544,8 +528,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
                   updatedAt: new Date(),
                 },
               })
-              .returning(),
-          );
+              .returning();
 
           return aggRows[0] ? aggregateToDTO(aggRows[0]) : null;
         }),
@@ -554,13 +537,12 @@ export const ScoresHandlers = HttpApiBuilder.group(
       // ── List realm fields / 列出 realm 的评分字段 ───────────────
       .handle("listRealmFields", ({ params }) =>
         Effect.gen(function* () {
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select()
               .from(ScoreRealmField)
               .where(eq(ScoreRealmField.realm, params.realmId))
-              .orderBy(asc(ScoreRealmField.position), asc(ScoreRealmField.key)),
-          );
+              .orderBy(asc(ScoreRealmField.position), asc(ScoreRealmField.key));
           return rows.map(realmFieldToDTO);
         }),
       )
@@ -571,29 +553,27 @@ export const ScoresHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
 
           // Admin check / 管理员检查
-          const userRows = yield* Effect.orDie(
+          const userRows = yield* 
             database
               .select({ permission: User.permission })
               .from(User)
               .where(eq(User.unitId, user.id))
-              .limit(1),
-          );
+              .limit(1);
           const perm = userRows[0]?.permission as { role?: string } | null;
           const isAdmin = perm?.role === "ADMIN" || perm?.role === "ROOT";
           if (!isAdmin) return yield* new ScoreForbidden();
 
           // Compute position: after the last existing field / 计算 position：排在最后一个已有字段之后
-          const lastRows = yield* Effect.orDie(
+          const lastRows = yield* 
             database
               .select({ position: ScoreRealmField.position })
               .from(ScoreRealmField)
               .where(eq(ScoreRealmField.realm, params.realmId))
               .orderBy(desc(ScoreRealmField.position), desc(ScoreRealmField.key))
-              .limit(1),
-          );
+              .limit(1);
           const position = payload.position ?? generateAfter(lastRows[0]?.position);
 
-          const fieldRows = yield* Effect.orDie(
+          const fieldRows = yield* 
             database
               .insert(ScoreRealmField)
               .values({
@@ -603,8 +583,7 @@ export const ScoresHandlers = HttpApiBuilder.group(
                 position,
                 updatedAt: new Date(),
               })
-              .returning(),
-          );
+              .returning();
 
           return realmFieldToDTO(fieldRows[0]!);
         }),
@@ -616,32 +595,29 @@ export const ScoresHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
 
           // Admin check / 管理员检查
-          const userRows = yield* Effect.orDie(
+          const userRows = yield* 
             database
               .select({ permission: User.permission })
               .from(User)
               .where(eq(User.unitId, user.id))
-              .limit(1),
-          );
+              .limit(1);
           const perm = userRows[0]?.permission as { role?: string } | null;
           const isAdmin = perm?.role === "ADMIN" || perm?.role === "ROOT";
           if (!isAdmin) return yield* new ScoreForbidden();
 
           // Check field exists / 检查字段是否存在
-          const existing = yield* Effect.orDie(
+          const existing = yield* 
             database
               .select()
               .from(ScoreRealmField)
               .where(and(eq(ScoreRealmField.realm, params.realmId), eq(ScoreRealmField.key, params.key)))
-              .limit(1),
-          );
+              .limit(1);
           if (!existing[0]) return yield* new ScoreNotFound();
 
-          yield* Effect.orDie(
+          yield* 
             database
               .delete(ScoreRealmField)
-              .where(and(eq(ScoreRealmField.realm, params.realmId), eq(ScoreRealmField.key, params.key))),
-          );
+              .where(and(eq(ScoreRealmField.realm, params.realmId), eq(ScoreRealmField.key, params.key)));
         }),
       );
   }),

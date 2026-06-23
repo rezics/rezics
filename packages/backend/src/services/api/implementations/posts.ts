@@ -64,23 +64,19 @@ export const PostsHandlers = HttpApiBuilder.group(
     // 共享辅助：获取单条帖子及其关联数据
     const fetchPost = (unitId: string) =>
       Effect.gen(function* () {
-        const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, unitId)));
+        const units = yield* database.select().from(Unit).where(eq(Unit.id, unitId));
         if (!units[0]) return yield* new PostNotFound();
-        const posts = yield* Effect.orDie(database.select().from(Post).where(eq(Post.unitId, unitId)));
+        const posts = yield* database.select().from(Post).where(eq(Post.unitId, unitId));
         if (!posts[0]) return yield* new PostNotFound();
         const lang = units[0].defaultLanguage ?? "en";
-        const translations = yield* Effect.orDie(
-          database
+        const translations = yield* database
             .select()
             .from(UnitTranslation)
-            .where(and(eq(UnitTranslation.unitId, unitId), eq(UnitTranslation.language, lang))),
-        );
-        const contents = yield* Effect.orDie(
-          database
+            .where(and(eq(UnitTranslation.unitId, unitId), eq(UnitTranslation.language, lang)));
+        const contents = yield* database
             .select()
             .from(ContentTranslation)
-            .where(and(eq(ContentTranslation.unitId, unitId), eq(ContentTranslation.language, lang))),
-        );
+            .where(and(eq(ContentTranslation.unitId, unitId), eq(ContentTranslation.language, lang)));
         return postToDTO(units[0], posts[0], translations[0], contents[0]);
       });
 
@@ -93,8 +89,7 @@ export const PostsHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           const language = payload.language ?? "en";
-          const unitRows = yield* Effect.orDie(
-            database
+          const unitRows = yield* database
               .insert(Unit)
               .values({
                 type: "POST",
@@ -103,49 +98,40 @@ export const PostsHandlers = HttpApiBuilder.group(
                 defaultLanguage: language,
                 status: "DRAFT",
               })
-              .returning(),
-          );
+              .returning();
           const unit = unitRows[0]!;
 
-          yield* Effect.orDie(
-            database.insert(Post).values({
+          yield* database.insert(Post).values({
               unitId: unit.id,
               authorUserId: user.id,
               kind: (payload.kind as (typeof Post.$inferInsert)["kind"]) ?? "POST",
               variantUnitId: payload.variantUnitId ?? undefined,
-            }),
-          );
+            });
 
           if (payload.title) {
-            yield* Effect.orDie(
-              database.insert(UnitTranslation).values({
+            yield* database.insert(UnitTranslation).values({
                 unitId: unit.id,
                 language,
                 title: payload.title,
-              }),
-            );
+              });
           }
 
           if (payload.content) {
-            yield* Effect.orDie(
-              database.insert(ContentTranslation).values({
+            yield* database.insert(ContentTranslation).values({
                 unitId: unit.id,
                 language,
                 content: payload.content,
-              }),
-            );
+              });
           }
 
           if (payload.realmUnitId) {
-            yield* Effect.orDie(
-              database.insert(UnitRealm).values({
+            yield* database.insert(UnitRealm).values({
                 realmUnitId: payload.realmUnitId,
                 unitId: unit.id,
-              }),
-            );
+              });
           }
 
-          return yield* Effect.orDie(fetchPost(unit.id));
+          return yield* fetchPost(unit.id);
         }),
       )
 
@@ -153,46 +139,40 @@ export const PostsHandlers = HttpApiBuilder.group(
       .handle("update", ({ params, payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const units = yield* database.select().from(Unit).where(eq(Unit.id, params.unitId));
           if (!units[0]) return yield* new PostNotFound();
           if (units[0].userId !== user.id) return yield* new PostForbidden();
 
           const language = payload.language ?? units[0].defaultLanguage ?? "en";
 
           if (payload.variantUnitId !== undefined) {
-            yield* Effect.orDie(
-              database
+            yield* database
                 .update(Post)
                 .set({ variantUnitId: payload.variantUnitId ?? null, updatedAt: new Date() })
-                .where(eq(Post.unitId, params.unitId)),
-            );
+                .where(eq(Post.unitId, params.unitId));
           }
 
           if (payload.title) {
-            yield* Effect.orDie(
-              database
+            yield* database
                 .insert(UnitTranslation)
                 .values({ unitId: params.unitId, language, title: payload.title })
                 .onConflictDoUpdate({
                   target: [UnitTranslation.unitId, UnitTranslation.language],
                   set: { title: payload.title, updatedAt: new Date() },
-                }),
-            );
+                });
           }
 
           if (payload.content) {
-            yield* Effect.orDie(
-              database
+            yield* database
                 .insert(ContentTranslation)
                 .values({ unitId: params.unitId, language, content: payload.content })
                 .onConflictDoUpdate({
                   target: [ContentTranslation.unitId, ContentTranslation.language],
                   set: { content: payload.content, updatedAt: new Date() },
-                }),
-            );
+                });
           }
 
-          yield* Effect.orDie(database.update(Unit).set({ updatedAt: new Date() }).where(eq(Unit.id, params.unitId)));
+          yield* database.update(Unit).set({ updatedAt: new Date() }).where(eq(Unit.id, params.unitId));
           return yield* fetchPost(params.unitId);
         }),
       )
@@ -201,10 +181,10 @@ export const PostsHandlers = HttpApiBuilder.group(
       .handle("delete", ({ params }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const units = yield* database.select().from(Unit).where(eq(Unit.id, params.unitId));
           if (!units[0]) return yield* new PostNotFound();
           if (units[0].userId !== user.id) return yield* new PostForbidden();
-          yield* Effect.orDie(database.delete(Unit).where(eq(Unit.id, params.unitId)));
+          yield* database.delete(Unit).where(eq(Unit.id, params.unitId));
         }),
       )
 
@@ -216,25 +196,23 @@ export const PostsHandlers = HttpApiBuilder.group(
           if (query.kind) conditions.push(eq(Post.kind, query.kind as (typeof Post.kind.enumValues)[number]));
           const where = conditions.length > 0 ? and(...conditions) : undefined;
 
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .select({ post: Post, unit: Unit })
               .from(Post)
               .innerJoin(Unit, eq(Unit.id, Post.unitId))
               .where(where)
               .orderBy(desc(Unit.createdAt))
               .limit(lim(query.limit))
-              .offset(query.offset ?? 0),
-          );
+              .offset(query.offset ?? 0);
 
           const unitIds = rows.map((r) => r.unit.id);
           const translations =
             unitIds.length > 0
-              ? yield* Effect.orDie(database.select().from(UnitTranslation).where(inArray(UnitTranslation.unitId, unitIds)))
+              ? yield* database.select().from(UnitTranslation).where(inArray(UnitTranslation.unitId, unitIds))
               : [];
           const transMap = new Map(translations.map((t) => [`${t.unitId}:${t.language}`, t]));
 
-          const agg = yield* Effect.orDie(database.select({ total: count() }).from(Post).where(where));
+          const agg = yield* database.select({ total: count() }).from(Post).where(where);
 
           const items = rows.map((r) => {
             const lang = r.unit.defaultLanguage ?? "en";
@@ -254,25 +232,23 @@ export const PostsHandlers = HttpApiBuilder.group(
           if (payload.kind) conditions.push(eq(Post.kind, payload.kind as (typeof Post.kind.enumValues)[number]));
           const where = conditions.length > 0 ? and(...conditions) : undefined;
 
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .select({ post: Post, unit: Unit })
               .from(Post)
               .innerJoin(Unit, eq(Unit.id, Post.unitId))
               .where(where)
               .orderBy(desc(Unit.createdAt))
               .limit(lim(payload.limit))
-              .offset(payload.offset ?? 0),
-          );
+              .offset(payload.offset ?? 0);
 
           const unitIds = rows.map((r) => r.unit.id);
           const translations =
             unitIds.length > 0
-              ? yield* Effect.orDie(database.select().from(UnitTranslation).where(inArray(UnitTranslation.unitId, unitIds)))
+              ? yield* database.select().from(UnitTranslation).where(inArray(UnitTranslation.unitId, unitIds))
               : [];
           const transMap = new Map(translations.map((t) => [`${t.unitId}:${t.language}`, t]));
 
-          const agg = yield* Effect.orDie(database.select({ total: count() }).from(Post).where(where));
+          const agg = yield* database.select({ total: count() }).from(Post).where(where);
 
           const items = rows.map((r) => {
             const lang = r.unit.defaultLanguage ?? "en";
@@ -290,9 +266,7 @@ export const PostsHandlers = HttpApiBuilder.group(
           yield* CurrentUser;
           const overlays: Record<string, unknown> = {};
           if (payload.unitIds.length > 0) {
-            const realms = yield* Effect.orDie(
-              database.select().from(UnitRealm).where(inArray(UnitRealm.unitId, [...payload.unitIds])),
-            );
+            const realms = yield* database.select().from(UnitRealm).where(inArray(UnitRealm.unitId, [...payload.unitIds]));
             for (const r of realms) {
               overlays[r.unitId] = { realmUnitId: r.realmUnitId, moderationStatus: r.moderationStatus };
             }
@@ -305,15 +279,13 @@ export const PostsHandlers = HttpApiBuilder.group(
       .handle("publish", ({ params }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const units = yield* database.select().from(Unit).where(eq(Unit.id, params.unitId));
           if (!units[0]) return yield* new PostNotFound();
           if (units[0].userId !== user.id) return yield* new PostForbidden();
-          yield* Effect.orDie(
-            database
+          yield* database
               .update(Unit)
               .set({ status: "PUBLISHED", publishedAt: new Date(), updatedAt: new Date() })
-              .where(eq(Unit.id, params.unitId)),
-          );
+              .where(eq(Unit.id, params.unitId));
           return yield* fetchPost(params.unitId);
         }),
       )
@@ -322,15 +294,13 @@ export const PostsHandlers = HttpApiBuilder.group(
       .handle("submitToRealm", ({ params, payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const units = yield* database.select().from(Unit).where(eq(Unit.id, params.unitId));
           if (!units[0]) return yield* new PostNotFound();
           if (units[0].userId !== user.id) return yield* new PostForbidden();
-          yield* Effect.orDie(
-            database
+          yield* database
               .insert(UnitRealm)
               .values({ realmUnitId: payload.realmUnitId, unitId: params.unitId })
-              .onConflictDoNothing(),
-          );
+              .onConflictDoNothing();
           return yield* fetchPost(params.unitId);
         }),
       )
@@ -339,12 +309,10 @@ export const PostsHandlers = HttpApiBuilder.group(
       .handle("setState", ({ params, payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const units = yield* database.select().from(Unit).where(eq(Unit.id, params.unitId));
           if (!units[0]) return yield* new PostNotFound();
           if (units[0].userId !== user.id) return yield* new PostForbidden();
-          yield* Effect.orDie(
-            database.update(Post).set({ state: payload.state, updatedAt: new Date() }).where(eq(Post.unitId, params.unitId)),
-          );
+          yield* database.update(Post).set({ state: payload.state, updatedAt: new Date() }).where(eq(Post.unitId, params.unitId));
           return yield* fetchPost(params.unitId);
         }),
       )
@@ -353,10 +321,9 @@ export const PostsHandlers = HttpApiBuilder.group(
       .handle("createPin", ({ payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, payload.unitId)));
+          const units = yield* database.select().from(Unit).where(eq(Unit.id, payload.unitId));
           if (!units[0]) return yield* new PostNotFound();
-          yield* Effect.orDie(
-            database
+          yield* database
               .insert(CommentPromotion)
               .values({
                 scopeUnitId: payload.unitId,
@@ -365,8 +332,7 @@ export const PostsHandlers = HttpApiBuilder.group(
                 position: "V",
                 byUserId: user.id,
               })
-              .onConflictDoNothing(),
-          );
+              .onConflictDoNothing();
           return yield* fetchPost(payload.unitId);
         }),
       )
@@ -375,13 +341,11 @@ export const PostsHandlers = HttpApiBuilder.group(
       .handle("deletePin", ({ payload }) =>
         Effect.gen(function* () {
           yield* CurrentUser;
-          yield* Effect.orDie(
-            database
+          yield* database
               .delete(CommentPromotion)
               .where(
                 and(eq(CommentPromotion.scopeUnitId, payload.unitId), eq(CommentPromotion.commentId, payload.unitId)),
-              ),
-          );
+              );
         }),
       )
 
@@ -389,11 +353,10 @@ export const PostsHandlers = HttpApiBuilder.group(
       .handle("acceptAnswer", ({ payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, payload.postUnitId)));
+          const units = yield* database.select().from(Unit).where(eq(Unit.id, payload.postUnitId));
           if (!units[0]) return yield* new PostNotFound();
           if (units[0].userId !== user.id) return yield* new PostForbidden();
-          yield* Effect.orDie(
-            database
+          yield* database
               .insert(CommentPromotion)
               .values({
                 scopeUnitId: payload.postUnitId,
@@ -402,8 +365,7 @@ export const PostsHandlers = HttpApiBuilder.group(
                 position: "V",
                 byUserId: user.id,
               })
-              .onConflictDoNothing(),
-          );
+              .onConflictDoNothing();
           return yield* fetchPost(payload.postUnitId);
         }),
       )
@@ -412,11 +374,10 @@ export const PostsHandlers = HttpApiBuilder.group(
       .handle("removeAcceptedAnswer", ({ payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, payload.postUnitId)));
+          const units = yield* database.select().from(Unit).where(eq(Unit.id, payload.postUnitId));
           if (!units[0]) return yield* new PostNotFound();
           if (units[0].userId !== user.id) return yield* new PostForbidden();
-          yield* Effect.orDie(
-            database
+          yield* database
               .delete(CommentPromotion)
               .where(
                 and(
@@ -424,8 +385,7 @@ export const PostsHandlers = HttpApiBuilder.group(
                   eq(CommentPromotion.commentId, payload.commentId),
                   eq(CommentPromotion.kind, "ACCEPTED_ANSWER"),
                 ),
-              ),
-          );
+              );
         }),
       );
   }),

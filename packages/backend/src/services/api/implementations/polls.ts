@@ -1,5 +1,5 @@
 import { Effect, Option } from "effect";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { and, asc, eq, sql } from "drizzle-orm";
 
 import { Database } from "../../database/index.ts";
@@ -100,30 +100,24 @@ export const PollsHandlers = HttpApiBuilder.group(
     // 共享核心：获取投票行、选项、用户投票并构建 DTO。当投票不存在时返回 undefined。
     const fetchPollCore = (pollUnitId: string, userId: string | undefined) =>
       Effect.gen(function* () {
-        const polls = yield* Effect.orDie(
-          database.select().from(Poll).where(eq(Poll.unitId, pollUnitId)),
-        );
+        const polls = yield* database.select().from(Poll).where(eq(Poll.unitId, pollUnitId));
         if (!polls[0]) return undefined;
         const poll = polls[0];
 
-        const options = yield* Effect.orDie(
-          database
+        const options = yield* database
             .select()
             .from(PollOption)
             .where(eq(PollOption.pollUnitId, pollUnitId))
-            .orderBy(asc(PollOption.position), asc(PollOption.optionId)),
-        );
+            .orderBy(asc(PollOption.position), asc(PollOption.optionId));
 
         // Result-visibility gating: LIVE always visible, AFTER_CLOSE only when closed or privileged
         // 结果可见性门控：LIVE 始终可见，AFTER_CLOSE 仅在关闭后或有特权时可见
         const closed = isPollClosed(poll);
         const ownerRows = userId
-          ? yield* Effect.orDie(
-              database
+          ? yield* database
                 .select({ userId: Unit.userId })
                 .from(Unit)
-                .where(eq(Unit.id, pollUnitId)),
-            )
+                .where(eq(Unit.id, pollUnitId))
           : [];
         const isOwner = ownerRows[0]?.userId === userId;
         const isResultsVisible =
@@ -133,8 +127,7 @@ export const PollsHandlers = HttpApiBuilder.group(
         const myVote: string[] = [];
         const myVoteContexts: PollVoteContext[] = [];
         if (userId) {
-          const votes = yield* Effect.orDie(
-            database
+          const votes = yield* database
               .select({
                 optionId: PollVote.optionId,
                 realmUnitId: PollVote.realmUnitId,
@@ -145,8 +138,7 @@ export const PollsHandlers = HttpApiBuilder.group(
                   eq(PollVote.pollUnitId, pollUnitId),
                   eq(PollVote.userId, userId),
                 ),
-              ),
-          );
+              );
           for (const v of votes) {
             myVote.push(v.optionId);
             myVoteContexts.push(
@@ -182,7 +174,7 @@ export const PollsHandlers = HttpApiBuilder.group(
     const fetchPollOrDie = (pollUnitId: string, userId: string) =>
       Effect.gen(function* () {
         const result = yield* fetchPollCore(pollUnitId, userId);
-        if (!result) return yield* Effect.die(new Error("Poll not found after creation"));
+        if (!result) return yield* new HttpApiError.InternalServerError();
         return result;
       });
 
@@ -196,8 +188,7 @@ export const PollsHandlers = HttpApiBuilder.group(
           const closesAt = payload.closesAt ? new Date(payload.closesAt) : null;
 
           // Create the Unit row / 创建 Unit 行
-          const unitRows = yield* Effect.orDie(
-            database
+          const unitRows = yield* database
               .insert(Unit)
               .values({
                 type: "POLL",
@@ -207,41 +198,34 @@ export const PollsHandlers = HttpApiBuilder.group(
                 publishedAt: now,
                 defaultLanguage: "en",
               })
-              .returning(),
-          );
+              .returning();
           const unit = unitRows[0]!;
 
           // Store the question as UnitTranslation title / 将问题存为 UnitTranslation 标题
-          yield* Effect.orDie(
-            database.insert(UnitTranslation).values({
+          yield* database.insert(UnitTranslation).values({
               unitId: unit.id,
               language: "en",
               title: payload.question,
-            }),
-          );
+            });
 
           // Create the Poll extension row / 创建 Poll 扩展行
-          yield* Effect.orDie(
-            database.insert(Poll).values({
+          yield* database.insert(Poll).values({
               unitId: unit.id,
               voteMode,
               resultVisibility: "LIVE",
               anonymous: false,
               closesAt,
-            }),
-          );
+            });
 
           // Create PollOption rows / 创建 PollOption 行
           const positions = generatePositions(payload.options.length);
-          yield* Effect.orDie(
-            database.insert(PollOption).values(
+          yield* database.insert(PollOption).values(
               payload.options.map((label, i) => ({
                 pollUnitId: unit.id,
                 position: positions[i]!,
                 label,
               })),
-            ),
-          );
+            );
 
           return yield* fetchPollOrDie(unit.id, user.id);
         }),
@@ -265,9 +249,7 @@ export const PollsHandlers = HttpApiBuilder.group(
           const pollUnitId = params.pollUnitId;
 
           // Validate poll exists and is open / 校验投票存在且未关闭
-          const polls = yield* Effect.orDie(
-            database.select().from(Poll).where(eq(Poll.unitId, pollUnitId)),
-          );
+          const polls = yield* database.select().from(Poll).where(eq(Poll.unitId, pollUnitId));
           if (!polls[0]) return yield* new PollNotFound();
           const poll = polls[0];
 
@@ -277,8 +259,7 @@ export const PollsHandlers = HttpApiBuilder.group(
 
           for (const optionId of payload.optionIds) {
             // Validate option belongs to this poll / 校验选项属于此投票
-            const optionRows = yield* Effect.orDie(
-              database
+            const optionRows = yield* database
                 .select()
                 .from(PollOption)
                 .where(
@@ -286,15 +267,13 @@ export const PollsHandlers = HttpApiBuilder.group(
                     eq(PollOption.pollUnitId, pollUnitId),
                     eq(PollOption.optionId, optionId),
                   ),
-                ),
-            );
+                );
             if (!optionRows[0]) return yield* new PollNotFound();
 
             if (poll.voteMode === "SINGLE") {
               // SINGLE mode: remove existing vote first, then insert new one
               // SINGLE 模式：先移除现有投票，再插入新投票
-              const existingVotes = yield* Effect.orDie(
-                database
+              const existingVotes = yield* database
                   .select()
                   .from(PollVote)
                   .where(
@@ -302,13 +281,11 @@ export const PollsHandlers = HttpApiBuilder.group(
                       eq(PollVote.pollUnitId, pollUnitId),
                       eq(PollVote.userId, user.id),
                     ),
-                  ),
-              );
+                  );
               if (existingVotes[0]) {
                 if (existingVotes[0].optionId === optionId) continue;
                 // Decrement old option's vote count / 递减旧选项的投票计数
-                yield* Effect.orDie(
-                  database
+                yield* database
                     .update(PollOption)
                     .set({
                       voteCount: sql`${PollOption.voteCount} - 1`,
@@ -319,11 +296,9 @@ export const PollsHandlers = HttpApiBuilder.group(
                         eq(PollOption.pollUnitId, pollUnitId),
                         eq(PollOption.optionId, existingVotes[0].optionId),
                       ),
-                    ),
-                );
+                    );
                 // Remove the old vote row / 移除旧投票行
-                yield* Effect.orDie(
-                  database
+                yield* database
                     .delete(PollVote)
                     .where(
                       and(
@@ -331,14 +306,12 @@ export const PollsHandlers = HttpApiBuilder.group(
                         eq(PollVote.userId, user.id),
                         eq(PollVote.optionId, existingVotes[0].optionId),
                       ),
-                    ),
-                );
+                    );
               }
             } else {
               // MULTI mode: skip if already voted for this option
               // MULTI 模式：若已对该选项投过票则跳过
-              const existingVote = yield* Effect.orDie(
-                database
+              const existingVote = yield* database
                   .select()
                   .from(PollVote)
                   .where(
@@ -347,24 +320,20 @@ export const PollsHandlers = HttpApiBuilder.group(
                       eq(PollVote.userId, user.id),
                       eq(PollVote.optionId, optionId),
                     ),
-                  ),
-              );
+                  );
               if (existingVote[0]) continue;
             }
 
             // Insert new vote / 插入新投票
-            yield* Effect.orDie(
-              database.insert(PollVote).values({
+            yield* database.insert(PollVote).values({
                 pollUnitId,
                 userId: user.id,
                 optionId,
                 voteMode: poll.voteMode,
-              }),
-            );
+              });
 
             // Increment option's vote count / 递增选项的投票计数
-            yield* Effect.orDie(
-              database
+            yield* database
                 .update(PollOption)
                 .set({
                   voteCount: sql`${PollOption.voteCount} + 1`,
@@ -375,8 +344,7 @@ export const PollsHandlers = HttpApiBuilder.group(
                     eq(PollOption.pollUnitId, pollUnitId),
                     eq(PollOption.optionId, optionId),
                   ),
-                ),
-            );
+                );
           }
 
           return yield* fetchPollOrNotFound(pollUnitId, user.id);
@@ -390,14 +358,11 @@ export const PollsHandlers = HttpApiBuilder.group(
           const pollUnitId = params.pollUnitId;
 
           // Validate poll exists / 校验投票存在
-          const polls = yield* Effect.orDie(
-            database.select().from(Poll).where(eq(Poll.unitId, pollUnitId)),
-          );
+          const polls = yield* database.select().from(Poll).where(eq(Poll.unitId, pollUnitId));
           if (!polls[0]) return yield* new PollNotFound();
 
           // Find all votes by this user on this poll / 查找此用户在此投票上的所有投票
-          const votes = yield* Effect.orDie(
-            database
+          const votes = yield* database
               .select()
               .from(PollVote)
               .where(
@@ -405,19 +370,15 @@ export const PollsHandlers = HttpApiBuilder.group(
                   eq(PollVote.pollUnitId, pollUnitId),
                   eq(PollVote.userId, user.id),
                 ),
-              ),
-          );
+              );
 
           // Remove each vote and decrement the corresponding option count
           // 移除每条投票并递减对应选项的计数
           for (const vote of votes) {
-            yield* Effect.orDie(
-              database
+            yield* database
                 .delete(PollVote)
-                .where(eq(PollVote.id, vote.id)),
-            );
-            yield* Effect.orDie(
-              database
+                .where(eq(PollVote.id, vote.id));
+            yield* database
                 .update(PollOption)
                 .set({
                   voteCount: sql`${PollOption.voteCount} - 1`,
@@ -428,8 +389,7 @@ export const PollsHandlers = HttpApiBuilder.group(
                     eq(PollOption.pollUnitId, pollUnitId),
                     eq(PollOption.optionId, vote.optionId),
                   ),
-                ),
-            );
+                );
           }
         }),
       );

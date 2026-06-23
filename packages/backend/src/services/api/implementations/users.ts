@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { and, count, desc, eq, ilike, inArray } from "drizzle-orm";
 
 import { Config } from "../../config/index.ts";
@@ -58,26 +58,24 @@ export const UsersHandlers = HttpApiBuilder.group(
     // Shared helper: fetch a User + its USER Unit by unitId
     // 共享辅助函数: 通过 unitId 获取 User + 其 USER Unit
     const fetchUserByUnitId = (unitId: string) =>
-      Effect.orDie(
-        database
+      database
           .select()
           .from(User)
           .innerJoin(Unit, eq(User.unitId, Unit.id))
           .where(and(eq(User.unitId, unitId), eq(Unit.type, "USER")))
-          .limit(1),
-      ).pipe(Effect.map((rows) => rows[0] ?? null));
+          .limit(1)
+      .pipe(Effect.map((rows) => rows[0] ?? null));
 
     // Shared helper: fetch a User + its USER Unit by authUserId
     // 共享辅助函数: 通过 authUserId 获取 User + 其 USER Unit
     const fetchUserByAuthId = (authUserId: string) =>
-      Effect.orDie(
-        database
+      database
           .select()
           .from(User)
           .innerJoin(Unit, eq(User.unitId, Unit.id))
           .where(and(eq(User.authUserId, authUserId), eq(Unit.type, "USER")))
-          .limit(1),
-      ).pipe(Effect.map((rows) => rows[0] ?? null));
+          .limit(1)
+      .pipe(Effect.map((rows) => rows[0] ?? null));
 
     // Shared helper: paginated user list
     // 共享辅助函数: 分页用户列表
@@ -92,19 +90,15 @@ export const UsersHandlers = HttpApiBuilder.group(
         if (opts.ids && opts.ids.length > 0) conditions.push(inArray(User.unitId, [...opts.ids]));
         if (opts.search) conditions.push(ilike(User.name, `%${opts.search}%`));
         const where = and(...conditions);
-        const rows = yield* Effect.orDie(
-          database
+        const rows = yield* database
             .select()
             .from(User)
             .innerJoin(Unit, eq(User.unitId, Unit.id))
             .where(where)
             .orderBy(desc(Unit.createdAt))
             .limit(lim(opts.limit))
-            .offset(opts.offset ?? 0),
-        );
-        const agg = yield* Effect.orDie(
-          database.select({ total: count() }).from(User).innerJoin(Unit, eq(User.unitId, Unit.id)).where(where),
-        );
+            .offset(opts.offset ?? 0);
+        const agg = yield* database.select({ total: count() }).from(User).innerJoin(Unit, eq(User.unitId, Unit.id)).where(where);
         return new UserListResult({
           users: rows.map((r) => userToDTO(r.Unit, r.User)),
           total: agg[0]?.total ?? 0,
@@ -122,7 +116,7 @@ export const UsersHandlers = HttpApiBuilder.group(
           // CurrentUser.id 是 auth 用户 ID；通过 authUserId 查找。
           // 已认证用户缺少行记录属于系统缺陷。
           const row = yield* fetchUserByAuthId(currentUser.id);
-          if (!row) return yield* Effect.die(new Error(`User row missing for auth user ${currentUser.id}`));
+          if (!row) return yield* new HttpApiError.InternalServerError();
           return userToDTO(row.Unit, row.User);
         }),
       )
@@ -141,14 +135,12 @@ export const UsersHandlers = HttpApiBuilder.group(
       // 通过 slug 查找用户
       .handle("getBySlug", ({ params }) =>
         Effect.gen(function* () {
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .select()
               .from(User)
               .innerJoin(Unit, eq(User.unitId, Unit.id))
               .where(and(eq(Unit.slug, params.slug), eq(Unit.type, "USER")))
-              .limit(1),
-          );
+              .limit(1);
           if (!rows[0]) return yield* new UserNotFound();
           return userToDTO(rows[0].Unit, rows[0].User);
         }),
@@ -160,21 +152,17 @@ export const UsersHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const currentUser = yield* CurrentUser;
           const row = yield* fetchUserByAuthId(currentUser.id);
-          if (!row) return yield* Effect.die(new Error(`User row missing for auth user ${currentUser.id}`));
+          if (!row) return yield* new HttpApiError.InternalServerError();
           const patch = payload as Record<string, unknown>;
           const userSet: Record<string, unknown> = { updatedAt: new Date() };
           if ("name" in patch) userSet["name"] = patch["name"];
           if ("avatar" in patch) userSet["avatar"] = patch["avatar"];
           if ("summary" in patch) userSet["summary"] = patch["summary"];
           if ("description" in patch) userSet["description"] = patch["description"];
-          yield* Effect.orDie(
-            database.update(User).set(userSet).where(eq(User.unitId, row.User.unitId)),
-          );
-          yield* Effect.orDie(
-            database.update(Unit).set({ updatedAt: new Date() }).where(eq(Unit.id, row.User.unitId)),
-          );
+          yield* database.update(User).set(userSet).where(eq(User.unitId, row.User.unitId));
+          yield* database.update(Unit).set({ updatedAt: new Date() }).where(eq(Unit.id, row.User.unitId));
           const updated = yield* fetchUserByUnitId(row.User.unitId);
-          if (!updated) return yield* Effect.die(new Error(`User row vanished during update for ${row.User.unitId}`));
+          if (!updated) return yield* new HttpApiError.InternalServerError();
           return userToDTO(updated.Unit, updated.User);
         }),
       )
@@ -216,13 +204,11 @@ export const UsersHandlers = HttpApiBuilder.group(
       .handle("batchBriefs", ({ payload }) =>
         Effect.gen(function* () {
           if (payload.unitIds.length === 0) return new UserBriefBatchResult({ users: [] });
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .select()
               .from(User)
               .innerJoin(Unit, eq(User.unitId, Unit.id))
-              .where(and(eq(Unit.type, "USER"), inArray(User.unitId, [...payload.unitIds]))),
-          );
+              .where(and(eq(Unit.type, "USER"), inArray(User.unitId, [...payload.unitIds])));
           return new UserBriefBatchResult({
             users: rows.map((r) => userToBriefDTO(r.Unit, r.User)),
           });
@@ -235,13 +221,11 @@ export const UsersHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const ids = query.ids.split(",").filter(Boolean);
           if (ids.length === 0) return [];
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .select()
               .from(User)
               .innerJoin(Unit, eq(User.unitId, Unit.id))
-              .where(and(eq(Unit.type, "USER"), inArray(User.unitId, ids))),
-          );
+              .where(and(eq(Unit.type, "USER"), inArray(User.unitId, ids)));
           return rows.map((r) => userToDTO(r.Unit, r.User));
         }),
       )
@@ -252,14 +236,12 @@ export const UsersHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const currentUser = yield* CurrentUser;
           const row = yield* fetchUserByAuthId(currentUser.id);
-          if (!row) return yield* Effect.die(new Error(`User row missing for auth user ${currentUser.id}`));
-          const prefs = yield* Effect.orDie(
-            database
+          if (!row) return yield* new HttpApiError.InternalServerError();
+          const prefs = yield* database
               .select()
               .from(UserPreference)
               .where(eq(UserPreference.userId, row.User.unitId))
-              .limit(1),
-          );
+              .limit(1);
           const pref = prefs[0];
           return {
             defaultLicenseSlug: pref?.defaultLicenseSlug ?? null,
@@ -275,7 +257,7 @@ export const UsersHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const currentUser = yield* CurrentUser;
           const row = yield* fetchUserByAuthId(currentUser.id);
-          if (!row) return yield* Effect.die(new Error(`User row missing for auth user ${currentUser.id}`));
+          if (!row) return yield* new HttpApiError.InternalServerError();
           const userId = row.User.unitId;
           const patch = payload as Record<string, unknown>;
           const set: typeof UserPreference.$inferInsert = {
@@ -288,8 +270,7 @@ export const UsersHandlers = HttpApiBuilder.group(
             set.realmManageModeDefault = patch["realmManageModeDefault"] as boolean | null;
           if ("bookshelfConfig" in patch)
             set.bookshelfConfig = patch["bookshelfConfig"];
-          yield* Effect.orDie(
-            database
+          yield* database
               .insert(UserPreference)
               .values(set)
               .onConflictDoUpdate({
@@ -300,15 +281,12 @@ export const UsersHandlers = HttpApiBuilder.group(
                   bookshelfConfig: set.bookshelfConfig,
                   updatedAt: new Date(),
                 },
-              }),
-          );
-          const prefs = yield* Effect.orDie(
-            database
+              });
+          const prefs = yield* database
               .select()
               .from(UserPreference)
               .where(eq(UserPreference.userId, userId))
-              .limit(1),
-          );
+              .limit(1);
           const pref = prefs[0];
           return {
             defaultLicenseSlug: pref?.defaultLicenseSlug ?? null,
@@ -324,7 +302,7 @@ export const UsersHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const currentUser = yield* CurrentUser;
           const row = yield* fetchUserByAuthId(currentUser.id);
-          if (!row) return yield* Effect.die(new Error(`User row missing for auth user ${currentUser.id}`));
+          if (!row) return yield* new HttpApiError.InternalServerError();
           return {
             email: row.User.email ?? currentUser.email,
             emailVerified: currentUser.emailVerified,
@@ -344,8 +322,7 @@ export const UsersHandlers = HttpApiBuilder.group(
           // join to get subscriber user info, filtered to USER units only.
           // 查找 subscribedUnitId = 目标用户 的订阅记录，
           // 连接获取订阅者用户信息，仅筛选 USER 类型。
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .select()
               .from(Subscription)
               .innerJoin(User, eq(Subscription.subscriberUnitId, User.unitId))
@@ -358,11 +335,9 @@ export const UsersHandlers = HttpApiBuilder.group(
               )
               .orderBy(desc(Subscription.createdAt))
               .limit(limit)
-              .offset(offset),
-          );
+              .offset(offset);
 
-          const agg = yield* Effect.orDie(
-            database
+          const agg = yield* database
               .select({ total: count() })
               .from(Subscription)
               .innerJoin(Unit, eq(Subscription.subscriberUnitId, Unit.id))
@@ -371,8 +346,7 @@ export const UsersHandlers = HttpApiBuilder.group(
                   eq(Subscription.subscribedUnitId, params.userId),
                   eq(Unit.type, "USER"),
                 ),
-              ),
-          );
+              );
 
           return new UserListResult({
             users: rows.map((r) => userToDTO(r.Unit, r.User)),
@@ -393,8 +367,7 @@ export const UsersHandlers = HttpApiBuilder.group(
           // join to get subscribed user info, filtered to USER units only.
           // 查找 subscriberUnitId = 目标用户 的订阅记录，
           // 连接获取被关注用户信息，仅筛选 USER 类型。
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .select()
               .from(Subscription)
               .innerJoin(User, eq(Subscription.subscribedUnitId, User.unitId))
@@ -407,11 +380,9 @@ export const UsersHandlers = HttpApiBuilder.group(
               )
               .orderBy(desc(Subscription.createdAt))
               .limit(limit)
-              .offset(offset),
-          );
+              .offset(offset);
 
-          const agg = yield* Effect.orDie(
-            database
+          const agg = yield* database
               .select({ total: count() })
               .from(Subscription)
               .innerJoin(Unit, eq(Subscription.subscribedUnitId, Unit.id))
@@ -420,8 +391,7 @@ export const UsersHandlers = HttpApiBuilder.group(
                   eq(Subscription.subscriberUnitId, params.userId),
                   eq(Unit.type, "USER"),
                 ),
-              ),
-          );
+              );
 
           return new UserListResult({
             users: rows.map((r) => userToDTO(r.Unit, r.User)),
@@ -432,12 +402,36 @@ export const UsersHandlers = HttpApiBuilder.group(
 
       // ── Stubs — admin + account management, not yet implemented ─
       // 桩 —— 管理员 + 账号管理，尚未实现
-      .handle("requestEmailVerification", () => Effect.die("TODO: not implemented"))
-      .handle("exportData", () => Effect.die("TODO: not implemented"))
-      .handle("deleteAccount", () => Effect.die("TODO: not implemented"))
-      .handle("adminGet", () => Effect.die("TODO: not implemented"))
-      .handle("adminUpdate", () => Effect.die("TODO: not implemented"))
-      .handle("adminDelete", () => Effect.die("TODO: not implemented"));
+      .handle("requestEmailVerification", () =>
+        Effect.gen(function* () {
+          yield* new HttpApiError.InternalServerError({ message: "Not implemented" });
+        }),
+      )
+      .handle("exportData", () =>
+        Effect.gen(function* () {
+          yield* new HttpApiError.InternalServerError({ message: "Not implemented" });
+        }),
+      )
+      .handle("deleteAccount", () =>
+        Effect.gen(function* () {
+          yield* new HttpApiError.InternalServerError({ message: "Not implemented" });
+        }),
+      )
+      .handle("adminGet", () =>
+        Effect.gen(function* () {
+          yield* new HttpApiError.InternalServerError({ message: "Not implemented" });
+        }),
+      )
+      .handle("adminUpdate", () =>
+        Effect.gen(function* () {
+          yield* new HttpApiError.InternalServerError({ message: "Not implemented" });
+        }),
+      )
+      .handle("adminDelete", () =>
+        Effect.gen(function* () {
+          yield* new HttpApiError.InternalServerError({ message: "Not implemented" });
+        }),
+      );
   }),
 );
 
@@ -446,7 +440,15 @@ export const ProfileHandlers = HttpApiBuilder.group(
   "profile",
   Effect.fn(function* (handlers) {
     return handlers
-      .handle("reactionGiven", () => Effect.die("TODO: not implemented"))
-      .handle("reactionReceived", () => Effect.die("TODO: not implemented"));
+      .handle("reactionGiven", () =>
+        Effect.gen(function* () {
+          yield* new HttpApiError.InternalServerError({ message: "Not implemented" });
+        }),
+      )
+      .handle("reactionReceived", () =>
+        Effect.gen(function* () {
+          yield* new HttpApiError.InternalServerError({ message: "Not implemented" });
+        }),
+      );
   }),
 );

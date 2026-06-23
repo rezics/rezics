@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 import { and, count, desc, eq, inArray, lt, type SQL } from "drizzle-orm";
 
 import { Database } from "../../database/index.ts";
@@ -130,7 +130,7 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
       .handle("create", ({ payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .insert(Subscription)
               .values({
@@ -145,8 +145,7 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
                   updatedAt: new Date(),
                 },
               })
-              .returning(),
-          );
+              .returning();
           return subscriptionToEntry(rows[0]!);
         }),
       )
@@ -158,13 +157,12 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
           // TODO: filter by subscribedType via Unit join when needed
           // TODO: 需要时通过 Unit join 按 subscribedType 过滤
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select()
               .from(Subscription)
               .where(eq(Subscription.subscriberUnitId, user.id))
-              .orderBy(desc(Subscription.createdAt)),
-          );
+              .orderBy(desc(Subscription.createdAt));
           return { subscriptions: rows.map(subscriptionToEntry) };
         }),
       )
@@ -174,7 +172,7 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
       .handle("updateChannels", ({ params, payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .update(Subscription)
               .set({ channels: [...payload.channels], updatedAt: new Date() })
@@ -184,8 +182,7 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
                   eq(Subscription.subscribedUnitId, params.subscribedUnitId),
                 ),
               )
-              .returning(),
-          );
+              .returning();
           if (!rows[0]) return yield* new EngagementNotFound();
           return subscriptionToEntry(rows[0]);
         }),
@@ -196,7 +193,7 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
       .handle("delete", ({ params }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .delete(Subscription)
               .where(
@@ -205,8 +202,7 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
                   eq(Subscription.subscribedUnitId, params.subscribedUnitId),
                 ),
               )
-              .returning(),
-          );
+              .returning();
           return { unsubscribed: rows.length > 0 };
         }),
       )
@@ -216,7 +212,7 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
       .handle("check", ({ params }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select()
               .from(Subscription)
@@ -226,8 +222,7 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
                   eq(Subscription.subscribedUnitId, params.subscribedUnitId),
                 ),
               )
-              .limit(1),
-          );
+              .limit(1);
           const row = rows[0];
           if (!row) return new SubscriptionCheckResult({ subscribed: false });
           return new SubscriptionCheckResult({
@@ -241,12 +236,11 @@ export const SubscriptionHandlers = HttpApiBuilder.group(
       // GET /subscription/count/:subscribedUnitId — 获取订阅者计数（公开）
       .handle("count", ({ params }) =>
         Effect.gen(function* () {
-          const agg = yield* Effect.orDie(
+          const agg = yield* 
             database
               .select({ total: count() })
               .from(Subscription)
-              .where(eq(Subscription.subscribedUnitId, params.subscribedUnitId)),
-          );
+              .where(eq(Subscription.subscribedUnitId, params.subscribedUnitId));
           return new SubscriberCountResult({ count: agg[0]?.total ?? 0 });
         }),
       );
@@ -269,7 +263,7 @@ export const ReactionHandlers = HttpApiBuilder.group(
       .handle("create", ({ payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .insert(Reaction)
               .values({
@@ -281,12 +275,11 @@ export const ReactionHandlers = HttpApiBuilder.group(
               .onConflictDoNothing({
                 target: [Reaction.userId, Reaction.targetId, Reaction.reaction],
               })
-              .returning(),
-          );
+              .returning();
           // If conflict (already exists), fetch the existing row
           // 如果冲突（已存在），获取已有行
           if (!rows[0]) {
-            const existing = yield* Effect.orDie(
+            const existing = yield* 
               database
                 .select()
                 .from(Reaction)
@@ -297,8 +290,7 @@ export const ReactionHandlers = HttpApiBuilder.group(
                     eq(Reaction.reaction, payload.reaction),
                   ),
                 )
-                .limit(1),
-            );
+                .limit(1);
             return reactionToEntry(existing[0]!);
           }
           return reactionToEntry(rows[0]);
@@ -310,7 +302,7 @@ export const ReactionHandlers = HttpApiBuilder.group(
       .handle("remove", ({ query }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          yield* Effect.orDie(
+          yield* 
             database
               .delete(Reaction)
               .where(
@@ -319,8 +311,7 @@ export const ReactionHandlers = HttpApiBuilder.group(
                   eq(Reaction.targetId, query.targetId),
                   eq(Reaction.reaction, query.reaction),
                 ),
-              ),
-          );
+              );
         }),
       )
 
@@ -331,7 +322,7 @@ export const ReactionHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
           // Create a reaction with "share" type to track the share intent
           // 创建一个 "share" 类型的 reaction 来追踪分享意图
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .insert(Reaction)
               .values({
@@ -342,11 +333,10 @@ export const ReactionHandlers = HttpApiBuilder.group(
               .onConflictDoNothing({
                 target: [Reaction.userId, Reaction.targetId, Reaction.reaction],
               })
-              .returning(),
-          );
+              .returning();
           if (!rows[0]) {
             // Already shared — fetch existing / 已分享过——获取已有记录
-            const existing = yield* Effect.orDie(
+            const existing = yield* 
               database
                 .select()
                 .from(Reaction)
@@ -357,8 +347,7 @@ export const ReactionHandlers = HttpApiBuilder.group(
                     eq(Reaction.reaction, "share"),
                   ),
                 )
-                .limit(1),
-            );
+                .limit(1);
             return new ShareResult({ id: existing[0]!.id, created: false });
           }
           return new ShareResult({ id: rows[0].id, created: true });
@@ -383,7 +372,7 @@ export const FeedbackHandlers = HttpApiBuilder.group(
       .handle("create", ({ payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .insert(Feedback)
               .values({
@@ -398,8 +387,7 @@ export const FeedbackHandlers = HttpApiBuilder.group(
                   : null,
                 updatedAt: new Date(),
               })
-              .returning(),
-          );
+              .returning();
           return feedbackToEntry(rows[0]!);
         }),
       )
@@ -424,18 +412,16 @@ export const FeedbackHandlers = HttpApiBuilder.group(
 
           const where = and(...conditions);
 
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select()
               .from(Feedback)
               .where(where)
               .orderBy(desc(Feedback.createdAt))
               .offset(offset)
-              .limit(limit),
-          );
-          const totalRows = yield* Effect.orDie(
-            database.select({ total: count() }).from(Feedback).where(where),
-          );
+              .limit(limit);
+          const totalRows = yield* 
+            database.select({ total: count() }).from(Feedback).where(where);
 
           return new FeedbackListResult({
             items: rows.map(feedbackToEntry),
@@ -451,13 +437,12 @@ export const FeedbackHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
 
           // Admin check / 管理员检查
-          const userRows = yield* Effect.orDie(
+          const userRows = yield* 
             database
               .select({ permission: User.permission })
               .from(User)
               .where(eq(User.unitId, user.id))
-              .limit(1),
-          );
+              .limit(1);
           if (!isAdmin(userRows[0]?.permission)) return yield* new EngagementForbidden();
 
           const limit = Math.max(1, Math.min(query.limit ?? DEFAULT_LIMIT, MAX_LIMIT));
@@ -476,18 +461,16 @@ export const FeedbackHandlers = HttpApiBuilder.group(
 
           const where = conditions.length > 0 ? and(...conditions) : undefined;
 
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select()
               .from(Feedback)
               .where(where)
               .orderBy(desc(Feedback.createdAt))
               .offset(offset)
-              .limit(limit),
-          );
-          const totalRows = yield* Effect.orDie(
-            database.select({ total: count() }).from(Feedback).where(where),
-          );
+              .limit(limit);
+          const totalRows = yield* 
+            database.select({ total: count() }).from(Feedback).where(where);
 
           return new FeedbackListResult({
             items: rows.map(feedbackToEntry),
@@ -503,16 +486,15 @@ export const FeedbackHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
 
           // Admin check / 管理员检查
-          const userRows = yield* Effect.orDie(
+          const userRows = yield* 
             database
               .select({ permission: User.permission })
               .from(User)
               .where(eq(User.unitId, user.id))
-              .limit(1),
-          );
+              .limit(1);
           if (!isAdmin(userRows[0]?.permission)) return yield* new EngagementForbidden();
 
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .update(Feedback)
               .set({
@@ -521,8 +503,7 @@ export const FeedbackHandlers = HttpApiBuilder.group(
                 updatedAt: new Date(),
               })
               .where(eq(Feedback.id, params.id))
-              .returning(),
-          );
+              .returning();
           if (!rows[0]) return yield* new EngagementNotFound();
           return feedbackToEntry(rows[0]);
         }),
@@ -546,13 +527,12 @@ export const BlockHandlers = HttpApiBuilder.group(
       .handle("list", () =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select()
               .from(UserBlock)
               .where(eq(UserBlock.blockerId, user.id))
-              .orderBy(desc(UserBlock.createdAt)),
-          );
+              .orderBy(desc(UserBlock.createdAt));
           return { items: rows.map(blockToEntry) };
         }),
       )
@@ -563,14 +543,13 @@ export const BlockHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           if (payload.userId === user.id) return yield* new EngagementBadRequest();
-          yield* Effect.orDie(
+          yield* 
             database
               .insert(UserBlock)
               .values({ blockerId: user.id, blockedId: payload.userId })
               .onConflictDoNothing({
                 target: [UserBlock.blockerId, UserBlock.blockedId],
-              }),
-          );
+              });
           return { success: true };
         }),
       )
@@ -580,7 +559,7 @@ export const BlockHandlers = HttpApiBuilder.group(
       .handle("remove", ({ params }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          yield* Effect.orDie(
+          yield* 
             database
               .delete(UserBlock)
               .where(
@@ -588,8 +567,7 @@ export const BlockHandlers = HttpApiBuilder.group(
                   eq(UserBlock.blockerId, user.id),
                   eq(UserBlock.blockedId, params.userId),
                 ),
-              ),
-          );
+              );
           return { success: true };
         }),
       );
@@ -612,7 +590,7 @@ export const ProgressHandlers = HttpApiBuilder.group(
       .handle("get", ({ params }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select()
               .from(UserUnitProgress)
@@ -623,8 +601,7 @@ export const ProgressHandlers = HttpApiBuilder.group(
                   eq(UserUnitProgress.isDeleted, false),
                 ),
               )
-              .limit(1),
-          );
+              .limit(1);
           return rows[0] ? progressToEntry(rows[0]) : null;
         }),
       )
@@ -640,7 +617,7 @@ export const ProgressHandlers = HttpApiBuilder.group(
             ? (payload.status.toUpperCase() as typeof UserUnitProgress.$inferInsert.status)
             : "BACKLOG";
 
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .insert(UserUnitProgress)
               .values({
@@ -659,8 +636,7 @@ export const ProgressHandlers = HttpApiBuilder.group(
                   lastSeenAt: now,
                 },
               })
-              .returning(),
-          );
+              .returning();
           return progressToEntry(rows[0]!);
         }),
       )
@@ -670,7 +646,7 @@ export const ProgressHandlers = HttpApiBuilder.group(
       .handle("delete", ({ params }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          yield* Effect.orDie(
+          yield* 
             database
               .update(UserUnitProgress)
               .set({ isDeleted: true, lastSeenAt: new Date() })
@@ -679,8 +655,7 @@ export const ProgressHandlers = HttpApiBuilder.group(
                   eq(UserUnitProgress.userId, user.id),
                   eq(UserUnitProgress.unitId, params.unitId),
                 ),
-              ),
-          );
+              );
         }),
       )
 
@@ -707,18 +682,16 @@ export const ProgressHandlers = HttpApiBuilder.group(
 
           const where = and(...conditions);
 
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select()
               .from(UserUnitProgress)
               .where(where)
               .orderBy(desc(UserUnitProgress.lastSeenAt))
               .offset(offset)
-              .limit(limit),
-          );
-          const totalRows = yield* Effect.orDie(
-            database.select({ total: count() }).from(UserUnitProgress).where(where),
-          );
+              .limit(limit);
+          const totalRows = yield* 
+            database.select({ total: count() }).from(UserUnitProgress).where(where);
 
           return new UnitProgressListResult({
             items: rows.map(progressToEntry),
@@ -734,7 +707,7 @@ export const ProgressHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
 
           // Verify node exists and belongs to the specified unit / 验证节点存在并属于指定的 unit
-          const nodeRows = yield* Effect.orDie(
+          const nodeRows = yield* 
             database
               .select({
                 ownerUnitId: ContentStructureNode.ownerUnitId,
@@ -742,26 +715,24 @@ export const ProgressHandlers = HttpApiBuilder.group(
               })
               .from(ContentStructureNode)
               .where(eq(ContentStructureNode.id, payload.nodeId))
-              .limit(1),
-          );
+              .limit(1);
           const node = nodeRows[0];
-          if (!node) return yield* Effect.die("Content structure node not found");
+          if (!node) return yield* new HttpApiError.InternalServerError();
           if (node.ownerUnitId !== params.unitId) {
-            return yield* Effect.die("Node does not belong to the specified unit");
+            return yield* new HttpApiError.InternalServerError();
           }
           if (node.isDeleted) {
-            return yield* Effect.die("Cannot mark a deleted node as completed");
+            return yield* new HttpApiError.InternalServerError();
           }
 
           if (payload.isCompleted) {
-            yield* Effect.orDie(
+            yield* 
               database
                 .insert(UserContentNodeProgress)
                 .values({ userId: user.id, nodeId: payload.nodeId })
-                .onConflictDoNothing(),
-            );
+                .onConflictDoNothing();
           } else {
-            yield* Effect.orDie(
+            yield* 
               database
                 .delete(UserContentNodeProgress)
                 .where(
@@ -769,8 +740,7 @@ export const ProgressHandlers = HttpApiBuilder.group(
                     eq(UserContentNodeProgress.userId, user.id),
                     eq(UserContentNodeProgress.nodeId, payload.nodeId),
                   ),
-                ),
-            );
+                );
           }
         }),
       );
@@ -798,7 +768,7 @@ export const DraftHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
           const limit = Math.max(1, Math.min(query.limit ?? 50, MAX_LIMIT));
 
-          const posts = yield* Effect.orDie(
+          const posts = yield* 
             database
               .select({
                 unitId: Post.unitId,
@@ -815,21 +785,19 @@ export const DraftHandlers = HttpApiBuilder.group(
                 ),
               )
               .orderBy(desc(Post.updatedAt))
-              .limit(limit),
-          );
+              .limit(limit);
 
           if (posts.length === 0) return { drafts: [] };
 
           const unitIds = posts.map((p) => p.unitId);
-          const translations = yield* Effect.orDie(
+          const translations = yield* 
             database
               .select({
                 unitId: UnitTranslation.unitId,
                 title: UnitTranslation.title,
               })
               .from(UnitTranslation)
-              .where(inArray(UnitTranslation.unitId, unitIds)),
-          );
+              .where(inArray(UnitTranslation.unitId, unitIds));
 
           const titleByUnit = new Map<string, string>();
           for (const tr of translations) {
@@ -889,7 +857,7 @@ export const ActivityHandlers = HttpApiBuilder.group(
             postConditions.push(lt(Post.createdAt, beforeValid));
           }
 
-          const posts = yield* Effect.orDie(
+          const posts = yield* 
             database
               .select({
                 unitId: Post.unitId,
@@ -900,8 +868,7 @@ export const ActivityHandlers = HttpApiBuilder.group(
               .innerJoin(Unit, eq(Unit.id, Post.unitId))
               .where(and(...postConditions))
               .orderBy(desc(Post.createdAt))
-              .limit(limit),
-          );
+              .limit(limit);
 
           // Fetch public shelves by the profile user / 获取该用户的公开书架
           const shelfConditions: SQL[] = [
@@ -914,7 +881,7 @@ export const ActivityHandlers = HttpApiBuilder.group(
             shelfConditions.push(lt(Shelf.updatedAt, beforeValid));
           }
 
-          const shelves = yield* Effect.orDie(
+          const shelves = yield* 
             database
               .select({
                 unitId: Shelf.unitId,
@@ -924,8 +891,7 @@ export const ActivityHandlers = HttpApiBuilder.group(
               .innerJoin(Unit, eq(Unit.id, Shelf.unitId))
               .where(and(...shelfConditions))
               .orderBy(desc(Shelf.updatedAt))
-              .limit(limit),
-          );
+              .limit(limit);
 
           // Merge and sort by date descending, take `limit` / 合并并按日期降序排列，取 `limit` 条
           const items: ActivityEntry[] = [
@@ -999,7 +965,7 @@ export const StreamHandlers = HttpApiBuilder.group(
 
             // Use UnitTranslation to filter by realm context via the post's target
             // 使用 UnitTranslation 通过帖子的目标按 realm 上下文过滤
-            const posts = yield* Effect.orDie(
+            const posts = yield* 
               database
                 .select({
                   unitId: Post.unitId,
@@ -1011,8 +977,7 @@ export const StreamHandlers = HttpApiBuilder.group(
                 .innerJoin(Unit, eq(Unit.id, Post.unitId))
                 .where(and(...postConditions))
                 .orderBy(desc(Post.createdAt))
-                .limit(limit + 1),
-            );
+                .limit(limit + 1);
 
             return new StreamResult({
               rows: posts.slice(0, limit).map(
@@ -1037,7 +1002,7 @@ export const StreamHandlers = HttpApiBuilder.group(
             postConditions.push(lt(Post.createdAt, beforeValid));
           }
 
-          const posts = yield* Effect.orDie(
+          const posts = yield* 
             database
               .select({
                 unitId: Post.unitId,
@@ -1048,8 +1013,7 @@ export const StreamHandlers = HttpApiBuilder.group(
               .innerJoin(Unit, eq(Unit.id, Post.unitId))
               .where(and(...postConditions))
               .orderBy(desc(Post.createdAt))
-              .limit(limit + 1),
-          );
+              .limit(limit + 1);
 
           return new StreamResult({
             rows: posts.slice(0, limit).map(

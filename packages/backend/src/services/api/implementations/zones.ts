@@ -76,22 +76,18 @@ export const ZonesHandlers = HttpApiBuilder.group(
     // 共享辅助函数: 获取 zone Unit + Zone 行 + 第一条翻译标题
     const fetchZoneByUnitId = (unitId: string) =>
       Effect.gen(function* () {
-        const rows = yield* Effect.orDie(
-          database
+        const rows = yield* database
             .select()
             .from(ZoneTable)
             .innerJoin(Unit, eq(ZoneTable.unitId, Unit.id))
             .where(and(eq(ZoneTable.unitId, unitId), eq(Unit.type, "ZONE")))
-            .limit(1),
-        );
+            .limit(1);
         if (!rows[0]) return null;
-        const trans = yield* Effect.orDie(
-          database
+        const trans = yield* database
             .select()
             .from(UnitTranslation)
             .where(eq(UnitTranslation.unitId, unitId))
-            .limit(1),
-        );
+            .limit(1);
         return {
           unit: rows[0].Unit,
           zone: rows[0].Zone,
@@ -103,22 +99,18 @@ export const ZonesHandlers = HttpApiBuilder.group(
     // 共享辅助函数: 按 slug 获取 zone
     const fetchZoneBySlug = (slug: string) =>
       Effect.gen(function* () {
-        const rows = yield* Effect.orDie(
-          database
+        const rows = yield* database
             .select()
             .from(Unit)
             .innerJoin(ZoneTable, eq(ZoneTable.unitId, Unit.id))
             .where(and(eq(Unit.slug, slug), eq(Unit.type, "ZONE")))
-            .limit(1),
-        );
+            .limit(1);
         if (!rows[0]) return null;
-        const trans = yield* Effect.orDie(
-          database
+        const trans = yield* database
             .select()
             .from(UnitTranslation)
             .where(eq(UnitTranslation.unitId, rows[0].Unit.id))
-            .limit(1),
-        );
+            .limit(1);
         return {
           unit: rows[0].Unit,
           zone: rows[0].Zone,
@@ -130,8 +122,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
     // 共享辅助函数: 验证当前用户在 zone 所属 realm 中拥有 owner/admin 角色。
     const requireZoneAdmin = (ownerRealmUnitId: string, userId: string) =>
       Effect.gen(function* () {
-        const rows = yield* Effect.orDie(
-          database
+        const rows = yield* database
             .select()
             .from(RealmMemberTable)
             .where(
@@ -141,8 +132,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
                 eq(RealmMemberTable.state, "ACTIVE"),
               ),
             )
-            .limit(1),
-        );
+            .limit(1);
         if (!rows[0] || (rows[0].roleKey !== "owner" && rows[0].roleKey !== "admin")) {
           return yield* new ZoneForbidden();
         }
@@ -159,8 +149,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
       Effect.gen(function* () {
         const baseConditions = [eq(Unit.type, "ZONE")];
         const where = opts.conditions ? and(...baseConditions, ...opts.conditions) : and(...baseConditions);
-        const rows = yield* Effect.orDie(
-          database
+        const rows = yield* database
             .select({
               Unit,
               Zone: ZoneTable,
@@ -172,8 +161,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
             .where(where)
             .orderBy(desc(Unit.createdAt))
             .limit(opts.limit)
-            .offset(opts.offset),
-        );
+            .offset(opts.offset);
         // Deduplicate: leftJoin on UnitTranslation may produce multiple rows per zone (one per language).
         // 去重: leftJoin UnitTranslation 可能每个 zone 产生多行（每种语言一行）。
         const seen = new Set<string>();
@@ -193,13 +181,11 @@ export const ZonesHandlers = HttpApiBuilder.group(
       Effect.gen(function* () {
         const baseConditions = [eq(Unit.type, "ZONE")];
         const where = conditions ? and(...baseConditions, ...conditions) : and(...baseConditions);
-        const rows = yield* Effect.orDie(
-          database
+        const rows = yield* database
             .select({ count: sql<number>`count(*)::int` })
             .from(ZoneTable)
             .innerJoin(Unit, eq(ZoneTable.unitId, Unit.id))
-            .where(where),
-        );
+            .where(where);
         return rows[0]?.count ?? 0;
       });
 
@@ -253,13 +239,11 @@ export const ZonesHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const found = yield* fetchZoneByUnitId(params.unitId);
           if (!found) return yield* new ZoneNotFound();
-          const pages = yield* Effect.orDie(
-            database
+          const pages = yield* database
               .select()
               .from(ZonePageTable)
               .where(and(eq(ZonePageTable.zoneUnitId, params.unitId), eq(ZonePageTable.slug, params.pageSlug)))
-              .limit(1),
-          );
+              .limit(1);
           if (!pages[0]) return yield* new ZoneNotFound();
           return {
             zone: zoneToDTO(found.unit, found.zone, found.title),
@@ -274,13 +258,11 @@ export const ZonesHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const found = yield* fetchZoneByUnitId(params.unitId);
           if (!found) return yield* new ZoneNotFound();
-          const pages = yield* Effect.orDie(
-            database
+          const pages = yield* database
               .select()
               .from(ZonePageTable)
               .where(and(eq(ZonePageTable.zoneUnitId, params.unitId), eq(ZonePageTable.id, params.pageId)))
-              .limit(1),
-          );
+              .limit(1);
           if (!pages[0]) return yield* new ZoneNotFound();
           // Return section reference; section content resolution is delegated to the frontend.
           // 返回栏目引用；栏目内容解析委托给前端。
@@ -305,8 +287,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
 
           // Create the Unit row with type ZONE
           // 创建 type=ZONE 的 Unit 行
-          const units = yield* Effect.orDie(
-            database
+          const units = yield* database
               .insert(Unit)
               .values({
                 type: "ZONE",
@@ -317,25 +298,21 @@ export const ZonesHandlers = HttpApiBuilder.group(
                 status: "PUBLISHED",
                 visibility: "PUBLIC",
               })
-              .returning(),
-          );
+              .returning();
           const unit = units[0]!;
 
           // Create UnitTranslation for the zone name
           // 创建 UnitTranslation 存储 zone 名称
-          yield* Effect.orDie(
-            database.insert(UnitTranslation).values({
+          yield* database.insert(UnitTranslation).values({
               unitId: unit.id,
               language: "en",
               title: payload.name ?? payload.slug,
               summary: payload.description ?? null,
-            }),
-          );
+            });
 
           // Create the Zone row
           // 创建 Zone 行
-          const zones = yield* Effect.orDie(
-            database
+          const zones = yield* database
               .insert(ZoneTable)
               .values({
                 unitId: unit.id,
@@ -344,8 +321,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
                 nav: payload.nav ?? { items: [] },
                 theme: payload.theme ?? {},
               })
-              .returning(),
-          );
+              .returning();
 
           return zoneToDTO(unit, zones[0]!, payload.name ?? payload.slug);
         }),
@@ -367,7 +343,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
             if (payload.slug) unitUpdates["slug"] = payload.slug;
             if (payload.status) unitUpdates["status"] = payload.status;
             if (payload.visibility) unitUpdates["visibility"] = payload.visibility;
-            yield* Effect.orDie(database.update(Unit).set(unitUpdates).where(eq(Unit.id, params.unitId)));
+            yield* database.update(Unit).set(unitUpdates).where(eq(Unit.id, params.unitId));
           }
 
           // Update translation if name/description provided
@@ -376,9 +352,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
             const transUpdates: Record<string, unknown> = { updatedAt: new Date() };
             if (payload.name) transUpdates["title"] = payload.name;
             if (payload.description !== undefined) transUpdates["summary"] = payload.description;
-            yield* Effect.orDie(
-              database.update(UnitTranslation).set(transUpdates).where(eq(UnitTranslation.unitId, params.unitId)),
-            );
+            yield* database.update(UnitTranslation).set(transUpdates).where(eq(UnitTranslation.unitId, params.unitId));
           }
 
           // Update Zone-specific fields if provided
@@ -388,7 +362,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
             if (payload.homePageId !== undefined) zoneUpdates["homePageId"] = payload.homePageId;
             if (payload.startsAt !== undefined) zoneUpdates["startsAt"] = payload.startsAt ? new Date(payload.startsAt) : null;
             if (payload.endsAt !== undefined) zoneUpdates["endsAt"] = payload.endsAt ? new Date(payload.endsAt) : null;
-            yield* Effect.orDie(database.update(ZoneTable).set(zoneUpdates).where(eq(ZoneTable.unitId, params.unitId)));
+            yield* database.update(ZoneTable).set(zoneUpdates).where(eq(ZoneTable.unitId, params.unitId));
           }
 
           const refreshed = yield* fetchZoneByUnitId(params.unitId);
@@ -405,12 +379,10 @@ export const ZonesHandlers = HttpApiBuilder.group(
           if (!found) return yield* new ZoneNotFound();
           yield* requireZoneAdmin(found.zone.ownerRealmUnitId, user.id);
 
-          yield* Effect.orDie(
-            database
+          yield* database
               .update(ZoneTable)
               .set({ boundary: payload, updatedAt: new Date() })
-              .where(eq(ZoneTable.unitId, params.unitId)),
-          );
+              .where(eq(ZoneTable.unitId, params.unitId));
 
           const refreshed = yield* fetchZoneByUnitId(params.unitId);
           return zoneToDTO(refreshed!.unit, refreshed!.zone, refreshed!.title);
@@ -426,12 +398,10 @@ export const ZonesHandlers = HttpApiBuilder.group(
           if (!found) return yield* new ZoneNotFound();
           yield* requireZoneAdmin(found.zone.ownerRealmUnitId, user.id);
 
-          yield* Effect.orDie(
-            database
+          yield* database
               .update(ZoneTable)
               .set({ nav: payload, updatedAt: new Date() })
-              .where(eq(ZoneTable.unitId, params.unitId)),
-          );
+              .where(eq(ZoneTable.unitId, params.unitId));
 
           const refreshed = yield* fetchZoneByUnitId(params.unitId);
           return zoneToDTO(refreshed!.unit, refreshed!.zone, refreshed!.title);
@@ -447,12 +417,10 @@ export const ZonesHandlers = HttpApiBuilder.group(
           if (!found) return yield* new ZoneNotFound();
           yield* requireZoneAdmin(found.zone.ownerRealmUnitId, user.id);
 
-          yield* Effect.orDie(
-            database
+          yield* database
               .update(ZoneTable)
               .set({ theme: payload, updatedAt: new Date() })
-              .where(eq(ZoneTable.unitId, params.unitId)),
-          );
+              .where(eq(ZoneTable.unitId, params.unitId));
 
           const refreshed = yield* fetchZoneByUnitId(params.unitId);
           return zoneToDTO(refreshed!.unit, refreshed!.zone, refreshed!.title);
@@ -470,7 +438,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
 
           // Cascade: deleting the Unit cascades to Zone + ZonePage + UnitTranslation
           // 级联: 删除 Unit 会级联删除 Zone + ZonePage + UnitTranslation
-          yield* Effect.orDie(database.delete(Unit).where(eq(Unit.id, params.unitId)));
+          yield* database.delete(Unit).where(eq(Unit.id, params.unitId));
 
           return { message: "Zone deleted" };
         }),
@@ -485,8 +453,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
           if (!found) return yield* new ZoneNotFound();
           yield* requireZoneAdmin(found.zone.ownerRealmUnitId, user.id);
 
-          const pages = yield* Effect.orDie(
-            database
+          const pages = yield* database
               .insert(ZonePageTable)
               .values({
                 zoneUnitId: params.unitId,
@@ -494,8 +461,7 @@ export const ZonesHandlers = HttpApiBuilder.group(
                 config: payload.config ?? { sections: [] },
                 position: payload.position ?? "V",
               })
-              .returning(),
-          );
+              .returning();
 
           return pageToDTO(pages[0]!);
         }),
@@ -510,13 +476,11 @@ export const ZonesHandlers = HttpApiBuilder.group(
           if (!found) return yield* new ZoneNotFound();
           yield* requireZoneAdmin(found.zone.ownerRealmUnitId, user.id);
 
-          const existing = yield* Effect.orDie(
-            database
+          const existing = yield* database
               .select()
               .from(ZonePageTable)
               .where(and(eq(ZonePageTable.zoneUnitId, params.unitId), eq(ZonePageTable.id, params.pageId)))
-              .limit(1),
-          );
+              .limit(1);
           if (!existing[0]) return yield* new ZoneNotFound();
 
           const updates: Record<string, unknown> = { updatedAt: new Date() };
@@ -524,20 +488,16 @@ export const ZonesHandlers = HttpApiBuilder.group(
           if (payload.config !== undefined) updates["config"] = payload.config;
           if (payload.position) updates["position"] = payload.position;
 
-          yield* Effect.orDie(
-            database
+          yield* database
               .update(ZonePageTable)
               .set(updates)
-              .where(and(eq(ZonePageTable.zoneUnitId, params.unitId), eq(ZonePageTable.id, params.pageId))),
-          );
+              .where(and(eq(ZonePageTable.zoneUnitId, params.unitId), eq(ZonePageTable.id, params.pageId)));
 
-          const refreshed = yield* Effect.orDie(
-            database
+          const refreshed = yield* database
               .select()
               .from(ZonePageTable)
               .where(and(eq(ZonePageTable.zoneUnitId, params.unitId), eq(ZonePageTable.id, params.pageId)))
-              .limit(1),
-          );
+              .limit(1);
 
           return pageToDTO(refreshed[0]!);
         }),
@@ -552,20 +512,16 @@ export const ZonesHandlers = HttpApiBuilder.group(
           if (!found) return yield* new ZoneNotFound();
           yield* requireZoneAdmin(found.zone.ownerRealmUnitId, user.id);
 
-          const existing = yield* Effect.orDie(
-            database
+          const existing = yield* database
               .select()
               .from(ZonePageTable)
               .where(and(eq(ZonePageTable.zoneUnitId, params.unitId), eq(ZonePageTable.id, params.pageId)))
-              .limit(1),
-          );
+              .limit(1);
           if (!existing[0]) return yield* new ZoneNotFound();
 
-          yield* Effect.orDie(
-            database
+          yield* database
               .delete(ZonePageTable)
-              .where(and(eq(ZonePageTable.zoneUnitId, params.unitId), eq(ZonePageTable.id, params.pageId))),
-          );
+              .where(and(eq(ZonePageTable.zoneUnitId, params.unitId), eq(ZonePageTable.id, params.pageId)));
 
           return { message: "Page deleted" };
         }),

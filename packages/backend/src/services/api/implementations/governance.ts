@@ -46,13 +46,12 @@ export const GovernanceHandlers = HttpApiBuilder.group(
      */
     const requireStaff = (userId: string) =>
       Effect.gen(function* () {
-        const grants = yield* Effect.orDie(
+        const grants = yield* 
           database
             .select()
             .from(StaffGrant)
             .where(and(eq(StaffGrant.userId, userId), eq(StaffGrant.state, "ACTIVE")))
-            .limit(1),
-        );
+            .limit(1);
         if (!grants[0]) return yield* new GovernanceForbidden();
         return grants;
       });
@@ -63,7 +62,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
      */
     const requireRealmMod = (realmUnitId: string, userId: string) =>
       Effect.gen(function* () {
-        const membership = yield* Effect.orDie(
+        const membership = yield* 
           database
             .select()
             .from(RealmMember)
@@ -74,20 +73,18 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                 eq(RealmMember.state, "ACTIVE"),
               ),
             )
-            .limit(1),
-        );
+            .limit(1);
         if (membership[0] && (membership[0].roleKey === "owner" || membership[0].roleKey === "moderator")) {
           return membership[0];
         }
         // Fall back to staff grant check
         // 回退到 staff 权限检查
-        const staffGrants = yield* Effect.orDie(
+        const staffGrants = yield* 
           database
             .select()
             .from(StaffGrant)
             .where(and(eq(StaffGrant.userId, userId), eq(StaffGrant.state, "ACTIVE")))
-            .limit(1),
-        );
+            .limit(1);
         if (!staffGrants[0]) return yield* new GovernanceForbidden();
         return membership[0] ?? null;
       });
@@ -98,9 +95,8 @@ export const GovernanceHandlers = HttpApiBuilder.group(
      */
     const insertAction = (values: typeof ModerationAction.$inferInsert) =>
       Effect.gen(function* () {
-        const rows = yield* Effect.orDie(
-          database.insert(ModerationAction).values(values).returning(),
-        );
+        const rows = yield* 
+          database.insert(ModerationAction).values(values).returning();
         return rows[0]!;
       });
 
@@ -110,9 +106,8 @@ export const GovernanceHandlers = HttpApiBuilder.group(
      */
     const insertAudit = (values: typeof StaffAuditLog.$inferInsert) =>
       Effect.gen(function* () {
-        const rows = yield* Effect.orDie(
-          database.insert(StaffAuditLog).values(values).returning(),
-        );
+        const rows = yield* 
+          database.insert(StaffAuditLog).values(values).returning();
         return rows[0]!;
       });
 
@@ -122,20 +117,18 @@ export const GovernanceHandlers = HttpApiBuilder.group(
       .handle("capabilityHintsMe", () =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const staffRows = yield* Effect.orDie(
+          const staffRows = yield* 
             database
               .select()
               .from(StaffGrant)
-              .where(and(eq(StaffGrant.userId, user.id), eq(StaffGrant.state, "ACTIVE"))),
-          );
-          const realmRows = yield* Effect.orDie(
+              .where(and(eq(StaffGrant.userId, user.id), eq(StaffGrant.state, "ACTIVE")));
+          const realmRows = yield* 
             database
               .select()
               .from(RealmCapabilityGrant)
               .where(
                 and(eq(RealmCapabilityGrant.userId, user.id), eq(RealmCapabilityGrant.state, "ACTIVE")),
-              ),
-          );
+              );
           const capabilities = [
             ...staffRows.map((r) => ({
               kind: "staff" as const,
@@ -160,7 +153,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
           yield* requireRealmMod(params.realmUnitId, user.id);
           const body = payload as Record<string, unknown>;
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .insert(RealmCapabilityGrant)
               .values({
@@ -170,8 +163,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                 grantedById: user.id,
                 state: "ACTIVE",
               })
-              .returning(),
-          );
+              .returning();
           yield* insertAudit({
             actorUserId: user.id,
             action: "GRANT_REALM_CAPABILITY",
@@ -191,7 +183,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
           yield* requireRealmMod(params.realmUnitId, user.id);
           const now = new Date();
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .update(RealmCapabilityGrant)
               .set({ state: "REVOKED", revokedById: user.id, revokedAt: now, updatedAt: now })
@@ -203,8 +195,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                   eq(RealmCapabilityGrant.state, "ACTIVE"),
                 ),
               )
-              .returning(),
-          );
+              .returning();
           yield* insertAudit({
             actorUserId: user.id,
             action: "REVOKE_REALM_CAPABILITY",
@@ -227,12 +218,11 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           // 策略评估：检查请求动作对应的 staff 权限
           const body = payload as Record<string, unknown>;
           const action = (body["action"] as string) ?? "unknown";
-          const grants = yield* Effect.orDie(
+          const grants = yield* 
             database
               .select()
               .from(StaffGrant)
-              .where(and(eq(StaffGrant.userId, user.id), eq(StaffGrant.state, "ACTIVE"))),
-          );
+              .where(and(eq(StaffGrant.userId, user.id), eq(StaffGrant.state, "ACTIVE")));
           const hasCapability = grants.some(
             (g) => g.capability === action || g.capability === "*",
           );
@@ -252,7 +242,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
           yield* requireStaff(user.id);
           const targetKind = params.targetKind as typeof ModerationAction.$inferSelect["targetKind"];
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select()
               .from(ModerationAction)
@@ -264,8 +254,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               )
               .orderBy(desc(ModerationAction.createdAt))
               .limit(lim(query.limit))
-              .offset(query.offset ?? 0),
-          );
+              .offset(query.offset ?? 0);
           return rows;
         }),
       )
@@ -281,7 +270,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           if (unitIds.length === 0) return [];
           // Return the latest ModerationAction per unit (target) for overlay state
           // 返回每个 unit（目标）的最新 ModerationAction 作为叠加层状态
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select()
               .from(ModerationAction)
@@ -292,8 +281,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                 ),
               )
               .orderBy(desc(ModerationAction.createdAt))
-              .limit(unitIds.length * 5),
-          );
+              .limit(unitIds.length * 5);
           // Deduplicate: keep latest action per targetId
           // 去重：每个 targetId 保留最新动作
           const seen = new Set<string>();
@@ -314,12 +302,11 @@ export const GovernanceHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           yield* requireStaff(user.id);
-          yield* Effect.orDie(
+          yield* 
             database
               .update(Unit)
               .set({ moderationStatus: "APPROVED" })
-              .where(eq(Unit.id, params.targetUnitId)),
-          );
+              .where(eq(Unit.id, params.targetUnitId));
           const action = yield* insertAction({
             authority: "PLATFORM",
             targetKind: "UNIT",
@@ -350,12 +337,11 @@ export const GovernanceHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           yield* requireStaff(user.id);
-          yield* Effect.orDie(
+          yield* 
             database
               .update(Unit)
               .set({ moderationStatus: "REMOVED" })
-              .where(eq(Unit.id, params.targetUnitId)),
-          );
+              .where(eq(Unit.id, params.targetUnitId));
           const action = yield* insertAction({
             authority: "PLATFORM",
             targetKind: "UNIT",
@@ -386,12 +372,11 @@ export const GovernanceHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           yield* requireStaff(user.id);
-          yield* Effect.orDie(
+          yield* 
             database
               .update(Unit)
               .set({ moderationStatus: "APPROVED" })
-              .where(eq(Unit.id, params.targetUnitId)),
-          );
+              .where(eq(Unit.id, params.targetUnitId));
           const action = yield* insertAction({
             authority: "PLATFORM",
             targetKind: "UNIT",
@@ -422,7 +407,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           yield* requireRealmMod(params.realmUnitId, user.id);
-          yield* Effect.orDie(
+          yield* 
             database
               .update(UnitRealm)
               .set({ moderationStatus: "APPROVED" })
@@ -431,8 +416,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                   eq(UnitRealm.realmUnitId, params.realmUnitId),
                   eq(UnitRealm.unitId, params.targetUnitId),
                 ),
-              ),
-          );
+              );
           const action = yield* insertAction({
             authority: "REALM",
             realmUnitId: params.realmUnitId,
@@ -456,7 +440,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           yield* requireRealmMod(params.realmUnitId, user.id);
-          yield* Effect.orDie(
+          yield* 
             database
               .update(UnitRealm)
               .set({ moderationStatus: "REMOVED" })
@@ -465,8 +449,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                   eq(UnitRealm.realmUnitId, params.realmUnitId),
                   eq(UnitRealm.unitId, params.targetUnitId),
                 ),
-              ),
-          );
+              );
           const action = yield* insertAction({
             authority: "REALM",
             realmUnitId: params.realmUnitId,
@@ -490,7 +473,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           yield* requireRealmMod(params.realmUnitId, user.id);
-          yield* Effect.orDie(
+          yield* 
             database
               .update(UnitRealm)
               .set({ moderationStatus: "APPROVED" })
@@ -499,8 +482,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                   eq(UnitRealm.realmUnitId, params.realmUnitId),
                   eq(UnitRealm.unitId, params.targetUnitId),
                 ),
-              ),
-          );
+              );
           const action = yield* insertAction({
             authority: "REALM",
             realmUnitId: params.realmUnitId,
@@ -524,7 +506,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           yield* requireRealmMod(params.realmUnitId, user.id);
-          yield* Effect.orDie(
+          yield* 
             database
               .update(UnitRealm)
               .set({ isLocked: true })
@@ -533,8 +515,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                   eq(UnitRealm.realmUnitId, params.realmUnitId),
                   eq(UnitRealm.unitId, params.targetUnitId),
                 ),
-              ),
-          );
+              );
           const action = yield* insertAction({
             authority: "REALM",
             realmUnitId: params.realmUnitId,
@@ -558,7 +539,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           yield* requireRealmMod(params.realmUnitId, user.id);
-          yield* Effect.orDie(
+          yield* 
             database
               .update(UnitRealm)
               .set({ isLocked: false })
@@ -567,8 +548,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                   eq(UnitRealm.realmUnitId, params.realmUnitId),
                   eq(UnitRealm.unitId, params.targetUnitId),
                 ),
-              ),
-          );
+              );
           const action = yield* insertAction({
             authority: "REALM",
             realmUnitId: params.realmUnitId,
@@ -622,7 +602,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           yield* requireStaff(user.id);
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select()
               .from(AccountEnforcement)
@@ -632,8 +612,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                   eq(AccountEnforcement.state, "ACTIVE"),
                 ),
               )
-              .orderBy(desc(AccountEnforcement.createdAt)),
-          );
+              .orderBy(desc(AccountEnforcement.createdAt));
           return {
             targetUserId: params.targetUserId,
             active: rows,
@@ -654,15 +633,14 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               eq(AccountEnforcement.state, query.state as typeof AccountEnforcement.state.enumValues[number]),
             );
           }
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select()
               .from(AccountEnforcement)
               .where(and(...conditions))
               .orderBy(desc(AccountEnforcement.createdAt))
               .limit(lim(query.limit))
-              .offset(query.offset ?? 0),
-          );
+              .offset(query.offset ?? 0);
           return rows;
         }),
       )
@@ -693,7 +671,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reasonText: reason,
             caseId: (body["caseId"] as string) ?? null,
           });
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .insert(AccountEnforcement)
               .values({
@@ -708,8 +686,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                 decisionActionId: action.id,
                 metadata: (body["metadata"] as Record<string, unknown>) ?? null,
               })
-              .returning(),
-          );
+              .returning();
           yield* insertAudit({
             actorUserId: user.id,
             action: `ENFORCEMENT_${kind}`,
@@ -743,7 +720,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
             reasonCode: "UNBLOCKED",
             reasonText: reason,
           });
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .update(AccountEnforcement)
               .set({
@@ -759,8 +736,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                   eq(AccountEnforcement.state, "ACTIVE"),
                 ),
               )
-              .returning(),
-          );
+              .returning();
           yield* insertAudit({
             actorUserId: user.id,
             action: "ENFORCEMENT_REVOKE",
@@ -785,15 +761,14 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               eq(ModerationCase.state, query.state as typeof ModerationCase.state.enumValues[number]),
             );
           }
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select()
               .from(ModerationCase)
               .where(and(...conditions))
               .orderBy(desc(ModerationCase.createdAt))
               .limit(lim(query.limit))
-              .offset(query.offset ?? 0),
-          );
+              .offset(query.offset ?? 0);
           return rows;
         }),
       )
@@ -804,9 +779,8 @@ export const GovernanceHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           yield* requireStaff(user.id);
-          const rows = yield* Effect.orDie(
-            database.select().from(ModerationCase).where(eq(ModerationCase.id, params.caseId)).limit(1),
-          );
+          const rows = yield* 
+            database.select().from(ModerationCase).where(eq(ModerationCase.id, params.caseId)).limit(1);
           if (!rows[0]) return yield* new GovernanceForbidden();
           return rows[0];
         }),
@@ -818,15 +792,14 @@ export const GovernanceHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           yield* requireStaff(user.id);
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select()
               .from(ModerationAction)
               .where(eq(ModerationAction.caseId, params.caseId))
               .orderBy(desc(ModerationAction.createdAt))
               .limit(lim(query.limit))
-              .offset(query.offset ?? 0),
-          );
+              .offset(query.offset ?? 0);
           return rows;
         }),
       )
@@ -837,13 +810,12 @@ export const GovernanceHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           yield* requireStaff(user.id);
-          const feedbackRows = yield* Effect.orDie(
-            database.select().from(Feedback).where(eq(Feedback.id, params.feedbackId)).limit(1),
-          );
+          const feedbackRows = yield* 
+            database.select().from(Feedback).where(eq(Feedback.id, params.feedbackId)).limit(1);
           if (!feedbackRows[0]) return yield* new GovernanceForbidden();
           const fb = feedbackRows[0];
           const body = payload as Record<string, unknown>;
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .insert(ModerationCase)
               .values({
@@ -857,8 +829,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                 reason: (body["reason"] as string) ?? fb.content,
                 severity: (body["severity"] as string) ?? null,
               })
-              .returning(),
-          );
+              .returning();
           yield* insertAudit({
             actorUserId: user.id,
             action: "CASE_CREATE_FROM_FEEDBACK",
@@ -880,13 +851,12 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const body = payload as Record<string, unknown>;
           const duplicateOfCaseId = body["duplicateOfCaseId"] as string;
           const now = new Date();
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .update(ModerationCase)
               .set({ state: "DUPLICATE", duplicateOfCaseId, updatedAt: now })
               .where(eq(ModerationCase.id, params.caseId))
-              .returning(),
-          );
+              .returning();
           if (!rows[0]) return yield* new GovernanceForbidden();
           yield* insertAudit({
             actorUserId: user.id,
@@ -909,13 +879,12 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const body = payload as Record<string, unknown>;
           const assignedToUserId = (body["assignedToUserId"] as string) ?? user.id;
           const now = new Date();
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .update(ModerationCase)
               .set({ state: "ASSIGNED", assignedToUserId, updatedAt: now })
               .where(eq(ModerationCase.id, params.caseId))
-              .returning(),
-          );
+              .returning();
           if (!rows[0]) return yield* new GovernanceForbidden();
           yield* insertAudit({
             actorUserId: user.id,
@@ -937,7 +906,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           yield* requireStaff(user.id);
           const body = payload as Record<string, unknown>;
           const now = new Date();
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .update(ModerationCase)
               .set({
@@ -946,8 +915,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                 updatedAt: now,
               })
               .where(eq(ModerationCase.id, params.caseId))
-              .returning(),
-          );
+              .returning();
           if (!rows[0]) return yield* new GovernanceForbidden();
           yield* insertAudit({
             actorUserId: user.id,
@@ -970,13 +938,12 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const body = payload as Record<string, unknown>;
           const decisionCode = (body["decisionCode"] as string) ?? "ACTIONED";
           const now = new Date();
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .update(ModerationCase)
               .set({ state: "ACTIONED", updatedAt: now })
               .where(eq(ModerationCase.id, params.caseId))
-              .returning(),
-          );
+              .returning();
           if (!rows[0]) return yield* new GovernanceForbidden();
           yield* insertAction({
             authority: "PLATFORM",
@@ -1010,13 +977,12 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const now = new Date();
           // Check the case exists
           // 检查案例是否存在
-          const caseRows = yield* Effect.orDie(
-            database.select().from(ModerationCase).where(eq(ModerationCase.id, params.caseId)).limit(1),
-          );
+          const caseRows = yield* 
+            database.select().from(ModerationCase).where(eq(ModerationCase.id, params.caseId)).limit(1);
           if (!caseRows[0]) return yield* new GovernanceForbidden();
           // Create a child case for the appeal
           // 为申诉创建子案例
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .insert(ModerationCase)
               .values({
@@ -1031,16 +997,14 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                 reason: (body["reason"] as string) ?? "Appeal submitted",
                 severity: (body["severity"] as string) ?? null,
               })
-              .returning(),
-          );
+              .returning();
           // Update the parent case state to REVIEWING if it was ACTIONED/RESOLVED
           // 如果父案例状态为 ACTIONED/RESOLVED，则更新为 REVIEWING
-          yield* Effect.orDie(
+          yield* 
             database
               .update(ModerationCase)
               .set({ state: "REVIEWING", updatedAt: now })
-              .where(eq(ModerationCase.id, params.caseId)),
-          );
+              .where(eq(ModerationCase.id, params.caseId));
           yield* insertAudit({
             actorUserId: user.id,
             action: "CASE_APPEAL",
@@ -1067,15 +1031,14 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               eq(ModerationCase.state, query.state as typeof ModerationCase.state.enumValues[number]),
             );
           }
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select()
               .from(ModerationCase)
               .where(and(...conditions))
               .orderBy(desc(ModerationCase.createdAt))
               .limit(lim(query.limit))
-              .offset(query.offset ?? 0),
-          );
+              .offset(query.offset ?? 0);
           return rows;
         }),
       )
@@ -1089,7 +1052,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const body = payload as Record<string, unknown>;
           const targetKind =
             (body["targetKind"] as typeof ModerationCase.$inferInsert["targetKind"]) ?? "UNIT";
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .insert(ModerationCase)
               .values({
@@ -1104,8 +1067,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                 reason: (body["reason"] as string) ?? null,
                 severity: (body["severity"] as string) ?? null,
               })
-              .returning(),
-          );
+              .returning();
           yield* insertAudit({
             actorUserId: user.id,
             action: "REALM_CASE_CREATE",
@@ -1124,13 +1086,12 @@ export const GovernanceHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           yield* requireRealmMod(params.realmUnitId, user.id);
-          const feedbackRows = yield* Effect.orDie(
-            database.select().from(Feedback).where(eq(Feedback.id, params.feedbackId)).limit(1),
-          );
+          const feedbackRows = yield* 
+            database.select().from(Feedback).where(eq(Feedback.id, params.feedbackId)).limit(1);
           if (!feedbackRows[0]) return yield* new GovernanceForbidden();
           const fb = feedbackRows[0];
           const body = payload as Record<string, unknown>;
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .insert(ModerationCase)
               .values({
@@ -1145,8 +1106,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                 reason: (body["reason"] as string) ?? fb.content,
                 severity: (body["severity"] as string) ?? null,
               })
-              .returning(),
-          );
+              .returning();
           yield* insertAudit({
             actorUserId: user.id,
             action: "REALM_CASE_CREATE_FROM_FEEDBACK",
@@ -1165,7 +1125,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           yield* requireRealmMod(params.realmUnitId, user.id);
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select()
               .from(ModerationAction)
@@ -1177,8 +1137,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
               )
               .orderBy(desc(ModerationAction.createdAt))
               .limit(lim(query.limit))
-              .offset(query.offset ?? 0),
-          );
+              .offset(query.offset ?? 0);
           return rows;
         }),
       )
@@ -1192,7 +1151,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const body = payload as Record<string, unknown>;
           const decisionCode = (body["decisionCode"] as string) ?? "ACTIONED";
           const now = new Date();
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .update(ModerationCase)
               .set({ state: "ACTIONED", updatedAt: now })
@@ -1202,8 +1161,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                   eq(ModerationCase.realmUnitId, params.realmUnitId),
                 ),
               )
-              .returning(),
-          );
+              .returning();
           if (!rows[0]) return yield* new GovernanceForbidden();
           yield* insertAction({
             authority: "REALM",
@@ -1239,7 +1197,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           const now = new Date();
           // Update realm case state to ESCALATED
           // 将 Realm 案例状态更新为 ESCALATED
-          const caseRows = yield* Effect.orDie(
+          const caseRows = yield* 
             database
               .update(ModerationCase)
               .set({ state: "ESCALATED", updatedAt: now })
@@ -1249,12 +1207,11 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                   eq(ModerationCase.realmUnitId, params.realmUnitId),
                 ),
               )
-              .returning(),
-          );
+              .returning();
           if (!caseRows[0]) return yield* new GovernanceForbidden();
           // Create a platform-scoped case referencing the realm case
           // 创建引用 Realm 案例的平台级案例
-          const escalatedRows = yield* Effect.orDie(
+          const escalatedRows = yield* 
             database
               .insert(ModerationCase)
               .values({
@@ -1270,8 +1227,7 @@ export const GovernanceHandlers = HttpApiBuilder.group(
                 reason: (body["reason"] as string) ?? `Escalated from realm case ${params.caseId}`,
                 severity: (body["severity"] as string) ?? caseRows[0].severity,
               })
-              .returning(),
-          );
+              .returning();
           yield* insertAction({
             authority: "REALM",
             realmUnitId: params.realmUnitId,
@@ -1310,15 +1266,14 @@ export const GovernanceHandlers = HttpApiBuilder.group(
           if (query.decisionCode) conditions.push(eq(StaffAuditLog.decisionCode, query.decisionCode));
           if (query.requestId) conditions.push(eq(StaffAuditLog.requestId, query.requestId));
           const where = conditions.length > 0 ? and(...conditions) : undefined;
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select()
               .from(StaffAuditLog)
               .where(where)
               .orderBy(desc(StaffAuditLog.createdAt))
               .limit(lim(query.limit))
-              .offset(query.offset ?? 0),
-          );
+              .offset(query.offset ?? 0);
           return rows;
         }),
       )
@@ -1329,9 +1284,8 @@ export const GovernanceHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           const user = yield* CurrentUser;
           yield* requireStaff(user.id);
-          const rows = yield* Effect.orDie(
-            database.select().from(StaffAuditLog).where(eq(StaffAuditLog.id, params.auditLogId)).limit(1),
-          );
+          const rows = yield* 
+            database.select().from(StaffAuditLog).where(eq(StaffAuditLog.id, params.auditLogId)).limit(1);
           if (!rows[0]) return yield* new GovernanceNotFound();
           return rows[0];
         }),

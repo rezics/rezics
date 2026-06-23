@@ -167,13 +167,12 @@ export const EntitiesHandlers = HttpApiBuilder.group(
     // Shared helper: hydrate entity by unitId / 共享辅助：通过 unitId 获取 entity 全量数据
     const hydrateEntity = (unitId: string) =>
       Effect.gen(function* () {
-        const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, unitId)));
+        const units = yield* database.select().from(Unit).where(eq(Unit.id, unitId));
         if (!units[0]) return yield* new EntityNotFound();
-        const entities = yield* Effect.orDie(database.select().from(Entity).where(eq(Entity.unitId, unitId)));
+        const entities = yield* database.select().from(Entity).where(eq(Entity.unitId, unitId));
         if (!entities[0]) return yield* new EntityNotFound();
-        const translations = yield* Effect.orDie(
-          database.select().from(UnitTranslation).where(eq(UnitTranslation.unitId, unitId)),
-        );
+        const translations = yield* 
+          database.select().from(UnitTranslation).where(eq(UnitTranslation.unitId, unitId));
         return entityToDTO(units[0], entities[0], translations);
       });
 
@@ -183,14 +182,13 @@ export const EntitiesHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           // Entity slugScope is a well-known scope; find entity Unit by slug
           // 实体的 slugScope 是固定作用域；通过 slug 查找实体 Unit
-          const unitRows = yield* Effect.orDie(
+          const unitRows = yield* 
             database
               .select({ id: Unit.id, type: Unit.type })
               .from(Unit)
               .innerJoin(Entity, eq(Entity.unitId, Unit.id))
               .where(eq(Unit.slug, params.slug))
-              .limit(1),
-          );
+              .limit(1);
           if (!unitRows[0]) return yield* new EntityNotFound();
           return yield* hydrateEntity(unitRows[0].id);
         }),
@@ -222,7 +220,7 @@ export const EntitiesHandlers = HttpApiBuilder.group(
 
           const where = conditions.length > 0 ? and(...conditions) : undefined;
 
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select({ unitId: Entity.unitId })
               .from(Entity)
@@ -230,29 +228,27 @@ export const EntitiesHandlers = HttpApiBuilder.group(
               .where(where)
               .orderBy(desc(Unit.createdAt))
               .limit(lim(query.limit))
-              .offset(query.offset ?? 0),
-          );
+              .offset(query.offset ?? 0);
 
-          const agg = yield* Effect.orDie(
+          const agg = yield* 
             database
               .select({ total: count() })
               .from(Entity)
               .innerJoin(Unit, eq(Entity.unitId, Unit.id))
-              .where(where),
-          );
+              .where(where);
 
           const entityIds = rows.map((r) => r.unitId);
           const entities =
             entityIds.length > 0
-              ? yield* Effect.orDie(database.select().from(Entity).where(inArray(Entity.unitId, entityIds)))
+              ? yield* database.select().from(Entity).where(inArray(Entity.unitId, entityIds))
               : [];
           const units =
             entityIds.length > 0
-              ? yield* Effect.orDie(database.select().from(Unit).where(inArray(Unit.id, entityIds)))
+              ? yield* database.select().from(Unit).where(inArray(Unit.id, entityIds))
               : [];
           const translations =
             entityIds.length > 0
-              ? yield* Effect.orDie(database.select().from(UnitTranslation).where(inArray(UnitTranslation.unitId, entityIds)))
+              ? yield* database.select().from(UnitTranslation).where(inArray(UnitTranslation.unitId, entityIds))
               : [];
 
           const entityMap = new Map(entities.map((e) => [e.unitId, e]));
@@ -284,7 +280,7 @@ export const EntitiesHandlers = HttpApiBuilder.group(
           const input = payload as Record<string, any>;
           const language = (input["translations"]?.[0]?.language as string) ?? "en";
 
-          const unitRows = yield* Effect.orDie(
+          const unitRows = yield* 
             database
               .insert(Unit)
               .values({
@@ -296,11 +292,10 @@ export const EntitiesHandlers = HttpApiBuilder.group(
                 userId: user.id,
                 defaultLanguage: language,
               })
-              .returning(),
-          );
+              .returning();
           const unit = unitRows[0]!;
 
-          yield* Effect.orDie(
+          yield* 
             database.insert(Entity).values({
               unitId: unit.id,
               kind: (input["kind"] as string) ?? undefined,
@@ -308,13 +303,12 @@ export const EntitiesHandlers = HttpApiBuilder.group(
               verified: (input["verified"] as boolean) ?? false,
               eligibleCreditRoles: (input["eligibleCreditRoles"] as string[]) ?? [],
               eligibleSubjectRoles: (input["eligibleSubjectRoles"] as string[]) ?? [],
-            }),
-          );
+            });
 
           // Insert translations / 插入翻译
           const translations = (input["translations"] ?? []) as Array<Record<string, any>>;
           for (const tr of translations) {
-            yield* Effect.orDie(
+            yield* 
               database.insert(UnitTranslation).values({
                 unitId: unit.id,
                 language: tr["language"] as string,
@@ -322,11 +316,10 @@ export const EntitiesHandlers = HttpApiBuilder.group(
                 subtitle: (tr["subtitle"] as string) ?? undefined,
                 summary: (tr["summary"] as string) ?? undefined,
                 description: tr["description"] ?? undefined,
-              }),
-            );
+              });
           }
 
-          return yield* Effect.orDie(hydrateEntity(unit.id));
+          return yield* hydrateEntity(unit.id);
         }),
       )
 
@@ -334,7 +327,7 @@ export const EntitiesHandlers = HttpApiBuilder.group(
       .handle("update", ({ params, payload }) =>
         Effect.gen(function* () {
           yield* CurrentUser;
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const units = yield* database.select().from(Unit).where(eq(Unit.id, params.unitId));
           if (!units[0]) return yield* new EntityNotFound();
 
           const input = payload as Record<string, any>;
@@ -351,23 +344,22 @@ export const EntitiesHandlers = HttpApiBuilder.group(
             entityUpdate.eligibleSubjectRoles = input["eligibleSubjectRoles"];
           }
           if (Object.keys(entityUpdate).length > 0) {
-            yield* Effect.orDie(database.update(Entity).set(entityUpdate).where(eq(Entity.unitId, params.unitId)));
+            yield* database.update(Entity).set(entityUpdate).where(eq(Entity.unitId, params.unitId));
           }
 
           // Update Unit slug / 更新 Unit slug
           if (input["slug"] !== undefined) {
-            yield* Effect.orDie(
+            yield* 
               database
                 .update(Unit)
                 .set({ slug: input["slug"] ?? null, updatedAt: new Date() })
-                .where(eq(Unit.id, params.unitId)),
-            );
+                .where(eq(Unit.id, params.unitId));
           }
 
           // Update/insert translations / 更新/插入翻译
           const translations = (input["translations"] ?? []) as Array<Record<string, any>>;
           for (const tr of translations) {
-            yield* Effect.orDie(
+            yield* 
               database
                 .insert(UnitTranslation)
                 .values({
@@ -387,11 +379,10 @@ export const EntitiesHandlers = HttpApiBuilder.group(
                     description: tr["description"] ?? undefined,
                     updatedAt: new Date(),
                   },
-                }),
-            );
+                });
           }
 
-          yield* Effect.orDie(database.update(Unit).set({ updatedAt: new Date() }).where(eq(Unit.id, params.unitId)));
+          yield* database.update(Unit).set({ updatedAt: new Date() }).where(eq(Unit.id, params.unitId));
           return yield* hydrateEntity(params.unitId);
         }),
       )
@@ -402,10 +393,10 @@ export const EntitiesHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
           // Admin-only check: entity deletion requires ownership or admin
           // 管理员检查：删除实体要求所有权或管理员身份
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const units = yield* database.select().from(Unit).where(eq(Unit.id, params.unitId));
           if (!units[0]) return yield* new EntityForbidden();
           if (units[0].userId !== user.id) return yield* new EntityForbidden();
-          yield* Effect.orDie(database.delete(Unit).where(eq(Unit.id, params.unitId)));
+          yield* database.delete(Unit).where(eq(Unit.id, params.unitId));
           return { message: "Entity deleted successfully" };
         }),
       );
@@ -437,7 +428,7 @@ export const EntityAttributionHandlers = HttpApiBuilder.group(
           if (op["op"] === "setCredits") {
             // Remove credits for this role not in new set / 移除此角色中不在新集合中的创作归属
             const keepEntityIds = entries.map((e) => e["entityId"] as string);
-            yield* Effect.orDie(
+            yield* 
               database
                 .delete(CreditAttribution)
                 .where(
@@ -448,12 +439,11 @@ export const EntityAttributionHandlers = HttpApiBuilder.group(
                       ? notInArray(CreditAttribution.entityId, keepEntityIds)
                       : undefined,
                   ),
-                ),
-            );
+                );
             // Upsert remaining / 更新或插入剩余条目
             for (const entry of entries) {
               const position = (entry["position"] as string) ?? "V";
-              yield* Effect.orDie(
+              yield* 
                 database
                   .insert(CreditAttribution)
                   .values({
@@ -465,13 +455,12 @@ export const EntityAttributionHandlers = HttpApiBuilder.group(
                   .onConflictDoUpdate({
                     target: [CreditAttribution.unitId, CreditAttribution.entityId, CreditAttribution.role],
                     set: { position },
-                  }),
-              );
+                  });
             }
           } else {
             // setSubjects / 设置主题归属
             const keepEntityIds = entries.map((e) => e["entityId"] as string);
-            yield* Effect.orDie(
+            yield* 
               database
                 .delete(SubjectAttribution)
                 .where(
@@ -482,12 +471,11 @@ export const EntityAttributionHandlers = HttpApiBuilder.group(
                       ? notInArray(SubjectAttribution.entityId, keepEntityIds)
                       : undefined,
                   ),
-                ),
-            );
+                );
             for (const entry of entries) {
               const position = (entry["position"] as string) ?? "V";
               const weight = (entry["weight"] as number) ?? null;
-              yield* Effect.orDie(
+              yield* 
                 database
                   .insert(SubjectAttribution)
                   .values({
@@ -500,27 +488,24 @@ export const EntityAttributionHandlers = HttpApiBuilder.group(
                   .onConflictDoUpdate({
                     target: [SubjectAttribution.unitId, SubjectAttribution.entityId, SubjectAttribution.role],
                     set: { position, weight },
-                  }),
-              );
+                  });
             }
           }
         }
 
         // Load final state and return / 加载最终状态并返回
-        const credits = yield* Effect.orDie(
+        const credits = yield* 
           database
             .select()
             .from(CreditAttribution)
             .where(eq(CreditAttribution.unitId, unitId))
-            .orderBy(asc(CreditAttribution.role), asc(CreditAttribution.position)),
-        );
-        const subjects = yield* Effect.orDie(
+            .orderBy(asc(CreditAttribution.role), asc(CreditAttribution.position));
+        const subjects = yield* 
           database
             .select()
             .from(SubjectAttribution)
             .where(eq(SubjectAttribution.unitId, unitId))
-            .orderBy(asc(SubjectAttribution.role), asc(SubjectAttribution.position)),
-        );
+            .orderBy(asc(SubjectAttribution.role), asc(SubjectAttribution.position));
 
         return {
           unitId,
@@ -561,11 +546,10 @@ export const CreditAttributionHandlers = HttpApiBuilder.group(
         if (rows.length === 0) return [];
         const entityIds = [...new Set(rows.map((r) => r.entityId))];
 
-        const entityUnits = yield* Effect.orDie(database.select().from(Unit).where(inArray(Unit.id, entityIds)));
-        const entities = yield* Effect.orDie(database.select().from(Entity).where(inArray(Entity.unitId, entityIds)));
-        const translations = yield* Effect.orDie(
-          database.select().from(UnitTranslation).where(inArray(UnitTranslation.unitId, entityIds)),
-        );
+        const entityUnits = yield* database.select().from(Unit).where(inArray(Unit.id, entityIds));
+        const entities = yield* database.select().from(Entity).where(inArray(Entity.unitId, entityIds));
+        const translations = yield* 
+          database.select().from(UnitTranslation).where(inArray(UnitTranslation.unitId, entityIds));
 
         const unitMap = new Map(entityUnits.map((u) => [u.id, u]));
         const entityMap = new Map(entities.map((e) => [e.unitId, e]));
@@ -597,12 +581,11 @@ export const CreditAttributionHandlers = HttpApiBuilder.group(
           const role = input["role"] as string;
           const position = (input["position"] as string) ?? "V";
 
-          const [row] = yield* Effect.orDie(
+          const [row] = yield* 
             database
               .insert(CreditAttribution)
               .values({ unitId, entityId, role, position })
-              .returning(),
-          );
+              .returning();
 
           const hydrated = yield* hydrateCreditRows([row!]);
           return hydrated[0]!;
@@ -612,7 +595,7 @@ export const CreditAttributionHandlers = HttpApiBuilder.group(
       // ---- GET /credit-attribution/by-unit/:unitId — list / 列出 ----
       .handle("listByUnit", ({ params }) =>
         Effect.gen(function* () {
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select()
               .from(CreditAttribution)
@@ -621,8 +604,7 @@ export const CreditAttributionHandlers = HttpApiBuilder.group(
                 asc(CreditAttribution.role),
                 asc(CreditAttribution.position),
                 asc(CreditAttribution.entityId),
-              ),
-          );
+              );
           return yield* hydrateCreditRows(rows);
         }),
       )
@@ -638,7 +620,7 @@ export const CreditAttributionHandlers = HttpApiBuilder.group(
           const sourceExternalLinkId = input["sourceExternalLinkId"] as string;
 
           // Verify CreditAttribution exists / 验证创作归属存在
-          const existing = yield* Effect.orDie(
+          const existing = yield* 
             database
               .select()
               .from(CreditAttribution)
@@ -649,21 +631,19 @@ export const CreditAttributionHandlers = HttpApiBuilder.group(
                   eq(CreditAttribution.role, role),
                 ),
               )
-              .limit(1),
-          );
+              .limit(1);
           if (!existing[0]) return yield* new EntityForbidden();
 
           // Verify source external link exists and belongs to the unit / 验证来源外部链接存在且属于该 unit
-          const linkRows = yield* Effect.orDie(
+          const linkRows = yield* 
             database
               .select({ id: UnitExternalLink.id, unitId: UnitExternalLink.unitId })
               .from(UnitExternalLink)
               .where(eq(UnitExternalLink.id, sourceExternalLinkId))
-              .limit(1),
-          );
+              .limit(1);
           if (!linkRows[0]) return yield* new EntityForbidden();
 
-          yield* Effect.orDie(
+          yield* 
             database.insert(CreditAttributionEvidence).values({
               unitId,
               entityId,
@@ -673,8 +653,7 @@ export const CreditAttributionHandlers = HttpApiBuilder.group(
               observedUrl: (input["observedUrl"] as string) ?? undefined,
               observedAt: input["observedAt"] ? new Date(input["observedAt"] as string) : new Date(),
               confidence: (input["confidence"] as number) ?? undefined,
-            }),
-          );
+            });
 
           const hydrated = yield* hydrateCreditRows([existing[0]]);
           return hydrated[0]!;
@@ -685,7 +664,7 @@ export const CreditAttributionHandlers = HttpApiBuilder.group(
       .handle("unlink", ({ params }) =>
         Effect.gen(function* () {
           yield* CurrentUser;
-          yield* Effect.orDie(
+          yield* 
             database
               .delete(CreditAttribution)
               .where(
@@ -694,8 +673,7 @@ export const CreditAttributionHandlers = HttpApiBuilder.group(
                   eq(CreditAttribution.entityId, params.entityId),
                   eq(CreditAttribution.role, params.role),
                 ),
-              ),
-          );
+              );
           return { message: "Credit attribution unlinked" };
         }),
       );
@@ -719,11 +697,10 @@ export const SubjectAttributionHandlers = HttpApiBuilder.group(
         if (rows.length === 0) return [];
         const entityIds = [...new Set(rows.map((r) => r.entityId))];
 
-        const entityUnits = yield* Effect.orDie(database.select().from(Unit).where(inArray(Unit.id, entityIds)));
-        const entities = yield* Effect.orDie(database.select().from(Entity).where(inArray(Entity.unitId, entityIds)));
-        const translations = yield* Effect.orDie(
-          database.select().from(UnitTranslation).where(inArray(UnitTranslation.unitId, entityIds)),
-        );
+        const entityUnits = yield* database.select().from(Unit).where(inArray(Unit.id, entityIds));
+        const entities = yield* database.select().from(Entity).where(inArray(Entity.unitId, entityIds));
+        const translations = yield* 
+          database.select().from(UnitTranslation).where(inArray(UnitTranslation.unitId, entityIds));
 
         const unitMap = new Map(entityUnits.map((u) => [u.id, u]));
         const entityMap = new Map(entities.map((e) => [e.unitId, e]));
@@ -756,12 +733,11 @@ export const SubjectAttributionHandlers = HttpApiBuilder.group(
           const position = (input["position"] as string) ?? "V";
           const weight = (input["weight"] as number) ?? null;
 
-          const [row] = yield* Effect.orDie(
+          const [row] = yield* 
             database
               .insert(SubjectAttribution)
               .values({ unitId, entityId, role, position, weight })
-              .returning(),
-          );
+              .returning();
 
           const hydrated = yield* hydrateSubjectRows([row!]);
           return hydrated[0]!;
@@ -774,7 +750,7 @@ export const SubjectAttributionHandlers = HttpApiBuilder.group(
           const conditions = [eq(SubjectAttribution.unitId, params.unitId)];
           if (query.role) conditions.push(eq(SubjectAttribution.role, query.role));
 
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select()
               .from(SubjectAttribution)
@@ -783,8 +759,7 @@ export const SubjectAttributionHandlers = HttpApiBuilder.group(
                 asc(SubjectAttribution.role),
                 asc(SubjectAttribution.position),
                 asc(SubjectAttribution.entityId),
-              ),
-          );
+              );
           return yield* hydrateSubjectRows(rows);
         }),
       )
@@ -795,7 +770,7 @@ export const SubjectAttributionHandlers = HttpApiBuilder.group(
           const conditions = [eq(SubjectAttribution.entityId, params.entityId)];
           if (query.role) conditions.push(eq(SubjectAttribution.role, query.role));
 
-          const rows = yield* Effect.orDie(
+          const rows = yield* 
             database
               .select({
                 unitId: SubjectAttribution.unitId,
@@ -810,8 +785,7 @@ export const SubjectAttributionHandlers = HttpApiBuilder.group(
                 asc(SubjectAttribution.role),
                 asc(SubjectAttribution.position),
                 asc(SubjectAttribution.unitId),
-              ),
-          );
+              );
           return yield* hydrateSubjectRows(rows);
         }),
       )
@@ -820,7 +794,7 @@ export const SubjectAttributionHandlers = HttpApiBuilder.group(
       .handle("unlink", ({ params }) =>
         Effect.gen(function* () {
           yield* CurrentUser;
-          yield* Effect.orDie(
+          yield* 
             database
               .delete(SubjectAttribution)
               .where(
@@ -829,8 +803,7 @@ export const SubjectAttributionHandlers = HttpApiBuilder.group(
                   eq(SubjectAttribution.entityId, params.entityId),
                   eq(SubjectAttribution.role, params.role),
                 ),
-              ),
-          );
+              );
           return { message: "Subject attribution unlinked" };
         }),
       );

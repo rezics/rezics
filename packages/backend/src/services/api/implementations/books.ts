@@ -40,7 +40,10 @@ import {
 // Mappers / 映射函数
 // ---------------------------------------------------------------------------
 
-function bookToDTO(unit: typeof Unit.$inferSelect, book: typeof Book.$inferSelect) {
+function bookToDTO(
+  unit: typeof Unit.$inferSelect,
+  book: typeof Book.$inferSelect,
+) {
   return new BookDTO({
     unitId: unit.id,
     type: unit.type,
@@ -77,16 +80,16 @@ export const BooksHandlers = HttpApiBuilder.group(
   Effect.fn(function* (handlers) {
     const database = yield* Database;
     const { pagination } = yield* Config;
-    const lim = (n?: number) => Math.min(n ?? pagination.defaultLimit, pagination.maxLimit);
+    const lim = (n?: number) =>
+      Math.min(n ?? pagination.defaultLimit, pagination.maxLimit);
 
     const fetchBook = (unitId: string) =>
-      Effect.orDie(
-        database
-          .select()
-          .from(Book)
-          .innerJoin(Unit, eq(Book.unitId, Unit.id))
-          .where(eq(Book.unitId, unitId)),
-      ).pipe(Effect.map((rows) => rows[0] ?? null));
+      database
+        .select()
+        .from(Book)
+        .innerJoin(Unit, eq(Book.unitId, Unit.id))
+        .where(eq(Book.unitId, unitId))
+        .pipe(Effect.map((rows) => rows[0] ?? null));
 
     const listBooksShared = (opts: {
       userId?: string;
@@ -99,165 +102,192 @@ export const BooksHandlers = HttpApiBuilder.group(
       Effect.gen(function* () {
         const conditions: ReturnType<typeof eq>[] = [eq(Unit.type, "BOOK")];
         if (opts.userId) conditions.push(eq(Unit.userId, opts.userId));
-        if (opts.status) conditions.push(eq(Unit.status, opts.status as (typeof Unit.status.enumValues)[number]));
-        if (opts.ids && opts.ids.length > 0) conditions.push(inArray(Book.unitId, [...opts.ids]));
+        if (opts.status)
+          conditions.push(
+            eq(
+              Unit.status,
+              opts.status as (typeof Unit.status.enumValues)[number],
+            ),
+          );
+        if (opts.ids && opts.ids.length > 0)
+          conditions.push(inArray(Book.unitId, [...opts.ids]));
         if (opts.search) conditions.push(ilike(Unit.slug, `%${opts.search}%`));
         const where = and(...conditions);
-        const rows = yield* Effect.orDie(
-          database
-            .select()
-            .from(Book)
-            .innerJoin(Unit, eq(Book.unitId, Unit.id))
-            .where(where)
-            .orderBy(desc(Unit.createdAt))
-            .limit(lim(opts.limit))
-            .offset(opts.offset ?? 0),
-        );
-        const agg = yield* Effect.orDie(
-          database.select({ total: count() }).from(Book).innerJoin(Unit, eq(Book.unitId, Unit.id)).where(where),
-        );
+        const rows = yield* database
+          .select()
+          .from(Book)
+          .innerJoin(Unit, eq(Book.unitId, Unit.id))
+          .where(where)
+          .orderBy(desc(Unit.createdAt))
+          .limit(lim(opts.limit))
+          .offset(opts.offset ?? 0);
+        const agg = yield* database
+          .select({ total: count() })
+          .from(Book)
+          .innerJoin(Unit, eq(Book.unitId, Unit.id))
+          .where(where);
         return new BookListResult({
           books: rows.map((r) => bookToDTO(r.Unit, r.Book)),
           total: agg[0]?.total ?? 0,
         });
       });
 
-    return handlers
-      // ── Book CRUD ──────────────────────────────────────────────
-      .handle("getBook", ({ params }) =>
-        Effect.gen(function* () {
-          const row = yield* fetchBook(params.unitId);
-          if (!row) return yield* new BookNotFound();
-          return bookToDTO(row.Unit, row.Book);
-        }),
-      )
+    return (
+      handlers
+        // ── Book CRUD ──────────────────────────────────────────────
+        .handle("getBook", ({ params }) =>
+          Effect.gen(function* () {
+            const row = yield* fetchBook(params.unitId);
+            if (!row) return yield* new BookNotFound();
+            return bookToDTO(row.Unit, row.Book);
+          }),
+        )
 
-      .handle("createBook", ({ payload }) =>
-        Effect.gen(function* () {
-          const user = yield* CurrentUser;
-          const lang = payload.defaultLanguage ?? "en";
-          const units = yield* Effect.orDie(
-            database
+        .handle("createBook", ({ payload }) =>
+          Effect.gen(function* () {
+            const user = yield* CurrentUser;
+            const lang = payload.defaultLanguage ?? "en";
+            const units = yield* database
               .insert(Unit)
               .values({
                 type: "BOOK",
                 userId: user.id,
                 slugScope: user.id,
                 defaultLanguage: lang,
-                status: (payload.status as (typeof Unit.$inferInsert)["status"]) ?? "DRAFT",
+                status:
+                  (payload.status as (typeof Unit.$inferInsert)["status"]) ??
+                  "DRAFT",
                 visibility: "PUBLIC",
               })
-              .returning(),
-          );
-          const unit = units[0]!;
-          yield* Effect.orDie(
-            database.insert(UnitTranslation).values({
+              .returning();
+            const unit = units[0]!;
+            yield* database.insert(UnitTranslation).values({
               unitId: unit.id,
               language: lang,
               title: payload.title,
-              extra: payload.coverUrl ? { coverUrl: payload.coverUrl } : undefined,
-            }),
-          );
-          const books = yield* Effect.orDie(
-            database
+              extra: payload.coverUrl
+                ? { coverUrl: payload.coverUrl }
+                : undefined,
+            });
+            const books = yield* database
               .insert(Book)
-              .values({ unitId: unit.id, isbn13: payload.isbn13, pageCount: payload.pageCount })
-              .returning(),
-          );
-          yield* Effect.orDie(database.insert(ContentStructure).values({ ownerUnitId: unit.id }));
-          return bookToDTO(unit, books[0]!);
-        }),
-      )
+              .values({
+                unitId: unit.id,
+                isbn13: payload.isbn13,
+                pageCount: payload.pageCount,
+              })
+              .returning();
+            yield* database
+              .insert(ContentStructure)
+              .values({ ownerUnitId: unit.id });
+            return bookToDTO(unit, books[0]!);
+          }),
+        )
 
-      .handle("updateBook", ({ params, payload }) =>
-        Effect.gen(function* () {
-          const user = yield* CurrentUser;
-          const row = yield* fetchBook(params.unitId);
-          if (!row) return yield* new BookNotFound();
-          if (row.Unit.userId !== user.id) return yield* new BookForbidden();
-          const patch = payload.patch as Record<string, unknown>;
-          const unitSet: Record<string, unknown> = { updatedAt: new Date() };
-          const bookSet: Record<string, unknown> = { updatedAt: new Date() };
-          if ("status" in patch) unitSet["status"] = patch["status"];
-          if ("visibility" in patch) unitSet["visibility"] = patch["visibility"];
-          if ("rating" in patch) unitSet["rating"] = patch["rating"];
-          if ("isbn13" in patch) bookSet["isbn13"] = patch["isbn13"];
-          if ("pageCount" in patch) bookSet["pageCount"] = patch["pageCount"];
-          if ("publicationDate" in patch) bookSet["publicationDate"] = patch["publicationDate"];
-          if ("formatKey" in patch) bookSet["formatKey"] = patch["formatKey"];
-          if ("isLicensed" in patch) bookSet["isLicensed"] = patch["isLicensed"];
-          if (Object.keys(unitSet).length > 1) {
-            yield* Effect.orDie(database.update(Unit).set(unitSet).where(eq(Unit.id, params.unitId)));
-          }
-          if (Object.keys(bookSet).length > 1) {
-            yield* Effect.orDie(database.update(Book).set(bookSet).where(eq(Book.unitId, params.unitId)));
-          }
-          const updated = yield* fetchBook(params.unitId);
-          return bookToDTO(updated!.Unit, updated!.Book);
-        }),
-      )
+        .handle("updateBook", ({ params, payload }) =>
+          Effect.gen(function* () {
+            const user = yield* CurrentUser;
+            const row = yield* fetchBook(params.unitId);
+            if (!row) return yield* new BookNotFound();
+            if (row.Unit.userId !== user.id) return yield* new BookForbidden();
+            const patch = payload.patch as Record<string, unknown>;
+            const unitSet: Record<string, unknown> = { updatedAt: new Date() };
+            const bookSet: Record<string, unknown> = { updatedAt: new Date() };
+            if ("status" in patch) unitSet["status"] = patch["status"];
+            if ("visibility" in patch)
+              unitSet["visibility"] = patch["visibility"];
+            if ("rating" in patch) unitSet["rating"] = patch["rating"];
+            if ("isbn13" in patch) bookSet["isbn13"] = patch["isbn13"];
+            if ("pageCount" in patch) bookSet["pageCount"] = patch["pageCount"];
+            if ("publicationDate" in patch)
+              bookSet["publicationDate"] = patch["publicationDate"];
+            if ("formatKey" in patch) bookSet["formatKey"] = patch["formatKey"];
+            if ("isLicensed" in patch)
+              bookSet["isLicensed"] = patch["isLicensed"];
+            if (Object.keys(unitSet).length > 1) {
+              yield* database
+                .update(Unit)
+                .set(unitSet)
+                .where(eq(Unit.id, params.unitId));
+            }
+            if (Object.keys(bookSet).length > 1) {
+              yield* database
+                .update(Book)
+                .set(bookSet)
+                .where(eq(Book.unitId, params.unitId));
+            }
+            const updated = yield* fetchBook(params.unitId);
+            return bookToDTO(updated!.Unit, updated!.Book);
+          }),
+        )
 
-      .handle("deleteBook", ({ params }) =>
-        Effect.gen(function* () {
-          const user = yield* CurrentUser;
-          const row = yield* fetchBook(params.unitId);
-          if (!row) return yield* new BookNotFound();
-          if (row.Unit.userId !== user.id) return yield* new BookForbidden();
-          yield* Effect.orDie(database.delete(Unit).where(eq(Unit.id, params.unitId)));
-        }),
-      )
+        .handle("deleteBook", ({ params }) =>
+          Effect.gen(function* () {
+            const user = yield* CurrentUser;
+            const row = yield* fetchBook(params.unitId);
+            if (!row) return yield* new BookNotFound();
+            if (row.Unit.userId !== user.id) return yield* new BookForbidden();
+            yield* database.delete(Unit).where(eq(Unit.id, params.unitId));
+          }),
+        )
 
-      // ── Book rating ───────────────────────────────────────────
-      .handle("getBookRating", ({ params }) =>
-        Effect.gen(function* () {
-          const rows = yield* Effect.orDie(
-            database.select().from(ScoreAggregate).where(eq(ScoreAggregate.unitId, params.unitId)),
-          );
-          return rows.map(
-            (r) =>
-              new ScoreAggregateDTO({
-                realmUnitId: r.realm,
-                average: r.totalCount > 0 ? r.totalScore / r.totalCount : 0,
-                count: r.totalCount,
-              }),
-          );
-        }),
-      )
+        // ── Book rating ───────────────────────────────────────────
+        .handle("getBookRating", ({ params }) =>
+          Effect.gen(function* () {
+            const rows = yield* database
+              .select()
+              .from(ScoreAggregate)
+              .where(eq(ScoreAggregate.unitId, params.unitId));
+            return rows.map(
+              (r) =>
+                new ScoreAggregateDTO({
+                  realmUnitId: r.realm,
+                  average: r.totalCount > 0 ? r.totalScore / r.totalCount : 0,
+                  count: r.totalCount,
+                }),
+            );
+          }),
+        )
 
-      // ── Content structure ─────────────────────────────────────
-      .handle("getBookContentStructure", ({ params }) =>
-        Effect.gen(function* () {
-          const nodes = yield* Effect.orDie(
-            database
+        // ── Content structure ─────────────────────────────────────
+        .handle("getBookContentStructure", ({ params }) =>
+          Effect.gen(function* () {
+            const nodes = yield* database
               .select()
               .from(ContentStructureNode)
               .where(
-                and(eq(ContentStructureNode.ownerUnitId, params.unitId), eq(ContentStructureNode.isDeleted, false)),
+                and(
+                  eq(ContentStructureNode.ownerUnitId, params.unitId),
+                  eq(ContentStructureNode.isDeleted, false),
+                ),
               )
-              .orderBy(ContentStructureNode.position),
-          );
-          return new ContentStructureDTO({ ownerUnitId: params.unitId, nodes: nodes.map(nodeToDTO) });
-        }),
-      )
+              .orderBy(ContentStructureNode.position);
+            return new ContentStructureDTO({
+              ownerUnitId: params.unitId,
+              nodes: nodes.map(nodeToDTO),
+            });
+          }),
+        )
 
-      .handle("updateBookContentStructure", ({ params, payload }) =>
-        Effect.gen(function* () {
-          const user = yield* CurrentUser;
-          const row = yield* fetchBook(params.unitId);
-          if (!row) return yield* new BookNotFound();
-          if (row.Unit.userId !== user.id) return yield* new BookForbidden();
-          const incoming = payload as Array<{
-            id?: string;
-            parentId?: string | null;
-            position: string;
-            title: string;
-            noContent?: boolean;
-            contentUnitId?: string | null;
-          }>;
-          yield* Effect.orDie(database.delete(ContentStructureNode).where(eq(ContentStructureNode.ownerUnitId, params.unitId)));
-          if (incoming.length > 0) {
-            yield* Effect.orDie(
-              database.insert(ContentStructureNode).values(
+        .handle("updateBookContentStructure", ({ params, payload }) =>
+          Effect.gen(function* () {
+            const user = yield* CurrentUser;
+            const row = yield* fetchBook(params.unitId);
+            if (!row) return yield* new BookNotFound();
+            if (row.Unit.userId !== user.id) return yield* new BookForbidden();
+            const incoming = payload as Array<{
+              id?: string;
+              parentId?: string | null;
+              position: string;
+              title: string;
+              noContent?: boolean;
+              contentUnitId?: string | null;
+            }>;
+            yield* database
+              .delete(ContentStructureNode)
+              .where(eq(ContentStructureNode.ownerUnitId, params.unitId));
+            if (incoming.length > 0) {
+              yield* database.insert(ContentStructureNode).values(
                 incoming.map((n) => ({
                   id: n.id,
                   ownerUnitId: params.unitId,
@@ -267,11 +297,9 @@ export const BooksHandlers = HttpApiBuilder.group(
                   noContent: n.noContent ?? false,
                   contentUnitId: n.contentUnitId ?? null,
                 })),
-              ),
-            );
-          }
-          const agg = yield* Effect.orDie(
-            database
+              );
+            }
+            const agg = yield* database
               .select({ cnt: count() })
               .from(ContentStructureNode)
               .where(
@@ -280,189 +308,228 @@ export const BooksHandlers = HttpApiBuilder.group(
                   eq(ContentStructureNode.isDeleted, false),
                   eq(ContentStructureNode.noContent, false),
                 ),
-              ),
-          );
-          yield* Effect.orDie(
-            database
+              );
+            yield* database
               .update(Book)
               .set({ chapterCount: agg[0]?.cnt ?? 0, updatedAt: new Date() })
-              .where(eq(Book.unitId, params.unitId)),
-          );
-          const nodes = yield* Effect.orDie(
-            database
+              .where(eq(Book.unitId, params.unitId));
+            const nodes = yield* database
               .select()
               .from(ContentStructureNode)
               .where(
-                and(eq(ContentStructureNode.ownerUnitId, params.unitId), eq(ContentStructureNode.isDeleted, false)),
+                and(
+                  eq(ContentStructureNode.ownerUnitId, params.unitId),
+                  eq(ContentStructureNode.isDeleted, false),
+                ),
               )
-              .orderBy(ContentStructureNode.position),
-          );
-          return new ContentStructureDTO({ ownerUnitId: params.unitId, nodes: nodes.map(nodeToDTO) });
-        }),
-      )
+              .orderBy(ContentStructureNode.position);
+            return new ContentStructureDTO({
+              ownerUnitId: params.unitId,
+              nodes: nodes.map(nodeToDTO),
+            });
+          }),
+        )
 
-      // ── Book list ──────────────────────────────────────────────
-      .handle("listBooks", ({ query }) => listBooksShared(query))
+        // ── Book list ──────────────────────────────────────────────
+        .handle("listBooks", ({ query }) => listBooksShared(query))
 
-      .handle("listBooksByBody", ({ payload }) => listBooksShared(payload))
+        .handle("listBooksByBody", ({ payload }) => listBooksShared(payload))
 
-      // ── Chapters ───────────────────────────────────────────────
-      .handle("getChapter", ({ params }) =>
-        Effect.gen(function* () {
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
-          if (!units[0]) return yield* new ChapterNotFound();
-          const unit = units[0];
-          const lang = unit.defaultLanguage ?? "en";
-          const trans = yield* Effect.orDie(
-            database
+        // ── Chapters ───────────────────────────────────────────────
+        .handle("getChapter", ({ params }) =>
+          Effect.gen(function* () {
+            const units = yield* database
+              .select()
+              .from(Unit)
+              .where(eq(Unit.id, params.unitId));
+            if (!units[0]) return yield* new ChapterNotFound();
+            const unit = units[0];
+            const lang = unit.defaultLanguage ?? "en";
+            const trans = yield* database
               .select()
               .from(UnitTranslation)
-              .where(and(eq(UnitTranslation.unitId, params.unitId), eq(UnitTranslation.language, lang))),
-          );
-          const ct = yield* Effect.orDie(
-            database
+              .where(
+                and(
+                  eq(UnitTranslation.unitId, params.unitId),
+                  eq(UnitTranslation.language, lang),
+                ),
+              );
+            const ct = yield* database
               .select()
               .from(ContentTranslation)
-              .where(and(eq(ContentTranslation.unitId, params.unitId), eq(ContentTranslation.language, lang))),
-          );
-          return new ChapterDTO({
-            unitId: unit.id,
-            title: (trans[0]?.title as string) ?? "",
-            content: ct[0] ? JSON.stringify(ct[0].content) : null,
-            status: unit.status,
-            targetUnitId: (unit.targetUnitId as string) ?? null,
-            createdAt: unit.createdAt.toISOString(),
-            updatedAt: unit.updatedAt.toISOString(),
-          });
-        }),
-      )
+              .where(
+                and(
+                  eq(ContentTranslation.unitId, params.unitId),
+                  eq(ContentTranslation.language, lang),
+                ),
+              );
+            return new ChapterDTO({
+              unitId: unit.id,
+              title: (trans[0]?.title as string) ?? "",
+              content: ct[0] ? JSON.stringify(ct[0].content) : null,
+              status: unit.status,
+              targetUnitId: (unit.targetUnitId as string) ?? null,
+              createdAt: unit.createdAt.toISOString(),
+              updatedAt: unit.updatedAt.toISOString(),
+            });
+          }),
+        )
 
-      .handle("createChapter", ({ payload }) =>
-        Effect.gen(function* () {
-          const user = yield* CurrentUser;
-          const lang = "en";
-          const units = yield* Effect.orDie(
-            database
+        .handle("createChapter", ({ payload }) =>
+          Effect.gen(function* () {
+            const user = yield* CurrentUser;
+            const lang = "en";
+            const units = yield* database
               .insert(Unit)
               .values({
                 type: "POST",
                 userId: user.id,
                 slugScope: user.id,
                 defaultLanguage: lang,
-                status: (payload.status as (typeof Unit.$inferInsert)["status"]) ?? "DRAFT",
+                status:
+                  (payload.status as (typeof Unit.$inferInsert)["status"]) ??
+                  "DRAFT",
                 targetUnitId: payload.targetUnitId,
               })
-              .returning(),
-          );
-          const unit = units[0]!;
-          yield* Effect.orDie(
-            database.insert(UnitTranslation).values({
+              .returning();
+            const unit = units[0]!;
+            yield* database.insert(UnitTranslation).values({
               unitId: unit.id,
               language: lang,
               title: payload.title,
-              extra: payload.coverUrl ? { coverUrl: payload.coverUrl } : undefined,
-            }),
-          );
-          if (payload.content) {
-            yield* Effect.orDie(
-              database.insert(ContentTranslation).values({
+              extra: payload.coverUrl
+                ? { coverUrl: payload.coverUrl }
+                : undefined,
+            });
+            if (payload.content) {
+              yield* database.insert(ContentTranslation).values({
                 unitId: unit.id,
                 language: lang,
                 content: JSON.parse(payload.content),
-              }),
-            );
-          }
-          return new ChapterDTO({
-            unitId: unit.id,
-            title: payload.title,
-            content: payload.content ?? null,
-            status: unit.status,
-            targetUnitId: (unit.targetUnitId as string) ?? null,
-            createdAt: unit.createdAt.toISOString(),
-            updatedAt: unit.updatedAt.toISOString(),
-          });
-        }),
-      )
+              });
+            }
+            return new ChapterDTO({
+              unitId: unit.id,
+              title: payload.title,
+              content: payload.content ?? null,
+              status: unit.status,
+              targetUnitId: (unit.targetUnitId as string) ?? null,
+              createdAt: unit.createdAt.toISOString(),
+              updatedAt: unit.updatedAt.toISOString(),
+            });
+          }),
+        )
 
-      .handle("updateChapter", ({ params, payload }) =>
-        Effect.gen(function* () {
-          const user = yield* CurrentUser;
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
-          if (!units[0]) return yield* new ChapterNotFound();
-          if (units[0].userId !== user.id) return yield* new ChapterForbidden();
-          const lang = units[0].defaultLanguage ?? "en";
-          if (payload.status) {
-            yield* Effect.orDie(
-              database
+        .handle("updateChapter", ({ params, payload }) =>
+          Effect.gen(function* () {
+            const user = yield* CurrentUser;
+            const units = yield* database
+              .select()
+              .from(Unit)
+              .where(eq(Unit.id, params.unitId));
+            if (!units[0]) return yield* new ChapterNotFound();
+            if (units[0].userId !== user.id)
+              return yield* new ChapterForbidden();
+            const lang = units[0].defaultLanguage ?? "en";
+            if (payload.status) {
+              yield* database
                 .update(Unit)
-                .set({ status: payload.status as (typeof Unit.$inferInsert)["status"], updatedAt: new Date() })
-                .where(eq(Unit.id, params.unitId)),
-            );
-          }
-          const transSet: Record<string, unknown> = { updatedAt: new Date() };
-          if (payload.title) transSet["title"] = payload.title;
-          if (payload.coverUrl !== undefined) transSet["extra"] = payload.coverUrl ? { coverUrl: payload.coverUrl } : null;
-          yield* Effect.orDie(
-            database
+                .set({
+                  status:
+                    payload.status as (typeof Unit.$inferInsert)["status"],
+                  updatedAt: new Date(),
+                })
+                .where(eq(Unit.id, params.unitId));
+            }
+            const transSet: Record<string, unknown> = { updatedAt: new Date() };
+            if (payload.title) transSet["title"] = payload.title;
+            if (payload.coverUrl !== undefined)
+              transSet["extra"] = payload.coverUrl
+                ? { coverUrl: payload.coverUrl }
+                : null;
+            yield* database
               .update(UnitTranslation)
               .set(transSet)
-              .where(and(eq(UnitTranslation.unitId, params.unitId), eq(UnitTranslation.language, lang))),
-          );
-          if (payload.content !== undefined) {
-            const contentVal = payload.content ? JSON.parse(payload.content) : {};
-            yield* Effect.orDie(
-              database
+              .where(
+                and(
+                  eq(UnitTranslation.unitId, params.unitId),
+                  eq(UnitTranslation.language, lang),
+                ),
+              );
+            if (payload.content !== undefined) {
+              const contentVal = payload.content
+                ? JSON.parse(payload.content)
+                : {};
+              yield* database
                 .insert(ContentTranslation)
-                .values({ unitId: params.unitId, language: lang, content: contentVal })
+                .values({
+                  unitId: params.unitId,
+                  language: lang,
+                  content: contentVal,
+                })
                 .onConflictDoUpdate({
-                  target: [ContentTranslation.unitId, ContentTranslation.language],
+                  target: [
+                    ContentTranslation.unitId,
+                    ContentTranslation.language,
+                  ],
                   set: { content: contentVal, updatedAt: new Date() },
-                }),
-            );
-          }
-          const updated = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
-          const trans = yield* Effect.orDie(
-            database
+                });
+            }
+            const updated = yield* database
+              .select()
+              .from(Unit)
+              .where(eq(Unit.id, params.unitId));
+            const trans = yield* database
               .select()
               .from(UnitTranslation)
-              .where(and(eq(UnitTranslation.unitId, params.unitId), eq(UnitTranslation.language, lang))),
-          );
-          const ct = yield* Effect.orDie(
-            database
+              .where(
+                and(
+                  eq(UnitTranslation.unitId, params.unitId),
+                  eq(UnitTranslation.language, lang),
+                ),
+              );
+            const ct = yield* database
               .select()
               .from(ContentTranslation)
-              .where(and(eq(ContentTranslation.unitId, params.unitId), eq(ContentTranslation.language, lang))),
-          );
-          return new ChapterDTO({
-            unitId: updated[0]!.id,
-            title: (trans[0]?.title as string) ?? "",
-            content: ct[0] ? JSON.stringify(ct[0].content) : null,
-            status: updated[0]!.status,
-            targetUnitId: (updated[0]!.targetUnitId as string) ?? null,
-            createdAt: updated[0]!.createdAt.toISOString(),
-            updatedAt: updated[0]!.updatedAt.toISOString(),
-          });
-        }),
-      )
+              .where(
+                and(
+                  eq(ContentTranslation.unitId, params.unitId),
+                  eq(ContentTranslation.language, lang),
+                ),
+              );
+            return new ChapterDTO({
+              unitId: updated[0]!.id,
+              title: (trans[0]?.title as string) ?? "",
+              content: ct[0] ? JSON.stringify(ct[0].content) : null,
+              status: updated[0]!.status,
+              targetUnitId: (updated[0]!.targetUnitId as string) ?? null,
+              createdAt: updated[0]!.createdAt.toISOString(),
+              updatedAt: updated[0]!.updatedAt.toISOString(),
+            });
+          }),
+        )
 
-      .handle("deleteChapter", ({ params }) =>
-        Effect.gen(function* () {
-          const user = yield* CurrentUser;
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
-          if (!units[0]) return yield* new ChapterNotFound();
-          if (units[0].userId !== user.id) return yield* new ChapterForbidden();
-          yield* Effect.orDie(database.delete(Unit).where(eq(Unit.id, params.unitId)));
-        }),
-      )
+        .handle("deleteChapter", ({ params }) =>
+          Effect.gen(function* () {
+            const user = yield* CurrentUser;
+            const units = yield* database
+              .select()
+              .from(Unit)
+              .where(eq(Unit.id, params.unitId));
+            if (!units[0]) return yield* new ChapterNotFound();
+            if (units[0].userId !== user.id)
+              return yield* new ChapterForbidden();
+            yield* database.delete(Unit).where(eq(Unit.id, params.unitId));
+          }),
+        )
 
-      .handle("materializeChapter", ({ params, payload }) =>
-        Effect.gen(function* () {
-          const user = yield* CurrentUser;
-          const row = yield* fetchBook(params.bookUnitId);
-          if (!row) return yield* new BookNotFound();
-          if (row.Unit.userId !== user.id) return yield* new BookForbidden();
-          const nodes = yield* Effect.orDie(
-            database
+        .handle("materializeChapter", ({ params, payload }) =>
+          Effect.gen(function* () {
+            const user = yield* CurrentUser;
+            const row = yield* fetchBook(params.bookUnitId);
+            if (!row) return yield* new BookNotFound();
+            if (row.Unit.userId !== user.id) return yield* new BookForbidden();
+            const nodes = yield* database
               .select()
               .from(ContentStructureNode)
               .where(
@@ -470,19 +537,17 @@ export const BooksHandlers = HttpApiBuilder.group(
                   eq(ContentStructureNode.id, payload.nodeId),
                   eq(ContentStructureNode.ownerUnitId, params.bookUnitId),
                 ),
-              ),
-          );
-          if (!nodes[0]) return yield* new ChapterNotFound();
-          const node = nodes[0];
-          if (node.contentUnitId) {
-            return new ChapterMaterializationResult({
-              unitId: node.contentUnitId,
-              nodeId: node.id,
-              created: false,
-            });
-          }
-          const units = yield* Effect.orDie(
-            database
+              );
+            if (!nodes[0]) return yield* new ChapterNotFound();
+            const node = nodes[0];
+            if (node.contentUnitId) {
+              return new ChapterMaterializationResult({
+                unitId: node.contentUnitId,
+                nodeId: node.id,
+                created: false,
+              });
+            }
+            const units = yield* database
               .insert(Unit)
               .values({
                 type: "POST",
@@ -492,135 +557,175 @@ export const BooksHandlers = HttpApiBuilder.group(
                 status: "DRAFT",
                 targetUnitId: params.bookUnitId,
               })
-              .returning(),
-          );
-          const unit = units[0]!;
-          yield* Effect.orDie(
-            database.insert(UnitTranslation).values({
+              .returning();
+            const unit = units[0]!;
+            yield* database.insert(UnitTranslation).values({
               unitId: unit.id,
               language: unit.defaultLanguage ?? "en",
               title: node.title,
-            }),
-          );
-          yield* Effect.orDie(
-            database
+            });
+            yield* database
               .update(ContentStructureNode)
               .set({ contentUnitId: unit.id, updatedAt: new Date() })
-              .where(eq(ContentStructureNode.id, payload.nodeId)),
-          );
-          return new ChapterMaterializationResult({ unitId: unit.id, nodeId: node.id, created: true });
-        }),
-      )
+              .where(eq(ContentStructureNode.id, payload.nodeId));
+            return new ChapterMaterializationResult({
+              unitId: unit.id,
+              nodeId: node.id,
+              created: true,
+            });
+          }),
+        )
 
-      // ── Series ─────────────────────────────────────────────────
-      .handle("getSeries", ({ params }) =>
-        Effect.gen(function* () {
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
-          if (!units[0] || units[0].type !== "SERIES") return yield* new SeriesNotFound();
-          const unit = units[0];
-          const nodes = yield* Effect.orDie(
-            database
+        // ── Series ─────────────────────────────────────────────────
+        .handle("getSeries", ({ params }) =>
+          Effect.gen(function* () {
+            const units = yield* database
+              .select()
+              .from(Unit)
+              .where(eq(Unit.id, params.unitId));
+            if (!units[0] || units[0].type !== "SERIES")
+              return yield* new SeriesNotFound();
+            const unit = units[0];
+            const nodes = yield* database
               .select()
               .from(ContentStructureNode)
               .where(
-                and(eq(ContentStructureNode.ownerUnitId, params.unitId), eq(ContentStructureNode.isDeleted, false)),
+                and(
+                  eq(ContentStructureNode.ownerUnitId, params.unitId),
+                  eq(ContentStructureNode.isDeleted, false),
+                ),
               )
-              .orderBy(ContentStructureNode.position),
-          );
-          const cs =
-            nodes.length > 0
-              ? new ContentStructureDTO({ ownerUnitId: params.unitId, nodes: nodes.map(nodeToDTO) })
-              : null;
-          return new SeriesDetailDTO({
-            unitId: unit.id,
-            type: unit.type,
-            slug: unit.slug ?? null,
-            status: unit.status,
-            contentStructure: cs,
-            createdAt: unit.createdAt.toISOString(),
-            updatedAt: unit.updatedAt.toISOString(),
-          });
-        }),
-      )
+              .orderBy(ContentStructureNode.position);
+            const cs =
+              nodes.length > 0
+                ? new ContentStructureDTO({
+                    ownerUnitId: params.unitId,
+                    nodes: nodes.map(nodeToDTO),
+                  })
+                : null;
+            return new SeriesDetailDTO({
+              unitId: unit.id,
+              type: unit.type,
+              slug: unit.slug ?? null,
+              status: unit.status,
+              contentStructure: cs,
+              createdAt: unit.createdAt.toISOString(),
+              updatedAt: unit.updatedAt.toISOString(),
+            });
+          }),
+        )
 
-      .handle("createSeries", ({ payload }) =>
-        Effect.gen(function* () {
-          const user = yield* CurrentUser;
-          const lang = payload.defaultLanguage ?? "en";
-          const units = yield* Effect.orDie(
-            database
+        .handle("createSeries", ({ payload }) =>
+          Effect.gen(function* () {
+            const user = yield* CurrentUser;
+            const lang = payload.defaultLanguage ?? "en";
+            const units = yield* database
               .insert(Unit)
-              .values({ type: "SERIES", userId: user.id, slugScope: user.id, defaultLanguage: lang, status: "DRAFT" })
-              .returning(),
-          );
-          const unit = units[0]!;
-          yield* Effect.orDie(database.insert(UnitTranslation).values({ unitId: unit.id, language: lang, title: payload.title }));
-          yield* Effect.orDie(database.insert(Series).values({ unitId: unit.id, kindKey: "default" }));
-          yield* Effect.orDie(database.insert(ContentStructure).values({ ownerUnitId: unit.id }));
-          return new SeriesDTO({
-            unitId: unit.id,
-            type: unit.type,
-            slug: unit.slug ?? null,
-            status: unit.status,
-            createdAt: unit.createdAt.toISOString(),
-            updatedAt: unit.updatedAt.toISOString(),
-          });
-        }),
-      )
+              .values({
+                type: "SERIES",
+                userId: user.id,
+                slugScope: user.id,
+                defaultLanguage: lang,
+                status: "DRAFT",
+              })
+              .returning();
+            const unit = units[0]!;
+            yield* database
+              .insert(UnitTranslation)
+              .values({
+                unitId: unit.id,
+                language: lang,
+                title: payload.title,
+              });
+            yield* database
+              .insert(Series)
+              .values({ unitId: unit.id, kindKey: "default" });
+            yield* database
+              .insert(ContentStructure)
+              .values({ ownerUnitId: unit.id });
+            return new SeriesDTO({
+              unitId: unit.id,
+              type: unit.type,
+              slug: unit.slug ?? null,
+              status: unit.status,
+              createdAt: unit.createdAt.toISOString(),
+              updatedAt: unit.updatedAt.toISOString(),
+            });
+          }),
+        )
 
-      .handle("updateSeries", ({ params, payload }) =>
-        Effect.gen(function* () {
-          const user = yield* CurrentUser;
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
-          if (!units[0] || units[0].type !== "SERIES") return yield* new SeriesNotFound();
-          if (units[0].userId !== user.id) return yield* new SeriesForbidden();
-          const lang = units[0].defaultLanguage ?? "en";
-          if (payload.title) {
-            yield* Effect.orDie(
-              database
+        .handle("updateSeries", ({ params, payload }) =>
+          Effect.gen(function* () {
+            const user = yield* CurrentUser;
+            const units = yield* database
+              .select()
+              .from(Unit)
+              .where(eq(Unit.id, params.unitId));
+            if (!units[0] || units[0].type !== "SERIES")
+              return yield* new SeriesNotFound();
+            if (units[0].userId !== user.id)
+              return yield* new SeriesForbidden();
+            const lang = units[0].defaultLanguage ?? "en";
+            if (payload.title) {
+              yield* database
                 .update(UnitTranslation)
                 .set({ title: payload.title, updatedAt: new Date() })
-                .where(and(eq(UnitTranslation.unitId, params.unitId), eq(UnitTranslation.language, lang))),
-            );
-          }
-          if (payload.status) {
-            yield* Effect.orDie(
-              database
+                .where(
+                  and(
+                    eq(UnitTranslation.unitId, params.unitId),
+                    eq(UnitTranslation.language, lang),
+                  ),
+                );
+            }
+            if (payload.status) {
+              yield* database
                 .update(Unit)
-                .set({ status: payload.status as (typeof Unit.$inferInsert)["status"], updatedAt: new Date() })
-                .where(eq(Unit.id, params.unitId)),
-            );
-          }
-          const updated = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
-          return new SeriesDTO({
-            unitId: updated[0]!.id,
-            type: updated[0]!.type,
-            slug: updated[0]!.slug ?? null,
-            status: updated[0]!.status,
-            createdAt: updated[0]!.createdAt.toISOString(),
-            updatedAt: updated[0]!.updatedAt.toISOString(),
-          });
-        }),
-      )
+                .set({
+                  status:
+                    payload.status as (typeof Unit.$inferInsert)["status"],
+                  updatedAt: new Date(),
+                })
+                .where(eq(Unit.id, params.unitId));
+            }
+            const updated = yield* database
+              .select()
+              .from(Unit)
+              .where(eq(Unit.id, params.unitId));
+            return new SeriesDTO({
+              unitId: updated[0]!.id,
+              type: updated[0]!.type,
+              slug: updated[0]!.slug ?? null,
+              status: updated[0]!.status,
+              createdAt: updated[0]!.createdAt.toISOString(),
+              updatedAt: updated[0]!.updatedAt.toISOString(),
+            });
+          }),
+        )
 
-      .handle("updateSeriesContentStructure", ({ params, payload }) =>
-        Effect.gen(function* () {
-          const user = yield* CurrentUser;
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
-          if (!units[0] || units[0].type !== "SERIES") return yield* new SeriesNotFound();
-          if (units[0].userId !== user.id) return yield* new SeriesForbidden();
-          const incoming = payload as Array<{
-            id?: string;
-            parentId?: string | null;
-            position: string;
-            title: string;
-            noContent?: boolean;
-            contentUnitId?: string | null;
-          }>;
-          yield* Effect.orDie(database.delete(ContentStructureNode).where(eq(ContentStructureNode.ownerUnitId, params.unitId)));
-          if (incoming.length > 0) {
-            yield* Effect.orDie(
-              database.insert(ContentStructureNode).values(
+        .handle("updateSeriesContentStructure", ({ params, payload }) =>
+          Effect.gen(function* () {
+            const user = yield* CurrentUser;
+            const units = yield* database
+              .select()
+              .from(Unit)
+              .where(eq(Unit.id, params.unitId));
+            if (!units[0] || units[0].type !== "SERIES")
+              return yield* new SeriesNotFound();
+            if (units[0].userId !== user.id)
+              return yield* new SeriesForbidden();
+            const incoming = payload as Array<{
+              id?: string;
+              parentId?: string | null;
+              position: string;
+              title: string;
+              noContent?: boolean;
+              contentUnitId?: string | null;
+            }>;
+            yield* database
+              .delete(ContentStructureNode)
+              .where(eq(ContentStructureNode.ownerUnitId, params.unitId));
+            if (incoming.length > 0) {
+              yield* database.insert(ContentStructureNode).values(
                 incoming.map((n) => ({
                   id: n.id,
                   ownerUnitId: params.unitId,
@@ -630,45 +735,55 @@ export const BooksHandlers = HttpApiBuilder.group(
                   noContent: n.noContent ?? false,
                   contentUnitId: n.contentUnitId ?? null,
                 })),
-              ),
-            );
-          }
-          const nodes = yield* Effect.orDie(
-            database
+              );
+            }
+            const nodes = yield* database
               .select()
               .from(ContentStructureNode)
               .where(
-                and(eq(ContentStructureNode.ownerUnitId, params.unitId), eq(ContentStructureNode.isDeleted, false)),
+                and(
+                  eq(ContentStructureNode.ownerUnitId, params.unitId),
+                  eq(ContentStructureNode.isDeleted, false),
+                ),
               )
-              .orderBy(ContentStructureNode.position),
-          );
-          return new ContentStructureDTO({ ownerUnitId: params.unitId, nodes: nodes.map(nodeToDTO) });
-        }),
-      )
+              .orderBy(ContentStructureNode.position);
+            return new ContentStructureDTO({
+              ownerUnitId: params.unitId,
+              nodes: nodes.map(nodeToDTO),
+            });
+          }),
+        )
 
-      .handle("getSeriesContentIndex", ({ params }) =>
-        Effect.gen(function* () {
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
-          if (!units[0] || units[0].type !== "SERIES") return yield* new SeriesNotFound();
-          const rows = yield* Effect.orDie(
-            database
+        .handle("getSeriesContentIndex", ({ params }) =>
+          Effect.gen(function* () {
+            const units = yield* database
+              .select()
+              .from(Unit)
+              .where(eq(Unit.id, params.unitId));
+            if (!units[0] || units[0].type !== "SERIES")
+              return yield* new SeriesNotFound();
+            const rows = yield* database
               .select()
               .from(SeriesContentIndex)
-              .innerJoin(ContentStructureNode, eq(SeriesContentIndex.contentNodeId, ContentStructureNode.id))
-              .where(eq(SeriesContentIndex.seriesUnitId, params.unitId)),
-          );
-          return {
-            rows: rows.map(
-              (r) =>
-                new SeriesContentIndexRow({
-                  nodeId: r.ContentStructureNode.id,
-                  contentUnitId: (r.ContentStructureNode.contentUnitId as string) ?? null,
-                  position: r.ContentStructureNode.position,
-                  title: r.ContentStructureNode.title,
-                }),
-            ),
-          };
-        }),
-      );
+              .innerJoin(
+                ContentStructureNode,
+                eq(SeriesContentIndex.contentNodeId, ContentStructureNode.id),
+              )
+              .where(eq(SeriesContentIndex.seriesUnitId, params.unitId));
+            return {
+              rows: rows.map(
+                (r) =>
+                  new SeriesContentIndexRow({
+                    nodeId: r.ContentStructureNode.id,
+                    contentUnitId:
+                      (r.ContentStructureNode.contentUnitId as string) ?? null,
+                    position: r.ContentStructureNode.position,
+                    title: r.ContentStructureNode.title,
+                  }),
+              ),
+            };
+          }),
+        )
+    );
   }),
 );

@@ -67,8 +67,7 @@ export const SearchHandlers = HttpApiBuilder.group(
         if (opts.q) conditions.push(titleLike(opts.q));
         const where = and(...conditions);
 
-        const rows = yield* Effect.orDie(
-          database
+        const rows = yield* database
             .select({
               id: Unit.id,
               type: Unit.type,
@@ -83,16 +82,13 @@ export const SearchHandlers = HttpApiBuilder.group(
             .where(where)
             .orderBy(desc(Unit.createdAt))
             .limit(lim(opts.limit))
-            .offset(opts.offset ?? 0),
-        );
+            .offset(opts.offset ?? 0);
 
-        const agg = yield* Effect.orDie(
-          database
+        const agg = yield* database
             .select({ total: count() })
             .from(Unit)
             .leftJoin(UnitTranslation, eq(Unit.id, UnitTranslation.unitId))
-            .where(where),
-        );
+            .where(where);
 
         return {
           hits: rows.map((r) => ({
@@ -133,8 +129,7 @@ export const SearchHandlers = HttpApiBuilder.group(
         }
         const where = conditions.length > 0 ? and(...conditions) : undefined;
 
-        const rows = yield* Effect.orDie(
-          database
+        const rows = yield* database
             .select({
               unitId: User.unitId,
               name: User.name,
@@ -147,12 +142,9 @@ export const SearchHandlers = HttpApiBuilder.group(
             .where(where)
             .orderBy(desc(User.createdAt))
             .limit(lim(opts.limit))
-            .offset(opts.offset ?? 0),
-        );
+            .offset(opts.offset ?? 0);
 
-        const agg = yield* Effect.orDie(
-          database.select({ total: count() }).from(User).where(where),
-        );
+        const agg = yield* database.select({ total: count() }).from(User).where(where);
 
         return {
           users: rows.map((r) => ({
@@ -301,8 +293,7 @@ export const SearchHandlers = HttpApiBuilder.group(
           // Comment.content 是 JSON；无查询时回退为空
           if (!q) return { hits: [], total: 0 };
 
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .select({
                 id: Comment.id,
                 rootUnitId: Comment.rootUnitId,
@@ -318,11 +309,9 @@ export const SearchHandlers = HttpApiBuilder.group(
               )
               .orderBy(desc(Comment.createdAt))
               .limit(lim(limit))
-              .offset(offset ?? 0),
-          );
+              .offset(offset ?? 0);
 
-          const agg = yield* Effect.orDie(
-            database
+          const agg = yield* database
               .select({ total: count() })
               .from(Comment)
               .where(
@@ -330,8 +319,7 @@ export const SearchHandlers = HttpApiBuilder.group(
                   isNull(Comment.deletedAt),
                   sql`${Comment.content}::text ilike ${"%" + q + "%"}`,
                 ),
-              ),
-          );
+              );
 
           return {
             hits: rows.map((r) => ({

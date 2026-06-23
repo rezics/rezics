@@ -103,7 +103,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
       // ── Unit CRUD ──────────────────────────────────────────────
       .handle("getUnit", ({ params }) =>
         Effect.gen(function* () {
-          const rows = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const rows = yield* database.select().from(Unit).where(eq(Unit.id, params.unitId));
           if (!rows[0]) return yield* new UnitNotFound();
           return unitToDTO(rows[0]);
         }),
@@ -112,8 +112,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
       .handle("createUnit", ({ payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .insert(Unit)
               .values({
                 type: payload.type as (typeof Unit.$inferInsert)["type"],
@@ -123,8 +122,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
                 defaultLanguage: payload.defaultLanguage ?? "en",
                 status: "DRAFT",
               })
-              .returning(),
-          );
+              .returning();
           return unitToDTO(rows[0]!);
         }),
       )
@@ -132,7 +130,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
       .handle("updateUnit", ({ params, payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const existing = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const existing = yield* database.select().from(Unit).where(eq(Unit.id, params.unitId));
           if (!existing[0]) return yield* new UnitNotFound();
           if (existing[0].userId !== user.id) return yield* new UnitForbidden();
           const set: Record<string, unknown> = { updatedAt: new Date() };
@@ -140,9 +138,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
           if (payload.visibility) set["visibility"] = payload.visibility;
           if (payload.rating) set["rating"] = payload.rating;
           if (payload.defaultLanguage) set["defaultLanguage"] = payload.defaultLanguage;
-          const rows = yield* Effect.orDie(
-            database.update(Unit).set(set).where(eq(Unit.id, params.unitId)).returning(),
-          );
+          const rows = yield* database.update(Unit).set(set).where(eq(Unit.id, params.unitId)).returning();
           return unitToDTO(rows[0]!);
         }),
       )
@@ -150,10 +146,10 @@ export const UnitsHandlers = HttpApiBuilder.group(
       .handle("deleteUnit", ({ params }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const existing = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const existing = yield* database.select().from(Unit).where(eq(Unit.id, params.unitId));
           if (!existing[0]) return yield* new UnitNotFound();
           if (existing[0].userId !== user.id) return yield* new UnitForbidden();
-          yield* Effect.orDie(database.delete(Unit).where(eq(Unit.id, params.unitId)));
+          yield* database.delete(Unit).where(eq(Unit.id, params.unitId));
         }),
       )
 
@@ -168,16 +164,14 @@ export const UnitsHandlers = HttpApiBuilder.group(
           if (payload.ids && payload.ids.length > 0) conditions.push(inArray(Unit.id, [...payload.ids]));
           if (payload.search) conditions.push(ilike(Unit.slug, `%${payload.search}%`));
           const where = conditions.length > 0 ? and(...conditions) : undefined;
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .select()
               .from(Unit)
               .where(where)
               .orderBy(desc(Unit.createdAt))
               .limit(lim(payload.limit))
-              .offset(payload.offset ?? 0),
-          );
-          const agg = yield* Effect.orDie(database.select({ total: count() }).from(Unit).where(where));
+              .offset(payload.offset ?? 0);
+          const agg = yield* database.select({ total: count() }).from(Unit).where(where);
           return new UnitListResult({ units: rows.map(unitToDTO), total: agg[0]?.total ?? 0 });
         }),
       )
@@ -186,17 +180,15 @@ export const UnitsHandlers = HttpApiBuilder.group(
       .handle("setUnitSlug", ({ params, payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const existing = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
+          const existing = yield* database.select().from(Unit).where(eq(Unit.id, params.unitId));
           if (!existing[0]) return yield* new UnitNotFound();
           if (existing[0].userId !== user.id) return yield* new UnitForbidden();
           if (!/^[a-z0-9][a-z0-9_-]*$/.test(payload.slug)) return yield* new InvalidSlug();
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .update(Unit)
               .set({ slug: payload.slug, updatedAt: new Date() })
               .where(eq(Unit.id, params.unitId))
-              .returning(),
-          );
+              .returning();
           return unitToDTO(rows[0]!);
         }),
       )
@@ -204,12 +196,10 @@ export const UnitsHandlers = HttpApiBuilder.group(
       // ── Translations ──────────────────────────────────────────
       .handle("getTranslation", ({ params }) =>
         Effect.gen(function* () {
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .select()
               .from(UnitTranslation)
-              .where(and(eq(UnitTranslation.unitId, params.unitId), eq(UnitTranslation.language, params.language))),
-          );
+              .where(and(eq(UnitTranslation.unitId, params.unitId), eq(UnitTranslation.language, params.language)));
           if (!rows[0]) return yield* new TranslationNotFound();
           return transToDTO(rows[0]);
         }),
@@ -225,16 +215,14 @@ export const UnitsHandlers = HttpApiBuilder.group(
           if ("summary" in patch) set["summary"] = patch["summary"];
           if ("description" in patch) set["description"] = patch["description"];
           if ("extra" in patch) set["extra"] = patch["extra"];
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .insert(UnitTranslation)
               .values({ unitId: params.unitId, language: params.language, ...set })
               .onConflictDoUpdate({
                 target: [UnitTranslation.unitId, UnitTranslation.language],
                 set,
               })
-              .returning(),
-          );
+              .returning();
           return transToDTO(rows[0]!);
         }),
       )
@@ -242,31 +230,25 @@ export const UnitsHandlers = HttpApiBuilder.group(
       .handle("deleteTranslation", ({ params }) =>
         Effect.gen(function* () {
           yield* CurrentUser;
-          const existing = yield* Effect.orDie(
-            database
+          const existing = yield* database
               .select()
               .from(UnitTranslation)
-              .where(and(eq(UnitTranslation.unitId, params.unitId), eq(UnitTranslation.language, params.language))),
-          );
+              .where(and(eq(UnitTranslation.unitId, params.unitId), eq(UnitTranslation.language, params.language)));
           if (!existing[0]) return yield* new TranslationNotFound();
-          yield* Effect.orDie(
-            database
+          yield* database
               .delete(UnitTranslation)
-              .where(and(eq(UnitTranslation.unitId, params.unitId), eq(UnitTranslation.language, params.language))),
-          );
+              .where(and(eq(UnitTranslation.unitId, params.unitId), eq(UnitTranslation.language, params.language)));
         }),
       )
 
       .handle("setTranslationSource", ({ params, payload }) =>
         Effect.gen(function* () {
           yield* CurrentUser;
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .update(UnitTranslation)
               .set({ sourceUnitId: payload.sourceUnitId ?? null, updatedAt: new Date() })
               .where(and(eq(UnitTranslation.unitId, params.unitId), eq(UnitTranslation.language, params.lang)))
-              .returning(),
-          );
+              .returning();
           if (!rows[0]) return yield* new UnitNotFound();
           return new TranslationSourceDTO({
             unitId: rows[0].unitId,
@@ -280,9 +262,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
       .handle("listCollaborators", ({ params }) =>
         Effect.gen(function* () {
           yield* CurrentUser;
-          const rows = yield* Effect.orDie(
-            database.select().from(UnitCollaborator).where(eq(UnitCollaborator.unitId, params.unitId)),
-          );
+          const rows = yield* database.select().from(UnitCollaborator).where(eq(UnitCollaborator.unitId, params.unitId));
           return { collaborators: rows.map(collabToDTO) };
         }),
       )
@@ -290,8 +270,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
       .handle("upsertCollaborator", ({ params, payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .insert(UnitCollaborator)
               .values({
                 unitId: params.unitId,
@@ -303,8 +282,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
                 target: [UnitCollaborator.unitId, UnitCollaborator.userId],
                 set: { roleKey: payload.role },
               })
-              .returning(),
-          );
+              .returning();
           return collabToDTO(rows[0]!);
         }),
       )
@@ -312,11 +290,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
       .handle("removeCollaborator", ({ params }) =>
         Effect.gen(function* () {
           yield* CurrentUser;
-          yield* Effect.orDie(
-            database
+          yield* database
               .delete(UnitCollaborator)
-              .where(and(eq(UnitCollaborator.unitId, params.unitId), eq(UnitCollaborator.userId, params.userId))),
-          );
+              .where(and(eq(UnitCollaborator.unitId, params.unitId), eq(UnitCollaborator.userId, params.userId)));
         }),
       )
 
@@ -324,9 +300,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
       .handle("listFieldLocks", ({ params }) =>
         Effect.gen(function* () {
           yield* CurrentUser;
-          const rows = yield* Effect.orDie(
-            database.select().from(UnitFieldLock).where(eq(UnitFieldLock.unitId, params.unitId)),
-          );
+          const rows = yield* database.select().from(UnitFieldLock).where(eq(UnitFieldLock.unitId, params.unitId));
           return { locks: rows.map(lockToDTO) };
         }),
       )
@@ -334,16 +308,14 @@ export const UnitsHandlers = HttpApiBuilder.group(
       .handle("upsertFieldLock", ({ params, payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .insert(UnitFieldLock)
               .values({ unitId: params.unitId, path: params.path, lockedById: user.id, reason: payload.reason })
               .onConflictDoUpdate({
                 target: [UnitFieldLock.unitId, UnitFieldLock.path],
                 set: { reason: payload.reason, lockedById: user.id },
               })
-              .returning(),
-          );
+              .returning();
           return lockToDTO(rows[0]!);
         }),
       )
@@ -351,11 +323,9 @@ export const UnitsHandlers = HttpApiBuilder.group(
       .handle("deleteFieldLock", ({ params }) =>
         Effect.gen(function* () {
           yield* CurrentUser;
-          yield* Effect.orDie(
-            database
+          yield* database
               .delete(UnitFieldLock)
-              .where(and(eq(UnitFieldLock.unitId, params.unitId), eq(UnitFieldLock.path, params.path))),
-          );
+              .where(and(eq(UnitFieldLock.unitId, params.unitId), eq(UnitFieldLock.path, params.path)));
         }),
       )
 
@@ -365,16 +335,14 @@ export const UnitsHandlers = HttpApiBuilder.group(
           const conditions: ReturnType<typeof eq>[] = [];
           if (query.unitId) conditions.push(eq(UnitAlias.unitId, query.unitId));
           const where = conditions.length > 0 ? and(...conditions) : undefined;
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .select()
               .from(UnitAlias)
               .where(where)
               .orderBy(desc(UnitAlias.score))
               .limit(lim(query.limit))
-              .offset(query.offset ?? 0),
-          );
-          const agg = yield* Effect.orDie(database.select({ total: count() }).from(UnitAlias).where(where));
+              .offset(query.offset ?? 0);
+          const agg = yield* database.select({ total: count() }).from(UnitAlias).where(where);
           return new AliasListResult({ aliases: rows.map(aliasToDTO), total: agg[0]?.total ?? 0 });
         }),
       )
@@ -382,8 +350,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
       .handle("createAlias", ({ payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .insert(UnitAlias)
               .values({
                 unitId: payload.unitId,
@@ -393,8 +360,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
                 createdById: user.id,
                 updatedById: user.id,
               })
-              .returning(),
-          );
+              .returning();
           return aliasToDTO(rows[0]!);
         }),
       )
@@ -408,9 +374,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
             set["normalizedValue"] = payload.value.toLowerCase().trim();
           }
           if (payload.language !== undefined) set["language"] = payload.language;
-          const rows = yield* Effect.orDie(
-            database.update(UnitAlias).set(set).where(eq(UnitAlias.id, params.aliasId)).returning(),
-          );
+          const rows = yield* database.update(UnitAlias).set(set).where(eq(UnitAlias.id, params.aliasId)).returning();
           if (!rows[0]) return yield* new AliasNotFound();
           return aliasToDTO(rows[0]);
         }),
@@ -419,7 +383,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
       .handle("deleteAlias", ({ params }) =>
         Effect.gen(function* () {
           yield* CurrentUser;
-          const deleted = yield* Effect.orDie(database.delete(UnitAlias).where(eq(UnitAlias.id, params.aliasId)).returning());
+          const deleted = yield* database.delete(UnitAlias).where(eq(UnitAlias.id, params.aliasId)).returning();
           if (deleted.length === 0) return yield* new AliasNotFound();
         }),
       )
@@ -427,29 +391,23 @@ export const UnitsHandlers = HttpApiBuilder.group(
       .handle("castAliasVote", ({ payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          yield* Effect.orDie(
-            database
+          yield* database
               .insert(UnitAliasVote)
               .values({ aliasId: payload.aliasId, userId: user.id, value: payload.value })
               .onConflictDoUpdate({
                 target: [UnitAliasVote.aliasId, UnitAliasVote.userId],
                 set: { value: payload.value, updatedAt: new Date() },
-              }),
-          );
+              });
           // ponytail: recalculate aggregate inline / 内联重算聚合
-          const agg = yield* Effect.orDie(
-            database
+          const agg = yield* database
               .select({ total: sql<number>`coalesce(sum(value), 0)`, cnt: count() })
               .from(UnitAliasVote)
-              .where(eq(UnitAliasVote.aliasId, payload.aliasId)),
-          );
-          yield* Effect.orDie(
-            database
+              .where(eq(UnitAliasVote.aliasId, payload.aliasId));
+          yield* database
               .update(UnitAlias)
               .set({ score: Number(agg[0]?.total ?? 0), voteCount: agg[0]?.cnt ?? 0, updatedAt: new Date() })
-              .where(eq(UnitAlias.id, payload.aliasId)),
-          );
-          const rows = yield* Effect.orDie(database.select().from(UnitAlias).where(eq(UnitAlias.id, payload.aliasId)));
+              .where(eq(UnitAlias.id, payload.aliasId));
+          const rows = yield* database.select().from(UnitAlias).where(eq(UnitAlias.id, payload.aliasId));
           if (!rows[0]) return yield* new AliasNotFound();
           return aliasToDTO(rows[0]);
         }),
@@ -463,16 +421,14 @@ export const UnitsHandlers = HttpApiBuilder.group(
           if (query.sourceEntityUnitId)
             conditions.push(eq(UnitExternalLink.sourceEntityUnitId, query.sourceEntityUnitId));
           const where = conditions.length > 0 ? and(...conditions) : undefined;
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .select()
               .from(UnitExternalLink)
               .where(where)
               .orderBy(UnitExternalLink.position)
               .limit(lim(query.limit))
-              .offset(query.offset ?? 0),
-          );
-          const agg = yield* Effect.orDie(database.select({ total: count() }).from(UnitExternalLink).where(where));
+              .offset(query.offset ?? 0);
+          const agg = yield* database.select({ total: count() }).from(UnitExternalLink).where(where);
           return new ExternalLinkListResult({ links: rows.map(extLinkToDTO), total: agg[0]?.total ?? 0 });
         }),
       )
@@ -482,9 +438,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
           const conditions = [eq(UnitExternalLink.unitId, params.unitId)];
           if (query.sourceEntityUnitId)
             conditions.push(eq(UnitExternalLink.sourceEntityUnitId, query.sourceEntityUnitId));
-          const rows = yield* Effect.orDie(
-            database.select().from(UnitExternalLink).where(and(...conditions)).orderBy(UnitExternalLink.position),
-          );
+          const rows = yield* database.select().from(UnitExternalLink).where(and(...conditions)).orderBy(UnitExternalLink.position);
           return { links: rows.map(extLinkToDTO) };
         }),
       )
@@ -492,13 +446,11 @@ export const UnitsHandlers = HttpApiBuilder.group(
       .handle("batchExternalLinks", ({ payload }) =>
         Effect.gen(function* () {
           if (payload.unitIds.length === 0) return {} as Record<string, ExternalLinkDTO[]>;
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .select()
               .from(UnitExternalLink)
               .where(inArray(UnitExternalLink.unitId, [...payload.unitIds]))
-              .orderBy(UnitExternalLink.position),
-          );
+              .orderBy(UnitExternalLink.position);
           const grouped: Record<string, ExternalLinkDTO[]> = {};
           for (const r of rows) (grouped[r.unitId] ??= []).push(extLinkToDTO(r));
           for (const id of payload.unitIds) grouped[id] ??= [];
@@ -510,8 +462,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           yield* CurrentUser;
           if (!payload.sourceEntityUnitId) return yield* new UnitForbidden();
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .insert(UnitExternalLink)
               .values({
                 unitId: payload.unitId,
@@ -519,8 +470,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
                 fallbackText: payload.label ?? null,
                 sourceEntityUnitId: payload.sourceEntityUnitId,
               })
-              .returning(),
-          );
+              .returning();
           return extLinkToDTO(rows[0]!);
         }),
       )
@@ -531,9 +481,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
           const set: Record<string, unknown> = { updatedAt: new Date() };
           if (payload.url) set["url"] = payload.url;
           if (payload.label !== undefined) set["fallbackText"] = payload.label;
-          const rows = yield* Effect.orDie(
-            database.update(UnitExternalLink).set(set).where(eq(UnitExternalLink.id, params.id)).returning(),
-          );
+          const rows = yield* database.update(UnitExternalLink).set(set).where(eq(UnitExternalLink.id, params.id)).returning();
           if (!rows[0]) return yield* new ExternalLinkNotFound();
           return extLinkToDTO(rows[0]);
         }),
@@ -542,9 +490,7 @@ export const UnitsHandlers = HttpApiBuilder.group(
       .handle("deleteExternalLink", ({ params }) =>
         Effect.gen(function* () {
           yield* CurrentUser;
-          const deleted = yield* Effect.orDie(
-            database.delete(UnitExternalLink).where(eq(UnitExternalLink.id, params.id)).returning(),
-          );
+          const deleted = yield* database.delete(UnitExternalLink).where(eq(UnitExternalLink.id, params.id)).returning();
           if (deleted.length === 0) return yield* new ExternalLinkNotFound();
         }),
       );

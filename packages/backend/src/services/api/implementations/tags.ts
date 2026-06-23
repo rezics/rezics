@@ -129,29 +129,25 @@ export const TagsHandlers = HttpApiBuilder.group(
       Effect.gen(function* () {
         const conditions = [eq(UnitTranslation.unitId, unitId)];
         if (language) conditions.push(eq(UnitTranslation.language, language));
-        const trans = yield* Effect.orDie(
-          database
+        const trans = yield* database
             .select()
             .from(UnitTranslation)
             .where(and(...conditions))
             .orderBy(asc(UnitTranslation.language))
-            .limit(1),
-        );
+            .limit(1);
         return trans[0];
       });
 
     // Shared: aggregate tag votes for a unit+tag pair / 聚合 unit+标签 配对的投票
     const aggregateVotes = (unitId: string, tagUnitId: string) =>
       Effect.gen(function* () {
-        const agg = yield* Effect.orDie(
-          database
+        const agg = yield* database
             .select({
               score: sql<number>`coalesce(sum(${TagVote.value}), 0)`,
               voteCount: count(TagVote.value),
             })
             .from(TagVote)
-            .where(and(eq(TagVote.unitId, unitId), eq(TagVote.tagUnitId, tagUnitId))),
-        );
+            .where(and(eq(TagVote.unitId, unitId), eq(TagVote.tagUnitId, tagUnitId)));
         return {
           score: Number(agg[0]?.score ?? 0),
           voteCount: Number(agg[0]?.voteCount ?? 0),
@@ -161,8 +157,7 @@ export const TagsHandlers = HttpApiBuilder.group(
     // Shared: upsert UnitTag with computed aggregates / 用计算的聚合值 upsert UnitTag
     const upsertUnitTagRow = (unitId: string, tagUnitId: string, agg: { score: number; voteCount: number }) =>
       Effect.gen(function* () {
-        const rows = yield* Effect.orDie(
-          database
+        const rows = yield* database
             .insert(UnitTag)
             .values({
               unitId,
@@ -179,8 +174,7 @@ export const TagsHandlers = HttpApiBuilder.group(
                 updatedAt: new Date(),
               },
             })
-            .returning(),
-        );
+            .returning();
         return rows[0]!;
       });
 
@@ -208,34 +202,30 @@ export const TagsHandlers = HttpApiBuilder.group(
           if (opts.language) {
             translationConditions.push(eq(UnitTranslation.language, opts.language));
           }
-          const matchingTranslations = yield* Effect.orDie(
-            database
+          const matchingTranslations = yield* database
               .select({ unitId: UnitTranslation.unitId })
               .from(UnitTranslation)
-              .where(and(...translationConditions)),
-          );
+              .where(and(...translationConditions));
           const matchingIds = [...new Set(matchingTranslations.map((r) => r.unitId))];
           if (matchingIds.length === 0) return new TagListResult({ tags: [], total: 0 });
           conditions.push(inArray(Unit.id, matchingIds));
         }
 
         const where = and(...conditions);
-        const rows = yield* Effect.orDie(
-          database
+        const rows = yield* database
             .select()
             .from(Unit)
             .where(where)
             .orderBy(desc(Unit.createdAt))
             .limit(lim(opts.limit))
-            .offset(opts.offset ?? 0),
-        );
-        const totalAgg = yield* Effect.orDie(database.select({ total: count() }).from(Unit).where(where));
+            .offset(opts.offset ?? 0);
+        const totalAgg = yield* database.select({ total: count() }).from(Unit).where(where);
 
         // Batch load translations / 批量加载翻译
         const unitIds = rows.map((r) => r.id);
         const translations =
           unitIds.length > 0
-            ? yield* Effect.orDie(database.select().from(UnitTranslation).where(inArray(UnitTranslation.unitId, unitIds)))
+            ? yield* database.select().from(UnitTranslation).where(inArray(UnitTranslation.unitId, unitIds))
             : [];
         const transMap = new Map<string, typeof UnitTranslation.$inferSelect>();
         for (const t of translations) {
@@ -288,19 +278,15 @@ export const TagsHandlers = HttpApiBuilder.group(
           const language = query.lang ?? "en";
 
           // Fetch tag units / 获取标签 unit
-          const tagUnits = yield* Effect.orDie(
-            database.select().from(Unit).where(and(inArray(Unit.id, unitIds), eq(Unit.type, "TAG"))),
-          );
+          const tagUnits = yield* database.select().from(Unit).where(and(inArray(Unit.id, unitIds), eq(Unit.type, "TAG")));
           if (tagUnits.length === 0) return {} as Record<string, BatchTagTranslationEntry>;
 
           const tagIds = tagUnits.map((t) => t.id);
-          const translations = yield* Effect.orDie(
-            database
+          const translations = yield* database
               .select()
               .from(UnitTranslation)
               .where(inArray(UnitTranslation.unitId, tagIds))
-              .orderBy(asc(UnitTranslation.language)),
-          );
+              .orderBy(asc(UnitTranslation.language));
 
           // Group translations by unitId / 按 unitId 分组翻译
           const transByUnit = new Map<string, Array<typeof UnitTranslation.$inferSelect>>();
@@ -336,15 +322,13 @@ export const TagsHandlers = HttpApiBuilder.group(
       .handle("getBySlug", ({ params }) =>
         Effect.gen(function* () {
           // Resolve slug via SlugScope for tags / 通过 SlugScope 解析标签的 slug
-          const slugScopes = yield* Effect.orDie(
-            database.select({ unitId: SlugScope.unitId }).from(SlugScope).where(eq(SlugScope.slug, "tag")).limit(1),
-          );
+          const slugScopes = yield* database.select({ unitId: SlugScope.unitId }).from(SlugScope).where(eq(SlugScope.slug, "tag")).limit(1);
           const tagScopeId = slugScopes[0]?.unitId;
 
           const conditions = [eq(Unit.type, "TAG"), eq(Unit.slug, params.slug)];
           if (tagScopeId) conditions.push(eq(Unit.slugScope, tagScopeId));
 
-          const units = yield* Effect.orDie(database.select().from(Unit).where(and(...conditions)).limit(1));
+          const units = yield* database.select().from(Unit).where(and(...conditions)).limit(1);
           if (!units[0]) return yield* new TagNotFound();
 
           const trans = yield* resolveTranslation(units[0].id);
@@ -355,13 +339,11 @@ export const TagsHandlers = HttpApiBuilder.group(
       // ── Get tag by ID / 按 ID 获取标签 ─────────────────────
       .handle("getById", ({ params }) =>
         Effect.gen(function* () {
-          const units = yield* Effect.orDie(
-            database
+          const units = yield* database
               .select()
               .from(Unit)
               .where(and(eq(Unit.id, params.unitId), eq(Unit.type, "TAG")))
-              .limit(1),
-          );
+              .limit(1);
           if (!units[0]) return yield* new TagNotFound();
           const trans = yield* resolveTranslation(units[0].id);
           return tagUnitToEntry(units[0], trans);
@@ -375,23 +357,18 @@ export const TagsHandlers = HttpApiBuilder.group(
           const language = payload.language ?? "en";
 
           // Resolve tag slug scope / 解析标签 slug scope
-          const slugScopes = yield* Effect.orDie(
-            database.select({ unitId: SlugScope.unitId }).from(SlugScope).where(eq(SlugScope.slug, "tag")).limit(1),
-          );
+          const slugScopes = yield* database.select({ unitId: SlugScope.unitId }).from(SlugScope).where(eq(SlugScope.slug, "tag")).limit(1);
           const tagScopeId = slugScopes[0]?.unitId ?? user.id;
 
           // Check for slug conflict / 检查 slug 冲突
-          const existing = yield* Effect.orDie(
-            database
+          const existing = yield* database
               .select({ id: Unit.id })
               .from(Unit)
               .where(and(eq(Unit.type, "TAG"), eq(Unit.slug, payload.slug), eq(Unit.slugScope, tagScopeId)))
-              .limit(1),
-          );
+              .limit(1);
           if (existing[0]) return yield* new TagConflict();
 
-          const unitRows = yield* Effect.orDie(
-            database
+          const unitRows = yield* database
               .insert(Unit)
               .values({
                 type: "TAG",
@@ -402,19 +379,16 @@ export const TagsHandlers = HttpApiBuilder.group(
                 isLanguageNeutral: true,
                 status: "PUBLISHED",
               })
-              .returning(),
-          );
+              .returning();
           const unit = unitRows[0]!;
 
           // Insert translation for the tag name / 插入标签名称的翻译
-          yield* Effect.orDie(
-            database.insert(UnitTranslation).values({
+          yield* database.insert(UnitTranslation).values({
               unitId: unit.id,
               language,
               title: payload.name,
               updatedAt: new Date(),
-            }),
-          );
+            });
 
           const trans = yield* resolveTranslation(unit.id);
           return tagUnitToEntry(unit, trans);
@@ -426,55 +400,47 @@ export const TagsHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           yield* CurrentUser;
 
-          const units = yield* Effect.orDie(
-            database
+          const units = yield* database
               .select()
               .from(Unit)
               .where(and(eq(Unit.id, params.unitId), eq(Unit.type, "TAG")))
-              .limit(1),
-          );
+              .limit(1);
           if (!units[0]) return yield* new TagNotFound();
 
           const language = payload.language ?? units[0].defaultLanguage ?? "en";
 
           // Update slug if provided / 如果提供了 slug 则更新
           if (payload.slug !== undefined) {
-            yield* Effect.orDie(
-              database
+            yield* database
                 .update(Unit)
                 .set({ slug: payload.slug, updatedAt: new Date() })
-                .where(eq(Unit.id, params.unitId)),
-            );
+                .where(eq(Unit.id, params.unitId));
           }
 
           // Update translation name/description / 更新翻译名称/描述
           if (payload.name !== undefined) {
-            yield* Effect.orDie(
-              database
+            yield* database
                 .insert(UnitTranslation)
                 .values({ unitId: params.unitId, language, title: payload.name, updatedAt: new Date() })
                 .onConflictDoUpdate({
                   target: [UnitTranslation.unitId, UnitTranslation.language],
                   set: { title: payload.name, updatedAt: new Date() },
-                }),
-            );
+                });
           }
 
           if (payload.description !== undefined) {
-            yield* Effect.orDie(
-              database
+            yield* database
                 .insert(UnitTranslation)
                 .values({ unitId: params.unitId, language, description: payload.description, updatedAt: new Date() })
                 .onConflictDoUpdate({
                   target: [UnitTranslation.unitId, UnitTranslation.language],
                   set: { description: payload.description, updatedAt: new Date() },
-                }),
-            );
+                });
           }
 
-          yield* Effect.orDie(database.update(Unit).set({ updatedAt: new Date() }).where(eq(Unit.id, params.unitId)));
+          yield* database.update(Unit).set({ updatedAt: new Date() }).where(eq(Unit.id, params.unitId));
 
-          const updated = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)).limit(1));
+          const updated = yield* database.select().from(Unit).where(eq(Unit.id, params.unitId)).limit(1);
           const trans = yield* resolveTranslation(params.unitId, language);
           return tagUnitToEntry(updated[0]!, trans);
         }),
@@ -484,15 +450,13 @@ export const TagsHandlers = HttpApiBuilder.group(
       .handle("delete", ({ params }) =>
         Effect.gen(function* () {
           yield* CurrentUser;
-          const units = yield* Effect.orDie(
-            database
+          const units = yield* database
               .select()
               .from(Unit)
               .where(and(eq(Unit.id, params.unitId), eq(Unit.type, "TAG")))
-              .limit(1),
-          );
+              .limit(1);
           if (!units[0]) return yield* new TagNotFound();
-          yield* Effect.orDie(database.delete(Unit).where(eq(Unit.id, params.unitId)));
+          yield* database.delete(Unit).where(eq(Unit.id, params.unitId));
         }),
       )
 
@@ -502,24 +466,20 @@ export const TagsHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
 
           // Verify the tag unit exists / 验证标签 unit 存在
-          const tagUnits = yield* Effect.orDie(
-            database
+          const tagUnits = yield* database
               .select({ id: Unit.id })
               .from(Unit)
               .where(and(eq(Unit.id, payload.tagUnitId), eq(Unit.type, "TAG")))
-              .limit(1),
-          );
+              .limit(1);
           if (!tagUnits[0]) return yield* new TagNotFound();
 
           // Insert tag vote with creation-as-vote semantics / 以创建即投票语义插入投票
-          yield* Effect.orDie(
-            database
+          yield* database
               .insert(TagVote)
               .values({ userId: user.id, unitId: payload.unitId, tagUnitId: payload.tagUnitId, value: 1 })
               .onConflictDoNothing({
                 target: [TagVote.userId, TagVote.unitId, TagVote.tagUnitId],
-              }),
-          );
+              });
 
           const agg = yield* aggregateVotes(payload.unitId, payload.tagUnitId);
           yield* upsertUnitTagRow(payload.unitId, payload.tagUnitId, agg);
@@ -532,26 +492,20 @@ export const TagsHandlers = HttpApiBuilder.group(
           yield* CurrentUser;
 
           // Verify the tag unit exists / 验证标签 unit 存在
-          const tagUnits = yield* Effect.orDie(
-            database
+          const tagUnits = yield* database
               .select({ id: Unit.id })
               .from(Unit)
               .where(and(eq(Unit.id, payload.tagUnitId), eq(Unit.type, "TAG")))
-              .limit(1),
-          );
+              .limit(1);
           if (!tagUnits[0]) return yield* new TagNotFound();
 
           // Delete all votes for this pair, then delete the UnitTag / 删除此配对的所有投票，然后删除 UnitTag
-          yield* Effect.orDie(
-            database
+          yield* database
               .delete(TagVote)
-              .where(and(eq(TagVote.unitId, payload.unitId), eq(TagVote.tagUnitId, payload.tagUnitId))),
-          );
-          yield* Effect.orDie(
-            database
+              .where(and(eq(TagVote.unitId, payload.unitId), eq(TagVote.tagUnitId, payload.tagUnitId)));
+          yield* database
               .delete(UnitTag)
-              .where(and(eq(UnitTag.unitId, payload.unitId), eq(UnitTag.tagUnitId, payload.tagUnitId))),
-          );
+              .where(and(eq(UnitTag.unitId, payload.unitId), eq(UnitTag.tagUnitId, payload.tagUnitId)));
         }),
       )
 
@@ -561,8 +515,7 @@ export const TagsHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
           const clampedValue = payload.value > 0 ? 1 : -1;
 
-          yield* Effect.orDie(
-            database
+          yield* database
               .insert(TagVote)
               .values({
                 userId: user.id,
@@ -573,16 +526,13 @@ export const TagsHandlers = HttpApiBuilder.group(
               .onConflictDoUpdate({
                 target: [TagVote.userId, TagVote.unitId, TagVote.tagUnitId],
                 set: { value: clampedValue },
-              }),
-          );
+              });
 
           const agg = yield* aggregateVotes(payload.unitId, payload.tagUnitId);
-          yield* Effect.orDie(
-            database
+          yield* database
               .update(UnitTag)
               .set({ score: agg.score, voteCount: agg.voteCount, updatedAt: new Date() })
-              .where(and(eq(UnitTag.unitId, payload.unitId), eq(UnitTag.tagUnitId, payload.tagUnitId))),
-          );
+              .where(and(eq(UnitTag.unitId, payload.unitId), eq(UnitTag.tagUnitId, payload.tagUnitId)));
         }),
       )
 
@@ -593,14 +543,11 @@ export const TagsHandlers = HttpApiBuilder.group(
           const userId = Option.isSome(userOption) ? userOption.value.id : undefined;
 
           // Check if viewer is privileged (owner) / 检查查看者是否为所有者
-          const unitRows = yield* Effect.orDie(
-            database.select({ userId: Unit.userId }).from(Unit).where(eq(Unit.id, params.unitId)).limit(1),
-          );
+          const unitRows = yield* database.select({ userId: Unit.userId }).from(Unit).where(eq(Unit.id, params.unitId)).limit(1);
           const isPrivileged = userId !== undefined && unitRows[0]?.userId === userId;
 
           // Fetch UnitTag rows, optionally including below-threshold / 获取 UnitTag 行，可选包括阈值以下的
-          const unitTags = yield* Effect.orDie(
-            database
+          const unitTags = yield* database
               .select()
               .from(UnitTag)
               .where(
@@ -608,14 +555,12 @@ export const TagsHandlers = HttpApiBuilder.group(
                   ? eq(UnitTag.unitId, params.unitId)
                   : and(eq(UnitTag.unitId, params.unitId), gt(UnitTag.score, VISIBILITY_THRESHOLD)),
               )
-              .orderBy(desc(UnitTag.pinned), asc(UnitTag.position), desc(UnitTag.score), asc(UnitTag.tagUnitId)),
-          );
+              .orderBy(desc(UnitTag.pinned), asc(UnitTag.position), desc(UnitTag.score), asc(UnitTag.tagUnitId));
 
           // Load viewer's votes if logged in / 如果已登录则加载查看者的投票
           const viewerVotes =
             userId && unitTags.length > 0
-              ? yield* Effect.orDie(
-                  database
+              ? yield* database
                     .select({ tagUnitId: TagVote.tagUnitId, value: TagVote.value })
                     .from(TagVote)
                     .where(
@@ -627,8 +572,7 @@ export const TagsHandlers = HttpApiBuilder.group(
                           unitTags.map((ut) => ut.tagUnitId),
                         ),
                       ),
-                    ),
-                )
+                    )
               : [];
           const viewerVoteMap = new Map(viewerVotes.map((v) => [v.tagUnitId, v.value]));
 
@@ -657,31 +601,27 @@ export const UnitTagHandlers = HttpApiBuilder.group(
     // Shared: aggregate tag votes / 聚合标签投票
     const aggregateVotes = (unitId: string, tagUnitId: string) =>
       Effect.gen(function* () {
-        const agg = yield* Effect.orDie(
-          database
+        const agg = yield* database
             .select({
               score: sql<number>`coalesce(sum(${TagVote.value}), 0)`,
               voteCount: count(TagVote.value),
             })
             .from(TagVote)
-            .where(and(eq(TagVote.unitId, unitId), eq(TagVote.tagUnitId, tagUnitId))),
-        );
+            .where(and(eq(TagVote.unitId, unitId), eq(TagVote.tagUnitId, tagUnitId)));
         return { score: Number(agg[0]?.score ?? 0), voteCount: Number(agg[0]?.voteCount ?? 0) };
       });
 
     // Shared: upsert UnitTag / upsert UnitTag
     const upsertRow = (unitId: string, tagUnitId: string, agg: { score: number; voteCount: number }) =>
       Effect.gen(function* () {
-        const rows = yield* Effect.orDie(
-          database
+        const rows = yield* database
             .insert(UnitTag)
             .values({ unitId, tagUnitId, score: agg.score, voteCount: agg.voteCount, updatedAt: new Date() })
             .onConflictDoUpdate({
               target: [UnitTag.unitId, UnitTag.tagUnitId],
               set: { score: agg.score, voteCount: agg.voteCount, updatedAt: new Date() },
             })
-            .returning(),
-        );
+            .returning();
         return rows[0]!;
       });
 
@@ -692,14 +632,12 @@ export const UnitTagHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
 
           // Insert voter's +1 via upsert / 通过 upsert 插入投票者的 +1
-          yield* Effect.orDie(
-            database
+          yield* database
               .insert(TagVote)
               .values({ userId: user.id, unitId: payload.unitId, tagUnitId: payload.tagUnitId, value: 1 })
               .onConflictDoNothing({
                 target: [TagVote.userId, TagVote.unitId, TagVote.tagUnitId],
-              }),
-          );
+              });
 
           // Recompute aggregates and upsert UnitTag / 重新计算聚合值并 upsert UnitTag
           const agg = yield* aggregateVotes(payload.unitId, payload.tagUnitId);
@@ -721,13 +659,11 @@ export const UnitTagHandlers = HttpApiBuilder.group(
           }
           if (payload.position !== undefined) sets.position = payload.position;
 
-          const updated = yield* Effect.orDie(
-            database
+          const updated = yield* database
               .update(UnitTag)
               .set(sets)
               .where(and(eq(UnitTag.unitId, params.unitId), eq(UnitTag.tagUnitId, params.tagUnitId)))
-              .returning(),
-          );
+              .returning();
           if (!updated[0]) return yield* new TagNotFound();
           return unitTagToEntry(updated[0]);
         }),
@@ -739,17 +675,13 @@ export const UnitTagHandlers = HttpApiBuilder.group(
           yield* CurrentUser;
 
           // Delete all votes for this pair first / 先删除此配对的所有投票
-          yield* Effect.orDie(
-            database
+          yield* database
               .delete(TagVote)
-              .where(and(eq(TagVote.unitId, params.unitId), eq(TagVote.tagUnitId, params.tagUnitId))),
-          );
-          const deleted = yield* Effect.orDie(
-            database
+              .where(and(eq(TagVote.unitId, params.unitId), eq(TagVote.tagUnitId, params.tagUnitId)));
+          const deleted = yield* database
               .delete(UnitTag)
               .where(and(eq(UnitTag.unitId, params.unitId), eq(UnitTag.tagUnitId, params.tagUnitId)))
-              .returning(),
-          );
+              .returning();
           if (!deleted[0]) return yield* new TagNotFound();
         }),
       );
@@ -773,8 +705,7 @@ export const TagVoteHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
           const clampedValue = payload.value > 0 ? 1 : -1;
 
-          yield* Effect.orDie(
-            database
+          yield* database
               .insert(TagVote)
               .values({
                 userId: user.id,
@@ -785,28 +716,23 @@ export const TagVoteHandlers = HttpApiBuilder.group(
               .onConflictDoUpdate({
                 target: [TagVote.userId, TagVote.unitId, TagVote.tagUnitId],
                 set: { value: clampedValue },
-              }),
-          );
+              });
 
           // Recompute and update UnitTag aggregates / 重新计算并更新 UnitTag 聚合值
-          const agg = yield* Effect.orDie(
-            database
+          const agg = yield* database
               .select({
                 score: sql<number>`coalesce(sum(${TagVote.value}), 0)`,
                 voteCount: count(TagVote.value),
               })
               .from(TagVote)
-              .where(and(eq(TagVote.unitId, payload.unitId), eq(TagVote.tagUnitId, payload.tagUnitId))),
-          );
+              .where(and(eq(TagVote.unitId, payload.unitId), eq(TagVote.tagUnitId, payload.tagUnitId)));
           const score = Number(agg[0]?.score ?? 0);
           const voteCount = Number(agg[0]?.voteCount ?? 0);
 
-          yield* Effect.orDie(
-            database
+          yield* database
               .update(UnitTag)
               .set({ score, voteCount, updatedAt: new Date() })
-              .where(and(eq(UnitTag.unitId, payload.unitId), eq(UnitTag.tagUnitId, payload.tagUnitId))),
-          );
+              .where(and(eq(UnitTag.unitId, payload.unitId), eq(UnitTag.tagUnitId, payload.tagUnitId)));
         }),
       );
   }),
@@ -838,8 +764,7 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
           }
           const where = filters.length > 0 ? and(...filters) : undefined;
 
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .select()
               .from(PolicyTagRule)
               .where(where)
@@ -850,9 +775,8 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
                 asc(PolicyTagRule.createdAt),
               )
               .limit(lim(query.limit))
-              .offset(query.offset ?? 0),
-          );
-          const totalAgg = yield* Effect.orDie(database.select({ total: count() }).from(PolicyTagRule).where(where));
+              .offset(query.offset ?? 0);
+          const totalAgg = yield* database.select({ total: count() }).from(PolicyTagRule).where(where);
 
           return new PolicyTagRuleListResult({
             rules: rows.map((r) => policyRuleToEntry(r)),
@@ -872,17 +796,14 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
           }
 
           // Verify tag unit exists / 验证标签 unit 存在
-          const tagUnits = yield* Effect.orDie(
-            database
+          const tagUnits = yield* database
               .select({ id: Unit.id })
               .from(Unit)
               .where(and(eq(Unit.id, payload.tagUnitId), eq(Unit.type, "TAG")))
-              .limit(1),
-          );
+              .limit(1);
           if (!tagUnits[0]) return yield* new TagForbidden();
 
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .insert(PolicyTagRule)
               .values({
                 scopeKind: payload.scope.kind,
@@ -893,8 +814,7 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
                 reason: payload.reason ?? null,
                 updatedAt: new Date(),
               })
-              .returning(),
-          );
+              .returning();
           if (!rows[0]) return yield* new TagConflict();
           return policyRuleToEntry(rows[0]);
         }),
@@ -916,9 +836,7 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
             sets.reason = payload.reason ?? null;
           }
 
-          const updated = yield* Effect.orDie(
-            database.update(PolicyTagRule).set(sets).where(eq(PolicyTagRule.id, params.ruleId)).returning(),
-          );
+          const updated = yield* database.update(PolicyTagRule).set(sets).where(eq(PolicyTagRule.id, params.ruleId)).returning();
           if (!updated[0]) return yield* new TagNotFound();
           return policyRuleToEntry(updated[0]);
         }),
@@ -932,8 +850,7 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
           if (query.unitId) filters.push(eq(PolicyTagApplication.unitId, query.unitId));
           const where = filters.length > 0 ? and(...filters) : undefined;
 
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .select()
               .from(PolicyTagApplication)
               .where(where)
@@ -944,11 +861,8 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
                 asc(PolicyTagApplication.unitId),
               )
               .limit(lim(query.limit))
-              .offset(query.offset ?? 0),
-          );
-          const totalAgg = yield* Effect.orDie(
-            database.select({ total: count() }).from(PolicyTagApplication).where(where),
-          );
+              .offset(query.offset ?? 0);
+          const totalAgg = yield* database.select({ total: count() }).from(PolicyTagApplication).where(where);
 
           return new PolicyTagApplicationListResult({
             applications: rows.map((r) => policyApplicationToEntry(r)),
@@ -963,14 +877,11 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
 
           // Verify rule exists and is ACTIVE / 验证规则存在且为 ACTIVE 状态
-          const rules = yield* Effect.orDie(
-            database.select().from(PolicyTagRule).where(eq(PolicyTagRule.id, params.ruleId)).limit(1),
-          );
+          const rules = yield* database.select().from(PolicyTagRule).where(eq(PolicyTagRule.id, params.ruleId)).limit(1);
           if (!rules[0]) return yield* new TagNotFound();
           if (rules[0].state !== "ACTIVE") return yield* new TagConflict();
 
-          const rows = yield* Effect.orDie(
-            database
+          const rows = yield* database
               .insert(PolicyTagApplication)
               .values({
                 ruleId: params.ruleId,
@@ -990,8 +901,7 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
                   updatedAt: new Date(),
                 },
               })
-              .returning(),
-          );
+              .returning();
           if (!rows[0]) return yield* new TagNotFound();
           return policyApplicationToEntry(rows[0]);
         }),
@@ -1003,9 +913,7 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
 
           // Verify rule exists and is ACTIVE / 验证规则存在且为 ACTIVE 状态
-          const rules = yield* Effect.orDie(
-            database.select().from(PolicyTagRule).where(eq(PolicyTagRule.id, params.ruleId)).limit(1),
-          );
+          const rules = yield* database.select().from(PolicyTagRule).where(eq(PolicyTagRule.id, params.ruleId)).limit(1);
           if (!rules[0]) return yield* new TagNotFound();
           if (rules[0].state !== "ACTIVE") return yield* new TagForbidden();
 
@@ -1016,8 +924,7 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
           if (payload.position !== undefined) sets.position = payload.position ?? null;
           if (payload.metadata !== undefined) sets.metadata = payload.metadata ?? null;
 
-          const updated = yield* Effect.orDie(
-            database
+          const updated = yield* database
               .update(PolicyTagApplication)
               .set(sets)
               .where(
@@ -1026,8 +933,7 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
                   eq(PolicyTagApplication.unitId, params.unitId),
                 ),
               )
-              .returning(),
-          );
+              .returning();
           if (!updated[0]) return yield* new TagNotFound();
           return policyApplicationToEntry(updated[0]);
         }),
@@ -1038,8 +944,7 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
         Effect.gen(function* () {
           yield* CurrentUser;
 
-          const deleted = yield* Effect.orDie(
-            database
+          const deleted = yield* database
               .delete(PolicyTagApplication)
               .where(
                 and(
@@ -1047,8 +952,7 @@ export const PolicyTagHandlers = HttpApiBuilder.group(
                   eq(PolicyTagApplication.unitId, params.unitId),
                 ),
               )
-              .returning(),
-          );
+              .returning();
           if (!deleted[0]) return yield* new TagNotFound();
         }),
       );
@@ -1067,13 +971,11 @@ export const UserTagApplicationHandlers = HttpApiBuilder.group(
 
     // Shared: list user tag applications for a given user+unit / 列出给定用户+unit 的用户标签应用
     const listForUnit = (userId: string, unitId: string) =>
-      Effect.orDie(
-        database
+      database
           .select()
           .from(UserTagApplication)
           .where(and(eq(UserTagApplication.userId, userId), eq(UserTagApplication.unitId, unitId)))
-          .orderBy(asc(UserTagApplication.position), asc(UserTagApplication.tagUnitId)),
-      );
+          .orderBy(asc(UserTagApplication.position), asc(UserTagApplication.tagUnitId));
 
     return handlers
       // ── List visible user tags for a user+unit / 列出用户+unit 的可见用户标签 ──
@@ -1101,18 +1003,15 @@ export const UserTagApplicationHandlers = HttpApiBuilder.group(
           const user = yield* CurrentUser;
 
           // Delete existing, then insert new tags / 删除现有的，然后插入新标签
-          yield* Effect.orDie(
-            database
+          yield* database
               .delete(UserTagApplication)
               .where(
                 and(eq(UserTagApplication.userId, user.id), eq(UserTagApplication.unitId, params.unitId)),
-              ),
-          );
+              );
 
           const uniqueTagIds = [...new Set(payload.tagUnitIds.map((id) => id.trim()).filter(Boolean))];
           if (uniqueTagIds.length > 0) {
-            yield* Effect.orDie(
-              database.insert(UserTagApplication).values(
+            yield* database.insert(UserTagApplication).values(
                 uniqueTagIds.map((tagUnitId, index) => ({
                   userId: user.id,
                   unitId: params.unitId,
@@ -1120,8 +1019,7 @@ export const UserTagApplicationHandlers = HttpApiBuilder.group(
                   position: String(index).padStart(8, "0"),
                   updatedAt: new Date(),
                 })),
-              ),
-            );
+              );
           }
 
           const rows = yield* listForUnit(user.id, params.unitId);
@@ -1139,8 +1037,7 @@ export const UserTagApplicationHandlers = HttpApiBuilder.group(
           const getPosition = (tagUnitId: string | null | undefined) => {
             if (!tagUnitId) return Effect.succeed(null as string | null);
             return Effect.map(
-              Effect.orDie(
-                database
+              database
                   .select({ position: UserTagApplication.position })
                   .from(UserTagApplication)
                   .where(
@@ -1151,7 +1048,6 @@ export const UserTagApplicationHandlers = HttpApiBuilder.group(
                     ),
                   )
                   .limit(1),
-              ),
               (rows) => rows[0]?.position ?? null,
             );
           };
@@ -1172,8 +1068,7 @@ export const UserTagApplicationHandlers = HttpApiBuilder.group(
             return "V";
           })();
 
-          const updated = yield* Effect.orDie(
-            database
+          const updated = yield* database
               .update(UserTagApplication)
               .set({ position, updatedAt: new Date() })
               .where(
@@ -1183,8 +1078,7 @@ export const UserTagApplicationHandlers = HttpApiBuilder.group(
                   eq(UserTagApplication.tagUnitId, params.tagUnitId),
                 ),
               )
-              .returning(),
-          );
+              .returning();
           if (!updated[0]) return yield* new TagNotFound();
           return userTagAppToEntry(updated[0]);
         }),
@@ -1194,8 +1088,7 @@ export const UserTagApplicationHandlers = HttpApiBuilder.group(
       .handle("delete", ({ params }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          yield* Effect.orDie(
-            database
+          yield* database
               .delete(UserTagApplication)
               .where(
                 and(
@@ -1203,8 +1096,7 @@ export const UserTagApplicationHandlers = HttpApiBuilder.group(
                   eq(UserTagApplication.unitId, params.unitId),
                   eq(UserTagApplication.tagUnitId, params.tagUnitId),
                 ),
-              ),
-          );
+              );
         }),
       );
   }),

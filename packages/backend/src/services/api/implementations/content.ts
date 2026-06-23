@@ -61,7 +61,9 @@ function buildStructureTree(rows: ContentStructureNodeRow[]): unknown {
     childrenByParent.set(row.parentId, bucket);
   }
   for (const bucket of childrenByParent.values()) {
-    bucket.sort((a, b) => (a.position < b.position ? -1 : a.position > b.position ? 1 : 0));
+    bucket.sort((a, b) =>
+      a.position < b.position ? -1 : a.position > b.position ? 1 : 0,
+    );
   }
 
   function rowToNode(row: ContentStructureNodeRow): unknown {
@@ -93,7 +95,8 @@ export const ContentHandlers = HttpApiBuilder.group(
   Effect.fn(function* (handlers) {
     const database = yield* Database;
     const { pagination } = yield* Config;
-    const lim = (n?: number) => Math.min(n ?? pagination.defaultLimit, pagination.maxLimit);
+    const lim = (n?: number) =>
+      Math.min(n ?? pagination.defaultLimit, pagination.maxLimit);
 
     /**
      * Shared reload helper: fetch content structure container + active nodes.
@@ -101,25 +104,24 @@ export const ContentHandlers = HttpApiBuilder.group(
      */
     const reloadStructure = (ownerUnitId: string) =>
       Effect.gen(function* () {
-        const containers = yield* Effect.orDie(
-          database
-            .select()
-            .from(ContentStructureTable)
-            .where(eq(ContentStructureTable.ownerUnitId, ownerUnitId)),
-        );
+        const containers = yield* database
+          .select()
+          .from(ContentStructureTable)
+          .where(eq(ContentStructureTable.ownerUnitId, ownerUnitId));
         if (!containers[0]) return yield* new ContentNotFound();
-        const nodes = yield* Effect.orDie(
-          database
-            .select()
-            .from(ContentStructureNode)
-            .where(
-              and(
-                eq(ContentStructureNode.ownerUnitId, ownerUnitId),
-                eq(ContentStructureNode.isDeleted, false),
-              ),
-            )
-            .orderBy(ContentStructureNode.parentId, ContentStructureNode.position),
-        );
+        const nodes = yield* database
+          .select()
+          .from(ContentStructureNode)
+          .where(
+            and(
+              eq(ContentStructureNode.ownerUnitId, ownerUnitId),
+              eq(ContentStructureNode.isDeleted, false),
+            ),
+          )
+          .orderBy(
+            ContentStructureNode.parentId,
+            ContentStructureNode.position,
+          );
         return new ContentStructureDTO({
           ownerUnitId: containers[0].ownerUnitId,
           tree: buildStructureTree(nodes),
@@ -127,58 +129,76 @@ export const ContentHandlers = HttpApiBuilder.group(
         });
       });
 
-    return handlers
-      // ── Get content structure / 获取内容结构 ────────────────────
-      .handle("getStructure", ({ params }) => reloadStructure(params.ownerUnitId))
+    return (
+      handlers
+        // ── Get content structure / 获取内容结构 ────────────────────
+        .handle("getStructure", ({ params }) =>
+          reloadStructure(params.ownerUnitId),
+        )
 
-      // ── Put content structure / 更新内容结构 ───────────────────
-      .handle("putStructure", ({ params, payload }) =>
-        Effect.gen(function* () {
-          const user = yield* CurrentUser;
+        // ── Put content structure / 更新内容结构 ───────────────────
+        .handle("putStructure", ({ params, payload }) =>
+          Effect.gen(function* () {
+            const user = yield* CurrentUser;
 
-          // Verify the owner unit exists and the user has permission
-          // 验证所有者 unit 存在且用户有权限
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.ownerUnitId)));
-          if (!units[0]) return yield* new ContentNotFound();
-          if (units[0].userId !== user.id) return yield* new ContentForbidden();
+            // Verify the owner unit exists and the user has permission
+            // 验证所有者 unit 存在且用户有权限
+            const units = yield* database
+              .select()
+              .from(Unit)
+              .where(eq(Unit.id, params.ownerUnitId));
+            if (!units[0]) return yield* new ContentNotFound();
+            if (units[0].userId !== user.id)
+              return yield* new ContentForbidden();
 
-          // Ensure the content structure container exists (upsert)
-          // 确保内容结构容器存在（upsert）
-          yield* Effect.orDie(
-            database
+            // Ensure the content structure container exists (upsert)
+            // 确保内容结构容器存在（upsert）
+            yield* database
               .insert(ContentStructureTable)
-              .values({ ownerUnitId: params.ownerUnitId, updatedAt: new Date() })
-              .onConflictDoNothing(),
-          );
+              .values({
+                ownerUnitId: params.ownerUnitId,
+                updatedAt: new Date(),
+              })
+              .onConflictDoNothing();
 
-          const submittedTree = payload.tree;
-          if (!Array.isArray(submittedTree)) return yield* new ContentConflict();
+            const submittedTree = payload.tree;
+            if (!Array.isArray(submittedTree))
+              return yield* new ContentConflict();
 
-          // Fetch all existing nodes for this owner (including deleted)
-          // 获取此所有者的所有现有节点（包括已删除的）
-          const allExisting = yield* Effect.orDie(
-            database
+            // Fetch all existing nodes for this owner (including deleted)
+            // 获取此所有者的所有现有节点（包括已删除的）
+            const allExisting = yield* database
               .select()
               .from(ContentStructureNode)
               .where(eq(ContentStructureNode.ownerUnitId, params.ownerUnitId))
-              .orderBy(ContentStructureNode.parentId, ContentStructureNode.position),
-          );
-          const existingActive = allExisting.filter((r) => !r.isDeleted);
-          const deletedById = new Map(allExisting.filter((r) => r.isDeleted).map((r) => [r.id, r]));
+              .orderBy(
+                ContentStructureNode.parentId,
+                ContentStructureNode.position,
+              );
+            const existingActive = allExisting.filter((r) => !r.isDeleted);
+            const deletedById = new Map(
+              allExisting.filter((r) => r.isDeleted).map((r) => [r.id, r]),
+            );
 
-          // Plan submitted tree into flat node list
-          // 将提交的树规划为扁平节点列表
-          const planned = flattenSubmittedTree(submittedTree as unknown[], null, existingActive, deletedById);
-          const submittedIds = new Set(planned.map((p) => p.id));
+            // Plan submitted tree into flat node list
+            // 将提交的树规划为扁平节点列表
+            const planned = flattenSubmittedTree(
+              submittedTree as unknown[],
+              null,
+              existingActive,
+              deletedById,
+            );
+            const submittedIds = new Set(planned.map((p) => p.id));
 
-          // Soft-delete nodes removed from the tree
-          // 软删除从树中移除的节点
-          const removedIds = existingActive.map((r) => r.id).filter((id) => !submittedIds.has(id));
-          if (removedIds.length > 0) {
-            // Promote children of removed nodes to root
-            // 将已移除节点的子节点提升到根级
-            yield* Effect.orDie(
-              database
+            // Soft-delete nodes removed from the tree
+            // 软删除从树中移除的节点
+            const removedIds = existingActive
+              .map((r) => r.id)
+              .filter((id) => !submittedIds.has(id));
+            if (removedIds.length > 0) {
+              // Promote children of removed nodes to root
+              // 将已移除节点的子节点提升到根级
+              yield* database
                 .update(ContentStructureNode)
                 .set({ parentId: null, updatedAt: new Date() })
                 .where(
@@ -187,29 +207,29 @@ export const ContentHandlers = HttpApiBuilder.group(
                     eq(ContentStructureNode.isDeleted, false),
                     inArray(ContentStructureNode.parentId, removedIds),
                   ),
-                ),
-            );
-            yield* Effect.orDie(
-              database
+                );
+              yield* database
                 .update(ContentStructureNode)
-                .set({ isDeleted: true, deletedAt: new Date(), updatedAt: new Date() })
+                .set({
+                  isDeleted: true,
+                  deletedAt: new Date(),
+                  updatedAt: new Date(),
+                })
                 .where(
                   and(
                     eq(ContentStructureNode.ownerUnitId, params.ownerUnitId),
                     inArray(ContentStructureNode.id, removedIds),
                   ),
-                ),
-            );
-          }
+                );
+            }
 
-          // Upsert planned nodes
-          // 更新或插入规划的节点
-          const existingById = new Map(existingActive.map((r) => [r.id, r]));
-          for (const plan of planned) {
-            const existing = existingById.get(plan.id);
-            if (!existing) {
-              yield* Effect.orDie(
-                database.insert(ContentStructureNode).values({
+            // Upsert planned nodes
+            // 更新或插入规划的节点
+            const existingById = new Map(existingActive.map((r) => [r.id, r]));
+            for (const plan of planned) {
+              const existing = existingById.get(plan.id);
+              if (!existing) {
+                yield* database.insert(ContentStructureNode).values({
                   id: plan.id,
                   ownerUnitId: params.ownerUnitId,
                   parentId: plan.parentId,
@@ -219,20 +239,19 @@ export const ContentHandlers = HttpApiBuilder.group(
                   noContent: plan.noContent,
                   rating: plan.rating ?? undefined,
                   updatedAt: new Date(),
-                }),
-              );
-              continue;
-            }
-            if (
-              existing.parentId !== plan.parentId ||
-              existing.position !== plan.position ||
-              (existing.contentUnitId ?? null) !== (plan.contentUnitId ?? null) ||
-              existing.title !== plan.title ||
-              existing.noContent !== plan.noContent ||
-              (existing.rating ?? null) !== (plan.rating ?? null)
-            ) {
-              yield* Effect.orDie(
-                database
+                });
+                continue;
+              }
+              if (
+                existing.parentId !== plan.parentId ||
+                existing.position !== plan.position ||
+                (existing.contentUnitId ?? null) !==
+                  (plan.contentUnitId ?? null) ||
+                existing.title !== plan.title ||
+                existing.noContent !== plan.noContent ||
+                (existing.rating ?? null) !== (plan.rating ?? null)
+              ) {
+                yield* database
                   .update(ContentStructureNode)
                   .set({
                     parentId: plan.parentId,
@@ -243,37 +262,37 @@ export const ContentHandlers = HttpApiBuilder.group(
                     rating: plan.rating ?? null,
                     updatedAt: new Date(),
                   })
-                  .where(eq(ContentStructureNode.id, plan.id)),
-              );
+                  .where(eq(ContentStructureNode.id, plan.id));
+              }
             }
-          }
 
-          // Bump container timestamp
-          // 更新容器时间戳
-          yield* Effect.orDie(
-            database
+            // Bump container timestamp
+            // 更新容器时间戳
+            yield* database
               .update(ContentStructureTable)
               .set({ updatedAt: new Date() })
-              .where(eq(ContentStructureTable.ownerUnitId, params.ownerUnitId)),
-          );
+              .where(eq(ContentStructureTable.ownerUnitId, params.ownerUnitId));
 
-          return yield* reloadStructure(params.ownerUnitId);
-        }),
-      )
+            return yield* reloadStructure(params.ownerUnitId);
+          }),
+        )
 
-      // ── Restore soft-deleted nodes / 恢复软删除的节点 ──────────
-      .handle("restoreStructure", ({ params }) =>
-        Effect.gen(function* () {
-          const user = yield* CurrentUser;
+        // ── Restore soft-deleted nodes / 恢复软删除的节点 ──────────
+        .handle("restoreStructure", ({ params }) =>
+          Effect.gen(function* () {
+            const user = yield* CurrentUser;
 
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.ownerUnitId)));
-          if (!units[0]) return yield* new ContentNotFound();
-          if (units[0].userId !== user.id) return yield* new ContentForbidden();
+            const units = yield* database
+              .select()
+              .from(Unit)
+              .where(eq(Unit.id, params.ownerUnitId));
+            if (!units[0]) return yield* new ContentNotFound();
+            if (units[0].userId !== user.id)
+              return yield* new ContentForbidden();
 
-          // Find all soft-deleted nodes for this owner
-          // 查找此所有者的所有软删除节点
-          const deletedNodes = yield* Effect.orDie(
-            database
+            // Find all soft-deleted nodes for this owner
+            // 查找此所有者的所有软删除节点
+            const deletedNodes = yield* database
               .select()
               .from(ContentStructureNode)
               .where(
@@ -281,14 +300,12 @@ export const ContentHandlers = HttpApiBuilder.group(
                   eq(ContentStructureNode.ownerUnitId, params.ownerUnitId),
                   eq(ContentStructureNode.isDeleted, true),
                 ),
-              ),
-          );
+              );
 
-          if (deletedNodes.length > 0) {
-            // Check which parents are still alive; if parent is deleted, reparent to root
-            // 检查哪些父级仍然存活；如果父级已删除，则重新设置为根级
-            const activeNodes = yield* Effect.orDie(
-              database
+            if (deletedNodes.length > 0) {
+              // Check which parents are still alive; if parent is deleted, reparent to root
+              // 检查哪些父级仍然存活；如果父级已删除，则重新设置为根级
+              const activeNodes = yield* database
                 .select()
                 .from(ContentStructureNode)
                 .where(
@@ -296,15 +313,14 @@ export const ContentHandlers = HttpApiBuilder.group(
                     eq(ContentStructureNode.ownerUnitId, params.ownerUnitId),
                     eq(ContentStructureNode.isDeleted, false),
                   ),
-                ),
-            );
-            const activeIds = new Set(activeNodes.map((n) => n.id));
+                );
+              const activeIds = new Set(activeNodes.map((n) => n.id));
 
-            for (const node of deletedNodes) {
-              const parentIsAlive = node.parentId === null || activeIds.has(node.parentId);
-              const restoredParentId = parentIsAlive ? node.parentId : null;
-              yield* Effect.orDie(
-                database
+              for (const node of deletedNodes) {
+                const parentIsAlive =
+                  node.parentId === null || activeIds.has(node.parentId);
+                const restoredParentId = parentIsAlive ? node.parentId : null;
+                yield* database
                   .update(ContentStructureNode)
                   .set({
                     isDeleted: false,
@@ -312,32 +328,30 @@ export const ContentHandlers = HttpApiBuilder.group(
                     parentId: restoredParentId,
                     updatedAt: new Date(),
                   })
-                  .where(eq(ContentStructureNode.id, node.id)),
-              );
-              // After restoring, this node becomes active for subsequent checks
-              // 恢复后，此节点对于后续检查变为活跃状态
-              activeIds.add(node.id);
-            }
+                  .where(eq(ContentStructureNode.id, node.id));
+                // After restoring, this node becomes active for subsequent checks
+                // 恢复后，此节点对于后续检查变为活跃状态
+                activeIds.add(node.id);
+              }
 
-            // Bump container timestamp
-            // 更新容器时间戳
-            yield* Effect.orDie(
-              database
+              // Bump container timestamp
+              // 更新容器时间戳
+              yield* database
                 .update(ContentStructureTable)
                 .set({ updatedAt: new Date() })
-                .where(eq(ContentStructureTable.ownerUnitId, params.ownerUnitId)),
-            );
-          }
+                .where(
+                  eq(ContentStructureTable.ownerUnitId, params.ownerUnitId),
+                );
+            }
 
-          return yield* reloadStructure(params.ownerUnitId);
-        }),
-      )
+            return yield* reloadStructure(params.ownerUnitId);
+          }),
+        )
 
-      // ── Get content translation / 获取内容翻译 ─────────────────
-      .handle("getTranslation", ({ params }) =>
-        Effect.gen(function* () {
-          const rows = yield* Effect.orDie(
-            database
+        // ── Get content translation / 获取内容翻译 ─────────────────
+        .handle("getTranslation", ({ params }) =>
+          Effect.gen(function* () {
+            const rows = yield* database
               .select()
               .from(ContentTranslationTable)
               .where(
@@ -346,36 +360,38 @@ export const ContentHandlers = HttpApiBuilder.group(
                   eq(ContentTranslationTable.language, params.language),
                 ),
               )
-              .limit(1),
-          );
-          if (!rows[0]) return yield* new ContentNotFound();
+              .limit(1);
+            if (!rows[0]) return yield* new ContentNotFound();
 
-          return new ContentTranslationDTO({
-            unitId: rows[0].unitId,
-            language: rows[0].language,
-            body: rows[0].content,
-            updatedAt: rows[0].updatedAt,
-          });
-        }),
-      )
+            return new ContentTranslationDTO({
+              unitId: rows[0].unitId,
+              language: rows[0].language,
+              body: rows[0].content,
+              updatedAt: rows[0].updatedAt,
+            });
+          }),
+        )
 
-      // ── Put content translation / 更新内容翻译 ─────────────────
-      .handle("putTranslation", ({ params, payload }) =>
-        Effect.gen(function* () {
-          const user = yield* CurrentUser;
+        // ── Put content translation / 更新内容翻译 ─────────────────
+        .handle("putTranslation", ({ params, payload }) =>
+          Effect.gen(function* () {
+            const user = yield* CurrentUser;
 
-          // Verify the unit exists and user has permission
-          // 验证 unit 存在且用户有权限
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
-          if (!units[0]) return yield* new ContentNotFound();
-          if (units[0].userId !== user.id) return yield* new ContentForbidden();
+            // Verify the unit exists and user has permission
+            // 验证 unit 存在且用户有权限
+            const units = yield* database
+              .select()
+              .from(Unit)
+              .where(eq(Unit.id, params.unitId));
+            if (!units[0]) return yield* new ContentNotFound();
+            if (units[0].userId !== user.id)
+              return yield* new ContentForbidden();
 
-          const now = new Date();
+            const now = new Date();
 
-          // Upsert the content translation
-          // 更新或插入内容翻译
-          const upserted = yield* Effect.orDie(
-            database
+            // Upsert the content translation
+            // 更新或插入内容翻译
+            const upserted = yield* database
               .insert(ContentTranslationTable)
               .values({
                 unitId: params.unitId,
@@ -386,20 +402,21 @@ export const ContentHandlers = HttpApiBuilder.group(
                 updatedAt: now,
               })
               .onConflictDoUpdate({
-                target: [ContentTranslationTable.unitId, ContentTranslationTable.language],
+                target: [
+                  ContentTranslationTable.unitId,
+                  ContentTranslationTable.language,
+                ],
                 set: {
                   content: payload.body,
                   authorUserId: user.id,
                   updatedAt: now,
                 },
               })
-              .returning(),
-          );
+              .returning();
 
-          // Ensure the support language record exists
-          // 确保支持语言记录存在
-          yield* Effect.orDie(
-            database
+            // Ensure the support language record exists
+            // 确保支持语言记录存在
+            yield* database
               .insert(UnitSupportLanguage)
               .values({
                 unitId: params.unitId,
@@ -407,35 +424,40 @@ export const ContentHandlers = HttpApiBuilder.group(
                 isPrimary: false,
               })
               .onConflictDoNothing({
-                target: [UnitSupportLanguage.unitId, UnitSupportLanguage.language],
-              }),
-          );
+                target: [
+                  UnitSupportLanguage.unitId,
+                  UnitSupportLanguage.language,
+                ],
+              });
 
-          const row = upserted[0]!;
-          return new ContentTranslationDTO({
-            unitId: row.unitId,
-            language: row.language,
-            body: row.content,
-            updatedAt: row.updatedAt,
-          });
-        }),
-      )
+            const row = upserted[0]!;
+            return new ContentTranslationDTO({
+              unitId: row.unitId,
+              language: row.language,
+              body: row.content,
+              updatedAt: row.updatedAt,
+            });
+          }),
+        )
 
-      // ── Delete content translation / 删除内容翻译 ──────────────
-      .handle("deleteTranslation", ({ params }) =>
-        Effect.gen(function* () {
-          const user = yield* CurrentUser;
+        // ── Delete content translation / 删除内容翻译 ──────────────
+        .handle("deleteTranslation", ({ params }) =>
+          Effect.gen(function* () {
+            const user = yield* CurrentUser;
 
-          // Verify the unit exists and user has permission
-          // 验证 unit 存在且用户有权限
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
-          if (!units[0]) return yield* new ContentNotFound();
-          if (units[0].userId !== user.id) return yield* new ContentForbidden();
+            // Verify the unit exists and user has permission
+            // 验证 unit 存在且用户有权限
+            const units = yield* database
+              .select()
+              .from(Unit)
+              .where(eq(Unit.id, params.unitId));
+            if (!units[0]) return yield* new ContentNotFound();
+            if (units[0].userId !== user.id)
+              return yield* new ContentForbidden();
 
-          // Check the translation actually exists
-          // 检查翻译确实存在
-          const existing = yield* Effect.orDie(
-            database
+            // Check the translation actually exists
+            // 检查翻译确实存在
+            const existing = yield* database
               .select()
               .from(ContentTranslationTable)
               .where(
@@ -444,96 +466,103 @@ export const ContentHandlers = HttpApiBuilder.group(
                   eq(ContentTranslationTable.language, params.language),
                 ),
               )
-              .limit(1),
-          );
-          if (!existing[0]) return yield* new ContentNotFound();
+              .limit(1);
+            if (!existing[0]) return yield* new ContentNotFound();
 
-          yield* Effect.orDie(
-            database
+            yield* database
               .delete(ContentTranslationTable)
               .where(
                 and(
                   eq(ContentTranslationTable.unitId, params.unitId),
                   eq(ContentTranslationTable.language, params.language),
                 ),
-              ),
-          );
-        }),
-      )
+              );
+          }),
+        )
 
-      // ── List revisions (from HistoryOutbox) / 列出修订记录 ─────
-      .handle("listRevisions", ({ params, query }) =>
-        Effect.gen(function* () {
-          // Verify the unit exists
-          // 验证 unit 存在
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
-          if (!units[0]) return yield* new ContentNotFound();
+        // ── List revisions (from HistoryOutbox) / 列出修订记录 ─────
+        .handle("listRevisions", ({ params, query }) =>
+          Effect.gen(function* () {
+            // Verify the unit exists
+            // 验证 unit 存在
+            const units = yield* database
+              .select()
+              .from(Unit)
+              .where(eq(Unit.id, params.unitId));
+            if (!units[0]) return yield* new ContentNotFound();
 
-          const rows = yield* Effect.orDie(
-            database
+            const rows = yield* database
               .select()
               .from(HistoryOutbox)
               .where(eq(HistoryOutbox.unitId, params.unitId))
               .orderBy(desc(HistoryOutbox.createdAt))
               .limit(lim(query.limit))
-              .offset(query.offset ?? 0),
-          );
+              .offset(query.offset ?? 0);
 
-          return rows.map(
-            (r) =>
-              new HistoryRevisionEntry({
-                id: r.id,
-                unitId: r.unitId,
-                actorId: r.actorUserId,
-                action: r.category,
-                timestamp: r.createdAt,
-                meta: r.payload ?? undefined,
-              }),
-          );
-        }),
-      )
+            return rows.map(
+              (r) =>
+                new HistoryRevisionEntry({
+                  id: r.id,
+                  unitId: r.unitId,
+                  actorId: r.actorUserId,
+                  action: r.category,
+                  timestamp: r.createdAt,
+                  meta: r.payload ?? undefined,
+                }),
+            );
+          }),
+        )
 
-      // ── Compare revisions / 比较修订 ──────────────────────────
-      .handle("compareRevisions", ({ params, query }) =>
-        Effect.gen(function* () {
-          // Verify the unit exists
-          // 验证 unit 存在
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
-          if (!units[0]) return yield* new ContentNotFound();
+        // ── Compare revisions / 比较修订 ──────────────────────────
+        .handle("compareRevisions", ({ params, query }) =>
+          Effect.gen(function* () {
+            // Verify the unit exists
+            // 验证 unit 存在
+            const units = yield* database
+              .select()
+              .from(Unit)
+              .where(eq(Unit.id, params.unitId));
+            if (!units[0]) return yield* new ContentNotFound();
 
-          // Fetch both revisions by ID
-          // 通过 ID 获取两个修订
-          const fromRows = yield* Effect.orDie(
-            database.select().from(HistoryOutbox).where(eq(HistoryOutbox.id, query.from)).limit(1),
-          );
-          const toRows = yield* Effect.orDie(
-            database.select().from(HistoryOutbox).where(eq(HistoryOutbox.id, query.to)).limit(1),
-          );
-          if (!fromRows[0] || !toRows[0]) return yield* new ContentNotFound();
+            // Fetch both revisions by ID
+            // 通过 ID 获取两个修订
+            const fromRows = yield* database
+              .select()
+              .from(HistoryOutbox)
+              .where(eq(HistoryOutbox.id, query.from))
+              .limit(1);
+            const toRows = yield* database
+              .select()
+              .from(HistoryOutbox)
+              .where(eq(HistoryOutbox.id, query.to))
+              .limit(1);
+            if (!fromRows[0] || !toRows[0]) return yield* new ContentNotFound();
 
-          return new HistoryComparison({
-            before: fromRows[0].payload,
-            after: toRows[0].payload,
-            diff: {
-              from: fromRows[0].id,
-              to: toRows[0].id,
-              fromSequence: fromRows[0].sequence,
-              toSequence: toRows[0].sequence,
-            },
-          });
-        }),
-      )
+            return new HistoryComparison({
+              before: fromRows[0].payload,
+              after: toRows[0].payload,
+              diff: {
+                from: fromRows[0].id,
+                to: toRows[0].id,
+                fromSequence: fromRows[0].sequence,
+                toSequence: toRows[0].sequence,
+              },
+            });
+          }),
+        )
 
-      // ── Get single revision / 获取单条修订 ─────────────────────
-      .handle("getRevision", ({ params }) =>
-        Effect.gen(function* () {
-          // Verify the unit exists
-          // 验证 unit 存在
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
-          if (!units[0]) return yield* new ContentNotFound();
+        // ── Get single revision / 获取单条修订 ─────────────────────
+        .handle("getRevision", ({ params }) =>
+          Effect.gen(function* () {
+            // Verify the unit exists
+            // 验证 unit 存在
+            const units = yield* database
+              .select()
+              .from(Unit)
+              .where(eq(Unit.id, params.unitId));
+            if (!units[0]) return yield* new ContentNotFound();
 
-          const rows = yield* Effect.orDie(
-            database
+            const rows = yield* database
               .select()
               .from(HistoryOutbox)
               .where(
@@ -542,125 +571,129 @@ export const ContentHandlers = HttpApiBuilder.group(
                   eq(HistoryOutbox.id, params.revisionId),
                 ),
               )
-              .limit(1),
-          );
-          if (!rows[0]) return yield* new ContentNotFound();
+              .limit(1);
+            if (!rows[0]) return yield* new ContentNotFound();
 
-          return new HistoryRevisionEntry({
-            id: rows[0].id,
-            unitId: rows[0].unitId,
-            actorId: rows[0].actorUserId,
-            action: rows[0].category,
-            timestamp: rows[0].createdAt,
-            meta: rows[0].payload ?? undefined,
-          });
-        }),
-      )
+            return new HistoryRevisionEntry({
+              id: rows[0].id,
+              unitId: rows[0].unitId,
+              actorId: rows[0].actorUserId,
+              action: rows[0].category,
+              timestamp: rows[0].createdAt,
+              meta: rows[0].payload ?? undefined,
+            });
+          }),
+        )
 
-      // ── List structure events / 列出结构事件 ───────────────────
-      .handle("listStructureEvents", ({ params, query }) =>
-        Effect.gen(function* () {
-          // Verify the unit exists
-          // 验证 unit 存在
-          const units = yield* Effect.orDie(database.select().from(Unit).where(eq(Unit.id, params.unitId)));
-          if (!units[0]) return yield* new ContentNotFound();
+        // ── List structure events / 列出结构事件 ───────────────────
+        .handle("listStructureEvents", ({ params, query }) =>
+          Effect.gen(function* () {
+            // Verify the unit exists
+            // 验证 unit 存在
+            const units = yield* database
+              .select()
+              .from(Unit)
+              .where(eq(Unit.id, params.unitId));
+            if (!units[0]) return yield* new ContentNotFound();
 
-          // Structure events are HistoryOutbox rows with structure-related categories
-          // 结构事件是具有结构相关类别的 HistoryOutbox 行
-          const rows = yield* Effect.orDie(
-            database
+            // Structure events are HistoryOutbox rows with structure-related categories
+            // 结构事件是具有结构相关类别的 HistoryOutbox 行
+            const rows = yield* database
               .select()
               .from(HistoryOutbox)
               .where(eq(HistoryOutbox.unitId, params.unitId))
               .orderBy(desc(HistoryOutbox.createdAt))
               .limit(lim(query.limit))
-              .offset(query.offset ?? 0),
-          );
+              .offset(query.offset ?? 0);
 
-          return rows.map(
-            (r) =>
-              new HistoryStructureEvent({
-                id: r.id,
-                unitId: r.unitId,
-                action: r.category,
-                timestamp: r.createdAt,
-                meta: r.payload ?? undefined,
-              }),
-          );
-        }),
-      )
+            return rows.map(
+              (r) =>
+                new HistoryStructureEvent({
+                  id: r.id,
+                  unitId: r.unitId,
+                  action: r.category,
+                  timestamp: r.createdAt,
+                  meta: r.payload ?? undefined,
+                }),
+            );
+          }),
+        )
 
-      // ── Resolve actors / 解析操作者 ────────────────────────────
-      .handle("resolveActors", ({ payload }) =>
-        Effect.gen(function* () {
-          const ids = uniqueIds(payload.ids);
-          if (ids.length === 0) return [];
+        // ── Resolve actors / 解析操作者 ────────────────────────────
+        .handle("resolveActors", ({ payload }) =>
+          Effect.gen(function* () {
+            const ids = uniqueIds(payload.ids);
+            if (ids.length === 0) return [];
 
-          const users = yield* Effect.orDie(
-            database
-              .select({ unitId: User.unitId, name: User.name, avatar: User.avatar })
+            const users = yield* database
+              .select({
+                unitId: User.unitId,
+                name: User.name,
+                avatar: User.avatar,
+              })
               .from(User)
-              .where(inArray(User.unitId, ids)),
-          );
+              .where(inArray(User.unitId, ids));
 
-          return users.map(
-            (u) =>
-              new ResolvedActor({
-                id: u.unitId,
-                name: u.name ?? u.unitId,
-                image: u.avatar ?? null,
-              }),
-          );
-        }),
-      )
+            return users.map(
+              (u) =>
+                new ResolvedActor({
+                  id: u.unitId,
+                  name: u.name ?? u.unitId,
+                  image: u.avatar ?? null,
+                }),
+            );
+          }),
+        )
 
-      // ── Resolve units / 解析 Unit 引用 ─────────────────────────
-      .handle("resolveUnits", ({ payload }) =>
-        Effect.gen(function* () {
-          const ids = uniqueIds(payload.ids);
-          if (ids.length === 0) return [];
+        // ── Resolve units / 解析 Unit 引用 ─────────────────────────
+        .handle("resolveUnits", ({ payload }) =>
+          Effect.gen(function* () {
+            const ids = uniqueIds(payload.ids);
+            if (ids.length === 0) return [];
 
-          const unitRows = yield* Effect.orDie(
-            database
-              .select({ id: Unit.id, type: Unit.type, slug: Unit.slug, defaultLanguage: Unit.defaultLanguage })
+            const unitRows = yield* database
+              .select({
+                id: Unit.id,
+                type: Unit.type,
+                slug: Unit.slug,
+                defaultLanguage: Unit.defaultLanguage,
+              })
               .from(Unit)
-              .where(inArray(Unit.id, ids)),
-          );
+              .where(inArray(Unit.id, ids));
 
-          if (unitRows.length === 0) return [];
+            if (unitRows.length === 0) return [];
 
-          // Fetch translations for titles
-          // 获取翻译以获得标题
-          const unitIds = unitRows.map((r) => r.id);
-          const translations = yield* Effect.orDie(
-            database
+            // Fetch translations for titles
+            // 获取翻译以获得标题
+            const unitIds = unitRows.map((r) => r.id);
+            const translations = yield* database
               .select({
                 unitId: UnitTranslation.unitId,
                 title: UnitTranslation.title,
                 language: UnitTranslation.language,
               })
               .from(UnitTranslation)
-              .where(inArray(UnitTranslation.unitId, unitIds)),
-          );
-          const titleByUnitId = new Map<string, string>();
-          for (const t of translations) {
-            // Prefer first translation found (stable order)
-            // 优先使用找到的第一个翻译（稳定顺序）
-            if (!titleByUnitId.has(t.unitId) && t.title) {
-              titleByUnitId.set(t.unitId, t.title);
+              .where(inArray(UnitTranslation.unitId, unitIds));
+            const titleByUnitId = new Map<string, string>();
+            for (const t of translations) {
+              // Prefer first translation found (stable order)
+              // 优先使用找到的第一个翻译（稳定顺序）
+              if (!titleByUnitId.has(t.unitId) && t.title) {
+                titleByUnitId.set(t.unitId, t.title);
+              }
             }
-          }
 
-          return unitRows.map(
-            (r) =>
-              new ResolvedUnit({
-                id: r.id,
-                title: titleByUnitId.get(r.id) ?? r.slug ?? r.id,
-                kind: r.type,
-              }),
-          );
-        }),
-      );
+            return unitRows.map(
+              (r) =>
+                new ResolvedUnit({
+                  id: r.id,
+                  title: titleByUnitId.get(r.id) ?? r.slug ?? r.id,
+                  kind: r.type,
+                }),
+            );
+          }),
+        )
+    );
   }),
 );
 
@@ -694,7 +727,8 @@ function flattenSubmittedTree(
     if (!node || typeof node !== "object") continue;
 
     const rawId = node["id"];
-    const nodeId = typeof rawId === "string" && rawId ? rawId : crypto.randomUUID();
+    const nodeId =
+      typeof rawId === "string" && rawId ? rawId : crypto.randomUUID();
 
     // Reject resurrected (deleted) IDs
     // 拒绝复活（已删除的）ID
@@ -703,7 +737,8 @@ function flattenSubmittedTree(
     // Assign position: use existing position if available and valid, otherwise generate
     // 分配位置：如果存在且有效则使用现有位置，否则生成
     const existing = existingById.get(nodeId);
-    const position = existing?.parentId === parentId ? existing.position : generatePosition(i);
+    const position =
+      existing?.parentId === parentId ? existing.position : generatePosition(i);
 
     const rawTitle = node["title"];
     const rawRating = node["rating"];
@@ -716,12 +751,15 @@ function flattenSubmittedTree(
       title: typeof rawTitle === "string" ? rawTitle : "",
       noContent: node["noContent"] === true,
       rating: isValidRating(rawRating) ? rawRating : null,
-      contentUnitId: typeof rawContentUnitId === "string" ? rawContentUnitId : null,
+      contentUnitId:
+        typeof rawContentUnitId === "string" ? rawContentUnitId : null,
     });
 
     const children = node["children"];
     if (Array.isArray(children) && children.length > 0) {
-      out.push(...flattenSubmittedTree(children, nodeId, existingActive, deletedById));
+      out.push(
+        ...flattenSubmittedTree(children, nodeId, existingActive, deletedById),
+      );
     }
   }
 
@@ -734,7 +772,9 @@ const VALID_RATINGS = new Set(["GENERAL", "R_15", "R_18", "R_18G"]);
  * Type-guard for ContentRating enum values.
  * ContentRating 枚举值的类型守卫。
  */
-function isValidRating(value: unknown): value is ContentStructureNodeRow["rating"] {
+function isValidRating(
+  value: unknown,
+): value is ContentStructureNodeRow["rating"] {
   return typeof value === "string" && VALID_RATINGS.has(value);
 }
 
