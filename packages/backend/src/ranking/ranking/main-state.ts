@@ -1,4 +1,4 @@
-import { createServerDb } from "@rezics/server/db/factory";
+import { createServerDb } from "../../../../server/src/db/factory";
 import { sql } from "drizzle-orm";
 
 export type MainStateReaderOptions = {

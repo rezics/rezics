@@ -69,7 +69,9 @@ async function getBookRepository(
   repository: BookSitemapRepository | undefined,
 ): Promise<BookSitemapRepository> {
   if (repository) return repository;
-  const { bookService } = await import("@rezics/server/book/book.service");
+  const { bookService } = await import(
+    "../../../../server/src/book/book.service"
+  );
   return bookService;
 }
 

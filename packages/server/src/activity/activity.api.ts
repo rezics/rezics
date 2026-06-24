@@ -9,6 +9,7 @@ export const activityApi = new Elysia({ prefix: "/profile/:userId/activity" })
       set.status = error.statusCode;
       return { status: error.statusCode, message: error.message };
     }
+    return undefined;
   })
   .get(
     "/",

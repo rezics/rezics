@@ -17,6 +17,7 @@ export const profileReactionHistoryApi = new Elysia({
       set.status = error.statusCode;
       return { status: error.statusCode, message: error.message };
     }
+    return undefined;
   })
   .get(
     "/given",

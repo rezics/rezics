@@ -1,8 +1,8 @@
 import type { BookDTO } from "@rezics/contract";
 
 import { bookParamsSchema } from "@rezics/contract";
-import { bookService } from "@rezics/server/book/book.service";
-import { mapBookToDTO } from "@rezics/server/book/mapper";
+import { bookService } from "../../../../server/src/book/book.service";
+import { mapBookToDTO } from "../../../../server/src/book/mapper";
 import { coreInstance } from "../core";
 import { BookDetailTemplate } from "../templates/book-detail";
 import { notFoundHtml } from "../templates/not-found";

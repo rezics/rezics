@@ -158,6 +158,7 @@ export function createHistoryProxyApi(
           ...(error.details ? { detail: error.details } : {}),
         };
       }
+      return undefined;
     })
     .get(
       "/unit/:unitId/revisions",

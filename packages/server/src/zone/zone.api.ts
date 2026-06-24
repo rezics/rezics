@@ -76,6 +76,7 @@ async function assertZoneManagePolicy(input: {
     input.set.status = 403;
     return decision.safeMessage ?? "Forbidden: policy denied this action";
   }
+  return undefined;
 }
 
 function resolveMutableZone(

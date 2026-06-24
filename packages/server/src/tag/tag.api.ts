@@ -44,6 +44,7 @@ async function assertTagVotePolicy(input: {
       decision.safeMessage ?? "Forbidden: policy denied this action",
     );
   }
+  return undefined;
 }
 
 export const tagApi = new Elysia({ prefix: "/tag" })

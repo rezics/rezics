@@ -37,7 +37,6 @@
         "@rezics/job": "workspace:*",
         "@rezics/jwt": "workspace:*",
         "@rezics/search": "workspace:*",
-        "@rezics/server": "workspace:*",
         "@rezics/shared": "workspace:*",
         "@t3-oss/env-core": "^0.13.10",
         "@types/bcrypt": "^6.0.0",

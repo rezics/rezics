@@ -1,4 +1,7 @@
-import type { ObservabilityConfig } from "@rezics/shared/observability";
+import type {
+  ObservabilityConfig,
+  ServiceKey,
+} from "@rezics/shared/observability";
 import { createAuthApp } from "./auth/app";
 import { resolveBackendPort } from "./env";
 import { createHistoryApp } from "./history/app";
@@ -7,6 +10,7 @@ import { createPreviewApp } from "./preview/app";
 import { bookApi as previewBookRoutes } from "./preview/book/book.api";
 import { createRankingApp } from "./ranking/app";
 import { createReactionApp } from "./reaction/app";
+import { createServerApp } from "../../server/src/app";
 
 export const INTERNAL_SERVICE_PREFIX = "/__services";
 
@@ -45,11 +49,7 @@ type ServiceAppOptions = {
 
 type ServerAppOptions = ServiceAppOptions & {
   displayName?: string;
-  serviceKey?: string;
-};
-
-type ServiceAppResult = {
-  app: FetchableApp;
+  serviceKey?: ServiceKey;
 };
 
 type ServerAppResult = {
@@ -57,51 +57,10 @@ type ServerAppResult = {
   observability: ObservabilityConfig;
   port: number;
 };
-type ServerAppFactory = (
-  options?: ServerAppOptions,
-) => Promise<ServerAppResult>;
-type ServiceAppFactory = (
-  options?: ServiceAppOptions,
-) => Promise<ServiceAppResult>;
 
-const appFactories = {
-  server: ["@rezics/server/app", "createServerApp"],
-} as const satisfies Record<
-  Exclude<
-    BackendMountedService,
-    "auth" | "history" | "notify" | "preview" | "ranking" | "reaction"
-  >,
-  readonly [string, string]
->;
+type CreateServerApp = (options?: ServerAppOptions) => Promise<ServerAppResult>;
 
-async function loadExport<Export>(
-  specifier: string,
-  exportName: string,
-): Promise<Export> {
-  const loaded = (await import(specifier)) as Record<string, unknown>;
-  if (!(exportName in loaded)) {
-    throw new Error(`Module ${specifier} does not export ${exportName}`);
-  }
-
-  return loaded[exportName] as Export;
-}
-
-async function loadFactory<Factory>(
-  specifier: string,
-  exportName: string,
-): Promise<Factory> {
-  const factory = await loadExport<unknown>(specifier, exportName);
-  if (typeof factory !== "function") {
-    throw new Error(`Module ${specifier} does not export ${exportName}`);
-  }
-
-  return factory as Factory;
-}
-
-async function loadServerAppFactory(): Promise<ServerAppFactory> {
-  const [specifier, exportName] = appFactories.server;
-  return loadFactory<ServerAppFactory>(specifier, exportName);
-}
+const createMonolithServerApp: CreateServerApp = createServerApp;
 
 function mountService(
   root: MountableApp,
@@ -115,8 +74,7 @@ export async function createBackendApp(options: CreateBackendAppOptions = {}) {
   const port = options.port ?? resolveBackendPort();
   const internalPrefix =
     options.internalServicePrefix ?? INTERNAL_SERVICE_PREFIX;
-  const createServerApp = await loadServerAppFactory();
-  const server = await createServerApp({
+  const server = await createMonolithServerApp({
     displayName: "Backend Monolith",
     initializeTelemetry: true,
     openApiPath: "/openapi",

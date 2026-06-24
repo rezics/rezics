@@ -28,6 +28,7 @@ async function assertTagVotePolicy(input: {
       decision.safeMessage ?? "Forbidden: policy denied this action",
     );
   }
+  return undefined;
 }
 
 export const unitTagApi = new Elysia({ prefix: "/unit-tag" })
