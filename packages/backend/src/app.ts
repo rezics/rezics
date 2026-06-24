@@ -1,4 +1,5 @@
 import type { ObservabilityConfig } from "@rezics/shared/observability";
+import { createAuthApp } from "./auth/app";
 import { resolveBackendPort } from "./env";
 import { createHistoryApp } from "./history/app";
 import { createNotifyApp } from "./notify/app";
@@ -64,12 +65,11 @@ type ServiceAppFactory = (
 ) => Promise<ServiceAppResult>;
 
 const appFactories = {
-  auth: ["@rezics/auth/app", "createAuthApp"],
   server: ["@rezics/server/app", "createServerApp"],
 } as const satisfies Record<
   Exclude<
     BackendMountedService,
-    "history" | "notify" | "preview" | "ranking" | "reaction"
+    "auth" | "history" | "notify" | "preview" | "ranking" | "reaction"
   >,
   readonly [string, string]
 >;
@@ -103,16 +103,6 @@ async function loadServerAppFactory(): Promise<ServerAppFactory> {
   return loadFactory<ServerAppFactory>(specifier, exportName);
 }
 
-async function loadServiceAppFactory(
-  service: Exclude<
-    BackendMountedService,
-    "history" | "notify" | "preview" | "ranking" | "reaction" | "server"
-  >,
-): Promise<ServiceAppFactory> {
-  const [specifier, exportName] = appFactories[service];
-  return loadFactory<ServiceAppFactory>(specifier, exportName);
-}
-
 function mountService(
   root: MountableApp,
   prefix: string,
@@ -133,10 +123,6 @@ export async function createBackendApp(options: CreateBackendAppOptions = {}) {
     port,
   });
   const app = server.app;
-
-  const [createAuthApp] = await Promise.all([
-    loadServiceAppFactory("auth"),
-  ]);
 
   const [auth, notify, reaction, history, ranking] = await Promise.all([
     createAuthApp({

@@ -12,7 +12,7 @@ const seedAuthUserMock = mock(async () => ({
   password: "password",
 }));
 
-mock.module("@rezics/auth/seed", () => ({
+mock.module("@rezics/backend/auth/seed", () => ({
   seedAuthUser: seedAuthUserMock,
   slugify: (value: string) => value.toLowerCase().replace(/\s+/g, "-"),
 }));

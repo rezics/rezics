@@ -21,48 +21,17 @@
         "vite": "^8.0.16",
       },
     },
-    "packages/auth": {
-      "name": "@rezics/auth",
+    "packages/backend": {
+      "name": "@rezics/backend",
       "dependencies": {
         "@better-auth/drizzle-adapter": "^1.5.3",
         "@better-auth/oauth-provider": "^1.5.3",
         "@elysiajs/bearer": "^1.4.1",
         "@elysiajs/cors": "^1.4.0",
-        "@elysiajs/openapi": "^1.4.14",
-        "@faker-js/faker": "^10.1.0",
-        "@rezics/contract": "workspace:*",
-        "@rezics/email": "workspace:*",
-        "@rezics/jwt": "workspace:*",
-        "@rezics/search": "workspace:*",
-        "@rezics/shared": "workspace:*",
-        "@types/bcrypt": "^6.0.0",
-        "bcrypt": "^6.0.0",
-        "better-auth": "^1.5.3",
-        "chalk": "^5.6.2",
-        "dotenv": "^17.2.3",
-        "drizzle-orm": "1.0.0-rc.3",
-        "elysia": "^1.4.22",
-        "jose": "^6.1.3",
-        "pg": "^8.16.3",
-        "uuid": "^13.0.0",
-      },
-      "devDependencies": {
-        "@types/bun": "^1.3.0",
-        "@types/pg": "^8.15.5",
-        "drizzle-kit": "1.0.0-rc.3",
-      },
-      "peerDependencies": {
-        "typescript": "^6",
-      },
-    },
-    "packages/backend": {
-      "name": "@rezics/backend",
-      "dependencies": {
-        "@elysiajs/cors": "^1.4.0",
         "@elysiajs/html": "^1.4.2",
         "@elysiajs/openapi": "^1.4.14",
+        "@faker-js/faker": "^10.1.0",
         "@kitajs/html": "^4.2.13",
-        "@rezics/auth": "workspace:*",
         "@rezics/contract": "workspace:*",
         "@rezics/email": "workspace:*",
         "@rezics/job": "workspace:*",
@@ -71,10 +40,16 @@
         "@rezics/server": "workspace:*",
         "@rezics/shared": "workspace:*",
         "@t3-oss/env-core": "^0.13.10",
+        "@types/bcrypt": "^6.0.0",
+        "bcrypt": "^6.0.0",
+        "better-auth": "^1.5.3",
+        "chalk": "^5.6.2",
         "dotenv": "^17.2.3",
         "drizzle-orm": "1.0.0-rc.3",
         "elysia": "^1.4.22",
+        "jose": "^6.2.0",
         "pg": "^8.16.3",
+        "uuid": "^13.0.0",
         "valibot": "^1.2.0",
       },
       "devDependencies": {
@@ -334,7 +309,6 @@
         "pg": "^8.16.3",
       },
       "devDependencies": {
-        "@rezics/auth": "workspace:*",
         "@types/bun": "^1.3.0",
         "@types/pg": "^8.15.5",
         "drizzle-kit": "1.0.0-rc.3",
@@ -446,7 +420,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@clack/prompts": "^0.11.0",
-        "@rezics/auth": "workspace:*",
+        "@rezics/backend": "workspace:*",
         "@rezics/contract": "workspace:*",
         "@rezics/search": "workspace:*",
         "@rezics/server": "workspace:*",
@@ -1168,8 +1142,6 @@
     "@react-email/text": ["@react-email/text@0.1.1", "", { "peerDependencies": { "react": "^18.0 || ^19.0 || ^19.0.0-rc" } }, "sha512-Zo9tSEzkO3fODLVH1yVhzVCiwETfeEL5wU93jXKWo2DHoMuiZ9Iabaso3T0D0UjhrCB1PBMeq2YiejqeToTyIQ=="],
 
     "@reduxjs/toolkit": ["@reduxjs/toolkit@2.11.2", "", { "dependencies": { "@standard-schema/spec": "^1.0.0", "@standard-schema/utils": "^0.3.0", "immer": "^11.0.0", "redux": "^5.0.1", "redux-thunk": "^3.1.0", "reselect": "^5.1.0" }, "peerDependencies": { "react": "^16.9.0 || ^17.0.0 || ^18 || ^19", "react-redux": "^7.2.1 || ^8.1.3 || ^9.0.0" }, "optionalPeers": ["react", "react-redux"] }, "sha512-Kd6kAHTA6/nUpp8mySPqj3en3dm0tdMIgbttnQ1xFMVpufoj+ADi8pXLBsd4xzTRHQa7t/Jv8W5UnCuW4kuWMQ=="],
-
-    "@rezics/auth": ["@rezics/auth@workspace:packages/auth"],
 
     "@rezics/backend": ["@rezics/backend@workspace:packages/backend"],
 

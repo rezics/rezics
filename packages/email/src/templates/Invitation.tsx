@@ -1,3 +1,4 @@
+/** @jsxImportSource react */
 import { Button, Section, Text } from "@react-email/components";
 import { EmailLayout } from "../components/EmailLayout";
 

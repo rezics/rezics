@@ -47,7 +47,7 @@ mock.module("@rezics/server/db/seed/init-meili-search", () => ({
   }),
 }));
 
-mock.module("@rezics/auth/seed", () => ({
+mock.module("@rezics/backend/auth/seed", () => ({
   resetAuthDatabase: mock(async () => {
     calls.resetAuthDatabase += 1;
   }),

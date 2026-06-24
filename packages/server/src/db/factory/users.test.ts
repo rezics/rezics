@@ -16,7 +16,7 @@ const seedAuthUserMock = mock(
 );
 const bootstrapSystemShelvesMock = mock(async () => {});
 
-mock.module("@rezics/auth/seed/seed-auth-user", () => ({
+mock.module("../../../../backend/src/auth/seed/seed-auth-user", () => ({
   seedAuthUser: seedAuthUserMock,
 }));
 

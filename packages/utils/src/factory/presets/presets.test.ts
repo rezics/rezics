@@ -3,7 +3,7 @@ import type { SeedPreset } from "@rezics/server/db/seed-factory";
 import * as v from "valibot";
 import { PRESETS } from "./index";
 
-mock.module("@rezics/auth/seed/seed-auth-user", () => ({
+mock.module("@rezics/backend/auth/seed/seed-auth-user", () => ({
   seedAuthUser: mock(async () => ({
     userId: "auth-user",
     email: "auth@example.test",

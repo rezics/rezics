@@ -1,4 +1,4 @@
-import { createAuthDb } from "@rezics/auth/db/factory";
+import { createAuthDb } from "@rezics/backend/auth/db/factory";
 import { createServerDb } from "@rezics/server/db/factory";
 
 export type AuthDbClient = ReturnType<typeof createAuthDb>;

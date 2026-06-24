@@ -13,6 +13,38 @@
       "types": "./src/app.ts",
       "default": "./src/app.ts"
     },
+    "./auth": {
+      "types": "./src/auth/export.ts",
+      "default": "./src/auth/export.ts"
+    },
+    "./auth/app": {
+      "types": "./src/auth/app.ts",
+      "default": "./src/auth/app.ts"
+    },
+    "./auth/db": {
+      "types": "./src/auth/db/index.ts",
+      "default": "./src/auth/db/index.ts"
+    },
+    "./auth/db/factory": {
+      "types": "./src/auth/db/factory.ts",
+      "default": "./src/auth/db/factory.ts"
+    },
+    "./auth/db/schema": {
+      "types": "./src/auth/db/schema/index.ts",
+      "default": "./src/auth/db/schema/index.ts"
+    },
+    "./auth/seed": {
+      "types": "./src/auth/seed/index.ts",
+      "default": "./src/auth/seed/index.ts"
+    },
+    "./auth/seed/*": {
+      "types": "./src/auth/seed/*.ts",
+      "default": "./src/auth/seed/*.ts"
+    },
+    "./auth/jwt": {
+      "types": "./src/auth/jwt/export.ts",
+      "default": "./src/auth/jwt/export.ts"
+    },
     "./history/db": {
       "types": "./src/history/db/index.ts",
       "default": "./src/history/db/index.ts"
@@ -39,11 +71,14 @@
     }
   },
   "dependencies": {
+    "@better-auth/drizzle-adapter": "^1.5.3",
+    "@better-auth/oauth-provider": "^1.5.3",
+    "@elysiajs/bearer": "^1.4.1",
     "@elysiajs/cors": "^1.4.0",
     "@elysiajs/html": "^1.4.2",
     "@elysiajs/openapi": "^1.4.14",
+    "@faker-js/faker": "^10.1.0",
     "@kitajs/html": "^4.2.13",
-    "@rezics/auth": "workspace:*",
     "@rezics/contract": "workspace:*",
     "@rezics/email": "workspace:*",
     "@rezics/job": "workspace:*",
@@ -52,10 +87,16 @@
     "@rezics/server": "workspace:*",
     "@rezics/shared": "workspace:*",
     "@t3-oss/env-core": "^0.13.10",
+    "@types/bcrypt": "^6.0.0",
+    "bcrypt": "^6.0.0",
+    "better-auth": "^1.5.3",
+    "chalk": "^5.6.2",
     "dotenv": "^17.2.3",
     "drizzle-orm": "1.0.0-rc.3",
     "elysia": "^1.4.22",
+    "jose": "^6.2.0",
     "pg": "^8.16.3",
+    "uuid": "^13.0.0",
     "valibot": "^1.2.0"
   },
   "devDependencies": {

@@ -26,6 +26,7 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
       set.status = 403;
       return { error: "Forbidden: Invalid or missing internal secret" };
     }
+    return undefined;
   })
   .post(
     "/registration/cancel",

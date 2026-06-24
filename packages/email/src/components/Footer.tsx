@@ -1,3 +1,4 @@
+/** @jsxImportSource react */
 import { Hr, Link, Section, Text } from "@react-email/components";
 
 export function Footer() {

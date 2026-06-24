@@ -22,6 +22,7 @@ export const adminEmailApi = new Elysia({ prefix: "/admin/email" })
       set.status = error === "Unauthorized" ? 401 : 403;
       return { error };
     }
+    return undefined;
   })
   .get("/templates", () => {
     return templateRegistry.map((entry) => ({

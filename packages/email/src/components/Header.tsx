@@ -1,3 +1,4 @@
+/** @jsxImportSource react */
 import { Column, Heading, Img, Row, Section } from "@react-email/components";
 
 const LOGO_URL =

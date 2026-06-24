@@ -8,8 +8,8 @@ import {
   oauthRefreshTokens,
   sessions,
   users,
-} from "@rezics/auth/db/schema";
-import { seedAuthUser } from "@rezics/auth/seed/seed-auth-user";
+} from "../../../../backend/src/auth/db/schema";
+import { seedAuthUser } from "../../../../backend/src/auth/seed/seed-auth-user";
 import {
   DEFAULT_PUBLICATION_LICENSE_SLUG,
   DEFAULT_REALM,

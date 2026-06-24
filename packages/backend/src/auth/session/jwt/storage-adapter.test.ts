@@ -389,8 +389,8 @@ describe("auth jwt storage adapter", () => {
   test("keeps migration bootstrap for jwks rows", () => {
     const migrationPath = join(
       import.meta.dir,
-      "../../..",
-      "drizzle/20260604052947_late_bug/migration.sql",
+      "../../../..",
+      "drizzle/auth/20260604052947_late_bug/migration.sql",
     );
     const migrationSql = readFileSync(migrationPath, "utf8");
 

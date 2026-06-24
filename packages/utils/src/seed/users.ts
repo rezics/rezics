@@ -2,7 +2,7 @@ import {
   type SeedAuthUserResult,
   seedAuthUser,
   slugify,
-} from "@rezics/auth/seed";
+} from "@rezics/backend/auth/seed";
 import { DEFAULT_PUBLICATION_LICENSE_SLUG } from "@rezics/contract";
 import { Unit, User, UserPreference } from "@rezics/server/db/schema";
 import type { SlugScopesMap } from "@rezics/server/db/seed/infra/seed-slug-scopes";

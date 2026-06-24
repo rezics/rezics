@@ -1,7 +1,6 @@
 version: "3"
 
 includes:
-  auth: { taskfile: ./packages/auth/Taskfile.yml, dir: ./packages/auth }
   backend:
     { taskfile: ./packages/backend/Taskfile.yml, dir: ./packages/backend }
   contract:

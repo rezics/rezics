@@ -1,5 +1,5 @@
 import * as p from "@clack/prompts";
-import { resetAuthDatabase } from "@rezics/auth/seed";
+import { resetAuthDatabase } from "@rezics/backend/auth/seed";
 import type { SearchClient } from "@rezics/search/client";
 import { resetDatabase } from "@rezics/server/db/seed/database";
 import { ensureMeiliIndexes } from "@rezics/server/db/seed/init-meili-search";
