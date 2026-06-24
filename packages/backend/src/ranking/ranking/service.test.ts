@@ -39,7 +39,7 @@ function defaultUnitState(unitId: string) {
   };
 }
 
-mock.module("@rezics/search", () => ({
+mock.module("../../search/client", () => ({
   SearchClient: class {
     async checkHealth() {
       return true;

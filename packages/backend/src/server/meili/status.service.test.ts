@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import { EXPECTED_MEILI_INDEX_SCHEMAS } from "@rezics/search";
+import { EXPECTED_MEILI_INDEX_SCHEMAS } from "../../search/schema";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=

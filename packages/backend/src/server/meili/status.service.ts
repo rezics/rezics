@@ -2,7 +2,7 @@ import {
   EXPECTED_MEILI_INDEX_SCHEMAS,
   type ExpectedMeiliIndexSchema,
   type ExpectedMeiliIndexUid,
-} from "@rezics/search";
+} from "../../search/schema";
 import type {
   AttributeDrift,
   MeiliIndexStatus,

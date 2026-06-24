@@ -1,4 +1,4 @@
-import { setSearchDb, syncAllPostRealmIds } from "@rezics/search";
+import { setSearchDb, syncAllPostRealmIds } from "../../src/search/sync";
 import { db, disconnectServerDb } from "@/db/client";
 import { searchClient } from "@/meili/search-client";
 

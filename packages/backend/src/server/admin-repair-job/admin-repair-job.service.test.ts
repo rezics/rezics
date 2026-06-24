@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import type { EnqueueResult } from "@rezics/job";
-import { EXPECTED_MEILI_INDEX_SCHEMAS } from "@rezics/search";
+import { EXPECTED_MEILI_INDEX_SCHEMAS } from "../../search/schema";
 import type { GovernanceAuditService } from "@/governance/audit.service";
 
 mock.module("@/env", () => ({
@@ -140,6 +140,8 @@ describe("adminRepairJobService", () => {
       "shelf-item",
       "realm",
       "zone",
+      "tag",
+      "label",
       "entity",
       "progress",
     ]);
@@ -155,6 +157,8 @@ describe("adminRepairJobService", () => {
       "job-9",
       "job-10",
       "job-11",
+      "job-12",
+      "job-13",
     ]);
   });
 

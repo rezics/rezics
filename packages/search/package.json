@@ -15,12 +15,10 @@
     }
   },
   "devDependencies": {},
-  "peerDependencies": {},
+  "peerDependencies": {
+    "typescript": "^6"
+  },
   "dependencies": {
-    "@types/node": "^24.10.1",
-    "drizzle-orm": "1.0.0-rc.3",
-    "meilisearch": "^0.54.0",
-    "@rezics/server": "workspace:*",
-    "@rezics/contract": "workspace:*"
+    "@rezics/backend": "workspace:*"
   }
 }

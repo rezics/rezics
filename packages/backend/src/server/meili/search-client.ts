@@ -1,4 +1,4 @@
-import { SearchClient } from "@rezics/search/client";
+import { SearchClient } from "../../search/client";
 import { env } from "../env";
 
 export const searchClient = new SearchClient({

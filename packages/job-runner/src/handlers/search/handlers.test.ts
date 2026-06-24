@@ -4,7 +4,7 @@ import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 async function loadSearchHarness() {
   mock.restore();
   const [{ setSearchDb }, { createSearchHandlers }] = await Promise.all([
-    import("@rezics/search/sync"),
+    import("@rezics/backend/search/sync"),
     import("./handlers"),
   ]);
   return { createSearchHandlers, setSearchDb };

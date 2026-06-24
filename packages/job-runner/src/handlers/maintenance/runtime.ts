@@ -1,8 +1,8 @@
-import { createServerDb } from "@rezics/server/db/factory";
+import { createServerDb } from "@rezics/backend/server/db/factory";
 import {
   createServerMaintenanceRepository,
   type ServerMaintenanceRepository,
-} from "@rezics/server/db/maintenance.repository";
+} from "@rezics/backend/server/db/maintenance.repository";
 
 export interface ServerMaintenanceRuntime {
   maintenance: ServerMaintenanceRepository;

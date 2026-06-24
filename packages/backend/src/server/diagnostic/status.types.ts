@@ -1,7 +1,7 @@
 import type {
   ExpectedMeiliIndexSchema,
   ExpectedMeiliIndexUid,
-} from "@rezics/search";
+} from "../../search/schema";
 
 export type StatusState = "available" | "degraded" | "unavailable" | "unknown";
 

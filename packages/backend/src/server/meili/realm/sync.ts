@@ -5,7 +5,7 @@ import {
   patchRealmTranslations,
   syncAllRealms,
   syncSingleRealm,
-} from "@rezics/search";
+} from "../../../search/sync";
 import { searchClient } from "../search-client";
 
 export async function syncRealmToMeili(unitId: string): Promise<void> {

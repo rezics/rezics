@@ -16,7 +16,7 @@ import {
   userUnitProgressStatusValues,
 } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
-import { PROGRESS_BUCKET_COUNT } from "@rezics/search";
+import { PROGRESS_BUCKET_COUNT } from "../../search/progress";
 import {
   and,
   asc,

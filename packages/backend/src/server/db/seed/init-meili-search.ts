@@ -1,4 +1,4 @@
-import type { SearchClient } from "@rezics/search/client";
+import type { SearchClient } from "../../../search/client";
 
 export async function ensureMeiliIndexes(
   searchClient: SearchClient,

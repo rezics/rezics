@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 import type { FederatedSearchOptions } from "@rezics/contract";
-import type { SearchClient } from "@rezics/search";
+import type { SearchClient } from "../../../search/client";
 import { federatedSearch } from "./federated.service";
 
 // Helper builds a fake SearchClient that records every per-index search and

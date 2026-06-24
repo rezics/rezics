@@ -1,4 +1,4 @@
-import { syncAllZones, syncSingleZone } from "@rezics/search";
+import { syncAllZones, syncSingleZone } from "../../../search/sync";
 import { searchClient } from "../search-client";
 
 export async function syncZoneToMeili(unitId: string): Promise<void> {

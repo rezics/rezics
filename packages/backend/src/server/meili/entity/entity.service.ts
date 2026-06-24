@@ -3,7 +3,7 @@ import type {
   EntitySearchOptions,
   EntitySearchResult,
 } from "@rezics/contract";
-import type { SearchResponse } from "@rezics/search";
+import type { SearchResponse } from "meilisearch";
 import { searchClient } from "../search-client";
 
 function escapeValue(value: string): string {

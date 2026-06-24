@@ -6,7 +6,7 @@ import {
   syncPostsByAuthor,
   syncPostsByTarget,
   syncSinglePost,
-} from "@rezics/search";
+} from "../../../search/sync";
 import { searchClient } from "../search-client";
 
 export async function syncPostToMeili(unitId: string): Promise<void> {

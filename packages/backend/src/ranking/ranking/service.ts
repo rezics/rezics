@@ -3,7 +3,7 @@ import {
   RANKING_COMMAND_KINDS,
   type RankingCommand,
 } from "@rezics/job";
-import { SearchClient } from "@rezics/search";
+import { SearchClient } from "../../search/client";
 import { env } from "../env";
 import { computeV1RankingScores, RANKING_FORMULA_VERSION } from "./formulas";
 import { MainStateReader } from "./main-state";

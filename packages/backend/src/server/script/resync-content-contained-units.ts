@@ -1,4 +1,4 @@
-import { setSearchDb, syncAllContainedUnitIds } from "@rezics/search";
+import { setSearchDb, syncAllContainedUnitIds } from "../../search/sync";
 import { db, disconnectServerDb } from "../db/client";
 import { searchClient } from "../meili/search-client";
 

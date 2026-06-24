@@ -1,6 +1,6 @@
 import { HistoryOutboxConsumer } from "@rezics/backend/history/outbox";
-import { createServerDb } from "@rezics/server/db/factory";
-import { createServerHistoryOutboxRepository } from "@rezics/server/db/history-outbox.repository";
+import { createServerDb } from "@rezics/backend/server/db/factory";
+import { createServerHistoryOutboxRepository } from "@rezics/backend/server/db/history-outbox.repository";
 
 export interface HistoryRuntime {
   consumer: HistoryOutboxConsumer;

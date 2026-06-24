@@ -1,7 +1,7 @@
 import {
   buildFeedbackSearchDocument,
   patchFeedbackResolution,
-} from "@rezics/search";
+} from "../../../search/sync";
 import { eq } from "drizzle-orm";
 import { Feedback } from "../../db/schema";
 import { searchClient } from "../search-client";

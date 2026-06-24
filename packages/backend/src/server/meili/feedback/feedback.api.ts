@@ -3,7 +3,7 @@ import type {
   FeedbackSearchDocument,
   FeedbackSearchResult,
 } from "@rezics/contract";
-import type { SearchResponse } from "@rezics/search";
+import type { SearchResponse } from "meilisearch";
 import { searchClient } from "../search-client";
 import { defaultSort } from "../util";
 /**

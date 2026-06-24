@@ -13,7 +13,7 @@ import type {
   UserSearchDocument,
   ZoneSearchDocument,
 } from "@rezics/contract";
-import type { SearchClient } from "@rezics/search";
+import type { SearchClient } from "../../../search/client";
 import {
   DEFAULT_GROUPED_SECTION_LIMIT,
   DEFAULT_PAGE_HITS_PER_PAGE,

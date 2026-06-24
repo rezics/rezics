@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 import { REACTION_SEQUIN_TABLES, SOURCE_SEQUIN_TABLES } from "@rezics/job";
-import { EXPECTED_MEILI_INDEX_SCHEMAS } from "@rezics/search";
+import { EXPECTED_MEILI_INDEX_SCHEMAS } from "../../search/schema";
 import type { MeiliStatusSummary } from "./status.types";
 
 process.env.NODE_ENV = "test";

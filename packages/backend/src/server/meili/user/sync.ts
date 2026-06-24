@@ -1,5 +1,5 @@
 import { mainMarkdownSource } from "@rezics/contract";
-import { patchUserFields } from "@rezics/search";
+import { patchUserFields } from "../../../search/sync";
 import { eq } from "drizzle-orm";
 import { Unit, User } from "../../db/schema";
 import { requireSlugScopeId } from "../../infra/slug-scopes";

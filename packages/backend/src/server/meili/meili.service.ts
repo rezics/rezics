@@ -35,7 +35,7 @@ import {
   syncAllUsers,
   syncAllZones,
   syncSingleContent,
-} from "@rezics/search";
+} from "../../search/sync";
 import { searchComments } from "./comment/comment.service";
 import { searchContent } from "./content/content.service";
 import { searchEntities } from "./entity/entity.service";

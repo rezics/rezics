@@ -9,7 +9,7 @@ import {
   patchContentTags,
   patchContentTranslations,
   syncSingleContent,
-} from "@rezics/search";
+} from "../../../search/sync";
 import { searchClient } from "../search-client";
 
 /**

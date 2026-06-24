@@ -42,7 +42,7 @@ class TestAppError extends Error {
   }
 }
 
-mock.module("@rezics/search", () => ({
+mock.module("../../search/progress", () => ({
   PROGRESS_BUCKET_COUNT: 10,
 }));
 

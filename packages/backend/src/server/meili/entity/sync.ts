@@ -2,7 +2,7 @@ import {
   patchEntityAliases,
   syncAllEntities,
   syncSingleEntity,
-} from "@rezics/search";
+} from "../../../search/sync";
 import { searchClient } from "../search-client";
 
 export async function syncEntityToMeili(unitId: string): Promise<void> {

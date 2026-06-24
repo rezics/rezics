@@ -1,6 +1,6 @@
 import type { UserListQuery } from "@rezics/contract";
 import { parseIdsCsv } from "@rezics/contract";
-import type { SearchResponse } from "@rezics/search";
+import type { SearchResponse } from "meilisearch";
 import { searchClient } from "../search-client";
 import type { UserSearchDocument, UserSearchResult } from "./index";
 

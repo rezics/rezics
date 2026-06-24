@@ -49,6 +49,8 @@ const SEARCH_INDEX_REBUILD_TARGETS = {
   posts: "post",
   comments: "comment",
   polls: "poll",
+  tags: "tag",
+  labels: "label",
   realms: "realm",
   zones: "zone",
   entities: "entity",
