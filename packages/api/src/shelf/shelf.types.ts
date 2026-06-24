@@ -55,7 +55,9 @@ export type {
 };
 
 export type ShelfFormData = CreateShelfInput;
-export type ShelfFilters = Partial<ShelfListQuery>;
+export type ShelfFilters = Omit<Partial<ShelfListQuery>, "languages"> & {
+  languages?: string | readonly string[];
+};
 export type ShelfView = "nested" | "flat" | "bookshelf";
 
 export type ShelfSortField =

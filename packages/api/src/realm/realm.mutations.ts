@@ -304,7 +304,6 @@ export function useUpdateRealmRulePolicyMutation(
   options?: Omit<
     UseMutationOptions<
       RealmRulePolicyDTO,
-      RealmRuleResolvedDTO,
       Error,
       { realmUnitId: string; input: UpdateRealmRulePolicyInput }
     >,

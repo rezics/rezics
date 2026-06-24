@@ -11,6 +11,10 @@ type ZoneReadQueryInput = Omit<ReadLanguageGetQueryBase, "languages"> & {
   languages?: string | readonly string[];
 };
 
+function isReadonlyStringArray(value: unknown): value is readonly string[] {
+  return Array.isArray(value);
+}
+
 export const zoneQueryOptions = (
   slug: string,
   query: ZoneReadQueryInput | readonly string[] = {},
@@ -80,7 +84,7 @@ export const zoneSectionInfiniteQuery = (
 function readQueryObject(
   query: ZoneReadQueryInput | readonly string[],
 ): ZoneReadQueryInput {
-  return Array.isArray(query) ? { languages: query } : query;
+  return isReadonlyStringArray(query) ? { languages: query } : query;
 }
 
 export const zoneQueries = {

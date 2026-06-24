@@ -20,10 +20,19 @@ type ZoneReadQueryInput = Omit<ReadLanguageGetQueryBase, "languages"> & {
   languages?: string | readonly string[];
 };
 
+function isReadonlyStringArray(value: unknown): value is readonly string[] {
+  return Array.isArray(value);
+}
+
 function normalizeZoneReadQuery(
   query: ZoneReadQueryInput | readonly string[] = {},
 ): ZoneReadQueryInput {
-  return Array.isArray(query) ? { languages: query } : query;
+  return isReadonlyStringArray(query) ? { languages: query } : query;
+}
+
+function serializeReadLanguages(value?: string | readonly string[]) {
+  if (!value?.length) return undefined;
+  return isReadonlyStringArray(value) ? [...value] : value;
 }
 
 export const zoneApi = {
@@ -65,14 +74,14 @@ export const zoneApi = {
     sectionId: string,
     options: {
       cursor?: string;
-      languages?: readonly string[];
+      languages?: string | readonly string[];
       appLocale?: string;
       dynamicTagUnitIds?: readonly string[];
     } = {},
   ): Promise<ZoneSectionData> => {
     const qs = buildQueryString({
       cursor: options.cursor,
-      languages: options.languages?.length ? [...options.languages] : undefined,
+      languages: serializeReadLanguages(options.languages),
       appLocale: options.appLocale,
       dynamicTagUnitIds: options.dynamicTagUnitIds?.length
         ? options.dynamicTagUnitIds.join(",")
