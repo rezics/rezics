@@ -13,7 +13,6 @@ includes:
   job: { taskfile: ./packages/job/Taskfile.yml, dir: ./packages/job }
   job-runner:
     { taskfile: ./packages/job-runner/Taskfile.yml, dir: ./packages/job-runner }
-  search: { taskfile: ./packages/search/Taskfile.yml, dir: ./packages/search }
   ui: { taskfile: ./packages/ui/Taskfile.yml, dir: ./packages/ui }
 
 tasks:
@@ -52,6 +51,16 @@ tasks:
   server:build:linux:
     desc: Compile backend linux-x64 binary
     cmd: task backend:build:linux
+
+  search:meilisearch:
+    desc: Run local Meilisearch from the bundled binary
+    dir: packages/backend/bin
+    cmd: ./meilisearch --config-file-path='../meilisearch.config.toml'
+
+  search:meilisearch:wsl:
+    desc: Run local Meilisearch bound to 0.0.0.0 (WSL)
+    dir: packages/backend/bin
+    cmd: ./meilisearch --http-addr 0.0.0.0:7700 --config-file-path='../meilisearch.config.toml'
 
   # ── Dev orchestration (Nomad) ──────────────────────────────────────────
   dev:

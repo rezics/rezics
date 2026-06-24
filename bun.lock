@@ -275,15 +275,6 @@
         "typescript": "^6",
       },
     },
-    "packages/search": {
-      "name": "@rezics/search",
-      "dependencies": {
-        "@rezics/backend": "workspace:*",
-      },
-      "peerDependencies": {
-        "typescript": "^6",
-      },
-    },
     "packages/shared": {
       "name": "@rezics/shared",
       "version": "0.1.0",
@@ -1110,8 +1101,6 @@
     "@rezics/job-runner": ["@rezics/job-runner@workspace:packages/job-runner"],
 
     "@rezics/jwt": ["@rezics/jwt@workspace:packages/jwt"],
-
-    "@rezics/search": ["@rezics/search@workspace:packages/search"],
 
     "@rezics/shared": ["@rezics/shared@workspace:packages/shared"],
 

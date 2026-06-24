@@ -2,7 +2,7 @@
  * One-shot entity search backfill / drift repair.
  *
  * Invocation:
- *   cd packages/search && bun run src/bin/backfill-entities.ts
+ *   cd packages/backend && bun run src/search/bin/backfill-entities.ts
  *
  * The script is idempotent because each projected document uses the stable
  * `Unit.id` primary key. It is resumable because it scans the source table in

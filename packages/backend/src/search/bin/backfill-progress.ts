@@ -2,7 +2,7 @@
  * One-shot progress search backfill / drift repair.
  *
  * Invocation:
- *   cd packages/search && bun run src/bin/backfill-progress.ts
+ *   cd packages/backend && bun run src/search/bin/backfill-progress.ts
  *
  * The script is idempotent because each projected document uses the stable
  * `${userId}:${unitId}` primary key. It is resumable because it scans the
