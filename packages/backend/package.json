@@ -12,13 +12,24 @@
     "./app": {
       "types": "./src/app.ts",
       "default": "./src/app.ts"
+    },
+    "./preview/app": {
+      "types": "./src/preview/app.ts",
+      "default": "./src/preview/app.ts"
+    },
+    "./preview/book/book.api": {
+      "types": "./src/preview/book/book.api.ts",
+      "default": "./src/preview/book/book.api.ts"
     }
   },
   "dependencies": {
+    "@elysiajs/html": "^1.4.2",
+    "@elysiajs/openapi": "^1.4.14",
+    "@kitajs/html": "^4.2.13",
     "@rezics/auth": "workspace:*",
+    "@rezics/contract": "workspace:*",
     "@rezics/history": "workspace:*",
     "@rezics/notify": "workspace:*",
-    "@rezics/preview": "workspace:*",
     "@rezics/ranking": "workspace:*",
     "@rezics/reaction": "workspace:*",
     "@rezics/server": "workspace:*",

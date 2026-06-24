@@ -1,8 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "@kitajs/html",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["../server/src/*", "./src/*"]
     },
     "noImplicitReturns": true,
     "noImplicitOverride": true,

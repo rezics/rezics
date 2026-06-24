@@ -1,17 +1,17 @@
 import { describe, expect, mock, test } from "bun:test";
 
-mock.module("./sitemap.service", () => ({
-  listBookSitemapEntries: mock(async () => ({
-    entries: [
-      {
-        loc: "https://rezics.example/book/book-1",
-        lastmod: new Date("2026-06-05T10:00:00.000Z"),
-      },
-    ],
-  })),
-  listBookSitemapShards: mock(async () => [
-    { loc: "https://rezics.example/sitemap/books.xml?start=0&limit=500" },
-  ]),
+mock.module("@rezics/server/book/book.service", () => ({
+  bookService: {
+    list: mock(async () => ({
+      total: 1,
+      books: [
+        {
+          unitId: "book-1",
+          updatedAt: new Date("2026-06-05T10:00:00.000Z"),
+        },
+      ],
+    })),
+  },
 }));
 
 const { sitemapApi } = await import("./sitemap.api");

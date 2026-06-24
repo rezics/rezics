@@ -1,5 +1,7 @@
 import type { ObservabilityConfig } from "@rezics/shared/observability";
 import { resolveBackendPort } from "./env";
+import { createPreviewApp } from "./preview/app";
+import { bookApi as previewBookRoutes } from "./preview/book/book.api";
 
 export const INTERNAL_SERVICE_PREFIX = "/__services";
 
@@ -50,13 +52,6 @@ type ServerAppResult = {
   observability: ObservabilityConfig;
   port: number;
 };
-
-type PreviewAppOptions = {
-  bookRoutes?: unknown;
-  isDev?: boolean;
-};
-
-type PreviewAppFactory = (options?: PreviewAppOptions) => FetchableApp;
 type ServerAppFactory = (
   options?: ServerAppOptions,
 ) => Promise<ServerAppResult>;
@@ -68,11 +63,13 @@ const appFactories = {
   auth: ["@rezics/auth/app", "createAuthApp"],
   history: ["@rezics/history/app", "createHistoryApp"],
   notify: ["@rezics/notify/app", "createNotifyApp"],
-  preview: ["@rezics/preview/app", "createPreviewApp"],
   ranking: ["@rezics/ranking/app", "createRankingApp"],
   reaction: ["@rezics/reaction/app", "createReactionApp"],
   server: ["@rezics/server/app", "createServerApp"],
-} as const satisfies Record<BackendMountedService, readonly [string, string]>;
+} as const satisfies Record<
+  Exclude<BackendMountedService, "preview">,
+  readonly [string, string]
+>;
 
 async function loadExport<Export>(
   specifier: string,
@@ -110,15 +107,6 @@ async function loadServiceAppFactory(
   return loadFactory<ServiceAppFactory>(specifier, exportName);
 }
 
-async function loadPreviewAppFactory(): Promise<PreviewAppFactory> {
-  const [specifier, exportName] = appFactories.preview;
-  return loadFactory<PreviewAppFactory>(specifier, exportName);
-}
-
-async function loadPreviewBookRoutes(): Promise<unknown> {
-  return loadExport<unknown>("@rezics/preview/book/book.api", "bookApi");
-}
-
 function mountService(
   root: MountableApp,
   prefix: string,
@@ -146,14 +134,12 @@ export async function createBackendApp(options: CreateBackendAppOptions = {}) {
     createReactionApp,
     createHistoryApp,
     createRankingApp,
-    createPreviewApp,
   ] = await Promise.all([
     loadServiceAppFactory("auth"),
     loadServiceAppFactory("notify"),
     loadServiceAppFactory("reaction"),
     loadServiceAppFactory("history"),
     loadServiceAppFactory("ranking"),
-    loadPreviewAppFactory(),
   ]);
 
   const [auth, notify, reaction, history, ranking] = await Promise.all([
@@ -183,7 +169,6 @@ export async function createBackendApp(options: CreateBackendAppOptions = {}) {
       port,
     }),
   ]);
-  const previewBookRoutes = await loadPreviewBookRoutes();
   const preview = createPreviewApp({
     bookRoutes: previewBookRoutes,
     isDev: process.env.NODE_ENV !== "production",
