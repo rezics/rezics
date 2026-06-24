@@ -12,3 +12,7 @@ tasks:
   start:
     desc: Start production server
     cmd: npx next start
+
+  cosmos:
+    desc: Start React Cosmos component explorer
+    cmd: npx cosmos --config cosmos.config.json

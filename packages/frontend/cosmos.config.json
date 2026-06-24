@@ -1,0 +1,14 @@
+{
+  "rootDir": ".",
+  "rendererUrl": "http://localhost:35002",
+  "port": 5050,
+  "watchDirs": ["src"],
+  "staticPath": "public",
+  "plugins": ["react-cosmos-next"],
+  "dom": {
+    "containerQuerySelector": "#cosmos-root"
+  },
+  "ui": {
+    "playgroundUrl": "http://localhost:5050"
+  }
+}
