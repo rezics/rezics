@@ -1,5 +1,4 @@
-import { type RealmDTO, realmQueries } from "@rezics/contract/api/realm/realm";
-import type { UnitTranslationDTO } from "@rezics/contract";
+import type { RealmDTO, UnitTranslationDTO } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import {
   Button,
@@ -11,11 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { SearchablePaginatedTableCard } from "@/admin/components/list/SearchablePaginatedTableCard";
 import type { PaginatedColumn } from "@/admin/components/table/PaginatedTable";
 import { Page } from "@/admin/core/layouts/Page";
+import { useRealmListQuery } from "@/admin/realm/hooks/useRealmListQuery";
 import { Link } from "@/admin/shared/ui/link";
 import { fmtDate } from "@/admin/utils/format";
 
@@ -61,18 +60,9 @@ export default function RealmsPage() {
     isOfficial: optionalBoolean(isOfficial),
   };
 
-  const listQuery = useQuery({
-    ...realmQueries.list(filters),
-    enabled: trimmedQuery.length === 0,
-  });
-  const searchQuery = useQuery({
-    ...realmQueries.search(trimmedQuery, filters),
-    enabled: trimmedQuery.length > 0,
-  });
-
-  const activeQuery = trimmedQuery.length > 0 ? searchQuery : listQuery;
-  const realms = activeQuery.data?.realms ?? [];
-  const total = activeQuery.data?.total ?? 0;
+  const listQuery = useRealmListQuery(filters, trimmedQuery);
+  const realms = listQuery.data?.realms ?? [];
+  const total = listQuery.data?.total ?? 0;
 
   const columns = React.useMemo<PaginatedColumn<RealmDTO>[]>(
     () => [
@@ -287,9 +277,9 @@ export default function RealmsPage() {
             </div>
           </div>
         }
-        isLoading={activeQuery.isLoading}
-        isError={activeQuery.isError}
-        error={activeQuery.error}
+        isLoading={listQuery.isLoading}
+        isError={listQuery.isError}
+        error={listQuery.error}
         columns={columns}
         rows={realms}
         getRowId={(realm) => realm.unitId}
