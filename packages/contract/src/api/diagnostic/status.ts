@@ -1,6 +1,4 @@
-export { statusApi } from "./status.api";
-export type { StatusEdenClient } from "./status.api";
-export { statusKeys } from "./status.keys";
+export type { StatusEdenClient } from "./status.eden";
 export type {
   CdcSourceStatus,
   CdcStatus,
