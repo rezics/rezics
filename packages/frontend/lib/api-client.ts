@@ -25,6 +25,11 @@ type ApiClient = {
       get: () => Promise<EdenResponse<unknown>>;
     };
   };
+  meili: {
+    status: {
+      get: () => Promise<EdenResponse<unknown>>;
+    };
+  };
 };
 
 export const apiClient = treaty<any>(API_BASE_URL, {

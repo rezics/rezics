@@ -1,20 +1,29 @@
 import {
+  type MeiliStatusSummary,
   type SystemStatusSummary,
-  useMeiliStatusQuery,
 } from "@rezics/contract/api";
 import useSWR from "swr";
 import { apiClient, unwrapEdenResponse } from "@/lib/api-client";
 
 const STATUS_REFRESH_INTERVAL_MS = 10_000;
+const MEILI_STATUS_KEY = ["eden", "meili", "status"] as const;
 const SYSTEM_STATUS_KEY = ["eden", "diagnostic", "system"] as const;
+
+async function getMeiliStatus(): Promise<MeiliStatusSummary> {
+  const response = await apiClient.meili.status.get();
+  return unwrapEdenResponse<MeiliStatusSummary>(response);
+}
 
 async function getSystemStatus(): Promise<SystemStatusSummary> {
   const response = await apiClient.diagnostic.system.get();
   return unwrapEdenResponse<SystemStatusSummary>(response);
 }
 
-export function useAdminSystemStatusQuery() {
-  const query = useSWR<SystemStatusSummary>(SYSTEM_STATUS_KEY, getSystemStatus, {
+function useAdminSWRStatusQuery<T>(
+  key: readonly string[],
+  fetcher: () => Promise<T>,
+) {
+  const query = useSWR<T>(key, fetcher, {
     refreshInterval: STATUS_REFRESH_INTERVAL_MS,
   });
 
@@ -30,6 +39,10 @@ export function useAdminSystemStatusQuery() {
   };
 }
 
+export function useAdminSystemStatusQuery() {
+  return useAdminSWRStatusQuery(SYSTEM_STATUS_KEY, getSystemStatus);
+}
+
 export function useAdminMeiliStatusQuery() {
-  return useMeiliStatusQuery();
+  return useAdminSWRStatusQuery(MEILI_STATUS_KEY, getMeiliStatus);
 }
