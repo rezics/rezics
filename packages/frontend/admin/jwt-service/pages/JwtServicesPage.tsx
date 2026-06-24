@@ -1,34 +1,29 @@
-import {
-  useActivateJwtServiceMutation,
-  useDeactivateJwtServiceMutation,
-  useRotateJwtServiceMutation,
-  useUpdateJwtServiceMutation,
-} from "@rezics/contract/api/jwt-service/jwt-service.mutations";
-import { jwtServiceQueries } from "@rezics/contract/api/jwt-service/jwt-service.queries";
 import type { JwtServiceDTO, UpdateJwtServiceInput } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Alert, AlertDescription } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
 import { Page } from "@/admin/core/layouts/Page";
+import {
+  activateJwtService,
+  deactivateJwtService,
+  rotateJwtService,
+  updateJwtService,
+  useJwtServiceListQuery,
+} from "@/admin/jwt-service/hooks/useJwtServiceAdmin";
 import { JwtServiceEditDialog, JwtServiceTable } from "../components";
 
 export const JwtServicesPage: FC = () => {
   const { t } = useTranslation(["admin"]);
-  const { data, isLoading, error } = useQuery(jwtServiceQueries.list());
+  const listQuery = useJwtServiceListQuery();
+  const { data, isLoading, error } = listQuery;
 
   const [services, setServices] = useState<JwtServiceDTO[]>([]);
 
   useEffect(() => {
     if (data?.services) setServices(data.services);
   }, [data]);
-
-  const updateMutation = useUpdateJwtServiceMutation();
-  const activateMutation = useActivateJwtServiceMutation();
-  const deactivateMutation = useDeactivateJwtServiceMutation();
-  const rotateMutation = useRotateJwtServiceMutation();
 
   const [updating, setUpdating] = useState(false);
   const [updatingServiceKey, setUpdatingServiceKey] = useState<string | null>(
@@ -53,7 +48,13 @@ export const JwtServicesPage: FC = () => {
     setUpdatingError(null);
     try {
       setUpdating(true);
-      await updateMutation.mutateAsync({ serviceKey, input });
+      const updated = await updateJwtService(serviceKey, input);
+      setServices((current) =>
+        current.map((service) =>
+          service.serviceKey === serviceKey ? updated : service,
+        ),
+      );
+      await listQuery.refetch();
       setOpenEdit(false);
       setEditingService(null);
     } catch (err) {
@@ -68,8 +69,14 @@ export const JwtServicesPage: FC = () => {
     try {
       setUpdating(true);
       setUpdatingServiceKey(serviceKey);
-      const updated = await activateMutation.mutateAsync(serviceKey);
+      const updated = await activateJwtService(serviceKey);
+      setServices((current) =>
+        current.map((service) =>
+          service.serviceKey === serviceKey ? updated : service,
+        ),
+      );
       setEditingService(updated);
+      await listQuery.refetch();
     } catch (err) {
       setUpdatingError(
         (err as Error)?.message ?? t("admin:jwt_activate_failed"),
@@ -85,8 +92,14 @@ export const JwtServicesPage: FC = () => {
     try {
       setUpdating(true);
       setUpdatingServiceKey(serviceKey);
-      const updated = await deactivateMutation.mutateAsync(serviceKey);
+      const updated = await deactivateJwtService(serviceKey);
+      setServices((current) =>
+        current.map((service) =>
+          service.serviceKey === serviceKey ? updated : service,
+        ),
+      );
       setEditingService(updated);
+      await listQuery.refetch();
     } catch (err) {
       setUpdatingError(
         (err as Error)?.message ?? t("admin:jwt_deactivate_failed"),
@@ -102,10 +115,16 @@ export const JwtServicesPage: FC = () => {
     try {
       setUpdating(true);
       setUpdatingServiceKey(serviceKey);
-      const updated = await rotateMutation.mutateAsync(serviceKey);
+      const updated = await rotateJwtService(serviceKey);
+      setServices((current) =>
+        current.map((service) =>
+          service.serviceKey === serviceKey ? updated : service,
+        ),
+      );
       setEditingService((current) =>
         current?.serviceKey === serviceKey ? updated : current,
       );
+      await listQuery.refetch();
     } catch (err) {
       setUpdatingError((err as Error)?.message ?? "Failed to rotate key");
     } finally {
