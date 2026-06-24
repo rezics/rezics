@@ -1,7 +1,0 @@
-# @rezics/preview — compatibility shim. Preview is served by @rezics/backend.
-version: "3"
-
-tasks:
-  typecheck:
-    desc: Typecheck preview compatibility exports
-    cmd: bunx tsc -p tsconfig.json --pretty false

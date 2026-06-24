@@ -16,7 +16,6 @@ includes:
   job-runner:
     { taskfile: ./packages/job-runner/Taskfile.yml, dir: ./packages/job-runner }
   notify: { taskfile: ./packages/notify/Taskfile.yml, dir: ./packages/notify }
-  preview: { taskfile: ./packages/preview/Taskfile.yml, dir: ./packages/preview }
   ranking: { taskfile: ./packages/ranking/Taskfile.yml, dir: ./packages/ranking }
   reaction:
     { taskfile: ./packages/reaction/Taskfile.yml, dir: ./packages/reaction }

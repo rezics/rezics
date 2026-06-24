@@ -343,17 +343,6 @@
         "typescript": "^6",
       },
     },
-    "packages/preview": {
-      "name": "@rezics/preview",
-      "version": "0.1.0",
-      "dependencies": {
-        "@rezics/backend": "workspace:*",
-      },
-      "devDependencies": {
-        "@types/pg": "^8.15.5",
-        "bun-types": "latest",
-      },
-    },
     "packages/ranking": {
       "name": "@rezics/ranking",
       "dependencies": {
@@ -1296,8 +1285,6 @@
     "@rezics/jwt": ["@rezics/jwt@workspace:packages/jwt"],
 
     "@rezics/notify": ["@rezics/notify@workspace:packages/notify"],
-
-    "@rezics/preview": ["@rezics/preview@workspace:packages/preview"],
 
     "@rezics/ranking": ["@rezics/ranking@workspace:packages/ranking"],
 
