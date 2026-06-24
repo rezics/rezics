@@ -1,5 +1,8 @@
+import "@rezics/ui/config/base.css";
+import "github-markdown-css/github-markdown-light.css";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import "@/admin/app/index.css";
 import "./globals.css";
 import { Providers } from "./providers";
 

@@ -19,7 +19,7 @@
       "!!**/coverage",
       "!!**/.next",
       "!!**/.turbo",
-      "!packages/admin/src/routeTree.gen.ts",
+      "!packages/frontend/admin/routeTree.gen.ts",
       "!packages/app/src/routeTree.gen.ts"
     ],
     "ignoreUnknown": true
