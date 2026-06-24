@@ -1,16 +1,16 @@
 import { useAlertStore } from "@/admin/app/states/windowAlertStore";
-import {
-  echoKvApi,
-  echoKvKeyListQuery,
-} from "@rezics/contract/api/echokv/echokv";
 import { RezicsJsonEditor } from "@rezics/ui/editor";
 import { Button, Input, Label, Separator } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { Search as SearchIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { Page } from "@/admin/core/layouts/Page";
+import {
+  getEchoKvValue,
+  setEchoKvValue,
+  useEchoKvKeyListQuery,
+} from "@/admin/misc/hooks/useEchoKvAdmin";
 
 export const EchokvEditPage: React.FC = () => {
   const { show: showAlert } = useAlertStore();
@@ -21,16 +21,15 @@ export const EchokvEditPage: React.FC = () => {
   const [_saving, setSaving] = useState(false);
   const [editorValue, setEditorValue] = useState("{}");
 
-  const { data: keyList, isLoading: keyListLoading } = useQuery(
-    echoKvKeyListQuery(searchKey),
-  );
+  const { data: keyList, isLoading: keyListLoading } =
+    useEchoKvKeyListQuery(searchKey);
 
   const handleLoad = async () => {
     if (!currentKey.trim()) return showAlert("请输入 key");
 
     setLoading(true);
     try {
-      const res = await echoKvApi.get(currentKey.trim());
+      const res = await getEchoKvValue(currentKey.trim());
       const raw = res?.value;
 
       let parsed: { value: unknown };
@@ -65,7 +64,7 @@ export const EchokvEditPage: React.FC = () => {
       const dataObject = JSON.parse(editorValue);
       const value = dataObject.value;
 
-      const result = await echoKvApi.set(currentKey.trim(), value);
+      const result = await setEchoKvValue(currentKey.trim(), value);
 
       showAlert(`已保存: ${JSON.stringify(result)}`);
     } catch (err) {
