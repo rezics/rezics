@@ -19,7 +19,7 @@ const notifyPool = new Pool({
   connectionString: readEnv("packages/notify/.env", "NOTIFY_DATABASE_URL"),
 });
 const historyPool = new Pool({
-  connectionString: readEnv("packages/history/.env", "HISTORY_DATABASE_URL"),
+  connectionString: readEnv("packages/backend/.env", "HISTORY_DATABASE_URL"),
 });
 const rankingPool = new Pool({
   connectionString: readEnv("packages/ranking/.env", "RANKING_DATABASE_URL"),

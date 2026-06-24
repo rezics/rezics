@@ -9,7 +9,6 @@
 package/server/server
 package/auth/server
 package/notify/notify
-package/history/history
 package/ranking/ranking
 package/job-runner/job-runner
 

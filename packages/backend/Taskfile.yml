@@ -15,6 +15,15 @@ tasks:
   typecheck:
     desc: Typecheck backend package
     cmd: bunx tsc -p tsconfig.json --pretty false
+  history:db:generate:
+    desc: Generate History Drizzle migrations
+    cmd: bun drizzle-kit generate --config drizzle.history.config.ts
+  history:db:migrate:
+    desc: Apply History Drizzle migrations
+    cmd: bun drizzle-kit migrate --config drizzle.history.config.ts
+  history:db:studio:
+    desc: Open History Drizzle Studio
+    cmd: bun drizzle-kit studio --config drizzle.history.config.ts
   reaction:db:generate:
     desc: Generate Reaction Drizzle migrations
     cmd: bun drizzle-kit generate --config drizzle.reaction.config.ts

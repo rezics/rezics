@@ -111,6 +111,7 @@
         JOB_DATABASE_URL           = "postgresql://[[ var "postgres_user" . ]]:[[ var "postgres_password" . ]]@127.0.0.1:5432/rezics_jobs"
         SERVER_DATABASE_URL        = "postgresql://[[ var "postgres_user" . ]]:[[ var "postgres_password" . ]]@127.0.0.1:5432/rezics_server"
         HISTORY_DATABASE_URL       = "postgresql://[[ var "postgres_user" . ]]:[[ var "postgres_password" . ]]@127.0.0.1:5432/rezics_history"
+        HISTORY_INTERNAL_SECRET    = "dev-history-internal-secret"
         MEILI_HOST                 = "http://127.0.0.1:7700"
         MEILI_MASTER_KEY           = "[[ var "meili_master_key" . ]]"
         JOB_RUNNER_INTERNAL_SECRET = "dev-job-runner-internal-secret"

@@ -13,6 +13,22 @@
       "types": "./src/app.ts",
       "default": "./src/app.ts"
     },
+    "./history/db": {
+      "types": "./src/history/db/index.ts",
+      "default": "./src/history/db/index.ts"
+    },
+    "./history/db/schema": {
+      "types": "./src/history/db/schema/index.ts",
+      "default": "./src/history/db/schema/index.ts"
+    },
+    "./history/outbox": {
+      "types": "./src/history/outbox/index.ts",
+      "default": "./src/history/outbox/index.ts"
+    },
+    "./history/revision/revision.service": {
+      "types": "./src/history/revision/revision.service.ts",
+      "default": "./src/history/revision/revision.service.ts"
+    },
     "./preview/app": {
       "types": "./src/preview/app.ts",
       "default": "./src/preview/app.ts"
@@ -29,7 +45,6 @@
     "@kitajs/html": "^4.2.13",
     "@rezics/auth": "workspace:*",
     "@rezics/contract": "workspace:*",
-    "@rezics/history": "workspace:*",
     "@rezics/jwt": "workspace:*",
     "@rezics/notify": "workspace:*",
     "@rezics/ranking": "workspace:*",

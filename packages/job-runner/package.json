@@ -17,7 +17,7 @@
   "dependencies": {
     "@elysiajs/cors": "^1.4.0",
     "@elysiajs/openapi": "^1.4.14",
-    "@rezics/history": "workspace:*",
+    "@rezics/backend": "workspace:*",
     "@rezics/job": "workspace:*",
     "@rezics/search": "workspace:*",
     "@rezics/server": "workspace:*",

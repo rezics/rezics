@@ -134,7 +134,7 @@
         image        = "[[ var "image_backend_migrate" . ]]"
         network_mode = "[[ var "network" . ]]"
         entrypoint   = ["/bin/sh", "-c"]
-        args         = ["until cd /repo/packages/history && bunx drizzle-kit migrate 2>&1; do echo 'Waiting for history database...'; sleep 2; done"]
+        args         = ["until cd /repo/packages/backend && bunx drizzle-kit migrate --config drizzle.history.config.ts 2>&1; do echo 'Waiting for history database...'; sleep 2; done"]
       }
 
       env {

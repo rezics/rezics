@@ -1,4 +1,4 @@
-import type { HistoryOutboxConsumer } from "@rezics/history/outbox";
+import type { HistoryOutboxConsumer } from "@rezics/backend/history/outbox";
 import {
   type AnyJobCommand,
   HISTORY_COMMAND_KINDS,

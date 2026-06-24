@@ -9,7 +9,6 @@
     { "path": "./packages/email" },
     { "path": "./packages/folio" },
     { "path": "./packages/frontend" },
-    { "path": "./packages/history" },
     { "path": "./packages/i18n" },
     { "path": "./packages/job" },
     { "path": "./packages/job-runner" },

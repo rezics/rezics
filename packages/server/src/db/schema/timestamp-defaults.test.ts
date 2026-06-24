@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import * as authSchema from "../../../../auth/src/db/schema";
-import * as historySchema from "../../../../history/src/db/schema";
+import * as historySchema from "../../../../backend/src/history/db/schema";
 import * as notifySchema from "../../../../notify/src/db/schema";
 import * as rankingSchema from "../../../../ranking/src/db/schema";
 import * as reactionSchema from "../../../../backend/src/reaction/db/schema";

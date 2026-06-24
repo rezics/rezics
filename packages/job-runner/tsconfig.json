@@ -2,8 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"],
-      "#/*": ["../history/*"]
+      "@/*": ["./src/*"]
     },
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,

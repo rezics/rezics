@@ -1,5 +1,6 @@
 import type { ObservabilityConfig } from "@rezics/shared/observability";
 import { resolveBackendPort } from "./env";
+import { createHistoryApp } from "./history/app";
 import { createPreviewApp } from "./preview/app";
 import { bookApi as previewBookRoutes } from "./preview/book/book.api";
 import { createReactionApp } from "./reaction/app";
@@ -62,12 +63,11 @@ type ServiceAppFactory = (
 
 const appFactories = {
   auth: ["@rezics/auth/app", "createAuthApp"],
-  history: ["@rezics/history/app", "createHistoryApp"],
   notify: ["@rezics/notify/app", "createNotifyApp"],
   ranking: ["@rezics/ranking/app", "createRankingApp"],
   server: ["@rezics/server/app", "createServerApp"],
 } as const satisfies Record<
-  Exclude<BackendMountedService, "preview" | "reaction">,
+  Exclude<BackendMountedService, "history" | "preview" | "reaction">,
   readonly [string, string]
 >;
 
@@ -101,7 +101,10 @@ async function loadServerAppFactory(): Promise<ServerAppFactory> {
 }
 
 async function loadServiceAppFactory(
-  service: Exclude<BackendMountedService, "preview" | "reaction" | "server">,
+  service: Exclude<
+    BackendMountedService,
+    "history" | "preview" | "reaction" | "server"
+  >,
 ): Promise<ServiceAppFactory> {
   const [specifier, exportName] = appFactories[service];
   return loadFactory<ServiceAppFactory>(specifier, exportName);
@@ -128,15 +131,9 @@ export async function createBackendApp(options: CreateBackendAppOptions = {}) {
   });
   const app = server.app;
 
-  const [
-    createAuthApp,
-    createNotifyApp,
-    createHistoryApp,
-    createRankingApp,
-  ] = await Promise.all([
+  const [createAuthApp, createNotifyApp, createRankingApp] = await Promise.all([
     loadServiceAppFactory("auth"),
     loadServiceAppFactory("notify"),
-    loadServiceAppFactory("history"),
     loadServiceAppFactory("ranking"),
   ]);
 

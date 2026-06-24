@@ -1,4 +1,4 @@
-import type { HistoryOutboxConsumer } from "@rezics/history/outbox";
+import type { HistoryOutboxConsumer } from "@rezics/backend/history/outbox";
 import type { SearchClient } from "@rezics/search";
 import { createHistoryHandlers } from "./history/handlers";
 import { createMaintenanceHandlers } from "./maintenance/handlers";
