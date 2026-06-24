@@ -8,14 +8,8 @@ job "rezics-prod" {
   [[ template "rustfs" . ]]
   [[ template "sequin" . ]]
 
-  // ── Backend services ──────────────────────────────────────
-  [[ template "server" . ]]
-  [[ template "auth" . ]]
-  [[ template "notify" . ]]
-  [[ template "reaction" . ]]
-  [[ template "history" . ]]
-  [[ template "ranking" . ]]
-  [[ template "preview" . ]]
+  // ── Backend service ───────────────────────────────────────
+  [[ template "backend" . ]]
 
   // ── Workers ───────────────────────────────────────────────
   [[ template "workers" . ]]

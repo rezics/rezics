@@ -9,6 +9,6 @@
     "not_found_handling": "single-page-application"
   },
   "vars": {
-    "PREVIEW_BASE_URL": "http://localhost:36003"
+    "PREVIEW_BASE_URL": "http://localhost:3000/__services/preview"
   }
 }

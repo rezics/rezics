@@ -10,7 +10,8 @@ export interface PreviewProxyOptions {
 function previewUrl(baseUrl: string, requestUrl: string): string {
   const source = new URL(requestUrl);
   const target = new URL(baseUrl);
-  target.pathname = source.pathname;
+  const basePath = target.pathname.replace(/\/+$/, "");
+  target.pathname = `${basePath}${source.pathname}`;
   target.search = source.search;
   return target.toString();
 }

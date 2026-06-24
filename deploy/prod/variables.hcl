@@ -1,38 +1,8 @@
 // ── Docker images (required) ────────────────────────────────────────────────
 // Runtime images — compiled Bun binaries on debian:bookworm-slim.
 
-variable "image_server" {
-  description = "ghcr.io/rezics/rezics-server:sha-<sha>"
-  type        = string
-}
-
-variable "image_auth" {
-  description = "ghcr.io/rezics/rezics-auth:sha-<sha>"
-  type        = string
-}
-
-variable "image_notify" {
-  description = "ghcr.io/rezics/rezics-notify:sha-<sha>"
-  type        = string
-}
-
-variable "image_reaction" {
-  description = "ghcr.io/rezics/rezics-reaction:sha-<sha>"
-  type        = string
-}
-
-variable "image_history" {
-  description = "ghcr.io/rezics/rezics-history:sha-<sha>"
-  type        = string
-}
-
-variable "image_ranking" {
-  description = "ghcr.io/rezics/rezics-ranking:sha-<sha>"
-  type        = string
-}
-
-variable "image_preview" {
-  description = "ghcr.io/rezics/rezics-preview:sha-<sha>"
+variable "image_backend" {
+  description = "ghcr.io/rezics/rezics-backend:sha-<sha>"
   type        = string
 }
 
@@ -43,33 +13,8 @@ variable "image_job_runner" {
 
 // Migrate images — build-stage snapshots with the full workspace + Drizzle Kit.
 
-variable "image_server_migrate" {
-  description = "ghcr.io/rezics/rezics-server-migrate:sha-<sha>"
-  type        = string
-}
-
-variable "image_auth_migrate" {
-  description = "ghcr.io/rezics/rezics-auth-migrate:sha-<sha>"
-  type        = string
-}
-
-variable "image_notify_migrate" {
-  description = "ghcr.io/rezics/rezics-notify-migrate:sha-<sha>"
-  type        = string
-}
-
-variable "image_reaction_migrate" {
-  description = "ghcr.io/rezics/rezics-reaction-migrate:sha-<sha>"
-  type        = string
-}
-
-variable "image_history_migrate" {
-  description = "ghcr.io/rezics/rezics-history-migrate:sha-<sha>"
-  type        = string
-}
-
-variable "image_ranking_migrate" {
-  description = "ghcr.io/rezics/rezics-ranking-migrate:sha-<sha>"
+variable "image_backend_migrate" {
+  description = "ghcr.io/rezics/rezics-backend-migrate:sha-<sha>"
   type        = string
 }
 
@@ -87,11 +32,6 @@ variable "network" {
 }
 
 // ── Public URLs (required) ──────────────────────────────────────────────────
-
-variable "server_public_url" {
-  description = "Public URL of the server API (e.g., https://api.rezics.com)"
-  type        = string
-}
 
 variable "auth_public_url" {
   description = "Public URL of the auth service (e.g., https://auth.rezics.com)"
@@ -190,10 +130,6 @@ variable "ranking_internal_secret" {
   type = string
 }
 
-variable "preview_internal_secret" {
-  type = string
-}
-
 // ── SMTP (required) ─────────────────────────────────────────────────────────
 
 variable "smtp_host" {
@@ -263,44 +199,14 @@ variable "telegram_bot_token" {
 
 // ── Host ports (optional, for reverse proxy) ────────────────────────────────
 
-variable "server_port" {
+variable "backend_port" {
   type    = number
   default = 3000
-}
-
-variable "auth_port" {
-  type    = number
-  default = 3001
-}
-
-variable "notify_port" {
-  type    = number
-  default = 3002
-}
-
-variable "reaction_port" {
-  type    = number
-  default = 3003
-}
-
-variable "history_port" {
-  type    = number
-  default = 3004
 }
 
 variable "job_runner_http_port" {
   type    = number
   default = 3005
-}
-
-variable "ranking_port" {
-  type    = number
-  default = 3006
-}
-
-variable "preview_port" {
-  type    = number
-  default = 3007
 }
 
 // ── Observability (optional) ────────────────────────────────────────────────

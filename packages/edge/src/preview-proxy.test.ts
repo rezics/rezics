@@ -46,4 +46,25 @@ describe("edge preview proxy", () => {
     expect(response.status).toBe(503);
     expect(response.headers.get("cache-control")).toBe("no-store");
   });
+
+  test("preserves base path for monolith-mounted preview routes", async () => {
+    const fetchImpl = mock(
+      async (
+        _input: Parameters<typeof fetch>[0],
+        _init?: Parameters<typeof fetch>[1],
+      ) => new Response("<html></html>"),
+    );
+
+    await proxyPreviewRequest(
+      new Request("https://rezics.com/book/book-1?lang=en"),
+      {
+        PREVIEW_BASE_URL: "https://api.internal/__services/preview",
+      },
+      { fetchImpl: fetchImpl as unknown as typeof fetch },
+    );
+
+    expect(fetchImpl.mock.calls[0]?.[0]?.toString()).toBe(
+      "https://api.internal/__services/preview/book/book-1?lang=en",
+    );
+  });
 });
