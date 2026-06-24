@@ -1,14 +1,13 @@
-import { type ShelfDTO, shelfQueries } from "@rezics/contract/api/shelf/shelf";
-import type { UnitTranslationDTO } from "@rezics/contract";
+import type { ShelfDTO, UnitTranslationDTO } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { SearchablePaginatedTableCard } from "@/admin/components/list/SearchablePaginatedTableCard";
 import type { PaginatedColumn } from "@/admin/components/table/PaginatedTable";
 import { Page } from "@/admin/core/layouts/Page";
 import { Link } from "@/admin/shared/ui/link";
 import { fmtDate } from "@/admin/utils/format";
+import { useShelfListQuery } from "../hooks/useShelfListQuery";
 
 function getPrimaryTitle(translations?: UnitTranslationDTO[] | null): string {
   if (!translations?.length)
@@ -33,15 +32,13 @@ export default function ShelvesPage() {
   const [limit, setLimit] = React.useState(20);
 
   const start = page * limit;
-  const listQuery = useQuery(
-    shelfQueries.list({
-      start,
-      limit,
-      ids: optionalFilter(queryIds),
-      userId: optionalFilter(userId),
-      containsUnitId: optionalFilter(containsUnitId),
-    }),
-  );
+  const listQuery = useShelfListQuery({
+    start,
+    limit,
+    ids: optionalFilter(queryIds),
+    userId: optionalFilter(userId),
+    containsUnitId: optionalFilter(containsUnitId),
+  });
 
   const shelves = listQuery.data?.shelves ?? [];
   const total = listQuery.data?.total ?? 0;
