@@ -1,4 +1,3 @@
-export type { StatusEdenClient } from "./status.eden";
 export type {
   CdcSourceStatus,
   CdcStatus,

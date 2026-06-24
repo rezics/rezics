@@ -2,8 +2,6 @@ import type { ShelfListQuery, ShelfListResponse } from "@rezics/contract";
 import useSWR from "swr";
 import { apiClient, unwrapEdenResponse } from "@/lib/api-client";
 
-const shelfClient = apiClient as any;
-
 type ShelfListKey = readonly ["eden", "shelf", "list", ShelfListQuery];
 
 function shelfListKey(filters: ShelfListQuery): ShelfListKey {
@@ -14,9 +12,9 @@ async function fetchShelfList(
   key: ShelfListKey,
 ): Promise<ShelfListResponse> {
   const [, , , filters] = key;
-  const response = await shelfClient.shelf.list.get({ query: filters });
+  const response = await apiClient.shelf.list.get({ query: filters });
 
-  return unwrapEdenResponse<ShelfListResponse>(response);
+  return unwrapEdenResponse(response);
 }
 
 export function useShelfListQuery(filters: ShelfListQuery) {

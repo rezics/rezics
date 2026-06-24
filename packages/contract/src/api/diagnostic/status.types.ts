@@ -40,10 +40,10 @@ export interface SettingsDrift {
 export interface ExpectedMeiliIndexSchema {
   uid: string;
   primaryKey: string;
-  searchableAttributes: string[];
-  filterableAttributes: string[];
-  sortableAttributes: string[];
-  facetableSummaryFields?: string[];
+  searchableAttributes: readonly string[];
+  filterableAttributes: readonly string[];
+  sortableAttributes: readonly string[];
+  facetableSummaryFields?: readonly string[];
   supportsFullSync?: boolean;
   domain: string;
   description: string;

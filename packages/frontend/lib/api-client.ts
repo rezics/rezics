@@ -1,16 +1,18 @@
 import { treaty } from "@elysiajs/eden";
+import type { ServerApp } from "@rezics/backend/server";
 import {
   ApiError,
   type ApiErrorDetail,
   type EdenResponse,
-  type StatusEdenClient,
 } from "@rezics/contract/api";
-import type { Elysia } from "elysia";
+import type { AnyElysia } from "elysia";
 
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
 
-export function createEdenClient<App extends Elysia>(baseUrl = API_BASE_URL) {
+export function createEdenClient<App extends AnyElysia>(
+  baseUrl = API_BASE_URL,
+) {
   return treaty<App>(baseUrl, {
     fetch: {
       credentials: "include",
@@ -18,11 +20,7 @@ export function createEdenClient<App extends Elysia>(baseUrl = API_BASE_URL) {
   });
 }
 
-export const apiClient = treaty<any>(API_BASE_URL, {
-  fetch: {
-    credentials: "include",
-  },
-}) as unknown as StatusEdenClient;
+export const apiClient = createEdenClient<ServerApp>();
 
 type EdenErrorValue = {
   code?: string;
