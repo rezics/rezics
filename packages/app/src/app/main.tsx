@@ -6,8 +6,6 @@ import { env } from "@/env";
 import { App } from "./App";
 import { initI18n } from "./providers/i18n";
 
-// import { setupMock } from "./plugin/providers/mock.ts";
-
 // Initialization (this type of side effect can be ingested and is not involved in hot-swap).
 // 初始化（这类副作用可被纳入，不参与热替换）。
 configureApi({
@@ -23,10 +21,6 @@ const container = document.getElementById("app") as HTMLElement;
 // directly create root; Vite/React Refresh will handle HMR gracefully.
 // 直接创建 root；Vite/React Refresh 会优雅地处理 HMR。
 const root = createRoot(container);
-
-// setupMock().then(() => {
-//   root.render(<App />);
-// });
 
 root.render(<App />);
 
