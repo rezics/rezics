@@ -222,9 +222,7 @@ export async function createServerApp(options: CreateServerAppOptions = {}) {
       };
     });
 
-  const routeApp = configuredApp as any;
-
-  routeApp
+  const contentRoutes = new Elysia()
     .use(authPublicApi)
     .use(wellKnownApi)
     .use(bookApi)
@@ -237,7 +235,9 @@ export async function createServerApp(options: CreateServerAppOptions = {}) {
     .use(streamApi)
     .use(progressApi)
     .use(draftApi)
-    .use(activityApi)
+    .use(activityApi);
+
+  const libraryRoutes = new Elysia()
     .use(shelfItemActionApi)
     .use(shelfApi)
     .use(linkApi)
@@ -245,7 +245,9 @@ export async function createServerApp(options: CreateServerAppOptions = {}) {
     .use(labelApi)
     .use(pinboardApi)
     .use(policyTagApi)
-    .use(realmTagTreeApi)
+    .use(realmTagTreeApi);
+
+  const realmRoutes = new Elysia()
     .use(realmApi)
     .use(realmDockApi)
     .use(realmExtraApi)
@@ -258,7 +260,9 @@ export async function createServerApp(options: CreateServerAppOptions = {}) {
     .use(entityAttributionApi)
     .use(unitExternalLinkApi)
     .use(gameSystemRequirementApi)
-    .use(entityApi)
+    .use(entityApi);
+
+  const discoveryRoutes = new Elysia()
     .use(slugApi)
     .use(subscriptionApi)
     .use(userApi)
@@ -279,7 +283,9 @@ export async function createServerApp(options: CreateServerAppOptions = {}) {
     .use(tagVoteApi)
     .use(lowScoreTagsAdminApi)
     .use(scoreApi)
-    .use(seriesApi)
+    .use(seriesApi);
+
+  const operationsRoutes = new Elysia()
     .use(reactionBoundaryApi)
     .use(profileReactionHistoryApi)
     .use(dispatchApi)
@@ -296,7 +302,14 @@ export async function createServerApp(options: CreateServerAppOptions = {}) {
     .use(accountOperationsAdminApi)
     .use(adminRepairJobApi)
     .use(uploadApi)
-    .use(dmBoundaryApi)
+    .use(dmBoundaryApi);
+
+  const routeApp = configuredApp
+    .use(contentRoutes)
+    .use(libraryRoutes)
+    .use(realmRoutes)
+    .use(discoveryRoutes)
+    .use(operationsRoutes)
     .get("/", () => "Hello Elysia")
     .get("/health", () => ({ status: "ok" }))
     .get("/ready", () => ({ status: "ready" }));
@@ -308,7 +321,7 @@ export async function createServerApp(options: CreateServerAppOptions = {}) {
   await initSlugScopesCache();
   await Promise.all([initDefaultRealmCache(), initSeedTagsCache()]);
 
-  return { app, observability, port };
+  return { app: routeApp, observability, port };
 }
 
 export type ServerApp = Awaited<ReturnType<typeof createServerApp>>["app"];
