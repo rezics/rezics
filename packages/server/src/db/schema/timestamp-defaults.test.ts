@@ -4,7 +4,7 @@ import * as authSchema from "../../../../auth/src/db/schema";
 import * as historySchema from "../../../../history/src/db/schema";
 import * as notifySchema from "../../../../notify/src/db/schema";
 import * as rankingSchema from "../../../../ranking/src/db/schema";
-import * as reactionSchema from "../../../../reaction/src/db/schema";
+import * as reactionSchema from "../../../../backend/src/reaction/db/schema";
 import * as serverSchema from "./schema";
 
 type SchemaOwner = {
@@ -13,7 +13,7 @@ type SchemaOwner = {
 };
 
 const owners = {
-  server: { schema: serverSchema, expectedUpdatedAtColumns: 56 },
+  server: { schema: serverSchema, expectedUpdatedAtColumns: 63 },
   auth: { schema: authSchema, expectedUpdatedAtColumns: 7 },
   notify: { schema: notifySchema, expectedUpdatedAtColumns: 1 },
   history: { schema: historySchema, expectedUpdatedAtColumns: 2 },

@@ -23,24 +23,29 @@
     }
   },
   "dependencies": {
+    "@elysiajs/cors": "^1.4.0",
     "@elysiajs/html": "^1.4.2",
     "@elysiajs/openapi": "^1.4.14",
     "@kitajs/html": "^4.2.13",
     "@rezics/auth": "workspace:*",
     "@rezics/contract": "workspace:*",
     "@rezics/history": "workspace:*",
+    "@rezics/jwt": "workspace:*",
     "@rezics/notify": "workspace:*",
     "@rezics/ranking": "workspace:*",
-    "@rezics/reaction": "workspace:*",
     "@rezics/server": "workspace:*",
     "@rezics/shared": "workspace:*",
     "@t3-oss/env-core": "^0.13.10",
     "dotenv": "^17.2.3",
+    "drizzle-orm": "1.0.0-rc.3",
     "elysia": "^1.4.22",
+    "pg": "^8.16.3",
     "valibot": "^1.2.0"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "@types/pg": "^8.15.5",
+    "bun-types": "latest",
+    "drizzle-kit": "1.0.0-rc.3"
   },
   "peerDependencies": {
     "typescript": "^6"

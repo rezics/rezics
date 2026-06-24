@@ -15,6 +15,15 @@ tasks:
   typecheck:
     desc: Typecheck backend package
     cmd: bunx tsc -p tsconfig.json --pretty false
+  reaction:db:generate:
+    desc: Generate Reaction Drizzle migrations
+    cmd: bun drizzle-kit generate --config drizzle.reaction.config.ts
+  reaction:db:migrate:
+    desc: Apply Reaction Drizzle migrations
+    cmd: bun drizzle-kit migrate --config drizzle.reaction.config.ts
+  reaction:db:studio:
+    desc: Open Reaction Drizzle Studio
+    cmd: bun drizzle-kit studio --config drizzle.reaction.config.ts
   build:
     desc: Compile native binary
     cmd: bun build src/cluster.ts --compile --minify-whitespace --minify-syntax --target bun --outfile backend

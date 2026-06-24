@@ -16,7 +16,6 @@
     { "path": "./packages/jwt" },
     { "path": "./packages/notify" },
     { "path": "./packages/ranking" },
-    { "path": "./packages/reaction" },
     { "path": "./packages/search" },
     { "path": "./packages/server" },
     { "path": "./packages/shared" },

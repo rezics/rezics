@@ -58,24 +58,29 @@
     "packages/backend": {
       "name": "@rezics/backend",
       "dependencies": {
+        "@elysiajs/cors": "^1.4.0",
         "@elysiajs/html": "^1.4.2",
         "@elysiajs/openapi": "^1.4.14",
         "@kitajs/html": "^4.2.13",
         "@rezics/auth": "workspace:*",
         "@rezics/contract": "workspace:*",
         "@rezics/history": "workspace:*",
+        "@rezics/jwt": "workspace:*",
         "@rezics/notify": "workspace:*",
         "@rezics/ranking": "workspace:*",
-        "@rezics/reaction": "workspace:*",
         "@rezics/server": "workspace:*",
         "@rezics/shared": "workspace:*",
         "@t3-oss/env-core": "^0.13.10",
         "dotenv": "^17.2.3",
+        "drizzle-orm": "1.0.0-rc.3",
         "elysia": "^1.4.22",
+        "pg": "^8.16.3",
         "valibot": "^1.2.0",
       },
       "devDependencies": {
+        "@types/pg": "^8.15.5",
         "bun-types": "latest",
+        "drizzle-kit": "1.0.0-rc.3",
       },
       "peerDependencies": {
         "typescript": "^6",
@@ -358,28 +363,6 @@
         "elysia": "^1.4.22",
         "pg": "^8.16.3",
         "valibot": "^1.2.0",
-      },
-      "devDependencies": {
-        "@types/bun": "^1.3.0",
-        "@types/pg": "^8.15.5",
-        "drizzle-kit": "1.0.0-rc.3",
-      },
-      "peerDependencies": {
-        "typescript": "^6",
-      },
-    },
-    "packages/reaction": {
-      "name": "@rezics/reaction",
-      "dependencies": {
-        "@elysiajs/cors": "^1.4.0",
-        "@elysiajs/openapi": "^1.4.14",
-        "@rezics/contract": "workspace:*",
-        "@rezics/jwt": "workspace:*",
-        "@rezics/shared": "workspace:*",
-        "dotenv": "^17.2.3",
-        "drizzle-orm": "1.0.0-rc.3",
-        "elysia": "^1.4.22",
-        "pg": "^8.16.3",
       },
       "devDependencies": {
         "@types/bun": "^1.3.0",
@@ -1287,8 +1270,6 @@
     "@rezics/notify": ["@rezics/notify@workspace:packages/notify"],
 
     "@rezics/ranking": ["@rezics/ranking@workspace:packages/ranking"],
-
-    "@rezics/reaction": ["@rezics/reaction@workspace:packages/reaction"],
 
     "@rezics/search": ["@rezics/search@workspace:packages/search"],
 
