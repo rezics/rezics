@@ -1,5 +1,10 @@
 import { treaty } from "@elysiajs/eden";
-import { ApiError, type ApiErrorDetail } from "@rezics/contract/api";
+import {
+  ApiError,
+  type ApiErrorDetail,
+  type EdenResponse,
+  type StatusEdenClient,
+} from "@rezics/contract/api";
 import type { Elysia } from "elysia";
 
 export const API_BASE_URL =
@@ -13,30 +18,11 @@ export function createEdenClient<App extends Elysia>(baseUrl = API_BASE_URL) {
   });
 }
 
-type EdenResponse<T> = {
-  data: T | null;
-  error: unknown;
-  status: number;
-};
-
-type ApiClient = {
-  diagnostic: {
-    system: {
-      get: () => Promise<EdenResponse<unknown>>;
-    };
-  };
-  meili: {
-    status: {
-      get: () => Promise<EdenResponse<unknown>>;
-    };
-  };
-};
-
 export const apiClient = treaty<any>(API_BASE_URL, {
   fetch: {
     credentials: "include",
   },
-}) as unknown as ApiClient;
+}) as unknown as StatusEdenClient;
 
 type EdenErrorValue = {
   code?: string;
@@ -50,7 +36,7 @@ function getEdenErrorValue(error: unknown): EdenErrorValue | null {
   return value && typeof value === "object" ? (value as EdenErrorValue) : null;
 }
 
-export function unwrapEdenResponse<T>(response: EdenResponse<unknown>): T {
+export function unwrapEdenResponse<T>(response: EdenResponse<T>): T {
   if (response.error) {
     const value = getEdenErrorValue(response.error);
     throw new ApiError(
@@ -65,5 +51,5 @@ export function unwrapEdenResponse<T>(response: EdenResponse<unknown>): T {
     throw new ApiError(response.status, "EMPTY_RESPONSE", "Empty response");
   }
 
-  return response.data as T;
+  return response.data;
 }

@@ -11,12 +11,12 @@ const SYSTEM_STATUS_KEY = ["eden", "diagnostic", "system"] as const;
 
 async function getMeiliStatus(): Promise<MeiliStatusSummary> {
   const response = await apiClient.meili.status.get();
-  return unwrapEdenResponse<MeiliStatusSummary>(response);
+  return unwrapEdenResponse(response);
 }
 
 async function getSystemStatus(): Promise<SystemStatusSummary> {
   const response = await apiClient.diagnostic.system.get();
-  return unwrapEdenResponse<SystemStatusSummary>(response);
+  return unwrapEdenResponse(response);
 }
 
 function useAdminSWRStatusQuery<T>(
