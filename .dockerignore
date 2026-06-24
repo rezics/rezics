@@ -8,7 +8,6 @@
 # Compiled service binaries (produced by build:linux inside the image)
 package/server/server
 package/auth/server
-package/notify/notify
 package/ranking/ranking
 package/job-runner/job-runner
 

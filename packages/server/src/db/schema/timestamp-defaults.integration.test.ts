@@ -16,7 +16,7 @@ const authPool = new Pool({
   connectionString: readEnv("packages/auth/.env", "DATABASE_URL"),
 });
 const notifyPool = new Pool({
-  connectionString: readEnv("packages/notify/.env", "NOTIFY_DATABASE_URL"),
+  connectionString: readEnv("packages/backend/.env", "NOTIFY_DATABASE_URL"),
 });
 const historyPool = new Pool({
   connectionString: readEnv("packages/backend/.env", "HISTORY_DATABASE_URL"),

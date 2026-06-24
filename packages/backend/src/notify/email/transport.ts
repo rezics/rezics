@@ -1,4 +1,4 @@
-import { createEmailSender } from "@rezics/email";
+import { createEmailSender } from "@rezics/email/sender";
 import { env } from "../env";
 
 export interface EmailMessage {

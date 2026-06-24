@@ -9,4 +9,6 @@ export const internalGuard = new Elysia({
     set.status = 401;
     return { error: "Unauthorized: Invalid or missing internal secret" };
   }
+
+  return undefined;
 });

@@ -24,6 +24,15 @@ tasks:
   history:db:studio:
     desc: Open History Drizzle Studio
     cmd: bun drizzle-kit studio --config drizzle.history.config.ts
+  notify:db:generate:
+    desc: Generate Notify Drizzle migrations
+    cmd: bun drizzle-kit generate --config drizzle.notify.config.ts
+  notify:db:migrate:
+    desc: Apply Notify Drizzle migrations
+    cmd: bun drizzle-kit migrate --config drizzle.notify.config.ts
+  notify:db:studio:
+    desc: Open Notify Drizzle Studio
+    cmd: bun drizzle-kit studio --config drizzle.notify.config.ts
   reaction:db:generate:
     desc: Generate Reaction Drizzle migrations
     cmd: bun drizzle-kit generate --config drizzle.reaction.config.ts

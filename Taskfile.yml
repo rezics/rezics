@@ -14,7 +14,6 @@ includes:
   job: { taskfile: ./packages/job/Taskfile.yml, dir: ./packages/job }
   job-runner:
     { taskfile: ./packages/job-runner/Taskfile.yml, dir: ./packages/job-runner }
-  notify: { taskfile: ./packages/notify/Taskfile.yml, dir: ./packages/notify }
   ranking: { taskfile: ./packages/ranking/Taskfile.yml, dir: ./packages/ranking }
   search: { taskfile: ./packages/search/Taskfile.yml, dir: ./packages/search }
   server: { taskfile: ./packages/server/Taskfile.yml, dir: ./packages/server }
