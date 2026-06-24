@@ -12,6 +12,10 @@
     "./app": {
       "types": "./src/app.ts",
       "import": "./src/app.ts"
+    },
+    "./book/book.api": {
+      "types": "./src/book/book.api.ts",
+      "import": "./src/book/book.api.ts"
     }
   },
   "dependencies": {

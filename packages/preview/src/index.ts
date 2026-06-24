@@ -38,6 +38,6 @@ await initializeOpenTelemetry(
   }),
 );
 
-const app = createPreviewApp({ isDev, bookRoutes: bookApi, observability });
+const app = createPreviewApp({ bookRoutes: bookApi, isDev, observability });
 app.listen(port);
 logStartupBanner(observability);

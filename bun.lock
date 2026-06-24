@@ -150,6 +150,29 @@
         "typescript": "^6",
       },
     },
+    "packages/backend": {
+      "name": "@rezics/backend",
+      "dependencies": {
+        "@rezics/auth": "workspace:*",
+        "@rezics/history": "workspace:*",
+        "@rezics/notify": "workspace:*",
+        "@rezics/preview": "workspace:*",
+        "@rezics/ranking": "workspace:*",
+        "@rezics/reaction": "workspace:*",
+        "@rezics/server": "workspace:*",
+        "@rezics/shared": "workspace:*",
+        "@t3-oss/env-core": "^0.13.10",
+        "dotenv": "^17.2.3",
+        "elysia": "^1.4.22",
+        "valibot": "^1.2.0",
+      },
+      "devDependencies": {
+        "bun-types": "latest",
+      },
+      "peerDependencies": {
+        "typescript": "^6",
+      },
+    },
     "packages/contract": {
       "name": "@rezics/contract",
       "version": "0.1.0",
@@ -1552,6 +1575,8 @@
     "@rezics/app": ["@rezics/app@workspace:packages/app"],
 
     "@rezics/auth": ["@rezics/auth@workspace:packages/auth"],
+
+    "@rezics/backend": ["@rezics/backend@workspace:packages/backend"],
 
     "@rezics/contract": ["@rezics/contract@workspace:packages/contract"],
 

@@ -11,7 +11,7 @@ type BookRoutes = typeof import("./book/book.api").bookApi;
 
 export type CreatePreviewAppOptions = {
   isDev?: boolean;
-  bookRoutes?: BookRoutes;
+  bookRoutes?: BookRoutes | false;
   observability?: ObservabilityConfig;
 };
 
