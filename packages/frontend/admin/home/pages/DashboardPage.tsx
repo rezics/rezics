@@ -1,11 +1,13 @@
-import type { AdminDashboardSummary } from "@rezics/contract/api/stat/stats";
-import {
-  adminDashboardSummaryQueryOptions,
-  adminStatsQueryOptions,
-} from "@rezics/contract/api/stat/stats.queries";
+import type { AdminDashboardSummary } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { Spinner } from "@rezics/ui";
+import {
+  Alert,
+  AlertDescription,
+  Badge,
+  Card,
+  CardContent,
+} from "@rezics/ui/shadcn";
 import {
   Activity,
   MessageCircle as CommentIcon,
@@ -22,6 +24,10 @@ import { Page } from "@/admin/core/layouts/Page";
 import { Link } from "@/admin/shared/ui/link";
 import { ContentTrendChart } from "../components/chart/ContentTrendChart";
 import { StatCard } from "../components/StatCard";
+import {
+  useAdminDashboardSummaryQuery,
+  useAdminStatsQuery,
+} from "../hooks/useDashboardQueries";
 
 type DashboardStatus = AdminDashboardSummary["system"]["status"];
 
@@ -215,87 +221,104 @@ function DashboardOperationsSummary({
 
 export default function DashboardPage() {
   const { t } = useTranslation(["admin"]);
-  const { data: stats } = useSuspenseQuery(adminStatsQueryOptions());
-  const { data: dashboardSummary } = useSuspenseQuery(
-    adminDashboardSummaryQueryOptions(),
-  );
+  const statsQuery = useAdminStatsQuery();
+  const dashboardSummaryQuery = useAdminDashboardSummaryQuery();
+  const error = statsQuery.error ?? dashboardSummaryQuery.error;
+  const stats = statsQuery.data;
+  const dashboardSummary = dashboardSummaryQuery.data;
+  const hasDashboardData = Boolean(stats && dashboardSummary);
+  const isInitialLoading =
+    !hasDashboardData &&
+    (statsQuery.isLoading || dashboardSummaryQuery.isLoading);
 
   return (
     <Page
       title={t("admin:dashboard_title")}
       description={t("admin:dashboard_description")}
     >
-      <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-12 sm:col-span-6 md:col-span-3">
-          <StatCard
-            label={t("admin:dashboard_total_users")}
-            value={stats.counts.users}
-            icon={<PeopleIcon />}
-          />
+      {isInitialLoading ? (
+        <div className="flex h-40 items-center justify-center">
+          <Spinner />
         </div>
-        <div className="col-span-12 sm:col-span-6 md:col-span-3">
-          <StatCard
-            label={t("admin:dashboard_total_books")}
-            value={stats.counts.books}
-            icon={<MenuBookIcon />}
-          />
-        </div>
-        <div className="col-span-12 sm:col-span-6 md:col-span-3">
-          <StatCard
-            label={t("admin:dashboard_comments")}
-            value={stats.counts.comments}
-            icon={<CommentIcon />}
-          />
-        </div>
-        <div className="col-span-12 sm:col-span-6 md:col-span-3">
-          <StatCard
-            label={t("admin:dashboard_unresolved_feedback")}
-            value={stats.counts.unresolvedFeedback}
-            icon={<FeedbackIcon />}
-            color={
-              stats.counts.unresolvedFeedback > 0
-                ? "var(--colors-semantic-warning-fill)"
-                : undefined
-            }
-          />
-        </div>
-        <div className="col-span-12 sm:col-span-6 md:col-span-3">
-          <StatCard
-            label={t("admin:dashboard_history_pending")}
-            value={stats.counts.historyOutboxPending}
-            icon={<HistoryIcon />}
-          />
-        </div>
-        <div className="col-span-12 sm:col-span-6 md:col-span-3">
-          <StatCard
-            label={t("admin:dashboard_history_failed")}
-            value={stats.counts.historyOutboxFailed}
-            icon={<HistoryIcon />}
-            color={
-              stats.counts.historyOutboxFailed > 0
-                ? "var(--colors-semantic-error-fill)"
-                : undefined
-            }
-          />
-        </div>
+      ) : error && !hasDashboardData ? (
+        <Alert className="mb-4">
+          <AlertDescription className="text-error-text">
+            {(error as Error).message}
+          </AlertDescription>
+        </Alert>
+      ) : !stats || !dashboardSummary ? null : (
+        <div className="grid grid-cols-12 gap-4">
+          <div className="col-span-12 sm:col-span-6 md:col-span-3">
+            <StatCard
+              label={t("admin:dashboard_total_users")}
+              value={stats.counts.users}
+              icon={<PeopleIcon />}
+            />
+          </div>
+          <div className="col-span-12 sm:col-span-6 md:col-span-3">
+            <StatCard
+              label={t("admin:dashboard_total_books")}
+              value={stats.counts.books}
+              icon={<MenuBookIcon />}
+            />
+          </div>
+          <div className="col-span-12 sm:col-span-6 md:col-span-3">
+            <StatCard
+              label={t("admin:dashboard_comments")}
+              value={stats.counts.comments}
+              icon={<CommentIcon />}
+            />
+          </div>
+          <div className="col-span-12 sm:col-span-6 md:col-span-3">
+            <StatCard
+              label={t("admin:dashboard_unresolved_feedback")}
+              value={stats.counts.unresolvedFeedback}
+              icon={<FeedbackIcon />}
+              color={
+                stats.counts.unresolvedFeedback > 0
+                  ? "var(--colors-semantic-warning-fill)"
+                  : undefined
+              }
+            />
+          </div>
+          <div className="col-span-12 sm:col-span-6 md:col-span-3">
+            <StatCard
+              label={t("admin:dashboard_history_pending")}
+              value={stats.counts.historyOutboxPending}
+              icon={<HistoryIcon />}
+            />
+          </div>
+          <div className="col-span-12 sm:col-span-6 md:col-span-3">
+            <StatCard
+              label={t("admin:dashboard_history_failed")}
+              value={stats.counts.historyOutboxFailed}
+              icon={<HistoryIcon />}
+              color={
+                stats.counts.historyOutboxFailed > 0
+                  ? "var(--colors-semantic-error-fill)"
+                  : undefined
+              }
+            />
+          </div>
 
-        <div className="col-span-12">
-          <DashboardOperationsSummary summary={dashboardSummary} />
-        </div>
+          <div className="col-span-12">
+            <DashboardOperationsSummary summary={dashboardSummary} />
+          </div>
 
-        <div className="col-span-12">
-          <Card>
-            <CardContent>
-              <h3 className="text-sm font-extrabold mb-2">
-                {t("admin:dashboard_content_created_30d")}
-              </h3>
-              <div style={{ height: 320 }}>
-                <ContentTrendChart trend={stats.contentTrend} />
-              </div>
-            </CardContent>
-          </Card>
+          <div className="col-span-12">
+            <Card>
+              <CardContent>
+                <h3 className="text-sm font-extrabold mb-2">
+                  {t("admin:dashboard_content_created_30d")}
+                </h3>
+                <div style={{ height: 320 }}>
+                  <ContentTrendChart trend={stats.contentTrend} />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
+      )}
     </Page>
   );
 }
