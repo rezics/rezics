@@ -1,8 +1,8 @@
 import {
   useAppendPinboardMutation,
   useRemovePinboardMutation,
-} from "@rezics/api/pinboard/pinboard.mutations";
-import { unitApi } from "@rezics/api/unit/unit";
+} from "@rezics/contract/api/pinboard/pinboard.mutations";
+import { unitApi } from "@rezics/contract/api/unit/unit";
 import {
   DEFAULT_LANGUAGE,
   type Language,

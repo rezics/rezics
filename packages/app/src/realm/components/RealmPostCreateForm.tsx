@@ -1,4 +1,4 @@
-import { useCreatePostMutation } from "@rezics/api/post/post";
+import { useCreatePostMutation } from "@rezics/contract/api/post/post";
 import {
   markdownContentDocWithPoll,
   type PollDTO,

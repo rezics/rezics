@@ -1,15 +1,15 @@
-import { governanceRealmCaseListQuery } from "@rezics/api/governance/governance";
-import { labelListQuery } from "@rezics/api/label/label";
-import { postQueries } from "@rezics/api/post/post";
+import { governanceRealmCaseListQuery } from "@rezics/contract/api/governance/governance";
+import { labelListQuery } from "@rezics/contract/api/label/label";
+import { postQueries } from "@rezics/contract/api/post/post";
 import {
   myRealmMembershipQuery,
   myRealmsQuery,
   realmDetailQuery,
   realmRuleResolvedQuery,
-} from "@rezics/api/realm/realm";
-import { realmTagTreeQuery } from "@rezics/api/realm-tag-tree";
-import { subscriptionCheckQuery } from "@rezics/api/subscription/subscription";
-import { tagBatchTranslationsQuery } from "@rezics/api/tag/tag";
+} from "@rezics/contract/api/realm/realm";
+import { realmTagTreeQuery } from "@rezics/contract/api/realm-tag-tree";
+import { subscriptionCheckQuery } from "@rezics/contract/api/subscription/subscription";
+import { tagBatchTranslationsQuery } from "@rezics/contract/api/tag/tag";
 import {
   emptyRealmTagTree,
   LANGUAGES,

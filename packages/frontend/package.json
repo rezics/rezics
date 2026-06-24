@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@elysiajs/eden": "^1.4.9",
-    "@rezics/api": "workspace:*",
     "@rezics/contract": "workspace:*",
     "@rezics/i18n": "workspace:*",
     "@rezics/ui": "workspace:*",

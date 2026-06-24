@@ -1,18 +1,18 @@
-import { historyQueries, unitAuthorityQueries } from "@rezics/api";
+import { historyQueries, unitAuthorityQueries } from "@rezics/contract/api";
 import {
   bookKeys,
   bookQueries,
   useCreateBookMutation,
   useUpdateBookMutation,
-} from "@rezics/api/book/book";
-import { creditAttributionQueries } from "@rezics/api/credit-attribution/credit-attribution";
-import { useEntityAttributionBatchMutation } from "@rezics/api/entity-attribution/entity-attribution";
-import { getLockedFieldError } from "@rezics/api/react-query/errors";
-import { positionForNewBottomPin } from "@rezics/api/tag/fractional-index";
+} from "@rezics/contract/api/book/book";
+import { creditAttributionQueries } from "@rezics/contract/api/credit-attribution/credit-attribution";
+import { useEntityAttributionBatchMutation } from "@rezics/contract/api/entity-attribution/entity-attribution";
+import { getLockedFieldError } from "@rezics/contract/api/react-query/errors";
+import { positionForNewBottomPin } from "@rezics/contract/api/tag/fractional-index";
 import {
   useDeleteTranslationMutation,
   useUpsertTranslationMutation,
-} from "@rezics/api/unit/unit.mutations";
+} from "@rezics/contract/api/unit/unit.mutations";
 import type {
   AiDisclosureMode,
   ContentRating,

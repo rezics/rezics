@@ -2,7 +2,7 @@ import {
   contentSearchQueryOptions,
   contentStructureQuery,
   gameSystemRequirementsByGameQueryOptions,
-} from "@rezics/api";
+} from "@rezics/contract/api";
 
 export const gameDetailTabs = [
   "overview",

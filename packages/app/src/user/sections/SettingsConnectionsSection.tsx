@@ -1,5 +1,5 @@
-import { authApi } from "@rezics/api/auth/auth.api";
-import { authQueries } from "@rezics/api/auth/auth.queries";
+import { authApi } from "@rezics/contract/api/auth/auth.api";
+import { authQueries } from "@rezics/contract/api/auth/auth.queries";
 import type { AuthProvider } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

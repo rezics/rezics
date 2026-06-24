@@ -1,5 +1,8 @@
 import { useAlertStore } from "@/admin/app/states/windowAlertStore";
-import { echoKvApi, echoKvKeyListQuery } from "@rezics/api/echokv/echokv";
+import {
+  echoKvApi,
+  echoKvKeyListQuery,
+} from "@rezics/contract/api/echokv/echokv";
 import { RezicsJsonEditor } from "@rezics/ui/editor";
 import { Button, Input, Label, Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";

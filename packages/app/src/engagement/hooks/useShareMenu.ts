@@ -1,6 +1,6 @@
-import { useCurrentUserId } from "@rezics/api/hooks";
-import { useCreatePostMutation } from "@rezics/api/post/post";
-import { useRecordShareMutation } from "@rezics/api/reaction/reaction";
+import { useCurrentUserId } from "@rezics/contract/api/hooks";
+import { useCreatePostMutation } from "@rezics/contract/api/post/post";
+import { useRecordShareMutation } from "@rezics/contract/api/reaction/reaction";
 import { useTranslation } from "@rezics/i18n/react";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";

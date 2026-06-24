@@ -1,5 +1,5 @@
-import { mySubscriptionListEntriesQuery } from "@rezics/api/subscription/subscription";
-import { userQueries } from "@rezics/api/user/user.queries";
+import { mySubscriptionListEntriesQuery } from "@rezics/contract/api/subscription/subscription";
+import { userQueries } from "@rezics/contract/api/user/user.queries";
 import type { UserSubscriptionListEntryDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";

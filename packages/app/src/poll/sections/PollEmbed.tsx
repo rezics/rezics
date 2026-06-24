@@ -1,4 +1,4 @@
-import { pollDetailQuery } from "@rezics/api/poll/poll.queries";
+import { pollDetailQuery } from "@rezics/contract/api/poll/poll.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight } from "lucide-react";

@@ -1,11 +1,11 @@
 import {
   useLinkProgressPost,
   useUpdateProgressPostLink,
-} from "@rezics/api/progress/progress.mutations";
+} from "@rezics/contract/api/progress/progress.mutations";
 import {
   useUnitProgress,
   useUnitProgressPosts,
-} from "@rezics/api/progress/progress.queries";
+} from "@rezics/contract/api/progress/progress.queries";
 import type { UserUnitProgressStatus } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { useAtom, useSetAtom } from "jotai";

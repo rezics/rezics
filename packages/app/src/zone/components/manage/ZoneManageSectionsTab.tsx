@@ -3,7 +3,7 @@ import type {
   UpdateZonePageInput,
   ZoneDTO,
 } from "@rezics/contract";
-import { positionForNewBottomPin } from "@rezics/api/shared/fractional-index";
+import { positionForNewBottomPin } from "@rezics/contract/api/shared/fractional-index";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Card, CardContent, Input, Label } from "@rezics/ui/shadcn";
 import { ArrowDown, ArrowUp, Plus, Save, Trash2 } from "lucide-react";

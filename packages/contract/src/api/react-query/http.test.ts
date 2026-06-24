@@ -1,15 +1,17 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import {
+  AUTH_PRESENCE_COOKIE_NAME,
+  AUTH_PRESENCE_COOKIE_VALUE,
+} from "@rezics/contract";
 import { configureApi } from "../config";
 
 const fetchMock = mock();
-let authPresence = false;
 
-mock.module("./authPresence", () => ({
-  hasAuthPresence: () => authPresence,
-  clearAuthPresence: () => {
-    authPresence = false;
-  },
-}));
+function setAuthPresenceCookie(present: boolean) {
+  document.cookie = present
+    ? `${AUTH_PRESENCE_COOKIE_NAME}=${AUTH_PRESENCE_COOKIE_VALUE}`
+    : "";
+}
 
 type MemoryStorage = {
   getItem(key: string): string | null;
@@ -40,7 +42,6 @@ function createMemoryStorage(): MemoryStorage {
 describe("refreshAuthToken", () => {
   beforeEach(() => {
     fetchMock.mockReset();
-    authPresence = false;
     configureApi({
       apiBaseUrl: "http://api.example",
       authBaseUrl: "http://api.example",
@@ -57,6 +58,7 @@ describe("refreshAuthToken", () => {
     globalThis.document = {
       cookie: "",
     } as Document;
+    setAuthPresenceCookie(false);
   });
 
   afterEach(() => {
@@ -66,7 +68,7 @@ describe("refreshAuthToken", () => {
   });
 
   test("retries 401 responses only when auth presence exists", async () => {
-    authPresence = true;
+    setAuthPresenceCookie(true);
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ message: "Expired" }), {
         status: 401,
@@ -143,7 +145,7 @@ describe("refreshAuthToken", () => {
   });
 
   test("preserves auth presence when main session refresh reports setup required", async () => {
-    authPresence = true;
+    setAuthPresenceCookie(true);
     fetchMock.mockResolvedValueOnce(
       new Response(
         JSON.stringify({
@@ -162,10 +164,11 @@ describe("refreshAuthToken", () => {
     );
 
     const { queryAccessToken, MainSessionRefreshError } = await import("./jwt");
+    const { hasAuthPresence } = await import("./authPresence");
 
     await expect(queryAccessToken()).rejects.toBeInstanceOf(
       MainSessionRefreshError,
     );
-    expect(authPresence).toBe(true);
+    expect(hasAuthPresence()).toBe(true);
   });
 });

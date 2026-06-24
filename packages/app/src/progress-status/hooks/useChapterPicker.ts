@@ -1,4 +1,4 @@
-import { contentStructureQueries } from "@rezics/api/content-structure";
+import { contentStructureQueries } from "@rezics/contract/api/content-structure";
 import type { ContentStructureItem } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";

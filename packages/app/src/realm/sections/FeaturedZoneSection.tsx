@@ -1,4 +1,4 @@
-import { zonePortalQueryOptions } from "@rezics/api/zone/zone";
+import { zonePortalQueryOptions } from "@rezics/contract/api/zone/zone";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Card, CardContent } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";

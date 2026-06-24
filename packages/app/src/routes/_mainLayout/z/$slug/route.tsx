@@ -1,4 +1,4 @@
-import { zoneQueries } from "@rezics/api/zone/zone";
+import { zoneQueries } from "@rezics/contract/api/zone/zone";
 import type { ZoneDTO } from "@rezics/contract";
 import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 import {

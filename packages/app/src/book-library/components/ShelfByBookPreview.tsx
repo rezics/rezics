@@ -1,4 +1,4 @@
-import { shelfQueries } from "@rezics/api/shelf/shelf";
+import { shelfQueries } from "@rezics/contract/api/shelf/shelf";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";

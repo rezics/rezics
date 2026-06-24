@@ -2,7 +2,7 @@ import {
   useIsSubscribed,
   useSubscribeMutation,
   useUnsubscribeMutation,
-} from "@rezics/api/subscription/subscription";
+} from "@rezics/contract/api/subscription/subscription";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,

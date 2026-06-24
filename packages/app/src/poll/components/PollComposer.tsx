@@ -1,4 +1,4 @@
-import { useCreatePollMutation } from "@rezics/api/poll/poll.mutations";
+import { useCreatePollMutation } from "@rezics/contract/api/poll/poll.mutations";
 import type {
   CreatePollInput,
   PollDTO,

@@ -1,6 +1,6 @@
-import { useCreateCommentMutation } from "@rezics/api/comment/comment";
-import { useCreatePostMutation } from "@rezics/api/post/post";
-import { realmDetailQuery } from "@rezics/api/realm/realm";
+import { useCreateCommentMutation } from "@rezics/contract/api/comment/comment";
+import { useCreatePostMutation } from "@rezics/contract/api/post/post";
+import { realmDetailQuery } from "@rezics/contract/api/realm/realm";
 import {
   CONTENT_LANGUAGE_SLUGS,
   type CommentDTO,

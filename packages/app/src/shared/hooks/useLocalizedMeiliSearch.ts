@@ -1,10 +1,10 @@
-import { federatedSearchQueryOptions } from "@rezics/api/meili/meili.federated";
+import { federatedSearchQueryOptions } from "@rezics/contract/api/meili/meili.federated";
 import {
   contentSearchQueryOptions,
   pollSearchQueryOptions,
   postSearchQueryOptions,
   realmSearchQueryOptions,
-} from "@rezics/api/meili/meili.queries";
+} from "@rezics/contract/api/meili/meili.queries";
 import type {
   ContentSearchOptions,
   FederatedSearchOptions,

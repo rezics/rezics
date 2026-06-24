@@ -1,5 +1,5 @@
-import { userMutations } from "@rezics/api/user/user.mutations";
-import { userQueries } from "@rezics/api/user/user.queries";
+import { userMutations } from "@rezics/contract/api/user/user.mutations";
+import { userQueries } from "@rezics/contract/api/user/user.queries";
 import {
   contentDocMarkdownFallback,
   markdownContentDoc,

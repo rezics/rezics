@@ -1,4 +1,4 @@
-import { getSeedTagId } from "@rezics/api/infra/bootstrap";
+import { getSeedTagId } from "@rezics/contract/api/infra/bootstrap";
 import {
   SEED_TAG_NAMES,
   SEED_TAG_TITLES,

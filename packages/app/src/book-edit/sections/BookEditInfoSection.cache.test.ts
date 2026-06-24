@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { upsertCachedTranslation } from "@rezics/api/react-query/cache-coherence";
+import { upsertCachedTranslation } from "@rezics/contract/api/react-query/cache-coherence";
 import type { BookDTO, UnitTranslationDTO } from "@rezics/contract";
 import { translationToDraft } from "../hooks/useBookTranslationEditor";
 

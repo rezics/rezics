@@ -1,4 +1,4 @@
-import { useCreateEntity } from "@rezics/api/entity";
+import { useCreateEntity } from "@rezics/contract/api/entity";
 import type { CreateEntityInput, EntityKind } from "@rezics/contract";
 import { CreationMode, entityKinds } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";

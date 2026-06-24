@@ -1,4 +1,4 @@
-import { unitQueries } from "@rezics/api/unit/unit.queries";
+import { unitQueries } from "@rezics/contract/api/unit/unit.queries";
 import { defaultSupportLanguage, type ExcerptSource } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input, Label } from "@rezics/ui/shadcn";

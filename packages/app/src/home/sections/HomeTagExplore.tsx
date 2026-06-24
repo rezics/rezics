@@ -1,4 +1,4 @@
-import { tagQueries } from "@rezics/api/tag/tag.queries";
+import { tagQueries } from "@rezics/contract/api/tag/tag.queries";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Badge } from "@rezics/ui/shadcn";

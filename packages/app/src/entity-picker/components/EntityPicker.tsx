@@ -1,4 +1,4 @@
-import { useEntitySearch } from "@rezics/api/entity";
+import { useEntitySearch } from "@rezics/contract/api/entity";
 import {
   type CreditAttributionRole,
   creditAttributionRoleRegistry,

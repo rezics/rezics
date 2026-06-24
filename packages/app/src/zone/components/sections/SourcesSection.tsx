@@ -1,4 +1,4 @@
-import { unitExternalLinksQueryOptions } from "@rezics/api/unit-external-link";
+import { unitExternalLinksQueryOptions } from "@rezics/contract/api/unit-external-link";
 import type { ZoneSourcesSection } from "@rezics/contract";
 import { Skeleton } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";

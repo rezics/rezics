@@ -1,9 +1,9 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
-import { bookQueries } from "@rezics/api/book/book";
-import { useCurrentUserId } from "@rezics/api/hooks";
-import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
-import { useCreatePostMutation } from "@rezics/api/post/post";
-import { useUpsertScoreMutation } from "@rezics/api/score/score";
+import { bookQueries } from "@rezics/contract/api/book/book";
+import { useCurrentUserId } from "@rezics/contract/api/hooks";
+import { getDefaultRealmId } from "@rezics/contract/api/infra/bootstrap";
+import { useCreatePostMutation } from "@rezics/contract/api/post/post";
+import { useUpsertScoreMutation } from "@rezics/contract/api/score/score";
 import {
   markdownContentDoc,
   normalizeContentLanguage,

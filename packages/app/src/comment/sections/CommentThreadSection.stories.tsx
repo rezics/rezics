@@ -1,4 +1,4 @@
-import { commentKeys } from "@rezics/api/comment/comment.keys";
+import { commentKeys } from "@rezics/contract/api/comment/comment.keys";
 import {
   type CommentDTO,
   type CommentListContext,

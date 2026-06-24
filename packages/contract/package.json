@@ -11,6 +11,66 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./api": {
+      "types": "./src/api/index.ts",
+      "default": "./src/api/index.ts"
+    },
+    "./api/activity": {
+      "types": "./src/api/activity/index.ts",
+      "default": "./src/api/activity/index.ts"
+    },
+    "./api/content-structure": {
+      "types": "./src/api/content-structure/content-structure.ts",
+      "default": "./src/api/content-structure/content-structure.ts"
+    },
+    "./api/draft": {
+      "types": "./src/api/draft/index.ts",
+      "default": "./src/api/draft/index.ts"
+    },
+    "./api/echokv": {
+      "types": "./src/api/echokv/echokv.ts",
+      "default": "./src/api/echokv/echokv.ts"
+    },
+    "./api/entity": {
+      "types": "./src/api/entity/index.ts",
+      "default": "./src/api/entity/index.ts"
+    },
+    "./api/hooks": {
+      "types": "./src/api/hooks/index.ts",
+      "default": "./src/api/hooks/index.ts"
+    },
+    "./api/notification": {
+      "types": "./src/api/notification/index.ts",
+      "default": "./src/api/notification/index.ts"
+    },
+    "./api/providers": {
+      "types": "./src/api/providers/index.ts",
+      "default": "./src/api/providers/index.ts"
+    },
+    "./api/shelf": {
+      "types": "./src/api/shelf/index.ts",
+      "default": "./src/api/shelf/index.ts"
+    },
+    "./api/slug": {
+      "types": "./src/api/slug/index.ts",
+      "default": "./src/api/slug/index.ts"
+    },
+    "./api/states": {
+      "types": "./src/api/states/index.ts",
+      "default": "./src/api/states/index.ts"
+    },
+    "./api/unit": {
+      "types": "./src/api/unit/index.ts",
+      "default": "./src/api/unit/index.ts"
+    },
+    "./api/unit-external-link": {
+      "types": "./src/api/unit-external-link/index.ts",
+      "default": "./src/api/unit-external-link/index.ts"
+    },
+    "./api/*": {
+      "types": "./src/api/*.ts",
+      "default": "./src/api/*.ts"
+    },
     "./language-core": {
       "types": "./src/language-core.ts",
       "default": "./src/language-core.ts"
@@ -30,7 +90,22 @@
   },
   "dependencies": {
     "@sinclair/typebox": "^0.34.41",
+    "@tanstack/query-broadcast-client-experimental": "^5.96.2",
+    "@tanstack/query-db-collection": "^1.0.36",
+    "@tanstack/query-sync-storage-persister": "^5.96.2",
+    "@tanstack/react-db": "^0.1.83",
+    "@tanstack/react-query": "^5.96.2",
+    "@tanstack/react-query-persist-client": "^5.96.2",
     "elysia": "^1.4.12",
-    "memoirist": "^0.4.0"
+    "memoirist": "^0.4.0",
+    "zustand": "5.0.7"
+  },
+  "peerDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "react": "^19"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
   }
 }

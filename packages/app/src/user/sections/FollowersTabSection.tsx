@@ -47,7 +47,7 @@
  * └──────────────────────┘
  */
 
-import { userQueries } from "@rezics/api/user/user.queries";
+import { userQueries } from "@rezics/contract/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";

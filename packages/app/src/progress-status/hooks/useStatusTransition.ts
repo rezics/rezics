@@ -1,7 +1,7 @@
 import {
   useDeleteUnitProgress,
   useUpdateUnitProgress,
-} from "@rezics/api/progress/progress.mutations";
+} from "@rezics/contract/api/progress/progress.mutations";
 import type { UserUnitProgressStatus } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { useMemo } from "react";

@@ -1,7 +1,7 @@
 import {
   getSystemShelfMissingSlug,
   useSystemShelfRecovery,
-} from "@rezics/api/shelf";
+} from "@rezics/contract/api/shelf";
 import { FAVORITES_SHELF_SLUG, type ReservedShelfSlug } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { toast } from "sonner";

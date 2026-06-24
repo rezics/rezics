@@ -1,4 +1,4 @@
-import { useCreateShelfMutation } from "@rezics/api/shelf/shelf.mutations";
+import { useCreateShelfMutation } from "@rezics/contract/api/shelf/shelf.mutations";
 import { DEFAULT_LANGUAGE, markdownContentDoc } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input, Label } from "@rezics/ui/shadcn";

@@ -1,4 +1,4 @@
-import { useRemovePinboardMutation } from "@rezics/api/pinboard/pinboard.mutations";
+import { useRemovePinboardMutation } from "@rezics/contract/api/pinboard/pinboard.mutations";
 import { useTranslation } from "@rezics/i18n/react";
 import { Alert, AlertDescription, AlertTitle, Button } from "@rezics/ui/shadcn";
 import { Brush as CleaningServicesRoundedIcon } from "lucide-react";

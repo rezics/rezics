@@ -1,8 +1,8 @@
 import {
   useRevokeTokenMutation,
   useUpdateTokenMutation,
-} from "@rezics/api/token/token.mutations";
-import { tokenQueries } from "@rezics/api/token/token.queries";
+} from "@rezics/contract/api/token/token.mutations";
+import { tokenQueries } from "@rezics/contract/api/token/token.queries";
 import type { ApiTokenDTO, ApiTokenScopes } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

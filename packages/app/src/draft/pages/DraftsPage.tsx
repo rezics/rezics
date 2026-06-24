@@ -1,4 +1,4 @@
-import { useDrafts } from "@rezics/api/draft";
+import { useDrafts } from "@rezics/contract/api/draft";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import type React from "react";

@@ -1,4 +1,4 @@
-import { useIsSubscribed } from "@rezics/api/subscription/subscription";
+import { useIsSubscribed } from "@rezics/contract/api/subscription/subscription";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,

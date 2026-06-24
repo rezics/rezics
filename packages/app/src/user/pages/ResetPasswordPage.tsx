@@ -1,4 +1,4 @@
-import { authApi } from "@rezics/api/auth/auth.api";
+import { authApi } from "@rezics/contract/api/auth/auth.api";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";

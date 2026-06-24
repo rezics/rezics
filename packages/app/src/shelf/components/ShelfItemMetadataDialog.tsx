@@ -5,7 +5,7 @@ import {
   userTagApplicationsForUnitQuery,
   userShelfItemForUnitQuery,
   useSetUserTagApplicationsMutation,
-} from "@rezics/api";
+} from "@rezics/contract/api";
 import type { TagSearchDocument } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import {

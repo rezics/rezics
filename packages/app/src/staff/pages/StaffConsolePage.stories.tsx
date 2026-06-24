@@ -1,8 +1,8 @@
 import {
   governanceCaseListQuery,
   governanceRealmCaseListQuery,
-} from "@rezics/api/governance/governance";
-import { governanceApi } from "@rezics/api/governance/governance.api";
+} from "@rezics/contract/api/governance/governance";
+import { governanceApi } from "@rezics/contract/api/governance/governance.api";
 import type { ModerationCaseDTO } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { QueryClient } from "@tanstack/react-query";

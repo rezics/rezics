@@ -1,4 +1,4 @@
-import { useUpdateZone } from "@rezics/api";
+import { useUpdateZone } from "@rezics/contract/api";
 import { useTranslation } from "@rezics/i18n/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";

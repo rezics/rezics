@@ -1,4 +1,4 @@
-import type { StreamPostRow } from "@rezics/api/stream/stream";
+import type { StreamPostRow } from "@rezics/contract/api/stream/stream";
 import type { ModerationActionDTO, ModerationStatus } from "@rezics/contract";
 import type React from "react";
 import { StreamPostCard } from "./StreamPostCard";

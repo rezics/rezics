@@ -1,4 +1,4 @@
-import { useEntityList } from "@rezics/api/entity";
+import { useEntityList } from "@rezics/contract/api/entity";
 import type {
   EntityDTO,
   EntityKind,

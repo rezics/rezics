@@ -1,4 +1,4 @@
-import { useRestoreContentStructureNodes } from "@rezics/api/content-structure";
+import { useRestoreContentStructureNodes } from "@rezics/contract/api/content-structure";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";

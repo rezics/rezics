@@ -1,8 +1,8 @@
-import type { AdminDashboardSummary } from "@rezics/api/stat/stats";
+import type { AdminDashboardSummary } from "@rezics/contract/api/stat/stats";
 import {
   adminDashboardSummaryQueryOptions,
   adminStatsQueryOptions,
-} from "@rezics/api/stat/stats.queries";
+} from "@rezics/contract/api/stat/stats.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { useSuspenseQuery } from "@tanstack/react-query";

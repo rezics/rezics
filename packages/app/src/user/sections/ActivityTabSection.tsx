@@ -1,4 +1,4 @@
-import { useActivityInfinite } from "@rezics/api/activity";
+import { useActivityInfinite } from "@rezics/contract/api/activity";
 import type { ActivityKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

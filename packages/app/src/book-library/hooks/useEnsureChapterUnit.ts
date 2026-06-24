@@ -1,4 +1,4 @@
-import { chapterMutations } from "@rezics/api/chapter/chapter.mutations";
+import { chapterMutations } from "@rezics/contract/api/chapter/chapter.mutations";
 import { useCallback } from "react";
 import { contentUnitIdForNode } from "../models/bookContentStructurePath";
 

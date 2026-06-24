@@ -1,5 +1,5 @@
-import { generateKeyBetween } from "@rezics/api/shared/fractional-index";
-import type { ShelfSortOrder } from "@rezics/api/shelf";
+import { generateKeyBetween } from "@rezics/contract/api/shared/fractional-index";
+import type { ShelfSortOrder } from "@rezics/contract/api/shelf";
 
 export interface PositionedShelfRow {
   position: string;

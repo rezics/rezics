@@ -15,7 +15,10 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { realmDetailQuery, realmSearchQuery } from "@rezics/api/realm/realm";
+import {
+  realmDetailQuery,
+  realmSearchQuery,
+} from "@rezics/contract/api/realm/realm";
 import type {
   RealmResponse,
   RealmTagDisplayTarget,

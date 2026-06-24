@@ -1,7 +1,7 @@
 import {
   hydrateAuthSessionState,
   useAuthSessionStore,
-} from "@rezics/api/states";
+} from "@rezics/contract/api/states";
 import { redirect } from "@tanstack/react-router";
 import {
   buildCurrentRedirectPath,

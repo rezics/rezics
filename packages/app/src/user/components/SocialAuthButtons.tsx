@@ -1,4 +1,4 @@
-import { authApi, authQueries } from "@rezics/api/auth/auth";
+import { authApi, authQueries } from "@rezics/contract/api/auth/auth";
 import type { AuthProvider } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { AuthProviderButton } from "@rezics/ui/composite/auth/AuthProviderButton.tsx";

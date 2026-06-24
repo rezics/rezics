@@ -1,4 +1,4 @@
-import { unitKeys } from "@rezics/api/unit/unit.keys";
+import { unitKeys } from "@rezics/contract/api/unit/unit.keys";
 import type { UnitDTO, UnitResponse } from "@rezics/contract";
 import { Button } from "@rezics/ui/shadcn";
 import type { Meta, StoryObj } from "@storybook/react-vite";

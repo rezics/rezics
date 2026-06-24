@@ -1,4 +1,4 @@
-import { realmSearchQueryOptions } from "@rezics/api/meili/meili.queries";
+import { realmSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Input } from "@rezics/ui/shadcn";

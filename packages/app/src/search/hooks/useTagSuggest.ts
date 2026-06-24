@@ -1,4 +1,4 @@
-import { meiliTagSearchQueryOptions } from "@rezics/api/meili/meili.queries";
+import { meiliTagSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
 import { useLocale } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";

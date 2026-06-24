@@ -1,4 +1,4 @@
-import { postQueries } from "@rezics/api/post/post";
+import { postQueries } from "@rezics/contract/api/post/post";
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 import { titleOfPost, unitTitleMeta } from "@/core/routing/documentTitle";
 import { routeQueryOrNotFound } from "@/core/routing/resourceErrors";

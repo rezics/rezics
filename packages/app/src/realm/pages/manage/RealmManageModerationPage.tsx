@@ -1,4 +1,4 @@
-import { useUpdateRealmMutation } from "@rezics/api/realm/realm";
+import { useUpdateRealmMutation } from "@rezics/contract/api/realm/realm";
 import { useTranslation } from "@rezics/i18n/react";
 import { Card, CardContent, Checkbox, Label } from "@rezics/ui/shadcn";
 import { toast } from "sonner";

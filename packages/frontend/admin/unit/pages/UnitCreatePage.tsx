@@ -1,5 +1,5 @@
-import { unitMutations } from "@rezics/api/unit/unit.mutations";
-import { userQueries } from "@rezics/api/user/user.queries";
+import { unitMutations } from "@rezics/contract/api/unit/unit.mutations";
+import { userQueries } from "@rezics/contract/api/user/user.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Alert,

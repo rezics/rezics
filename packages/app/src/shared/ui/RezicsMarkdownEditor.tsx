@@ -1,5 +1,5 @@
-import { meiliUserApi } from "@rezics/api/meili/meili.api";
-import { uploadApi } from "@rezics/api/upload/upload.api";
+import { meiliUserApi } from "@rezics/contract/api/meili/meili.api";
+import { uploadApi } from "@rezics/contract/api/upload/upload.api";
 import {
   RezicsMarkdownEditor as BaseRezicsMarkdownEditor,
   createRezicsUploadProvider,

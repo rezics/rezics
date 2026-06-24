@@ -1,7 +1,7 @@
-import { realmMembersQuery } from "@rezics/api/realm/realm";
-import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
-import { zonePortalQueryOptions } from "@rezics/api/zone/zone";
-import { postQueries } from "@rezics/api/post/post";
+import { realmMembersQuery } from "@rezics/contract/api/realm/realm";
+import { unitDetailQuery } from "@rezics/contract/api/unit/unit.queries";
+import { zonePortalQueryOptions } from "@rezics/contract/api/zone/zone";
+import { postQueries } from "@rezics/contract/api/post/post";
 import {
   mainMarkdownSource,
   type RealmDockBuiltinItem,

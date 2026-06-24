@@ -1,4 +1,4 @@
-import { useCreatePostMutation } from "@rezics/api/post/post";
+import { useCreatePostMutation } from "@rezics/contract/api/post/post";
 import { useTranslation } from "@rezics/i18n/react";
 import { Input } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";

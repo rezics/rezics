@@ -16,16 +16,16 @@ const i18nMessages = {
     getI18nRuntime().i18n.t("entity:shelf_view_bookshelf"),
 } as const;
 
-import { useCanEdit } from "@rezics/api/hooks";
-import { useReactionHydration } from "@rezics/api/reaction/reaction";
-import type { ShelfSortState, ShelfView } from "@rezics/api/shelf";
+import { useCanEdit } from "@rezics/contract/api/hooks";
+import { useReactionHydration } from "@rezics/contract/api/reaction/reaction";
+import type { ShelfSortState, ShelfView } from "@rezics/contract/api/shelf";
 import {
   shelfDetailQuery,
   shelfItemsInfiniteQuery,
   useCleanupOrphansMutation,
   useHydratedShelfItems,
   useShelfItemStatusHydration,
-} from "@rezics/api/shelf";
+} from "@rezics/contract/api/shelf";
 import {
   contentDocMarkdownFallback,
   isLibraryKind,

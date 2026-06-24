@@ -1,8 +1,8 @@
 import {
   clearAuthPresence,
   hasAuthPresence,
-} from "@rezics/api/react-query/authPresence";
-import { exchangeForSessionToken } from "@rezics/api/react-query/jwt";
+} from "../react-query/authPresence";
+import { exchangeForSessionToken } from "../react-query/jwt";
 import { useEffect } from "react";
 import {
   clearAuthSessionState,

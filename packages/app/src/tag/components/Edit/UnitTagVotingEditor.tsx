@@ -3,20 +3,20 @@ import {
   useCastRealmTagApplicationVoteMutation,
   useCreateRealmTagApplicationMutation,
   useWithdrawRealmTagApplicationVoteMutation,
-} from "@rezics/api/realm/realm";
+} from "@rezics/contract/api/realm/realm";
 import {
   tagApi,
   tagQueries,
   useCastTagVoteMutation,
   useCreateUnitTagMutation,
   useWithdrawUnitTagVoteMutation,
-} from "@rezics/api/tag/tag";
-import { meiliTagSearchQueryOptions } from "@rezics/api/meili/meili.queries";
+} from "@rezics/contract/api/tag/tag";
+import { meiliTagSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
 import {
   useDeleteUserTagApplicationMutation,
   userTagApplicationQueries,
   useSetUserTagApplicationsMutation,
-} from "@rezics/api/user-tag-application/user-tag-application";
+} from "@rezics/contract/api/user-tag-application/user-tag-application";
 import type {
   BatchTagTranslationResult,
   TagSearchDocument,

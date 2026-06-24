@@ -1,4 +1,4 @@
-import { userBySlugQuery } from "@rezics/api/user/user.queries";
+import { userBySlugQuery } from "@rezics/contract/api/user/user.queries";
 import { isPublicUserSlugRouteParams, type UserDTO } from "@rezics/contract";
 import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 import {

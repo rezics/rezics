@@ -1,5 +1,5 @@
 import type { ZoneTheme } from "@rezics/contract";
-import { uploadApi } from "@rezics/api/upload/upload.api";
+import { uploadApi } from "@rezics/contract/api/upload/upload.api";
 import { useTranslation } from "@rezics/i18n/react";
 import { ColorField, type ColorThemeSet } from "@rezics/ui";
 import { createRezicsUploadProvider } from "@rezics/ui/editor";

@@ -57,7 +57,7 @@ const i18nMessages = {
 import {
   useGivenReactionsInfinite,
   useReceivedReactionsInfinite,
-} from "@rezics/api/reaction/reaction.queries";
+} from "@rezics/contract/api/reaction/reaction.queries";
 import type { FC } from "react";
 import { useState } from "react";
 import {

@@ -1,4 +1,4 @@
-import { pollDetailQuery } from "@rezics/api/poll/poll.queries";
+import { pollDetailQuery } from "@rezics/contract/api/poll/poll.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { useQuery } from "@tanstack/react-query";

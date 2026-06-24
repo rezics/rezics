@@ -1,5 +1,5 @@
-import { type BookDTO, bookQueries } from "@rezics/api/book/book";
-import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
+import { type BookDTO, bookQueries } from "@rezics/contract/api/book/book";
+import { contentSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
 import type { BookListResponse } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import {

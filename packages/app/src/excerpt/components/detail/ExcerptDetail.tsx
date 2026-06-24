@@ -1,4 +1,4 @@
-import { useReactionHydration } from "@rezics/api/reaction/reaction";
+import { useReactionHydration } from "@rezics/contract/api/reaction/reaction";
 import {
   contentDocMarkdownFallback,
   type ExcerptSource,

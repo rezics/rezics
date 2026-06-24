@@ -1,4 +1,4 @@
-import { postQueries } from "@rezics/api/post/post";
+import { postQueries } from "@rezics/contract/api/post/post";
 import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";

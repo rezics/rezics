@@ -2,11 +2,11 @@ import type {
   CreateTagInput,
   UnitTagDTO,
   UpdateTagInput,
-} from "@rezics/api/tag/tag";
+} from "@rezics/contract/api/tag/tag";
 import {
   useCreateTagMutation,
   useUpdateTagMutation,
-} from "@rezics/api/tag/tag";
+} from "@rezics/contract/api/tag/tag";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

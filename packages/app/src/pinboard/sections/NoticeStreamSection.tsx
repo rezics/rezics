@@ -1,4 +1,4 @@
-import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
+import { getDefaultRealmId } from "@rezics/contract/api/infra/bootstrap";
 import { Skeleton } from "@rezics/ui/shadcn";
 import type React from "react";
 import { usePinboardList } from "../hooks/usePinboard";

@@ -1,10 +1,10 @@
-import { useEntity } from "@rezics/api/entity";
-import { positionForNewBottomPin } from "@rezics/api/tag/fractional-index";
+import { useEntity } from "@rezics/contract/api/entity";
+import { positionForNewBottomPin } from "@rezics/contract/api/tag/fractional-index";
 import {
   useCreateUnitExternalLink,
   useDeleteUnitExternalLink,
   useUnitExternalLinks,
-} from "@rezics/api/unit-external-link";
+} from "@rezics/contract/api/unit-external-link";
 import type { UnitExternalLinkDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

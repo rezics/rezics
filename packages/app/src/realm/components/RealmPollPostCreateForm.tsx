@@ -1,4 +1,4 @@
-import { useCreatePostMutation } from "@rezics/api/post/post";
+import { useCreatePostMutation } from "@rezics/contract/api/post/post";
 import type { PollDTO, PostDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input, ToggleGroup, ToggleGroupItem } from "@rezics/ui/shadcn";

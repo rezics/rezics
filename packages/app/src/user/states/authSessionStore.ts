@@ -21,4 +21,4 @@ export {
   selectRegistrationStage,
   selectShouldRedirectToCompleteRegistration,
   useAuthSessionStore,
-} from "@rezics/api/states";
+} from "@rezics/contract/api/states";

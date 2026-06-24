@@ -1,4 +1,4 @@
-import { bookQueries } from "@rezics/api/book/book.queries";
+import { bookQueries } from "@rezics/contract/api/book/book.queries";
 import type { BookContentStructureItem } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";

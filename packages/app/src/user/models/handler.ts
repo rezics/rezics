@@ -1,7 +1,7 @@
-import { authApi } from "@rezics/api/auth/auth.api";
-import { authKeys } from "@rezics/api/auth/auth.keys";
-import { exchangeForSessionToken } from "@rezics/api/react-query/jwt";
-import { userKeys } from "@rezics/api/user/user.keys";
+import { authApi } from "@rezics/contract/api/auth/auth.api";
+import { authKeys } from "@rezics/contract/api/auth/auth.keys";
+import { exchangeForSessionToken } from "@rezics/contract/api/react-query/jwt";
+import { userKeys } from "@rezics/contract/api/user/user.keys";
 import { qc } from "@/app";
 import {
   clearAuthSessionState,

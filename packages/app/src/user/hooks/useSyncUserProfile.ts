@@ -1,4 +1,4 @@
-import { userQueries } from "@rezics/api/user/user.queries";
+import { userQueries } from "@rezics/contract/api/user/user.queries";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import {

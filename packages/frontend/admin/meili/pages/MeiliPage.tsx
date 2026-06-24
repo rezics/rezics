@@ -2,7 +2,7 @@ import {
   type MeiliKey,
   meiliAdminMutations,
   meiliAdminQueries,
-} from "@rezics/api/meili/meili.admin.queries";
+} from "@rezics/contract/api/meili/meili.admin.queries";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Spinner } from "@rezics/ui";
 import {

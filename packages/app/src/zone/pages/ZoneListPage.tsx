@@ -20,9 +20,9 @@ import {
   usePinSubscriptionListEntryMutation,
   useReorderSubscriptionListEntriesMutation,
   useUnsubscribeMutation,
-} from "@rezics/api/subscription/subscription";
-import { userQueries } from "@rezics/api/user/user.queries";
-import { zoneQueries } from "@rezics/api/zone/zone";
+} from "@rezics/contract/api/subscription/subscription";
+import { userQueries } from "@rezics/contract/api/user/user.queries";
+import { zoneQueries } from "@rezics/contract/api/zone/zone";
 import type {
   UserSubscriptionListEntryDTO,
   UserSubscriptionListSort,

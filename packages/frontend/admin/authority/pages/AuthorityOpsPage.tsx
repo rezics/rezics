@@ -5,7 +5,7 @@ import {
   useRemoveUnitFieldLockMutation,
   useUpsertUnitCollaboratorMutation,
   useUpsertUnitFieldLockMutation,
-} from "@rezics/api/unit/unit";
+} from "@rezics/contract/api/unit/unit";
 import { UnitAuthorityRoleKey } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

@@ -1,7 +1,7 @@
 import type {
   ReactionHistoryGivenItem,
   ReactionHistoryReceivedItem,
-} from "@rezics/api/reaction/reaction.types";
+} from "@rezics/contract/api/reaction/reaction.types";
 import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState, Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";

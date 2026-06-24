@@ -1,4 +1,4 @@
-import { bookQueries } from "@rezics/api/book/book";
+import { bookQueries } from "@rezics/contract/api/book/book";
 import type { BookDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

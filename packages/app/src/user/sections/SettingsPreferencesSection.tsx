@@ -16,8 +16,8 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useUpdateSettingsMutation } from "@rezics/api/user/user.mutations";
-import { userQueries } from "@rezics/api/user/user.queries";
+import { useUpdateSettingsMutation } from "@rezics/contract/api/user/user.mutations";
+import { userQueries } from "@rezics/contract/api/user/user.queries";
 import {
   CONTENT_LANGUAGE_SLUGS,
   type ContentLanguage,

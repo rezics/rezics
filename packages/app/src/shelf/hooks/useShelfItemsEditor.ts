@@ -1,6 +1,6 @@
-import type { ShelfSortOrder } from "@rezics/api/shelf";
-import { useBatchUpdateShelfItemsMutation } from "@rezics/api/shelf/shelf.mutations";
-import { shelfItemsInfiniteQuery } from "@rezics/api/shelf/shelf.queries";
+import type { ShelfSortOrder } from "@rezics/contract/api/shelf";
+import { useBatchUpdateShelfItemsMutation } from "@rezics/contract/api/shelf/shelf.mutations";
+import { shelfItemsInfiniteQuery } from "@rezics/contract/api/shelf/shelf.queries";
 import type {
   ShelfItemBatchOp,
   ShelfItemBatchResult,

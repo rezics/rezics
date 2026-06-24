@@ -1,6 +1,6 @@
 import "github-markdown-css/github-markdown-light.css";
 import "./index.css";
-import { AuthProvider } from "@rezics/api/providers";
+import { AuthProvider } from "@rezics/contract/api/providers";
 import {
   RezicsI18nProvider,
   useLocale,

@@ -1,5 +1,5 @@
-import { useEditorEntry } from "@rezics/api/hooks";
-import { postQueries } from "@rezics/api/post/post";
+import { useEditorEntry } from "@rezics/contract/api/hooks";
+import { postQueries } from "@rezics/contract/api/post/post";
 import type { CommentListContext } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";

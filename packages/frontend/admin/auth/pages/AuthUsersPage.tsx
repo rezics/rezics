@@ -1,16 +1,16 @@
 import {
   accountOperationsQueries,
   useStartAuthUserImpersonationMutation,
-} from "@rezics/api/account-operation/account-operation";
-import { authApi } from "@rezics/api/auth/auth.api";
+} from "@rezics/contract/api/account-operation/account-operation";
+import { authApi } from "@rezics/contract/api/auth/auth.api";
 import {
   useAdminBanUserMutation,
   useAdminRemoveUserMutation,
   useAdminSetRoleMutation,
   useAdminUnbanUserMutation,
-} from "@rezics/api/auth/auth.mutations";
-import { authQueries } from "@rezics/api/auth/auth.queries";
-import { useUnblockAccountEnforcementMutation } from "@rezics/api/governance/governance";
+} from "@rezics/contract/api/auth/auth.mutations";
+import { authQueries } from "@rezics/contract/api/auth/auth.queries";
+import { useUnblockAccountEnforcementMutation } from "@rezics/contract/api/governance/governance";
 import type { AdminAuthUserAccountSummary } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { SafeLink, Spinner } from "@rezics/ui";

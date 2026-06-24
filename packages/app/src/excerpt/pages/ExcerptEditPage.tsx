@@ -1,7 +1,7 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
-import { useUpdateUnitMutation } from "@rezics/api/unit/unit.mutations";
-import { unitQueries } from "@rezics/api/unit/unit.queries";
-import type { UnitFormData } from "@rezics/api/unit/unit.types";
+import { useUpdateUnitMutation } from "@rezics/contract/api/unit/unit.mutations";
+import { unitQueries } from "@rezics/contract/api/unit/unit.queries";
+import type { UnitFormData } from "@rezics/contract/api/unit/unit.types";
 import {
   contentDocMarkdownFallback,
   type ExcerptSource,

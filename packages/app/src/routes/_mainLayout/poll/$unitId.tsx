@@ -1,4 +1,4 @@
-import { pollDetailQuery } from "@rezics/api/poll/poll.queries";
+import { pollDetailQuery } from "@rezics/contract/api/poll/poll.queries";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { titleOfPoll, unitTitleMeta } from "@/core/routing/documentTitle";
 import { PollPage } from "@/poll";

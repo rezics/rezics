@@ -1,4 +1,4 @@
-import { createQueryClient } from "@rezics/api/react-query/tsr";
+import { createQueryClient } from "@rezics/contract/api/react-query/tsr";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { toast } from "sonner";
 

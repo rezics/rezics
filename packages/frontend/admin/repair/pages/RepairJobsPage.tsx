@@ -4,7 +4,7 @@ import {
   type HistoryOutboxRepairStatus,
   useAdminRepairJobDryRunMutation,
   useAdminRepairJobStartMutation,
-} from "@rezics/api";
+} from "@rezics/contract/api";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Badge,

@@ -1,4 +1,7 @@
-import { meiliLabelSearchQueryOptions, useCreateLabel } from "@rezics/api";
+import {
+  meiliLabelSearchQueryOptions,
+  useCreateLabel,
+} from "@rezics/contract/api";
 import {
   LANGUAGE_META,
   type LabelDTO,

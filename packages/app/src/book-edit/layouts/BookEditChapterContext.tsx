@@ -1,4 +1,4 @@
-import { chapterDetailQuery } from "@rezics/api/chapter/chapter";
+import { chapterDetailQuery } from "@rezics/contract/api/chapter/chapter";
 import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { BookOpenText, ListTree } from "lucide-react";

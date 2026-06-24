@@ -1,5 +1,5 @@
-import { realmDetailQuery } from "@rezics/api/realm/realm";
-import { userQueries } from "@rezics/api/user/user";
+import { realmDetailQuery } from "@rezics/contract/api/realm/realm";
+import { userQueries } from "@rezics/contract/api/user/user";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Avatar,

@@ -61,8 +61,12 @@
  * +-------------------------+
  */
 
-import { entityKeys, useEntity, useUpdateEntity } from "@rezics/api/entity";
-import { useServerPermission } from "@rezics/api/hooks";
+import {
+  entityKeys,
+  useEntity,
+  useUpdateEntity,
+} from "@rezics/contract/api/entity";
+import { useServerPermission } from "@rezics/contract/api/hooks";
 import type { EntityDTO, EntityKind } from "@rezics/contract";
 import {
   BasicAdminPermission,

@@ -1,4 +1,4 @@
-import { useReactionHydration } from "@rezics/api/reaction/reaction";
+import { useReactionHydration } from "@rezics/contract/api/reaction/reaction";
 import type { CommentDTO } from "@rezics/contract";
 import { useEffect, useMemo, useState } from "react";
 import { useCommentTreeCollapse } from "../hooks/useCommentTreeCollapse";

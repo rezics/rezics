@@ -1,4 +1,4 @@
-import { postKeys } from "@rezics/api/post/post.keys";
+import { postKeys } from "@rezics/contract/api/post/post.keys";
 import { markdownContentDoc, type PostDTO, PostKind } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";

@@ -2,8 +2,8 @@ import {
   useCreateTokenMutation,
   useRevokeTokenMutation,
   useUpdateTokenMutation,
-} from "@rezics/api/token/token.mutations";
-import { tokenQueries } from "@rezics/api/token/token.queries";
+} from "@rezics/contract/api/token/token.mutations";
+import { tokenQueries } from "@rezics/contract/api/token/token.queries";
 import type {
   ApiTokenDTO,
   CreateApiTokenInput,

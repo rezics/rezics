@@ -1,4 +1,4 @@
-import { slugApi } from "@rezics/api/slug";
+import { slugApi } from "@rezics/contract/api/slug";
 import { isPublicUserShelfSlugRouteParams } from "@rezics/contract";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { ShelfPage } from "@/shelf";

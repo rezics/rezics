@@ -16,7 +16,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useReorderPinboardMutation } from "@rezics/api/pinboard/pinboard.mutations";
+import { useReorderPinboardMutation } from "@rezics/contract/api/pinboard/pinboard.mutations";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { GripVertical as DragIndicatorRoundedIcon } from "lucide-react";

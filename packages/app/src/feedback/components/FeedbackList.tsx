@@ -1,10 +1,10 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
-import { useSetFeedbackResolvedMutation } from "@rezics/api/feedback/feedback.mutations";
+import { useSetFeedbackResolvedMutation } from "@rezics/contract/api/feedback/feedback.mutations";
 import type {
   FeedbackDTO,
   FeedbackType,
-} from "@rezics/api/feedback/feedback.types";
-import { buildMeiliFeedbackQuery } from "@rezics/api/meili/meili.queries";
+} from "@rezics/contract/api/feedback/feedback.types";
+import { buildMeiliFeedbackQuery } from "@rezics/contract/api/meili/meili.queries";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import {
   UniversalPaginator,

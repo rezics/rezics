@@ -1,4 +1,4 @@
-import { type ShelfDTO, shelfQueries } from "@rezics/api/shelf/shelf";
+import { type ShelfDTO, shelfQueries } from "@rezics/contract/api/shelf/shelf";
 import type { UnitTranslationDTO } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Button, Input, Label } from "@rezics/ui/shadcn";

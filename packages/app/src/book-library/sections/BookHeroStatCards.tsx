@@ -1,6 +1,6 @@
-import { postQueries } from "@rezics/api/post/post";
-import { shelfQueries } from "@rezics/api/shelf/shelf";
-import { tagQueries } from "@rezics/api/tag/tag.queries";
+import { postQueries } from "@rezics/contract/api/post/post";
+import { shelfQueries } from "@rezics/contract/api/shelf/shelf";
+import { tagQueries } from "@rezics/contract/api/tag/tag.queries";
 import { PostKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";

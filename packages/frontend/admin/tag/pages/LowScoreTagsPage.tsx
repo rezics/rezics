@@ -1,16 +1,16 @@
 import {
   useDeleteRealmTagApplicationMutation,
   usePatchRealmTagApplicationMutation,
-} from "@rezics/api/realm/realm.mutations";
+} from "@rezics/contract/api/realm/realm.mutations";
 import {
   positionForNewBottomPin,
   positionForNewTopPin,
-} from "@rezics/api/tag/fractional-index";
+} from "@rezics/contract/api/tag/fractional-index";
 import {
   useDeleteUnitTagMutation,
   usePatchUnitTagMutation,
-} from "@rezics/api/tag/tag.mutations";
-import { lowScoreTagsQuery } from "@rezics/api/tag/tag.queries";
+} from "@rezics/contract/api/tag/tag.mutations";
+import { lowScoreTagsQuery } from "@rezics/contract/api/tag/tag.queries";
 import type {
   LowScoreTagsScope,
   RealmTagApplicationDTO,

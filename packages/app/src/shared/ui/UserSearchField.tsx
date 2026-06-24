@@ -1,4 +1,4 @@
-import { useUserSearchQuery } from "@rezics/api/meili/meili.queries";
+import { useUserSearchQuery } from "@rezics/contract/api/meili/meili.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Input, Label } from "@rezics/ui/shadcn";

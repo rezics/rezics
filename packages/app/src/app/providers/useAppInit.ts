@@ -1,4 +1,4 @@
-import { useInfraBootstrap } from "@rezics/api/infra/bootstrap";
+import { useInfraBootstrap } from "@rezics/contract/api/infra/bootstrap";
 import { useEffect } from "react";
 import { initI18n } from "./i18n";
 

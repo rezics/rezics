@@ -9,7 +9,7 @@ import {
   useMessages,
   useSendDmMutation,
   useSetDmBlockMutation,
-} from "@rezics/api/dm/dm";
+} from "@rezics/contract/api/dm/dm";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input } from "@rezics/ui/shadcn";
 import { useQueryClient } from "@tanstack/react-query";

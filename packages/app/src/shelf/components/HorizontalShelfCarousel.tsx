@@ -1,4 +1,4 @@
-import { useReactionHydration } from "@rezics/api/reaction/reaction";
+import { useReactionHydration } from "@rezics/contract/api/reaction/reaction";
 import type { ShelfDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";

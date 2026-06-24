@@ -1,7 +1,7 @@
 import {
   mySubscriptionListEntriesQuery,
   useRecoverSubscriptionListEntryMutation,
-} from "@rezics/api/subscription/subscription";
+} from "@rezics/contract/api/subscription/subscription";
 import type { UserSubscriptionListEntryDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState, Spinner } from "@rezics/ui";

@@ -3,7 +3,7 @@ import {
   useDeleteZonePage,
   useUpdateZonePage,
   zonePortalQueryOptions,
-} from "@rezics/api";
+} from "@rezics/contract/api";
 import type {
   CreateZonePageInput,
   UpdateZonePageInput,

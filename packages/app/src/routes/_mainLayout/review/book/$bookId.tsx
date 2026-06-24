@@ -1,4 +1,4 @@
-import { bookQueries } from "@rezics/api/book/book";
+import { bookQueries } from "@rezics/contract/api/book/book";
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 import { titleOfBook, unitTitleMeta } from "@/core/routing/documentTitle";
 import { routeQueryOrNotFound } from "@/core/routing/resourceErrors";

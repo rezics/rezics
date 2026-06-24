@@ -1,4 +1,4 @@
-import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
+import type { CreateFeedbackInput } from "@rezics/contract/api/feedback/feedback.types";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Dialog,

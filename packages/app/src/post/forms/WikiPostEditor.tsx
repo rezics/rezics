@@ -1,9 +1,9 @@
-import { getLockedFieldError } from "@rezics/api";
+import { getLockedFieldError } from "@rezics/contract/api";
 import {
   useCreateWikiPostMutation,
   useSetPostPublicationMutation,
   useUpdateWikiPostContentMutation,
-} from "@rezics/api/post/post";
+} from "@rezics/contract/api/post/post";
 import {
   mainMarkdownSource,
   markdownContentDoc,

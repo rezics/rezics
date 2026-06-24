@@ -1,17 +1,25 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { configureApi } from "../config";
 
 const calls: Array<{ url: string; init?: RequestInit }> = [];
 
-mock.module("../react-query/http", () => ({
-  apiFetch: mock(async (url: string, init?: RequestInit) => {
-    calls.push({ url, init });
-    return {};
-  }),
-}));
-
 describe("policyTagApi", () => {
   beforeEach(() => {
+    configureApi({
+      apiBaseUrl: "",
+      authBaseUrl: "",
+      reactionServiceUrl: "",
+    });
     calls.length = 0;
+    globalThis.fetch = mock(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        calls.push({ url: String(input), init });
+        return new Response(JSON.stringify({}), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        });
+      },
+    ) as unknown as typeof fetch;
   });
 
   test("serializes rule list scope filters", async () => {

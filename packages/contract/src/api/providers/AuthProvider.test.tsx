@@ -1,40 +1,9 @@
-import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 
-process.env.VITE_API_URL ??= "http://api.example";
+process.env.VITE_API_URL ??= "http://contract/api.example";
 process.env.VITE_TURNSTILE_SITE_KEY ??= "turnstile-test-key";
 
-let presence = false;
-const exchangeForSessionTokenMock = mock(async () => true);
-const clearAuthSessionStateMock = mock(() => undefined);
-
-mock.module("@rezics/api/react-query/jwt", () => ({
-  exchangeForSessionToken: exchangeForSessionTokenMock,
-}));
-
-mock.module("@rezics/api/react-query/authPresence", () => ({
-  hasAuthPresence: () => presence,
-  clearAuthPresence: () => {
-    presence = false;
-  },
-}));
-
-const hydrateAuthSessionStateMock = mock(async () => null);
-
-mock.module("../states/authSessionStore", () => ({
-  clearAuthSessionState: clearAuthSessionStateMock,
-  hydrateAuthSessionState: hydrateAuthSessionStateMock,
-  useAuthSessionStore: {
-    getState: () => ({ status: "idle" }),
-  },
-}));
-
 describe("AuthProvider gateway + fan-out model", () => {
-  beforeEach(() => {
-    presence = false;
-    exchangeForSessionTokenMock.mockClear();
-    clearAuthSessionStateMock.mockClear();
-  });
-
   test("AuthProvider component exists and renders null", async () => {
     const { AuthProvider } = await import("./AuthProvider");
     expect(typeof AuthProvider).toBe("function");

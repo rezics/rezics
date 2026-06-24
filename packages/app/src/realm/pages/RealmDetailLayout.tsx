@@ -1,11 +1,11 @@
-import { useServerPermission } from "@rezics/api/hooks";
-import { labelListQuery } from "@rezics/api/label/label";
+import { useServerPermission } from "@rezics/contract/api/hooks";
+import { labelListQuery } from "@rezics/contract/api/label/label";
 import {
   myRealmMembershipQuery,
   realmDetailQuery,
-} from "@rezics/api/realm/realm";
-import { realmTagTreeQuery } from "@rezics/api/realm-tag-tree";
-import { tagBatchTranslationsQuery } from "@rezics/api/tag/tag";
+} from "@rezics/contract/api/realm/realm";
+import { realmTagTreeQuery } from "@rezics/contract/api/realm-tag-tree";
+import { tagBatchTranslationsQuery } from "@rezics/contract/api/tag/tag";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";

@@ -1,4 +1,4 @@
-import { zoneSectionInfiniteQuery } from "@rezics/api";
+import { zoneSectionInfiniteQuery } from "@rezics/contract/api";
 import { mainMarkdownSource, type ZoneRichTextSection } from "@rezics/contract";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { Skeleton } from "@rezics/ui/shadcn";

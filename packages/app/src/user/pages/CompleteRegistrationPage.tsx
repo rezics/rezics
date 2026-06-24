@@ -1,5 +1,5 @@
-import { authApi } from "@rezics/api/auth/auth.api";
-import { authQueries } from "@rezics/api/auth/auth.queries";
+import { authApi } from "@rezics/contract/api/auth/auth.api";
+import { authQueries } from "@rezics/contract/api/auth/auth.queries";
 import {
   FALLBACK_LANGUAGE,
   LANGUAGE_META,

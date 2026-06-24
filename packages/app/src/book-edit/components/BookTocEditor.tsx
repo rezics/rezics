@@ -1,7 +1,7 @@
 import { useAlertStore } from "@app/states/windowAlertStore.ts";
-import { bookMutations } from "@rezics/api/book/book.mutations";
-import { chapterMutations } from "@rezics/api/chapter/chapter.mutations";
-import { chapterDetailQuery } from "@rezics/api/chapter/chapter.queries";
+import { bookMutations } from "@rezics/contract/api/book/book.mutations";
+import { chapterMutations } from "@rezics/contract/api/chapter/chapter.mutations";
+import { chapterDetailQuery } from "@rezics/contract/api/chapter/chapter.queries";
 import type { ContentRating } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";

@@ -3,8 +3,8 @@ import {
   useDeactivateAuthJwtServiceMutation,
   useRotateAuthJwtServiceMutation,
   useUpdateAuthJwtServiceMutation,
-} from "@rezics/api/auth-jwt-service/auth-jwt-service.mutations";
-import { authJwtServiceQueries } from "@rezics/api/auth-jwt-service/auth-jwt-service.queries";
+} from "@rezics/contract/api/auth-jwt-service/auth-jwt-service.mutations";
+import { authJwtServiceQueries } from "@rezics/contract/api/auth-jwt-service/auth-jwt-service.queries";
 import type { JwtServiceDTO, UpdateJwtServiceInput } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

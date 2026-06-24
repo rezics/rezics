@@ -1,7 +1,7 @@
 import {
   useCreatePostMutation,
   useUpdatePostMutation,
-} from "@rezics/api/post/post.mutations";
+} from "@rezics/contract/api/post/post.mutations";
 import {
   DEFAULT_LANGUAGE,
   markdownContentDoc,

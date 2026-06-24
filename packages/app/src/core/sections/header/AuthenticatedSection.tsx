@@ -1,9 +1,9 @@
-import { useDmStream } from "@rezics/api/dm/dm";
+import { useDmStream } from "@rezics/contract/api/dm/dm";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   useNotificationStream,
   useUnreadCount,
-} from "@rezics/api/notification";
+} from "@rezics/contract/api/notification";
 import { Badge, Button } from "@rezics/ui/shadcn";
 import { Bell as NotificationsIcon } from "lucide-react";
 import { HeaderTooltip } from "@/core/components/header/HeaderTooltip";

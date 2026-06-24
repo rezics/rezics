@@ -51,7 +51,7 @@
  * +------------------------+
  */
 
-import { feedbackListQuery } from "@rezics/api/feedback/feedback.queries";
+import { feedbackListQuery } from "@rezics/contract/api/feedback/feedback.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,

@@ -1,7 +1,7 @@
 import {
   myRealmMembershipQuery,
   realmDetailQuery,
-} from "@rezics/api/realm/realm";
+} from "@rezics/contract/api/realm/realm";
 import { contentDocMarkdownFallback } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

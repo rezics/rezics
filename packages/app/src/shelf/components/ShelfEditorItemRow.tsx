@@ -1,6 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { ShelfView } from "@rezics/api/shelf";
+import type { ShelfView } from "@rezics/contract/api/shelf";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Checkbox } from "@rezics/ui/shadcn";
 import { GripVertical, MoveRight, Trash2 } from "lucide-react";

@@ -1,4 +1,7 @@
-import { useMeiliStatusQuery, useSystemStatusQuery } from "@rezics/api";
+import {
+  useMeiliStatusQuery,
+  useSystemStatusQuery,
+} from "@rezics/contract/api";
 
 export function useAdminSystemStatusQuery() {
   return useSystemStatusQuery();

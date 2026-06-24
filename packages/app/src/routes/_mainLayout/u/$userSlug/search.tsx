@@ -1,4 +1,4 @@
-import { userBySlugQuery } from "@rezics/api/user/user.queries";
+import { userBySlugQuery } from "@rezics/contract/api/user/user.queries";
 import type { SearchCategory, SearchQuery } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";

@@ -1,9 +1,9 @@
-import { getLockedFieldError } from "@rezics/api";
-import { useUpdateCommentMutation } from "@rezics/api/comment/comment";
+import { getLockedFieldError } from "@rezics/contract/api";
+import { useUpdateCommentMutation } from "@rezics/contract/api/comment/comment";
 import {
   useUpdatePostMutation,
   useUpdateWikiPostContentMutation,
-} from "@rezics/api/post/post";
+} from "@rezics/contract/api/post/post";
 import type { CommentDTO, PostDTO } from "@rezics/contract";
 import {
   type ContentLanguage,

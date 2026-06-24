@@ -1,4 +1,4 @@
-import { ApiError } from "@rezics/api";
+import { ApiError } from "@rezics/contract/api";
 import { describe, expect, test } from "bun:test";
 import { routeQueryOrNotFound, isApiNotFoundError } from "./resourceErrors";
 

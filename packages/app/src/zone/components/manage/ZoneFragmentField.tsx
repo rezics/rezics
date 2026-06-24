@@ -1,4 +1,4 @@
-import { wikiPostsByRealmQuery } from "@rezics/api/post/post";
+import { wikiPostsByRealmQuery } from "@rezics/contract/api/post/post";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {

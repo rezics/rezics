@@ -1,4 +1,4 @@
-import { useUpdateSettingsMutation } from "@rezics/api/user/user.mutations";
+import { useUpdateSettingsMutation } from "@rezics/contract/api/user/user.mutations";
 import type { RealmTagPreferences, UserSettings } from "@rezics/contract";
 
 /**

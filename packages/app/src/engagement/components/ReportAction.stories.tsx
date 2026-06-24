@@ -1,5 +1,5 @@
-import { ApiError } from "@rezics/api";
-import { governanceApi } from "@rezics/api/governance/governance.api";
+import { ApiError } from "@rezics/contract/api";
+import { governanceApi } from "@rezics/contract/api/governance/governance.api";
 import type { ModerationCaseDTO, Permission } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { type ReactNode, useEffect, useState } from "react";

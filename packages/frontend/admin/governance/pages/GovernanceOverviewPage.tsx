@@ -1,9 +1,9 @@
 import {
   type GovernanceAuditListQuery,
   governanceQueries,
-} from "@rezics/api/governance/governance";
-import type { AdminDashboardSummary } from "@rezics/api/stat/stats";
-import { adminDashboardSummaryQueryOptions } from "@rezics/api/stat/stats.queries";
+} from "@rezics/contract/api/governance/governance";
+import type { AdminDashboardSummary } from "@rezics/contract/api/stat/stats";
+import { adminDashboardSummaryQueryOptions } from "@rezics/contract/api/stat/stats.queries";
 import type {
   DecisionCode,
   ModerationCaseDTO,

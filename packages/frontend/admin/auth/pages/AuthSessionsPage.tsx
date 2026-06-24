@@ -2,7 +2,7 @@ import {
   accountOperationsQueries,
   useRevokeAuthUserSessionMutation,
   useRevokeAuthUserSessionsMutation,
-} from "@rezics/api/account-operation/account-operation";
+} from "@rezics/contract/api/account-operation/account-operation";
 import type { AdminAuthSession } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

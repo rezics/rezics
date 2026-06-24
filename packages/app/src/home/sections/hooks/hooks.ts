@@ -1,4 +1,4 @@
-import { bookQueries } from "@rezics/api/book/book";
+import { bookQueries } from "@rezics/contract/api/book/book";
 import type { BookDTO, ShelfDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";

@@ -1,19 +1,19 @@
 import {
   commentDiscoveryInfiniteQuery,
   useModerateCommentMutation,
-} from "@rezics/api/comment/comment";
+} from "@rezics/contract/api/comment/comment";
 import {
   computeEditorEntryDecision,
   useCurrentUserId,
   useServerPermission,
-} from "@rezics/api/hooks";
+} from "@rezics/contract/api/hooks";
 import {
   useAcceptAnswerMutation,
   usePinCommentMutation,
   useUnacceptAnswerMutation,
   useUnpinCommentMutation,
-} from "@rezics/api/post/post";
-import { realmDetailQuery } from "@rezics/api/realm/realm";
+} from "@rezics/contract/api/post/post";
+import { realmDetailQuery } from "@rezics/contract/api/realm/realm";
 import {
   BasicAdminPermission,
   type CommentDTO,

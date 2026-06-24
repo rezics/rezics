@@ -1,5 +1,5 @@
-import { bookQueries } from "@rezics/api/book/book";
-import { tagQueries } from "@rezics/api/tag/tag.queries";
+import { bookQueries } from "@rezics/contract/api/book/book";
+import { tagQueries } from "@rezics/contract/api/tag/tag.queries";
 import { mainMarkdownSource } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";

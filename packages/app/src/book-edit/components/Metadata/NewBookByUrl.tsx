@@ -1,4 +1,4 @@
-import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
+import { echoKvGetQuery } from "@rezics/contract/api/echokv/echokv";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Alert,

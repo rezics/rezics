@@ -1,4 +1,4 @@
-import { realmDetailQuery } from "@rezics/api/realm/realm";
+import { realmDetailQuery } from "@rezics/contract/api/realm/realm";
 import { LANGUAGE_META, type Language, type ZoneDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {

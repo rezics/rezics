@@ -1,4 +1,4 @@
-import { ApiError } from "@rezics/api";
+import { ApiError } from "@rezics/contract/api";
 import { useTranslation } from "@rezics/i18n/react";
 import { Alert, AlertDescription } from "@rezics/ui/shadcn";
 import { useState } from "react";

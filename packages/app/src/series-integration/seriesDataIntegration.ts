@@ -3,7 +3,7 @@ import {
   seriesDetailQuery,
   seriesDiagnosticsQuery,
   seriesListQuery,
-} from "@rezics/api";
+} from "@rezics/contract/api";
 
 export function seriesManagementData(unitId: string) {
   return {

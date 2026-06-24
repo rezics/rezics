@@ -4,7 +4,7 @@ import {
   useAcknowledgeRealmRulesMutation,
   useJoinRealmMutation,
   useLeaveRealmMutation,
-} from "@rezics/api/realm/realm";
+} from "@rezics/contract/api/realm/realm";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";

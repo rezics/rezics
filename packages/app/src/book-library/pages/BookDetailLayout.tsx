@@ -1,5 +1,5 @@
-import { bookQueries } from "@rezics/api/book/book";
-import { scoreQueries } from "@rezics/api/score/score";
+import { bookQueries } from "@rezics/contract/api/book/book";
+import { scoreQueries } from "@rezics/contract/api/score/score";
 import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";

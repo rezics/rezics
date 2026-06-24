@@ -1,4 +1,4 @@
-import { type RealmDTO, realmQueries } from "@rezics/api/realm/realm";
+import { type RealmDTO, realmQueries } from "@rezics/contract/api/realm/realm";
 import type { UnitTranslationDTO } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import {

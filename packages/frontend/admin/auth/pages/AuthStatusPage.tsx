@@ -1,8 +1,8 @@
-import { queryAccessToken } from "@rezics/api/react-query/jwt";
+import { queryAccessToken } from "@rezics/contract/api/react-query/jwt";
 import {
   hydrateAuthSessionState,
   useAuthSessionStore,
-} from "@rezics/api/states";
+} from "@rezics/contract/api/states";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {

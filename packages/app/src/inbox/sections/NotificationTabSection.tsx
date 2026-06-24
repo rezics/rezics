@@ -1,7 +1,7 @@
 import {
   useMarkAsReadMutation,
   useNotifications,
-} from "@rezics/api/notification";
+} from "@rezics/contract/api/notification";
 import { useTranslation } from "@rezics/i18n/react";
 import { NotificationCard } from "../components/NotificationCard.tsx";
 

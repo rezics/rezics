@@ -1,4 +1,7 @@
-import { clearAuthSessionState, useAuthSessionStore } from "@rezics/api/states";
+import {
+  clearAuthSessionState,
+  useAuthSessionStore,
+} from "@rezics/contract/api/states";
 import { useRouter } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef } from "react";
 import { qc } from "@/admin/app/providers/reactQueryUtil";

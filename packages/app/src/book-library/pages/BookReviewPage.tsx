@@ -1,5 +1,5 @@
-import { bookQueries } from "@rezics/api/book/book";
-import { postQueries } from "@rezics/api/post/post";
+import { bookQueries } from "@rezics/contract/api/book/book";
+import { postQueries } from "@rezics/contract/api/post/post";
 import { PostKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";

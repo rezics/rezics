@@ -1,5 +1,5 @@
-import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
-import { type UnitDTO, unitQueries } from "@rezics/api/unit/unit";
+import { contentSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
+import { type UnitDTO, unitQueries } from "@rezics/contract/api/unit/unit";
 import {
   defaultSupportLanguage,
   type UnitListResponse,

@@ -1,7 +1,7 @@
 import type {
   ReactionHistoryGivenItem,
   ReactionHistoryReceivedItem,
-} from "@rezics/api/reaction/reaction.types";
+} from "@rezics/contract/api/reaction/reaction.types";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { ReactionList } from "./ReactionList";

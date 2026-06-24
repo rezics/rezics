@@ -1,5 +1,5 @@
-import { postQueries } from "@rezics/api/post/post";
-import { zoneKeys } from "@rezics/api/zone/zone";
+import { postQueries } from "@rezics/contract/api/post/post";
+import { zoneKeys } from "@rezics/contract/api/zone/zone";
 import type { PostDTO, RealmDTO, ZonePortalResponse } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";

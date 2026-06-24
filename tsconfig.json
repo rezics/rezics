@@ -1,7 +1,6 @@
 {
   "files": [],
   "references": [
-    { "path": "./packages/api" },
     { "path": "./packages/auth" },
     { "path": "./packages/contract" },
     { "path": "./packages/edge" },

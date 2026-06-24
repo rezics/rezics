@@ -1,5 +1,5 @@
-import { useCurrentUserId } from "@rezics/api/hooks";
-import { userQueries } from "@rezics/api/user/user.queries";
+import { useCurrentUserId } from "@rezics/contract/api/hooks";
+import { userQueries } from "@rezics/contract/api/user/user.queries";
 import type { ContentRating } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";

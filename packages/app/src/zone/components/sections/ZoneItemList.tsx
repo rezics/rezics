@@ -2,7 +2,7 @@ import {
   useIsSubscribed,
   useSubscribeMutation,
   useUnsubscribeMutation,
-} from "@rezics/api/subscription/subscription";
+} from "@rezics/contract/api/subscription/subscription";
 import {
   CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE,
   isCatalogUnitType,

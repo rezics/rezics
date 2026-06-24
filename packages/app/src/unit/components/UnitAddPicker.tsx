@@ -1,4 +1,4 @@
-import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
+import { contentSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
 import type { UnitDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

@@ -1,4 +1,4 @@
-import { useCreateEntity } from "@rezics/api/entity";
+import { useCreateEntity } from "@rezics/contract/api/entity";
 import type {
   CreateEntityInput,
   CreditAttributionRole,

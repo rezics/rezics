@@ -1,4 +1,7 @@
-import { contentSearchQueryOptions, contentStructureQuery } from "@rezics/api";
+import {
+  contentSearchQueryOptions,
+  contentStructureQuery,
+} from "@rezics/contract/api";
 
 export type MediaDetailTab = (typeof mediaDetailTabs)[number];
 

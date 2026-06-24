@@ -3,7 +3,7 @@ import {
   type StreamQuery,
   type StreamRow,
   streamRowsInfiniteQuery,
-} from "@rezics/api/stream/stream";
+} from "@rezics/contract/api/stream/stream";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";

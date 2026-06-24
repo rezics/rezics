@@ -1,4 +1,4 @@
-import { realmDetailQuery } from "@rezics/api/realm/realm";
+import { realmDetailQuery } from "@rezics/contract/api/realm/realm";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { routeQueryOrNotFound } from "@/core";
 import {

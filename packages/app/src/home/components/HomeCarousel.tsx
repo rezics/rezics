@@ -1,6 +1,6 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
-import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
-import { parseEchoKVResponse } from "@rezics/api/echokv/util";
+import { echoKvGetQuery } from "@rezics/contract/api/echokv/echokv";
+import { parseEchoKVResponse } from "@rezics/contract/api/echokv/util";
 import { useTranslation } from "@rezics/i18n/react";
 import { CarouselIndicator } from "@rezics/ui/primitive/carousel/CarouselIndicator.tsx";
 import { useEmblaAutoplay } from "@rezics/ui/primitive/carousel/use-embla-autoplay.ts";

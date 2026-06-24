@@ -1,8 +1,8 @@
-import { useCanEdit, useCurrentUserId } from "@rezics/api/hooks";
+import { useCanEdit, useCurrentUserId } from "@rezics/contract/api/hooks";
 import {
   useCastTagVoteMutation,
   useWithdrawUnitTagVoteMutation,
-} from "@rezics/api/tag/tag";
+} from "@rezics/contract/api/tag/tag";
 import type {
   BatchTagTranslationResult,
   BookDTO,

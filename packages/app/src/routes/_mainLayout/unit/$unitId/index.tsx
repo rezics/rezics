@@ -1,4 +1,4 @@
-import { unitDetailQuery } from "@rezics/api/unit/unit";
+import { unitDetailQuery } from "@rezics/contract/api/unit/unit";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   titleOfTranslatedUnit,

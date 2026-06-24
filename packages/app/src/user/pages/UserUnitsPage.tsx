@@ -49,12 +49,12 @@
  * └──────────────────────┘
  */
 
-import { bookQueries } from "@rezics/api/book/book";
+import { bookQueries } from "@rezics/contract/api/book/book";
 import {
   contentSearchQueryOptions,
   postSearchQueryOptions,
-} from "@rezics/api/meili/meili.queries";
-import { useReactionHydration } from "@rezics/api/reaction/reaction";
+} from "@rezics/contract/api/meili/meili.queries";
+import { useReactionHydration } from "@rezics/contract/api/reaction/reaction";
 import type {
   BookDTO,
   ContentSearchOptions,

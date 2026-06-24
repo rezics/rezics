@@ -1,9 +1,9 @@
-import { postKeys } from "@rezics/api/post/post";
+import { postKeys } from "@rezics/contract/api/post/post";
 import {
   myRealmMembershipQuery,
   realmKeys,
   realmRuleResolvedQuery,
-} from "@rezics/api/realm/realm";
+} from "@rezics/contract/api/realm/realm";
 import {
   LANGUAGES,
   markdownContentDoc,

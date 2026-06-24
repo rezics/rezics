@@ -3,7 +3,7 @@ import {
   tagBatchTranslationsQuery,
   userShelfItemForUnitQuery,
   userTagApplicationsForUnitQuery,
-} from "@rezics/api";
+} from "@rezics/contract/api";
 import type { TagSearchDocument } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import {

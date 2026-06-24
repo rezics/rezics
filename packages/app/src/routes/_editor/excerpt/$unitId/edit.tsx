@@ -1,4 +1,4 @@
-import { excerptQueries } from "@rezics/api/excerpt/excerpt.queries";
+import { excerptQueries } from "@rezics/contract/api/excerpt/excerpt.queries";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 import {

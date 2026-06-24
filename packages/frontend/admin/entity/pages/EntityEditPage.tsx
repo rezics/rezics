@@ -1,4 +1,4 @@
-import { useEntity, useUpdateEntity } from "@rezics/api/entity";
+import { useEntity, useUpdateEntity } from "@rezics/contract/api/entity";
 import type { EntityKind } from "@rezics/contract";
 import {
   contentDocMarkdownFallback,

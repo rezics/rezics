@@ -1,5 +1,5 @@
-import { useUpdateSettingsMutation } from "@rezics/api/user/user.mutations";
-import { userQueries } from "@rezics/api/user/user.queries";
+import { useUpdateSettingsMutation } from "@rezics/contract/api/user/user.mutations";
+import { userQueries } from "@rezics/contract/api/user/user.queries";
 import {
   NOTIFICATION_PREFERENCE_KEYS,
   type NotificationPreferenceKey,

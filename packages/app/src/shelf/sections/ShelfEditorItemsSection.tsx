@@ -34,8 +34,8 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import type { ShelfSortState, ShelfView } from "@rezics/api/shelf";
-import { useHydratedShelfItems } from "@rezics/api/shelf";
+import type { ShelfSortState, ShelfView } from "@rezics/contract/api/shelf";
+import { useHydratedShelfItems } from "@rezics/contract/api/shelf";
 import {
   type ShelfDTO,
   type ShelfItemKind,

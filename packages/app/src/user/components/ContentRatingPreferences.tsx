@@ -7,8 +7,8 @@ const i18nMessages = {
     getI18nRuntime().i18n.t("settings:content_rating_description_R_18G"),
 } as const;
 
-import { useUpdateSettingsMutation } from "@rezics/api/user/user.mutations";
-import { userQueries } from "@rezics/api/user/user.queries";
+import { useUpdateSettingsMutation } from "@rezics/contract/api/user/user.mutations";
+import { userQueries } from "@rezics/contract/api/user/user.queries";
 import type { ContentRating } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { RatingBadge } from "@rezics/ui";

@@ -1,7 +1,7 @@
 import {
   useClearRealmExtraValueMutation,
   useSetRealmExtraValueMutation,
-} from "@rezics/api/realm/realm-extra.mutations";
+} from "@rezics/contract/api/realm/realm-extra.mutations";
 import type { RealmAvatarExtra, RealmBannerExtra } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { toast } from "sonner";

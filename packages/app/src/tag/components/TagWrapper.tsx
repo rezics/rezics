@@ -1,5 +1,5 @@
-import type { TagFilters } from "@rezics/api/tag/tag";
-import { tagContextQuery, tagQueries } from "@rezics/api/tag/tag";
+import type { TagFilters } from "@rezics/contract/api/tag/tag";
+import { tagContextQuery, tagQueries } from "@rezics/contract/api/tag/tag";
 import type { UnitTagDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";

@@ -3,7 +3,7 @@ import type {
   StatusItem,
   StatusState,
   SystemStatusSummary,
-} from "@rezics/api";
+} from "@rezics/contract/api";
 
 export type { StatusState };
 

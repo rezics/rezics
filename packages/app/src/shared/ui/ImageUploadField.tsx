@@ -1,4 +1,4 @@
-import { useImageUpload } from "@rezics/api/upload/upload.mutations";
+import { useImageUpload } from "@rezics/contract/api/upload/upload.mutations";
 import { Camera, Trash2, Upload } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "@rezics/i18n/react";

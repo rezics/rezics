@@ -1,7 +1,7 @@
 import {
   useCreateReactionMutation,
   useDeleteReactionMutation,
-} from "@rezics/api/reaction/reaction.mutations";
+} from "@rezics/contract/api/reaction/reaction.mutations";
 import { useTranslation } from "@rezics/i18n/react";
 import { useRetryToast } from "@/shared/hooks/useRetryToast";
 import { useAuth, useAuthModal } from "@/user";

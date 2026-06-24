@@ -1,5 +1,5 @@
-import { userSearchQueryOptions } from "@rezics/api/meili/meili.queries";
-import { userQueries } from "@rezics/api/user/user.queries";
+import { userSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
+import { userQueries } from "@rezics/contract/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

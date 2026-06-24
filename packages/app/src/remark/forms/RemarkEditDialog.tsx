@@ -1,4 +1,4 @@
-import { useUpdatePostMutation } from "@rezics/api/post/post";
+import { useUpdatePostMutation } from "@rezics/contract/api/post/post";
 import {
   type ContentLanguage,
   mainMarkdownSource,

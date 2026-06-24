@@ -1,5 +1,5 @@
-import { tagApi } from "@rezics/api/tag/tag";
-import { unitApi } from "@rezics/api/unit/unit";
+import { tagApi } from "@rezics/contract/api/tag/tag";
+import { unitApi } from "@rezics/contract/api/unit/unit";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useEffect, useState } from "react";
 

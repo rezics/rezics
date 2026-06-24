@@ -1,12 +1,12 @@
-import { authApi } from "@rezics/api/auth/auth.api";
-import { authKeys } from "@rezics/api/auth/auth.keys";
-import { exchangeForSessionToken } from "@rezics/api/react-query/jwt";
+import { authApi } from "@rezics/contract/api/auth/auth.api";
+import { authKeys } from "@rezics/contract/api/auth/auth.keys";
+import { exchangeForSessionToken } from "@rezics/contract/api/react-query/jwt";
 import {
   clearAuthSessionState,
   hydrateAuthSessionState,
   useAuthSessionStore,
-} from "@rezics/api/states";
-import { userKeys } from "@rezics/api/user/user.keys";
+} from "@rezics/contract/api/states";
+import { userKeys } from "@rezics/contract/api/user/user.keys";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { qc } from "@/admin/app/providers/reactQueryUtil";
 /**

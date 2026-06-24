@@ -1,4 +1,4 @@
-import { useCurrentUserId } from "@rezics/api/hooks";
+import { useCurrentUserId } from "@rezics/contract/api/hooks";
 import type { PollSearchDocument } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Badge, Button, Input } from "@rezics/ui/shadcn";

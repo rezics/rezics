@@ -1,4 +1,4 @@
-import { userQueries } from "@rezics/api/user/user.queries";
+import { userQueries } from "@rezics/contract/api/user/user.queries";
 import { type Language, normalizeLanguage } from "@rezics/contract";
 import { getLocale, LOCALE_STORAGE_KEY } from "@rezics/i18n/react";
 import type { QueryClient } from "@tanstack/react-query";

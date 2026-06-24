@@ -2,8 +2,8 @@ import {
   realmRuleResolvedQuery,
   useCreateRealmRuleRevisionMutation,
   useUpdateRealmRulePolicyMutation,
-} from "@rezics/api/realm/realm";
-import { postSearchQueryOptions } from "@rezics/api/meili/meili.queries";
+} from "@rezics/contract/api/realm/realm";
+import { postSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
 import type {
   PostSearchDocument,
   RealmRuleResolvedItemDTO,

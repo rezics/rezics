@@ -1,8 +1,13 @@
-import { beforeEach, describe, expect, mock, test } from "bun:test";
-import type { CapabilityHint, GetSessionStateResponse } from "@rezics/contract";
-import { governanceApi as actualGovernanceApi } from "../governance/governance.api";
+import { afterAll, beforeEach, describe, expect, mock, test } from "bun:test";
+import {
+  AUTH_PRESENCE_COOKIE_NAME,
+  AUTH_PRESENCE_COOKIE_VALUE,
+  type CapabilityHint,
+  type GetSessionStateResponse,
+} from "@rezics/contract";
+import { authApi } from "../auth/auth.api";
+import { governanceApi } from "../governance/governance.api";
 
-let presence = false;
 const getSessionStateMock = mock();
 const capabilityHintsMock = mock(
   async (): Promise<{ capabilities: CapabilityHint[] }> => ({
@@ -10,25 +15,19 @@ const capabilityHintsMock = mock(
   }),
 );
 
-mock.module("@rezics/api/react-query/authPresence", () => ({
-  hasAuthPresence: () => presence,
-  clearAuthPresence: () => {
-    presence = false;
-  },
-}));
+const originalGetSessionState = authApi.getSessionState;
+const originalCapabilityHints = governanceApi.capabilityHints;
 
-mock.module("@rezics/api/auth/auth.api", () => ({
-  authApi: {
-    getSessionState: getSessionStateMock,
-  },
-}));
+authApi.getSessionState =
+  getSessionStateMock as unknown as typeof authApi.getSessionState;
+governanceApi.capabilityHints =
+  capabilityHintsMock as unknown as typeof governanceApi.capabilityHints;
 
-mock.module("@rezics/api/governance/governance.api", () => ({
-  governanceApi: {
-    ...actualGovernanceApi,
-    capabilityHints: capabilityHintsMock,
-  },
-}));
+function setAuthPresenceCookie(present: boolean) {
+  document.cookie = present
+    ? `${AUTH_PRESENCE_COOKIE_NAME}=${AUTH_PRESENCE_COOKIE_VALUE}`
+    : "";
+}
 
 const readySession: GetSessionStateResponse = {
   session: {
@@ -130,8 +129,23 @@ const profileSetupSession = {
 };
 
 describe("authSessionStore", () => {
+  afterAll(() => {
+    authApi.getSessionState = originalGetSessionState;
+    governanceApi.capabilityHints = originalCapabilityHints;
+    delete (globalThis as Partial<typeof globalThis>).document;
+    delete (globalThis as Partial<typeof globalThis>).window;
+  });
+
   beforeEach(async () => {
-    presence = false;
+    globalThis.window = {
+      location: {
+        hostname: "app.example",
+      },
+    } as Window & typeof globalThis;
+    globalThis.document = {
+      cookie: "",
+    } as Document;
+    setAuthPresenceCookie(false);
     getSessionStateMock.mockReset();
     capabilityHintsMock.mockReset();
     capabilityHintsMock.mockResolvedValue({ capabilities: [] });
@@ -140,7 +154,7 @@ describe("authSessionStore", () => {
   });
 
   test("hydrates ready state on reload when session is complete", async () => {
-    presence = true;
+    setAuthPresenceCookie(true);
     getSessionStateMock.mockResolvedValueOnce(readySession);
 
     const { hydrateAuthSessionState, useAuthSessionStore } = await import(
@@ -206,7 +220,7 @@ describe("authSessionStore", () => {
   });
 
   test("hydrates UI-only governance capability hints for member sessions", async () => {
-    presence = true;
+    setAuthPresenceCookie(true);
     getSessionStateMock.mockResolvedValueOnce(readySession);
     capabilityHintsMock.mockResolvedValueOnce({
       capabilities: [
@@ -321,7 +335,7 @@ describe("authSessionStore", () => {
   });
 
   test("hydrates authenticated but incomplete registration as not complete", async () => {
-    presence = true;
+    setAuthPresenceCookie(true);
     getSessionStateMock.mockResolvedValueOnce(incompleteSession);
 
     const { hydrateAuthSessionState, useAuthSessionStore } = await import(
@@ -372,7 +386,7 @@ describe("authSessionStore", () => {
   });
 
   test("allows explicit post-auth hydration before presence is readable", async () => {
-    presence = false;
+    setAuthPresenceCookie(false);
     getSessionStateMock.mockResolvedValueOnce(setupRequiredSession);
 
     const { hydrateAuthSessionState, useAuthSessionStore } = await import(
@@ -400,7 +414,7 @@ describe("authSessionStore", () => {
   });
 
   test("fails closed and clears presence on stale passive auth presence", async () => {
-    presence = true;
+    setAuthPresenceCookie(true);
     getSessionStateMock.mockRejectedValueOnce(new Error("Unauthorized"));
 
     const { hydrateAuthSessionState, useAuthSessionStore } = await import(
@@ -409,7 +423,8 @@ describe("authSessionStore", () => {
 
     await hydrateAuthSessionState();
 
-    expect(presence).toBe(false);
+    const { hasAuthPresence } = await import("../react-query/authPresence");
+    expect(hasAuthPresence()).toBe(false);
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: "error",
       capabilityLevel: "anonymous",

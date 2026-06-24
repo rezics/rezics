@@ -1,4 +1,4 @@
-import { zonePortalQueryOptions } from "@rezics/api";
+import { zonePortalQueryOptions } from "@rezics/contract/api";
 import { createFileRoute } from "@tanstack/react-router";
 import { routeQueryOrNotFound } from "@/core";
 import { resolveRouteReadLanguageContext } from "@/shared/models/readLanguageContext";

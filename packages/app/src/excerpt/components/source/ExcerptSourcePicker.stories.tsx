@@ -1,4 +1,4 @@
-import { unitKeys } from "@rezics/api/unit/unit.keys";
+import { unitKeys } from "@rezics/contract/api/unit/unit.keys";
 import type { ExcerptSource, UnitDTO, UnitResponse } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";

@@ -1,4 +1,4 @@
-import { realmListQuery } from "@rezics/api/realm/realm";
+import { realmListQuery } from "@rezics/contract/api/realm/realm";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";

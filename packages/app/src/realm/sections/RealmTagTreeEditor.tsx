@@ -1,13 +1,13 @@
-import { labelListQuery } from "@rezics/api/label/label";
+import { labelListQuery } from "@rezics/contract/api/label/label";
 import {
   meiliLabelSearchQueryOptions,
   meiliTagSearchQueryOptions,
-} from "@rezics/api/meili/meili.queries";
+} from "@rezics/contract/api/meili/meili.queries";
 import {
   realmTagTreeQuery,
   useUpdateRealmTagTreeMutation,
-} from "@rezics/api/realm-tag-tree";
-import { tagBatchTranslationsQuery } from "@rezics/api/tag/tag";
+} from "@rezics/contract/api/realm-tag-tree";
+import { tagBatchTranslationsQuery } from "@rezics/contract/api/tag/tag";
 import type {
   LabelSearchDocument,
   RealmTagTree,

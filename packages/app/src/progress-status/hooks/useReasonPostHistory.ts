@@ -1,4 +1,4 @@
-import { postQueries } from "@rezics/api/post/post.queries";
+import { postQueries } from "@rezics/contract/api/post/post.queries";
 import { mainMarkdownSource, type PostResponse } from "@rezics/contract";
 import { useQueries } from "@tanstack/react-query";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";

@@ -1,4 +1,7 @@
-import { useDmBlockState, useSetDmBlockMutation } from "@rezics/api/dm/dm";
+import {
+  useDmBlockState,
+  useSetDmBlockMutation,
+} from "@rezics/contract/api/dm/dm";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { Ban } from "lucide-react";

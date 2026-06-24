@@ -1,12 +1,12 @@
 import {
   bookContentStructureQuery,
   bookMutations,
-} from "@rezics/api/book/book";
-import { bookQueries } from "@rezics/api/book/book.queries";
+} from "@rezics/contract/api/book/book";
+import { bookQueries } from "@rezics/contract/api/book/book.queries";
 import {
   chapterDetailQuery,
   useUpdateChapterMutation,
-} from "@rezics/api/chapter/chapter";
+} from "@rezics/contract/api/chapter/chapter";
 import {
   type BookContentStructureItem,
   mainMarkdownSource,

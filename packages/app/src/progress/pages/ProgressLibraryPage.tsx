@@ -1,5 +1,5 @@
-import { myProgressPageQuery } from "@rezics/api/progress/progress.queries";
-import { userQueries } from "@rezics/api/user/user.queries";
+import { myProgressPageQuery } from "@rezics/contract/api/progress/progress.queries";
+import { userQueries } from "@rezics/contract/api/user/user.queries";
 import {
   type BookshelfViewConfig,
   type UserUnitProgressStatus,

@@ -3,9 +3,9 @@ import {
   postSearchQueryOptions,
   realmSearchQueryOptions,
   zoneSearchQueryOptions,
-} from "@rezics/api/meili/meili.queries";
-import { realmDockQuery } from "@rezics/api/realm/realm-dock.queries";
-import { useUpdateRealmDockMutation } from "@rezics/api/realm/realm-dock.mutations";
+} from "@rezics/contract/api/meili/meili.queries";
+import { realmDockQuery } from "@rezics/contract/api/realm/realm-dock.queries";
+import { useUpdateRealmDockMutation } from "@rezics/contract/api/realm/realm-dock.mutations";
 import type {
   LabelSearchDocument,
   PostSearchDocument,

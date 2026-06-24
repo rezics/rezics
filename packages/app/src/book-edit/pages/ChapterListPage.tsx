@@ -1,5 +1,5 @@
-import { bookContentStructureQuery } from "@rezics/api/book/book";
-import { bookQueries } from "@rezics/api/book/book.queries";
+import { bookContentStructureQuery } from "@rezics/contract/api/book/book";
+import { bookQueries } from "@rezics/contract/api/book/book.queries";
 import type { ContentRating } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rezics/ui/shadcn";

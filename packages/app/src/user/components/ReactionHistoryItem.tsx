@@ -1,7 +1,7 @@
 import type {
   ReactionHistoryGivenItem,
   ReactionHistoryReceivedItem,
-} from "@rezics/api/reaction/reaction.types";
+} from "@rezics/contract/api/reaction/reaction.types";
 import { useTranslation } from "@rezics/i18n/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import {

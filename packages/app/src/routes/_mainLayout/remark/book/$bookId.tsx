@@ -1,4 +1,4 @@
-import { bookQueries } from "@rezics/api/book/book";
+import { bookQueries } from "@rezics/contract/api/book/book";
 import { useTranslation } from "@rezics/i18n/react";
 import { createFileRoute } from "@tanstack/react-router";
 import { titleOfBook, unitTitleMeta } from "@/core/routing/documentTitle";

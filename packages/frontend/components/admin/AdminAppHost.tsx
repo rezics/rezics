@@ -1,6 +1,6 @@
 "use client";
 
-import { configureApi } from "@rezics/api/config";
+import { configureApi } from "@rezics/contract/api/config";
 import { adminRuntime, env } from "@/admin/env";
 import App from "@/admin/app/App";
 import { initI18n } from "@/admin/app/providers/i18n";

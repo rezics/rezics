@@ -2,8 +2,8 @@ import {
   useChangeEmailMutation,
   useRevokeSessionMutation,
   useSetPasswordMutation,
-} from "@rezics/api/auth/auth.mutations";
-import { authQueries } from "@rezics/api/auth/auth.queries";
+} from "@rezics/contract/api/auth/auth.mutations";
+import { authQueries } from "@rezics/contract/api/auth/auth.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {

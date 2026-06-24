@@ -1,9 +1,9 @@
 import {
   useBlockUserMutation,
   useUnblockUserMutation,
-} from "@rezics/api/block/block.mutations";
-import { blockQueries } from "@rezics/api/block/block.queries";
-import { userQueries } from "@rezics/api/user/user.queries";
+} from "@rezics/contract/api/block/block.mutations";
+import { blockQueries } from "@rezics/contract/api/block/block.queries";
+import { userQueries } from "@rezics/contract/api/user/user.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Alert, AlertDescription, Button, Input } from "@rezics/ui/shadcn";

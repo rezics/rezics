@@ -1,4 +1,4 @@
-import { subscriptionCheckQuery } from "@rezics/api/subscription/subscription";
+import { subscriptionCheckQuery } from "@rezics/contract/api/subscription/subscription";
 import type { Permission } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";

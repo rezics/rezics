@@ -1,7 +1,7 @@
 import type {
   MeiliKey,
   MeiliKeyListResponse,
-} from "@rezics/api/meili/meili.admin.queries";
+} from "@rezics/contract/api/meili/meili.admin.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {

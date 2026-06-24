@@ -1,6 +1,6 @@
-import { bookQueries } from "@rezics/api/book/book";
-import { chapterDetailQuery } from "@rezics/api/chapter/chapter";
-import { useCanEdit } from "@rezics/api/hooks";
+import { bookQueries } from "@rezics/contract/api/book/book";
+import { chapterDetailQuery } from "@rezics/contract/api/chapter/chapter";
+import { useCanEdit } from "@rezics/contract/api/hooks";
 import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";

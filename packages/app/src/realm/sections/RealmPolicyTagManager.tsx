@@ -8,11 +8,11 @@ import {
   usePatchPolicyTagApplicationMutation,
   useUpdatePolicyTagRuleMutation,
   useUpsertPolicyTagApplicationMutation,
-} from "@rezics/api";
+} from "@rezics/contract/api";
 import {
   contentSearchQueryOptions,
   meiliTagSearchQueryOptions,
-} from "@rezics/api/meili/meili.queries";
+} from "@rezics/contract/api/meili/meili.queries";
 import type {
   ContentSearchDocument,
   PolicyTagApplicationDTO,

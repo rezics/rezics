@@ -1,4 +1,4 @@
-import { tagQueries } from "@rezics/api/tag/tag";
+import { tagQueries } from "@rezics/contract/api/tag/tag";
 import { useTranslation } from "@rezics/i18n/react";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useQuery } from "@tanstack/react-query";

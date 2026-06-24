@@ -1,15 +1,15 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { configureApi } from "@rezics/api/config";
+import { configureApi } from "@rezics/contract/api/config";
 
 // Required for @rezics/app env.ts validation
 // @rezics/app env.ts 校验所必需。
-process.env.VITE_API_URL ??= "http://api.example";
+process.env.VITE_API_URL ??= "http://contract/api.example";
 process.env.VITE_REACTION_SERVICE_URL ??= "http://reaction.example";
 process.env.VITE_TURNSTILE_SITE_KEY ??= "turnstile-test-key";
 
 configureApi({
-  apiBaseUrl: "http://api.example",
-  authBaseUrl: "http://api.example",
+  apiBaseUrl: "http://contract/api.example",
+  authBaseUrl: "http://contract/api.example",
   reactionServiceUrl: "http://reaction.example",
 });
 
@@ -69,7 +69,7 @@ const hydrateAuthSessionStateMock = mock(async () => ({
   },
 }));
 
-mock.module("@rezics/api/auth/auth.api", () => ({
+mock.module("@rezics/contract/api/auth/auth.api", () => ({
   authApi: {
     signIn: signInMock,
     signUp: signUpMock,
@@ -78,19 +78,19 @@ mock.module("@rezics/api/auth/auth.api", () => ({
   },
 }));
 
-mock.module("@rezics/api/auth/auth.keys", () => ({
+mock.module("@rezics/contract/api/auth/auth.keys", () => ({
   authKeys: {
     all: () => ["auth"],
   },
 }));
 
-mock.module("@rezics/api/user/user.keys", () => ({
+mock.module("@rezics/contract/api/user/user.keys", () => ({
   userKeys: {
     all: () => ["user"],
   },
 }));
 
-mock.module("@rezics/api/user/user.api", () => ({
+mock.module("@rezics/contract/api/user/user.api", () => ({
   userApi: {
     me: mock(),
     ensure: ensureMock,
@@ -174,7 +174,7 @@ describe("auth handlers", () => {
 
     expect(signInMock).toHaveBeenCalledTimes(1);
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "http://api.example/auth/session/refresh",
+      "http://contract/api.example/auth/session/refresh",
     );
     expect(result.token).toBeNull();
     expect(hydrateAuthSessionStateMock).toHaveBeenCalledWith({

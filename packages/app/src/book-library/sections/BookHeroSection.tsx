@@ -1,5 +1,5 @@
-import { postQueries } from "@rezics/api/post/post";
-import { tagQueries } from "@rezics/api/tag/tag.queries";
+import { postQueries } from "@rezics/contract/api/post/post";
+import { tagQueries } from "@rezics/contract/api/tag/tag.queries";
 import type { BookDTO } from "@rezics/contract";
 import { mainMarkdownSource, PostKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";

@@ -1,5 +1,5 @@
-import type { ShelfView } from "@rezics/api/shelf";
-import { shelfKeys } from "@rezics/api/shelf/shelf.keys";
+import type { ShelfView } from "@rezics/contract/api/shelf";
+import { shelfKeys } from "@rezics/contract/api/shelf/shelf.keys";
 import type {
   BookDTO,
   PostDTO,

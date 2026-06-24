@@ -1,4 +1,4 @@
-import { ApiError } from "@rezics/api";
+import { ApiError } from "@rezics/contract/api";
 import { type DecisionCode, decisionCodes } from "@rezics/contract";
 
 /**

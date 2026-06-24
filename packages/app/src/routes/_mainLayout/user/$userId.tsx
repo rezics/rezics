@@ -1,4 +1,4 @@
-import { userDetailQuery } from "@rezics/api/user/user.queries";
+import { userDetailQuery } from "@rezics/contract/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
 import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 import {

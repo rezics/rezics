@@ -1,4 +1,4 @@
-import { useCanEdit } from "@rezics/api/hooks";
+import { useCanEdit } from "@rezics/contract/api/hooks";
 import { contentDocMarkdownFallback, type ShelfDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";

@@ -1,4 +1,4 @@
-import { entityBySlugQueryOptions } from "@rezics/api/entity";
+import { entityBySlugQueryOptions } from "@rezics/contract/api/entity";
 import { isPublicEntitySlugRouteParams } from "@rezics/contract";
 import { titleOfEntity, unitTitleMeta } from "@/core/routing/documentTitle";
 import { resolveRouteReadLanguageContext } from "@/shared/models/readLanguageContext";

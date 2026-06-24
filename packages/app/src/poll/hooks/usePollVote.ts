@@ -1,7 +1,7 @@
 import {
   useCastPollVoteMutation,
   useWithdrawPollVoteMutation,
-} from "@rezics/api/poll/poll.mutations";
+} from "@rezics/contract/api/poll/poll.mutations";
 import type { PollVoteMode } from "@rezics/contract";
 
 export interface UsePollVoteArgs {

@@ -1,4 +1,4 @@
-import { useDeleteRealmMutation } from "@rezics/api/realm/realm";
+import { useDeleteRealmMutation } from "@rezics/contract/api/realm/realm";
 import type { RealmDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {

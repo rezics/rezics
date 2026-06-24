@@ -1,8 +1,8 @@
-import { useServerPermission } from "@rezics/api/hooks";
+import { useServerPermission } from "@rezics/contract/api/hooks";
 import {
   myRealmMembershipQuery,
   realmDetailQuery,
-} from "@rezics/api/realm/realm";
+} from "@rezics/contract/api/realm/realm";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";

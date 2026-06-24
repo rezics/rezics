@@ -1,5 +1,5 @@
-import type { StreamPostRow } from "@rezics/api/stream/stream";
-import { postQueries } from "@rezics/api/post/post";
+import type { StreamPostRow } from "@rezics/contract/api/stream/stream";
+import { postQueries } from "@rezics/contract/api/post/post";
 import {
   type ModerationActionDTO,
   PostKind,

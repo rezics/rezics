@@ -2,7 +2,7 @@ import {
   subjectAttributionQueries,
   useLinkSubjectAttributionMutation,
   useUnlinkSubjectAttributionMutation,
-} from "@rezics/api/subject-attribution/subject-attribution";
+} from "@rezics/contract/api/subject-attribution/subject-attribution";
 import {
   type RemoveUnitCollaboratorVariables,
   type RemoveUnitFieldLockVariables,
@@ -14,7 +14,7 @@ import {
   useRemoveUnitFieldLockMutation,
   useUpsertUnitCollaboratorMutation,
   useUpsertUnitFieldLockMutation,
-} from "@rezics/api/unit/unit";
+} from "@rezics/contract/api/unit/unit";
 import {
   subjectAttributionRoles,
   UNIT_FIELD_LOCK_ALL,

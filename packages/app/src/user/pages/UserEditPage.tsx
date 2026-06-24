@@ -1,5 +1,5 @@
-import { userApi } from "@rezics/api/user/user.api";
-import { userQueries } from "@rezics/api/user/user.queries";
+import { userApi } from "@rezics/contract/api/user/user.api";
+import { userQueries } from "@rezics/contract/api/user/user.queries";
 import {
   contentDocMarkdownFallback,
   markdownContentDoc,

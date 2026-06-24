@@ -3,7 +3,7 @@ import {
   realmMembersQuery,
   useRemoveMemberMutation,
   useUpdateMemberRoleMutation,
-} from "@rezics/api/realm/realm";
+} from "@rezics/contract/api/realm/realm";
 import type { RealmMemberDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {

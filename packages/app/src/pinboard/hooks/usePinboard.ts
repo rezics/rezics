@@ -12,12 +12,12 @@
  *      UnitTranslation.description.
  */
 
-import { postDetailQuery } from "@rezics/api/post/post.queries";
+import { postDetailQuery } from "@rezics/contract/api/post/post.queries";
 import {
   pinboardAdminReadQuery,
   pinboardReadQuery,
-} from "@rezics/api/pinboard/pinboard.queries";
-import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
+} from "@rezics/contract/api/pinboard/pinboard.queries";
+import { unitDetailQuery } from "@rezics/contract/api/unit/unit.queries";
 import {
   contentDocMarkdownFallback,
   defaultSupportLanguage,

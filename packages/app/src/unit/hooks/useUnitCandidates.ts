@@ -1,4 +1,4 @@
-import { unitQueries } from "@rezics/api/unit/unit.queries";
+import { unitQueries } from "@rezics/contract/api/unit/unit.queries";
 import type { UnitResponse } from "@rezics/contract";
 import { useQueries } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";

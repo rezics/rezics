@@ -1,8 +1,8 @@
-import { reactionKeys } from "@rezics/api/reaction/reaction.keys";
+import { reactionKeys } from "@rezics/contract/api/reaction/reaction.keys";
 import type {
   ReactionMyResponse,
   ReactionSummaryResponse,
-} from "@rezics/api/reaction/reaction.types";
+} from "@rezics/contract/api/reaction/reaction.types";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";

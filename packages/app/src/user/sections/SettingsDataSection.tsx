@@ -1,9 +1,9 @@
-import { useSignOutMutation } from "@rezics/api/auth/auth.mutations";
+import { useSignOutMutation } from "@rezics/contract/api/auth/auth.mutations";
 import {
   useDeleteAccountMutation,
   useExportDataMutation,
-} from "@rezics/api/user/user.mutations";
-import { userQueries } from "@rezics/api/user/user.queries";
+} from "@rezics/contract/api/user/user.mutations";
+import { userQueries } from "@rezics/contract/api/user/user.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {

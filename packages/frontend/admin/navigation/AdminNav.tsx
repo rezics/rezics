@@ -1,4 +1,4 @@
-import { useAuthSessionStore } from "@rezics/api/states";
+import { useAuthSessionStore } from "@rezics/contract/api/states";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Separator } from "@rezics/ui/shadcn";
 import { useRouterState } from "@tanstack/react-router";

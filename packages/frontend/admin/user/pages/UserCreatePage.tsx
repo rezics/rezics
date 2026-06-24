@@ -1,4 +1,4 @@
-import { userMutations } from "@rezics/api/user/user.mutations";
+import { userMutations } from "@rezics/contract/api/user/user.mutations";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Alert,

@@ -1,4 +1,4 @@
-import { unitDetailQuery } from "@rezics/api/unit/unit";
+import { unitDetailQuery } from "@rezics/contract/api/unit/unit";
 import type { PollResultsDTO, UnitDTO } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";

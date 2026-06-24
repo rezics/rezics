@@ -60,7 +60,7 @@ const i18nMessages = {
   shelf_sort_oldest: () => getI18nRuntime().i18n.t("entity:shelf_sort_oldest"),
 } as const;
 
-import { shelfQueries } from "@rezics/api/shelf/shelf.queries";
+import { shelfQueries } from "@rezics/contract/api/shelf/shelf.queries";
 import { FAVORITES_SHELF_SLUG, type ShelfDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Card } from "@rezics/ui/shadcn";

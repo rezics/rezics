@@ -1,9 +1,9 @@
-import { authApi } from "@rezics/api/auth/auth.api";
-import { governanceApi } from "@rezics/api/governance/governance.api";
+import { authApi } from "../auth/auth.api";
+import { governanceApi } from "../governance/governance.api";
 import {
   clearAuthPresence,
   hasAuthPresence,
-} from "@rezics/api/react-query/authPresence";
+} from "../react-query/authPresence";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import {

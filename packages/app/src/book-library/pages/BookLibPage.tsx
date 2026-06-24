@@ -1,4 +1,4 @@
-import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
+import { contentSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
 import {
   type ContentSearchDocument,
   DEFAULT_LANGUAGE,

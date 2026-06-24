@@ -1,7 +1,7 @@
-import { labelListQuery } from "@rezics/api/label/label";
-import { meiliTagSearchQueryOptions } from "@rezics/api/meili/meili.queries";
-import { realmTagTreeQuery } from "@rezics/api/realm-tag-tree";
-import { tagBatchTranslationsQuery } from "@rezics/api/tag/tag";
+import { labelListQuery } from "@rezics/contract/api/label/label";
+import { meiliTagSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
+import { realmTagTreeQuery } from "@rezics/contract/api/realm-tag-tree";
+import { tagBatchTranslationsQuery } from "@rezics/contract/api/tag/tag";
 import {
   emptyRealmTagTree,
   LANGUAGES,

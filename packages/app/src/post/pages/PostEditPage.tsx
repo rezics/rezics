@@ -1,10 +1,10 @@
-import { getLockedFieldError } from "@rezics/api";
+import { getLockedFieldError } from "@rezics/contract/api";
 import {
   postQueries,
   useUpdatePostMutation,
   useUpdateWikiPostContentMutation,
-} from "@rezics/api/post/post";
-import { unitQueries } from "@rezics/api/unit/unit";
+} from "@rezics/contract/api/post/post";
+import { unitQueries } from "@rezics/contract/api/unit/unit";
 import {
   type ContentLanguage,
   mainMarkdownSource,

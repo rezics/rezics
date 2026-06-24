@@ -1,4 +1,4 @@
-import { draftListQuery } from "@rezics/api/draft";
+import { draftListQuery } from "@rezics/contract/api/draft";
 import type { DraftMetadata } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";

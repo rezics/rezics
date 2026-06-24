@@ -1,4 +1,4 @@
-import { generateKeyBetween } from "@rezics/api/shared/fractional-index";
+import { generateKeyBetween } from "@rezics/contract/api/shared/fractional-index";
 import type { UserSubscriptionListSort } from "@rezics/contract";
 
 export const DEFAULT_SUBSCRIPTION_LIST_SORT: UserSubscriptionListSort =

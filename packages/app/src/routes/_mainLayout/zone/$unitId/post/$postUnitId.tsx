@@ -1,5 +1,5 @@
-import { zonePortalQueryOptions } from "@rezics/api";
-import { postQueries } from "@rezics/api/post/post";
+import { zonePortalQueryOptions } from "@rezics/contract/api";
+import { postQueries } from "@rezics/contract/api/post/post";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { resolveDefaultCommentContext } from "@/comment";

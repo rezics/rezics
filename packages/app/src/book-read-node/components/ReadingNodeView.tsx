@@ -1,6 +1,9 @@
-import { useToggleNodeCompletion, useUpdateUnitProgress } from "@rezics/api";
-import { useCurrentUserId } from "@rezics/api/hooks";
-import { chapterDetailQuery } from "@rezics/api/chapter/chapter";
+import {
+  useToggleNodeCompletion,
+  useUpdateUnitProgress,
+} from "@rezics/contract/api";
+import { useCurrentUserId } from "@rezics/contract/api/hooks";
+import { chapterDetailQuery } from "@rezics/contract/api/chapter/chapter";
 import { contentDocMarkdownFallback } from "@rezics/contract";
 import { createRezicsRenderer } from "@rezics/editor/markdown";
 import { useTranslation } from "@rezics/i18n/react";
