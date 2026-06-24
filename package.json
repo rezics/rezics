@@ -5,15 +5,9 @@
   "license": "AGPL-3.0-only",
   "packageManager": "bun@1.3.13",
   "scripts": {
-    "format": "task format",
-    "format:check": "task format:check",
-    "lint": "task lint",
-    "lint:fix": "task lint:fix",
     "typecheck": "tsc -b",
     "check": "tsc -b",
-    "check:repo": "task ci",
     "test": "task test",
-    "knip": "task knip",
     "storybook": "task storybook",
     "build:storybook": "task build:storybook"
   },
@@ -21,14 +15,12 @@
     "./packages/*"
   ],
   "devDependencies": {
-    "@biomejs/biome": "^2.4.10",
     "@rezics/storybook-config": "workspace:*",
     "@rezics/ui": "workspace:*",
     "@storybook/addon-docs": "10.3.6",
     "@storybook/react-vite": "^10.3.6",
     "babel-plugin-react-compiler": "^1.0.0",
     "concurrently": "^9",
-    "knip": "^5.85.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "storybook": "^10.3.6",

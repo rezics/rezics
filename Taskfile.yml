@@ -81,32 +81,6 @@ tasks:
       - nohup nomad agent -dev -log-level=warn -bind=127.0.0.1 -config=deploy/nomad-dev.hcl > .dev/nomad.log 2>&1 &
       - until nomad agent-info > /dev/null 2>&1; do sleep 1; done
 
-  # ── Format / lint / static checks ──────────────────────────────────────
-  format:
-    desc: Format the repo (write) with Biome
-    cmd: bun biome format --write .
-  format:check:
-    desc: Check formatting with Biome
-    cmd: bun biome format .
-  lint:
-    desc: Lint with Biome
-    cmd: bun biome lint .
-  lint:fix:
-    desc: Lint and apply safe fixes with Biome
-    cmd: bun biome check --write .
-  check:
-    desc: Biome check (lint + format, write)
-    cmd: bun biome check --write .
-  knip:
-    desc: Report unused exports & dependencies
-    cmd: bun knip
-  ci:
-    desc: Run the local static gate
-    cmds:
-      - task: format:check
-      - task: lint
-      - task: knip
-
   # ── Tests ──────────────────────────────────────────────────────────────
   test:
     desc: Run all tests (bun test, whole repo)
