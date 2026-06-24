@@ -16,7 +16,7 @@ tasks:
     desc: Start development environment, Ctrl+C stops all
     cmds:
       - task: dev:setup
-      - nomad-pack run deploy/dev --var project_root={{.ROOT_DIR}}
+      - nomad job run -var project_root={{.ROOT_DIR}} deploy/dev.nomad.hcl
       - defer: nomad job stop rezics-dev || true
       - cmd: |-
           alloc=$(nomad job allocs -json rezics-dev | jq -r '.[] | select(.TaskGroup == "app") | .ID' | head -1)
@@ -182,41 +182,6 @@ tasks:
   browser:inspect:
     desc: "Run a headed browser inspect scratch script from tool/browser-inspect/work"
     cmd: bun run tool/browser-inspect/run-work.ts {{.CLI_ARGS}}
-
-
-  # ── Storybook ──────────────────────────────────────────────────────────
-  storybook:
-    desc: All Storybooks (host + every package) with color-prefixed output
-    cmd: >-
-      bun concurrently -k -n host,ui,editor,folio,admin,app,info
-      -c blue,cyan,magenta,green,yellow,red,greenBright
-      "task storybook:host -- --quiet --loglevel error"
-      "task ui:storybook -- --quiet --loglevel error"
-      "task editor:storybook -- --quiet --loglevel error"
-      "task folio:storybook -- --quiet --loglevel error"
-      "task admin:storybook -- --quiet --loglevel error"
-      "task app:storybook -- --quiet --loglevel error"
-      "bun run tool/src/commands/storybook/banner.ts"
-  storybook:host:
-    desc: Host Storybook (port 6006)
-    cmd: bun storybook dev -p 6006 --no-open {{.CLI_ARGS}}
-  storybook:banner:
-    internal: true
-    cmd: bun run tool/src/commands/storybook/banner.ts
-  build:storybook:
-    desc: Build every static Storybook
-    cmd: >-
-      bun concurrently -n host,ui,editor,folio,admin,app
-      -c blue,cyan,magenta,green,yellow,red
-      "task storybook:build-host"
-      "task ui:build-storybook"
-      "task editor:build-storybook"
-      "task folio:build-storybook"
-      "task admin:build-storybook"
-      "task app:build-storybook"
-  storybook:build-host:
-    internal: true
-    cmd: bun storybook build -o storybook-static
 
   # ── Raw tool/ CLI passthrough ──────────────────────────────────────────
   tool:

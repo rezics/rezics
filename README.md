@@ -53,19 +53,17 @@ co-location.
 - **Shelves that explain themselves** — each saved work is paired with the
   curator's review, so browsing a shelf tells you *why* something was collected,
   making it easy to judge whether a work is for you.
-- **Reading & authoring built in** — a native ebook reader (`@rezics/folio`) and
-  a CodeMirror-based content editor (`@rezics/editor`).
+- **Reading & authoring built in** — a Portable Text editor for rich content
+  creation.
 
 ## Stack
 
-A service-oriented backend — an Elysia API (`@rezics/server`) plus standalone
-auth, history, job-runner, and preview services, with Drizzle/PostgreSQL,
-Meilisearch search, and a React + Vite frontend (`@rezics/app`).
+An Effect 4 HttpApi backend (`@rezics/backend`) with Drizzle/PostgreSQL and
+Meilisearch search, and a Next.js 16 frontend (`@rezics/frontend`).
 
-Runtime and package manager: **Bun**. Workspaces live under `package/*`. See
-`AGENTS.md` and `CONTRIBUTING.md` for architecture and setup.
+Runtime: **Bun**. Package manager: **Yarn 4**. Workspaces live under
+`packages/*`. See `AGENTS.md` and `CONTRIBUTING.md` for architecture and setup.
 
 ## Docs
 
-The `Docs` folder is for manually written documentation, while the `tsDocs`
-folder stores automatically generated documentation.
+See `docs/` for operational guides and reference documentation.

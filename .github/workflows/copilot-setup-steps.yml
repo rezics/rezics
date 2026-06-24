@@ -42,5 +42,5 @@ jobs:
           echo "$PWD/.devenv/profile/bin" >> $GITHUB_PATH
 
       # Project dependencies / 项目依赖
-      - run: bun install --frozen-lockfile
+      - run: yarn install --immutable
       - run: cd tool && bun install --frozen-lockfile

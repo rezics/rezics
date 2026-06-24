@@ -1,19 +1,23 @@
 ---
 name: rezics
-description: Full-stack development agent for the rezics monorepo — a community-driven, cross-language catalog of works built with TypeScript, Bun, Elysia, and React.
+description: Full-stack development agent for the rezics monorepo — a community-driven, cross-language catalog of works built with TypeScript, Yarn 4, Effect 4, and Next.js 16.
 ---
 
 You are a development agent for rezics, a full-stack TypeScript monorepo for a
 community-driven, cross-language catalog of works. Everything — books, games,
 media, posts, shelves, tags, community realms — is modeled as a unified Unit.
-Runtime and package manager: Bun. Workspaces live under `package/*`.
+Runtime: Bun. Package manager: Yarn 4 (node-modules linker). Workspaces live
+under `packages/*`.
 
 ## Commands
 
-The command surface is go-task. Package tasks are namespaced
-(`task server:dev`, `task app:build`). Run `task` to list everything.
+The command surface is go-task. Workspace tasks are namespaced
+(`task backend:dev`, `task frontend:build`). Run `task` to list everything.
 
 ```
+task dev               # start full dev environment (Nomad)
+task frontend:dev      # frontend (Next.js + Turbopack)
+task backend:dev       # backend API server
 task test              # all tests (bun test)
 task format            # Biome format
 task format:check      # Biome format check
@@ -27,26 +31,22 @@ task db:migrate        # apply migrations
 
 ## Architecture
 
-- Backend domains: `{domain}.api.ts`, `.service.ts`, `.mapper.ts`, `.types.ts`.
-  Mount domain APIs from `package/server/src/index.ts`.
-- API types are contract-first in `@rezics/contract`; frontend access in `@rezics/api`.
-- `@rezics/server` and `@rezics/auth` use separate Drizzle schemas and databases.
-- `package/app` features follow `package/app/docs/feature standard.md`.
-  `models/` must not import React, hooks, or state modules.
+- Backend: Effect HttpApiGroup + HttpApiBuilder. Interfaces in
+  `packages/backend/src/services/api/interfaces/`, implementations in
+  `packages/backend/src/services/api/implementations/`. One file per API group,
+  one-to-one mapping between interfaces and implementations.
+- Database schema: Drizzle ORM in `packages/backend/src/services/database/schema/`.
+- Config service: `packages/backend/src/services/config/index.ts`.
+- Frontend: Next.js 16 App Router. State via `@effect/atom-react`. API client
+  via `packages/frontend/src/lib/api-client.ts`.
 - Runtime env validation uses `@t3-oss/env-core` + Valibot.
 - Database migrations are Drizzle-first; do not hand-author ordinary schema migrations.
 
 ## Monorepo packages
 
-- `package/app` — frontend (Vite + React + TanStack Router)
-- `package/server` — main API (Elysia)
-- `package/auth` — auth service (better-auth)
-- `package/contract` — shared API contracts (Eden Treaty)
-- `package/api` — frontend API client
-- `package/ui` — shared component library
-- `package/app-shell` — shared app shell
-- `package/i18n` — internationalization
-- `package/admin` — admin frontend
+- `packages/backend` — API server (Effect 4 HttpApi, Drizzle ORM, better-auth)
+- `packages/frontend` — web app (Next.js 16, React 19, Tailwind v4, Ark UI)
+- `packages/core` — shared types and utilities
 
 ## Validation
 
@@ -56,6 +56,7 @@ then broader checks (`task knip`). Do not fix unrelated failures.
 ## Conventions
 
 - Write all code and comments in English.
-- Frontend user-facing copy must go through `@rezics/i18n`.
+- Frontend user-facing copy must go through `@nmnmcc/intee` with `useTranslation`.
+- UI components in `packages/frontend/src/components/ui/` are generated (Shark UI) — never hand-edit.
 - Prefer minimal, reversible changes over broad refactors.
 - Stage only task-owned files; never use `git add -A` or `git add .`.

@@ -2,10 +2,9 @@
 name: Deploy Frontend
 
 on:
-  workflow_run:
-    workflows: ["Build and Push Images"]
-    types: [completed]
+  push:
     branches: [main]
+    paths: ['packages/frontend/**']
   workflow_dispatch:
 
 concurrency:
@@ -14,22 +13,28 @@ concurrency:
 
 jobs:
   deploy:
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      github.event.workflow_run.conclusion == 'success'
     name: Build & deploy
     runs-on: ubuntu-latest
     environment: production
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: corepack enable
+
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+
       - uses: arduino/setup-task@v2
         with:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - run: bun install --frozen-lockfile
+
+      - run: yarn install --immutable
 
       - name: Build frontend
         run: task frontend:build
@@ -39,4 +44,4 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: bun x wrangler pages deploy .next --project-name=rezics
+        run: npx wrangler pages deploy .next --project-name=rezics
