@@ -4,6 +4,16 @@
   "type": "module",
   "license": "AGPL-3.0-only",
   "module": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    },
+    "./app": {
+      "types": "./src/app.ts",
+      "import": "./src/app.ts"
+    }
+  },
   "dependencies": {
     "@elysiajs/bearer": "^1.4.1",
     "@elysiajs/cors": "^1.4.0",

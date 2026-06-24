@@ -1,16 +1,12 @@
-import { html } from "@elysiajs/html";
-import { openapi } from "@elysiajs/openapi";
 import {
   createObservabilityConfig,
   createTelemetryConfig,
-  elysiaObservability,
   initializeOpenTelemetry,
   logStartupBanner,
 } from "@rezics/shared/observability";
-import { Elysia } from "elysia";
+import { createPreviewApp } from "./app";
 import { bookApi } from "./book/book.api";
 import { env } from "./env";
-import { sitemapApi } from "./sitemap/sitemap.api";
 import { getProdState } from "./utils/getProdState";
 
 const { isDev } = getProdState();
@@ -42,16 +38,6 @@ await initializeOpenTelemetry(
   }),
 );
 
-const app = new Elysia()
-  .use(elysiaObservability(observability))
-  .use(html())
-  .use(sitemapApi)
-  .use(bookApi)
-  .get("/health", () => ({ status: "ok" }));
-
-if (isDev) {
-  app.use(openapi({ exclude: { staticFile: false } }));
-}
-
+const app = createPreviewApp({ isDev, bookRoutes: bookApi, observability });
 app.listen(port);
 logStartupBanner(observability);
