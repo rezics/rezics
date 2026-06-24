@@ -284,12 +284,6 @@
         "typescript": "^6",
       },
     },
-    "packages/server": {
-      "name": "@rezics/server",
-      "peerDependencies": {
-        "typescript": "^6",
-      },
-    },
     "packages/shared": {
       "name": "@rezics/shared",
       "version": "0.1.0",
@@ -1118,8 +1112,6 @@
     "@rezics/jwt": ["@rezics/jwt@workspace:packages/jwt"],
 
     "@rezics/search": ["@rezics/search@workspace:packages/search"],
-
-    "@rezics/server": ["@rezics/server@workspace:packages/server"],
 
     "@rezics/shared": ["@rezics/shared@workspace:packages/shared"],
 

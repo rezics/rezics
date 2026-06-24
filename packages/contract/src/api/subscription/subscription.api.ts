@@ -17,7 +17,7 @@ import { buildQueryString } from "../utils/buildQuery";
 
 /**
  * Thin client over the `/subscription/*` endpoints exposed by
- * `@rezics/server`. Responsible for the wire shape only — TanStack
+ * the backend API. Responsible for the wire shape only — TanStack
  * Query integration lives in `subscription.queries.ts` and
  * `subscription.mutations.ts`.
  */

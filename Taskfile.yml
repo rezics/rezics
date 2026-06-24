@@ -14,13 +14,44 @@ includes:
   job-runner:
     { taskfile: ./packages/job-runner/Taskfile.yml, dir: ./packages/job-runner }
   search: { taskfile: ./packages/search/Taskfile.yml, dir: ./packages/search }
-  server: { taskfile: ./packages/server/Taskfile.yml, dir: ./packages/server }
   ui: { taskfile: ./packages/ui/Taskfile.yml, dir: ./packages/ui }
 
 tasks:
   default:
     desc: List all available tasks
     cmd: task --list
+
+  server:db:generate:
+    desc: Generate Server Drizzle migrations
+    cmd: task backend:server:db:generate
+
+  server:db:migrate:
+    desc: Apply Server Drizzle migrations
+    cmd: task backend:server:db:migrate
+
+  server:db:deploy:
+    desc: Apply Server Drizzle migrations
+    cmd: task backend:server:db:deploy
+
+  server:db:studio:
+    desc: Open Server Drizzle Studio
+    cmd: task backend:server:db:studio
+
+  server:dev:
+    desc: Dev monolith backend (watch)
+    cmd: task backend:dev
+
+  server:dev:cluster:
+    desc: Dev monolith backend cluster entrypoint (watch)
+    cmd: task backend:dev:cluster
+
+  server:build:
+    desc: Compile backend native binary
+    cmd: task backend:build
+
+  server:build:linux:
+    desc: Compile backend linux-x64 binary
+    cmd: task backend:build:linux
 
   # ── Dev orchestration (Nomad) ──────────────────────────────────────────
   dev:

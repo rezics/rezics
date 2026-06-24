@@ -13,7 +13,6 @@
     { "path": "./packages/job-runner" },
     { "path": "./packages/jwt" },
     { "path": "./packages/search" },
-    { "path": "./packages/server" },
     { "path": "./packages/shared" },
     { "path": "./packages/storybook-config" },
     { "path": "./packages/ui" }

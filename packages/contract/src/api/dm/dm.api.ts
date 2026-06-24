@@ -10,7 +10,7 @@ import type {
 /**
  * DM client surface.
  *
- * - `send` POSTs to `@rezics/server`'s `/dm/send` route, which gates the
+ * - `send` POSTs to the backend `/dm/send` route, which gates the
  *   send on a Subscription whose `channels` includes `'*'`, `'dm.*'`, or
  *   `'dm.message'` (sender -> recipient), then forwards to notify.
  * - `listConversations` and `listMessages` hit notify directly via

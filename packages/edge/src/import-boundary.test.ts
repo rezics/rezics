@@ -3,7 +3,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 const FORBIDDEN_IMPORTS = [
-  "@rezics/server",
+  "@rezics/backend",
   "@rezics/preview",
   "elysia",
   "drizzle-orm",
