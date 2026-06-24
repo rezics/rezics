@@ -24,7 +24,6 @@
     pkgs.openssl
     pkgs.jq
     inputs.hashicorp.packages.${pkgs.system}.nomad
-    inputs.hashicorp.packages.${pkgs.system}.nomad-pack
     pkgs.sops
     pkgs.age
   ];
