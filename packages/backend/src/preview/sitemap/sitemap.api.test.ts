@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 
-mock.module("../../../../server/src/book/book.service", () => ({
+mock.module("../../server/book/book.service", () => ({
   bookService: {
     list: mock(async () => ({
       total: 1,

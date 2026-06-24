@@ -9,7 +9,7 @@ import { and, eq } from "drizzle-orm";
 import { Shelf, Unit, UnitTranslation } from "../schema";
 
 /**
- * Seed-runtime copy of `packages/server/src/shelf/system-shelves.ts`.
+ * Seed-runtime copy of `packages/backend/src/server/shelf/system-shelves.ts`.
  *
  * Keep this copy in sync when the runtime reserved shelf bootstrap logic
  * changes. Favorites is the only reserved shelf minted by bootstrap.

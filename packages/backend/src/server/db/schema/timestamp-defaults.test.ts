@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 
-import * as authSchema from "../../../../backend/src/auth/db/schema";
-import * as historySchema from "../../../../backend/src/history/db/schema";
-import * as notifySchema from "../../../../backend/src/notify/db/schema";
-import * as rankingSchema from "../../../../backend/src/ranking/db/schema";
-import * as reactionSchema from "../../../../backend/src/reaction/db/schema";
+import * as authSchema from "../../../auth/db/schema";
+import * as historySchema from "../../../history/db/schema";
+import * as notifySchema from "../../../notify/db/schema";
+import * as rankingSchema from "../../../ranking/db/schema";
+import * as reactionSchema from "../../../reaction/db/schema";
 import * as serverSchema from "./schema";
 
 type SchemaOwner = {

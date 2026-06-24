@@ -13,6 +13,54 @@
       "types": "./src/app.ts",
       "default": "./src/app.ts"
     },
+    "./server": {
+      "types": "./src/server/export.ts",
+      "default": "./src/server/export.ts"
+    },
+    "./server/*": {
+      "types": "./src/server/*.ts",
+      "default": "./src/server/*.ts"
+    },
+    "./server/db": {
+      "types": "./src/server/db/index.ts",
+      "default": "./src/server/db/index.ts"
+    },
+    "./server/db/factory": {
+      "types": "./src/server/db/factory.ts",
+      "default": "./src/server/db/factory.ts"
+    },
+    "./server/db/history-outbox.repository": {
+      "types": "./src/server/db/history-outbox.repository.ts",
+      "default": "./src/server/db/history-outbox.repository.ts"
+    },
+    "./server/db/maintenance.repository": {
+      "types": "./src/server/db/maintenance.repository.ts",
+      "default": "./src/server/db/maintenance.repository.ts"
+    },
+    "./server/db/relations": {
+      "types": "./src/server/db/relations/index.ts",
+      "default": "./src/server/db/relations/index.ts"
+    },
+    "./server/db/schema": {
+      "types": "./src/server/db/schema/index.ts",
+      "default": "./src/server/db/schema/index.ts"
+    },
+    "./server/db/seed": {
+      "types": "./src/server/db/seed/index.ts",
+      "default": "./src/server/db/seed/index.ts"
+    },
+    "./server/db/seed/*": {
+      "types": "./src/server/db/seed/*.ts",
+      "default": "./src/server/db/seed/*.ts"
+    },
+    "./server/db/seed-factory": {
+      "types": "./src/server/db/factory/index.ts",
+      "default": "./src/server/db/factory/index.ts"
+    },
+    "./server/db/seed-factory/*": {
+      "types": "./src/server/db/factory/*.ts",
+      "default": "./src/server/db/factory/*.ts"
+    },
     "./auth": {
       "types": "./src/auth/export.ts",
       "default": "./src/auth/export.ts"
@@ -71,6 +119,8 @@
     }
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "3.1066.0",
+    "@aws-sdk/s3-request-presigner": "3.1066.0",
     "@better-auth/drizzle-adapter": "^1.5.3",
     "@better-auth/oauth-provider": "^1.5.3",
     "@elysiajs/bearer": "^1.4.1",
@@ -85,6 +135,7 @@
     "@rezics/jwt": "workspace:*",
     "@rezics/search": "workspace:*",
     "@rezics/shared": "workspace:*",
+    "@sinclair/typebox": "^0.34.41",
     "@t3-oss/env-core": "^0.13.10",
     "@types/bcrypt": "^6.0.0",
     "bcrypt": "^6.0.0",

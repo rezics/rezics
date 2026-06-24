@@ -282,8 +282,8 @@ export async function createDefaultHistoryOutboxConsumer() {
     { revisionService: defaultRevisionService },
     { env },
   ] = await Promise.all([
-    import("../../../../server/src/db/factory"),
-    import("../../../../server/src/db/history-outbox.repository"),
+    import("../../server/db/factory"),
+    import("../../server/db/history-outbox.repository"),
     import("../db/history.repository"),
     import("../revision/revision.service"),
     import("../env"),

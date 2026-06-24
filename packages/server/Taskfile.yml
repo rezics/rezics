@@ -1,33 +1,28 @@
-# @rezics/server — main API (owns the primary schema). Aggregated as `server:*`.
-version: '3'
+# @rezics/server — compatibility task aliases for the backend-owned server.
+version: "3"
 
 tasks:
   db:generate:
     desc: Generate Drizzle migrations
-    cmd: bun drizzle-kit generate
+    cmd: task -d ../backend server:db:generate
   db:migrate:
     desc: Apply Drizzle migrations
-    cmd: bun drizzle-kit migrate
+    cmd: task -d ../backend server:db:migrate
   db:deploy:
     desc: Apply Drizzle migrations
-    cmds:
-      - task: db:migrate
+    cmd: task -d ../backend server:db:deploy
   db:studio:
     desc: Open Drizzle Studio
-    cmd: bun drizzle-kit studio
+    cmd: task -d ../backend server:db:studio
   dev:
-    desc: Dev (watch)
-    env:
-      NODE_ENV: development
-    cmd: bun run --watch --no-cache src/index.ts
+    desc: Dev monolith backend (watch)
+    cmd: task -d ../backend dev
   dev:cluster:
-    desc: Dev cluster entrypoint (watch)
-    env:
-      NODE_ENV: development
-    cmd: bun run --watch --no-cache src/cluster.ts
+    desc: Dev monolith backend cluster entrypoint (watch)
+    cmd: task -d ../backend dev:cluster
   build:
-    desc: Compile native binary
-    cmd: bun build src/cluster.ts --compile --minify-whitespace --minify-syntax --target bun --outfile server
+    desc: Compile backend native binary
+    cmd: task -d ../backend build
   build:linux:
-    desc: Compile linux-x64 binary (mirrors Dockerfile.server)
-    cmd: bun build src/cluster.ts --compile --minify-whitespace --minify-syntax --target bun-linux-x64 --outfile server
+    desc: Compile backend linux-x64 binary
+    cmd: task -d ../backend build:linux

@@ -15,6 +15,19 @@ tasks:
   typecheck:
     desc: Typecheck backend package
     cmd: bunx tsc -p tsconfig.json --pretty false
+  server:db:generate:
+    desc: Generate Server Drizzle migrations
+    cmd: bun drizzle-kit generate --config drizzle.server.config.ts
+  server:db:migrate:
+    desc: Apply Server Drizzle migrations
+    cmd: bun drizzle-kit migrate --config drizzle.server.config.ts
+  server:db:deploy:
+    desc: Apply Server Drizzle migrations
+    cmds:
+      - task: server:db:migrate
+  server:db:studio:
+    desc: Open Server Drizzle Studio
+    cmd: bun drizzle-kit studio --config drizzle.server.config.ts
   auth:db:generate:
     desc: Generate Auth Drizzle migrations
     cmd: bun drizzle-kit generate --config drizzle.auth.config.ts

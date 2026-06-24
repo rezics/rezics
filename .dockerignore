@@ -6,7 +6,6 @@
 **/node_modules
 
 # Compiled service binaries (produced by build:linux inside the image)
-package/server/server
 package/job-runner/job-runner
 
 # Frontend build output (built by the Cloudflare pipeline, not these images)

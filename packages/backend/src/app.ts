@@ -10,7 +10,7 @@ import { createPreviewApp } from "./preview/app";
 import { bookApi as previewBookRoutes } from "./preview/book/book.api";
 import { createRankingApp } from "./ranking/app";
 import { createReactionApp } from "./reaction/app";
-import { createServerApp } from "../../server/src/app";
+import { createServerApp } from "./server/app";
 
 export const INTERNAL_SERVICE_PREFIX = "/__services";
 

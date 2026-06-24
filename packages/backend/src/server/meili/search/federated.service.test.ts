@@ -527,6 +527,7 @@ describe("federatedSearch", () => {
             processingTimeMs: 1,
           };
         }
+        return undefined;
       },
     });
 
@@ -648,6 +649,7 @@ describe("federatedSearch", () => {
             processingTimeMs: 1,
           };
         }
+        return undefined;
       },
     });
 

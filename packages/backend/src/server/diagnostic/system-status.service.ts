@@ -621,7 +621,7 @@ async function getCdcStatus(options: {
       lagWarningBytes,
       unconfiguredReason: "STATUS_REACTION_DATABASE_URL is not configured",
       unconfiguredRemediation:
-        "Set STATUS_REACTION_DATABASE_URL on @rezics/server to the reaction Postgres URL, then verify reaction CDC with task service -- cdc verify --source=reaction.",
+        "Set STATUS_REACTION_DATABASE_URL for the backend server module to the reaction Postgres URL, then verify reaction CDC with task service -- cdc verify --source=reaction.",
     }),
   ]);
 

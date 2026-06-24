@@ -308,7 +308,7 @@ describe("getSystemStatusSummary", () => {
       "STATUS_REACTION_DATABASE_URL is not configured",
     );
     expect(reactionSource?.item.remediation).toContain(
-      "Set STATUS_REACTION_DATABASE_URL on @rezics/server",
+      "Set STATUS_REACTION_DATABASE_URL for the backend server module",
     );
     expect(reactionSource?.item.remediation).toContain(
       "task service -- cdc verify --source=reaction",

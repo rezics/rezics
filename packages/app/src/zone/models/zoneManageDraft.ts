@@ -863,10 +863,10 @@ export function outdentZoneMenuNodeAtPath(
 
 /**
  * Client-side mirror of `assertConfigStructure` in
- * `packages/server/src/zone/zone.service.ts` so the editor can surface
+ * `packages/backend/src/server/zone/zone.service.ts` so the editor can surface
  * structural problems before the write round-trip. The server remains the
  * enforcement point.
- * `packages/server/src/zone/zone.service.ts` 中 `assertConfigStructure`
+ * `packages/backend/src/server/zone/zone.service.ts` 中 `assertConfigStructure`
  * 的客户端镜像，使编辑器能在写入往返之前提示结构问题。服务端仍是强制
  * 执行点。
  */

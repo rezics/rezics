@@ -9,10 +9,6 @@
       "types": "./src/export.ts",
       "default": "./src/export.ts"
     },
-    "./*": {
-      "types": "./src/*.ts",
-      "default": "./src/*.ts"
-    },
     "./db": {
       "types": "./src/db/index.ts",
       "default": "./src/db/index.ts"
@@ -45,6 +41,10 @@
       "types": "./src/db/seed/*.ts",
       "default": "./src/db/seed/*.ts"
     },
+    "./db/seed/infra/*": {
+      "types": "./src/db/seed/infra/*.ts",
+      "default": "./src/db/seed/infra/*.ts"
+    },
     "./db/seed-factory": {
       "types": "./src/db/factory/index.ts",
       "default": "./src/db/factory/index.ts"
@@ -52,34 +52,13 @@
     "./db/seed-factory/*": {
       "types": "./src/db/factory/*.ts",
       "default": "./src/db/factory/*.ts"
+    },
+    "./shelf/system-shelves": {
+      "types": "./src/shelf/system-shelves.ts",
+      "default": "./src/shelf/system-shelves.ts"
     }
-  },
-  "devDependencies": {
-    "@types/bun": "^1.3.0",
-    "@types/pg": "^8.15.5",
-    "drizzle-kit": "1.0.0-rc.3"
   },
   "peerDependencies": {
     "typescript": "^6"
-  },
-  "dependencies": {
-    "@aws-sdk/client-s3": "3.1066.0",
-    "@aws-sdk/s3-request-presigner": "3.1066.0",
-    "@elysiajs/cors": "^1.4.0",
-    "@elysiajs/openapi": "^1.4.14",
-    "@faker-js/faker": "^10.1.0",
-    "@rezics/contract": "workspace:*",
-    "@rezics/email": "workspace:*",
-    "@rezics/job": "workspace:*",
-    "@rezics/jwt": "workspace:*",
-    "@rezics/search": "workspace:*",
-    "@rezics/shared": "workspace:*",
-    "@sinclair/typebox": "^0.34.41",
-    "chalk": "^5.6.2",
-    "dotenv": "^17.2.3",
-    "drizzle-orm": "1.0.0-rc.3",
-    "elysia": "^1.4.22",
-    "jose": "^6.2.0",
-    "pg": "^8.16.3"
   }
 }

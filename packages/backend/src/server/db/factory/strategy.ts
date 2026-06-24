@@ -1,4 +1,4 @@
-import type { createAuthDb } from "../../../../backend/src/auth/db/factory";
+import type { createAuthDb } from "../../../auth/db/factory";
 import type { SlugScopeName } from "@rezics/contract";
 import * as v from "valibot";
 import type { ServerDb } from "../client.js";

@@ -19,7 +19,7 @@ import { ManageField } from "./ZoneManageFields";
 /**
  * richText `contentUnitId` field. Boundary: zone fragments are WIKI posts
  * with `visibility: "UNLISTED"`, and the public post list endpoints only
- * return PUBLIC units (`packages/server/src/post/post.service.ts`), so
+ * return PUBLIC units (`packages/backend/src/server/post/post.service.ts`), so
  * UNLISTED fragments cannot be listed here — the raw id input is the
  * primary path for them, while the picker covers listable PUBLIC wiki
  * posts of the context realm. The "create fragment" shortcut links into
@@ -27,7 +27,7 @@ import { ManageField } from "./ZoneManageFields";
  * parameter yet, so authors set visibility inside the editor.
  * richText 的 `contentUnitId` 字段。边界：专区片段是
  * `visibility: "UNLISTED"` 的 WIKI 帖子，而公开帖子列表端点只返回
- * PUBLIC Unit（`packages/server/src/post/post.service.ts`），因此此处无法
+ * PUBLIC Unit（`packages/backend/src/server/post/post.service.ts`），因此此处无法
  * 列出 UNLISTED 片段——原始 id 输入是它们的主要路径，选择器则覆盖语境
  * realm 中可列出的 PUBLIC wiki 帖子。「创建片段」捷径链入 realm wiki
  * 创建流程；该流程尚无 UNLISTED 可见性预设参数，作者需在编辑器内设置

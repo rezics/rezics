@@ -1,4 +1,4 @@
-import { createServerDb } from "../../../../server/src/db/factory";
+import { createServerDb } from "../../server/db/factory";
 import { sql } from "drizzle-orm";
 
 export type MainStateReaderOptions = {

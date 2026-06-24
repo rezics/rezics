@@ -10,7 +10,7 @@ function readEnv(path: string, key: string) {
 }
 
 const serverPool = new Pool({
-  connectionString: readEnv("packages/server/.env", "DATABASE_URL"),
+  connectionString: readEnv("packages/backend/.env", "SERVER_DATABASE_URL"),
 });
 const authPool = new Pool({
   connectionString: readEnv("packages/backend/.env", "AUTH_DATABASE_URL"),

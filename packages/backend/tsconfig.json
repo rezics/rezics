@@ -4,7 +4,8 @@
     "jsx": "react-jsx",
     "jsxImportSource": "@kitajs/html",
     "paths": {
-      "@/*": ["../server/src/*", "./src/*"]
+      "@/*": ["./src/server/*", "./src/*"],
+      "#/*": ["./*"]
     },
     "noImplicitReturns": true,
     "noImplicitOverride": true,
@@ -15,5 +16,5 @@
     "noPropertyAccessFromIndexSignature": false,
     "verbatimModuleSyntax": true
   },
-  "exclude": ["dist", "node_modules"]
+  "exclude": ["dist", "node_modules", "src/server/test/cookie.ts"]
 }
