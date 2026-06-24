@@ -1,16 +1,7 @@
 import {
-  useDeleteRealmTagApplicationMutation,
-  usePatchRealmTagApplicationMutation,
-} from "@rezics/contract/api/realm/realm.mutations";
-import {
   positionForNewBottomPin,
   positionForNewTopPin,
-} from "@rezics/contract/api/tag/fractional-index";
-import {
-  useDeleteUnitTagMutation,
-  usePatchUnitTagMutation,
-} from "@rezics/contract/api/tag/tag.mutations";
-import { lowScoreTagsQuery } from "@rezics/contract/api/tag/tag.queries";
+} from "@rezics/contract/shared/fractional-index";
 import type {
   LowScoreTagsScope,
   RealmTagApplicationDTO,
@@ -37,7 +28,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import { Pin, Trash2 } from "lucide-react";
 import React from "react";
 import {
@@ -45,10 +35,27 @@ import {
   PaginatedTable,
 } from "@/admin/components/table/PaginatedTable";
 import { Page } from "@/admin/core/layouts/Page";
+import {
+  deleteRealmTagApplication,
+  deleteUnitTag,
+  patchRealmTagApplication,
+  patchUnitTag,
+  useLowScoreTagsQuery,
+} from "@/admin/tag/hooks/useLowScoreTagsAdmin";
 
 type Row =
   | ({ kind: "global" } & UnitTagDTO)
   | ({ kind: "realm" } & RealmTagApplicationDTO);
+
+type PendingAction =
+  | "delete-global"
+  | "delete-realm"
+  | "patch-global"
+  | "patch-realm";
+
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
+}
 
 export default function LowScoreTagsPage() {
   const { t } = useTranslation(["admin", "common"]);
@@ -60,22 +67,19 @@ export default function LowScoreTagsPage() {
   const [page, setPage] = React.useState(0);
   const [limit, setLimit] = React.useState(50);
 
-  const query = useQuery(
-    lowScoreTagsQuery({
-      scope,
-      threshold: appliedThreshold,
-      realmUnitId:
-        scope === "realm" && appliedRealm.trim().length > 0
-          ? appliedRealm.trim()
-          : undefined,
-      limit: 200,
-    }),
+  const query = useLowScoreTagsQuery({
+    scope,
+    threshold: appliedThreshold,
+    realmUnitId:
+      scope === "realm" && appliedRealm.trim().length > 0
+        ? appliedRealm.trim()
+        : undefined,
+    limit: 200,
+  });
+  const [pendingAction, setPendingAction] = React.useState<PendingAction | null>(
+    null,
   );
-
-  const deleteUnitTag = useDeleteUnitTagMutation();
-  const patchUnitTag = usePatchUnitTagMutation();
-  const deleteRealmTagApplication = useDeleteRealmTagApplicationMutation();
-  const patchRealmTagApplication = usePatchRealmTagApplicationMutation();
+  const [actionError, setActionError] = React.useState<string | null>(null);
 
   const rows: Row[] = React.useMemo(() => {
     const data = query.data;
@@ -103,58 +107,89 @@ export default function LowScoreTagsPage() {
   };
 
   const handleDelete = React.useCallback(
-    (row: Row) => {
+    async (row: Row) => {
       if (row.kind === "global") {
-        deleteUnitTag.mutate({
-          unitId: row.unitId,
-          tagUnitId: row.tagUnitId,
-        });
+        setPendingAction("delete-global");
+        setActionError(null);
+        try {
+          await deleteUnitTag(row.unitId, row.tagUnitId);
+          await query.refetch();
+        } catch (error) {
+          setActionError(errorMessage(error));
+        } finally {
+          setPendingAction(null);
+        }
       } else {
-        deleteRealmTagApplication.mutate({
-          realmUnitId: row.realmUnitId,
-          unitId: row.unitId,
-          tagUnitId: row.tagUnitId,
-        });
+        setPendingAction("delete-realm");
+        setActionError(null);
+        try {
+          await deleteRealmTagApplication(
+            row.realmUnitId,
+            row.unitId,
+            row.tagUnitId,
+          );
+          await query.refetch();
+        } catch (error) {
+          setActionError(errorMessage(error));
+        } finally {
+          setPendingAction(null);
+        }
       }
     },
-    [deleteUnitTag, deleteRealmTagApplication],
+    [query],
   );
 
   const handleTogglePin = React.useCallback(
-    (row: Row) => {
+    async (row: Row) => {
       if (row.kind === "global") {
-        if (row.pinned) {
-          patchUnitTag.mutate({
-            unitId: row.unitId,
-            tagUnitId: row.tagUnitId,
-            input: { pinned: false, position: null },
-          });
-        } else {
-          patchUnitTag.mutate({
-            unitId: row.unitId,
-            tagUnitId: row.tagUnitId,
-            input: { pinned: true, position: positionForNewBottomPin() },
-          });
+        setPendingAction("patch-global");
+        setActionError(null);
+        try {
+          if (row.pinned) {
+            await patchUnitTag(row.unitId, row.tagUnitId, {
+              pinned: false,
+              position: null,
+            });
+          } else {
+            await patchUnitTag(row.unitId, row.tagUnitId, {
+              pinned: true,
+              position: positionForNewBottomPin(),
+            });
+          }
+          await query.refetch();
+        } catch (error) {
+          setActionError(errorMessage(error));
+        } finally {
+          setPendingAction(null);
         }
       } else {
-        if (row.pinned) {
-          patchRealmTagApplication.mutate({
-            realmUnitId: row.realmUnitId,
-            unitId: row.unitId,
-            tagUnitId: row.tagUnitId,
-            input: { pinned: false, position: null },
-          });
-        } else {
-          patchRealmTagApplication.mutate({
-            realmUnitId: row.realmUnitId,
-            unitId: row.unitId,
-            tagUnitId: row.tagUnitId,
-            input: { pinned: true, position: positionForNewTopPin() },
-          });
+        setPendingAction("patch-realm");
+        setActionError(null);
+        try {
+          if (row.pinned) {
+            await patchRealmTagApplication(
+              row.realmUnitId,
+              row.unitId,
+              row.tagUnitId,
+              { pinned: false, position: null },
+            );
+          } else {
+            await patchRealmTagApplication(
+              row.realmUnitId,
+              row.unitId,
+              row.tagUnitId,
+              { pinned: true, position: positionForNewTopPin() },
+            );
+          }
+          await query.refetch();
+        } catch (error) {
+          setActionError(errorMessage(error));
+        } finally {
+          setPendingAction(null);
         }
       }
     },
-    [patchUnitTag, patchRealmTagApplication],
+    [query],
   );
 
   const columns = React.useMemo<PaginatedColumn<Row>[]>(() => {
@@ -229,8 +264,8 @@ export default function LowScoreTagsPage() {
                       onClick={() => handleTogglePin(r)}
                       disabled={
                         r.kind === "global"
-                          ? patchUnitTag.isPending
-                          : patchRealmTagApplication.isPending
+                          ? pendingAction === "patch-global"
+                          : pendingAction === "patch-realm"
                       }
                       aria-label={
                         r.pinned ? t("admin:tag_unpin") : t("admin:tag_pin")
@@ -259,8 +294,8 @@ export default function LowScoreTagsPage() {
                       onClick={() => handleDelete(r)}
                       disabled={
                         r.kind === "global"
-                          ? deleteUnitTag.isPending
-                          : deleteRealmTagApplication.isPending
+                          ? pendingAction === "delete-global"
+                          : pendingAction === "delete-realm"
                       }
                       aria-label={t("common:delete")}
                       {...props}
@@ -281,10 +316,7 @@ export default function LowScoreTagsPage() {
     scope,
     handleDelete,
     handleTogglePin,
-    deleteUnitTag.isPending,
-    deleteRealmTagApplication.isPending,
-    patchUnitTag.isPending,
-    patchRealmTagApplication.isPending,
+    pendingAction,
     t,
   ]);
 
@@ -350,6 +382,14 @@ export default function LowScoreTagsPage() {
           </div>
 
           <Separator className="my-4" />
+
+          {actionError ? (
+            <Alert className="mb-4">
+              <AlertDescription className="text-error-text">
+                {actionError}
+              </AlertDescription>
+            </Alert>
+          ) : null}
 
           {query.isLoading ? (
             <div className="flex justify-center py-12">
