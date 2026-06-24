@@ -6,28 +6,28 @@ Rezics (repo `rezics/rezics`) is a full-stack TypeScript monorepo for a
 community-driven, cross-language catalog of works — books, games, media, posts,
 shelves, tags, and community `realm`s, all modeled as a unified `Unit`.
 Communities (`realm`s) collectively classify and discuss works, co-locating a
-work's index, discussion, and collaborative knowledge. Built on **Bun**
-workspaces; packages live under `package/`.
+work's index, discussion, and collaborative knowledge. Package manager:
+**Yarn 4** (node-modules linker). Workspaces live under `packages/`.
 
 ## Development Setup
 
-**Prerequisites:** Bun, Docker, devenv (provides Nomad + Nomad Pack via Nix)
+**Prerequisites:** devenv (provides Node.js, Bun, Yarn, Nomad, go-task, PostgreSQL client)
 
 ```bash
-bun install              # install workspace deps (Bun is the package manager)
+yarn install             # install workspace deps
 task                     # list every task (task --list)
 task dev                 # start full dev environment (Nomad: infra + app services)
 task dev:stop            # stop all services
 task dev:status          # show service status
 task dev:logs -- server  # follow logs for a specific task
-task app:dev             # frontend only (Vite, port 35001)
-task server:dev          # backend only (Elysia with --watch)
+task frontend:dev        # frontend only (Next.js + Turbopack, port 35001)
+task backend:dev         # backend only (Effect HttpApi with tsx watch)
 ```
 
 `task dev` starts the full development environment through Nomad
 (`deploy/dev/`). Infrastructure (PostgreSQL, Meilisearch, Redis, RustFS,
 Sequin) runs as Docker containers managed by Nomad. Application dev servers
-(server, auth, notify, etc.) run as raw_exec tasks with filesystem watch.
+(backend, frontend) run as raw_exec tasks with filesystem watch.
 
 If the source database comes from an old or manually modified volume, verify CDC
 readiness first:
@@ -65,7 +65,7 @@ Collection access uses the **`/list` suffix**:
 - `GET /{resource}/list?ids=a,b,c` — small, cacheable CSV (up to 200 ids)
 - `POST /{resource}/list` — large id arrays or nested filters (JSON body)
 
-Every `*ListQuerySchema` spreads `listGetQueryBase.properties` from `@rezics/contract` for the shared `ids` field. POST body schemas spread `listPostBodyBase.properties`. Services call `parseIdsCsv(query.ids)` and intersect with other where-clause filters.
+List query patterns are defined in the backend API interfaces (`packages/backend/src/services/api/interfaces/`). GET list endpoints accept an `ids` CSV param (up to 200 ids); POST list endpoints accept JSON body with id arrays or nested filters.
 
 `@rezics/auth` is out of scope (governed by better-auth).
 
@@ -105,11 +105,9 @@ the authoritative source.
 
 ## Database Workflow
 
-Backend schema ownership is package-local. `@rezics/server` and `@rezics/auth`
-use separate Drizzle schemas and databases; `notify`, `reaction`, `history`,
-and `ranking` also own package-specific Drizzle schemas. `job-runner` is the
-exception: its database is pg-boss-owned, so it uses `db:ensure` rather than
-Drizzle schema migrations.
+Backend schema lives in `@rezics/backend`. The database schema is in
+`packages/backend/src/services/database/schema/`. There is one PostgreSQL
+database (`rezics_server`) for the main application.
 
 Schema migrations are Drizzle-first: edit the owning package's Drizzle schema,
 generate migrations with the repo `db:generate` workflow, then validate with
@@ -127,11 +125,8 @@ task db:ensure
 task db:smoke
 ```
 
-`db:migrate`, `db:deploy`, and `db:reset` run schema owners in package order:
-`auth -> server -> notify -> reaction -> history -> ranking`. The tool preflight
-requires a reachable PostgreSQL 18+ database with built-in `uuidv7()`. Each
-schema owner keeps migrations in its package-local `drizzle/` folder and uses
-Drizzle Kit's default migration journal table.
+`db:migrate` runs the schema migrations. The tool preflight requires a
+reachable PostgreSQL 18+ database with built-in `uuidv7()`.
 
 Resetting local databases is destructive and development-only. After a reset,
 run the required seed and optional factory workflows explicitly; never depend on
@@ -142,16 +137,14 @@ rules, and Drizzle rc caveats.
 
 ## Seeding
 
-The unified CLI is `task seed` (entry: `package/utils/bin/cli.ts`). It covers users, infrastructure, and factory (synthetic dev) data.
+The unified CLI is `task seed` (entry: `tool/bin/tool.ts`). It covers users, infrastructure, and factory (synthetic dev) data.
 
 **Two seed concepts**, kept separate for safety:
-- **`package/server/src/db/seed/`** — production-required infra: default realm, content type tags, root user, meilisearch init. Idempotent.
-- **`package/server/src/db/factory/`** — dev/demo synthetic data generators (books, posts, shelves, users, …) with presets and a `SeedPlan` framework. Never run in production.
+- **`tool/src/commands/seed/`** — production-required infra: default realm, content type tags, root user, meilisearch init. Idempotent.
+- **`tool/src/commands/factory/`** — dev/demo synthetic data generators (books, posts, shelves, users, ...) with presets and a `SeedPlan` framework. Never run in production.
 
-Seed and factory Meilisearch synchronization remains direct through
-`@rezics/search`. Runtime server mutations enqueue job-runner commands, but
-setup-time seed/factory flows must not require `JOB_RUNNER_BASE_URL`,
-`JOB_DATABASE_URL`, Sequin, or a job-runner worker.
+Seed and factory flows synchronize Meilisearch directly. Setup-time
+seed/factory flows must not require external workers or job queues.
 
 ```bash
 # Interactive baseline seed; does not reset databases
@@ -169,7 +162,7 @@ task seed:database-reset
 task seed:database-reset -- --yes
 ```
 
-**Presets** (`package/utils/src/factory/presets/`):
+**Presets** (defined in the factory command):
 
 | Preset            | Mode      | Use                                                                                                    |
 | ----------------- | --------- | ------------------------------------------------------------------------------------------------------ |
@@ -192,23 +185,20 @@ Seeders never read counts directly — all count decisions go through `ctx.draw(
 
 Pick UI primitives in this order:
 
-1. **shadcn** — `@rezics/ui/shadcn` (Radix-based, token-aligned)
-2. **Custom rezics primitives** — `@rezics/ui/primitive/`, `@rezics/ui/composite/`, or feature-local `components/`
+1. **Shark UI** — `@shark` registry (Ark UI based, generated in `packages/frontend/src/components/ui/`) — never hand-edit generated files
+2. **Custom components** — feature-local `components/`
 
-There is no third option. Icons: `lucide-react` by default, `@tabler/icons-react` as the named fallback when lucide lacks the glyph. Load the `rezics-design` skill and see the `@rezics/ui` Storybook for the authoritative rules.
+Icons: `lucide-react` by default, `@tabler/icons-react` as the named fallback when lucide lacks the glyph.
 
 ### Frontend Copy and i18n
 
-All user-facing frontend product copy must go through `@rezics/i18n`, not
-hard-coded strings in JSX or component state. Add keys to
-`package/i18n/locales/{locale}/{ns}.json`, choose the namespace closest to the
-feature domain, and use `common` only for genuinely shared words or actions.
+All user-facing frontend product copy must go through `@nmnmcc/intee`, not
+hard-coded strings in JSX or component state. Language files live in
+`packages/frontend/src/lib/i18n/languages/`.
 
-Use `useTranslation` / `Trans` from `@rezics/i18n/react` in React components.
-For dynamic enum or slug labels, use typed key maps in `@rezics/i18n` helpers
-instead of branching to raw strings in app code. Reusable `@rezics/ui`
-components that own default copy must also resolve it through i18n; host string
-override props remain host-owned and are rendered as supplied.
+Use `useTranslation` from `@nmnmcc/intee` in React components. For dynamic enum
+or slug labels, use typed key maps instead of branching to raw strings in app
+code.
 
 User-generated content, imported catalog metadata, API identifiers, test fixture
 data, route paths, aria IDs, and non-display constants are not product copy and
@@ -223,33 +213,8 @@ Planning is **code-first**: capture a plan in `plan/proposal/<change>.md` with
 into code (types/tests/comments) so the plan file stays disposable. See
 `plan/README.md`.
 
-## Storybook
-
-The design system is documented across **five package-owned Storybooks** plus an aggregating host. Each publishable surface owns its Storybook so the package can ship standalone.
-
-### Port assignments
-
-| Port | Instance            | Owner                              |
-| ---- | ------------------- | ---------------------------------- |
-| 6006 | host                | root `.storybook/` (refs the rest) |
-| 6007 | UI · Foundation     | `@rezics/ui`                       |
-| 6008 | Editor · CodeMirror | `@rezics/editor`                   |
-| 6009 | Folio · Reader      | `@rezics/folio`                    |
-| 6010 | Admin               | `@rezics/admin`                    |
-| 6011 | App                 | `@rezics/app`                      |
-
-> **Chrome unsafe ports.** Don't reassign to `:6000` (X11 — `ERR_UNSAFE_PORT`), `:6566`, `:6665–6669`, or `:6697`. Storybook's own default `:6006` is what we use for the host.
-
-### Running
-
-- `task storybook` — boots all six instances concurrently (color-prefixed output via `concurrently`).
-- `task build:storybook` — builds all six static dists concurrently.
-- `task storybook:host` / `task <name>:storybook` (e.g. `task ui:storybook`) — boot one at a time.
-
-The host on `:6006` aggregates the others via `refs`, so visiting a single URL is enough once the per-package instances are up.
-
 ## Code Style
 
-- **Formatter:** Prettier (2 spaces, single quotes, trailing commas)
+- **Formatter:** Biome (primary). Prettier handles import sorting and Tailwind class ordering.
 - **Comments:** None by default; only add when the "why" is non-obvious
 - **Branch:** `main` is the main branch
