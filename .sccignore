@@ -1,0 +1,14 @@
+# Dependency and generated outputs that make raw `scc` counts misleading.
+bun.lock
+**/node_modules/**
+**/.next/**
+**/dist/**
+**/storybook-static/**
+
+# Generated source and migration metadata.
+**/routeTree.gen.ts
+**/drizzle/**/snapshot.json
+
+# Local/reference workspaces.
+.claude/**
+.ref/**
