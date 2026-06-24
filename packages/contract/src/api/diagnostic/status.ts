@@ -1,11 +1,6 @@
 export { statusApi } from "./status.api";
 export type { StatusEdenClient } from "./status.api";
 export { statusKeys } from "./status.keys";
-export {
-  statusQueryOptions,
-  useMeiliStatusQuery,
-  useSystemStatusQuery,
-} from "./status.queries";
 export type {
   CdcSourceStatus,
   CdcStatus,

@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { configureApi } from "../config";
 import { statusApi } from "./status.api";
 import { statusKeys } from "./status.keys";
-import { statusQueryOptions } from "./status.queries";
 
 const fetchMock = mock();
 
@@ -37,16 +36,8 @@ describe("status API client", () => {
     );
   });
 
-  test("uses stable query keys and short polling stale times", () => {
+  test("uses stable status cache keys", () => {
     expect(statusKeys.meili()).toEqual(["status", "meili"]);
     expect(statusKeys.system()).toEqual(["status", "system"]);
-
-    const meili = statusQueryOptions.meili();
-    const system = statusQueryOptions.system();
-
-    expect([...meili.queryKey]).toEqual(["status", "meili"]);
-    expect([...system.queryKey]).toEqual(["status", "system"]);
-    expect(meili.staleTime).toBe(10_000);
-    expect(system.refetchInterval).toBe(10_000);
   });
 });
