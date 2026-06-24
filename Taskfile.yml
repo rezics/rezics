@@ -39,7 +39,7 @@ tasks:
       - defer: nomad job stop rezics-dev || true
       - cmd: |-
           alloc=$(nomad job allocs -json rezics-dev | jq -r '.[] | select(.TaskGroup == "app") | .ID' | head -1)
-          exec nomad alloc logs -f "$alloc" server
+          exec nomad alloc logs -f "$alloc" backend
 
   dev:stop:
     desc: Stop all services

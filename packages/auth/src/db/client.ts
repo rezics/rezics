@@ -1,7 +1,7 @@
-import { env } from "../env";
+import { authEnv } from "../env";
 import { createAuthDb } from "./factory";
 
-const defaultAuthDb = createAuthDb(env.DATABASE_URL);
+const defaultAuthDb = createAuthDb(authEnv.DATABASE_URL);
 
 export const db = defaultAuthDb.db;
 

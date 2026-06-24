@@ -14,6 +14,7 @@
 
     network {
       port "http" {
+        static       = 7376
         to           = 7376
         host_network = "loopback"
       }

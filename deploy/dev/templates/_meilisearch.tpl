@@ -8,6 +8,7 @@
 
     network {
       port "http" {
+        static       = 7700
         to           = 7700
         host_network = "loopback"
       }

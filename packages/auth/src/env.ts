@@ -65,7 +65,8 @@ export const env = createEnv({
      * PostgreSQL connection string for auth data persistence.
      * 用于认证数据持久化的 PostgreSQL 连接字符串。
      */
-    DATABASE_URL: v.string(),
+    DATABASE_URL: v.optional(v.string()),
+    AUTH_DATABASE_URL: v.optional(v.string()),
 
     /*
      * Better Auth Core Configuration
@@ -232,3 +233,15 @@ export const env = createEnv({
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,
 });
+
+const authDatabaseUrl = env.AUTH_DATABASE_URL ?? env.DATABASE_URL;
+
+if (!authDatabaseUrl) {
+  throw new Error("AUTH_DATABASE_URL or DATABASE_URL is required");
+}
+
+export const authEnv = {
+  ...env,
+  AUTH_DATABASE_URL: authDatabaseUrl,
+  DATABASE_URL: authDatabaseUrl,
+};
