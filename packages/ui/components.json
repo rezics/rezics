@@ -18,5 +18,7 @@
     "lib": "@/shared/lib",
     "hooks": "@/shared/hooks"
   },
-  "registries": {}
+  "registries": {
+    "@shark": "https://shark.vini.one/r/{name}.json"
+  }
 }
