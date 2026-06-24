@@ -1,9 +1,3 @@
-import {
-  useCreateTokenMutation,
-  useRevokeTokenMutation,
-  useUpdateTokenMutation,
-} from "@rezics/contract/api/token/token.mutations";
-import { tokenQueries } from "@rezics/contract/api/token/token.queries";
 import type {
   ApiTokenDTO,
   CreateApiTokenInput,
@@ -12,10 +6,15 @@ import type {
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
 import { Page } from "@/admin/core/layouts/Page";
+import {
+  createApiToken,
+  revokeApiToken,
+  updateApiToken,
+  useApiTokenListQuery,
+} from "@/admin/token/hooks/useApiTokenAdmin";
 import {
   CreateTokenDialog,
   EditTokenDialog,
@@ -37,17 +36,14 @@ import {
  */
 export const TokenPage: FC = () => {
   const { t } = useTranslation(["admin"]);
-  const { data, isLoading, error } = useQuery(tokenQueries.list());
+  const listQuery = useApiTokenListQuery();
+  const { data, isLoading, error } = listQuery;
 
   const [tokens, setTokens] = useState<ApiTokenDTO[]>([]);
 
   useEffect(() => {
     if (data?.tokens) setTokens(data.tokens);
   }, [data]);
-
-  const createMutation = useCreateTokenMutation();
-  const revokeMutation = useRevokeTokenMutation();
-  const updateMutation = useUpdateTokenMutation();
 
   const [creating, setCreating] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -69,8 +65,10 @@ export const TokenPage: FC = () => {
     setCreatingError(null);
     try {
       setCreating(true);
-      const res = await createMutation.mutateAsync(input);
+      const res = await createApiToken(input);
+      setTokens((current) => [res.tokenInfo, ...current]);
       setCreatedSecret(res.token);
+      await listQuery.refetch();
       setOpenCreate(false);
     } catch (err) {
       setCreatingError(
@@ -91,7 +89,11 @@ export const TokenPage: FC = () => {
     setUpdatingError(null);
     try {
       setUpdating(true);
-      await updateMutation.mutateAsync({ id, input });
+      const updated = await updateApiToken(id, input);
+      setTokens((current) =>
+        current.map((token) => (token.id === id ? updated : token)),
+      );
+      await listQuery.refetch();
       setOpenEdit(false);
       setEditingToken(null);
     } catch (err) {
@@ -107,7 +109,9 @@ export const TokenPage: FC = () => {
     if (!confirm(t("admin:token_revoke_confirm"))) return;
     try {
       setRevokingIds((s) => ({ ...s, [id]: true }));
-      await revokeMutation.mutateAsync(id);
+      await revokeApiToken(id);
+      setTokens((current) => current.filter((token) => token.id !== id));
+      await listQuery.refetch();
     } catch (err) {
       alert((err as Error)?.message ?? t("admin:token_revoke_failed"));
     } finally {
