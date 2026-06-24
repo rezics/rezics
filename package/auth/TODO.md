@@ -1,1 +1,0 @@
-- [ ] Specify the environment variables required by better-auth

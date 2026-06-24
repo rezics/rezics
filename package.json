@@ -8,8 +8,7 @@
   },
   "workspaces": [
     "./package/*",
-    "./tool",
-    "./docs"
+    "./tool"
   ],
   "devDependencies": {
     "@biomejs/biome": "^2.4.10",
