@@ -5,7 +5,8 @@ import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: "Rezics",
-  description: "Rezics web application",
+  description:
+    "Rezics is a community for works, knowledge, and creativity to be inherited, created anew, and spread onward.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

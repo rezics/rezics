@@ -1,0 +1,20 @@
+{
+  "nav": {
+    "home": "Über Rezics",
+    "product": "Produkt",
+    "app": "Rezics öffnen",
+    "language": "Sprache"
+  },
+  "cta": {
+    "enterApp": "Katalog öffnen",
+    "readProduct": "Produkte ansehen",
+    "backHome": "Zurück zur Übersicht"
+  },
+  "footer": {
+    "originNote": "Interaktive Katalog-, Regal- und Community-Abläufe öffnen sich in der Rezics-Hauptanwendung."
+  },
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "body": "Diese öffentliche Site enthält derzeit die Über-uns- und Produktseiten. Nutze die lokalisierte Navigation, um fortzufahren."
+  }
+}

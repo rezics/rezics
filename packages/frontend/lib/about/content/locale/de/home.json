@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "title": "Rezics | inherited · create · spread",
+    "description": "Rezics ist eine Community, in der Werke, Wissen und Kreativität über Plattformen, Sprachen und Communities hinweg weitergetragen, neu geschaffen und weiterverbreitet werden."
+  },
+  "hero": {
+    "eyebrow": "Begegne den Geschichten, die du liebst.",
+    "heading": "inherited · create · spread"
+  },
+  "primaryCtaPage": "product",
+  "sections": [
+    {
+      "eyebrow": "Der Anfang",
+      "title": "Webromane und digital entstandene Bücher sind alten Katalogen bereits entwachsen.",
+      "body": "Serielle Fiction, unabhängiges Schreiben und plattform-native Bücher bewegen sich zu schnell und über zu viele Orte und Sprachen, um von klassischen Regalen oder einsprachigen Datenbanken gut geordnet zu werden."
+    },
+    {
+      "eyebrow": "Die Richtung",
+      "title": "Je leichter Schaffen wird, desto mehr braucht jedes Medium einen besseren öffentlichen Index.",
+      "body": "Derselbe Druck erreicht Spiele, Medien, Posts, Welten und gemischte Werkformen. Rezics ist von Beginn an für diese Zukunft gebaut."
+    }
+  ],
+  "storySections": [
+    {
+      "eyebrow": "Über Plattformen hinweg",
+      "title": "Menschen brauchen einen Ort für das Werk selbst, nicht nur für die Kopie einer Plattform.",
+      "body": "Ein Werk kann viele Verlage, Sprachen, Aliase, Fassungen und Communities haben. Rezics gibt ihm eine gemeinsame Identität, damit Leser über diese Grenzen hinweg im selben Kontext ankommen."
+    },
+    {
+      "eyebrow": "Tag-shelf discovery",
+      "title": "Tags und Regale sollen zeigen, was wirklich passt.",
+      "body": "Rezics verbindet gemeinsame Tags, realm-spezifische Klassifikation und Regale, die Reviews tragen können. So zeigt Browsing nicht nur, was ein Werk ist, sondern auch, warum jemand es gesammelt hat."
+    },
+    {
+      "eyebrow": "Für Schaffende",
+      "title": "Bessere Klassifikation hilft Schaffenden, die richtigen Leser zu finden.",
+      "body": "Wenn Leser Werke in der Sprache ihrer Communities beschreiben, erhalten Schaffende klarere Signale darüber, wen ein Werk erreicht, wo es Resonanz findet und welche nahen Zielgruppen sich dafür interessieren könnten."
+    },
+    {
+      "eyebrow": "Realms",
+      "title": "Communities sollten Katalog, Diskussion und Wiki nicht auf mehrere Orte verteilen müssen.",
+      "body": "Realms sammeln Menschen um das, was sie lieben, und lassen sie Werke neben dem gemeinsamen öffentlichen Index klassifizieren, besprechen, kuratieren und dokumentieren."
+    }
+  ]
+}

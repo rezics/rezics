@@ -6,6 +6,7 @@
     "allowJs": false,
     "jsx": "preserve",
     "incremental": true,
+    "resolveJsonModule": true,
     "types": ["node"],
     "plugins": [{ "name": "next" }],
     "paths": {
