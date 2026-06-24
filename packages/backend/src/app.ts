@@ -1,7 +1,3 @@
-import type {
-  ObservabilityConfig,
-  ServiceKey,
-} from "@rezics/shared/observability";
 import { createAuthApp } from "./auth/app";
 import { resolveBackendPort } from "./env";
 import { createHistoryApp } from "./history/app";
@@ -41,27 +37,6 @@ type MountableApp = FetchableApp & {
   ): unknown;
 };
 
-type ServiceAppOptions = {
-  initializeTelemetry?: boolean;
-  openApiPath?: string | false;
-  port?: number;
-};
-
-type ServerAppOptions = ServiceAppOptions & {
-  displayName?: string;
-  serviceKey?: ServiceKey;
-};
-
-type ServerAppResult = {
-  app: MountableApp;
-  observability: ObservabilityConfig;
-  port: number;
-};
-
-type CreateServerApp = (options?: ServerAppOptions) => Promise<ServerAppResult>;
-
-const createMonolithServerApp: CreateServerApp = createServerApp;
-
 function mountService(
   root: MountableApp,
   prefix: string,
@@ -74,7 +49,7 @@ export async function createBackendApp(options: CreateBackendAppOptions = {}) {
   const port = options.port ?? resolveBackendPort();
   const internalPrefix =
     options.internalServicePrefix ?? INTERNAL_SERVICE_PREFIX;
-  const server = await createMonolithServerApp({
+  const server = await createServerApp({
     displayName: "Backend Monolith",
     initializeTelemetry: true,
     openApiPath: "/openapi",
