@@ -392,27 +392,6 @@
         "storybook": "^10.3.6",
       },
     },
-    "packages/utils": {
-      "name": "@rezics/utils",
-      "version": "0.1.0",
-      "dependencies": {
-        "@clack/prompts": "^0.11.0",
-        "@rezics/backend": "workspace:*",
-        "@rezics/contract": "workspace:*",
-        "@rezics/search": "workspace:*",
-        "@rezics/server": "workspace:*",
-        "@t3-oss/env-core": "^0.13.10",
-        "dotenv": "^17.2.3",
-        "drizzle-orm": "1.0.0-rc.3",
-        "valibot": "^1.2.0",
-      },
-      "devDependencies": {
-        "@types/bun": "^1.3.0",
-      },
-      "peerDependencies": {
-        "typescript": "^6",
-      },
-    },
   },
   "patchedDependencies": {
     "storybook@10.3.6": "patches/storybook@10.3.6.patch",
@@ -1151,8 +1130,6 @@
     "@rezics/storybook-config": ["@rezics/storybook-config@workspace:packages/storybook-config"],
 
     "@rezics/ui": ["@rezics/ui@workspace:packages/ui"],
-
-    "@rezics/utils": ["@rezics/utils@workspace:packages/utils"],
 
     "@rolldown/binding-android-arm64": ["@rolldown/binding-android-arm64@1.0.3", "", { "os": "android", "cpu": "arm64" }, "sha512-454rs7jHngixp/NMxd5srYD57OnzSlZ/eFTETjORQHLwJG1lRtmNOJcBerZlfu4GjKqeq8aCCIQrMdHyhI51Hw=="],
 

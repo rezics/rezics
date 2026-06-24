@@ -16,7 +16,6 @@ includes:
   search: { taskfile: ./packages/search/Taskfile.yml, dir: ./packages/search }
   server: { taskfile: ./packages/server/Taskfile.yml, dir: ./packages/server }
   ui: { taskfile: ./packages/ui/Taskfile.yml, dir: ./packages/ui }
-  utils: { taskfile: ./packages/utils/Taskfile.yml, dir: ./packages/utils }
 
 tasks:
   default:

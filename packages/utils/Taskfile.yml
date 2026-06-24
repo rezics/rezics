@@ -1,7 +1,0 @@
-# @rezics/utils — shared repository utilities. Aggregated as `utils:*`.
-version: '3'
-
-tasks:
-  default:
-    desc: List package tasks
-    cmd: task --list
