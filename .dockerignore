@@ -44,6 +44,5 @@ docs/.vitepress/cache
 **/.DS_Store
 
 # Local infra data and tooling output that is not part of any service runtime
-tool/external-services/**/data
 **/coverage
 **/*.log
