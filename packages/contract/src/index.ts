@@ -36,6 +36,7 @@ export * from "./routing/index";
 export * from "./schema";
 export * from "./search/index";
 export * from "./shelf/index";
+export * from "./shared/fractional-index";
 export * from "./slug";
 export * from "./source/index";
 export * from "./subscription";

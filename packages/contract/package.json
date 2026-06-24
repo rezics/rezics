@@ -22,6 +22,10 @@
     "./reaction": {
       "types": "./src/reaction/index.ts",
       "default": "./src/reaction/index.ts"
+    },
+    "./shared/fractional-index": {
+      "types": "./src/shared/fractional-index.ts",
+      "default": "./src/shared/fractional-index.ts"
     }
   },
   "dependencies": {

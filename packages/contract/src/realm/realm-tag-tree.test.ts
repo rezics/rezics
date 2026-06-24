@@ -1,5 +1,6 @@
 import { Value } from "@sinclair/typebox/value";
 import { describe, expect, test } from "bun:test";
+import type { RealmTagTree } from "./realm-tag-tree";
 import {
   emptyRealmTagTree,
   parseRealmTagTree,
@@ -10,7 +11,7 @@ import {
 
 describe("realm tag tree contract", () => {
   test("accepts tag and label nodes without durable node ids", () => {
-    const tree = {
+    const tree: RealmTagTree = {
       schema: "rezics/realm-tag-tree",
       version: 1,
       view: { defaultMode: "tree", allowViewerSwitch: true },
