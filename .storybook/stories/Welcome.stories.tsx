@@ -14,7 +14,7 @@ const refs: Array<{ port: number; title: string; pkg: string; what: string }> =
       port: 6006,
       title: "Host",
       pkg: "(this)",
-      what: "Aggregates the five package storybooks via refs.",
+      what: "Aggregates package storybooks via refs.",
     },
     {
       port: 6007,
@@ -33,18 +33,6 @@ const refs: Array<{ port: number; title: string; pkg: string; what: string }> =
       title: "Folio · Reader",
       pkg: "@rezics/folio",
       what: "Book reader, paginated + scroll modes.",
-    },
-    {
-      port: 6010,
-      title: "Admin",
-      pkg: "@rezics/admin",
-      what: "Operations app — dense tables, outlined inputs.",
-    },
-    {
-      port: 6011,
-      title: "App",
-      pkg: "@rezics/app",
-      what: "Main app — generous browsing, content-led.",
     },
   ];
 

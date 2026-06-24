@@ -1,10 +1,20 @@
 # @rezics/notify — notify service. Aggregated as `notify:*`.
 version: '3'
 
-includes:
-  db: ../../tool/taskfiles/drizzle.yml
-
 tasks:
+  db:generate:
+    desc: Generate Drizzle migrations
+    cmd: bun drizzle-kit generate
+  db:migrate:
+    desc: Apply Drizzle migrations
+    cmd: bun drizzle-kit migrate
+  db:deploy:
+    desc: Apply Drizzle migrations
+    cmds:
+      - task: db:migrate
+  db:studio:
+    desc: Open Drizzle Studio
+    cmd: bun drizzle-kit studio
   dev:
     desc: Dev (watch)
     env:

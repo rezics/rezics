@@ -19,23 +19,18 @@ process.env.SERVER_DATABASE_URL ??=
 
 const config: KnipConfig = {
   ignore: ["@tanstack/router-plugin"],
-  ignoreWorkspaces: ["@rezics/admin"],
   // `concurrently` drives the root Taskfile's `storybook` / `build:storybook`
   // fan-out; the toolchain moved from package.json scripts to Taskfiles, which
   // knip cannot see, so mark it used here.
   ignoreDependencies: ["concurrently"],
   workspaces: {
-    tool: {
-      entry: ["bin/*.ts", "src/commands/**/*.ts", "tests/**/*.test.ts"],
-      project: ["**/*.ts"],
-    },
     // CLI entry scripts invoked by the Taskfile, not by any package.json
     // script — declare them so knip keeps them and their imports.
     "packages/job-runner": {
       entry: ["src/index.ts", "scripts/ensure-job-db.ts"],
     },
     "packages/utils": {
-      entry: ["src/index.ts", "bin/cli.ts"],
+      entry: ["src/index.ts"],
     },
   },
 };

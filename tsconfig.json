@@ -1,16 +1,14 @@
 {
   "files": [],
   "references": [
-    { "path": "./packages/about" },
-    { "path": "./packages/admin" },
     { "path": "./packages/api" },
-    { "path": "./packages/app" },
     { "path": "./packages/auth" },
     { "path": "./packages/contract" },
     { "path": "./packages/edge" },
     { "path": "./packages/editor" },
     { "path": "./packages/email" },
     { "path": "./packages/folio" },
+    { "path": "./packages/frontend" },
     { "path": "./packages/history" },
     { "path": "./packages/i18n" },
     { "path": "./packages/job" },
@@ -25,7 +23,6 @@
     { "path": "./packages/shared" },
     { "path": "./packages/storybook-config" },
     { "path": "./packages/ui" },
-    { "path": "./packages/utils" },
-    { "path": "./tool" }
+    { "path": "./packages/utils" }
   ]
 }

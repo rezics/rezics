@@ -1,0 +1,18 @@
+version: "3"
+
+tasks:
+  default:
+    desc: Run the Next.js frontend dev server
+    cmd: bun run dev
+  dev:
+    desc: Run the Next.js frontend dev server
+    cmd: bun run dev
+  build:
+    desc: Build the Next.js frontend
+    cmd: bun run build
+  start:
+    desc: Run the built Next.js frontend
+    cmd: bun run start
+  typecheck:
+    desc: Typecheck the Next.js frontend
+    cmd: bun run typecheck

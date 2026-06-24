@@ -8,16 +8,6 @@ export default baseStorybookConfig({
       url: "http://localhost:6007",
       expanded: true,
     },
-    app: {
-      title: "App · Main",
-      url: "http://localhost:6011",
-      expanded: false,
-    },
-    admin: {
-      title: "Admin",
-      url: "http://localhost:6010",
-      expanded: false,
-    },
     editor: {
       title: "Editor · CodeMirror",
       url: "http://localhost:6008",

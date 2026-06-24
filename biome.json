@@ -14,13 +14,13 @@
       "!**/*.d.ts",
       "!.agents",
       "!.claude",
-      "!packages/admin/src/routeTree.gen.ts",
-      "!packages/app/src/routeTree.gen.ts",
       "!!**/dist",
       "!!**/build",
       "!!**/coverage",
       "!!**/.next",
-      "!!**/.turbo"
+      "!!**/.turbo",
+      "!packages/admin/src/routeTree.gen.ts",
+      "!packages/app/src/routeTree.gen.ts"
     ],
     "ignoreUnknown": true
   },

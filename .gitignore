@@ -39,6 +39,7 @@ coverage/
 
 # Caches
 .vite/
+.next/
 .tanstack/
 .eslintcache
 .cache/
@@ -70,9 +71,6 @@ install/
 tailwind.config.js
 git-staged.txt
 .temp
-tool/browser-inspect/profile/
-tool/browser-inspect/work/*
-!tool/browser-inspect/work/.gitkeep
 
 # Devenv
 .devenv*

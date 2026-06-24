@@ -1,9 +1,6 @@
 version: "3"
 
 includes:
-  app: { taskfile: ./packages/app/Taskfile.yml, dir: ./packages/app }
-  admin: { taskfile: ./packages/admin/Taskfile.yml, dir: ./packages/admin }
-  about: { taskfile: ./packages/about/Taskfile.yml, dir: ./packages/about }
   api: { taskfile: ./packages/api/Taskfile.yml, dir: ./packages/api }
   auth: { taskfile: ./packages/auth/Taskfile.yml, dir: ./packages/auth }
   contract:
@@ -11,6 +8,8 @@ includes:
   edge: { taskfile: ./packages/edge/Taskfile.yml, dir: ./packages/edge }
   editor: { taskfile: ./packages/editor/Taskfile.yml, dir: ./packages/editor }
   folio: { taskfile: ./packages/folio/Taskfile.yml, dir: ./packages/folio }
+  frontend:
+    { taskfile: ./packages/frontend/Taskfile.yml, dir: ./packages/frontend }
   history: { taskfile: ./packages/history/Taskfile.yml, dir: ./packages/history }
   job: { taskfile: ./packages/job/Taskfile.yml, dir: ./packages/job }
   job-runner:
@@ -40,10 +39,6 @@ tasks:
       - cmd: |-
           alloc=$(nomad job allocs -json rezics-dev | jq -r '.[] | select(.TaskGroup == "app") | .ID' | head -1)
           exec nomad alloc logs -f "$alloc" server
-
-  dev:zellij:
-    desc: Start lightweight app services in a Zellij session
-    cmd: bun run tool/dev-script/dev.ts
 
   dev:stop:
     desc: Stop all services
@@ -85,17 +80,6 @@ tasks:
       - nohup nomad agent -dev -log-level=warn -bind=127.0.0.1 -config=deploy/nomad-dev.hcl > .dev/nomad.log 2>&1 &
       - until nomad agent-info > /dev/null 2>&1; do sleep 1; done
 
-  # ── CDC (Sequin source verification) ────────────────────────────────────
-  cdc:verify:
-    desc: Verify every Sequin CDC source database
-    cmd: bun run tool/bin/tool.ts service cdc verify {{.CLI_ARGS}}
-  cdc:repair:
-    desc: Low-level repair Sequin CDC source objects
-    cmd: bun run tool/bin/tool.ts service cdc repair {{.CLI_ARGS}}
-  cdc:recover:
-    desc: End-to-end Sequin CDC recovery (repair + restart + verify)
-    cmd: bun run tool/bin/tool.ts service cdc recover {{.CLI_ARGS}}
-
   # ── Format / lint / static checks ──────────────────────────────────────
   format:
     desc: Format the repo (write) with Biome
@@ -115,129 +99,40 @@ tasks:
   knip:
     desc: Report unused exports & dependencies
     cmd: bun knip
-  check:convention:
-    desc: Repo route & folder conventions (pass --staged after --)
-    cmd: bun run tool/src/commands/convention/check.ts {{.CLI_ARGS}}
-  check:tokens:
-    desc: Design token checks
-    cmd: bun run tool/src/commands/tokens/check.ts
-  check:i18n:
-    desc: i18n keys & namespaces
-    cmd: bun run tool/bin/tool.ts i18n check
-  check:runtime-env:
-    desc: Runtime env isolation
-    cmd: node tool/src/commands/check-no-runtime-env.mjs
   ci:
-    desc: Run the CI gate locally (convention, i18n, knip, runtime-env)
+    desc: Run the local static gate
     cmds:
-      - task: check:convention
-      - task: check:i18n
+      - task: format:check
+      - task: lint
       - task: knip
-      - task: check:runtime-env
 
   # ── Tests ──────────────────────────────────────────────────────────────
   test:
     desc: Run all tests (bun test, whole repo)
     cmd: bun test
 
-  # ── Database: repo orchestrator (tool/ CLI) ────────────────────────────
-  # Per-service Drizzle tasks live in each package, e.g. `task server:db:migrate`.
-  db:generate:
-    desc: Generate migrations across schema units (pass --package=<owner> after --)
-    cmd: bun run tool/bin/tool.ts db generate {{.CLI_ARGS}}
-  db:migrate:
-    desc: Apply migrations across schema units (pass --package=<owner> after --)
-    cmd: bun run tool/bin/tool.ts db migrate {{.CLI_ARGS}}
-  db:deploy:
-    desc: Deploy migrations (production shape)
-    cmd: bun run tool/bin/tool.ts db deploy {{.CLI_ARGS}}
-  db:reset:
-    desc: Reset local databases (pass --yes after --)
-    cmd: bun run tool/bin/tool.ts db reset {{.CLI_ARGS}}
-  db:ensure:
-    desc: Ensure local databases exist
-    cmd: bun run tool/bin/tool.ts db ensure {{.CLI_ARGS}}
-  db:smoke:
-    desc: Database smoke test
-    cmd: bun run tool/bin/tool.ts db smoke {{.CLI_ARGS}}
-
-  backfill:
-    desc: Resumable persisted JSON envelope backfills
-    cmd: bun run tool/bin/tool.ts backfill {{.CLI_ARGS}}
-
-  # ── Seed / factory (tool/ CLI) ─────────────────────────────────────────
-  seed:
-    desc: Interactive seeder (pass args after --)
-    cmd: bun run tool/bin/tool.ts seed {{.CLI_ARGS}}
-  seed:all:
-    desc: Seed non-interactively
-    cmd: bun run tool/bin/tool.ts seed --no-interactive
-  factory:
-    desc: Synthetic data factory (pass args after --)
-    cmd: bun run tool/bin/tool.ts factory {{.CLI_ARGS}}
-  seed:factory:
-    desc: Factory — realistic preset
-    cmd: bun run tool/bin/tool.ts factory --preset=realistic --no-interactive
-  seed:factory:fast:
-    desc: Factory — fast preset
-    cmd: bun run tool/bin/tool.ts factory --preset=fast --no-interactive
-  seed:factory:medium:
-    desc: Factory — medium preset
-    cmd: bun run tool/bin/tool.ts factory --preset=medium --no-interactive
-  seed:factory:echokv:
-    desc: Factory — echokv subset only
-    cmd: bun run tool/bin/tool.ts factory --only=echokv --no-interactive
-  seed:reset-root:
-    desc: Reset the root user/account
-    cmd: bun run tool/bin/tool.ts seed reset-root
-  seed:database-reset:
-    desc: Seed-driven database reset (pass args after --)
-    cmd: bun run tool/bin/tool.ts seed database-reset {{.CLI_ARGS}}
-  seed:init-meili-search:
-    desc: Ensure Meilisearch indexes
-    cmd: bun run tool/bin/tool.ts seed init-meili-search
-
-  # ── Browser inspection workbench ───────────────────────────────────────
-  browser:inspect:
-    desc: "Run a headed browser inspect scratch script from tool/browser-inspect/work"
-    cmd: bun run tool/browser-inspect/run-work.ts {{.CLI_ARGS}}
-
-
   # ── Storybook ──────────────────────────────────────────────────────────
   storybook:
     desc: All Storybooks (host + every package) with color-prefixed output
     cmd: >-
-      bun concurrently -k -n host,ui,editor,folio,admin,app,info
-      -c blue,cyan,magenta,green,yellow,red,greenBright
+      bun concurrently -k -n host,ui,editor,folio
+      -c blue,cyan,magenta,green
       "task storybook:host -- --quiet --loglevel error"
       "task ui:storybook -- --quiet --loglevel error"
       "task editor:storybook -- --quiet --loglevel error"
       "task folio:storybook -- --quiet --loglevel error"
-      "task admin:storybook -- --quiet --loglevel error"
-      "task app:storybook -- --quiet --loglevel error"
-      "bun run tool/src/commands/storybook/banner.ts"
   storybook:host:
     desc: Host Storybook (port 6006)
     cmd: bun storybook dev -p 6006 --no-open {{.CLI_ARGS}}
-  storybook:banner:
-    internal: true
-    cmd: bun run tool/src/commands/storybook/banner.ts
   build:storybook:
     desc: Build every static Storybook
     cmd: >-
-      bun concurrently -n host,ui,editor,folio,admin,app
-      -c blue,cyan,magenta,green,yellow,red
+      bun concurrently -n host,ui,editor,folio
+      -c blue,cyan,magenta,green
       "task storybook:build-host"
       "task ui:build-storybook"
       "task editor:build-storybook"
       "task folio:build-storybook"
-      "task admin:build-storybook"
-      "task app:build-storybook"
   storybook:build-host:
     internal: true
     cmd: bun storybook build -o storybook-static
-
-  # ── Raw tool/ CLI passthrough ──────────────────────────────────────────
-  tool:
-    desc: "Raw repo maintenance CLI: task tool -- <subcommand> <args>"
-    cmd: bun run tool/bin/tool.ts {{.CLI_ARGS}}

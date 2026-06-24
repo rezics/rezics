@@ -18,12 +18,10 @@
     "build:storybook": "task build:storybook"
   },
   "workspaces": [
-    "./packages/*",
-    "./tool"
+    "./packages/*"
   ],
   "devDependencies": {
     "@biomejs/biome": "^2.4.10",
-    "@playwright/test": "^1.59.1",
     "@rezics/storybook-config": "workspace:*",
     "@rezics/ui": "workspace:*",
     "@storybook/addon-docs": "10.3.6",
@@ -34,15 +32,11 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "storybook": "^10.3.6",
-    "ts-morph": "^28.0.0",
     "typescript": "^6.0.3",
     "vite": "^8.0.16"
   },
   "dependencies": {
-    "@t3-oss/env-core": "^0.13.10",
-    "@vitejs/plugin-react": "^5.1.4",
-    "valibot": "^1.2.0",
-    "better-result": "^2.7.0"
+    "@vitejs/plugin-react": "^5.1.4"
   },
   "patchedDependencies": {
     "storybook@10.3.6": "patches/storybook@10.3.6.patch"

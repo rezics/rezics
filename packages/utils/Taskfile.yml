@@ -1,7 +1,7 @@
-# @rezics/utils — repo utilities CLI. Aggregated as `utils:*`.
+# @rezics/utils — shared repository utilities. Aggregated as `utils:*`.
 version: '3'
 
 tasks:
-  cli:
-    desc: Run the utils CLI (pass args after --)
-    cmd: bun run bin/cli.ts {{.CLI_ARGS}}
+  default:
+    desc: List package tasks
+    cmd: task --list

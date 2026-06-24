@@ -12,10 +12,9 @@
  * `--radius-*`, `--shadow-*`, `--duration-*`, `--easing-*`, state opacities)
  * that consumers reference directly.
  *
- * Authors consume tokens via the curated short names exposed by
- * `theme.colors` (`text-primary`, `bg-surface-elevated`, …). R9 in
- * `tool/src/commands/convention/check.ts` bans any `var(--rezics-*)` reference in
- * source files; the `--rezics-*` namespace is retired.
+ * Authors consume tokens via the curated short names exposed by `theme.colors`
+ * (`text-primary`, `bg-surface-elevated`, …). The `--rezics-*` namespace is
+ * retired.
  *
  * uno-config.ts — rezics 设计 token 的单一消费入口。
  *
@@ -29,8 +28,7 @@
  * 状态不透明度）。
  *
  * 作者通过 `theme.colors` 暴露的精选短名称（`text-primary`、`bg-surface-elevated`
- * 等）消费 token。`tool/src/commands/convention/check.ts` 中的 R9 禁止源文件中出现
- * 任何 `var(--rezics-*)` 引用；`--rezics-*` 命名空间已废弃。
+ * 等）消费 token。`--rezics-*` 命名空间已废弃。
  */
 import presetWind4 from "@unocss/preset-wind4";
 import { container as defaultContainer } from "@unocss/preset-wind4/theme";

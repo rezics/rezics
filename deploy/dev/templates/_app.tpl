@@ -225,8 +225,9 @@
       }
 
       resources {
-        cpu    = 300
-        memory = 384
+        cpu        = 500
+        memory     = 512
+        memory_max = 768
       }
     }
 
@@ -261,9 +262,9 @@
       }
     }
 
-    # ── app (frontend) ──────────────────────────────────────
+    # ── frontend ────────────────────────────────────────────
 
-    task "app" {
+    task "frontend" {
       driver = "raw_exec"
 
       config {
@@ -275,38 +276,7 @@
         data        = <<-SCRIPT
         #!/bin/sh
         cd [[ var "project_root" . ]]
-        exec task app:dev
-        SCRIPT
-        destination = "local/run.sh"
-        perms       = "0755"
-      }
-
-      env {
-        NODE_ENV = "development"
-      }
-
-      resources {
-        cpu        = 500
-        memory     = 512
-        memory_max = 768
-      }
-    }
-
-    # ── admin (frontend) ────────────────────────────────────
-
-    task "admin" {
-      driver = "raw_exec"
-
-      config {
-        command = "/bin/sh"
-        args    = ["${NOMAD_TASK_DIR}/run.sh"]
-      }
-
-      template {
-        data        = <<-SCRIPT
-        #!/bin/sh
-        cd [[ var "project_root" . ]]
-        exec task admin:dev
+        exec task frontend:dev
         SCRIPT
         destination = "local/run.sh"
         perms       = "0755"
