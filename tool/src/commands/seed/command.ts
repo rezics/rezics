@@ -17,7 +17,7 @@ function cancel(): never {
 async function runBaselineSeed(options: { noInteractive?: boolean } = {}) {
   p.intro("Rezics Seed");
   const { runSeedCommand } = await import(
-    "../../../../package/utils/src/seed/command"
+    "../../../../packages/utils/src/seed/command"
   );
   await runSeedCommand({
     noInteractive: Boolean(options.noInteractive),
@@ -28,7 +28,7 @@ async function runBaselineSeed(options: { noInteractive?: boolean } = {}) {
 async function runResetRootSeed() {
   p.intro("Rezics Reset Root");
   const { runResetRoot } = await import(
-    "../../../../package/utils/src/seed/index"
+    "../../../../packages/utils/src/seed/index"
   );
   await runResetRoot();
   p.outro("Done!");
@@ -57,21 +57,21 @@ async function confirmDatabaseReset(options: { yes?: boolean } = {}) {
 async function runDatabaseReset(options: { yes?: boolean } = {}) {
   await confirmDatabaseReset(options);
   const { runDbReset } = await import(
-    "../../../../package/utils/src/db/command"
+    "../../../../packages/utils/src/db/command"
   );
   await runDbReset();
 }
 
 async function runInitMeiliSearch() {
   const { runInitMeili } = await import(
-    "../../../../package/utils/src/db/command"
+    "../../../../packages/utils/src/db/command"
   );
   await runInitMeili();
 }
 
 async function runResetMeiliSearch() {
   const { runResetMeili } = await import(
-    "../../../../package/utils/src/db/command"
+    "../../../../packages/utils/src/db/command"
   );
   await runResetMeili();
 }

@@ -10,7 +10,7 @@ const INLINE_PATTERN = /queryKey\s*:\s*\[/g;
 
 function isTarget(absPath: string): boolean {
   const relPath = relative(REPO_ROOT, absPath);
-  if (!/^package\/(app|admin|ui)\//.test(relPath)) return false;
+  if (!/^packages\/(app|admin|ui)\//.test(relPath)) return false;
   if (!/\.(ts|tsx)$/.test(relPath)) return false;
   if (/\.test\.tsx?$/.test(relPath)) return false;
   return true;
@@ -38,7 +38,7 @@ export const queryKeysRule: RuleScanner = {
             rule: "R6",
             path: `${relPath}:${i + 1}`,
             message:
-              "Inline `queryKey: [` — move this key into a per-domain factory in package/api/src/<domain>/<domain>.keys.ts and consume it via a queryOptions / useQuery wrapper.",
+              "Inline `queryKey: [` — move this key into a per-domain factory in packages/api/src/<domain>/<domain>.keys.ts and consume it via a queryOptions / useQuery wrapper.",
             spec: SPEC,
           });
         }

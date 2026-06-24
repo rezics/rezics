@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-const base = "package/i18n/locales";
+const base = "packages/i18n/locales";
 const enDir = join(base, "en");
 const zhDir = join(base, "zh-Hant");
 

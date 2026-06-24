@@ -6,7 +6,7 @@
     "R3": 1
   },
   "keys": [
-    "R3  package/web/src/components/layout",
-    "R4  package/web/src/app/(main)/book/[bookId]/variants"
+    "R3  packages/web/src/components/layout",
+    "R4  packages/web/src/app/(main)/book/[bookId]/variants"
   ]
 }

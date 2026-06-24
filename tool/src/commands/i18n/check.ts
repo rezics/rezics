@@ -38,12 +38,12 @@ import {
 } from "../core/paths";
 
 const SCAN_ROOTS = [
-  "package/app/src",
-  "package/admin/src",
-  "package/ui/src",
-  "package/editor/src",
-  "package/folio/src",
-  "package/i18n/src",
+  "packages/app/src",
+  "packages/admin/src",
+  "packages/ui/src",
+  "packages/editor/src",
+  "packages/folio/src",
+  "packages/i18n/src",
 ];
 const SKIP_DIRS = new Set(["node_modules", "dist", ".turbo", ".storybook"]);
 const TARGET_EXT = /\.(tsx?|jsx?)$/;
@@ -95,8 +95,8 @@ async function loadCatalog(): Promise<{
       catalog[lng][ns] = JSON.parse(raw) as Record<string, string>;
     }
   }
-  // UI namespace lives in `package/ui/locales/{locale}.ts`.
-  // UI 命名空间位于 `package/ui/locales/{locale}.ts`。
+  // UI namespace lives in `packages/ui/locales/{locale}.ts`.
+  // UI 命名空间位于 `packages/ui/locales/{locale}.ts`。
   try {
     for (const lng of locales) {
       const path = join(UI_LOCALES_ROOT, `${lng}.ts`);

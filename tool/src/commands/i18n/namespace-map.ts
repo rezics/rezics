@@ -2,10 +2,10 @@
  * Underscore-prefix → namespace map for the Paraglide → i18next migration.
  * 下划线前缀 → 命名空间映射，用于 Paraglide → i18next 迁移。
  *
- * Each legacy flat-catalog key in `package/i18n/messages/*.json` is split
+ * Each legacy flat-catalog key in `packages/i18n/messages/*.json` is split
  * by its first underscore; the resulting prefix is looked up here to find
  * the target namespace under `public/locales/<lng>/<ns>.json`.
- * `package/i18n/messages/*.json` 中每个旧的扁平目录 key 按第一个下划线拆分；
+ * `packages/i18n/messages/*.json` 中每个旧的扁平目录 key 按第一个下划线拆分；
  * 在此处查找得到的前缀，以确定 `public/locales/<lng>/<ns>.json` 下的目标命名空间。
  *
  * `NAMESPACES` below is the canonical, exhaustive namespace set; every

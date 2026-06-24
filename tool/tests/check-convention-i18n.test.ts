@@ -11,7 +11,7 @@ describe("frontend i18n convention checks", () => {
   test("passes typed map translation lookup", () => {
     expect(
       rulesFor(
-        "package/app/src/example.tsx",
+        "packages/app/src/example.tsx",
         `
           const LABEL_KEYS = {
             save: "common:save",
@@ -28,7 +28,7 @@ describe("frontend i18n convention checks", () => {
   test("rejects dynamic translation keys", () => {
     expect(
       rulesFor(
-        "package/app/src/example.tsx",
+        "packages/app/src/example.tsx",
         `
           export function Example({ t, keyName }) {
             return <button>{t(keyName)}</button>;
@@ -41,7 +41,7 @@ describe("frontend i18n convention checks", () => {
   test("rejects template-literal translation keys", () => {
     expect(
       rulesFor(
-        "package/app/src/example.tsx",
+        "packages/app/src/example.tsx",
         `
           export function Example({ t, keyName }) {
             return <button>{t(\`common:\${keyName}\`)}</button>;
@@ -54,7 +54,7 @@ describe("frontend i18n convention checks", () => {
   test("rejects fallback-string translation calls", () => {
     expect(
       rulesFor(
-        "package/app/src/example.tsx",
+        "packages/app/src/example.tsx",
         `
           export function Example({ t }) {
             return <button>{t("common:save", "Save")}</button>;
@@ -67,7 +67,7 @@ describe("frontend i18n convention checks", () => {
   test("rejects contract i18nKey fields", () => {
     expect(
       rulesFor(
-        "package/contract/src/example.ts",
+        "packages/contract/src/example.ts",
         `
           export const Example = t.Object({
             i18nKey: t.String(),

@@ -3,12 +3,12 @@
  * check-tokens.ts — contrast-invariant verification for rezics design tokens.
  * check-tokens.ts — 对 rezics 设计 token 的对比度不变量校验。
  *
- * Reads `package/ui/src/config/tokens/colors.ts` (the single source of truth)
+ * Reads `packages/ui/src/config/tokens/colors.ts` (the single source of truth)
  * and asserts WCAG contrast invariants against the curated key paths in both
  * light and dark modes. The runtime CSS variables emitted by uno-config.ts
  * mirror this object, so passing here implies the runtime cascade meets the
  * same thresholds.
- * 读取 `package/ui/src/config/tokens/colors.ts`（唯一事实来源），并针对精选的
+ * 读取 `packages/ui/src/config/tokens/colors.ts`（唯一事实来源），并针对精选的
  * 键路径在 light 和 dark 两种模式下断言 WCAG 对比度不变量。uno-config.ts 输出的
  * 运行时 CSS 变量与该对象一致，因此此处通过即意味着运行时级联满足相同阈值。
  */
@@ -16,7 +16,7 @@ import {
   type ColorTokens,
   darkColors,
   lightColors,
-} from "../../../../package/ui/src/config/tokens/colors";
+} from "../../../../packages/ui/src/config/tokens/colors";
 
 type RGB = { r: number; g: number; b: number; a: number };
 

@@ -11,7 +11,7 @@
 ARG BASE_IMAGE=rezics-base:dev
 FROM ${BASE_IMAGE} AS build
 
-WORKDIR /repo/package/job-runner
+WORKDIR /repo/packages/job-runner
 # Compile the linux-x64 binary inline (mirrors `task job-runner:build:linux`).
 RUN bun build src/index.ts --compile --minify-whitespace --minify-syntax \
   --target bun-linux-x64 --outfile job-runner
@@ -24,7 +24,7 @@ RUN apt-get update \
   && useradd --system --uid 10001 --no-create-home rezics
 WORKDIR /app
 
-COPY --from=build /repo/package/job-runner/job-runner /app/job-runner
+COPY --from=build /repo/packages/job-runner/job-runner /app/job-runner
 
 USER rezics
 ENV PORT=3005

@@ -48,7 +48,7 @@ function collectJsonColumns(schemaFiles: string[]): JsonColumn[] {
 
   for (const absPath of schemaFiles) {
     const relPath = toRepoPath(absPath);
-    const database = relPath.startsWith("package/auth/") ? "auth" : "server";
+    const database = relPath.startsWith("packages/auth/") ? "auth" : "server";
     let content: string;
     try {
       content = readFileSync(absPath, "utf8");
@@ -194,7 +194,7 @@ export const jsonPolicyRule: RuleScanner = {
       const relPath = toRepoPath(absPath);
       if (
         !relPath.startsWith("..") &&
-        !/^package\/server\/src\//.test(relPath)
+        !/^packages\/server\/src\//.test(relPath)
       ) {
         continue;
       }

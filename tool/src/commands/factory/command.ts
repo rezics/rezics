@@ -90,7 +90,7 @@ export const factoryCommand = define({
   run: async (ctx) => {
     p.intro("Rezics Factory");
     const { runFactoryCommand } = await import(
-      "../../../../package/utils/src/factory/command"
+      "../../../../packages/utils/src/factory/command"
     );
     await runFactoryCommand(
       factoryOptionsFromValues(ctx.values as FactoryCliValues),

@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
 const rootDir = process.cwd();
-const packageDir = join(rootDir, "package");
+const packageDir = join(rootDir, "packages");
 const forbiddenPatterns = [/process\.env/g, /import\.meta\.env/g];
 
 function shouldSkipFile(relativePath) {

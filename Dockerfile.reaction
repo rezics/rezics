@@ -11,7 +11,7 @@
 # --- build stage -----------------------------------------------------------
 ARG BASE_IMAGE=rezics-base:dev
 FROM ${BASE_IMAGE} AS build
-WORKDIR /repo/package/reaction
+WORKDIR /repo/packages/reaction
 
 # Compile the standalone Linux amd64 binary inline (mirrors
 # `task reaction:build:linux`).
@@ -27,7 +27,7 @@ RUN apt-get update \
   && useradd --system --uid 10001 --no-create-home rezics
 WORKDIR /app
 
-COPY --from=build /repo/package/reaction/reaction /app/reaction
+COPY --from=build /repo/packages/reaction/reaction /app/reaction
 
 USER rezics
 ENV PORT=3000

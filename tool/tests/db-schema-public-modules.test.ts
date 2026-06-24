@@ -7,9 +7,9 @@ const repoRoot = join(import.meta.dir, "../..");
 const schemaModules = [
   {
     packageName: "server",
-    importPath: "../../package/server/src/db/schema/index.ts",
-    sourcePath: "package/server/src/db/schema/index.ts",
-    rowSourcePath: "package/server/src/db/schema/index.ts",
+    importPath: "../../packages/server/src/db/schema/index.ts",
+    sourcePath: "packages/server/src/db/schema/index.ts",
+    rowSourcePath: "packages/server/src/db/schema/index.ts",
     tableExport: "Unit",
     rowAlias: "UnitRow",
     newRowAlias: "NewUnitRow",
@@ -18,9 +18,9 @@ const schemaModules = [
   },
   {
     packageName: "auth",
-    importPath: "../../package/auth/src/db/schema/index.ts",
-    sourcePath: "package/auth/src/db/schema/index.ts",
-    rowSourcePath: "package/auth/src/db/schema/auth.ts",
+    importPath: "../../packages/auth/src/db/schema/index.ts",
+    sourcePath: "packages/auth/src/db/schema/index.ts",
+    rowSourcePath: "packages/auth/src/db/schema/auth.ts",
     tableExport: "users",
     rowAlias: "UserRow",
     newRowAlias: "NewUserRow",
@@ -29,9 +29,9 @@ const schemaModules = [
   },
   {
     packageName: "notify",
-    importPath: "../../package/notify/src/db/schema/index.ts",
-    sourcePath: "package/notify/src/db/schema/index.ts",
-    rowSourcePath: "package/notify/src/db/schema/notifications.ts",
+    importPath: "../../packages/notify/src/db/schema/index.ts",
+    sourcePath: "packages/notify/src/db/schema/index.ts",
+    rowSourcePath: "packages/notify/src/db/schema/notifications.ts",
     tableExport: "notifications",
     rowAlias: "NotificationRow",
     newRowAlias: "NewNotificationRow",
@@ -40,9 +40,9 @@ const schemaModules = [
   },
   {
     packageName: "reaction",
-    importPath: "../../package/reaction/src/db/schema/index.ts",
-    sourcePath: "package/reaction/src/db/schema/index.ts",
-    rowSourcePath: "package/reaction/src/db/schema/reactions.ts",
+    importPath: "../../packages/reaction/src/db/schema/index.ts",
+    sourcePath: "packages/reaction/src/db/schema/index.ts",
+    rowSourcePath: "packages/reaction/src/db/schema/reactions.ts",
     tableExport: "reactions",
     rowAlias: "ReactionRow",
     newRowAlias: "NewReactionRow",
@@ -51,9 +51,9 @@ const schemaModules = [
   },
   {
     packageName: "history",
-    importPath: "../../package/history/src/db/schema/index.ts",
-    sourcePath: "package/history/src/db/schema/index.ts",
-    rowSourcePath: "package/history/src/db/schema/history.ts",
+    importPath: "../../packages/history/src/db/schema/index.ts",
+    sourcePath: "packages/history/src/db/schema/index.ts",
+    rowSourcePath: "packages/history/src/db/schema/history.ts",
     tableExport: "unitRevisions",
     rowAlias: "UnitRevisionRow",
     newRowAlias: "NewUnitRevisionRow",
@@ -62,9 +62,9 @@ const schemaModules = [
   },
   {
     packageName: "ranking",
-    importPath: "../../package/ranking/src/db/schema/index.ts",
-    sourcePath: "package/ranking/src/db/schema/index.ts",
-    rowSourcePath: "package/ranking/src/db/schema/ranking.ts",
+    importPath: "../../packages/ranking/src/db/schema/index.ts",
+    sourcePath: "packages/ranking/src/db/schema/index.ts",
+    rowSourcePath: "packages/ranking/src/db/schema/ranking.ts",
     tableExport: "unitRankProjections",
     rowAlias: "UnitRankProjectionRow",
     newRowAlias: "NewUnitRankProjectionRow",
@@ -100,7 +100,7 @@ describe("database schema public modules", () => {
     for (const schemaModule of schemaModules) {
       const manifest = JSON.parse(
         readFileSync(
-          join(repoRoot, `package/${schemaModule.packageName}/package.json`),
+          join(repoRoot, `packages/${schemaModule.packageName}/package.json`),
           "utf8",
         ),
       ) as {
@@ -114,16 +114,16 @@ describe("database schema public modules", () => {
 
   test("server exposes relations as a stable public db subpath", async () => {
     const manifest = JSON.parse(
-      readFileSync(join(repoRoot, "package/server/package.json"), "utf8"),
+      readFileSync(join(repoRoot, "packages/server/package.json"), "utf8"),
     ) as {
       exports?: Record<string, unknown>;
     };
     const dbIndexSource = readFileSync(
-      join(repoRoot, "package/server/src/db/index.ts"),
+      join(repoRoot, "packages/server/src/db/index.ts"),
       "utf8",
     );
     const publicRelations = await import(
-      "../../package/server/src/db/relations/index.ts"
+      "../../packages/server/src/db/relations/index.ts"
     );
 
     expect(Object.hasOwn(manifest.exports ?? {}, "./db/relations")).toBe(true);
@@ -135,13 +135,13 @@ describe("database schema public modules", () => {
     for (const packageName of ["notify", "reaction", "history", "ranking"]) {
       const sourceFiles = [
         ...new Bun.Glob("src/**/*.ts").scanSync({
-          cwd: join(repoRoot, "package", packageName),
+          cwd: join(repoRoot, "packages", packageName),
         }),
       ].filter((file) => !file.endsWith(".test.ts"));
 
       for (const file of sourceFiles) {
         const source = readFileSync(
-          join(repoRoot, "package", packageName, file),
+          join(repoRoot, "packages", packageName, file),
           "utf8",
         );
         expect(source).not.toContain("@prisma/client");

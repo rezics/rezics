@@ -35,7 +35,7 @@ export function isExemptPath(absPath: string): boolean {
 
 export function isExemptPackage(absPath: string): boolean {
   const relPath = toRepoRelPath(absPath);
-  const match = relPath.match(/^package\/([^/]+)/);
+  const match = relPath.match(/^packages\/([^/]+)/);
   if (!match?.[1]) return false;
   return EXEMPT_PACKAGES.has(match[1]);
 }

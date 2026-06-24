@@ -13,7 +13,7 @@ function isAllowed(relPath: string): boolean {
   return (
     /\.stories\.tsx?$/.test(relPath) ||
     /\.test\.tsx?$/.test(relPath) ||
-    relPath.startsWith("package/ui/src/mocks/")
+    relPath.startsWith("packages/ui/src/mocks/")
   );
 }
 
@@ -23,7 +23,7 @@ export const uiAutonomyRule: RuleScanner = {
 
     for (const filePath of tsAndTsxFiles) {
       const relPath = relative(REPO_ROOT, filePath);
-      if (!relPath.startsWith("package/ui/src/")) continue;
+      if (!relPath.startsWith("packages/ui/src/")) continue;
       if (isAllowed(relPath)) continue;
 
       let content: string;
@@ -50,7 +50,7 @@ export const uiAutonomyRule: RuleScanner = {
 
     try {
       const content = readFileSync(
-        join(REPO_ROOT, "package/ui/src/shadcn/index.ts"),
+        join(REPO_ROOT, "packages/ui/src/shadcn/index.ts"),
         "utf8",
       );
       const lines = content.split("\n");
@@ -58,7 +58,7 @@ export const uiAutonomyRule: RuleScanner = {
         if (/from\s+["']\.\/sections["']/.test(lines[i]!)) {
           violations.push({
             rule: "R13",
-            path: `package/ui/src/shadcn/index.ts:${i + 1}`,
+            path: `packages/ui/src/shadcn/index.ts:${i + 1}`,
             message:
               "@rezics/ui/shadcn must not re-export demo/dashboard sections from the primitive barrel",
             spec: SPEC,

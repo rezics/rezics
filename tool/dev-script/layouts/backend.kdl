@@ -1,41 +1,41 @@
 tab name="auth" focus=true {
-    pane command="task" cwd="../../../package/auth" start_suspended=false {
+    pane command="task" cwd="../../../packages/auth" start_suspended=false {
         args "dev"
     }
 }
 
 tab name="server" {
-    pane command="task" cwd="../../../package/server" start_suspended=false {
+    pane command="task" cwd="../../../packages/server" start_suspended=false {
         args "dev"
     }
 }
 
 tab name="history" {
-    pane command="task" cwd="../../../package/history" start_suspended=false {
+    pane command="task" cwd="../../../packages/history" start_suspended=false {
         args "dev"
     }
 }
 
 tab name="job-runner" {
-    pane command="task" cwd="../../../package/job-runner" start_suspended=false {
+    pane command="task" cwd="../../../packages/job-runner" start_suspended=false {
         args "dev"
     }
 }
 
 tab name="reaction" {
-    pane command="task" cwd="../../../package/reaction" start_suspended=false {
+    pane command="task" cwd="../../../packages/reaction" start_suspended=false {
         args "dev"
     }
 }
 
 tab name="ranking" {
-    pane command="task" cwd="../../../package/ranking" start_suspended=false {
+    pane command="task" cwd="../../../packages/ranking" start_suspended=false {
         args "dev"
     }
 }
 
 tab name="notify" {
-    pane command="task" cwd="../../../package/notify" start_suspended=false {
+    pane command="task" cwd="../../../packages/notify" start_suspended=false {
         args "dev"
     }
 }

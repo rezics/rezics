@@ -2,7 +2,7 @@
  * Generate barrel file for a given directory.
  *
  * Example:
- * cd tool && bun run generate-barrel "../package/ui/src/shadcn"
+ * cd tool && bun run generate-barrel "../packages/ui/src/shadcn"
  *
  * Features:
  * - Export all .ts/.tsx files in current directory (excluding index.ts)

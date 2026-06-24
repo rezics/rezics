@@ -12,7 +12,7 @@ function readJson(path: string): unknown {
 
 function contractLanguages(): string[] {
   const source = readFileSync(
-    join(REPO_ROOT, "package/contract/src/language-core.ts"),
+    join(REPO_ROOT, "packages/contract/src/language-core.ts"),
     "utf8",
   );
   const match = source.match(
@@ -43,13 +43,13 @@ export const localeParityRule: RuleScanner = {
     const langs = contractLanguages();
     const baseLocale = "en";
 
-    // 1. The shared product/admin tree lives at `package/i18n/locales/<lng>/<ns>.json`.
-    // 1. 共享的 product/admin 文案树位于 `package/i18n/locales/<lng>/<ns>.json`。
+    // 1. The shared product/admin tree lives at `packages/i18n/locales/<lng>/<ns>.json`.
+    // 1. 共享的 product/admin 文案树位于 `packages/i18n/locales/<lng>/<ns>.json`。
     const sharedRoot = I18N_LOCALES_ROOT;
     if (!existsSync(sharedRoot) || !statSync(sharedRoot).isDirectory()) {
       violations.push({
         rule: "R14",
-        path: "package/i18n/locales",
+        path: "packages/i18n/locales",
         message: "Shared i18n locale tree is missing",
         spec: SPEC,
       });
@@ -73,7 +73,7 @@ export const localeParityRule: RuleScanner = {
           violations.push({
             rule: "R14",
             path: relative(REPO_ROOT, lngDir),
-            message: `Namespace files must match package/i18n/locales/${baseLocale} (missing: ${nsDiff.missing.join(", ") || "none"}; extra: ${nsDiff.extra.join(", ") || "none"})`,
+            message: `Namespace files must match packages/i18n/locales/${baseLocale} (missing: ${nsDiff.missing.join(", ") || "none"}; extra: ${nsDiff.extra.join(", ") || "none"})`,
             spec: SPEC,
           });
         }
@@ -98,15 +98,15 @@ export const localeParityRule: RuleScanner = {
       }
     }
 
-    // 2. UI per-locale ES modules at `package/ui/locales/<lng>.ts` must mirror
+    // 2. UI per-locale ES modules at `packages/ui/locales/<lng>.ts` must mirror
     //    the English UI bundle's key set.
-    // 2. 位于 `package/ui/locales/<lng>.ts` 的各语言 UI ES 模块必须与英文 UI
+    // 2. 位于 `packages/ui/locales/<lng>.ts` 的各语言 UI ES 模块必须与英文 UI
     //    bundle 的键集合保持一致。
     const uiRoot = UI_LOCALES_ROOT;
     if (!existsSync(uiRoot)) {
       violations.push({
         rule: "R14",
-        path: "package/ui/locales",
+        path: "packages/ui/locales",
         message: "UI locale modules are missing",
         spec: SPEC,
       });

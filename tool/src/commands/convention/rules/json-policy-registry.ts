@@ -33,7 +33,7 @@ export const jsonColumnRegistry = [
     category: "enveloped",
     contractSchema: {
       symbol: "zoneBoundaryEnvelopeSchema",
-      path: "package/contract/src/zone/boundary-v1.ts",
+      path: "packages/contract/src/zone/boundary-v1.ts",
     },
   },
   {
@@ -43,8 +43,8 @@ export const jsonColumnRegistry = [
     category: "enveloped",
     contractSchema: {
       symbol: "zoneNavEnvelopeSchema",
-      path: "package/contract/src/zone/nav-v1.ts",
-      supportingPaths: ["package/contract/src/zone/menu.ts"],
+      path: "packages/contract/src/zone/nav-v1.ts",
+      supportingPaths: ["packages/contract/src/zone/menu.ts"],
     },
   },
   {
@@ -54,7 +54,7 @@ export const jsonColumnRegistry = [
     category: "enveloped",
     contractSchema: {
       symbol: "zoneThemeEnvelopeSchema",
-      path: "package/contract/src/zone/theme-v1.ts",
+      path: "packages/contract/src/zone/theme-v1.ts",
     },
   },
   {
@@ -64,8 +64,8 @@ export const jsonColumnRegistry = [
     category: "enveloped",
     contractSchema: {
       symbol: "zonePageEnvelopeSchema",
-      path: "package/contract/src/zone/page-v1.ts",
-      supportingPaths: ["package/contract/src/zone/section.ts"],
+      path: "packages/contract/src/zone/page-v1.ts",
+      supportingPaths: ["packages/contract/src/zone/section.ts"],
     },
   },
   {
@@ -75,7 +75,7 @@ export const jsonColumnRegistry = [
     category: "enveloped",
     contractSchema: {
       symbol: "realmDockEnvelopeSchema",
-      path: "package/contract/src/realm/realm-dock.ts",
+      path: "packages/contract/src/realm/realm-dock.ts",
     },
   },
   {
@@ -85,7 +85,7 @@ export const jsonColumnRegistry = [
     category: "enveloped",
     contractSchema: {
       symbol: "realmTagTreeEnvelopeSchema",
-      path: "package/contract/src/realm/realm-tag-tree.ts",
+      path: "packages/contract/src/realm/realm-tag-tree.ts",
     },
   },
   {
@@ -95,7 +95,7 @@ export const jsonColumnRegistry = [
     category: "enveloped",
     contractSchema: {
       symbol: "contentDocEnvelopeSchema",
-      path: "package/contract/src/content/doc-v1.ts",
+      path: "packages/contract/src/content/doc-v1.ts",
     },
   },
   {
@@ -105,8 +105,8 @@ export const jsonColumnRegistry = [
     category: "enveloped",
     contractSchema: {
       symbol: "persistedContentDocSchema",
-      path: "package/contract/src/json-column.ts",
-      supportingPaths: ["package/contract/src/content/doc-v1.ts"],
+      path: "packages/contract/src/json-column.ts",
+      supportingPaths: ["packages/contract/src/content/doc-v1.ts"],
     },
   },
   {
@@ -116,7 +116,7 @@ export const jsonColumnRegistry = [
     category: "enveloped",
     contractSchema: {
       symbol: "contentDocEnvelopeSchema",
-      path: "package/contract/src/content/doc-v1.ts",
+      path: "packages/contract/src/content/doc-v1.ts",
     },
   },
   {
@@ -126,7 +126,7 @@ export const jsonColumnRegistry = [
     category: "enveloped",
     contractSchema: {
       symbol: "contentDocEnvelopeSchema",
-      path: "package/contract/src/content/doc-v1.ts",
+      path: "packages/contract/src/content/doc-v1.ts",
     },
   },
   {
@@ -291,7 +291,7 @@ function compat(
     category: "compat",
     contractSchema: {
       symbol,
-      path: "package/contract/src/json-column.ts",
+      path: "packages/contract/src/json-column.ts",
     },
   };
 }

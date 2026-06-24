@@ -7,7 +7,7 @@ import {
   ZONE_NAV_SCHEMA,
   ZONE_PAGE_SCHEMA,
   ZONE_THEME_SCHEMA,
-} from "../../../../package/contract/src/zone";
+} from "../../../../packages/contract/src/zone";
 
 export type EnvelopeBackfillSpec = {
   schemaName: string;

@@ -7,7 +7,7 @@
 # --- build stage -----------------------------------------------------------
 ARG BASE_IMAGE=rezics-base:dev
 FROM ${BASE_IMAGE} AS build
-WORKDIR /repo/package/notify
+WORKDIR /repo/packages/notify
 
 ENV NOTIFY_DATABASE_URL="postgresql://build:build@localhost:5432/build"
 # Compile the linux-x64 binary inline (mirrors `task notify:build:linux`).
@@ -22,7 +22,7 @@ RUN apt-get update \
   && useradd --system --uid 10001 --no-create-home rezics
 WORKDIR /app
 
-COPY --from=build /repo/package/notify/notify /app/notify
+COPY --from=build /repo/packages/notify/notify /app/notify
 
 USER rezics
 ENV PORT=3000

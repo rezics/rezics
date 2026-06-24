@@ -5,7 +5,7 @@ import { DB_SCHEMA_PACKAGES } from "../src/commands/db/packages";
 
 const repoRoot = new URL("../..", import.meta.url).pathname;
 const serverDrizzleDir = new URL(
-  "../../package/server/drizzle",
+  "../../packages/server/drizzle",
   import.meta.url,
 ).pathname;
 
@@ -16,7 +16,7 @@ function readMigration(dirName: string): string {
 describe("server Drizzle migration artifacts", () => {
   test("each schema owner has one generated baseline artifact", () => {
     for (const packageName of DB_SCHEMA_PACKAGES) {
-      const drizzleDir = join(repoRoot, "package", packageName, "drizzle");
+      const drizzleDir = join(repoRoot, "packages", packageName, "drizzle");
       const migrationDirs = readdirSync(drizzleDir, { withFileTypes: true })
         .filter((entry) => entry.isDirectory())
         .map((entry) => entry.name)

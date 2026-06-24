@@ -11,14 +11,14 @@ describe("folder naming convention checks", () => {
   test("allows file-router segment folders under app routes", () => {
     expect(
       scanFolderNamingForTest([
-        abs("package/app/src/routes/_mainLayout/z/$slug/page"),
+        abs("packages/app/src/routes/_mainLayout/z/$slug/page"),
       ]),
     ).toEqual([]);
   });
 
   test("still rejects singular container names outside routes", () => {
     expect(
-      scanFolderNamingForTest([abs("package/app/src/zone/page")]).map(
+      scanFolderNamingForTest([abs("packages/app/src/zone/page")]).map(
         (violation) => violation.rule,
       ),
     ).toContain("R3");

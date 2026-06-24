@@ -17,7 +17,7 @@ async function runTool(args: string[]) {
 }
 
 async function runUtilsCli(args: string[]) {
-  const proc = Bun.spawn(["bun", "run", "package/utils/bin/cli.ts", ...args], {
+  const proc = Bun.spawn(["bun", "run", "packages/utils/bin/cli.ts", ...args], {
     cwd: REPO_ROOT,
     stdout: "pipe",
     stderr: "pipe",

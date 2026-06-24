@@ -1,11 +1,11 @@
 tab name="app" {
-    pane command="task" cwd="../../../package/app" start_suspended=false {
+    pane command="task" cwd="../../../packages/app" start_suspended=false {
         args "dev"
     }
 }
 
 tab name="admin" {
-    pane command="task" cwd="../../../package/admin" start_suspended=false {
+    pane command="task" cwd="../../../packages/admin" start_suspended=false {
         args "dev"
     }
 }

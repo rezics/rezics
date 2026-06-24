@@ -10,7 +10,7 @@ function readJson(path: string): Record<string, unknown> {
 
 function contractLanguages(): string[] {
   const source = readFileSync(
-    join(REPO_ROOT, "package/contract/src/language-core.ts"),
+    join(REPO_ROOT, "packages/contract/src/language-core.ts"),
     "utf8",
   );
   const match = source.match(
@@ -30,11 +30,11 @@ describe("frontend i18n catalog parity", () => {
   ] as const)("%s locales match contract languages and message keys", (packageName) => {
     const languages = contractLanguages();
     const settings = readJson(
-      join(REPO_ROOT, `package/${packageName}/project.inlang/settings.json`),
+      join(REPO_ROOT, `packages/${packageName}/project.inlang/settings.json`),
     ) as { locales: string[] };
     expect(settings.locales).toEqual(languages);
 
-    const messagesDir = join(REPO_ROOT, `package/${packageName}/messages`);
+    const messagesDir = join(REPO_ROOT, `packages/${packageName}/messages`);
     const baseKeys = Object.keys(readJson(join(messagesDir, "en.json")));
 
     for (const language of languages) {

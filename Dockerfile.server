@@ -8,7 +8,7 @@
 # --- build stage -----------------------------------------------------------
 ARG BASE_IMAGE=rezics-base:dev
 FROM ${BASE_IMAGE} AS build
-WORKDIR /repo/package/server
+WORKDIR /repo/packages/server
 
 # Compile the linux-x64 binary inline (mirrors `task server:build:linux`).
 RUN bun build src/cluster.ts --compile --minify-whitespace --minify-syntax \
@@ -22,7 +22,7 @@ RUN apt-get update \
   && useradd --system --uid 10001 --no-create-home rezics
 WORKDIR /app
 
-COPY --from=build /repo/package/server/server /app/server
+COPY --from=build /repo/packages/server/server /app/server
 
 USER rezics
 ENV PORT=3000

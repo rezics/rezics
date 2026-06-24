@@ -1,29 +1,29 @@
 version: "3"
 
 includes:
-  app: { taskfile: ./package/app/Taskfile.yml, dir: ./package/app }
-  admin: { taskfile: ./package/admin/Taskfile.yml, dir: ./package/admin }
-  about: { taskfile: ./package/about/Taskfile.yml, dir: ./package/about }
-  api: { taskfile: ./package/api/Taskfile.yml, dir: ./package/api }
-  auth: { taskfile: ./package/auth/Taskfile.yml, dir: ./package/auth }
+  app: { taskfile: ./packages/app/Taskfile.yml, dir: ./packages/app }
+  admin: { taskfile: ./packages/admin/Taskfile.yml, dir: ./packages/admin }
+  about: { taskfile: ./packages/about/Taskfile.yml, dir: ./packages/about }
+  api: { taskfile: ./packages/api/Taskfile.yml, dir: ./packages/api }
+  auth: { taskfile: ./packages/auth/Taskfile.yml, dir: ./packages/auth }
   contract:
-    { taskfile: ./package/contract/Taskfile.yml, dir: ./package/contract }
-  edge: { taskfile: ./package/edge/Taskfile.yml, dir: ./package/edge }
-  editor: { taskfile: ./package/editor/Taskfile.yml, dir: ./package/editor }
-  folio: { taskfile: ./package/folio/Taskfile.yml, dir: ./package/folio }
-  history: { taskfile: ./package/history/Taskfile.yml, dir: ./package/history }
-  job: { taskfile: ./package/job/Taskfile.yml, dir: ./package/job }
+    { taskfile: ./packages/contract/Taskfile.yml, dir: ./packages/contract }
+  edge: { taskfile: ./packages/edge/Taskfile.yml, dir: ./packages/edge }
+  editor: { taskfile: ./packages/editor/Taskfile.yml, dir: ./packages/editor }
+  folio: { taskfile: ./packages/folio/Taskfile.yml, dir: ./packages/folio }
+  history: { taskfile: ./packages/history/Taskfile.yml, dir: ./packages/history }
+  job: { taskfile: ./packages/job/Taskfile.yml, dir: ./packages/job }
   job-runner:
-    { taskfile: ./package/job-runner/Taskfile.yml, dir: ./package/job-runner }
-  notify: { taskfile: ./package/notify/Taskfile.yml, dir: ./package/notify }
-  preview: { taskfile: ./package/preview/Taskfile.yml, dir: ./package/preview }
-  ranking: { taskfile: ./package/ranking/Taskfile.yml, dir: ./package/ranking }
+    { taskfile: ./packages/job-runner/Taskfile.yml, dir: ./packages/job-runner }
+  notify: { taskfile: ./packages/notify/Taskfile.yml, dir: ./packages/notify }
+  preview: { taskfile: ./packages/preview/Taskfile.yml, dir: ./packages/preview }
+  ranking: { taskfile: ./packages/ranking/Taskfile.yml, dir: ./packages/ranking }
   reaction:
-    { taskfile: ./package/reaction/Taskfile.yml, dir: ./package/reaction }
-  search: { taskfile: ./package/search/Taskfile.yml, dir: ./package/search }
-  server: { taskfile: ./package/server/Taskfile.yml, dir: ./package/server }
-  ui: { taskfile: ./package/ui/Taskfile.yml, dir: ./package/ui }
-  utils: { taskfile: ./package/utils/Taskfile.yml, dir: ./package/utils }
+    { taskfile: ./packages/reaction/Taskfile.yml, dir: ./packages/reaction }
+  search: { taskfile: ./packages/search/Taskfile.yml, dir: ./packages/search }
+  server: { taskfile: ./packages/server/Taskfile.yml, dir: ./packages/server }
+  ui: { taskfile: ./packages/ui/Taskfile.yml, dir: ./packages/ui }
+  utils: { taskfile: ./packages/utils/Taskfile.yml, dir: ./packages/utils }
 
 tasks:
   default:

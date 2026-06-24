@@ -29,5 +29,5 @@ function patch(path: string, lang: "en" | "zh") {
   console.log(`${path}: +${added} keys`);
 }
 
-patch("package/i18n/locales/en/community.json", "en");
-patch("package/i18n/locales/zh-hant/community.json", "zh");
+patch("packages/i18n/locales/en/community.json", "en");
+patch("packages/i18n/locales/zh-hant/community.json", "zh");

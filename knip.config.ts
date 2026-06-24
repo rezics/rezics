@@ -31,10 +31,10 @@ const config: KnipConfig = {
     },
     // CLI entry scripts invoked by the Taskfile, not by any package.json
     // script — declare them so knip keeps them and their imports.
-    "package/job-runner": {
+    "packages/job-runner": {
       entry: ["src/index.ts", "scripts/ensure-job-db.ts"],
     },
-    "package/utils": {
+    "packages/utils": {
       entry: ["src/index.ts", "bin/cli.ts"],
     },
   },

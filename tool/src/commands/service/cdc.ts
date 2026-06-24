@@ -5,7 +5,7 @@ import { Client } from "pg";
 import {
   REACTION_SEQUIN_TABLES,
   SOURCE_SEQUIN_TABLES,
-} from "../../../../package/job/src/sequin/manifest";
+} from "../../../../packages/job/src/sequin/manifest";
 
 const TOOL_DIR = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -15,7 +15,7 @@ const REPO_ROOT = path.resolve(TOOL_DIR, "..");
 
 loadDotenv({ path: path.join(TOOL_DIR, ".env"), override: false, quiet: true });
 loadDotenv({
-  path: path.join(REPO_ROOT, "package/job-runner/.env"),
+  path: path.join(REPO_ROOT, "packages/job-runner/.env"),
   override: false,
   quiet: true,
 });

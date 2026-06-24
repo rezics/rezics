@@ -82,8 +82,8 @@ export const folderNamingRule: RuleScanner = {
       if (isExemptPath(dirPath)) continue;
       if (isExemptPackage(dirPath)) continue;
       const relPath = relative(REPO_ROOT, dirPath);
-      if (!/^package\/[^/]+\/(src|docs)/.test(relPath)) continue;
-      if (/^package\/[^/]+\/(src|docs)$/.test(relPath)) continue;
+      if (!/^packages\/[^/]+\/(src|docs)/.test(relPath)) continue;
+      if (/^packages\/[^/]+\/(src|docs)$/.test(relPath)) continue;
       if (isFileRouterSegmentPath(relPath)) continue;
 
       const name = basename(dirPath);
@@ -116,7 +116,7 @@ export const folderNamingRule: RuleScanner = {
 };
 
 function isFileRouterSegmentPath(relPath: string): boolean {
-  return /^package\/(app|admin)\/src\/routes(?:\/|$)/.test(relPath);
+  return /^packages\/(app|admin)\/src\/routes(?:\/|$)/.test(relPath);
 }
 
 export function scanFolderNamingForTest(folderPaths: string[]): Violation[] {

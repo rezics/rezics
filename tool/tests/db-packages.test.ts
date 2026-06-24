@@ -63,7 +63,7 @@ describe("db package registry", () => {
 
   test("schema owners pin the selected Drizzle rc pair where Drizzle is used", () => {
     for (const packageName of DB_SCHEMA_PACKAGES) {
-      const manifest = readPackageJson(`package/${packageName}/package.json`);
+      const manifest = readPackageJson(`packages/${packageName}/package.json`);
 
       expect(manifest.devDependencies?.["drizzle-kit"]).toBe("1.0.0-rc.3");
       expect(manifest.dependencies?.["drizzle-orm"]).toBe("1.0.0-rc.3");
@@ -74,7 +74,7 @@ describe("db package registry", () => {
 
   test("Drizzle Kit is declared only by schema owners", () => {
     const packageDirs = [
-      ...new Bun.Glob("package/*/package.json").scanSync({ cwd: repoRoot }),
+      ...new Bun.Glob("packages/*/package.json").scanSync({ cwd: repoRoot }),
     ];
     const owners = packageDirs
       .filter((packageJsonPath) => {
@@ -94,7 +94,7 @@ describe("db preflight configuration", () => {
       resolveDbConnectionUrl(
         "server",
         { DATABASE_URL: "postgresql://process/server" } as never,
-        { DATABASE_URL: "postgresql://package/server" },
+        { DATABASE_URL: "postgresql://packages/server" },
       ),
     ).toBe("postgresql://process/server");
   });
@@ -104,9 +104,9 @@ describe("db preflight configuration", () => {
       resolveDbConnectionUrl(
         "reaction",
         {},
-        { REACTION_DATABASE_URL: "postgresql://package/reaction" },
+        { REACTION_DATABASE_URL: "postgresql://packages/reaction" },
       ),
-    ).toBe("postgresql://package/reaction");
+    ).toBe("postgresql://packages/reaction");
   });
 
   test("rejects malformed database URLs before connecting", () => {
