@@ -3,7 +3,12 @@ import { proxyPreviewRequest } from "./preview-proxy";
 
 describe("edge preview proxy", () => {
   test("forwards requests to preview with internal secret", async () => {
-    const fetchImpl = mock(async () => new Response("<html></html>"));
+    const fetchImpl = mock(
+      async (
+        _input: Parameters<typeof fetch>[0],
+        _init?: Parameters<typeof fetch>[1],
+      ) => new Response("<html></html>"),
+    );
 
     const response = await proxyPreviewRequest(
       new Request("https://rezics.com/book/book-1?lang=en"),
@@ -27,9 +32,14 @@ describe("edge preview proxy", () => {
       new Request("https://rezics.com/book/book-1"),
       { PREVIEW_BASE_URL: "https://preview.internal" },
       {
-        fetchImpl: mock(async () => {
-          throw new Error("network");
-        }) as unknown as typeof fetch,
+        fetchImpl: mock(
+          async (
+            _input: Parameters<typeof fetch>[0],
+            _init?: Parameters<typeof fetch>[1],
+          ) => {
+            throw new Error("network");
+          },
+        ) as unknown as typeof fetch,
       },
     );
 
