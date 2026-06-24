@@ -5,7 +5,6 @@
   "license": "AGPL-3.0-only",
   "packageManager": "bun@1.3.13",
   "scripts": {
-    "postinstall": "lefthook install || true",
     "format": "task format",
     "format:check": "task format:check",
     "lint": "task lint",
@@ -32,7 +31,6 @@
     "babel-plugin-react-compiler": "^1.0.0",
     "concurrently": "^9",
     "knip": "^5.85.0",
-    "lefthook": "^2.1.6",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "storybook": "^10.3.6",

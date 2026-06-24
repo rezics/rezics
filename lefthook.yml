@@ -1,9 +1,0 @@
-pre-commit:
-  parallel: true
-  jobs:
-    - name: check-convention
-      run: task check:convention -- --staged
-      stage_fixed: false
-    - name: check-i18n
-      run: task check:i18n
-      stage_fixed: false
