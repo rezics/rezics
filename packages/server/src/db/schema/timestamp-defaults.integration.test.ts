@@ -22,7 +22,7 @@ const historyPool = new Pool({
   connectionString: readEnv("packages/backend/.env", "HISTORY_DATABASE_URL"),
 });
 const rankingPool = new Pool({
-  connectionString: readEnv("packages/ranking/.env", "RANKING_DATABASE_URL"),
+  connectionString: readEnv("packages/backend/.env", "RANKING_DATABASE_URL"),
 });
 
 function uuid() {

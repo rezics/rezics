@@ -13,7 +13,6 @@
     { "path": "./packages/job" },
     { "path": "./packages/job-runner" },
     { "path": "./packages/jwt" },
-    { "path": "./packages/ranking" },
     { "path": "./packages/search" },
     { "path": "./packages/server" },
     { "path": "./packages/shared" },

@@ -33,6 +33,15 @@ tasks:
   notify:db:studio:
     desc: Open Notify Drizzle Studio
     cmd: bun drizzle-kit studio --config drizzle.notify.config.ts
+  ranking:db:generate:
+    desc: Generate Ranking Drizzle migrations
+    cmd: bun drizzle-kit generate --config drizzle.ranking.config.ts
+  ranking:db:migrate:
+    desc: Apply Ranking Drizzle migrations
+    cmd: bun drizzle-kit migrate --config drizzle.ranking.config.ts
+  ranking:db:studio:
+    desc: Open Ranking Drizzle Studio
+    cmd: bun drizzle-kit studio --config drizzle.ranking.config.ts
   reaction:db:generate:
     desc: Generate Reaction Drizzle migrations
     cmd: bun drizzle-kit generate --config drizzle.reaction.config.ts

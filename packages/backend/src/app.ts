@@ -4,6 +4,7 @@ import { createHistoryApp } from "./history/app";
 import { createNotifyApp } from "./notify/app";
 import { createPreviewApp } from "./preview/app";
 import { bookApi as previewBookRoutes } from "./preview/book/book.api";
+import { createRankingApp } from "./ranking/app";
 import { createReactionApp } from "./reaction/app";
 
 export const INTERNAL_SERVICE_PREFIX = "/__services";
@@ -64,12 +65,11 @@ type ServiceAppFactory = (
 
 const appFactories = {
   auth: ["@rezics/auth/app", "createAuthApp"],
-  ranking: ["@rezics/ranking/app", "createRankingApp"],
   server: ["@rezics/server/app", "createServerApp"],
 } as const satisfies Record<
   Exclude<
     BackendMountedService,
-    "history" | "notify" | "preview" | "reaction"
+    "history" | "notify" | "preview" | "ranking" | "reaction"
   >,
   readonly [string, string]
 >;
@@ -106,7 +106,7 @@ async function loadServerAppFactory(): Promise<ServerAppFactory> {
 async function loadServiceAppFactory(
   service: Exclude<
     BackendMountedService,
-    "history" | "notify" | "preview" | "reaction" | "server"
+    "history" | "notify" | "preview" | "ranking" | "reaction" | "server"
   >,
 ): Promise<ServiceAppFactory> {
   const [specifier, exportName] = appFactories[service];
@@ -134,9 +134,8 @@ export async function createBackendApp(options: CreateBackendAppOptions = {}) {
   });
   const app = server.app;
 
-  const [createAuthApp, createRankingApp] = await Promise.all([
+  const [createAuthApp] = await Promise.all([
     loadServiceAppFactory("auth"),
-    loadServiceAppFactory("ranking"),
   ]);
 
   const [auth, notify, reaction, history, ranking] = await Promise.all([
