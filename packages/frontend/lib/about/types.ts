@@ -1,4 +1,4 @@
-import type { AboutPageId } from "./locales";
+import type { AboutContentPageId } from "./locales";
 
 export type ContentSection = {
   eyebrow: string;
@@ -58,7 +58,7 @@ export type BaseAboutPageCopy = {
 };
 
 export type HomePageCopy = BaseAboutPageCopy & {
-  primaryCtaPage: AboutPageId;
+  primaryCtaPage: AboutContentPageId;
 };
 
 export type ProductPageCopy = BaseAboutPageCopy & {

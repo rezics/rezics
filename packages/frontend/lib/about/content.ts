@@ -1,4 +1,4 @@
-import { ABOUT_PAGES, type AboutLocale, type AboutPageId } from "./locales";
+import { ABOUT_CONTENT_PAGES, type AboutLocale } from "./locales";
 import deCommon from "./content/locale/de/common.json";
 import deHome from "./content/locale/de/home.json";
 import deProduct from "./content/locale/de/product.json";
@@ -30,7 +30,10 @@ import type {
 export const ABOUT_MARKDOWN_FRAGMENTS = {
   home: ["hero", "closing"],
   product: ["hero", "closing"],
-} as const satisfies Record<AboutPageId, readonly MarkdownFragmentSlug[]>;
+} as const satisfies Record<
+  keyof AboutPageCopyByPage,
+  readonly MarkdownFragmentSlug[]
+>;
 
 const commonCopyByLocale = {
   "zh-hant": zhHantCommon,
@@ -62,9 +65,12 @@ const productCopyByLocale = {
 const pageCopyByPage = {
   home: homeCopyByLocale,
   product: productCopyByLocale,
-} as const satisfies Record<AboutPageId, Record<AboutLocale, unknown>>;
+} as const satisfies Record<
+  keyof AboutPageCopyByPage,
+  Record<AboutLocale, unknown>
+>;
 
-const ABOUT_PAGE_SET = new Set<string>(ABOUT_PAGES);
+const ABOUT_PAGE_SET = new Set<string>(ABOUT_CONTENT_PAGES);
 const PRODUCT_STATUS_SET = new Set<string>([
   "available",
   "preview",
@@ -111,7 +117,7 @@ export function getProductPageCopy(locale: AboutLocale): ProductPageCopy {
   return asProductPageCopy(locale, productCopyByLocale[locale]);
 }
 
-export function getPageCopy<Page extends AboutPageId>(
+export function getPageCopy<Page extends keyof AboutPageCopyByPage>(
   locale: AboutLocale,
   page: Page,
 ): AboutPageCopyByPage[Page] {

@@ -12,13 +12,24 @@ export type AboutLocale = (typeof ABOUT_LOCALES)[number];
 export const DEFAULT_LOCALE: AboutLocale = "zh-hant";
 export const FALLBACK_LOCALE: AboutLocale = "en";
 
-export const ABOUT_PAGES = ["home", "product"] as const;
+export const ABOUT_CONTENT_PAGES = ["home", "product"] as const;
+export const ABOUT_LIBRARY_PAGES = ["game", "media"] as const;
+
+export type AboutContentPageId = (typeof ABOUT_CONTENT_PAGES)[number];
+export type AboutLibraryPageId = (typeof ABOUT_LIBRARY_PAGES)[number];
+
+export const ABOUT_PAGES = [
+  ...ABOUT_CONTENT_PAGES,
+  ...ABOUT_LIBRARY_PAGES,
+] as const;
 
 export type AboutPageId = (typeof ABOUT_PAGES)[number];
 
 export const ABOUT_PAGE_PATHS = {
   home: "",
   product: "product",
+  game: "game",
+  media: "media",
 } as const satisfies Record<AboutPageId, string>;
 
 export const ABOUT_SITE_ORIGIN = "https://about.rezics.com";
