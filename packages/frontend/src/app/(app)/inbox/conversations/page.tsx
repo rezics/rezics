@@ -1,8 +1,8 @@
 "use client";
 
-import { useT } from "@/lib/i18n/locale";
 import { MessageSquareIcon } from "lucide-react";
 import { useState } from "react";
+import { useT } from "@/lib/i18n/locale";
 
 /**
  * Mobile (<640px):
@@ -45,7 +45,7 @@ import { useState } from "react";
  * 空状态时显示占位提示。
  */
 
-interface ConversationThread {
+export interface ConversationThread {
   readonly id: string;
   readonly participantName: string;
   readonly participantInitial: string;
@@ -58,11 +58,14 @@ interface ConversationThread {
 // API 连接前的占位数据
 const PLACEHOLDER_CONVERSATIONS: readonly ConversationThread[] = [];
 
-export default function ConversationsPage() {
+export function ConversationsContent({
+  initialConversations = PLACEHOLDER_CONVERSATIONS,
+}: {
+  readonly initialConversations?: readonly ConversationThread[];
+} = {}) {
   const [t] = useT();
-  const [conversations] = useState<readonly ConversationThread[]>(
-    PLACEHOLDER_CONVERSATIONS,
-  );
+  const [conversations] =
+    useState<readonly ConversationThread[]>(initialConversations);
 
   if (conversations.length === 0) {
     return (
@@ -79,7 +82,7 @@ export default function ConversationsPage() {
   }
 
   return (
-    <ul className="divide-border w-full divide-y" role="list">
+    <ul className="divide-border w-full divide-y">
       {conversations.map((thread) => (
         <li
           className={`flex gap-3 px-2 py-3 ${thread.unread ? "bg-accent/40" : ""}`}
@@ -94,7 +97,9 @@ export default function ConversationsPage() {
           {/* Name + preview — truncates when narrow */}
           {/* 名称 + 预览 — 窄屏时截断 */}
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <span className={`truncate text-sm ${thread.unread ? "font-semibold" : "font-medium"}`}>
+            <span
+              className={`truncate text-sm ${thread.unread ? "font-semibold" : "font-medium"}`}
+            >
               {thread.participantName}
             </span>
             <span className="text-muted-foreground min-w-0 truncate text-xs">
@@ -111,4 +116,8 @@ export default function ConversationsPage() {
       ))}
     </ul>
   );
+}
+
+export default function ConversationsPage() {
+  return <ConversationsContent />;
 }

@@ -15,6 +15,15 @@ import { useT } from "@/lib/i18n/locale";
 import { SearchIcon } from "lucide-react";
 import { useState } from "react";
 
+export interface AdminRealmRow {
+  readonly id: string;
+  readonly name: string;
+  readonly slug: string;
+  readonly members: string;
+  readonly posts: string;
+  readonly created: string;
+}
+
 /**
  * Mobile (<640px):
  * +-----------------------------+
@@ -51,9 +60,17 @@ import { useState } from "react";
  * 当前为占位实现，待 API 接入后填充。
  */
 
-function AdminRealmsContent() {
+export function AdminRealmsContent({
+  rows = [],
+  disabled = false,
+  initialQuery = "",
+}: {
+  readonly rows?: readonly AdminRealmRow[];
+  readonly disabled?: boolean;
+  readonly initialQuery?: string;
+}) {
   const [t] = useT();
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
 
   return (
     <div className="space-y-4">
@@ -63,6 +80,7 @@ function AdminRealmsContent() {
         <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
         <Input
           className="pl-10"
+          disabled={disabled}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t.admin.searchRealms}
           type="search"
@@ -81,15 +99,25 @@ function AdminRealmsContent() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {/* Placeholder empty state — rows populated once API connected */}
-          {/* 占位空状态 — API 接入后填充行数据 */}
-          <TableRow>
-            <TableCell colSpan={5}>
-              <p className="text-muted-foreground py-8 text-center text-sm">
-                {t.admin.noData}
-              </p>
-            </TableCell>
-          </TableRow>
+          {rows.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5}>
+                <p className="text-muted-foreground py-8 text-center text-sm">
+                  {t.admin.noData}
+                </p>
+              </TableCell>
+            </TableRow>
+          ) : (
+            rows.map((row) => (
+              <TableRow key={row.id}>
+                <TableCell className="max-w-44 truncate">{row.name}</TableCell>
+                <TableCell className="max-w-52 truncate">{row.slug}</TableCell>
+                <TableCell>{row.members}</TableCell>
+                <TableCell className="hidden sm:table-cell">{row.posts}</TableCell>
+                <TableCell className="hidden lg:table-cell">{row.created}</TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
     </div>

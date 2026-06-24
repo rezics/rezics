@@ -1,13 +1,13 @@
 "use client";
 
+import { ArrowLeftIcon, UploadIcon } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 import { PortableTextEditor } from "@/components/shared/PortableTextEditor";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useT } from "@/lib/i18n/locale";
-import { ArrowLeftIcon, UploadIcon } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
 
 /**
  * Mobile (<640px):
@@ -66,11 +66,19 @@ import { useState } from "react";
  * 图书元数据编辑器：标题、ISBN、封面上传、描述（富文本）。
  * 使用 (editor) layout（无侧栏/底部导航）。
  */
-export default function EditBookPage() {
+export function EditBookEditor({
+  initialDescription = "",
+  initialIsbn = "",
+  initialTitle = "",
+}: {
+  readonly initialDescription?: string;
+  readonly initialIsbn?: string;
+  readonly initialTitle?: string;
+} = {}) {
   const [t] = useT();
-  const [title, setTitle] = useState("");
-  const [isbn, setIsbn] = useState("");
-  const [description, setDescription] = useState("");
+  const [title, setTitle] = useState(initialTitle);
+  const [isbn, setIsbn] = useState(initialIsbn);
+  const [description, setDescription] = useState(initialDescription);
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
@@ -132,13 +140,14 @@ export default function EditBookPage() {
         <Field>
           <FieldLabel>{t.editor.bookDescription}</FieldLabel>
           <div className="border-input min-h-48 rounded-md border p-4">
-            <PortableTextEditor
-              onChange={setDescription}
-              value={description}
-            />
+            <PortableTextEditor onChange={setDescription} value={description} />
           </div>
         </Field>
       </div>
     </div>
   );
+}
+
+export default function EditBookPage() {
+  return <EditBookEditor />;
 }

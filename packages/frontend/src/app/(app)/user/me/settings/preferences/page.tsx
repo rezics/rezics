@@ -1,7 +1,14 @@
 "use client";
 
+import { createListCollection } from "@ark-ui/react/select";
+import { type FormEvent, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -11,8 +18,6 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
 import { useT } from "@/lib/i18n/locale";
-import { createListCollection } from "@ark-ui/react/select";
-import { type FormEvent, useMemo, useState } from "react";
 
 /**
  * Mobile (<640px):
@@ -38,11 +43,19 @@ import { type FormEvent, useMemo, useState } from "react";
  * Ultra-wide (>=1536px):
  * 与 Desktop 一致。
  */
-export default function SettingsPreferencesPage() {
+export function SettingsPreferencesContent({
+  initialContentRating = "general",
+  initialLanguage = "en",
+  initialTheme = "system",
+}: {
+  readonly initialContentRating?: string;
+  readonly initialLanguage?: string;
+  readonly initialTheme?: string;
+} = {}) {
   const [t] = useT();
-  const [language, setLanguage] = useState(["en"]);
-  const [theme, setTheme] = useState(["system"]);
-  const [contentRating, setContentRating] = useState(["general"]);
+  const [language, setLanguage] = useState([initialLanguage]);
+  const [theme, setTheme] = useState([initialTheme]);
+  const [contentRating, setContentRating] = useState([initialContentRating]);
   const [saving, setSaving] = useState(false);
 
   const languageCollection = useMemo(
@@ -108,9 +121,7 @@ export default function SettingsPreferencesPage() {
           <CardHeader title={t.settings.preferences} />
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">
-                {t.settings.language}
-              </label>
+              <span className="text-sm font-medium">{t.settings.language}</span>
               <Select
                 collection={languageCollection}
                 onValueChange={(detail) => setLanguage(detail.value)}
@@ -129,9 +140,7 @@ export default function SettingsPreferencesPage() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">
-                {t.settings.theme}
-              </label>
+              <span className="text-sm font-medium">{t.settings.theme}</span>
               <Select
                 collection={themeCollection}
                 onValueChange={(detail) => setTheme(detail.value)}
@@ -150,9 +159,9 @@ export default function SettingsPreferencesPage() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">
+              <span className="text-sm font-medium">
                 {t.settings.contentRating}
-              </label>
+              </span>
               <p className="text-muted-foreground text-xs">
                 {t.settings.contentRatingDescription}
               </p>
@@ -183,4 +192,8 @@ export default function SettingsPreferencesPage() {
       </Card>
     </div>
   );
+}
+
+export default function SettingsPreferencesPage() {
+  return <SettingsPreferencesContent />;
 }

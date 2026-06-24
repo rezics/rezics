@@ -9,26 +9,23 @@ import { useT } from "@/lib/i18n/locale";
 import { useAtomSuspense } from "@effect/atom-react";
 import { MessageSquareIcon } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useState, type ComponentProps } from "react";
 
-function DiscussionListInner({ bookId }: { readonly bookId: string }) {
+type BookDiscussionPost = ComponentProps<typeof PostCard>["post"];
+
+export function BookDiscussionListView({
+  items,
+  total,
+  offset,
+  onLoadMore,
+}: {
+  readonly items: readonly BookDiscussionPost[];
+  readonly total: number;
+  readonly offset: number;
+  readonly onLoadMore: () => void;
+}) {
   const [t] = useT();
-  const [offset, setOffset] = useState(0);
-
-  const args: PostListArgs = {
-    parentUnitId: bookId,
-    kind: "discussion",
-    limit: PAGE_SIZE,
-    offset,
-  };
-
-  const result = useAtomSuspense(postListQuery(args));
-  const { items, total } = result.value;
   const hasMore = offset + PAGE_SIZE < total;
-
-  const handleLoadMore = useCallback(() => {
-    setOffset((prev) => prev + PAGE_SIZE);
-  }, []);
 
   if (items.length === 0 && offset === 0) {
     return (
@@ -42,11 +39,38 @@ function DiscussionListInner({ bookId }: { readonly bookId: string }) {
 
   return (
     <PagedList
-      items={items}
-      renderItem={(post) => <PostCard key={post.unitId} post={post} />}
-      hasMore={hasMore}
-      onLoadMore={handleLoadMore}
       emptyMessage={t.book.emptyDiscussion}
+      hasMore={hasMore}
+      items={items}
+      onLoadMore={onLoadMore}
+      renderItem={(post) => <PostCard key={post.unitId} post={post} />}
+    />
+  );
+}
+
+function DiscussionListInner({ bookId }: { readonly bookId: string }) {
+  const [offset, setOffset] = useState(0);
+
+  const args: PostListArgs = {
+    parentUnitId: bookId,
+    kind: "discussion",
+    limit: PAGE_SIZE,
+    offset,
+  };
+
+  const result = useAtomSuspense(postListQuery(args));
+  const { items, total } = result.value;
+
+  const handleLoadMore = useCallback(() => {
+    setOffset((prev) => prev + PAGE_SIZE);
+  }, []);
+
+  return (
+    <BookDiscussionListView
+      items={items}
+      offset={offset}
+      onLoadMore={handleLoadMore}
+      total={total}
     />
   );
 }

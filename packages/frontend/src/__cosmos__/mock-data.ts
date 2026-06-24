@@ -1,8 +1,6 @@
 // Realistic mock data factories for React Cosmos fixtures.
 // All dates are fixed strings for deterministic rendering.
 
-const FIXED_NOW = "2025-06-20T12:00:00.000Z";
-
 export function mockPost(overrides: Partial<MockPost> = {}): MockPost {
   return {
     unitId: "post-001",

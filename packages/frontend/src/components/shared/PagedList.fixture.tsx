@@ -1,6 +1,7 @@
 "use client";
 
 import { mockPost, mockPostLong, mockPostLocked, mockPostMinimal } from "@/__cosmos__/mock-data";
+import { useState } from "react";
 import { PagedList } from "./PagedList";
 
 const fiveItems = [
@@ -12,12 +13,39 @@ const fiveItems = [
 ];
 
 const oneItem = [mockPost()];
+const longItems = [
+  mockPostLong({
+    unitId: "post-overflow-1",
+    title:
+      "Singleunbrokenidentifierthatshouldnotforcehorizontaloverflowinsidepagedlistrows",
+  }),
+  mockPost({
+    unitId: "post-overflow-2",
+    title:
+      "A compact row with mixed English and 中文标题 plus 1234567890 to exercise dense wrapping.",
+  }),
+];
 
 function renderPost(post: { unitId: string; title: string | null }) {
   return (
     <div key={post.unitId} className="px-4 py-3">
       <span className="text-sm">{post.title ?? "(no title)"}</span>
     </div>
+  );
+}
+
+function StatefulLoadMore() {
+  const [count, setCount] = useState(2);
+  const visibleItems = fiveItems.slice(0, count);
+
+  return (
+    <PagedList
+      emptyMessage="No posts found."
+      hasMore={count < fiveItems.length}
+      items={visibleItems}
+      onLoadMore={() => setCount((prev) => Math.min(prev + 2, fiveItems.length))}
+      renderItem={renderPost}
+    />
   );
 }
 
@@ -63,5 +91,26 @@ export default {
       onLoadMore={() => {}}
       renderItem={renderPost}
     />
+  ),
+  StatefulLoadMore: <StatefulLoadMore />,
+  MobileDense: (
+    <div className="mx-auto w-full max-w-[320px]">
+      <PagedList
+        hasMore={true}
+        items={fiveItems}
+        onLoadMore={() => {}}
+        renderItem={renderPost}
+      />
+    </div>
+  ),
+  LongRows: (
+    <div className="mx-auto w-full max-w-[320px]">
+      <PagedList
+        hasMore={false}
+        items={longItems}
+        onLoadMore={() => {}}
+        renderItem={renderPost}
+      />
+    </div>
   ),
 };

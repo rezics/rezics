@@ -1,14 +1,19 @@
 "use client";
 
+import { useAtomSet } from "@effect/atom-react";
+import { type FormEvent, useState } from "react";
 import { updateProfileAtom } from "@/atoms/users";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/toast";
 import { useT } from "@/lib/i18n/locale";
-import { useAtomSet } from "@effect/atom-react";
-import { type FormEvent, useState } from "react";
 
 /**
  * Mobile (<640px):
@@ -39,12 +44,20 @@ import { type FormEvent, useState } from "react";
  * Ultra-wide (>=1536px):
  * 与 Desktop 一致。
  */
-export default function SettingsAccountPage() {
+export function SettingsAccountContent({
+  initialDisplayName = "",
+  initialEmail = "",
+  initialUsername = "",
+}: {
+  readonly initialDisplayName?: string;
+  readonly initialEmail?: string;
+  readonly initialUsername?: string;
+} = {}) {
   const [t] = useT();
   const updateProfile = useAtomSet(updateProfileAtom, { mode: "promise" });
-  const [displayName, setDisplayName] = useState("");
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
+  const [displayName, setDisplayName] = useState(initialDisplayName);
+  const [username, setUsername] = useState(initialUsername);
+  const [email, setEmail] = useState(initialEmail);
   const [saving, setSaving] = useState(false);
 
   async function handleSave(e: FormEvent) {
@@ -74,7 +87,10 @@ export default function SettingsAccountPage() {
           <CardHeader title={t.settings.account} />
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" htmlFor="settings-displayName">
+              <label
+                className="text-sm font-medium"
+                htmlFor="settings-displayName"
+              >
                 {t.settings.displayName}
               </label>
               <Input
@@ -84,7 +100,10 @@ export default function SettingsAccountPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" htmlFor="settings-username">
+              <label
+                className="text-sm font-medium"
+                htmlFor="settings-username"
+              >
                 {t.settings.username}
               </label>
               <Input
@@ -134,4 +153,8 @@ export default function SettingsAccountPage() {
       </Card>
     </div>
   );
+}
+
+export default function SettingsAccountPage() {
+  return <SettingsAccountContent />;
 }

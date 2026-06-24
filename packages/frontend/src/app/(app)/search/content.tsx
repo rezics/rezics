@@ -7,7 +7,7 @@ import { SearchIcon } from "lucide-react";
 import { parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
 
 const CATEGORIES = ["all", "books", "realms", "posts", "users", "tags"] as const;
-type Category = (typeof CATEGORIES)[number];
+export type Category = (typeof CATEGORIES)[number];
 
 // Runtime membership guard for Ark UI string callback
 // Ark UI 字符串回调的运行时成员守卫
@@ -15,11 +15,35 @@ const categorySet: ReadonlySet<string> = new Set(CATEGORIES);
 const isCategory = (v: string): v is Category => categorySet.has(v);
 
 export function SearchContent() {
-  const [t] = useT();
   const [{ q, category }, setParams] = useQueryStates({
     q: parseAsString.withDefault(""),
     category: parseAsStringLiteral(CATEGORIES).withDefault("all"),
   });
+
+  return (
+    <SearchContentView
+      category={category}
+      onCategoryChange={(nextCategory) => setParams({ category: nextCategory })}
+      onQueryChange={(query) => setParams({ q: query })}
+      query={q}
+    />
+  );
+}
+
+export function SearchContentView({
+  query,
+  category,
+  onQueryChange,
+  onCategoryChange,
+  disabled = false,
+}: {
+  readonly query: string;
+  readonly category: Category;
+  readonly onQueryChange: (query: string) => void;
+  readonly onCategoryChange: (category: Category) => void;
+  readonly disabled?: boolean;
+}) {
+  const [t] = useT();
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-4">
@@ -27,15 +51,20 @@ export function SearchContent() {
         <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
         <Input
           className="pl-10"
-          onChange={(e) => setParams({ q: e.target.value })}
+          disabled={disabled}
+          onChange={(e) => onQueryChange(e.target.value)}
           placeholder={t.nav.searchPlaceholder}
           type="search"
-          value={q}
+          value={query}
         />
       </div>
 
       <Tabs
-        onValueChange={(details) => { if (isCategory(details.value)) setParams({ category: details.value }); }}
+        onValueChange={(details) => {
+          if (isCategory(details.value)) {
+            onCategoryChange(details.value);
+          }
+        }}
         value={category}
       >
         <TabsList className="overflow-x-auto">
@@ -48,8 +77,8 @@ export function SearchContent() {
         </TabsList>
       </Tabs>
 
-      {q.length > 0 ? (
-        <SearchResults category={category} query={q} />
+      {query.length > 0 ? (
+        <SearchResults category={category} query={query} />
       ) : (
         <div className="text-muted-foreground py-12 text-center text-sm">
           {t.nav.searchPlaceholder}

@@ -9,14 +9,23 @@ import type { ReactNode } from "react";
 
 export function BookLayoutShell({
   bookId,
+  activePath,
+  title,
+  subtitle,
   children,
 }: {
   readonly bookId: string;
+  readonly activePath?: string;
+  readonly title?: string;
+  readonly subtitle?: string;
   readonly children: ReactNode;
 }) {
   const pathname = usePathname();
   const [t] = useT();
   const base = `/book/${bookId}`;
+  const currentPath = activePath ?? pathname;
+  const displayTitle = title ?? t.nav.books;
+  const displaySubtitle = subtitle ?? t.book.placeholder;
 
   const tabs = [
     { href: base, label: t.book.content, exact: true },
@@ -32,9 +41,9 @@ export function BookLayoutShell({
           <BookOpenIcon className="text-muted-foreground size-8" />
         </div>
         <div className="min-w-0 flex-1 space-y-1">
-          <h1 className="truncate text-xl font-bold sm:text-2xl">{t.nav.books}</h1>
+          <h1 className="truncate text-xl font-bold sm:text-2xl">{displayTitle}</h1>
           <p className="text-muted-foreground truncate text-sm">
-            {t.book.placeholder}
+            {displaySubtitle}
           </p>
         </div>
       </div>
@@ -42,8 +51,8 @@ export function BookLayoutShell({
       <nav className="border-border flex gap-1 overflow-x-auto border-b">
         {tabs.map((tab) => {
           const isActive = ("exact" in tab && tab.exact)
-            ? pathname === tab.href
-            : pathname.startsWith(tab.href);
+            ? currentPath === tab.href
+            : currentPath.startsWith(tab.href);
           return (
             <Link
               className={cn(

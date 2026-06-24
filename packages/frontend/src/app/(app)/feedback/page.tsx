@@ -24,10 +24,18 @@ import { useState } from "react";
  *
  * 用户反馈提交页面：标题 + 详情 + 提交按钮。
  */
-export default function FeedbackPage() {
+export default function FeedbackPage({
+  initialSubject = "",
+  initialDetails = "",
+  disabled = false,
+}: {
+  readonly initialSubject?: string;
+  readonly initialDetails?: string;
+  readonly disabled?: boolean;
+}) {
   const [t] = useT();
-  const [subject, setSubject] = useState("");
-  const [details, setDetails] = useState("");
+  const [subject, setSubject] = useState(initialSubject);
+  const [details, setDetails] = useState(initialDetails);
 
   return (
     <div className="mx-auto w-full max-w-xl space-y-6 py-4">
@@ -53,6 +61,7 @@ export default function FeedbackPage() {
           </label>
           <Input
             id="feedback-subject"
+            disabled={disabled}
             onChange={(e) => setSubject(e.target.value)}
             placeholder={t.feedback.subjectPlaceholder}
             value={subject}
@@ -66,13 +75,14 @@ export default function FeedbackPage() {
           <Textarea
             className="min-h-32"
             id="feedback-details"
+            disabled={disabled}
             onChange={(e) => setDetails(e.target.value)}
             placeholder={t.feedback.detailsPlaceholder}
             value={details}
           />
         </div>
 
-        <Button type="submit">{t.feedback.submit}</Button>
+        <Button disabled={disabled} type="submit">{t.feedback.submit}</Button>
       </form>
     </div>
   );

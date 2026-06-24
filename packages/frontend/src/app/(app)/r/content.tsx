@@ -1,28 +1,27 @@
 "use client";
 
 import { PAGE_SIZE, realmListQuery } from "@/atoms/realms";
-import { SectionBoundary } from "@/components/SectionBoundary";
 import { RealmCard } from "@/components/realm/RealmCard";
+import { SectionBoundary } from "@/components/SectionBoundary";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n/locale";
 import { useAtomSuspense } from "@effect/atom-react";
+import type { Realm } from "@rezics/backend/api";
 import { UsersIcon } from "lucide-react";
 import { useState } from "react";
 
-function RealmListPage({
-  offset,
-  isLast,
+export function RealmListView({
+  realms,
+  showLoadMore = false,
   onLoadMore,
 }: {
-  readonly offset: number;
-  readonly isLast: boolean;
-  readonly onLoadMore: () => void;
+  readonly realms: readonly Realm[];
+  readonly showLoadMore?: boolean;
+  readonly onLoadMore?: () => void;
 }) {
   const [t] = useT();
-  const result = useAtomSuspense(realmListQuery(offset));
-  const realms = result.value;
 
-  if (offset === 0 && realms.length === 0) {
+  if (realms.length === 0) {
     return (
       <div className="flex flex-col items-center gap-2 py-12">
         <UsersIcon className="text-muted-foreground size-8" />
@@ -36,13 +35,28 @@ function RealmListPage({
       {realms.map((realm) => (
         <RealmCard key={realm.id} realm={realm} />
       ))}
-      {isLast && realms.length === PAGE_SIZE && (
+      {showLoadMore && (
         <Button className="self-center" onClick={onLoadMore} variant="outline">
           {t.common.loadMore}
         </Button>
       )}
     </>
   );
+}
+
+function RealmListPage({
+  offset,
+  isLast,
+  onLoadMore,
+}: {
+  readonly offset: number;
+  readonly isLast: boolean;
+  readonly onLoadMore: () => void;
+}) {
+  const result = useAtomSuspense(realmListQuery(offset));
+  const realms = result.value;
+
+  return <RealmListView realms={realms} showLoadMore={isLast && realms.length === PAGE_SIZE} onLoadMore={onLoadMore} />;
 }
 
 export function RealmsContent() {

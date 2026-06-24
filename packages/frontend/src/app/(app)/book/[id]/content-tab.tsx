@@ -50,10 +50,12 @@ function flattenTree(nodes: TreeNode[]): TreeNode[] {
   return result;
 }
 
-function ContentTreeInner({ bookId }: { readonly bookId: string }) {
+export function BookContentTree({
+  nodes,
+}: {
+  readonly nodes: readonly ContentStructureNodeDTO[];
+}) {
   const [t] = useT();
-  const result = useAtomSuspense(bookContentStructureQuery(bookId));
-  const nodes = result.value.nodes;
 
   const flatList = useMemo(() => {
     const tree = buildTree(nodes);
@@ -107,6 +109,12 @@ function ContentTreeInner({ bookId }: { readonly bookId: string }) {
       })}
     </ul>
   );
+}
+
+function ContentTreeInner({ bookId }: { readonly bookId: string }) {
+  const result = useAtomSuspense(bookContentStructureQuery(bookId));
+
+  return <BookContentTree nodes={result.value.nodes} />;
 }
 
 /**

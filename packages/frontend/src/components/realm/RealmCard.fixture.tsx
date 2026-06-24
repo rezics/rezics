@@ -1,21 +1,21 @@
 "use client";
 import { mockRealm, mockRealms } from "@/__cosmos__/mock-data";
-import { Realm } from "@rezics/backend/api";
+import type { Realm } from "@rezics/backend/api";
 import { RealmCard } from "./RealmCard";
 
 function toRealm(mock: ReturnType<typeof mockRealm>): Realm {
-  return new Realm(mock);
+  return mock;
 }
 
 export default {
   Default: (
-    <div className="p-4 max-w-sm">
+    <div className="mx-auto w-full max-w-sm p-4">
       <RealmCard realm={toRealm(mockRealm())} />
     </div>
   ),
 
   LongName: (
-    <div className="p-4 max-w-sm">
+    <div className="mx-auto w-full max-w-sm p-4">
       <RealmCard
         realm={toRealm(
           mockRealm({
@@ -29,7 +29,7 @@ export default {
   ),
 
   ShortName: (
-    <div className="p-4 max-w-sm">
+    <div className="mx-auto w-full max-w-sm p-4">
       <RealmCard
         realm={toRealm(
           mockRealm({
@@ -43,10 +43,32 @@ export default {
   ),
 
   List: (
-    <div className="p-4 max-w-sm flex flex-col gap-2">
+    <div className="mx-auto flex w-full max-w-sm flex-col gap-2 p-4">
       {mockRealms().map((r) => (
         <RealmCard key={r.id} realm={toRealm(r)} />
       ))}
+    </div>
+  ),
+
+  MobileDenseList: (
+    <div className="mx-auto flex w-full max-w-[320px] flex-col gap-2 p-2">
+      {mockRealms().map((r) => (
+        <RealmCard key={r.id} realm={toRealm(r)} />
+      ))}
+    </div>
+  ),
+
+  OverflowName: (
+    <div className="mx-auto w-full max-w-[320px] p-2">
+      <RealmCard
+        realm={toRealm(
+          mockRealm({
+            id: "realm-overflow",
+            slug: "overflow",
+            name: "RealmWithOneExtremelyLongUnbrokenIdentifierThatMustWrapAnywhereWithoutHorizontalScroll",
+          }),
+        )}
+      />
     </div>
   ),
 };

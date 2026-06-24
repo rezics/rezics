@@ -1,5 +1,6 @@
 "use client";
 
+import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,7 +20,6 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/toast";
 import { authClient } from "@/lib/auth-client";
 import { useT } from "@/lib/i18n/locale";
-import { type FormEvent, useState } from "react";
 
 /**
  * Mobile (<640px):
@@ -52,13 +52,19 @@ import { type FormEvent, useState } from "react";
  * Ultra-wide (>=1536px):
  * 与 Desktop 一致。
  */
-export default function SettingsSecurityPage() {
+export function SettingsSecurityContent({
+  initialTwoFactorEnabled = false,
+}: {
+  readonly initialTwoFactorEnabled?: boolean;
+} = {}) {
   const [t] = useT();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(
+    initialTwoFactorEnabled,
+  );
   const [revokingAll, setRevokingAll] = useState(false);
 
   async function handleChangePassword(e: FormEvent) {
@@ -110,7 +116,10 @@ export default function SettingsSecurityPage() {
           <CardHeader title={t.settings.changePassword} />
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" htmlFor="settings-currentPwd">
+              <label
+                className="text-sm font-medium"
+                htmlFor="settings-currentPwd"
+              >
                 {t.settings.currentPassword}
               </label>
               <PasswordInput>
@@ -140,7 +149,10 @@ export default function SettingsSecurityPage() {
               </PasswordInput>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" htmlFor="settings-confirmPwd">
+              <label
+                className="text-sm font-medium"
+                htmlFor="settings-confirmPwd"
+              >
                 {t.settings.confirmPassword}
               </label>
               <PasswordInput>
@@ -205,4 +217,8 @@ export default function SettingsSecurityPage() {
       </Card>
     </div>
   );
+}
+
+export default function SettingsSecurityPage() {
+  return <SettingsSecurityContent />;
 }

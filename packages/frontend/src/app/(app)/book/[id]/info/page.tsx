@@ -5,6 +5,7 @@ import { ClientOnly } from "@/components/ClientOnly";
 import { SectionBoundary } from "@/components/SectionBoundary";
 import { useT } from "@/lib/i18n/locale";
 import { useAtomSuspense } from "@effect/atom-react";
+import type { BookDTO } from "@rezics/backend/api";
 import { useParams } from "next/navigation";
 
 function InfoRow({
@@ -22,10 +23,8 @@ function InfoRow({
   );
 }
 
-function BookInfoInner({ bookId }: { readonly bookId: string }) {
+export function BookInfoView({ book }: { readonly book: BookDTO }) {
   const [t] = useT();
-  const result = useAtomSuspense(bookQuery(bookId));
-  const book = result.value;
 
   return (
     <dl className="space-y-3">
@@ -42,6 +41,12 @@ function BookInfoInner({ bookId }: { readonly bookId: string }) {
       <InfoRow label={t.book.updated} value={new Date(book.updatedAt).toLocaleDateString()} />
     </dl>
   );
+}
+
+function BookInfoInner({ bookId }: { readonly bookId: string }) {
+  const result = useAtomSuspense(bookQuery(bookId));
+
+  return <BookInfoView book={result.value} />;
 }
 
 /**

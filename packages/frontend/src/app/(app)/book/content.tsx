@@ -9,6 +9,60 @@ import { useAtomSuspense } from "@effect/atom-react";
 import { BookOpenIcon } from "lucide-react";
 import { useState } from "react";
 
+export interface BooksContentViewBook {
+  readonly unitId: string;
+  readonly slug: string | null;
+  readonly status: string;
+  readonly chapterCount: number;
+}
+
+export function BooksContentView({
+  books,
+  hasMore,
+  onLoadMore,
+}: {
+  readonly books: readonly BooksContentViewBook[];
+  readonly hasMore: boolean;
+  readonly onLoadMore: () => void;
+}) {
+  const [t] = useT();
+
+  if (books.length === 0) {
+    return (
+      <div className="mx-auto w-full max-w-3xl">
+        <h1 className="mb-4 text-xl font-semibold">{t.library.title}</h1>
+        <div className="flex flex-col items-center gap-2 py-12">
+          <BookOpenIcon className="text-muted-foreground size-8" />
+          <p className="text-muted-foreground text-sm">{t.common.empty}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto w-full max-w-3xl">
+      <h1 className="mb-4 text-xl font-semibold">{t.library.title}</h1>
+      <div className="flex flex-col gap-3">
+        {books.map((book) => (
+          <BookCard
+            chapterCount={book.chapterCount}
+            key={book.unitId}
+            slug={book.slug}
+            status={book.status}
+            title={book.slug ?? book.unitId}
+            unitId={book.unitId}
+          />
+        ))}
+        {hasMore && (
+          <Button className="self-center" onClick={onLoadMore} variant="outline">
+            {t.common.loadMore}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function BookListPage({
   offset,
   isLast,
@@ -22,17 +76,14 @@ function BookListPage({
   const result = useAtomSuspense(bookListQuery({ offset, limit: PAGE_SIZE }));
   const books = result.value.books;
 
-  if (offset === 0 && books.length === 0) {
-    return (
-      <div className="flex flex-col items-center gap-2 py-12">
-        <BookOpenIcon className="text-muted-foreground size-8" />
-        <p className="text-muted-foreground text-sm">{t.common.empty}</p>
-      </div>
-    );
-  }
-
   return (
     <>
+      {offset === 0 && books.length === 0 && (
+        <div className="flex flex-col items-center gap-2 py-12">
+          <BookOpenIcon className="text-muted-foreground size-8" />
+          <p className="text-muted-foreground text-sm">{t.common.empty}</p>
+        </div>
+      )}
       {books.map((book) => (
         <BookCard
           chapterCount={book.chapterCount}

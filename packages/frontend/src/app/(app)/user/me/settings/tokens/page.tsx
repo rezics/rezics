@@ -1,5 +1,6 @@
 "use client";
 
+import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,7 +11,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
 import { useT } from "@/lib/i18n/locale";
-import { type FormEvent, useState } from "react";
 
 /**
  * Mobile (<640px):
@@ -42,17 +42,21 @@ import { type FormEvent, useState } from "react";
  * 与 Desktop 一致。
  */
 
-interface Token {
+export interface Token {
   readonly id: string;
   readonly name: string;
   readonly createdAt: string;
   readonly lastUsed: string | null;
 }
 
-export default function SettingsTokensPage() {
+export function SettingsTokensContent({
+  initialTokens = [],
+}: {
+  readonly initialTokens?: Token[];
+} = {}) {
   const [t] = useT();
   const [tokenName, setTokenName] = useState("");
-  const [tokens, setTokens] = useState<Token[]>([]);
+  const [tokens, setTokens] = useState<Token[]>(initialTokens);
   const [creating, setCreating] = useState(false);
   const [revokingId, setRevokingId] = useState<string | null>(null);
 
@@ -107,7 +111,10 @@ export default function SettingsTokensPage() {
           <CardHeader title={t.settings.createToken} />
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" htmlFor="settings-tokenName">
+              <label
+                className="text-sm font-medium"
+                htmlFor="settings-tokenName"
+              >
                 {t.settings.tokenName}
               </label>
               <Input
@@ -160,4 +167,8 @@ export default function SettingsTokensPage() {
       </Card>
     </div>
   );
+}
+
+export default function SettingsTokensPage() {
+  return <SettingsTokensContent />;
 }

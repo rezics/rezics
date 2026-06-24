@@ -28,11 +28,122 @@ const longArticleBlocks = [
   { _type: "block", _key: "b12", style: "normal", children: [{ _type: "span", _key: "s20", text: "Effect transforms how you think about side effects. Once you internalize the model, writing correct concurrent programs becomes natural.", marks: [] }], markDefs: [] },
 ];
 
+const linkedAndListedBlocks = [
+  {
+    _type: "block",
+    _key: "l1",
+    style: "normal",
+    children: [
+      { _type: "span", _key: "l1s1", text: "Read the ", marks: [] },
+      { _type: "span", _key: "l1s2", text: "Effect docs", marks: ["effectLink"] },
+      { _type: "span", _key: "l1s3", text: " before migrating.", marks: [] },
+    ],
+    markDefs: [{ _key: "effectLink", _type: "link", href: "https://effect.website" }],
+  },
+  {
+    _type: "block",
+    _key: "l2",
+    listItem: "bullet",
+    level: 1,
+    style: "normal",
+    children: [{ _type: "span", _key: "l2s1", text: "First checklist item", marks: [] }],
+    markDefs: [],
+  },
+  {
+    _type: "block",
+    _key: "l3",
+    listItem: "bullet",
+    level: 1,
+    style: "normal",
+    children: [{ _type: "span", _key: "l3s1", text: "Second checklist item with code", marks: ["code"] }],
+    markDefs: [],
+  },
+  {
+    _type: "block",
+    _key: "l4",
+    listItem: "number",
+    level: 1,
+    style: "normal",
+    children: [{ _type: "span", _key: "l4s1", text: "Ordered step", marks: [] }],
+    markDefs: [],
+  },
+];
+
+const overflowBlocks = [
+  {
+    _type: "block",
+    _key: "o1",
+    style: "h2",
+    children: [
+      {
+        _type: "span",
+        _key: "o1s1",
+        text: "Singleunbrokenheadingidentifierthatshouldnotcreatehorizontaloverflow",
+        marks: [],
+      },
+    ],
+    markDefs: [],
+  },
+  {
+    _type: "block",
+    _key: "o2",
+    style: "normal",
+    children: [
+      {
+        _type: "span",
+        _key: "o2s1",
+        text: "singleunbrokenbodyidentifierthatkeepsgoingandgoingandgoingandgoingandgoing",
+        marks: ["code"],
+      },
+    ],
+    markDefs: [],
+  },
+];
+
 export default {
-  RichContent: <PortableTextView value={mockPortableTextBlocks()} />,
-  SingleParagraph: <PortableTextView value={singleParagraph} />,
-  EmptyArray: <PortableTextView value={[]} />,
-  InvalidInput_Null: <PortableTextView value={null} />,
-  InvalidInput_String: <PortableTextView value="some raw string content" />,
-  LongArticle: <PortableTextView value={longArticleBlocks} />,
+  RichContent: (
+    <div className="mx-auto w-full max-w-2xl p-4">
+      <PortableTextView value={mockPortableTextBlocks()} />
+    </div>
+  ),
+  SingleParagraph: (
+    <div className="mx-auto w-full max-w-2xl p-4">
+      <PortableTextView value={singleParagraph} />
+    </div>
+  ),
+  EmptyArray: (
+    <div className="mx-auto w-full max-w-2xl p-4">
+      <PortableTextView value={[]} />
+    </div>
+  ),
+  InvalidInput_Null: (
+    <div className="mx-auto w-full max-w-2xl p-4">
+      <PortableTextView value={null} />
+    </div>
+  ),
+  InvalidInput_String: (
+    <div className="mx-auto w-full max-w-2xl p-4">
+      <PortableTextView value="some raw string content" />
+    </div>
+  ),
+  InvalidInput_Object: (
+    <div className="mx-auto w-full max-w-2xl p-4">
+      <PortableTextView value={{ _type: "block" }} />
+    </div>
+  ),
+  LongArticle: (
+    <div className="mx-auto w-full max-w-2xl p-4">
+      <PortableTextView value={longArticleBlocks} />
+    </div>
+  ),
+  LinksAndLists: (
+    <div className="mx-auto w-full max-w-2xl p-4">
+      <PortableTextView value={linkedAndListedBlocks} />
+    </div>
+  ),
+  MobileOverflow: (
+    <div className="mx-auto w-full max-w-[320px] p-2">
+      <PortableTextView value={overflowBlocks} />
+    </div>
+  ),
 };

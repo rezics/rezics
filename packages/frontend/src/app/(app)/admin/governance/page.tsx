@@ -15,6 +15,15 @@ import { useT } from "@/lib/i18n/locale";
 import { SearchIcon } from "lucide-react";
 import { useState } from "react";
 
+export interface AdminGovernanceRow {
+  readonly id: string;
+  readonly type: string;
+  readonly reporter: string;
+  readonly target: string;
+  readonly severity: string;
+  readonly status: string;
+}
+
 /**
  * Mobile (<640px):
  * +-----------------------------+
@@ -51,9 +60,17 @@ import { useState } from "react";
  * 当前为占位实现，待 API 接入后填充。
  */
 
-function AdminGovernanceContent() {
+export function AdminGovernanceContent({
+  rows = [],
+  disabled = false,
+  initialQuery = "",
+}: {
+  readonly rows?: readonly AdminGovernanceRow[];
+  readonly disabled?: boolean;
+  readonly initialQuery?: string;
+}) {
   const [t] = useT();
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
 
   return (
     <div className="space-y-4">
@@ -63,6 +80,7 @@ function AdminGovernanceContent() {
         <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
         <Input
           className="pl-10"
+          disabled={disabled}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t.admin.searchCases}
           type="search"
@@ -81,15 +99,29 @@ function AdminGovernanceContent() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {/* Placeholder empty state — rows populated once API connected */}
-          {/* 占位空状态 — API 接入后填充行数据 */}
-          <TableRow>
-            <TableCell colSpan={5}>
-              <p className="text-muted-foreground py-8 text-center text-sm">
-                {t.admin.noData}
-              </p>
-            </TableCell>
-          </TableRow>
+          {rows.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5}>
+                <p className="text-muted-foreground py-8 text-center text-sm">
+                  {t.admin.noData}
+                </p>
+              </TableCell>
+            </TableRow>
+          ) : (
+            rows.map((row) => (
+              <TableRow key={row.id}>
+                <TableCell className="max-w-44 truncate">{row.type}</TableCell>
+                <TableCell className="hidden max-w-44 truncate sm:table-cell">
+                  {row.reporter}
+                </TableCell>
+                <TableCell className="hidden max-w-64 truncate lg:table-cell">
+                  {row.target}
+                </TableCell>
+                <TableCell>{row.severity}</TableCell>
+                <TableCell>{row.status}</TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
     </div>

@@ -14,6 +14,17 @@ function AuthDialogOpen({ mode }: { readonly mode: "login" | "register" }) {
 }
 
 export default {
+  Closed: <AuthDialog />,
   LoginMode: <AuthDialogOpen mode="login" />,
   RegisterMode: <AuthDialogOpen mode="register" />,
+  LoginModeShortViewport: (
+    <div className="h-[420px] overflow-hidden">
+      <AuthDialogOpen mode="login" />
+    </div>
+  ),
+  RegisterModeShortViewport: (
+    <div className="h-[420px] overflow-hidden">
+      <AuthDialogOpen mode="register" />
+    </div>
+  ),
 };

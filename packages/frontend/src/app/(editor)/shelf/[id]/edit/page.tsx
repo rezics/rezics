@@ -1,13 +1,13 @@
 "use client";
 
+import { ArrowLeftIcon, GripVerticalIcon } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useT } from "@/lib/i18n/locale";
-import { ArrowLeftIcon, GripVerticalIcon } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
 
 /**
  * Mobile (<640px):
@@ -66,16 +66,24 @@ import { useState } from "react";
  * 使用 (editor) layout（无侧栏/底部导航）。
  */
 
-interface ShelfItem {
+export interface ShelfItem {
   readonly id: string;
   readonly title: string;
 }
 
-export default function EditShelfPage() {
+export function EditShelfEditor({
+  initialDescription = "",
+  initialItems = [],
+  initialName = "",
+}: {
+  readonly initialDescription?: string;
+  readonly initialItems?: readonly ShelfItem[];
+  readonly initialName?: string;
+} = {}) {
   const [t] = useT();
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [items, setItems] = useState<readonly ShelfItem[]>([]);
+  const [name, setName] = useState(initialName);
+  const [description, setDescription] = useState(initialDescription);
+  const [items, setItems] = useState<readonly ShelfItem[]>(initialItems);
 
   const removeItem = (id: string) => {
     setItems((prev) => prev.filter((item) => item.id !== id));
@@ -139,7 +147,7 @@ export default function EditShelfPage() {
             </p>
           </div>
         ) : (
-          <ul className="divide-border divide-y rounded-md border" role="list">
+          <ul className="divide-border divide-y rounded-md border">
             {items.map((item) => (
               <li className="flex items-center gap-2 px-3 py-2" key={item.id}>
                 {/* Drag handle — fixed */}
@@ -169,4 +177,8 @@ export default function EditShelfPage() {
       </div>
     </div>
   );
+}
+
+export default function EditShelfPage() {
+  return <EditShelfEditor />;
 }

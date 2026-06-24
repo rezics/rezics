@@ -1,10 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { toast } from "@/components/ui/toast";
 import { useT } from "@/lib/i18n/locale";
-import { useState } from "react";
 
 /**
  * Mobile (<640px):
@@ -30,7 +30,7 @@ import { useState } from "react";
  * 与 Desktop 一致。
  */
 
-interface Provider {
+export interface Provider {
   readonly id: string;
   readonly name: string;
   readonly connected: boolean;
@@ -42,9 +42,13 @@ const defaultProviders: Provider[] = [
   { id: "discord", name: "Discord", connected: false },
 ];
 
-export default function SettingsConnectionsPage() {
+export function SettingsConnectionsContent({
+  initialProviders = defaultProviders,
+}: {
+  readonly initialProviders?: Provider[];
+} = {}) {
   const [t] = useT();
-  const [providers, setProviders] = useState<Provider[]>(defaultProviders);
+  const [providers, setProviders] = useState<Provider[]>(initialProviders);
   const [busy, setBusy] = useState<string | null>(null);
 
   async function handleToggle(providerId: string) {
@@ -99,4 +103,8 @@ export default function SettingsConnectionsPage() {
       </Card>
     </div>
   );
+}
+
+export default function SettingsConnectionsPage() {
+  return <SettingsConnectionsContent />;
 }

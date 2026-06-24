@@ -1,22 +1,28 @@
 "use client";
 
+import { ArrowLeftIcon } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useT } from "@/lib/i18n/locale";
-import { ArrowLeftIcon } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
 
 /**
  * Mobile-Ultra-wide: max-w-xl mx-auto。
  *
  * 个人资料编辑页：头像上传 + 显示名称 + Bio + 保存。
  */
-export default function EditProfilePage() {
+export function EditProfileContent({
+  initialBio = "",
+  initialName = "",
+}: {
+  readonly initialBio?: string;
+  readonly initialName?: string;
+} = {}) {
   const [t] = useT();
-  const [name, setName] = useState("");
-  const [bio, setBio] = useState("");
+  const [name, setName] = useState(initialName);
+  const [bio, setBio] = useState(initialBio);
 
   return (
     <div className="mx-auto w-full max-w-xl space-y-6">
@@ -64,4 +70,8 @@ export default function EditProfilePage() {
       </form>
     </div>
   );
+}
+
+export default function EditProfilePage() {
+  return <EditProfileContent />;
 }

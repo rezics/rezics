@@ -1,7 +1,14 @@
 "use client";
 
+import { createListCollection } from "@ark-ui/react/select";
+import { type FormEvent, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -12,8 +19,6 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/toast";
 import { useT } from "@/lib/i18n/locale";
-import { createListCollection } from "@ark-ui/react/select";
-import { type FormEvent, useMemo, useState } from "react";
 
 /**
  * Mobile (<640px):
@@ -42,12 +47,22 @@ import { type FormEvent, useMemo, useState } from "react";
  * Ultra-wide (>=1536px):
  * 与 Desktop 一致。
  */
-export default function SettingsLibraryPage() {
+export function SettingsLibraryContent({
+  initialDefaultView = "grid",
+  initialShowProgress = true,
+  initialShowRatings = true,
+  initialSortBy = "date-added",
+}: {
+  readonly initialDefaultView?: string;
+  readonly initialShowProgress?: boolean;
+  readonly initialShowRatings?: boolean;
+  readonly initialSortBy?: string;
+} = {}) {
   const [t] = useT();
-  const [defaultView, setDefaultView] = useState(["grid"]);
-  const [sortBy, setSortBy] = useState(["date-added"]);
-  const [showRatings, setShowRatings] = useState(true);
-  const [showProgress, setShowProgress] = useState(true);
+  const [defaultView, setDefaultView] = useState([initialDefaultView]);
+  const [sortBy, setSortBy] = useState([initialSortBy]);
+  const [showRatings, setShowRatings] = useState(initialShowRatings);
+  const [showProgress, setShowProgress] = useState(initialShowProgress);
   const [saving, setSaving] = useState(false);
 
   const viewCollection = useMemo(
@@ -90,7 +105,9 @@ export default function SettingsLibraryPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold">{t.settings.libraryPreferences}</h2>
+        <h2 className="text-lg font-semibold">
+          {t.settings.libraryPreferences}
+        </h2>
         <p className="text-muted-foreground text-sm">
           {t.settings.libraryDescription}
         </p>
@@ -101,9 +118,9 @@ export default function SettingsLibraryPage() {
           <CardHeader title={t.settings.defaultView} />
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">
+              <span className="text-sm font-medium">
                 {t.settings.defaultView}
-              </label>
+              </span>
               <Select
                 collection={viewCollection}
                 onValueChange={(detail) => setDefaultView(detail.value)}
@@ -122,9 +139,7 @@ export default function SettingsLibraryPage() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">
-                {t.settings.sortBy}
-              </label>
+              <span className="text-sm font-medium">{t.settings.sortBy}</span>
               <Select
                 collection={sortCollection}
                 onValueChange={(detail) => setSortBy(detail.value)}
@@ -184,4 +199,8 @@ export default function SettingsLibraryPage() {
       </form>
     </div>
   );
+}
+
+export default function SettingsLibraryPage() {
+  return <SettingsLibraryContent />;
 }

@@ -1,7 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { useT } from "@/lib/i18n/locale";
 import {
   BellIcon,
   CheckIcon,
@@ -10,6 +8,8 @@ import {
   UsersIcon,
 } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n/locale";
 
 /**
  * Mobile (<640px):
@@ -52,7 +52,7 @@ import { useState } from "react";
  * 空状态时显示占位提示。
  */
 
-interface NotificationItem {
+export interface NotificationItem {
   readonly id: string;
   readonly type: "reply" | "mention" | "follow" | "realm_invite";
   readonly actorName: string;
@@ -72,11 +72,14 @@ const ICON_MAP = {
   realm_invite: UsersIcon,
 } as const;
 
-export default function NotificationsPage() {
+export function NotificationsContent({
+  initialNotifications = PLACEHOLDER_NOTIFICATIONS,
+}: {
+  readonly initialNotifications?: readonly NotificationItem[];
+} = {}) {
   const [t] = useT();
-  const [notifications, setNotifications] = useState<readonly NotificationItem[]>(
-    PLACEHOLDER_NOTIFICATIONS,
-  );
+  const [notifications, setNotifications] =
+    useState<readonly NotificationItem[]>(initialNotifications);
 
   const markAsRead = (id: string) => {
     setNotifications((prev) =>
@@ -95,7 +98,8 @@ export default function NotificationsPage() {
     reply: (item) => t.inbox.notificationReply(item.actorName),
     mention: (item) => t.inbox.notificationMention(item.actorName),
     follow: (item) => t.inbox.notificationFollow(item.actorName),
-    realm_invite: (item) => t.inbox.notificationRealmInvite(item.targetName ?? ""),
+    realm_invite: (item) =>
+      t.inbox.notificationRealmInvite(item.targetName ?? ""),
   };
 
   const getNotificationText = (item: NotificationItem): string =>
@@ -118,7 +122,7 @@ export default function NotificationsPage() {
         </Button>
       </div>
 
-      <ul className="divide-border divide-y" role="list">
+      <ul className="divide-border divide-y">
         {notifications.map((item) => {
           const Icon = ICON_MAP[item.type];
           return (
@@ -165,4 +169,8 @@ export default function NotificationsPage() {
       </ul>
     </div>
   );
+}
+
+export default function NotificationsPage() {
+  return <NotificationsContent />;
 }

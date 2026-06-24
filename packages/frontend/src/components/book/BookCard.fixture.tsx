@@ -4,25 +4,25 @@ import { BookCard } from "./BookCard";
 
 export default {
   Default: (
-    <div className="p-4 max-w-md">
+    <div className="mx-auto w-full max-w-md p-4">
       <BookCard {...mockBook()} />
     </div>
   ),
 
   Draft: (
-    <div className="p-4 max-w-md">
+    <div className="mx-auto w-full max-w-md p-4">
       <BookCard {...mockBookDraft()} />
     </div>
   ),
 
   NoSlug: (
-    <div className="p-4 max-w-md">
+    <div className="mx-auto w-full max-w-md p-4">
       <BookCard {...mockBookNoSlug()} />
     </div>
   ),
 
   LongTitle: (
-    <div className="p-4 max-w-md">
+    <div className="mx-auto w-full max-w-md p-4">
       <BookCard
         {...mockBook({
           unitId: "book-long-title",
@@ -37,7 +37,7 @@ export default {
   ),
 
   ManyChapters: (
-    <div className="p-4 max-w-md">
+    <div className="mx-auto w-full max-w-md p-4">
       <BookCard
         {...mockBook({
           unitId: "book-many-chapters",
@@ -45,6 +45,31 @@ export default {
           slug: "ostep",
           status: "published",
           chapterCount: 114,
+        })}
+      />
+    </div>
+  ),
+
+  MobileDense: (
+    <div className="mx-auto w-full max-w-[320px] p-2">
+      <div className="flex flex-col gap-2">
+        <BookCard {...mockBook()} />
+        <BookCard {...mockBookDraft()} />
+        <BookCard {...mockBookNoSlug()} />
+      </div>
+    </div>
+  ),
+
+  OverflowTitle: (
+    <div className="mx-auto w-full max-w-[320px] p-2">
+      <BookCard
+        {...mockBook({
+          unitId: "book-overflow",
+          title:
+            "Lopadotemachoselachogaleokranioleipsanodrimhypotrimmatosilphioparaomelitokatakechymenokichlepikossyphophattoperisteralektryonoptekephalliokigklopeleiolagoiosiraiobaphetraganopterygon",
+          slug: "overflow-title",
+          status: "experimental-preview-release-candidate",
+          chapterCount: 9999,
         })}
       />
     </div>

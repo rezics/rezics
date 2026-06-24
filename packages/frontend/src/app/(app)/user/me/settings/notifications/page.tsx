@@ -1,11 +1,16 @@
 "use client";
 
+import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/toast";
 import { useT } from "@/lib/i18n/locale";
-import { type FormEvent, useState } from "react";
 
 /**
  * Mobile (<640px):
@@ -35,13 +40,25 @@ import { type FormEvent, useState } from "react";
  * Ultra-wide (>=1536px):
  * 与 Desktop 一致。
  */
-export default function SettingsNotificationsPage() {
+export function SettingsNotificationsContent({
+  initialEmailNotifs = true,
+  initialMentions = true,
+  initialPostReplies = true,
+  initialPushNotifs = false,
+  initialRealmUpdates = true,
+}: {
+  readonly initialEmailNotifs?: boolean;
+  readonly initialMentions?: boolean;
+  readonly initialPostReplies?: boolean;
+  readonly initialPushNotifs?: boolean;
+  readonly initialRealmUpdates?: boolean;
+} = {}) {
   const [t] = useT();
-  const [emailNotifs, setEmailNotifs] = useState(true);
-  const [pushNotifs, setPushNotifs] = useState(false);
-  const [postReplies, setPostReplies] = useState(true);
-  const [mentions, setMentions] = useState(true);
-  const [realmUpdates, setRealmUpdates] = useState(true);
+  const [emailNotifs, setEmailNotifs] = useState(initialEmailNotifs);
+  const [pushNotifs, setPushNotifs] = useState(initialPushNotifs);
+  const [postReplies, setPostReplies] = useState(initialPostReplies);
+  const [mentions, setMentions] = useState(initialMentions);
+  const [realmUpdates, setRealmUpdates] = useState(initialRealmUpdates);
   const [saving, setSaving] = useState(false);
 
   async function handleSave(e: FormEvent) {
@@ -73,7 +90,9 @@ export default function SettingsNotificationsPage() {
           <CardContent className="space-y-4">
             <div className="flex items-center gap-3">
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">{t.settings.emailNotifications}</p>
+                <p className="text-sm font-medium">
+                  {t.settings.emailNotifications}
+                </p>
                 <p className="text-muted-foreground text-xs">
                   {t.settings.emailNotificationsDescription}
                 </p>
@@ -86,7 +105,9 @@ export default function SettingsNotificationsPage() {
             </div>
             <div className="flex items-center gap-3">
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">{t.settings.pushNotifications}</p>
+                <p className="text-sm font-medium">
+                  {t.settings.pushNotifications}
+                </p>
                 <p className="text-muted-foreground text-xs">
                   {t.settings.pushNotificationsDescription}
                 </p>
@@ -152,4 +173,8 @@ export default function SettingsNotificationsPage() {
       </form>
     </div>
   );
+}
+
+export default function SettingsNotificationsPage() {
+  return <SettingsNotificationsContent />;
 }

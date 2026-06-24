@@ -17,6 +17,8 @@ node_modules/
 # Build output
 dist/
 out/
+cosmos-export/
+**/cosmos-export/
 *.tgz
 *.exe
 storybook-static/
@@ -88,3 +90,6 @@ devenv.local.yaml
 .pre-commit-config.yaml
 
 .playwright*
+next-env.d.ts
+
+.dev

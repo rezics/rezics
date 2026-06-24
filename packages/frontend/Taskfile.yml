@@ -15,4 +15,12 @@ tasks:
 
   cosmos:
     desc: Start React Cosmos component explorer
-    cmd: npx cosmos --config cosmos.config.json
+    cmds:
+      - |
+        bash -lc '
+          set -euo pipefail
+          export NODE_OPTIONS="${NODE_OPTIONS:-} --max-old-space-size=8192"
+          trap "jobs -pr | xargs -r kill" EXIT
+          npx next dev --turbopack -p 35002 &
+          npx cosmos --config cosmos.config.json --expose-imports
+        '

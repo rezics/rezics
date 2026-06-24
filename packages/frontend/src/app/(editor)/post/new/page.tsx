@@ -1,12 +1,12 @@
 "use client";
 
+import { ArrowLeftIcon } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 import { PortableTextEditor } from "@/components/shared/PortableTextEditor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useT } from "@/lib/i18n/locale";
-import { ArrowLeftIcon } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
 
 /**
  * Mobile (<640px):
@@ -51,9 +51,15 @@ import { useState } from "react";
  * 新帖编辑器：标题 + Portable Text 富文本编辑器。
  * 使用 (editor) layout（无侧栏/底部导航）。
  */
-export default function NewPostPage() {
+export function NewPostEditor({
+  initialContent = "",
+  initialTitle = "",
+}: {
+  readonly initialContent?: string;
+  readonly initialTitle?: string;
+} = {}) {
   const [t] = useT();
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(initialTitle);
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6">
@@ -77,9 +83,13 @@ export default function NewPostPage() {
           value={title}
         />
         <div className="border-input min-h-64 rounded-md border p-4">
-          <PortableTextEditor />
+          <PortableTextEditor value={initialContent} />
         </div>
       </div>
     </div>
   );
+}
+
+export default function NewPostPage() {
+  return <NewPostEditor />;
 }
