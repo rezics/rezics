@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
+import type { RealmRuleAcknowledgementStatus } from "@rezics/contract";
 import {
   Realm,
   RealmMember,
@@ -19,17 +20,18 @@ const setSingleExtraKeyMock = mock(async () => undefined);
 const clearSingleExtraKeyMock = mock(async () => undefined);
 const auditPrivilegedMutationMock = mock(async () => ({ id: "audit-1" }));
 const broadcastMock = mock(async (_event: any) => ({ ok: true }));
-const defaultRuleAcknowledgementStatus = () => ({
-  currentPolicyId: null,
-  currentRevisionId: null,
-  requiredVersion: null,
-  acceptedPolicyId: null,
-  acceptedRevisionId: null,
-  acceptedVersion: null,
-  acceptedAt: null,
-  acceptedLanguage: null,
-  acknowledgementRequired: false,
-});
+const defaultRuleAcknowledgementStatus =
+  (): RealmRuleAcknowledgementStatus => ({
+    currentPolicyId: null,
+    currentRevisionId: null,
+    requiredVersion: null,
+    acceptedPolicyId: null,
+    acceptedRevisionId: null,
+    acceptedVersion: null,
+    acceptedAt: null,
+    acceptedLanguage: null,
+    acknowledgementRequired: false,
+  });
 const assertAcknowledgedForActionMock = mock(async () => undefined);
 const getRuleAcknowledgementStatusMock = mock(async () =>
   defaultRuleAcknowledgementStatus(),

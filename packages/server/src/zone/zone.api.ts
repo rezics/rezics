@@ -51,7 +51,7 @@ function preferredLanguages(query: {
   appLocale?: string;
 }): string[] {
   return parseReadLanguages([
-    query.appLocale,
+    ...(query.appLocale ? [query.appLocale] : []),
     ...parseReadLanguages(query.languages),
   ]);
 }

@@ -16,6 +16,10 @@ export function userPatchToUpdateUser(
   return {
     name: typeof user.name === "string" ? user.name : undefined,
     avatar,
+    summary:
+      user.summary === null || typeof user.summary === "string"
+        ? user.summary
+        : undefined,
     bio:
       user.bio === null || typeof user.bio === "string" ? user.bio : undefined,
     description:

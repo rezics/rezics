@@ -4,6 +4,7 @@ import type {
   RealmRulePolicyDTO,
   RealmRuleRevisionDTO,
 } from "@rezics/contract";
+import { normalizeContentLanguage } from "@rezics/contract";
 import type {
   RealmRuleAcknowledgement,
   RealmRuleItem,
@@ -74,6 +75,9 @@ export function mapRealmRuleRevisionToDTO(
 export function mapRealmRuleAcknowledgementToDTO(
   row: AckRow,
 ): RealmRuleAcknowledgementDTO {
+  const acceptedLanguage = row.acceptedLanguage
+    ? normalizeContentLanguage(row.acceptedLanguage)
+    : null;
   return {
     realmUnitId: row.realmUnitId,
     policyId: row.policyId,
@@ -81,6 +85,6 @@ export function mapRealmRuleAcknowledgementToDTO(
     version: row.version,
     userId: row.userId,
     acceptedAt: row.acceptedAt,
-    acceptedLanguage: row.acceptedLanguage ?? null,
+    acceptedLanguage,
   };
 }

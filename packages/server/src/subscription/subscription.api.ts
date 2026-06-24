@@ -65,7 +65,7 @@ export const subscriptionApi = new Elysia({ prefix: "/subscription" })
         start: query.start,
         limit: query.limit,
         preferredLanguages: parseReadLanguages([
-          query.appLocale,
+          ...(query.appLocale ? [query.appLocale] : []),
           ...parseReadLanguages(query.languages),
         ]),
       });

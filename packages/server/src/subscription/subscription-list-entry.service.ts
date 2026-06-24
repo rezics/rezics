@@ -255,7 +255,7 @@ export class SubscriptionListEntryService {
     }
 
     const subscribedUnitIds = entryRows.map(
-      (row) => row.entry.subscribedUnitId,
+      (row: { entry: EntryRow }) => row.entry.subscribedUnitId,
     );
     const detailRows = await db
       .select({

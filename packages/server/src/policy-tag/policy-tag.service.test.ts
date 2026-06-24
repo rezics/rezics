@@ -2,7 +2,20 @@ import { beforeEach, describe, expect, mock, test } from "bun:test";
 
 const now = new Date("2026-06-17T00:00:00.000Z");
 
-const activeRuleRow = {
+type PolicyTagRuleRow = {
+  id: string;
+  scopeKind: string;
+  realmUnitId: string | null;
+  tagUnitId: string;
+  state: "ACTIVE" | "ARCHIVED";
+  createdByUserId: string;
+  updatedByUserId: string | null;
+  reason: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+const activeRuleRow: PolicyTagRuleRow = {
   id: "rule-1",
   scopeKind: "realm",
   realmUnitId: "realm-1",
@@ -15,7 +28,7 @@ const activeRuleRow = {
   updatedAt: now,
 };
 
-const archivedRuleRow = {
+const archivedRuleRow: PolicyTagRuleRow = {
   ...activeRuleRow,
   id: "rule-archived",
   state: "ARCHIVED",
@@ -169,7 +182,7 @@ mock.module("../db/client", () => ({
 }));
 
 async function importPolicyTagService() {
-  return import("./policy-tag.service.ts?policy-tag-service-test");
+  return import("./policy-tag.service");
 }
 
 describe("PolicyTagService", () => {

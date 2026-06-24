@@ -59,11 +59,11 @@ import {
   ZonePage,
 } from "../db/schema";
 import { generateBetween, rebalance } from "../shelf/fractional-index";
-import { mapBookToStreamRow } from "../stream/stream.mapper";
 import {
-  mapPostToStreamRow,
+  mapBookToStreamRow,
   mapUnitToStreamRow,
-} from "../stream/stream.response";
+} from "../stream/stream.mapper";
+import { mapPostToStreamRow } from "../stream/stream.response";
 
 const SECTION_DEFAULT_LIMIT = 12;
 
@@ -2024,7 +2024,7 @@ export class ZoneService {
       default:
         throw new AppError(400, "Unsupported section data kind", {
           code: "ZONE_SECTION_NO_DATA",
-          details: { sectionId, kind: section.kind },
+          details: { sectionId },
         });
     }
   }

@@ -180,15 +180,15 @@ export const tagApi = new Elysia({ prefix: "/tag" })
   // PUT /:unitId - 更新标签（管理员）
   .put(
     "/:unitId",
-    async ({ params, body, identity }): Promise<TagUnitDTO | string> => {
+    async ({ params, body, identity }): Promise<TagUnitDTO> => {
       if (
         identity.permission.role !== "ADMIN" &&
         identity.permission.role !== "ROOT"
       ) {
-        return status(403, "Forbidden: Admin role required");
+        throw status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.userId);
-      if (!isAdmin) return status(403, "Forbidden: Admin role required");
+      if (!isAdmin) throw status(403, "Forbidden: Admin role required");
 
       const updated = await tagService.update(
         params.unitId,

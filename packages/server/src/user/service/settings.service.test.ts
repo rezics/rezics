@@ -12,6 +12,12 @@ import {
 } from "../../db/schema";
 
 type Row = Record<string, any>;
+type MockDb = {
+  select: () => SelectBuilder;
+  insert: (table: unknown) => InsertBuilder;
+  delete: (table: unknown) => DeleteBuilder;
+  transaction: <T>(fn: (tx: MockDb) => Promise<T>) => Promise<T>;
+};
 
 const state = new Map<unknown, Row[]>();
 
@@ -131,8 +137,9 @@ class InsertBuilder {
         (existing) => rowKey(this.table, existing) === key,
       );
       if (upsert && index >= 0) {
-        tableRows[index] = { ...tableRows[index], ...row };
-        this.inserted.push(tableRows[index]);
+        const updated = { ...tableRows[index]!, ...row };
+        tableRows[index] = updated;
+        this.inserted.push(updated);
       } else {
         tableRows.push(row);
         this.inserted.push(row);
@@ -158,11 +165,11 @@ class DeleteBuilder {
   }
 }
 
-const db = {
+const db: MockDb = {
   select: () => new SelectBuilder(),
   insert: (table: unknown) => new InsertBuilder(table),
   delete: (table: unknown) => new DeleteBuilder(table),
-  transaction: async (fn: (tx: typeof db) => Promise<void>) => fn(db),
+  transaction: async (fn) => fn(db),
 };
 
 mock.module("../../db/client", () => ({ db }));

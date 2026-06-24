@@ -2,12 +2,11 @@ import type {
   BookshelfViewConfig,
   ContentLanguage,
   ContentRating,
+  LicenseSlug,
   NotificationPreference,
   NotificationPreferenceKey,
-  ProfileFieldVisibility,
   UpdateUserSettings,
   UserSettings,
-  UserSubscriptionListSort,
 } from "@rezics/contract";
 import {
   FALLBACK_LANGUAGE,
@@ -16,6 +15,8 @@ import {
   NOTIFICATION_PREFERENCE_KEYS,
   normalizeContentLanguage,
   OPT_IN_RATINGS,
+  PROFILE_FIELD_VISIBILITIES,
+  USER_SUBSCRIPTION_LIST_SORTS,
   USER_TAG_PRIVACY_FIELD_KEY,
 } from "@rezics/contract";
 import { asc, eq, inArray } from "drizzle-orm";
@@ -34,6 +35,10 @@ import {
 type DbLike = Awaited<ReturnType<typeof getServerDb>>;
 type TxLike = Parameters<Parameters<DbLike["transaction"]>[0]>[0];
 type WritableDb = DbLike | TxLike;
+type OptInRating = "R_18" | "R_18G";
+type UserSubscriptionListSortValue =
+  (typeof USER_SUBSCRIPTION_LIST_SORTS)[number];
+type ProfileFieldVisibilityValue = (typeof PROFILE_FIELD_VISIBILITIES)[number];
 
 type SettingsRows = {
   exists: boolean;
@@ -79,6 +84,32 @@ function hasOwn<T extends object, K extends PropertyKey>(
   return Object.hasOwn(object, key);
 }
 
+function isOptInRating(value: string): value is OptInRating {
+  return (OPT_IN_RATINGS as readonly string[]).includes(value);
+}
+
+function isLicenseSlug(value: string): value is LicenseSlug {
+  return (LICENSE_SLUGS as readonly string[]).includes(value);
+}
+
+function isUserSubscriptionListSort(
+  value: unknown,
+): value is UserSubscriptionListSortValue {
+  return (
+    typeof value === "string" &&
+    (USER_SUBSCRIPTION_LIST_SORTS as readonly string[]).includes(value)
+  );
+}
+
+function isProfileFieldVisibility(
+  value: unknown,
+): value is ProfileFieldVisibilityValue {
+  return (
+    typeof value === "string" &&
+    (PROFILE_FIELD_VISIBILITIES as readonly string[]).includes(value)
+  );
+}
+
 function validateSettings(settings: UpdateUserSettings): void {
   if (settings.realmTagPreferences) {
     for (const [, pref] of Object.entries(settings.realmTagPreferences)) {
@@ -93,7 +124,7 @@ function validateSettings(settings: UpdateUserSettings): void {
 
   const optedIn = settings.content?.optedInRatings;
   if (optedIn) {
-    const invalid = optedIn.filter((r) => !OPT_IN_RATINGS.includes(r as any));
+    const invalid = optedIn.filter((rating) => !isOptInRating(rating));
     if (invalid.length > 0) {
       throw new Error(
         `content.optedInRatings contains invalid values: ${invalid.join(", ")}. Only R_18 and R_18G are opt-in tiers.`,
@@ -102,10 +133,7 @@ function validateSettings(settings: UpdateUserSettings): void {
   }
 
   const defaultLicenseSlug = settings.publishing?.defaultLicenseSlug;
-  if (
-    defaultLicenseSlug != null &&
-    !(LICENSE_SLUGS as readonly string[]).includes(defaultLicenseSlug)
-  ) {
+  if (defaultLicenseSlug != null && !isLicenseSlug(defaultLicenseSlug)) {
     throw new Error(
       `publishing.defaultLicenseSlug contains invalid value: ${defaultLicenseSlug}.`,
     );
@@ -211,16 +239,18 @@ function materializeSettings(rows: SettingsRows): UserSettings {
   };
 
   if (rows.contentRatings.length > 0) {
-    settings.content = {
-      optedInRatings: rows.contentRatings.map(
-        (row) => row.rating as ContentRating,
-      ),
-    };
+    const optedInRatings = rows.contentRatings
+      .map((row) => row.rating)
+      .filter(isOptInRating);
+    if (optedInRatings.length > 0) {
+      settings.content = { optedInRatings };
+    }
   }
 
-  if (rows.core && rows.core.defaultLicenseSlug !== null) {
+  const defaultLicenseSlug = rows.core?.defaultLicenseSlug;
+  if (defaultLicenseSlug != null && isLicenseSlug(defaultLicenseSlug)) {
     settings.publishing = {
-      defaultLicenseSlug: rows.core.defaultLicenseSlug,
+      defaultLicenseSlug,
     };
   }
 
@@ -239,8 +269,9 @@ function materializeSettings(rows: SettingsRows): UserSettings {
   if (rows.subscriptionLists.length > 0) {
     settings.subscriptionLists = {};
     for (const row of rows.subscriptionLists) {
+      if (!isUserSubscriptionListSort(row.defaultSort)) continue;
       settings.subscriptionLists[row.list as "zones" | "realms"] = {
-        defaultSort: row.defaultSort as UserSubscriptionListSort,
+        defaultSort: row.defaultSort,
       };
     }
   }
@@ -259,10 +290,9 @@ function materializeSettings(rows: SettingsRows): UserSettings {
     const userTags = rows.privacy.find(
       (row) => row.field === USER_TAG_PRIVACY_FIELD_KEY,
     );
-    if (userTags) {
+    if (userTags && isProfileFieldVisibility(userTags.visibility)) {
       settings.privacy = {
-        [USER_TAG_PRIVACY_FIELD_KEY]:
-          userTags.visibility as ProfileFieldVisibility,
+        [USER_TAG_PRIVACY_FIELD_KEY]: userTags.visibility,
       };
     }
   }
@@ -322,11 +352,7 @@ async function replaceContentRatings(
   userId: string,
   ratings: readonly string[],
 ) {
-  const uniqueRatings = [
-    ...new Set(
-      ratings.filter((rating) => OPT_IN_RATINGS.includes(rating as any)),
-    ),
-  ];
+  const uniqueRatings = [...new Set(ratings.filter(isOptInRating))];
   await db
     .delete(UserContentRatingPreference)
     .where(eq(UserContentRatingPreference.userId, userId));
@@ -417,7 +443,12 @@ export async function updateSettings(
     if (partial.subscriptionLists) {
       for (const list of ["zones", "realms"] as const) {
         const value = partial.subscriptionLists[list]?.defaultSort;
-        if (!value) continue;
+        if (value === undefined) continue;
+        if (!isUserSubscriptionListSort(value)) {
+          throw new Error(
+            `subscriptionLists.${list}.defaultSort contains invalid value: ${String(value)}.`,
+          );
+        }
         const now = new Date();
         await tx
           .insert(UserSubscriptionListPreference)
@@ -460,6 +491,11 @@ export async function updateSettings(
 
     const userTagVisibility = partial.privacy?.[USER_TAG_PRIVACY_FIELD_KEY];
     if (userTagVisibility !== undefined) {
+      if (!isProfileFieldVisibility(userTagVisibility)) {
+        throw new Error(
+          `privacy.${USER_TAG_PRIVACY_FIELD_KEY} contains invalid value: ${String(userTagVisibility)}.`,
+        );
+      }
       const now = new Date();
       await tx
         .insert(UserPrivacyPreference)

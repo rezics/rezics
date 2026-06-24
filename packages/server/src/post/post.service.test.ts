@@ -76,6 +76,18 @@ mock.module("@/unit/language-resolution", () => ({
     isPrimary: true,
     position: "a",
   }),
+  resolveEffectiveReadLanguageCandidates: () => ["en"],
+  resolveEffectiveReadLanguageInput: (input: {
+    explicitLanguage?: string | null;
+    languages?: readonly string[] | string | null;
+    actorSettings?: { preferredLanguages?: readonly string[] | null } | null;
+    appLocale?: string | null;
+  }) => ({
+    explicitLanguage: input.explicitLanguage,
+    languages: input.languages,
+    preferredLanguages: input.actorSettings?.preferredLanguages,
+    appLocale: input.appLocale,
+  }),
   resolveUnitAuthoringLanguage: (input: {
     explicitLanguage?: string | null;
     appLocale?: string | null;
@@ -1069,7 +1081,6 @@ function createFakeSelect(
           where: { unitId: { in: strings.length ? strings : ["realm-1"] } },
           select: {
             unitId: true,
-            unitId: true,
             contentRequiresApproval: true,
           },
         }) ?? []
@@ -1208,6 +1219,8 @@ mock.module("@/job/job-boundary", () => ({
 
 mock.module("@/shelf/fractional-index", () => ({
   generateBetween: generateBetweenMock,
+  rebalance: (count: number) =>
+    Array.from({ length: count }, (_value, index) => `p${index}`),
 }));
 
 mock.module("@/unit/collaborative-metadata", () => ({
@@ -1333,7 +1346,6 @@ function resetMocks() {
     (args.where.unitId.in as string[]).map((unitId) => ({
       unitId,
       contentRequiresApproval: false,
-      contentRequiresApproval: false,
     })),
   );
   realmFindUniqueMock.mockClear();
@@ -1452,7 +1464,6 @@ describe("PostService.create realm/tag junction writes", () => {
     realmFindManyMock.mockImplementation(async (args: any) =>
       (args.where.unitId.in as string[]).map((unitId) => ({
         unitId,
-        contentRequiresApproval: false,
         contentRequiresApproval: true,
       })),
     );
@@ -1714,7 +1725,6 @@ describe("PostService.submitToRealm", () => {
     realmFindManyMock.mockImplementation(async (args: any) =>
       (args.where.unitId.in as string[]).map((unitId) => ({
         unitId,
-        contentRequiresApproval: false,
         contentRequiresApproval: true,
       })),
     );

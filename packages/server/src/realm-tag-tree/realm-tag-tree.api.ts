@@ -1,5 +1,6 @@
 import type { RealmTagTreeReadResponse } from "@rezics/contract";
 import {
+  parseRealmTagTree,
   realmParamsSchema,
   realmTagTreeReadResponseSchema,
   updateRealmTagTreeSchema,
@@ -45,11 +46,15 @@ export const realmTagTreeApi = new Elysia({ prefix: "/realm" })
     "/:unitId/tag-tree",
     async ({ params, body, identity }): Promise<RealmTagTreeReadResponse> => {
       try {
-        return await realmTagTreeService.update(
-          identity,
-          params.unitId,
-          body.tree,
-        );
+        const tree = parseRealmTagTree(body.tree);
+        if (!tree) {
+          throw new RealmTagTreeError(
+            "INVALID_TREE",
+            "Realm tag tree envelope is invalid",
+            400,
+          );
+        }
+        return await realmTagTreeService.update(identity, params.unitId, tree);
       } catch (error) {
         handleRealmTagTreeError(error);
       }

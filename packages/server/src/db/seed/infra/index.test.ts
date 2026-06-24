@@ -179,13 +179,23 @@ describe("seedInfra", () => {
       },
       sync: {
         content: noop,
-        post: async (id) => synced.post.push(id),
-        realm: async (id) => synced.realm.push(id),
-        zone: async (id) => synced.zone.push(id),
-        tag: async (id) => synced.tag.push(id),
+        post: async (id) => {
+          synced.post.push(id);
+        },
+        realm: async (id) => {
+          synced.realm.push(id);
+        },
+        zone: async (id) => {
+          synced.zone.push(id);
+        },
+        tag: async (id) => {
+          synced.tag.push(id);
+        },
         label: noop,
         user: noop,
-        entity: async (id) => synced.entity.push(id),
+        entity: async (id) => {
+          synced.entity.push(id);
+        },
         contentContainedUnits: noop,
       },
     });
