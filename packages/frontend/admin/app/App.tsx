@@ -16,7 +16,6 @@ import { router } from "@/admin/router";
 import { WindowAlert } from "./components/WindowAlert";
 import { PersistentSettingsLoader } from "./providers/PersistentSettingsLoader";
 import "./providers/i18n";
-import { ReactQueryProvider } from "./providers/react-query";
 import { useAppInit } from "./providers/useAppInit";
 import { useAppStore } from "./states/appStore";
 
@@ -37,12 +36,10 @@ function AppProviders({ children }: { children: ReactNode }) {
       >
         <HelmetProvider>
           <PersistentSettingsLoader />
-          <ReactQueryProvider>
-            <AuthProvider />
-            <WindowAlert />
-            <ExternalLinkModal />
-            {children}
-          </ReactQueryProvider>
+          <AuthProvider />
+          <WindowAlert />
+          <ExternalLinkModal />
+          {children}
         </HelmetProvider>
       </ErrorBoundary>
     </StrictMode>

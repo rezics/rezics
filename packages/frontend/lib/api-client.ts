@@ -2,6 +2,7 @@ import { treaty } from "@elysiajs/eden";
 import type {
   AuthAdminEmailRouter,
   AuthAdminRouter,
+  AuthSignInRouter,
 } from "@rezics/backend/auth";
 import type { AuthJwtServiceAdminRouter } from "@rezics/backend/auth/jwt";
 import type { ServerApp } from "@rezics/backend/server";
@@ -32,6 +33,8 @@ export const authAdminEmailClient =
   createEdenClient<AuthAdminEmailRouter>(`${API_BASE_URL}/auth`);
 export const authJwtServiceClient =
   createEdenClient<AuthJwtServiceAdminRouter>(`${API_BASE_URL}/auth`);
+export const authSignInClient =
+  createEdenClient<AuthSignInRouter>(`${API_BASE_URL}/auth`);
 
 type EdenErrorValue = {
   code?: string;
@@ -61,4 +64,35 @@ export function unwrapEdenResponse<T>(response: EdenResponse<T>): T {
   }
 
   return response.data;
+}
+
+function getRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+export async function unwrapEdenProxyResponse<T>(
+  response: unknown,
+): Promise<T> {
+  const data = unwrapEdenResponse(
+    response as EdenResponse<Response | T>,
+  );
+  if (!(data instanceof Response)) return data as T;
+
+  const payload = await data.json().catch(() => null);
+  if (data.ok) return payload as T;
+
+  const payloadRecord = getRecord(payload);
+  const errorRecord = getRecord(payloadRecord?.error);
+  const code =
+    typeof errorRecord?.code === "string" ? errorRecord.code : "UNKNOWN";
+  const message =
+    typeof payloadRecord?.message === "string"
+      ? payloadRecord.message
+      : typeof errorRecord?.message === "string"
+        ? errorRecord.message
+        : data.statusText || "Request failed";
+
+  throw new ApiError(data.status, code, message);
 }

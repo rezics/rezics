@@ -1,7 +1,6 @@
 import type {
   AccountEnforcementDTO,
   BanUserBody,
-  EdenResponse,
   RemoveUserBody,
   SetRoleBody,
   UnblockAccountEnforcementInput,
@@ -12,6 +11,7 @@ import {
   apiClient,
   authAdminClient,
   unwrapEdenResponse,
+  unwrapEdenProxyResponse,
 } from "@/lib/api-client";
 
 export type AuthAdminUser = {
@@ -80,30 +80,10 @@ function normalizeAuthAdminUsersResponse(value: unknown): AuthAdminUsersResponse
   };
 }
 
-async function unwrapAuthAdminProxyResponse<T>(response: unknown): Promise<T> {
-  const data = unwrapEdenResponse(response as EdenResponse<Response>);
-  if (data instanceof Response) {
-    const json = await data.json().catch(() => null);
-    if (!data.ok) {
-      const error = json?.error;
-      throw new Error(
-        JSON.stringify({
-          status: data.status,
-          code: error?.code,
-          message: json?.message ?? error?.message ?? data.statusText,
-          retryAfterSeconds: error?.retryAfterSeconds,
-        }),
-      );
-    }
-    return json as T;
-  }
-  return data as T;
-}
-
 async function fetchAuthAdminUsers(): Promise<AuthAdminUsersResponse> {
   const response = await authAdminClient.admin["list-users"].get();
   return normalizeAuthAdminUsersResponse(
-    await unwrapAuthAdminProxyResponse<unknown>(response),
+    await unwrapEdenProxyResponse<unknown>(response),
   );
 }
 
@@ -131,28 +111,28 @@ export async function banAuthAdminUser(
   input: BanUserBody,
 ): Promise<AuthAdminMutationResponse> {
   const response = await authAdminClient.admin["ban-user"].post(input);
-  return unwrapAuthAdminProxyResponse<AuthAdminMutationResponse>(response);
+  return unwrapEdenProxyResponse<AuthAdminMutationResponse>(response);
 }
 
 export async function unbanAuthAdminUser(
   input: UnbanUserBody,
 ): Promise<AuthAdminMutationResponse> {
   const response = await authAdminClient.admin["unban-user"].post(input);
-  return unwrapAuthAdminProxyResponse<AuthAdminMutationResponse>(response);
+  return unwrapEdenProxyResponse<AuthAdminMutationResponse>(response);
 }
 
 export async function setAuthAdminUserRole(
   input: SetRoleBody,
 ): Promise<AuthAdminMutationResponse> {
   const response = await authAdminClient.admin["set-role"].post(input);
-  return unwrapAuthAdminProxyResponse<AuthAdminMutationResponse>(response);
+  return unwrapEdenProxyResponse<AuthAdminMutationResponse>(response);
 }
 
 export async function removeAuthAdminUser(
   input: RemoveUserBody,
 ): Promise<AuthAdminMutationResponse> {
   const response = await authAdminClient.admin["remove-user"].post(input);
-  return unwrapAuthAdminProxyResponse<AuthAdminMutationResponse>(response);
+  return unwrapEdenProxyResponse<AuthAdminMutationResponse>(response);
 }
 
 export async function unblockAccountEnforcement(

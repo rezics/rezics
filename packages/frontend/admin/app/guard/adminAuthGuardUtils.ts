@@ -1,10 +1,3 @@
-import { ApiError } from "@rezics/contract";
-
-type ErrorLike = {
-  status?: unknown;
-  message?: unknown;
-};
-
 export function isAdminRole(role: string | null | undefined): boolean {
   return role === "admin" || role === "owner";
 }
@@ -34,39 +27,4 @@ export function sanitizeRedirectPath(to: unknown): string {
   if (typeof to !== "string") return "/";
   if (!to.startsWith("/") || to.startsWith("//")) return "/";
   return to;
-}
-
-export function isUnauthorizedError(error: unknown): boolean {
-  if (error instanceof ApiError) {
-    return error.status === 401;
-  }
-
-  if (hasStatus(error)) {
-    return error.status === 401;
-  }
-
-  if (error instanceof Error) {
-    const parsed = parseErrorMessage(error.message);
-    return parsed?.status === 401;
-  }
-
-  return false;
-}
-
-function hasStatus(error: unknown): error is { status: number } {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    typeof (error as ErrorLike).status === "number"
-  );
-}
-
-function parseErrorMessage(message: string): { status?: number } | null {
-  try {
-    const parsed: unknown = JSON.parse(message);
-    if (!hasStatus(parsed)) return null;
-    return { status: parsed.status };
-  } catch {
-    return null;
-  }
 }

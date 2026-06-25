@@ -40,3 +40,5 @@ export const signInRouter = new Elysia()
       },
     },
   });
+
+export type AuthSignInRouter = typeof signInRouter;

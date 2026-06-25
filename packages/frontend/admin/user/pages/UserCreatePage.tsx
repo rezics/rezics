@@ -1,56 +1,24 @@
-import { userMutations } from "@rezics/contract/api/user/user.mutations";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Alert,
   AlertDescription,
+  AlertTitle,
   Button,
   Card,
   CardContent,
-  Input,
-  Label,
   Separator,
 } from "@rezics/ui/shadcn";
-import { useNavigate } from "@tanstack/react-router";
-import { ArrowLeft as ArrowBackIcon, Save as SaveIcon } from "lucide-react";
-import React from "react";
+import { ArrowLeft as ArrowBackIcon } from "lucide-react";
 import { Page } from "@/admin/core/layouts/Page";
 import { Link } from "@/admin/shared/ui/link";
 
 export default function UserCreatePage() {
   const { t } = useTranslation(["admin", "common"]);
-  const navigate = useNavigate();
-
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [slug, setSlug] = React.useState("");
-  const [avatar, setAvatar] = React.useState("");
-  const [summary, setSummary] = React.useState("");
-  const [error, setError] = React.useState<string | null>(null);
-
-  const createMutation = userMutations.useAdminCreate({
-    onError: (err: unknown) =>
-      setError(
-        err instanceof Error ? err.message : t("admin:user_create_failed"),
-      ),
-  });
-
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    const user = await createMutation.mutateAsync({
-      email: email.trim(),
-      password,
-      slug: slug.trim(),
-      avatar: avatar.trim() || undefined,
-      summary: summary.trim() || undefined,
-    });
-    await navigate({ to: `/user/${user.unitId}`, replace: true });
-  }
 
   return (
     <Page
       title={t("admin:user_create_title")}
-      description={t("admin:user_create_description")}
+      description={t("admin:placeholder_coming_soon_description")}
     >
       <Card>
         <CardContent>
@@ -70,89 +38,12 @@ export default function UserCreatePage() {
 
           <Separator className="my-4" />
 
-          {error ? (
-            <Alert className="mb-4">
-              <AlertDescription className="text-error-text">
-                {error}
-              </AlertDescription>
-            </Alert>
-          ) : null}
-
-          <form onSubmit={onSubmit}>
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1">
-                <Label htmlFor="ucp-email">
-                  {t("admin:user_rezics_email_label")}
-                </Label>
-                <Input
-                  id="ucp-email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  type="email"
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <Label htmlFor="ucp-password">{t("common:password")}</Label>
-                <Input
-                  id="ucp-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  type="password"
-                />
-                <p className="text-xs text-text-secondary">
-                  {t("admin:user_password_min_help")}
-                </p>
-              </div>
-              <div className="flex flex-col gap-1">
-                <Label htmlFor="ucp-slug">{t("admin:user_slug_label")}</Label>
-                <Input
-                  id="ucp-slug"
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
-                  required
-                />
-                <p className="text-xs text-text-secondary">
-                  {t("admin:user_slug_help")}
-                </p>
-              </div>
-              <div className="flex flex-col gap-1">
-                <Label htmlFor="ucp-avatar">
-                  {t("admin:user_avatar_url_label")}
-                </Label>
-                <Input
-                  id="ucp-avatar"
-                  value={avatar}
-                  onChange={(e) => setAvatar(e.target.value)}
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <Label htmlFor="ucp-summary">
-                  {t("admin:user_summary_label")}
-                </Label>
-                <textarea
-                  id="ucp-summary"
-                  value={summary}
-                  onChange={(e) => setSummary(e.target.value)}
-                  rows={3}
-                  className="rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-fill"
-                />
-              </div>
-
-              <div>
-                <Button type="submit" disabled={createMutation.isPending}>
-                  <SaveIcon className="size-4" />
-                  {createMutation.isPending
-                    ? t("admin:user_creating")
-                    : t("common:create")}
-                </Button>
-              </div>
-              <p className="text-xs text-text-secondary">
-                {t("admin:user_create_note")}
-              </p>
-            </div>
-          </form>
+          <Alert>
+            <AlertTitle>{t("admin:placeholder_coming_soon_title")}</AlertTitle>
+            <AlertDescription>
+              {t("admin:placeholder_coming_soon_description")}
+            </AlertDescription>
+          </Alert>
         </CardContent>
       </Card>
     </Page>

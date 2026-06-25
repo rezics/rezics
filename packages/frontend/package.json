@@ -15,7 +15,6 @@
     "@rezics/contract": "workspace:*",
     "@rezics/i18n": "workspace:*",
     "@rezics/ui": "workspace:*",
-    "@tanstack/react-query": "^5.96.2",
     "@tanstack/react-router": "^1.168.10",
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",

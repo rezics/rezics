@@ -1,6 +1,5 @@
 import { useRouter } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef } from "react";
-import { qc } from "@/admin/app/providers/reactQueryUtil";
 import {
   clearAuthSessionState,
   useAuthSessionStore,
@@ -8,7 +7,6 @@ import {
 import {
   buildCurrentRedirectPath,
   isAdminRole,
-  isUnauthorizedError,
 } from "./adminAuthGuardUtils";
 
 export function AdminAuthGuard() {
@@ -42,37 +40,6 @@ export function AdminAuthGuard() {
       redirectToLogin();
     }
   }, [permission, redirectToLogin, role, status]);
-
-  useEffect(() => {
-    const handleError = (error: unknown) => {
-      if (isUnauthorizedError(error)) {
-        redirectToLogin();
-      }
-    };
-
-    const unsubscribeQueries = qc.getQueryCache().subscribe((event) => {
-      if (event.type !== "updated") return;
-      handleError(event.query.state.error);
-    });
-
-    const unsubscribeMutations = qc.getMutationCache().subscribe((event) => {
-      if (event.type !== "updated") return;
-      handleError(event.mutation.state.error);
-    });
-
-    for (const query of qc.getQueryCache().findAll()) {
-      handleError(query.state.error);
-    }
-
-    for (const mutation of qc.getMutationCache().getAll()) {
-      handleError(mutation.state.error);
-    }
-
-    return () => {
-      unsubscribeQueries();
-      unsubscribeMutations();
-    };
-  }, [redirectToLogin]);
 
   return null;
 }
