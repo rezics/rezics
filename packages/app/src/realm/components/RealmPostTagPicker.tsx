@@ -1,6 +1,6 @@
 import { labelListQuery } from "@rezics/contract/api/label/label.queries";
 import { meiliTagSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
-import { realmTagTreeQuery } from "@rezics/contract/api/realm-tag-tree";
+import { realmTagTreeQuery } from "@rezics/contract/api/realm-tag-tree/realm-tag-tree.queries";
 import { tagBatchTranslationsQuery } from "@rezics/contract/api/tag/tag";
 import type { TagSearchDocument } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";

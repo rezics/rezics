@@ -2,8 +2,10 @@ import { meiliTagSearchQueryOptions } from "@rezics/contract/api/meili/meili.que
 import { tagBatchTranslationsQuery } from "@rezics/contract/api/tag/tag";
 import {
   usePatchUserShelfItemMutation,
+} from "@rezics/contract/api/user-shelf-item/user-shelf-item.mutations";
+import {
   userShelfItemForUnitQuery,
-} from "@rezics/contract/api/user-shelf-item/user-shelf-item";
+} from "@rezics/contract/api/user-shelf-item/user-shelf-item.queries";
 import { useSetUserTagApplicationsMutation } from "@rezics/contract/api/user-tag-application/user-tag-application.mutations";
 import { userTagApplicationsForUnitQuery } from "@rezics/contract/api/user-tag-application/user-tag-application.queries";
 import type { TagSearchDocument } from "@rezics/contract";

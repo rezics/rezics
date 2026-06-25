@@ -55,7 +55,7 @@ import { tagBatchTranslationsQuery } from "@rezics/contract/api/tag/tag";
 import {
   userShelfItemSearchMineQuery,
   userShelfItemSearchUserQuery,
-} from "@rezics/contract/api/user-shelf-item/user-shelf-item";
+} from "@rezics/contract/api/user-shelf-item/user-shelf-item.queries";
 import type { TagSearchDocument, UserShelfItemDTO } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Badge, Button, Input, Label } from "@rezics/ui/shadcn";

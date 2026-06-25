@@ -1,5 +1,5 @@
 import { getDefaultRealmId } from "@rezics/contract/api/infra/bootstrap";
-import { scoreQueries } from "@rezics/contract/api/score/score";
+import { scoreQueries } from "@rezics/contract/api/score/score.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";

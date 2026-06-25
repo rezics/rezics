@@ -1,7 +1,7 @@
 import {
   commentQuery,
   commentRootChildrenInfiniteQuery,
-} from "@rezics/contract/api/comment/comment";
+} from "@rezics/contract/api/comment/comment.queries";
 import { useEditorEntry } from "@rezics/contract/api/hooks/useEditorEntry";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

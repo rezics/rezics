@@ -1,4 +1,4 @@
-import { useCreateCommentMutation } from "@rezics/contract/api/comment/comment";
+import { useCreateCommentMutation } from "@rezics/contract/api/comment/comment.mutations";
 import { useCreatePostMutation } from "@rezics/contract/api/post/post";
 import { realmDetailQuery } from "@rezics/contract/api/realm/realm";
 import {

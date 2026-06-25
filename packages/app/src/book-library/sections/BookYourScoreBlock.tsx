@@ -1,10 +1,10 @@
 import { useCurrentUserId } from "@rezics/contract/api/hooks/useCurrentUserId";
 import { getDefaultRealmId } from "@rezics/contract/api/infra/bootstrap";
 import {
-  scoreQueries,
   useDeleteScoreMutation,
   useUpsertScoreMutation,
-} from "@rezics/contract/api/score/score";
+} from "@rezics/contract/api/score/score.mutations";
+import { scoreQueries } from "@rezics/contract/api/score/score.queries";
 import { SCORE_MAX } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { RatingInput } from "@rezics/ui";

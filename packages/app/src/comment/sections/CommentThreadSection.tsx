@@ -1,7 +1,5 @@
-import {
-  commentDiscoveryInfiniteQuery,
-  useModerateCommentMutation,
-} from "@rezics/contract/api/comment/comment";
+import { useModerateCommentMutation } from "@rezics/contract/api/comment/comment.mutations";
+import { commentDiscoveryInfiniteQuery } from "@rezics/contract/api/comment/comment.queries";
 import {
   computeEditorEntryDecision,
 } from "@rezics/contract/api/hooks/useEditorEntry";

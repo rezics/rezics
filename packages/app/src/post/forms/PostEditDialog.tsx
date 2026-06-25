@@ -1,5 +1,5 @@
 import { getLockedFieldError } from "@rezics/contract/api/react-query/errors";
-import { useUpdateCommentMutation } from "@rezics/contract/api/comment/comment";
+import { useUpdateCommentMutation } from "@rezics/contract/api/comment/comment.mutations";
 import {
   useUpdatePostMutation,
   useUpdateWikiPostContentMutation,

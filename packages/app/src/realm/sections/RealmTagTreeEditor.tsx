@@ -3,10 +3,8 @@ import {
   meiliLabelSearchQueryOptions,
   meiliTagSearchQueryOptions,
 } from "@rezics/contract/api/meili/meili.queries";
-import {
-  realmTagTreeQuery,
-  useUpdateRealmTagTreeMutation,
-} from "@rezics/contract/api/realm-tag-tree";
+import { useUpdateRealmTagTreeMutation } from "@rezics/contract/api/realm-tag-tree/realm-tag-tree.mutations";
+import { realmTagTreeQuery } from "@rezics/contract/api/realm-tag-tree/realm-tag-tree.queries";
 import { tagBatchTranslationsQuery } from "@rezics/contract/api/tag/tag";
 import type {
   LabelSearchDocument,
