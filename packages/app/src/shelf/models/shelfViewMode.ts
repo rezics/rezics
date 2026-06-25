@@ -1,4 +1,4 @@
-import type { ShelfView } from "@rezics/contract/api/shelf";
+import type { ShelfView } from "@rezics/contract/api/shelf/shelf";
 
 /**
  * Persisted shelf view-mode normalization is a clear cutover: recognized

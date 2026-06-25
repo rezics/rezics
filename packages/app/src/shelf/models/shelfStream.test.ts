@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import type { EnrichedShelfItem } from "@rezics/contract/api/shelf";
+import type { EnrichedShelfItem } from "@rezics/contract/api/shelf/shelf";
 import type {
   BookDTO,
   PostDTO,

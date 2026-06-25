@@ -1,4 +1,4 @@
-import type { ShelfItemDTO } from "@rezics/contract/api/shelf";
+import type { ShelfItemDTO } from "@rezics/contract/api/shelf/shelf";
 import { shelfItemReference } from "@rezics/contract";
 import { Badge } from "@rezics/ui/shadcn";
 

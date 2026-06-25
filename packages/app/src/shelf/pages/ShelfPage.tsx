@@ -18,14 +18,14 @@ const i18nMessages = {
 
 import { useCanEdit } from "@rezics/contract/api/hooks/useCanEdit";
 import { useReactionHydration } from "@rezics/contract/api/reaction/reaction";
-import type { ShelfSortState, ShelfView } from "@rezics/contract/api/shelf";
+import type { ShelfSortState, ShelfView } from "@rezics/contract/api/shelf/shelf";
 import {
   shelfDetailQuery,
   shelfItemsInfiniteQuery,
   useCleanupOrphansMutation,
   useHydratedShelfItems,
   useShelfItemStatusHydration,
-} from "@rezics/contract/api/shelf";
+} from "@rezics/contract/api/shelf/shelf";
 import {
   contentDocMarkdownFallback,
   isLibraryKind,

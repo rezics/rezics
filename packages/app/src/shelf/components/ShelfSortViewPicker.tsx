@@ -4,7 +4,7 @@ import type {
   ShelfSortOrder,
   ShelfSortState,
   ShelfView,
-} from "@rezics/contract/api/shelf";
+} from "@rezics/contract/api/shelf/shelf";
 import {
   Select,
   SelectContent,

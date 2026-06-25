@@ -2,7 +2,7 @@
  * TODO The current strategy has an issue. In list mode, a review actually does not need to be tied to the prime ordering. It should be able to be sorted into any position independently, while the bound prime information should be shown in the review card.
  * TODO 当前策略存在问题。在 list 模式下，review 其实不需要绑定到 prime 排序。它应当能够独立排序到任意位置，同时绑定的 prime 信息应展示在 review card 中。
  */
-import type { ShelfView } from "@rezics/contract/api/shelf";
+import type { ShelfView } from "@rezics/contract/api/shelf/shelf";
 
 /**
  * Shelf edit page with translation-row metadata and item editor. Title,
@@ -52,7 +52,7 @@ import type { ShelfView } from "@rezics/contract/api/shelf";
  * | Outer whitespace expands     |
  * +------------------------------+
  */
-import { shelfDetailQuery, shelfKeys } from "@rezics/contract/api/shelf";
+import { shelfDetailQuery, shelfKeys } from "@rezics/contract/api/shelf/shelf";
 import {
   useSetShelfPinnedTagsMutation,
   useUpdateShelfMutation,

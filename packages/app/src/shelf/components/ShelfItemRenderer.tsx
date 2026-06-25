@@ -2,7 +2,7 @@ import type {
   EnrichedShelfItem,
   ShelfView,
   TagListEntryDTO,
-} from "@rezics/contract/api/shelf";
+} from "@rezics/contract/api/shelf/shelf";
 import type {
   BookDTO,
   CommentDTO,

@@ -2,7 +2,7 @@ import type {
   EnrichedShelfItem,
   ShelfSortState,
   ShelfView,
-} from "@rezics/contract/api/shelf";
+} from "@rezics/contract/api/shelf/shelf";
 import type { ShelfItemChildDTO, ShelfItemDTO } from "@rezics/contract";
 import {
   shelfItemIdentity,
