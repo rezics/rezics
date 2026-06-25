@@ -1,4 +1,4 @@
-import { zoneQueryOptions } from "@rezics/contract/api/zone/zone";
+import { zoneQueryOptions } from "@rezics/contract/api/zone/zone.queries";
 import type { SearchCategory, SearchQuery } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";

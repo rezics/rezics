@@ -1,5 +1,5 @@
 import { unitDetailQuery } from "@rezics/contract/api/unit/unit.queries";
-import { zoneQueries } from "@rezics/contract/api/zone/zone";
+import { zoneQueries } from "@rezics/contract/api/zone/zone.queries";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import {
   titleContext,

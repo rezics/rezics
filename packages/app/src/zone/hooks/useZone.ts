@@ -1,4 +1,4 @@
-import { zonePortalQueryOptions, zoneQueryOptions } from "@rezics/contract/api/zone/zone";
+import { zonePortalQueryOptions, zoneQueryOptions } from "@rezics/contract/api/zone/zone.queries";
 import { useQuery } from "@tanstack/react-query";
 import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 

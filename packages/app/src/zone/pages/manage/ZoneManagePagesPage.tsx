@@ -2,8 +2,8 @@ import {
   useCreateZonePage,
   useDeleteZonePage,
   useUpdateZonePage,
-  zonePortalQueryOptions,
-} from "@rezics/contract/api/zone/zone";
+} from "@rezics/contract/api/zone/zone.mutations";
+import { zonePortalQueryOptions } from "@rezics/contract/api/zone/zone.queries";
 import type {
   CreateZonePageInput,
   UpdateZonePageInput,

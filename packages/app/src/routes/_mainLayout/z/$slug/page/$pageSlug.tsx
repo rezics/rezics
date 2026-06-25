@@ -1,4 +1,4 @@
-import { zoneQueries } from "@rezics/contract/api/zone/zone";
+import { zoneQueries } from "@rezics/contract/api/zone/zone.queries";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { titleOfZone, unitTitleMeta } from "@/core/routing/documentTitle";
 import { resolveRouteReadLanguageContext } from "@/shared/models/readLanguageContext";

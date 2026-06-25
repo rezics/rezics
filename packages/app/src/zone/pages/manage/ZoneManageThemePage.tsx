@@ -1,4 +1,4 @@
-import { useUpdateZoneNav, useUpdateZoneTheme } from "@rezics/contract/api/zone/zone";
+import { useUpdateZoneNav, useUpdateZoneTheme } from "@rezics/contract/api/zone/zone.mutations";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { useEffect, useState } from "react";

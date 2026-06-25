@@ -1,4 +1,4 @@
-import { zoneSectionInfiniteQuery } from "@rezics/contract/api/zone/zone";
+import { zoneSectionInfiniteQuery } from "@rezics/contract/api/zone/zone.queries";
 import type { ZoneQuerySection } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
