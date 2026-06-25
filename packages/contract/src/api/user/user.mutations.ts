@@ -41,6 +41,28 @@ export function useUpdateMeMutation(
   });
 }
 
+export function useUpdateUserMutation(
+  options?: Omit<
+    UseMutationOptions<UserDTO, Error, { userId: string; input: UpdateUser }>,
+    "mutationFn"
+  >,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, input }) => userApi.update(userId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      qc.setQueryData(userKeys.detail(variables.userId), data);
+      qc.invalidateQueries({ queryKey: userKeys.lists() });
+      qc.invalidateQueries({
+        queryKey: [...userKeys.all(), "by-slug"],
+      });
+      qc.invalidateQueries({ queryKey: userKeys.details() });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
 type AdminCreateUserInput = {
   email: string;
   password: string;
@@ -207,6 +229,7 @@ export function useDeleteAccountMutation(
 
 export const userMutations = {
   useUpdateMe: useUpdateMeMutation,
+  useUpdateUser: useUpdateUserMutation,
   useAdminCreate: useAdminCreateUserMutation,
   useAdminUpdate: useAdminUpdateUserMutation,
   useDeleteMe: useDeleteMeMutation,

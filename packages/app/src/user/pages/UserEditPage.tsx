@@ -1,4 +1,7 @@
-import { userApi } from "@rezics/contract/api/user/user.api";
+import {
+  useUpdateMeMutation,
+  useUpdateUserMutation,
+} from "@rezics/contract/api/user/user.mutations";
 import { userQueries } from "@rezics/contract/api/user/user.queries";
 import {
   contentDocMarkdownFallback,
@@ -59,6 +62,8 @@ export const UserEditPage: FC<UserEditPageProps> = ({
   } = useQuery(userQueries.detail(resolvedUserId ?? ""));
   const [error, setError] = useState<string | any | null>(null);
   const [saving, setSaving] = useState(false);
+  const updateMeMutation = useUpdateMeMutation();
+  const updateUserMutation = useUpdateUserMutation();
 
   const [formData, setFormData] = useState<UserEditFormData>({
     name: "",
@@ -105,9 +110,12 @@ export const UserEditPage: FC<UserEditPageProps> = ({
       }
       let updatedUser: UserDTO;
       if (!resolvedUserId) {
-        updatedUser = await userApi.updateMe(updateData);
+        updatedUser = await updateMeMutation.mutateAsync(updateData);
       } else {
-        updatedUser = await userApi.update(resolvedUserId, updateData);
+        updatedUser = await updateUserMutation.mutateAsync({
+          userId: resolvedUserId,
+          input: updateData,
+        });
       }
       setUser(updatedUser);
 
