@@ -12,6 +12,7 @@ import {
   TagSearchOptionsSchema,
   type UserListQuery,
   userListQuerySchema,
+  userListResponseSchema,
   ZoneSearchOptionsSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
@@ -91,6 +92,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       query: userListQuerySchema,
+      response: { 200: userListResponseSchema },
       detail: {
         summary: "Search users (Meilisearch)",
         tags: ["Meili", "Users", "Search"],

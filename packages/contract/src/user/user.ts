@@ -64,6 +64,13 @@ export const userListBodySchema = t.Object({
 
 export type UserListBody = (typeof userListBodySchema)["static"];
 
+export const userListResponseSchema = t.Object({
+  users: t.Array(userDTOSchema),
+  total: t.Number(),
+});
+
+export type UserListResponse = (typeof userListResponseSchema)["static"];
+
 export const userParamsSchema = t.Object({
   userId: t.String(),
 });

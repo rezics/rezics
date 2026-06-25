@@ -2,6 +2,7 @@ import type { UpdateUser } from "@rezics/contract";
 import {
   editorialPatchSubmissionSchema,
   userListQuerySchema,
+  userListResponseSchema,
   userParamsSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
@@ -32,7 +33,7 @@ export const adminRoute = new Elysia()
       requireLogin: true,
       query: userListQuerySchema,
       response: {
-        200: t.Any(),
+        200: userListResponseSchema,
         403: t.String(),
       },
       detail: {

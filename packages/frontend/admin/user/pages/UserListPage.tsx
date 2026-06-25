@@ -1,6 +1,4 @@
-import { userSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
-import { userQueries } from "@rezics/contract/api/user/user.queries";
-import type { UserDTO } from "@rezics/contract";
+import type { UserDTO, UserListQuery } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
@@ -11,7 +9,6 @@ import {
   Label,
   Separator,
 } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
 import { Plus as AddIcon, Search as SearchIcon } from "lucide-react";
 import React from "react";
@@ -21,6 +18,10 @@ import {
 } from "@/admin/components/table/PaginatedTable";
 import { Page } from "@/admin/core/layouts/Page";
 import { Link } from "@/admin/shared/ui/link";
+import {
+  useAdminUserListQuery,
+  useMeiliUserSearchQuery,
+} from "../hooks/useUserListQueries";
 
 function fmtDate(v?: string | Date) {
   if (!v) return "";
@@ -45,27 +46,18 @@ export default function UserListPage() {
     setLimit(20);
   }, []);
 
-  const listQuery = useQuery({
-    ...userQueries.adminList({
-      page: page + 1,
-      limit,
-      ...(query ? { q: query } : {}),
-    }),
-    enabled: !isMeiliMode,
-  });
+  const filters: UserListQuery = {
+    page: page + 1,
+    limit,
+    ...(query ? { q: query } : {}),
+  };
 
-  const meiliQuery = useQuery({
-    ...userSearchQueryOptions({
-      q: query || undefined,
-      page: page + 1,
-      limit,
-    }),
-    enabled: isMeiliMode,
-  });
+  const listQuery = useAdminUserListQuery(filters, !isMeiliMode);
+  const meiliQuery = useMeiliUserSearchQuery(filters, isMeiliMode);
 
   const data = isMeiliMode ? meiliQuery.data : listQuery.data;
 
-  const users = (data?.users ?? []) as UserDTO[];
+  const users = data?.users ?? [];
   const total = data?.total ?? 0;
 
   const columns = React.useMemo(() => {

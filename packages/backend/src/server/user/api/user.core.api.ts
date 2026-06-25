@@ -5,6 +5,7 @@ import {
   userBySlugParamsSchema,
   userListBodySchema,
   userListQuerySchema,
+  userListResponseSchema,
   userParamsSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
@@ -33,6 +34,7 @@ export const coreRoute = new Elysia()
     },
     {
       query: userListQuerySchema,
+      response: { 200: userListResponseSchema },
       detail: {
         summary: "Get all users",
         description: "Get all users with filters and pagination",
@@ -54,6 +56,7 @@ export const coreRoute = new Elysia()
     },
     {
       body: userListBodySchema,
+      response: { 200: userListResponseSchema },
       detail: {
         summary: "Get all users (POST)",
         description:
