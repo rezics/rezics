@@ -1,3 +1,7 @@
+import type {
+  EchoKvKeyListResponse,
+  EchoKvResponse,
+} from "@rezics/contract/api/echokv/echokv.api";
 import useSWR from "swr";
 import { apiClient, unwrapEdenResponse } from "@/lib/api-client";
 
@@ -7,7 +11,9 @@ function echoKvKeyListKey(search: string): EchoKvKeyListKey {
   return ["eden", "echokv", "list", search] as const;
 }
 
-async function fetchEchoKvKeys(key: EchoKvKeyListKey) {
+async function fetchEchoKvKeys(
+  key: EchoKvKeyListKey,
+): Promise<EchoKvKeyListResponse> {
   const [, , , search] = key;
   const query = search.trim() ? { search: search.trim() } : {};
   const response = await apiClient.echokv.list.get({ query });
@@ -30,12 +36,17 @@ export function useEchoKvKeyListQuery(search: string) {
   };
 }
 
-export async function getEchoKvValue(key: string) {
+export async function getEchoKvValue(
+  key: string,
+): Promise<EchoKvResponse<unknown>> {
   const response = await apiClient.echokv({ key }).get();
   return unwrapEdenResponse(response);
 }
 
-export async function setEchoKvValue(key: string, value: unknown) {
+export async function setEchoKvValue(
+  key: string,
+  value: unknown,
+): Promise<EchoKvResponse<unknown>> {
   const response = await apiClient.echokv({ key }).put({ value });
   return unwrapEdenResponse(response);
 }

@@ -1,11 +1,4 @@
 import { treaty } from "@elysiajs/eden";
-import type {
-  AuthAdminEmailRouter,
-  AuthAdminRouter,
-  AuthSignInRouter,
-} from "@rezics/backend/auth";
-import type { AuthJwtServiceAdminRouter } from "@rezics/backend/auth/jwt";
-import type { ServerApp } from "@rezics/backend/server";
 import {
   ApiError,
   type ApiErrorDetail,
@@ -16,25 +9,41 @@ import type { AnyElysia } from "elysia";
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
 
-export function createEdenClient<App extends AnyElysia>(
+type LooseEdenResponse<T = any> = EdenResponse<T>;
+
+type LooseEdenClient = {
+  (
+    body?: unknown,
+    options?: {
+      fetch?: RequestInit;
+      headers?: Record<string, unknown>;
+      query?: Record<string, unknown>;
+      throwHttpError?: boolean;
+    },
+  ): LooseEdenClient & Promise<LooseEdenResponse>;
+  get: LooseEdenClient;
+  post: LooseEdenClient;
+  put: LooseEdenClient;
+  patch: LooseEdenClient;
+  delete: LooseEdenClient;
+  [segment: string]: LooseEdenClient;
+};
+
+export function createEdenClient<App extends AnyElysia = AnyElysia>(
   baseUrl = API_BASE_URL,
-) {
+): LooseEdenClient {
   return treaty<App>(baseUrl, {
     fetch: {
       credentials: "include",
     },
-  });
+  }) as unknown as LooseEdenClient;
 }
 
-export const apiClient = createEdenClient<ServerApp>();
-export const authAdminClient =
-  createEdenClient<AuthAdminRouter>(`${API_BASE_URL}/auth`);
-export const authAdminEmailClient =
-  createEdenClient<AuthAdminEmailRouter>(`${API_BASE_URL}/auth`);
-export const authJwtServiceClient =
-  createEdenClient<AuthJwtServiceAdminRouter>(`${API_BASE_URL}/auth`);
-export const authSignInClient =
-  createEdenClient<AuthSignInRouter>(`${API_BASE_URL}/auth`);
+export const apiClient = createEdenClient();
+export const authAdminClient = createEdenClient(`${API_BASE_URL}/auth`);
+export const authAdminEmailClient = createEdenClient(`${API_BASE_URL}/auth`);
+export const authJwtServiceClient = createEdenClient(`${API_BASE_URL}/auth`);
+export const authSignInClient = createEdenClient(`${API_BASE_URL}/auth`);
 
 type EdenErrorValue = {
   code?: string;
@@ -48,7 +57,7 @@ function getEdenErrorValue(error: unknown): EdenErrorValue | null {
   return value && typeof value === "object" ? (value as EdenErrorValue) : null;
 }
 
-export function unwrapEdenResponse<T>(response: EdenResponse<T>): T {
+export function unwrapEdenResponse<T = any>(response: EdenResponse<T>): T {
   if (response.error) {
     const value = getEdenErrorValue(response.error);
     throw new ApiError(
