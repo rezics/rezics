@@ -4,6 +4,7 @@ import {
   type EntityKind,
   editorialPatchSubmissionSchema,
   entityBySlugParamsSchema,
+  entityDTOSchema,
   entityListQuerySchema,
   entityListResponseSchema,
   entityParamsSchema,
@@ -14,6 +15,13 @@ import { assertEditorialPatchAllowed } from "@/unit/collaborative-metadata";
 import { assertMediaUrl } from "../upload/media-url.guard";
 import { mapEntityToDTO } from "./entity.mapper";
 import { entityService } from "./entity.service";
+
+const entityNotFoundResponseSchema = t.Object({
+  error: t.Object({
+    code: t.String(),
+    message: t.String(),
+  }),
+});
 
 /**
  * Entity HTTP surface mounted at `/entity`.
@@ -32,16 +40,21 @@ export const entityApi = new Elysia({ prefix: "/entity" })
 
   .get(
     "/by-slug/:slug",
-    async ({ params, set }) => {
+    async ({ params, status }) => {
       const row = await entityService.getBySlug(params.slug);
       if (!row) {
-        set.status = 404;
-        return { error: { code: "NOT_FOUND", message: "Entity not found" } };
+        return status(404, {
+          error: { code: "NOT_FOUND", message: "Entity not found" },
+        });
       }
       return mapEntityToDTO(row);
     },
     {
       params: entityBySlugParamsSchema,
+      response: {
+        200: entityDTOSchema,
+        404: entityNotFoundResponseSchema,
+      },
       detail: {
         summary: "Get entity by slug",
         description:
@@ -72,16 +85,21 @@ export const entityApi = new Elysia({ prefix: "/entity" })
 
   .get(
     "/:unitId",
-    async ({ params, set }) => {
+    async ({ params, status }) => {
       const row = await entityService.getByUnitId(params.unitId);
       if (!row) {
-        set.status = 404;
-        return { error: { code: "NOT_FOUND", message: "Entity not found" } };
+        return status(404, {
+          error: { code: "NOT_FOUND", message: "Entity not found" },
+        });
       }
       return mapEntityToDTO(row);
     },
     {
       params: entityParamsSchema,
+      response: {
+        200: entityDTOSchema,
+        404: entityNotFoundResponseSchema,
+      },
       detail: {
         summary: "Get entity by unitId",
         tags: ["Entity"],
@@ -105,6 +123,7 @@ export const entityApi = new Elysia({ prefix: "/entity" })
     {
       requireLogin: true,
       body: createEntitySchema,
+      response: entityDTOSchema,
       detail: {
         summary: "Create entity",
         description:
@@ -177,6 +196,7 @@ export const entityApi = new Elysia({ prefix: "/entity" })
       requireLogin: true,
       params: entityParamsSchema,
       body: editorialPatchSubmissionSchema,
+      response: entityDTOSchema,
       detail: {
         summary: "Update entity",
         description:

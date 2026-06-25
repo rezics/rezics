@@ -1,5 +1,4 @@
-import { useEntity, useUpdateEntity } from "@rezics/contract/api/entity";
-import type { EntityKind } from "@rezics/contract";
+import type { EditorialPatchSubmission, EntityKind } from "@rezics/contract";
 import {
   contentDocMarkdownFallback,
   entityKinds,
@@ -29,6 +28,10 @@ import React from "react";
 import { Page } from "@/admin/core/layouts/Page";
 import { Route } from "@/admin/routes/_admin/entity/$unitId";
 import { Link } from "@/admin/shared/ui/link";
+import {
+  useEntityDetailQuery,
+  useUpdateEntityMutation,
+} from "../hooks/useEntityListQuery";
 
 interface TranslationDraft {
   _draftId: string;
@@ -52,16 +55,10 @@ function createTranslationDraft(
 export default function EntityEditPage() {
   const { t } = useTranslation(["admin", "book", "common"]);
   const { unitId } = Route.useParams();
-  const entityQuery = useEntity(unitId);
+  const entityQuery = useEntityDetailQuery(unitId);
   const [error, setError] = React.useState<string | null>(null);
 
-  const updateMutation = useUpdateEntity({
-    onError: (err) =>
-      setError(
-        err instanceof Error ? err.message : t("admin:unit_update_failed"),
-      ),
-    onSuccess: () => setError(null),
-  });
+  const updateMutation = useUpdateEntityMutation(unitId);
 
   const [kind, setKind] = React.useState<EntityKind | "">("");
   const [avatar, setAvatar] = React.useState("");
@@ -154,34 +151,40 @@ export default function EntityEditPage() {
         description: (t.description ?? "").trim() || undefined,
       }));
 
-    await updateMutation.mutateAsync({
-      unitId,
-      input: {
-        patch: {
-          entity: {
-            kind: kind || undefined,
-            avatar: avatar.trim() || null,
-            verified,
-            slug: wantsSlug ? slugInput.trim() || null : undefined,
-          },
-          translations:
-            liveTranslations.length > 0
-              ? Object.fromEntries(
-                  liveTranslations.map((translation) => [
-                    translation.language,
-                    {
-                      ...translation,
-                      description: translation.description
-                        ? markdownContentDoc(translation.description)
-                        : undefined,
-                    },
-                  ]),
-                )
-              : undefined,
+    const input: EditorialPatchSubmission = {
+      patch: {
+        entity: {
+          kind: kind || undefined,
+          avatar: avatar.trim() || null,
+          verified,
+          slug: wantsSlug ? slugInput.trim() || null : undefined,
         },
+        translations:
+          liveTranslations.length > 0
+            ? Object.fromEntries(
+                liveTranslations.map((translation) => [
+                  translation.language,
+                  {
+                    ...translation,
+                    description: translation.description
+                      ? markdownContentDoc(translation.description)
+                      : undefined,
+                  },
+                ]),
+              )
+            : undefined,
       },
-    });
-    await entityQuery.refetch();
+    };
+
+    try {
+      await updateMutation.mutateAsync(input);
+      setError(null);
+      await entityQuery.refetch();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : t("admin:unit_update_failed"),
+      );
+    }
   }
 
   if (entityQuery.isLoading) {
