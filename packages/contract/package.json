@@ -43,10 +43,6 @@
       "types": "./src/api/notification/index.ts",
       "default": "./src/api/notification/index.ts"
     },
-    "./api/providers": {
-      "types": "./src/api/providers/index.ts",
-      "default": "./src/api/providers/index.ts"
-    },
     "./api/shelf": {
       "types": "./src/api/shelf/index.ts",
       "default": "./src/api/shelf/index.ts"
