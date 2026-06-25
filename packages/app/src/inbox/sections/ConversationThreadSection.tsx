@@ -1,6 +1,6 @@
-import { dmApi } from "@rezics/contract/api/dm/dm.api";
 import { dmKeys } from "@rezics/contract/api/dm/dm.keys";
 import {
+  setDmTyping,
   useMarkDmReadMutation,
   useSendDmMutation,
   useSetDmBlockMutation,
@@ -92,7 +92,7 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
   }, [conversationId, newestId, newestMine, markRead]);
 
   const emitTyping = (isTyping: boolean) => {
-    void dmApi.setTyping(conversationId, isTyping).catch(() => {});
+    void setDmTyping(conversationId, isTyping).catch(() => {});
   };
 
   useEffect(() => {
@@ -100,7 +100,7 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
       if (typingResetRef.current) clearTimeout(typingResetRef.current);
       // Notify peer that typing stopped on unmount
       // 卸载时通知对方用户已停止输入
-      void dmApi.setTyping(conversationId, false).catch(() => {});
+      void setDmTyping(conversationId, false).catch(() => {});
     };
   }, [conversationId]);
 

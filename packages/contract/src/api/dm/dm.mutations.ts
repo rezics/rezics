@@ -27,6 +27,13 @@ export function useSendDmMutation(
 
 export const useSendDm = useSendDmMutation;
 
+export function setDmTyping(
+  conversationId: string,
+  isTyping: boolean,
+): Promise<void> {
+  return dmApi.setTyping(conversationId, isTyping);
+}
+
 export function useMarkDmReadMutation(
   options?: Omit<
     UseMutationOptions<
@@ -73,6 +80,7 @@ export function useSetDmBlockMutation(
 
 export const dmMutations = {
   useSend: useSendDmMutation,
+  setTyping: setDmTyping,
   useMarkRead: useMarkDmReadMutation,
   useSetBlock: useSetDmBlockMutation,
 };
