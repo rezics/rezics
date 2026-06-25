@@ -1,5 +1,5 @@
 import type { ZoneTheme } from "@rezics/contract";
-import { uploadApi } from "@rezics/contract/api/upload/upload.api";
+import { uploadImage } from "@rezics/contract/api/upload/upload.mutations";
 import { useTranslation } from "@rezics/i18n/react";
 import { ColorField, type ColorThemeSet } from "@rezics/ui";
 import { createRezicsUploadProvider } from "@rezics/ui/editor";
@@ -136,7 +136,7 @@ export function ZoneManageThemeTab({
   const images = draft.theme.images ?? {};
   const layout = draft.theme.layout ?? {};
   const imageProvider = useMemo(
-    () => createRezicsUploadProvider(uploadApi.uploadImage),
+    () => createRezicsUploadProvider(uploadImage),
     [],
   );
 

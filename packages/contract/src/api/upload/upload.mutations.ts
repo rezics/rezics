@@ -1,7 +1,11 @@
 import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
 import { uploadApi } from "./upload.api";
 
-type ImageUploadResult = { url: string };
+export type ImageUploadResult = { url: string };
+
+export function uploadImage(file: File): Promise<ImageUploadResult> {
+  return uploadApi.uploadImage(file);
+}
 
 export function useImageUpload(
   options?: Omit<
@@ -10,7 +14,7 @@ export function useImageUpload(
   >,
 ) {
   return useMutation({
-    mutationFn: (file: File) => uploadApi.uploadImage(file),
+    mutationFn: uploadImage,
     ...options,
   });
 }

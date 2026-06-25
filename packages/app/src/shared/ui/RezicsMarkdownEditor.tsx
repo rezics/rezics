@@ -1,5 +1,5 @@
 import { meiliUserApi } from "@rezics/contract/api/meili/meili.api";
-import { uploadApi } from "@rezics/contract/api/upload/upload.api";
+import { uploadImage } from "@rezics/contract/api/upload/upload.mutations";
 import {
   RezicsMarkdownEditor as BaseRezicsMarkdownEditor,
   createRezicsUploadProvider,
@@ -18,7 +18,7 @@ const searchUsers: UserSearchAdapter = async (query) => {
 
 export function RezicsMarkdownEditor(props: RezicsMarkdownEditorProps) {
   const imageProviders = useMemo(
-    () => [createRezicsUploadProvider(uploadApi.uploadImage)],
+    () => [createRezicsUploadProvider(uploadImage)],
     [],
   );
 
