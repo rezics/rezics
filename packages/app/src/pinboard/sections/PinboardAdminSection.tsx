@@ -2,7 +2,7 @@ import {
   useAppendPinboardMutation,
   useRemovePinboardMutation,
 } from "@rezics/contract/api/pinboard/pinboard.mutations";
-import { unitApi } from "@rezics/contract/api/unit/unit.api";
+import { useCreateUnitMutation } from "@rezics/contract/api/unit/unit.mutations";
 import {
   DEFAULT_LANGUAGE,
   type Language,
@@ -79,6 +79,7 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
 
   const append = useAppendPinboardMutation();
   const removeMut = useRemovePinboardMutation();
+  const createUnit = useCreateUnitMutation();
 
   const openCreate = () => {
     setEditorOpen(true);
@@ -112,7 +113,7 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
 
   const handleCreate = async (translations: TranslationEditorEntry[]) => {
     try {
-      const created = await unitApi.create({
+      const created = await createUnit.mutateAsync({
         type: "POST",
         translations: translations.flatMap((tr) => {
           const language = toLanguage(tr.language);
