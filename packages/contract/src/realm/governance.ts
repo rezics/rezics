@@ -159,6 +159,25 @@ export const moderationScopeSchema = t.Union([
 
 export type ModerationScope = (typeof moderationScopeSchema)["static"];
 
+export type GovernanceListQuery = {
+  offset?: number;
+  limit?: number;
+  scope?: ModerationScope;
+  state?: ModerationCaseState;
+};
+
+export type GovernanceAuditListQuery = Omit<
+  GovernanceListQuery,
+  "scope" | "state"
+> & {
+  actorUserId?: string;
+  action?: string;
+  targetKind?: string;
+  targetId?: string;
+  decisionCode?: string;
+  requestId?: string;
+};
+
 export const moderationAuthoritySchema = t.Union([
   t.Literal("platform"),
   t.Literal("realm"),

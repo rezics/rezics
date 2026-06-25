@@ -15,6 +15,8 @@ import type {
   DecideRealmModerationCaseInput,
   DuplicateModerationCaseInput,
   EscalateRealmModerationCaseInput,
+  GovernanceAuditListQuery,
+  GovernanceListQuery,
   GrantCapabilityInput,
   ModerationActionDTO,
   ModerationCaseDTO,
@@ -30,22 +32,13 @@ import type {
 import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
 
+export type {
+  GovernanceAuditListQuery,
+  GovernanceListQuery,
+} from "@rezics/contract";
+
 export type GovernanceCapabilityHintsResponse = {
   capabilities: CapabilityHint[];
-};
-
-export type GovernanceListQuery = {
-  offset?: number;
-  limit?: number;
-};
-
-export type GovernanceAuditListQuery = GovernanceListQuery & {
-  actorUserId?: string;
-  action?: string;
-  targetKind?: string;
-  targetId?: string;
-  decisionCode?: string;
-  requestId?: string;
 };
 
 const encodePathPart = (value: string) => encodeURIComponent(value);

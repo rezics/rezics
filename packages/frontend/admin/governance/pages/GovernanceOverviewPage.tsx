@@ -1,15 +1,15 @@
-import {
-  type GovernanceAuditListQuery,
-  governanceQueries,
-} from "@rezics/contract/api/governance/governance";
-import type { AdminDashboardSummary } from "@rezics/contract/api/stat/stats";
-import { adminDashboardSummaryQueryOptions } from "@rezics/contract/api/stat/stats.queries";
 import type {
+  AdminDashboardSummary,
   DecisionCode,
+  GovernanceAuditListQuery,
+  GovernanceListQuery,
   ModerationCaseDTO,
   StaffAuditLogDTO,
 } from "@rezics/contract";
+import { Spinner } from "@rezics/ui";
 import {
+  Alert,
+  AlertDescription,
   Badge,
   buttonVariants,
   Card,
@@ -23,7 +23,6 @@ import {
   TableHeader,
   TableRow,
 } from "@rezics/ui/shadcn";
-import { useQueries, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import {
   ClipboardList,
   FileClock,
@@ -33,8 +32,11 @@ import {
   UserX,
 } from "lucide-react";
 import React from "react";
+import useSWR from "swr";
 import { Page } from "@/admin/core/layouts/Page";
 import { Link } from "@/admin/shared/ui/link";
+import { useAdminDashboardSummaryQuery } from "@/admin/home/hooks/useDashboardQueries";
+import { apiClient, unwrapEdenResponse } from "@/lib/api-client";
 
 const openCaseStates = new Set<ModerationCaseDTO["state"]>([
   "new",
@@ -57,6 +59,44 @@ const policyExceptionCodes: DecisionCode[] = [
   "EXPIRED_GRANT",
   "INVALID_STATE",
 ];
+
+const GOVERNANCE_CASES_KEY = (query?: GovernanceListQuery) =>
+  ["eden", "governance", "cases", query] as const;
+const GOVERNANCE_AUDIT_KEY = (query?: GovernanceAuditListQuery) =>
+  ["eden", "governance", "audit", query] as const;
+const GOVERNANCE_POLICY_EXCEPTION_AUDIT_KEY = [
+  "eden",
+  "governance",
+  "audit",
+  "policy-exceptions",
+] as const;
+
+async function fetchGovernanceCases(
+  key: ReturnType<typeof GOVERNANCE_CASES_KEY>,
+): Promise<ModerationCaseDTO[]> {
+  const [, , , query] = key;
+  const response = await apiClient.governance.cases.get({ query });
+  return unwrapEdenResponse(response);
+}
+
+async function fetchGovernanceAudit(
+  key: ReturnType<typeof GOVERNANCE_AUDIT_KEY>,
+): Promise<StaffAuditLogDTO[]> {
+  const [, , , query] = key;
+  const response = await apiClient.governance.audit.get({ query });
+  return unwrapEdenResponse(response);
+}
+
+async function fetchPolicyExceptionAudits(): Promise<StaffAuditLogDTO[][]> {
+  return Promise.all(
+    policyExceptionCodes.map(async (decisionCode) => {
+      const response = await apiClient.governance.audit.get({
+        query: { decisionCode, limit: 3 },
+      });
+      return unwrapEdenResponse(response);
+    }),
+  );
+}
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -311,26 +351,26 @@ function uniqueAudits(audits: StaffAuditLogDTO[]) {
 function PolicyExceptionPanel({
   query,
 }: {
-  query: Array<{
-    data?: StaffAuditLogDTO[];
+  query: {
+    data?: StaffAuditLogDTO[][];
     isLoading: boolean;
-    isError: boolean;
-  }>;
+    error?: unknown;
+  };
 }) {
   const audits = React.useMemo(
     () =>
       uniqueAudits(
-        query
-          .flatMap((result) => result.data ?? [])
+        (query.data ?? [])
+          .flatMap((items) => items)
           .sort(
             (a, b) =>
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
           ),
       ).slice(0, 8),
-    [query],
+    [query.data],
   );
-  const loading = query.some((result) => result.isLoading);
-  const error = query.some((result) => result.isError);
+  const loading = query.isLoading;
+  const error = Boolean(query.error);
 
   return (
     <Card surface="contained">
@@ -408,29 +448,58 @@ function GovernanceMetrics({
 }
 
 export default function GovernanceOverviewPage() {
-  const { data: summary } = useSuspenseQuery(
-    adminDashboardSummaryQueryOptions(),
+  const dashboardSummaryQuery = useAdminDashboardSummaryQuery();
+  const recentCasesQuery = useSWR(
+    GOVERNANCE_CASES_KEY({ limit: 10 }),
+    fetchGovernanceCases,
+    {
+      dedupingInterval: 30_000,
+      keepPreviousData: true,
+    },
   );
-  const recentCasesQuery = useSuspenseQuery(
-    governanceQueries.caseList({ limit: 10 }),
+  const escalatedRealmCasesQuery = useSWR(
+    GOVERNANCE_CASES_KEY({ limit: 8, scope: "realm", state: "escalated" }),
+    fetchGovernanceCases,
+    {
+      dedupingInterval: 30_000,
+      keepPreviousData: true,
+    },
   );
-  const escalatedRealmCasesQuery = useSuspenseQuery(
-    governanceQueries.escalatedRealmCases({ limit: 8 }),
+  const auditQuery = useSWR(
+    GOVERNANCE_AUDIT_KEY({ limit: 10 }),
+    fetchGovernanceAudit,
+    {
+      dedupingInterval: 30_000,
+      keepPreviousData: true,
+    },
   );
-  const auditQuery = useQuery(governanceQueries.auditList({ limit: 10 }));
-  const policyExceptionQuery = useQueries({
-    queries: policyExceptionCodes.map((decisionCode) =>
-      governanceQueries.auditList({
-        decisionCode,
-        limit: 3,
-      } satisfies GovernanceAuditListQuery),
-    ),
-  });
+  const policyExceptionQuery = useSWR(
+    GOVERNANCE_POLICY_EXCEPTION_AUDIT_KEY,
+    fetchPolicyExceptionAudits,
+    {
+      dedupingInterval: 30_000,
+      keepPreviousData: true,
+    },
+  );
 
-  const recentCases = recentCasesQuery.data;
+  const summary = dashboardSummaryQuery.data;
+  const recentCases = recentCasesQuery.data ?? [];
+  const escalatedRealmCases = escalatedRealmCasesQuery.data ?? [];
   const escalatedCases = recentCases.filter(
     (item) => item.state === "escalated",
   );
+  const hasInitialData = Boolean(
+    summary && recentCasesQuery.data && escalatedRealmCasesQuery.data,
+  );
+  const isInitialLoading =
+    !hasInitialData &&
+    (dashboardSummaryQuery.isLoading ||
+      recentCasesQuery.isLoading ||
+      escalatedRealmCasesQuery.isLoading);
+  const initialError =
+    dashboardSummaryQuery.error ??
+    recentCasesQuery.error ??
+    escalatedRealmCasesQuery.error;
 
   return (
     <Page
@@ -448,121 +517,131 @@ export default function GovernanceOverviewPage() {
         </div>
       }
     >
-      <div className="flex flex-col gap-4">
-        <GovernanceMetrics summary={summary} recentCases={recentCases} />
+      {isInitialLoading ? (
+        <div className="flex h-40 items-center justify-center">
+          <Spinner />
+        </div>
+      ) : initialError && !hasInitialData ? (
+        <Alert className="mb-4">
+          <AlertDescription className="text-error-text">
+            {(initialError as Error).message}
+          </AlertDescription>
+        </Alert>
+      ) : !summary ? null : (
+        <div className="flex flex-col gap-4">
+          <GovernanceMetrics summary={summary} recentCases={recentCases} />
 
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.65fr)]">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.65fr)]">
+            <Card surface="contained">
+              <CardHeader className="p-4 pb-2">
+                <div className="flex items-center justify-between gap-3">
+                  <CardTitle className="text-base leading-[1.4]">
+                    Recent Site Cases
+                  </CardTitle>
+                  <Badge
+                    variant={escalatedCases.length ? "destructive" : "outline"}
+                  >
+                    {escalatedCases.length} escalated
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="p-4 pt-2">
+                <RecentCasesTable cases={recentCases} />
+              </CardContent>
+            </Card>
+
+            <Card surface="contained">
+              <CardHeader className="p-4 pb-2">
+                <CardTitle className="text-base leading-[1.4]">
+                  Audit Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 pt-2">
+                <div className="grid gap-3">
+                  <div className="rounded-sm bg-surface-subtle p-3">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <History className="size-4" />
+                      Recent privileged operations
+                    </div>
+                    <p className="mt-1 text-xs leading-[1.4] text-text-secondary">
+                      {summary.audit.recent.length} entries in dashboard summary
+                      · latest check {formatDate(summary.checkedAt)}
+                    </p>
+                  </div>
+                  {summary.audit.recent.slice(0, 5).map((item) => (
+                    <div
+                      key={item.id}
+                      className="border-b border-border-whisper pb-3 last:border-b-0"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium">
+                            {item.action}
+                          </p>
+                          <p className="truncate text-xs text-text-secondary">
+                            {item.targetKind}:{item.targetId}
+                          </p>
+                        </div>
+                        <AuditDecisionBadge code={item.decisionCode} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <PolicyExceptionPanel query={policyExceptionQuery} />
+
           <Card surface="contained">
             <CardHeader className="p-4 pb-2">
               <div className="flex items-center justify-between gap-3">
                 <CardTitle className="text-base leading-[1.4]">
-                  Recent Site Cases
+                  Realm Escalations
                 </CardTitle>
                 <Badge
-                  variant={escalatedCases.length ? "destructive" : "outline"}
+                  variant={
+                    escalatedRealmCases.length ? "destructive" : "outline"
+                  }
                 >
-                  {escalatedCases.length} escalated
+                  {escalatedRealmCases.length} operator-relevant
                 </Badge>
               </div>
             </CardHeader>
             <CardContent className="p-4 pt-2">
-              <RecentCasesTable cases={recentCases} />
+              <p className="mb-3 text-sm leading-[1.4] text-text-secondary">
+                Ordinary realm case work remains in the app realm console. Admin
+                lists only escalated cases that need site staff visibility.
+              </p>
+              <RealmEscalationsTable items={escalatedRealmCases} />
             </CardContent>
           </Card>
 
           <Card surface="contained">
             <CardHeader className="p-4 pb-2">
               <CardTitle className="text-base leading-[1.4]">
-                Audit Summary
+                Staff Audit
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-2">
-              <div className="grid gap-3">
-                <div className="rounded-sm bg-surface-subtle p-3">
-                  <div className="flex items-center gap-2 text-sm font-medium">
-                    <History className="size-4" />
-                    Recent privileged operations
-                  </div>
-                  <p className="mt-1 text-xs leading-[1.4] text-text-secondary">
-                    {summary.audit.recent.length} entries in dashboard summary ·
-                    latest check {formatDate(summary.checkedAt)}
-                  </p>
-                </div>
-                {summary.audit.recent.slice(0, 5).map((item) => (
-                  <div
-                    key={item.id}
-                    className="border-b border-border-whisper pb-3 last:border-b-0"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">
-                          {item.action}
-                        </p>
-                        <p className="truncate text-xs text-text-secondary">
-                          {item.targetKind}:{item.targetId}
-                        </p>
-                      </div>
-                      <AuditDecisionBadge code={item.decisionCode} />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {auditQuery.error ? (
+                <p className="rounded-sm bg-error-fill/10 p-3 text-sm text-error-text">
+                  Staff audit list failed to load.
+                </p>
+              ) : (
+                <AuditTable
+                  audits={auditQuery.data ?? []}
+                  empty={
+                    auditQuery.isLoading
+                      ? "Loading staff audit entries."
+                      : "No staff audit entries found."
+                  }
+                />
+              )}
             </CardContent>
           </Card>
         </div>
-
-        <PolicyExceptionPanel query={policyExceptionQuery} />
-
-        <Card surface="contained">
-          <CardHeader className="p-4 pb-2">
-            <div className="flex items-center justify-between gap-3">
-              <CardTitle className="text-base leading-[1.4]">
-                Realm Escalations
-              </CardTitle>
-              <Badge
-                variant={
-                  escalatedRealmCasesQuery.data.length
-                    ? "destructive"
-                    : "outline"
-                }
-              >
-                {escalatedRealmCasesQuery.data.length} operator-relevant
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="p-4 pt-2">
-            <p className="mb-3 text-sm leading-[1.4] text-text-secondary">
-              Ordinary realm case work remains in the app realm console. Admin
-              lists only escalated cases that need site staff visibility.
-            </p>
-            <RealmEscalationsTable items={escalatedRealmCasesQuery.data} />
-          </CardContent>
-        </Card>
-
-        <Card surface="contained">
-          <CardHeader className="p-4 pb-2">
-            <CardTitle className="text-base leading-[1.4]">
-              Staff Audit
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 pt-2">
-            {auditQuery.isError ? (
-              <p className="rounded-sm bg-error-fill/10 p-3 text-sm text-error-text">
-                Staff audit list failed to load.
-              </p>
-            ) : (
-              <AuditTable
-                audits={auditQuery.data ?? []}
-                empty={
-                  auditQuery.isLoading
-                    ? "Loading staff audit entries."
-                    : "No staff audit entries found."
-                }
-              />
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      )}
     </Page>
   );
 }
