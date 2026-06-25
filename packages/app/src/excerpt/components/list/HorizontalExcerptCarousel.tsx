@@ -1,5 +1,5 @@
 import { useTranslation } from "@rezics/i18n/react";
-import { useReactionHydration } from "@rezics/contract/api/reaction/reaction";
+import { useReactionHydration } from "@rezics/contract/api/reaction/useReactionHydration";
 import type { UnitDTO } from "@rezics/contract";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
 import type * as React from "react";

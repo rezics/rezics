@@ -17,7 +17,7 @@ const i18nMessages = {
 } as const;
 
 import { useCanEdit } from "@rezics/contract/api/hooks/useCanEdit";
-import { useReactionHydration } from "@rezics/contract/api/reaction/reaction";
+import { useReactionHydration } from "@rezics/contract/api/reaction/useReactionHydration";
 import type { ShelfSortState, ShelfView } from "@rezics/contract/api/shelf/shelf";
 import {
   shelfDetailQuery,

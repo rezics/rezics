@@ -54,7 +54,7 @@ import {
   contentSearchQueryOptions,
   postSearchQueryOptions,
 } from "@rezics/contract/api/meili/meili.queries";
-import { useReactionHydration } from "@rezics/contract/api/reaction/reaction";
+import { useReactionHydration } from "@rezics/contract/api/reaction/useReactionHydration";
 import type {
   BookDTO,
   ContentSearchOptions,

@@ -1,4 +1,4 @@
-import { useReactionHydration } from "@rezics/contract/api/reaction/reaction";
+import { useReactionHydration } from "@rezics/contract/api/reaction/useReactionHydration";
 import type { ShelfDTO } from "@rezics/contract";
 import type React from "react";
 import { useMemo } from "react";

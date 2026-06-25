@@ -1,4 +1,4 @@
-import { useReactionHydration } from "@rezics/contract/api/reaction/reaction";
+import { useReactionHydration } from "@rezics/contract/api/reaction/useReactionHydration";
 import type { BookDTO, PostDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
