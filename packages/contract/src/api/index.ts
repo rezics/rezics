@@ -6,8 +6,6 @@ export {
   type UnitPublicationMetadata,
 } from "@rezics/contract";
 export type { EdenResponse } from "../eden";
-export * from "./account-operation/account-operation";
-export * from "./admin-repair-job/admin-repair-job";
 export * from "./comment/comment";
 export * from "./content-structure/content-structure";
 export * from "./content-translation/content-translation";
