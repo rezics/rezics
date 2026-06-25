@@ -39,10 +39,6 @@
       "types": "./src/api/shelf/index.ts",
       "default": "./src/api/shelf/index.ts"
     },
-    "./api/states": {
-      "types": "./src/api/states/index.ts",
-      "default": "./src/api/states/index.ts"
-    },
     "./api/*": {
       "types": "./src/api/*.ts",
       "default": "./src/api/*.ts"

@@ -6,11 +6,8 @@ export {
   type AuthSessionDerivedState,
   type AuthSessionHydrationStatus,
   type AuthSessionSnapshot,
-  type AuthSessionStoreState,
-  clearAuthSessionState,
   deriveAuthSessionState,
   hasGovernanceCapabilityHint,
-  hydrateAuthSessionState,
   type RezicsSessionState,
   selectCanFetchUserProfile,
   selectGovernanceCapabilityHints,
@@ -20,5 +17,10 @@ export {
   selectIsPendingRegistration,
   selectRegistrationStage,
   selectShouldRedirectToCompleteRegistration,
+} from "@rezics/contract/api/states/authSessionModel";
+export {
+  type AuthSessionStoreState,
+  clearAuthSessionState,
+  hydrateAuthSessionState,
   useAuthSessionStore,
-} from "@rezics/contract/api/states";
+} from "@rezics/contract/api/states/authSessionStore";
