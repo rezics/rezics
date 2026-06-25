@@ -1,4 +1,3 @@
-import { importPrivateJwk } from "@/internal/jwt";
 import { getAuthJwtIssuer } from "./options";
 import {
   authJwtPersistence,
@@ -25,15 +24,6 @@ export async function getActiveAuthSigningKey() {
   }
 
   return active;
-}
-
-export async function getAuthPrivateSigningKey() {
-  const active = await getActiveAuthSigningKey();
-  return {
-    kid: active.kid,
-    alg: active.algorithm,
-    key: await importPrivateJwk(active.privateJwk),
-  };
 }
 
 export async function getAuthPublicJwks() {
