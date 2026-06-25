@@ -1,4 +1,4 @@
-import type { StreamBookRow } from "@rezics/contract/api/stream/stream";
+import type { StreamBookRow } from "@rezics/contract/api/stream/stream.types";
 import {
   CATALOG_UNIT_COVER_ASPECT_RATIO_BY_TYPE,
   UnitType,

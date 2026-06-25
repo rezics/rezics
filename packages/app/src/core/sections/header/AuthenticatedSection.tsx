@@ -1,4 +1,4 @@
-import { useDmStream } from "@rezics/contract/api/dm/dm";
+import { useDmStream } from "@rezics/contract/api/dm/use-dm-stream";
 import { useUnreadCount } from "@rezics/contract/api/notification/notification.queries";
 import { useNotificationStream } from "@rezics/contract/api/notification/use-notification-stream";
 import { useTranslation } from "@rezics/i18n/react";

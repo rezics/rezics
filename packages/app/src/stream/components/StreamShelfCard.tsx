@@ -1,4 +1,4 @@
-import type { StreamShelfRow } from "@rezics/contract/api/stream/stream";
+import type { StreamShelfRow } from "@rezics/contract/api/stream/stream.types";
 import { useTranslation } from "@rezics/i18n/react";
 import { Card, CardMedia } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";

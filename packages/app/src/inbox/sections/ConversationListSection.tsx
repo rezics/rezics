@@ -1,7 +1,5 @@
-import {
-  type DmConversation,
-  useConversations,
-} from "@rezics/contract/api/dm/dm";
+import { useConversations } from "@rezics/contract/api/dm/dm.queries";
+import type { DmConversation } from "@rezics/contract/api/dm/dm.types";
 import { useTranslation } from "@rezics/i18n/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import { Link, useNavigate } from "@tanstack/react-router";

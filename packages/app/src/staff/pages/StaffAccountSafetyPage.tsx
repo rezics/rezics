@@ -2,7 +2,7 @@ import {
   governanceActiveEnforcementQuery,
   governanceAuditListQuery,
   governanceEnforcementListQuery,
-} from "@rezics/contract/api/governance/governance";
+} from "@rezics/contract/api/governance/governance.queries";
 import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import {

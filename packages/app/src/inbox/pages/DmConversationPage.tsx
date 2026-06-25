@@ -1,4 +1,4 @@
-import { useConversation } from "@rezics/contract/api/dm/dm";
+import { useConversation } from "@rezics/contract/api/dm/dm.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { Link, useParams } from "@tanstack/react-router";

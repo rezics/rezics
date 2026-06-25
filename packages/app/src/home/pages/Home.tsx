@@ -1,4 +1,4 @@
-import type { StreamQuery } from "@rezics/contract/api/stream/stream";
+import type { StreamQuery } from "@rezics/contract/api/stream/stream.types";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Select,

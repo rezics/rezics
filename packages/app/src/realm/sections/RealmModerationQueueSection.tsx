@@ -1,8 +1,10 @@
 import {
   governanceAuditListQuery,
   governanceRealmCaseListQuery,
+} from "@rezics/contract/api/governance/governance.queries";
+import {
   useDecideRealmCaseMutation,
-} from "@rezics/contract/api/governance/governance";
+} from "@rezics/contract/api/governance/governance.mutations";
 import type { ModerationCaseDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState, Spinner } from "@rezics/ui";

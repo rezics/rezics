@@ -1,7 +1,7 @@
 import {
   governanceCaseListQuery,
   governanceRealmCaseListQuery,
-} from "@rezics/contract/api/governance/governance";
+} from "@rezics/contract/api/governance/governance.queries";
 import type { ModerationCaseDTO } from "@rezics/contract";
 import {
   Badge,

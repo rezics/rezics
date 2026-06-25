@@ -1,7 +1,7 @@
 import {
   governanceAuditListQuery,
   governanceTargetActionsQuery,
-} from "@rezics/contract/api/governance/governance";
+} from "@rezics/contract/api/governance/governance.queries";
 import type { ModerationActionDTO } from "@rezics/contract";
 import {
   Badge,

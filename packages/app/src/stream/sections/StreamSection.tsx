@@ -1,9 +1,9 @@
-import {
-  type StreamPostRow,
-  type StreamQuery,
-  type StreamRow,
-  streamRowsInfiniteQuery,
-} from "@rezics/contract/api/stream/stream";
+import { streamRowsInfiniteQuery } from "@rezics/contract/api/stream/stream.queries";
+import type {
+  StreamPostRow,
+  StreamQuery,
+  StreamRow,
+} from "@rezics/contract/api/stream/stream.types";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";

@@ -1,4 +1,4 @@
-import { useCreateRealmCaseMutation } from "@rezics/contract/api/governance/governance";
+import { useCreateRealmCaseMutation } from "@rezics/contract/api/governance/governance.mutations";
 import type { ModerationTargetKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {

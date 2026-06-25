@@ -1,7 +1,7 @@
 import {
   governanceCaseActionsQuery,
   governanceCaseDetailQuery,
-} from "@rezics/contract/api/governance/governance";
+} from "@rezics/contract/api/governance/governance.queries";
 import type { ModerationActionDTO } from "@rezics/contract";
 import { Badge, Card, CardContent, Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";

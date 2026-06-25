@@ -3,7 +3,7 @@ import {
   useRemoveRealmContentMutation,
   useRestoreRealmContentMutation,
   useSetRealmContentLockMutation,
-} from "@rezics/contract/api/governance/governance";
+} from "@rezics/contract/api/governance/governance.mutations";
 import { useAppendPinboardMutation } from "@rezics/contract/api/pinboard/pinboard.mutations";
 import type { UnitRealmDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";

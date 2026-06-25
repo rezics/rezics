@@ -1,4 +1,4 @@
-import type { StreamPostRow } from "@rezics/contract/api/stream/stream";
+import type { StreamPostRow } from "@rezics/contract/api/stream/stream.types";
 import { postQueries } from "@rezics/contract/api/post/post";
 import {
   type ModerationActionDTO,

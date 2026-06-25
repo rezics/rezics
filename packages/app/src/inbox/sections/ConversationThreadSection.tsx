@@ -1,15 +1,19 @@
+import { dmApi } from "@rezics/contract/api/dm/dm.api";
+import { dmKeys } from "@rezics/contract/api/dm/dm.keys";
 import {
-  type DmMessage,
-  dmApi,
-  dmKeys,
-  selectIsPeerTyping,
-  useDmBlockState,
-  useDmTypingStore,
   useMarkDmReadMutation,
-  useMessages,
   useSendDmMutation,
   useSetDmBlockMutation,
-} from "@rezics/contract/api/dm/dm";
+} from "@rezics/contract/api/dm/dm.mutations";
+import {
+  useDmBlockState,
+  useMessages,
+} from "@rezics/contract/api/dm/dm.queries";
+import {
+  selectIsPeerTyping,
+  useDmTypingStore,
+} from "@rezics/contract/api/dm/dm.realtime";
+import type { DmMessage } from "@rezics/contract/api/dm/dm.types";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input } from "@rezics/ui/shadcn";
 import { useQueryClient } from "@tanstack/react-query";
