@@ -1,8 +1,3 @@
-import {
-  accountOperationsQueries,
-  useRevokeAuthUserSessionMutation,
-  useRevokeAuthUserSessionsMutation,
-} from "@rezics/contract/api/account-operation/account-operation";
 import type { AdminAuthSession } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
@@ -20,13 +15,17 @@ import {
   Label,
   Textarea,
 } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import {
   type PaginatedColumn,
   PaginatedTable,
 } from "@/admin/components/table/PaginatedTable";
 import { Page } from "@/admin/core/layouts/Page";
+import {
+  revokeAuthUserSession,
+  revokeAuthUserSessions,
+  useAuthUserSessionsQuery,
+} from "../hooks/useAccountOperationAdmin";
 
 function fmtDate(v?: string | Date) {
   if (!v) return "";
@@ -76,12 +75,9 @@ export default function AuthSessionsPage() {
     sessionId: "",
     reason: "",
   });
+  const [revoking, setRevoking] = React.useState(false);
 
-  const sessionsQuery = useQuery(
-    accountOperationsQueries.authUserSessions(authUserId),
-  );
-  const revokeMutation = useRevokeAuthUserSessionMutation();
-  const revokeAllMutation = useRevokeAuthUserSessionsMutation();
+  const sessionsQuery = useAuthUserSessionsQuery(authUserId);
 
   const sessions = React.useMemo(
     () => (sessionsQuery.data?.sessions ?? []).map(toSession),
@@ -93,6 +89,33 @@ export default function AuthSessionsPage() {
     [limit, page, sessions],
   );
   const reasonIsValid = confirmDialog.reason.trim().length > 0;
+
+  const handleConfirmRevoke = React.useCallback(async () => {
+    const reason = confirmDialog.reason.trim();
+    if (!reason || !authUserId) return;
+
+    setRevoking(true);
+    try {
+      if (confirmDialog.mode === "all") {
+        await revokeAuthUserSessions({ authUserId, reason });
+      } else {
+        await revokeAuthUserSession({
+          authUserId,
+          sessionId: confirmDialog.sessionId,
+          reason,
+        });
+      }
+      await sessionsQuery.refetch();
+      setConfirmDialog({
+        open: false,
+        mode: "single",
+        sessionId: "",
+        reason: "",
+      });
+    } finally {
+      setRevoking(false);
+    }
+  }, [authUserId, confirmDialog, sessionsQuery]);
 
   const columns = React.useMemo(() => {
     const cols: PaginatedColumn<AuthSession>[] = [
@@ -281,30 +304,8 @@ export default function AuthSessionsPage() {
             </Button>
             <Button
               className="bg-error-fill text-white"
-              disabled={
-                !reasonIsValid ||
-                revokeMutation.isPending ||
-                revokeAllMutation.isPending
-              }
-              onClick={() => {
-                const reason = confirmDialog.reason.trim();
-                if (!reason || !authUserId) return;
-                if (confirmDialog.mode === "all") {
-                  revokeAllMutation.mutate({ authUserId, reason });
-                } else {
-                  revokeMutation.mutate({
-                    authUserId,
-                    sessionId: confirmDialog.sessionId,
-                    reason,
-                  });
-                }
-                setConfirmDialog({
-                  open: false,
-                  mode: "single",
-                  sessionId: "",
-                  reason: "",
-                });
-              }}
+              disabled={!reasonIsValid || revoking}
+              onClick={() => void handleConfirmRevoke()}
             >
               {t("common:revoke")}
             </Button>
