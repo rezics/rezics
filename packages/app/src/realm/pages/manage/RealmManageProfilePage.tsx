@@ -1,6 +1,5 @@
-import { patchTranslationDetailQueries } from "@rezics/contract/api/react-query/cache-coherence";
 import { realmKeys } from "@rezics/contract/api/realm/realm.keys";
-import { unitApi } from "@rezics/contract/api/unit/unit.api";
+import { useUpsertTranslationMutation } from "@rezics/contract/api/unit/unit.mutations";
 import {
   contentDocMarkdownFallback,
   DEFAULT_LANGUAGE,
@@ -58,6 +57,13 @@ export function RealmManageProfilePage() {
   const { t } = useTranslation(["common", "community"]);
   const queryClient = useQueryClient();
   const { realmId, realm } = useRealmManage();
+  const upsertTranslationMutation = useUpsertTranslationMutation({
+    affectedDetailKeys: () => [realmKeys.detail(realmId)],
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: realmKeys.detail(realmId),
+      }),
+  });
   const existingLanguages = useMemo(
     () =>
       (realm.translations ?? [])
@@ -118,22 +124,13 @@ export function RealmManageProfilePage() {
     if (!trimmedTitle) return;
     setSaving(true);
     try {
-      const translation = await unitApi.upsertTranslation(
-        realmId,
-        selectedLanguage,
-        {
+      await upsertTranslationMutation.mutateAsync({
+        unitId: realmId,
+        language: selectedLanguage,
+        input: {
           title: trimmedTitle,
           description: markdownContentDoc(description),
         },
-      );
-
-      await patchTranslationDetailQueries({
-        queryClient,
-        detailKeys: [realmKeys.detail(realmId)],
-        translation,
-      });
-      await queryClient.invalidateQueries({
-        queryKey: realmKeys.detail(realmId),
       });
 
       toast.success(t("community:realm_profile_saved"));
