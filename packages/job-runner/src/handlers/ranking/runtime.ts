@@ -1,4 +1,4 @@
-import type { RankingCommand } from "@rezics/job";
+import type { RankingCommand } from "@rezics/contract/job";
 
 export type RankingRuntimeOptions = {
   rankingBaseUrl?: string;

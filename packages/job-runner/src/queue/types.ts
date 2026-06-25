@@ -1,4 +1,4 @@
-import type { AnyJobCommand, JobLane } from "@rezics/job";
+import type { AnyJobCommand, JobLane } from "@rezics/contract/job";
 
 export interface QueueSendOptions {
   retryLimit?: number;

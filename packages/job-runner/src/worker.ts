@@ -3,7 +3,7 @@ import {
   JOB_LANE_VALUES,
   type JobLane,
   parseJobCommand,
-} from "@rezics/job";
+} from "@rezics/contract/job";
 import { enqueueCommand } from "./queue/enqueue";
 import type { WorkerQueueLike } from "./queue/types";
 

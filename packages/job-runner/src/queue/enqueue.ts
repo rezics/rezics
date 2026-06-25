@@ -1,4 +1,4 @@
-import type { AnyJobCommand, EnqueueResult, JobLane } from "@rezics/job";
+import type { AnyJobCommand, EnqueueResult, JobLane } from "@rezics/contract/job";
 import { queueOptionsForCommand } from "./policy";
 import type { QueueLike } from "./types";
 

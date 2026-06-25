@@ -4,7 +4,7 @@ import {
   MAINTENANCE_COMMAND_KINDS,
   type MaintenanceCommand,
   SEARCH_COMMAND_KINDS,
-} from "@rezics/job";
+} from "@rezics/contract/job";
 import type { HandlerContext, JobHandler } from "../../worker";
 import type { ServerMaintenanceRuntime } from "./runtime";
 

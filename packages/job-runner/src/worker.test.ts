@@ -4,7 +4,7 @@ import {
   JOB_LANE_VALUES,
   JOB_LANES,
   SEARCH_COMMAND_KINDS,
-} from "@rezics/job";
+} from "@rezics/contract/job";
 import { resolveWorkerLanes } from "./lanes";
 import type { WorkerQueueLike } from "./queue/types";
 import { registerWorkers } from "./worker";

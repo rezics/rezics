@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/contract/job";
 import { normalizeEnqueueResult } from "./enqueue";
 import { queueOptionsForCommand } from "./policy";
 

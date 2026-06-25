@@ -3,7 +3,7 @@ import {
   createSearchCommand,
   SEARCH_COMMAND_KINDS,
   type SearchCommand,
-} from "@rezics/job";
+} from "@rezics/contract/job";
 import type { SearchClient } from "@rezics/backend/search/client";
 import {
   patchContentAliases,

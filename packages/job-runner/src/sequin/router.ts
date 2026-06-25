@@ -8,7 +8,7 @@ import {
   MAINTENANCE_COMMAND_KINDS,
   RANKING_COMMAND_KINDS,
   SEARCH_COMMAND_KINDS,
-} from "@rezics/job";
+} from "@rezics/contract/job";
 import type { SequinMessage } from "./types";
 
 function targetId(message: SequinMessage, keys: string[] = ["id"]) {

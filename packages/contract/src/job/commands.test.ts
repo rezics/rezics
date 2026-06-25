@@ -13,9 +13,9 @@ import {
   MAINTENANCE_COMMAND_KINDS,
   RANKING_COMMAND_KINDS,
   SEARCH_COMMAND_KINDS,
-} from ".";
+} from "./index";
 
-describe("@rezics/job command contract", () => {
+describe("@rezics/contract/job command contract", () => {
   test("validates search commands with the expected lane", () => {
     const command = createSearchCommand(SEARCH_COMMAND_KINDS.contentPatchTags, {
       unitId: "unit-1",

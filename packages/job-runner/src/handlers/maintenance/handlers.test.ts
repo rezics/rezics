@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   createMaintenanceCommand,
   MAINTENANCE_COMMAND_KINDS,
-} from "@rezics/job";
+} from "@rezics/contract/job";
 import { createMaintenanceHandlers } from "./handlers";
 
 describe("maintenance handlers", () => {

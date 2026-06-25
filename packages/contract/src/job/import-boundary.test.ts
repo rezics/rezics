@@ -19,7 +19,7 @@ async function collectSourceFiles(dir: string): Promise<string[]> {
   return files;
 }
 
-describe("@rezics/job import boundary", () => {
+describe("@rezics/contract/job import boundary", () => {
   test("does not import runtime queue, app, Prisma, Meili, or env modules", async () => {
     const files = await collectSourceFiles(import.meta.dir);
     const violations: string[] = [];

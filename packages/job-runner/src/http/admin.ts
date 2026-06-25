@@ -2,7 +2,7 @@ import {
   createSearchCommand,
   JOB_LANE_VALUES,
   SEARCH_COMMAND_KINDS,
-} from "@rezics/job";
+} from "@rezics/contract/job";
 import { Elysia } from "elysia";
 import { isAuthorized } from "../auth";
 import { enqueueCommand } from "../queue/enqueue";
@@ -180,7 +180,7 @@ export function createAdminApi(options: {
       if (!authorized) return { status: "error", message: "Unauthorized" };
       return { counts: await countsFor(options.queue) };
     })
-    .get("/admin/jobs/failed", async ({ authorized, query }) => {
+    .get("/admin/contract/jobs/failed", async ({ authorized, query }) => {
       if (!authorized) return { status: "error", message: "Unauthorized" };
       const limit =
         typeof query.limit === "string" ? Number.parseInt(query.limit, 10) : 50;
@@ -230,7 +230,7 @@ export function createAdminApi(options: {
       },
     )
     .get(
-      "/admin/jobs/failed/:lane/:id",
+      "/admin/contract/jobs/failed/:lane/:id",
       async ({ authorized, params, set }) => {
         if (!authorized) return { status: "error", message: "Unauthorized" };
         if (!validLane(params.lane)) {
@@ -243,7 +243,7 @@ export function createAdminApi(options: {
       },
     )
     .post(
-      "/admin/jobs/failed/:lane/:id/retry",
+      "/admin/contract/jobs/failed/:lane/:id/retry",
       async ({ authorized, params, set }) => {
         if (!authorized) return { status: "error", message: "Unauthorized" };
         if (!validLane(params.lane)) {
@@ -260,7 +260,7 @@ export function createAdminApi(options: {
       },
     )
     .post(
-      "/admin/jobs/failed/:lane/:id/discard",
+      "/admin/contract/jobs/failed/:lane/:id/discard",
       async ({ authorized, params, set }) => {
         if (!authorized) return { status: "error", message: "Unauthorized" };
         if (!validLane(params.lane)) {

@@ -2,7 +2,7 @@ import { describe, expect, mock, test } from "bun:test";
 import {
   createHistoryOutboxIngestBatchCommand,
   createHistoryOutboxIngestCommand,
-} from "@rezics/job";
+} from "@rezics/contract/job";
 import { createHistoryHandlers } from "./handlers";
 
 describe("history handlers", () => {

@@ -10,7 +10,6 @@ includes:
   folio: { taskfile: ./packages/folio/Taskfile.yml, dir: ./packages/folio }
   frontend:
     { taskfile: ./packages/frontend/Taskfile.yml, dir: ./packages/frontend }
-  job: { taskfile: ./packages/job/Taskfile.yml, dir: ./packages/job }
   job-runner:
     { taskfile: ./packages/job-runner/Taskfile.yml, dir: ./packages/job-runner }
   ui: { taskfile: ./packages/ui/Taskfile.yml, dir: ./packages/ui }

@@ -1,4 +1,4 @@
-import { JOB_LANE_VALUES, JOB_LANES, type JobLane } from "@rezics/job";
+import { JOB_LANE_VALUES, JOB_LANES, type JobLane } from "@rezics/contract/job";
 import { LANE_POLICIES } from "./policy";
 import type { QueueLike } from "./types";
 

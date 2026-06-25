@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/contract/job";
 import { createJobRunnerApp } from "./app";
 import type { QueueLike } from "./queue/types";
 
@@ -25,7 +25,7 @@ describe("job-runner HTTP app", () => {
     });
 
     const response = await app.handle(
-      new Request("http://localhost/jobs/enqueue", { method: "POST" }),
+      new Request("http://localhost/contract/jobs/enqueue", { method: "POST" }),
     );
 
     expect(response.status).toBe(401);
@@ -43,7 +43,7 @@ describe("job-runner HTTP app", () => {
     });
 
     const response = await app.handle(
-      new Request("http://localhost/jobs/enqueue", {
+      new Request("http://localhost/contract/jobs/enqueue", {
         method: "POST",
         headers: {
           "content-type": "application/json",
@@ -71,7 +71,7 @@ describe("job-runner HTTP app", () => {
     });
 
     const response = await app.handle(
-      new Request("http://localhost/jobs/enqueue", {
+      new Request("http://localhost/contract/jobs/enqueue", {
         method: "POST",
         headers: {
           "content-type": "application/json",
@@ -96,7 +96,7 @@ describe("job-runner HTTP app", () => {
     });
 
     const response = await app.handle(
-      new Request("http://localhost/jobs/enqueue", {
+      new Request("http://localhost/contract/jobs/enqueue", {
         method: "POST",
         headers: {
           "content-type": "application/json",
@@ -323,13 +323,13 @@ describe("job-runner HTTP app", () => {
     });
 
     const listResponse = await app.handle(
-      new Request("http://localhost/admin/jobs/failed", {
+      new Request("http://localhost/admin/contract/jobs/failed", {
         headers: { "x-internal-secret": "secret" },
       }),
     );
     const inspectResponse = await app.handle(
       new Request(
-        `http://localhost/admin/jobs/failed/${command.lane}/${failedJob.id}`,
+        `http://localhost/admin/contract/jobs/failed/${command.lane}/${failedJob.id}`,
         { headers: { "x-internal-secret": "secret" } },
       ),
     );
@@ -385,13 +385,13 @@ describe("job-runner HTTP app", () => {
 
     await app.handle(
       new Request(
-        `http://localhost/admin/jobs/failed/${command.lane}/${failedJob.id}/retry`,
+        `http://localhost/admin/contract/jobs/failed/${command.lane}/${failedJob.id}/retry`,
         { method: "POST", headers: { "x-internal-secret": "secret" } },
       ),
     );
     await app.handle(
       new Request(
-        `http://localhost/admin/jobs/failed/${command.lane}/${failedJob.id}/discard`,
+        `http://localhost/admin/contract/jobs/failed/${command.lane}/${failedJob.id}/discard`,
         { method: "POST", headers: { "x-internal-secret": "secret" } },
       ),
     );

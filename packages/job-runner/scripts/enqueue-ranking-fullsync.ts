@@ -16,7 +16,7 @@
  *   JOB_RUNNER_INTERNAL_SECRET  (required)
  *   RANKING_FULL_SYNC_RANK_KIND (optional: content | post | comment)
  */
-import { createRankingCommand, RANKING_COMMAND_KINDS } from "@rezics/job";
+import { createRankingCommand, RANKING_COMMAND_KINDS } from "@rezics/contract/job";
 
 const baseUrl = process.env.JOB_RUNNER_BASE_URL ?? "http://127.0.0.1:3005";
 const secret = process.env.JOB_RUNNER_INTERNAL_SECRET;
@@ -37,7 +37,7 @@ const command = createRankingCommand(
   { type: "server" },
 );
 
-const response = await fetch(`${baseUrl}/jobs/enqueue`, {
+const response = await fetch(`${baseUrl}/contract/jobs/enqueue`, {
   method: "POST",
   headers: {
     "content-type": "application/json",

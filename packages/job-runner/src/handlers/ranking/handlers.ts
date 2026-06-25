@@ -2,7 +2,7 @@ import {
   type AnyJobCommand,
   RANKING_COMMAND_KINDS,
   type RankingCommand,
-} from "@rezics/job";
+} from "@rezics/contract/job";
 
 export type RankingCommandDispatcher = {
   dispatch(command: RankingCommand): Promise<unknown>;

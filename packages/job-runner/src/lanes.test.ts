@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { JOB_LANE_VALUES, JOB_LANES } from "@rezics/job";
+import { JOB_LANE_VALUES, JOB_LANES } from "@rezics/contract/job";
 import { resolveWorkerLanes } from "./lanes";
 
 describe("resolveWorkerLanes", () => {

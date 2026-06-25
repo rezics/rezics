@@ -1,4 +1,4 @@
-import { type AnyJobCommand, JOB_LANES, type JobLane } from "@rezics/job";
+import { type AnyJobCommand, JOB_LANES, type JobLane } from "@rezics/contract/job";
 import type { QueueSendOptions } from "./types";
 
 const DEAD_LETTER_SUFFIX = ".dead";

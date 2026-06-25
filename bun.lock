@@ -226,26 +226,13 @@
         "react": "^19",
       },
     },
-    "packages/job": {
-      "name": "@rezics/job",
-      "dependencies": {
-        "@rezics/contract": "workspace:*",
-        "valibot": "^1.2.0",
-      },
-      "devDependencies": {
-        "@types/bun": "^1.3.0",
-      },
-      "peerDependencies": {
-        "typescript": "^6",
-      },
-    },
     "packages/job-runner": {
       "name": "@rezics/job-runner",
       "dependencies": {
         "@elysiajs/cors": "^1.4.0",
         "@elysiajs/openapi": "^1.4.14",
         "@rezics/backend": "workspace:*",
-        "@rezics/job": "workspace:*",
+        "@rezics/contract": "workspace:*",
         "@rezics/shared": "workspace:*",
         "@t3-oss/env-core": "^0.13.10",
         "dotenv": "^17.2.3",
@@ -1096,8 +1083,6 @@
     "@rezics/frontend": ["@rezics/frontend@workspace:packages/frontend"],
 
     "@rezics/i18n": ["@rezics/i18n@workspace:packages/i18n"],
-
-    "@rezics/job": ["@rezics/job@workspace:packages/job"],
 
     "@rezics/job-runner": ["@rezics/job-runner@workspace:packages/job-runner"],
 

@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/contract/job";
 
 async function loadSearchHarness() {
   mock.restore();

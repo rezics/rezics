@@ -5,7 +5,7 @@ import {
   REACTION_SEQUIN_TABLES,
   ROUTED_SEQUIN_TABLES,
   SOURCE_SEQUIN_TABLES,
-} from "@rezics/job";
+} from "@rezics/contract/job";
 
 const yaml = readFileSync(
   join(import.meta.dir, "../../sequin/sequin.yml"),

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { JOB_LANE_VALUES } from "@rezics/job";
+import { JOB_LANE_VALUES } from "@rezics/contract/job";
 import { createQueues, DEAD_LETTER_LANES } from "./create-queues";
 import { LANE_POLICIES } from "./policy";
 import type { QueueSendOptions } from "./types";

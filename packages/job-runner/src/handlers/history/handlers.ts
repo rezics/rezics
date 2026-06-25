@@ -3,7 +3,7 @@ import {
   type AnyJobCommand,
   HISTORY_COMMAND_KINDS,
   type HistoryCommand,
-} from "@rezics/job";
+} from "@rezics/contract/job";
 import type { JobHandler } from "../../worker";
 
 export function createHistoryHandlers(consumer: HistoryOutboxConsumer) {

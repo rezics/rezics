@@ -2,7 +2,7 @@ import {
   type AnyJobCommand,
   parseJobCommand,
   safeParseJobCommand,
-} from "@rezics/job";
+} from "@rezics/contract/job";
 import { Elysia } from "elysia";
 import { isAuthorized } from "../auth";
 import { enqueueCommand } from "../queue/enqueue";
@@ -15,7 +15,7 @@ export function createEnqueueApi(options: {
   internalSecret: string;
 }) {
   return new Elysia({ name: "job-runner-enqueue" })
-    .post("/jobs/enqueue", async ({ body, headers, set }) => {
+    .post("/contract/jobs/enqueue", async ({ body, headers, set }) => {
       if (!isAuthorized(headers, options.internalSecret)) {
         set.status = 401;
         return { status: "error", message: "Unauthorized" };
@@ -29,7 +29,7 @@ export function createEnqueueApi(options: {
 
       return enqueueCommand(options.queue, parsed.output);
     })
-    .post("/jobs/enqueue/batch", async ({ body, headers, set }) => {
+    .post("/contract/jobs/enqueue/batch", async ({ body, headers, set }) => {
       if (!isAuthorized(headers, options.internalSecret)) {
         set.status = 401;
         return { status: "error", message: "Unauthorized" };
