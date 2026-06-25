@@ -1,10 +1,10 @@
 import { bookQueries } from "@rezics/contract/api/book/book";
 import { useCanEdit } from "@rezics/contract/api/hooks/useCanEdit";
 import {
-  unitAuthorityQueries,
   useRemoveUnitFieldLockMutation,
   useUpsertUnitFieldLockMutation,
-} from "@rezics/contract/api/unit/unit";
+} from "@rezics/contract/api/unit/authority.mutations";
+import { unitAuthorityQueries } from "@rezics/contract/api/unit/authority.queries";
 import type { UnitFieldLockDTO } from "@rezics/contract";
 import {
   EDITORIAL_LOCK_PATH_OPTIONS,

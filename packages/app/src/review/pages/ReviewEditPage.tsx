@@ -4,7 +4,7 @@ import {
   useDeletePostMutation,
   useUpdatePostMutation,
 } from "@rezics/contract/api/post/post";
-import { unitQueries } from "@rezics/contract/api/unit/unit";
+import { unitQueries } from "@rezics/contract/api/unit/unit.queries";
 import { mainMarkdownSource, markdownContentDoc } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { DeleteButton } from "@rezics/ui/composite/forms/DeleteWrapper.tsx";

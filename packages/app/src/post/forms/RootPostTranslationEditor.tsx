@@ -1,4 +1,4 @@
-import { unitQueries } from "@rezics/contract/api/unit/unit";
+import { unitQueries } from "@rezics/contract/api/unit/unit.queries";
 import {
   mainMarkdownSource,
   normalizeContentLanguage,

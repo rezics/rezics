@@ -1,4 +1,4 @@
-import { unitDetailQuery } from "@rezics/contract/api/unit/unit";
+import { unitDetailQuery } from "@rezics/contract/api/unit/unit.queries";
 import { mainMarkdownSource } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
