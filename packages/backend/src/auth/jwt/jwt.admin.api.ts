@@ -200,3 +200,5 @@ export const jwtServiceAdminRouter = new Elysia({
       },
     },
   );
+
+export type AuthJwtServiceAdminRouter = typeof jwtServiceAdminRouter;

@@ -7,3 +7,4 @@ export {
   verifySessionToken,
   verifyTokenFromHeader as verifyToken,
 } from "@rezics/jwt";
+export type { AuthJwtServiceAdminRouter } from "./jwt.admin.api";

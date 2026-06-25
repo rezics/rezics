@@ -1,18 +1,17 @@
-import {
-  useActivateAuthJwtServiceMutation,
-  useDeactivateAuthJwtServiceMutation,
-  useRotateAuthJwtServiceMutation,
-  useUpdateAuthJwtServiceMutation,
-} from "@rezics/contract/api/auth-jwt-service/auth-jwt-service.mutations";
-import { authJwtServiceQueries } from "@rezics/contract/api/auth-jwt-service/auth-jwt-service.queries";
 import type { JwtServiceDTO, UpdateJwtServiceInput } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Alert, AlertDescription } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
 import { Page } from "@/admin/core/layouts/Page";
+import {
+  activateAuthJwtService,
+  deactivateAuthJwtService,
+  rotateAuthJwtService,
+  updateAuthJwtService,
+  useAuthJwtServiceListQuery,
+} from "../hooks/useAuthJwtServiceAdmin";
 import {
   JwtServiceEditDialog,
   JwtServiceTable,
@@ -20,18 +19,14 @@ import {
 
 export const AuthJwtServicesPage: FC = () => {
   const { t } = useTranslation(["admin"]);
-  const { data, isLoading, error } = useQuery(authJwtServiceQueries.list());
+  const listQuery = useAuthJwtServiceListQuery();
+  const { data, isLoading, error } = listQuery;
 
   const [services, setServices] = useState<JwtServiceDTO[]>([]);
 
   useEffect(() => {
     if (data?.services) setServices(data.services);
   }, [data]);
-
-  const updateMutation = useUpdateAuthJwtServiceMutation();
-  const activateMutation = useActivateAuthJwtServiceMutation();
-  const deactivateMutation = useDeactivateAuthJwtServiceMutation();
-  const rotateMutation = useRotateAuthJwtServiceMutation();
 
   const [updating, setUpdating] = useState(false);
   const [updatingServiceKey, setUpdatingServiceKey] = useState<string | null>(
@@ -56,7 +51,13 @@ export const AuthJwtServicesPage: FC = () => {
     setUpdatingError(null);
     try {
       setUpdating(true);
-      await updateMutation.mutateAsync({ serviceKey, input });
+      const updated = await updateAuthJwtService(serviceKey, input);
+      setServices((current) =>
+        current.map((service) =>
+          service.serviceKey === serviceKey ? updated : service,
+        ),
+      );
+      await listQuery.refetch();
       setOpenEdit(false);
       setEditingService(null);
     } catch (err) {
@@ -71,8 +72,14 @@ export const AuthJwtServicesPage: FC = () => {
     try {
       setUpdating(true);
       setUpdatingServiceKey(serviceKey);
-      const updated = await activateMutation.mutateAsync(serviceKey);
+      const updated = await activateAuthJwtService(serviceKey);
+      setServices((current) =>
+        current.map((service) =>
+          service.serviceKey === serviceKey ? updated : service,
+        ),
+      );
       setEditingService(updated);
+      await listQuery.refetch();
     } catch (err) {
       setUpdatingError(
         (err as Error)?.message ?? t("admin:jwt_activate_failed"),
@@ -88,8 +95,14 @@ export const AuthJwtServicesPage: FC = () => {
     try {
       setUpdating(true);
       setUpdatingServiceKey(serviceKey);
-      const updated = await deactivateMutation.mutateAsync(serviceKey);
+      const updated = await deactivateAuthJwtService(serviceKey);
+      setServices((current) =>
+        current.map((service) =>
+          service.serviceKey === serviceKey ? updated : service,
+        ),
+      );
       setEditingService(updated);
+      await listQuery.refetch();
     } catch (err) {
       setUpdatingError(
         (err as Error)?.message ?? t("admin:jwt_deactivate_failed"),
@@ -105,10 +118,16 @@ export const AuthJwtServicesPage: FC = () => {
     try {
       setUpdating(true);
       setUpdatingServiceKey(serviceKey);
-      const updated = await rotateMutation.mutateAsync(serviceKey);
+      const updated = await rotateAuthJwtService(serviceKey);
+      setServices((current) =>
+        current.map((service) =>
+          service.serviceKey === serviceKey ? updated : service,
+        ),
+      );
       setEditingService((current) =>
         current?.serviceKey === serviceKey ? updated : current,
       );
+      await listQuery.refetch();
     } catch (err) {
       setUpdatingError((err as Error)?.message ?? "Failed to rotate key");
     } finally {

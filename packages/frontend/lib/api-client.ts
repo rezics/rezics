@@ -1,4 +1,5 @@
 import { treaty } from "@elysiajs/eden";
+import type { AuthJwtServiceAdminRouter } from "@rezics/backend/auth/jwt";
 import type { ServerApp } from "@rezics/backend/server";
 import {
   ApiError,
@@ -21,6 +22,8 @@ export function createEdenClient<App extends AnyElysia>(
 }
 
 export const apiClient = createEdenClient<ServerApp>();
+export const authJwtServiceClient =
+  createEdenClient<AuthJwtServiceAdminRouter>(`${API_BASE_URL}/auth`);
 
 type EdenErrorValue = {
   code?: string;
