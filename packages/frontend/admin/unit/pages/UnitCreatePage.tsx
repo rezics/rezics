@@ -1,5 +1,8 @@
-import { unitMutations } from "@rezics/contract/api/unit/unit.mutations";
-import { userQueries } from "@rezics/contract/api/user/user.queries";
+import {
+  CONTENT_LANGUAGE_SLUGS,
+  type ContentLanguage,
+  type CreateUnitInput,
+} from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Alert,
@@ -11,19 +14,26 @@ import {
   Label,
   Separator,
 } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { ArrowLeft as ArrowBackIcon, Save as SaveIcon } from "lucide-react";
 import React from "react";
 import { Page } from "@/admin/core/layouts/Page";
 import { Link } from "@/admin/shared/ui/link";
+import {
+  useCreateUnitMutation,
+  useCurrentUserQuery,
+} from "../hooks/useUnitAdminQueries";
+
+function isContentLanguage(value: string): value is ContentLanguage {
+  return (CONTENT_LANGUAGE_SLUGS as readonly string[]).includes(value);
+}
 
 export default function UnitCreatePage() {
   const { t } = useTranslation(["admin", "common"]);
   const navigate = useNavigate();
   const [error, setError] = React.useState<string | null>(null);
 
-  const meQuery = useQuery(userQueries.me());
+  const meQuery = useCurrentUserQuery();
   const myUnitId = meQuery.data?.unitId ?? "";
 
   const [userId, setUserId] = React.useState("");
@@ -38,34 +48,46 @@ export default function UnitCreatePage() {
     if (myUnitId) setUserId(myUnitId);
   }, [myUnitId, userId]);
 
-  const createMutation = unitMutations.useCreate({
-    onError: (err) =>
-      setError(
-        err instanceof Error ? err.message : t("admin:unit_create_failed"),
-      ),
-  });
+  const createMutation = useCreateUnitMutation();
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    const translations =
+    const language = defaultLanguage.trim() || "en";
+    if (!isContentLanguage(language)) {
+      setError(t("common:language_code_placeholder"));
+      return;
+    }
+
+    const translations: CreateUnitInput["translations"] =
       translationTitle.trim() || translationSummary.trim()
         ? [
             {
-              language: defaultLanguage.trim() || "en",
+              language,
               title: translationTitle.trim() || undefined,
               summary: translationSummary.trim() || undefined,
             },
           ]
         : undefined;
-    const unit = await createMutation.mutateAsync({
+    const input: CreateUnitInput = {
       userId: userId.trim(),
       type: type.trim(),
       status: status.trim() || undefined,
-      defaultLanguage: defaultLanguage.trim() || undefined,
       translations,
-    } as any);
-    await navigate({ to: `/unit/${(unit as any).id}`, replace: true });
+    };
+
+    try {
+      const unit = await createMutation.mutateAsync(input);
+      await navigate({
+        to: "/unit/$unitId",
+        params: { unitId: unit.id },
+        replace: true,
+      });
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : t("admin:unit_create_failed"),
+      );
+    }
   }
 
   return (

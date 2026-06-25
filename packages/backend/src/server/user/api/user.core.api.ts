@@ -3,6 +3,7 @@ import {
   editorialPatchSubmissionSchema,
   hasPermissionToUpdateUser,
   userBySlugParamsSchema,
+  userDTOSchema,
   userListBodySchema,
   userListQuerySchema,
   userListResponseSchema,
@@ -92,6 +93,7 @@ export const coreRoute = new Elysia()
     },
     {
       requireLogin: true,
+      response: { 200: userDTOSchema },
       detail: {
         summary: "Get current user",
         description:
