@@ -5,7 +5,7 @@ import {
   realmDetailQuery,
 } from "@rezics/contract/api/realm/realm";
 import { realmTagTreeQuery } from "@rezics/contract/api/realm-tag-tree/realm-tag-tree.queries";
-import { tagBatchTranslationsQuery } from "@rezics/contract/api/tag/tag";
+import { tagBatchTranslationsQuery } from "@rezics/contract/api/tag/tag.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";

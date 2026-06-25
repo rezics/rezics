@@ -3,7 +3,7 @@ import { useCurrentUserId } from "@rezics/contract/api/hooks/useCurrentUserId";
 import {
   useCastTagVoteMutation,
   useWithdrawUnitTagVoteMutation,
-} from "@rezics/contract/api/tag/tag";
+} from "@rezics/contract/api/tag/tag.mutations";
 import type {
   BatchTagTranslationResult,
   BookDTO,

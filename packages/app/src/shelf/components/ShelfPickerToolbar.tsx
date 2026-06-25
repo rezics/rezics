@@ -1,5 +1,5 @@
 import { meiliTagSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
-import { tagBatchTranslationsQuery } from "@rezics/contract/api/tag/tag";
+import { tagBatchTranslationsQuery } from "@rezics/contract/api/tag/tag.queries";
 import type { TagSearchDocument } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import {

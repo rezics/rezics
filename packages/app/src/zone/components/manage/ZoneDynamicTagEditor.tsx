@@ -1,5 +1,5 @@
 import { meiliTagSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
-import { tagApi } from "@rezics/contract/api/tag/tag";
+import { tagApi } from "@rezics/contract/api/tag/tag.api";
 import type { TagSearchDocument, ZoneDynamicTags } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Badge, Button, Checkbox, Input } from "@rezics/ui/shadcn";

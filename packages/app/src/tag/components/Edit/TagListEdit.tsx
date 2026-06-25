@@ -1,9 +1,9 @@
 import { meiliTagSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
 import {
-  tagQueries,
   useAttachTagMutation,
   useDetachTagMutation,
-} from "@rezics/contract/api/tag/tag";
+} from "@rezics/contract/api/tag/tag.mutations";
+import { tagQueries } from "@rezics/contract/api/tag/tag.queries";
 import type { TagSearchDocument, UnitTagDTO } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

@@ -1,4 +1,4 @@
-import { useAttachTagMutation } from "@rezics/contract/api/tag/tag";
+import { useAttachTagMutation } from "@rezics/contract/api/tag/tag.mutations";
 import type { UnitTagDTO } from "@rezics/contract";
 import type React from "react";
 import { TagEdit } from "./TagEdit";

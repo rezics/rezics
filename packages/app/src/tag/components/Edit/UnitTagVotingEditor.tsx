@@ -4,13 +4,13 @@ import {
   useCreateRealmTagApplicationMutation,
   useWithdrawRealmTagApplicationVoteMutation,
 } from "@rezics/contract/api/realm/realm";
+import { tagApi } from "@rezics/contract/api/tag/tag.api";
 import {
-  tagApi,
-  tagQueries,
   useCastTagVoteMutation,
   useCreateUnitTagMutation,
   useWithdrawUnitTagVoteMutation,
-} from "@rezics/contract/api/tag/tag";
+} from "@rezics/contract/api/tag/tag.mutations";
+import { tagQueries } from "@rezics/contract/api/tag/tag.queries";
 import { meiliTagSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
 import {
   useDeleteUserTagApplicationMutation,

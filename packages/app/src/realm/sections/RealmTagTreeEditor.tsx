@@ -5,7 +5,7 @@ import {
 } from "@rezics/contract/api/meili/meili.queries";
 import { useUpdateRealmTagTreeMutation } from "@rezics/contract/api/realm-tag-tree/realm-tag-tree.mutations";
 import { realmTagTreeQuery } from "@rezics/contract/api/realm-tag-tree/realm-tag-tree.queries";
-import { tagBatchTranslationsQuery } from "@rezics/contract/api/tag/tag";
+import { tagBatchTranslationsQuery } from "@rezics/contract/api/tag/tag.queries";
 import type {
   LabelSearchDocument,
   RealmTagTree,

@@ -1,4 +1,4 @@
-import { tagQueries } from "@rezics/contract/api/tag/tag";
+import { tagQueries } from "@rezics/contract/api/tag/tag.queries";
 import type { UnitTagDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
