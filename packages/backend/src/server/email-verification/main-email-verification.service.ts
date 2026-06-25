@@ -3,7 +3,7 @@ import {
   type EmailDeliveryResult,
   render,
   VerificationCode,
-} from "@rezics/email";
+} from "@/email";
 import { env } from "@/env";
 
 export const USER_EMAIL_CONTRACT_NAME = "user.email" as const;

@@ -5,7 +5,6 @@
     { "path": "./packages/contract" },
     { "path": "./packages/edge" },
     { "path": "./packages/editor" },
-    { "path": "./packages/email" },
     { "path": "./packages/folio" },
     { "path": "./packages/frontend" },
     { "path": "./packages/i18n" },

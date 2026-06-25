@@ -2,7 +2,7 @@ import {
   createEmailSender,
   type EmailSender,
   formatSenderAddress,
-} from "@rezics/email";
+} from "@/email";
 import { env } from "../env";
 
 export function getDefaultSender(): string {

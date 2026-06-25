@@ -79,9 +79,9 @@ export const env = createEnv({
 
     /**
      * SMTP host used by main product email verification flows.
-     * Main validates this value locally and passes it to `@rezics/email`.
+     * Main validates this value locally and passes it to the email sender.
      * main 产品邮件验证流程使用的 SMTP 主机。
-     * main 在本地验证此值并将其传递给 `@rezics/email`。
+     * main 在本地验证此值并将其传递给 email sender。
      */
     SMTP_HOST: v.string(),
 

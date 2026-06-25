@@ -1,4 +1,4 @@
-import { createEmailSender } from "@rezics/email/sender";
+import { createEmailSender } from "@/email/sender";
 import { env } from "../env";
 
 export interface EmailMessage {
@@ -20,8 +20,8 @@ function getSmtpSender() {
   if (smtpSender) return smtpSender;
   if (!env.SMTP_HOST) return null;
 
-  // Pool/maxConnections/maxMessages come from @rezics/email defaults.
-  // Pool/maxConnections/maxMessages 取自 @rezics/email 的默认值。
+  // Pool/maxConnections/maxMessages come from backend email defaults.
+  // Pool/maxConnections/maxMessages 取自 backend email 的默认值。
   smtpSender = createEmailSender({
     defaultFrom: {
       email: env.SMTP_FROM ?? "no-reply@rezics.com",

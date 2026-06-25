@@ -137,8 +137,8 @@
     "@elysiajs/openapi": "^1.4.14",
     "@faker-js/faker": "^10.1.0",
     "@kitajs/html": "^4.2.13",
+    "@react-email/components": "^0.0.36",
     "@rezics/contract": "workspace:*",
-    "@rezics/email": "workspace:*",
     "@rezics/jwt": "workspace:*",
     "@rezics/shared": "workspace:*",
     "@sinclair/typebox": "^0.34.41",
@@ -152,12 +152,16 @@
     "elysia": "^1.4.22",
     "jose": "^6.2.0",
     "meilisearch": "^0.54.0",
+    "nodemailer": "^7.0.11",
     "pg": "^8.16.3",
+    "react": "^19.1.0",
     "uuid": "^13.0.0",
     "valibot": "^1.2.0"
   },
   "devDependencies": {
+    "@types/nodemailer": "^7.0.4",
     "@types/pg": "^8.15.5",
+    "@types/react": "^19.1.0",
     "bun-types": "latest",
     "drizzle-kit": "1.0.0-rc.3"
   },

@@ -1,4 +1,4 @@
-import { render, templateRegistry } from "@rezics/email";
+import { render, templateRegistry } from "@/email";
 import { Elysia, t } from "elysia";
 import { auth } from "../auth/instance";
 import { createAuthMailer, getDefaultSender } from "../notification/mailer";
