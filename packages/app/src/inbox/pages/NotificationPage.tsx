@@ -1,8 +1,8 @@
 import {
   useMarkAllAsReadMutation,
   useMarkAsReadMutation,
-  useNotifications,
-} from "@rezics/contract/api/notification";
+} from "@rezics/contract/api/notification/notification.mutations";
+import { useNotifications } from "@rezics/contract/api/notification/notification.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { Button } from "@rezics/ui/shadcn";
