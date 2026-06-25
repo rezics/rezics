@@ -11,8 +11,6 @@ export * from "./credit-attribution/credit-attribution";
 export * from "./entity-attribution/entity-attribution";
 export * from "./stream/stream";
 export * from "./governance/governance";
-export * from "./label/label";
-export * from "./meili/meili";
 export * from "./realm-tag-tree";
 export * from "./subject-attribution/subject-attribution";
 export * from "./subscription/subscription";
