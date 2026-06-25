@@ -7,7 +7,7 @@ import type {
   QueueStatus,
   StatusItem,
   StatusLink,
-} from "@rezics/contract/api";
+} from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {

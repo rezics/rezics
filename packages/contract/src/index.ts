@@ -8,6 +8,7 @@ export * from "./book/index";
 export * from "./comment";
 export * from "./common";
 export * from "./content/index";
+export * from "./diagnostic";
 export * from "./dispatch";
 export * from "./editorial-path-scope";
 export * from "./engagement/index";

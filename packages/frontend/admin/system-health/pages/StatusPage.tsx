@@ -1,4 +1,4 @@
-import type { SystemStatusSummary } from "@rezics/contract/api";
+import type { SystemStatusSummary } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Button, Card, CardContent } from "@rezics/ui/shadcn";
 import {

@@ -19,4 +19,4 @@ export type {
   StatusLink,
   StatusState,
   SystemStatusSummary,
-} from "../../diagnostic/status.types";
+} from "./status.types";

@@ -1,4 +1,4 @@
-import type { SystemStatusSummary } from "@rezics/contract/api";
+import type { SystemStatusSummary } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { RefreshCw } from "lucide-react";

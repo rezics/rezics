@@ -1,8 +1,13 @@
 export type {
+  AttributeDrift,
+  CdcDetectedIssue,
+  CdcIssueCode,
   CdcSourceStatus,
   CdcStatus,
   ExpectedMeiliIndexSchema,
   FailedJobSummary,
+  HistoryOutboxFailedSummary,
+  HistoryOutboxPendingSummary,
   HistoryOutboxStatus,
   MeiliIndexStatus,
   MeiliStatusSummary,
@@ -14,4 +19,4 @@ export type {
   StatusLink,
   StatusState,
   SystemStatusSummary,
-} from "./status.types";
+} from "../../diagnostic/status";

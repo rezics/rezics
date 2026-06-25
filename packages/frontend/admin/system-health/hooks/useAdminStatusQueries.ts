@@ -1,7 +1,7 @@
 import {
   type MeiliStatusSummary,
   type SystemStatusSummary,
-} from "@rezics/contract/api";
+} from "@rezics/contract";
 import useSWR from "swr";
 import { apiClient, unwrapEdenResponse } from "@/lib/api-client";
 
