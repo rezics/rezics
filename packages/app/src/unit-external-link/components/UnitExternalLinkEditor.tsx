@@ -3,8 +3,10 @@ import { positionForNewBottomPin } from "@rezics/contract/api/tag/fractional-ind
 import {
   useCreateUnitExternalLink,
   useDeleteUnitExternalLink,
+} from "@rezics/contract/api/unit-external-link/unit-external-link.mutations";
+import {
   useUnitExternalLinks,
-} from "@rezics/contract/api/unit-external-link";
+} from "@rezics/contract/api/unit-external-link/unit-external-link.queries";
 import type { UnitExternalLinkDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

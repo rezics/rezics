@@ -28,7 +28,6 @@ export * from "./subject-attribution/subject-attribution";
 export * from "./subscription/subscription";
 export * from "./tag/tag";
 export * from "./unit/unit";
-export * from "./unit-external-link";
 export * from "./user-tag-application/user-tag-application";
 export * from "./user-shelf-item/user-shelf-item";
 export * from "./zone/zone";
