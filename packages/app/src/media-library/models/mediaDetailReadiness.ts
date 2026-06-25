@@ -1,7 +1,5 @@
-import {
-  contentSearchQueryOptions,
-  contentStructureQuery,
-} from "@rezics/contract/api";
+import { contentStructureQuery } from "@rezics/contract/api/content-structure/content-structure";
+import { contentSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
 
 export type MediaDetailTab = (typeof mediaDetailTabs)[number];
 

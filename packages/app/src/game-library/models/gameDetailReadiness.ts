@@ -1,8 +1,6 @@
-import {
-  contentSearchQueryOptions,
-  contentStructureQuery,
-  gameSystemRequirementsByGameQueryOptions,
-} from "@rezics/contract/api";
+import { contentStructureQuery } from "@rezics/contract/api/content-structure/content-structure";
+import { gameSystemRequirementsByGameQueryOptions } from "@rezics/contract/api/game-system-requirement/game-system-requirement";
+import { contentSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
 
 export const gameDetailTabs = [
   "overview",
