@@ -21,7 +21,7 @@ import {
   DialogTitle,
 } from "@rezics/ui/shadcn";
 import { Plus as AddRoundedIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PinboardEmptyState } from "../components/PinboardEmptyState";
 import { PinboardErrorState } from "../components/PinboardErrorState";
