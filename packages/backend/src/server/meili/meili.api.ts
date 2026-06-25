@@ -6,6 +6,12 @@ import {
   feedbackListQuerySchema,
   isRoot,
   LabelSearchOptionsSchema,
+  type MeiliKeyListResponse,
+  meiliApiMessageResponseSchema,
+  meiliHealthResponseSchema,
+  meiliKeyListResponseSchema,
+  meiliKeySchema,
+  meiliTaskResponseSchema,
   PollSearchOptionsSchema,
   PostSearchOptionsSchema,
   RealmSearchOptionsSchema,
@@ -36,6 +42,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       return { status: ok ? "available" : "unavailable" };
     },
     {
+      response: { 200: meiliHealthResponseSchema },
       detail: {
         summary: "Meilisearch health check",
         tags: ["Meili"],
@@ -255,6 +262,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Init content index",
         tags: ["Meili", "Admin"],
@@ -278,6 +286,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Init feedbacks index",
         tags: ["Meili", "Admin"],
@@ -301,6 +310,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Init users index",
         tags: ["Meili", "Admin"],
@@ -324,6 +334,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Init posts index",
         tags: ["Meili", "Admin"],
@@ -347,6 +358,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Init polls index",
         tags: ["Meili", "Admin"],
@@ -370,6 +382,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Init realms index",
         tags: ["Meili", "Admin"],
@@ -393,6 +406,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Init zones index",
         tags: ["Meili", "Admin"],
@@ -416,6 +430,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Init tags index",
         tags: ["Meili", "Admin"],
@@ -439,6 +454,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Init labels index",
         tags: ["Meili", "Admin"],
@@ -462,6 +478,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Init entities index",
         tags: ["Meili", "Admin"],
@@ -485,6 +502,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Init progress index",
         tags: ["Meili", "Admin"],
@@ -510,6 +528,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliTaskResponseSchema },
       detail: {
         summary: "Sync all content to Meilisearch",
         tags: ["Meili", "Admin"],
@@ -533,6 +552,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliTaskResponseSchema },
       detail: {
         summary: "Sync all feedbacks to Meilisearch",
         tags: ["Meili", "Admin"],
@@ -556,6 +576,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliTaskResponseSchema },
       detail: {
         summary: "Sync all users to Meilisearch",
         tags: ["Meili", "Admin"],
@@ -579,6 +600,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliTaskResponseSchema },
       detail: {
         summary: "Sync all posts to Meilisearch",
         tags: ["Meili", "Admin"],
@@ -602,6 +624,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliTaskResponseSchema },
       detail: {
         summary: "Sync all polls to Meilisearch",
         tags: ["Meili", "Admin"],
@@ -625,6 +648,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliTaskResponseSchema },
       detail: {
         summary: "Sync all realms to Meilisearch",
         tags: ["Meili", "Admin"],
@@ -648,6 +672,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliTaskResponseSchema },
       detail: {
         summary: "Sync all zones to Meilisearch",
         tags: ["Meili", "Admin"],
@@ -671,6 +696,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliTaskResponseSchema },
       detail: {
         summary: "Sync all tags to Meilisearch",
         tags: ["Meili", "Admin"],
@@ -694,6 +720,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliTaskResponseSchema },
       detail: {
         summary: "Sync all labels to Meilisearch",
         tags: ["Meili", "Admin"],
@@ -717,6 +744,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliTaskResponseSchema },
       detail: {
         summary: "Sync all entities to Meilisearch",
         tags: ["Meili", "Admin"],
@@ -742,6 +770,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Delete all content from Meilisearch",
         tags: ["Meili", "Admin"],
@@ -765,6 +794,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Delete all feedbacks from Meilisearch",
         tags: ["Meili", "Admin"],
@@ -788,6 +818,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Delete all users from Meilisearch",
         tags: ["Meili", "Admin"],
@@ -811,6 +842,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Delete all posts from Meilisearch",
         tags: ["Meili", "Admin"],
@@ -834,6 +866,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Delete all polls from Meilisearch",
         tags: ["Meili", "Admin"],
@@ -857,6 +890,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Delete all realms from Meilisearch",
         tags: ["Meili", "Admin"],
@@ -880,6 +914,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Delete all zones from Meilisearch",
         tags: ["Meili", "Admin"],
@@ -903,6 +938,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Delete all entities from Meilisearch",
         tags: ["Meili", "Admin"],
@@ -926,6 +962,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Delete all Meilisearch indexes (nuclear reset)",
         tags: ["Meili", "Admin"],
@@ -950,6 +987,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
     {
       requireLogin: true,
+      response: { 200: meiliKeySchema },
       detail: {
         summary: "Create admin API key",
         tags: ["Meili", "Keys", "Admin"],
@@ -968,10 +1006,11 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
         set.status = 403;
         throw new Error("Forbidden: not authorized to list keys");
       }
-      return meiliService.listKeys();
+      return (await meiliService.listKeys()) as MeiliKeyListResponse;
     },
     {
       requireLogin: true,
+      response: { 200: meiliKeyListResponseSchema },
       detail: {
         summary: "List Meilisearch keys",
         tags: ["Meili", "Keys", "Admin"],
@@ -998,6 +1037,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       params: t.Object({
         uid: t.String(),
       }),
+      response: { 200: meiliApiMessageResponseSchema },
       detail: {
         summary: "Delete Meilisearch key",
         tags: ["Meili", "Keys", "Admin"],

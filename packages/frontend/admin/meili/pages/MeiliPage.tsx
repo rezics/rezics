@@ -1,8 +1,4 @@
-import {
-  type MeiliKey,
-  meiliAdminMutations,
-  meiliAdminQueries,
-} from "@rezics/contract/api/meili/meili.admin.queries";
+import type { MeiliKey } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Spinner } from "@rezics/ui";
 import {
@@ -12,11 +8,45 @@ import {
   Button,
   buttonVariants,
 } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { BarChart3, X as CloseIcon } from "lucide-react";
 import { useState } from "react";
 import { Page } from "@/admin/core/layouts/Page";
+import {
+  useMeiliCreateAdminKeyMutation,
+  useMeiliDeleteAllContentMutation,
+  useMeiliDeleteAllEntitiesMutation,
+  useMeiliDeleteAllFeedbacksMutation,
+  useMeiliDeleteAllPollsMutation,
+  useMeiliDeleteAllPostsMutation,
+  useMeiliDeleteAllRealmsMutation,
+  useMeiliDeleteAllUsersMutation,
+  useMeiliDeleteAllZonesMutation,
+  useMeiliDeleteKeyMutation,
+  useMeiliHealthQuery,
+  useMeiliInitContentIndexMutation,
+  useMeiliInitEntitiesIndexMutation,
+  useMeiliInitFeedbacksIndexMutation,
+  useMeiliInitLabelsIndexMutation,
+  useMeiliInitPollsIndexMutation,
+  useMeiliInitPostsIndexMutation,
+  useMeiliInitRealmsIndexMutation,
+  useMeiliInitTagsIndexMutation,
+  useMeiliInitUsersIndexMutation,
+  useMeiliInitZonesIndexMutation,
+  useMeiliKeysQuery,
+  useMeiliResetAllIndexesMutation,
+  useMeiliSyncContentMutation,
+  useMeiliSyncEntitiesMutation,
+  useMeiliSyncFeedbacksMutation,
+  useMeiliSyncLabelsMutation,
+  useMeiliSyncPollsMutation,
+  useMeiliSyncPostsMutation,
+  useMeiliSyncRealmsMutation,
+  useMeiliSyncTagsMutation,
+  useMeiliSyncUsersMutation,
+  useMeiliSyncZonesMutation,
+} from "../hooks/useMeiliAdmin";
 import {
   type MeiliDangerAction,
   MeiliDangerZoneSection,
@@ -56,17 +86,15 @@ export function MeiliPage() {
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [resetConfirmText, setResetConfirmText] = useState("");
 
-  const { data: health, isLoading: isHealthLoading } = useQuery(
-    meiliAdminQueries.health(),
-  );
+  const { data: health, isLoading: isHealthLoading } = useMeiliHealthQuery();
 
   const {
     data: keyList,
     isLoading: isKeysLoading,
     refetch: refetchKeys,
-  } = useQuery(meiliAdminQueries.keys());
+  } = useMeiliKeysQuery();
 
-  const initContentMutation = meiliAdminMutations.useInitContentIndex({
+  const initContentMutation = useMeiliInitContentIndexMutation({
     onSuccess: (res) => {
       setMessage({
         type: "success",
@@ -78,7 +106,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const initFeedbacksMutation = meiliAdminMutations.useInitFeedbacksIndex({
+  const initFeedbacksMutation = useMeiliInitFeedbacksIndexMutation({
     onSuccess: (res) => {
       setMessage({
         type: "success",
@@ -90,7 +118,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const initUsersMutation = meiliAdminMutations.useInitUsersIndex({
+  const initUsersMutation = useMeiliInitUsersIndexMutation({
     onSuccess: (res) => {
       setMessage({
         type: "success",
@@ -102,7 +130,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const initPostsMutation = meiliAdminMutations.useInitPostsIndex({
+  const initPostsMutation = useMeiliInitPostsIndexMutation({
     onSuccess: (res) => {
       setMessage({
         type: "success",
@@ -114,7 +142,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const initPollsMutation = meiliAdminMutations.useInitPollsIndex({
+  const initPollsMutation = useMeiliInitPollsIndexMutation({
     onSuccess: (res) => {
       setMessage({
         type: "success",
@@ -126,7 +154,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const initRealmsMutation = meiliAdminMutations.useInitRealmsIndex({
+  const initRealmsMutation = useMeiliInitRealmsIndexMutation({
     onSuccess: (res) => {
       setMessage({
         type: "success",
@@ -138,7 +166,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const initZonesMutation = meiliAdminMutations.useInitZonesIndex({
+  const initZonesMutation = useMeiliInitZonesIndexMutation({
     onSuccess: (res) => {
       setMessage({
         type: "success",
@@ -150,7 +178,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const initTagsMutation = meiliAdminMutations.useInitTagsIndex({
+  const initTagsMutation = useMeiliInitTagsIndexMutation({
     onSuccess: (res) => {
       setMessage({
         type: "success",
@@ -162,7 +190,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const initLabelsMutation = meiliAdminMutations.useInitLabelsIndex({
+  const initLabelsMutation = useMeiliInitLabelsIndexMutation({
     onSuccess: (res) => {
       setMessage({
         type: "success",
@@ -174,7 +202,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const initEntitiesMutation = meiliAdminMutations.useInitEntitiesIndex({
+  const initEntitiesMutation = useMeiliInitEntitiesIndexMutation({
     onSuccess: (res) => {
       setMessage({
         type: "success",
@@ -186,7 +214,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const syncContentMutation = meiliAdminMutations.useSyncContent({
+  const syncContentMutation = useMeiliSyncContentMutation({
     onSuccess: () => {
       setMessage({
         type: "success",
@@ -196,7 +224,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const syncFeedbacksMutation = meiliAdminMutations.useSyncFeedbacks({
+  const syncFeedbacksMutation = useMeiliSyncFeedbacksMutation({
     onSuccess: () => {
       setMessage({
         type: "success",
@@ -206,7 +234,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const syncUsersMutation = meiliAdminMutations.useSyncUsers({
+  const syncUsersMutation = useMeiliSyncUsersMutation({
     onSuccess: () => {
       setMessage({
         type: "success",
@@ -216,7 +244,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const syncPostsMutation = meiliAdminMutations.useSyncPosts({
+  const syncPostsMutation = useMeiliSyncPostsMutation({
     onSuccess: () => {
       setMessage({
         type: "success",
@@ -226,7 +254,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const syncPollsMutation = meiliAdminMutations.useSyncPolls({
+  const syncPollsMutation = useMeiliSyncPollsMutation({
     onSuccess: () => {
       setMessage({
         type: "success",
@@ -236,7 +264,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const syncRealmsMutation = meiliAdminMutations.useSyncRealms({
+  const syncRealmsMutation = useMeiliSyncRealmsMutation({
     onSuccess: () => {
       setMessage({
         type: "success",
@@ -246,7 +274,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const syncZonesMutation = meiliAdminMutations.useSyncZones({
+  const syncZonesMutation = useMeiliSyncZonesMutation({
     onSuccess: () => {
       setMessage({
         type: "success",
@@ -256,7 +284,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const syncTagsMutation = meiliAdminMutations.useSyncTags({
+  const syncTagsMutation = useMeiliSyncTagsMutation({
     onSuccess: () => {
       setMessage({
         type: "success",
@@ -266,7 +294,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const syncLabelsMutation = meiliAdminMutations.useSyncLabels({
+  const syncLabelsMutation = useMeiliSyncLabelsMutation({
     onSuccess: () => {
       setMessage({
         type: "success",
@@ -276,7 +304,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const syncEntitiesMutation = meiliAdminMutations.useSyncEntities({
+  const syncEntitiesMutation = useMeiliSyncEntitiesMutation({
     onSuccess: () => {
       setMessage({
         type: "success",
@@ -286,7 +314,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const deleteAllContentMutation = meiliAdminMutations.useDeleteAllContent({
+  const deleteAllContentMutation = useMeiliDeleteAllContentMutation({
     onSuccess: (res) => {
       setMessage({
         type: "success",
@@ -298,7 +326,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const deleteAllFeedbacksMutation = meiliAdminMutations.useDeleteAllFeedbacks({
+  const deleteAllFeedbacksMutation = useMeiliDeleteAllFeedbacksMutation({
     onSuccess: (res) => {
       setMessage({
         type: "success",
@@ -310,7 +338,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const deleteAllUsersMutation = meiliAdminMutations.useDeleteAllUsers({
+  const deleteAllUsersMutation = useMeiliDeleteAllUsersMutation({
     onSuccess: (res) => {
       setMessage({
         type: "success",
@@ -322,7 +350,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const deleteAllPostsMutation = meiliAdminMutations.useDeleteAllPosts({
+  const deleteAllPostsMutation = useMeiliDeleteAllPostsMutation({
     onSuccess: (res) => {
       setMessage({
         type: "success",
@@ -334,7 +362,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const deleteAllPollsMutation = meiliAdminMutations.useDeleteAllPolls({
+  const deleteAllPollsMutation = useMeiliDeleteAllPollsMutation({
     onSuccess: (res) => {
       setMessage({
         type: "success",
@@ -346,7 +374,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const deleteAllRealmsMutation = meiliAdminMutations.useDeleteAllRealms({
+  const deleteAllRealmsMutation = useMeiliDeleteAllRealmsMutation({
     onSuccess: (res) => {
       setMessage({
         type: "success",
@@ -358,7 +386,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const deleteAllZonesMutation = meiliAdminMutations.useDeleteAllZones({
+  const deleteAllZonesMutation = useMeiliDeleteAllZonesMutation({
     onSuccess: (res) => {
       setMessage({
         type: "success",
@@ -370,7 +398,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const deleteAllEntitiesMutation = meiliAdminMutations.useDeleteAllEntities({
+  const deleteAllEntitiesMutation = useMeiliDeleteAllEntitiesMutation({
     onSuccess: (res) => {
       setMessage({
         type: "success",
@@ -382,7 +410,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const resetAllIndexesMutation = meiliAdminMutations.useResetAllIndexes({
+  const resetAllIndexesMutation = useMeiliResetAllIndexesMutation({
     onSuccess: (res) => {
       setMessage({
         type: "success",
@@ -394,10 +422,9 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const createAdminKeyMutation = meiliAdminMutations.useCreateAdminKey({
+  const createAdminKeyMutation = useMeiliCreateAdminKeyMutation({
     onSuccess: (res) => {
-      const keyString =
-        typeof (res as any).key === "string" ? (res as any).key : null;
+      const keyString = typeof res.key === "string" ? res.key : null;
       setLastAdminKey(keyString);
       setMessage({
         type: "success",
@@ -410,7 +437,7 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const deleteKeyMutation = meiliAdminMutations.useDeleteKey({
+  const deleteKeyMutation = useMeiliDeleteKeyMutation({
     onSuccess: async (res) => {
       setMessage({
         type: "success",

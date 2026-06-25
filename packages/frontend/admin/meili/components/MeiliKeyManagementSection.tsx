@@ -1,7 +1,7 @@
 import type {
   MeiliKey,
   MeiliKeyListResponse,
-} from "@rezics/contract/api/meili/meili.admin.queries";
+} from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
@@ -33,6 +33,11 @@ export function MeiliKeyManagementSection({
   onDeleteKey: (key: MeiliKey) => void;
 }) {
   const { t } = useTranslation(["admin", "common"]);
+  const formatExpiresAt = (value: MeiliKey["expiresAt"]) => {
+    if (!value) return t("common:never");
+    return value instanceof Date ? value.toISOString() : value;
+  };
+
   return (
     <Card className="border-border-whisper bg-surface-base">
       <CardHeader>
@@ -120,7 +125,7 @@ export function MeiliKeyManagementSection({
                         {(key.indexes || []).join(", ") || "-"}
                       </td>
                       <td className="py-1 pr-3 align-top text-xs">
-                        {key.expiresAt || t("common:never")}
+                        {formatExpiresAt(key.expiresAt)}
                       </td>
                       <td className="py-1 pr-3 align-top">
                         <Button
