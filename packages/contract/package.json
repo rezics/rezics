@@ -11,14 +11,6 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
-    "./api/content-structure": {
-      "types": "./src/api/content-structure/content-structure.ts",
-      "default": "./src/api/content-structure/content-structure.ts"
-    },
-    "./api/echokv": {
-      "types": "./src/api/echokv/echokv.ts",
-      "default": "./src/api/echokv/echokv.ts"
-    },
     "./api/*": {
       "types": "./src/api/*.ts",
       "default": "./src/api/*.ts"
