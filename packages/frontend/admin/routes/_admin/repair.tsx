@@ -1,7 +1,7 @@
 import type {
   AdminRepairJobScope,
   HistoryOutboxRepairStatus,
-} from "@rezics/contract/api";
+} from "@rezics/contract";
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 const RepairJobsPage = lazyRouteComponent(
