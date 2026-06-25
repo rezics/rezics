@@ -1,4 +1,4 @@
-import { bookQueries } from "@rezics/contract/api/book/book";
+import { bookQueries } from "@rezics/contract/api/book/book.queries";
 import { chapterDetailQuery } from "@rezics/contract/api/chapter/chapter.queries";
 import { useCanEdit } from "@rezics/contract/api/hooks/useCanEdit";
 import { useTranslation } from "@rezics/i18n/react";

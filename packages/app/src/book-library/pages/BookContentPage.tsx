@@ -1,4 +1,4 @@
-import { bookQueries } from "@rezics/contract/api/book/book";
+import { bookQueries } from "@rezics/contract/api/book/book.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";

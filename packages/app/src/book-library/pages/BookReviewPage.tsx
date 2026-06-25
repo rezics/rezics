@@ -1,4 +1,4 @@
-import { bookQueries } from "@rezics/contract/api/book/book";
+import { bookQueries } from "@rezics/contract/api/book/book.queries";
 import { postQueries } from "@rezics/contract/api/post/post";
 import { PostKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";

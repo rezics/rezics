@@ -1,4 +1,4 @@
-import { bookQueries } from "@rezics/contract/api/book/book";
+import { bookQueries } from "@rezics/contract/api/book/book.queries";
 import type { BookDTO } from "@rezics/contract";
 import {
   createFileRoute,

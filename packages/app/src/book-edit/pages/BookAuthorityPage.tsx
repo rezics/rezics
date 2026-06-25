@@ -1,4 +1,4 @@
-import { bookQueries } from "@rezics/contract/api/book/book";
+import { bookQueries } from "@rezics/contract/api/book/book.queries";
 import { useCanEdit } from "@rezics/contract/api/hooks/useCanEdit";
 import {
   useRemoveUnitFieldLockMutation,

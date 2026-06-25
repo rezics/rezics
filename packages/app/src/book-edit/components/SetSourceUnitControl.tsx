@@ -1,4 +1,4 @@
-import { bookKeys } from "@rezics/contract/api/book/book";
+import { bookKeys } from "@rezics/contract/api/book/book.keys";
 import { useSetTranslationSourceMutation } from "@rezics/contract/api/unit/translation-source.mutations";
 import type { BookDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";

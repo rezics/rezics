@@ -1,4 +1,4 @@
-import { bookQueries } from "@rezics/contract/api/book/book";
+import { bookQueries } from "@rezics/contract/api/book/book.queries";
 import { useEditorEntry } from "@rezics/contract/api/hooks/useEditorEntry";
 import { postQueries } from "@rezics/contract/api/post/post";
 import type { CommentListContext } from "@rezics/contract";

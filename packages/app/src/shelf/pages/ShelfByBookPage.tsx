@@ -1,4 +1,4 @@
-import { bookQueries } from "@rezics/contract/api/book/book";
+import { bookQueries } from "@rezics/contract/api/book/book.queries";
 import { shelfInfiniteListQuery } from "@rezics/contract/api/shelf/shelf";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

@@ -1,11 +1,11 @@
 import { historyQueries } from "@rezics/contract/api/history/history.queries";
 import { unitAuthorityQueries } from "@rezics/contract/api/unit/authority.queries";
+import { bookKeys } from "@rezics/contract/api/book/book.keys";
 import {
-  bookKeys,
-  bookQueries,
   useCreateBookMutation,
   useUpdateBookMutation,
-} from "@rezics/contract/api/book/book";
+} from "@rezics/contract/api/book/book.mutations";
+import { bookQueries } from "@rezics/contract/api/book/book.queries";
 import { creditAttributionQueries } from "@rezics/contract/api/credit-attribution/credit-attribution.queries";
 import { useEntityAttributionBatchMutation } from "@rezics/contract/api/entity-attribution/entity-attribution.mutations";
 import { getLockedFieldError } from "@rezics/contract/api/react-query/errors";

@@ -49,7 +49,7 @@
  * └──────────────────────┘
  */
 
-import { bookQueries } from "@rezics/contract/api/book/book";
+import { bookQueries } from "@rezics/contract/api/book/book.queries";
 import {
   contentSearchQueryOptions,
   postSearchQueryOptions,

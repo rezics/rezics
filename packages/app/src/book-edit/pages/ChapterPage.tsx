@@ -1,8 +1,8 @@
+import { bookMutations } from "@rezics/contract/api/book/book.mutations";
 import {
   bookContentStructureQuery,
-  bookMutations,
-} from "@rezics/contract/api/book/book";
-import { bookQueries } from "@rezics/contract/api/book/book.queries";
+  bookQueries,
+} from "@rezics/contract/api/book/book.queries";
 import { useUpdateChapterMutation } from "@rezics/contract/api/chapter/chapter.mutations";
 import { chapterDetailQuery } from "@rezics/contract/api/chapter/chapter.queries";
 import {
