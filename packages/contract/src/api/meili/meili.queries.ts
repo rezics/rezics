@@ -50,10 +50,13 @@ export function useContentSearch(opts: ContentSearchOptions) {
 
 // ANCHOR: User search 用户搜索
 
+export const userSearch = (opts?: UserListQuery) =>
+  meiliUserApi.userSearch(opts);
+
 export const userSearchQueryOptions = (opts: UserListQuery) =>
   queryOptions({
     queryKey: ["meili", "users", opts],
-    queryFn: () => meiliUserApi.userSearch(opts),
+    queryFn: () => userSearch(opts),
     staleTime: 1000 * 60 * 2,
   });
 

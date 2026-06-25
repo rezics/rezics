@@ -1,4 +1,4 @@
-import { meiliUserApi } from "@rezics/contract/api/meili/meili.api";
+import { userSearch } from "@rezics/contract/api/meili/meili.queries";
 import { uploadImage } from "@rezics/contract/api/upload/upload.mutations";
 import {
   RezicsMarkdownEditor as BaseRezicsMarkdownEditor,
@@ -12,7 +12,7 @@ import { useMemo } from "react";
 export type { RezicsMarkdownEditorProps, ViewMode };
 
 const searchUsers: UserSearchAdapter = async (query) => {
-  const { users } = await meiliUserApi.userSearch({ q: query, limit: 10 });
+  const { users } = await userSearch({ q: query, limit: 10 });
   return users;
 };
 
