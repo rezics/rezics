@@ -21,17 +21,21 @@ export const tagListQuery = (filters?: TagFilters) =>
 /**
  * Query options for getting a single tag by unitId
  */
+export const getTag = (unitId: string) => tagApi.get(unitId);
+
 export const tagDetailQuery = (unitId: string) =>
   queryOptions({
     queryKey: tagKeys.detail(unitId),
-    queryFn: () => tagApi.get(unitId),
+    queryFn: () => getTag(unitId),
     staleTime: 1000 * 60 * 10,
   });
+
+export const getTagBySlug = (slug: string) => tagApi.getBySlug(slug);
 
 export const tagBySlugQuery = (slug: string) =>
   queryOptions({
     queryKey: tagKeys.bySlug(slug),
-    queryFn: () => tagApi.getBySlug(slug),
+    queryFn: () => getTagBySlug(slug),
     enabled: slug.length > 0,
     staleTime: 1000 * 60 * 10,
   });

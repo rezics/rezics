@@ -4,13 +4,16 @@ import {
   useWithdrawRealmTagApplicationVoteMutation,
 } from "@rezics/contract/api/realm/realm.mutations";
 import { realmQueries } from "@rezics/contract/api/realm/realm.queries";
-import { tagApi } from "@rezics/contract/api/tag/tag.api";
 import {
   useCastTagVoteMutation,
   useCreateUnitTagMutation,
   useWithdrawUnitTagVoteMutation,
 } from "@rezics/contract/api/tag/tag.mutations";
-import { tagQueries } from "@rezics/contract/api/tag/tag.queries";
+import {
+  getTag,
+  getTagBySlug,
+  tagQueries,
+} from "@rezics/contract/api/tag/tag.queries";
 import { meiliTagSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
 import {
   useDeleteUserTagApplicationMutation,
@@ -89,8 +92,8 @@ async function resolveTagOption(
   const token = parseTagLookupInput(value);
   if (!token) return null;
   const tag = UUID_RE.test(token)
-    ? ((await tagApi.get(token)) as TagSearchResult)
-    : ((await tagApi.getBySlug(token)) as TagSearchResult);
+    ? ((await getTag(token)) as TagSearchResult)
+    : ((await getTagBySlug(token)) as TagSearchResult);
   return tagResultToOption(tag, fallbackLabel);
 }
 
@@ -504,9 +507,12 @@ export function UnitTagVotingEditor({
             actionLabel={t("common:add")}
             excludeIds={globalIds}
             disabled={createUnitTag.isPending}
-            onSelect={(option) =>
-              createUnitTag.mutateAsync({ unitId, tagUnitId: option.tagUnitId })
-            }
+            onSelect={async (option) => {
+              await createUnitTag.mutateAsync({
+                unitId,
+                tagUnitId: option.tagUnitId,
+              });
+            }}
           />
         </section>
 
@@ -557,13 +563,13 @@ export function UnitTagVotingEditor({
                 actionLabel={t("common:add")}
                 excludeIds={realmIds}
                 disabled={createRealmTag.isPending}
-                onSelect={(option) =>
-                  createRealmTag.mutateAsync({
+                onSelect={async (option) => {
+                  await createRealmTag.mutateAsync({
                     realmUnitId,
                     unitId,
                     tagUnitId: option.tagUnitId,
-                  })
-                }
+                  });
+                }}
               />
             </>
           ) : null}

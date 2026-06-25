@@ -1,5 +1,5 @@
 import { meiliTagSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
-import { tagApi } from "@rezics/contract/api/tag/tag.api";
+import { getTagBySlug } from "@rezics/contract/api/tag/tag.queries";
 import type { TagSearchDocument, ZoneDynamicTags } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Badge, Button, Checkbox, Input } from "@rezics/ui/shadcn";
@@ -43,8 +43,8 @@ function tagLabel(tagUnitId: string, refUnits: ZoneRefUnitMap): string {
 
 async function resolveTagTokens(tokens: readonly string[]): Promise<string[]> {
   return resolveDynamicTagInputTokens(tokens, async (token) => {
-    const tag = await tagApi.getBySlug(token);
-    return tag.tagUnitId;
+    const tag = await getTagBySlug(token);
+    return tag.unitId;
   });
 }
 
