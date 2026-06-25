@@ -1,6 +1,5 @@
 import "github-markdown-css/github-markdown-light.css";
 import "./index.css";
-import { AuthProvider } from "@rezics/contract/api/providers";
 import {
   RezicsI18nProvider,
   useLocale,
@@ -14,6 +13,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Toaster } from "sonner";
 import { router } from "@/router";
 import { WindowAlert } from "./components/WindowAlert";
+import { AuthProvider } from "./providers/AuthProvider";
 import { PersistentSettingsLoader } from "./providers/PersistentSettingsLoader";
 import "./providers/i18n";
 import { ReactQueryProvider } from "./providers/react-query";

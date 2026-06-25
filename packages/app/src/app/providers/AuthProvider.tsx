@@ -1,14 +1,13 @@
 import {
   clearAuthPresence,
   hasAuthPresence,
-} from "../react-query/authPresence";
-import { exchangeForSessionToken } from "../react-query/jwt";
+} from "@rezics/contract/api/react-query/authPresence";
+import { exchangeForSessionToken } from "@rezics/contract/api/react-query/jwt";
 import { useEffect } from "react";
 import {
   clearAuthSessionState,
   hydrateAuthSessionState,
-  useAuthSessionStore,
-} from "../states/authSessionStore";
+} from "@/user/states";
 import { createRefreshRetryPolicy } from "./refreshRetryPolicy";
 
 async function refreshSessionToken(): Promise<
