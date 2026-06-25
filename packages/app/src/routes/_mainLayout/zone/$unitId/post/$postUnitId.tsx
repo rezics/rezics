@@ -1,4 +1,4 @@
-import { zonePortalQueryOptions } from "@rezics/contract/api";
+import { zonePortalQueryOptions } from "@rezics/contract/api/zone/zone";
 import { postQueries } from "@rezics/contract/api/post/post";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";

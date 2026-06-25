@@ -1,4 +1,4 @@
-import { zoneSectionInfiniteQuery } from "@rezics/contract/api";
+import { zoneSectionInfiniteQuery } from "@rezics/contract/api/zone/zone";
 import type { ZoneStatsSection } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Skeleton } from "@rezics/ui/shadcn";
