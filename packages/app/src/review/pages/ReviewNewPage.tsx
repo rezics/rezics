@@ -2,7 +2,7 @@ import { useAlertStore } from "@app/states/windowAlertStore";
 import { bookQueries } from "@rezics/contract/api/book/book.queries";
 import { useCurrentUserId } from "@rezics/contract/api/hooks/useCurrentUserId";
 import { getDefaultRealmId } from "@rezics/contract/api/infra/bootstrap";
-import { useCreatePostMutation } from "@rezics/contract/api/post/post";
+import { useCreatePostMutation } from "@rezics/contract/api/post/post.mutations";
 import { useUpsertScoreMutation } from "@rezics/contract/api/score/score.mutations";
 import {
   markdownContentDoc,

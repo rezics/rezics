@@ -1,5 +1,5 @@
 import { useCreateCommentMutation } from "@rezics/contract/api/comment/comment.mutations";
-import { useCreatePostMutation } from "@rezics/contract/api/post/post";
+import { useCreatePostMutation } from "@rezics/contract/api/post/post.mutations";
 import { realmDetailQuery } from "@rezics/contract/api/realm/realm";
 import {
   CONTENT_LANGUAGE_SLUGS,

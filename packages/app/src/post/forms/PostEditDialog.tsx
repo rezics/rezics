@@ -3,7 +3,7 @@ import { useUpdateCommentMutation } from "@rezics/contract/api/comment/comment.m
 import {
   useUpdatePostMutation,
   useUpdateWikiPostContentMutation,
-} from "@rezics/contract/api/post/post";
+} from "@rezics/contract/api/post/post.mutations";
 import type { CommentDTO, PostDTO } from "@rezics/contract";
 import {
   type ContentLanguage,

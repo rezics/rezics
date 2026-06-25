@@ -1,4 +1,4 @@
-import { postQueries } from "@rezics/contract/api/post/post";
+import { postQueries } from "@rezics/contract/api/post/post.queries";
 import { tagQueries } from "@rezics/contract/api/tag/tag.queries";
 import type { BookDTO } from "@rezics/contract";
 import { mainMarkdownSource, PostKind } from "@rezics/contract";

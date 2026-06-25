@@ -1,4 +1,4 @@
-import { postQueries } from "@rezics/contract/api/post/post";
+import { postQueries } from "@rezics/contract/api/post/post.queries";
 import { type PostDTO, PostKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";

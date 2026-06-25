@@ -3,7 +3,7 @@ import {
   useCreateWikiPostMutation,
   useSetPostPublicationMutation,
   useUpdateWikiPostContentMutation,
-} from "@rezics/contract/api/post/post";
+} from "@rezics/contract/api/post/post.mutations";
 import {
   mainMarkdownSource,
   markdownContentDoc,

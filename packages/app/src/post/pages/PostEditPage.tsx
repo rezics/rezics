@@ -1,9 +1,9 @@
 import { getLockedFieldError } from "@rezics/contract/api/react-query/errors";
 import {
-  postQueries,
   useUpdatePostMutation,
   useUpdateWikiPostContentMutation,
-} from "@rezics/contract/api/post/post";
+} from "@rezics/contract/api/post/post.mutations";
+import { postQueries } from "@rezics/contract/api/post/post.queries";
 import { unitQueries } from "@rezics/contract/api/unit/unit.queries";
 import {
   type ContentLanguage,

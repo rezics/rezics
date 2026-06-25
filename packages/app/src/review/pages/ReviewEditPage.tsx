@@ -1,9 +1,9 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
 import {
-  postQueries,
   useDeletePostMutation,
   useUpdatePostMutation,
-} from "@rezics/contract/api/post/post";
+} from "@rezics/contract/api/post/post.mutations";
+import { postQueries } from "@rezics/contract/api/post/post.queries";
 import { unitQueries } from "@rezics/contract/api/unit/unit.queries";
 import { mainMarkdownSource, markdownContentDoc } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";

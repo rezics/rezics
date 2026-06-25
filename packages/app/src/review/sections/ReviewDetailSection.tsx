@@ -1,6 +1,6 @@
 import { bookQueries } from "@rezics/contract/api/book/book.queries";
 import { useEditorEntry } from "@rezics/contract/api/hooks/useEditorEntry";
-import { postQueries } from "@rezics/contract/api/post/post";
+import { postQueries } from "@rezics/contract/api/post/post.queries";
 import type { CommentListContext } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

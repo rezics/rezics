@@ -1,5 +1,5 @@
 import { getI18nRuntime } from "@rezics/i18n/runtime";
-import { postQueries } from "@rezics/contract/api/post/post";
+import { postQueries } from "@rezics/contract/api/post/post.queries";
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 import {
   createMinimalEditConsoleConfig,

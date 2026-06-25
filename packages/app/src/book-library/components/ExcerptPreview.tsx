@@ -1,4 +1,4 @@
-import { postQueries } from "@rezics/contract/api/post/post";
+import { postQueries } from "@rezics/contract/api/post/post.queries";
 import { PostKind, type UnitDTO } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";

@@ -1,4 +1,4 @@
-import { postQueries } from "@rezics/contract/api/post/post";
+import { postQueries } from "@rezics/contract/api/post/post.queries";
 import { shelfQueries } from "@rezics/contract/api/shelf/shelf";
 import { tagQueries } from "@rezics/contract/api/tag/tag.queries";
 import { PostKind } from "@rezics/contract";

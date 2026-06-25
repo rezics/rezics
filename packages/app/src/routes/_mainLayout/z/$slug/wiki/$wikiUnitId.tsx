@@ -1,4 +1,4 @@
-import { postQueries } from "@rezics/contract/api/post/post";
+import { postQueries } from "@rezics/contract/api/post/post.queries";
 import { zoneQueries } from "@rezics/contract/api/zone/zone.queries";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { resolveDefaultCommentContext } from "@/comment";
