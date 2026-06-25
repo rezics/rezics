@@ -1,4 +1,4 @@
-import { useDrafts } from "@rezics/contract/api/draft";
+import { useDrafts } from "@rezics/contract/api/draft/draft.queries";
 import { useCurrentUserId } from "@rezics/contract/api/hooks/useCurrentUserId";
 import {
   postListQuery,

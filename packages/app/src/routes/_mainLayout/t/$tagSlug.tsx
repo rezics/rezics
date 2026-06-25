@@ -1,4 +1,4 @@
-import { slugApi } from "@rezics/contract/api/slug";
+import { slugApi } from "@rezics/contract/api/slug/slug.api";
 import { isPublicTagSlugRouteParams } from "@rezics/contract";
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 

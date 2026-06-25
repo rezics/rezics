@@ -15,17 +15,9 @@
       "types": "./src/api/index.ts",
       "default": "./src/api/index.ts"
     },
-    "./api/activity": {
-      "types": "./src/api/activity/index.ts",
-      "default": "./src/api/activity/index.ts"
-    },
     "./api/content-structure": {
       "types": "./src/api/content-structure/content-structure.ts",
       "default": "./src/api/content-structure/content-structure.ts"
-    },
-    "./api/draft": {
-      "types": "./src/api/draft/index.ts",
-      "default": "./src/api/draft/index.ts"
     },
     "./api/echokv": {
       "types": "./src/api/echokv/echokv.ts",
@@ -46,10 +38,6 @@
     "./api/shelf": {
       "types": "./src/api/shelf/index.ts",
       "default": "./src/api/shelf/index.ts"
-    },
-    "./api/slug": {
-      "types": "./src/api/slug/index.ts",
-      "default": "./src/api/slug/index.ts"
     },
     "./api/states": {
       "types": "./src/api/states/index.ts",
