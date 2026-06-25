@@ -75,48 +75,6 @@ export function useSetPasswordMutation() {
   });
 }
 
-export function useAdminBanUserMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (input: { userId: string; reason?: string }) =>
-      authApi.adminBanUser(input),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: authKeys.adminUsers() });
-    },
-  });
-}
-
-export function useAdminUnbanUserMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (input: { userId: string }) => authApi.adminUnbanUser(input),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: authKeys.adminUsers() });
-    },
-  });
-}
-
-export function useAdminSetRoleMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (input: { userId: string; role: string }) =>
-      authApi.adminSetRole(input),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: authKeys.adminUsers() });
-    },
-  });
-}
-
-export function useAdminRemoveUserMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (input: { userId: string }) => authApi.adminRemoveUser(input),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: authKeys.adminUsers() });
-    },
-  });
-}
-
 export function useRevokeSessionMutation() {
   const qc = useQueryClient();
   return useMutation({
@@ -171,10 +129,6 @@ export const authMutations = {
   useSendVerificationEmail: useSendVerificationEmailMutation,
   useChangeEmail: useChangeEmailMutation,
   useSetPassword: useSetPasswordMutation,
-  useAdminBanUser: useAdminBanUserMutation,
-  useAdminUnbanUser: useAdminUnbanUserMutation,
-  useAdminSetRole: useAdminSetRoleMutation,
-  useAdminRemoveUser: useAdminRemoveUserMutation,
   useRevokeSession: useRevokeSessionMutation,
   useSendVerificationOTP: useSendVerificationOTPMutation,
   useVerifyEmailOTP: useVerifyEmailOTPMutation,

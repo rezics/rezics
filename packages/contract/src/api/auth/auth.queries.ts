@@ -30,13 +30,6 @@ export const authSessionsQuery = () =>
     staleTime: 1000 * 60 * 1,
   });
 
-export const authAdminUsersQuery = () =>
-  queryOptions({
-    queryKey: authKeys.adminUsers(),
-    queryFn: () => authApi.adminListUsers(),
-    staleTime: 1000 * 60 * 1,
-  });
-
 export const accountSlugAvailabilityQuery = (slug: string) =>
   queryOptions({
     queryKey: authKeys.slugAvailability(slug),
@@ -50,6 +43,5 @@ export const authQueries = {
   sessionState: authSessionStateQuery,
   sessions: authSessionsQuery,
   providers: authProvidersQuery,
-  adminUsers: authAdminUsersQuery,
   slugAvailability: accountSlugAvailabilityQuery,
 };

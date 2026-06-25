@@ -1,16 +1,3 @@
-import {
-  accountOperationsQueries,
-  useStartAuthUserImpersonationMutation,
-} from "@rezics/contract/api/account-operation/account-operation";
-import { authApi } from "@rezics/contract/api/auth/auth.api";
-import {
-  useAdminBanUserMutation,
-  useAdminRemoveUserMutation,
-  useAdminSetRoleMutation,
-  useAdminUnbanUserMutation,
-} from "@rezics/contract/api/auth/auth.mutations";
-import { authQueries } from "@rezics/contract/api/auth/auth.queries";
-import { useUnblockAccountEnforcementMutation } from "@rezics/contract/api/governance/governance";
 import type { AdminAuthUserAccountSummary } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { SafeLink, Spinner } from "@rezics/ui";
@@ -33,7 +20,6 @@ import {
   SelectValue,
   Textarea,
 } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import {
   type PaginatedColumn,
@@ -41,6 +27,20 @@ import {
 } from "@/admin/components/table/PaginatedTable";
 import { Page } from "@/admin/core/layouts/Page";
 import { Link } from "@/admin/shared/ui/link";
+import {
+  startAuthUserImpersonation,
+  useAuthUserAccountSummaryQuery,
+} from "../hooks/useAccountOperationAdmin";
+import {
+  banAuthAdminUser,
+  refreshMainSession,
+  removeAuthAdminUser,
+  setAuthAdminUserRole,
+  type AuthAdminUser,
+  unblockAccountEnforcement,
+  unbanAuthAdminUser,
+  useAuthAdminUsersQuery,
+} from "../hooks/useAuthUsersAdmin";
 
 function fmtDate(v?: string | Date) {
   if (!v) return "";
@@ -49,17 +49,7 @@ function fmtDate(v?: string | Date) {
   return d.toLocaleString();
 }
 
-type AuthUser = {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  banned: boolean;
-  emailVerified?: boolean;
-  sessions?: unknown[];
-  sessionCount?: number;
-  createdAt: string;
-};
+type AuthUser = AuthAdminUser;
 
 function formatMainUser(summary?: AdminAuthUserAccountSummary) {
   const mainUser = summary?.mainUser;
@@ -117,25 +107,22 @@ export default function AuthUsersPage() {
     error: null,
     resultCount: null,
   });
+  const [authActionPending, setAuthActionPending] = React.useState(false);
+  const [impersonationPending, setImpersonationPending] =
+    React.useState(false);
+  const [overridePending, setOverridePending] = React.useState(false);
 
-  const usersQuery = useQuery(authQueries.adminUsers());
-  const banMutation = useAdminBanUserMutation();
-  const unbanMutation = useAdminUnbanUserMutation();
-  const setRoleMutation = useAdminSetRoleMutation();
-  const removeMutation = useAdminRemoveUserMutation();
-  const impersonateMutation = useStartAuthUserImpersonationMutation();
-  const unblockEnforcementMutation = useUnblockAccountEnforcementMutation();
+  const usersQuery = useAuthAdminUsersQuery();
 
-  const users = (usersQuery.data?.users ?? []) as AuthUser[];
+  const users = usersQuery.data?.users ?? [];
   const total = users.length;
   const paginatedUsers = users.slice(page * limit, (page + 1) * limit);
   const visibleAuthUserIds = React.useMemo(
     () => paginatedUsers.map((user) => user.id),
     [paginatedUsers],
   );
-  const accountSummaryQuery = useQuery(
-    accountOperationsQueries.authUserSummary(visibleAuthUserIds),
-  );
+  const accountSummaryQuery =
+    useAuthUserAccountSummaryQuery(visibleAuthUserIds);
   const accountSummariesByAuthId = React.useMemo(() => {
     return new Map(
       (accountSummaryQuery.data?.summaries ?? []).map((summary) => [
@@ -144,6 +131,19 @@ export default function AuthUsersPage() {
       ]),
     );
   }, [accountSummaryQuery.data?.summaries]);
+
+  const runAuthUserMutation = React.useCallback(
+    async (action: () => Promise<unknown>) => {
+      setAuthActionPending(true);
+      try {
+        await action();
+        await usersQuery.refetch();
+      } finally {
+        setAuthActionPending(false);
+      }
+    },
+    [usersQuery],
+  );
 
   const columns = React.useMemo(() => {
     const cols: PaginatedColumn<AuthUser>[] = [
@@ -176,8 +176,12 @@ export default function AuthUsersPage() {
         cell: (u) => (
           <Select
             value={u.role ?? "user"}
+            disabled={authActionPending}
             onValueChange={(value) =>
-              value && setRoleMutation.mutate({ userId: u.id, role: value })
+              value &&
+              void runAuthUserMutation(() =>
+                setAuthAdminUserRole({ userId: u.id, role: value }),
+              )
             }
           >
             <SelectTrigger size="sm" className="w-28">
@@ -376,7 +380,12 @@ export default function AuthUsersPage() {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => unbanMutation.mutate({ userId: u.id })}
+                  disabled={authActionPending}
+                  onClick={() =>
+                    void runAuthUserMutation(() =>
+                      unbanAuthAdminUser({ userId: u.id }),
+                    )
+                  }
                 >
                   {t("admin:auth_users_unban")}
                 </Button>
@@ -385,7 +394,12 @@ export default function AuthUsersPage() {
                   size="sm"
                   variant="outline"
                   className="text-warning-text"
-                  onClick={() => banMutation.mutate({ userId: u.id })}
+                  disabled={authActionPending}
+                  onClick={() =>
+                    void runAuthUserMutation(() =>
+                      banAuthAdminUser({ userId: u.id }),
+                    )
+                  }
                 >
                   {t("admin:auth_users_ban")}
                 </Button>
@@ -394,6 +408,7 @@ export default function AuthUsersPage() {
                 size="sm"
                 variant="outline"
                 className="text-error-text"
+                disabled={authActionPending}
                 onClick={() =>
                   setConfirmDialog({
                     open: true,
@@ -403,8 +418,13 @@ export default function AuthUsersPage() {
                       email: u.email,
                     }),
                     onConfirm: () => {
-                      removeMutation.mutate({ userId: u.id });
-                      setConfirmDialog((prev) => ({ ...prev, open: false }));
+                      void runAuthUserMutation(async () => {
+                        await removeAuthAdminUser({ userId: u.id });
+                        setConfirmDialog((prev) => ({
+                          ...prev,
+                          open: false,
+                        }));
+                      });
                     },
                   })
                 }
@@ -418,10 +438,8 @@ export default function AuthUsersPage() {
     ];
     return cols;
   }, [
-    banMutation,
-    unbanMutation,
-    setRoleMutation,
-    removeMutation,
+    authActionPending,
+    runAuthUserMutation,
     accountSummariesByAuthId,
     t,
   ]);
@@ -570,15 +588,16 @@ export default function AuthUsersPage() {
                 !overrideDialog.targetUserId ||
                 overrideDialog.reason.trim().length === 0 ||
                 overrideDialog.resultCount !== null ||
-                unblockEnforcementMutation.isPending
+                overridePending
               }
               onClick={async () => {
                 if (!overrideDialog.targetUserId) return;
+                setOverridePending(true);
                 try {
-                  const result = await unblockEnforcementMutation.mutateAsync({
-                    targetUserId: overrideDialog.targetUserId,
-                    input: { reason: overrideDialog.reason.trim() },
-                  });
+                  const result = await unblockAccountEnforcement(
+                    overrideDialog.targetUserId,
+                    { reason: overrideDialog.reason.trim() },
+                  );
                   await accountSummaryQuery.refetch();
                   setOverrideDialog((prev) => ({
                     ...prev,
@@ -593,6 +612,8 @@ export default function AuthUsersPage() {
                         ? error.message
                         : "Enforcement override failed",
                   }));
+                } finally {
+                  setOverridePending(false);
                 }
               }}
             >
@@ -687,17 +708,18 @@ export default function AuthUsersPage() {
                 !impersonationDialog.user ||
                 Boolean(impersonationDialog.auditLogId) ||
                 impersonationDialog.reason.trim().length === 0 ||
-                impersonateMutation.isPending
+                impersonationPending
               }
               onClick={async () => {
                 if (!impersonationDialog.user) return;
+                setImpersonationPending(true);
                 try {
-                  const result = await impersonateMutation.mutateAsync({
+                  const result = await startAuthUserImpersonation({
                     targetAuthUserId: impersonationDialog.user.id,
                     reason: impersonationDialog.reason.trim(),
                     durationSeconds: impersonationDialog.durationSeconds,
                   });
-                  await authApi.refreshMainSession();
+                  await refreshMainSession();
                   setImpersonationDialog((prev) => ({
                     ...prev,
                     auditLogId: result.auditLogId,
@@ -711,6 +733,8 @@ export default function AuthUsersPage() {
                         ? error.message
                         : "Impersonation failed",
                   }));
+                } finally {
+                  setImpersonationPending(false);
                 }
               }}
             >

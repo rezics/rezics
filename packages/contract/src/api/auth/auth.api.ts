@@ -216,38 +216,6 @@ export const authApi = {
     });
   },
 
-  adminListUsers: async () => {
-    return authFetch<{ users: any[] }>("/auth/admin/list-users");
-  },
-
-  adminRemoveUser: async (input: { userId: string }) => {
-    return authFetch<{ success: boolean }>("/auth/admin/remove-user", {
-      method: "POST",
-      body: JSON.stringify(input),
-    });
-  },
-
-  adminBanUser: async (input: { userId: string; reason?: string }) => {
-    return authFetch<{ success: boolean }>("/auth/admin/ban-user", {
-      method: "POST",
-      body: JSON.stringify(input),
-    });
-  },
-
-  adminUnbanUser: async (input: { userId: string }) => {
-    return authFetch<{ success: boolean }>("/auth/admin/unban-user", {
-      method: "POST",
-      body: JSON.stringify(input),
-    });
-  },
-
-  adminSetRole: async (input: { userId: string; role: string }) => {
-    return authFetch<{ success: boolean }>("/auth/admin/set-role", {
-      method: "POST",
-      body: JSON.stringify(input),
-    });
-  },
-
   materializeAccount: async (): Promise<AccountMaterializationResponse> => {
     return authFetch<AccountMaterializationResponse>(
       "/auth/account/materialize",

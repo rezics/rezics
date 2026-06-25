@@ -52,3 +52,5 @@ export const adminRouter = new Elysia()
       requestBody: jsonRequestBody(setRoleBodySchema),
     },
   });
+
+export type AuthAdminRouter = typeof adminRouter;

@@ -8,9 +8,6 @@ export const authKeys = {
   sessionState: () => [...authKeys.all(), "session-state"] as const,
   sessions: () => [...authKeys.all(), "sessions"] as const,
   providers: () => [...authKeys.all(), "providers"] as const,
-  adminUsers: () => [...authKeys.all(), "admin", "users"] as const,
-  adminUserList: (filters?: Record<string, unknown>) =>
-    [...authKeys.adminUsers(), filters] as const,
   slugAvailability: (slug: string) =>
     [...authKeys.all(), "slug-availability", slug] as const,
 } as const;
