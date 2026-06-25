@@ -1,11 +1,3 @@
-import {
-  unitAuthorityApi,
-  unitAuthorityQueries,
-  useRemoveUnitCollaboratorMutation,
-  useRemoveUnitFieldLockMutation,
-  useUpsertUnitCollaboratorMutation,
-  useUpsertUnitFieldLockMutation,
-} from "@rezics/contract/api/unit/unit";
 import { UnitAuthorityRoleKey } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
@@ -25,10 +17,18 @@ import {
   Separator,
   Textarea,
 } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import { RotateCcw as RetryIcon, Search as SearchIcon } from "lucide-react";
 import React from "react";
 import { Page } from "@/admin/core/layouts/Page";
+import {
+  useRemoveUnitCollaboratorMutation,
+  useRemoveUnitFieldLockMutation,
+  useRetryFailedHistoryOutboxMutation,
+  useUnitCollaboratorsQuery,
+  useUnitFieldLocksQuery,
+  useUpsertUnitCollaboratorMutation,
+  useUpsertUnitFieldLockMutation,
+} from "@/admin/unit/hooks/useUnitAdminQueries";
 
 const authorityRoles = Object.values(UnitAuthorityRoleKey);
 
@@ -45,40 +45,19 @@ export default function AuthorityOpsPage() {
   const [unitId, setUnitId] = React.useState("");
   const [message, setMessage] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
-  const [retrying, setRetrying] = React.useState(false);
   const [collaboratorUserId, setCollaboratorUserId] = React.useState("");
   const [collaboratorRole, setCollaboratorRole] =
     React.useState<UnitAuthorityRoleKey>(UnitAuthorityRoleKey.EDITOR);
   const [lockPath, setLockPath] = React.useState("");
   const [lockReason, setLockReason] = React.useState("");
 
-  const fieldLocksQuery = useQuery({
-    ...unitAuthorityQueries.fieldLocks(unitId),
-    enabled: !!unitId,
-  });
-  const collaboratorsQuery = useQuery({
-    ...unitAuthorityQueries.collaborators(unitId),
-    enabled: !!unitId,
-  });
-  const upsertCollaborator = useUpsertUnitCollaboratorMutation({
-    onSuccess: () => {
-      setMessage("Collaborator authority updated.");
-      setCollaboratorUserId("");
-    },
-  });
-  const removeCollaborator = useRemoveUnitCollaboratorMutation({
-    onSuccess: () => setMessage("Collaborator authority removed."),
-  });
-  const upsertFieldLock = useUpsertUnitFieldLockMutation({
-    onSuccess: () => {
-      setMessage("Field lock updated.");
-      setLockPath("");
-      setLockReason("");
-    },
-  });
-  const removeFieldLock = useRemoveUnitFieldLockMutation({
-    onSuccess: () => setMessage("Field lock removed."),
-  });
+  const fieldLocksQuery = useUnitFieldLocksQuery(unitId, Boolean(unitId));
+  const collaboratorsQuery = useUnitCollaboratorsQuery(unitId, Boolean(unitId));
+  const upsertCollaborator = useUpsertUnitCollaboratorMutation();
+  const removeCollaborator = useRemoveUnitCollaboratorMutation();
+  const upsertFieldLock = useUpsertUnitFieldLockMutation();
+  const removeFieldLock = useRemoveUnitFieldLockMutation();
+  const retryFailedHistoryOutbox = useRetryFailedHistoryOutboxMutation();
 
   function onSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -88,11 +67,10 @@ export default function AuthorityOpsPage() {
   }
 
   async function retryFailedOutbox() {
-    setRetrying(true);
     setError(null);
     setMessage(null);
     try {
-      const result = await unitAuthorityApi.retryFailedHistoryOutbox(
+      const result = await retryFailedHistoryOutbox.mutateAsync(
         unitId ? { unitId } : {},
       );
       setMessage(t("admin:authority_retry_queued", { count: result.retried }));
@@ -100,8 +78,6 @@ export default function AuthorityOpsPage() {
       setError(
         err instanceof Error ? err.message : t("admin:authority_retry_failed"),
       );
-    } finally {
-      setRetrying(false);
     }
   }
 
@@ -124,6 +100,8 @@ export default function AuthorityOpsPage() {
         userId: targetUserId,
         roleKey: collaboratorRole,
       });
+      setMessage("Collaborator authority updated.");
+      setCollaboratorUserId("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Authority update failed.");
     }
@@ -153,6 +131,9 @@ export default function AuthorityOpsPage() {
         path,
         reason,
       });
+      setMessage("Field lock updated.");
+      setLockPath("");
+      setLockReason("");
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Field lock update failed.",
@@ -165,6 +146,7 @@ export default function AuthorityOpsPage() {
     setMessage(null);
     try {
       await removeCollaborator.mutateAsync({ unitId, userId });
+      setMessage("Collaborator authority removed.");
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Collaborator removal failed.",
@@ -177,6 +159,7 @@ export default function AuthorityOpsPage() {
     setMessage(null);
     try {
       await removeFieldLock.mutateAsync({ unitId, path });
+      setMessage("Field lock removed.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Field unlock failed.");
     }
@@ -225,7 +208,7 @@ export default function AuthorityOpsPage() {
               type="button"
               variant="secondary"
               className="self-end"
-              disabled={retrying}
+              disabled={retryFailedHistoryOutbox.isPending}
               onClick={retryFailedOutbox}
             >
               <RetryIcon className="size-4" />
