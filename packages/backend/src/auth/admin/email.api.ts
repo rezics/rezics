@@ -93,3 +93,5 @@ export const adminEmailApi = new Elysia({ prefix: "/admin/email" })
       };
     }
   });
+
+export type AuthAdminEmailRouter = typeof adminEmailApi;

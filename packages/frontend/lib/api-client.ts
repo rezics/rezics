@@ -1,4 +1,5 @@
 import { treaty } from "@elysiajs/eden";
+import type { AuthAdminEmailRouter } from "@rezics/backend/auth";
 import type { AuthJwtServiceAdminRouter } from "@rezics/backend/auth/jwt";
 import type { ServerApp } from "@rezics/backend/server";
 import {
@@ -22,6 +23,8 @@ export function createEdenClient<App extends AnyElysia>(
 }
 
 export const apiClient = createEdenClient<ServerApp>();
+export const authAdminEmailClient =
+  createEdenClient<AuthAdminEmailRouter>(`${API_BASE_URL}/auth`);
 export const authJwtServiceClient =
   createEdenClient<AuthJwtServiceAdminRouter>(`${API_BASE_URL}/auth`);
 

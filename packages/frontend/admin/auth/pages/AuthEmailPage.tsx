@@ -1,4 +1,3 @@
-import { authApi } from "@rezics/contract/api/auth/auth.api";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
@@ -15,15 +14,13 @@ import {
 } from "@rezics/ui/shadcn";
 import { useEffect, useMemo, useState } from "react";
 import { Page } from "@/admin/core/layouts/Page";
-
-type EmailTemplate = {
-  name: string;
-  description: string;
-  propSchema: Record<
-    string,
-    { type: string; required: boolean; description: string }
-  >;
-};
+import {
+  sendAuthEmailTest,
+  testAuthEmailSmtp,
+  type AuthEmailTemplate,
+  useAuthEmailPreviewQuery,
+  useAuthEmailTemplatesQuery,
+} from "../hooks/useAuthEmailAdmin";
 
 type SendTestStats = {
   status: "success" | "error";
@@ -36,11 +33,11 @@ type SendTestStats = {
 
 export default function AuthEmailPage() {
   const { t } = useTranslation(["admin"]);
-  const [templates, setTemplates] = useState<EmailTemplate[]>([]);
+  const templatesQuery = useAuthEmailTemplatesQuery();
+  const templates = templatesQuery.data ?? [];
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [recipientEmail, setRecipientEmail] = useState("");
-  const [previewHtml, setPreviewHtml] = useState("");
   const [sendResult, setSendResult] = useState<{
     type: "success" | "error";
     message: string;
@@ -59,29 +56,8 @@ export default function AuthEmailPage() {
   );
 
   useEffect(() => {
-    let cancelled = false;
-
-    authApi
-      .adminEmailTemplates()
-      .then((items) => {
-        if (cancelled) return;
-        setTemplates(items);
-        setSelectedTemplate((current) => current || items[0]?.name || "");
-        setTemplateError(null);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        setTemplateError(
-          err instanceof Error
-            ? err.message
-            : t("admin:auth_email_failed_load_templates"),
-        );
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [t]);
+    setSelectedTemplate((current) => current || templates[0]?.name || "");
+  }, [templates]);
 
   useEffect(() => {
     if (!currentTemplate) return;
@@ -92,36 +68,35 @@ export default function AuthEmailPage() {
     setFormValues(defaults);
   }, [currentTemplate]);
 
+  const previewQuery = useAuthEmailPreviewQuery(
+    selectedTemplate
+      ? {
+          template: selectedTemplate,
+          props: formValues,
+        }
+      : null,
+  );
+  const previewHtml = previewQuery.data?.html ?? "";
+
   useEffect(() => {
-    if (!selectedTemplate) return;
-    let cancelled = false;
-
-    authApi
-      .adminEmailPreview({
-        template: selectedTemplate,
-        props: formValues,
-      })
-      .then(({ html }) => {
-        if (!cancelled) {
-          setPreviewHtml(html);
-          setTemplateError(null);
-        }
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setPreviewHtml("");
-          setTemplateError(
-            err instanceof Error
-              ? err.message
-              : t("admin:auth_email_failed_render_preview"),
-          );
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedTemplate, formValues, t]);
+    if (templatesQuery.error) {
+      setTemplateError(
+        templatesQuery.error instanceof Error
+          ? templatesQuery.error.message
+          : t("admin:auth_email_failed_load_templates"),
+      );
+      return;
+    }
+    if (previewQuery.error) {
+      setTemplateError(
+        previewQuery.error instanceof Error
+          ? previewQuery.error.message
+          : t("admin:auth_email_failed_render_preview"),
+      );
+      return;
+    }
+    setTemplateError(null);
+  }, [previewQuery.error, t, templatesQuery.error]);
 
   const handleSendTest = async () => {
     if (!recipientEmail || !selectedTemplate) return;
@@ -131,7 +106,7 @@ export default function AuthEmailPage() {
     setSendResult(null);
     setSendStats(null);
     try {
-      const result = await authApi.adminEmailSendTest({
+      const result = await sendAuthEmailTest({
         template: selectedTemplate,
         props: formValues,
         to: recipientEmail,
@@ -175,7 +150,7 @@ export default function AuthEmailPage() {
     setLoading(true);
     setSmtpResult(null);
     try {
-      const result = await authApi.adminEmailSmtpTest();
+      const result = await testAuthEmailSmtp();
       if (result.connected) {
         setSmtpResult({
           type: "success",
@@ -389,6 +364,9 @@ export default function AuthEmailPage() {
         {/* Right panel: preview — 右侧面板：预览 */}
         <div className="flex-1 min-w-[400px] basis-[500px] rounded-md border border-border-whisper overflow-hidden">
           <p className="text-sm font-semibold p-2 bg-surface-elevated border-b border-border-whisper">
+            {previewQuery.isLoading ? (
+              <Spinner className="h-4 w-4" />
+            ) : null}
             {t("admin:auth_email_preview")}
           </p>
           {previewHtml ? (

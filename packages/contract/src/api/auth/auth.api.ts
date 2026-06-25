@@ -39,23 +39,11 @@ function getAuthBaseUrl(): string {
   return config.authBaseUrl || config.apiBaseUrl;
 }
 
-function getAuthAdminBaseUrl(): string {
-  const config = getApiConfig();
-  return config.authAdminBaseUrl || getAuthBaseUrl();
-}
-
 async function authFetch<T>(
   endpoint: string,
   options?: RequestInit,
 ): Promise<T> {
   return fetchJson<T>(`${getAuthBaseUrl()}${endpoint}`, options);
-}
-
-async function authAdminFetch<T>(
-  endpoint: string,
-  options?: RequestInit,
-): Promise<T> {
-  return fetchJson<T>(`${getAuthAdminBaseUrl()}${endpoint}`, options);
 }
 
 async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
@@ -257,54 +245,6 @@ export const authApi = {
     return authFetch<{ success: boolean }>("/auth/admin/set-role", {
       method: "POST",
       body: JSON.stringify(input),
-    });
-  },
-
-  adminEmailTemplates: async () => {
-    return authAdminFetch<
-      {
-        name: string;
-        description: string;
-        propSchema: Record<
-          string,
-          { type: string; required: boolean; description: string }
-        >;
-      }[]
-    >("/admin/email/templates");
-  },
-
-  adminEmailSendTest: async (input: {
-    template: string;
-    props: Record<string, unknown>;
-    to: string;
-  }) => {
-    return authAdminFetch<{ success: boolean; to: string }>(
-      "/admin/email/send-test",
-      {
-        method: "POST",
-        body: JSON.stringify(input),
-      },
-    );
-  },
-
-  adminEmailPreview: async (input: {
-    template: string;
-    props: Record<string, unknown>;
-  }) => {
-    return authAdminFetch<{ html: string }>("/admin/email/preview", {
-      method: "POST",
-      body: JSON.stringify(input),
-    });
-  },
-
-  adminEmailSmtpTest: async () => {
-    return authAdminFetch<{
-      connected: boolean;
-      host?: string;
-      port?: string;
-      error?: string;
-    }>("/admin/email/smtp-test", {
-      method: "POST",
     });
   },
 
