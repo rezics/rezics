@@ -1,4 +1,4 @@
-import { getLockedFieldError } from "@rezics/contract/api";
+import { getLockedFieldError } from "@rezics/contract/api/react-query/errors";
 import {
   useCreateWikiPostMutation,
   useSetPostPublicationMutation,

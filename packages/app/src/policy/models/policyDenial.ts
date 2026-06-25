@@ -1,4 +1,4 @@
-import { ApiError } from "@rezics/contract/api";
+import { ApiError } from "@rezics/contract/api/react-query/errors";
 import { type DecisionCode, decisionCodes } from "@rezics/contract";
 
 /**

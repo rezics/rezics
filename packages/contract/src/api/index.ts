@@ -17,12 +17,6 @@ export * from "./history/history";
 export * from "./label/label";
 export * from "./meili/meili";
 export * from "./realm-tag-tree";
-export {
-  ApiError,
-  type ApiErrorDetail,
-  getLockedFieldError,
-  type LockedFieldApiError,
-} from "./react-query/errors";
 export * from "./series-unit/series";
 export * from "./subject-attribution/subject-attribution";
 export * from "./subscription/subscription";

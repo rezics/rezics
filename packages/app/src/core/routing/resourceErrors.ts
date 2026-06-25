@@ -1,4 +1,4 @@
-import { ApiError } from "@rezics/contract/api";
+import { ApiError } from "@rezics/contract/api/react-query/errors";
 import type { QueryClient } from "@tanstack/react-query";
 import { notFound } from "@tanstack/react-router";
 

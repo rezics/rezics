@@ -1,4 +1,4 @@
-import { getLockedFieldError } from "@rezics/contract/api";
+import { getLockedFieldError } from "@rezics/contract/api/react-query/errors";
 import { useUpdateCommentMutation } from "@rezics/contract/api/comment/comment";
 import {
   useUpdatePostMutation,
