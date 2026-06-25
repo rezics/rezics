@@ -1,6 +1,4 @@
-import { type BookDTO, bookQueries } from "@rezics/contract/api/book/book";
-import { contentSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
-import type { BookListResponse } from "@rezics/contract";
+import type { BookDTO, ContentSearchDocument } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import {
   Button,
@@ -9,7 +7,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
 import React from "react";
 import { SearchablePaginatedTableCard } from "@/admin/components/list/SearchablePaginatedTableCard";
@@ -17,6 +14,10 @@ import type { PaginatedColumn } from "@/admin/components/table/PaginatedTable";
 import { Page } from "@/admin/core/layouts/Page";
 import { Link } from "@/admin/shared/ui/link";
 import { fmtDate } from "@/admin/utils/format";
+import {
+  useBookContentSearchQuery,
+  useBookListQuery,
+} from "../hooks/useBookAdminQueries";
 
 /**
  * Extract the best title from the translations array.
@@ -44,6 +45,48 @@ function formatCredits(book: BookDTO): string {
   return credits.map((c) => `${c.name} (${c.role})`).join(", ");
 }
 
+function mapContentSearchDocumentToBookRow(
+  document: ContentSearchDocument,
+): BookDTO {
+  const book = document as unknown as Partial<BookDTO>;
+  const translations =
+    book.translations ??
+    document.translations?.map((translation) => ({
+      ...translation,
+      unitId: document.id,
+    }));
+
+  return {
+    ...book,
+    unitId: book.unitId ?? document.id,
+    userId: book.userId ?? document.userId,
+    defaultLanguage: book.defaultLanguage ?? document.defaultLanguage,
+    resolvedLanguage: book.resolvedLanguage ?? document.resolvedLanguage,
+    title: book.title ?? document.title ?? document.titles[0] ?? null,
+    subtitle: book.subtitle ?? document.subtitle ?? document.subtitles[0] ?? null,
+    summary: book.summary ?? document.summary ?? document.summaries[0] ?? null,
+    description: book.description ?? document.description ?? null,
+    translations,
+    creditAttributions:
+      book.creditAttributions ??
+      document.creditNames.map((name) => ({
+        entityId: name,
+        name,
+        role: "author" as const,
+      })),
+    createdAt: book.createdAt ?? document.createdAt,
+    updatedAt: book.updatedAt ?? document.updatedAt,
+    publishedAt: book.publishedAt ?? document.publishedAt,
+    coverUrl: book.coverUrl ?? document.coverUrl,
+    rating: book.rating ?? document.rating,
+    visibility: book.visibility ?? document.visibility,
+    textLength: book.textLength ?? document.textLength ?? undefined,
+    isLicensed: book.isLicensed ?? document.isLicensed,
+    referenceCount: book.referenceCount ?? document.referenceCount,
+    shareCount: book.shareCount ?? document.shareCount,
+  };
+}
+
 export default function BooksPage() {
   const matchRoute = useMatchRoute();
   const isMeiliMode = Boolean(matchRoute({ to: "/book/meili" }));
@@ -63,31 +106,26 @@ export default function BooksPage() {
     setLimit(20);
   }, []);
 
-  const listQuery = useQuery({
-    ...bookQueries.list({ start, limit }),
-    enabled: !isMeiliMode && trimmedQuery.length === 0,
-  });
+  const listQuery = useBookListQuery(
+    { start, limit },
+    trimmedQuery,
+    !isMeiliMode,
+  );
 
-  const searchQuery = useQuery({
-    ...bookQueries.search(trimmedQuery, { start, limit }),
-    enabled: !isMeiliMode && trimmedQuery.length > 0,
-  });
-
-  const meiliQuery = useQuery({
-    ...contentSearchQueryOptions({
+  const meiliQuery = useBookContentSearchQuery(
+    {
       keyword: query || undefined,
       type: "BOOK",
       offset: start,
       limit,
-    }),
-    enabled: isMeiliMode,
-  });
+    },
+    isMeiliMode,
+  );
 
-  const normalQuery = trimmedQuery.length > 0 ? searchQuery : listQuery;
-  const data = isMeiliMode ? meiliQuery.data : normalQuery.data;
+  const data = isMeiliMode ? meiliQuery.data : listQuery.data;
   const books = isMeiliMode
-    ? ((data as any)?.items ?? [])
-    : ((data as BookListResponse | undefined)?.books ?? []);
+    ? (meiliQuery.data?.items ?? []).map(mapContentSearchDocumentToBookRow)
+    : (listQuery.data?.books ?? []);
   const total = data?.total;
 
   const columns = React.useMemo(() => {
@@ -212,9 +250,9 @@ export default function BooksPage() {
           setPage(0);
           setQuery(q.trim());
         }}
-        isLoading={isMeiliMode ? meiliQuery.isLoading : normalQuery.isLoading}
-        isError={isMeiliMode ? meiliQuery.isError : normalQuery.isError}
-        error={isMeiliMode ? meiliQuery.error : normalQuery.error}
+        isLoading={isMeiliMode ? meiliQuery.isLoading : listQuery.isLoading}
+        isError={isMeiliMode ? meiliQuery.isError : listQuery.isError}
+        error={isMeiliMode ? meiliQuery.error : listQuery.error}
         columns={columns}
         rows={books}
         getRowId={(b) => b.unitId}
