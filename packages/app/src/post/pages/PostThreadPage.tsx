@@ -1,7 +1,7 @@
 import { useEditorEntry } from "@rezics/contract/api/hooks/useEditorEntry";
 import { postQueries } from "@rezics/contract/api/post/post.queries";
 import { useReactionHydration } from "@rezics/contract/api/reaction/useReactionHydration";
-import { realmDetailQuery } from "@rezics/contract/api/realm/realm";
+import { realmDetailQuery } from "@rezics/contract/api/realm/realm.queries";
 import { type CommentListContext, PostKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";

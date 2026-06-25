@@ -1,6 +1,6 @@
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { postQueries } from "@rezics/contract/api/post/post.queries";
-import { realmDetailQuery } from "@rezics/contract/api/realm/realm";
+import { realmDetailQuery } from "@rezics/contract/api/realm/realm.queries";
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 import {
   createMinimalEditConsoleConfig,

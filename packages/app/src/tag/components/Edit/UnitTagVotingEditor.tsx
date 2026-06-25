@@ -1,9 +1,9 @@
 import {
-  realmQueries,
   useCastRealmTagApplicationVoteMutation,
   useCreateRealmTagApplicationMutation,
   useWithdrawRealmTagApplicationVoteMutation,
-} from "@rezics/contract/api/realm/realm";
+} from "@rezics/contract/api/realm/realm.mutations";
+import { realmQueries } from "@rezics/contract/api/realm/realm.queries";
 import { tagApi } from "@rezics/contract/api/tag/tag.api";
 import {
   useCastTagVoteMutation,

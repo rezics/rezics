@@ -2,7 +2,7 @@ import {
   useLeaveRealmMutation,
   useMuteRealmMutation,
   useUnmuteRealmMutation,
-} from "@rezics/contract/api/realm/realm";
+} from "@rezics/contract/api/realm/realm.mutations";
 import { useIsSubscribed } from "@rezics/contract/api/subscription/subscription.queries";
 import { userQueries } from "@rezics/contract/api/user/user.queries";
 import { useTranslation } from "@rezics/i18n/react";

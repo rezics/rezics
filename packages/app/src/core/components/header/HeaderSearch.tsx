@@ -1,4 +1,4 @@
-import { realmDetailQuery } from "@rezics/contract/api/realm/realm";
+import { realmDetailQuery } from "@rezics/contract/api/realm/realm.queries";
 import { userQueries } from "@rezics/contract/api/user/user.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import {

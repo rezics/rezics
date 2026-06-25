@@ -1,4 +1,4 @@
-import { realmDetailQuery } from "@rezics/contract/api/realm/realm";
+import { realmDetailQuery } from "@rezics/contract/api/realm/realm.queries";
 import type { SearchCategory, SearchQuery } from "@rezics/contract";
 import { createFileRoute, notFound, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";

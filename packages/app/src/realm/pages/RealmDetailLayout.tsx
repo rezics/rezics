@@ -3,7 +3,7 @@ import { labelListQuery } from "@rezics/contract/api/label/label.queries";
 import {
   myRealmMembershipQuery,
   realmDetailQuery,
-} from "@rezics/contract/api/realm/realm";
+} from "@rezics/contract/api/realm/realm.queries";
 import { realmTagTreeQuery } from "@rezics/contract/api/realm-tag-tree/realm-tag-tree.queries";
 import { tagBatchTranslationsQuery } from "@rezics/contract/api/tag/tag.queries";
 import { useTranslation } from "@rezics/i18n/react";

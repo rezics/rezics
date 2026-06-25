@@ -18,7 +18,7 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   realmDetailQuery,
   realmSearchQuery,
-} from "@rezics/contract/api/realm/realm";
+} from "@rezics/contract/api/realm/realm.queries";
 import type {
   RealmResponse,
   RealmTagDisplayTarget,

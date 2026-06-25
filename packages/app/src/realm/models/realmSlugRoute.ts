@@ -1,7 +1,5 @@
-import {
-  realmBySlugQuery,
-  realmDetailQuery,
-} from "@rezics/contract/api/realm/realm";
+import { realmDetailQuery } from "@rezics/contract/api/realm/realm.queries";
+import { realmBySlugQuery } from "@rezics/contract/api/realm/useRealmBySlug";
 import { isPublicRealmSlugRouteParams, type RealmDTO } from "@rezics/contract";
 import type { QueryClient } from "@tanstack/react-query";
 import { notFound } from "@tanstack/react-router";

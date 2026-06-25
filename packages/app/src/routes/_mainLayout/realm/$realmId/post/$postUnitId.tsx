@@ -1,5 +1,5 @@
 import { postQueries } from "@rezics/contract/api/post/post.queries";
-import { realmDetailQuery } from "@rezics/contract/api/realm/realm";
+import { realmDetailQuery } from "@rezics/contract/api/realm/realm.queries";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import {
   titleContext,

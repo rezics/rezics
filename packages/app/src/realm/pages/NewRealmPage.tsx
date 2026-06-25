@@ -1,4 +1,4 @@
-import { useCreateRealmMutation } from "@rezics/contract/api/realm/realm";
+import { useCreateRealmMutation } from "@rezics/contract/api/realm/realm.mutations";
 import { markdownContentDoc } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input, Label, Textarea } from "@rezics/ui/shadcn";

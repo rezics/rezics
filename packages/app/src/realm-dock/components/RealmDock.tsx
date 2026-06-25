@@ -1,4 +1,4 @@
-import { realmMembersQuery } from "@rezics/contract/api/realm/realm";
+import { realmMembersQuery } from "@rezics/contract/api/realm/realm.queries";
 import { unitDetailQuery } from "@rezics/contract/api/unit/unit.queries";
 import { zonePortalQueryOptions } from "@rezics/contract/api/zone/zone.queries";
 import { postQueries } from "@rezics/contract/api/post/post.queries";

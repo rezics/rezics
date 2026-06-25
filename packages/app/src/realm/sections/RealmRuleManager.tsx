@@ -1,8 +1,8 @@
 import {
-  realmRuleResolvedQuery,
   useCreateRealmRuleRevisionMutation,
   useUpdateRealmRulePolicyMutation,
-} from "@rezics/contract/api/realm/realm";
+} from "@rezics/contract/api/realm/realm.mutations";
+import { realmRuleResolvedQuery } from "@rezics/contract/api/realm/realm.queries";
 import { postSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
 import type {
   PostSearchDocument,

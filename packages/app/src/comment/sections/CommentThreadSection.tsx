@@ -11,7 +11,7 @@ import {
   useUnacceptAnswerMutation,
   useUnpinCommentMutation,
 } from "@rezics/contract/api/post/post.mutations";
-import { realmDetailQuery } from "@rezics/contract/api/realm/realm";
+import { realmDetailQuery } from "@rezics/contract/api/realm/realm.queries";
 import {
   BasicAdminPermission,
   type CommentDTO,

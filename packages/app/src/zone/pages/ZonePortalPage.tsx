@@ -1,5 +1,5 @@
 import { useServerPermission } from "@rezics/contract/api/hooks/useServerPermission";
-import { myRealmMembershipQuery } from "@rezics/contract/api/realm/realm";
+import { myRealmMembershipQuery } from "@rezics/contract/api/realm/realm.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";

@@ -1,5 +1,5 @@
 import { patchTranslationDetailQueries } from "@rezics/contract/api/react-query/cache-coherence";
-import { realmKeys } from "@rezics/contract/api/realm/realm";
+import { realmKeys } from "@rezics/contract/api/realm/realm.keys";
 import { unitApi } from "@rezics/contract/api/unit/unit.api";
 import {
   contentDocMarkdownFallback,

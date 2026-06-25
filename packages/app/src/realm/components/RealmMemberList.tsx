@@ -1,9 +1,9 @@
+import { realmKeys } from "@rezics/contract/api/realm/realm.keys";
 import {
-  realmKeys,
-  realmMembersQuery,
   useRemoveMemberMutation,
   useUpdateMemberRoleMutation,
-} from "@rezics/contract/api/realm/realm";
+} from "@rezics/contract/api/realm/realm.mutations";
+import { realmMembersQuery } from "@rezics/contract/api/realm/realm.queries";
 import type { RealmMemberDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {

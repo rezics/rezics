@@ -1,4 +1,4 @@
-import { realmRuleResolvedQuery } from "@rezics/contract/api/realm/realm";
+import { realmRuleResolvedQuery } from "@rezics/contract/api/realm/realm.queries";
 import {
   mainMarkdownSource,
   type RealmRuleResolvedItemDTO,
