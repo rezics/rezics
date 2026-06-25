@@ -3,7 +3,7 @@ import { openapi } from "@elysiajs/openapi";
 import {
   elysiaObservability,
   type ObservabilityConfig,
-} from "@rezics/shared/observability";
+} from "@/internal/shared/observability";
 import { Elysia } from "elysia";
 import { createAdminApi } from "./http/admin";
 import type { AdminQueueLike } from "./http/admin";

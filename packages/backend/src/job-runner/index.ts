@@ -5,7 +5,7 @@ import {
   createTelemetryConfig,
   initializeOpenTelemetry,
   logStartupBanner,
-} from "@rezics/shared/observability";
+} from "@/internal/shared/observability";
 import { createJobRunnerApp } from "./app";
 import { env } from "./env";
 import { createJobHandlers } from "./handlers";

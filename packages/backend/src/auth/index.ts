@@ -1,4 +1,4 @@
-import { logStartupBanner } from "@rezics/shared/observability";
+import { logStartupBanner } from "@/internal/shared/observability";
 import { createAuthApp } from "./app";
 
 const { app, observability, port } = await createAuthApp();

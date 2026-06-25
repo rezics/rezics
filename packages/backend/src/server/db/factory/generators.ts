@@ -7,7 +7,7 @@ import {
   getSummaryPool,
   getTitlePool,
   LANG_DISTRIBUTION,
-} from "@rezics/shared/text";
+} from "@/internal/shared/text";
 import { PostKind, UnitType } from "./storage-values.js";
 import { randomBoolean, randomFloat } from "./utils.js";
 

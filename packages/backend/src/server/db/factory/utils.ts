@@ -7,8 +7,8 @@ export {
   randomBoolean,
   randomFloat,
   randomInt,
-} from "@rezics/shared/random";
-export { generateParagraph, generateTitle } from "@rezics/shared/text";
+} from "@/internal/shared/random";
+export { generateParagraph, generateTitle } from "@/internal/shared/text";
 
 export function unitTypeToShelfKind(type: UnitType): string {
   switch (type) {

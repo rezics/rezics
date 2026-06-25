@@ -5,7 +5,7 @@ import {
   createTelemetryConfig,
   elysiaObservability,
   initializeOpenTelemetry,
-} from "@rezics/shared/observability";
+} from "@/internal/shared/observability";
 import { Elysia } from "elysia";
 import { dmApi } from "./dm/dm.api";
 import { env } from "./env";

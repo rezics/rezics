@@ -6,7 +6,7 @@ import {
   elysiaObservability,
   initializeOpenTelemetry,
   type ServiceKey,
-} from "@rezics/shared/observability";
+} from "@/internal/shared/observability";
 import { Elysia } from "elysia";
 import { activityApi } from "./activity";
 import { accountOperationsAdminApi } from "./admin-account";

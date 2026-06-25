@@ -1,3 +1,3 @@
-import { runCluster } from "@rezics/shared/cluster";
+import { runCluster } from "@/internal/shared/cluster";
 
 await runCluster(() => import("./index"), { serviceName: "reaction" });

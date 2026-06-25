@@ -5,7 +5,7 @@ import {
   createTelemetryConfig,
   elysiaObservability,
   initializeOpenTelemetry,
-} from "@rezics/shared/observability";
+} from "@/internal/shared/observability";
 import { adminEmailApi } from "./admin/email.api";
 import { coreInstance } from "./core";
 import { env } from "./env";

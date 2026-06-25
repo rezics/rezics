@@ -34,9 +34,13 @@
         "@elysiajs/openapi": "^1.4.14",
         "@faker-js/faker": "^10.1.0",
         "@kitajs/html": "^4.2.13",
+        "@opentelemetry/api": "^1.9.1",
+        "@opentelemetry/exporter-trace-otlp-http": "^0.218.0",
+        "@opentelemetry/resources": "^2.7.1",
+        "@opentelemetry/sdk-node": "^0.218.0",
+        "@opentelemetry/semantic-conventions": "^1.41.1",
         "@react-email/components": "^0.0.36",
         "@rezics/contract": "workspace:*",
-        "@rezics/shared": "workspace:*",
         "@sinclair/typebox": "^0.34.41",
         "@t3-oss/env-core": "^0.13.10",
         "@types/bcrypt": "^6.0.0",
@@ -211,23 +215,6 @@
       },
       "peerDependencies": {
         "react": "^19",
-      },
-    },
-    "packages/shared": {
-      "name": "@rezics/shared",
-      "version": "0.1.0",
-      "dependencies": {
-        "@faker-js/faker": "^10.1.0",
-        "@opentelemetry/api": "^1.9.1",
-        "@opentelemetry/exporter-trace-otlp-http": "^0.218.0",
-        "@opentelemetry/resources": "^2.7.1",
-        "@opentelemetry/sdk-node": "^0.218.0",
-        "@opentelemetry/semantic-conventions": "^1.41.1",
-        "@rezics/contract": "workspace:*",
-        "elysia": "^1.4.28",
-      },
-      "devDependencies": {
-        "@types/bun": "^1.3.11",
       },
     },
     "packages/storybook-config": {
@@ -1029,8 +1016,6 @@
     "@rezics/frontend": ["@rezics/frontend@workspace:packages/frontend"],
 
     "@rezics/i18n": ["@rezics/i18n@workspace:packages/i18n"],
-
-    "@rezics/shared": ["@rezics/shared@workspace:packages/shared"],
 
     "@rezics/storybook-config": ["@rezics/storybook-config@workspace:packages/storybook-config"],
 
