@@ -1,4 +1,9 @@
-import { authApi } from "@rezics/contract/api/auth/auth.api";
+import {
+  materializeAccount,
+  sendVerificationOTP,
+  setupProfile,
+  verifyEmailOTP,
+} from "@rezics/contract/api/auth/auth.mutations";
 import { authQueries } from "@rezics/contract/api/auth/auth.queries";
 import {
   FALLBACK_LANGUAGE,
@@ -210,7 +215,7 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
     setLoading(true);
     setError(undefined);
     try {
-      await authApi.setupProfile({
+      await setupProfile({
         ...(displayName.trim() ? { displayName: displayName.trim() } : {}),
         slug,
         preferredLanguages,
@@ -381,7 +386,7 @@ function EmailVerificationStep({
       if (!turnstileToken) {
         throw new Error(t("auth:flow_verify_complete_widget"));
       }
-      await authApi.sendVerificationOTP({
+      await sendVerificationOTP({
         email,
         type: "email-verification",
         ...(turnstileToken && { turnstileToken }),
@@ -407,7 +412,7 @@ function EmailVerificationStep({
     setError(undefined);
     setMessage(undefined);
     try {
-      const result = await authApi.verifyEmailOTP({ email, otp: otpCode });
+      const result = await verifyEmailOTP({ email, otp: otpCode });
       if (result.status) {
         onComplete();
         return;
@@ -633,7 +638,7 @@ export const CompleteRegistrationPage: FC = () => {
     setMaterializing(true);
     setMaterializeError(undefined);
     try {
-      await authApi.materializeAccount();
+      await materializeAccount();
     } catch (caughtError) {
       const msg = (caughtError as Error).message;
       try {
@@ -661,8 +666,7 @@ export const CompleteRegistrationPage: FC = () => {
 
     let mounted = true;
     setMaterializing(true);
-    void authApi
-      .materializeAccount()
+    void materializeAccount()
       .catch((caughtError) => {
         const msg = (caughtError as Error).message;
         try {

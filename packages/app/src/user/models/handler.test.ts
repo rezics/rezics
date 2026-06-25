@@ -35,19 +35,6 @@ const signUpMock = mock(async () => ({
   },
 }));
 const signOutMock = mock(async () => ({ success: true }));
-const getContextTokenMock = mock(async () => ({
-  token: "context-token",
-  claims: {
-    id: "user-1",
-    userId: "user-1",
-    sub: "user-1",
-    slug: "reader",
-    name: "Reader",
-    avatar: null,
-    emailVerified: true,
-    verificationStatus: "verified",
-  },
-}));
 const ensureMock = mock(async () => ({
   user: { userId: "user-1", name: "Reader" },
   alreadyCreated: false,
@@ -69,13 +56,10 @@ const hydrateAuthSessionStateMock = mock(async () => ({
   },
 }));
 
-mock.module("@rezics/contract/api/auth/auth.api", () => ({
-  authApi: {
-    signIn: signInMock,
-    signUp: signUpMock,
-    signOut: signOutMock,
-    getContextToken: getContextTokenMock,
-  },
+mock.module("@rezics/contract/api/auth/auth.mutations", () => ({
+  signIn: signInMock,
+  signUp: signUpMock,
+  signOut: signOutMock,
 }));
 
 mock.module("@rezics/contract/api/auth/auth.keys", () => ({
@@ -98,7 +82,7 @@ mock.module("@rezics/contract/api/user/user.api", () => ({
   },
 }));
 
-mock.module("@/app/providers/reactQueryUtil", () => ({
+mock.module("@/app", () => ({
   qc: {
     removeQueries: removeQueriesMock,
   },
@@ -153,7 +137,6 @@ describe("auth handlers", () => {
     signInMock.mockClear();
     signUpMock.mockClear();
     signOutMock.mockClear();
-    getContextTokenMock.mockClear();
     ensureMock.mockClear();
     issueSessionTokenMock.mockClear();
     hydrateAuthSessionStateMock.mockClear();

@@ -1,5 +1,9 @@
-import { authApi } from "@rezics/contract/api/auth/auth.api";
 import { authKeys } from "@rezics/contract/api/auth/auth.keys";
+import {
+  signIn,
+  signOut,
+  signUp,
+} from "@rezics/contract/api/auth/auth.mutations";
 import { exchangeForSessionToken } from "@rezics/contract/api/react-query/jwt";
 import { userKeys } from "@rezics/contract/api/user/user.keys";
 import { qc } from "@/app";
@@ -11,7 +15,7 @@ import {
 } from "@/user/states";
 
 export const login = async (email: string, password: string) => {
-  await authApi.signIn({ email, password });
+  await signIn({ email, password });
   await exchangeForSessionToken();
   await hydrateAuthSessionState({ requirePresence: false });
   return { token: null };
@@ -26,7 +30,7 @@ export const register = async (
   try {
     void avatar;
     void summary;
-    await authApi.signUp({ email, password });
+    await signUp({ email, password });
     await hydrateAuthSessionState({ requirePresence: false });
     return { token: null };
   } catch (error) {
@@ -36,7 +40,7 @@ export const register = async (
 };
 
 export const logout = async (disableReload = false) => {
-  await authApi.signOut();
+  await signOut();
   clearAuthSessionState();
   useAuthSessionStore.getState().reset();
   useUserProfileStore.getState().clearProfile();

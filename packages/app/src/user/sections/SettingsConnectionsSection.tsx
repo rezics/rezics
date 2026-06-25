@@ -1,4 +1,4 @@
-import { authApi } from "@rezics/contract/api/auth/auth.api";
+import { signInSocial } from "@rezics/contract/api/auth/auth.mutations";
 import { authQueries } from "@rezics/contract/api/auth/auth.queries";
 import type { AuthProvider } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
@@ -99,7 +99,7 @@ export const SettingsConnectionsSection: FC = () => {
   const handleConnect = async (providerId: AuthProvider["id"]) => {
     setConnecting(providerId);
     try {
-      const response = await authApi.signInSocial({
+      const response = await signInSocial({
         provider: providerId,
         callbackURL: window.location.href,
       });

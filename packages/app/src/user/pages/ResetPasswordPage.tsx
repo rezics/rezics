@@ -1,4 +1,7 @@
-import { authApi } from "@rezics/contract/api/auth/auth.api";
+import {
+  requestPasswordReset,
+  resetPassword,
+} from "@rezics/contract/api/auth/auth.mutations";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
@@ -130,7 +133,7 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
           ? "/reset-password"
           : `${window.location.origin}/reset-password`;
 
-      const response = await authApi.requestPasswordReset({
+      const response = await requestPasswordReset({
         email,
         redirectTo,
       });
@@ -161,7 +164,7 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
         throw new Error(t("auth:reset_missing_token"));
       }
 
-      await authApi.resetPassword({
+      await resetPassword({
         newPassword: password,
         token: resetToken,
       });

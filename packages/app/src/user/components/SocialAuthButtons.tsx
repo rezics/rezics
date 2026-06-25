@@ -1,4 +1,4 @@
-import { authApi } from "@rezics/contract/api/auth/auth.api";
+import { signInSocial } from "@rezics/contract/api/auth/auth.mutations";
 import { authQueries } from "@rezics/contract/api/auth/auth.queries";
 import type { AuthProvider } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
@@ -49,7 +49,7 @@ export const SocialAuthButtons: FC<{
       const origin =
         typeof window === "undefined" ? "" : window.location.origin;
       const callbackTargets = buildOAuthCallbackTargets(origin, mode);
-      const response = await authApi.signInSocial({
+      const response = await signInSocial({
         provider: providerId,
         disableRedirect: true,
         callbackURL: callbackTargets.callbackURL,
