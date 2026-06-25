@@ -1,4 +1,5 @@
-import { useCanEdit, useCurrentUserId } from "@rezics/contract/api/hooks";
+import { useCanEdit } from "@rezics/contract/api/hooks/useCanEdit";
+import { useCurrentUserId } from "@rezics/contract/api/hooks/useCurrentUserId";
 import {
   useCastTagVoteMutation,
   useWithdrawUnitTagVoteMutation,

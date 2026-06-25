@@ -1,5 +1,5 @@
 import { excerptQueries } from "@rezics/contract/api/excerpt/excerpt.queries";
-import { useEditorEntry } from "@rezics/contract/api/hooks";
+import { useEditorEntry } from "@rezics/contract/api/hooks/useEditorEntry";
 import { useTranslation } from "@rezics/i18n/react";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { Button } from "@rezics/ui/shadcn";

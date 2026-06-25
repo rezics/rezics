@@ -1,5 +1,5 @@
-import type { EditableResource } from "@rezics/contract/api/hooks";
-import { useCanEdit } from "@rezics/contract/api/hooks";
+import type { EditableResource } from "@rezics/contract/api/hooks/useCanEdit";
+import { useCanEdit } from "@rezics/contract/api/hooks/useCanEdit";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,

@@ -66,7 +66,7 @@ import {
   useEntity,
   useUpdateEntity,
 } from "@rezics/contract/api/entity";
-import { useServerPermission } from "@rezics/contract/api/hooks";
+import { useServerPermission } from "@rezics/contract/api/hooks/useServerPermission";
 import type { EntityDTO, EntityKind } from "@rezics/contract";
 import {
   BasicAdminPermission,

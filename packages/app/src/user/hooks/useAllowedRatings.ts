@@ -1,4 +1,4 @@
-import { useCurrentUserId } from "@rezics/contract/api/hooks";
+import { useCurrentUserId } from "@rezics/contract/api/hooks/useCurrentUserId";
 import { userQueries } from "@rezics/contract/api/user/user.queries";
 import type { ContentRating } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";

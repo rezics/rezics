@@ -2,7 +2,7 @@ import {
   useToggleNodeCompletion,
   useUpdateUnitProgress,
 } from "@rezics/contract/api/progress/progress.mutations";
-import { useCurrentUserId } from "@rezics/contract/api/hooks";
+import { useCurrentUserId } from "@rezics/contract/api/hooks/useCurrentUserId";
 import { chapterDetailQuery } from "@rezics/contract/api/chapter/chapter";
 import { contentDocMarkdownFallback } from "@rezics/contract";
 import { createRezicsRenderer } from "@rezics/editor/markdown";

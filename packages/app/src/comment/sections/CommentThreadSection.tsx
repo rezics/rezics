@@ -4,9 +4,9 @@ import {
 } from "@rezics/contract/api/comment/comment";
 import {
   computeEditorEntryDecision,
-  useCurrentUserId,
-  useServerPermission,
-} from "@rezics/contract/api/hooks";
+} from "@rezics/contract/api/hooks/useEditorEntry";
+import { useCurrentUserId } from "@rezics/contract/api/hooks/useCurrentUserId";
+import { useServerPermission } from "@rezics/contract/api/hooks/useServerPermission";
 import {
   useAcceptAnswerMutation,
   usePinCommentMutation,

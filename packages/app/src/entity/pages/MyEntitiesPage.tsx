@@ -58,7 +58,7 @@
  */
 
 import { useEntityList } from "@rezics/contract/api/entity";
-import { useCurrentUserId } from "@rezics/contract/api/hooks";
+import { useCurrentUserId } from "@rezics/contract/api/hooks/useCurrentUserId";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";

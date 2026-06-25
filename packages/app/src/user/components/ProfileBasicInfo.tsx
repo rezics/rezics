@@ -1,4 +1,4 @@
-import { useCanEdit } from "@rezics/contract/api/hooks";
+import { useCanEdit } from "@rezics/contract/api/hooks/useCanEdit";
 import type { UserDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";

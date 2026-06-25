@@ -1,4 +1,4 @@
-import { useEditorEntry } from "@rezics/contract/api/hooks";
+import { useEditorEntry } from "@rezics/contract/api/hooks/useEditorEntry";
 import { postQueries } from "@rezics/contract/api/post/post";
 import { useReactionHydration } from "@rezics/contract/api/reaction/reaction";
 import { realmDetailQuery } from "@rezics/contract/api/realm/realm";

@@ -1,4 +1,4 @@
-import { useCurrentUserId } from "@rezics/contract/api/hooks";
+import { useCurrentUserId } from "@rezics/contract/api/hooks/useCurrentUserId";
 import { useCreatePostMutation } from "@rezics/contract/api/post/post";
 import { useRecordShareMutation } from "@rezics/contract/api/reaction/reaction";
 import { useTranslation } from "@rezics/i18n/react";

@@ -1,6 +1,6 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
 import { useCreateChapterMutation } from "@rezics/contract/api/chapter/chapter.mutations";
-import { useCurrentUserId } from "@rezics/contract/api/hooks";
+import { useCurrentUserId } from "@rezics/contract/api/hooks/useCurrentUserId";
 import { markdownContentDoc } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {

@@ -27,10 +27,6 @@
       "types": "./src/api/entity/index.ts",
       "default": "./src/api/entity/index.ts"
     },
-    "./api/hooks": {
-      "types": "./src/api/hooks/index.ts",
-      "default": "./src/api/hooks/index.ts"
-    },
     "./api/notification": {
       "types": "./src/api/notification/index.ts",
       "default": "./src/api/notification/index.ts"

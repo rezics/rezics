@@ -34,7 +34,7 @@ import {
   entityDetailQueryOptions,
   useEntity,
 } from "@rezics/contract/api/entity";
-import { useServerPermission } from "@rezics/contract/api/hooks";
+import { useServerPermission } from "@rezics/contract/api/hooks/useServerPermission";
 import { BasicAdminPermission } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { getI18nRuntime } from "@rezics/i18n/runtime";

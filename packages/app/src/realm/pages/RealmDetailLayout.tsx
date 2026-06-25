@@ -1,4 +1,4 @@
-import { useServerPermission } from "@rezics/contract/api/hooks";
+import { useServerPermission } from "@rezics/contract/api/hooks/useServerPermission";
 import { labelListQuery } from "@rezics/contract/api/label/label";
 import {
   myRealmMembershipQuery,

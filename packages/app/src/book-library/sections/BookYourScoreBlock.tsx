@@ -1,4 +1,4 @@
-import { useCurrentUserId } from "@rezics/contract/api/hooks";
+import { useCurrentUserId } from "@rezics/contract/api/hooks/useCurrentUserId";
 import { getDefaultRealmId } from "@rezics/contract/api/infra/bootstrap";
 import {
   scoreQueries,

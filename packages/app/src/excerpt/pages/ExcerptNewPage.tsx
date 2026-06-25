@@ -1,5 +1,5 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
-import { useCurrentUserId } from "@rezics/contract/api/hooks";
+import { useCurrentUserId } from "@rezics/contract/api/hooks/useCurrentUserId";
 import { useCreateUnitMutation } from "@rezics/contract/api/unit/unit.mutations";
 import type { UnitFormData } from "@rezics/contract/api/unit/unit.types";
 import { markdownContentDoc } from "@rezics/contract";

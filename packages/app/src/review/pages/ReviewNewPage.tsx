@@ -1,6 +1,6 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
 import { bookQueries } from "@rezics/contract/api/book/book";
-import { useCurrentUserId } from "@rezics/contract/api/hooks";
+import { useCurrentUserId } from "@rezics/contract/api/hooks/useCurrentUserId";
 import { getDefaultRealmId } from "@rezics/contract/api/infra/bootstrap";
 import { useCreatePostMutation } from "@rezics/contract/api/post/post";
 import { useUpsertScoreMutation } from "@rezics/contract/api/score/score";

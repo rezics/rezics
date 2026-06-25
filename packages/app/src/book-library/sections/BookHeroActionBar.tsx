@@ -1,4 +1,4 @@
-import { useEditorEntry } from "@rezics/contract/api/hooks";
+import { useEditorEntry } from "@rezics/contract/api/hooks/useEditorEntry";
 import type { BookDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {

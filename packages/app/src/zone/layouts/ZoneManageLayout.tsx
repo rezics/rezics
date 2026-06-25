@@ -1,5 +1,5 @@
 import { zonePortalQueryOptions, zoneQueryOptions } from "@rezics/contract/api";
-import { useServerPermission } from "@rezics/contract/api/hooks";
+import { useServerPermission } from "@rezics/contract/api/hooks/useServerPermission";
 import { myRealmMembershipQuery } from "@rezics/contract/api/realm/realm";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
