@@ -155,11 +155,6 @@ export async function removeAuthAdminUser(
   return unwrapAuthAdminProxyResponse<AuthAdminMutationResponse>(response);
 }
 
-export async function refreshMainSession(): Promise<unknown> {
-  const response = await apiClient.auth.session.refresh.post();
-  return unwrapEdenResponse(response);
-}
-
 export async function unblockAccountEnforcement(
   targetUserId: string,
   input: UnblockAccountEnforcementInput,

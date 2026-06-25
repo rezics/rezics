@@ -1,6 +1,5 @@
 "use client";
 
-import { AuthProvider } from "@rezics/contract/api/providers";
 import {
   RezicsI18nProvider,
   useLocale,
@@ -12,6 +11,7 @@ import { RouterProvider } from "@tanstack/react-router";
 import { type ReactNode, StrictMode, Suspense, useEffect, useRef } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { HelmetProvider } from "react-helmet-async";
+import { AuthProvider } from "@/admin/auth/session/AuthProvider";
 import { router } from "@/admin/router";
 import { WindowAlert } from "./components/WindowAlert";
 import { PersistentSettingsLoader } from "./providers/PersistentSettingsLoader";

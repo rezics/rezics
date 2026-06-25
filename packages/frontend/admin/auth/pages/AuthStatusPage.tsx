@@ -1,7 +1,7 @@
 import {
   hydrateAuthSessionState,
   useAuthSessionStore,
-} from "@rezics/contract/api/states";
+} from "@/admin/auth/session/authSessionStore";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
@@ -21,7 +21,7 @@ import { Shield, ShieldUser } from "lucide-react";
 import { useState } from "react";
 import { Page } from "@/admin/core/layouts/Page";
 import { adminLogout } from "@/admin/user/models/handler";
-import { refreshMainSession } from "../hooks/useAuthUsersAdmin";
+import { refreshMainSession } from "../session/authSessionStore";
 
 type SessionStatus = "active" | "missing";
 

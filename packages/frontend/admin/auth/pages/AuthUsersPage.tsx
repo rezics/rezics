@@ -33,7 +33,6 @@ import {
 } from "../hooks/useAccountOperationAdmin";
 import {
   banAuthAdminUser,
-  refreshMainSession,
   removeAuthAdminUser,
   setAuthAdminUserRole,
   type AuthAdminUser,
@@ -41,6 +40,7 @@ import {
   unbanAuthAdminUser,
   useAuthAdminUsersQuery,
 } from "../hooks/useAuthUsersAdmin";
+import { refreshMainSession } from "../session/authSessionStore";
 
 function fmtDate(v?: string | Date) {
   if (!v) return "";

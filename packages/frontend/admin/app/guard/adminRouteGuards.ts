@@ -1,8 +1,8 @@
+import { redirect } from "@tanstack/react-router";
 import {
   hydrateAuthSessionState,
   useAuthSessionStore,
-} from "@rezics/contract/api/states";
-import { redirect } from "@tanstack/react-router";
+} from "@/admin/auth/session/authSessionStore";
 import {
   buildCurrentRedirectPath,
   isAdminRole,

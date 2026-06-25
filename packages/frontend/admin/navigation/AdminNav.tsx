@@ -1,4 +1,3 @@
-import { useAuthSessionStore } from "@rezics/contract/api/states";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Separator } from "@rezics/ui/shadcn";
 import { useRouterState } from "@tanstack/react-router";
@@ -9,6 +8,7 @@ import {
 } from "lucide-react";
 import React from "react";
 import { adminConfig } from "@/admin/app/config/adminConfig";
+import { useAuthSessionStore } from "@/admin/auth/session/authSessionStore";
 import { Link } from "@/admin/shared/ui/link";
 import type {
   AdminNavEntry,
