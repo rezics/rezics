@@ -71,6 +71,7 @@ export const unitAuthorityApi = new Elysia({ prefix: "/unit" })
     {
       requireLogin: true,
       params: collaboratorParamsSchema,
+      response: { 200: t.Object({ message: t.String() }) },
       detail: {
         summary: "Remove Unit collaborator",
         tags: ["Units", "Authority"],
@@ -123,6 +124,7 @@ export const unitAuthorityApi = new Elysia({ prefix: "/unit" })
     {
       requireLogin: true,
       params: fieldLockParamsSchema,
+      response: { 200: t.Object({ message: t.String() }) },
       detail: {
         summary: "Remove Unit field lock",
         tags: ["Units", "Authority"],

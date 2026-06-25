@@ -3,6 +3,7 @@ import {
   linkSubjectAttributionSchema,
   subjectAttributionBySubjectQuerySchema,
   subjectAttributionByUnitQuerySchema,
+  subjectAttributionDTOSchema,
   subjectAttributionRoleKeySchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
@@ -21,6 +22,7 @@ export const subjectAttributionApi = new Elysia({
     {
       requireLogin: true,
       body: linkSubjectAttributionSchema,
+      response: { 200: subjectAttributionDTOSchema },
       detail: {
         summary: "Link subject attribution",
         description:
@@ -37,6 +39,7 @@ export const subjectAttributionApi = new Elysia({
     {
       params: t.Object({ unitId: t.String() }),
       query: subjectAttributionByUnitQuerySchema,
+      response: { 200: t.Array(subjectAttributionDTOSchema) },
       detail: {
         summary: "List subject attributions for a unit",
         tags: ["Subject Attribution"],
@@ -51,6 +54,7 @@ export const subjectAttributionApi = new Elysia({
     {
       params: t.Object({ entityId: t.String() }),
       query: subjectAttributionBySubjectQuerySchema,
+      response: { 200: t.Array(subjectAttributionDTOSchema) },
       detail: {
         summary: "List units for a subject Entity",
         tags: ["Subject Attribution"],
@@ -75,6 +79,7 @@ export const subjectAttributionApi = new Elysia({
         entityId: t.String(),
         role: subjectAttributionRoleKeySchema,
       }),
+      response: { 200: t.Object({ message: t.String() }) },
       detail: {
         summary: "Unlink subject attribution",
         description: "Unlink an Entity subject from a Unit by composite key.",

@@ -3,6 +3,9 @@ import type {
   ContentSearchResult,
   CreateUnitInput,
   CreateUnitFieldLockInput,
+  LinkSubjectAttributionInput,
+  SubjectAttributionDTO,
+  SubjectAttributionRole,
   UnitListQuery,
   UnitListResponse,
   UnitResponse,
@@ -11,6 +14,7 @@ import type {
   UnitCollaboratorListResponse,
   UnitFieldLockDTO,
   UnitFieldLockListResponse,
+  UpdateUnitInput,
   UserDTO,
 } from "@rezics/contract";
 import useSWR, { useSWRConfig } from "swr";
@@ -21,7 +25,30 @@ type CurrentUserKey = readonly ["eden", "user", "me"];
 
 type UnitListKey = readonly ["eden", "unit", "list", UnitListQuery];
 
+type UnitDetailKey = readonly ["eden", "unit", "detail", string];
+
 type CreateUnitKey = readonly ["eden", "unit", "create"];
+
+type UpdateUnitKey = readonly ["eden", "unit", "update"];
+
+type SubjectAttributionsByUnitKey = readonly [
+  "eden",
+  "subject-attribution",
+  "by-unit",
+  string,
+];
+
+type LinkSubjectAttributionKey = readonly [
+  "eden",
+  "subject-attribution",
+  "link",
+];
+
+type UnlinkSubjectAttributionKey = readonly [
+  "eden",
+  "subject-attribution",
+  "unlink",
+];
 
 type UnitCollaboratorsKey = readonly [
   "eden",
@@ -114,12 +141,33 @@ export type RetryHistoryOutboxResponse = {
   retried: number;
 };
 
+export type UpdateUnitVariables = {
+  unitId: string;
+  input: UpdateUnitInput;
+};
+
+export type UnlinkSubjectAttributionVariables = {
+  unitId: string;
+  entityId: string;
+  role: SubjectAttributionRole;
+};
+
 function unitListKey(query: UnitListQuery): UnitListKey {
   return ["eden", "unit", "list", query] as const;
 }
 
+function unitDetailKey(unitId: string): UnitDetailKey {
+  return ["eden", "unit", "detail", unitId] as const;
+}
+
 function contentSearchKey(options: ContentSearchOptions): ContentSearchKey {
   return ["eden", "meili", "content", "search", options] as const;
+}
+
+function subjectAttributionsByUnitKey(
+  unitId: string,
+): SubjectAttributionsByUnitKey {
+  return ["eden", "subject-attribution", "by-unit", unitId] as const;
 }
 
 function unitCollaboratorsKey(unitId: string): UnitCollaboratorsKey {
@@ -141,6 +189,13 @@ async function fetchUnitList(
 ): Promise<UnitListResponse> {
   const [, , , query] = key;
   const response = await apiClient.unit.list.get({ query });
+
+  return unwrapEdenResponse(response);
+}
+
+async function fetchUnitDetail(key: UnitDetailKey): Promise<UnitResponse> {
+  const [, , , unitId] = key;
+  const response = await apiClient.unit({ unitId }).get();
 
   return unwrapEdenResponse(response);
 }
@@ -172,11 +227,51 @@ async function fetchUnitFieldLocks(
   return unwrapEdenResponse(response);
 }
 
+async function fetchSubjectAttributionsByUnit(
+  key: SubjectAttributionsByUnitKey,
+): Promise<SubjectAttributionDTO[]> {
+  const [, , , unitId] = key;
+  const response = await apiClient["subject-attribution"]["by-unit"]({
+    unitId,
+  }).get();
+
+  return unwrapEdenResponse(response);
+}
+
 async function createUnit(
   _key: CreateUnitKey,
   { arg }: { arg: CreateUnitInput },
 ): Promise<UnitResponse> {
   const response = await apiClient.unit.post(arg);
+
+  return unwrapEdenResponse(response);
+}
+
+async function updateUnit(
+  _key: UpdateUnitKey,
+  { arg }: { arg: UpdateUnitVariables },
+): Promise<UnitResponse> {
+  const response = await apiClient.unit({ unitId: arg.unitId }).put(arg.input);
+
+  return unwrapEdenResponse(response);
+}
+
+async function linkSubjectAttribution(
+  _key: LinkSubjectAttributionKey,
+  { arg }: { arg: LinkSubjectAttributionInput },
+): Promise<SubjectAttributionDTO> {
+  const response = await apiClient["subject-attribution"].post(arg);
+
+  return unwrapEdenResponse(response);
+}
+
+async function unlinkSubjectAttribution(
+  _key: UnlinkSubjectAttributionKey,
+  { arg }: { arg: UnlinkSubjectAttributionVariables },
+): Promise<{ message: string }> {
+  const response = await apiClient["subject-attribution"]({
+    unitId: arg.unitId,
+  })({ entityId: arg.entityId })({ role: arg.role }).delete();
 
   return unwrapEdenResponse(response);
 }
@@ -284,6 +379,49 @@ export function useUnitListQuery(query: UnitListQuery, enabled: boolean) {
   };
 }
 
+export function useUnitDetailQuery(unitId: string, enabled = true) {
+  const result = useSWR<UnitResponse>(
+    enabled && unitId ? unitDetailKey(unitId) : null,
+    fetchUnitDetail,
+    {
+      dedupingInterval: 120_000,
+      keepPreviousData: true,
+    },
+  );
+
+  return {
+    data: result.data,
+    error: result.error,
+    isError: Boolean(result.error),
+    isFetching: result.isValidating,
+    isLoading: result.isLoading,
+    refetch: () => result.mutate(),
+  };
+}
+
+export function useSubjectAttributionsByUnitQuery(
+  unitId: string,
+  enabled = true,
+) {
+  const result = useSWR<SubjectAttributionDTO[]>(
+    enabled && unitId ? subjectAttributionsByUnitKey(unitId) : null,
+    fetchSubjectAttributionsByUnit,
+    {
+      dedupingInterval: 120_000,
+      keepPreviousData: true,
+    },
+  );
+
+  return {
+    data: result.data,
+    error: result.error,
+    isError: Boolean(result.error),
+    isFetching: result.isValidating,
+    isLoading: result.isLoading,
+    refetch: () => result.mutate(),
+  };
+}
+
 export function useUnitCollaboratorsQuery(unitId: string, enabled = true) {
   const result = useSWR<UnitCollaboratorListResponse>(
     enabled && unitId ? unitCollaboratorsKey(unitId) : null,
@@ -345,6 +483,88 @@ export function useCreateUnitMutation() {
         key[2] === "list",
     );
     return unit;
+  };
+
+  return {
+    error: mutation.error,
+    isPending: mutation.isMutating,
+    mutateAsync,
+    reset: mutation.reset,
+  };
+}
+
+export function useUpdateUnitMutation() {
+  const { mutate } = useSWRConfig();
+  const mutation = useSWRMutation<
+    UnitResponse,
+    Error,
+    UpdateUnitKey,
+    UpdateUnitVariables
+  >(
+    ["eden", "unit", "update"],
+    updateUnit,
+  );
+  const mutateAsync = async (input: UpdateUnitVariables) => {
+    const result = await mutation.trigger(input);
+    await mutate(unitDetailKey(input.unitId), result, false);
+    await mutate(
+      (key) =>
+        Array.isArray(key) &&
+        key[0] === "eden" &&
+        key[1] === "unit" &&
+        key[2] === "list",
+    );
+    return result;
+  };
+
+  return {
+    error: mutation.error,
+    isPending: mutation.isMutating,
+    mutateAsync,
+    reset: mutation.reset,
+  };
+}
+
+export function useLinkSubjectAttributionMutation() {
+  const { mutate } = useSWRConfig();
+  const mutation = useSWRMutation<
+    SubjectAttributionDTO,
+    Error,
+    LinkSubjectAttributionKey,
+    LinkSubjectAttributionInput
+  >(
+    ["eden", "subject-attribution", "link"],
+    linkSubjectAttribution,
+  );
+  const mutateAsync = async (input: LinkSubjectAttributionInput) => {
+    const result = await mutation.trigger(input);
+    await mutate(subjectAttributionsByUnitKey(input.unitId));
+    return result;
+  };
+
+  return {
+    error: mutation.error,
+    isPending: mutation.isMutating,
+    mutateAsync,
+    reset: mutation.reset,
+  };
+}
+
+export function useUnlinkSubjectAttributionMutation() {
+  const { mutate } = useSWRConfig();
+  const mutation = useSWRMutation<
+    { message: string },
+    Error,
+    UnlinkSubjectAttributionKey,
+    UnlinkSubjectAttributionVariables
+  >(
+    ["eden", "subject-attribution", "unlink"],
+    unlinkSubjectAttribution,
+  );
+  const mutateAsync = async (input: UnlinkSubjectAttributionVariables) => {
+    const result = await mutation.trigger(input);
+    await mutate(subjectAttributionsByUnitKey(input.unitId));
+    return result;
   };
 
   return {

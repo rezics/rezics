@@ -1,25 +1,10 @@
 import {
-  subjectAttributionQueries,
-  useLinkSubjectAttributionMutation,
-  useUnlinkSubjectAttributionMutation,
-} from "@rezics/contract/api/subject-attribution/subject-attribution";
-import {
-  type RemoveUnitCollaboratorVariables,
-  type RemoveUnitFieldLockVariables,
-  type UnitDTO,
-  unitAuthorityQueries,
-  unitMutations,
-  unitQueries,
-  useRemoveUnitCollaboratorMutation,
-  useRemoveUnitFieldLockMutation,
-  useUpsertUnitCollaboratorMutation,
-  useUpsertUnitFieldLockMutation,
-} from "@rezics/contract/api/unit/unit";
-import {
   subjectAttributionRoles,
   UNIT_FIELD_LOCK_ALL,
+  type UnitDTO,
   UnitAuthorityRoleKey,
   type UnitAuthorityRoleKey as UnitAuthorityRoleKeyType,
+  type UpdateUnitInput,
 } from "@rezics/contract";
 import { entityKindLabel, subjectRoleLabel } from "@rezics/i18n";
 import { useTranslation } from "@rezics/i18n/react";
@@ -34,7 +19,6 @@ import {
   Label,
   Separator,
 } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft as ArrowBackIcon,
   Plus as PlusIcon,
@@ -45,6 +29,21 @@ import React from "react";
 import { Page } from "@/admin/core/layouts/Page";
 import { Route } from "@/admin/routes/_admin/unit/$unitId";
 import { Link } from "@/admin/shared/ui/link";
+import {
+  type RemoveUnitCollaboratorVariables,
+  type RemoveUnitFieldLockVariables,
+  useLinkSubjectAttributionMutation,
+  useRemoveUnitCollaboratorMutation,
+  useRemoveUnitFieldLockMutation,
+  useSubjectAttributionsByUnitQuery,
+  useUnitCollaboratorsQuery,
+  useUnitDetailQuery,
+  useUnitFieldLocksQuery,
+  useUnlinkSubjectAttributionMutation,
+  useUpdateUnitMutation,
+  useUpsertUnitCollaboratorMutation,
+  useUpsertUnitFieldLockMutation,
+} from "@/admin/unit/hooks/useUnitAdminQueries";
 
 const lockPathOptions = [
   UNIT_FIELD_LOCK_ALL,
@@ -79,79 +78,27 @@ function toJsonText(value: unknown) {
   }
 }
 
+function mutationMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
 export default function UnitEditPage() {
   const { t } = useTranslation(["admin", "common"]);
   const { unitId } = Route.useParams();
   const [error, setError] = React.useState<string | null>(null);
 
-  const detailQuery = useQuery(unitQueries.detail(unitId));
-  const subjectQuery = useQuery(subjectAttributionQueries.byUnit(unitId));
-  const fieldLocksQuery = useQuery(unitAuthorityQueries.fieldLocks(unitId));
-  const collaboratorsQuery = useQuery(
-    unitAuthorityQueries.collaborators(unitId),
-  );
+  const detailQuery = useUnitDetailQuery(unitId);
+  const subjectQuery = useSubjectAttributionsByUnitQuery(unitId);
+  const fieldLocksQuery = useUnitFieldLocksQuery(unitId);
+  const collaboratorsQuery = useUnitCollaboratorsQuery(unitId);
 
-  const updateMutation = unitMutations.useUpdate({
-    onError: (err) =>
-      setError(
-        err instanceof Error ? err.message : t("admin:unit_update_failed"),
-      ),
-    onSuccess: () => setError(null),
-  });
-  const linkSubjectMutation = useLinkSubjectAttributionMutation({
-    onError: (err) =>
-      setError(
-        err instanceof Error
-          ? err.message
-          : t("admin:unit_subject_link_failed"),
-      ),
-    onSuccess: () => setError(null),
-  });
-  const unlinkSubjectMutation = useUnlinkSubjectAttributionMutation({
-    onError: (err) =>
-      setError(
-        err instanceof Error
-          ? err.message
-          : t("admin:unit_subject_unlink_failed"),
-      ),
-    onSuccess: () => setError(null),
-  });
-  const upsertFieldLockMutation = useUpsertUnitFieldLockMutation({
-    onError: (err) =>
-      setError(
-        err instanceof Error
-          ? err.message
-          : t("admin:unit_field_lock_update_failed"),
-      ),
-    onSuccess: () => setError(null),
-  });
-  const removeFieldLockMutation = useRemoveUnitFieldLockMutation({
-    onError: (err) =>
-      setError(
-        err instanceof Error
-          ? err.message
-          : t("admin:unit_field_lock_removal_failed"),
-      ),
-    onSuccess: () => setError(null),
-  });
-  const upsertCollaboratorMutation = useUpsertUnitCollaboratorMutation({
-    onError: (err) =>
-      setError(
-        err instanceof Error
-          ? err.message
-          : t("admin:unit_collaborator_update_failed"),
-      ),
-    onSuccess: () => setError(null),
-  });
-  const removeCollaboratorMutation = useRemoveUnitCollaboratorMutation({
-    onError: (err) =>
-      setError(
-        err instanceof Error
-          ? err.message
-          : t("admin:unit_collaborator_removal_failed"),
-      ),
-    onSuccess: () => setError(null),
-  });
+  const updateMutation = useUpdateUnitMutation();
+  const linkSubjectMutation = useLinkSubjectAttributionMutation();
+  const unlinkSubjectMutation = useUnlinkSubjectAttributionMutation();
+  const upsertFieldLockMutation = useUpsertUnitFieldLockMutation();
+  const removeFieldLockMutation = useRemoveUnitFieldLockMutation();
+  const upsertCollaboratorMutation = useUpsertUnitCollaboratorMutation();
+  const removeCollaboratorMutation = useRemoveUnitCollaboratorMutation();
 
   const [status, setStatus] = React.useState("");
   const [visibility, setVisibility] = React.useState("");
@@ -179,27 +126,40 @@ export default function UnitEditPage() {
     e.preventDefault();
     setError(null);
 
-    let extra: any;
+    let extra: UpdateUnitInput["extra"];
     const trimmedExtra = extraText.trim();
     if (trimmedExtra.length > 0) {
       try {
-        extra = JSON.parse(trimmedExtra);
+        const parsed: unknown = JSON.parse(trimmedExtra);
+        if (
+          typeof parsed !== "object" ||
+          parsed === null ||
+          Array.isArray(parsed)
+        ) {
+          setError(t("admin:unit_extra_json_invalid"));
+          return;
+        }
+        extra = parsed as Record<string, unknown>;
       } catch {
         setError(t("admin:unit_extra_json_invalid"));
         return;
       }
     }
 
-    await updateMutation.mutateAsync({
-      unitId,
-      input: {
-        status: status.trim() || undefined,
-        visibility: visibility.trim() || undefined,
-        extra,
-      } as any,
-    });
-
-    await detailQuery.refetch();
+    try {
+      await updateMutation.mutateAsync({
+        unitId,
+        input: {
+          status: status.trim() || undefined,
+          visibility: visibility.trim() || undefined,
+          extra,
+        },
+      });
+      setError(null);
+      await detailQuery.refetch();
+    } catch (err) {
+      setError(mutationMessage(err, t("admin:unit_update_failed")));
+    }
   }
 
   async function onLinkSubject(e: React.FormEvent) {
@@ -218,33 +178,52 @@ export default function UnitEditPage() {
       return;
     }
 
-    await linkSubjectMutation.mutateAsync({
-      unitId,
-      entityId: subjectEntityId.trim(),
-      role: subjectRole,
-      weight: parsedWeight,
-    });
-    setSubjectEntityId("");
-    setSubjectWeight("");
-    await subjectQuery.refetch();
+    try {
+      await linkSubjectMutation.mutateAsync({
+        unitId,
+        entityId: subjectEntityId.trim(),
+        role: subjectRole,
+        weight: parsedWeight,
+      });
+      setError(null);
+      setSubjectEntityId("");
+      setSubjectWeight("");
+      await subjectQuery.refetch();
+    } catch (err) {
+      setError(mutationMessage(err, t("admin:unit_subject_link_failed")));
+    }
   }
 
   async function onUpsertFieldLock(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    await upsertFieldLockMutation.mutateAsync({
-      unitId,
-      path: lockPath,
-      reason: lockReason.trim() || null,
-    });
-    setLockReason("");
-    await fieldLocksQuery.refetch();
+    try {
+      await upsertFieldLockMutation.mutateAsync({
+        unitId,
+        path: lockPath,
+        reason: lockReason.trim() || null,
+      });
+      setError(null);
+      setLockReason("");
+      await fieldLocksQuery.refetch();
+    } catch (err) {
+      setError(
+        mutationMessage(err, t("admin:unit_field_lock_update_failed")),
+      );
+    }
   }
 
   async function onRemoveFieldLock(variables: RemoveUnitFieldLockVariables) {
     setError(null);
-    await removeFieldLockMutation.mutateAsync(variables);
-    await fieldLocksQuery.refetch();
+    try {
+      await removeFieldLockMutation.mutateAsync(variables);
+      setError(null);
+      await fieldLocksQuery.refetch();
+    } catch (err) {
+      setError(
+        mutationMessage(err, t("admin:unit_field_lock_removal_failed")),
+      );
+    }
   }
 
   async function onUpsertCollaborator(e: React.FormEvent) {
@@ -254,21 +233,35 @@ export default function UnitEditPage() {
       setError(t("admin:unit_collaborator_required"));
       return;
     }
-    await upsertCollaboratorMutation.mutateAsync({
-      unitId,
-      userId: collaboratorUserId.trim(),
-      roleKey: collaboratorRole,
-    });
-    setCollaboratorUserId("");
-    await collaboratorsQuery.refetch();
+    try {
+      await upsertCollaboratorMutation.mutateAsync({
+        unitId,
+        userId: collaboratorUserId.trim(),
+        roleKey: collaboratorRole,
+      });
+      setError(null);
+      setCollaboratorUserId("");
+      await collaboratorsQuery.refetch();
+    } catch (err) {
+      setError(
+        mutationMessage(err, t("admin:unit_collaborator_update_failed")),
+      );
+    }
   }
 
   async function onRemoveCollaborator(
     variables: RemoveUnitCollaboratorVariables,
   ) {
     setError(null);
-    await removeCollaboratorMutation.mutateAsync(variables);
-    await collaboratorsQuery.refetch();
+    try {
+      await removeCollaboratorMutation.mutateAsync(variables);
+      setError(null);
+      await collaboratorsQuery.refetch();
+    } catch (err) {
+      setError(
+        mutationMessage(err, t("admin:unit_collaborator_removal_failed")),
+      );
+    }
   }
 
   return (
@@ -461,12 +454,23 @@ export default function UnitEditPage() {
                           )}
                           disabled={unlinkSubjectMutation.isPending}
                           onClick={async () => {
-                            await unlinkSubjectMutation.mutateAsync({
-                              unitId,
-                              entityId: subject.entityId,
-                              role: subject.role,
-                            });
-                            await subjectQuery.refetch();
+                            setError(null);
+                            try {
+                              await unlinkSubjectMutation.mutateAsync({
+                                unitId,
+                                entityId: subject.entityId,
+                                role: subject.role,
+                              });
+                              setError(null);
+                              await subjectQuery.refetch();
+                            } catch (err) {
+                              setError(
+                                mutationMessage(
+                                  err,
+                                  t("admin:unit_subject_unlink_failed"),
+                                ),
+                              );
+                            }
                           }}
                         >
                           <TrashIcon className="size-4 text-text-secondary" />
