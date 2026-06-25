@@ -55,10 +55,6 @@
       "types": "./src/api/states/index.ts",
       "default": "./src/api/states/index.ts"
     },
-    "./api/unit": {
-      "types": "./src/api/unit/index.ts",
-      "default": "./src/api/unit/index.ts"
-    },
     "./api/unit-external-link": {
       "types": "./src/api/unit-external-link/index.ts",
       "default": "./src/api/unit-external-link/index.ts"
