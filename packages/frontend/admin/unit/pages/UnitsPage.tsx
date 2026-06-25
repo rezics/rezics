@@ -1,8 +1,9 @@
-import { contentSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
-import { type UnitDTO, unitQueries } from "@rezics/contract/api/unit/unit";
 import {
+  type ContentSearchDocument,
+  type ContentSearchOptions,
   defaultSupportLanguage,
-  type UnitListResponse,
+  type UnitDTO,
+  type UnitListQuery,
   UnitStatus,
   UnitType,
   UnitVisibility,
@@ -19,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
 import { Plus as AddIcon } from "lucide-react";
 import React from "react";
@@ -28,6 +28,10 @@ import type { PaginatedColumn } from "@/admin/components/table/PaginatedTable";
 import { Page } from "@/admin/core/layouts/Page";
 import { Link } from "@/admin/shared/ui/link";
 import { fmtDate } from "@/admin/utils/format";
+import {
+  useUnitContentSearchQuery,
+  useUnitListQuery,
+} from "../hooks/useUnitAdminQueries";
 
 /**
  * Extract the best title from the translations array on a UnitDTO.
@@ -76,6 +80,45 @@ function optionalFilter(value: string) {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
+function mapContentSearchDocumentToUnit(
+  document: ContentSearchDocument,
+): UnitDTO {
+  const translations = document.translations?.map((translation) => ({
+    ...translation,
+    unitId: document.id,
+  }));
+  const supportLanguages = document.supportLanguages?.map((language) => ({
+    unitId: document.id,
+    language: language.language,
+    isPrimary: Boolean(language.isPrimary),
+    position: language.position ?? "",
+  }));
+
+  return {
+    id: document.id,
+    type: document.type,
+    userId: document.userId,
+    visibility: document.visibility,
+    rating: document.rating,
+    aiDisclosureMode: document.aiDisclosureMode,
+    catalogEntryKind: document.catalogEntryKind,
+    targetUnitId: document.targetUnitId,
+    isLanguageNeutral: document.isLanguageNeutral,
+    resolvedLanguage: document.resolvedLanguage,
+    title: document.title,
+    subtitle: document.subtitle,
+    summary: document.summary,
+    description: document.description,
+    translations,
+    supportLanguages,
+    createdAt: document.createdAt,
+    updatedAt: document.updatedAt,
+    publishedAt: document.publishedAt,
+    referenceCount: document.referenceCount,
+    shareCount: document.shareCount,
+  };
+}
+
 export default function UnitsPage() {
   const matchRoute = useMatchRoute();
   const isMeiliMode = Boolean(matchRoute({ to: "/unit/meili" }));
@@ -92,7 +135,7 @@ export default function UnitsPage() {
   const trimmedQuery = query.trim();
   const start = page * limit;
   const effectiveMeiliMode = isMeiliMode;
-  const listFilters = React.useMemo(
+  const listFilters = React.useMemo<UnitListQuery>(
     () => ({
       start,
       limit,
@@ -109,6 +152,27 @@ export default function UnitsPage() {
     [filters, limit, start],
   );
 
+  const normalFilters = React.useMemo<UnitListQuery>(
+    () => ({
+      ...listFilters,
+      ...(trimmedQuery ? { q: trimmedQuery } : {}),
+    }),
+    [listFilters, trimmedQuery],
+  );
+
+  const meiliOptions = React.useMemo<ContentSearchOptions>(
+    () => ({
+      keyword: query || undefined,
+      ...(filters.type ? { type: filters.type } : {}),
+      ...(optionalFilter(filters.ownerUserId)
+        ? { userId: filters.ownerUserId.trim() }
+        : {}),
+      offset: start,
+      limit,
+    }),
+    [filters.ownerUserId, filters.type, limit, query, start],
+  );
+
   React.useEffect(() => {
     setQ("");
     setQuery("");
@@ -118,35 +182,18 @@ export default function UnitsPage() {
     setLimit(20);
   }, []);
 
-  const listQuery = useQuery({
-    ...unitQueries.list(listFilters),
-    enabled: !effectiveMeiliMode && trimmedQuery.length === 0,
-  });
+  const listQuery = useUnitListQuery(normalFilters, !effectiveMeiliMode);
+  const meiliQuery = useUnitContentSearchQuery(
+    meiliOptions,
+    effectiveMeiliMode,
+  );
 
-  const searchQuery = useQuery({
-    ...unitQueries.search(trimmedQuery, listFilters),
-    enabled: !effectiveMeiliMode && trimmedQuery.length > 0,
-  });
-
-  const meiliQuery = useQuery({
-    ...contentSearchQueryOptions({
-      keyword: query || undefined,
-      ...(filters.type ? { type: filters.type } : {}),
-      ...(optionalFilter(filters.ownerUserId)
-        ? { userId: filters.ownerUserId.trim() }
-        : {}),
-      offset: start,
-      limit,
-    }),
-    enabled: effectiveMeiliMode,
-  });
-
-  const normalQuery = trimmedQuery.length > 0 ? searchQuery : listQuery;
-  const data = effectiveMeiliMode ? meiliQuery.data : normalQuery.data;
   const units = effectiveMeiliMode
-    ? ((data as any)?.items ?? [])
-    : ((data as UnitListResponse | undefined)?.units ?? []);
-  const total = data?.total;
+    ? (meiliQuery.data?.items ?? []).map(mapContentSearchDocumentToUnit)
+    : (listQuery.data?.units ?? []);
+  const total = effectiveMeiliMode
+    ? meiliQuery.data?.total
+    : listQuery.data?.total;
 
   const columns = React.useMemo(() => {
     const cols: PaginatedColumn<UnitDTO>[] = [
@@ -436,10 +483,10 @@ export default function UnitsPage() {
           </>
         }
         isLoading={
-          effectiveMeiliMode ? meiliQuery.isLoading : normalQuery.isLoading
+          effectiveMeiliMode ? meiliQuery.isLoading : listQuery.isLoading
         }
-        isError={effectiveMeiliMode ? meiliQuery.isError : normalQuery.isError}
-        error={effectiveMeiliMode ? meiliQuery.error : normalQuery.error}
+        isError={effectiveMeiliMode ? meiliQuery.isError : listQuery.isError}
+        error={effectiveMeiliMode ? meiliQuery.error : listQuery.error}
         columns={columns}
         rows={units}
         getRowId={(u) => u.id}
