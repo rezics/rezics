@@ -80,6 +80,18 @@ tasks:
     desc: Compile linux-x64 binary
     cmd: bun build src/cluster.ts --compile --minify-whitespace --minify-syntax --target bun-linux-x64 --outfile backend
 
+  edge:dev:
+    desc: Wrangler dev for backend edge worker
+    cmd: bun wrangler dev --config wrangler.edge.jsonc
+
+  edge:deploy:
+    desc: Wrangler deploy for backend edge worker
+    cmd: bun wrangler deploy --config wrangler.edge.jsonc
+
+  edge:test:
+    desc: Run backend edge worker tests
+    cmd: bun test src/edge
+
   job-runner:dev:
     desc: Dev backend job runner (watch)
     env:

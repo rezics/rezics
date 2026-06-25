@@ -3,7 +3,6 @@
   "references": [
     { "path": "./packages/backend" },
     { "path": "./packages/contract" },
-    { "path": "./packages/edge" },
     { "path": "./packages/editor" },
     { "path": "./packages/folio" },
     { "path": "./packages/frontend" },

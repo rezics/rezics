@@ -60,11 +60,13 @@
         "valibot": "^1.2.0",
       },
       "devDependencies": {
+        "@cloudflare/workers-types": "^4.20260601.0",
         "@types/nodemailer": "^7.0.4",
         "@types/pg": "^8.15.5",
         "@types/react": "^19.1.0",
         "bun-types": "latest",
         "drizzle-kit": "1.0.0-rc.3",
+        "wrangler": "^4.52.0",
       },
       "peerDependencies": {
         "typescript": "^6",
@@ -93,15 +95,6 @@
         "@types/react": "^19.2.14",
         "@types/react-dom": "^19.2.3",
         "react": "^19",
-      },
-    },
-    "packages/edge": {
-      "name": "@rezics/edge",
-      "version": "0.1.0",
-      "devDependencies": {
-        "@cloudflare/workers-types": "^4.20260601.0",
-        "@types/bun": "^1.3.0",
-        "wrangler": "^4.52.0",
       },
     },
     "packages/editor": {
@@ -1006,8 +999,6 @@
     "@rezics/backend": ["@rezics/backend@workspace:packages/backend"],
 
     "@rezics/contract": ["@rezics/contract@workspace:packages/contract"],
-
-    "@rezics/edge": ["@rezics/edge@workspace:packages/edge"],
 
     "@rezics/editor": ["@rezics/editor@workspace:packages/editor"],
 

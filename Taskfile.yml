@@ -5,7 +5,6 @@ includes:
     { taskfile: ./packages/backend/Taskfile.yml, dir: ./packages/backend }
   contract:
     { taskfile: ./packages/contract/Taskfile.yml, dir: ./packages/contract }
-  edge: { taskfile: ./packages/edge/Taskfile.yml, dir: ./packages/edge }
   editor: { taskfile: ./packages/editor/Taskfile.yml, dir: ./packages/editor }
   folio: { taskfile: ./packages/folio/Taskfile.yml, dir: ./packages/folio }
   frontend:
@@ -48,6 +47,18 @@ tasks:
   server:build:linux:
     desc: Compile backend linux-x64 binary
     cmd: task backend:build:linux
+
+  edge:dev:
+    desc: Wrangler dev for backend edge worker
+    cmd: task backend:edge:dev
+
+  edge:deploy:
+    desc: Wrangler deploy for backend edge worker
+    cmd: task backend:edge:deploy
+
+  edge:test:
+    desc: Run backend edge worker tests
+    cmd: task backend:edge:test
 
   job-runner:dev:
     desc: Dev backend job runner (watch)
