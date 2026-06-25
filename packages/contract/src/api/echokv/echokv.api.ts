@@ -1,4 +1,3 @@
-import { queryOptions } from "@tanstack/react-query";
 import { apiFetch } from "../react-query/http";
 
 export type EchoKvResponse<T = unknown> = {
@@ -41,19 +40,3 @@ export const echoKvApi = {
     return apiFetch<EchoKvKeyListResponse>(`/echokv${query}`);
   },
 };
-
-export function echoKvGetQuery(key: string) {
-  return queryOptions({
-    queryKey: ["echokv", key],
-    queryFn: () => echoKvApi.get(key),
-    staleTime: 1000 * 60 * 60 * 2, // 2 hours
-  });
-}
-
-export function echoKvKeyListQuery(search: string) {
-  return queryOptions({
-    queryKey: ["echokv-keys", search],
-    queryFn: () => echoKvApi.listKeys(search),
-    staleTime: 1000 * 60, // 1 hour is overkill; 1 min is enough
-  });
-}

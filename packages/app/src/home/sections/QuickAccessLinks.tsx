@@ -1,4 +1,4 @@
-import { echoKvGetQuery } from "@rezics/contract/api/echokv/echokv";
+import { echoKvGetQuery } from "@rezics/contract/api/echokv/echokv.queries";
 import { parseEchoKVResponse } from "@rezics/contract/api/echokv/util";
 import { Badge } from "@rezics/ui/shadcn";
 import {

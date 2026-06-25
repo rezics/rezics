@@ -1,5 +1,5 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
-import { echoKvGetQuery } from "@rezics/contract/api/echokv/echokv";
+import { echoKvGetQuery } from "@rezics/contract/api/echokv/echokv.queries";
 import { parseEchoKVResponse } from "@rezics/contract/api/echokv/util";
 import { useTranslation } from "@rezics/i18n/react";
 import { CarouselIndicator } from "@rezics/ui/primitive/carousel/CarouselIndicator.tsx";
