@@ -1,7 +1,7 @@
 import {
   useToggleNodeCompletion,
   useUpdateUnitProgress,
-} from "@rezics/contract/api";
+} from "@rezics/contract/api/progress/progress.mutations";
 import { useCurrentUserId } from "@rezics/contract/api/hooks";
 import { chapterDetailQuery } from "@rezics/contract/api/chapter/chapter";
 import { contentDocMarkdownFallback } from "@rezics/contract";

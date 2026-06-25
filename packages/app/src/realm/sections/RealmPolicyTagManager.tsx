@@ -1,14 +1,18 @@
 import {
   generateKeyBetween,
+  positionForNewBottomPin,
+} from "@rezics/contract/api/shared/fractional-index";
+import {
   policyTagApplicationListQuery,
   policyTagRuleListQuery,
-  positionForNewBottomPin,
+} from "@rezics/contract/api/policy-tag/policy-tag.queries";
+import {
   useCreatePolicyTagRuleMutation,
   useDeletePolicyTagApplicationMutation,
   usePatchPolicyTagApplicationMutation,
   useUpdatePolicyTagRuleMutation,
   useUpsertPolicyTagApplicationMutation,
-} from "@rezics/contract/api";
+} from "@rezics/contract/api/policy-tag/policy-tag.mutations";
 import {
   contentSearchQueryOptions,
   meiliTagSearchQueryOptions,

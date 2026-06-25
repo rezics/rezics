@@ -1,4 +1,4 @@
-import { useUpdateUnitProgress } from "@rezics/contract/api";
+import { useUpdateUnitProgress } from "@rezics/contract/api/progress/progress.mutations";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
