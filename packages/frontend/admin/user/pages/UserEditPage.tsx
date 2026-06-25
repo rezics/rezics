@@ -1,5 +1,4 @@
-import { userMutations } from "@rezics/contract/api/user/user.mutations";
-import { userQueries } from "@rezics/contract/api/user/user.queries";
+import type { EditorialPatchSubmission } from "@rezics/contract";
 import {
   contentDocMarkdownFallback,
   markdownContentDoc,
@@ -16,27 +15,24 @@ import {
   Label,
   Separator,
 } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft as ArrowBackIcon, Save as SaveIcon } from "lucide-react";
 import React from "react";
 import { Page } from "@/admin/core/layouts/Page";
 import { Route } from "@/admin/routes/_admin/user/$userId";
 import { Link } from "@/admin/shared/ui/link";
+import {
+  useAdminUserDetailQuery,
+  useAdminUserUpdateMutation,
+} from "../hooks/useUserListQueries";
 
 export default function UserEditPage() {
   const { t } = useTranslation(["admin", "common"]);
   const { userId } = Route.useParams();
   const [error, setError] = React.useState<string | null>(null);
 
-  const detailQuery = useQuery(userQueries.adminDetail(userId));
+  const detailQuery = useAdminUserDetailQuery(userId);
 
-  const updateMutation = userMutations.useAdminUpdate({
-    onError: (err) =>
-      setError(
-        err instanceof Error ? err.message : t("admin:user_update_failed"),
-      ),
-    onSuccess: () => setError(null),
-  });
+  const updateMutation = useAdminUserUpdateMutation(userId);
 
   const [name, setName] = React.useState("");
   const [avatar, setAvatar] = React.useState("");
@@ -57,20 +53,30 @@ export default function UserEditPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    await updateMutation.mutateAsync({
-      userId,
-      input: {
-        name: name.trim() || undefined,
-        avatar: avatar.trim() || undefined,
-        summary: summary.trim() || undefined,
-        description: description.trim()
-          ? markdownContentDoc(description.trim())
-          : undefined,
-        password: password.length ? password : undefined,
-      } as any,
-    });
-    setPassword("");
-    await detailQuery.refetch();
+    const input: EditorialPatchSubmission = {
+      patch: {
+        user: {
+          name: name.trim() || undefined,
+          avatar: avatar.trim() || undefined,
+          summary: summary.trim() || undefined,
+          description: description.trim()
+            ? markdownContentDoc(description.trim())
+            : undefined,
+          password: password.length ? password : undefined,
+        },
+      },
+    };
+
+    try {
+      await updateMutation.mutateAsync(input);
+      setError(null);
+      setPassword("");
+      await detailQuery.refetch();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : t("admin:user_update_failed"),
+      );
+    }
   }
 
   return (
