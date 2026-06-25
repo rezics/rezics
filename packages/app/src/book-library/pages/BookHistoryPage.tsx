@@ -1,4 +1,4 @@
-import { historyQueries } from "@rezics/contract/api";
+import { historyQueries } from "@rezics/contract/api/history/history";
 import type {
   HistoryActorResolution,
   StructureEventDTO,

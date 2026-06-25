@@ -1,4 +1,5 @@
-import { historyQueries, unitAuthorityQueries } from "@rezics/contract/api";
+import { historyQueries } from "@rezics/contract/api/history/history";
+import { unitAuthorityQueries } from "@rezics/contract/api/unit/unit";
 import {
   bookKeys,
   bookQueries,
