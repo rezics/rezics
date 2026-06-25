@@ -6,8 +6,8 @@ import {
   useCreateBookMutation,
   useUpdateBookMutation,
 } from "@rezics/contract/api/book/book";
-import { creditAttributionQueries } from "@rezics/contract/api/credit-attribution/credit-attribution";
-import { useEntityAttributionBatchMutation } from "@rezics/contract/api/entity-attribution/entity-attribution";
+import { creditAttributionQueries } from "@rezics/contract/api/credit-attribution/credit-attribution.queries";
+import { useEntityAttributionBatchMutation } from "@rezics/contract/api/entity-attribution/entity-attribution.mutations";
 import { getLockedFieldError } from "@rezics/contract/api/react-query/errors";
 import { positionForNewBottomPin } from "@rezics/contract/api/tag/fractional-index";
 import {

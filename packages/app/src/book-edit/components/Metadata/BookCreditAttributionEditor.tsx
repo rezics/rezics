@@ -1,5 +1,5 @@
-import { creditAttributionQueries } from "@rezics/contract/api/credit-attribution/credit-attribution";
-import { useEntityAttributionBatchMutation } from "@rezics/contract/api/entity-attribution/entity-attribution";
+import { creditAttributionQueries } from "@rezics/contract/api/credit-attribution/credit-attribution.queries";
+import { useEntityAttributionBatchMutation } from "@rezics/contract/api/entity-attribution/entity-attribution.mutations";
 import {
   creditAttributionRoleRegistry,
   creditAttributionRoles,

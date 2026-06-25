@@ -1,4 +1,4 @@
-import { subjectAttributionQueries } from "@rezics/contract/api/subject-attribution/subject-attribution";
+import { subjectAttributionQueries } from "@rezics/contract/api/subject-attribution/subject-attribution.queries";
 import { defaultSupportLanguage } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 
