@@ -15,7 +15,7 @@ databases:
     publication:
       name: rezics_sequin_pub_${ENV:-development}
       create_if_not_exists: true
-      # Keep this table list in sync with packages/job-runner/src/sequin/router.ts.
+      # Keep this table list in sync with packages/backend/src/job-runner/sequin/router.ts.
       init_sql: |
         CREATE PUBLICATION rezics_sequin_pub_${ENV:-development}
         FOR TABLE

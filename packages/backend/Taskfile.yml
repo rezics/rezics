@@ -79,3 +79,25 @@ tasks:
   build:linux:
     desc: Compile linux-x64 binary
     cmd: bun build src/cluster.ts --compile --minify-whitespace --minify-syntax --target bun-linux-x64 --outfile backend
+
+  job-runner:dev:
+    desc: Dev backend job runner (watch)
+    env:
+      NODE_ENV: development
+    cmd: bun run --watch --no-cache src/job-runner/index.ts
+
+  job-runner:build:
+    desc: Compile backend job runner native binary
+    cmd: bun build src/job-runner/index.ts --compile --minify-whitespace --minify-syntax --target bun --outfile job-runner
+
+  job-runner:build:linux:
+    desc: Compile backend job runner linux-x64 binary
+    cmd: bun build src/job-runner/index.ts --compile --minify-whitespace --minify-syntax --target bun-linux-x64 --outfile job-runner
+
+  job-runner:test:
+    desc: Run backend job runner tests
+    cmd: bun test src/job-runner
+
+  job-runner:db:ensure:
+    desc: Ensure the pg-boss queue database exists
+    cmd: bun run src/job-runner/scripts/ensure-job-db.ts

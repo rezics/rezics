@@ -1,6 +1,6 @@
-import { HistoryOutboxConsumer } from "@rezics/backend/history/outbox";
-import { createServerDb } from "@rezics/backend/server/db/factory";
-import { createServerHistoryOutboxRepository } from "@rezics/backend/server/db/history-outbox.repository";
+import { HistoryOutboxConsumer } from "@/history/outbox";
+import { createServerDb } from "@/server/db/factory";
+import { createServerHistoryOutboxRepository } from "@/server/db/history-outbox.repository";
 
 export interface HistoryRuntime {
   consumer: HistoryOutboxConsumer;
@@ -13,8 +13,8 @@ export async function createHistoryRuntime(options: {
 }): Promise<HistoryRuntime> {
   process.env.HISTORY_DATABASE_URL ??= options.historyDatabaseUrl;
   const [{ historyRepository }, { revisionService }] = await Promise.all([
-    import("@rezics/backend/history/db"),
-    import("@rezics/backend/history/revision/revision.service"),
+    import("@/history/db"),
+    import("@/history/revision/revision.service"),
   ]);
   const mainDb = createServerDb(options.serverDatabaseUrl, 10);
   const mainOutbox = createServerHistoryOutboxRepository(mainDb.db);

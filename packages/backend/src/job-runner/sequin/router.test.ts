@@ -174,14 +174,34 @@ describe("Sequin payload routing", () => {
       record: { unitId: "work-1" },
     });
 
-    expect(routeSequinMessages(messages)).toMatchObject([
-      { kind: "search.content.patchTranslations" },
-      { kind: "search.post.patchTargetFanout" },
-      {
-        kind: "search.shelfItem.sourceFanout",
-        payload: { itemType: "unit", itemId: "work-1" },
-      },
-    ]);
+    expect(routeSequinMessages(messages)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "search.content.patchTranslations",
+          payload: { unitId: "work-1" },
+        }),
+        expect.objectContaining({
+          kind: "search.post.patchTargetFanout",
+          payload: { targetId: "work-1" },
+        }),
+        expect.objectContaining({
+          kind: "search.content.patchTagFanout",
+          payload: { targetId: "work-1" },
+        }),
+        expect.objectContaining({
+          kind: "search.tag.sync",
+          payload: { unitId: "work-1" },
+        }),
+        expect.objectContaining({
+          kind: "search.label.sync",
+          payload: { unitId: "work-1" },
+        }),
+        expect.objectContaining({
+          kind: "search.shelfItem.sourceFanout",
+          payload: { itemType: "unit", itemId: "work-1" },
+        }),
+      ]),
+    );
   });
 
   test("routes ShelfItem changes to shelf item sync and shelf contained-unit patch", () => {

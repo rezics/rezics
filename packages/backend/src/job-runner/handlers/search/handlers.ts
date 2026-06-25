@@ -4,7 +4,7 @@ import {
   SEARCH_COMMAND_KINDS,
   type SearchCommand,
 } from "@rezics/contract/job";
-import type { SearchClient } from "@rezics/backend/search/client";
+import type { SearchClient } from "@/search/client";
 import {
   patchContentAliases,
   patchContentContainedUnitIds,
@@ -63,7 +63,7 @@ import {
   syncUserSegment,
   syncZoneSegment,
   syncTagSegment,
-} from "@rezics/backend/search/sync";
+} from "@/search/sync";
 import {
   DEFAULT_FANOUT_SEGMENT_LIMIT,
   type FanoutPayload,

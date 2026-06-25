@@ -1,4 +1,4 @@
-import type { HistoryOutboxConsumer } from "@rezics/backend/history/outbox";
+import type { HistoryOutboxConsumer } from "@/history/outbox";
 import {
   type AnyJobCommand,
   HISTORY_COMMAND_KINDS,
@@ -6,7 +6,9 @@ import {
 } from "@rezics/contract/job";
 import type { JobHandler } from "../../worker";
 
-export function createHistoryHandlers(consumer: HistoryOutboxConsumer) {
+export function createHistoryHandlers(
+  consumer: HistoryOutboxConsumer,
+): Partial<Record<AnyJobCommand["kind"], JobHandler>> {
   return {
     [HISTORY_COMMAND_KINDS.outboxIngest]: async (command) => {
       const historyCommand = command as HistoryCommand;

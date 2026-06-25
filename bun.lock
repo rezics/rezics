@@ -50,6 +50,7 @@
         "meilisearch": "^0.54.0",
         "nodemailer": "^7.0.11",
         "pg": "^8.16.3",
+        "pg-boss": "^10.3.2",
         "react": "^19.1.0",
         "uuid": "^13.0.0",
         "valibot": "^1.2.0",
@@ -210,29 +211,6 @@
       },
       "peerDependencies": {
         "react": "^19",
-      },
-    },
-    "packages/job-runner": {
-      "name": "@rezics/job-runner",
-      "dependencies": {
-        "@elysiajs/cors": "^1.4.0",
-        "@elysiajs/openapi": "^1.4.14",
-        "@rezics/backend": "workspace:*",
-        "@rezics/contract": "workspace:*",
-        "@rezics/shared": "workspace:*",
-        "@t3-oss/env-core": "^0.13.10",
-        "dotenv": "^17.2.3",
-        "elysia": "^1.4.22",
-        "pg": "^8.16.3",
-        "pg-boss": "^10.3.2",
-        "valibot": "^1.2.0",
-      },
-      "devDependencies": {
-        "@types/bun": "^1.3.0",
-        "@types/pg": "^8.15.5",
-      },
-      "peerDependencies": {
-        "typescript": "^6",
       },
     },
     "packages/shared": {
@@ -1051,8 +1029,6 @@
     "@rezics/frontend": ["@rezics/frontend@workspace:packages/frontend"],
 
     "@rezics/i18n": ["@rezics/i18n@workspace:packages/i18n"],
-
-    "@rezics/job-runner": ["@rezics/job-runner@workspace:packages/job-runner"],
 
     "@rezics/shared": ["@rezics/shared@workspace:packages/shared"],
 

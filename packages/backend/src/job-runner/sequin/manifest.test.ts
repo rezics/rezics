@@ -8,7 +8,7 @@ import {
 } from "@rezics/contract/job";
 
 const yaml = readFileSync(
-  join(import.meta.dir, "../../sequin/sequin.yml"),
+  join(import.meta.dir, "sequin.yml"),
   "utf8",
 );
 

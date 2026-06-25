@@ -36,7 +36,7 @@
         image        = "[[ var "image_job_runner_migrate" . ]]"
         network_mode = "[[ var "network" . ]]"
         entrypoint   = ["/bin/sh", "-c"]
-        args         = ["until cd /repo && bun run packages/job-runner/scripts/ensure-job-db.ts 2>&1; do echo 'Waiting for database...'; sleep 2; done"]
+        args         = ["until cd /repo && bun run packages/backend/src/job-runner/scripts/ensure-job-db.ts 2>&1; do echo 'Waiting for database...'; sleep 2; done"]
       }
 
       env {

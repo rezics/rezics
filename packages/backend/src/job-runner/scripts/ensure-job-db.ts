@@ -3,13 +3,15 @@ import { fileURLToPath } from "node:url";
 import { config as loadEnv } from "dotenv";
 import { Client } from "pg";
 
-const packageDir = path.resolve(
+const jobRunnerDir = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
 );
-const repoRoot = path.resolve(packageDir, "../..");
+const backendPackageDir = path.resolve(jobRunnerDir, "../../..");
+const repoRoot = path.resolve(backendPackageDir, "../..");
 
-loadEnv({ path: path.join(packageDir, ".env"), quiet: true });
+loadEnv({ path: path.join(jobRunnerDir, ".env"), quiet: true });
+loadEnv({ path: path.join(backendPackageDir, ".env"), quiet: true });
 loadEnv({ path: path.join(repoRoot, ".env"), quiet: true });
 
 function argValue(name: string) {

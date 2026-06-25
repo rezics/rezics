@@ -3,7 +3,7 @@ import type { JobRunnerRole } from "../env";
 export type SequinHealthPreflightOptions = {
   role: JobRunnerRole;
   healthUrl?: string;
-  fetchImpl?: typeof fetch;
+  fetchImpl?: (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
 };
 
 export function roleRequiresSequinHealth(role: JobRunnerRole) {

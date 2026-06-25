@@ -6,12 +6,13 @@ import {
 } from "@rezics/shared/observability";
 import { Elysia } from "elysia";
 import { createAdminApi } from "./http/admin";
+import type { AdminQueueLike } from "./http/admin";
 import { createEnqueueApi } from "./http/enqueue";
 import { createSequinApi } from "./http/sequin";
 import type { QueueLike } from "./queue/types";
 
 export function createJobRunnerApp(options: {
-  queue: QueueLike;
+  queue: QueueLike & AdminQueueLike;
   internalSecret: string;
   sequinWebhookSecret: string;
   readiness?: () => Promise<boolean> | boolean;
@@ -72,7 +73,7 @@ export function createJobRunnerApp(options: {
     )
     .use(
       createAdminApi({
-        queue: options.queue as never,
+        queue: options.queue,
         internalSecret: options.internalSecret,
       }),
     );

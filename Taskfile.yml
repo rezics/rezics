@@ -10,8 +10,6 @@ includes:
   folio: { taskfile: ./packages/folio/Taskfile.yml, dir: ./packages/folio }
   frontend:
     { taskfile: ./packages/frontend/Taskfile.yml, dir: ./packages/frontend }
-  job-runner:
-    { taskfile: ./packages/job-runner/Taskfile.yml, dir: ./packages/job-runner }
   ui: { taskfile: ./packages/ui/Taskfile.yml, dir: ./packages/ui }
 
 tasks:
@@ -50,6 +48,30 @@ tasks:
   server:build:linux:
     desc: Compile backend linux-x64 binary
     cmd: task backend:build:linux
+
+  job-runner:dev:
+    desc: Dev backend job runner (watch)
+    cmd: task backend:job-runner:dev
+
+  job-runner:build:
+    desc: Compile backend job runner native binary
+    cmd: task backend:job-runner:build
+
+  job-runner:build:linux:
+    desc: Compile backend job runner linux-x64 binary
+    cmd: task backend:job-runner:build:linux
+
+  job-runner:test:
+    desc: Run backend job runner tests
+    cmd: task backend:job-runner:test
+
+  job-runner:typecheck:
+    desc: Typecheck backend package including job runner
+    cmd: task backend:typecheck
+
+  job-runner:db:ensure:
+    desc: Ensure the pg-boss queue database exists
+    cmd: task backend:job-runner:db:ensure
 
   search:meilisearch:
     desc: Run local Meilisearch from the bundled binary

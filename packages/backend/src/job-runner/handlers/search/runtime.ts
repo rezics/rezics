@@ -1,6 +1,6 @@
-import { SearchClient } from "@rezics/backend/search/client";
-import { setSearchDb } from "@rezics/backend/search/sync";
-import { createServerDb } from "@rezics/backend/server/db/factory";
+import { SearchClient } from "@/search/client";
+import { setSearchDb } from "@/search/sync";
+import { createServerDb } from "@/server/db/factory";
 
 export interface SearchRuntime {
   client: SearchClient;
