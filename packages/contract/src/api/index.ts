@@ -8,7 +8,6 @@ export {
 export type { EdenResponse } from "../eden";
 export * from "./comment/comment";
 export * from "./content-structure/content-structure";
-export * from "./content-translation/content-translation";
 export * from "./credit-attribution/credit-attribution";
 export * from "./entity-attribution/entity-attribution";
 export * from "./stream/stream";
