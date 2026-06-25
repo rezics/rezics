@@ -1,5 +1,5 @@
 import { useEntity } from "@rezics/contract/api/entity/entity.queries";
-import { positionForNewBottomPin } from "@rezics/contract/api/tag/fractional-index";
+import { positionForNewBottomPin } from "@rezics/contract/shared/fractional-index";
 import {
   useCreateUnitExternalLink,
   useDeleteUnitExternalLink,

@@ -9,7 +9,7 @@ import { bookQueries } from "@rezics/contract/api/book/book.queries";
 import { creditAttributionQueries } from "@rezics/contract/api/credit-attribution/credit-attribution.queries";
 import { useEntityAttributionBatchMutation } from "@rezics/contract/api/entity-attribution/entity-attribution.mutations";
 import { getLockedFieldError } from "@rezics/contract/api/react-query/errors";
-import { positionForNewBottomPin } from "@rezics/contract/api/tag/fractional-index";
+import { positionForNewBottomPin } from "@rezics/contract/shared/fractional-index";
 import {
   useDeleteTranslationMutation,
   useUpsertTranslationMutation,

@@ -5,7 +5,7 @@ import type {
   SubjectAttributionDTO,
   SubjectAttributionRole,
 } from "@rezics/contract";
-import { generateKeyBetween } from "@rezics/contract/api/shared/fractional-index";
+import { generateKeyBetween } from "@rezics/contract/shared/fractional-index";
 
 export type EntityAttributionQueueSaveStatus =
   | "idle"

@@ -1,7 +1,7 @@
 import {
   generateKeyBetween,
   positionForNewBottomPin,
-} from "@rezics/contract/api/shared/fractional-index";
+} from "@rezics/contract/shared/fractional-index";
 import {
   policyTagApplicationListQuery,
   policyTagRuleListQuery,
