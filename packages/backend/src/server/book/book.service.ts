@@ -8,7 +8,7 @@ import type {
   UpdateBookInput,
 } from "@rezics/contract";
 import { parseIdsCsv, withCoverUrl } from "@rezics/contract";
-import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/contract/job";
 import { and, asc, count, desc, eq, ilike, inArray, sql } from "drizzle-orm";
 import { nullableContentDocJson } from "@/content-doc/json-write";
 import { contentStructureService } from "@/content-structure";

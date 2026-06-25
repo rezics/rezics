@@ -5,7 +5,7 @@
 
 import { randomUUID } from "node:crypto";
 import type { ContentLanguage, UpdateUser } from "@rezics/contract";
-import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/contract/job";
 import { and, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { requireSlugScopeId } from "@/infra/slug-scopes";
 import { serverJobProducer } from "@/job/job-boundary";

@@ -21,7 +21,7 @@ import type {
   UpdateShelfInput,
 } from "@rezics/contract";
 import { parseIdsCsv, SEED_TAG_NAMES, withCoverUrl } from "@rezics/contract";
-import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/contract/job";
 import {
   and,
   asc,

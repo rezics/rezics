@@ -5,7 +5,7 @@ import type {
   UpdateTranslationInput,
 } from "@rezics/contract";
 import { FALLBACK_LANGUAGE } from "@rezics/contract";
-import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/contract/job";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { serverJobProducer } from "@/job/job-boundary";
 import { Unit, UnitSupportLanguage, UnitTranslation } from "../db/schema";

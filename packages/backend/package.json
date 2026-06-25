@@ -139,7 +139,6 @@
     "@kitajs/html": "^4.2.13",
     "@rezics/contract": "workspace:*",
     "@rezics/email": "workspace:*",
-    "@rezics/job": "workspace:*",
     "@rezics/jwt": "workspace:*",
     "@rezics/shared": "workspace:*",
     "@sinclair/typebox": "^0.34.41",

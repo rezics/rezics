@@ -8,7 +8,7 @@ import type {
   RezicsSessionClaims,
   SubjectAttributionDTO,
 } from "@rezics/contract";
-import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/contract/job";
 import { and, eq, inArray, notInArray } from "drizzle-orm";
 import { creditAttributionService } from "../credit-attribution/credit-attribution.service";
 import { CreditAttribution, Entity, SubjectAttribution } from "../db/schema";

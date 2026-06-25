@@ -14,7 +14,7 @@ import {
   createMaintenanceCommand,
   type EnqueueResult,
   MAINTENANCE_COMMAND_KINDS,
-} from "@rezics/job";
+} from "@rezics/contract/job";
 import { and, asc, eq, inArray, lte } from "drizzle-orm";
 import { db, HistoryOutbox, type ServerDb } from "@/db";
 import { getSystemStatusSummary } from "@/diagnostic";

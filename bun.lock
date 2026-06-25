@@ -36,7 +36,6 @@
         "@kitajs/html": "^4.2.13",
         "@rezics/contract": "workspace:*",
         "@rezics/email": "workspace:*",
-        "@rezics/job": "workspace:*",
         "@rezics/jwt": "workspace:*",
         "@rezics/shared": "workspace:*",
         "@sinclair/typebox": "^0.34.41",
@@ -76,6 +75,7 @@
         "@tanstack/react-query-persist-client": "^5.96.2",
         "elysia": "^1.4.12",
         "memoirist": "^0.4.0",
+        "valibot": "^1.2.0",
         "zustand": "5.0.7",
       },
       "devDependencies": {
@@ -182,7 +182,6 @@
         "@rezics/contract": "workspace:*",
         "@rezics/i18n": "workspace:*",
         "@rezics/ui": "workspace:*",
-        "@tanstack/react-query": "^5.96.2",
         "@tanstack/react-router": "^1.168.10",
         "chart.js": "^4.5.1",
         "clsx": "^2.1.1",
@@ -230,6 +229,7 @@
     "packages/job": {
       "name": "@rezics/job",
       "dependencies": {
+        "@rezics/contract": "workspace:*",
         "valibot": "^1.2.0",
       },
       "devDependencies": {

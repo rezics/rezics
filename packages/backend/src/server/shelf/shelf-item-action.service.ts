@@ -8,7 +8,7 @@ import type {
   ToggleFavoriteResponse,
 } from "@rezics/contract";
 import { FAVORITES_SHELF_SLUG } from "@rezics/contract";
-import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/contract/job";
 import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { serverJobProducer } from "@/job/job-boundary";
 import { AppError } from "@/utils/errors";

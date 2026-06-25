@@ -1,4 +1,4 @@
-import { REACTION_SEQUIN_TABLES, SOURCE_SEQUIN_TABLES } from "@rezics/job";
+import { REACTION_SEQUIN_TABLES, SOURCE_SEQUIN_TABLES } from "@rezics/contract/job";
 import { type SQL, sql } from "drizzle-orm";
 import { db } from "../db/client";
 import { createServerDb } from "../db/factory";

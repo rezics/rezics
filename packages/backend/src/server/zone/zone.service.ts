@@ -26,7 +26,7 @@ import {
   type ZoneTheme,
   type ZoneTranslation,
 } from "@rezics/contract";
-import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/contract/job";
 import {
   and,
   asc,

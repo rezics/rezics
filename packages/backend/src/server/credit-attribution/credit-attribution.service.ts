@@ -4,7 +4,7 @@ import type {
   LinkCreditAttributionInput,
   RezicsSessionClaims,
 } from "@rezics/contract";
-import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/contract/job";
 import { and, asc, desc, eq, inArray, type SQL } from "drizzle-orm";
 import {
   CreditAttribution,

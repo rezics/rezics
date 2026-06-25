@@ -2,7 +2,7 @@ import {
   createRankingCommand,
   RANKING_COMMAND_KINDS,
   type RankingCommand,
-} from "@rezics/job";
+} from "@rezics/contract/job";
 import { SearchClient } from "../../search/client";
 import { env } from "../env";
 import { computeV1RankingScores, RANKING_FORMULA_VERSION } from "./formulas";

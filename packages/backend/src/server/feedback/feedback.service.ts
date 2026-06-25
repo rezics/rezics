@@ -1,6 +1,6 @@
 import type { CreateFeedbackInput, FeedbackListQuery } from "@rezics/contract";
 import { parseIdsCsv } from "@rezics/contract";
-import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/contract/job";
 import { and, count, desc, eq, gte, inArray, lte, type SQL } from "drizzle-orm";
 import { Feedback } from "../db/schema";
 import { serverJobProducer } from "../job/job-boundary";

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import type { EnqueueResult } from "@rezics/job";
+import type { EnqueueResult } from "@rezics/contract/job";
 import { EXPECTED_MEILI_INDEX_SCHEMAS } from "../../search/schema";
 import type { GovernanceAuditService } from "@/governance/audit.service";
 

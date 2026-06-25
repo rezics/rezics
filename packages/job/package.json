@@ -18,6 +18,7 @@
     "typescript": "^6"
   },
   "dependencies": {
+    "@rezics/contract": "workspace:*",
     "valibot": "^1.2.0"
   },
   "devDependencies": {

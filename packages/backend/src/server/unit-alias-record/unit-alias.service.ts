@@ -6,7 +6,7 @@ import type {
   UnitAliasStatus,
   UpdateUnitAliasInput,
 } from "@rezics/contract";
-import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/contract/job";
 import { and, asc, desc, eq, gt, ilike, or, type SQL, sql } from "drizzle-orm";
 import type { ServerDb } from "../db/client";
 import { Unit, UnitAlias, UnitAliasVote } from "../db/schema";

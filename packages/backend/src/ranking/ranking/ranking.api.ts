@@ -1,4 +1,4 @@
-import { JobCommandSchema, safeParseJobCommand } from "@rezics/job";
+import { JobCommandSchema, safeParseJobCommand } from "@rezics/contract/job";
 import { Elysia, t } from "elysia";
 import * as v from "valibot";
 import { rankingService } from "./service";

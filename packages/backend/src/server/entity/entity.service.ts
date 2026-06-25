@@ -6,7 +6,7 @@ import type {
   UpdateEntityInput,
 } from "@rezics/contract";
 import { parseIdsCsv } from "@rezics/contract";
-import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/contract/job";
 import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
 import { nullableContentDocJson } from "@/content-doc/json-write";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";

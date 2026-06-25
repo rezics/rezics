@@ -2,7 +2,7 @@ import {
   type AnyJobCommand,
   createJobEnqueueClient,
   type EnqueueResult,
-} from "@rezics/job";
+} from "@rezics/contract/job";
 import { env } from "../env";
 
 export interface JobProducer {
