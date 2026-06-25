@@ -1,4 +1,4 @@
-import { useEntity } from "@rezics/contract/api/entity";
+import { useEntity } from "@rezics/contract/api/entity/entity";
 import { positionForNewBottomPin } from "@rezics/contract/api/tag/fractional-index";
 import {
   useCreateUnitExternalLink,

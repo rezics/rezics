@@ -23,10 +23,6 @@
       "types": "./src/api/echokv/echokv.ts",
       "default": "./src/api/echokv/echokv.ts"
     },
-    "./api/entity": {
-      "types": "./src/api/entity/index.ts",
-      "default": "./src/api/entity/index.ts"
-    },
     "./api/shelf": {
       "types": "./src/api/shelf/index.ts",
       "default": "./src/api/shelf/index.ts"
