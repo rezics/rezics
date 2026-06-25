@@ -1,4 +1,4 @@
-import { ApiError } from "@rezics/contract/api";
+import { ApiError } from "@rezics/contract";
 
 type ErrorLike = {
   status?: unknown;

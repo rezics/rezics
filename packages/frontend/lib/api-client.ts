@@ -4,7 +4,7 @@ import {
   ApiError,
   type ApiErrorDetail,
   type EdenResponse,
-} from "@rezics/contract/api";
+} from "@rezics/contract";
 import type { AnyElysia } from "elysia";
 
 export const API_BASE_URL =

@@ -1,5 +1,1 @@
-export type EdenResponse<T> = {
-  data: T | null;
-  error: unknown;
-  status: number;
-};
+export type { EdenResponse } from "../eden";

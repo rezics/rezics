@@ -14,6 +14,8 @@ export * from "./editorial-path-scope";
 export * from "./engagement/index";
 export * from "./entity/index";
 export * from "./envelope";
+export * from "./eden";
+export * from "./errors";
 export * from "./stream/index";
 export * from "./infra";
 export * from "./json-column";
