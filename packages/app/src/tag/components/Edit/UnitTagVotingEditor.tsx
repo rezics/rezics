@@ -14,9 +14,9 @@ import {
 import { meiliTagSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
 import {
   useDeleteUserTagApplicationMutation,
-  userTagApplicationQueries,
   useSetUserTagApplicationsMutation,
-} from "@rezics/contract/api/user-tag-application/user-tag-application";
+} from "@rezics/contract/api/user-tag-application/user-tag-application.mutations";
+import { userTagApplicationQueries } from "@rezics/contract/api/user-tag-application/user-tag-application.queries";
 import type {
   BatchTagTranslationResult,
   TagSearchDocument,

@@ -1,4 +1,4 @@
-import { labelListQuery } from "@rezics/contract/api/label/label";
+import { labelListQuery } from "@rezics/contract/api/label/label.queries";
 import { meiliTagSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
 import { realmTagTreeQuery } from "@rezics/contract/api/realm-tag-tree";
 import { tagBatchTranslationsQuery } from "@rezics/contract/api/tag/tag";

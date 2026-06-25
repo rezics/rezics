@@ -1,4 +1,4 @@
-import { labelListQuery } from "@rezics/contract/api/label/label";
+import { labelListQuery } from "@rezics/contract/api/label/label.queries";
 import {
   meiliLabelSearchQueryOptions,
   meiliTagSearchQueryOptions,

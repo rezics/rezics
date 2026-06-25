@@ -1,7 +1,7 @@
 import { meiliTagSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
 import { tagBatchTranslationsQuery } from "@rezics/contract/api/tag/tag";
 import { userShelfItemForUnitQuery } from "@rezics/contract/api/user-shelf-item/user-shelf-item";
-import { userTagApplicationsForUnitQuery } from "@rezics/contract/api/user-tag-application/user-tag-application";
+import { userTagApplicationsForUnitQuery } from "@rezics/contract/api/user-tag-application/user-tag-application.queries";
 import type { TagSearchDocument } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import {

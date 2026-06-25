@@ -1,4 +1,4 @@
-import { useCreateLabel } from "@rezics/contract/api/label/label";
+import { useCreateLabel } from "@rezics/contract/api/label/label.mutations";
 import { meiliLabelSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
 import {
   LANGUAGE_META,
