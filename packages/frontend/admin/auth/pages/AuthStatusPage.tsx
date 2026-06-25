@@ -1,4 +1,3 @@
-import { queryAccessToken } from "@rezics/contract/api/react-query/jwt";
 import {
   hydrateAuthSessionState,
   useAuthSessionStore,
@@ -22,6 +21,7 @@ import { Shield, ShieldUser } from "lucide-react";
 import { useState } from "react";
 import { Page } from "@/admin/core/layouts/Page";
 import { adminLogout } from "@/admin/user/models/handler";
+import { refreshMainSession } from "../hooks/useAuthUsersAdmin";
 
 type SessionStatus = "active" | "missing";
 
@@ -295,7 +295,7 @@ export default function AuthStatusPage() {
           <SessionRefreshCard
             title={t("admin:auth_cookie_session")}
             onRefresh={async () => {
-              await queryAccessToken({ requirePresence: false });
+              await refreshMainSession();
               await hydrateAuthSessionState({ requirePresence: false });
             }}
             refreshLabel={t("admin:auth_refresh_session")}
