@@ -1,4 +1,4 @@
-import { slugApi } from "@rezics/contract/api/slug/slug.api";
+import { shelfBySlugLookupQuery } from "@rezics/contract/api/slug/slug.queries";
 import { isPublicUserShelfSlugRouteParams } from "@rezics/contract";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { ShelfPage } from "@/shelf";
@@ -8,10 +8,10 @@ import { ShelfPage } from "@/shelf";
  * owner scope. Returns 404 for any non-system-shelf slug in v1.
  */
 export const Route = createFileRoute("/_mainLayout/u/$userSlug/shelf/$slug")({
-  loader: async ({ params }) => {
+  loader: async ({ params, context }) => {
     if (!isPublicUserShelfSlugRouteParams(params)) throw notFound();
-    const shelf = await slugApi
-      .shelfBySlug(params.userSlug, params.slug)
+    const shelf = await context.qc
+      .ensureQueryData(shelfBySlugLookupQuery(params.userSlug, params.slug))
       .catch(() => null);
     if (!shelf) throw notFound();
     return { shelfId: shelf.unitId };
