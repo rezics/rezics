@@ -1,4 +1,4 @@
-import { mySubscriptionListEntriesQuery } from "@rezics/contract/api/subscription/subscription";
+import { mySubscriptionListEntriesQuery } from "@rezics/contract/api/subscription/subscription.queries";
 import { userQueries } from "@rezics/contract/api/user/user.queries";
 import type { UserSubscriptionListEntryDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";

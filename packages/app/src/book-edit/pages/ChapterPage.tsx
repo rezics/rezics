@@ -3,10 +3,8 @@ import {
   bookMutations,
 } from "@rezics/contract/api/book/book";
 import { bookQueries } from "@rezics/contract/api/book/book.queries";
-import {
-  chapterDetailQuery,
-  useUpdateChapterMutation,
-} from "@rezics/contract/api/chapter/chapter";
+import { useUpdateChapterMutation } from "@rezics/contract/api/chapter/chapter.mutations";
+import { chapterDetailQuery } from "@rezics/contract/api/chapter/chapter.queries";
 import {
   type BookContentStructureItem,
   mainMarkdownSource,

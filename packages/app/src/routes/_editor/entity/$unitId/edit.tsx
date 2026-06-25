@@ -1,4 +1,4 @@
-import { entityDetailQueryOptions } from "@rezics/contract/api/entity/entity";
+import { entityDetailQueryOptions } from "@rezics/contract/api/entity/entity.queries";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 import {

@@ -1,8 +1,8 @@
 import {
-  useIsSubscribed,
   useSubscribeMutation,
   useUnsubscribeMutation,
-} from "@rezics/contract/api/subscription/subscription";
+} from "@rezics/contract/api/subscription/subscription.mutations";
+import { useIsSubscribed } from "@rezics/contract/api/subscription/subscription.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,

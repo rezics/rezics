@@ -57,7 +57,7 @@
  * +------------------------+
  */
 
-import { useEntityList } from "@rezics/contract/api/entity/entity";
+import { useEntityList } from "@rezics/contract/api/entity/entity.queries";
 import { useCurrentUserId } from "@rezics/contract/api/hooks/useCurrentUserId";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

@@ -16,11 +16,11 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
-  mySubscriptionListEntriesQuery,
   usePinSubscriptionListEntryMutation,
   useReorderSubscriptionListEntriesMutation,
   useUnsubscribeMutation,
-} from "@rezics/contract/api/subscription/subscription";
+} from "@rezics/contract/api/subscription/subscription.mutations";
+import { mySubscriptionListEntriesQuery } from "@rezics/contract/api/subscription/subscription.queries";
 import { userQueries } from "@rezics/contract/api/user/user.queries";
 import { zoneQueries } from "@rezics/contract/api/zone/zone";
 import type {

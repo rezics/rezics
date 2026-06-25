@@ -2,7 +2,7 @@ import {
   useMuteRealmMutation,
   useUnmuteRealmMutation,
 } from "@rezics/contract/api/realm/realm";
-import { useIsSubscribed } from "@rezics/contract/api/subscription/subscription";
+import { useIsSubscribed } from "@rezics/contract/api/subscription/subscription.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";

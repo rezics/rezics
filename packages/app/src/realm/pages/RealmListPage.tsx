@@ -18,10 +18,10 @@ import { CSS } from "@dnd-kit/utilities";
 import { useLeaveRealmMutation } from "@rezics/contract/api/realm/realm.mutations";
 import { realmQueries } from "@rezics/contract/api/realm/realm.queries";
 import {
-  mySubscriptionListEntriesQuery,
   usePinSubscriptionListEntryMutation,
   useReorderSubscriptionListEntriesMutation,
-} from "@rezics/contract/api/subscription/subscription";
+} from "@rezics/contract/api/subscription/subscription.mutations";
+import { mySubscriptionListEntriesQuery } from "@rezics/contract/api/subscription/subscription.queries";
 import { userQueries } from "@rezics/contract/api/user/user.queries";
 import type {
   UserSubscriptionListEntryDTO,

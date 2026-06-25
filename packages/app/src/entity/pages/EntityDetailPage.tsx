@@ -33,7 +33,7 @@
 import {
   entityDetailQueryOptions,
   useEntity,
-} from "@rezics/contract/api/entity/entity";
+} from "@rezics/contract/api/entity/entity.queries";
 import { useServerPermission } from "@rezics/contract/api/hooks/useServerPermission";
 import { BasicAdminPermission } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";

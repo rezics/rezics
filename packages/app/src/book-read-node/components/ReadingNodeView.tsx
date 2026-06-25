@@ -3,7 +3,7 @@ import {
   useUpdateUnitProgress,
 } from "@rezics/contract/api/progress/progress.mutations";
 import { useCurrentUserId } from "@rezics/contract/api/hooks/useCurrentUserId";
-import { chapterDetailQuery } from "@rezics/contract/api/chapter/chapter";
+import { chapterDetailQuery } from "@rezics/contract/api/chapter/chapter.queries";
 import { contentDocMarkdownFallback } from "@rezics/contract";
 import { createRezicsRenderer } from "@rezics/editor/markdown";
 import { useTranslation } from "@rezics/i18n/react";

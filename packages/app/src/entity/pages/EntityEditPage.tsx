@@ -61,11 +61,9 @@
  * +-------------------------+
  */
 
-import {
-  entityKeys,
-  useEntity,
-  useUpdateEntity,
-} from "@rezics/contract/api/entity/entity";
+import { entityKeys } from "@rezics/contract/api/entity/entity.keys";
+import { useUpdateEntity } from "@rezics/contract/api/entity/entity.mutations";
+import { useEntity } from "@rezics/contract/api/entity/entity.queries";
 import { useServerPermission } from "@rezics/contract/api/hooks/useServerPermission";
 import type { EntityDTO, EntityKind } from "@rezics/contract";
 import {

@@ -1,4 +1,4 @@
-import { chapterDetailQuery } from "@rezics/contract/api/chapter/chapter";
+import { chapterDetailQuery } from "@rezics/contract/api/chapter/chapter.queries";
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 import { routeQueryOrNotFound } from "@/core";
 
