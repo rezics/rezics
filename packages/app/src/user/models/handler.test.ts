@@ -35,17 +35,10 @@ const signUpMock = mock(async () => ({
   },
 }));
 const signOutMock = mock(async () => ({ success: true }));
-const ensureMock = mock(async () => ({
-  user: { userId: "user-1", name: "Reader" },
-  alreadyCreated: false,
-}));
-const issueSessionTokenMock = mock(async () => ({ token: "member-token" }));
 const removeQueriesMock = mock(() => undefined);
 const clearProfileMock = mock(() => undefined);
 const clearAuthSessionStateMock = mock(() => undefined);
-const syncBusinessTokenMock = mock(() => undefined);
 const resetAuthSessionStoreMock = mock(() => undefined);
-const setUserMock = mock(() => undefined);
 const hydrateAuthSessionStateMock = mock(async () => ({
   session: { id: "session-1" },
   user: { id: "user-1" },
@@ -74,14 +67,6 @@ mock.module("@rezics/contract/api/user/user.keys", () => ({
   },
 }));
 
-mock.module("@rezics/contract/api/user/user.api", () => ({
-  userApi: {
-    me: mock(),
-    ensure: ensureMock,
-    issueSessionToken: issueSessionTokenMock,
-  },
-}));
-
 mock.module("@/app", () => ({
   qc: {
     removeQueries: removeQueriesMock,
@@ -93,15 +78,12 @@ mock.module("@/user/states", () => ({
   hydrateAuthSessionState: hydrateAuthSessionStateMock,
   useAuthSessionStore: {
     getState: () => ({
-      hasBusinessToken: false,
       reset: resetAuthSessionStoreMock,
-      syncBusinessToken: syncBusinessTokenMock,
     }),
   },
   useUserProfileStore: {
     getState: () => ({
       clearProfile: clearProfileMock,
-      setUser: setUserMock,
     }),
   },
 }));
@@ -137,15 +119,11 @@ describe("auth handlers", () => {
     signInMock.mockClear();
     signUpMock.mockClear();
     signOutMock.mockClear();
-    ensureMock.mockClear();
-    issueSessionTokenMock.mockClear();
     hydrateAuthSessionStateMock.mockClear();
     removeQueriesMock.mockClear();
     clearProfileMock.mockClear();
     clearAuthSessionStateMock.mockClear();
-    syncBusinessTokenMock.mockClear();
     resetAuthSessionStoreMock.mockClear();
-    setUserMock.mockClear();
   });
 
   test("login refreshes the main cookie-backed session through main", async () => {
