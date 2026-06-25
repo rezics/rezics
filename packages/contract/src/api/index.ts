@@ -16,7 +16,4 @@ export * from "./meili/meili";
 export * from "./realm-tag-tree";
 export * from "./subject-attribution/subject-attribution";
 export * from "./subscription/subscription";
-export * from "./tag/tag";
-export * from "./user-tag-application/user-tag-application";
-export * from "./user-shelf-item/user-shelf-item";
 export * from "./zone/zone";

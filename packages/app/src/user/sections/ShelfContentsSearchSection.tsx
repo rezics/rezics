@@ -50,12 +50,12 @@
  * └────────────────────┘
  */
 
+import { meiliTagSearchQueryOptions } from "@rezics/contract/api/meili/meili.queries";
+import { tagBatchTranslationsQuery } from "@rezics/contract/api/tag/tag";
 import {
-  meiliTagSearchQueryOptions,
-  tagBatchTranslationsQuery,
   userShelfItemSearchMineQuery,
   userShelfItemSearchUserQuery,
-} from "@rezics/contract/api";
+} from "@rezics/contract/api/user-shelf-item/user-shelf-item";
 import type { TagSearchDocument, UserShelfItemDTO } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Badge, Button, Input, Label } from "@rezics/ui/shadcn";
