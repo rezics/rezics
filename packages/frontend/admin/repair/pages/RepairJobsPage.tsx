@@ -2,9 +2,7 @@ import {
   type AdminRepairJobDryRun,
   type AdminRepairJobScope,
   type HistoryOutboxRepairStatus,
-  useAdminRepairJobDryRunMutation,
-  useAdminRepairJobStartMutation,
-} from "@rezics/contract/api";
+} from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Badge,
@@ -25,6 +23,10 @@ import React from "react";
 import { Page } from "@/admin/core/layouts/Page";
 import { Route } from "@/admin/routes/_admin/repair";
 import { Link } from "@/admin/shared/ui/link";
+import {
+  useAdminRepairJobDryRunMutation,
+  useAdminRepairJobStartMutation,
+} from "../hooks/useRepairJobMutations";
 
 type RepairScopeConfig = {
   scope: AdminRepairJobScope;
