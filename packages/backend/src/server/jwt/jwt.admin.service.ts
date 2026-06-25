@@ -3,7 +3,7 @@ import type {
   JwtServiceDTO,
   UpdateJwtServiceInput,
 } from "@rezics/contract";
-import { defaultJwtCryptoProvider } from "@rezics/jwt";
+import { defaultJwtCryptoProvider } from "@/internal/jwt";
 import { and, asc, eq, gt, isNull, or } from "drizzle-orm";
 import { env } from "@/env";
 import { invalidateJwtService } from "@/jwt";

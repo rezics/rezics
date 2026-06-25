@@ -3,7 +3,7 @@ import {
   type RezicsSessionClaims,
   TokenTransportHeader,
 } from "@rezics/contract";
-import { createJwtVerifier, JwtAlgorithm } from "@rezics/jwt";
+import { createJwtVerifier, JwtAlgorithm } from "@/internal/jwt";
 import { Elysia, status } from "elysia";
 import { env } from "../env";
 

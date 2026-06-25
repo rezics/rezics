@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { exportJWK, generateKeyPair, SignJWT } from "jose";
-import { JwtAlgorithm, verifyTokenFromHeader } from "@rezics/jwt";
+import { JwtAlgorithm, verifyTokenFromHeader } from "@/internal/jwt";
 import type { JWTPayload } from "../models/types";
 
 process.env.NODE_ENV = "test";

@@ -1,4 +1,4 @@
-import type { JwtPrivateJwk, JwtPublicJwk } from "@rezics/jwt";
+import type { JwtPrivateJwk, JwtPublicJwk } from "@/internal/jwt";
 import { and, desc, eq, gt, isNull, or } from "drizzle-orm";
 import { Jwks, JwtService } from "../db/schema";
 

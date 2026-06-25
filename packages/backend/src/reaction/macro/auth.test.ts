@@ -21,7 +21,7 @@ const verifier = mock(async (raw?: string) => {
   };
 });
 
-mock.module("@rezics/jwt", () => ({
+mock.module("@/internal/jwt", () => ({
   JwtAlgorithm: { ES256: "ES256" },
   createJwtVerifier: () => verifier,
 }));

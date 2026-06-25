@@ -9,7 +9,6 @@
     { "path": "./packages/frontend" },
     { "path": "./packages/i18n" },
     { "path": "./packages/job-runner" },
-    { "path": "./packages/jwt" },
     { "path": "./packages/shared" },
     { "path": "./packages/storybook-config" },
     { "path": "./packages/ui" }

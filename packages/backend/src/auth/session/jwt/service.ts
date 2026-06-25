@@ -1,4 +1,4 @@
-import { importPrivateJwk } from "@rezics/jwt";
+import { importPrivateJwk } from "@/internal/jwt";
 import { getAuthJwtIssuer } from "./options";
 import {
   authJwtPersistence,

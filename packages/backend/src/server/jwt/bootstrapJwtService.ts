@@ -1,4 +1,4 @@
-import { defaultJwtCryptoProvider } from "@rezics/jwt";
+import { defaultJwtCryptoProvider } from "@/internal/jwt";
 import { count, eq } from "drizzle-orm";
 import { Jwks, JwtService } from "../db/schema";
 

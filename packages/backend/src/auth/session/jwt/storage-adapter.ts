@@ -1,12 +1,12 @@
 import { createHash } from "node:crypto";
-import type { JwtKeyPersistence, JwtKeyRecord } from "@rezics/jwt";
+import type { JwtKeyPersistence, JwtKeyRecord } from "@/internal/jwt";
 import {
   asJwtPrivateJwk,
   asJwtPublicJwk,
   JwtAlgorithm,
   type JwtPrivateJwk,
   type JwtPublicJwk,
-} from "@rezics/jwt";
+} from "@/internal/jwt";
 import { symmetricDecrypt, symmetricEncrypt } from "better-auth/crypto";
 import { desc, eq } from "drizzle-orm";
 import { db } from "../../db/client";

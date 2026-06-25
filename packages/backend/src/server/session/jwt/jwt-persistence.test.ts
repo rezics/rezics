@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { JwtAlgorithm } from "@rezics/jwt";
+import { JwtAlgorithm } from "@/internal/jwt";
 import {
   createServerJwtPersistence,
   type JwksRepository,

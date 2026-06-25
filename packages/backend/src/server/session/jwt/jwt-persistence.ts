@@ -1,11 +1,11 @@
-import type { JwtKeyPersistence, JwtKeyRecord } from "@rezics/jwt";
+import type { JwtKeyPersistence, JwtKeyRecord } from "@/internal/jwt";
 import {
   asJwtPrivateJwk,
   asJwtPublicJwk,
   JwtAlgorithm,
   type JwtPrivateJwk,
   type JwtPublicJwk,
-} from "@rezics/jwt";
+} from "@/internal/jwt";
 import { desc, eq } from "drizzle-orm";
 import { Jwks } from "../../db/schema";
 import { getJwtService as getCachedJwtService } from "../../jwt/jwtServiceCache";

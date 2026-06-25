@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { JwtAlgorithm } from "@rezics/jwt";
+import { JwtAlgorithm } from "@/internal/jwt";
 import { symmetricDecrypt, symmetricEncrypt } from "better-auth/crypto";
 import type { AuthJwtStorage } from "./storage-adapter";
 

@@ -4,7 +4,7 @@ import {
   JwtAlgorithm,
   verifyBearerToken,
   verifyTokenFromHeader,
-} from "@rezics/jwt";
+} from "@/internal/jwt";
 import { exportJWK, generateKeyPair, SignJWT } from "jose";
 
 process.env.DATABASE_URL =
