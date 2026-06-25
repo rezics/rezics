@@ -1,7 +1,7 @@
-import { useEntityList } from "@rezics/contract/api/entity";
 import type {
   EntityDTO,
   EntityKind,
+  EntityListQuery,
   UnitTranslationDTO,
 } from "@rezics/contract";
 import { entityKindLabel } from "@rezics/i18n";
@@ -21,6 +21,7 @@ import { SearchablePaginatedTableCard } from "@/admin/components/list/Searchable
 import type { PaginatedColumn } from "@/admin/components/table/PaginatedTable";
 import { Page } from "@/admin/core/layouts/Page";
 import { Link } from "@/admin/shared/ui/link";
+import { useEntityListQuery } from "../hooks/useEntityListQuery";
 
 function fmtDate(v?: string | Date) {
   if (!v) return "-";
@@ -49,13 +50,17 @@ export default function EntityListPage() {
   const [page, setPage] = React.useState(0);
   const [limit, setLimit] = React.useState(20);
 
-  const listQuery = useEntityList({
+  const filters: EntityListQuery = {
     page: page + 1,
     limit,
-    q: query || undefined,
-    kind: (kind || undefined) as EntityKind | undefined,
-    verified: verifiedFilter === "all" ? undefined : verifiedFilter === "true",
-  });
+    ...(query ? { q: query } : {}),
+    ...(kind ? { kind: kind as EntityKind } : {}),
+    ...(verifiedFilter === "all"
+      ? {}
+      : { verified: verifiedFilter === "true" }),
+  };
+
+  const listQuery = useEntityListQuery(filters);
 
   const entities = listQuery.data?.entities ?? [];
   const total = listQuery.data?.total ?? 0;
