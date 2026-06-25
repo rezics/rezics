@@ -1,8 +1,8 @@
+import type { EnrichedShelfItem } from "@rezics/contract/api/shelf/useShelfHydration";
 import type {
-  EnrichedShelfItem,
   ShelfSortState,
   ShelfView,
-} from "@rezics/contract/api/shelf/shelf";
+} from "@rezics/contract/api/shelf/shelf.types";
 import type { ShelfItemChildDTO, ShelfItemDTO } from "@rezics/contract";
 import {
   shelfItemIdentity,

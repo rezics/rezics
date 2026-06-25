@@ -1,4 +1,4 @@
-import type { ShelfItemKind, ShelfItemType } from "@rezics/contract/api/shelf/shelf";
+import type { ShelfItemKind, ShelfItemType } from "@rezics/contract/api/shelf/shelf.types";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { BookmarkPlus } from "lucide-react";

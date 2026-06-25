@@ -18,14 +18,14 @@ const i18nMessages = {
 
 import { useCanEdit } from "@rezics/contract/api/hooks/useCanEdit";
 import { useReactionHydration } from "@rezics/contract/api/reaction/useReactionHydration";
-import type { ShelfSortState, ShelfView } from "@rezics/contract/api/shelf/shelf";
+import { useCleanupOrphansMutation } from "@rezics/contract/api/shelf/shelf.mutations";
 import {
   shelfDetailQuery,
   shelfItemsInfiniteQuery,
-  useCleanupOrphansMutation,
-  useHydratedShelfItems,
   useShelfItemStatusHydration,
-} from "@rezics/contract/api/shelf/shelf";
+} from "@rezics/contract/api/shelf/shelf.queries";
+import type { ShelfSortState, ShelfView } from "@rezics/contract/api/shelf/shelf.types";
+import { useHydratedShelfItems } from "@rezics/contract/api/shelf/useShelfHydration";
 import {
   contentDocMarkdownFallback,
   isLibraryKind,

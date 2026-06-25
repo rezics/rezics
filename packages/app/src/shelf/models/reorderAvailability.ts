@@ -1,4 +1,4 @@
-import type { ShelfSortState, ShelfView } from "@rezics/contract/api/shelf/shelf";
+import type { ShelfSortState, ShelfView } from "@rezics/contract/api/shelf/shelf.types";
 import type { ShelfStreamEntry } from "./shelfStream";
 
 export function canUseShelfReorder(

@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import type {
   EnrichedShelfItem,
-  ShelfSortState,
-} from "@rezics/contract/api/shelf/shelf";
+} from "@rezics/contract/api/shelf/useShelfHydration";
+import type { ShelfSortState } from "@rezics/contract/api/shelf/shelf.types";
 import type { ShelfItemDTO } from "@rezics/contract";
 import {
   canReorderShelfStreamEntry,

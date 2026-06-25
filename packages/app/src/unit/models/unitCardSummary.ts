@@ -1,4 +1,4 @@
-import type { TagListEntryDTO } from "@rezics/contract/api/shelf/shelf";
+import type { TagListEntryDTO } from "@rezics/contract/api/shelf/useShelfHydration";
 import type {
   BookDTO,
   PostDTO,

@@ -3,13 +3,15 @@ import type {
   ShelfItemType,
   ShelfSortField,
   ShelfSortOrder,
-} from "@rezics/contract/api/shelf/shelf";
+} from "@rezics/contract/api/shelf/shelf.types";
 import {
   shelfItemStatusQuery,
+  userShelvesInfiniteQuery,
+} from "@rezics/contract/api/shelf/shelf.queries";
+import {
   useAddShelfItemMutation,
   useAddToShelvesMutation,
-  userShelvesInfiniteQuery,
-} from "@rezics/contract/api/shelf/shelf";
+} from "@rezics/contract/api/shelf/shelf.mutations";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,

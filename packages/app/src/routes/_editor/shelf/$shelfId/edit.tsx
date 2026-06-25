@@ -1,4 +1,4 @@
-import { shelfDetailQuery } from "@rezics/contract/api/shelf/shelf";
+import { shelfDetailQuery } from "@rezics/contract/api/shelf/shelf.queries";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 import {

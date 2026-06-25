@@ -1,5 +1,5 @@
 import { postQueries } from "@rezics/contract/api/post/post.queries";
-import { shelfQueries } from "@rezics/contract/api/shelf/shelf";
+import { shelfQueries } from "@rezics/contract/api/shelf/shelf.queries";
 import { tagQueries } from "@rezics/contract/api/tag/tag.queries";
 import { PostKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";

@@ -1,4 +1,4 @@
-import type { ShelfDTO } from "@rezics/contract/api/shelf/shelf";
+import type { ShelfDTO } from "@rezics/contract/api/shelf/shelf.types";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Checkbox } from "@rezics/ui/shadcn";
 import { ListChecks } from "lucide-react";

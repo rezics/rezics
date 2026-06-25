@@ -1,4 +1,4 @@
-import { shelfDetailQuery } from "@rezics/contract/api/shelf/shelf";
+import { shelfDetailQuery } from "@rezics/contract/api/shelf/shelf.queries";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { titleOfShelf, unitTitleMeta } from "@/core/routing/documentTitle";
 import { resolveRouteReadLanguageContext } from "@/shared/models/readLanguageContext";

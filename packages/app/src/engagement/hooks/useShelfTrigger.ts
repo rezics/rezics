@@ -1,4 +1,4 @@
-import type { ShelfItemKind, ShelfItemType } from "@rezics/contract/api/shelf/shelf";
+import type { ShelfItemKind, ShelfItemType } from "@rezics/contract/api/shelf/shelf.types";
 import type React from "react";
 import { useAddToShelfDialog } from "@/shelf";
 import { useAuth, useAuthModal } from "@/user";
