@@ -159,7 +159,6 @@
         "@rezics/contract": "workspace:*",
         "@rezics/i18n": "workspace:*",
         "@rezics/ui": "workspace:*",
-        "@tanstack/react-router": "^1.168.10",
         "chart.js": "^4.5.1",
         "clsx": "^2.1.1",
         "elysia": "^1.4.28",
