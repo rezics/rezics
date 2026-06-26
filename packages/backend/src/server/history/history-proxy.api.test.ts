@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import type { HistoryProxyRepository } from "./history-proxy.api";
+import type {
+  HistoryProxyReader,
+  HistoryProxyRepository,
+} from "./history-proxy.api";
 
 mock.module("../env", () => ({
   env: { HISTORY_BASE_URL: "http://history.example" },
@@ -46,20 +49,34 @@ const fetchMock = mock(
   },
 );
 
+const listUnitRevisions = mock(
+  async (
+    _input: Parameters<HistoryProxyReader["listUnitRevisions"]>[0],
+  ) => ({
+    revisions: [],
+    nextCursor: null,
+  }),
+);
+
 function repository(): HistoryProxyRepository {
   return { findUnit };
+}
+
+function historyReader(): HistoryProxyReader {
+  return { listUnitRevisions };
 }
 
 describe("historyProxyApi", () => {
   beforeEach(() => {
     findUnit.mockClear();
     fetchMock.mockClear();
+    listUnitRevisions.mockClear();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
   });
 
-  test("allows public Unit history through the app-facing proxy", async () => {
+  test("allows public Unit history through the in-process reader", async () => {
     const { createHistoryProxyApi } = await import("./history-proxy.api");
-    const historyProxyApi = createHistoryProxyApi(repository());
+    const historyProxyApi = createHistoryProxyApi(repository(), historyReader());
     const response = await historyProxyApi.handle(
       new Request(
         "http://localhost/history/unit/unit-public/revisions?limit=10",
@@ -67,14 +84,18 @@ describe("historyProxyApi", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "http://history.example/history/unit/unit-public/revisions?limit=10",
-    );
+    expect(listUnitRevisions).toHaveBeenCalledWith({
+      unitId: "unit-public",
+      cursor: null,
+      includeContent: false,
+      limit: 10,
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  test("blocks public raw revision content for non-owners before proxying", async () => {
+  test("blocks public raw revision content for non-owners before reading", async () => {
     const { createHistoryProxyApi } = await import("./history-proxy.api");
-    const historyProxyApi = createHistoryProxyApi(repository());
+    const historyProxyApi = createHistoryProxyApi(repository(), historyReader());
     const response = await historyProxyApi.handle(
       new Request(
         "http://localhost/history/unit/unit-public/revisions?includeContent=true",
@@ -82,12 +103,13 @@ describe("historyProxyApi", () => {
     );
 
     expect(response.status).toBe(403);
+    expect(listUnitRevisions).not.toHaveBeenCalled();
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
   test("allows raw revision content for the owner", async () => {
     const { createHistoryProxyApi } = await import("./history-proxy.api");
-    const historyProxyApi = createHistoryProxyApi(repository());
+    const historyProxyApi = createHistoryProxyApi(repository(), historyReader());
     const response = await historyProxyApi.handle(
       new Request(
         "http://localhost/history/unit/unit-public/revisions?includeContent=true",
@@ -98,14 +120,34 @@ describe("historyProxyApi", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "http://history.example/history/unit/unit-public/revisions?includeContent=true",
+    expect(listUnitRevisions).toHaveBeenCalledWith({
+      unitId: "unit-public",
+      cursor: null,
+      includeContent: true,
+      limit: undefined,
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  test("continues to proxy structure event timelines over HTTP", async () => {
+    const { createHistoryProxyApi } = await import("./history-proxy.api");
+    const historyProxyApi = createHistoryProxyApi(repository(), historyReader());
+    const response = await historyProxyApi.handle(
+      new Request(
+        "http://localhost/history/unit/unit-public/structure-events?limit=5",
+      ),
     );
+
+    expect(response.status).toBe(200);
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      "http://history.example/history/unit/unit-public/structure-events?limit=5",
+    );
+    expect(listUnitRevisions).not.toHaveBeenCalled();
   });
 
   test("blocks structure event payloads for public non-owners", async () => {
     const { createHistoryProxyApi } = await import("./history-proxy.api");
-    const historyProxyApi = createHistoryProxyApi(repository());
+    const historyProxyApi = createHistoryProxyApi(repository(), historyReader());
     const response = await historyProxyApi.handle(
       new Request(
         "http://localhost/history/unit/unit-public/structure-events?includePayload=true",
@@ -116,20 +158,21 @@ describe("historyProxyApi", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  test("blocks private Unit history for non-owners before proxying", async () => {
+  test("blocks private Unit history for non-owners before reading", async () => {
     const { createHistoryProxyApi } = await import("./history-proxy.api");
-    const historyProxyApi = createHistoryProxyApi(repository());
+    const historyProxyApi = createHistoryProxyApi(repository(), historyReader());
     const response = await historyProxyApi.handle(
       new Request("http://localhost/history/unit/unit-private/revisions"),
     );
 
     expect(response.status).toBe(403);
+    expect(listUnitRevisions).not.toHaveBeenCalled();
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
   test("allows private Unit history for the owner", async () => {
     const { createHistoryProxyApi } = await import("./history-proxy.api");
-    const historyProxyApi = createHistoryProxyApi(repository());
+    const historyProxyApi = createHistoryProxyApi(repository(), historyReader());
     const response = await historyProxyApi.handle(
       new Request("http://localhost/history/unit/unit-private/revisions", {
         headers: { authorization: "Bearer owner" },
@@ -137,6 +180,7 @@ describe("historyProxyApi", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(listUnitRevisions).toHaveBeenCalledTimes(1);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

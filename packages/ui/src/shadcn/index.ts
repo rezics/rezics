@@ -1,12 +1,5 @@
 export { Alert, AlertDescription, AlertTitle } from "./alert";
-export {
-  Avatar,
-  AvatarBadge,
-  AvatarFallback,
-  AvatarGroup,
-  AvatarGroupCount,
-  AvatarImage,
-} from "./avatar";
+export { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 export { Badge, badgeVariants } from "./badge";
 export { Button, buttonVariants } from "./button";
 export {

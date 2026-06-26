@@ -1,0 +1,31 @@
+import { t } from "elysia";
+import { verifiedRegistrationFactsSchema } from "../account/registration";
+
+export const authInternalVerifiedRegistrationFactsRequestSchema = t.Object({
+  authUserId: t.String(),
+});
+export type AuthInternalVerifiedRegistrationFactsRequest =
+  (typeof authInternalVerifiedRegistrationFactsRequestSchema)["static"];
+
+export const authInternalVerifiedRegistrationFactsErrorSchema = t.Object({
+  code: t.Union([
+    t.Literal("AUTH_USER_NOT_FOUND"),
+    t.Literal("REGISTRATION_NOT_VERIFIED"),
+  ]),
+  message: t.String(),
+});
+export type AuthInternalVerifiedRegistrationFactsError =
+  (typeof authInternalVerifiedRegistrationFactsErrorSchema)["static"];
+
+export const authInternalVerifiedRegistrationFactsResponseSchema = t.Union([
+  t.Object({
+    success: t.Literal(true),
+    facts: verifiedRegistrationFactsSchema,
+  }),
+  t.Object({
+    success: t.Literal(false),
+    error: authInternalVerifiedRegistrationFactsErrorSchema,
+  }),
+]);
+export type AuthInternalVerifiedRegistrationFactsResponse =
+  (typeof authInternalVerifiedRegistrationFactsResponseSchema)["static"];

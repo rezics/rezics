@@ -14,6 +14,10 @@ import {
 } from "@rezics/contract";
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
+import {
+  revisionService,
+  type RevisionService,
+} from "../../history/revision/revision.service";
 import { Unit } from "../db/schema";
 import { env } from "../env";
 import { tryResolveIdentity } from "../middleware";
@@ -68,6 +72,8 @@ type HistoryProxyUnit = Pick<
 export type HistoryProxyRepository = {
   findUnit(unitId: string): Promise<HistoryProxyUnit | undefined>;
 };
+
+export type HistoryProxyReader = Pick<RevisionService, "listUnitRevisions">;
 
 async function getServerDb() {
   const { db } = await import("../db/client");
@@ -146,6 +152,7 @@ const encodePathPart = (value: string | number) => encodeURIComponent(value);
 
 export function createHistoryProxyApi(
   repository: HistoryProxyRepository = createDrizzleHistoryProxyRepository(),
+  historyReader: HistoryProxyReader = revisionService,
 ) {
   return new Elysia({ prefix: "/history" })
     .onError(({ error, set }) => {
@@ -174,16 +181,12 @@ export function createHistoryProxyApi(
         ) {
           throw forbidden("you cannot view raw history payloads for this Unit");
         }
-        return fetchHistoryJson<UnitRevisionTimelinePage>(
-          appendQuery(
-            `/history/unit/${encodePathPart(params.unitId)}/revisions`,
-            {
-              cursor: query.cursor,
-              includeContent: query.includeContent,
-              limit: query.limit,
-            },
-          ),
-        );
+        return historyReader.listUnitRevisions({
+          unitId: params.unitId,
+          cursor: query.cursor ?? null,
+          includeContent: query.includeContent ?? false,
+          limit: query.limit,
+        });
       },
       {
         params: unitHistoryParamsSchema,

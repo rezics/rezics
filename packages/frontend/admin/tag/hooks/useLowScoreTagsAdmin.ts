@@ -6,7 +6,10 @@ import type {
   RealmTagApplicationDTO,
   UnitTagDTO,
 } from "@rezics/contract";
-import useSWR from "swr";
+import {
+  createEdenFetcher,
+  useAdminEdenQuery,
+} from "@/admin/shared/eden-swr";
 import { apiClient, unwrapEdenResponse } from "@/lib/api-client";
 
 type LowScoreTagsKey = readonly [
@@ -20,31 +23,19 @@ function lowScoreTagsKey(query: LowScoreTagsQuery): LowScoreTagsKey {
   return ["eden", "admin", "low-score-tag", query] as const;
 }
 
-async function fetchLowScoreTags(
-  key: LowScoreTagsKey,
-): Promise<LowScoreTagsResponse> {
+const fetchLowScoreTags = createEdenFetcher<
+  LowScoreTagsResponse,
+  LowScoreTagsKey
+>((key) => {
   const [, , , query] = key;
-  const response = await apiClient.admin["low-score-tag"].get({ query });
-  return unwrapEdenResponse(response);
-}
+  return apiClient.admin["low-score-tag"].get({ query });
+});
 
 export function useLowScoreTagsQuery(query: LowScoreTagsQuery) {
-  const result = useSWR<LowScoreTagsResponse>(
-    lowScoreTagsKey(query),
-    fetchLowScoreTags,
-    {
-      dedupingInterval: 30_000,
-      keepPreviousData: true,
-    },
-  );
-
-  return {
-    data: result.data,
-    error: result.error,
-    isError: Boolean(result.error),
-    isLoading: result.isLoading,
-    refetch: () => result.mutate(),
-  };
+  return useAdminEdenQuery(lowScoreTagsKey(query), fetchLowScoreTags, {
+    dedupingInterval: 30_000,
+    keepPreviousData: true,
+  });
 }
 
 export async function patchUnitTag(

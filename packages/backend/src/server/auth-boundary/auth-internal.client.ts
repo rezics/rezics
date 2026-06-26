@@ -1,5 +1,7 @@
 import type {
   AdminAuthSession,
+  AuthInternalVerifiedRegistrationFactsRequest,
+  AuthInternalVerifiedRegistrationFactsResponse,
   VerifiedRegistrationFacts,
 } from "@rezics/contract";
 import { env } from "../env";
@@ -15,21 +17,24 @@ export async function fetchVerifiedRegistrationFacts(
     "/internal/registration/verified-facts",
     getInternalAuthBaseUrl(),
   );
+  const requestBody: AuthInternalVerifiedRegistrationFactsRequest = {
+    authUserId,
+  };
   const response = await fetch(url, {
     method: "POST",
     headers: {
       "content-type": "application/json",
       "x-internal-secret": env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET,
     },
-    body: JSON.stringify({ authUserId }),
+    body: JSON.stringify(requestBody),
   });
 
   if (!response.ok) return null;
-  const body = (await response.json()) as {
-    success?: boolean;
-    facts?: VerifiedRegistrationFacts;
-  };
-  return body.success && body.facts ? body.facts : null;
+  const responseBody =
+    (await response.json()) as AuthInternalVerifiedRegistrationFactsResponse;
+  return responseBody.success && responseBody.facts
+    ? responseBody.facts
+    : null;
 }
 
 export async function projectSlugToAuth(input: {

@@ -1,4 +1,8 @@
 import { randomUUID } from "node:crypto";
+import {
+  authInternalVerifiedRegistrationFactsRequestSchema,
+  type AuthInternalVerifiedRegistrationFactsResponse,
+} from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import {
   cleanupStaleRegistrations,
@@ -63,7 +67,10 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
   )
   .post(
     "/registration/verified-facts",
-    async ({ body, set }) => {
+    async ({
+      body,
+      set,
+    }): Promise<AuthInternalVerifiedRegistrationFactsResponse> => {
       const user = await findVerifiedFactsUser(body.authUserId);
 
       if (!user) {
@@ -105,9 +112,7 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
       };
     },
     {
-      body: t.Object({
-        authUserId: t.String(),
-      }),
+      body: authInternalVerifiedRegistrationFactsRequestSchema,
     },
   )
   .post(

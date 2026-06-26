@@ -238,11 +238,12 @@ export const env = createEnv({
     MEDIA_PRESIGN_EXPIRY: v.optional(v.pipe(v.string(), v.transform(Number))),
 
     /**
-     * Base URL of the History service for app-facing read proxy requests.
-     * When omitted, history proxy endpoints return a clear service-unavailable
-     * response instead of bypassing Unit visibility checks.
-     * History 服务用于面向应用的读取代理请求的基础 URL。
-     * 省略时，history 代理端点返回明确的服务不可用响应，
+     * Base URL of the History service for app-facing read proxy requests that
+     * still cross the HTTP service boundary. When omitted, HTTP-backed history
+     * proxy endpoints return a clear service-unavailable response instead of
+     * bypassing Unit visibility checks.
+     * History 服务用于仍跨 HTTP 服务边界的面向应用读取代理请求。
+     * 省略时，由 HTTP 支撑的 history 代理端点返回明确的服务不可用响应，
      * 而不会绕过 Unit 可见性检查。
      */
     HISTORY_BASE_URL: v.optional(v.string()),

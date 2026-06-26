@@ -3,34 +3,28 @@ import type {
   JwtServiceListResponse,
   UpdateJwtServiceInput,
 } from "@rezics/contract";
-import useSWR from "swr";
+import {
+  createEdenFetcher,
+  useAdminEdenQuery,
+} from "@/admin/shared/eden-swr";
 import { apiClient, unwrapEdenResponse } from "@/lib/api-client";
 
 const JWT_SERVICE_LIST_KEY = ["eden", "admin", "jwt-services", "list"] as const;
 
-async function fetchJwtServices(): Promise<JwtServiceListResponse> {
-  const response = await apiClient.admin["jwt-services"].list.get();
-  return unwrapEdenResponse(response);
-}
+const fetchJwtServices = createEdenFetcher<
+  JwtServiceListResponse,
+  typeof JWT_SERVICE_LIST_KEY
+>(() => apiClient.admin["jwt-services"].list.get());
 
 export function useJwtServiceListQuery() {
-  const query = useSWR<JwtServiceListResponse>(
-    JWT_SERVICE_LIST_KEY,
-    fetchJwtServices,
-    {
-      dedupingInterval: 60_000,
-      keepPreviousData: true,
-    },
-  );
-
-  return {
-    data: query.data,
-    error: query.error,
-    isError: Boolean(query.error),
-    isFetching: query.isValidating,
-    isLoading: query.isLoading,
-    refetch: () => query.mutate(),
-  };
+  return useAdminEdenQuery<
+    JwtServiceListResponse,
+    typeof JWT_SERVICE_LIST_KEY,
+    Error
+  >(JWT_SERVICE_LIST_KEY, fetchJwtServices, {
+    dedupingInterval: 60_000,
+    keepPreviousData: true,
+  });
 }
 
 export async function updateJwtService(
