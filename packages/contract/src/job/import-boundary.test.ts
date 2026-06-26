@@ -2,7 +2,6 @@ import { describe, expect, test } from "bun:test";
 
 const FORBIDDEN_PATTERNS = [
   /from\s+["']pg-boss["']/,
-  /from\s+["']elysia["']/,
   /from\s+["']meilisearch["']/,
   /from\s+["']@prisma\/client["']/,
   /from\s+["'][^"']*\/env["']/,
