@@ -1,12 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import {
-  createMemoryHistory,
-  createRootRoute,
-  createRouter,
-  Outlet,
-  RouterProvider,
-} from "@tanstack/react-router";
-import { useMemo } from "react";
 
 import { Link } from "./Link";
 
@@ -16,24 +8,13 @@ interface LinkPreviewProps {
 }
 
 function LinkPreview({ to, label }: LinkPreviewProps) {
-  const router = useMemo(() => {
-    const rootRoute = createRootRoute({
-      component: () => (
-        <div className="space-y-3">
-          <Link to={to} className="text-link hover:underline">
-            {label}
-          </Link>
-          <Outlet />
-        </div>
-      ),
-    });
-    return createRouter({
-      routeTree: rootRoute,
-      history: createMemoryHistory({ initialEntries: ["/"] }),
-    });
-  }, [to, label]);
-
-  return <RouterProvider router={router as never} />;
+  return (
+    <div className="space-y-3">
+      <Link to={to} className="text-link hover:underline">
+        {label}
+      </Link>
+    </div>
+  );
 }
 
 const meta = {

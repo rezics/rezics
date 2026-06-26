@@ -1,14 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import {
-  createLink,
-  createMemoryHistory,
-  createRootRoute,
-  createRouter,
-  Outlet,
-  RouterProvider,
-} from "@tanstack/react-router";
 import * as React from "react";
-import { useMemo } from "react";
 
 import { ExternalLinkModal } from "./ExternalLinkModal";
 import { SafeLink } from "./SafeLink";
@@ -22,7 +13,6 @@ const StoryAnchor = React.forwardRef<
   </a>
 ));
 StoryAnchor.displayName = "StoryAnchor";
-const StoryRouterLink = createLink(StoryAnchor);
 
 interface SafeLinkPreviewProps {
   href: string;
@@ -30,38 +20,22 @@ interface SafeLinkPreviewProps {
 }
 
 function SafeLinkPreview({ href, label }: SafeLinkPreviewProps) {
-  const router = useMemo(() => {
-    const rootRoute = createRootRoute({
-      component: () => (
-        <div className="space-y-3">
-          <SafeLink
-            href={href}
-            className="text-link hover:underline"
-            linkRenderer={({ href, children, className, title, ...rest }) => (
-              <StoryRouterLink
-                to={href}
-                className={className}
-                title={title}
-                {...rest}
-              >
-                {children}
-              </StoryRouterLink>
-            )}
-          >
-            {label}
-          </SafeLink>
-          <Outlet />
-          <ExternalLinkModal />
-        </div>
-      ),
-    });
-    return createRouter({
-      routeTree: rootRoute,
-      history: createMemoryHistory({ initialEntries: ["/"] }),
-    });
-  }, [href, label]);
-
-  return <RouterProvider router={router as never} />;
+  return (
+    <div className="space-y-3">
+      <SafeLink
+        href={href}
+        className="text-link hover:underline"
+        linkRenderer={({ href, children, className, title, ...rest }) => (
+          <StoryAnchor href={href} className={className} title={title} {...rest}>
+            {children}
+          </StoryAnchor>
+        )}
+      >
+        {label}
+      </SafeLink>
+      <ExternalLinkModal />
+    </div>
+  );
 }
 
 const meta = {

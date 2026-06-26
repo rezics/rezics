@@ -81,8 +81,6 @@
   },
   "devDependencies": {
     "@storybook/react-vite": "^10.3.6",
-    "@tanstack/router-plugin": "^1.167.12",
-    "@tanstack/react-router": "^1.168.10",
     "@types/markdown-it": "^14.1.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
