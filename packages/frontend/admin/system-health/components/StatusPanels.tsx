@@ -1,12 +1,16 @@
-import type {
-  CdcSourceStatus,
-  CdcStatus,
-  HistoryOutboxStatus,
-  MeiliIndexStatus,
-  MeiliStatusSummary,
-  QueueStatus,
-  StatusItem,
-  StatusLink,
+import {
+  FAILED_HISTORY_OUTBOX_REPAIR_STATUSES,
+  HISTORY_OUTBOX_REPAIR_STATUSES,
+  type AdminRepairJobScope,
+  type CdcSourceStatus,
+  type CdcStatus,
+  type HistoryOutboxRepairStatus,
+  type HistoryOutboxStatus,
+  type MeiliIndexStatus,
+  type MeiliStatusSummary,
+  type QueueStatus,
+  type StatusItem,
+  type StatusLink,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
@@ -44,6 +48,16 @@ import {
 } from "../models/status";
 import { StatusIndicator } from "./StatusIndicator";
 
+type RepairSearchInput = {
+  scope: AdminRepairJobScope;
+  targetIds?: string;
+  historyOutboxStatuses?: readonly HistoryOutboxRepairStatus[];
+  unitId?: string;
+  olderThanMinutes?: number;
+  limit?: number;
+  reason?: string;
+};
+
 function repairSearch({
   scope,
   targetIds,
@@ -52,22 +66,7 @@ function repairSearch({
   olderThanMinutes,
   limit,
   reason,
-}: {
-  scope:
-    | "search"
-    | "cdc"
-    | "slug"
-    | "queue-failed-job"
-    | "history-outbox-replay"
-    | "attribution"
-    | "counters";
-  targetIds?: string;
-  historyOutboxStatuses?: ("pending" | "failed")[];
-  unitId?: string;
-  olderThanMinutes?: number;
-  limit?: number;
-  reason?: string;
-}) {
+}: RepairSearchInput) {
   return {
     scope,
     targetIds,
@@ -884,7 +883,7 @@ export function CdcPanel({
             to="/repair"
             search={repairSearch({
               scope: "history-outbox-replay",
-              historyOutboxStatuses: ["pending", "failed"],
+              historyOutboxStatuses: HISTORY_OUTBOX_REPAIR_STATUSES,
               olderThanMinutes: 5,
               limit: 50,
             })}
@@ -951,7 +950,7 @@ export function HistoryOutboxPanel({
               to="/repair"
               search={repairSearch({
                 scope: "history-outbox-replay",
-                historyOutboxStatuses: ["failed"],
+                historyOutboxStatuses: FAILED_HISTORY_OUTBOX_REPAIR_STATUSES,
                 olderThanMinutes: 0,
                 limit: 50,
               })}

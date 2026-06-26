@@ -19,6 +19,10 @@ import type {
 } from "@rezics/contract";
 import useSWR, { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
+import {
+  createEdenFetcher,
+  useAdminEdenQuery,
+} from "@/admin/shared/eden-swr";
 import { apiClient, unwrapEdenResponse } from "@/lib/api-client";
 
 type CurrentUserKey = readonly ["eden", "user", "me"];
@@ -178,27 +182,23 @@ function unitFieldLocksKey(unitId: string): UnitFieldLocksKey {
   return ["eden", "unit", "authority", "field-locks", unitId] as const;
 }
 
-async function fetchCurrentUser(): Promise<UserDTO> {
-  const response = await apiClient.user.me.get();
+const fetchCurrentUser = createEdenFetcher<UserDTO, CurrentUserKey>(() =>
+  apiClient.user.me.get(),
+);
 
-  return unwrapEdenResponse(response);
-}
+const fetchUnitList = createEdenFetcher<UnitListResponse, UnitListKey>(
+  (key) => {
+    const [, , , query] = key;
+    return apiClient.unit.list.get({ query });
+  },
+);
 
-async function fetchUnitList(
-  key: UnitListKey,
-): Promise<UnitListResponse> {
-  const [, , , query] = key;
-  const response = await apiClient.unit.list.get({ query });
-
-  return unwrapEdenResponse(response);
-}
-
-async function fetchUnitDetail(key: UnitDetailKey): Promise<UnitResponse> {
-  const [, , , unitId] = key;
-  const response = await apiClient.unit({ unitId }).get();
-
-  return unwrapEdenResponse(response);
-}
+const fetchUnitDetail = createEdenFetcher<UnitResponse, UnitDetailKey>(
+  (key) => {
+    const [, , , unitId] = key;
+    return apiClient.unit({ unitId }).get();
+  },
+);
 
 async function fetchContentSearch(
   key: ContentSearchKey,
@@ -209,34 +209,31 @@ async function fetchContentSearch(
   return unwrapEdenResponse(response);
 }
 
-async function fetchUnitCollaborators(
-  key: UnitCollaboratorsKey,
-): Promise<UnitCollaboratorListResponse> {
+const fetchUnitCollaborators = createEdenFetcher<
+  UnitCollaboratorListResponse,
+  UnitCollaboratorsKey
+>((key) => {
   const [, , , , unitId] = key;
-  const response = await apiClient.unit({ unitId }).collaborators.get();
+  return apiClient.unit({ unitId }).collaborators.get();
+});
 
-  return unwrapEdenResponse(response);
-}
-
-async function fetchUnitFieldLocks(
-  key: UnitFieldLocksKey,
-): Promise<UnitFieldLockListResponse> {
+const fetchUnitFieldLocks = createEdenFetcher<
+  UnitFieldLockListResponse,
+  UnitFieldLocksKey
+>((key) => {
   const [, , , , unitId] = key;
-  const response = await apiClient.unit({ unitId })["field-locks"].get();
+  return apiClient.unit({ unitId })["field-locks"].get();
+});
 
-  return unwrapEdenResponse(response);
-}
-
-async function fetchSubjectAttributionsByUnit(
-  key: SubjectAttributionsByUnitKey,
-): Promise<SubjectAttributionDTO[]> {
+const fetchSubjectAttributionsByUnit = createEdenFetcher<
+  SubjectAttributionDTO[],
+  SubjectAttributionsByUnitKey
+>((key) => {
   const [, , , unitId] = key;
-  const response = await apiClient["subject-attribution"]["by-unit"]({
+  return apiClient["subject-attribution"]["by-unit"]({
     unitId,
   }).get();
-
-  return unwrapEdenResponse(response);
-}
+});
 
 async function createUnit(
   _key: CreateUnitKey,
@@ -336,7 +333,7 @@ async function retryFailedHistoryOutbox(
 }
 
 export function useCurrentUserQuery() {
-  const result = useSWR<UserDTO>(
+  return useAdminEdenQuery<UserDTO, CurrentUserKey>(
     ["eden", "user", "me"] satisfies CurrentUserKey,
     fetchCurrentUser,
     {
@@ -344,21 +341,10 @@ export function useCurrentUserQuery() {
       keepPreviousData: true,
     },
   );
-
-  return {
-    data: result.data,
-    error: result.error,
-    isError: Boolean(result.error),
-    isFetching: result.isValidating,
-    isLoading: result.isLoading,
-    refetch: () => {
-      void result.mutate();
-    },
-  };
 }
 
 export function useUnitListQuery(query: UnitListQuery, enabled: boolean) {
-  const result = useSWR<UnitListResponse>(
+  return useAdminEdenQuery<UnitListResponse, UnitListKey | null>(
     enabled ? unitListKey(query) : null,
     fetchUnitList,
     {
@@ -366,21 +352,10 @@ export function useUnitListQuery(query: UnitListQuery, enabled: boolean) {
       keepPreviousData: true,
     },
   );
-
-  return {
-    data: result.data,
-    error: result.error,
-    isError: Boolean(result.error),
-    isFetching: result.isValidating,
-    isLoading: result.isLoading,
-    refetch: () => {
-      void result.mutate();
-    },
-  };
 }
 
 export function useUnitDetailQuery(unitId: string, enabled = true) {
-  const result = useSWR<UnitResponse>(
+  return useAdminEdenQuery<UnitResponse, UnitDetailKey | null>(
     enabled && unitId ? unitDetailKey(unitId) : null,
     fetchUnitDetail,
     {
@@ -388,22 +363,16 @@ export function useUnitDetailQuery(unitId: string, enabled = true) {
       keepPreviousData: true,
     },
   );
-
-  return {
-    data: result.data,
-    error: result.error,
-    isError: Boolean(result.error),
-    isFetching: result.isValidating,
-    isLoading: result.isLoading,
-    refetch: () => result.mutate(),
-  };
 }
 
 export function useSubjectAttributionsByUnitQuery(
   unitId: string,
   enabled = true,
 ) {
-  const result = useSWR<SubjectAttributionDTO[]>(
+  return useAdminEdenQuery<
+    SubjectAttributionDTO[],
+    SubjectAttributionsByUnitKey | null
+  >(
     enabled && unitId ? subjectAttributionsByUnitKey(unitId) : null,
     fetchSubjectAttributionsByUnit,
     {
@@ -411,19 +380,13 @@ export function useSubjectAttributionsByUnitQuery(
       keepPreviousData: true,
     },
   );
-
-  return {
-    data: result.data,
-    error: result.error,
-    isError: Boolean(result.error),
-    isFetching: result.isValidating,
-    isLoading: result.isLoading,
-    refetch: () => result.mutate(),
-  };
 }
 
 export function useUnitCollaboratorsQuery(unitId: string, enabled = true) {
-  const result = useSWR<UnitCollaboratorListResponse>(
+  return useAdminEdenQuery<
+    UnitCollaboratorListResponse,
+    UnitCollaboratorsKey | null
+  >(
     enabled && unitId ? unitCollaboratorsKey(unitId) : null,
     fetchUnitCollaborators,
     {
@@ -431,19 +394,13 @@ export function useUnitCollaboratorsQuery(unitId: string, enabled = true) {
       keepPreviousData: true,
     },
   );
-
-  return {
-    data: result.data,
-    error: result.error,
-    isError: Boolean(result.error),
-    isFetching: result.isValidating,
-    isLoading: result.isLoading,
-    refetch: () => result.mutate(),
-  };
 }
 
 export function useUnitFieldLocksQuery(unitId: string, enabled = true) {
-  const result = useSWR<UnitFieldLockListResponse>(
+  return useAdminEdenQuery<
+    UnitFieldLockListResponse,
+    UnitFieldLocksKey | null
+  >(
     enabled && unitId ? unitFieldLocksKey(unitId) : null,
     fetchUnitFieldLocks,
     {
@@ -451,15 +408,6 @@ export function useUnitFieldLocksQuery(unitId: string, enabled = true) {
       keepPreviousData: true,
     },
   );
-
-  return {
-    data: result.data,
-    error: result.error,
-    isError: Boolean(result.error),
-    isFetching: result.isValidating,
-    isLoading: result.isLoading,
-    refetch: () => result.mutate(),
-  };
 }
 
 export function useCreateUnitMutation() {

@@ -4,8 +4,12 @@ import type {
   UserListQuery,
   UserListResponse,
 } from "@rezics/contract";
-import useSWR, { useSWRConfig } from "swr";
+import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
+import {
+  createEdenFetcher,
+  useAdminEdenQuery,
+} from "@/admin/shared/eden-swr";
 import { apiClient, unwrapEdenResponse } from "@/lib/api-client";
 
 type UserListKey = readonly [
@@ -44,32 +48,24 @@ function userAdminUpdateKey(userId: string): UserAdminUpdateKey {
   return ["eden", "user", "admin", "update", userId] as const;
 }
 
-async function fetchUserList(
-  key: UserListKey,
-): Promise<UserListResponse> {
+const fetchUserList = createEdenFetcher<UserListResponse, UserListKey>((key) => {
   const [, , , , query] = key;
-  const response = await apiClient.user.admin.get({ query });
+  return apiClient.user.admin.get({ query });
+});
 
-  return unwrapEdenResponse(response);
-}
+const fetchUserSearch = createEdenFetcher<UserListResponse, UserSearchKey>(
+  (key) => {
+    const [, , , , query] = key;
+    return apiClient.meili.users.search.get({ query });
+  },
+);
 
-async function fetchUserSearch(
-  key: UserSearchKey,
-): Promise<UserListResponse> {
-  const [, , , , query] = key;
-  const response = await apiClient.meili.users.search.get({ query });
-
-  return unwrapEdenResponse(response);
-}
-
-async function fetchAdminUserDetail(
-  key: UserAdminDetailKey,
-): Promise<UserDTO> {
-  const [, , , , userId] = key;
-  const response = await apiClient.user.admin({ userId }).get();
-
-  return unwrapEdenResponse(response);
-}
+const fetchAdminUserDetail = createEdenFetcher<UserDTO, UserAdminDetailKey>(
+  (key) => {
+    const [, , , , userId] = key;
+    return apiClient.user.admin({ userId }).get();
+  },
+);
 
 async function updateAdminUser(
   key: UserAdminUpdateKey,
@@ -82,29 +78,14 @@ async function updateAdminUser(
 }
 
 export function useAdminUserListQuery(query: UserListQuery, enabled: boolean) {
-  const result = useSWR<UserListResponse>(
-    enabled ? userListKey(query) : null,
-    fetchUserList,
-    {
-      dedupingInterval: 60_000,
-      keepPreviousData: true,
-    },
-  );
-
-  return {
-    data: result.data,
-    error: result.error,
-    isError: Boolean(result.error),
-    isFetching: result.isValidating,
-    isLoading: result.isLoading,
-    refetch: () => {
-      void result.mutate();
-    },
-  };
+  return useAdminEdenQuery(enabled ? userListKey(query) : null, fetchUserList, {
+    dedupingInterval: 60_000,
+    keepPreviousData: true,
+  });
 }
 
 export function useAdminUserDetailQuery(userId: string) {
-  const result = useSWR<UserDTO>(
+  return useAdminEdenQuery(
     userId ? userAdminDetailKey(userId) : null,
     fetchAdminUserDetail,
     {
@@ -112,15 +93,6 @@ export function useAdminUserDetailQuery(userId: string) {
       keepPreviousData: true,
     },
   );
-
-  return {
-    data: result.data,
-    error: result.error,
-    isError: Boolean(result.error),
-    isFetching: result.isValidating,
-    isLoading: result.isLoading,
-    refetch: () => result.mutate(),
-  };
 }
 
 export function useAdminUserUpdateMutation(userId: string) {
@@ -161,7 +133,7 @@ export function useMeiliUserSearchQuery(
   query: UserListQuery,
   enabled: boolean,
 ) {
-  const result = useSWR<UserListResponse>(
+  return useAdminEdenQuery(
     enabled ? userSearchKey(query) : null,
     fetchUserSearch,
     {
@@ -169,15 +141,4 @@ export function useMeiliUserSearchQuery(
       keepPreviousData: true,
     },
   );
-
-  return {
-    data: result.data,
-    error: result.error,
-    isError: Boolean(result.error),
-    isFetching: result.isValidating,
-    isLoading: result.isLoading,
-    refetch: () => {
-      void result.mutate();
-    },
-  };
 }

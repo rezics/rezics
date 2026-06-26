@@ -1,24 +1,47 @@
 import { t } from "elysia";
 
+export const ADMIN_REPAIR_JOB_SCOPES = [
+  "search",
+  "queue-failed-job",
+  "history-outbox-replay",
+  "cdc",
+  "slug",
+  "attribution",
+  "counters",
+] as const;
+
+export type AdminRepairJobScope = (typeof ADMIN_REPAIR_JOB_SCOPES)[number];
+
+export const ADMIN_REPAIR_JOB_SCOPE_SET: ReadonlySet<AdminRepairJobScope> =
+  new Set(ADMIN_REPAIR_JOB_SCOPES);
+
 export const adminRepairJobScopeSchema = t.Union([
-  t.Literal("search"),
-  t.Literal("queue-failed-job"),
-  t.Literal("history-outbox-replay"),
-  t.Literal("cdc"),
-  t.Literal("slug"),
-  t.Literal("attribution"),
-  t.Literal("counters"),
+  t.Literal(ADMIN_REPAIR_JOB_SCOPES[0]),
+  t.Literal(ADMIN_REPAIR_JOB_SCOPES[1]),
+  t.Literal(ADMIN_REPAIR_JOB_SCOPES[2]),
+  t.Literal(ADMIN_REPAIR_JOB_SCOPES[3]),
+  t.Literal(ADMIN_REPAIR_JOB_SCOPES[4]),
+  t.Literal(ADMIN_REPAIR_JOB_SCOPES[5]),
+  t.Literal(ADMIN_REPAIR_JOB_SCOPES[6]),
 ]);
 
-export type AdminRepairJobScope = (typeof adminRepairJobScopeSchema)["static"];
-
-export const historyOutboxRepairStatusSchema = t.Union([
-  t.Literal("pending"),
-  t.Literal("failed"),
-]);
+export const HISTORY_OUTBOX_REPAIR_STATUSES = ["pending", "failed"] as const;
 
 export type HistoryOutboxRepairStatus =
-  (typeof historyOutboxRepairStatusSchema)["static"];
+  (typeof HISTORY_OUTBOX_REPAIR_STATUSES)[number];
+
+export const FAILED_HISTORY_OUTBOX_REPAIR_STATUSES = [
+  HISTORY_OUTBOX_REPAIR_STATUSES[1],
+] as const satisfies readonly HistoryOutboxRepairStatus[];
+
+export const HISTORY_OUTBOX_REPAIR_STATUS_SET: ReadonlySet<
+  HistoryOutboxRepairStatus
+> = new Set(HISTORY_OUTBOX_REPAIR_STATUSES);
+
+export const historyOutboxRepairStatusSchema = t.Union([
+  t.Literal(HISTORY_OUTBOX_REPAIR_STATUSES[0]),
+  t.Literal(HISTORY_OUTBOX_REPAIR_STATUSES[1]),
+]);
 
 export const adminRepairJobStatusSchema = t.Union([
   t.Literal("pending"),

@@ -4,8 +4,12 @@ import type {
   EntityListQuery,
   EntityListResponse,
 } from "@rezics/contract";
-import useSWR, { useSWRConfig } from "swr";
+import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
+import {
+  createEdenFetcher,
+  useAdminEdenQuery,
+} from "@/admin/shared/eden-swr";
 import { apiClient, unwrapEdenResponse } from "@/lib/api-client";
 
 type EntityListKey = readonly ["eden", "entity", "list", EntityListQuery];
@@ -24,21 +28,20 @@ function entityUpdateKey(unitId: string): EntityUpdateKey {
   return ["eden", "entity", "update", unitId] as const;
 }
 
-async function fetchEntityList(
-  key: EntityListKey,
-): Promise<EntityListResponse> {
+const fetchEntityList = createEdenFetcher<
+  EntityListResponse,
+  EntityListKey
+>((key) => {
   const [, , , query] = key;
-  const response = await apiClient.entity.get({ query });
+  return apiClient.entity.get({ query });
+});
 
-  return unwrapEdenResponse(response);
-}
-
-async function fetchEntityDetail(key: EntityDetailKey): Promise<EntityDTO> {
-  const [, , , unitId] = key;
-  const response = await apiClient.entity({ unitId }).get();
-
-  return unwrapEdenResponse(response);
-}
+const fetchEntityDetail = createEdenFetcher<EntityDTO, EntityDetailKey>(
+  (key) => {
+    const [, , , unitId] = key;
+    return apiClient.entity({ unitId }).get();
+  },
+);
 
 async function updateEntity(
   key: EntityUpdateKey,
@@ -51,29 +54,14 @@ async function updateEntity(
 }
 
 export function useEntityListQuery(query: EntityListQuery) {
-  const result = useSWR<EntityListResponse>(
-    entityListKey(query),
-    fetchEntityList,
-    {
-      dedupingInterval: 120_000,
-      keepPreviousData: true,
-    },
-  );
-
-  return {
-    data: result.data,
-    error: result.error,
-    isError: Boolean(result.error),
-    isFetching: result.isValidating,
-    isLoading: result.isLoading,
-    refetch: () => {
-      void result.mutate();
-    },
-  };
+  return useAdminEdenQuery(entityListKey(query), fetchEntityList, {
+    dedupingInterval: 120_000,
+    keepPreviousData: true,
+  });
 }
 
 export function useEntityDetailQuery(unitId: string) {
-  const result = useSWR<EntityDTO>(
+  return useAdminEdenQuery(
     unitId ? entityDetailKey(unitId) : null,
     fetchEntityDetail,
     {
@@ -81,15 +69,6 @@ export function useEntityDetailQuery(unitId: string) {
       keepPreviousData: true,
     },
   );
-
-  return {
-    data: result.data,
-    error: result.error,
-    isError: Boolean(result.error),
-    isFetching: result.isValidating,
-    isLoading: result.isLoading,
-    refetch: () => result.mutate(),
-  };
 }
 
 export function useUpdateEntityMutation(unitId: string) {

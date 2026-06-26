@@ -4,8 +4,11 @@ import type {
   ContentSearchOptions,
   ContentSearchResult,
 } from "@rezics/contract";
-import useSWR from "swr";
-import { apiClient, unwrapEdenResponse } from "@/lib/api-client";
+import {
+  createEdenFetcher,
+  useAdminEdenQuery,
+} from "@/admin/shared/eden-swr";
+import { apiClient } from "@/lib/api-client";
 
 type BookListKey = readonly [
   "eden",
@@ -34,30 +37,25 @@ function contentSearchKey(options: ContentSearchOptions): ContentSearchKey {
   return ["eden", "meili", "content", "search", options] as const;
 }
 
-async function fetchBookList(
-  key: BookListKey,
-): Promise<BookListResponse> {
+const fetchBookList = createEdenFetcher<BookListResponse, BookListKey>((key) => {
   const [, , , filters] = key;
-  const response = await apiClient.book.list.get({ query: filters });
+  return apiClient.book.list.get({ query: filters });
+});
 
-  return unwrapEdenResponse(response);
-}
-
-async function fetchContentSearch(
-  key: ContentSearchKey,
-): Promise<ContentSearchResult> {
+const fetchContentSearch = createEdenFetcher<
+  ContentSearchResult,
+  ContentSearchKey
+>((key) => {
   const [, , , , options] = key;
-  const response = await apiClient.meili.content.search.post(options);
-
-  return unwrapEdenResponse(response);
-}
+  return apiClient.meili.content.search.post(options);
+});
 
 export function useBookListQuery(
   filters: BookListQuery,
   searchTerm: string,
   enabled = true,
 ) {
-  const query = useSWR<BookListResponse>(
+  return useAdminEdenQuery(
     enabled ? bookListKey(filters, searchTerm) : null,
     fetchBookList,
     {
@@ -65,24 +63,13 @@ export function useBookListQuery(
       keepPreviousData: true,
     },
   );
-
-  return {
-    data: query.data,
-    error: query.error,
-    isError: Boolean(query.error),
-    isFetching: query.isValidating,
-    isLoading: query.isLoading,
-    refetch: () => {
-      void query.mutate();
-    },
-  };
 }
 
 export function useBookContentSearchQuery(
   options: ContentSearchOptions,
   enabled: boolean,
 ) {
-  const query = useSWR<ContentSearchResult>(
+  return useAdminEdenQuery(
     enabled ? contentSearchKey(options) : null,
     fetchContentSearch,
     {
@@ -90,15 +77,4 @@ export function useBookContentSearchQuery(
       keepPreviousData: true,
     },
   );
-
-  return {
-    data: query.data,
-    error: query.error,
-    isError: Boolean(query.error),
-    isFetching: query.isValidating,
-    isLoading: query.isLoading,
-    refetch: () => {
-      void query.mutate();
-    },
-  };
 }

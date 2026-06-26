@@ -61,14 +61,6 @@
       "types": "./src/server/db/seed/*.ts",
       "default": "./src/server/db/seed/*.ts"
     },
-    "./server/db/seed-factory": {
-      "types": "./src/server/db/factory/index.ts",
-      "default": "./src/server/db/factory/index.ts"
-    },
-    "./server/db/seed-factory/*": {
-      "types": "./src/server/db/factory/*.ts",
-      "default": "./src/server/db/factory/*.ts"
-    },
     "./auth": {
       "types": "./src/auth/export.ts",
       "default": "./src/auth/export.ts"

@@ -2,8 +2,11 @@ import type {
   AdminDashboardSummary,
   AdminStatsResponse,
 } from "@rezics/contract";
-import useSWR from "swr";
-import { apiClient, unwrapEdenResponse } from "@/lib/api-client";
+import {
+  createEdenFetcher,
+  useAdminEdenQuery,
+} from "@/admin/shared/eden-swr";
+import { apiClient } from "@/lib/api-client";
 
 const ADMIN_STATS_KEY = ["eden", "admin", "stats"] as const;
 const ADMIN_DASHBOARD_SUMMARY_KEY = [
@@ -13,25 +16,25 @@ const ADMIN_DASHBOARD_SUMMARY_KEY = [
   "dashboard-summary",
 ] as const;
 
-async function getAdminStats(): Promise<AdminStatsResponse> {
-  const response = await apiClient.admin.stats.get();
-  return unwrapEdenResponse(response);
-}
+const getAdminStats = createEdenFetcher<
+  AdminStatsResponse,
+  typeof ADMIN_STATS_KEY
+>(() => apiClient.admin.stats.get());
 
-async function getAdminDashboardSummary(): Promise<AdminDashboardSummary> {
-  const response = await apiClient.admin.stats["dashboard-summary"].get();
-  return unwrapEdenResponse(response);
-}
+const getAdminDashboardSummary = createEdenFetcher<
+  AdminDashboardSummary,
+  typeof ADMIN_DASHBOARD_SUMMARY_KEY
+>(() => apiClient.admin.stats["dashboard-summary"].get());
 
 export function useAdminStatsQuery() {
-  return useSWR<AdminStatsResponse>(ADMIN_STATS_KEY, getAdminStats, {
+  return useAdminEdenQuery(ADMIN_STATS_KEY, getAdminStats, {
     dedupingInterval: 60_000,
     keepPreviousData: true,
   });
 }
 
 export function useAdminDashboardSummaryQuery() {
-  return useSWR<AdminDashboardSummary>(
+  return useAdminEdenQuery(
     ADMIN_DASHBOARD_SUMMARY_KEY,
     getAdminDashboardSummary,
     {

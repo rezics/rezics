@@ -1,4 +1,7 @@
 import {
+  ADMIN_REPAIR_JOB_SCOPE_SET,
+  HISTORY_OUTBOX_REPAIR_STATUSES,
+  HISTORY_OUTBOX_REPAIR_STATUS_SET,
   type AdminRepairJobDryRun,
   type AdminRepairJobScope,
   type HistoryOutboxRepairStatus,
@@ -38,24 +41,6 @@ type RepairScopeConfig = {
   };
 };
 
-const HISTORY_OUTBOX_REPAIR_STATUSES: HistoryOutboxRepairStatus[] = [
-  "pending",
-  "failed",
-];
-const validRepairScopes = new Set<AdminRepairJobScope>([
-  "search",
-  "queue-failed-job",
-  "history-outbox-replay",
-  "cdc",
-  "slug",
-  "attribution",
-  "counters",
-]);
-const historyOutboxStatuses = new Set<HistoryOutboxRepairStatus>([
-  "pending",
-  "failed",
-]);
-
 function parseNumber(value: unknown) {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value !== "string") return undefined;
@@ -74,7 +59,7 @@ function parseStatusList(
   const statuses = raw.filter(
     (item): item is HistoryOutboxRepairStatus =>
       typeof item === "string" &&
-      historyOutboxStatuses.has(item as HistoryOutboxRepairStatus),
+      HISTORY_OUTBOX_REPAIR_STATUS_SET.has(item as HistoryOutboxRepairStatus),
   );
   return statuses.length ? [...new Set(statuses)] : undefined;
 }
@@ -315,10 +300,12 @@ function RepairScopePicker({
 export default function RepairJobsPage() {
   const { t } = useTranslation(["admin"]);
   const searchParams = useSearchParams();
+  const scopeParam = searchParams.get("scope");
   const search = {
     scope:
-      validRepairScopes.has(searchParams.get("scope") as AdminRepairJobScope)
-        ? (searchParams.get("scope") as AdminRepairJobScope)
+      scopeParam &&
+      ADMIN_REPAIR_JOB_SCOPE_SET.has(scopeParam as AdminRepairJobScope)
+        ? (scopeParam as AdminRepairJobScope)
         : undefined,
     targetIds: searchParams.get("targetIds") ?? undefined,
     historyOutboxStatuses: parseStatusList(
@@ -336,7 +323,7 @@ export default function RepairJobsPage() {
   const [targetIds, setTargetIds] = React.useState(search.targetIds ?? "");
   const [historyOutboxStatuses, setHistoryOutboxStatuses] = React.useState<
     HistoryOutboxRepairStatus[]
-  >(search.historyOutboxStatuses ?? ["pending", "failed"]);
+  >(search.historyOutboxStatuses ?? [...HISTORY_OUTBOX_REPAIR_STATUSES]);
   const [historyOutboxUnitId, setHistoryOutboxUnitId] = React.useState(
     search.unitId ?? "",
   );
