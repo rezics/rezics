@@ -9,18 +9,13 @@ import { AuthProvider } from "@/admin/auth/session/AuthProvider";
 import { WindowAlert } from "./components/WindowAlert";
 import { PersistentSettingsLoader } from "./providers/PersistentSettingsLoader";
 import "./providers/i18n";
-import { useAppInit } from "./providers/useAppInit";
-import { useAppStore } from "./states/appStore";
 
 export function AdminAppProviders({ children }: { children: ReactNode }) {
   const { t } = useTranslation(["shell"]);
-  const themeMode = useAppStore((s) => s.theme);
-
-  useAppInit();
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", themeMode === "dark");
-  }, [themeMode]);
+    document.documentElement.classList.remove("dark");
+  }, []);
 
   return (
     <StrictMode>
