@@ -4,7 +4,6 @@ import { ExternalLinkModal } from "@rezics/ui";
 import type { ReactNode } from "react";
 import { StrictMode, useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { HelmetProvider } from "react-helmet-async";
 import { useTranslation } from "@rezics/i18n/react";
 import { AuthProvider } from "@/admin/auth/session/AuthProvider";
 import { WindowAlert } from "./components/WindowAlert";
@@ -28,13 +27,11 @@ export function AdminAppProviders({ children }: { children: ReactNode }) {
       <ErrorBoundary
         fallback={<div>{t("shell:app_error_boundary_message")}</div>}
       >
-        <HelmetProvider>
-          <PersistentSettingsLoader />
-          <AuthProvider />
-          <WindowAlert />
-          <ExternalLinkModal />
-          {children}
-        </HelmetProvider>
+        <PersistentSettingsLoader />
+        <AuthProvider />
+        <WindowAlert />
+        <ExternalLinkModal />
+        {children}
       </ErrorBoundary>
     </StrictMode>
   );
