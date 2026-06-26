@@ -1,6 +1,9 @@
 import type { RealmListQuery, RealmListResponse } from "@rezics/contract";
-import useSWR from "swr";
-import { apiClient, unwrapEdenResponse } from "@/lib/api-client";
+import {
+  createEdenFetcher,
+  useAdminEdenQuery,
+} from "@/admin/shared/eden-swr";
+import { apiClient } from "@/lib/api-client";
 
 type RealmListKey = readonly [
   "eden",
@@ -17,36 +20,19 @@ function realmListKey(
   return ["eden", "realm", "list", filters, searchTerm] as const;
 }
 
-async function fetchRealmList(
-  key: RealmListKey,
-): Promise<RealmListResponse> {
-  const [, , , filters] = key;
-  const response = await apiClient.realm.list.get({ query: filters });
-
-  return unwrapEdenResponse(response);
-}
+const fetchRealmList = createEdenFetcher<RealmListResponse, RealmListKey>(
+  (key) => {
+    const [, , , filters] = key;
+    return apiClient.realm.list.get({ query: filters });
+  },
+);
 
 export function useRealmListQuery(
   filters: RealmListQuery,
   searchTerm: string,
 ) {
-  const query = useSWR<RealmListResponse>(
-    realmListKey(filters, searchTerm),
-    fetchRealmList,
-    {
-      dedupingInterval: 60_000,
-      keepPreviousData: true,
-    },
-  );
-
-  return {
-    data: query.data,
-    error: query.error,
-    isError: Boolean(query.error),
-    isFetching: query.isValidating,
-    isLoading: query.isLoading,
-    refetch: () => {
-      void query.mutate();
-    },
-  };
+  return useAdminEdenQuery(realmListKey(filters, searchTerm), fetchRealmList, {
+    dedupingInterval: 60_000,
+    keepPreviousData: true,
+  });
 }

@@ -238,18 +238,6 @@ export const env = createEnv({
     MEDIA_PRESIGN_EXPIRY: v.optional(v.pipe(v.string(), v.transform(Number))),
 
     /**
-     * Base URL of the Notify service for internal calls.
-     * Notify 服务用于内部调用的基础 URL。
-     */
-    NOTIFY_BASE_URL: v.string(),
-
-    /**
-     * Shared secret for authenticating internal calls to the Notify service.
-     * 用于对 Notify 服务的内部调用进行认证的共享密钥。
-     */
-    NOTIFY_INTERNAL_SECRET: v.string(),
-
-    /**
      * Base URL of the History service for app-facing read proxy requests.
      * When omitted, history proxy endpoints return a clear service-unavailable
      * response instead of bypassing Unit visibility checks.

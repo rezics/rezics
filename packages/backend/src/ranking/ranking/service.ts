@@ -117,12 +117,7 @@ export class RankingService {
       new MainStateReader({
         serverDatabaseUrl: env.SERVER_DATABASE_URL,
       });
-    this.reactions =
-      options.reactions ??
-      new ReactionSummaryClient({
-        baseUrl: env.REACTION_BASE_URL,
-        internalSecret: env.REACTION_INTERNAL_SECRET,
-      });
+    this.reactions = options.reactions ?? new ReactionSummaryClient();
     this.search =
       options.search ??
       new SearchClient({

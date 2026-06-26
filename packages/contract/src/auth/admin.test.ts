@@ -2,15 +2,43 @@ import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
   adminAuthUserAccountSummaryResponseSchema,
+  adminAuthUserSchema,
   adminAuthUserSessionsResponseSchema,
   adminStartAuthImpersonationResponseSchema,
   authEmailPreviewInputSchema,
   authEmailSendTestInputSchema,
   authEmailSmtpTestResponseSchema,
   authEmailTemplatesResponseSchema,
+  listUsersResponseSchema,
 } from "./admin";
 
 describe("auth admin contracts", () => {
+  test("accepts Better Auth admin user list DTOs", () => {
+    const user = {
+      id: "auth-user-1",
+      name: "Reader",
+      email: "reader@example.com",
+      role: "admin",
+      banned: false,
+      emailVerified: true,
+      sessions: [],
+      sessionCount: 0,
+      createdAt: "2026-05-28T00:00:00.000Z",
+      updatedAt: "2026-05-29T00:00:00.000Z",
+      image: null,
+      banReason: null,
+      banExpires: null,
+    };
+
+    expect(Value.Check(adminAuthUserSchema, user)).toBe(true);
+    expect(
+      Value.Check(listUsersResponseSchema, {
+        users: [user],
+        total: 1,
+      }),
+    ).toBe(true);
+  });
+
   test("accepts main-server account summary enrichment", () => {
     expect(
       Value.Check(adminAuthUserAccountSummaryResponseSchema, {

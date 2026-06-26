@@ -1,5 +1,7 @@
 import type {
   AccountEnforcementDTO,
+  AdminAuthUser as AuthAdminUser,
+  AdminAuthUsersResponse as AuthAdminUsersResponse,
   BanUserBody,
   RemoveUserBody,
   SetRoleBody,
@@ -14,22 +16,10 @@ import {
   unwrapEdenProxyResponse,
 } from "@/lib/api-client";
 
-export type AuthAdminUser = {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  banned: boolean;
-  emailVerified?: boolean;
-  sessions?: unknown[];
-  sessionCount?: number;
-  createdAt: string;
-};
-
-export type AuthAdminUsersResponse = {
-  users: AuthAdminUser[];
-  total?: number;
-};
+export type {
+  AdminAuthUser as AuthAdminUser,
+  AdminAuthUsersResponse as AuthAdminUsersResponse,
+} from "@rezics/contract";
 
 type AuthAdminMutationResponse = {
   success: boolean;

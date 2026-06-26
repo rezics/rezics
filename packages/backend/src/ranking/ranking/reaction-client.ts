@@ -1,44 +1,32 @@
 export type ReactionSummaryMap = Record<string, Record<string, number>>;
 
-export type ReactionSummaryClientOptions = {
-  baseUrl: string;
-  internalSecret: string;
+export type ReactionSummaryReader = {
+  getSummary(
+    targetIds: string[],
+    contextUnitId?: string | null,
+  ): Promise<ReactionSummaryMap>;
 };
 
-function joinUrl(baseUrl: string, path: string) {
-  return `${baseUrl.replace(/\/$/, "")}${path}`;
+export type ReactionSummaryClientOptions = {
+  service?: ReactionSummaryReader;
+};
+
+async function getReactionService(): Promise<ReactionSummaryReader> {
+  const { reactionService } = await import(
+    "../../reaction/reaction/reaction.service"
+  );
+  return reactionService;
 }
 
 export class ReactionSummaryClient {
-  constructor(private readonly options: ReactionSummaryClientOptions) {}
+  constructor(private readonly options: ReactionSummaryClientOptions = {}) {}
 
   async getSummaries(
     targetIds: string[],
     options: { contextUnitId?: string | null } = {},
   ): Promise<ReactionSummaryMap> {
     if (targetIds.length === 0) return {};
-    const params = new URLSearchParams();
-    for (const id of targetIds) params.append("targetIds", id);
-    if (options.contextUnitId !== undefined) {
-      params.set("contextUnitId", options.contextUnitId ?? "");
-    }
-
-    const response = await fetch(
-      joinUrl(this.options.baseUrl, `/reaction/summary?${params.toString()}`),
-      {
-        headers: {
-          "x-internal-secret": this.options.internalSecret,
-        },
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        `reaction summary fetch failed: ${response.status} ${await response.text()}`,
-      );
-    }
-
-    const body = (await response.json()) as { summaries?: ReactionSummaryMap };
-    return body.summaries ?? {};
+    const service = this.options.service ?? (await getReactionService());
+    return service.getSummary(targetIds, options.contextUnitId);
   }
 }

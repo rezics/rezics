@@ -15,43 +15,40 @@ async function getServerDb() {
   return db;
 }
 
-async function getNotifyEnv() {
-  const { env } = await import("../env");
-  return {
-    baseUrl: env.NOTIFY_BASE_URL,
-    secret: env.NOTIFY_INTERNAL_SECRET,
-  };
-}
-
-async function postInternal<T>(
-  path: string,
-  body: T,
+async function postInternal(
+  path: "/internal/event",
+  body: InternalBroadcastBody,
+): Promise<{ ok: boolean; data?: unknown }>;
+async function postInternal(
+  path: "/internal/dm",
+  body: InternalDmBody,
+): Promise<{ ok: boolean; data?: unknown }>;
+async function postInternal(
+  path: "/internal/event" | "/internal/dm",
+  body: InternalBroadcastBody | InternalDmBody,
 ): Promise<{ ok: boolean; data?: unknown }> {
-  const { baseUrl, secret } = await getNotifyEnv();
-  if (!secret) {
-    console.warn(
-      "[notify-boundary-client] NOTIFY_INTERNAL_SECRET not set, skipping",
+  try {
+    const { deliverInternalDm, emitInternalNotificationEvent } = await import(
+      "../../notify/internal/internal.service"
     );
+    const result =
+      path === "/internal/event"
+        ? await emitInternalNotificationEvent(body as InternalBroadcastBody)
+        : await deliverInternalDm(body as InternalDmBody);
+
+    if (!result.ok) {
+      const data = JSON.stringify(result.data);
+      console.error(
+        `[notify-boundary-client] ${path} failed: ${result.status} ${data}`,
+      );
+      return { ok: false };
+    }
+
+    return { ok: true, data: result.data };
+  } catch (err) {
+    console.error(`[notify-boundary-client] ${path} failed:`, err);
     return { ok: false };
   }
-
-  const res = await fetch(`${baseUrl}${path}`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-internal-secret": secret,
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    console.error(
-      `[notify-boundary-client] ${path} failed: ${res.status} ${await res.text()}`,
-    );
-    return { ok: false };
-  }
-
-  return { ok: true, data: await res.json() };
 }
 
 export type BroadcastEvent = {
@@ -182,9 +179,9 @@ export async function filterRecipientsByPreference(
  *   prior `emitNotificationEvent` contract).
  * - Resolves recipients via `resolveRecipients` (direct recipients unioned
  *   with subscription matches).
- * - Skips the HTTP call entirely when the resolved recipient set is empty.
- * - Sends a single batched POST to `/internal/event`; notify persists rows
- *   via `createMany` and SSE-pushes to each connected recipient.
+ * - Skips notify dispatch entirely when the resolved recipient set is empty.
+ * - Calls notify's in-process internal service; notify persists rows via
+ *   `createMany` and SSE-pushes to each connected recipient.
  */
 export async function broadcast(
   event: BroadcastEvent,

@@ -9,8 +9,6 @@ process.env.RANKING_DATABASE_URL ??=
   "postgresql://postgres:postgres@localhost:5432/ranking";
 process.env.SERVER_DATABASE_URL ??=
   "postgresql://postgres:postgres@localhost:5432/server";
-process.env.REACTION_BASE_URL ??= "http://reaction.example";
-process.env.REACTION_INTERNAL_SECRET ??= "reaction-secret";
 process.env.MEILI_HOST ??= "http://meili.example";
 process.env.MEILI_MASTER_KEY ??= "masterKey";
 

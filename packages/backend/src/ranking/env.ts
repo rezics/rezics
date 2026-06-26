@@ -24,18 +24,6 @@ export const env = createEnv({
     SERVER_DATABASE_URL: v.string(),
 
     /**
-     * Reaction service base URL for current summary reads.
-     * 用于读取当前汇总的 Reaction 服务基础 URL。
-     */
-    REACTION_BASE_URL: v.string(),
-
-    /**
-     * Shared secret for reaction internal summary reads.
-     * 用于 reaction 内部汇总读取的共享密钥。
-     */
-    REACTION_INTERNAL_SECRET: v.string(),
-
-    /**
      * Meilisearch endpoint used for serving projection patches.
      * 用于提供投影补丁的 Meilisearch 端点。
      */

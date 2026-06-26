@@ -1,12 +1,29 @@
 import { t } from "elysia";
 
-import { authUserSchema } from "./sign-in";
+export const adminAuthUserSchema = t.Object({
+  id: t.String(),
+  name: t.String(),
+  email: t.String(),
+  role: t.String(),
+  banned: t.Boolean(),
+  emailVerified: t.Optional(t.Boolean()),
+  sessions: t.Optional(t.Array(t.Unknown())),
+  sessionCount: t.Optional(t.Number()),
+  createdAt: t.Union([t.String(), t.Date()]),
+  updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
+  image: t.Optional(t.Nullable(t.String())),
+  banReason: t.Optional(t.Nullable(t.String())),
+  banExpires: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),
+});
+export type AdminAuthUser = (typeof adminAuthUserSchema)["static"];
 
 export const listUsersResponseSchema = t.Object({
-  users: t.Array(authUserSchema),
-  total: t.Number(),
+  users: t.Array(adminAuthUserSchema),
+  total: t.Optional(t.Number()),
 });
-export type ListUsersResponse = (typeof listUsersResponseSchema)["static"];
+export type AdminAuthUsersResponse =
+  (typeof listUsersResponseSchema)["static"];
+export type ListUsersResponse = AdminAuthUsersResponse;
 
 export const removeUserBodySchema = t.Object({
   userId: t.String(),
