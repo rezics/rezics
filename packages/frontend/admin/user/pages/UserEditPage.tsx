@@ -16,9 +16,9 @@ import {
   Separator,
 } from "@rezics/ui/shadcn";
 import { ArrowLeft as ArrowBackIcon, Save as SaveIcon } from "lucide-react";
+import { useParams } from "next/navigation";
 import React from "react";
 import { Page } from "@/admin/core/layouts/Page";
-import { Route } from "@/admin/routes/_admin/user/$userId";
 import { Link } from "@/admin/shared/ui/link";
 import {
   useAdminUserDetailQuery,
@@ -27,7 +27,7 @@ import {
 
 export default function UserEditPage() {
   const { t } = useTranslation(["admin", "common"]);
-  const { userId } = Route.useParams();
+  const { userId } = useParams<{ userId: string }>();
   const [error, setError] = React.useState<string | null>(null);
 
   const detailQuery = useAdminUserDetailQuery(userId);

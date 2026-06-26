@@ -19,9 +19,9 @@ import {
   Textarea,
 } from "@rezics/ui/shadcn";
 import { Loader2, Play, Search } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import React from "react";
 import { Page } from "@/admin/core/layouts/Page";
-import { Route } from "@/admin/routes/_admin/repair";
 import { Link } from "@/admin/shared/ui/link";
 import {
   useAdminRepairJobDryRunMutation,
@@ -42,6 +42,42 @@ const HISTORY_OUTBOX_REPAIR_STATUSES: HistoryOutboxRepairStatus[] = [
   "pending",
   "failed",
 ];
+const validRepairScopes = new Set<AdminRepairJobScope>([
+  "search",
+  "queue-failed-job",
+  "history-outbox-replay",
+  "cdc",
+  "slug",
+  "attribution",
+  "counters",
+]);
+const historyOutboxStatuses = new Set<HistoryOutboxRepairStatus>([
+  "pending",
+  "failed",
+]);
+
+function parseNumber(value: unknown) {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value !== "string") return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function parseStatusList(
+  value: unknown,
+): HistoryOutboxRepairStatus[] | undefined {
+  const raw = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(",")
+      : [];
+  const statuses = raw.filter(
+    (item): item is HistoryOutboxRepairStatus =>
+      typeof item === "string" &&
+      historyOutboxStatuses.has(item as HistoryOutboxRepairStatus),
+  );
+  return statuses.length ? [...new Set(statuses)] : undefined;
+}
 
 function buildRepairScopes(t: (key: string) => string): RepairScopeConfig[] {
   return [
@@ -278,7 +314,21 @@ function RepairScopePicker({
  */
 export default function RepairJobsPage() {
   const { t } = useTranslation(["admin"]);
-  const search = Route.useSearch();
+  const searchParams = useSearchParams();
+  const search = {
+    scope:
+      validRepairScopes.has(searchParams.get("scope") as AdminRepairJobScope)
+        ? (searchParams.get("scope") as AdminRepairJobScope)
+        : undefined,
+    targetIds: searchParams.get("targetIds") ?? undefined,
+    historyOutboxStatuses: parseStatusList(
+      searchParams.get("historyOutboxStatuses"),
+    ),
+    unitId: searchParams.get("unitId") ?? undefined,
+    olderThanMinutes: parseNumber(searchParams.get("olderThanMinutes")),
+    limit: parseNumber(searchParams.get("limit")),
+    reason: searchParams.get("reason") ?? undefined,
+  };
   const repairScopes = React.useMemo(() => buildRepairScopes(t), [t]);
   const [scope, setScope] = React.useState<AdminRepairJobScope>(
     search.scope ?? "search",

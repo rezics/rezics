@@ -1,7 +1,7 @@
 import { buttonVariants } from "@rezics/ui/shadcn";
-import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { Page } from "@/admin/core/layouts/Page";
+import { Link } from "@/admin/shared/ui/link";
 import { MeiliObservabilitySection } from "../components/MeiliObservabilitySection";
 
 export function MeiliObservabilityPage() {

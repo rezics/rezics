@@ -21,7 +21,6 @@ import {
   CardTitle,
   Separator,
 } from "@rezics/ui/shadcn";
-import { Link } from "@tanstack/react-router";
 import {
   Activity,
   AppWindow,
@@ -35,7 +34,7 @@ import {
   Wrench,
 } from "lucide-react";
 import type React from "react";
-import { AdminSafeLink } from "@/admin/shared/ui/link";
+import { AdminSafeLink, Link } from "@/admin/shared/ui/link";
 import {
   formatCheckedAt,
   getMeiliDriftCount,

@@ -9,7 +9,7 @@ import {
   Label,
   Separator,
 } from "@rezics/ui/shadcn";
-import { useMatchRoute } from "@tanstack/react-router";
+import { usePathname } from "next/navigation";
 import { Plus as AddIcon, Search as SearchIcon } from "lucide-react";
 import React from "react";
 import {
@@ -32,8 +32,8 @@ function fmtDate(v?: string | Date) {
 
 export default function UserListPage() {
   const { t } = useTranslation(["admin", "common"]);
-  const matchRoute = useMatchRoute();
-  const isMeiliMode = Boolean(matchRoute({ to: "/user/meili" }));
+  const pathname = usePathname();
+  const isMeiliMode = pathname.endsWith("/user/meili");
   const [q, setQ] = React.useState("");
   const [query, setQuery] = React.useState("");
   const [page, setPage] = React.useState(0);

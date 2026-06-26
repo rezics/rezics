@@ -8,10 +8,10 @@ import {
   Button,
   buttonVariants,
 } from "@rezics/ui/shadcn";
-import { Link } from "@tanstack/react-router";
 import { BarChart3, X as CloseIcon } from "lucide-react";
 import { useState } from "react";
 import { Page } from "@/admin/core/layouts/Page";
+import { Link } from "@/admin/shared/ui/link";
 import {
   useMeiliCreateAdminKeyMutation,
   useMeiliDeleteAllContentMutation,

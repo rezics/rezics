@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rezics/ui/shadcn";
-import { useMatchRoute } from "@tanstack/react-router";
+import { usePathname } from "next/navigation";
 import { Plus as AddIcon } from "lucide-react";
 import React from "react";
 import { SearchablePaginatedTableCard } from "@/admin/components/list/SearchablePaginatedTableCard";
@@ -120,8 +120,8 @@ function mapContentSearchDocumentToUnit(
 }
 
 export default function UnitsPage() {
-  const matchRoute = useMatchRoute();
-  const isMeiliMode = Boolean(matchRoute({ to: "/unit/meili" }));
+  const pathname = usePathname();
+  const isMeiliMode = pathname.endsWith("/unit/meili");
 
   const [q, setQ] = React.useState("");
   const [query, setQuery] = React.useState("");

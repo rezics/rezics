@@ -1,11 +1,13 @@
+"use client";
+
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Separator } from "@rezics/ui/shadcn";
-import { useRouterState } from "@tanstack/react-router";
 import clsx from "clsx";
 import {
   ChevronUp as ExpandLessIcon,
   ChevronDown as ExpandMoreIcon,
 } from "lucide-react";
+import { usePathname } from "next/navigation";
 import React from "react";
 import { adminConfig } from "@/admin/app/config/adminConfig";
 import { useAuthSessionStore } from "@/admin/auth/session/authSessionStore";
@@ -46,7 +48,7 @@ export function AdminNav({
   items: AdminNavEntry[];
   onNavigate?: () => void;
 }) {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const pathname = usePathname();
   const currentRole = useAuthSessionStore((state) => state.auth.role);
 
   const initialOpenGroups = React.useMemo(() => {

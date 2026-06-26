@@ -7,10 +7,9 @@ import {
   Input,
   Label,
 } from "@rezics/ui/shadcn";
-import { useNavigate } from "@tanstack/react-router";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { FormEvent } from "react";
 import { useState } from "react";
-import { Route } from "@/admin/routes/login";
 import { adminLogin } from "@/admin/user/models/handler";
 
 function normalizeRedirect(to?: string) {
@@ -21,8 +20,9 @@ function normalizeRedirect(to?: string) {
 
 export default function LoginPage() {
   const { t } = useTranslation(["admin", "auth", "common"]);
-  const navigate = useNavigate();
-  const { redirect: redirectTo } = Route.useSearch();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") ?? undefined;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,10 +35,7 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       await adminLogin(email, password);
-      navigate({
-        to: normalizeRedirect(redirectTo),
-        replace: true,
-      });
+      router.replace(normalizeRedirect(redirectTo));
     } catch (err) {
       const message =
         err instanceof Error ? err.message : t("admin:user_login_failed");

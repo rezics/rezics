@@ -25,9 +25,9 @@ import {
   Save as SaveIcon,
   Trash2 as TrashIcon,
 } from "lucide-react";
+import { useParams } from "next/navigation";
 import React from "react";
 import { Page } from "@/admin/core/layouts/Page";
-import { Route } from "@/admin/routes/_admin/unit/$unitId";
 import { Link } from "@/admin/shared/ui/link";
 import {
   type RemoveUnitCollaboratorVariables,
@@ -84,7 +84,7 @@ function mutationMessage(error: unknown, fallback: string) {
 
 export default function UnitEditPage() {
   const { t } = useTranslation(["admin", "common"]);
-  const { unitId } = Route.useParams();
+  const { unitId } = useParams<{ unitId: string }>();
   const [error, setError] = React.useState<string | null>(null);
 
   const detailQuery = useUnitDetailQuery(unitId);

@@ -14,11 +14,11 @@ import {
   Label,
   Separator,
 } from "@rezics/ui/shadcn";
-import { useNavigate } from "@tanstack/react-router";
 import { ArrowLeft as ArrowBackIcon, Save as SaveIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React from "react";
 import { Page } from "@/admin/core/layouts/Page";
-import { Link } from "@/admin/shared/ui/link";
+import { Link, resolveAdminHref } from "@/admin/shared/ui/link";
 import {
   useCreateUnitMutation,
   useCurrentUserQuery,
@@ -30,7 +30,7 @@ function isContentLanguage(value: string): value is ContentLanguage {
 
 export default function UnitCreatePage() {
   const { t } = useTranslation(["admin", "common"]);
-  const navigate = useNavigate();
+  const router = useRouter();
   const [error, setError] = React.useState<string | null>(null);
 
   const meQuery = useCurrentUserQuery();
@@ -78,11 +78,7 @@ export default function UnitCreatePage() {
 
     try {
       const unit = await createMutation.mutateAsync(input);
-      await navigate({
-        to: "/unit/$unitId",
-        params: { unitId: unit.id },
-        replace: true,
-      });
+      router.replace(resolveAdminHref("/unit/$unitId", { unitId: unit.id }));
     } catch (err) {
       setError(
         err instanceof Error ? err.message : t("admin:unit_create_failed"),

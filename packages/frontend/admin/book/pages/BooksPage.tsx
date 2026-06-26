@@ -7,7 +7,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
-import { useMatchRoute } from "@tanstack/react-router";
+import { usePathname } from "next/navigation";
 import React from "react";
 import { SearchablePaginatedTableCard } from "@/admin/components/list/SearchablePaginatedTableCard";
 import type { PaginatedColumn } from "@/admin/components/table/PaginatedTable";
@@ -88,8 +88,8 @@ function mapContentSearchDocumentToBookRow(
 }
 
 export default function BooksPage() {
-  const matchRoute = useMatchRoute();
-  const isMeiliMode = Boolean(matchRoute({ to: "/book/meili" }));
+  const pathname = usePathname();
+  const isMeiliMode = pathname.endsWith("/book/meili");
 
   const [q, setQ] = React.useState("");
   const [query, setQuery] = React.useState("");

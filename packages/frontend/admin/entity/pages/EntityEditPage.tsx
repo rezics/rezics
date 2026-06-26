@@ -24,9 +24,9 @@ import {
   Save as SaveIcon,
   Trash2 as TrashIcon,
 } from "lucide-react";
+import { useParams } from "next/navigation";
 import React from "react";
 import { Page } from "@/admin/core/layouts/Page";
-import { Route } from "@/admin/routes/_admin/entity/$unitId";
 import { Link } from "@/admin/shared/ui/link";
 import {
   useEntityDetailQuery,
@@ -54,7 +54,7 @@ function createTranslationDraft(
 
 export default function EntityEditPage() {
   const { t } = useTranslation(["admin", "book", "common"]);
-  const { unitId } = Route.useParams();
+  const { unitId } = useParams<{ unitId: string }>();
   const entityQuery = useEntityDetailQuery(unitId);
   const [error, setError] = React.useState<string | null>(null);
 

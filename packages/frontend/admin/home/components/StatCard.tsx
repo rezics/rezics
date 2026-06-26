@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@rezics/ui/shadcn";
-import { useNavigate } from "@tanstack/react-router";
+import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 
 interface StatCardProps {
@@ -11,7 +11,7 @@ interface StatCardProps {
 }
 
 export function StatCard({ label, value, icon, color, href }: StatCardProps) {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const content = (
     <CardContent>
@@ -43,7 +43,7 @@ export function StatCard({ label, value, icon, color, href }: StatCardProps) {
     return (
       <Card
         className="cursor-pointer transition-colors hover:bg-surface-elevated"
-        onClick={() => navigate({ to: href })}
+        onClick={() => router.push(href)}
       >
         {content}
       </Card>

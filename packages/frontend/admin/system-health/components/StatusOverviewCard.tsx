@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@rezics/ui/shadcn";
-import { Link } from "@tanstack/react-router";
 import { ArrowRight, RefreshCw } from "lucide-react";
+import { Link } from "@/admin/shared/ui/link";
 import { useAdminSystemStatusQuery } from "../hooks/useAdminStatusQueries";
 import {
   countStatusStates,

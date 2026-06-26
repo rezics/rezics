@@ -1,4 +1,6 @@
-import { useRouter } from "@tanstack/react-router";
+"use client";
+
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
 import {
   clearAuthSessionState,
@@ -11,6 +13,8 @@ import {
 
 export function AdminAuthGuard() {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const redirectingRef = useRef(false);
   const status = useAuthSessionStore((state) => state.status);
   const role = useAuthSessionStore((state) => state.auth.role);
@@ -20,15 +24,17 @@ export function AdminAuthGuard() {
     if (redirectingRef.current) return;
     redirectingRef.current = true;
 
-    const redirect = buildCurrentRedirectPath(router.state.location);
+    const search = searchParams.toString();
+    const redirect = buildCurrentRedirectPath({
+      pathname,
+      searchStr: search ? `?${search}` : "",
+      hash: window.location.hash,
+    });
     clearAuthSessionState();
 
-    void router.navigate({
-      to: "/login",
-      search: { redirect },
-      replace: true,
-    });
-  }, [router]);
+    const params = new URLSearchParams({ redirect });
+    router.replace(`/admin/login?${params.toString()}`);
+  }, [pathname, router, searchParams]);
 
   useEffect(() => {
     if (status === "error") {

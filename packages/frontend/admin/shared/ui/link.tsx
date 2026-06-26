@@ -1,73 +1,86 @@
+"use client";
+
 import { SafeLink, type SafeLinkProps } from "@rezics/ui";
-import { createLink, Link as RouterLink } from "@tanstack/react-router";
-import clsx from "clsx";
+import NextLink from "next/link";
 import * as React from "react";
 
-export const Link = RouterLink;
+export const ADMIN_BASEPATH = "/admin";
 
-type Underline = "always" | "hover" | "none";
+type Params = Record<string, string | number | undefined>;
+type BuildSearchInput = Record<string, unknown> | undefined;
 
-type RezicsAnchorProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
-  underline?: Underline;
-  color?: string;
-  variant?: string;
+export function resolveAdminHref(to: string, params?: Params): string {
+  let path = to;
+  if (params) {
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined) {
+        path = path.replaceAll(`$${key}`, String(value));
+      }
+    }
+  }
+  if (!path.startsWith(ADMIN_BASEPATH)) {
+    path = `${ADMIN_BASEPATH}${path.startsWith("/") ? "" : "/"}${path}`;
+  }
+  return path;
+}
+
+function appendSearch(href: string, search: BuildSearchInput): string {
+  if (!search) return href;
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(search)) {
+    if (value === undefined || value === null) continue;
+    params.set(key, String(value));
+  }
+  const serialized = params.toString();
+  return serialized ? `${href}?${serialized}` : href;
+}
+
+function appendHash(href: string, hash: string | undefined): string {
+  if (!hash) return href;
+  return hash.startsWith("#") ? `${href}${hash}` : `${href}#${hash}`;
+}
+
+type AdminLinkProps = Omit<
+  React.AnchorHTMLAttributes<HTMLAnchorElement>,
+  "href"
+> & {
+  to: string;
+  params?: Params;
+  search?: BuildSearchInput;
+  hash?: string;
+  replace?: boolean;
 };
 
-const VARIANT_CLASS: Record<string, string> = {
-  body1: "text-base",
-  body2: "text-sm",
-  caption: "text-xs",
-  subtitle1: "text-base font-medium",
-  subtitle2: "text-sm font-medium",
-};
-
-const RezicsAnchor = React.forwardRef<HTMLAnchorElement, RezicsAnchorProps>(
-  (
-    {
-      underline = "always",
-      color: _color,
-      variant,
-      className,
-      children,
-      ...rest
-    },
-    ref,
-  ) => {
-    const variantClass = variant ? (VARIANT_CLASS[variant] ?? "") : "";
-    const underlineClass =
-      underline === "always"
-        ? "underline underline-offset-2"
-        : underline === "hover"
-          ? "no-underline hover:underline underline-offset-2"
-          : "no-underline";
-    return (
-      <a
-        ref={ref}
-        className={clsx(
-          "text-link transition-colors",
-          underlineClass,
-          variantClass,
-          className,
-        )}
-        {...rest}
-      >
-        {children}
-      </a>
-    );
-  },
-);
-RezicsAnchor.displayName = "RezicsAnchor";
-
-export const TextLink = createLink(RezicsAnchor);
+export function Link({
+  to,
+  params,
+  search,
+  hash,
+  replace,
+  ...rest
+}: AdminLinkProps): React.ReactElement {
+  const base = resolveAdminHref(to, params);
+  const withSearch = appendSearch(base, search);
+  const href = appendHash(withSearch, hash);
+  return <NextLink href={href} replace={Boolean(replace)} {...rest} />;
+}
 
 export function AdminSafeLink(props: SafeLinkProps) {
   return (
     <SafeLink
       {...props}
       linkRenderer={({ href, children, className, title, ...rest }) => (
-        <RouterLink to={href} className={className} title={title} {...rest}>
+        <NextLink
+          href={href}
+          className={className}
+          title={title}
+          {...(rest as Omit<
+            React.AnchorHTMLAttributes<HTMLAnchorElement>,
+            "href" | "className" | "title"
+          >)}
+        >
           {children}
-        </RouterLink>
+        </NextLink>
       )}
     />
   );

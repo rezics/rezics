@@ -1,3 +1,5 @@
+"use client";
+
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Sheet, SheetContent } from "@rezics/ui/shadcn";
 import { Menu as MenuIcon } from "lucide-react";
