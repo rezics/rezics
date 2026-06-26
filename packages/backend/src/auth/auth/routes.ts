@@ -339,8 +339,8 @@ export async function handleJwksWellKnownRequest(
   request: Request,
 ): Promise<Response> {
   void request;
-  const { getAuthSessionJwksResponse } = await import("../session/jwt/routes");
-  return getAuthSessionJwksResponse();
+  const { getAuthPublicJwks } = await import("../session/jwt/service");
+  return Response.json(await getAuthPublicJwks());
 }
 
 export async function handleOpenIdConfigRequest(

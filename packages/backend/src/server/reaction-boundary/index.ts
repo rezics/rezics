@@ -1,5 +1,5 @@
 /**
- * Reaction boundary - main-owned write API and internal reaction service client.
+ * Reaction boundary - main-owned write API and in-process reaction service facade.
  */
 
 export { reactionBoundaryApi } from "./reaction-boundary.api";

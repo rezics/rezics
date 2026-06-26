@@ -8,60 +8,25 @@ import type {
   InternalRemoveResponse,
 } from "@rezics/contract/reaction";
 import { normalizeReactionContextUnitId } from "@rezics/contract/reaction";
-import { env } from "../env";
 
-const baseUrl = env.REACTION_BASE_URL;
-
-async function postInternal<T>(path: string, body: unknown): Promise<T> {
-  const secret = env.REACTION_INTERNAL_SECRET;
-  if (!secret) {
-    throw new Error(
-      "[reaction-boundary-client] REACTION_INTERNAL_SECRET not set",
-    );
-  }
-
-  const res = await fetch(`${baseUrl}${path}`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-internal-secret": secret,
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(
-      `[reaction-boundary-client] ${path} failed: ${res.status} ${text}`,
-    );
-  }
-
-  return res.json() as Promise<T>;
+async function getReactionService() {
+  const { reactionService } = await import(
+    "../../reaction/reaction/reaction.service"
+  );
+  return reactionService;
 }
 
-async function getPublic<T>(
-  path: string,
-  query: Record<string, string | number | null | undefined>,
-): Promise<T> {
-  const params = new URLSearchParams();
-  for (const [key, value] of Object.entries(query)) {
-    if (value === undefined) continue;
-    params.append(key, value === null ? "" : String(value));
-  }
-  const qs = params.toString();
-  const url = `${baseUrl}${path}${qs ? `?${qs}` : ""}`;
-  const res = await fetch(url, { method: "GET" });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(
-      `[reaction-boundary-client] ${path} failed: ${res.status} ${text}`,
-    );
-  }
-  return res.json() as Promise<T>;
+function parseReactionFilter(raw: string | undefined): string[] | undefined {
+  if (!raw) return undefined;
+  const parts = raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return parts.length > 0 ? parts : undefined;
 }
 
 /**
- * Create a reaction via the reaction service's internal API.
+ * Create a reaction through the in-process reaction service.
  * Returns the reaction DTO and whether it was newly created.
  */
 export async function createReaction(
@@ -70,16 +35,27 @@ export async function createReaction(
   reaction: AllowedReactionKind,
   contextUnitId?: string | null,
 ): Promise<InternalCreateResponse> {
-  return postInternal<InternalCreateResponse>("/internal/create", {
+  const service = await getReactionService();
+  const result = await service.create(
     userId,
     targetId,
     reaction,
-    contextUnitId: normalizeReactionContextUnitId(contextUnitId),
-  });
+    normalizeReactionContextUnitId(contextUnitId),
+  );
+  const row = result.reaction;
+  return {
+    id: row.id,
+    userId: row.userId,
+    targetId: row.targetId,
+    reaction: row.reaction as AllowedReactionKind,
+    contextUnitId: row.contextUnitId,
+    createdAt: row.createdAt.toISOString(),
+    created: result.created,
+  };
 }
 
 /**
- * Remove a reaction via the reaction service's internal API.
+ * Remove a reaction through the in-process reaction service.
  */
 export async function removeReaction(
   userId: string,
@@ -87,26 +63,25 @@ export async function removeReaction(
   reaction: AllowedReactionKind,
   contextUnitId?: string | null,
 ): Promise<InternalRemoveResponse> {
-  return postInternal<InternalRemoveResponse>("/internal/remove", {
+  const service = await getReactionService();
+  return service.remove(
     userId,
     targetId,
     reaction,
-    contextUnitId: normalizeReactionContextUnitId(contextUnitId),
-  });
+    normalizeReactionContextUnitId(contextUnitId),
+  );
 }
 
 export async function recordShare(
   userId: string,
   targetId: string,
 ): Promise<InternalCreateShareResponse> {
-  return postInternal<InternalCreateShareResponse>("/internal/share", {
-    userId,
-    targetId,
-  });
+  const service = await getReactionService();
+  return service.recordShare(userId, targetId);
 }
 
 /**
- * List a user's own reaction events via the reaction service's public endpoint.
+ * List a user's own reaction events through the in-process reaction service.
  * Used by the profile Given view; the main server is responsible for any
  * privacy gating before calling this.
  */
@@ -117,31 +92,43 @@ export async function listGivenReactions(query: {
   cursor?: string;
   limit?: number;
 }): Promise<GivenResponse> {
-  return getPublic<GivenResponse>("/reaction/given", query);
+  const service = await getReactionService();
+  return service.listGiven({
+    userId: query.userId,
+    reactions: parseReactionFilter(query.reactions),
+    contextUnitId:
+      query.contextUnitId === undefined
+        ? undefined
+        : normalizeReactionContextUnitId(query.contextUnitId),
+    cursor: query.cursor,
+    limit: query.limit,
+  });
 }
 
 /**
- * List reactions on a given target id set via the reaction service's internal
- * endpoint. Used by the profile Received view.
+ * List reactions on a given target id set through the in-process reaction
+ * service. Used by the profile Received view.
  */
 export async function listByUser(
   body: InternalByUserBody,
 ): Promise<InternalByUserResponse> {
-  return postInternal<InternalByUserResponse>("/internal/by-user", body);
+  const service = await getReactionService();
+  return service.listByUser(body);
 }
 
 /**
- * Call reaction service's cleanup endpoint to delete all reactions for a target.
+ * Delete all reactions for a target through the in-process reaction service.
  * Used when a Unit is deleted. Fire-and-forget — does not throw.
  */
 export async function cleanupReactions(
   targetId: string,
 ): Promise<{ ok: boolean }> {
   try {
-    await postInternal("/internal/cleanup", { targetId });
+    const service = await getReactionService();
+    await service.cleanupTarget(targetId);
     return { ok: true };
   } catch (e) {
-    console.error("[reaction-boundary-client] Cleanup call failed:", e);
+    console.error("[reaction-boundary] Cleanup call failed:", e);
     return { ok: false };
   }
 }

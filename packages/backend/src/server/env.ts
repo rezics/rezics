@@ -250,18 +250,6 @@ export const env = createEnv({
     NOTIFY_INTERNAL_SECRET: v.string(),
 
     /**
-     * Base URL of the Reaction service for internal calls.
-     * Reaction 服务用于内部调用的基础 URL。
-     */
-    REACTION_BASE_URL: v.string(),
-
-    /**
-     * Shared secret for authenticating internal calls to the Reaction service.
-     * 用于对 Reaction 服务的内部调用进行认证的共享密钥。
-     */
-    REACTION_INTERNAL_SECRET: v.string(),
-
-    /**
      * Base URL of the History service for app-facing read proxy requests.
      * When omitted, history proxy endpoints return a clear service-unavailable
      * response instead of bypassing Unit visibility checks.

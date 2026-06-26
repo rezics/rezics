@@ -1,3 +1,8 @@
+import {
+  retryHistoryOutboxInputSchema,
+  retryHistoryOutboxResponseSchema,
+  type RetryHistoryOutboxResponse,
+} from "@rezics/contract";
 import { and, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { historyOutbox } from "../db/schema";
@@ -51,15 +56,17 @@ export const historyOutboxAdminApi = new Elysia({
         )
         .returning({ id: historyOutbox.id });
 
-      return { retried: result.length };
+      const response = {
+        retried: result.length,
+      } satisfies RetryHistoryOutboxResponse;
+
+      return response;
     },
     {
       requireLogin: true,
-      body: t.Object({
-        unitId: t.Optional(t.String()),
-      }),
+      body: retryHistoryOutboxInputSchema,
       response: {
-        200: t.Object({ retried: t.Number() }),
+        200: retryHistoryOutboxResponseSchema,
         403: t.String(),
       },
       detail: {

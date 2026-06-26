@@ -32,11 +32,14 @@ import {
   UserX,
 } from "lucide-react";
 import React from "react";
-import useSWR from "swr";
 import { Page } from "@/admin/core/layouts/Page";
-import { Link } from "@/admin/shared/ui/link";
 import { useAdminDashboardSummaryQuery } from "@/admin/home/hooks/useDashboardQueries";
-import { apiClient, unwrapEdenResponse } from "@/lib/api-client";
+import {
+  createEdenFetcher,
+  useAdminEdenQuery,
+} from "@/admin/shared/eden-swr";
+import { Link } from "@/admin/shared/ui/link";
+import { apiClient } from "@/lib/api-client";
 
 const openCaseStates = new Set<ModerationCaseDTO["state"]>([
   "new",
@@ -71,30 +74,29 @@ const GOVERNANCE_POLICY_EXCEPTION_AUDIT_KEY = [
   "policy-exceptions",
 ] as const;
 
-async function fetchGovernanceCases(
-  key: ReturnType<typeof GOVERNANCE_CASES_KEY>,
-): Promise<ModerationCaseDTO[]> {
+const fetchGovernanceCases = createEdenFetcher<
+  ModerationCaseDTO[],
+  ReturnType<typeof GOVERNANCE_CASES_KEY>
+>((key) => {
   const [, , , query] = key;
-  const response = await apiClient.governance.cases.get({ query });
-  return unwrapEdenResponse(response);
-}
+  return apiClient.governance.cases.get({ query });
+});
 
-async function fetchGovernanceAudit(
-  key: ReturnType<typeof GOVERNANCE_AUDIT_KEY>,
-): Promise<StaffAuditLogDTO[]> {
+const fetchGovernanceAudit = createEdenFetcher<
+  StaffAuditLogDTO[],
+  ReturnType<typeof GOVERNANCE_AUDIT_KEY>
+>((key) => {
   const [, , , query] = key;
-  const response = await apiClient.governance.audit.get({ query });
-  return unwrapEdenResponse(response);
-}
+  return apiClient.governance.audit.get({ query });
+});
 
 async function fetchPolicyExceptionAudits(): Promise<StaffAuditLogDTO[][]> {
   return Promise.all(
-    policyExceptionCodes.map(async (decisionCode) => {
-      const response = await apiClient.governance.audit.get({
-        query: { decisionCode, limit: 3 },
-      });
-      return unwrapEdenResponse(response);
-    }),
+    policyExceptionCodes.map((decisionCode) =>
+      fetchGovernanceAudit(
+        GOVERNANCE_AUDIT_KEY({ decisionCode, limit: 3 }),
+      ),
+    ),
   );
 }
 
@@ -449,7 +451,7 @@ function GovernanceMetrics({
 
 export default function GovernanceOverviewPage() {
   const dashboardSummaryQuery = useAdminDashboardSummaryQuery();
-  const recentCasesQuery = useSWR(
+  const recentCasesQuery = useAdminEdenQuery(
     GOVERNANCE_CASES_KEY({ limit: 10 }),
     fetchGovernanceCases,
     {
@@ -457,7 +459,7 @@ export default function GovernanceOverviewPage() {
       keepPreviousData: true,
     },
   );
-  const escalatedRealmCasesQuery = useSWR(
+  const escalatedRealmCasesQuery = useAdminEdenQuery(
     GOVERNANCE_CASES_KEY({ limit: 8, scope: "realm", state: "escalated" }),
     fetchGovernanceCases,
     {
@@ -465,7 +467,7 @@ export default function GovernanceOverviewPage() {
       keepPreviousData: true,
     },
   );
-  const auditQuery = useSWR(
+  const auditQuery = useAdminEdenQuery(
     GOVERNANCE_AUDIT_KEY({ limit: 10 }),
     fetchGovernanceAudit,
     {
@@ -473,7 +475,7 @@ export default function GovernanceOverviewPage() {
       keepPreviousData: true,
     },
   );
-  const policyExceptionQuery = useSWR(
+  const policyExceptionQuery = useAdminEdenQuery(
     GOVERNANCE_POLICY_EXCEPTION_AUDIT_KEY,
     fetchPolicyExceptionAudits,
     {

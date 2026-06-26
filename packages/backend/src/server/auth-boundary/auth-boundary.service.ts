@@ -1,5 +1,8 @@
 import {
   type AccountSetupBody,
+  type AuthAccountState,
+  type AuthSession,
+  type AuthUser,
   type SlugAvailabilityResponse,
   validateSlug,
 } from "@rezics/contract";
@@ -31,23 +34,9 @@ const LOCAL_DEV_ORIGINS = [
 ];
 
 type AuthBoundarySessionStateResponse = {
-  session?: {
-    id?: string;
-    token?: string;
-    userId?: string;
-  };
-  user?: {
-    id?: string;
-    name?: string;
-    email?: string;
-    emailVerified?: boolean;
-    image?: string | null;
-  };
-  authAccountState?: {
-    email?: string;
-    mainUserExists?: boolean;
-    registrationComplete?: boolean;
-    readinessStatus?: string;
+  session?: Partial<AuthSession>;
+  user?: Partial<AuthUser>;
+  authAccountState?: Partial<Omit<AuthAccountState, "trustedProviderId">> & {
     trustedProviderId?: string;
   };
 };

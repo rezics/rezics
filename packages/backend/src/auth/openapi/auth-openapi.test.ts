@@ -88,9 +88,8 @@ mock.module("../auth/storage", () => ({
   updateAuthUserName: authStorageMock("updateAuthUserName"),
 }));
 
-mock.module("../session/jwt/routes", () => ({
-  getAuthSessionJwksResponse: () =>
-    Response.json({ pathname: "/api/auth/session/jwks" }),
+mock.module("../session/jwt/service", () => ({
+  getAuthPublicJwks: () => ({ pathname: "/api/auth/session/jwks" }),
 }));
 
 describe("auth openapi routes", () => {

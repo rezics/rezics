@@ -1,29 +1,8 @@
 import { getAuthJwtIssuer } from "./options";
-import {
-  authJwtPersistence,
-  getLocalAuthJwtServiceRecord,
-} from "./storage-adapter";
+import { authJwtPersistence } from "./storage-adapter";
 
 export async function listAuthJwtKeys() {
   return authJwtPersistence.listKeys({ issuer: getAuthJwtIssuer() });
-}
-
-export async function getLocalAuthJwtService() {
-  return getLocalAuthJwtServiceRecord();
-}
-
-export async function getActiveAuthSigningKey() {
-  const keys = await listAuthJwtKeys();
-  const now = Date.now();
-  const active = keys.find(
-    (key) => key.expiresAt === null || key.expiresAt.getTime() > now,
-  );
-
-  if (!active) {
-    throw new Error("Missing auth JWKS signing key");
-  }
-
-  return active;
 }
 
 export async function getAuthPublicJwks() {

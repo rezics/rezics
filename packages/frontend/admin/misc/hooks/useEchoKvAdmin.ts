@@ -3,45 +3,51 @@ import type {
   EchoKvResponse,
   EchoKvUpsertRequest,
 } from "@rezics/contract";
-import useSWR from "swr";
+import {
+  createEdenFetcher,
+  useAdminEdenQuery,
+} from "@/admin/shared/eden-swr";
 import { apiClient, unwrapEdenResponse } from "@/lib/api-client";
 
 type EchoKvKeyListKey = readonly ["eden", "echokv", "list", string];
+type EchoKvValueKey = readonly ["eden", "echokv", "value", string];
 
 function echoKvKeyListKey(search: string): EchoKvKeyListKey {
   return ["eden", "echokv", "list", search] as const;
 }
 
-async function fetchEchoKvKeys(
-  key: EchoKvKeyListKey,
-): Promise<EchoKvKeyListResponse> {
-  const [, , , search] = key;
-  const query = search.trim() ? { search: search.trim() } : {};
-  const response = await apiClient.echokv.list.get({ query });
-  return unwrapEdenResponse(response);
+function echoKvValueKey(key: string): EchoKvValueKey {
+  return ["eden", "echokv", "value", key] as const;
 }
 
+const fetchEchoKvKeys = createEdenFetcher<
+  EchoKvKeyListResponse,
+  EchoKvKeyListKey
+>((key) => {
+  const [, , , search] = key;
+  const query = search.trim() ? { search: search.trim() } : {};
+  return apiClient.echokv.list.get({ query });
+});
+
+const fetchEchoKvValue = createEdenFetcher<
+  EchoKvResponse<unknown>,
+  EchoKvValueKey
+>((cacheKey) => {
+  const [, , , key] = cacheKey;
+  return apiClient.echokv({ key }).get();
+});
+
 export function useEchoKvKeyListQuery(search: string) {
-  const query = useSWR(echoKvKeyListKey(search), fetchEchoKvKeys, {
+  return useAdminEdenQuery(echoKvKeyListKey(search), fetchEchoKvKeys, {
     dedupingInterval: 60_000,
     keepPreviousData: true,
   });
-
-  return {
-    data: query.data,
-    error: query.error,
-    isError: Boolean(query.error),
-    isFetching: query.isValidating,
-    isLoading: query.isLoading,
-    refetch: () => query.mutate(),
-  };
 }
 
 export async function getEchoKvValue(
   key: string,
 ): Promise<EchoKvResponse<unknown>> {
-  const response = await apiClient.echokv({ key }).get();
-  return unwrapEdenResponse(response);
+  return fetchEchoKvValue(echoKvValueKey(key));
 }
 
 export async function setEchoKvValue(

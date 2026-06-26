@@ -4,6 +4,8 @@ import type {
   CreateUnitInput,
   CreateUnitFieldLockInput,
   LinkSubjectAttributionInput,
+  RetryHistoryOutboxInput,
+  RetryHistoryOutboxResponse,
   SubjectAttributionDTO,
   SubjectAttributionRole,
   UnitListQuery,
@@ -135,14 +137,6 @@ export type UpsertUnitFieldLockVariables = CreateUnitFieldLockInput & {
 export type RemoveUnitFieldLockVariables = {
   unitId: string;
   path: string;
-};
-
-export type RetryHistoryOutboxInput = {
-  unitId?: string;
-};
-
-export type RetryHistoryOutboxResponse = {
-  retried: number;
 };
 
 export type UpdateUnitVariables = {

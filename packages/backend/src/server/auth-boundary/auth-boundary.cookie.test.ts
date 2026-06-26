@@ -1,5 +1,24 @@
 import { describe, expect, test } from "bun:test";
-import { buildCookieAttributes } from "./auth-boundary.service";
+
+process.env.NODE_ENV ??= "test";
+process.env.DATABASE_URL ??=
+  "postgresql://postgres:postgres@localhost:5432/rezics_book";
+process.env.AUTH_INTERNAL_BASE_URL ??= "http://auth.internal";
+process.env.AUTH_PUBLIC_BASE_URL ??= "http://main.test/auth";
+process.env.AUTH_PUBLIC_ISSUER_URL ??= "http://main.test";
+process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??= "internal-test-secret";
+process.env.SMTP_HOST ??= "localhost";
+process.env.SMTP_USER ??= "smtp";
+process.env.SMTP_PASSWORD ??= "smtp";
+process.env.TURNSTILE_SECRET ??= "turnstile";
+process.env.MEILI_HOST ??= "http://localhost:7700";
+process.env.MEILI_MASTER_KEY ??= "masterKey";
+process.env.NOTIFY_BASE_URL ??= "http://localhost:3010";
+process.env.NOTIFY_INTERNAL_SECRET ??= "notify";
+process.env.REACTION_BASE_URL ??= "http://localhost:3011";
+process.env.REACTION_INTERNAL_SECRET ??= "reaction";
+
+const { buildCookieAttributes } = await import("./auth-boundary.service");
 
 const SESSION = "rezics-session-token";
 

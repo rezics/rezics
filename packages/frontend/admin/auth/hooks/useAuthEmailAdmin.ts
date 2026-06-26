@@ -7,7 +7,10 @@ import type {
   AuthEmailSmtpTestResponse,
   AuthEmailTemplatesResponse,
 } from "@rezics/contract";
-import useSWR from "swr";
+import {
+  createEdenFetcher,
+  useAdminEdenQuery,
+} from "@/admin/shared/eden-swr";
 import { authAdminEmailClient, unwrapEdenResponse } from "@/lib/api-client";
 
 export type {
@@ -46,41 +49,61 @@ const AUTH_EMAIL_TEMPLATES_KEY = [
   "admin-email",
   "templates",
 ] as const;
+type AuthEmailTemplatesKey = typeof AUTH_EMAIL_TEMPLATES_KEY;
+type AuthEmailPreviewKey = readonly [
+  "eden",
+  "auth",
+  "admin-email",
+  "preview",
+  AuthEmailPreviewInput["template"],
+  AuthEmailPreviewInput["props"],
+];
 
-async function fetchAuthEmailTemplates(): Promise<AuthEmailTemplatesResponse> {
-  const response = await authAdminEmailClient.admin.email.templates.get();
+function authEmailPreviewKey(input: AuthEmailPreviewInput): AuthEmailPreviewKey {
+  return [
+    "eden",
+    "auth",
+    "admin-email",
+    "preview",
+    input.template,
+    input.props,
+  ] as const;
+}
+
+const fetchAuthEmailTemplatesResponse = createEdenFetcher<
+  AuthEmailTemplatesResponse | AuthEmailErrorResponse,
+  AuthEmailTemplatesKey
+>(() => authAdminEmailClient.admin.email.templates.get());
+
+async function fetchAuthEmailTemplates(
+  key: AuthEmailTemplatesKey,
+): Promise<AuthEmailTemplatesResponse> {
   return unwrapAuthEmailData<AuthEmailTemplatesResponse>(
-    unwrapEdenResponse(response),
+    await fetchAuthEmailTemplatesResponse(key),
     "Failed to load email templates",
   );
 }
 
 export function useAuthEmailTemplatesQuery() {
-  const query = useSWR<AuthEmailTemplatesResponse>(
-    AUTH_EMAIL_TEMPLATES_KEY,
-    fetchAuthEmailTemplates,
-    {
-      dedupingInterval: 60_000,
-      keepPreviousData: true,
-    },
-  );
-
-  return {
-    data: query.data,
-    error: query.error,
-    isError: Boolean(query.error),
-    isFetching: query.isValidating,
-    isLoading: query.isLoading,
-    refetch: () => query.mutate(),
-  };
+  return useAdminEdenQuery(AUTH_EMAIL_TEMPLATES_KEY, fetchAuthEmailTemplates, {
+    dedupingInterval: 60_000,
+    keepPreviousData: true,
+  });
 }
 
+const fetchAuthEmailPreviewResponse = createEdenFetcher<
+  AuthEmailPreviewResponse | AuthEmailErrorResponse,
+  AuthEmailPreviewKey
+>((key) => {
+  const [, , , , template, props] = key;
+  return authAdminEmailClient.admin.email.preview.post({ template, props });
+});
+
 async function fetchAuthEmailPreview(
-  input: AuthEmailPreviewInput,
+  key: AuthEmailPreviewKey,
 ): Promise<AuthEmailPreviewResponse> {
-  const response = await authAdminEmailClient.admin.email.preview.post(input);
   return unwrapAuthEmailData<AuthEmailPreviewResponse>(
-    unwrapEdenResponse(response),
+    await fetchAuthEmailPreviewResponse(key),
     "Failed to render email preview",
   );
 }
@@ -88,24 +111,13 @@ async function fetchAuthEmailPreview(
 export function useAuthEmailPreviewQuery(
   input: AuthEmailPreviewInput | null,
 ) {
-  const query = useSWR(
-    input
-      ? ["eden", "auth", "admin-email", "preview", input.template, input.props]
-      : null,
-    () => fetchAuthEmailPreview(input!),
+  return useAdminEdenQuery(
+    input ? authEmailPreviewKey(input) : null,
+    fetchAuthEmailPreview,
     {
       keepPreviousData: true,
     },
   );
-
-  return {
-    data: query.data,
-    error: query.error,
-    isError: Boolean(query.error),
-    isFetching: query.isValidating,
-    isLoading: query.isLoading,
-    refetch: () => query.mutate(),
-  };
 }
 
 export async function sendAuthEmailTest(

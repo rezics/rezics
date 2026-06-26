@@ -141,10 +141,8 @@ export const sessionRouter = coreInstance()
   .get(
     "/session/jwks",
     async () => {
-      const { getAuthSessionJwksResponse } = await import(
-        "../session/jwt/routes"
-      );
-      return getAuthSessionJwksResponse();
+      const { getAuthPublicJwks } = await import("../session/jwt/service");
+      return Response.json(await getAuthPublicJwks());
     },
     {
       detail: {
