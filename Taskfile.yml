@@ -84,16 +84,6 @@ tasks:
     desc: Ensure the pg-boss queue database exists
     cmd: task backend:job-runner:db:ensure
 
-  search:meilisearch:
-    desc: Run local Meilisearch from the bundled binary
-    dir: packages/backend/bin
-    cmd: ./meilisearch --config-file-path='../meilisearch.config.toml'
-
-  search:meilisearch:wsl:
-    desc: Run local Meilisearch bound to 0.0.0.0 (WSL)
-    dir: packages/backend/bin
-    cmd: ./meilisearch --http-addr 0.0.0.0:7700 --config-file-path='../meilisearch.config.toml'
-
   # ── Dev orchestration (Nomad) ──────────────────────────────────────────
   dev:
     desc: Start development environment, Ctrl+C stops all
@@ -152,24 +142,22 @@ tasks:
 
   # ── Storybook ──────────────────────────────────────────────────────────
   storybook:
-    desc: All Storybooks (host + every package) with color-prefixed output
+    desc: All active Storybooks (host + package storybooks) with color-prefixed output
     cmd: >-
-      bun concurrently -k -n host,ui,editor,folio
-      -c blue,cyan,magenta,green
+      bun concurrently -k -n host,editor,folio
+      -c blue,magenta,green
       "task storybook:host -- --quiet --loglevel error"
-      "task ui:storybook -- --quiet --loglevel error"
       "task editor:storybook -- --quiet --loglevel error"
       "task folio:storybook -- --quiet --loglevel error"
   storybook:host:
     desc: Host Storybook (port 6006)
     cmd: bun storybook dev -p 6006 --no-open {{.CLI_ARGS}}
   build:storybook:
-    desc: Build every static Storybook
+    desc: Build every active static Storybook
     cmd: >-
-      bun concurrently -n host,ui,editor,folio
-      -c blue,cyan,magenta,green
+      bun concurrently -n host,editor,folio
+      -c blue,magenta,green
       "task storybook:build-host"
-      "task ui:build-storybook"
       "task editor:build-storybook"
       "task folio:build-storybook"
   storybook:build-host:

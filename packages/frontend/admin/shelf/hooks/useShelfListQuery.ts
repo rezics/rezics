@@ -1,6 +1,9 @@
 import type { ShelfListQuery, ShelfListResponse } from "@rezics/contract";
-import useSWR from "swr";
-import { apiClient, unwrapEdenResponse } from "@/lib/api-client";
+import {
+  createEdenFetcher,
+  useAdminEdenQuery,
+} from "@/admin/shared/eden-swr";
+import { apiClient } from "@/lib/api-client";
 
 type ShelfListKey = readonly ["eden", "shelf", "list", ShelfListQuery];
 
@@ -8,28 +11,15 @@ function shelfListKey(filters: ShelfListQuery): ShelfListKey {
   return ["eden", "shelf", "list", filters] as const;
 }
 
-async function fetchShelfList(
-  key: ShelfListKey,
-): Promise<ShelfListResponse> {
-  const [, , , filters] = key;
-  const response = await apiClient.shelf.list.get({ query: filters });
-
-  return unwrapEdenResponse(response);
-}
+const fetchShelfList = createEdenFetcher<ShelfListResponse, ShelfListKey>(
+  (key) => {
+    const [, , , filters] = key;
+    return apiClient.shelf.list.get({ query: filters });
+  },
+);
 
 export function useShelfListQuery(filters: ShelfListQuery) {
-  const query = useSWR<ShelfListResponse>(shelfListKey(filters), fetchShelfList, {
+  return useAdminEdenQuery(shelfListKey(filters), fetchShelfList, {
     keepPreviousData: true,
   });
-
-  return {
-    data: query.data,
-    error: query.error,
-    isError: Boolean(query.error),
-    isFetching: query.isValidating,
-    isLoading: query.isLoading,
-    refetch: () => {
-      void query.mutate();
-    },
-  };
 }

@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/contract/job";
+import {
+  createSearchCommand,
+  JOB_ENQUEUE_BATCH_PATH,
+  JOB_ENQUEUE_PATH,
+  SEARCH_COMMAND_KINDS,
+} from "@rezics/contract/job";
 import { createJobRunnerApp } from "./app";
 import type { QueueLike } from "./queue/types";
 
@@ -31,7 +36,77 @@ describe("job-runner HTTP app", () => {
     expect(response.status).toBe(401);
   });
 
-  test("validates and enqueues a command", async () => {
+  test("accepts enqueue on the recommended job-runner path", async () => {
+    const { queue } = createMemoryQueue("job-1");
+    const app = createJobRunnerApp({
+      queue,
+      internalSecret: "secret",
+      sequinWebhookSecret: "sequin",
+    });
+    const command = createSearchCommand(SEARCH_COMMAND_KINDS.contentPatchTags, {
+      unitId: "unit-1",
+    });
+
+    const response = await app.handle(
+      new Request(`http://localhost${JOB_ENQUEUE_PATH}`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-internal-secret": "secret",
+        },
+        body: JSON.stringify(command),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      kind: command.kind,
+      idempotencyKey: command.idempotencyKey,
+      status: "created",
+      jobId: "job-1",
+    });
+  });
+
+  test("accepts batch enqueue on the recommended job-runner path", async () => {
+    const { queue, sent } = createMemoryQueue("job-1");
+    const app = createJobRunnerApp({
+      queue,
+      internalSecret: "secret",
+      sequinWebhookSecret: "sequin",
+    });
+    const commands = [
+      createSearchCommand(SEARCH_COMMAND_KINDS.contentPatchTags, {
+        unitId: "unit-1",
+      }),
+      createSearchCommand(SEARCH_COMMAND_KINDS.contentPatchTags, {
+        unitId: "unit-2",
+      }),
+    ];
+
+    const response = await app.handle(
+      new Request(`http://localhost${JOB_ENQUEUE_BATCH_PATH}`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-internal-secret": "secret",
+        },
+        body: JSON.stringify({ commands }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      results: commands.map((command) => ({
+        kind: command.kind,
+        idempotencyKey: command.idempotencyKey,
+        status: "created",
+        jobId: "job-1",
+      })),
+    });
+    expect(sent).toHaveLength(2);
+  });
+
+  test("keeps legacy contract enqueue path compatible", async () => {
     const { queue } = createMemoryQueue("job-1");
     const app = createJobRunnerApp({
       queue,

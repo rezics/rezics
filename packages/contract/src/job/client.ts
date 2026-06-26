@@ -1,5 +1,8 @@
 import { type AnyJobCommand, parseJobCommand } from "./command";
 
+export const JOB_ENQUEUE_PATH = "/jobs/enqueue";
+export const JOB_ENQUEUE_BATCH_PATH = "/jobs/enqueue/batch";
+
 export interface EnqueueClientOptions {
   baseUrl: string;
   internalSecret: string;
@@ -31,7 +34,7 @@ export class JobEnqueueClient {
 
   async enqueue(command: AnyJobCommand): Promise<EnqueueResult> {
     const parsed = parseJobCommand(command);
-    const response = await this.#fetch(`${this.#baseUrl}/jobs/enqueue`, {
+    const response = await this.#fetch(`${this.#baseUrl}${JOB_ENQUEUE_PATH}`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -49,14 +52,17 @@ export class JobEnqueueClient {
 
   async enqueueBatch(commands: AnyJobCommand[]): Promise<BatchEnqueueResult> {
     const parsed = commands.map((command) => parseJobCommand(command));
-    const response = await this.#fetch(`${this.#baseUrl}/jobs/enqueue/batch`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-internal-secret": this.#internalSecret,
+    const response = await this.#fetch(
+      `${this.#baseUrl}${JOB_ENQUEUE_BATCH_PATH}`,
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-internal-secret": this.#internalSecret,
+        },
+        body: JSON.stringify({ commands: parsed }),
       },
-      body: JSON.stringify({ commands: parsed }),
-    });
+    );
     if (!response.ok) {
       throw new Error(
         `Batch job enqueue failed with HTTP ${response.status}: ${await response.text()}`,

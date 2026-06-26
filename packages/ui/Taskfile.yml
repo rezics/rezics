@@ -1,4 +1,4 @@
-# @rezics/ui — component library + Storybook. Aggregated as `ui:*`.
+# @rezics/ui — shared component library. Aggregated as `ui:*`.
 version: '3'
 
 tasks:
@@ -8,9 +8,3 @@ tasks:
   test:
     desc: Run tests
     cmd: bun test
-  storybook:
-    desc: Storybook (port 6007)
-    cmd: bun storybook dev -p 6007 --no-open {{.CLI_ARGS}}
-  build-storybook:
-    desc: Build the static Storybook
-    cmd: bun storybook build -o storybook-static

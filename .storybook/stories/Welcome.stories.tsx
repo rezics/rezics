@@ -17,12 +17,6 @@ const refs: Array<{ port: number; title: string; pkg: string; what: string }> =
       what: "Aggregates package storybooks via refs.",
     },
     {
-      port: 6007,
-      title: "UI · Foundation",
-      pkg: "@rezics/ui",
-      what: "Tokens, primitives, shadcn glue.",
-    },
-    {
       port: 6008,
       title: "Editor · CodeMirror",
       pkg: "@rezics/editor",

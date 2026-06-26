@@ -1,5 +1,7 @@
 import {
   type AnyJobCommand,
+  JOB_ENQUEUE_BATCH_PATH,
+  JOB_ENQUEUE_PATH,
   parseJobCommand,
   safeParseJobCommand,
 } from "@rezics/contract/job";
@@ -10,12 +12,17 @@ import type { QueueLike } from "../queue/types";
 
 const MAX_BATCH_SIZE = 100;
 
-export function createEnqueueApi(options: {
+interface EnqueueApiOptions {
   queue: QueueLike;
   internalSecret: string;
-}) {
-  return new Elysia({ name: "job-runner-enqueue" })
-    .post("/contract/jobs/enqueue", async ({ body, headers, set }) => {
+}
+
+function createEnqueueRoutes(options: EnqueueApiOptions, prefix = "") {
+  return new Elysia({
+    name: prefix ? "job-runner-enqueue-contract" : "job-runner-enqueue-root",
+    prefix,
+  })
+    .post(JOB_ENQUEUE_PATH, async ({ body, headers, set }) => {
       if (!isAuthorized(headers, options.internalSecret)) {
         set.status = 401;
         return { status: "error", message: "Unauthorized" };
@@ -29,7 +36,7 @@ export function createEnqueueApi(options: {
 
       return enqueueCommand(options.queue, parsed.output);
     })
-    .post("/contract/jobs/enqueue/batch", async ({ body, headers, set }) => {
+    .post(JOB_ENQUEUE_BATCH_PATH, async ({ body, headers, set }) => {
       if (!isAuthorized(headers, options.internalSecret)) {
         set.status = 401;
         return { status: "error", message: "Unauthorized" };
@@ -63,4 +70,10 @@ export function createEnqueueApi(options: {
         ),
       };
     });
+}
+
+export function createEnqueueApi(options: EnqueueApiOptions) {
+  return new Elysia({ name: "job-runner-enqueue" })
+    .use(createEnqueueRoutes(options))
+    .use(createEnqueueRoutes(options, "/contract"));
 }
