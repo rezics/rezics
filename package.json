@@ -16,7 +16,6 @@
   ],
   "devDependencies": {
     "@rezics/storybook-config": "workspace:*",
-    "@rezics/ui": "workspace:*",
     "@storybook/addon-docs": "10.3.6",
     "@storybook/react-vite": "^10.3.6",
     "babel-plugin-react-compiler": "^1.0.0",

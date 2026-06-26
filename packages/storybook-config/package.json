@@ -14,10 +14,6 @@
     "./preview": {
       "types": "./src/preview.tsx",
       "import": "./src/preview.tsx"
-    },
-    "./i18n": {
-      "types": "./src/i18n.tsx",
-      "import": "./src/i18n.tsx"
     }
   },
   "peerDependencies": {

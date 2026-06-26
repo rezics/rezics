@@ -5,7 +5,6 @@ import {
   isValidKind,
   type NotificationPreference,
   notificationPreferenceKeyForKind,
-  type SystemEmailBody,
 } from "@rezics/contract";
 import { and, eq, sql } from "drizzle-orm";
 import { Subscription } from "../db/schema";
@@ -219,10 +218,4 @@ export async function broadcast(
 
 export async function sendDm(dm: InternalDmBody) {
   return postInternal("/internal/dm", dm);
-}
-
-export async function notifySystemAndEmail(
-  body: SystemEmailBody & { primaryEmail?: string | null },
-) {
-  return postInternal("/internal/system-email", body);
 }

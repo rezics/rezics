@@ -1,4 +1,5 @@
 import { treaty } from "@elysiajs/eden";
+import type { ServerApp } from "@rezics/backend/server/app";
 import {
   ApiError,
   type ApiErrorDetail,
@@ -29,17 +30,23 @@ type LooseEdenClient = {
   [segment: string]: LooseEdenClient;
 };
 
-export function createEdenClient<App extends AnyElysia = AnyElysia>(
+type TypedEdenClient<App extends AnyElysia> = ReturnType<typeof treaty<App>>;
+
+function createTypedEdenClient<App extends AnyElysia>(
   baseUrl = API_BASE_URL,
-): LooseEdenClient {
+): TypedEdenClient<App> {
   return treaty<App>(baseUrl, {
     fetch: {
       credentials: "include",
     },
-  }) as unknown as LooseEdenClient;
+  });
 }
 
-export const apiClient = createEdenClient();
+export function createEdenClient(baseUrl = API_BASE_URL): LooseEdenClient {
+  return createTypedEdenClient(baseUrl) as unknown as LooseEdenClient;
+}
+
+export const apiClient = createTypedEdenClient<ServerApp>();
 export const authAdminClient = createEdenClient(`${API_BASE_URL}/auth`);
 export const authAdminEmailClient = createEdenClient(`${API_BASE_URL}/auth`);
 export const authJwtServiceClient = createEdenClient(`${API_BASE_URL}/auth`);

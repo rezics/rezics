@@ -1,43 +1,23 @@
+import type {
+  AuthEmailErrorResponse,
+  AuthEmailPreviewInput,
+  AuthEmailPreviewResponse,
+  AuthEmailSendTestInput,
+  AuthEmailSendTestResponse,
+  AuthEmailSmtpTestResponse,
+  AuthEmailTemplatesResponse,
+} from "@rezics/contract";
 import useSWR from "swr";
 import { authAdminEmailClient, unwrapEdenResponse } from "@/lib/api-client";
 
-export type AuthEmailTemplate = {
-  name: string;
-  description: string;
-  propSchema: Record<
-    string,
-    { type: string; required: boolean; description: string }
-  >;
-};
-
-export type AuthEmailPreviewInput = {
-  template: string;
-  props: Record<string, unknown>;
-};
-
-export type AuthEmailSendTestInput = AuthEmailPreviewInput & {
-  to: string;
-};
-
-export type AuthEmailPreviewResponse = {
-  html: string;
-};
-
-export type AuthEmailSendTestResponse = {
-  success: boolean;
-  to: string;
-};
-
-export type AuthEmailSmtpTestResponse = {
-  connected: boolean;
-  host?: string;
-  port?: string;
-  error?: string;
-};
-
-type AuthEmailErrorResponse = {
-  error: string;
-};
+export type {
+  AuthEmailPreviewInput,
+  AuthEmailPreviewResponse,
+  AuthEmailSendTestInput,
+  AuthEmailSendTestResponse,
+  AuthEmailSmtpTestResponse,
+  AuthEmailTemplate,
+} from "@rezics/contract";
 
 function isAuthEmailErrorResponse(
   value: unknown,
@@ -67,16 +47,16 @@ const AUTH_EMAIL_TEMPLATES_KEY = [
   "templates",
 ] as const;
 
-async function fetchAuthEmailTemplates(): Promise<AuthEmailTemplate[]> {
+async function fetchAuthEmailTemplates(): Promise<AuthEmailTemplatesResponse> {
   const response = await authAdminEmailClient.admin.email.templates.get();
-  return unwrapAuthEmailData<AuthEmailTemplate[]>(
+  return unwrapAuthEmailData<AuthEmailTemplatesResponse>(
     unwrapEdenResponse(response),
     "Failed to load email templates",
   );
 }
 
 export function useAuthEmailTemplatesQuery() {
-  const query = useSWR<AuthEmailTemplate[]>(
+  const query = useSWR<AuthEmailTemplatesResponse>(
     AUTH_EMAIL_TEMPLATES_KEY,
     fetchAuthEmailTemplates,
     {

@@ -10,7 +10,7 @@
     "types": ["node"],
     "plugins": [{ "name": "next" }],
     "paths": {
-      "@/*": ["./*"],
+      "@/*": ["./*", "../backend/src/server/*", "../backend/src/*"],
       "#/*": ["../ui/src/*"]
     }
   },

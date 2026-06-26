@@ -134,7 +134,7 @@ export const TokenPage: FC = () => {
         </div>
       )}
 
-      {error && (
+      {Boolean(error) && (
         <Alert className="mb-4">
           <AlertDescription className="text-error-text">
             {(error as Error).message}

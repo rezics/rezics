@@ -1,26 +1,29 @@
-import { BasicAdminPermission } from "@rezics/contract";
+import {
+  BasicAdminPermission,
+  echoKvKeyListQuerySchema,
+  echoKvKeyListResponseSchema,
+  echoKvResponseSchema,
+  echoKvUpsertRequestSchema,
+  type EchoKvKeyListResponse,
+  type EchoKvResponse,
+  type EchoKvUpsertRequest,
+} from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro } from "@/middleware";
 import { echoKvService } from "./echokv.service";
-import type {
-  EchoKVKeyListResponse,
-  EchoKVResponse,
-  EchoKVUpsertRequest,
-} from "./types";
 
 export const echoKvApi = new Elysia({ prefix: "/echokv" })
   .use(authMacro)
   // @convention:get-only-ok — dev tool, no batch-id use case
   .get(
     "/list",
-    async ({ query }): Promise<EchoKVKeyListResponse> => {
+    async ({ query }): Promise<EchoKvKeyListResponse> => {
       const keys = await echoKvService.listKeys(query.search);
       return { keys };
     },
     {
-      query: t.Object({
-        search: t.Optional(t.String()),
-      }),
+      query: echoKvKeyListQuerySchema,
+      response: { 200: echoKvKeyListResponseSchema },
       detail: {
         summary: "List keys",
         description: "List all keys with an optional search string.",
@@ -30,7 +33,7 @@ export const echoKvApi = new Elysia({ prefix: "/echokv" })
   )
   .get(
     "/:key",
-    async ({ params }): Promise<EchoKVResponse> => {
+    async ({ params }): Promise<EchoKvResponse> => {
       const value = await echoKvService.get(params.key);
       return { value };
     },
@@ -38,6 +41,7 @@ export const echoKvApi = new Elysia({ prefix: "/echokv" })
       params: t.Object({
         key: t.String(),
       }),
+      response: { 200: echoKvResponseSchema },
       detail: {
         summary: "Get value by key",
         description: "Get value by key",
@@ -47,14 +51,14 @@ export const echoKvApi = new Elysia({ prefix: "/echokv" })
   )
   .put(
     "/:key",
-    async ({ params, body, identity, set }): Promise<EchoKVResponse> => {
+    async ({ params, body, identity, set }): Promise<EchoKvResponse> => {
       if (!BasicAdminPermission(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: You are not authorized to update EchoKV");
       }
       const value = await echoKvService.set(
         params.key,
-        body.value as EchoKVUpsertRequest["value"],
+        body.value as EchoKvUpsertRequest["value"],
       );
       return { value };
     },
@@ -63,9 +67,8 @@ export const echoKvApi = new Elysia({ prefix: "/echokv" })
       params: t.Object({
         key: t.String(),
       }),
-      body: t.Object({
-        value: t.Any(),
-      }),
+      body: echoKvUpsertRequestSchema,
+      response: { 200: echoKvResponseSchema },
       detail: {
         summary: "Upsert value by key",
         description:

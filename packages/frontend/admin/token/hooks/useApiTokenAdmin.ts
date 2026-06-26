@@ -5,34 +5,24 @@ import type {
   CreateApiTokenResponse,
   UpdateApiTokenInput,
 } from "@rezics/contract";
-import useSWR from "swr";
+import {
+  createEdenFetcher,
+  useAdminEdenQuery,
+} from "@/admin/shared/eden-swr";
 import { apiClient, unwrapEdenResponse } from "@/lib/api-client";
 
 const API_TOKEN_LIST_KEY = ["eden", "token", "tokens"] as const;
 
-async function fetchApiTokens(): Promise<ApiTokenListResponse> {
-  const response = await apiClient.token.tokens.get();
-  return unwrapEdenResponse(response);
-}
+const fetchApiTokens = createEdenFetcher<
+  ApiTokenListResponse,
+  typeof API_TOKEN_LIST_KEY
+>(() => apiClient.token.tokens.get());
 
 export function useApiTokenListQuery() {
-  const query = useSWR<ApiTokenListResponse>(
-    API_TOKEN_LIST_KEY,
-    fetchApiTokens,
-    {
-      dedupingInterval: 60_000,
-      keepPreviousData: true,
-    },
-  );
-
-  return {
-    data: query.data,
-    error: query.error,
-    isError: Boolean(query.error),
-    isFetching: query.isValidating,
-    isLoading: query.isLoading,
-    refetch: () => query.mutate(),
-  };
+  return useAdminEdenQuery(API_TOKEN_LIST_KEY, fetchApiTokens, {
+    dedupingInterval: 60_000,
+    keepPreviousData: true,
+  });
 }
 
 export async function createApiToken(

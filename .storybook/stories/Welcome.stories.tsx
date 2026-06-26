@@ -40,14 +40,14 @@ export const Welcome: Story = {
         padding: 16,
       }}
     >
-      <h1 style={{ fontWeight: 500 }}>rezics design system</h1>
+      <h1 style={{ fontWeight: 500 }}>rezics workspace storybooks</h1>
       <p>
-        Each publishable surface owns its own Storybook so the package can ship
-        standalone. This host simply aggregates them via <code>refs</code>.
+        This host aggregates the remaining package Storybooks via <code>refs</code>:
+        editor and folio.
       </p>
       <p>
-        Boot the package storybooks in their own terminals first, then run{" "}
-        <code>bun run storybook</code> at the repo root.
+        Run <code>bun run storybook</code> at the repo root to start the host and
+        package Storybooks together.
       </p>
       <table
         style={{

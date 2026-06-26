@@ -8,15 +8,6 @@ export {
   AvatarImage,
 } from "./avatar";
 export { Badge, badgeVariants } from "./badge";
-export {
-  Breadcrumb,
-  BreadcrumbEllipsis,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "./breadcrumb";
 export { Button, buttonVariants } from "./button";
 export {
   Card,
@@ -40,32 +31,7 @@ export {
   CarouselPrevious,
   CarouselPreviousShadcn,
 } from "./carousel";
-export type { ChartConfig } from "./chart";
-export {
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartStyle,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "./chart";
 export { Checkbox } from "./checkbox";
-export {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "./collapsible";
-export {
-  Command,
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-  CommandShortcut,
-} from "./command";
 export {
   Dialog,
   DialogClose,
@@ -78,35 +44,6 @@ export {
   DialogTitle,
   DialogTrigger,
 } from "./dialog";
-export {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerOverlay,
-  DrawerPortal,
-  DrawerTitle,
-  DrawerTrigger,
-} from "./drawer";
-export {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "./dropdown-menu";
 export { Input } from "./input";
 export { Label } from "./label";
 export {
@@ -141,34 +78,6 @@ export {
   SheetTrigger,
 } from "./sheet";
 export {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupAction,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarInput,
-  SidebarInset,
-  SidebarMenu,
-  SidebarMenuAction,
-  SidebarMenuBadge,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSkeleton,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-  SidebarProvider,
-  SidebarRail,
-  SidebarSeparator,
-  SidebarTrigger,
-  useSidebar,
-} from "./sidebar";
-export { Skeleton } from "./skeleton";
-export { Toaster } from "./sonner";
-export {
   Table,
   TableBody,
   TableCaption,
@@ -186,7 +95,6 @@ export {
   tabsListVariants,
 } from "./tabs";
 export { Textarea } from "./textarea";
-export { ThemeSwitch } from "./theme-switch";
 export { Toggle, toggleVariants } from "./toggle";
 export { ToggleGroup, ToggleGroupItem } from "./toggle-group";
 export {

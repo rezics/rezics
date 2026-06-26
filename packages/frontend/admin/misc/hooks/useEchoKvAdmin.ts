@@ -1,13 +1,10 @@
+import type {
+  EchoKvKeyListResponse,
+  EchoKvResponse,
+  EchoKvUpsertRequest,
+} from "@rezics/contract";
 import useSWR from "swr";
 import { apiClient, unwrapEdenResponse } from "@/lib/api-client";
-
-type EchoKvResponse<T = unknown> = {
-  value: T;
-};
-
-type EchoKvKeyListResponse = {
-  keys: string[];
-};
 
 type EchoKvKeyListKey = readonly ["eden", "echokv", "list", string];
 
@@ -49,7 +46,7 @@ export async function getEchoKvValue(
 
 export async function setEchoKvValue(
   key: string,
-  value: unknown,
+  value: EchoKvUpsertRequest["value"],
 ): Promise<EchoKvResponse<unknown>> {
   const response = await apiClient.echokv({ key }).put({ value });
   return unwrapEdenResponse(response);

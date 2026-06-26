@@ -337,7 +337,6 @@ function installServiceTestModuleMocks() {
     filterRecipientsByPreference: mock(
       async (recipients: unknown) => recipients,
     ),
-    notifySystemAndEmail: mock(async () => ({ ok: true })),
     resolveRecipients: mock(
       async (event: { directRecipients?: string[] }) =>
         event.directRecipients ?? [],

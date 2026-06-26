@@ -146,3 +146,72 @@ export const adminStartAuthImpersonationResponseSchema = t.Object({
 });
 export type AdminStartAuthImpersonationResponse =
   (typeof adminStartAuthImpersonationResponseSchema)["static"];
+
+export const authEmailTemplatePropSchema = t.Object({
+  type: t.String(),
+  required: t.Boolean(),
+  description: t.String(),
+});
+export type AuthEmailTemplateProp =
+  (typeof authEmailTemplatePropSchema)["static"];
+
+export const authEmailTemplateSchema = t.Object({
+  name: t.String(),
+  description: t.String(),
+  propSchema: t.Record(t.String(), authEmailTemplatePropSchema),
+});
+export type AuthEmailTemplate = (typeof authEmailTemplateSchema)["static"];
+
+export const authEmailTemplatesResponseSchema = t.Array(
+  authEmailTemplateSchema,
+);
+export type AuthEmailTemplatesResponse =
+  (typeof authEmailTemplatesResponseSchema)["static"];
+
+export const authEmailRenderPropsSchema = t.Record(t.String(), t.Unknown());
+export type AuthEmailRenderProps =
+  (typeof authEmailRenderPropsSchema)["static"];
+
+export const authEmailPreviewInputSchema = t.Object({
+  template: t.String(),
+  props: authEmailRenderPropsSchema,
+});
+export type AuthEmailPreviewInput =
+  (typeof authEmailPreviewInputSchema)["static"];
+
+export const authEmailSendTestInputSchema = t.Intersect([
+  authEmailPreviewInputSchema,
+  t.Object({
+    to: t.String(),
+  }),
+]);
+export type AuthEmailSendTestInput =
+  (typeof authEmailSendTestInputSchema)["static"];
+
+export const authEmailPreviewResponseSchema = t.Object({
+  html: t.String(),
+});
+export type AuthEmailPreviewResponse =
+  (typeof authEmailPreviewResponseSchema)["static"];
+
+export const authEmailSendTestResponseSchema = t.Object({
+  success: t.Boolean(),
+  to: t.String(),
+});
+export type AuthEmailSendTestResponse =
+  (typeof authEmailSendTestResponseSchema)["static"];
+
+export const authEmailSmtpTestResponseSchema = t.Object({
+  connected: t.Boolean(),
+  host: t.Optional(t.String()),
+  port: t.Optional(t.String()),
+  error: t.Optional(t.String()),
+});
+export type AuthEmailSmtpTestResponse =
+  (typeof authEmailSmtpTestResponseSchema)["static"];
+
+export const authEmailErrorResponseSchema = t.Object({
+  error: t.String(),
+});
+export type AuthEmailErrorResponse =
+  (typeof authEmailErrorResponseSchema)["static"];

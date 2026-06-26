@@ -1,7 +1,26 @@
+import {
+  authEmailErrorResponseSchema,
+  authEmailPreviewInputSchema,
+  authEmailPreviewResponseSchema,
+  authEmailSendTestInputSchema,
+  authEmailSendTestResponseSchema,
+  authEmailSmtpTestResponseSchema,
+  authEmailTemplatesResponseSchema,
+} from "@rezics/contract";
+import { Elysia } from "elysia";
 import { render, templateRegistry } from "@/email";
-import { Elysia, t } from "elysia";
 import { auth } from "../auth/instance";
 import { createAuthMailer, getDefaultSender } from "../notification/mailer";
+
+const authEmailAdminErrorResponses = {
+  401: authEmailErrorResponseSchema,
+  403: authEmailErrorResponseSchema,
+} as const;
+
+const authEmailTemplateErrorResponses = {
+  400: authEmailErrorResponseSchema,
+  ...authEmailAdminErrorResponses,
+} as const;
 
 async function requireAdmin(request: Request): Promise<string | null> {
   const session = await auth.api.getSession({ headers: request.headers });
@@ -24,13 +43,22 @@ export const adminEmailApi = new Elysia({ prefix: "/admin/email" })
     }
     return undefined;
   })
-  .get("/templates", () => {
-    return templateRegistry.map((entry) => ({
-      name: entry.name,
-      description: entry.description,
-      propSchema: entry.propSchema,
-    }));
-  })
+  .get(
+    "/templates",
+    () => {
+      return templateRegistry.map((entry) => ({
+        name: entry.name,
+        description: entry.description,
+        propSchema: entry.propSchema,
+      }));
+    },
+    {
+      response: {
+        200: authEmailTemplatesResponseSchema,
+        ...authEmailAdminErrorResponses,
+      },
+    },
+  )
   .post(
     "/preview",
     async ({ body, set }) => {
@@ -44,10 +72,11 @@ export const adminEmailApi = new Elysia({ prefix: "/admin/email" })
       return { html };
     },
     {
-      body: t.Object({
-        template: t.String(),
-        props: t.Record(t.String(), t.Any()),
-      }),
+      body: authEmailPreviewInputSchema,
+      response: {
+        200: authEmailPreviewResponseSchema,
+        ...authEmailTemplateErrorResponses,
+      },
     },
   )
   .post(
@@ -73,25 +102,34 @@ export const adminEmailApi = new Elysia({ prefix: "/admin/email" })
       return { success: true, to: body.to };
     },
     {
-      body: t.Object({
-        template: t.String(),
-        props: t.Record(t.String(), t.Any()),
-        to: t.String(),
-      }),
+      body: authEmailSendTestInputSchema,
+      response: {
+        200: authEmailSendTestResponseSchema,
+        ...authEmailTemplateErrorResponses,
+      },
     },
   )
-  .post("/smtp-test", async () => {
-    const transport = createAuthMailer();
+  .post(
+    "/smtp-test",
+    async () => {
+      const transport = createAuthMailer();
 
-    try {
-      const verified = await transport.verify();
-      return { connected: verified };
-    } catch (err) {
-      return {
-        connected: false,
-        error: err instanceof Error ? err.message : "Unknown error",
-      };
-    }
-  });
+      try {
+        const verified = await transport.verify();
+        return { connected: verified };
+      } catch (err) {
+        return {
+          connected: false,
+          error: err instanceof Error ? err.message : "Unknown error",
+        };
+      }
+    },
+    {
+      response: {
+        200: authEmailSmtpTestResponseSchema,
+        ...authEmailAdminErrorResponses,
+      },
+    },
+  );
 
 export type AuthAdminEmailRouter = typeof adminEmailApi;

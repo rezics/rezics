@@ -148,68 +148,6 @@ async function countIndividualUnread(recipientId: string): Promise<number> {
   return rows[0]?.count ?? 0;
 }
 
-export async function createNotification(input: {
-  recipientId: string;
-  actorId: string | null;
-  kind: string;
-  sourceUnitId: string;
-  extra: unknown;
-}): Promise<NotificationRow> {
-  const [notification] = await db
-    .insert(notifications)
-    .values(input)
-    .returning();
-  if (!notification) throw new Error("Notification insert returned no row");
-  return notification;
-}
-
-export async function findSystemEmailDuplicate(input: {
-  recipientId: string;
-  kind: string;
-  sourceUnitId: string;
-  actorId: string;
-  since: Date;
-}): Promise<NotificationRow | null> {
-  const [row] = await db
-    .select()
-    .from(notifications)
-    .where(
-      and(
-        eq(notifications.recipientId, input.recipientId),
-        eq(notifications.kind, input.kind),
-        eq(notifications.sourceUnitId, input.sourceUnitId),
-        eq(notifications.actorId, input.actorId),
-        sql`${notifications.createdAt} >= ${input.since}`,
-        sql`${notifications.extra}->>'kind' = ${input.kind}`,
-        sql`${notifications.extra}->'payload'->>'actorUserId' = ${input.actorId}`,
-        sql`${notifications.extra}->'payload'->>'sourceUnitId' = ${input.sourceUnitId}`,
-      ),
-    )
-    .orderBy(desc(notifications.createdAt))
-    .limit(1);
-
-  return row ?? null;
-}
-
-export async function refreshNotification(input: {
-  id: string;
-  createdAt: Date;
-  extra: unknown;
-}): Promise<NotificationRow> {
-  const [row] = await db
-    .update(notifications)
-    .set({
-      createdAt: input.createdAt,
-      read: false,
-      readAt: null,
-      extra: input.extra,
-    })
-    .where(eq(notifications.id, input.id))
-    .returning();
-  if (!row) throw new Error("Notification refresh returned no row");
-  return row;
-}
-
 export async function getNotifications(
   recipientId: string,
   page: number,

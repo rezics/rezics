@@ -66,26 +66,6 @@ export const themeGlobalTypes = {
   },
 } satisfies NonNullable<Preview["globalTypes"]>;
 
-export const localeGlobalTypes = {
-  locale: {
-    name: "Locale",
-    description: "UI language",
-    defaultValue: "zh-hant",
-    toolbar: {
-      icon: "globe",
-      items: [
-        { value: "zh-hant", title: "繁體中文" },
-        { value: "zh-hans", title: "简体中文" },
-        { value: "en", title: "English" },
-        { value: "ja", title: "日本語" },
-        { value: "de", title: "Deutsch" },
-        { value: "ko", title: "한국어" },
-      ],
-      dynamicTitle: true,
-    },
-  },
-} satisfies NonNullable<Preview["globalTypes"]>;
-
 export const basePreviewParameters = {
   layout: "padded",
   controls: { expanded: true },

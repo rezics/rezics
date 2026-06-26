@@ -4,6 +4,10 @@ import {
   adminAuthUserAccountSummaryResponseSchema,
   adminAuthUserSessionsResponseSchema,
   adminStartAuthImpersonationResponseSchema,
+  authEmailPreviewInputSchema,
+  authEmailSendTestInputSchema,
+  authEmailSmtpTestResponseSchema,
+  authEmailTemplatesResponseSchema,
 } from "./admin";
 
 describe("auth admin contracts", () => {
@@ -77,6 +81,47 @@ describe("auth admin contracts", () => {
         expiresAt: "2026-05-28T00:15:00.000Z",
         durationSeconds: 900,
         auditLogId: "audit-1",
+      }),
+    ).toBe(true);
+  });
+
+  test("accepts auth email admin contracts", () => {
+    expect(
+      Value.Check(authEmailTemplatesResponseSchema, [
+        {
+          name: "verification-code",
+          description: "6-digit email verification code",
+          propSchema: {
+            code: {
+              type: "string",
+              required: true,
+              description: "6-digit verification code",
+            },
+          },
+        },
+      ]),
+    ).toBe(true);
+
+    expect(
+      Value.Check(authEmailPreviewInputSchema, {
+        template: "verification-code",
+        props: { code: "123456" },
+      }),
+    ).toBe(true);
+
+    expect(
+      Value.Check(authEmailSendTestInputSchema, {
+        template: "verification-code",
+        props: { code: "123456" },
+        to: "admin@example.com",
+      }),
+    ).toBe(true);
+
+    expect(
+      Value.Check(authEmailSmtpTestResponseSchema, {
+        connected: true,
+        host: "smtp.example.com",
+        port: "587",
       }),
     ).toBe(true);
   });

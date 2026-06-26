@@ -5,8 +5,12 @@ import type {
   MeiliKeyListResponse,
   MeiliTaskResponse,
 } from "@rezics/contract";
-import useSWR, { useSWRConfig } from "swr";
+import { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
+import {
+  createEdenFetcher,
+  useAdminEdenQuery,
+} from "@/admin/shared/eden-swr";
 import { apiClient, unwrapEdenResponse } from "@/lib/api-client";
 
 type MeiliHealthKey = readonly ["eden", "meili", "admin", "health"];
@@ -61,15 +65,13 @@ function toError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
 }
 
-async function fetchMeiliHealth(): Promise<MeiliHealthResponse> {
-  const response = await apiClient.meili.health.get();
-  return unwrapEdenResponse(response);
-}
+const fetchMeiliHealth = createEdenFetcher<MeiliHealthResponse, MeiliHealthKey>(
+  () => apiClient.meili.health.get(),
+);
 
-async function fetchMeiliKeys(): Promise<MeiliKeyListResponse> {
-  const response = await apiClient.meili.keys.get();
-  return unwrapEdenResponse(response);
-}
+const fetchMeiliKeys = createEdenFetcher<MeiliKeyListResponse, MeiliKeysKey>(
+  () => apiClient.meili.keys.get(),
+);
 
 function useMeiliActionMutation<Data>(
   action: string,
@@ -106,38 +108,16 @@ function useMeiliActionMutation<Data>(
 }
 
 export function useMeiliHealthQuery() {
-  const result = useSWR<MeiliHealthResponse>(
-    MEILI_HEALTH_KEY,
-    fetchMeiliHealth,
-    {
-      dedupingInterval: 5_000,
-    },
-  );
-
-  return {
-    data: result.data,
-    error: result.error,
-    isError: Boolean(result.error),
-    isFetching: result.isValidating,
-    isLoading: result.isLoading,
-    refetch: () => result.mutate(),
-  };
+  return useAdminEdenQuery(MEILI_HEALTH_KEY, fetchMeiliHealth, {
+    dedupingInterval: 5_000,
+  });
 }
 
 export function useMeiliKeysQuery() {
-  const result = useSWR<MeiliKeyListResponse>(MEILI_KEYS_KEY, fetchMeiliKeys, {
+  return useAdminEdenQuery(MEILI_KEYS_KEY, fetchMeiliKeys, {
     dedupingInterval: 30_000,
     keepPreviousData: true,
   });
-
-  return {
-    data: result.data,
-    error: result.error,
-    isError: Boolean(result.error),
-    isFetching: result.isValidating,
-    isLoading: result.isLoading,
-    refetch: () => result.mutate(),
-  };
 }
 
 export function useMeiliInitContentIndexMutation(
