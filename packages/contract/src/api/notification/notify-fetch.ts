@@ -14,7 +14,7 @@ export async function notifyFetch<T>(
     throw new ApiError(
       0,
       "NOTIFY_NOT_CONFIGURED",
-      "@rezics/contract/api notifyBaseUrl is not configured. Call configureApi({ notifyBaseUrl }) at app boot.",
+      "notifyBaseUrl is not configured. Call configureApi({ notifyBaseUrl }) before using the notification client.",
     );
   }
   const url = `${base}${endpoint}`;

@@ -131,12 +131,10 @@ export function useDeleteMeMutation(
 // useFollowMutation / useUnfollowMutation removed by the
 // `engagement-subscription` change — the underlying `/user/follow/:id`
 // POST/DELETE endpoints are retired. UI consumers go through
-// `useSubscribe` / `useUnsubscribe` from `@rezics/contract/api` (subscription
-// module) with default `channels=['*']`.
+// the subscription client with default `channels=['*']`.
 // useFollowMutation / useUnfollowMutation 已被 `engagement-subscription`
 // 改动移除——底层的 `/user/follow/:id` POST/DELETE 端点已停用。UI 消费者改用
-// `@rezics/contract/api`（subscription 模块）的 `useSubscribe` / `useUnsubscribe`，
-// 默认 `channels=['*']`。
+// subscription client，默认 `channels=['*']`。
 
 export function useUpdateSettingsMutation(
   options?: Omit<

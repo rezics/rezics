@@ -17,7 +17,7 @@ let config: ApiConfig = {
 };
 
 /**
- * Initialise `@rezics/contract/api` with externally-provided configuration.
+ * Initialise the legacy internal client API with externally-provided configuration.
  * Must be called once before any API function is used.
  */
 export function configureApi(overrides: ApiConfig) {

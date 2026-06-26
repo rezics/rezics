@@ -11,10 +11,6 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
-    "./api/*": {
-      "types": "./src/api/*.ts",
-      "default": "./src/api/*.ts"
-    },
     "./language-core": {
       "types": "./src/language-core.ts",
       "default": "./src/language-core.ts"

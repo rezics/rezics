@@ -1,9 +1,13 @@
-import type {
-  EchoKvKeyListResponse,
-  EchoKvResponse,
-} from "@rezics/contract/api/echokv/echokv.api";
 import useSWR from "swr";
 import { apiClient, unwrapEdenResponse } from "@/lib/api-client";
+
+type EchoKvResponse<T = unknown> = {
+  value: T;
+};
+
+type EchoKvKeyListResponse = {
+  keys: string[];
+};
 
 type EchoKvKeyListKey = readonly ["eden", "echokv", "list", string];
 
