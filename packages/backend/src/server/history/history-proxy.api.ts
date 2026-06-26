@@ -73,7 +73,10 @@ export type HistoryProxyRepository = {
   findUnit(unitId: string): Promise<HistoryProxyUnit | undefined>;
 };
 
-export type HistoryProxyReader = Pick<RevisionService, "listUnitRevisions">;
+export type HistoryProxyReader = Pick<
+  RevisionService,
+  "compareRevisionPaths" | "listUnitRevisions"
+>;
 
 async function getServerDb() {
   const { db } = await import("../db/client");
@@ -202,9 +205,11 @@ export function createHistoryProxyApi(
       "/unit/:unitId/revisions/compare/:baseSequence/:targetSequence",
       async ({ headers, params }): Promise<UnitRevisionPathCompareResponse> => {
         await assertCanReadHistory(repository, params.unitId, headers);
-        return fetchHistoryJson<UnitRevisionPathCompareResponse>(
-          `/history/unit/${encodePathPart(params.unitId)}/revisions/compare/${encodePathPart(params.baseSequence)}/${encodePathPart(params.targetSequence)}`,
-        );
+        return historyReader.compareRevisionPaths({
+          unitId: params.unitId,
+          baseSequence: Number(params.baseSequence),
+          targetSequence: Number(params.targetSequence),
+        });
       },
       {
         params: revisionCompareParamsSchema,

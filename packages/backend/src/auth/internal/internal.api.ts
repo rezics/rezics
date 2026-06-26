@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
 import {
+  authInternalProjectSlugRequestSchema,
+  type AuthInternalProjectSlugResponse,
   authInternalVerifiedRegistrationFactsRequestSchema,
   type AuthInternalVerifiedRegistrationFactsResponse,
 } from "@rezics/contract";
@@ -117,7 +119,7 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
   )
   .post(
     "/users/project-slug",
-    async ({ body, set }) => {
+    async ({ body, set }): Promise<AuthInternalProjectSlugResponse> => {
       const user = await findAuthUserId(body.authUserId);
 
       if (!user) {
@@ -136,10 +138,7 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
       return { success: true };
     },
     {
-      body: t.Object({
-        authUserId: t.String(),
-        slug: t.String({ minLength: 1 }),
-      }),
+      body: authInternalProjectSlugRequestSchema,
     },
   )
   .post(

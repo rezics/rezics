@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
+  authInternalProjectSlugRequestSchema,
+  authInternalProjectSlugResponseSchema,
   authInternalVerifiedRegistrationFactsRequestSchema,
   authInternalVerifiedRegistrationFactsResponseSchema,
 } from "./internal";
@@ -33,6 +35,31 @@ describe("auth internal contracts", () => {
         error: {
           code: "REGISTRATION_NOT_VERIFIED",
           message: "Registration verification is not complete",
+        },
+      }),
+    ).toBe(true);
+  });
+
+  test("accepts project slug boundary DTOs", () => {
+    expect(
+      Value.Check(authInternalProjectSlugRequestSchema, {
+        authUserId: "auth-user-1",
+        slug: "reader",
+      }),
+    ).toBe(true);
+
+    expect(
+      Value.Check(authInternalProjectSlugResponseSchema, {
+        success: true,
+      }),
+    ).toBe(true);
+
+    expect(
+      Value.Check(authInternalProjectSlugResponseSchema, {
+        success: false,
+        error: {
+          code: "AUTH_USER_NOT_FOUND",
+          message: "Auth user was not found",
         },
       }),
     ).toBe(true);

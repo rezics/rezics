@@ -58,12 +58,22 @@ const listUnitRevisions = mock(
   }),
 );
 
+const compareRevisionPaths = mock(
+  async (input: Parameters<HistoryProxyReader["compareRevisionPaths"]>[0]) => ({
+    unitId: input.unitId,
+    baseSequence: input.baseSequence,
+    targetSequence: input.targetSequence,
+    candidatePaths: [],
+    changes: [],
+  }),
+);
+
 function repository(): HistoryProxyRepository {
   return { findUnit };
 }
 
 function historyReader(): HistoryProxyReader {
-  return { listUnitRevisions };
+  return { compareRevisionPaths, listUnitRevisions };
 }
 
 describe("historyProxyApi", () => {
@@ -71,6 +81,7 @@ describe("historyProxyApi", () => {
     findUnit.mockClear();
     fetchMock.mockClear();
     listUnitRevisions.mockClear();
+    compareRevisionPaths.mockClear();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
   });
 
@@ -104,6 +115,7 @@ describe("historyProxyApi", () => {
 
     expect(response.status).toBe(403);
     expect(listUnitRevisions).not.toHaveBeenCalled();
+    expect(compareRevisionPaths).not.toHaveBeenCalled();
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -129,6 +141,24 @@ describe("historyProxyApi", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  test("compares revisions through the in-process reader", async () => {
+    const { createHistoryProxyApi } = await import("./history-proxy.api");
+    const historyProxyApi = createHistoryProxyApi(repository(), historyReader());
+    const response = await historyProxyApi.handle(
+      new Request(
+        "http://localhost/history/unit/unit-public/revisions/compare/1/3",
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(compareRevisionPaths).toHaveBeenCalledWith({
+      unitId: "unit-public",
+      baseSequence: 1,
+      targetSequence: 3,
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   test("continues to proxy structure event timelines over HTTP", async () => {
     const { createHistoryProxyApi } = await import("./history-proxy.api");
     const historyProxyApi = createHistoryProxyApi(repository(), historyReader());
@@ -143,6 +173,7 @@ describe("historyProxyApi", () => {
       "http://history.example/history/unit/unit-public/structure-events?limit=5",
     );
     expect(listUnitRevisions).not.toHaveBeenCalled();
+    expect(compareRevisionPaths).not.toHaveBeenCalled();
   });
 
   test("blocks structure event payloads for public non-owners", async () => {

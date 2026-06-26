@@ -29,3 +29,29 @@ export const authInternalVerifiedRegistrationFactsResponseSchema = t.Union([
 ]);
 export type AuthInternalVerifiedRegistrationFactsResponse =
   (typeof authInternalVerifiedRegistrationFactsResponseSchema)["static"];
+
+export const authInternalProjectSlugRequestSchema = t.Object({
+  authUserId: t.String(),
+  slug: t.String({ minLength: 1 }),
+});
+export type AuthInternalProjectSlugRequest =
+  (typeof authInternalProjectSlugRequestSchema)["static"];
+
+export const authInternalProjectSlugErrorSchema = t.Object({
+  code: t.Literal("AUTH_USER_NOT_FOUND"),
+  message: t.String(),
+});
+export type AuthInternalProjectSlugError =
+  (typeof authInternalProjectSlugErrorSchema)["static"];
+
+export const authInternalProjectSlugResponseSchema = t.Union([
+  t.Object({
+    success: t.Literal(true),
+  }),
+  t.Object({
+    success: t.Literal(false),
+    error: authInternalProjectSlugErrorSchema,
+  }),
+]);
+export type AuthInternalProjectSlugResponse =
+  (typeof authInternalProjectSlugResponseSchema)["static"];

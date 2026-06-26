@@ -1,5 +1,7 @@
 import type {
   AdminAuthSession,
+  AuthInternalProjectSlugRequest,
+  AuthInternalProjectSlugResponse,
   AuthInternalVerifiedRegistrationFactsRequest,
   AuthInternalVerifiedRegistrationFactsResponse,
   VerifiedRegistrationFacts,
@@ -37,10 +39,9 @@ export async function fetchVerifiedRegistrationFacts(
     : null;
 }
 
-export async function projectSlugToAuth(input: {
-  authUserId: string;
-  slug: string;
-}): Promise<boolean> {
+export async function projectSlugToAuth(
+  input: AuthInternalProjectSlugRequest,
+): Promise<boolean> {
   const url = new URL("/internal/users/project-slug", getInternalAuthBaseUrl());
   const response = await fetch(url, {
     method: "POST",
@@ -51,7 +52,11 @@ export async function projectSlugToAuth(input: {
     body: JSON.stringify(input),
   });
 
-  return response.ok;
+  if (!response.ok) return false;
+
+  const responseBody =
+    (await response.json()) as AuthInternalProjectSlugResponse;
+  return responseBody.success;
 }
 
 export async function revokeAuthSessionsForAuthUser(input: {
