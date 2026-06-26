@@ -24,27 +24,6 @@ export type CreateBackendAppOptions = {
   port?: number;
 };
 
-type FetchableApp = {
-  fetch(request: Request): Response | Promise<Response>;
-};
-
-type MountableApp = FetchableApp & {
-  get(path: string, handler: () => unknown): unknown;
-  listen(port: number): unknown;
-  mount(
-    path: string,
-    handler: (request: Request) => Response | Promise<Response>,
-  ): unknown;
-};
-
-function mountService(
-  root: MountableApp,
-  prefix: string,
-  service: FetchableApp,
-) {
-  root.mount(prefix, (request) => service.fetch(request));
-}
-
 export async function createBackendApp(options: CreateBackendAppOptions = {}) {
   const port = options.port ?? resolveBackendPort();
   const internalPrefix =
@@ -89,25 +68,25 @@ export async function createBackendApp(options: CreateBackendAppOptions = {}) {
     isDev: process.env.NODE_ENV !== "production",
   });
 
-  mountService(app, `${internalPrefix}/auth`, auth.app);
-  mountService(app, `${internalPrefix}/notify`, notify.app);
-  mountService(app, `${internalPrefix}/reaction`, reaction.app);
-  mountService(app, `${internalPrefix}/history`, history.app);
-  mountService(app, `${internalPrefix}/ranking`, ranking.app);
-  mountService(app, `${internalPrefix}/preview`, preview);
-
-  app.get(`${internalPrefix}/health`, () => ({
-    status: "ok",
-    services: [
-      "server",
-      "auth",
-      "notify",
-      "reaction",
-      "history",
-      "ranking",
-      "preview",
-    ] satisfies BackendMountedService[],
-  }));
+  app
+    .group(`${internalPrefix}/auth`, (group) => group.use(auth.app))
+    .group(`${internalPrefix}/notify`, (group) => group.use(notify.app))
+    .group(`${internalPrefix}/reaction`, (group) => group.use(reaction.app))
+    .group(`${internalPrefix}/history`, (group) => group.use(history.app))
+    .group(`${internalPrefix}/ranking`, (group) => group.use(ranking.app))
+    .group(`${internalPrefix}/preview`, (group) => group.use(preview))
+    .get(`${internalPrefix}/health`, () => ({
+      status: "ok",
+      services: [
+        "server",
+        "auth",
+        "notify",
+        "reaction",
+        "history",
+        "ranking",
+        "preview",
+      ] satisfies BackendMountedService[],
+    }));
 
   return {
     app,
