@@ -1,8 +1,8 @@
-import * as v from "valibot";
+import { t, type Static } from "elysia";
 import { historyIdempotency } from "../idempotency";
 import { JOB_LANES } from "../lanes";
 import { jobTags, uniqueTags } from "../tags";
-import { commandSchema } from "./common";
+import { commandSchema, parseSchema } from "./common";
 
 export const HISTORY_COMMAND_KINDS = {
   outboxIngest: "history.outbox.ingest",
@@ -12,13 +12,15 @@ export const HISTORY_COMMAND_KINDS = {
 export type HistoryCommandKind =
   (typeof HISTORY_COMMAND_KINDS)[keyof typeof HISTORY_COMMAND_KINDS];
 
-const HistoryOutboxIngestPayloadSchema = v.strictObject({
-  outboxId: v.string(),
-});
+const HistoryOutboxIngestPayloadSchema = t.Object(
+  { outboxId: t.String() },
+  { additionalProperties: false },
+);
 
-const HistoryOutboxIngestBatchPayloadSchema = v.strictObject({
-  batchSize: v.optional(v.number()),
-});
+const HistoryOutboxIngestBatchPayloadSchema = t.Object(
+  { batchSize: t.Optional(t.Number()) },
+  { additionalProperties: false },
+);
 
 export const HistoryOutboxIngestCommandSchema = commandSchema(
   HISTORY_COMMAND_KINDS.outboxIngest,
@@ -32,12 +34,12 @@ export const HistoryOutboxIngestBatchCommandSchema = commandSchema(
   HistoryOutboxIngestBatchPayloadSchema,
 );
 
-export const HistoryCommandSchema = v.union([
+export const HistoryCommandSchema = t.Union([
   HistoryOutboxIngestCommandSchema,
   HistoryOutboxIngestBatchCommandSchema,
 ]);
 
-export type HistoryCommand = v.InferOutput<typeof HistoryCommandSchema>;
+export type HistoryCommand = Static<typeof HistoryCommandSchema>;
 
 export function createHistoryOutboxIngestCommand(
   outboxId: string,
@@ -48,7 +50,7 @@ export function createHistoryOutboxIngestCommand(
     recordPks: { id: outboxId },
   },
 ): HistoryCommand {
-  return v.parse(HistoryCommandSchema, {
+  return parseSchema(HistoryCommandSchema, {
     kind: HISTORY_COMMAND_KINDS.outboxIngest,
     lane: JOB_LANES.historyIngest,
     payload: { outboxId },
@@ -71,7 +73,7 @@ export function createHistoryOutboxIngestBatchCommand(
     reason: "history-outbox-recovery",
   },
 ): HistoryCommand {
-  return v.parse(HistoryCommandSchema, {
+  return parseSchema(HistoryCommandSchema, {
     kind: HISTORY_COMMAND_KINDS.outboxIngestBatch,
     lane: JOB_LANES.historyIngest,
     payload: {

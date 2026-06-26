@@ -1,4 +1,5 @@
-import * as v from "valibot";
+import { t } from "elysia";
+import { parseSchema, safeParseSchema } from "./common";
 import { type HistoryCommand, HistoryCommandSchema } from "./history";
 import {
   type MaintenanceCommand,
@@ -13,7 +14,7 @@ export type AnyJobCommand =
   | MaintenanceCommand
   | RankingCommand;
 
-export const JobCommandSchema = v.union([
+export const JobCommandSchema = t.Union([
   SearchCommandSchema,
   HistoryCommandSchema,
   MaintenanceCommandSchema,
@@ -21,11 +22,11 @@ export const JobCommandSchema = v.union([
 ]);
 
 export function parseJobCommand(input: unknown): AnyJobCommand {
-  return v.parse(JobCommandSchema, input);
+  return parseSchema(JobCommandSchema, input);
 }
 
 export function safeParseJobCommand(input: unknown) {
-  return v.safeParse(JobCommandSchema, input);
+  return safeParseSchema(JobCommandSchema, input);
 }
 
 export * from "./common";

@@ -1,5 +1,4 @@
 import { describe, expect, test } from "bun:test";
-import * as v from "valibot";
 import {
   createHistoryOutboxIngestCommand,
   createIdempotencyKey,
@@ -8,7 +7,7 @@ import {
   createSearchCommand,
   HISTORY_COMMAND_KINDS,
   JOB_LANES,
-  JobCommandSchema,
+  parseJobCommand,
   jobTags,
   MAINTENANCE_COMMAND_KINDS,
   RANKING_COMMAND_KINDS,
@@ -24,7 +23,7 @@ describe("@rezics/contract/job command contract", () => {
     expect(command.kind).toBe("search.content.patchTags");
     expect(command.lane).toBe(JOB_LANES.searchSyncSlow);
     expect(command.idempotencyKey).toBe("search.content.patchTags:unit-1");
-    expect(v.parse(JobCommandSchema, command)).toEqual(command);
+    expect(parseJobCommand(command)).toEqual(command);
   });
 
   test("validates content search repair commands", () => {
@@ -45,8 +44,8 @@ describe("@rezics/contract/job command contract", () => {
     expect(gameMediaCommand.idempotencyKey).toBe(
       "search.content.gameMediaFullSync:all:game-1",
     );
-    expect(v.parse(JobCommandSchema, fullCommand)).toEqual(fullCommand);
-    expect(v.parse(JobCommandSchema, gameMediaCommand)).toEqual(
+    expect(parseJobCommand(fullCommand)).toEqual(fullCommand);
+    expect(parseJobCommand(gameMediaCommand)).toEqual(
       gameMediaCommand,
     );
   });
@@ -74,11 +73,11 @@ describe("@rezics/contract/job command contract", () => {
       "search.shelfItem.sourceFanout:comment_comment-1:shelf-1_comment_0",
     );
     expect(fullSyncCommand.lane).toBe(JOB_LANES.maintenance);
-    expect(v.parse(JobCommandSchema, syncCommand)).toEqual(syncCommand);
-    expect(v.parse(JobCommandSchema, sourceFanoutCommand)).toEqual(
+    expect(parseJobCommand(syncCommand)).toEqual(syncCommand);
+    expect(parseJobCommand(sourceFanoutCommand)).toEqual(
       sourceFanoutCommand,
     );
-    expect(v.parse(JobCommandSchema, fullSyncCommand)).toEqual(fullSyncCommand);
+    expect(parseJobCommand(fullSyncCommand)).toEqual(fullSyncCommand);
   });
 
   test("validates GAME/MEDIA search drift repair targets", () => {
@@ -97,8 +96,8 @@ describe("@rezics/contract/job command contract", () => {
     expect(ratingCommand.idempotencyKey).toBe(
       "maintenance.search.driftRepair:game-media-ratings:all",
     );
-    expect(v.parse(JobCommandSchema, platformCommand)).toEqual(platformCommand);
-    expect(v.parse(JobCommandSchema, ratingCommand)).toEqual(ratingCommand);
+    expect(parseJobCommand(platformCommand)).toEqual(platformCommand);
+    expect(parseJobCommand(ratingCommand)).toEqual(ratingCommand);
   });
 
   test("validates history outbox ingest commands", () => {
@@ -108,7 +107,7 @@ describe("@rezics/contract/job command contract", () => {
     expect(command.lane).toBe(JOB_LANES.historyIngest);
     expect(command.idempotencyKey).toBe("history.outbox.ingest:outbox-1");
     expect(command.tags).toContain("domain:history");
-    expect(v.parse(JobCommandSchema, command)).toEqual(command);
+    expect(parseJobCommand(command)).toEqual(command);
   });
 
   test("validates rebuild maintenance commands with cursor idempotency", () => {
@@ -150,15 +149,15 @@ describe("@rezics/contract/job command contract", () => {
     expect(pollCommand.idempotencyKey).toBe(
       "maintenance.search.rebuildIndex:poll:poll-1",
     );
-    expect(v.parse(JobCommandSchema, command)).toEqual(command);
-    expect(v.parse(JobCommandSchema, commentCommand)).toEqual(commentCommand);
-    expect(v.parse(JobCommandSchema, collectionCommand)).toEqual(
+    expect(parseJobCommand(command)).toEqual(command);
+    expect(parseJobCommand(commentCommand)).toEqual(commentCommand);
+    expect(parseJobCommand(collectionCommand)).toEqual(
       collectionCommand,
     );
-    expect(v.parse(JobCommandSchema, shelfItemCommand)).toEqual(
+    expect(parseJobCommand(shelfItemCommand)).toEqual(
       shelfItemCommand,
     );
-    expect(v.parse(JobCommandSchema, pollCommand)).toEqual(pollCommand);
+    expect(parseJobCommand(pollCommand)).toEqual(pollCommand);
   });
 
   test("validates Series repair maintenance commands", () => {
@@ -170,7 +169,7 @@ describe("@rezics/contract/job command contract", () => {
     expect(indexCommand.idempotencyKey).toBe(
       "maintenance.series:contentIndex:series-1",
     );
-    expect(v.parse(JobCommandSchema, indexCommand)).toEqual(indexCommand);
+    expect(parseJobCommand(indexCommand)).toEqual(indexCommand);
   });
 
   test("validates ranking commands with stable target idempotency", () => {
@@ -186,7 +185,7 @@ describe("@rezics/contract/job command contract", () => {
       "ranking.invalidate:unit-1:realm:realm-1:post",
     );
     expect(command.tags).toContain("domain:ranking");
-    expect(v.parse(JobCommandSchema, command)).toEqual(command);
+    expect(parseJobCommand(command)).toEqual(command);
   });
 
   test("validates ranking reaction bucket commands", () => {
@@ -203,7 +202,7 @@ describe("@rezics/contract/job command contract", () => {
     expect(command.idempotencyKey).toBe(
       "ranking.reactionBucket:unit-1:realm-1:upvote:2026-02-01T10_25_00.000Z",
     );
-    expect(v.parse(JobCommandSchema, command)).toEqual(command);
+    expect(parseJobCommand(command)).toEqual(command);
   });
 
   test("normalizes idempotency key parts", () => {

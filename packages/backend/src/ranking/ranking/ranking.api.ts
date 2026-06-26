@@ -1,18 +1,13 @@
-import { JobCommandSchema, safeParseJobCommand } from "@rezics/contract/job";
+import { parseJobCommand } from "@rezics/contract/job";
 import { Elysia, t } from "elysia";
-import * as v from "valibot";
 import { rankingService } from "./service";
 
 function parseRankingCommand(input: unknown) {
-  const parsed = safeParseJobCommand(input);
-  if (!parsed.success) {
-    throw new Error("Invalid ranking command");
-  }
-  const command = parsed.output;
+  const command = parseJobCommand(input);
   if (!command.kind.startsWith("ranking.")) {
     throw new Error("Expected ranking command");
   }
-  return v.parse(JobCommandSchema, command);
+  return command;
 }
 
 export const rankingApi = new Elysia({ prefix: "/ranking" })

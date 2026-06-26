@@ -1,8 +1,8 @@
-import * as v from "valibot";
+import { t, type Static } from "elysia";
 import { maintenanceIdempotency } from "../idempotency";
 import { JOB_LANES } from "../lanes";
 import { jobTags, uniqueTags } from "../tags";
-import { commandSchema } from "./common";
+import { commandSchema, parseSchema } from "./common";
 
 export const MAINTENANCE_COMMAND_KINDS = {
   replay: "maintenance.replay",
@@ -15,64 +15,77 @@ export const MAINTENANCE_COMMAND_KINDS = {
 export type MaintenanceCommandKind =
   (typeof MAINTENANCE_COMMAND_KINDS)[keyof typeof MAINTENANCE_COMMAND_KINDS];
 
-const ReplayPayloadSchema = v.strictObject({
-  scope: v.union([v.literal("source"), v.literal("target")]),
-  key: v.string(),
-});
+const ReplayPayloadSchema = t.Object(
+  {
+    scope: t.Union([t.Literal("source"), t.Literal("target")]),
+    key: t.String(),
+  },
+  { additionalProperties: false },
+);
 
-const DriftRepairPayloadSchema = v.strictObject({
-  targetType: v.union([
-    v.literal("content"),
-    v.literal("post"),
-    v.literal("comment"),
-    v.literal("poll"),
-    v.literal("realm"),
-    v.literal("zone"),
-    v.literal("tag"),
-    v.literal("label"),
-    v.literal("entity"),
-    v.literal("user"),
-    v.literal("feedback"),
-    v.literal("progress"),
-    v.literal("shelf-item"),
-    v.literal("collection"),
-    v.literal("game-media-platforms"),
-    v.literal("game-media-ratings"),
-  ]),
-  targetId: v.string(),
-});
+const DriftRepairPayloadSchema = t.Object(
+  {
+    targetType: t.Union([
+      t.Literal("content"),
+      t.Literal("post"),
+      t.Literal("comment"),
+      t.Literal("poll"),
+      t.Literal("realm"),
+      t.Literal("zone"),
+      t.Literal("tag"),
+      t.Literal("label"),
+      t.Literal("entity"),
+      t.Literal("user"),
+      t.Literal("feedback"),
+      t.Literal("progress"),
+      t.Literal("shelf-item"),
+      t.Literal("collection"),
+      t.Literal("game-media-platforms"),
+      t.Literal("game-media-ratings"),
+    ]),
+    targetId: t.String(),
+  },
+  { additionalProperties: false },
+);
 
-const RebuildIndexPayloadSchema = v.strictObject({
-  index: v.union([
-    v.literal("content"),
-    v.literal("post"),
-    v.literal("comment"),
-    v.literal("poll"),
-    v.literal("realm"),
-    v.literal("zone"),
-    v.literal("tag"),
-    v.literal("label"),
-    v.literal("entity"),
-    v.literal("user"),
-    v.literal("feedback"),
-    v.literal("progress"),
-    v.literal("shelf-item"),
-    v.literal("collection"),
-  ]),
-  cursor: v.optional(v.string()),
-  limit: v.optional(v.number()),
-});
+const RebuildIndexPayloadSchema = t.Object(
+  {
+    index: t.Union([
+      t.Literal("content"),
+      t.Literal("post"),
+      t.Literal("comment"),
+      t.Literal("poll"),
+      t.Literal("realm"),
+      t.Literal("zone"),
+      t.Literal("tag"),
+      t.Literal("label"),
+      t.Literal("entity"),
+      t.Literal("user"),
+      t.Literal("feedback"),
+      t.Literal("progress"),
+      t.Literal("shelf-item"),
+      t.Literal("collection"),
+    ]),
+    cursor: t.Optional(t.String()),
+    limit: t.Optional(t.Number()),
+  },
+  { additionalProperties: false },
+);
 
-const SeriesRepairPayloadSchema = v.strictObject({
-  seriesUnitId: v.string(),
-});
+const SeriesRepairPayloadSchema = t.Object(
+  { seriesUnitId: t.String() },
+  { additionalProperties: false },
+);
 
-const FanoutContinuationPayloadSchema = v.strictObject({
-  fanout: v.string(),
-  targetId: v.string(),
-  cursor: v.string(),
-  limit: v.optional(v.number()),
-});
+const FanoutContinuationPayloadSchema = t.Object(
+  {
+    fanout: t.String(),
+    targetId: t.String(),
+    cursor: t.String(),
+    limit: t.Optional(t.Number()),
+  },
+  { additionalProperties: false },
+);
 
 export const ReplayCommandSchema = commandSchema(
   MAINTENANCE_COMMAND_KINDS.replay,
@@ -100,7 +113,7 @@ export const FanoutContinuationCommandSchema = commandSchema(
   FanoutContinuationPayloadSchema,
 );
 
-export const MaintenanceCommandSchema = v.union([
+export const MaintenanceCommandSchema = t.Union([
   ReplayCommandSchema,
   SearchDriftRepairCommandSchema,
   SearchRebuildIndexCommandSchema,
@@ -108,7 +121,7 @@ export const MaintenanceCommandSchema = v.union([
   FanoutContinuationCommandSchema,
 ]);
 
-export type MaintenanceCommand = v.InferOutput<typeof MaintenanceCommandSchema>;
+export type MaintenanceCommand = Static<typeof MaintenanceCommandSchema>;
 
 export function createMaintenanceCommand(
   kind: MaintenanceCommandKind,
@@ -139,7 +152,7 @@ export function createMaintenanceCommand(
               ? maintenanceIdempotency.replay(payload.scope, payload.key)
               : `${kind}:unknown`;
 
-  return v.parse(MaintenanceCommandSchema, {
+  return parseSchema(MaintenanceCommandSchema, {
     kind,
     lane: JOB_LANES.maintenance,
     payload,

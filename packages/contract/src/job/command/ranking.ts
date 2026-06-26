@@ -1,8 +1,8 @@
-import * as v from "valibot";
+import { t, type Static } from "elysia";
 import { rankingIdempotency } from "../idempotency";
 import { JOB_LANES } from "../lanes";
 import { jobTags, uniqueTags } from "../tags";
-import { commandSchema } from "./common";
+import { commandSchema, parseSchema } from "./common";
 
 export const RANKING_COMMAND_KINDS = {
   invalidate: "ranking.invalidate",
@@ -16,56 +16,74 @@ export const RANKING_COMMAND_KINDS = {
 export type RankingCommandKind =
   (typeof RANKING_COMMAND_KINDS)[keyof typeof RANKING_COMMAND_KINDS];
 
-export const RankingScopeSchema = v.strictObject({
-  kind: v.union([
-    v.literal("global"),
-    v.literal("realm"),
-    v.literal("work"),
-    v.literal("tag"),
-    v.literal("parent"),
-  ]),
-  id: v.optional(v.string()),
-});
+export const RankingScopeSchema = t.Object(
+  {
+    kind: t.Union([
+      t.Literal("global"),
+      t.Literal("realm"),
+      t.Literal("work"),
+      t.Literal("tag"),
+      t.Literal("parent"),
+    ]),
+    id: t.Optional(t.String()),
+  },
+  { additionalProperties: false },
+);
 
-export const RankingRankKindSchema = v.union([
-  v.literal("content"),
-  v.literal("post"),
-  v.literal("comment"),
+export const RankingRankKindSchema = t.Union([
+  t.Literal("content"),
+  t.Literal("post"),
+  t.Literal("comment"),
 ]);
 
-const RankingTargetPayloadSchema = v.strictObject({
-  unitId: v.string(),
-  scope: v.optional(RankingScopeSchema),
-  rankKind: v.optional(RankingRankKindSchema),
-  reason: v.optional(v.string()),
-});
+const RankingTargetPayloadSchema = t.Object(
+  {
+    unitId: t.String(),
+    scope: t.Optional(RankingScopeSchema),
+    rankKind: t.Optional(RankingRankKindSchema),
+    reason: t.Optional(t.String()),
+  },
+  { additionalProperties: false },
+);
 
-const RankingPatchPayloadSchema = v.strictObject({
-  unitId: v.optional(v.string()),
-  projectionId: v.optional(v.string()),
-  rankKind: v.optional(RankingRankKindSchema),
-  limit: v.optional(v.number()),
-});
+const RankingPatchPayloadSchema = t.Object(
+  {
+    unitId: t.Optional(t.String()),
+    projectionId: t.Optional(t.String()),
+    rankKind: t.Optional(RankingRankKindSchema),
+    limit: t.Optional(t.Number()),
+  },
+  { additionalProperties: false },
+);
 
-const RankingFullSyncPayloadSchema = v.strictObject({
-  cursor: v.optional(v.string()),
-  limit: v.optional(v.number()),
-  rankKind: v.optional(RankingRankKindSchema),
-});
+const RankingFullSyncPayloadSchema = t.Object(
+  {
+    cursor: t.Optional(t.String()),
+    limit: t.Optional(t.Number()),
+    rankKind: t.Optional(RankingRankKindSchema),
+  },
+  { additionalProperties: false },
+);
 
-const RankingViewBucketFlushPayloadSchema = v.strictObject({
-  cursor: v.optional(v.string()),
-  limit: v.optional(v.number()),
-  bucketBefore: v.optional(v.string()),
-});
+const RankingViewBucketFlushPayloadSchema = t.Object(
+  {
+    cursor: t.Optional(t.String()),
+    limit: t.Optional(t.Number()),
+    bucketBefore: t.Optional(t.String()),
+  },
+  { additionalProperties: false },
+);
 
-const RankingReactionBucketPayloadSchema = v.strictObject({
-  targetId: v.string(),
-  contextUnitId: v.optional(v.string()),
-  reaction: v.union([v.literal("upvote"), v.literal("downvote")]),
-  count: v.number(),
-  at: v.optional(v.string()),
-});
+const RankingReactionBucketPayloadSchema = t.Object(
+  {
+    targetId: t.String(),
+    contextUnitId: t.Optional(t.String()),
+    reaction: t.Union([t.Literal("upvote"), t.Literal("downvote")]),
+    count: t.Number(),
+    at: t.Optional(t.String()),
+  },
+  { additionalProperties: false },
+);
 
 export const RankingInvalidateCommandSchema = commandSchema(
   RANKING_COMMAND_KINDS.invalidate,
@@ -98,7 +116,7 @@ export const RankingReactionBucketCommandSchema = commandSchema(
   RankingReactionBucketPayloadSchema,
 );
 
-export const RankingCommandSchema = v.union([
+export const RankingCommandSchema = t.Union([
   RankingInvalidateCommandSchema,
   RankingRecomputeCommandSchema,
   RankingPatchServingCommandSchema,
@@ -107,9 +125,9 @@ export const RankingCommandSchema = v.union([
   RankingReactionBucketCommandSchema,
 ]);
 
-export type RankingCommand = v.InferOutput<typeof RankingCommandSchema>;
-export type RankingScope = v.InferOutput<typeof RankingScopeSchema>;
-export type RankingRankKind = v.InferOutput<typeof RankingRankKindSchema>;
+export type RankingCommand = Static<typeof RankingCommandSchema>;
+export type RankingScope = Static<typeof RankingScopeSchema>;
+export type RankingRankKind = Static<typeof RankingRankKindSchema>;
 
 function sourceTag(source: RankingCommand["source"]) {
   return jobTags.source(source.type);
@@ -155,7 +173,7 @@ export function createRankingCommand(
                 payloadRecord.rankKind,
               );
 
-  return v.parse(RankingCommandSchema, {
+  return parseSchema(RankingCommandSchema, {
     kind,
     lane: JOB_LANES.ranking,
     payload,

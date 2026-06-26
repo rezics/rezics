@@ -1,8 +1,8 @@
-import * as v from "valibot";
+import { t, type Static } from "elysia";
 import { createIdempotencyKey } from "../idempotency";
 import { JOB_LANES } from "../lanes";
 import { jobTags, uniqueTags } from "../tags";
-import { commandSchema, StringRecordSchema } from "./common";
+import { commandSchema, parseSchema, StringRecordSchema } from "./common";
 
 export const SEARCH_COMMAND_KINDS = {
   contentSync: "search.content.sync",
@@ -89,50 +89,104 @@ export const SEARCH_COMMAND_KINDS = {
 export type SearchCommandKind =
   (typeof SEARCH_COMMAND_KINDS)[keyof typeof SEARCH_COMMAND_KINDS];
 
-const UnitTargetPayloadSchema = v.strictObject({ unitId: v.string() });
-const PostTargetPayloadSchema = v.strictObject({ postId: v.string() });
-const CommentTargetPayloadSchema = v.strictObject({ commentId: v.string() });
-const PollTargetPayloadSchema = v.strictObject({ unitId: v.string() });
-const RealmTargetPayloadSchema = v.strictObject({ unitId: v.string() });
-const ZoneTargetPayloadSchema = v.strictObject({ unitId: v.string() });
-const TagTargetPayloadSchema = v.strictObject({ unitId: v.string() });
-const LabelTargetPayloadSchema = v.strictObject({ unitId: v.string() });
-const EntityTargetPayloadSchema = v.strictObject({ unitId: v.string() });
-const UserTargetPayloadSchema = v.strictObject({ userId: v.string() });
-const FeedbackTargetPayloadSchema = v.strictObject({ feedbackId: v.string() });
-const ProgressTargetPayloadSchema = v.strictObject({
-  userId: v.string(),
-  unitId: v.string(),
-});
-const ShelfItemTargetPayloadSchema = v.strictObject({
-  shelfId: v.string(),
-  itemType: v.string(),
-  itemId: v.string(),
-});
-const ShelfItemShelfFanoutPayloadSchema = v.strictObject({
-  shelfId: v.string(),
-  cursor: v.optional(v.string()),
-  limit: v.optional(v.number()),
-});
-const ShelfItemSourceFanoutPayloadSchema = v.strictObject({
-  itemType: v.string(),
-  itemId: v.string(),
-  cursor: v.optional(v.string()),
-  limit: v.optional(v.number()),
-});
-const PatchPayloadSchema = v.strictObject({
-  targetId: v.string(),
-  fields: v.optional(StringRecordSchema),
-});
-const FullSyncPayloadSchema = v.strictObject({
-  cursor: v.optional(v.string()),
-  limit: v.optional(v.number()),
-});
-const FanoutPayloadSchema = v.strictObject({
-  targetId: v.string(),
-  cursor: v.optional(v.string()),
-  limit: v.optional(v.number()),
-});
+const UnitTargetPayloadSchema = t.Object(
+  { unitId: t.String() },
+  { additionalProperties: false },
+);
+const PostTargetPayloadSchema = t.Object(
+  { postId: t.String() },
+  { additionalProperties: false },
+);
+const CommentTargetPayloadSchema = t.Object(
+  { commentId: t.String() },
+  { additionalProperties: false },
+);
+const PollTargetPayloadSchema = t.Object(
+  { unitId: t.String() },
+  { additionalProperties: false },
+);
+const RealmTargetPayloadSchema = t.Object(
+  { unitId: t.String() },
+  { additionalProperties: false },
+);
+const ZoneTargetPayloadSchema = t.Object(
+  { unitId: t.String() },
+  { additionalProperties: false },
+);
+const TagTargetPayloadSchema = t.Object(
+  { unitId: t.String() },
+  { additionalProperties: false },
+);
+const LabelTargetPayloadSchema = t.Object(
+  { unitId: t.String() },
+  { additionalProperties: false },
+);
+const EntityTargetPayloadSchema = t.Object(
+  { unitId: t.String() },
+  { additionalProperties: false },
+);
+const UserTargetPayloadSchema = t.Object(
+  { userId: t.String() },
+  { additionalProperties: false },
+);
+const FeedbackTargetPayloadSchema = t.Object(
+  { feedbackId: t.String() },
+  { additionalProperties: false },
+);
+const ProgressTargetPayloadSchema = t.Object(
+  {
+    userId: t.String(),
+    unitId: t.String(),
+  },
+  { additionalProperties: false },
+);
+const ShelfItemTargetPayloadSchema = t.Object(
+  {
+    shelfId: t.String(),
+    itemType: t.String(),
+    itemId: t.String(),
+  },
+  { additionalProperties: false },
+);
+const ShelfItemShelfFanoutPayloadSchema = t.Object(
+  {
+    shelfId: t.String(),
+    cursor: t.Optional(t.String()),
+    limit: t.Optional(t.Number()),
+  },
+  { additionalProperties: false },
+);
+const ShelfItemSourceFanoutPayloadSchema = t.Object(
+  {
+    itemType: t.String(),
+    itemId: t.String(),
+    cursor: t.Optional(t.String()),
+    limit: t.Optional(t.Number()),
+  },
+  { additionalProperties: false },
+);
+const PatchPayloadSchema = t.Object(
+  {
+    targetId: t.String(),
+    fields: t.Optional(StringRecordSchema),
+  },
+  { additionalProperties: false },
+);
+const FullSyncPayloadSchema = t.Object(
+  {
+    cursor: t.Optional(t.String()),
+    limit: t.Optional(t.Number()),
+  },
+  { additionalProperties: false },
+);
+const FanoutPayloadSchema = t.Object(
+  {
+    targetId: t.String(),
+    cursor: t.Optional(t.String()),
+    limit: t.Optional(t.Number()),
+  },
+  { additionalProperties: false },
+);
 
 export const ContentSyncCommandSchema = commandSchema(
   SEARCH_COMMAND_KINDS.contentSync,
@@ -479,7 +533,7 @@ export const ShelfItemFullSyncCommandSchema = commandSchema(
   FullSyncPayloadSchema,
 );
 
-export const SearchCommandSchema = v.union([
+export const SearchCommandSchema = t.Union([
   ContentSyncCommandSchema,
   ContentDeleteCommandSchema,
   ContentPatchMetadataCommandSchema,
@@ -549,7 +603,7 @@ export const SearchCommandSchema = v.union([
   ShelfItemFullSyncCommandSchema,
 ]);
 
-export type SearchCommand = v.InferOutput<typeof SearchCommandSchema>;
+export type SearchCommand = Static<typeof SearchCommandSchema>;
 
 export function createSearchCommand(
   kind: SearchCommandKind,
@@ -596,7 +650,7 @@ export function createSearchCommand(
         ? JOB_LANES.searchSyncFast
         : JOB_LANES.searchSyncSlow;
   const [, domain, operation] = kind.split(".");
-  return v.parse(SearchCommandSchema, {
+  return parseSchema(SearchCommandSchema, {
     kind,
     lane,
     payload,
