@@ -1,0 +1,74 @@
+import { StatusCodes } from "http-status-codes";
+import type { JsonValue } from "@rezics/portable-text";
+import * as Data from "effect/Data";
+
+export class AccountRestricted extends Data.TaggedError("AccountRestricted") {
+	static readonly status = StatusCodes.FORBIDDEN as const;
+	readonly status = AccountRestricted.status;
+	readonly message = "Account is restricted";
+}
+
+export class RealmCapabilityRequired extends Data.TaggedError("RealmCapabilityRequired") {
+	static readonly status = StatusCodes.FORBIDDEN as const;
+	readonly status = RealmCapabilityRequired.status;
+	readonly message = "Realm capability required";
+}
+
+export class RealmRulesAcceptanceRequired extends Data.TaggedError("RealmRulesAcceptanceRequired") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = RealmRulesAcceptanceRequired.status;
+	readonly message = "Current Realm rules must be accepted";
+
+	constructor(readonly details: JsonValue) {
+		super();
+	}
+}
+
+export class RealmRoleManagementForbidden extends Data.TaggedError("RealmRoleManagementForbidden") {
+	static readonly status = StatusCodes.FORBIDDEN as const;
+	readonly status = RealmRoleManagementForbidden.status;
+	readonly message: string;
+
+	constructor(readonly operation: "manage" | "grant") {
+		super();
+		this.message =
+			operation === "manage"
+				? "Cannot manage an equal or higher role"
+				: "Cannot grant an equal or higher role";
+	}
+}
+
+export class PlatformCapabilityRequired extends Data.TaggedError("PlatformCapabilityRequired") {
+	static readonly status = StatusCodes.FORBIDDEN as const;
+	readonly status = PlatformCapabilityRequired.status;
+	readonly message = "Platform capability required";
+}
+
+export class CollectionOwnershipRequired extends Data.TaggedError("CollectionOwnershipRequired") {
+	static readonly status = StatusCodes.FORBIDDEN as const;
+	readonly status = CollectionOwnershipRequired.status;
+	readonly message = "You do not own this collection";
+}
+
+export class UploadKeyForbidden extends Data.TaggedError("UploadKeyForbidden") {
+	static readonly status = StatusCodes.FORBIDDEN as const;
+	readonly status = UploadKeyForbidden.status;
+	readonly message: string;
+
+	constructor(upload = false) {
+		super();
+		this.message = upload
+			? "Upload does not belong to this user"
+			: "Upload key is not owned by this user";
+	}
+}
+
+export const AuthorizationErrors = [
+	AccountRestricted,
+	RealmCapabilityRequired,
+	RealmRulesAcceptanceRequired,
+	RealmRoleManagementForbidden,
+	PlatformCapabilityRequired,
+	CollectionOwnershipRequired,
+	UploadKeyForbidden,
+] as const;

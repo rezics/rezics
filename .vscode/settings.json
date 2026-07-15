@@ -1,0 +1,19 @@
+{
+	"cSpell.words": [
+		"devenv",
+		"direnvrc",
+		"elysia",
+		"Elysia",
+		"intee",
+		"lucide",
+		"nmnmcc",
+		"portabletext",
+		"rezics",
+		"REZICS",
+		"vinext"
+	],
+	"js/ts.experimental.useTsgo": true,
+	"oxc.fmt.configPath": ".oxfmtrc.json",
+	"editor.defaultFormatter": "oxc.oxc-vscode",
+	"editor.formatOnSave": true
+}

@@ -1,0 +1,12 @@
+version: "3"
+
+tasks:
+    generate:
+        desc: Generate the Fetch SDK from the OpenAPI document.
+        cmds:
+            - KUBB_DISABLE_TELEMETRY=1 yarn exec kubb generate --config ./kubb.config.ts
+
+    typecheck:
+        desc: Type-check the Fetch SDK.
+        cmds:
+            - yarn exec tsc --noEmit -p tsconfig.json

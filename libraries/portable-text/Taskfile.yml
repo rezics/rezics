@@ -1,0 +1,7 @@
+version: "3"
+
+tasks:
+    typecheck:
+        desc: Type-check the Portable Text schema package.
+        cmds:
+            - yarn exec tsc --noEmit -p tsconfig.json

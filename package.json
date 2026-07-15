@@ -1,0 +1,30 @@
+{
+	"name": "rezics",
+	"private": true,
+	"type": "module",
+	"packageManager": "yarn@4.17.1",
+	"workspaces": [
+		"apps/*",
+		"services/*",
+		"libraries/*",
+		"libraries/services/*/*",
+		"packages/*"
+	],
+	"resolutions": {
+		"@kubb/adapter-oas": "5.0.0-beta.95",
+		"@kubb/plugin-fetch": "5.0.0-beta.95",
+		"@kubb/plugin-react-query": "5.0.0-beta.95",
+		"@kubb/plugin-ts": "5.0.0-beta.95",
+		"@kubb/plugin-zod": "5.0.0-beta.95",
+		"@kubb/parser-ts": "5.0.0-beta.96",
+		"kubb": "5.0.0-beta.96"
+	},
+	"devDependencies": {
+		"@nmnmcc/task": "^3.52.0",
+		"@types/node": "26",
+		"@vitest/coverage-v8": "4.1.10",
+		"prettier": "3",
+		"typescript": "7",
+		"vitest": "4.1.10"
+	}
+}

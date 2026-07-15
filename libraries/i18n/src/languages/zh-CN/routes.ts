@@ -1,0 +1,5 @@
+export default {
+	notFoundTitle: "页面不存在",
+	notFoundDescription: "你访问的内容不存在，或已被移动。",
+	home: "返回首页",
+};

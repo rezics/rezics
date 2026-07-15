@@ -1,0 +1,46 @@
+.temp/
+
+.playwright-mcp/
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.astro/
+
+# TypeScript / Vite caches
+*.tsbuildinfo
+.vite/
+.cache/
+
+# Test and coverage output
+coverage/
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Logs
+*.log
+bun-debug.log*
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Deployment/tooling state
+.vercel/
+.netlify/
+.wrangler/
+.codex/
+.agents/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json

@@ -1,0 +1,17 @@
+---
+import {
+  ABOUT_LOCALES,
+  type AboutLocale,
+} from "../../../i18n/locales";
+import { getProductPath } from "../../../i18n/productPaths";
+
+export function getStaticPaths() {
+  return ABOUT_LOCALES.map((locale) => ({ params: { locale } }));
+}
+
+const locale = Astro.params.locale as AboutLocale;
+const redirectTarget = getProductPath(locale, "entity-attribution");
+return Astro.redirect(redirectTarget, 301);
+---
+
+<span hidden data-redirect-target={redirectTarget}></span>

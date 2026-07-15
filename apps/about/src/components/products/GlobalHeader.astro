@@ -1,0 +1,153 @@
+---
+import ChevronRight from "@lucide/astro/icons/chevron-right";
+import Languages from "@lucide/astro/icons/languages";
+import Menu from "@lucide/astro/icons/menu";
+import Moon from "@lucide/astro/icons/moon";
+import Settings from "@lucide/astro/icons/settings";
+import Sun from "@lucide/astro/icons/sun";
+import X from "@lucide/astro/icons/x";
+import type { AboutLocale } from "../../i18n/locales";
+import { ABOUT_LOCALE_META, ABOUT_LOCALES } from "../../i18n/locales";
+import { getHomePath, getProductPath, getProductsPath } from "../../i18n/productPaths";
+import type { SiteCopy } from "../../content/productTypes";
+import { getInterfaceCopy } from "../../content/interfaceCopy";
+
+type Props = {
+  locale: AboutLocale;
+  copy: SiteCopy;
+  active: "home" | "products" | "platform" | "history";
+  alternatePathByLocale: Record<AboutLocale, string>;
+};
+
+const { locale, copy, active, alternatePathByLocale } = Astro.props;
+const interfaceCopy = getInterfaceCopy(locale);
+const outlineUrl = "https://outline.rezics.com/collection/rezics-ud1QiRBQYV/recent";
+const githubUrl = "https://github.com/rezics";
+const links = [
+  { label: copy.nav.products, href: getProductsPath(locale), active: active === "products" },
+  { label: copy.nav.platform, href: `${getProductsPath(locale)}#platform`, active: active === "platform" },
+  { label: copy.nav.history, href: getProductPath(locale, "history"), active: active === "history" },
+];
+---
+
+<a class="skip-link" href="#main-content">{interfaceCopy.a11y.skipContent}</a>
+<header class="global-header">
+  <div class="site-container global-header__inner">
+    <a class="global-logo" href={getHomePath(locale)} aria-label="Rezics">
+      <img src="/logo.svg" width="34" height="24" alt="" />
+    </a>
+
+    <nav class="global-nav" aria-label={interfaceCopy.a11y.primaryNavigation}>
+      {links.map((link) => (
+        <a href={link.href} aria-current={link.active ? "page" : undefined}>{link.label}</a>
+      ))}
+      <a href={outlineUrl} target="_blank" rel="noreferrer">{copy.nav.docs}</a>
+      <a href={githubUrl} target="_blank" rel="noreferrer">{copy.nav.github}</a>
+    </nav>
+
+    <div class="header-tools header-tools--desktop">
+      <details class="relative" data-header-details>
+        <summary class="header-icon-button" aria-label={copy.nav.language}>
+          <Languages width={18} height={18} aria-hidden="true" />
+        </summary>
+        <div class="header-popover">
+          {ABOUT_LOCALES.map((alternateLocale) => (
+            <a
+              href={alternatePathByLocale[alternateLocale]}
+              lang={ABOUT_LOCALE_META[alternateLocale].htmlLang}
+              aria-current={alternateLocale === locale ? "true" : undefined}
+            >
+              <span>{ABOUT_LOCALE_META[alternateLocale].nativeName}</span>
+              {alternateLocale === locale && <span aria-hidden="true">✓</span>}
+            </a>
+          ))}
+        </div>
+      </details>
+      <details class="relative" data-header-details>
+        <summary class="header-icon-button" aria-label={copy.nav.theme}>
+          <Settings width={18} height={18} aria-hidden="true" />
+        </summary>
+        <div class="header-popover">
+          <button
+            type="button"
+            data-theme-toggle
+            data-light-label={copy.theme.light}
+            data-dark-label={copy.theme.dark}
+            aria-pressed="false"
+          >
+            <span data-theme-label>{copy.theme.light}</span>
+            <span>
+              <Sun width={17} height={17} data-theme-icon="light" aria-hidden="true" />
+              <span data-theme-icon="dark" hidden><Moon width={17} height={17} aria-hidden="true" /></span>
+            </span>
+          </button>
+        </div>
+      </details>
+    </div>
+
+    <div class="header-tools header-tools--mobile">
+      <button
+        class="header-icon-button"
+        type="button"
+        aria-expanded="false"
+        aria-controls="product-mobile-drawer"
+        aria-label={copy.nav.openMenu}
+        data-drawer-toggle
+        data-open-label={copy.nav.openMenu}
+        data-close-label={copy.nav.closeMenu}
+      >
+        <Menu width={20} height={20} data-drawer-icon="open" aria-hidden="true" />
+        <span data-drawer-icon="close" hidden><X width={20} height={20} aria-hidden="true" /></span>
+      </button>
+    </div>
+  </div>
+
+  <div id="product-mobile-drawer" class="mobile-drawer" data-drawer hidden>
+    <nav class="site-container" aria-label={interfaceCopy.a11y.mobileNavigation}>
+      {links.map((link) => (
+        <a href={link.href} aria-current={link.active ? "page" : undefined}>
+          <span>{link.label}</span>
+          <ChevronRight width={17} height={17} aria-hidden="true" />
+        </a>
+      ))}
+      <a href={outlineUrl} target="_blank" rel="noreferrer">
+        <span>{copy.nav.docs}</span>
+        <ChevronRight width={17} height={17} aria-hidden="true" />
+      </a>
+      <a href={githubUrl} target="_blank" rel="noreferrer">
+        <span>{copy.nav.github}</span>
+        <ChevronRight width={17} height={17} aria-hidden="true" />
+      </a>
+      <button
+        type="button"
+        data-theme-toggle
+        data-light-label={copy.theme.light}
+        data-dark-label={copy.theme.dark}
+        aria-pressed="false"
+      >
+        <span data-theme-label>{copy.theme.light}</span>
+        <span>
+          <Sun width={17} height={17} data-theme-icon="light" aria-hidden="true" />
+          <span data-theme-icon="dark" hidden><Moon width={17} height={17} aria-hidden="true" /></span>
+        </span>
+      </button>
+      <details>
+        <summary>
+          <span>{copy.nav.language}</span>
+          <Languages width={17} height={17} aria-hidden="true" />
+        </summary>
+        <div>
+          {ABOUT_LOCALES.map((alternateLocale) => (
+            <a
+              href={alternatePathByLocale[alternateLocale]}
+              lang={ABOUT_LOCALE_META[alternateLocale].htmlLang}
+              aria-current={alternateLocale === locale ? "true" : undefined}
+            >
+              <span>{ABOUT_LOCALE_META[alternateLocale].nativeName}</span>
+            </a>
+          ))}
+        </div>
+      </details>
+    </nav>
+  </div>
+</header>

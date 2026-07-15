@@ -1,0 +1,4 @@
+interface:
+  display_name: "Simplicity"
+  short_description: "Keep software work simple and fit for its need."
+  default_prompt: "Use $simplicity to make this software work simple and fit for its real need."

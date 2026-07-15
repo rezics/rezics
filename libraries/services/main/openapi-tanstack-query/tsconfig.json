@@ -1,0 +1,10 @@
+{
+	"extends": "../../../../tsconfig.base.json",
+	"compilerOptions": {
+		"lib": ["dom", "dom.iterable", "esnext"],
+		"noEmit": true,
+		"exactOptionalPropertyTypes": false,
+		"ignoreDeprecations": "6.0"
+	},
+	"include": ["src", "kubb.config.ts"]
+}

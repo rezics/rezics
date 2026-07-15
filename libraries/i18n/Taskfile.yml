@@ -1,0 +1,7 @@
+version: "3"
+
+tasks:
+    typecheck:
+        desc: Type-check the internationalization package.
+        cmds:
+            - yarn exec tsc --noEmit -p tsconfig.json

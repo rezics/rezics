@@ -1,0 +1,4 @@
+interface:
+  display_name: "Line"
+  short_description: "Make one rule hold in every part of a domain."
+  default_prompt: "Use $line to set one rule and make every affected part of this technical domain follow it."

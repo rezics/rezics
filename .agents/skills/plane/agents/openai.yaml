@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plane"
+  short_description: "Make one result work across all system boundaries."
+  default_prompt: "Use $plane to make this result work across every system boundary and release state."

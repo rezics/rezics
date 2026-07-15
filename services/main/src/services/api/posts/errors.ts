@@ -1,0 +1,47 @@
+import { StatusCodes } from "http-status-codes";
+import * as Data from "effect/Data";
+
+export class PostNotFound extends Data.TaggedError("PostNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = PostNotFound.status;
+	readonly message = "Post not found";
+}
+
+export class PostLocalizationNotFound extends Data.TaggedError("PostLocalizationNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = PostLocalizationNotFound.status;
+	readonly message = "Post localization not found";
+}
+
+export class PostLocked extends Data.TaggedError("PostLocked") {
+	static readonly status = StatusCodes.FORBIDDEN as const;
+	readonly status = PostLocked.status;
+	readonly message = "This post is locked";
+}
+
+export class ReplyPostNotFound extends Data.TaggedError("ReplyPostNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = ReplyPostNotFound.status;
+	readonly message = "Reply post not found";
+}
+
+export class ParentReplyNotFound extends Data.TaggedError("ParentReplyNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = ParentReplyNotFound.status;
+	readonly message = "Parent reply post not found in thread";
+}
+
+export class ReplyDepthExceeded extends Data.TaggedError("ReplyDepthExceeded") {
+	static readonly status = StatusCodes.FORBIDDEN as const;
+	readonly status = ReplyDepthExceeded.status;
+	readonly message = "Maximum reply depth reached";
+}
+
+export const PostErrors = [
+	PostNotFound,
+	PostLocalizationNotFound,
+	PostLocked,
+	ReplyPostNotFound,
+	ParentReplyNotFound,
+	ReplyDepthExceeded,
+] as const;

@@ -1,0 +1,10 @@
+export default {
+	explore: "Explore",
+	units: "Units",
+	entity: "Entity",
+	realm: "Realm",
+	collections: "Collections",
+	favorites: "Saved",
+	progress: "Progress",
+	me: "Me",
+} satisfies typeof import("../zh-CN/nav").default;

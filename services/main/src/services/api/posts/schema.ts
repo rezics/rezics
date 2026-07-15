@@ -1,0 +1,70 @@
+import { type Static, t } from "elysia";
+import { PortableText } from "@rezics/portable-text";
+
+import { Uuid } from "../schema";
+
+export const ListPostsQuery = t.Object({
+	realmId: t.Optional(Uuid),
+	subjectId: t.Optional(Uuid),
+	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
+});
+export type ListPostsQuery = Static<typeof ListPostsQuery>;
+
+export const CreatePostBody = t.Object({
+	title: t.String({ minLength: 1, maxLength: 500 }),
+	body: PortableText,
+	language: t.String({ minLength: 2, maxLength: 35 }),
+	realmId: t.Optional(Uuid),
+	subjectId: t.Optional(Uuid),
+});
+export type CreatePostBody = Static<typeof CreatePostBody>;
+
+export const PostParams = t.Object({ postId: Uuid });
+export type PostParams = Static<typeof PostParams>;
+
+export const UpdatePostBody = t.Object({
+	title: t.String({ minLength: 1, maxLength: 500 }),
+	body: PortableText,
+	baseRevisionId: Uuid,
+	editSummary: t.Optional(t.String({ maxLength: 500 })),
+	minor: t.Optional(t.Boolean()),
+});
+export type UpdatePostBody = Static<typeof UpdatePostBody>;
+
+export const ListRepliesQuery = t.Object({
+	parentPostId: t.Optional(Uuid),
+	limit: t.Optional(t.Integer({ minimum: 1, maximum: 200, default: 100 })),
+});
+export type ListRepliesQuery = Static<typeof ListRepliesQuery>;
+
+export const ReplyThreadQuery = t.Object({
+	parentPostId: t.Optional(Uuid),
+	sort: t.Optional(
+		t.Union([t.Literal("best"), t.Literal("new"), t.Literal("top")], { default: "best" }),
+	),
+	cursor: t.Optional(t.String({ maxLength: 256 })),
+	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
+});
+export type ReplyThreadQuery = Static<typeof ReplyThreadQuery>;
+
+export const CreateReplyBody = t.Object({
+	parentPostId: t.Optional(Uuid),
+	realmId: t.Optional(Uuid),
+	language: t.String({ minLength: 2, maxLength: 35 }),
+	body: PortableText,
+});
+export type CreateReplyBody = Static<typeof CreateReplyBody>;
+
+export const ReplyParams = t.Object({ postId: Uuid, replyPostId: Uuid });
+export type ReplyParams = Static<typeof ReplyParams>;
+
+export const RootPostParams = t.Object({ postId: Uuid });
+export type RootPostParams = Static<typeof RootPostParams>;
+
+export const UpdateReplyBody = t.Object({
+	body: PortableText,
+	baseRevisionId: Uuid,
+	editSummary: t.Optional(t.String({ maxLength: 500 })),
+	minor: t.Optional(t.Boolean()),
+});
+export type UpdateReplyBody = Static<typeof UpdateReplyBody>;

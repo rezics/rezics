@@ -1,0 +1,14 @@
+{
+	"name": "@rezics/i18n",
+	"private": true,
+	"type": "module",
+	"sideEffects": false,
+	"exports": {
+		".": "./src/index.ts",
+		"./languages/en-US": "./src/languages/en-US/index.ts",
+		"./languages/zh-CN": "./src/languages/zh-CN/index.ts"
+	},
+	"devDependencies": {
+		"typescript": "7"
+	}
+}

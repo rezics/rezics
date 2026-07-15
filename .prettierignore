@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.next/
+.vinext/
+.vite/
+coverage/
+references/
+journals/
+.agents/
+.codex/
+*.tsbuildinfo
+yarn.lock
+.yarn/

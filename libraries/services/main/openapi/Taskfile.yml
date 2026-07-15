@@ -1,0 +1,12 @@
+version: "3"
+
+tasks:
+    generate:
+        desc: Generate the OpenAPI document from the backend API.
+        cmds:
+            - yarn workspace @rezics/backend exec tsx scripts/generate-openapi.ts
+
+    typecheck:
+        desc: Type-check the OpenAPI document package.
+        cmds:
+            - yarn exec tsc --noEmit -p tsconfig.json

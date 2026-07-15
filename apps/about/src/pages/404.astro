@@ -1,0 +1,36 @@
+---
+import {
+  DEFAULT_LOCALE,
+} from "../i18n/locales";
+import { getHomePath } from "../i18n/productPaths";
+import { getSiteCopy } from "../content/siteCopy";
+import ProductLayout from "../layouts/ProductLayout.astro";
+
+const copy = getSiteCopy(DEFAULT_LOCALE);
+const meta = {
+  title: `${copy.notFound.title} — Rezics`,
+  description: copy.notFound.body,
+};
+---
+
+<ProductLayout
+  locale={DEFAULT_LOCALE}
+  meta={meta}
+  active="home"
+  pageKind="home"
+>
+  <section class="site-section">
+    <div class="site-container">
+      <div class="section-heading">
+        <p class="eyebrow">404</p>
+        <h1 class="section-title">{copy.notFound.title}</h1>
+        <p class="section-lead">{copy.notFound.body}</p>
+        <div>
+          <a class="primary-action" href={getHomePath(DEFAULT_LOCALE)}>
+            {copy.notFound.back}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</ProductLayout>

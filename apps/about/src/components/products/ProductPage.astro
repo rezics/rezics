@@ -1,0 +1,329 @@
+---
+import ArrowRight from "@lucide/astro/icons/arrow-right";
+import ExternalLink from "@lucide/astro/icons/external-link";
+import type { AboutLocale } from "../../i18n/locales";
+import { getHomePath, getProductPath, getProductsPath } from "../../i18n/productPaths";
+import {
+  getConsumedCapabilities,
+  getProductById,
+  getRelatedProducts,
+  type ProductId,
+} from "../../content/productRegistry";
+import { getLocalizedProductCopy } from "../../content/productCopy";
+import { getProductPageFacts } from "../../content/productPageFacts";
+import { getSiteCopy } from "../../content/siteCopy";
+import { getInterfaceCopy } from "../../content/interfaceCopy";
+import type { ProductDefinition } from "../../content/productTypes";
+import ProductLayout from "../../layouts/ProductLayout.astro";
+import ProductDemo from "./ProductDemo.astro";
+
+type Props = { locale: AboutLocale; product: ProductDefinition };
+
+const { locale, product } = Astro.props;
+const copy = getSiteCopy(locale);
+const interfaceCopy = getInterfaceCopy(locale);
+const localized = getLocalizedProductCopy(locale, product.id as ProductId);
+const pageFacts = getProductPageFacts(locale, product, localized);
+const parent = product.canonicalParentId
+  ? getProductById(product.canonicalParentId)
+  : undefined;
+const capabilities = getConsumedCapabilities(product);
+const related = getRelatedProducts(product);
+const active = product.id === "history"
+  ? "history"
+  : product.navGroup === "platform"
+    ? "platform"
+    : "products";
+const meta = {
+  title: `${product.name} — Rezics`,
+  description: localized.summary,
+};
+const outlineUrl = "https://outline.rezics.com/collection/rezics-ud1QiRBQYV/recent";
+---
+
+<ProductLayout
+  locale={locale}
+  meta={meta}
+  active={active}
+  pageKind="product"
+  slug={product.slug}
+  productName={product.name}
+  productStatus={product.implementationStatus}
+>
+  <section class="site-section">
+    <div class="site-container">
+      <nav class="breadcrumbs" aria-label={interfaceCopy.a11y.breadcrumb}>
+        <a href={getHomePath(locale)}>{copy.product.breadcrumbsHome}</a>
+        <span aria-hidden="true">/</span>
+        <a href={getProductsPath(locale)}>{copy.product.breadcrumbsProducts}</a>
+        {parent && (
+          <>
+            <span aria-hidden="true">/</span>
+            <a href={getProductPath(locale, parent.slug)}>{parent.name}</a>
+          </>
+        )}
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{product.name}</span>
+      </nav>
+
+      <div class="product-hero">
+        <div>
+          <p class="eyebrow">{copy.classes[product.pageClass]}</p>
+          <h1 class="display-title">{product.name}</h1>
+          <p class="product-hero__lead">{localized.value}</p>
+          {product.manifestation && (
+            <p class="formula-token" style="margin-top:1.5rem">
+              {product.manifestation.formula}
+            </p>
+          )}
+        </div>
+        <dl class="product-facts">
+          <div class="product-fact">
+            <dt>{copy.product.statusLabel}</dt>
+            <dd>{copy.status[product.implementationStatus]}</dd>
+          </div>
+          <div class="product-fact">
+            <dt>{copy.product.classificationLabel}</dt>
+            <dd>{copy.classes[product.pageClass]}</dd>
+          </div>
+          <div class="product-fact">
+            <dt>{copy.common.parentProduct}</dt>
+            <dd>
+              {parent ? (
+                <a href={getProductPath(locale, parent.slug)}>{parent.name}</a>
+              ) : (
+                copy.common.noParent
+              )}
+            </dd>
+          </div>
+          {product.capabilityModes && (
+            <div class="product-fact">
+              <dt>{interfaceCopy.a11y.modes}</dt>
+              <dd>{product.capabilityModes.join(" · ")}</dd>
+            </div>
+          )}
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  {product.sections.map((section) => {
+    if (section === "identity") return null;
+
+    if (section === "stage") {
+      return (
+        <section class="site-section" style="padding-top:0">
+          <div class="site-container">
+            <ProductDemo
+              kind={product.demoKind}
+              name={product.name}
+              locale={locale}
+              instanceId={`product-${product.slug}-main`}
+            />
+            {product.id === "book" && (
+              <div style="display:grid;gap:2rem;margin-top:2rem">
+                <ProductDemo
+                  kind="attribution"
+                  name="Book · Entity & Attribution"
+                  locale={locale}
+                  instanceId="book-attribution"
+                  compact
+                />
+                <ProductDemo
+                  kind="history"
+                  name="Book · History"
+                  locale={locale}
+                  instanceId="book-history"
+                  compact
+                />
+              </div>
+            )}
+          </div>
+        </section>
+      );
+    }
+
+    if (section === "scenarios") {
+      return (
+        <section class="site-section">
+          <div class="site-container">
+            <div class="section-heading reveal">
+              <p class="eyebrow">01 · Use</p>
+              <h2 class="section-title">{copy.product.scenarios}</h2>
+              <p class="section-lead">{localized.scenarioLead}</p>
+            </div>
+            <div class="info-columns">
+              {pageFacts.scenarios.map((fact, index) => (
+                <article class="info-column reveal">
+                  <h3>{String(index + 1).padStart(2, "0")}</h3>
+                  <p>{fact}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    if (section === "workflow") {
+      return (
+        <section class="site-section">
+          <div class="site-container">
+            <div class="section-heading reveal">
+              <p class="eyebrow">02 · Workflow</p>
+              <h2 class="section-title">{copy.product.workflow}</h2>
+              <p class="section-lead">{localized.workflowLead}</p>
+            </div>
+            <div class="product-rows">
+              {pageFacts.workflow.map((step, index) => (
+                <div class="product-row reveal" style="cursor:default">
+                  <span class="product-row__name">
+                    <span class="product-row__index">{String(index + 1).padStart(2, "0")}</span>
+                    <span>{step}</span>
+                  </span>
+                  <span class="product-row__summary">{product.name}</span>
+                  <span class="product-row__meta">→</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    if (section === "capabilities") {
+      const capabilityItems = capabilities.length > 0 ? capabilities : related;
+      return (
+        <section class="site-section">
+          <div class="site-container">
+            <div class="section-heading reveal">
+              <p class="eyebrow">03 · Platform</p>
+              <h2 class="section-title">
+                {capabilities.length > 0
+                  ? copy.product.capabilities
+                  : copy.product.consumers}
+              </h2>
+            </div>
+            <div class="capability-list">
+              {capabilityItems.map((capability) => {
+                const capabilityCopy = getLocalizedProductCopy(
+                  locale,
+                  capability.id as ProductId,
+                );
+                return (
+                  <a
+                    class="capability-link reveal"
+                    href={getProductPath(locale, capability.slug)}
+                  >
+                    <span class="demo-status">{capability.name}</span>
+                    <span>
+                      <strong>{capability.name}</strong>
+                      <p>{capabilityCopy.summary}</p>
+                    </span>
+                    <span class="text-link">
+                      {copy.common.learnMore}
+                      <ArrowRight width={15} height={15} aria-hidden="true" />
+                    </span>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    if (section === "boundaries") {
+      return (
+        <section class="site-section">
+          <div class="site-container">
+            <div class="section-heading reveal">
+              <p class="eyebrow">04 · Scope</p>
+              <h2 class="section-title">{copy.product.boundaries}</h2>
+              <p class="section-lead">{localized.boundaryLead}</p>
+            </div>
+            <div class="info-columns">
+              {pageFacts.boundaries.map((boundary) => (
+                <article class="info-column reveal"><p>{boundary}</p></article>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    if (section === "faq") {
+      return (
+        <section class="site-section">
+          <div class="site-container">
+            <div class="section-heading reveal">
+              <p class="eyebrow">05 · FAQ</p>
+              <h2 class="section-title">{copy.product.faq}</h2>
+            </div>
+            <div class="accordion-list">
+              {localized.faq.map((item) => (
+                <details class="accordion-item">
+                  <summary>{item.question}</summary>
+                  <div class="accordion-answer">{item.answer}</div>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    if (section === "related") {
+      return (
+        <section class="site-section">
+          <div class="site-container">
+            <div class="section-heading reveal">
+              <p class="eyebrow">06 · Next</p>
+              <h2 class="section-title">{copy.common.relatedProducts}</h2>
+            </div>
+            <div class="product-rows">
+              {related.map((relatedProduct, index) => {
+                const relatedCopy = getLocalizedProductCopy(
+                  locale,
+                  relatedProduct.id as ProductId,
+                );
+                return (
+                  <a
+                    class="product-row reveal"
+                    href={getProductPath(locale, relatedProduct.slug)}
+                  >
+                    <span class="product-row__name">
+                      <span class="product-row__index">{String(index + 1).padStart(2, "0")}</span>
+                      {relatedProduct.name}
+                    </span>
+                    <span class="product-row__summary">{relatedCopy.summary}</span>
+                    <span class="product-row__meta">
+                      {copy.status[relatedProduct.implementationStatus]}
+                      <ArrowRight width={16} height={16} aria-hidden="true" />
+                    </span>
+                  </a>
+                );
+              })}
+            </div>
+            <div style="display:grid;gap:1rem;margin-top:3rem;border-top:1px solid var(--colors-border-defined);padding-top:1.5rem">
+              <p class="eyebrow">{copy.common.sourceBasis}</p>
+              <p class="demo-muted">{product.sourceDocuments.join(" · ")}</p>
+              <div style="display:flex;flex-wrap:wrap;gap:.75rem">
+                <a class="secondary-action" href={outlineUrl} target="_blank" rel="noreferrer">
+                  {copy.common.documentation}
+                  <ExternalLink width={15} height={15} aria-hidden="true" />
+                </a>
+                <a class="secondary-action" href="https://github.com/rezics" target="_blank" rel="noreferrer">
+                  {copy.common.sourceCode}
+                  <ExternalLink width={15} height={15} aria-hidden="true" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    return null;
+  })}
+</ProductLayout>

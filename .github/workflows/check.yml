@@ -1,0 +1,37 @@
+name: Check
+
+on:
+    pull_request:
+    push:
+        branches: [main]
+
+jobs:
+    check:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v5
+            - uses: cachix/install-nix-action@v31
+            - uses: cachix/cachix-action@v16
+              with:
+                  name: devenv
+            - name: Cache Nix store
+              uses: nix-community/cache-nix-action@v7
+              with:
+                  primary-key: nix-${{ runner.os }}-${{ hashFiles('devenv.lock', 'devenv.nix', 'devenv.yaml') }}
+                  restore-prefixes-first-match: nix-${{ runner.os }}-
+                  gc-max-store-size-linux: 1G
+            - name: Install Devenv
+              run: nix profile add nixpkgs#devenv
+            - name: Cache Yarn packages
+              uses: actions/cache@v6
+              with:
+                  path: ~/.yarn/berry/cache
+                  key: yarn-${{ runner.os }}-${{ hashFiles('yarn.lock', '.yarnrc.yml', '.yarn/releases/*.cjs') }}
+                  restore-keys: yarn-${{ runner.os }}-
+            - run: devenv shell yarn install --immutable
+            - run: devenv shell yarn task format:check
+            - run: devenv shell yarn task openapi:check
+            - run: devenv shell yarn task typecheck
+            - run: devenv shell yarn task test
+            - run: devenv shell yarn task web:build
+            - run: devenv shell yarn task about:build

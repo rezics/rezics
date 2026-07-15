@@ -1,88 +1,62 @@
-.ref
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
 
-# Claude Code
-.claude/worktrees/
-.claude/settings.local.json
-.claude/scheduled_tasks.lock
-
-# Dependencies
 node_modules/
-**/node_modules
 **/node_modules/
+.pnp.*
 
-# Bun
-.bun-cache
-.bun-tmp
-
-# Build output
-dist/
-out/
-*.tgz
-*.exe
-storybook-static/
-**/storybook-static/
-
-# Prisma generated clients
-**/prisma/generated/
-
-# Environment variables
 .env
 .env.*
 !.env.example
+!.env.*.example
 
-# Logs
-*.log
+.devenv*
+devenv.local.nix
+devenv.local.yaml
+.direnv/
+.pre-commit-config.yaml
 
-# Coverage
+.next/
+.open-next/
+.vinext/
+.astro/
+dist/
+out/
 coverage/
-*.lcov
-
-# Caches
+storybook-static/
+*.tsbuildinfo
 .vite/
 .tanstack/
-.eslintcache
 .cache/
-*.tsbuildinfo
 
-# IDE / OS
-.idea/
+.wrangler/
+.vercel/
+.netlify/
+.playwright*
+*.local.*
+*.tgz
+*.exe
+
+*.log
+*.lcov
 .DS_Store
+Thumbs.db
+.idea/
+.vscode/mcp.json
 *.suo
 *.sw?
-.vscode/mcp.json
 
-# VitePress
-**/.vitepress/dist/
-**/.vitepress/cache/
-
-# Secrets — commit only SOPS-encrypted *.enc.env (never plaintext) and never the
-# age PRIVATE key. Encrypt in place with `sops -e -i config/secrets/<unit>.enc.env`.
 config/secrets/*.dec.env
 config/secrets/*.plain.env
 *.agekey
 age-key.txt
 sops-age.key
 
-# Project-specific
-.VSCodeCounter/
-example-gitignore/
-install/
-tailwind.config.js
-git-staged.txt
-.temp
-tool/browser-inspect/profile/
-tool/browser-inspect/work/*
-!tool/browser-inspect/work/.gitkeep
-
-# Devenv
-.devenv*
-devenv.local.nix
-devenv.local.yaml
-
-# direnv
-.direnv
-
-# pre-commit
-.pre-commit-config.yaml
-
-.playwright*
+/references/
+/.temp/
+/.VSCodeCounter/
+/example-gitignore/

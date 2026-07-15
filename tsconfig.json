@@ -1,0 +1,29 @@
+{
+	"files": [],
+	"references": [
+		{
+			"path": "./services/main"
+		},
+		{
+			"path": "./apps/web"
+		},
+		{
+			"path": "./libraries/i18n"
+		},
+		{
+			"path": "./libraries/services/main/openapi"
+		},
+		{
+			"path": "./libraries/services/main/openapi-fetch"
+		},
+		{
+			"path": "./libraries/services/main/openapi-tanstack-query"
+		},
+		{
+			"path": "./libraries/portable-text"
+		},
+		{
+			"path": "./libraries/ui"
+		}
+	]
+}

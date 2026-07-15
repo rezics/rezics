@@ -1,0 +1,61 @@
+---
+import type { AboutLocale } from "../../i18n/locales";
+import { getProductPath } from "../../i18n/productPaths";
+import { PRODUCT_DEFINITIONS } from "../../content/productRegistry";
+import { getLocalizedProductCopy } from "../../content/productCopy";
+import { getSiteCopy } from "../../content/siteCopy";
+import ProductDemo from "./ProductDemo.astro";
+
+type Props = { locale: AboutLocale };
+
+const { locale } = Astro.props;
+const copy = getSiteCopy(locale);
+const featuredIds = ["book", "history", "content-structure", "zone"] as const;
+const featured = featuredIds.map((id) => {
+  const product = PRODUCT_DEFINITIONS.find((entry) => entry.id === id);
+  if (!product) throw new Error(`Missing featured product: ${id}`);
+  return product;
+});
+---
+
+<div data-home-stage>
+  <div class="tab-list" role="tablist" aria-label={copy.home.stageTitle}>
+    {featured.map((product, index) => (
+      <button
+        class="tab-button"
+        type="button"
+        role="tab"
+        aria-selected={index === 0 ? "true" : "false"}
+        tabindex={index === 0 ? "0" : "-1"}
+        aria-controls={`home-stage-${product.slug}`}
+      >
+        {product.name}
+      </button>
+    ))}
+  </div>
+
+  {featured.map((product, index) => {
+    const localized = getLocalizedProductCopy(locale, product.id);
+    return (
+      <section
+        id={`home-stage-${product.slug}`}
+        role="tabpanel"
+        hidden={index !== 0}
+        style="padding-top: 1rem"
+      >
+        <ProductDemo
+          kind={product.demoKind}
+          name={product.name}
+          locale={locale}
+          instanceId={`home-stage-demo-${product.slug}`}
+        />
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:1rem;margin-top:1rem">
+          <p class="demo-muted" style="max-width: 44rem">{localized.summary}</p>
+          <a class="text-link" href={getProductPath(locale, product.slug)}>
+            {copy.common.viewProduct} →
+          </a>
+        </div>
+      </section>
+    );
+  })}
+</div>

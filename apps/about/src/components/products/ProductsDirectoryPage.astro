@@ -1,0 +1,57 @@
+---
+import type { AboutLocale } from "../../i18n/locales";
+import { PRODUCT_GROUPS } from "../../content/productRegistry";
+import { getSiteCopy } from "../../content/siteCopy";
+import ProductLayout from "../../layouts/ProductLayout.astro";
+import InteractiveProductDirectory from "./InteractiveProductDirectory.astro";
+
+type Props = { locale: AboutLocale };
+
+const { locale } = Astro.props;
+const copy = getSiteCopy(locale);
+---
+
+<ProductLayout
+  locale={locale}
+  meta={copy.directory.meta}
+  active="products"
+  pageKind="products"
+>
+  <section class="site-section">
+    <div class="site-container">
+      <div class="section-heading">
+        <p class="eyebrow">{copy.directory.eyebrow}</p>
+        <h1 class="display-title">{copy.directory.title}</h1>
+        <p class="section-lead">{copy.directory.lead}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="site-section" style="padding-top:0">
+    <div class="site-container">
+      <div class="section-heading reveal">
+        <p class="eyebrow">01</p>
+        <h2 class="section-title">{copy.directory.productsTitle}</h2>
+      </div>
+      <InteractiveProductDirectory
+        locale={locale}
+        products={PRODUCT_GROUPS.products}
+        instanceId="all-products"
+      />
+    </div>
+  </section>
+
+  <section class="site-section" id="platform">
+    <div class="site-container">
+      <div class="section-heading reveal">
+        <p class="eyebrow">02</p>
+        <h2 class="section-title">{copy.directory.platformTitle}</h2>
+      </div>
+      <InteractiveProductDirectory
+        locale={locale}
+        products={PRODUCT_GROUPS.platform}
+        instanceId="all-platform"
+      />
+    </div>
+  </section>
+</ProductLayout>

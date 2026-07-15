@@ -1,0 +1,15 @@
+---
+import HomeExperience from "../../components/products/HomeExperience.astro";
+import {
+  ABOUT_LOCALES,
+  type AboutLocale,
+} from "../../i18n/locales";
+
+export function getStaticPaths() {
+  return ABOUT_LOCALES.map((locale) => ({ params: { locale } }));
+}
+
+const locale = Astro.params.locale as AboutLocale;
+---
+
+<HomeExperience locale={locale} />

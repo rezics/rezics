@@ -1,0 +1,41 @@
+{
+	"version": 1,
+	"skills": {
+		"just-do-it": {
+			"source": "nmnmcc/skills",
+			"sourceType": "github",
+			"skillPath": "skills/just-do-it/SKILL.md",
+			"computedHash": "b089216e1bab4630f821130572e1843fd176a7fc55e4076ed9416e7dce4b3579"
+		},
+		"line": {
+			"source": "nmnmcc/skills",
+			"sourceType": "github",
+			"skillPath": "skills/line/SKILL.md",
+			"computedHash": "32188eec8d9c45c608d80df1c25a0238ee0e5c81dccbf84ddc7b914b4fbe6aa2"
+		},
+		"plane": {
+			"source": "nmnmcc/skills",
+			"sourceType": "github",
+			"skillPath": "skills/plane/SKILL.md",
+			"computedHash": "792292e41364b09becf1fcbb12c48babf4410f014a05199d85728f4822a6c0fe"
+		},
+		"point": {
+			"source": "nmnmcc/skills",
+			"sourceType": "github",
+			"skillPath": "skills/point/SKILL.md",
+			"computedHash": "bcc0db4cea1b6a707a758eaacd0e4caf9a25d199e2dbce8797a5735472b58645"
+		},
+		"simplicity": {
+			"source": "nmnmcc/skills",
+			"sourceType": "github",
+			"skillPath": "skills/simplicity/SKILL.md",
+			"computedHash": "98542e5852206e198ad53273168e336b5f2a6e3e28e9d93b5377bc4512964a8e"
+		},
+		"typesafe": {
+			"source": "nmnmcc/skills",
+			"sourceType": "github",
+			"skillPath": "skills/typesafe/SKILL.md",
+			"computedHash": "dfb300d2acdc1e9c2ab3bc92a3168d37e17210d2e826f755365ff1d2d8092b45"
+		}
+	}
+}

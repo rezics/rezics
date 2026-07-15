@@ -1,0 +1,23 @@
+version: "3"
+
+tasks:
+    dev:
+        desc: Start the frontend development server.
+        cmds:
+            - yarn exec vinext dev --port "${FRONTEND_PORT:-3000}"
+
+    build:
+        desc: Create the frontend production build.
+        cmds:
+            - yarn exec vinext build
+
+    typecheck:
+        desc: Type-check the frontend.
+        cmds:
+            - yarn exec tsc --noEmit -p tsconfig.json
+
+    test:
+        desc: Run frontend behavior tests.
+        dir: ../..
+        cmds:
+            - yarn exec vitest run --project web

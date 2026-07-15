@@ -1,0 +1,197 @@
+---
+import ArrowRight from "@lucide/astro/icons/arrow-right";
+import ExternalLink from "@lucide/astro/icons/external-link";
+import type { AboutLocale } from "../../i18n/locales";
+import { getProductPath, getProductsPath } from "../../i18n/productPaths";
+import { PRODUCT_DEFINITIONS } from "../../content/productRegistry";
+import { getSiteCopy } from "../../content/siteCopy";
+import { getInterfaceCopy } from "../../content/interfaceCopy";
+import ProductLayout from "../../layouts/ProductLayout.astro";
+import HomeProductStage from "./HomeProductStage.astro";
+import InteractiveProductDirectory from "./InteractiveProductDirectory.astro";
+import ProductDemo from "./ProductDemo.astro";
+
+type Props = { locale: AboutLocale };
+
+const { locale } = Astro.props;
+const copy = getSiteCopy(locale);
+const interfaceCopy = getInterfaceCopy(locale);
+const selectProducts = (ids: readonly string[]) =>
+  ids.map((id) => {
+    const product = PRODUCT_DEFINITIONS.find((entry) => entry.id === id);
+    if (!product) throw new Error(`Unknown product: ${id}`);
+    return product;
+  });
+
+const featuredProducts = selectProducts(["catalog", "book", "gamebook", "post", "shelf", "zone"]);
+const featuredPlatform = selectProducts([
+  "content-structure",
+  "history",
+  "entity-attribution",
+  "feed",
+  "editor",
+]);
+const formulas = [
+  ["Book", "ContentStructure", interfaceCopy.home.formulaResults.chapters],
+  ["Book", "GameContentStructure", "GameBook"],
+  ["Unit", "CreditAttribution", interfaceCopy.home.formulaResults.credits],
+  ["Unit", "SubjectAttribution", interfaceCopy.home.formulaResults.subjects],
+];
+---
+
+<ProductLayout
+  locale={locale}
+  meta={copy.home.meta}
+  active="home"
+  pageKind="home"
+>
+  <section class="site-section">
+    <div class="site-container">
+      <div class="section-heading">
+        <p class="eyebrow">{copy.home.eyebrow}</p>
+        <h1 class="display-title">{copy.home.title}</h1>
+        <p class="section-lead">{copy.home.lead}</p>
+        <div style="display:flex;flex-wrap:wrap;gap:.75rem;margin-top:.5rem">
+          <a class="primary-action" href={getProductsPath(locale)}>
+            {copy.nav.products}
+            <ArrowRight width={16} height={16} aria-hidden="true" />
+          </a>
+          <a
+            class="secondary-action"
+            href="https://outline.rezics.com/collection/rezics-ud1QiRBQYV/recent"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {copy.nav.docs}
+            <ExternalLink width={15} height={15} aria-hidden="true" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="site-section" style="padding-top:0">
+    <div class="site-container">
+      <div class="section-heading reveal">
+        <p class="eyebrow">01 · {interfaceCopy.home.eyebrows.stage}</p>
+        <h2 class="section-title">{copy.home.stageTitle}</h2>
+        <p class="section-lead">{copy.home.stageLead}</p>
+      </div>
+      <HomeProductStage locale={locale} />
+    </div>
+  </section>
+
+  <section class="site-section">
+    <div class="site-container">
+      <div class="section-heading reveal">
+        <p class="eyebrow">02 · {interfaceCopy.home.eyebrows.products}</p>
+        <h2 class="section-title">{copy.home.productsTitle}</h2>
+        <p class="section-lead">{copy.home.productsLead}</p>
+      </div>
+      <InteractiveProductDirectory
+        locale={locale}
+        products={featuredProducts}
+        instanceId="home-products"
+      />
+      <div style="margin-top:2rem">
+        <a class="text-link" href={getProductsPath(locale)}>{copy.common.viewAll} →</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="site-section" id="platform">
+    <div class="site-container">
+      <div class="section-heading reveal">
+        <p class="eyebrow">03 · {interfaceCopy.home.eyebrows.platform}</p>
+        <h2 class="section-title">{copy.home.platformTitle}</h2>
+        <p class="section-lead">{copy.home.platformLead}</p>
+      </div>
+      <InteractiveProductDirectory
+        locale={locale}
+        products={featuredPlatform}
+        instanceId="home-platform"
+      />
+    </div>
+  </section>
+
+  <section class="site-section">
+    <div class="site-container">
+      <div class="section-heading reveal">
+        <p class="eyebrow">04 · {interfaceCopy.home.eyebrows.composition}</p>
+        <h2 class="section-title">{copy.home.formulaTitle}</h2>
+        <p class="section-lead">{copy.home.formulaLead}</p>
+      </div>
+      <div class="formula-grid">
+        {formulas.map(([left, capability, result]) => (
+          <div class="formula-row reveal">
+            <span class="formula-token">{left}</span>
+            <span class="formula-symbol">+</span>
+            <span class="formula-token">{capability}</span>
+            <span class="formula-symbol">→</span>
+            <strong class="formula-token">{result}</strong>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="site-section">
+    <div class="site-container">
+      <div class="section-heading reveal">
+        <p class="eyebrow">05 · {interfaceCopy.home.eyebrows.history}</p>
+        <h2 class="section-title">{copy.home.historyTitle}</h2>
+        <p class="section-lead">{copy.home.historyLead}</p>
+      </div>
+      <ProductDemo
+        kind="history"
+        name="History"
+        locale={locale}
+        instanceId="home-history-backbone"
+      />
+      <div class="info-columns" style="margin-top:2rem">
+        <article class="info-column">
+          <h3>Book</h3>
+          <p>{interfaceCopy.home.historyConsumers.book}</p>
+        </article>
+        <article class="info-column">
+          <h3>Post</h3>
+          <p>{interfaceCopy.home.historyConsumers.post}</p>
+        </article>
+        <article class="info-column">
+          <h3>Zone</h3>
+          <p>{interfaceCopy.home.historyConsumers.zone}</p>
+        </article>
+      </div>
+      <a class="text-link" style="margin-top:1.5rem" href={getProductPath(locale, "history")}>
+        {copy.common.learnMore} · History →
+      </a>
+    </div>
+  </section>
+
+  <section class="site-section">
+    <div class="site-container">
+      <div class="section-heading reveal">
+        <p class="eyebrow">06 · {interfaceCopy.home.eyebrows.openSource}</p>
+        <h2 class="section-title">{copy.home.openTitle}</h2>
+        <p class="section-lead">{copy.home.openLead}</p>
+      </div>
+      <div class="info-columns">
+        <article class="info-column">
+          <h3>Outline</h3>
+          <p>{interfaceCopy.home.openDescriptions.outline}</p>
+          <a class="text-link" href="https://outline.rezics.com/collection/rezics-ud1QiRBQYV/recent" target="_blank" rel="noreferrer">{copy.nav.docs} →</a>
+        </article>
+        <article class="info-column">
+          <h3>API & OAuth</h3>
+          <p>{interfaceCopy.home.openDescriptions.api}</p>
+          <a class="text-link" href={getProductPath(locale, "api-oauth")}>{copy.common.learnMore} →</a>
+        </article>
+        <article class="info-column">
+          <h3>GitHub</h3>
+          <p>{interfaceCopy.home.openDescriptions.github}</p>
+          <a class="text-link" href="https://github.com/rezics" target="_blank" rel="noreferrer">{copy.nav.github} →</a>
+        </article>
+      </div>
+    </div>
+  </section>
+</ProductLayout>

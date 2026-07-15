@@ -1,0 +1,230 @@
+@import "tailwindcss";
+
+@theme inline {
+	--font-sans:
+		"Inter", "rezics-sans", var(--font-sans-cjk, "Source Han Sans TC"), system-ui,
+		-apple-system, "Segoe UI", sans-serif;
+	--font-serif:
+		"Source Serif 4", "rezics-serif", var(--font-serif-cjk, "Source Han Serif TC"), Georgia,
+		serif;
+	--font-mono:
+		"CaskaydiaMono Nerd Font", "Cascadia Code", "rezics-mono", "Sarasa Mono TC", ui-monospace,
+		"SF Mono", Menlo, monospace;
+
+	--color-background: var(--colors-background);
+	--color-foreground: var(--colors-foreground);
+	--color-surface-canvas: var(--colors-surface-canvas);
+	--color-surface-base: var(--colors-surface-base);
+	--color-surface-subtle: var(--colors-surface-subtle);
+	--color-text-primary: var(--colors-text-primary);
+	--color-text-secondary: var(--colors-text-secondary);
+	--color-text-tertiary: var(--colors-text-tertiary);
+	--color-text-on-brand: var(--colors-text-on-brand);
+	--color-text-brand: var(--colors-text-brand);
+	--color-brand-fill: var(--colors-brand-fill);
+	--color-brand-fill-hover: var(--colors-brand-fill-hover);
+	--color-border-whisper: var(--colors-border-whisper);
+	--color-border-defined: var(--colors-border-defined);
+
+	--spacing-42: 10.5rem;
+	--shadow-modal:
+		0 1px 2px rgba(0, 0, 0, 0.03), 0 4px 8px rgba(0, 0, 0, 0.04),
+		0 8px 16px rgba(0, 0, 0, 0.04), 0 16px 32px rgba(0, 0, 0, 0.06);
+}
+
+:root {
+	color-scheme: light;
+	--font-sans-cjk: "Source Han Sans TC", "Noto Sans TC";
+	--font-serif-cjk: "Source Han Serif TC", "Noto Serif TC";
+	--colors-background: #ffffff;
+	--colors-foreground: #111111;
+	--colors-surface-canvas: #ffffff;
+	--colors-surface-base: #ffffff;
+	--colors-surface-subtle: #f5f5f5;
+	--colors-text-primary: #111111;
+	--colors-text-secondary: #5f6368;
+	--colors-text-tertiary: #7a7a7a;
+	--colors-text-on-brand: #ffffff;
+	--colors-text-brand: #ef4444;
+	--colors-brand-fill: #ef4444;
+	--colors-brand-fill-hover: #dc2626;
+	--colors-border-whisper: rgba(0, 0, 0, 0.1);
+	--colors-border-defined: #d9d9d9;
+	--color-background: var(--colors-background);
+	--color-foreground: var(--colors-foreground);
+	--color-surface-canvas: var(--colors-surface-canvas);
+	--color-surface-base: var(--colors-surface-base);
+	--color-surface-subtle: var(--colors-surface-subtle);
+	--color-text-primary: var(--colors-text-primary);
+	--color-text-secondary: var(--colors-text-secondary);
+	--color-text-tertiary: var(--colors-text-tertiary);
+	--color-text-on-brand: var(--colors-text-on-brand);
+	--color-text-brand: var(--colors-text-brand);
+	--color-brand-fill: var(--colors-brand-fill);
+	--color-brand-fill-hover: var(--colors-brand-fill-hover);
+	--color-border-whisper: var(--colors-border-whisper);
+	--color-border-defined: var(--colors-border-defined);
+}
+
+.dark {
+	color-scheme: dark;
+	--colors-background: #000000;
+	--colors-foreground: #f5f5f5;
+	--colors-surface-canvas: #000000;
+	--colors-surface-base: #0b0b0b;
+	--colors-surface-subtle: #202020;
+	--colors-text-primary: #f5f5f5;
+	--colors-text-secondary: #b6b6b6;
+	--colors-text-tertiary: #8a8a8a;
+	--colors-text-on-brand: #ffffff;
+	--colors-text-brand: #ef4444;
+	--colors-brand-fill: #ef4444;
+	--colors-brand-fill-hover: #dc2626;
+	--colors-border-whisper: rgba(255, 255, 255, 0.12);
+	--colors-border-defined: #3a3a3a;
+	--color-background: var(--colors-background);
+	--color-foreground: var(--colors-foreground);
+	--color-surface-canvas: var(--colors-surface-canvas);
+	--color-surface-base: var(--colors-surface-base);
+	--color-surface-subtle: var(--colors-surface-subtle);
+	--color-text-primary: var(--colors-text-primary);
+	--color-text-secondary: var(--colors-text-secondary);
+	--color-text-tertiary: var(--colors-text-tertiary);
+	--color-text-on-brand: var(--colors-text-on-brand);
+	--color-text-brand: var(--colors-text-brand);
+	--color-brand-fill: var(--colors-brand-fill);
+	--color-brand-fill-hover: var(--colors-brand-fill-hover);
+	--color-border-whisper: var(--colors-border-whisper);
+	--color-border-defined: var(--colors-border-defined);
+	--shadow-modal:
+		0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.28), 0 8px 16px rgba(0, 0, 0, 0.32),
+		0 16px 32px rgba(0, 0, 0, 0.4);
+}
+
+body {
+	margin: 0;
+	background-color: var(--colors-background);
+	color: var(--colors-foreground);
+}
+
+.theme-switching,
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+	transition-duration: 0ms !important;
+}
+
+* {
+	scrollbar-color: color-mix(in srgb, var(--colors-foreground) 24%, transparent) transparent;
+	scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+	background-clip: content-box;
+	background-color: color-mix(in srgb, var(--colors-foreground) 20%, transparent);
+	border: 3px solid transparent;
+	border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+	background-color: color-mix(in srgb, var(--colors-foreground) 32%, transparent);
+}
+
+*::-webkit-scrollbar-corner {
+	background: transparent;
+}
+
+:lang(zh-Hans),
+:lang(zh-CN) {
+	--font-sans-cjk: "Source Han Sans SC", "Noto Sans SC";
+	--font-serif-cjk: "Source Han Serif SC", "Noto Serif SC";
+}
+
+:lang(ja) {
+	--font-sans-cjk: "Source Han Sans JP", "Noto Sans JP";
+	--font-serif-cjk: "Source Han Serif JP", "Noto Serif JP";
+}
+
+:lang(ko) {
+	--font-sans-cjk: "Source Han Sans KR", "Noto Sans KR";
+	--font-serif-cjk: "Source Han Serif KR", "Noto Serif KR";
+}
+
+.language-switcher summary::-webkit-details-marker,
+.settings-switcher summary::-webkit-details-marker {
+	display: none;
+}
+
+.settings-popover {
+	opacity: 0;
+	transform: translateY(-4px);
+	transform-origin: top right;
+}
+
+.settings-switcher[open] .settings-popover {
+	animation: settings-popover-enter 160ms ease-out forwards;
+}
+
+.mobile-menu {
+	position: fixed;
+	inset: 4rem 0 0;
+	overflow-y: auto;
+	background: var(--colors-surface-canvas);
+	box-shadow: var(--shadow-modal);
+	opacity: 0;
+	transform: translateY(-8px);
+	transition:
+		opacity 180ms ease,
+		transform 180ms ease;
+}
+
+.mobile-menu.is-open {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+body.mobile-menu-open {
+	overflow: hidden;
+}
+
+@keyframes settings-popover-enter {
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.about-prose :where(p, h2) {
+	margin: 0;
+}
+
+.about-prose :where(h2) {
+	color: var(--colors-text-primary);
+	font-size: clamp(28px, 1.75rem + 0.8vw, 36px);
+	font-weight: 500;
+	line-height: 1.4;
+}
+
+.about-prose :where(p) {
+	color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0ms !important;
+		animation-iteration-count: 1 !important;
+		scroll-behavior: auto !important;
+		transition-duration: 0ms !important;
+	}
+}

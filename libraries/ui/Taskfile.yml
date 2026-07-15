@@ -1,0 +1,12 @@
+version: "3"
+
+tasks:
+    shark-audit:
+        desc: Verify the vendored SharkUI registry and application usage rules.
+        cmds:
+            - yarn node scripts/check-shark-ui.mjs
+
+    typecheck:
+        desc: Type-check the shared UI package.
+        cmds:
+            - yarn exec tsc --noEmit -p tsconfig.json

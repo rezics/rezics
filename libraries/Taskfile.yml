@@ -1,0 +1,39 @@
+version: "3"
+
+includes:
+    i18n:
+        taskfile: ./i18n/Taskfile.yml
+        dir: ./i18n
+    ui:
+        taskfile: ./ui/Taskfile.yml
+        dir: ./ui
+    portable-text:
+        taskfile: ./portable-text/Taskfile.yml
+        dir: ./portable-text
+    openapi:
+        taskfile: ./services/main/openapi/Taskfile.yml
+        dir: ./services/main/openapi
+    openapi-fetch:
+        taskfile: ./services/main/openapi-fetch/Taskfile.yml
+        dir: ./services/main/openapi-fetch
+    openapi-tanstack-query:
+        taskfile: ./services/main/openapi-tanstack-query/Taskfile.yml
+        dir: ./services/main/openapi-tanstack-query
+
+tasks:
+    generate:
+        desc: Generate the OpenAPI document and SDKs.
+        cmds:
+            - task: openapi:generate
+            - task: openapi-fetch:generate
+            - task: openapi-tanstack-query:generate
+
+    typecheck:
+        desc: Type-check library packages.
+        cmds:
+            - task: i18n:typecheck
+            - task: ui:typecheck
+            - task: portable-text:typecheck
+            - task: openapi:typecheck
+            - task: openapi-fetch:typecheck
+            - task: openapi-tanstack-query:typecheck

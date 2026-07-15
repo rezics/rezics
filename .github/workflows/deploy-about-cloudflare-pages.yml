@@ -1,0 +1,60 @@
+name: Deploy About to Cloudflare Pages
+
+on:
+    push:
+        tags:
+            - "about-v*"
+    workflow_dispatch:
+        inputs:
+            cloudflare_branch:
+                description: "Cloudflare Pages branch metadata"
+                default: "main"
+                required: true
+                type: string
+
+concurrency:
+    group: cloudflare-pages-about-${{ github.ref }}
+    cancel-in-progress: false
+
+env:
+    CLOUDFLARE_PAGES_PROJECT_NAME: ${{ vars.CLOUDFLARE_PAGES_PROJECT_NAME || 'rezics-about' }}
+    CLOUDFLARE_PAGES_BRANCH: ${{ github.event_name == 'workflow_dispatch' && inputs.cloudflare_branch || 'main' }}
+
+jobs:
+    deploy:
+        name: Build and deploy
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            deployments: write
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v6
+
+            - name: Setup Node
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 26
+
+            - name: Enable Corepack
+              run: corepack enable
+
+            - name: Install dependencies
+              run: yarn install --immutable
+
+            - name: Test
+              run: yarn task about:test
+
+            - name: Build
+              run: yarn task about:build
+
+            - name: Deploy to Cloudflare Pages
+              uses: cloudflare/wrangler-action@v3
+              with:
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  packageManager: yarn
+                  wranglerVersion: "4"
+                  workingDirectory: apps/about
+                  command: pages deploy dist --project-name=${{ env.CLOUDFLARE_PAGES_PROJECT_NAME }} --branch=${{ env.CLOUDFLARE_PAGES_BRANCH }}
+                  gitHubToken: ${{ secrets.GITHUB_TOKEN }}

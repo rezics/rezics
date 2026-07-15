@@ -1,0 +1,320 @@
+import { StatusCodes } from "http-status-codes";
+import { and, eq, inArray, sql } from "drizzle-orm";
+import Elysia from "elysia";
+
+import session, { resolveIdentity } from "../../auth/session";
+import { database } from "../../database";
+import {
+	pollOption,
+	poll,
+	pollVote,
+	unitCollaborator,
+	unitLocalization,
+	unit,
+} from "../../database/schema";
+import { UnitNotFound } from "../../units/errors";
+import { recordUnitRevision } from "../../units/history";
+import { CreatePollBody, PollParams, VotePollBody } from "./schema";
+import { toApiErrorResponse, PollDetailResponse } from "../schema/response";
+import { IdResponse, PollVoteResponse } from "../schema/action-response";
+import {
+	PollAlreadyClosed,
+	PollClosed,
+	PollNotFound,
+	PollOptionInvalid,
+	PollOptionsDuplicated,
+	PollSingleChoiceInvalid,
+} from "./errors";
+
+export default new Elysia({ prefix: "/polls" })
+	.use(session)
+	.post(
+		"",
+		async ({ profile, body }) => {
+			if (
+				new Set(body.options.map((option) => option.trim().toLowerCase())).size !==
+				body.options.length
+			)
+				throw new PollOptionsDuplicated();
+			const id = await database.transaction(async (tx) => {
+				const [pollUnit] = await tx
+					.insert(unit)
+					.values({
+						kind: "poll",
+						slug: `poll-${crypto.randomUUID().slice(0, 12)}`,
+						status: "published",
+						visibility: "public",
+						publishedAt: new Date(),
+					})
+					.returning({ id: unit.id });
+				if (!pollUnit) throw new Error("Poll Unit insertion did not return an id");
+				await tx.insert(poll).values({
+					id: pollUnit.id,
+					mode: body.voteMode,
+					anonymous: body.anonymous,
+					resultVisibility: body.resultsVisibility,
+					closesAt: body.closesAt ? new Date(body.closesAt) : undefined,
+				});
+				await tx.insert(pollOption).values(
+					body.options.map((label, position) => ({
+						pollId: pollUnit.id,
+						label,
+						position: String(position).padStart(8, "0"),
+					})),
+				);
+				await tx.insert(unitLocalization).values({
+					unitId: pollUnit.id,
+					language: body.language,
+					title: body.question,
+					isDefault: true,
+				});
+				await tx.insert(unitCollaborator).values({
+					unitId: pollUnit.id,
+					profileId: profile.unitId,
+					role: "owner",
+					addedByProfileId: profile.unitId,
+				});
+				await recordUnitRevision(tx, {
+					unitId: pollUnit.id,
+					actorProfileId: profile.unitId,
+					event: "create",
+				});
+				return pollUnit.id;
+			});
+			return { id };
+		},
+		{
+			contribute: true,
+			body: CreatePollBody,
+			response: {
+				[StatusCodes.OK]: IdResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["PollOptionsDuplicated"]),
+			},
+			detail: { summary: "Create poll", tags: ["Polls"] },
+		},
+	)
+	.get(
+		"/:pollId",
+		async ({ params, request }) => {
+			const [pollRecord] = await database
+				.select({
+					id: poll.id,
+					question: unitLocalization.title,
+					voteMode: poll.mode,
+					anonymous: poll.anonymous,
+					resultsVisibility: poll.resultVisibility,
+					closesAt: poll.closesAt,
+					closedAt: poll.closedAt,
+					createdAt: unit.createdAt,
+				})
+				.from(poll)
+				.innerJoin(unit, eq(unit.id, poll.id))
+				.innerJoin(
+					unitLocalization,
+					and(eq(unitLocalization.unitId, poll.id), eq(unitLocalization.isDefault, true)),
+				)
+				.where(eq(poll.id, params.pollId))
+				.limit(1);
+			if (!pollRecord) throw new PollNotFound();
+			const { profile: viewer, authorization } = await resolveIdentity(request.headers);
+			await authorization.unit.ensureCanRead(params.pollId, () => new UnitNotFound("Poll"));
+			const viewerVotes = viewer
+				? await database
+						.select({ optionId: pollVote.optionId })
+						.from(pollVote)
+						.where(
+							and(
+								eq(pollVote.pollId, params.pollId),
+								eq(pollVote.profileId, viewer.unitId),
+							),
+						)
+				: [];
+			const closed = Boolean(
+				pollRecord.closedAt || (pollRecord.closesAt && pollRecord.closesAt <= new Date()),
+			);
+			const showResults =
+				pollRecord.resultsVisibility === "live" ||
+				(pollRecord.resultsVisibility === "after_close" && closed);
+			const options = await database
+				.select({
+					id: pollOption.id,
+					label: pollOption.label,
+					position: pollOption.position,
+					voteCount: sql<number>`(select count(*) from ${pollVote} where ${pollVote.optionId} = ${pollOption.id})::int`,
+				})
+				.from(pollOption)
+				.where(eq(pollOption.pollId, params.pollId))
+				.orderBy(pollOption.position);
+			return {
+				...pollRecord,
+				question: pollRecord.question ?? "",
+				voteMode: pollRecord.voteMode,
+				resultsVisibility: pollRecord.resultsVisibility,
+				closed,
+				viewerOptionIds: viewerVotes.map((vote) => vote.optionId),
+				options: options.map((option) => ({
+					...option,
+					label: option.label ?? "",
+					voteCount: showResults ? option.voteCount : null,
+				})),
+			};
+		},
+		{
+			params: PollParams,
+			response: {
+				[StatusCodes.OK]: PollDetailResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PollNotFound", "UnitNotFound"]),
+			},
+			detail: { summary: "Get poll", tags: ["Polls"] },
+		},
+	)
+	.put(
+		"/:pollId/vote",
+		async ({ params, profile, authorization, body }) => {
+			await authorization.unit.ensureCanRead(params.pollId, () => new UnitNotFound("Poll"));
+			await authorization.realm.ensureParticipation(body.realmId);
+			await database.transaction(async (tx) => {
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${`poll:${params.pollId}`}::text, 0))`,
+				);
+				const [pollRecord] = await tx
+					.select()
+					.from(poll)
+					.where(eq(poll.id, params.pollId))
+					.limit(1);
+				if (!pollRecord) throw new PollNotFound();
+				if (
+					pollRecord.closedAt ||
+					(pollRecord.closesAt && pollRecord.closesAt <= new Date())
+				)
+					throw new PollClosed();
+				if (pollRecord.mode === "single" && body.optionIds.length !== 1)
+					throw new PollSingleChoiceInvalid();
+				const valid = await tx
+					.select({ id: pollOption.id })
+					.from(pollOption)
+					.where(
+						and(
+							eq(pollOption.pollId, params.pollId),
+							inArray(pollOption.id, body.optionIds),
+						),
+					);
+				if (valid.length !== new Set(body.optionIds).size) throw new PollOptionInvalid();
+				await tx
+					.delete(pollVote)
+					.where(
+						and(
+							eq(pollVote.pollId, params.pollId),
+							eq(pollVote.profileId, profile.unitId),
+						),
+					);
+				await tx.insert(pollVote).values(
+					body.optionIds.map((optionId) => ({
+						pollId: params.pollId,
+						optionId,
+						profileId: profile.unitId,
+						realmId: body.realmId,
+					})),
+				);
+			});
+			return { optionIds: body.optionIds };
+		},
+		{
+			contribute: true,
+			params: PollParams,
+			body: VotePollBody,
+			response: {
+				[StatusCodes.OK]: PollVoteResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"PollSingleChoiceInvalid",
+					"PollOptionInvalid",
+				]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"RealmCapabilityRequired",
+					"PollClosed",
+				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "PollNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmRulesAcceptanceRequired"]),
+			},
+			detail: { summary: "Replace poll vote", tags: ["Polls"] },
+		},
+	)
+	.delete(
+		"/:pollId/vote",
+		async ({ params, profile, authorization }) => {
+			await authorization.unit.ensureCanRead(params.pollId, () => new UnitNotFound("Poll"));
+			await database.transaction(async (tx) => {
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${`poll:${params.pollId}`}::text, 0))`,
+				);
+				const [pollRecord] = await tx
+					.select({ closedAt: poll.closedAt, closesAt: poll.closesAt })
+					.from(poll)
+					.where(eq(poll.id, params.pollId))
+					.limit(1);
+				if (!pollRecord) throw new PollNotFound();
+				if (
+					pollRecord.closedAt ||
+					(pollRecord.closesAt && pollRecord.closesAt <= new Date())
+				)
+					throw new PollClosed();
+				await tx
+					.delete(pollVote)
+					.where(
+						and(
+							eq(pollVote.pollId, params.pollId),
+							eq(pollVote.profileId, profile.unitId),
+						),
+					);
+			});
+			return { optionIds: [] };
+		},
+		{
+			write: true,
+			params: PollParams,
+			response: {
+				[StatusCodes.OK]: PollVoteResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PollClosed"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "PollNotFound"]),
+			},
+			detail: { summary: "Withdraw poll vote", tags: ["Polls"] },
+		},
+	)
+	.post(
+		"/:pollId/close",
+		async ({ params, profile, authorization }) => {
+			await authorization.unit.ensureCanEdit(params.pollId);
+			await authorization.unit.ensureFieldsUnlocked(params.pollId, ["/poll/closedAt"]);
+			await database.transaction(async (tx) => {
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${`poll:${params.pollId}`}::text, 0))`,
+				);
+				const [updated] = await tx
+					.update(poll)
+					.set({ closedAt: new Date() })
+					.where(and(eq(poll.id, params.pollId), sql`${poll.closedAt} is null`))
+					.returning({ id: poll.id });
+				if (!updated) throw new PollAlreadyClosed();
+				await recordUnitRevision(tx, {
+					unitId: params.pollId,
+					actorProfileId: profile.unitId,
+					event: "update",
+				});
+			});
+			return { id: params.pollId };
+		},
+		{
+			write: true,
+			params: PollParams,
+			response: {
+				[StatusCodes.OK]: IdResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"UnitEditForbidden",
+					"UnitFieldLocked",
+				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["PollAlreadyClosed"]),
+			},
+			detail: { summary: "Close poll", tags: ["Polls"] },
+		},
+	);

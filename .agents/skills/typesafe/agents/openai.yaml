@@ -1,0 +1,4 @@
+interface:
+  display_name: "TypeSafe"
+  short_description: "Build TypeScript with true types and safe operations."
+  default_prompt: "Use $typesafe to keep meaning, runtime values, static types, data forms, proof, and allowed operations in agreement from source to final use."

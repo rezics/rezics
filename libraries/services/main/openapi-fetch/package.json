@@ -1,0 +1,15 @@
+{
+	"name": "@rezics/openapi-fetch",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"devDependencies": {
+		"@kubb/adapter-oas": "5.0.0-beta.95",
+		"@kubb/plugin-fetch": "5.0.0-beta.95",
+		"@kubb/plugin-ts": "5.0.0-beta.95",
+		"kubb": "5.0.0-beta.96",
+		"typescript": "7"
+	}
+}

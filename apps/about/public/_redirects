@@ -1,0 +1,10 @@
+# Specific renamed product paths must precede the general legacy product rules.
+/:locale/product/entity-source /:locale/products/entity-attribution/ 301
+/:locale/product/entity-source/ /:locale/products/entity-attribution/ 301
+/:locale/products/entity-source /:locale/products/entity-attribution/ 301
+/:locale/products/entity-source/ /:locale/products/entity-attribution/ 301
+
+/:locale/product/:slug /:locale/products/:slug/ 301
+/:locale/product/:slug/ /:locale/products/:slug/ 301
+/:locale/product /:locale/products/ 301
+/:locale/product/ /:locale/products/ 301

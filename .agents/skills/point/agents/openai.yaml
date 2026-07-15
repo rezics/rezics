@@ -1,0 +1,4 @@
+interface:
+  display_name: "Point"
+  short_description: "Find one local cause, make the change, and prove it."
+  default_prompt: "Use $point to find the local cause, make this small change, and prove the result."

@@ -1,0 +1,102 @@
+version: "3"
+
+dotenv:
+    - .env
+    - .env.example
+
+includes:
+    main:
+        taskfile: ./services/main/Taskfile.yml
+        dir: ./services/main
+    web:
+        taskfile: ./apps/web/Taskfile.yml
+        dir: ./apps/web
+    about:
+        taskfile: ./apps/about/Taskfile.yml
+        dir: ./apps/about
+    libraries:
+        taskfile: ./libraries/Taskfile.yml
+        dir: ./libraries
+
+tasks:
+    format:
+        desc: Format source files with Prettier.
+        cmds:
+            - yarn exec prettier . --write
+
+    format:check:
+        desc: Check source formatting with Prettier.
+        cmds:
+            - yarn exec prettier . --check
+
+    scc:
+        desc: Count source code without generated outputs.
+        cmds:
+            - >-
+                scc --no-gen
+                --exclude-dir dist
+                --exclude-dir generated
+                --exclude-dir migrations
+                --exclude-file next-env.d.ts
+                --exclude-file openapi.json
+
+    typecheck:
+        desc: Type-check every application, service, and library workspace.
+        cmds:
+            - task: main:typecheck
+            - task: web:typecheck
+            - task: about:check
+            - task: libraries:typecheck
+
+    test:
+        desc: Run behavior tests for every application and service workspace.
+        cmds:
+            - task: main:test
+            - task: web:test
+            - task: about:test
+
+    test:coverage:
+        desc: Generate a local behavior-test coverage report without enforcing thresholds.
+        cmds:
+            - yarn exec vitest run --coverage
+
+    openapi:generate:
+        desc: Generate the OpenAPI document and Fetch SDK.
+        cmds:
+            - task: libraries:generate
+
+    openapi:check:
+        desc: Verify committed OpenAPI and SDK outputs are current.
+        cmds:
+            - task: openapi:generate
+            - git diff --exit-code -- libraries/services/main/openapi/openapi.json libraries/services/main/openapi-fetch/src/generated libraries/services/main/openapi-tanstack-query/src/generated
+            - test -z "$(git ls-files --others --exclude-standard -- libraries/services/main/openapi/openapi.json libraries/services/main/openapi-fetch/src/generated libraries/services/main/openapi-tanstack-query/src/generated)"
+
+    services:up:
+        desc: Start the base development services.
+        cmds:
+            - docker compose up -d --wait postgres rustfs
+            - docker compose up rustfs-setup
+
+    services:down:
+        desc: Remove every development container and network without deleting data.
+        cmds:
+            - docker compose down --timeout 30 --remove-orphans
+
+    services:stop:
+        desc: Gracefully stop every development service.
+        cmds:
+            - docker compose stop --timeout 30
+
+    dev:prepare:
+        internal: true
+        cmds:
+            - task: services:up
+            - task: main:db:migrate
+
+    dev:
+        desc: Enter full-stack development with initialized services, API, and web app.
+        cmds:
+            - defer: { task: services:stop }
+            - task: dev:prepare
+            - task --parallel --failfast main:dev web:dev

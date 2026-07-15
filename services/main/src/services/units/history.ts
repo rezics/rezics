@@ -1,0 +1,1113 @@
+import { createHash } from "node:crypto";
+
+import { and, desc, eq, max, sql } from "drizzle-orm";
+import { createSchemaFactory } from "drizzle-orm/zod";
+import { z } from "zod";
+import { isPortableText, type JsonValue, type PortableText } from "@rezics/portable-text";
+
+import type { DatabaseTransaction } from "../database";
+import {
+	auditEvent,
+	book,
+	collection,
+	collectionItem,
+	contentNode,
+	entity,
+	game,
+	gameRequirement,
+	media,
+	poll,
+	pollOption,
+	profile,
+	realmPin,
+	realmRule,
+	realmRuleRevision,
+	revisionContent,
+	series,
+	seriesRelease,
+	unit,
+	unitAlias,
+	unitCredit,
+	unitLink,
+	unitLocalization,
+	unitRevision,
+	unitRevisionHead,
+	unitRevisionSlot,
+	unitRevisionTag,
+	unitTag,
+	unitVariant,
+	zone,
+	zonePage,
+} from "../database/schema";
+import { UnitRevisionConflict } from "./errors";
+
+export type UnitRevisionEvent = "create" | "update" | "delete" | "restore";
+
+type SnapshotRow = Record<string, unknown>;
+
+const SnapshotRowSchema = z.record(z.string(), z.unknown());
+const JsonObjectSchema = z.record(z.string(), z.unknown());
+const PortableTextSchema = z.custom<PortableText>(isPortableText);
+const RuleSnapshotSchema = z.object({
+	requireOnJoin: z.boolean(),
+	requireOnPost: z.boolean(),
+	requireOnUpdate: z.boolean(),
+	rules: z.array(
+		z.object({
+			position: z.string(),
+			language: z.string(),
+			title: z.string(),
+			content: PortableTextSchema,
+		}),
+	),
+});
+const UnitSnapshotSchema = z.object({
+	version: z.literal(1),
+	kind: z.enum(unit.kind.enumValues),
+	unit: SnapshotRowSchema,
+	localizations: z.array(SnapshotRowSchema),
+	extension: SnapshotRowSchema.nullable(),
+	preference: SnapshotRowSchema.nullable(),
+	owned: z.object({
+		aliases: z.array(SnapshotRowSchema),
+		credits: z.array(SnapshotRowSchema),
+		links: z.array(SnapshotRowSchema),
+		tags: z.array(SnapshotRowSchema),
+		variants: z.array(SnapshotRowSchema),
+		seriesReleases: z.array(SnapshotRowSchema),
+		gameRequirements: z.array(SnapshotRowSchema),
+		zonePages: z.array(SnapshotRowSchema),
+		collectionItems: z.array(SnapshotRowSchema),
+		contentNodes: z.array(SnapshotRowSchema),
+		pollOptions: z.array(SnapshotRowSchema),
+		realmPins: z.array(SnapshotRowSchema),
+		realmContent: z.array(SnapshotRowSchema),
+		realmRules: RuleSnapshotSchema.nullable(),
+	}),
+});
+type RuleSnapshot = z.infer<typeof RuleSnapshotSchema>;
+type UnitSnapshot = z.infer<typeof UnitSnapshotSchema>;
+
+const schemaFactory = createSchemaFactory({ coerce: { date: true } });
+const unitStateSchema = schemaFactory
+	.createSelectSchema(unit, { metadata: JsonObjectSchema.nullable() })
+	.omit({
+		id: true,
+		kind: true,
+		slug: true,
+		status: true,
+		visibility: true,
+		moderationStatus: true,
+		publishedAt: true,
+		deletedAt: true,
+		createdAt: true,
+		updatedAt: true,
+	});
+const unitLocalizationStateSchema = schemaFactory
+	.createSelectSchema(unitLocalization, {
+		description: PortableTextSchema.nullable(),
+		content: PortableTextSchema.nullable(),
+	})
+	.omit({ unitId: true, createdAt: true, updatedAt: true });
+const profileStateSchema = schemaFactory
+	.createSelectSchema(profile, { description: PortableTextSchema.nullable() })
+	.omit({ id: true, authUserId: true, joinedAt: true, createdAt: true, updatedAt: true });
+const bookStateSchema = schemaFactory
+	.createSelectSchema(book)
+	.omit({ id: true, createdAt: true, updatedAt: true });
+const gameStateSchema = schemaFactory
+	.createSelectSchema(game)
+	.omit({ id: true, createdAt: true, updatedAt: true });
+const mediaStateSchema = schemaFactory
+	.createSelectSchema(media)
+	.omit({ id: true, createdAt: true, updatedAt: true });
+const entityStateSchema = schemaFactory
+	.createSelectSchema(entity)
+	.omit({ id: true, createdAt: true, updatedAt: true });
+const seriesStateSchema = schemaFactory
+	.createSelectSchema(series)
+	.omit({ id: true, createdAt: true, updatedAt: true });
+const zoneStateSchema = schemaFactory
+	.createSelectSchema(zone, {
+		boundary: JsonObjectSchema,
+		nav: JsonObjectSchema,
+		theme: JsonObjectSchema,
+	})
+	.omit({ id: true, ownerRealmId: true, createdAt: true, updatedAt: true });
+const collectionStateSchema = schemaFactory
+	.createSelectSchema(collection)
+	.omit({ id: true, ownerProfileId: true, createdAt: true, updatedAt: true });
+const pollStateSchema = schemaFactory
+	.createSelectSchema(poll)
+	.omit({ id: true, closedAt: true, createdAt: true, updatedAt: true });
+const unitAliasRowSchema = schemaFactory.createSelectSchema(unitAlias);
+const unitCreditRowSchema = schemaFactory.createSelectSchema(unitCredit);
+const unitLinkRowSchema = schemaFactory.createSelectSchema(unitLink);
+const unitTagRowSchema = schemaFactory.createSelectSchema(unitTag);
+const unitVariantRowSchema = schemaFactory.createSelectSchema(unitVariant);
+const seriesReleaseRowSchema = schemaFactory.createSelectSchema(seriesRelease);
+const gameRequirementRowSchema = schemaFactory.createSelectSchema(gameRequirement, {
+	hardware: JsonObjectSchema,
+});
+const zonePageRowSchema = schemaFactory.createSelectSchema(zonePage, {
+	config: JsonObjectSchema,
+});
+const collectionItemRowSchema = schemaFactory.createSelectSchema(collectionItem);
+const contentNodeRowSchema = schemaFactory.createSelectSchema(contentNode);
+const pollOptionRowSchema = schemaFactory.createSelectSchema(pollOption);
+const realmPinRowSchema = schemaFactory.createSelectSchema(realmPin);
+const realmRuleInsertSchema = schemaFactory.createInsertSchema(realmRule, {
+	content: PortableTextSchema,
+});
+
+function parseSnapshotState(
+	schema: { parse(value: unknown): SnapshotRow },
+	row: SnapshotRow | undefined,
+) {
+	return row ? schema.parse(row) : null;
+}
+
+async function lockUnitHistory(tx: DatabaseTransaction, unitId: string) {
+	await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${unitId}::text, 0))`);
+}
+
+async function snapshotExtension(
+	tx: DatabaseTransaction,
+	unitId: string,
+	kind: UnitSnapshot["kind"],
+) {
+	switch (kind) {
+		case "profile":
+			return parseSnapshotState(
+				profileStateSchema,
+				(await tx.select().from(profile).where(eq(profile.id, unitId)).limit(1))[0],
+			);
+		case "book":
+			return parseSnapshotState(
+				bookStateSchema,
+				(await tx.select().from(book).where(eq(book.id, unitId)).limit(1))[0],
+			);
+		case "game":
+			return parseSnapshotState(
+				gameStateSchema,
+				(await tx.select().from(game).where(eq(game.id, unitId)).limit(1))[0],
+			);
+		case "media":
+			return parseSnapshotState(
+				mediaStateSchema,
+				(await tx.select().from(media).where(eq(media.id, unitId)).limit(1))[0],
+			);
+		case "entity":
+			return parseSnapshotState(
+				entityStateSchema,
+				(await tx.select().from(entity).where(eq(entity.id, unitId)).limit(1))[0],
+			);
+		case "series":
+			return parseSnapshotState(
+				seriesStateSchema,
+				(await tx.select().from(series).where(eq(series.id, unitId)).limit(1))[0],
+			);
+		case "zone":
+			return parseSnapshotState(
+				zoneStateSchema,
+				(await tx.select().from(zone).where(eq(zone.id, unitId)).limit(1))[0],
+			);
+		case "collection":
+			return parseSnapshotState(
+				collectionStateSchema,
+				(await tx.select().from(collection).where(eq(collection.id, unitId)).limit(1))[0],
+			);
+		case "post":
+			return null;
+		case "poll":
+			return parseSnapshotState(
+				pollStateSchema,
+				(await tx.select().from(poll).where(eq(poll.id, unitId)).limit(1))[0],
+			);
+		case "realm":
+		case "tag":
+			return null;
+	}
+}
+
+async function snapshotRealmRules(tx: DatabaseTransaction, realmId: string) {
+	const [revision] = await tx
+		.select()
+		.from(realmRuleRevision)
+		.where(eq(realmRuleRevision.realmId, realmId))
+		.orderBy(desc(realmRuleRevision.version))
+		.limit(1);
+	if (!revision) return null;
+	const rules = await tx
+		.select({
+			position: realmRule.position,
+			language: realmRule.language,
+			title: realmRule.title,
+			content: realmRule.content,
+		})
+		.from(realmRule)
+		.where(eq(realmRule.revisionId, revision.id))
+		.orderBy(realmRule.position, realmRule.id);
+	return {
+		requireOnJoin: revision.requireOnJoin,
+		requireOnPost: revision.requireOnPost,
+		requireOnUpdate: revision.requireOnUpdate,
+		rules,
+	} satisfies RuleSnapshot;
+}
+
+async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
+	const [record] = await tx.select().from(unit).where(eq(unit.id, unitId)).limit(1);
+	if (!record) throw new Error(`Cannot snapshot missing Unit ${unitId}`);
+	const localizations = await tx
+		.select()
+		.from(unitLocalization)
+		.where(eq(unitLocalization.unitId, unitId))
+		.orderBy(unitLocalization.language);
+	const aliases = await tx
+		.select()
+		.from(unitAlias)
+		.where(eq(unitAlias.unitId, unitId))
+		.orderBy(unitAlias.id);
+	const credits = await tx
+		.select()
+		.from(unitCredit)
+		.where(eq(unitCredit.unitId, unitId))
+		.orderBy(unitCredit.id);
+	const links = await tx
+		.select()
+		.from(unitLink)
+		.where(eq(unitLink.unitId, unitId))
+		.orderBy(unitLink.id);
+	const tags = await tx
+		.select()
+		.from(unitTag)
+		.where(eq(unitTag.unitId, unitId))
+		.orderBy(unitTag.tagId);
+	const variants = await tx
+		.select()
+		.from(unitVariant)
+		.where(eq(unitVariant.unitId, unitId))
+		.orderBy(unitVariant.unitId);
+
+	const empty: SnapshotRow[] = [];
+	const owned: UnitSnapshot["owned"] = {
+		aliases,
+		credits,
+		links,
+		tags,
+		variants,
+		seriesReleases:
+			record.kind === "series"
+				? await tx
+						.select()
+						.from(seriesRelease)
+						.where(eq(seriesRelease.seriesId, unitId))
+						.orderBy(seriesRelease.position, seriesRelease.releaseUnitId)
+				: empty,
+		gameRequirements:
+			record.kind === "game"
+				? await tx
+						.select()
+						.from(gameRequirement)
+						.where(eq(gameRequirement.gameId, unitId))
+						.orderBy(gameRequirement.id)
+				: empty,
+		zonePages:
+			record.kind === "zone"
+				? await tx
+						.select()
+						.from(zonePage)
+						.where(eq(zonePage.zoneId, unitId))
+						.orderBy(zonePage.position, zonePage.id)
+				: empty,
+		collectionItems:
+			record.kind === "collection"
+				? await tx
+						.select()
+						.from(collectionItem)
+						.where(eq(collectionItem.collectionId, unitId))
+						.orderBy(collectionItem.position, collectionItem.unitId)
+				: empty,
+		contentNodes:
+			record.kind === "book"
+				? await tx
+						.select()
+						.from(contentNode)
+						.where(eq(contentNode.bookId, unitId))
+						.orderBy(contentNode.position, contentNode.id)
+				: empty,
+		pollOptions:
+			record.kind === "poll"
+				? await tx
+						.select()
+						.from(pollOption)
+						.where(eq(pollOption.pollId, unitId))
+						.orderBy(pollOption.position, pollOption.id)
+				: empty,
+		realmPins:
+			record.kind === "realm"
+				? await tx
+						.select()
+						.from(realmPin)
+						.where(eq(realmPin.realmId, unitId))
+						.orderBy(realmPin.kind, realmPin.position, realmPin.unitId)
+				: empty,
+		realmContent: empty,
+		realmRules: record.kind === "realm" ? await snapshotRealmRules(tx, unitId) : null,
+	};
+	return {
+		version: 1,
+		kind: record.kind,
+		unit: unitStateSchema.parse(record),
+		localizations: localizations.map((localization) =>
+			unitLocalizationStateSchema.parse(localization),
+		),
+		extension: await snapshotExtension(tx, unitId, record.kind),
+		preference: null,
+		owned,
+	} satisfies UnitSnapshot;
+}
+
+async function restoreExtension(
+	tx: DatabaseTransaction,
+	unitId: string,
+	kind: UnitSnapshot["kind"],
+	value: SnapshotRow | null,
+) {
+	if (kind === "post" || kind === "realm" || kind === "tag") return;
+	if (!value) throw new Error(`Missing ${kind} extension in Unit snapshot`);
+	switch (kind) {
+		case "profile":
+			await tx
+				.update(profile)
+				.set(profileStateSchema.parse(value))
+				.where(eq(profile.id, unitId));
+			break;
+		case "book":
+			await tx.update(book).set(bookStateSchema.parse(value)).where(eq(book.id, unitId));
+			break;
+		case "game":
+			await tx.update(game).set(gameStateSchema.parse(value)).where(eq(game.id, unitId));
+			break;
+		case "media":
+			await tx.update(media).set(mediaStateSchema.parse(value)).where(eq(media.id, unitId));
+			break;
+		case "entity":
+			await tx
+				.update(entity)
+				.set(entityStateSchema.parse(value))
+				.where(eq(entity.id, unitId));
+			break;
+		case "series":
+			await tx
+				.update(series)
+				.set(seriesStateSchema.parse(value))
+				.where(eq(series.id, unitId));
+			break;
+		case "zone":
+			await tx.update(zone).set(zoneStateSchema.parse(value)).where(eq(zone.id, unitId));
+			break;
+		case "collection":
+			await tx
+				.update(collection)
+				.set(collectionStateSchema.parse(value))
+				.where(eq(collection.id, unitId));
+			break;
+		case "poll":
+			await tx.update(poll).set(pollStateSchema.parse(value)).where(eq(poll.id, unitId));
+			break;
+	}
+}
+
+async function restoreAliases(tx: DatabaseTransaction, unitId: string, rows: SnapshotRow[]) {
+	await tx.update(unitAlias).set({ deletedAt: new Date() }).where(eq(unitAlias.unitId, unitId));
+	for (const value of rows) {
+		const row = unitAliasRowSchema.parse(value);
+		const { createdAt: _createdAt, updatedAt: _updatedAt, ...state } = row;
+		await tx
+			.insert(unitAlias)
+			.values(row)
+			.onConflictDoUpdate({ target: unitAlias.id, set: state });
+	}
+}
+
+async function restoreSoftRows(
+	tx: DatabaseTransaction,
+	unitId: string,
+	table: "contentNode" | "pollOption",
+	rows: SnapshotRow[],
+) {
+	if (table === "contentNode") {
+		await tx
+			.update(contentNode)
+			.set({ deletedAt: new Date() })
+			.where(eq(contentNode.bookId, unitId));
+		for (const value of rows) {
+			const row = contentNodeRowSchema.parse(value);
+			const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...state } = row;
+			await tx
+				.insert(contentNode)
+				.values(row)
+				.onConflictDoUpdate({ target: contentNode.id, set: state });
+		}
+		return;
+	}
+	await tx.update(pollOption).set({ deletedAt: new Date() }).where(eq(pollOption.pollId, unitId));
+	for (const value of rows) {
+		const row = pollOptionRowSchema.parse(value);
+		const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...state } = row;
+		await tx
+			.insert(pollOption)
+			.values(row)
+			.onConflictDoUpdate({ target: pollOption.id, set: state });
+	}
+}
+
+async function restoreRealmRules(
+	tx: DatabaseTransaction,
+	realmId: string,
+	value: RuleSnapshot | null,
+) {
+	const [latest] = await tx
+		.select({ value: max(realmRuleRevision.version) })
+		.from(realmRuleRevision)
+		.where(eq(realmRuleRevision.realmId, realmId));
+	const [revision] = await tx
+		.insert(realmRuleRevision)
+		.values({
+			realmId,
+			version: Number(latest?.value ?? 0) + 1,
+			requireOnJoin: value?.requireOnJoin ?? false,
+			requireOnPost: value?.requireOnPost ?? false,
+			requireOnUpdate: value?.requireOnUpdate ?? false,
+		})
+		.returning({ id: realmRuleRevision.id });
+	if (!revision) throw new Error("Realm rule restore did not return a revision");
+	if (value?.rules.length)
+		await tx
+			.insert(realmRule)
+			.values(
+				value.rules.map((rule) =>
+					realmRuleInsertSchema.parse({ revisionId: revision.id, ...rule }),
+				),
+			);
+}
+
+export async function restoreUnitSnapshot(tx: DatabaseTransaction, unitId: string, value: unknown) {
+	const result = UnitSnapshotSchema.safeParse(value);
+	if (!result.success) throw new Error("Unsupported Unit snapshot", { cause: result.error });
+	const snapshot = result.data;
+	await lockUnitHistory(tx, unitId);
+	const [current] = await tx
+		.select({ kind: unit.kind })
+		.from(unit)
+		.where(eq(unit.id, unitId))
+		.limit(1);
+	if (!current || current.kind !== snapshot.kind) throw new Error("Unit snapshot kind mismatch");
+	await tx.update(unit).set(unitStateSchema.parse(snapshot.unit)).where(eq(unit.id, unitId));
+	await tx.delete(unitLocalization).where(eq(unitLocalization.unitId, unitId));
+	if (snapshot.localizations.length)
+		await tx.insert(unitLocalization).values(
+			snapshot.localizations.map((localization) => ({
+				unitId,
+				...unitLocalizationStateSchema.parse(localization),
+			})),
+		);
+	await restoreExtension(tx, unitId, snapshot.kind, snapshot.extension);
+
+	await restoreAliases(tx, unitId, snapshot.owned.aliases);
+	if (snapshot.kind === "game")
+		await tx.delete(gameRequirement).where(eq(gameRequirement.gameId, unitId));
+	await tx.delete(unitCredit).where(eq(unitCredit.unitId, unitId));
+	await tx.delete(unitLink).where(eq(unitLink.unitId, unitId));
+	await tx.delete(unitTag).where(eq(unitTag.unitId, unitId));
+	await tx.delete(unitVariant).where(eq(unitVariant.unitId, unitId));
+	if (snapshot.owned.credits.length)
+		await tx
+			.insert(unitCredit)
+			.values(snapshot.owned.credits.map((row) => unitCreditRowSchema.parse(row)));
+	if (snapshot.owned.links.length)
+		await tx
+			.insert(unitLink)
+			.values(snapshot.owned.links.map((row) => unitLinkRowSchema.parse(row)));
+	if (snapshot.owned.tags.length)
+		await tx
+			.insert(unitTag)
+			.values(snapshot.owned.tags.map((row) => unitTagRowSchema.parse(row)));
+	if (snapshot.owned.variants.length)
+		await tx
+			.insert(unitVariant)
+			.values(snapshot.owned.variants.map((row) => unitVariantRowSchema.parse(row)));
+
+	if (snapshot.kind === "series") {
+		await tx.delete(seriesRelease).where(eq(seriesRelease.seriesId, unitId));
+		if (snapshot.owned.seriesReleases.length)
+			await tx
+				.insert(seriesRelease)
+				.values(
+					snapshot.owned.seriesReleases.map((row) => seriesReleaseRowSchema.parse(row)),
+				);
+	}
+	if (snapshot.kind === "game" && snapshot.owned.gameRequirements.length)
+		await tx
+			.insert(gameRequirement)
+			.values(
+				snapshot.owned.gameRequirements.map((row) => gameRequirementRowSchema.parse(row)),
+			);
+	if (snapshot.kind === "zone") {
+		await tx.delete(zonePage).where(eq(zonePage.zoneId, unitId));
+		if (snapshot.owned.zonePages.length)
+			await tx
+				.insert(zonePage)
+				.values(snapshot.owned.zonePages.map((row) => zonePageRowSchema.parse(row)));
+	}
+	if (snapshot.kind === "collection") {
+		await tx.delete(collectionItem).where(eq(collectionItem.collectionId, unitId));
+		if (snapshot.owned.collectionItems.length)
+			await tx
+				.insert(collectionItem)
+				.values(
+					snapshot.owned.collectionItems.map((row) => collectionItemRowSchema.parse(row)),
+				);
+	}
+	if (snapshot.kind === "book")
+		await restoreSoftRows(tx, unitId, "contentNode", snapshot.owned.contentNodes);
+	if (snapshot.kind === "poll")
+		await restoreSoftRows(tx, unitId, "pollOption", snapshot.owned.pollOptions);
+	if (snapshot.kind === "realm") {
+		await tx.delete(realmPin).where(eq(realmPin.realmId, unitId));
+		if (snapshot.owned.realmPins.length)
+			await tx
+				.insert(realmPin)
+				.values(snapshot.owned.realmPins.map((row) => realmPinRowSchema.parse(row)));
+		await restoreRealmRules(tx, unitId, snapshot.owned.realmRules);
+	}
+}
+
+export const UnitRevisionChangeTags = ["mw-undo", "mw-manual-revert"] as const;
+export type UnitRevisionChangeTag = (typeof UnitRevisionChangeTags)[number];
+
+type SlotRole = (typeof unitRevisionSlot.role.enumValues)[number];
+type SlotDocument = { readonly model: string; readonly payload: unknown };
+export type UnitRevisionDocuments = Partial<Record<SlotRole, SlotDocument>>;
+
+export type UnitRevisionCommitResult = {
+	readonly revisionId: string;
+	readonly revisionCreated: boolean;
+};
+
+const SlotModels = {
+	main: "rezics.unit.main.v1",
+	localizations: "rezics.unit.localizations.v1",
+	relations: "rezics.unit.relations.v1",
+	structure: "rezics.unit.structure.v1",
+	rules: "rezics.unit.rules.v1",
+} as const satisfies Record<SlotRole, string>;
+
+function normalizeJson(value: unknown): unknown {
+	return JSON.parse(JSON.stringify(value)) as unknown;
+}
+
+function canonicalJson(value: unknown): string {
+	if (value === null || typeof value !== "object") return JSON.stringify(value);
+	if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+	return `{${Object.entries(value)
+		.sort(([left], [right]) => left.localeCompare(right))
+		.map(([key, item]) => `${JSON.stringify(key)}:${canonicalJson(item)}`)
+		.join(",")}}`;
+}
+
+function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
+	const documents: UnitRevisionDocuments = {
+		main: {
+			model: SlotModels.main,
+			payload: {
+				version: 1,
+				kind: snapshot.kind,
+				unit: snapshot.unit,
+				extension: snapshot.extension,
+			},
+		},
+		localizations: {
+			model: SlotModels.localizations,
+			payload: { version: 1, items: snapshot.localizations },
+		},
+		relations: {
+			model: SlotModels.relations,
+			payload: {
+				version: 1,
+				aliases: snapshot.owned.aliases,
+				credits: snapshot.owned.credits,
+				links: snapshot.owned.links,
+				tags: snapshot.owned.tags,
+				variants: snapshot.owned.variants,
+			},
+		},
+		structure: {
+			model: SlotModels.structure,
+			payload: {
+				version: 1,
+				seriesReleases: snapshot.owned.seriesReleases,
+				gameRequirements: snapshot.owned.gameRequirements,
+				zonePages: snapshot.owned.zonePages,
+				collectionItems: snapshot.owned.collectionItems,
+				contentNodes: snapshot.owned.contentNodes,
+				pollOptions: snapshot.owned.pollOptions,
+				realmPins: snapshot.owned.realmPins,
+			},
+		},
+	};
+	if (snapshot.owned.realmRules)
+		documents.rules = {
+			model: SlotModels.rules,
+			payload: { version: 1, ...snapshot.owned.realmRules },
+		};
+	return documents;
+}
+
+function asRecord(value: unknown, name: string): Record<string, unknown> {
+	if (!value || typeof value !== "object" || Array.isArray(value))
+		throw new Error(`Invalid ${name} revision content`);
+	return value as Record<string, unknown>;
+}
+
+function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
+	const main = asRecord(documents.main?.payload, "main");
+	const localizations = asRecord(documents.localizations?.payload, "localizations");
+	const relations = asRecord(documents.relations?.payload, "relations");
+	const structure = asRecord(documents.structure?.payload, "structure");
+	const rules = documents.rules ? asRecord(documents.rules.payload, "rules") : null;
+	return UnitSnapshotSchema.parse({
+		version: 1,
+		kind: main.kind,
+		unit: main.unit,
+		localizations: localizations.items,
+		extension: main.extension,
+		preference: null,
+		owned: {
+			aliases: relations.aliases,
+			credits: relations.credits,
+			links: relations.links,
+			tags: relations.tags,
+			variants: relations.variants,
+			seriesReleases: structure.seriesReleases,
+			gameRequirements: structure.gameRequirements,
+			zonePages: structure.zonePages,
+			collectionItems: structure.collectionItems,
+			contentNodes: structure.contentNodes,
+			pollOptions: structure.pollOptions,
+			realmPins: structure.realmPins,
+			realmContent: [],
+			realmRules: rules
+				? {
+						requireOnJoin: rules.requireOnJoin,
+						requireOnPost: rules.requireOnPost,
+						requireOnUpdate: rules.requireOnUpdate,
+						rules: rules.rules,
+					}
+				: null,
+		},
+	});
+}
+
+async function findOrCreateContent(
+	tx: DatabaseTransaction,
+	document: SlotDocument,
+): Promise<{ readonly id: string; readonly byteSize: number }> {
+	const payload = normalizeJson(document.payload) as JsonValue;
+	const canonical = canonicalJson(payload);
+	const sha256 = createHash("sha256").update(canonical).digest("hex");
+	const byteSize = Buffer.byteLength(canonical);
+	await tx
+		.insert(revisionContent)
+		.values({ model: document.model, sha256, byteSize, payload })
+		.onConflictDoNothing({
+			target: [revisionContent.model, revisionContent.sha256],
+		});
+	const [content] = await tx
+		.select({
+			id: revisionContent.id,
+			byteSize: revisionContent.byteSize,
+			payload: revisionContent.payload,
+		})
+		.from(revisionContent)
+		.where(and(eq(revisionContent.model, document.model), eq(revisionContent.sha256, sha256)))
+		.limit(1);
+	if (!content || canonicalJson(content.payload) !== canonical)
+		throw new Error("Revision content hash collision");
+	return content;
+}
+
+export async function getUnitRevisionDocuments(
+	tx: DatabaseTransaction,
+	revisionId: string,
+): Promise<UnitRevisionDocuments> {
+	const rows = await tx
+		.select({
+			role: unitRevisionSlot.role,
+			model: revisionContent.model,
+			payload: revisionContent.payload,
+		})
+		.from(unitRevisionSlot)
+		.innerJoin(revisionContent, eq(revisionContent.id, unitRevisionSlot.contentId))
+		.where(eq(unitRevisionSlot.revisionId, revisionId));
+	return Object.fromEntries(
+		rows.map((row) => [row.role, { model: row.model, payload: row.payload }]),
+	) as UnitRevisionDocuments;
+}
+
+export async function recordUnitRevision(
+	tx: DatabaseTransaction,
+	input: {
+		unitId: string;
+		actorProfileId?: string | null;
+		event: UnitRevisionEvent;
+		message?: string;
+		minor?: boolean;
+		baseRevisionId?: string;
+		sourceRevisionId?: string;
+		tags?: readonly UnitRevisionChangeTag[];
+	},
+): Promise<UnitRevisionCommitResult> {
+	await lockUnitHistory(tx, input.unitId);
+	const [head] = await tx
+		.select({ revisionId: unitRevisionHead.revisionId })
+		.from(unitRevisionHead)
+		.where(eq(unitRevisionHead.unitId, input.unitId))
+		.limit(1);
+	if (input.baseRevisionId !== undefined && head?.revisionId !== input.baseRevisionId) {
+		throw new UnitRevisionConflict(head?.revisionId ?? null);
+	}
+	if (input.event === "delete")
+		await tx.insert(auditEvent).values({
+			actorProfileId: input.actorProfileId,
+			action: "unit.delete",
+			decisionCode: "allowed",
+			reason: input.message ?? "Unit deleted",
+			subjectKind: "unit",
+			subjectId: input.unitId,
+		});
+
+	const documents = snapshotToDocuments(await snapshotUnit(tx, input.unitId));
+	const previousSlots = head
+		? await tx
+				.select({
+					role: unitRevisionSlot.role,
+					contentId: unitRevisionSlot.contentId,
+					originRevisionId: unitRevisionSlot.originRevisionId,
+				})
+				.from(unitRevisionSlot)
+				.where(eq(unitRevisionSlot.revisionId, head.revisionId))
+		: [];
+	const previousByRole = new Map(previousSlots.map((slot) => [slot.role, slot]));
+	const sourceSlots = input.sourceRevisionId
+		? await tx
+				.select({
+					role: unitRevisionSlot.role,
+					contentId: unitRevisionSlot.contentId,
+					originRevisionId: unitRevisionSlot.originRevisionId,
+				})
+				.from(unitRevisionSlot)
+				.where(eq(unitRevisionSlot.revisionId, input.sourceRevisionId))
+		: [];
+	const sourceByRole = new Map(sourceSlots.map((slot) => [slot.role, slot]));
+
+	const contents: { role: SlotRole; id: string; byteSize: number }[] = [];
+	for (const [role, document] of Object.entries(documents)) {
+		const content = await findOrCreateContent(tx, document);
+		contents.push({ role: role as SlotRole, ...content });
+	}
+	const contentByRole = new Map(contents.map((content) => [content.role, content]));
+	const unchanged =
+		Boolean(head) &&
+		previousSlots.length === contents.length &&
+		contents.every((content) => previousByRole.get(content.role)?.contentId === content.id);
+	if (unchanged && head) return { revisionId: head.revisionId, revisionCreated: false };
+
+	const byteSize = contents.reduce((total, content) => total + content.byteSize, 0);
+	const [revision] = await tx
+		.insert(unitRevision)
+		.values({
+			unitId: input.unitId,
+			parentRevisionId: head?.revisionId,
+			actorProfileId: input.actorProfileId,
+			editSummary: input.message,
+			minor: input.minor ?? false,
+			byteSize,
+		})
+		.returning({ id: unitRevision.id });
+	if (!revision) throw new Error("Unit revision insertion did not return an id");
+
+	await tx.insert(unitRevisionSlot).values(
+		[...contentByRole].map(([role, content]) => {
+			const previous = previousByRole.get(role);
+			const source = sourceByRole.get(role);
+			return {
+				revisionId: revision.id,
+				unitId: input.unitId,
+				role,
+				contentId: content.id,
+				originRevisionId:
+					previous?.contentId === content.id
+						? previous.originRevisionId
+						: source?.contentId === content.id
+							? source.originRevisionId
+							: revision.id,
+			};
+		}),
+	);
+	await tx
+		.insert(unitRevisionHead)
+		.values({ unitId: input.unitId, revisionId: revision.id })
+		.onConflictDoUpdate({
+			target: unitRevisionHead.unitId,
+			set: { revisionId: revision.id },
+		});
+	const tags = new Set(input.tags ?? []);
+	if (input.event === "restore") tags.add("mw-manual-revert");
+	if (tags.size)
+		await tx.insert(unitRevisionTag).values(
+			[...tags].map((tag) => ({
+				revisionId: revision.id,
+				tag,
+				metadata: input.sourceRevisionId
+					? { sourceRevisionId: input.sourceRevisionId }
+					: {},
+			})),
+		);
+	return { revisionId: revision.id, revisionCreated: true };
+}
+
+export async function restoreUnitRevision(
+	tx: DatabaseTransaction,
+	input: {
+		unitId: string;
+		sourceRevisionId: string;
+		baseRevisionId: string;
+		actorProfileId: string;
+		message?: string;
+		minor?: boolean;
+	},
+) {
+	const documents = await getUnitRevisionDocuments(tx, input.sourceRevisionId);
+	if (!documents.main) throw new Error("Unit revision not found");
+	await restoreUnitSnapshot(tx, input.unitId, documentsToSnapshot(documents));
+	return recordUnitRevision(tx, {
+		unitId: input.unitId,
+		actorProfileId: input.actorProfileId,
+		event: "restore",
+		message: input.message,
+		minor: input.minor,
+		baseRevisionId: input.baseRevisionId,
+		sourceRevisionId: input.sourceRevisionId,
+	});
+}
+
+const Missing = Symbol("missing revision value");
+type MergeValue = unknown | typeof Missing;
+
+function revisionValueEquals(left: MergeValue, right: MergeValue) {
+	if (left === Missing || right === Missing) return left === right;
+	return canonicalJson(normalizeJson(left)) === canonicalJson(normalizeJson(right));
+}
+
+function revisionPath(path: string, key: string) {
+	return `${path}/${key.replaceAll("~", "~0").replaceAll("/", "~1")}`;
+}
+
+const StableArrayKeys = [
+	["id"],
+	["language"],
+	["tagId"],
+	["unitId", "role"],
+	["creditedEntityId", "role"],
+	["sourceEntityId", "role", "position"],
+	["seriesId", "releaseUnitId"],
+	["gameId", "kind"],
+	["zoneId", "unitId"],
+	["collectionId", "unitId"],
+	["position"],
+] as const;
+
+function getStableArrayKey(lists: readonly unknown[][]) {
+	for (const fields of StableArrayKeys) {
+		const getKey = (value: unknown) => {
+			if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+			const record = value as Record<string, unknown>;
+			const parts = fields.map((field) => record[field]);
+			if (parts.some((part) => part === undefined || part === null)) return undefined;
+			return parts.map((part) => String(part)).join("\u0000");
+		};
+		if (
+			lists.every((values) => {
+				const keys = values.map(getKey);
+				return keys.every((key) => key !== undefined) && new Set(keys).size === keys.length;
+			})
+		)
+			return getKey as (value: unknown) => string;
+	}
+	return undefined;
+}
+
+function undoArrayChange(
+	before: unknown[],
+	after: unknown[],
+	current: unknown[],
+	path: string,
+	conflicts: string[],
+): unknown[] | undefined {
+	const getKey = getStableArrayKey([before, after, current]);
+	if (!getKey) return undefined;
+	const toMap = (values: unknown[]) => new Map(values.map((value) => [getKey(value), value]));
+	const beforeByKey = toMap(before);
+	const afterByKey = toMap(after);
+	const currentByKey = toMap(current);
+	const touchedKeys = new Set([...beforeByKey.keys(), ...afterByKey.keys()]);
+	for (const key of touchedKeys) {
+		const beforeValue = beforeByKey.get(key) ?? Missing;
+		const afterValue = afterByKey.get(key) ?? Missing;
+		if (revisionValueEquals(beforeValue, afterValue)) continue;
+		const currentValue = currentByKey.get(key) ?? Missing;
+		const merged = undoRevisionValue(
+			beforeValue,
+			afterValue,
+			currentValue,
+			revisionPath(path, key),
+			conflicts,
+		);
+		if (merged === Missing) currentByKey.delete(key);
+		else currentByKey.set(key, merged);
+	}
+	const result = current
+		.map(getKey)
+		.filter((key) => currentByKey.has(key))
+		.map((key) => currentByKey.get(key));
+	for (const value of before) {
+		const key = getKey(value);
+		if (!result.includes(currentByKey.get(key)) && currentByKey.has(key))
+			result.push(currentByKey.get(key));
+	}
+	return result;
+}
+
+function undoRevisionValue(
+	before: MergeValue,
+	after: MergeValue,
+	current: MergeValue,
+	path: string,
+	conflicts: string[],
+): MergeValue {
+	if (revisionValueEquals(before, after)) return current;
+	if (revisionValueEquals(current, after) || revisionValueEquals(current, before)) return before;
+	if (before === Missing || after === Missing || current === Missing) {
+		conflicts.push(path || "/");
+		return current;
+	}
+	if (Array.isArray(before) && Array.isArray(after) && Array.isArray(current)) {
+		const merged = undoArrayChange(before, after, current, path, conflicts);
+		if (merged) return merged;
+	}
+	if (
+		before &&
+		after &&
+		current &&
+		typeof before === "object" &&
+		typeof after === "object" &&
+		typeof current === "object" &&
+		!Array.isArray(before) &&
+		!Array.isArray(after) &&
+		!Array.isArray(current)
+	) {
+		const beforeRecord = before as Record<string, unknown>;
+		const afterRecord = after as Record<string, unknown>;
+		const currentRecord = current as Record<string, unknown>;
+		const result: Record<string, unknown> = { ...currentRecord };
+		for (const key of new Set([...Object.keys(beforeRecord), ...Object.keys(afterRecord)])) {
+			const merged = undoRevisionValue(
+				key in beforeRecord ? beforeRecord[key] : Missing,
+				key in afterRecord ? afterRecord[key] : Missing,
+				key in currentRecord ? currentRecord[key] : Missing,
+				revisionPath(path, key),
+				conflicts,
+			);
+			if (merged === Missing) delete result[key];
+			else result[key] = merged;
+		}
+		return result;
+	}
+	conflicts.push(path || "/");
+	return current;
+}
+
+export function undoRevisionDocuments(
+	before: UnitRevisionDocuments,
+	after: UnitRevisionDocuments,
+	current: UnitRevisionDocuments,
+) {
+	const conflicts: string[] = [];
+	const merged: UnitRevisionDocuments = {};
+	for (const role of new Set<SlotRole>([
+		...(Object.keys(before) as SlotRole[]),
+		...(Object.keys(after) as SlotRole[]),
+		...(Object.keys(current) as SlotRole[]),
+	])) {
+		const beforeDocument = before[role] ?? Missing;
+		const afterDocument = after[role] ?? Missing;
+		const currentDocument = current[role] ?? Missing;
+		const value = undoRevisionValue(
+			beforeDocument,
+			afterDocument,
+			currentDocument,
+			`/${role}`,
+			conflicts,
+		);
+		if (value !== Missing) merged[role] = value as SlotDocument;
+	}
+	return { documents: merged, conflictPaths: [...new Set(conflicts)].sort() };
+}
+
+export async function undoUnitRevision(
+	tx: DatabaseTransaction,
+	input: {
+		unitId: string;
+		targetRevisionId: string;
+		baseRevisionId: string;
+		actorProfileId: string;
+		message?: string;
+		minor?: boolean;
+	},
+) {
+	await lockUnitHistory(tx, input.unitId);
+	const [head] = await tx
+		.select({ revisionId: unitRevisionHead.revisionId })
+		.from(unitRevisionHead)
+		.where(eq(unitRevisionHead.unitId, input.unitId))
+		.limit(1);
+	if (head?.revisionId !== input.baseRevisionId)
+		throw new UnitRevisionConflict(head?.revisionId ?? null);
+	const [target] = await tx
+		.select({ unitId: unitRevision.unitId, parentRevisionId: unitRevision.parentRevisionId })
+		.from(unitRevision)
+		.where(eq(unitRevision.id, input.targetRevisionId))
+		.limit(1);
+	if (!target || target.unitId !== input.unitId || !target.parentRevisionId)
+		throw new UnitRevisionConflict(head?.revisionId ?? null, ["/"]);
+	const before = await getUnitRevisionDocuments(tx, target.parentRevisionId);
+	const after = await getUnitRevisionDocuments(tx, input.targetRevisionId);
+	const current = await getUnitRevisionDocuments(tx, input.baseRevisionId);
+	const result = undoRevisionDocuments(before, after, current);
+	if (result.conflictPaths.length)
+		throw new UnitRevisionConflict(head.revisionId, result.conflictPaths);
+	await restoreUnitSnapshot(tx, input.unitId, documentsToSnapshot(result.documents));
+	return recordUnitRevision(tx, {
+		unitId: input.unitId,
+		actorProfileId: input.actorProfileId,
+		event: "update",
+		message: input.message,
+		minor: input.minor,
+		baseRevisionId: input.baseRevisionId,
+		sourceRevisionId: input.targetRevisionId,
+		tags: ["mw-undo"],
+	});
+}

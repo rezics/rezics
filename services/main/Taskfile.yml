@@ -1,0 +1,77 @@
+version: "3"
+
+tasks:
+    storage:up:
+        desc: Start RustFS and create the development bucket.
+        dir: ../..
+        cmds:
+            - docker compose up -d rustfs rustfs-setup
+
+    storage:down:
+        desc: Stop the development RustFS service.
+        dir: ../..
+        cmds:
+            - docker compose down
+
+    dev:
+        desc: Start the backend API and recommendation worker.
+        cmds:
+            - task --parallel --failfast dev:api dev:worker
+
+    dev:api:
+        internal: true
+        cmds:
+            - yarn exec tsx watch src/index.ts
+
+    dev:worker:
+        internal: true
+        cmds:
+            - yarn exec tsx watch src/worker.ts
+
+    recommendations:refresh:
+        desc: Build one recommendation snapshot, aggregate metrics, and exit.
+        cmds:
+            - yarn exec tsx scripts/refresh-recommendations.ts
+
+    build:
+        desc: Build the backend.
+        cmds:
+            - yarn exec tsc -p tsconfig.json
+
+    typecheck:
+        desc: Type-check the backend.
+        cmds:
+            - yarn exec tsc --noEmit -p tsconfig.typecheck.json
+
+    test:
+        desc: Run backend behavior tests.
+        dir: ../..
+        cmds:
+            - yarn exec vitest run --project main
+
+    openapi:generate:
+        desc: Generate the OpenAPI document from backend route schemas.
+        cmds:
+            - yarn exec tsx scripts/generate-openapi.ts
+
+    db:auth:
+        desc: Verify that Better Auth model requirements match the mapped schema.
+        cmds:
+            - yarn exec tsx scripts/generate-auth-schema.ts
+
+    db:generate:
+        desc: Generate a Drizzle migration from the schema.
+        cmds:
+            - yarn exec drizzle-kit generate
+
+    db:migrate:
+        desc: Apply pending Drizzle migrations.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-${DATABASE_URL:-}}"
+            - yarn exec tsx scripts/migrate.ts
+
+    db:reset:
+        desc: Destructively rebuild a local development database, then migrate it.
+        cmds:
+            - yarn exec tsx scripts/reset-database.ts {{.CLI_ARGS}}
+            - task: db:migrate

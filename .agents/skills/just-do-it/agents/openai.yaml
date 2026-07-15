@@ -1,0 +1,7 @@
+interface:
+  display_name: "Just Do It"
+  short_description: "Jump in, make joyful progress, and celebrate finishing well."
+  default_prompt: "Use $just-do-it to jump into this task with confidence, care, and joy."
+
+policy:
+  allow_implicit_invocation: true

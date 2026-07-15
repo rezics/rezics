@@ -1,0 +1,268 @@
+---
+import GlobalFooter from "../components/products/GlobalFooter.astro";
+import GlobalHeader from "../components/products/GlobalHeader.astro";
+import { getSiteCopy } from "../content/siteCopy";
+import type { AboutPageMeta, ImplementationStatus } from "../content/productTypes";
+import {
+  ABOUT_LOCALE_META,
+  DEFAULT_LOCALE,
+  type AboutLocale,
+} from "../i18n/locales";
+import {
+  getAlternatePaths,
+  getCanonicalForPath,
+  type PublicPageKind,
+} from "../i18n/productPaths";
+import "../styles/products.css";
+
+type Props = {
+  locale: AboutLocale;
+  meta: AboutPageMeta;
+  active: "home" | "products" | "platform" | "history";
+  pageKind: PublicPageKind;
+  slug?: string;
+  productName?: string;
+  productStatus?: ImplementationStatus;
+};
+
+const {
+  locale,
+  meta,
+  active,
+  pageKind,
+  slug,
+  productName,
+  productStatus,
+} = Astro.props;
+const copy = getSiteCopy(locale);
+const alternatePathByLocale = getAlternatePaths(pageKind, slug);
+const canonicalUrl = getCanonicalForPath(alternatePathByLocale[locale]);
+const xDefaultUrl = getCanonicalForPath(alternatePathByLocale[DEFAULT_LOCALE]);
+const localeMeta = ABOUT_LOCALE_META[locale];
+const schema = productName && productStatus === "implemented"
+  ? {
+      "@context": "https://schema.org",
+      "@type": ["WebPage", "SoftwareApplication"],
+      name: productName,
+      description: meta.description,
+      url: canonicalUrl,
+      applicationCategory: "WebApplication",
+      operatingSystem: "Web",
+    }
+  : {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: meta.title,
+      description: meta.description,
+      url: canonicalUrl,
+    };
+---
+
+<!doctype html>
+<html lang={localeMeta.htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <script is:inline>
+      (() => {
+        try {
+          const stored = localStorage.getItem("rezics-theme");
+          const dark = stored === "dark";
+          document.documentElement.classList.toggle("dark", dark);
+          document.documentElement.classList.toggle("light", !dark);
+        } catch {
+          document.documentElement.classList.add("light");
+        }
+      })();
+    </script>
+    <title>{meta.title}</title>
+    <meta name="description" content={meta.description} />
+    <link rel="canonical" href={canonicalUrl} />
+    {Object.entries(alternatePathByLocale).map(([alternateLocale, path]) => (
+      <link
+        rel="alternate"
+        hreflang={ABOUT_LOCALE_META[alternateLocale as AboutLocale].htmlLang}
+        href={getCanonicalForPath(path)}
+      />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={xDefaultUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Rezics" />
+    <meta property="og:title" content={meta.title} />
+    <meta property="og:description" content={meta.description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:locale" content={localeMeta.htmlLang.replace("-", "_")} />
+    <meta name="twitter:card" content="summary" />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />
+    <style is:global>
+      .global-header {
+        background: var(--colors-surface-canvas);
+        backdrop-filter: none;
+      }
+    </style>
+  </head>
+  <body class="bg-surface-canvas text-text-primary">
+    <GlobalHeader
+      locale={locale}
+      copy={copy}
+      active={active}
+      alternatePathByLocale={alternatePathByLocale}
+    />
+    <main id="main-content">
+      <slot />
+    </main>
+    <GlobalFooter locale={locale} copy={copy} />
+
+    <script>
+      const syncThemeControls = () => {
+        const dark = document.documentElement.classList.contains("dark");
+        document.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]").forEach((button) => {
+          button.setAttribute("aria-pressed", String(dark));
+          const label = button.querySelector<HTMLElement>("[data-theme-label]");
+          if (label) {
+            label.textContent = dark
+              ? button.dataset.darkLabel ?? "Dark"
+              : button.dataset.lightLabel ?? "Light";
+          }
+          button.querySelector<HTMLElement>('[data-theme-icon="light"]')?.toggleAttribute("hidden", dark);
+          button.querySelector<HTMLElement>('[data-theme-icon="dark"]')?.toggleAttribute("hidden", !dark);
+        });
+      };
+
+      document.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const root = document.documentElement;
+          const dark = !root.classList.contains("dark");
+          root.classList.toggle("dark", dark);
+          root.classList.toggle("light", !dark);
+          try {
+            localStorage.setItem("rezics-theme", dark ? "dark" : "light");
+          } catch {
+            // The theme still applies for this page view.
+          }
+          syncThemeControls();
+        });
+      });
+      syncThemeControls();
+
+      const drawer = document.querySelector<HTMLElement>("[data-drawer]");
+      const drawerToggle = document.querySelector<HTMLButtonElement>("[data-drawer-toggle]");
+      let drawerTimer: number | undefined;
+      const setDrawerOpen = (open: boolean) => {
+        if (!drawer || !drawerToggle) return;
+        window.clearTimeout(drawerTimer);
+        drawerToggle.setAttribute("aria-expanded", String(open));
+        drawerToggle.setAttribute(
+          "aria-label",
+          open
+            ? drawerToggle.dataset.closeLabel ?? "Close menu"
+            : drawerToggle.dataset.openLabel ?? "Open menu",
+        );
+        drawerToggle.querySelector<HTMLElement>('[data-drawer-icon="open"]')?.toggleAttribute("hidden", open);
+        drawerToggle.querySelector<HTMLElement>('[data-drawer-icon="close"]')?.toggleAttribute("hidden", !open);
+        document.body.classList.toggle("has-open-drawer", open);
+        if (open) {
+          drawer.hidden = false;
+          requestAnimationFrame(() => drawer.classList.add("is-open"));
+          drawer.querySelector<HTMLElement>("a, button, summary")?.focus();
+        } else {
+          drawer.classList.remove("is-open");
+          drawerTimer = window.setTimeout(() => {
+            drawer.hidden = true;
+          }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 220);
+        }
+      };
+
+      drawerToggle?.addEventListener("click", () => {
+        setDrawerOpen(drawerToggle.getAttribute("aria-expanded") !== "true");
+      });
+      drawer?.querySelectorAll("a").forEach((link) => {
+        link.addEventListener("click", () => setDrawerOpen(false));
+      });
+
+      document.querySelectorAll<HTMLDetailsElement>("[data-header-details]").forEach((details) => {
+        document.addEventListener("click", (event) => {
+          if (details.open && !details.contains(event.target as Node)) details.open = false;
+        });
+      });
+
+      const activateTab = (button: HTMLButtonElement, focus = false) => {
+        const tablist = button.closest<HTMLElement>('[role="tablist"]');
+        const targetId = button.getAttribute("aria-controls");
+        if (!tablist || !targetId) return;
+        const tabs = Array.from(tablist.querySelectorAll<HTMLButtonElement>(':scope > [role="tab"]'));
+        tabs.forEach((tab) => {
+          const selected = tab === button;
+          tab.setAttribute("aria-selected", String(selected));
+          tab.tabIndex = selected ? 0 : -1;
+          const panelId = tab.getAttribute("aria-controls");
+          if (panelId) document.getElementById(panelId)?.toggleAttribute("hidden", !selected);
+        });
+        if (focus) button.focus();
+      };
+
+      document.querySelectorAll<HTMLButtonElement>('[role="tab"][aria-controls]').forEach((button) => {
+        button.addEventListener("click", () => activateTab(button));
+        button.addEventListener("keydown", (event) => {
+          const tablist = button.closest<HTMLElement>('[role="tablist"]');
+          if (!tablist) return;
+          const tabs = Array.from(tablist.querySelectorAll<HTMLButtonElement>(':scope > [role="tab"]'));
+          const current = tabs.indexOf(button);
+          let next = current;
+          if (event.key === "ArrowRight") next = (current + 1) % tabs.length;
+          else if (event.key === "ArrowLeft") next = (current - 1 + tabs.length) % tabs.length;
+          else if (event.key === "Home") next = 0;
+          else if (event.key === "End") next = tabs.length - 1;
+          else return;
+          event.preventDefault();
+          const nextTab = tabs[next];
+          if (nextTab) activateTab(nextTab, true);
+        });
+      });
+
+      document.querySelectorAll<HTMLElement>("[data-choice-demo]").forEach((demo) => {
+        const outcome = demo.querySelector<HTMLElement>("[data-choice-outcome]");
+        const step = demo.querySelector<HTMLElement>("[data-journey-step]");
+        demo.querySelectorAll<HTMLButtonElement>("[data-choice]").forEach((button) => {
+          button.addEventListener("click", () => {
+            demo.querySelectorAll<HTMLButtonElement>("[data-choice]").forEach((choice) => {
+              choice.setAttribute("aria-pressed", String(choice === button));
+            });
+            if (outcome) outcome.textContent = button.dataset.outcome ?? "";
+            if (step) step.textContent = button.dataset.step ?? "";
+          });
+        });
+      });
+
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const reveals = document.querySelectorAll<HTMLElement>(".reveal");
+      if (reducedMotion || !("IntersectionObserver" in window)) {
+        reveals.forEach((element) => element.classList.add("is-visible"));
+      } else {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
+        );
+        reveals.forEach((element) => observer.observe(element));
+      }
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape") return;
+        setDrawerOpen(false);
+        document.querySelectorAll<HTMLDetailsElement>("[data-header-details]").forEach((details) => {
+          details.open = false;
+        });
+        drawerToggle?.focus();
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,31 @@
+{
+	"name": "@rezics/about",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"license": "AGPL-3.0-only",
+	"installConfig": {
+		"hoistingLimits": "workspaces"
+	},
+	"scripts": {
+		"dev": "astro dev",
+		"build": "astro build",
+		"preview": "astro preview",
+		"check": "astro-check",
+		"test": "vitest run --config vitest.config.ts"
+	},
+	"devDependencies": {
+		"@astrojs/check": "^0.9.9",
+		"@astrojs/mdx": "^6.0.2",
+		"@tailwindcss/vite": "^4.3.0",
+		"@types/node": "26",
+		"astro": "^6.4.4",
+		"tailwindcss": "^4.3.0",
+		"typescript": "^6.0.3",
+		"vite": "^7",
+		"vitest": "4.1.10"
+	},
+	"dependencies": {
+		"@lucide/astro": "^1.21.0"
+	}
+}

@@ -1,71 +1,69 @@
 # REZICS
 
-*inherited · create · spread*
+_inherited · create · spread_
 
-The name draws from reincarnation — not in a mystical sense, but in its 
-simplest idea: what is made, learned, or loved does not vanish. It finds 
-new form, passes to new hands, and grows.
+REZICS is a community-driven, cross-language catalog of works. Communities form
+around shared interests, classify and discuss the works they care about, and
+keep a work's index, discussion, and collective knowledge together.
 
-REZICS is built on that premise. We want to be a community where knowledge 
-and creativity are freely inherited, remixed, and passed forward — so that 
-everyone can pursue what they genuinely love, together.
+Everything — books, games, media, posts, shelves, tags, and realms — is modeled
+as a unified `Unit`, allowing the same catalog, classification, attribution, and
+social layers to work across content types and languages.
 
-## What it is
+## Repository structure
 
-Rezics is a community-driven, cross-language catalog of works. Realm based 
-community — form around shared interests and collectively classify and discuss
-the works they care about, so a work's index, its discussion, and its collective
-knowledge live in one place instead of three.
+```text
+apps/
+├─ web/                              # Main Vinext/React application
+└─ about/                            # Static multilingual Astro site
 
-It is a full-stack TypeScript monorepo. Everything — books, games, media, posts,
-shelves, tags, realms — is modeled as a unified `Unit`, so the same catalog,
-classification, attribution, and social layers work across content types and
-languages.
+services/
+└─ main/                             # Elysia/srvx API and recommendation worker
 
-## Why
+libraries/
+├─ i18n/                             # Internal localization library
+├─ portable-text/                    # Internal Portable Text contracts
+├─ ui/                               # Internal shared UI
+└─ services/main/
+   ├─ openapi/                       # Main-service API contract
+   ├─ openapi-fetch/                 # Generated Fetch client
+   └─ openapi-tanstack-query/        # Generated TanStack Query client
 
-Engaging with a single work today means bouncing between disconnected places:
+packages/
+└─ brand/                            # Public @rezics/brand package
+```
 
-- **Indexability** — modern, born-digital works (web comics, web novels,
-  serialized and indie titles) fall outside traditional catalogs.
-- **Language fragmentation** — each language keeps its own partial database; the
-  same work has separate, unlinked entries with no shared cross-language
-  identity.
-- **Ecosystem fragmentation** — the catalog, the community (forums, chat), and
-  the wiki live on different platforms; the wiki may not even exist, and you
-  rarely know where to look.
+`apps/` and `services/` contain deployable units. `libraries/` contains private
+workspace libraries. `packages/` contains externally consumable packages and
+must not depend on private libraries, applications, or services.
 
-Rezics gives any work one cross-language identity and co-locates the community
-and the collaborative knowledge around it. AI translation lowers the language
-wall, but it is an enabler — the core is identity, classification, and
-co-location.
+## Development
 
-## How it works
+The root workspace uses Node.js 26, Yarn 4, Go Task, PostgreSQL 18 with
+PGroonga, and S3-compatible object storage. Use the repository's devenv/direnv
+environment or provide compatible tools locally.
 
-- **Collective classification, not editorial** — a global tag vocabulary anyone
-  can vote on, plus *realm*-scoped tag votes on individual works layered over it.
-  Each community can classify a work in its own terms without forking the shared
-  vocabulary, resolving the "same word, different meaning across communities"
-  problem.
-- **Realms as the community unit** — people gather around what they love; a realm
-  is both the place discussion happens and the carrier of collective
-  classification. It is the bridge between the library and its communities.
-- **Shelves that explain themselves** — each saved work is paired with the
-  curator's review, so browsing a shelf tells you *why* something was collected,
-  making it easy to judge whether a work is for you.
-- **Reading & authoring built in** — a native ebook reader (`@rezics/folio`) and
-  a CodeMirror-based content editor (`@rezics/editor`).
+```sh
+yarn install --immutable
+yarn task services:up
+yarn task dev
+```
 
-## Stack
+The main checks are:
 
-A service-oriented backend — an Elysia API (`@rezics/server`) plus standalone
-auth, history, job-runner, and preview services, with Drizzle/PostgreSQL,
-Meilisearch search, and a React + Vite frontend (`@rezics/app`).
+```sh
+yarn task format:check
+yarn task openapi:check
+yarn task typecheck
+yarn task test
+yarn task web:build
+yarn task about:build
+```
 
-Runtime and package manager: **Bun**. Workspaces live under `package/*`. See
-`AGENTS.md` and `CONTRIBUTING.md` for architecture and setup.
+OpenAPI documents and generated clients are updated through
+`yarn task openapi:generate` and should not be edited by hand.
+`libraries/ui` contains both local components and the tracked SharkUI mirror;
+preserve that upstream boundary.
 
-## Docs
-
-The `Docs` folder is for manually written documentation, while the `tsDocs`
-folder stores automatically generated documentation.
+The about site is deployed independently to Cloudflare Pages from the
+`about-v*` tag or a manual workflow dispatch.
