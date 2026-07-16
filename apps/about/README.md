@@ -1,43 +1,16 @@
 # @rezics/about
 
-Static, multilingual product site for `about.rezics.com`, built with Astro 6,
-Tailwind CSS 4, and vanilla browser interactions.
+`about.rezics.com` 的静态多语言产品站，使用 React 19、Vike、`vike-react`、MDX 与 Tailwind CSS 构建。
 
-## Product model
+## 架构
 
-The public site is generated from one typed product registry:
+- `src/content/`：六语言文案、产品注册表、页面事实和媒体清单。
+- `pages/`：Vike 文件路由；全局配置开启 SSR、客户端路由、尾斜线与全量 prerender。
+- `src/components/products/`：真实 React 页面与交互组件。
+- `pages/_error/+Page.mdx`：MDX 错误页；仓库内 MDX 可直接导入 React 组件。
+- `functions/_middleware.ts` 与 `public/_redirects`：Cloudflare 语言协商与旧 URL 永久重定向。
 
-- `surface`: Catalog, Book, Media, Post, Zone, and other carrier products.
-- `capability`: Content Structure, History, Entity & Attribution, and other
-  shared platform products.
-- `manifestation`: GameBook, Wiki, Picture, Review, and Library.
-- `protocol`: internal concepts such as Unit, Chapter, and Block Schema;
-  protocols do not generate public product pages.
-
-Important relationships are encoded in `src/content/productRegistry.ts`.
-For example, GameBook belongs to Book, GameContentStructure is a Content
-Structure mode, and Entity & Attribution is an implemented independent
-capability containing Entity, CreditAttribution, and SubjectAttribution.
-
-## Content architecture
-
-- `src/content/productRegistry.ts`: non-translatable product facts,
-  relationships, status, claims, and media manifests.
-- `src/content/siteCopy.ts`: six-language global, directory, and page copy.
-- `src/content/productCopy.ts`: explicit localized copy for every product.
-- `src/content/productPageFacts.ts`: detailed scenarios, workflows, and
-  product boundaries.
-- `src/content/interfaceCopy.ts`: localized homepage details and
-  accessibility labels.
-- `src/components/products/`: code-native product stages and page sections.
-
-The supported locales are Traditional Chinese, Simplified Chinese, English,
-Japanese, German, and Korean. Product slugs and domain relationships are
-defined once; localized files contain copy only.
-
-## Routes
-
-Public routes use the plural form:
+公开 URL 保持为：
 
 ```text
 /[locale]/
@@ -45,62 +18,19 @@ Public routes use the plural form:
 /[locale]/products/[slug]/
 ```
 
-The sitemap contains the homepage, product directory, and all product pages for
-all six locales. Each page emits canonical and alternate-language links,
-including `x-default`.
-
-Legacy singular routes and the former `entity-source` route are permanent
-redirects. Cloudflare Pages receives both a middleware implementation and
-ordered `public/_redirects` fallback rules.
-
-## Media and interaction
-
-Product stages prefer real screenshots. Until those assets are available,
-replaceable HTML/CSS concept interfaces provide stable dimensions without
-abstract illustrations, generated interface text, or decorative relationship
-graphs.
-
-Interactions are implemented without a client framework:
-
-- manual homepage product switching;
-- product-directory previews;
-- Structure Tree/Game modes;
-- GameBook choices;
-- History scopes;
-- Credit/Subject Attribution modes;
-- FAQ accordions;
-- theme selection and mobile navigation.
-
-Reduced-motion preferences disable entrance movement and animated drawer
-height changes.
+旧的单数 `product` 路径与 `entity-source` 会永久重定向。所有公开页面均由同一注册表生成 canonical、hreflang、Open Graph、JSON-LD 与 sitemap。
 
 ## Commands
 
-From the repository root:
+从仓库根目录运行：
 
 ```bash
-yarn install --immutable
 yarn task about:dev
 yarn task about:check
 yarn task about:test
 yarn task about:build
+yarn task about:test:dist
 yarn task about:preview
 ```
 
-## Cloudflare Pages
-
-- Root build command: `yarn task about:build`
-- Application directory: `apps/about`
-- Build output directory: `apps/about/dist`
-- Custom domain: `about.rezics.com`
-
-Deployment is handled by
-`.github/workflows/deploy-about-cloudflare-pages.yml` with Cloudflare Pages Direct
-Upload. The workflow requires `CLOUDFLARE_API_TOKEN` and
-`CLOUDFLARE_ACCOUNT_ID`; `CLOUDFLARE_PAGES_PROJECT_NAME` is optional and
-defaults to `rezics-about`. Release tags use the `about-v*` namespace so other
-monorepo releases cannot deploy this site accidentally.
-
-This project remains static-first. It does not request Outline at production
-runtime and does not require authentication, database bindings, or a client
-framework.
+Cloudflare Pages 的构建目录是 `apps/about/dist/client`。部署不依赖 `dist/server`。

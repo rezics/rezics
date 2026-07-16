@@ -1,31 +1,33 @@
-# @rezics/about — Astro site. Aggregated by the root Taskfile as about:*.
+# @rezics/about — Vike/React site. Aggregated by the root Taskfile as about:*.
 version: "3"
-
-env:
-    ASTRO_TELEMETRY_DISABLED: "1"
 
 tasks:
     dev:
-        desc: Start the Astro development server.
+        desc: Start the Vike development server.
         cmds:
-            - yarn exec astro dev --host 0.0.0.0 --port 4174
+            - yarn exec vike dev --host 0.0.0.0 --port 4174
 
     build:
-        desc: Build the static Astro site.
+        desc: Build the prerendered Vike site.
         cmds:
-            - yarn exec astro build
+            - yarn run build
 
     preview:
-        desc: Preview the built Astro site.
+        desc: Preview the built Vike site.
         cmds:
-            - yarn exec astro preview --host 0.0.0.0 --port 4174
+            - yarn exec vike preview --host 0.0.0.0 --port 4174
 
     check:
-        desc: Run Astro and TypeScript checks.
+        desc: Run TypeScript checks.
         cmds:
-            - yarn exec astro-check
+            - yarn exec tsc --noEmit
 
     test:
         desc: Run about-site behavior tests.
         cmds:
             - yarn exec vitest run --config vitest.config.ts
+
+    test:dist:
+        desc: Verify the prerendered output.
+        cmds:
+            - yarn exec vitest run --config vitest.dist.config.ts

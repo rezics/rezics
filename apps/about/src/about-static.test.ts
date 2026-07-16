@@ -29,7 +29,7 @@ import {
 	getProductsPath,
 } from "./i18n/productPaths";
 import { onRequest as languageMiddleware } from "../functions/_middleware";
-import { GET as getSitemap } from "./pages/sitemap.xml";
+import { createSitemapXml } from "./sitemap";
 
 const workspaceRoot = join(fileURLToPath(new URL(".", import.meta.url)), "..");
 
@@ -256,7 +256,7 @@ describe("public routes, redirects, and discovery", () => {
 	});
 
 	test("lists home, directory, and all product pages for every locale", async () => {
-		const sitemap = await getSitemap().text();
+		const sitemap = createSitemapXml();
 		const urls = sitemap.match(/<url>/g) ?? [];
 
 		expect(urls).toHaveLength(ABOUT_LOCALES.length * (PRODUCT_DEFINITIONS.length + 2));

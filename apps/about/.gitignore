@@ -7,7 +7,6 @@ node_modules/
 
 # Build output
 dist/
-.astro/
 
 # TypeScript / Vite caches
 *.tsbuildinfo

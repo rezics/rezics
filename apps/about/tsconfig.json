@@ -4,7 +4,8 @@
 		"module": "ESNext",
 		"moduleResolution": "Bundler",
 		"lib": ["ES2022", "DOM", "DOM.Iterable"],
-		"types": ["astro/client", "node"],
+		"types": ["node", "react", "react-dom"],
+		"jsx": "react-jsx",
 		"strict": true,
 		"noEmit": true,
 		"allowJs": true,
@@ -22,6 +23,6 @@
 		"noUnusedLocals": true,
 		"noUnusedParameters": true
 	},
-	"include": ["src", "astro.config.mjs"],
-	"exclude": ["dist", ".astro", "node_modules"]
+	"include": ["src", "pages", "scripts", "vite.config.ts", "vitest*.config.ts"],
+	"exclude": ["dist", "node_modules"]
 }
