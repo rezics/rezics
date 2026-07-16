@@ -1,0 +1,26 @@
+const content = {
+	versions: "版本",
+	publishedVersions: "已發佈版本",
+	fieldHistory: "欄位歷史",
+	diff: "欄位差異",
+	locked: "此欄位目前在編輯範圍內被鎖定",
+	bookTitle: "Book.title",
+	postBlock: "Post.block",
+	zoneConfig: "Zone.config",
+	publishedVersionC: "已發佈版本 C",
+	publishedVersionB: "已發佈版本 B",
+	publishedVersionA: "已發佈版本 A",
+	current: "目前",
+	previous: "上一版",
+	initial: "初始版本",
+	previousTitle: "上一版標題",
+	currentTitle: "目前已發佈標題",
+	postBlockHistory: "Post 內容區塊歷史",
+	previousPostBlock: "paragraph.block / 已發佈 B",
+	currentPostBlock: "paragraph.block / 已發佈 C",
+	zoneConfigurationHistory: "Zone 配置歷史",
+	previousZoneQuery: "feed.query / 已發佈 A",
+	currentZoneQuery: "feed.query / 已發佈 B",
+} satisfies typeof import("../../en/components/history").default;
+
+export default content;

@@ -6,6 +6,6 @@ export const mdxComponents = {
 			{children}
 		</a>
 	),
-	h1: ({ children }: { children?: ReactNode }) => <h1 className="section-title">{children}</h1>,
-	p: ({ children }: { children?: ReactNode }) => <p className="section-lead">{children}</p>,
+	h1: ({ children }: { children?: ReactNode }) => <h1>{children}</h1>,
+	p: ({ children }: { children?: ReactNode }) => <p>{children}</p>,
 } satisfies Record<string, ComponentType<any>>;

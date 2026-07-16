@@ -1,0 +1,26 @@
+const content = {
+	versions: "バージョン",
+	publishedVersions: "公開済みバージョン",
+	fieldHistory: "フィールド履歴",
+	diff: "フィールド差分",
+	locked: "このフィールドは現在の編集範囲でロック中です",
+	bookTitle: "Book.title",
+	postBlock: "Post.block",
+	zoneConfig: "Zone.config",
+	publishedVersionC: "公開バージョン C",
+	publishedVersionB: "公開バージョン B",
+	publishedVersionA: "公開バージョン A",
+	current: "現在",
+	previous: "以前",
+	initial: "初期",
+	previousTitle: "以前のタイトル",
+	currentTitle: "現在公開中のタイトル",
+	postBlockHistory: "Post ブロック履歴",
+	previousPostBlock: "paragraph.block / 公開 B",
+	currentPostBlock: "paragraph.block / 公開 C",
+	zoneConfigurationHistory: "Zone 設定履歴",
+	previousZoneQuery: "feed.query / 公開 A",
+	currentZoneQuery: "feed.query / 公開 B",
+} satisfies typeof import("../../en/components/history").default;
+
+export default content;

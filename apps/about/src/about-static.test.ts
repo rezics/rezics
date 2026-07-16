@@ -1,4 +1,4 @@
-import { access, readFile } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
@@ -9,15 +9,13 @@ import {
 	PRODUCT_MEDIA,
 	PROTOCOL_DEFINITIONS,
 	getProductById,
-	type ProductId,
 } from "./content/productRegistry";
 import type { ProductDefinition } from "./content/productTypes";
-import { getLocalizedProductCopy } from "./content/productCopy";
-import { getProductPageFacts } from "./content/productPageFacts";
-import { getInterfaceCopy } from "./content/interfaceCopy";
+import { getLocaleContent } from "./content/locales";
 import {
 	ABOUT_LOCALES,
 	ABOUT_SITE_ORIGIN,
+	type AboutLocale,
 	matchAboutLocale,
 	negotiateAboutLocale,
 } from "./i18n/locales";
@@ -37,6 +35,36 @@ function requireProduct(id: string): ProductDefinition {
 	const product = getProductById(id);
 	if (!product) throw new Error(`Missing product definition: ${id}`);
 	return product;
+}
+
+const localeContentRoot = join(workspaceRoot, "src", "content", "locales");
+
+async function readProductMarkdown(locale: AboutLocale, productId: string): Promise<string> {
+	const productRoot = join(localeContentRoot, locale, "products", productId);
+	const files = [
+		"summary.md",
+		"scenarios.md",
+		"workflow.md",
+		"boundaries.md",
+		"faq/preview.md",
+		"faq/status.md",
+	];
+	return (await Promise.all(files.map((file) => readFile(join(productRoot, file), "utf8")))).join(
+		"\n",
+	);
+}
+
+async function listRelativeFiles(root: string, current = root): Promise<string[]> {
+	const entries = await readdir(current, { withFileTypes: true });
+	const files = await Promise.all(
+		entries.map(async (entry) => {
+			const path = join(current, entry.name);
+			return entry.isDirectory()
+				? listRelativeFiles(root, path)
+				: [path.slice(root.length + 1).replaceAll("\\", "/")];
+		}),
+	);
+	return files.flat().sort();
 }
 
 describe("locale handling", () => {
@@ -121,14 +149,15 @@ describe("product fact registry", () => {
 			"Issue",
 			"Chapter",
 		]);
+		const productIds = new Set<string>(PRODUCT_DEFINITIONS.map(({ id }) => id));
 		for (const protocol of PROTOCOL_DEFINITIONS) {
-			expect(PRODUCT_DEFINITIONS.some(({ id }) => id === protocol.id)).toBe(false);
+			expect(productIds.has(protocol.id)).toBe(false);
 		}
 	});
 });
 
 describe("confirmed product claims", () => {
-	test("tracks the Entity and Attribution implementation truth", () => {
+	test("tracks the Entity and Attribution implementation truth", async () => {
 		const claimStatus = Object.fromEntries(
 			PRODUCT_CLAIMS.map((claim) => [claim.id, claim.status]),
 		);
@@ -138,16 +167,7 @@ describe("confirmed product claims", () => {
 		expect(claimStatus["subject-attribution"]).toBe("confirmed");
 		expect(claimStatus["source-provenance-future"]).toBe("planned");
 
-		const entity = requireProduct("entity-attribution");
-		const copy = getLocalizedProductCopy("zh-hant", entity.id as ProductId);
-		const facts = getProductPageFacts("zh-hant", entity, copy);
-		const publicText = [
-			copy.summary,
-			...facts.scenarios,
-			...facts.workflow,
-			...facts.boundaries,
-		].join(" ");
-
+		const publicText = await readProductMarkdown("zh-hant", "entity-attribution");
 		for (const fact of [
 			"Entity",
 			"CreditAttribution",
@@ -166,24 +186,15 @@ describe("confirmed product claims", () => {
 		}
 	});
 
-	test("keeps Content Structure and History boundaries explicit", () => {
-		const structure = requireProduct("content-structure");
-		const structureCopy = getLocalizedProductCopy("en", structure.id as ProductId);
-		const structureText = Object.values(getProductPageFacts("en", structure, structureCopy))
-			.flat()
-			.join(" ");
-
+	test("keeps Content Structure and History boundaries explicit", async () => {
+		const structureText = await readProductMarkdown("en", "content-structure");
 		expect(structureText).toContain("ordered tree");
 		expect(structureText).toContain("occurrence");
 		expect(structureText).toContain("Node is not the same thing as a Post");
 		expect(structureText).toContain("Book integration");
 		expect(structureText).toContain("not GameBook’s parent");
 
-		const history = requireProduct("history");
-		const historyCopy = getLocalizedProductCopy("en", history.id as ProductId);
-		const historyFacts = getProductPageFacts("en", history, historyCopy);
-		const historyText = Object.values(historyFacts).flat().join(" ");
-
+		const historyText = await readProductMarkdown("en", "history");
 		expect(historyText).toContain("published versions");
 		expect(historyText).toContain("lock state and scope");
 		expect(historyText).toContain("draft operations");
@@ -196,32 +207,43 @@ describe("confirmed product claims", () => {
 describe("complete localized content and media", () => {
 	test("has explicit non-English copy for every product", () => {
 		for (const product of PRODUCT_DEFINITIONS) {
-			const english = getLocalizedProductCopy("en", product.id).summary;
+			const english = getLocaleContent("en").products.byId[product.id].summaryText;
 			expect(english.trim().length).toBeGreaterThan(0);
 
 			for (const locale of ABOUT_LOCALES) {
-				const localized = getLocalizedProductCopy(locale, product.id);
-				expect(localized.summary.trim().length).toBeGreaterThan(0);
+				const localized = getLocaleContent(locale).products.byId[product.id];
+				expect(localized.summaryText.trim().length).toBeGreaterThan(0);
 				expect(localized.faq).toHaveLength(2);
-				if (locale !== "en") {
-					expect(localized.summary).not.toBe(english);
-				}
+				if (locale !== "en") expect(localized.summaryText).not.toBe(english);
 			}
 		}
 	});
 
-	test("has explicit localized homepage and accessibility interface copy", () => {
-		const english = JSON.stringify(getInterfaceCopy("en"));
+	test("has explicit localized homepage and accessibility interface copy", async () => {
+		const english = JSON.stringify(getLocaleContent("en").common);
 
 		for (const locale of ABOUT_LOCALES) {
-			const localized = getInterfaceCopy(locale);
-			expect(localized.home.historyConsumers.book.trim().length).toBeGreaterThan(0);
-			expect(localized.home.openDescriptions.github.trim().length).toBeGreaterThan(0);
-			expect(localized.a11y.skipContent.trim().length).toBeGreaterThan(0);
-			expect(localized.a11y.primaryNavigation.trim().length).toBeGreaterThan(0);
-			if (locale !== "en") {
-				expect(JSON.stringify(localized)).not.toBe(english);
-			}
+			const localized = getLocaleContent(locale);
+			const historyBook = await readFile(
+				join(localeContentRoot, locale, "home", "sections", "historyBook.md"),
+				"utf8",
+			);
+			const openGithub = await readFile(
+				join(localeContentRoot, locale, "home", "sections", "openGithub.md"),
+				"utf8",
+			);
+			expect(historyBook.trim().length).toBeGreaterThan(0);
+			expect(openGithub.trim().length).toBeGreaterThan(0);
+			expect(localized.common.a11y.skipContent.trim().length).toBeGreaterThan(0);
+			expect(localized.common.a11y.primaryNavigation.trim().length).toBeGreaterThan(0);
+			if (locale !== "en") expect(JSON.stringify(localized.common)).not.toBe(english);
+		}
+	});
+
+	test("mirrors the English locale file tree in every language", async () => {
+		const english = await listRelativeFiles(join(localeContentRoot, "en"));
+		for (const locale of ABOUT_LOCALES.filter((locale) => locale !== "en")) {
+			expect(await listRelativeFiles(join(localeContentRoot, locale))).toEqual(english);
 		}
 	});
 

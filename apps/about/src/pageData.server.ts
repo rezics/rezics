@@ -1,6 +1,5 @@
 import { PRODUCT_DEFINITIONS, type ProductId, type ProductSlug } from "./content/productRegistry";
-import { getLocalizedProductCopy } from "./content/productCopy";
-import { getSiteCopy } from "./content/siteCopy";
+import { getLocaleContent } from "./content/locales";
 import { ABOUT_LOCALES, DEFAULT_LOCALE, type AboutLocale } from "./i18n/locales";
 import {
 	getAlternatePaths,
@@ -23,12 +22,12 @@ function makeMetadata(
 }
 
 export function createRootPageData(): AboutPageData {
-	const copy = getSiteCopy(DEFAULT_LOCALE);
+	const content = getLocaleContent(DEFAULT_LOCALE);
 	return {
 		kind: "root",
 		metadata: makeMetadata(
 			"Rezics",
-			copy.home.meta.description,
+			content.home.meta.description,
 			getHomePath(DEFAULT_LOCALE),
 			"home",
 		),
@@ -36,13 +35,13 @@ export function createRootPageData(): AboutPageData {
 }
 
 export function createHomePageData(locale: AboutLocale): AboutPageData {
-	const copy = getSiteCopy(locale);
+	const content = getLocaleContent(locale);
 	return {
 		kind: "home",
 		locale,
 		metadata: makeMetadata(
-			copy.home.meta.title,
-			copy.home.meta.description,
+			content.home.meta.title,
+			content.home.meta.description,
 			getHomePath(locale),
 			"home",
 		),
@@ -50,13 +49,13 @@ export function createHomePageData(locale: AboutLocale): AboutPageData {
 }
 
 export function createProductsPageData(locale: AboutLocale): AboutPageData {
-	const copy = getSiteCopy(locale);
+	const content = getLocaleContent(locale);
 	return {
 		kind: "products",
 		locale,
 		metadata: makeMetadata(
-			copy.directory.meta.title,
-			copy.directory.meta.description,
+			content.products.directory.meta.title,
+			content.products.directory.meta.description,
 			getProductsPath(locale),
 			"products",
 		),
@@ -70,7 +69,7 @@ export function createProductPageData(
 ): AboutPageData {
 	const product = PRODUCT_DEFINITIONS.find((entry) => entry.id === productId);
 	if (!product) throw new Error("Unknown product: " + productId);
-	const localized = getLocalizedProductCopy(locale, productId);
+	const summary = getLocaleContent(locale).products.byId[productId].summaryText;
 	const canonicalPath = getProductPath(locale, slug);
 	return {
 		kind: "product",
@@ -79,7 +78,7 @@ export function createProductPageData(
 		slug,
 		metadata: makeMetadata(
 			product.name + " — Rezics",
-			localized.summary,
+			summary,
 			canonicalPath,
 			"product",
 			slug,
@@ -87,7 +86,7 @@ export function createProductPageData(
 				"@context": "https://schema.org",
 				"@type": "SoftwareApplication",
 				name: product.name,
-				description: localized.summary,
+				description: summary,
 				url: new URL(canonicalPath, "https://about.rezics.com").toString(),
 				applicationCategory: "WebApplication",
 			},
@@ -97,14 +96,14 @@ export function createProductPageData(
 
 export function createErrorPageData(statusCode: 404 | 500 = 404): AboutPageData {
 	const locale = DEFAULT_LOCALE;
-	const copy = getSiteCopy(locale);
+	const content = getLocaleContent(locale);
 	return {
 		kind: "error",
 		locale,
 		statusCode,
 		metadata: makeMetadata(
-			copy.notFound.title + " — Rezics",
-			copy.notFound.body,
+			content.common.notFound.title + " — Rezics",
+			content.common.notFound.body,
 			getHomePath(locale),
 			"home",
 		),

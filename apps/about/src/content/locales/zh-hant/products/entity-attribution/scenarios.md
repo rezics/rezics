@@ -1,0 +1,5 @@
+從建立、閱讀到分享，Entity & Attribution 都保持清楚的產品邊界，並只連接真正需要的共享能力。
+
+- Entity 同時表示作者、譯者、出版商等現實實體，以及角色等虛擬實體。
+- CreditAttribution 描述作者、譯者、出版商與其他貢獻或出版關係。
+- SubjectAttribution 描述角色、主角、相關角色與二創或衍生關係。

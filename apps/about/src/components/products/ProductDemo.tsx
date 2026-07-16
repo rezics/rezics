@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 import type { ProductDemoKind } from "../../content/productTypes";
-import { getSiteCopy } from "../../content/siteCopy";
+import { getLocaleContent } from "../../content/locales";
 import type { AboutLocale } from "../../i18n/locales";
 
 type Props = {
@@ -10,173 +10,21 @@ type Props = {
 	label: string;
 	caption: string;
 };
-const DEMO_TEXT = {
-	"zh-hant": {
-		identity: "整體身份",
-		variants: "main 與 variants",
-		contents: "章節目錄",
-		credits: "歸屬關係",
-		author: "作者",
-		translator: "譯者",
-		publisher: "出版商",
-		entity: "Entity 記錄",
-		published: "已發佈",
-		reader: "讀者界面",
-		authoring: "作者編輯器",
-		journey: "本次 Journey",
-		currentStep: "目前 JourneyStep",
-		choose: "做出選擇",
-		structure: "結構編輯器",
-		validation: "結構有效 · DAG 檢查通過",
-		versions: "版本",
-		diff: "欄位差異",
-		locked: "此欄位目前在編輯範圍內被鎖定",
-		relationship: "關係類型",
-		subject: "主題對象",
-		blocks: "區塊配置",
-		query: "內容查詢",
-		preview: "產品預覽",
-		record: "記錄",
-	},
-	"zh-hans": {
-		identity: "整体身份",
-		variants: "main 与 variants",
-		contents: "章节目录",
-		credits: "归属关系",
-		author: "作者",
-		translator: "译者",
-		publisher: "出版商",
-		entity: "Entity 记录",
-		published: "已发布",
-		reader: "读者界面",
-		authoring: "作者编辑器",
-		journey: "本次 Journey",
-		currentStep: "当前 JourneyStep",
-		choose: "做出选择",
-		structure: "结构编辑器",
-		validation: "结构有效 · DAG 检查通过",
-		versions: "版本",
-		diff: "字段差异",
-		locked: "此字段当前在编辑范围内被锁定",
-		relationship: "关系类型",
-		subject: "主题对象",
-		blocks: "区块配置",
-		query: "内容查询",
-		preview: "产品预览",
-		record: "记录",
-	},
-	en: {
-		identity: "Book identity",
-		variants: "main and variants",
-		contents: "Chapter structure",
-		credits: "Attribution",
-		author: "Author",
-		translator: "Translator",
-		publisher: "Publisher",
-		entity: "Entity record",
-		published: "Published",
-		reader: "Reader",
-		authoring: "Authoring editor",
-		journey: "Current Journey",
-		currentStep: "Current JourneyStep",
-		choose: "Make a choice",
-		structure: "Structure editor",
-		validation: "Valid structure · DAG check passed",
-		versions: "Versions",
-		diff: "Field diff",
-		locked: "This field is locked within the active editing scope",
-		relationship: "Relationship type",
-		subject: "Subject",
-		blocks: "Block configuration",
-		query: "Content query",
-		preview: "Product preview",
-		record: "Record",
-	},
-	ja: {
-		identity: "書籍の同一性",
-		variants: "main と variants",
-		contents: "章構造",
-		credits: "帰属関係",
-		author: "著者",
-		translator: "翻訳者",
-		publisher: "出版社",
-		entity: "Entity レコード",
-		published: "公開済み",
-		reader: "読者画面",
-		authoring: "著者エディタ",
-		journey: "現在の Journey",
-		currentStep: "現在の JourneyStep",
-		choose: "選択する",
-		structure: "構造エディタ",
-		validation: "有効な構造 · DAG 検証済み",
-		versions: "バージョン",
-		diff: "フィールド差分",
-		locked: "このフィールドは現在の編集範囲でロック中です",
-		relationship: "関係タイプ",
-		subject: "対象",
-		blocks: "ブロック設定",
-		query: "コンテンツクエリ",
-		preview: "プロダクトプレビュー",
-		record: "レコード",
-	},
-	de: {
-		identity: "Buchidentität",
-		variants: "main und variants",
-		contents: "Kapitelstruktur",
-		credits: "Zuordnungen",
-		author: "Autor",
-		translator: "Übersetzer",
-		publisher: "Verlag",
-		entity: "Entity-Datensatz",
-		published: "Veröffentlicht",
-		reader: "Leseansicht",
-		authoring: "Autoreneditor",
-		journey: "Aktuelle Journey",
-		currentStep: "Aktueller JourneyStep",
-		choose: "Auswahl treffen",
-		structure: "Struktur-Editor",
-		validation: "Gültige Struktur · DAG-Prüfung bestanden",
-		versions: "Versionen",
-		diff: "Felddifferenz",
-		locked: "Dieses Feld ist im aktiven Bearbeitungsbereich gesperrt",
-		relationship: "Beziehungstyp",
-		subject: "Gegenstand",
-		blocks: "Blockkonfiguration",
-		query: "Inhaltsabfrage",
-		preview: "Produktvorschau",
-		record: "Datensatz",
-	},
-	ko: {
-		identity: "책 정체성",
-		variants: "main과 variants",
-		contents: "장 구조",
-		credits: "귀속 관계",
-		author: "저자",
-		translator: "번역자",
-		publisher: "출판사",
-		entity: "Entity 레코드",
-		published: "공개됨",
-		reader: "독자 화면",
-		authoring: "저작 편집기",
-		journey: "현재 Journey",
-		currentStep: "현재 JourneyStep",
-		choose: "선택하기",
-		structure: "구조 편집기",
-		validation: "유효한 구조 · DAG 검사 통과",
-		versions: "버전",
-		diff: "필드 차이",
-		locked: "이 필드는 현재 편집 범위에서 잠겨 있습니다",
-		relationship: "관계 유형",
-		subject: "주제 대상",
-		blocks: "블록 설정",
-		query: "콘텐츠 쿼리",
-		preview: "제품 미리보기",
-		record: "레코드",
-	},
-} as const;
 export function ProductDemo({ kind, productName: name, locale, label, caption }: Props) {
-	const copy = getSiteCopy(locale);
-	const ui = DEMO_TEXT[locale];
+	const { components } = getLocaleContent(locale);
+	const {
+		book,
+		gamebook,
+		structure,
+		history,
+		attribution,
+		zone,
+		feed,
+		catalog,
+		editor,
+		progress,
+		generic,
+	} = components;
 	const instanceId = useId();
 	const panelId = (suffix: string) => `${instanceId}-${suffix}`;
 	const figureRef = useRef<HTMLElement>(null);
@@ -280,56 +128,54 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 			<div className="product-stage__body">
 				{kind === "book" && (
 					<div className="demo-shell">
-						<aside className="demo-sidebar" aria-label="Book sections">
-							<p className="demo-sidebar__title">Book</p>
+						<aside className="demo-sidebar" aria-label={book.sectionsLabel}>
+							<p className="demo-sidebar__title">{book.book}</p>
 							<div className="demo-nav">
-								<span className="is-active">{ui.identity}</span>
-								<span>{ui.variants}</span>
-								<span>{ui.contents}</span>
-								<span>History</span>
+								<span className="is-active">{book.identity}</span>
+								<span>{book.variants}</span>
+								<span>{book.contents}</span>
+								<span>{book.history}</span>
 							</div>
 						</aside>
 						<div className="demo-main">
 							<div className="demo-toolbar">
-								<span className="demo-toolbar__path">Book / main</span>
-								<span className="demo-status">{ui.published}</span>
+								<span className="demo-toolbar__path">{book.book} / main</span>
+								<span className="demo-status">{book.published}</span>
 							</div>
-							<h2 className="demo-title">Book title</h2>
-							<p className="demo-muted">
-								main · variant: translation-edition · Unit / Book
-							</p>
+							<h2 className="demo-title">{book.title}</h2>
+							<p className="demo-muted">{book.variantDescription}</p>
 							<div className="demo-grid">
 								<section className="demo-panel">
-									<h3>{ui.contents} · ContentStructure</h3>
+									<h3>{book.contents} · ContentStructure</h3>
 									<ol className="demo-list">
 										<li>
-											<strong>01 · Chapter title</strong>
-											<span>Post A</span>
+											<strong>{book.chapterOne}</strong>
+											<span>{book.postA}</span>
 										</li>
 										<li>
-											<strong>02 · Chapter title</strong>
-											<span>Post B</span>
+											<strong>{book.chapterTwo}</strong>
+											<span>{book.postB}</span>
 										</li>
 										<li>
-											<strong>03 · Reused interlude</strong>
-											<span>Post A</span>
+											<strong>{book.reusedInterlude}</strong>
+											<span>{book.postA}</span>
 										</li>
 									</ol>
 								</section>
 								<section className="demo-panel">
-									<h3>{ui.credits} · CreditAttribution</h3>
+									<h3>{book.credits} · CreditAttribution</h3>
 									<ul className="demo-list">
 										<li>
-											<strong>{ui.author}</strong>
-											<span>{ui.entity}</span>
+											<strong>{book.author}</strong>
+											<span>{book.entity}</span>
 										</li>
 										<li>
-											<strong>{ui.translator}</strong>
-											<span>{ui.entity}</span>
+											<strong>{book.translator}</strong>
+											<span>{book.entity}</span>
 										</li>
 										<li>
-											<strong>{ui.publisher}</strong>
-											<span>{ui.entity}</span>
+											<strong>{book.publisher}</strong>
+											<span>{book.entity}</span>
 										</li>
 									</ul>
 								</section>
@@ -341,70 +187,67 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 				{kind === "gamebook" && (
 					<div className="demo-main" data-choice-demo>
 						<div className="demo-toolbar">
-							<span className="demo-toolbar__path">Book / GameContentStructure</span>
-							<span className="demo-status">GameBook</span>
+							<span className="demo-toolbar__path">
+								{book.book} / GameContentStructure
+							</span>
+							<span className="demo-status">{name}</span>
 						</div>
 						<div className="demo-grid">
 							<section className="demo-panel">
-								<h3>{ui.reader}</h3>
+								<h3>{gamebook.reader}</h3>
 								<p className="demo-muted">
-									{ui.journey} · <span data-journey-step>Entrance</span>
+									{gamebook.journey} ·{" "}
+									<span data-journey-step>{gamebook.entrance}</span>
 								</p>
 								<h2 className="demo-title" data-choice-outcome>
-									Passage: Archive entrance
+									{gamebook.passageTitle}
 								</h2>
-								<p className="demo-muted">
-									The reader reaches a documented branch. The selected path is
-									recorded as JourneyStep, separate from general Progress.
-								</p>
-								<div className="choice-list" aria-label={ui.choose}>
+								<p className="demo-muted">{gamebook.branchDescription}</p>
+								<div className="choice-list" aria-label={gamebook.choose}>
 									<button
 										className="choice-button"
 										type="button"
 										data-choice
-										data-outcome="Passage: Reading room"
-										data-step="Choice A → Reading room"
+										data-outcome={gamebook.choiceAOutcome}
+										data-step={gamebook.choiceAStep}
 										aria-pressed="false"
 									>
-										Choice A · Continue to the reading room
+										{gamebook.choiceA}
 									</button>
 									<button
 										className="choice-button"
 										type="button"
 										data-choice
-										data-outcome="Ending: Return later"
-										data-step="Choice B → Ending"
+										data-outcome={gamebook.choiceBOutcome}
+										data-step={gamebook.choiceBStep}
 										aria-pressed="false"
 									>
-										Choice B · Leave the archive
+										{gamebook.choiceB}
 									</button>
 								</div>
 							</section>
 							<section className="demo-panel">
 								<h3>
-									{ui.authoring} · {ui.validation}
+									{gamebook.authoring} · {gamebook.validation}
 								</h3>
 								<div
 									className="game-editor"
-									aria-label="GameContentStructure authoring sequence"
+									aria-label={gamebook.authoringSequence}
 								>
 									<div className="game-node">
-										<strong>Entrance</strong>
-										<span>entry</span>
+										<strong>{gamebook.entrance}</strong>
+										<span>{gamebook.entry}</span>
 									</div>
 									<div className="game-node is-passage">
-										<strong>Passage</strong>
-										<span>choices: 2</span>
+										<strong>{gamebook.passage}</strong>
+										<span>{gamebook.choicesTwo}</span>
 									</div>
 									<div className="game-node">
-										<strong>Ending</strong>
-										<span>retirable</span>
+										<strong>{gamebook.ending}</strong>
+										<span>{gamebook.retirable}</span>
 									</div>
 								</div>
-								<p className="demo-muted">
-									Entrance → Passage → Ending · no loops, scripts, variables,
-									combat, or runtime rules.
-								</p>
+								<p className="demo-muted">{gamebook.constraints}</p>
 							</section>
 						</div>
 					</div>
@@ -413,12 +256,10 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 				{kind === "structure" && (
 					<div className="demo-main">
 						<div className="demo-toolbar">
-							<span className="demo-toolbar__path">
-								Content Structure / Book adapter
-							</span>
-							<span className="demo-status">{ui.validation}</span>
+							<span className="demo-toolbar__path">{structure.path}</span>
+							<span className="demo-status">{structure.validation}</span>
 						</div>
-						<div role="tablist" className="tab-list" aria-label={ui.structure}>
+						<div role="tablist" className="tab-list" aria-label={structure.structure}>
 							<button
 								className="tab-button"
 								type="button"
@@ -426,7 +267,7 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 								aria-selected="true"
 								aria-controls={panelId("tree")}
 							>
-								{copy.product.structureTree}
+								{structure.treeMode}
 							</button>
 							<button
 								className="tab-button"
@@ -436,49 +277,55 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 								tabIndex={-1}
 								aria-controls={panelId("game")}
 							>
-								{copy.product.structureGame}
+								{structure.gameMode}
 							</button>
 						</div>
 						<section
 							id={panelId("tree")}
 							role="tabpanel"
-							aria-label={copy.product.structureTree}
+							aria-label={structure.treeMode}
 						>
 							<div className="demo-grid">
 								<div className="demo-panel">
-									<h3>ContentStructure · ordered tree</h3>
+									<h3>{structure.orderedTree}</h3>
 									<div className="demo-tree">
 										<div className="demo-tree__row is-selected" data-depth="0">
-											Book root
+											{structure.bookRoot}
 										</div>
 										<div className="demo-tree__row" data-depth="1">
-											Part I · occurrence
+											{structure.partOccurrence}
 										</div>
-										<div className="demo-tree__row" data-depth="2">
-											Post A · occurrence 01
+										<div
+											className="demo-tree__row"
+											data-depth={structure.choicesCount}
+										>
+											{structure.postAOccurrence}
 										</div>
-										<div className="demo-tree__row" data-depth="2">
-											Post B · occurrence 02
+										<div
+											className="demo-tree__row"
+											data-depth={structure.choicesCount}
+										>
+											{structure.postBOccurrence}
 										</div>
 										<div className="demo-tree__row" data-depth="1">
-											Post A · reused occurrence 03
+											{structure.reusedOccurrence}
 										</div>
 									</div>
 								</div>
 								<div className="demo-panel">
-									<h3>Book reader result</h3>
+									<h3>{structure.bookReaderResult}</h3>
 									<ol className="demo-list">
 										<li>
-											<strong>Part I</strong>
-											<span>section</span>
+											<strong>{structure.partOne}</strong>
+											<span>{structure.section}</span>
 										</li>
 										<li>
-											<strong>Chapter 01</strong>
-											<span>Post A</span>
+											<strong>{structure.chapterOne}</strong>
+											<span>{structure.postA}</span>
 										</li>
 										<li>
-											<strong>Chapter 02</strong>
-											<span>Post B</span>
+											<strong>{structure.chapterTwo}</strong>
+											<span>{structure.postB}</span>
 										</li>
 									</ol>
 								</div>
@@ -487,41 +334,41 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 						<section
 							id={panelId("game")}
 							role="tabpanel"
-							aria-label={copy.product.structureGame}
+							aria-label={structure.gameMode}
 							hidden
 						>
 							<div className="demo-grid">
 								<div className="demo-panel">
-									<h3>GameContentStructure · optional graph layer</h3>
+									<h3>{structure.optionalGraph}</h3>
 									<div className="game-editor">
 										<div className="game-node">
-											<strong>Entrance</strong>
-											<span>entry</span>
+											<strong>{structure.entrance}</strong>
+											<span>{structure.entry}</span>
 										</div>
 										<div className="game-node is-passage">
-											<strong>Passage</strong>
-											<span>Choice A / B</span>
+											<strong>{structure.passage}</strong>
+											<span>{structure.choiceAB}</span>
 										</div>
 										<div className="game-node">
-											<strong>Ending</strong>
-											<span>terminal</span>
+											<strong>{structure.ending}</strong>
+											<span>{structure.terminal}</span>
 										</div>
 									</div>
 								</div>
 								<div className="demo-panel">
-									<h3>GameBook reader result</h3>
+									<h3>{structure.gamebookReaderResult}</h3>
 									<ul className="demo-list">
 										<li>
-											<strong>Current Passage</strong>
-											<span>stable id</span>
+											<strong>{structure.currentPassage}</strong>
+											<span>{structure.stableId}</span>
 										</li>
 										<li>
-											<strong>Available choices</strong>
-											<span>2</span>
+											<strong>{structure.availableChoices}</strong>
+											<span>{structure.choicesCount}</span>
 										</li>
 										<li>
-											<strong>JourneyStep</strong>
-											<span>separate</span>
+											<strong>{structure.journeyStep}</strong>
+											<span>{structure.separate}</span>
 										</li>
 									</ul>
 								</div>
@@ -533,11 +380,11 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 				{kind === "history" && (
 					<div className="demo-shell">
 						<aside className="demo-sidebar">
-							<p className="demo-sidebar__title">{ui.versions}</p>
+							<p className="demo-sidebar__title">{history.versions}</p>
 							<div
 								className="demo-nav"
 								role="tablist"
-								aria-label={copy.product.publishedVersions}
+								aria-label={history.publishedVersions}
 							>
 								<button
 									className="tab-button is-active"
@@ -546,7 +393,7 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 									aria-selected="true"
 									aria-controls={panelId("history-title")}
 								>
-									Book.title
+									{history.bookTitle}
 								</button>
 								<button
 									className="tab-button"
@@ -556,7 +403,7 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 									tabIndex={-1}
 									aria-controls={panelId("history-post")}
 								>
-									Post.block
+									{history.postBlock}
 								</button>
 								<button
 									className="tab-button"
@@ -566,76 +413,76 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 									tabIndex={-1}
 									aria-controls={panelId("history-zone")}
 								>
-									Zone.config
+									{history.zoneConfig}
 								</button>
 							</div>
 						</aside>
 						<div className="demo-main">
 							<div className="demo-toolbar">
 								<span className="demo-toolbar__path">
-									{copy.product.fieldHistory} / {copy.product.publishedVersions}
+									{history.fieldHistory} / {history.publishedVersions}
 								</span>
-								<span className="demo-status">History</span>
+								<span className="demo-status">{book.history}</span>
 							</div>
 							<section id={panelId("history-title")} role="tabpanel">
 								<div className="demo-grid">
 									<div className="demo-panel">
-										<h3>{copy.product.publishedVersions}</h3>
+										<h3>{history.publishedVersions}</h3>
 										<ul className="demo-list">
 											<li>
-												<strong>Published version C</strong>
-												<span>current</span>
+												<strong>{history.publishedVersionC}</strong>
+												<span>{history.current}</span>
 											</li>
 											<li>
-												<strong>Published version B</strong>
-												<span>previous</span>
+												<strong>{history.publishedVersionB}</strong>
+												<span>{history.previous}</span>
 											</li>
 											<li>
-												<strong>Published version A</strong>
-												<span>initial</span>
+												<strong>{history.publishedVersionA}</strong>
+												<span>{history.initial}</span>
 											</li>
 										</ul>
 									</div>
 									<div className="demo-panel">
-										<h3>{ui.diff} · Book.title</h3>
+										<h3>{history.diff} · Book.title</h3>
 										<div className="diff-line">
 											<span>−</span>
-											<span>Previous title</span>
+											<span>{history.previousTitle}</span>
 										</div>
 										<div className="diff-line is-change">
 											<span>+</span>
-											<span>Current published title</span>
+											<span>{history.currentTitle}</span>
 										</div>
 										<div className="lock-banner">
-											<span>{ui.locked}</span>
-											<strong>Book.title</strong>
+											<span>{history.locked}</span>
+											<strong>{history.bookTitle}</strong>
 										</div>
 									</div>
 								</div>
 							</section>
 							<section id={panelId("history-post")} role="tabpanel" hidden>
 								<div className="demo-panel">
-									<h3>Post block history</h3>
+									<h3>{history.postBlockHistory}</h3>
 									<div className="diff-line">
 										<span>−</span>
-										<span>paragraph.block / published B</span>
+										<span>{history.previousPostBlock}</span>
 									</div>
 									<div className="diff-line is-change">
 										<span>+</span>
-										<span>paragraph.block / published C</span>
+										<span>{history.currentPostBlock}</span>
 									</div>
 								</div>
 							</section>
 							<section id={panelId("history-zone")} role="tabpanel" hidden>
 								<div className="demo-panel">
-									<h3>Zone configuration history</h3>
+									<h3>{history.zoneConfigurationHistory}</h3>
 									<div className="diff-line">
 										<span>−</span>
-										<span>feed.query / published A</span>
+										<span>{history.previousZoneQuery}</span>
 									</div>
 									<div className="diff-line is-change">
 										<span>+</span>
-										<span>feed.query / published B</span>
+										<span>{history.currentZoneQuery}</span>
 									</div>
 								</div>
 							</section>
@@ -646,10 +493,12 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 				{kind === "attribution" && (
 					<div className="demo-main">
 						<div className="demo-toolbar">
-							<span className="demo-toolbar__path">Book / Entity / Attribution</span>
-							<span className="demo-status">{copy.status.implemented}</span>
+							<span className="demo-toolbar__path">
+								{book.book} / {attribution.entity} / {book.credits}
+							</span>
+							<span className="demo-status">{attribution.implemented}</span>
 						</div>
-						<div role="tablist" className="tab-list" aria-label="Attribution modes">
+						<div role="tablist" className="tab-list" aria-label={attribution.modes}>
 							<button
 								className="tab-button"
 								type="button"
@@ -657,7 +506,7 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 								aria-selected="true"
 								aria-controls={panelId("credit")}
 							>
-								{copy.product.credit}
+								{attribution.credit}
 							</button>
 							<button
 								className="tab-button"
@@ -667,60 +516,60 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 								tabIndex={-1}
 								aria-controls={panelId("subject")}
 							>
-								{copy.product.subject}
+								{attribution.subject}
 							</button>
 						</div>
 						<section id={panelId("credit")} role="tabpanel">
 							<div className="demo-grid">
 								<div className="demo-panel">
-									<h3>Book credits</h3>
+									<h3>{attribution.bookCredits}</h3>
 									<table className="demo-table">
 										<thead>
 											<tr>
-												<th>{ui.relationship}</th>
-												<th>Entity</th>
-												<th>Unit</th>
+												<th>{attribution.relationship}</th>
+												<th>{attribution.entity}</th>
+												<th>{attribution.unit}</th>
 											</tr>
 										</thead>
 										<tbody>
 											<tr>
 												<td>
-													<strong>{ui.author}</strong>
+													<strong>{attribution.author}</strong>
 												</td>
-												<td>Entity / person</td>
-												<td>Book</td>
+												<td>{attribution.personEntity}</td>
+												<td>{attribution.book}</td>
 											</tr>
 											<tr>
 												<td>
-													<strong>{ui.translator}</strong>
+													<strong>{attribution.translator}</strong>
 												</td>
-												<td>Entity / person</td>
-												<td>Book variant</td>
+												<td>{attribution.personEntity}</td>
+												<td>{attribution.bookVariant}</td>
 											</tr>
 											<tr>
 												<td>
-													<strong>{ui.publisher}</strong>
+													<strong>{attribution.publisher}</strong>
 												</td>
-												<td>Entity / organization</td>
-												<td>Release</td>
+												<td>{attribution.organizationEntity}</td>
+												<td>{attribution.release}</td>
 											</tr>
 										</tbody>
 									</table>
 								</div>
 								<aside className="demo-panel">
-									<h3>Entity detail</h3>
+									<h3>{attribution.entityDetail}</h3>
 									<ul className="demo-list">
 										<li>
-											<strong>Entity type</strong>
-											<span>real / fictional</span>
+											<strong>{attribution.entityType}</strong>
+											<span>{attribution.realOrFictional}</span>
 										</li>
 										<li>
-											<strong>{ui.record}</strong>
-											<span>stable identity</span>
+											<strong>{attribution.record}</strong>
+											<span>{attribution.stableIdentity}</span>
 										</li>
 										<li>
-											<strong>Attributions</strong>
-											<span>managed list</span>
+											<strong>{attribution.attributions}</strong>
+											<span>{attribution.managedList}</span>
 										</li>
 									</ul>
 								</aside>
@@ -729,54 +578,54 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 						<section id={panelId("subject")} role="tabpanel" hidden>
 							<div className="demo-grid">
 								<div className="demo-panel">
-									<h3>Book subjects</h3>
+									<h3>{attribution.bookSubjects}</h3>
 									<table className="demo-table">
 										<thead>
 											<tr>
-												<th>{ui.relationship}</th>
-												<th>{ui.subject}</th>
-												<th>Unit</th>
+												<th>{attribution.relationship}</th>
+												<th>{attribution.subject}</th>
+												<th>{attribution.unit}</th>
 											</tr>
 										</thead>
 										<tbody>
 											<tr>
 												<td>
-													<strong>Protagonist</strong>
+													<strong>{attribution.protagonist}</strong>
 												</td>
-												<td>Character Entity</td>
-												<td>Book</td>
+												<td>{attribution.characterEntity}</td>
+												<td>{attribution.book}</td>
 											</tr>
 											<tr>
 												<td>
-													<strong>Character</strong>
+													<strong>{attribution.character}</strong>
 												</td>
-												<td>Fictional Entity</td>
-												<td>Book</td>
+												<td>{attribution.fictionalEntity}</td>
+												<td>{attribution.book}</td>
 											</tr>
 											<tr>
 												<td>
-													<strong>Derivative of</strong>
+													<strong>{attribution.derivativeOf}</strong>
 												</td>
-												<td>Entity / Unit relation</td>
-												<td>Post</td>
+												<td>{attribution.entityUnitRelation}</td>
+												<td>{attribution.post}</td>
 											</tr>
 										</tbody>
 									</table>
 								</div>
 								<aside className="demo-panel">
-									<h3>Relationship editor</h3>
+									<h3>{attribution.relationshipEditor}</h3>
 									<ul className="demo-list">
 										<li>
-											<strong>Type</strong>
-											<span>Protagonist</span>
+											<strong>{attribution.type}</strong>
+											<span>{attribution.protagonist}</span>
 										</li>
 										<li>
-											<strong>Subject</strong>
-											<span>Character Entity</span>
+											<strong>{attribution.subject}</strong>
+											<span>{attribution.characterEntity}</span>
 										</li>
 										<li>
-											<strong>Target Unit</strong>
-											<span>Book</span>
+											<strong>{attribution.targetUnit}</strong>
+											<span>{attribution.book}</span>
 										</li>
 									</ul>
 								</aside>
@@ -788,48 +637,44 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 				{kind === "zone" && (
 					<div className="demo-shell">
 						<aside className="demo-sidebar">
-							<p className="demo-sidebar__title">Zone</p>
+							<p className="demo-sidebar__title">{zone.zone}</p>
 							<div className="demo-nav">
-								<span className="is-active">{ui.blocks}</span>
-								<span>{ui.query}</span>
-								<span>History</span>
-								<span>Preview</span>
+								<span className="is-active">{zone.blocks}</span>
+								<span>{zone.query}</span>
+								<span>{zone.history}</span>
+								<span>{zone.preview}</span>
 							</div>
 						</aside>
 						<div className="demo-main">
 							<div className="demo-toolbar">
-								<span className="demo-toolbar__path">Zone / configuration</span>
-								<span className="demo-status">Block Schema</span>
+								<span className="demo-toolbar__path">{zone.path}</span>
+								<span className="demo-status">{zone.blockSchema}</span>
 							</div>
 							<div className="demo-grid">
 								<section className="demo-panel">
-									<h3>{ui.blocks}</h3>
+									<h3>{zone.blocks}</h3>
 									<div className="demo-tree">
 										<div className="demo-tree__row is-selected">
-											Header block
+											{zone.headerBlock}
 										</div>
-										<div className="demo-tree__row">
-											Feed block · query: recent
-										</div>
-										<div className="demo-tree__row">
-											Shelf block · reference
-										</div>
+										<div className="demo-tree__row">{zone.feedBlock}</div>
+										<div className="demo-tree__row">{zone.shelfBlock}</div>
 									</div>
 								</section>
 								<section className="demo-panel">
-									<h3>{ui.preview}</h3>
+									<h3>{zone.preview}</h3>
 									<ul className="demo-list">
 										<li>
-											<strong>Feed result</strong>
-											<span>Post card</span>
+											<strong>{zone.feedResult}</strong>
+											<span>{zone.postCard}</span>
 										</li>
 										<li>
-											<strong>Catalog result</strong>
-											<span>Book card</span>
+											<strong>{zone.catalogResult}</strong>
+											<span>{zone.bookCard}</span>
 										</li>
 										<li>
-											<strong>Discussion</strong>
-											<span>Comment</span>
+											<strong>{zone.discussion}</strong>
+											<span>{zone.comment}</span>
 										</li>
 									</ul>
 								</section>
@@ -841,14 +686,12 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 				{kind === "feed" && (
 					<div className="demo-main">
 						<div className="demo-toolbar">
-							<span className="demo-toolbar__path">Feed / consumers</span>
-							<span className="demo-status">Feed</span>
+							<span className="demo-toolbar__path">
+								{name} / {feed.consumers}
+							</span>
+							<span className="demo-status">{name}</span>
 						</div>
-						<div
-							role="tablist"
-							className="tab-list"
-							aria-label={copy.product.consumers}
-						>
+						<div role="tablist" className="tab-list" aria-label={feed.consumers}>
 							{["Zone", "Realm", "Home"].map((consumer, index) => (
 								<button
 									className="tab-button"
@@ -873,33 +716,33 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 										<h3>{consumer} feed</h3>
 										<ul className="demo-list">
 											<li>
-												<strong>Post card</strong>
-												<span>kind-aware</span>
+												<strong>{feed.postCard}</strong>
+												<span>{feed.kindAware}</span>
 											</li>
 											<li>
-												<strong>Book card</strong>
-												<span>catalog</span>
+												<strong>{feed.bookCard}</strong>
+												<span>{feed.catalog}</span>
 											</li>
 											<li>
-												<strong>Comment card</strong>
-												<span>discussion</span>
+												<strong>{feed.commentCard}</strong>
+												<span>{feed.discussion}</span>
 											</li>
 										</ul>
 									</div>
 									<div className="demo-panel">
-										<h3>Consumer configuration</h3>
+										<h3>{feed.consumerConfiguration}</h3>
 										<ul className="demo-list">
 											<li>
-												<strong>Query</strong>
-												<span>consumer scope</span>
+												<strong>{feed.query}</strong>
+												<span>{feed.consumerScope}</span>
 											</li>
 											<li>
-												<strong>Card</strong>
-												<span>per feature</span>
+												<strong>{feed.card}</strong>
+												<span>{feed.perFeature}</span>
 											</li>
 											<li>
-												<strong>Order</strong>
-												<span>feed order</span>
+												<strong>{feed.order}</strong>
+												<span>{feed.feedOrder}</span>
 											</li>
 										</ul>
 									</div>
@@ -912,50 +755,49 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 				{kind === "catalog" && (
 					<div className="demo-main">
 						<div className="demo-toolbar">
-							<span className="demo-toolbar__path">Catalog / Unit types</span>
-							<span className="demo-status">Catalog</span>
+							<span className="demo-toolbar__path">
+								{name} / {catalog.unitTypes}
+							</span>
+							<span className="demo-status">{name}</span>
 						</div>
-						<h2 className="demo-title">Catalog identity</h2>
-						<p className="demo-muted">
-							No Work abstraction: each catalog Unit keeps its own identity and main /
-							variants relationship.
-						</p>
+						<h2 className="demo-title">{catalog.identity}</h2>
+						<p className="demo-muted">{catalog.description}</p>
 						<div className="demo-grid">
 							<section className="demo-panel">
-								<h3>Unit types</h3>
+								<h3>{catalog.unitTypes}</h3>
 								<ul className="demo-list">
 									<li>
-										<strong>Book</strong>
-										<span>main + variants</span>
+										<strong>{catalog.book}</strong>
+										<span>{catalog.mainVariants}</span>
 									</li>
 									<li>
-										<strong>Media</strong>
-										<span>main + variants</span>
+										<strong>{catalog.media}</strong>
+										<span>{catalog.mainVariants}</span>
 									</li>
 									<li>
-										<strong>Software</strong>
-										<span>main + variants</span>
+										<strong>{catalog.software}</strong>
+										<span>{catalog.mainVariants}</span>
 									</li>
 									<li>
-										<strong>Series</strong>
-										<span>composition</span>
+										<strong>{catalog.series}</strong>
+										<span>{catalog.composition}</span>
 									</li>
 								</ul>
 							</section>
 							<section className="demo-panel">
-								<h3>Selected identity</h3>
+								<h3>{catalog.selectedIdentity}</h3>
 								<ul className="demo-list">
 									<li>
-										<strong>Canonical Unit</strong>
-										<span>stable id</span>
+										<strong>{catalog.canonicalUnit}</strong>
+										<span>{catalog.stableId}</span>
 									</li>
 									<li>
-										<strong>Release</strong>
-										<span>edition context</span>
+										<strong>{catalog.release}</strong>
+										<span>{catalog.editionContext}</span>
 									</li>
 									<li>
-										<strong>Attribution</strong>
-										<span>Entity relations</span>
+										<strong>{catalog.attribution}</strong>
+										<span>{catalog.entityRelations}</span>
 									</li>
 								</ul>
 							</section>
@@ -968,22 +810,21 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 						<aside className="demo-sidebar">
 							<p className="demo-sidebar__title">{name}</p>
 							<div className="demo-nav">
-								<span className="is-active">Document</span>
-								<span>Blocks</span>
-								<span>History</span>
+								<span className="is-active">{editor.document}</span>
+								<span>{editor.blocks}</span>
+								<span>{editor.history}</span>
 							</div>
 						</aside>
 						<div className="demo-main">
 							<div className="demo-toolbar">
 								<span className="demo-toolbar__path">Editor / {name}</span>
-								<span className="demo-status">Draft boundary</span>
+								<span className="demo-status">{editor.draftBoundary}</span>
 							</div>
-							<h2 className="demo-title">Content title</h2>
+							<h2 className="demo-title">{editor.contentTitle}</h2>
 							<div className="demo-panel" style={{ marginTop: "1.5rem" }}>
-								<p className="demo-muted">Paragraph block</p>
+								<p className="demo-muted">{editor.paragraphBlock}</p>
 								<p style={{ margin: "0.8rem 0 0", lineHeight: 1.75 }}>
-									Structured content stays editable here. Published changes enter
-									History only at the publication boundary.
+									{editor.description}
 								</p>
 							</div>
 						</div>
@@ -993,41 +834,43 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 				{kind === "progress" && (
 					<div className="demo-main">
 						<div className="demo-toolbar">
-							<span className="demo-toolbar__path">Progress / Book</span>
-							<span className="demo-status">General progress</span>
+							<span className="demo-toolbar__path">
+								{name} / {progress.book}
+							</span>
+							<span className="demo-status">{progress.generalProgress}</span>
 						</div>
 						<div className="demo-grid">
 							<section className="demo-panel">
-								<h3>Reading position</h3>
+								<h3>{progress.readingPosition}</h3>
 								<ul className="demo-list">
 									<li>
-										<strong>Unit</strong>
-										<span>Book</span>
+										<strong>{progress.unit}</strong>
+										<span>{progress.book}</span>
 									</li>
 									<li>
-										<strong>Occurrence</strong>
-										<span>Chapter</span>
+										<strong>{progress.occurrence}</strong>
+										<span>{progress.chapter}</span>
 									</li>
 									<li>
-										<strong>Position</strong>
-										<span>reader state</span>
+										<strong>{progress.position}</strong>
+										<span>{progress.readerState}</span>
 									</li>
 								</ul>
 							</section>
 							<section className="demo-panel">
-								<h3>GameBook boundary</h3>
+								<h3>{progress.gamebookBoundary}</h3>
 								<ul className="demo-list">
 									<li>
-										<strong>Progress</strong>
-										<span>general summary</span>
+										<strong>{progress.progress}</strong>
+										<span>{progress.generalSummary}</span>
 									</li>
 									<li>
-										<strong>Journey</strong>
-										<span>GameBook-owned</span>
+										<strong>{progress.journey}</strong>
+										<span>{progress.gamebookOwned}</span>
 									</li>
 									<li>
-										<strong>JourneyStep</strong>
-										<span>path history</span>
+										<strong>{progress.journeyStep}</strong>
+										<span>{progress.pathHistory}</span>
 									</li>
 								</ul>
 							</section>
@@ -1040,55 +883,52 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 						<aside className="demo-sidebar">
 							<p className="demo-sidebar__title">{name}</p>
 							<div className="demo-nav">
-								<span className="is-active">{ui.record}</span>
-								<span>Relations</span>
-								<span>History</span>
+								<span className="is-active">{generic.record}</span>
+								<span>{generic.relations}</span>
+								<span>{generic.history}</span>
 							</div>
 						</aside>
 						<div className="demo-main">
 							<div className="demo-toolbar">
 								<span className="demo-toolbar__path">
-									{name} / {ui.record}
+									{name} / {generic.record}
 								</span>
-								<span className="demo-status">{copy.common.conceptPreview}</span>
+								<span className="demo-status">{generic.conceptPreview}</span>
 							</div>
 							<h2 className="demo-title">{name}</h2>
-							<p className="demo-muted">
-								A neutral, replaceable product surface. It contains no decorative
-								artwork or invented usage metrics.
-							</p>
+							<p className="demo-muted">{generic.description}</p>
 							<div className="demo-grid">
 								<section className="demo-panel">
-									<h3>Identity</h3>
+									<h3>{generic.identity}</h3>
 									<ul className="demo-list">
 										<li>
-											<strong>Stable record</strong>
-											<span>Unit</span>
+											<strong>{generic.stableRecord}</strong>
+											<span>{generic.unit}</span>
 										</li>
 										<li>
-											<strong>Related products</strong>
-											<span>references</span>
+											<strong>{generic.relatedProducts}</strong>
+											<span>{generic.references}</span>
 										</li>
 										<li>
-											<strong>Published state</strong>
-											<span>History</span>
+											<strong>{generic.publishedState}</strong>
+											<span>{generic.history}</span>
 										</li>
 									</ul>
 								</section>
 								<section className="demo-panel">
-									<h3>Shared capabilities</h3>
+									<h3>{generic.sharedCapabilities}</h3>
 									<ul className="demo-list">
 										<li>
-											<strong>Attribution</strong>
-											<span>Entity</span>
+											<strong>{generic.attribution}</strong>
+											<span>{generic.entity}</span>
 										</li>
 										<li>
-											<strong>Tags</strong>
-											<span>queryable</span>
+											<strong>{generic.tags}</strong>
+											<span>{generic.queryable}</span>
 										</li>
 										<li>
-											<strong>API</strong>
-											<span>permissioned</span>
+											<strong>{generic.api}</strong>
+											<span>{generic.permissioned}</span>
 										</li>
 									</ul>
 								</section>

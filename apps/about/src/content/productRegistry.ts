@@ -5,7 +5,7 @@ import type {
 	ProtocolDefinition,
 } from "./productTypes";
 
-const defineProduct = <T extends ProductDefinition>(definition: T): T => definition;
+const defineProduct = <const T extends ProductDefinition>(definition: T): T => definition;
 const defaultSections = [
 	"identity",
 	"stage",

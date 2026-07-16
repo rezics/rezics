@@ -1,14 +1,11 @@
 import { ArrowRight, ExternalLink } from "lucide-react";
-import { getInterfaceCopy } from "../../content/interfaceCopy";
-import { getLocalizedProductCopy } from "../../content/productCopy";
-import { getProductPageFacts } from "../../content/productPageFacts";
+import { getLocaleContent } from "../../content/locales";
 import {
 	getConsumedCapabilities,
 	getProductById,
 	getRelatedProducts,
 	type ProductId,
 } from "../../content/productRegistry";
-import { getSiteCopy } from "../../content/siteCopy";
 import type { ProductDefinition } from "../../content/productTypes";
 import type { AboutLocale } from "../../i18n/locales";
 import { getHomePath, getProductPath, getProductsPath } from "../../i18n/productPaths";
@@ -21,10 +18,10 @@ export function ProductPage({
 	locale: AboutLocale;
 	product: ProductDefinition;
 }) {
-	const copy = getSiteCopy(locale);
-	const ui = getInterfaceCopy(locale);
-	const localized = getLocalizedProductCopy(locale, product.id as ProductId);
-	const facts = getProductPageFacts(locale, product, localized);
+	const { common, products } = getLocaleContent(locale);
+	const page = products.common;
+	const localized = products.byId[product.id as ProductId];
+	const { Summary, Scenarios, Workflow, Boundaries } = localized;
 	const parent = product.canonicalParentId
 		? getProductById(product.canonicalParentId)
 		: undefined;
@@ -32,14 +29,15 @@ export function ProductPage({
 	const related = getRelatedProducts(product);
 	const has = (section: string) => product.sections.some((item) => item === section);
 	const outlineUrl = "https://outline.rezics.com/collection/rezics-ud1QiRBQYV/recent";
+
 	return (
 		<>
 			<section className="site-section">
 				<div className="site-container">
-					<nav className="breadcrumbs" aria-label={ui.a11y.breadcrumb}>
-						<a href={getHomePath(locale)}>{copy.product.breadcrumbsHome}</a>
+					<nav className="breadcrumbs" aria-label={common.a11y.breadcrumb}>
+						<a href={getHomePath(locale)}>{page.breadcrumbsHome}</a>
 						<span aria-hidden>/</span>
-						<a href={getProductsPath(locale)}>{copy.product.breadcrumbsProducts}</a>
+						<a href={getProductsPath(locale)}>{page.breadcrumbsProducts}</a>
 						{parent && (
 							<>
 								<span aria-hidden>/</span>
@@ -51,9 +49,11 @@ export function ProductPage({
 					</nav>
 					<div className="product-hero">
 						<div>
-							<p className="eyebrow">{copy.classes[product.pageClass]}</p>
+							<p className="eyebrow">{common.classes[product.pageClass]}</p>
 							<h1 className="display-title">{product.name}</h1>
-							<p className="product-hero__lead">{localized.value}</p>
+							<div className="product-hero__lead markdown-copy">
+								<Summary />
+							</div>
 							{product.manifestation && (
 								<p className="formula-token" style={{ marginTop: "1.5rem" }}>
 									{product.manifestation.formula}
@@ -62,28 +62,28 @@ export function ProductPage({
 						</div>
 						<dl className="product-facts">
 							<div className="product-fact">
-								<dt>{copy.product.statusLabel}</dt>
-								<dd>{copy.status[product.implementationStatus]}</dd>
+								<dt>{page.statusLabel}</dt>
+								<dd>{common.status[product.implementationStatus]}</dd>
 							</div>
 							<div className="product-fact">
-								<dt>{copy.product.classificationLabel}</dt>
-								<dd>{copy.classes[product.pageClass]}</dd>
+								<dt>{page.classificationLabel}</dt>
+								<dd>{common.classes[product.pageClass]}</dd>
 							</div>
 							<div className="product-fact">
-								<dt>{copy.common.parentProduct}</dt>
+								<dt>{common.labels.parentProduct}</dt>
 								<dd>
 									{parent ? (
 										<a href={getProductPath(locale, parent.slug)}>
 											{parent.name}
 										</a>
 									) : (
-										copy.common.noParent
+										common.labels.noParent
 									)}
 								</dd>
 							</div>
 							{product.capabilityModes && (
 								<div className="product-fact">
-									<dt>{ui.a11y.modes}</dt>
+									<dt>{common.a11y.modes}</dt>
 									<dd>{product.capabilityModes.join(" · ")}</dd>
 								</div>
 							)}
@@ -91,6 +91,7 @@ export function ProductPage({
 					</div>
 				</div>
 			</section>
+
 			{has("stage") && (
 				<section className="site-section" style={{ paddingTop: 0 }}>
 					<div className="site-container">
@@ -98,8 +99,8 @@ export function ProductPage({
 							kind={product.demoKind}
 							productName={product.name}
 							locale={locale}
-							label={copy.common.conceptPreview}
-							caption={copy.common.conceptCaption}
+							label={common.labels.conceptPreview}
+							caption={common.labels.conceptCaption}
 						/>
 						{product.id === "book" && (
 							<div style={{ display: "grid", gap: "2rem", marginTop: "2rem" }}>
@@ -107,86 +108,62 @@ export function ProductPage({
 									kind="attribution"
 									productName="Book · Entity & Attribution"
 									locale={locale}
-									label={copy.common.conceptPreview}
-									caption={copy.common.conceptCaption}
+									label={common.labels.conceptPreview}
+									caption={common.labels.conceptCaption}
 								/>
 								<ProductDemo
 									kind="history"
 									productName="Book · History"
 									locale={locale}
-									label={copy.common.conceptPreview}
-									caption={copy.common.conceptCaption}
+									label={common.labels.conceptPreview}
+									caption={common.labels.conceptCaption}
 								/>
 							</div>
 						)}
 					</div>
 				</section>
 			)}
+
 			{has("scenarios") && (
 				<section className="site-section">
 					<div className="site-container">
 						<div className="section-heading reveal">
 							<p className="eyebrow">01 · Use</p>
-							<h2 className="section-title">{copy.product.scenarios}</h2>
-							<p className="section-lead">{localized.scenarioLead}</p>
+							<h2 className="section-title">{page.scenarios}</h2>
 						</div>
-						<div className="info-columns">
-							{facts.scenarios.map((fact, index) => (
-								<article className="info-column reveal" key={fact}>
-									<h3>{String(index + 1).padStart(2, "0")}</h3>
-									<p>{fact}</p>
-								</article>
-							))}
+						<div className="markdown-section reveal">
+							<Scenarios />
 						</div>
 					</div>
 				</section>
 			)}
+
 			{has("workflow") && (
 				<section className="site-section">
 					<div className="site-container">
 						<div className="section-heading reveal">
 							<p className="eyebrow">02 · Workflow</p>
-							<h2 className="section-title">{copy.product.workflow}</h2>
-							<p className="section-lead">{localized.workflowLead}</p>
+							<h2 className="section-title">{page.workflow}</h2>
 						</div>
-						<div className="product-rows">
-							{facts.workflow.map((step, index) => (
-								<div
-									className="product-row reveal"
-									style={{ cursor: "default" }}
-									key={step}
-								>
-									<span className="product-row__name">
-										<span className="product-row__index">
-											{String(index + 1).padStart(2, "0")}
-										</span>
-										<span>{step}</span>
-									</span>
-									<span className="product-row__summary">{product.name}</span>
-									<span className="product-row__meta">→</span>
-								</div>
-							))}
+						<div className="markdown-section reveal">
+							<Workflow />
 						</div>
 					</div>
 				</section>
 			)}
+
 			{has("capabilities") && (
 				<section className="site-section">
 					<div className="site-container">
 						<div className="section-heading reveal">
 							<p className="eyebrow">03 · Platform</p>
 							<h2 className="section-title">
-								{capabilities.length
-									? copy.product.capabilities
-									: copy.product.consumers}
+								{capabilities.length ? page.capabilities : page.consumers}
 							</h2>
 						</div>
 						<div className="capability-list">
 							{(capabilities.length ? capabilities : related).map((item) => {
-								const itemCopy = getLocalizedProductCopy(
-									locale,
-									item.id as ProductId,
-								);
+								const ItemSummary = products.byId[item.id as ProductId].Summary;
 								return (
 									<a
 										className="capability-link reveal"
@@ -194,12 +171,14 @@ export function ProductPage({
 										key={item.id}
 									>
 										<span className="demo-status">{item.name}</span>
-										<span>
+										<div>
 											<strong>{item.name}</strong>
-											<p>{itemCopy.summary}</p>
-										</span>
+											<div className="markdown-copy">
+												<ItemSummary />
+											</div>
+										</div>
 										<span className="text-link">
-											{copy.common.learnMore}
+											{common.labels.learnMore}
 											<ArrowRight width={15} height={15} aria-hidden />
 										</span>
 									</a>
@@ -209,55 +188,52 @@ export function ProductPage({
 					</div>
 				</section>
 			)}
+
 			{has("boundaries") && (
 				<section className="site-section">
 					<div className="site-container">
 						<div className="section-heading reveal">
 							<p className="eyebrow">04 · Scope</p>
-							<h2 className="section-title">{copy.product.boundaries}</h2>
-							<p className="section-lead">{localized.boundaryLead}</p>
+							<h2 className="section-title">{page.boundaries}</h2>
 						</div>
-						<div className="info-columns">
-							{facts.boundaries.map((boundary) => (
-								<article className="info-column reveal" key={boundary}>
-									<p>{boundary}</p>
-								</article>
-							))}
+						<div className="markdown-section reveal">
+							<Boundaries />
 						</div>
 					</div>
 				</section>
 			)}
+
 			{has("faq") && (
 				<section className="site-section">
 					<div className="site-container">
 						<div className="section-heading reveal">
 							<p className="eyebrow">05 · FAQ</p>
-							<h2 className="section-title">{copy.product.faq}</h2>
+							<h2 className="section-title">{page.faq}</h2>
 						</div>
 						<div className="accordion-list">
-							{localized.faq.map((item) => (
-								<details className="accordion-item" key={item.question}>
-									<summary>{item.question}</summary>
-									<div className="accordion-answer">{item.answer}</div>
+							{localized.faq.map(({ question, Answer }) => (
+								<details className="accordion-item" key={question}>
+									<summary>{question}</summary>
+									<div className="accordion-answer markdown-copy">
+										<Answer />
+									</div>
 								</details>
 							))}
 						</div>
 					</div>
 				</section>
 			)}
+
 			{has("related") && (
 				<section className="site-section">
 					<div className="site-container">
 						<div className="section-heading reveal">
 							<p className="eyebrow">06 · Next</p>
-							<h2 className="section-title">{copy.common.relatedProducts}</h2>
+							<h2 className="section-title">{common.labels.relatedProducts}</h2>
 						</div>
 						<div className="product-rows">
 							{related.map((item, index) => {
-								const itemCopy = getLocalizedProductCopy(
-									locale,
-									item.id as ProductId,
-								);
+								const ItemSummary = products.byId[item.id as ProductId].Summary;
 								return (
 									<a
 										className="product-row reveal"
@@ -270,11 +246,11 @@ export function ProductPage({
 											</span>
 											{item.name}
 										</span>
-										<span className="product-row__summary">
-											{itemCopy.summary}
-										</span>
+										<div className="product-row__summary markdown-copy">
+											<ItemSummary />
+										</div>
 										<span className="product-row__meta">
-											{copy.status[item.implementationStatus]}
+											{common.status[item.implementationStatus]}
 											<ArrowRight width={16} height={16} aria-hidden />
 										</span>
 									</a>
@@ -290,7 +266,7 @@ export function ProductPage({
 								paddingTop: "1.5rem",
 							}}
 						>
-							<p className="eyebrow">{copy.common.sourceBasis}</p>
+							<p className="eyebrow">{common.labels.sourceBasis}</p>
 							<p className="demo-muted">{product.sourceDocuments.join(" · ")}</p>
 							<div style={{ display: "flex", flexWrap: "wrap", gap: ".75rem" }}>
 								<a
@@ -299,7 +275,7 @@ export function ProductPage({
 									target="_blank"
 									rel="noreferrer"
 								>
-									{copy.common.documentation}
+									{common.labels.documentation}
 									<ExternalLink width={15} height={15} aria-hidden />
 								</a>
 								<a
@@ -308,7 +284,7 @@ export function ProductPage({
 									target="_blank"
 									rel="noreferrer"
 								>
-									{copy.common.sourceCode}
+									{common.labels.sourceCode}
 									<ExternalLink width={15} height={15} aria-hidden />
 								</a>
 							</div>

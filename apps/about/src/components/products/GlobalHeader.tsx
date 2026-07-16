@@ -1,13 +1,12 @@
 import { ChevronRight, Languages, Menu, Moon, Settings, Sun, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { getInterfaceCopy } from "../../content/interfaceCopy";
-import type { SiteCopy } from "../../content/productTypes";
+import type { LocaleContent } from "../../content/locales";
 import { ABOUT_LOCALE_META, ABOUT_LOCALES, type AboutLocale } from "../../i18n/locales";
 import { getHomePath, getProductPath, getProductsPath } from "../../i18n/productPaths";
 
 type Props = {
 	locale: AboutLocale;
-	copy: SiteCopy;
+	copy: LocaleContent["common"];
 	active: "home" | "products" | "platform" | "history";
 	alternatePathByLocale: Record<AboutLocale, string>;
 };
@@ -21,7 +20,6 @@ function readTheme(): "light" | "dark" {
 }
 
 export function GlobalHeader({ locale, copy, active, alternatePathByLocale }: Props) {
-	const interfaceCopy = getInterfaceCopy(locale);
 	const [theme, setTheme] = useState<"light" | "dark" | null>(null);
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const toggleRef = useRef<HTMLButtonElement>(null);
@@ -91,14 +89,14 @@ export function GlobalHeader({ locale, copy, active, alternatePathByLocale }: Pr
 	return (
 		<>
 			<a className="skip-link" href="#main-content">
-				{interfaceCopy.a11y.skipContent}
+				{copy.a11y.skipContent}
 			</a>
 			<header className="global-header" ref={headerRef}>
 				<div className="site-container global-header__inner">
 					<a className="global-logo" href={getHomePath(locale)} aria-label="Rezics">
 						<img src="/logo.svg" width="34" height="24" alt="" />
 					</a>
-					<nav className="global-nav" aria-label={interfaceCopy.a11y.primaryNavigation}>
+					<nav className="global-nav" aria-label={copy.a11y.primaryNavigation}>
 						{links.map((link) => (
 							<a
 								key={link.href}
@@ -162,10 +160,7 @@ export function GlobalHeader({ locale, copy, active, alternatePathByLocale }: Pr
 					</div>
 				</div>
 				<div id="product-mobile-drawer" className="mobile-drawer" hidden={!drawerOpen}>
-					<nav
-						className="site-container"
-						aria-label={interfaceCopy.a11y.mobileNavigation}
-					>
+					<nav className="site-container" aria-label={copy.a11y.mobileNavigation}>
 						{links.map((link, index) => (
 							<a
 								ref={index === 0 ? firstDrawerLinkRef : undefined}

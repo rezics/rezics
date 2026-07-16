@@ -1,4 +1,4 @@
-import { getSiteCopy } from "../../content/siteCopy";
+import { getLocaleContent } from "../../content/locales";
 import type { AboutLocale } from "../../i18n/locales";
 import { getHomePath } from "../../i18n/productPaths";
 import { useData } from "vike-react/useData";
@@ -7,7 +7,7 @@ import type { AboutPageData } from "../../pageData";
 export function ErrorContent() {
 	const data = useData<AboutPageData>();
 	const locale: AboutLocale = data.kind === "error" ? data.locale : "zh-hant";
-	const copy = getSiteCopy(locale);
+	const copy = getLocaleContent(locale).common;
 	return (
 		<section className="site-section">
 			<div className="site-container">

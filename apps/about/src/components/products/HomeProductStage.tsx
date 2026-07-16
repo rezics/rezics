@@ -1,7 +1,6 @@
 import { useRef, useState, type KeyboardEvent } from "react";
-import { getLocalizedProductCopy } from "../../content/productCopy";
 import { PRODUCT_DEFINITIONS, type ProductId } from "../../content/productRegistry";
-import { getSiteCopy } from "../../content/siteCopy";
+import { getLocaleContent } from "../../content/locales";
 import type { AboutLocale } from "../../i18n/locales";
 import { getProductPath } from "../../i18n/productPaths";
 import { ProductDemo } from "./ProductDemo";
@@ -15,9 +14,9 @@ const featured = ["book", "history", "content-structure", "zone"].map((id) => {
 export function HomeProductStage({ locale }: { locale: AboutLocale }) {
 	const [active, setActive] = useState(0);
 	const refs = useRef<Array<HTMLButtonElement | null>>([]);
-	const copy = getSiteCopy(locale);
+	const { common, home, products } = getLocaleContent(locale);
 	const product = featured[active]!;
-	const localized = getLocalizedProductCopy(locale, product.id as ProductId);
+	const { Summary } = products.byId[product.id as ProductId];
 	const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
 		let next = active;
 		if (event.key === "ArrowRight") next = (active + 1) % featured.length;
@@ -31,7 +30,7 @@ export function HomeProductStage({ locale }: { locale: AboutLocale }) {
 	};
 	return (
 		<div>
-			<div className="tab-list" role="tablist" aria-label={copy.home.stageTitle}>
+			<div className="tab-list" role="tablist" aria-label={home.labels.stageTitle}>
 				{featured.map((entry, index) => (
 					<button
 						ref={(node) => {
@@ -60,8 +59,8 @@ export function HomeProductStage({ locale }: { locale: AboutLocale }) {
 					kind={product.demoKind}
 					productName={product.name}
 					locale={locale}
-					label={copy.common.conceptPreview}
-					caption={copy.common.conceptCaption}
+					label={common.labels.conceptPreview}
+					caption={common.labels.conceptCaption}
 				/>
 				<div
 					style={{
@@ -72,11 +71,11 @@ export function HomeProductStage({ locale }: { locale: AboutLocale }) {
 						marginTop: "1rem",
 					}}
 				>
-					<p className="demo-muted" style={{ maxWidth: "44rem" }}>
-						{localized.summary}
-					</p>
+					<div className="demo-muted" style={{ maxWidth: "44rem" }}>
+						<Summary />
+					</div>
 					<a className="text-link" href={getProductPath(locale, product.slug)}>
-						{copy.common.viewProduct} →
+						{common.labels.viewProduct} →
 					</a>
 				</div>
 			</section>

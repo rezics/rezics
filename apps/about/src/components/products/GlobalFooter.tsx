@@ -1,8 +1,14 @@
-import type { SiteCopy } from "../../content/productTypes";
+import type { LocaleContent } from "../../content/locales";
 import type { AboutLocale } from "../../i18n/locales";
 import { getHomePath, getProductPath, getProductsPath } from "../../i18n/productPaths";
 
-export function GlobalFooter({ locale, copy }: { locale: AboutLocale; copy: SiteCopy }) {
+export function GlobalFooter({
+	locale,
+	copy,
+}: {
+	locale: AboutLocale;
+	copy: LocaleContent["common"];
+}) {
 	const outlineUrl = "https://outline.rezics.com/collection/rezics-ud1QiRBQYV/recent";
 	return (
 		<footer className="global-footer">
@@ -20,7 +26,7 @@ export function GlobalFooter({ locale, copy }: { locale: AboutLocale; copy: Site
 						<a href={getProductPath(locale, "gamebook")}>GameBook</a>
 						<a href={getProductPath(locale, "post")}>Post</a>
 						<a href={getProductPath(locale, "zone")}>Zone</a>
-						<a href={getProductsPath(locale)}>{copy.common.viewAll}</a>
+						<a href={getProductsPath(locale)}>{copy.labels.viewAll}</a>
 					</nav>
 					<nav aria-label={copy.footer.platformLinks}>
 						<h2>{copy.footer.platformLinks}</h2>

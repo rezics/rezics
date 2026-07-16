@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { GlobalHeader } from "./GlobalHeader";
 import { ProductDemo } from "./ProductDemo";
-import { getSiteCopy } from "../../content/siteCopy";
+import { getLocaleContent } from "../../content/locales";
 import { getAlternatePaths } from "../../i18n/productPaths";
 import { useReveal } from "../../hooks/useReveal";
 import ComponentExample from "../../content/mdx/ComponentExample.mdx";
@@ -34,7 +34,7 @@ beforeEach(() => {
 
 describe("React interactions", () => {
 	test("persists theme and closes the mobile drawer with Escape while restoring focus", () => {
-		const copy = getSiteCopy("en");
+		const copy = getLocaleContent("en").common;
 		render(
 			<GlobalHeader
 				locale="en"

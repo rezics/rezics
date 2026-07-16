@@ -1,0 +1,25 @@
+const content = {
+	sectionsLabel: "Book sections",
+	book: "Book",
+	identity: "Book identity",
+	variants: "main and variants",
+	contents: "Chapter structure",
+	history: "History",
+	published: "Published",
+	title: "Book title",
+	variantDescription: "main · variant: translation-edition · Unit / Book",
+	contentStructure: "ContentStructure",
+	chapterOne: "01 · Chapter title",
+	chapterTwo: "02 · Chapter title",
+	reusedInterlude: "03 · Reused interlude",
+	postA: "Post A",
+	postB: "Post B",
+	credits: "Attribution",
+	creditAttribution: "CreditAttribution",
+	author: "Author",
+	translator: "Translator",
+	publisher: "Publisher",
+	entity: "Entity record",
+};
+
+export default content;

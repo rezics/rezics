@@ -1,0 +1,26 @@
+const content = {
+	versions: "버전",
+	publishedVersions: "공개 버전",
+	fieldHistory: "필드 이력",
+	diff: "필드 차이",
+	locked: "이 필드는 현재 편집 범위에서 잠겨 있습니다",
+	bookTitle: "Book.title",
+	postBlock: "Post.block",
+	zoneConfig: "Zone.config",
+	publishedVersionC: "공개 버전 C",
+	publishedVersionB: "공개 버전 B",
+	publishedVersionA: "공개 버전 A",
+	current: "현재",
+	previous: "이전",
+	initial: "최초",
+	previousTitle: "이전 제목",
+	currentTitle: "현재 공개 제목",
+	postBlockHistory: "Post 블록 이력",
+	previousPostBlock: "paragraph.block / 공개 B",
+	currentPostBlock: "paragraph.block / 공개 C",
+	zoneConfigurationHistory: "Zone 설정 이력",
+	previousZoneQuery: "feed.query / 공개 A",
+	currentZoneQuery: "feed.query / 공개 B",
+} satisfies typeof import("../../en/components/history").default;
+
+export default content;

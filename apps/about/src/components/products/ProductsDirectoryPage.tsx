@@ -1,18 +1,20 @@
 import { PRODUCT_GROUPS } from "../../content/productRegistry";
-import { getSiteCopy } from "../../content/siteCopy";
+import { getLocaleContent } from "../../content/locales";
 import type { AboutLocale } from "../../i18n/locales";
 import { InteractiveProductDirectory } from "./InteractiveProductDirectory";
 
 export function ProductsDirectoryPage({ locale }: { locale: AboutLocale }) {
-	const copy = getSiteCopy(locale);
+	const { directory } = getLocaleContent(locale).products;
 	return (
 		<>
 			<section className="site-section">
 				<div className="site-container">
 					<div className="section-heading">
-						<p className="eyebrow">{copy.directory.eyebrow}</p>
-						<h1 className="display-title">{copy.directory.title}</h1>
-						<p className="section-lead">{copy.directory.lead}</p>
+						<p className="eyebrow">{directory.labels.eyebrow}</p>
+						<h1 className="display-title">{directory.labels.title}</h1>
+						<div className="section-lead">
+							<directory.Lead />
+						</div>
 					</div>
 				</div>
 			</section>
@@ -20,7 +22,7 @@ export function ProductsDirectoryPage({ locale }: { locale: AboutLocale }) {
 				<div className="site-container">
 					<div className="section-heading reveal">
 						<p className="eyebrow">01</p>
-						<h2 className="section-title">{copy.directory.productsTitle}</h2>
+						<h2 className="section-title">{directory.labels.productsTitle}</h2>
 					</div>
 					<InteractiveProductDirectory
 						locale={locale}
@@ -33,7 +35,7 @@ export function ProductsDirectoryPage({ locale }: { locale: AboutLocale }) {
 				<div className="site-container">
 					<div className="section-heading reveal">
 						<p className="eyebrow">02</p>
-						<h2 className="section-title">{copy.directory.platformTitle}</h2>
+						<h2 className="section-title">{directory.labels.platformTitle}</h2>
 					</div>
 					<InteractiveProductDirectory
 						locale={locale}

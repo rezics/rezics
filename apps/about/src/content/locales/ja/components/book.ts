@@ -1,0 +1,25 @@
+const content = {
+	sectionsLabel: "Book のセクション",
+	book: "Book",
+	identity: "書籍の同一性",
+	variants: "main と variants",
+	contents: "章構造",
+	history: "History",
+	published: "公開済み",
+	title: "Book のタイトル",
+	variantDescription: "main · variant: translation-edition · Unit / Book",
+	contentStructure: "ContentStructure",
+	chapterOne: "01 · 章タイトル",
+	chapterTwo: "02 · 章タイトル",
+	reusedInterlude: "03 · 再利用された幕間",
+	postA: "Post A",
+	postB: "Post B",
+	credits: "帰属関係",
+	creditAttribution: "CreditAttribution",
+	author: "著者",
+	translator: "翻訳者",
+	publisher: "出版社",
+	entity: "Entity レコード",
+} satisfies typeof import("../../en/components/book").default;
+
+export default content;

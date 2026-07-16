@@ -1,7 +1,6 @@
 import { useRef, useState, type KeyboardEvent } from "react";
-import { getLocalizedProductCopy } from "../../content/productCopy";
 import type { ProductId } from "../../content/productRegistry";
-import { getSiteCopy } from "../../content/siteCopy";
+import { getLocaleContent } from "../../content/locales";
 import type { ProductDefinition } from "../../content/productTypes";
 import type { AboutLocale } from "../../i18n/locales";
 import { getProductPath } from "../../i18n/productPaths";
@@ -18,7 +17,7 @@ export function InteractiveProductDirectory({
 }) {
 	const [active, setActive] = useState(0);
 	const refs = useRef<Array<HTMLButtonElement | null>>([]);
-	const copy = getSiteCopy(locale);
+	const { common, products: productContent } = getLocaleContent(locale);
 	const activateFromKey = (event: KeyboardEvent<HTMLButtonElement>) => {
 		let next = active;
 		if (event.key === "ArrowDown" || event.key === "ArrowRight")
@@ -39,10 +38,10 @@ export function InteractiveProductDirectory({
 			<div
 				className="directory-list"
 				role="tablist"
-				aria-label={copy.directory.previewInstruction}
+				aria-label={productContent.directory.labels.previewInstruction}
 			>
 				{products.map((entry, index) => {
-					const localized = getLocalizedProductCopy(locale, entry.id as ProductId);
+					const { Summary } = productContent.byId[entry.id as ProductId];
 					return (
 						<button
 							ref={(node) => {
@@ -64,18 +63,24 @@ export function InteractiveProductDirectory({
 						>
 							<span>
 								<strong>{entry.name}</strong>
-								<span
-									style={{
-										display: "block",
-										marginTop: ".28rem",
-										fontSize: ".76rem",
-										lineHeight: 1.5,
+								<Summary
+									components={{
+										p: ({ children }) => (
+											<span
+												style={{
+													display: "block",
+													marginTop: ".28rem",
+													fontSize: ".76rem",
+													lineHeight: 1.5,
+												}}
+											>
+												{children}
+											</span>
+										),
 									}}
-								>
-									{localized.summary}
-								</span>
+								/>
 							</span>
-							<span>{copy.status[entry.implementationStatus]}</span>
+							<span>{common.status[entry.implementationStatus]}</span>
 						</button>
 					);
 				})}
@@ -86,15 +91,15 @@ export function InteractiveProductDirectory({
 						kind={product.demoKind}
 						productName={product.name}
 						locale={locale}
-						label={copy.common.conceptPreview}
-						caption={copy.common.conceptCaption}
+						label={common.labels.conceptPreview}
+						caption={common.labels.conceptCaption}
 					/>
 					<a
 						className="text-link"
 						style={{ marginTop: "1rem" }}
 						href={getProductPath(locale, product.slug)}
 					>
-						{copy.common.viewProduct} · {product.name} →
+						{common.labels.viewProduct} · {product.name} →
 					</a>
 				</section>
 			</div>

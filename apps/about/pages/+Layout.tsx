@@ -5,7 +5,7 @@ import { useConfig } from "vike-react/useConfig";
 import { useData } from "vike-react/useData";
 import { GlobalFooter } from "../src/components/products/GlobalFooter";
 import { GlobalHeader } from "../src/components/products/GlobalHeader";
-import { getSiteCopy } from "../src/content/siteCopy";
+import { getLocaleContent } from "../src/content/locales";
 import { ABOUT_LOCALE_META, ABOUT_SITE_ORIGIN, DEFAULT_LOCALE } from "../src/i18n/locales";
 import { mdxComponents } from "../src/mdxComponents";
 import type { AboutPageData } from "../src/pageData";
@@ -46,7 +46,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 				: data.kind === "products"
 					? "products"
 					: "home";
-	const copy = getSiteCopy(locale);
+	const copy = getLocaleContent(locale).common;
 
 	return (
 		<MDXProvider components={mdxComponents}>

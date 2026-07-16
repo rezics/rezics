@@ -1,0 +1,26 @@
+const content = {
+	versions: "Versions",
+	publishedVersions: "Published versions",
+	fieldHistory: "Field history",
+	diff: "Field diff",
+	locked: "This field is locked within the active editing scope",
+	bookTitle: "Book.title",
+	postBlock: "Post.block",
+	zoneConfig: "Zone.config",
+	publishedVersionC: "Published version C",
+	publishedVersionB: "Published version B",
+	publishedVersionA: "Published version A",
+	current: "current",
+	previous: "previous",
+	initial: "initial",
+	previousTitle: "Previous title",
+	currentTitle: "Current published title",
+	postBlockHistory: "Post block history",
+	previousPostBlock: "paragraph.block / published B",
+	currentPostBlock: "paragraph.block / published C",
+	zoneConfigurationHistory: "Zone configuration history",
+	previousZoneQuery: "feed.query / published A",
+	currentZoneQuery: "feed.query / published B",
+};
+
+export default content;

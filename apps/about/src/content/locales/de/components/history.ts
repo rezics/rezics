@@ -1,0 +1,26 @@
+const content = {
+	versions: "Versionen",
+	publishedVersions: "Veröffentlichte Versionen",
+	fieldHistory: "Feldverlauf",
+	diff: "Felddifferenz",
+	locked: "Dieses Feld ist im aktiven Bearbeitungsbereich gesperrt",
+	bookTitle: "Book.title",
+	postBlock: "Post.block",
+	zoneConfig: "Zone.config",
+	publishedVersionC: "Veröffentlichte Version C",
+	publishedVersionB: "Veröffentlichte Version B",
+	publishedVersionA: "Veröffentlichte Version A",
+	current: "aktuell",
+	previous: "vorherig",
+	initial: "initial",
+	previousTitle: "Vorheriger Titel",
+	currentTitle: "Aktuell veröffentlichter Titel",
+	postBlockHistory: "Verlauf des Post-Blocks",
+	previousPostBlock: "paragraph.block / veröffentlicht B",
+	currentPostBlock: "paragraph.block / veröffentlicht C",
+	zoneConfigurationHistory: "Verlauf der Zone-Konfiguration",
+	previousZoneQuery: "feed.query / veröffentlicht A",
+	currentZoneQuery: "feed.query / veröffentlicht B",
+} satisfies typeof import("../../en/components/history").default;
+
+export default content;

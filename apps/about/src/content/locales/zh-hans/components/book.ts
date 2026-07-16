@@ -1,0 +1,25 @@
+const content = {
+	sectionsLabel: "Book 分区",
+	book: "Book",
+	identity: "整体身份",
+	variants: "main 与 variants",
+	contents: "章节目录",
+	history: "History",
+	published: "已发布",
+	title: "Book 标题",
+	variantDescription: "main · 变体：translation-edition · Unit / Book",
+	contentStructure: "ContentStructure",
+	chapterOne: "01 · 章节标题",
+	chapterTwo: "02 · 章节标题",
+	reusedInterlude: "03 · 复用的幕间章节",
+	postA: "Post A",
+	postB: "Post B",
+	credits: "归属关系",
+	creditAttribution: "CreditAttribution",
+	author: "作者",
+	translator: "译者",
+	publisher: "出版商",
+	entity: "Entity 记录",
+} satisfies typeof import("../../en/components/book").default;
+
+export default content;
