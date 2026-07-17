@@ -201,6 +201,26 @@ export function PostRevisionComparePage({
 	to,
 }: {
 	postId: string;
+	from: string | null;
+	to: string | null;
+}) {
+	const { t } = useTranslation({ suspense: true });
+	if (!from || !to)
+		return (
+			<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6">
+				<PageHeading title={t.posts.compareTitle} />
+				<p className="text-sm text-destructive">{t.errors.invalid}</p>
+			</main>
+		);
+	return <PostRevisionCompareResult postId={postId} from={from} to={to} />;
+}
+
+function PostRevisionCompareResult({
+	postId,
+	from,
+	to,
+}: {
+	postId: string;
 	from: string;
 	to: string;
 }) {

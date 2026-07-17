@@ -42,11 +42,12 @@ import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
+import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { selectLocalization } from "@/lib/localization";
-import { authClient } from "@/lib/auth-client";
+import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 const CollectionStatuses = ["draft", "published", "archived"] as const;
 const CollectionVisibilities = ["public", "unlisted", "private"] as const;
@@ -232,7 +233,7 @@ export function CollectionCreate() {
 
 export function CollectionDetail({ id }: { id: string }) {
 	const query = useGetApiCollectionsByCollectionId({ path: { collectionId: id } });
-	const { data: session } = authClient.useSession();
+	const { data: session } = useHydratedSession();
 	const me = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
 	const { locale, t } = useTranslation({ suspense: true });
 	const queryClient = useQueryClient();
@@ -402,7 +403,7 @@ export function CollectionDetail({ id }: { id: string }) {
 
 export function CollectionEdit({ id }: { id: string }) {
 	const query = useGetApiCollectionsByCollectionId({ path: { collectionId: id } });
-	const { data: session } = authClient.useSession();
+	const { data: session } = useHydratedSession();
 	const me = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
 	const update = usePatchApiCollectionsByCollectionId();
 	const queryClient = useQueryClient();
@@ -530,7 +531,7 @@ export function FavoriteToggle({
 	targetId: string;
 	isFavorited?: boolean;
 }) {
-	const { data: session } = authClient.useSession();
+	const { data: session } = useHydratedSession();
 	const addFavorite = usePutApiCollectionsFavoritesItemsByTargetId();
 	const removeFavorite = useDeleteApiCollectionsFavoritesItemsByTargetId();
 	const queryClient = useQueryClient();
@@ -539,9 +540,9 @@ export function FavoriteToggle({
 	useEffect(() => setFavorited(isFavorited), [isFavorited]);
 	if (!session)
 		return (
-			<Button asChild size="sm" variant="outline">
-				<Link href="/login">{t.actions.login}</Link>
-			</Button>
+			<SignInButton size="sm" variant="outline">
+				{t.actions.login}
+			</SignInButton>
 		);
 	async function toggle() {
 		try {

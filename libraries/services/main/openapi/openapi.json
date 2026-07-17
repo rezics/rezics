@@ -7085,6 +7085,7 @@
 										"required": ["language", "title"],
 										"properties": {
 											"language": {
+												"format": "bcp-47",
 												"minLength": 2,
 												"maxLength": 35,
 												"type": "string"
@@ -7781,6 +7782,7 @@
 										"required": ["language", "title"],
 										"properties": {
 											"language": {
+												"format": "bcp-47",
 												"minLength": 2,
 												"maxLength": 35,
 												"type": "string"
@@ -9048,7 +9050,12 @@
 									"language": {
 										"nullable": true,
 										"anyOf": [
-											{ "minLength": 2, "maxLength": 35, "type": "string" },
+											{
+												"format": "bcp-47",
+												"minLength": 2,
+												"maxLength": 35,
+												"type": "string"
+											},
 											{ "type": "null" }
 										]
 									},
@@ -9291,7 +9298,12 @@
 									"language": {
 										"nullable": true,
 										"anyOf": [
-											{ "minLength": 2, "maxLength": 35, "type": "string" },
+											{
+												"format": "bcp-47",
+												"minLength": 2,
+												"maxLength": 35,
+												"type": "string"
+											},
 											{ "type": "null" }
 										]
 									},
@@ -10788,6 +10800,7 @@
 										"uniqueItems": true,
 										"type": "array",
 										"items": {
+											"format": "bcp-47",
 											"minLength": 2,
 											"maxLength": 35,
 											"type": "string"
@@ -11836,6 +11849,7 @@
 										"required": ["language", "title"],
 										"properties": {
 											"language": {
+												"format": "bcp-47",
 												"minLength": 2,
 												"maxLength": 35,
 												"type": "string"
@@ -13959,6 +13973,7 @@
 										"type": "object",
 										"properties": {
 											"originalLanguage": {
+												"format": "bcp-47",
 												"minLength": 2,
 												"maxLength": 35,
 												"type": "string"
@@ -15080,7 +15095,12 @@
 						"name": "language",
 						"in": "path",
 						"required": true,
-						"schema": { "minLength": 2, "maxLength": 35, "type": "string" }
+						"schema": {
+							"format": "bcp-47",
+							"minLength": 2,
+							"maxLength": 35,
+							"type": "string"
+						}
 					}
 				],
 				"requestBody": {
@@ -17694,6 +17714,7 @@
 										"required": ["language", "title"],
 										"properties": {
 											"language": {
+												"format": "bcp-47",
 												"minLength": 2,
 												"maxLength": 35,
 												"type": "string"
@@ -18509,6 +18530,7 @@
 										"required": ["language", "title"],
 										"properties": {
 											"language": {
+												"format": "bcp-47",
 												"minLength": 2,
 												"maxLength": 35,
 												"type": "string"
@@ -18823,6 +18845,7 @@
 								"properties": {
 									"value": { "minLength": 1, "maxLength": 500, "type": "string" },
 									"language": {
+										"format": "bcp-47",
 										"minLength": 2,
 										"maxLength": 35,
 										"type": "string"
@@ -20361,6 +20384,7 @@
 									"parentId": { "format": "uuid", "type": "string" },
 									"title": { "minLength": 1, "maxLength": 500, "type": "string" },
 									"language": {
+										"format": "bcp-47",
 										"minLength": 2,
 										"maxLength": 35,
 										"type": "string"
@@ -20892,7 +20916,12 @@
 						"name": "language",
 						"in": "query",
 						"required": true,
-						"schema": { "minLength": 2, "maxLength": 35, "type": "string" }
+						"schema": {
+							"format": "bcp-47",
+							"minLength": 2,
+							"maxLength": 35,
+							"type": "string"
+						}
 					}
 				],
 				"responses": {
@@ -21230,7 +21259,12 @@
 						"name": "language",
 						"in": "path",
 						"required": true,
-						"schema": { "minLength": 2, "maxLength": 35, "type": "string" }
+						"schema": {
+							"format": "bcp-47",
+							"minLength": 2,
+							"maxLength": 35,
+							"type": "string"
+						}
 					}
 				],
 				"requestBody": {
@@ -22286,6 +22320,7 @@
 										"required": ["language", "title"],
 										"properties": {
 											"language": {
+												"format": "bcp-47",
 												"minLength": 2,
 												"maxLength": 35,
 												"type": "string"
@@ -23103,6 +23138,7 @@
 										"required": ["language", "title"],
 										"properties": {
 											"language": {
+												"format": "bcp-47",
 												"minLength": 2,
 												"maxLength": 35,
 												"type": "string"
@@ -24139,6 +24175,7 @@
 									"targetId": { "format": "uuid", "type": "string" },
 									"realmId": { "format": "uuid", "type": "string" },
 									"language": {
+										"format": "bcp-47",
 										"minLength": 2,
 										"maxLength": 35,
 										"type": "string"
@@ -24890,6 +24927,7 @@
 								"required": ["language", "title", "body"],
 								"properties": {
 									"language": {
+										"format": "bcp-47",
 										"minLength": 2,
 										"maxLength": 35,
 										"type": "string"
@@ -25959,6 +25997,7 @@
 										"type": "string"
 									},
 									"language": {
+										"format": "bcp-47",
 										"minLength": 2,
 										"maxLength": 35,
 										"type": "string"
@@ -27233,6 +27272,7 @@
 										}
 									},
 									"language": {
+										"format": "bcp-47",
 										"minLength": 2,
 										"maxLength": 35,
 										"type": "string"
@@ -28618,6 +28658,7 @@
 									"parentPostId": { "format": "uuid", "type": "string" },
 									"realmId": { "format": "uuid", "type": "string" },
 									"language": {
+										"format": "bcp-47",
 										"minLength": 2,
 										"maxLength": 35,
 										"type": "string"
@@ -30029,6 +30070,7 @@
 										"required": ["language", "title"],
 										"properties": {
 											"language": {
+												"format": "bcp-47",
 												"minLength": 2,
 												"maxLength": 35,
 												"type": "string"
@@ -30485,6 +30527,7 @@
 										"required": ["language", "title"],
 										"properties": {
 											"language": {
+												"format": "bcp-47",
 												"minLength": 2,
 												"maxLength": 35,
 												"type": "string"
@@ -30963,6 +31006,7 @@
 								"properties": {
 									"ruleRevisionId": { "format": "uuid", "type": "string" },
 									"language": {
+										"format": "bcp-47",
 										"minLength": 2,
 										"maxLength": 35,
 										"type": "string"
@@ -31510,6 +31554,7 @@
 											"required": ["language", "title", "content"],
 											"properties": {
 												"language": {
+													"format": "bcp-47",
 													"minLength": 2,
 													"maxLength": 35,
 													"type": "string"
@@ -32706,7 +32751,12 @@
 									"Languages": {
 										"maxItems": 50,
 										"type": "array",
-										"items": { "minLength": 1, "type": "string" }
+										"items": {
+											"format": "bcp-47",
+											"minLength": 2,
+											"maxLength": 35,
+											"type": "string"
+										}
 									},
 									"limitPerIndex": {
 										"minimum": 1,
@@ -32970,7 +33020,12 @@
 									"Languages": {
 										"maxItems": 50,
 										"type": "array",
-										"items": { "minLength": 1, "type": "string" }
+										"items": {
+											"format": "bcp-47",
+											"minLength": 2,
+											"maxLength": 35,
+											"type": "string"
+										}
 									},
 									"types": {
 										"maxItems": 50,

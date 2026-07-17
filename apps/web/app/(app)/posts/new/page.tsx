@@ -1,10 +1,11 @@
 import { PostCreatePage } from "@/features/posts/post-pages";
+import { postCreateSearchParams } from "@/lib/search-params.server";
 
 export default async function Page({
 	searchParams,
 }: {
 	searchParams: Promise<{ realmId?: string | string[] }>;
 }) {
-	const realmId = (await searchParams).realmId;
-	return <PostCreatePage defaultRealmId={typeof realmId === "string" ? realmId : undefined} />;
+	const { realmId } = await postCreateSearchParams.parse(searchParams);
+	return <PostCreatePage defaultRealmId={realmId ?? undefined} />;
 }

@@ -24,7 +24,6 @@ const inpuGroupVariants = tv({
 		"has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-end]]:[&>input]:pt-3",
 		"outline-none focus-within:border-primary focus-within:ring-[3px] focus-within:ring-ring/32",
 		"has-[[data-slot][aria-invalid=true]]:border-destructive has-[[data-slot][aria-invalid=true]]:ring-[3px] has-[[data-slot][aria-invalid=true]]:ring-destructive/24",
-		"dark:has-[[data-slot][aria-invalid=true]]:border-destructive-foreground dark:has-[[data-slot][aria-invalid=true]]:ring-destructive-foreground/40",
 		"motion-reduce:transition-none!",
 	],
 	variants: {

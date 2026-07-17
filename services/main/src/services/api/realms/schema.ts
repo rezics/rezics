@@ -10,7 +10,7 @@ import {
 	UnitStatusValues,
 	UnitVisibilityValues,
 } from "../../database/schema/contract-values";
-import { LocalizationInput, Uuid } from "../schema";
+import { LanguageTag, LocalizationInput, Uuid } from "../schema";
 
 const RealmVisibility = t.Union(UnitVisibilityValues.map((value) => t.Literal(value)));
 
@@ -54,7 +54,7 @@ export type UpdateRealmBody = Static<typeof UpdateRealmBody>;
 
 export const JoinRealmBody = t.Object({
 	ruleRevisionId: t.Optional(Uuid),
-	language: t.Optional(t.String({ minLength: 2, maxLength: 35 })),
+	language: t.Optional(LanguageTag),
 });
 export type JoinRealmBody = Static<typeof JoinRealmBody>;
 
@@ -79,7 +79,7 @@ export const PublishRealmRulesBody = t.Object({
 	requireOnUpdate: t.Boolean(),
 	rules: t.Array(
 		t.Object({
-			language: t.String({ minLength: 2, maxLength: 35 }),
+			language: LanguageTag,
 			title: t.String({ minLength: 1, maxLength: 500 }),
 			content: PortableText,
 		}),

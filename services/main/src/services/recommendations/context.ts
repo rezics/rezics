@@ -1,13 +1,13 @@
 import { and, desc, eq, gte } from "drizzle-orm";
 
 import { database } from "../database";
-import { profilePreference, recommendationSnapshot } from "../database/schema";
+import { ContentRatingValues, profilePreference, recommendationSnapshot } from "../database/schema";
 import { RecommendationPolicy, RecommendationPolicyVersion } from "./policy";
 
 export interface RecommendationViewer {
 	profileId?: string;
 	personalized: boolean;
-	contentRatings: string[];
+	contentRatings: (typeof ContentRatingValues)[number][];
 	preferredLanguages: string[];
 }
 

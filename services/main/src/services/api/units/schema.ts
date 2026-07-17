@@ -1,7 +1,7 @@
 import { type Static, t } from "elysia";
 import { JsonValue } from "@rezics/portable-text";
 
-import { LifecycleInput, LocalizationInput, Uuid } from "../schema";
+import { LanguageTag, LifecycleInput, LocalizationInput, Uuid } from "../schema";
 
 export const UnitType = t.Union([t.Literal("book"), t.Literal("game"), t.Literal("media")]);
 export type UnitType = Static<typeof UnitType>;
@@ -64,7 +64,7 @@ export const UpdateUnitBody = t.Object(
 		unit: t.Optional(
 			t.Object(
 				{
-					originalLanguage: t.Optional(t.String({ minLength: 2, maxLength: 35 })),
+					originalLanguage: t.Optional(LanguageTag),
 					releasedOn: t.Optional(t.Nullable(t.String({ format: "date" }))),
 				},
 				{ additionalProperties: false },
@@ -94,7 +94,7 @@ export type UnitUnitIdParams = Static<typeof UnitUnitIdParams>;
 export const UnitLocalizationParams = t.Object({
 	type: UnitType,
 	unitId: t.String({ format: "uuid" }),
-	language: t.String({ minLength: 2, maxLength: 35 }),
+	language: LanguageTag,
 });
 export type UnitLocalizationParams = Static<typeof UnitLocalizationParams>;
 

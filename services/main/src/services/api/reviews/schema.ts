@@ -1,7 +1,7 @@
 import { type Static, t } from "elysia";
 import { PortableText } from "@rezics/portable-text";
 
-import { Uuid } from "../schema";
+import { LanguageTag, Uuid } from "../schema";
 
 export const ListReviewsQuery = t.Object({
 	targetId: t.Optional(Uuid),
@@ -13,7 +13,7 @@ export type ListReviewsQuery = Static<typeof ListReviewsQuery>;
 export const CreateReviewBody = t.Object({
 	targetId: Uuid,
 	realmId: t.Optional(Uuid),
-	language: t.String({ minLength: 2, maxLength: 35 }),
+	language: LanguageTag,
 	title: t.String({ minLength: 1, maxLength: 500 }),
 	summary: t.Optional(t.String({ maxLength: 2_000 })),
 	body: PortableText,
@@ -25,7 +25,7 @@ export const ReviewParams = t.Object({ reviewId: Uuid });
 export type ReviewParams = Static<typeof ReviewParams>;
 
 export const UpdateReviewBody = t.Object({
-	language: t.String({ minLength: 2, maxLength: 35 }),
+	language: LanguageTag,
 	title: t.String({ minLength: 1, maxLength: 500 }),
 	summary: t.Optional(t.String({ maxLength: 2_000 })),
 	body: PortableText,

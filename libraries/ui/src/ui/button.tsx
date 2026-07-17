@@ -40,7 +40,7 @@ export const buttonVariants = tv({
 			],
 			destructive: [
 				"bg-destructive",
-				"text-white",
+				"text-destructive-foreground",
 				"border border-transparent shadow-destructive/24 shadow-sm",
 				"hover:bg-destructive/90",
 				"focus-visible:border-background focus-visible:ring-destructive-foreground/32",

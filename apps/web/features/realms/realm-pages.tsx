@@ -12,26 +12,28 @@ import {
 	usePutApiRealmsByRealmIdMembership,
 	type GetApiRealmsByRealmIdStatus200,
 } from "@rezics/openapi-tanstack-query";
-import { PortableText } from "@portabletext/react";
 import { useQueryClient } from "@tanstack/react-query";
+import { PinIcon, ShieldCheckIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent } from "react";
 
 import { PageHeading } from "@rezics/ui";
+import { PortableTextContent } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { Button } from "@rezics/ui";
+import { Badge } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Skeleton } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
+import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
 import { PostList } from "@/features/posts/post-list";
-import { authClient } from "@/lib/auth-client";
+import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { selectLocalization } from "@/lib/localization";
-import { toPortableTextForEditor } from "@/lib/portable-text";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { canManageRealm, isRealmOwner } from "./realm-permissions";
@@ -199,74 +201,109 @@ export function RealmDetailPage({ id }: { id: string }) {
 	const canManage = canManageRealm(realm.viewerMembership);
 	const canPost = realm.viewerMembership?.state === "active";
 	return (
-		<main className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6">
-			<PageHeading
-				title={localization?.title ?? realm.slug ?? t.realms.untitled}
-				description={localization?.summary ?? undefined}
-				action={
-					<RealmActions
-						realm={realm}
-						ruleRevisionId={rules.data?.revisionId ?? undefined}
-						canManage={canManage}
-					/>
-				}
-			/>
-			<div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-				<span>
-					{t.realms.joinPolicy}:{" "}
-					{realm.joinPolicy === "approval" ? t.realms.approval : t.realms.open}
-				</span>
-				{realm.viewerMembership?.state === "pending" && (
-					<span>{t.realms.membershipPending}</span>
-				)}
-			</div>
-			{rules.isError ? (
-				<RequestFailure error={rules.error} />
-			) : rules.data?.items.length ? (
-				<section className="grid gap-3">
-					<h2 className="font-heading text-xl font-bold">{t.realms.rules}</h2>
-					{rules.data.items.map((rule) => (
-						<Card key={rule.id}>
-							<CardContent className="grid gap-2 p-5">
-								<h3 className="font-semibold">{rule.title}</h3>
-								<div className="prose prose-sm max-w-none">
-									<PortableText value={toPortableTextForEditor(rule.content)} />
+		<main className="mx-auto flex w-full max-w-[76rem] flex-col gap-7 px-4 py-6 sm:px-6 sm:py-9">
+			<header className="grid gap-6 border-b pb-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+				<div className="min-w-0">
+					<div className="mb-3 flex flex-wrap items-center gap-2">
+						<Badge variant="secondary">Realm</Badge>
+						<Badge variant="outline">
+							{realm.joinPolicy === "approval" ? t.realms.approval : t.realms.open}
+						</Badge>
+						{realm.viewerMembership?.state === "pending" ? (
+							<Badge variant="outline">{t.realms.membershipPending}</Badge>
+						) : null}
+					</div>
+					<h1 className="break-words font-serif font-semibold text-3xl tracking-tight sm:text-5xl">
+						{localization?.title ?? realm.slug ?? t.realms.untitled}
+					</h1>
+					{localization?.summary ? (
+						<p className="mt-3 max-w-3xl text-base text-muted-foreground leading-7 sm:text-lg">
+							{localization.summary}
+						</p>
+					) : null}
+				</div>
+				<RealmActions
+					canManage={canManage}
+					realm={realm}
+					ruleRevisionId={rules.data?.revisionId ?? undefined}
+				/>
+			</header>
+
+			<div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
+				<Card className="min-w-0 gap-0 overflow-hidden py-0">
+					<div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-4 sm:px-5">
+						<div>
+							<h2 className="font-serif font-semibold text-2xl">{t.realms.feed}</h2>
+							<p className="mt-1 text-muted-foreground text-sm">{t.feed.trending}</p>
+						</div>
+						{canPost ? (
+							<Button asChild size="sm">
+								<Link href={`/posts/new?realmId=${realm.id}`}>
+									{t.posts.create}
+								</Link>
+							</Button>
+						) : null}
+					</div>
+					<PostList realmId={realm.id} />
+				</Card>
+
+				<aside className="grid min-w-0 gap-5 lg:sticky lg:top-20">
+					{rules.isError ? (
+						<RequestFailure error={rules.error} />
+					) : rules.data?.items.length ? (
+						<Card className="min-w-0">
+							<CardContent className="grid gap-4 px-5">
+								<div className="flex items-center justify-between gap-3">
+									<h2 className="font-serif font-semibold text-lg">
+										{t.realms.rules}
+									</h2>
+									<ShieldCheckIcon aria-hidden className="size-4 text-primary" />
 								</div>
+								{rules.data.items.map((rule, index) => (
+									<section
+										className="grid gap-1.5 border-t pt-3 first:border-t-0 first:pt-0"
+										key={rule.id}
+									>
+										<h3 className="font-medium text-sm">
+											{index + 1}. {rule.title}
+										</h3>
+										<PortableTextContent
+											value={rule.content}
+											variant="compact"
+										/>
+									</section>
+								))}
 							</CardContent>
 						</Card>
-					))}
-				</section>
-			) : null}
-			{pins.isError ? (
-				<RequestFailure error={pins.error} />
-			) : pins.data?.items.length ? (
-				<section className="grid gap-3">
-					<h2 className="font-heading text-xl font-bold">{t.realms.pins}</h2>
-					<div className="grid gap-2 sm:grid-cols-2">
-						{pins.data.items.map((pin) => (
-							<Card key={pin.unitId}>
-								<CardContent className="grid gap-1 p-4 text-sm">
-									<span className="font-medium">{t.realms.pinnedContent}</span>
-									<span className="text-muted-foreground">
-										{t.realms.pinPosition}: {pin.position}
-									</span>
-								</CardContent>
-							</Card>
-						))}
-					</div>
-				</section>
-			) : null}
-			<section className="grid gap-4">
-				<div className="flex flex-wrap items-center justify-between gap-3">
-					<h2 className="font-heading text-xl font-bold">{t.realms.feed}</h2>
-					{canPost && (
-						<Button size="sm" asChild>
-							<Link href={`/posts/new?realmId=${realm.id}`}>{t.posts.create}</Link>
-						</Button>
-					)}
-				</div>
-				<PostList realmId={realm.id} />
-			</section>
+					) : null}
+
+					{pins.isError ? (
+						<RequestFailure error={pins.error} />
+					) : pins.data?.items.length ? (
+						<Card className="min-w-0">
+							<CardContent className="grid gap-3 px-5">
+								<div className="flex items-center justify-between gap-3">
+									<h2 className="font-serif font-semibold text-lg">
+										{t.realms.pins}
+									</h2>
+									<PinIcon aria-hidden className="size-4 text-primary" />
+								</div>
+								{pins.data.items.map((pin) => (
+									<div
+										className="border-t pt-3 text-sm first:border-t-0 first:pt-0"
+										key={pin.unitId}
+									>
+										<p className="font-medium">{t.realms.pinnedContent}</p>
+										<p className="mt-1 text-muted-foreground text-xs">
+											{t.realms.pinPosition}: {pin.position}
+										</p>
+									</div>
+								))}
+							</CardContent>
+						</Card>
+					) : null}
+				</aside>
+			</div>
 		</main>
 	);
 }
@@ -282,7 +319,7 @@ function RealmActions({
 }) {
 	const { t, locale } = useTranslation({ suspense: true });
 	const queryClient = useQueryClient();
-	const { data: session } = authClient.useSession();
+	const { data: session } = useHydratedSession();
 	const follow = usePutApiRealmsByRealmIdFollow();
 	const unfollow = useDeleteApiRealmsByRealmIdFollow();
 	const join = usePutApiRealmsByRealmIdMembership();
@@ -291,11 +328,7 @@ function RealmActions({
 
 	if (!session)
 		return (
-			<Button asChild>
-				<Link href={`/login?next=${encodeURIComponent(`/realms/${realm.id}`)}`}>
-					{t.realms.signInToJoin}
-				</Link>
-			</Button>
+			<SignInButton destination={`/realms/${realm.id}`}>{t.realms.signInToJoin}</SignInButton>
 		);
 
 	return (

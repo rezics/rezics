@@ -8,7 +8,7 @@ export default defineProject({
 	test: {
 		name: "main",
 		environment: "node",
-		include: ["src/**/*.test.ts"],
+		include: ["src/**/*.test.ts", "scripts/**/*.test.ts"],
 		setupFiles: ["./vitest.setup.ts"],
 		globals: false,
 		restoreMocks: true,

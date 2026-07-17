@@ -7,8 +7,7 @@ import {
 	usePatchApiPostsByPostIdRepliesByReplyPostId,
 	usePostApiPostsByPostIdReplies,
 } from "@rezics/openapi-tanstack-query";
-import type { PortableTextBlock } from "@portabletext/editor";
-import { PortableText } from "@portabletext/react";
+import { normalizePortableText, type PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
@@ -24,19 +23,14 @@ import {
 	AlertDialogTrigger,
 	Button,
 	cn,
-	Field,
 	FieldGroup,
-	FieldLabel,
-	PortableTextEditor,
+	PortableTextContent,
 	Skeleton,
 	Spinner,
 } from "@rezics/ui";
-import { authClient } from "@/lib/auth-client";
-import {
-	toPortableTextFromEditor,
-	toPortableTextForEditor,
-	toPortableTextForReact,
-} from "@/lib/portable-text";
+import { SignInButton } from "@/features/auth/auth-portal";
+import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { buildReplyPostTree, findReplyPost, type ReplyPostTreeNode } from "./reply-tree";
@@ -54,7 +48,7 @@ export function ReplyPostThread({
 		path: { postId: rootPostId },
 		query: { limit: 200 },
 	});
-	const { data: session } = authClient.useSession();
+	const { data: session } = useHydratedSession();
 	const viewer = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
 	const tree = buildReplyPostTree(replies.data?.items ?? []);
 	const visibleTree = parentPostId ? (findReplyPost(tree, parentPostId)?.children ?? []) : tree;
@@ -69,13 +63,13 @@ export function ReplyPostThread({
 					action={t.ui.postReply}
 				/>
 			) : (
-				<Button className="w-fit" variant="outline" asChild>
-					<Link
-						href={`/login?next=${encodeURIComponent(`/posts/${parentPostId ?? rootPostId}`)}`}
-					>
-						{t.posts.signInToReply}
-					</Link>
-				</Button>
+				<SignInButton
+					className="w-fit"
+					destination={`/posts/${parentPostId ?? rootPostId}`}
+					variant="outline"
+				>
+					{t.posts.signInToReply}
+				</SignInButton>
 			)}
 			{replies.isPending ? (
 				<div className="flex flex-col gap-3">
@@ -126,7 +120,7 @@ function ReplyPostNode({
 	const remove = useDeleteApiPostsByPostIdRepliesByReplyPostId();
 	const [editing, setEditing] = useState(false);
 	const [replying, setReplying] = useState(false);
-	const [body, setBody] = useState<PortableTextBlock[]>([]);
+	const [body, setBody] = useState<PortableTextValue>([]);
 	const canEdit =
 		viewerId === reply.authorId &&
 		reply.status !== "deleted" &&
@@ -139,7 +133,7 @@ function ReplyPostNode({
 			{
 				path: { postId: rootPostId, replyPostId: reply.id },
 				body: {
-					body: toPortableTextFromEditor(body),
+					body: normalizePortableText(body),
 					baseRevisionId: reply.latestRevisionId,
 				},
 			},
@@ -170,10 +164,11 @@ function ReplyPostNode({
 				) : editing ? (
 					<form onSubmit={save}>
 						<FieldGroup>
-							<Field>
-								<FieldLabel>{t.posts.replyBody}</FieldLabel>
-								<PortableTextEditor value={body} onChange={setBody} />
-							</Field>
+							<PortableTextEditor
+								label={t.posts.replyBody}
+								onChange={setBody}
+								value={body}
+							/>
 							<RequestFailure error={update.error} />
 							<div className="flex flex-wrap gap-2">
 								<Button
@@ -197,7 +192,7 @@ function ReplyPostNode({
 					</form>
 				) : (
 					<div className="prose prose-sm max-w-none">
-						<PortableText value={toPortableTextForReact(reply.body)} />
+						<PortableTextContent value={reply.body} variant="compact" />
 					</div>
 				)}
 				{reply.status !== "deleted" && (
@@ -219,7 +214,7 @@ function ReplyPostNode({
 									size="xs"
 									variant="ghost"
 									onClick={() => {
-										setBody(toPortableTextForEditor(reply.body));
+										setBody(normalizePortableText(reply.body));
 										setEditing(true);
 									}}
 								>
@@ -318,7 +313,7 @@ function ReplyPostComposer({
 	const { t, locale } = useTranslation({ suspense: true });
 	const queryClient = useQueryClient();
 	const create = usePostApiPostsByPostIdReplies();
-	const [body, setBody] = useState<PortableTextBlock[]>([]);
+	const [body, setBody] = useState<PortableTextValue>([]);
 	const [editorKey, setEditorKey] = useState(0);
 
 	function submit(event: FormEvent<HTMLFormElement>) {
@@ -329,7 +324,7 @@ function ReplyPostComposer({
 				body: {
 					...(parentPostId ? { parentPostId } : {}),
 					language: locale.target,
-					body: toPortableTextFromEditor(body),
+					body: normalizePortableText(body),
 				},
 			},
 			{
@@ -346,10 +341,12 @@ function ReplyPostComposer({
 	return (
 		<form onSubmit={submit}>
 			<FieldGroup>
-				<Field>
-					<FieldLabel>{t.posts.replyBody}</FieldLabel>
-					<PortableTextEditor key={editorKey} value={body} onChange={setBody} />
-				</Field>
+				<PortableTextEditor
+					key={editorKey}
+					label={t.posts.replyBody}
+					onChange={setBody}
+					value={body}
+				/>
 				<RequestFailure error={create.error} />
 				<Button
 					type="submit"

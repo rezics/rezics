@@ -2,7 +2,7 @@ import { type Static, t } from "elysia";
 import { PortableText } from "@rezics/portable-text";
 
 import { ContentRatingValues } from "../../database/schema/contract-values";
-import { Uuid } from "../schema";
+import { LanguageTag, Uuid } from "../schema";
 
 export const UpdateProfileBody = t.Object(
 	{
@@ -31,7 +31,7 @@ export const ReplacePreferencesBody = t.Object({
 	contentRatings: t.Array(t.Union(ContentRatingValues.map((value) => t.Literal(value))), {
 		uniqueItems: true,
 	}),
-	preferredLanguages: t.Array(t.String({ minLength: 2, maxLength: 35 }), {
+	preferredLanguages: t.Array(LanguageTag, {
 		minItems: 1,
 		uniqueItems: true,
 	}),

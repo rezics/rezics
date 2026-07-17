@@ -14,6 +14,8 @@ import { Button } from "./button";
 import type { inputVariants } from "./input";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "./input-group";
 
+export { createListCollection } from "@ark-ui/react/combobox";
+
 export const useCombobox = useArkComboboxContext;
 
 export const ComboboxContext = ArkCombobox.Context;

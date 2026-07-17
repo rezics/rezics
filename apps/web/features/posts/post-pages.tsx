@@ -10,8 +10,7 @@ import {
 	usePostApiPosts,
 	type GetApiPostsByPostIdStatus200,
 } from "@rezics/openapi-tanstack-query";
-import type { PortableTextBlock } from "@portabletext/editor";
-import { PortableText } from "@portabletext/react";
+import { normalizePortableText, type PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,7 +18,7 @@ import { useEffect, useState, type FormEvent } from "react";
 
 import { EntityPicker } from "@rezics/ui";
 import { PageHeading } from "@rezics/ui";
-import { PortableTextEditor } from "@rezics/ui";
+import { PortableTextContent } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import {
 	AlertDialog,
@@ -36,14 +35,10 @@ import { Card, CardContent, CardDescription, CardHeader, Spinner } from "@rezics
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
+import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { selectLocalization } from "@/lib/localization";
-import {
-	toPortableTextFromEditor,
-	toPortableTextForEditor,
-	toPortableTextForReact,
-} from "@/lib/portable-text";
 import { ReplyPostThread } from "./reply-thread";
 import { PostList, RelatedPostRecommendations } from "./post-list";
 import { invalidatePostQueries } from "./query";
@@ -78,7 +73,7 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 	);
 	const [realm, setRealm] = useState<PickedEntity>();
 	const [subject, setSubject] = useState<PickedEntity>();
-	const [body, setBody] = useState<PortableTextBlock[]>([]);
+	const [body, setBody] = useState<PortableTextValue>([]);
 
 	useEffect(() => {
 		if (!defaultRealm.data || realm) return;
@@ -103,7 +98,7 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 				body: {
 					title,
 					language: locale.target,
-					body: toPortableTextFromEditor(body),
+					body: normalizePortableText(body),
 					...(realm ? { realmId: realm.id } : {}),
 					...(subject ? { subjectId: subject.id } : {}),
 				},
@@ -224,7 +219,7 @@ export function PostDetailPage({ id }: { id: string }) {
 				</CardHeader>
 				<CardContent>
 					<article className="prose max-w-none">
-						<PortableText value={toPortableTextForReact(post.body)} />
+						<PortableTextContent value={post.body} variant="article" />
 					</article>
 				</CardContent>
 			</Card>
@@ -269,7 +264,7 @@ function PostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const update = usePatchApiPostsByPostId();
-	const [body, setBody] = useState(() => toPortableTextForEditor(post.body));
+	const [body, setBody] = useState(() => normalizePortableText(post.body));
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -280,7 +275,7 @@ function PostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
 				path: { postId: post.id },
 				body: {
 					title,
-					body: toPortableTextFromEditor(body),
+					body: normalizePortableText(body),
 					baseRevisionId: post.latestRevisionId,
 				},
 			},
@@ -325,7 +320,7 @@ function ReplyPostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const update = usePatchApiPostsByPostIdRepliesByReplyPostId();
-	const [body, setBody] = useState(() => toPortableTextForEditor(post.body));
+	const [body, setBody] = useState(() => normalizePortableText(post.body));
 	const rootPostId = post.rootPostId;
 
 	function submit(event: FormEvent<HTMLFormElement>) {
@@ -335,7 +330,7 @@ function ReplyPostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
 			{
 				path: { postId: rootPostId, replyPostId: post.id },
 				body: {
-					body: toPortableTextFromEditor(body),
+					body: normalizePortableText(body),
 					baseRevisionId: post.latestRevisionId,
 				},
 			},
@@ -353,10 +348,12 @@ function ReplyPostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
 			<PageHeading title={t.posts.editReplyTitle} />
 			<form onSubmit={submit}>
 				<FieldGroup>
-					<Field required>
-						<FieldLabel>{t.posts.replyBody}</FieldLabel>
-						<PortableTextEditor value={body} onChange={setBody} />
-					</Field>
+					<PortableTextEditor
+						label={t.posts.replyBody}
+						onChange={setBody}
+						required
+						value={body}
+					/>
 					<RequestFailure error={update.error} />
 					<Button
 						type="submit"
@@ -379,8 +376,8 @@ function PostFields({
 	pending,
 	error,
 }: {
-	body: PortableTextBlock[];
-	onBodyChange: (value: PortableTextBlock[]) => void;
+	body: PortableTextValue;
+	onBodyChange: (value: PortableTextValue) => void;
 	submitLabel: string;
 	pending: boolean;
 	error: Parameters<typeof RequestFailure>[0]["error"];
@@ -388,10 +385,7 @@ function PostFields({
 	const { t } = useTranslation({ suspense: true });
 	return (
 		<>
-			<Field required>
-				<FieldLabel>{t.ui.body}</FieldLabel>
-				<PortableTextEditor value={body} onChange={onBodyChange} />
-			</Field>
+			<PortableTextEditor label={t.ui.body} onChange={onBodyChange} required value={body} />
 			<RequestFailure error={error} />
 			<Button type="submit" className="w-fit" disabled={!body.length || pending}>
 				{pending && <Spinner data-icon="inline-start" />}

@@ -6,7 +6,14 @@ import {
 	usePutApiRecommendationsExclusionsByUnitId,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowRight, Ellipsis, EyeOff } from "lucide-react";
+import {
+	ArrowRight,
+	BookOpenIcon,
+	Ellipsis,
+	EyeOff,
+	Gamepad2Icon,
+	PlaySquareIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -15,6 +22,7 @@ import {
 	Card,
 	CardContent,
 	CardMedia,
+	cn,
 	Menu,
 	MenuContent,
 	MenuItem,
@@ -25,9 +33,11 @@ import { recommendationReasonLabel } from "@/features/recommendations/reason";
 import { invalidateRecommendationQueries } from "@/features/recommendations/query";
 import { useRecommendationTracking } from "@/features/recommendations/tracking";
 import { useTranslation } from "@/i18n/client";
-import { authClient } from "@/lib/auth-client";
+import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 type RecommendedUnit = GetApiRecommendationsUnitsStatus200["items"][number];
+
+const UnitIcons = { book: BookOpenIcon, game: Gamepad2Icon, media: PlaySquareIcon };
 
 export function UnitShelf({
 	type,
@@ -39,7 +49,7 @@ export function UnitShelf({
 	seedUnitId?: string;
 }) {
 	const { t } = useTranslation({ suspense: true });
-	const { data: session } = authClient.useSession();
+	const { data: session } = useHydratedSession();
 	const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
 	const query = useGetApiRecommendationsUnits({
 		query: {
@@ -68,12 +78,13 @@ export function UnitShelf({
 			return next;
 		});
 	return (
-		<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-			{items.map((item) => (
+		<div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+			{items.map((item, index) => (
 				<UnitRecommendationCard
 					key={item.id}
 					item={item}
 					canExclude={Boolean(session)}
+					featuredMobile={index === 0}
 					onHiddenChange={(value) => setItemHidden(item.id, value)}
 				/>
 			))}
@@ -84,10 +95,12 @@ export function UnitShelf({
 function UnitRecommendationCard({
 	item,
 	canExclude,
+	featuredMobile,
 	onHiddenChange,
 }: {
 	item: RecommendedUnit;
 	canExclude: boolean;
+	featuredMobile: boolean;
 	onHiddenChange: (hidden: boolean) => void;
 }) {
 	const { t } = useTranslation({ suspense: true });
@@ -100,6 +113,7 @@ function UnitRecommendationCard({
 		},
 	});
 	const reason = recommendationReasonLabel(item.recommendationReason, t.feed);
+	const UnitIcon = UnitIcons[item.type];
 	const markNotInterested = () => {
 		onHiddenChange(true);
 		exclude.mutate({
@@ -116,14 +130,22 @@ function UnitRecommendationCard({
 		});
 	};
 	return (
-		<Card asChild className="group relative overflow-hidden p-0">
+		<Card
+			asChild
+			className={cn(
+				"group relative overflow-hidden p-0",
+				!featuredMobile && "hidden sm:flex",
+				featuredMobile &&
+					"grid grid-cols-[7.25rem_minmax(0,1fr)] sm:flex sm:grid-cols-none",
+			)}
+		>
 			<article ref={elementRef}>
 				{canExclude && (
 					<Menu>
 						<MenuTrigger asChild>
 							<Button
 								aria-label={t.feed.recommendationMenu}
-								className="absolute end-2 top-2 z-10 bg-background/80 backdrop-blur"
+								className="absolute end-2 top-2 z-10 size-11 bg-background/80 backdrop-blur sm:size-6"
 								pill
 								size="icon-xs"
 								variant="secondary"
@@ -149,11 +171,13 @@ function UnitRecommendationCard({
 					onClick={trackOpen}
 				>
 					<CardMedia
-						className={
+						className={cn(
 							item.type === "book"
 								? "bg-accent aspect-[2/3]"
-								: "bg-accent aspect-video"
-						}
+								: "bg-accent aspect-video",
+							featuredMobile &&
+								"h-full min-h-44 aspect-auto sm:h-auto sm:min-h-0 sm:aspect-[2/3]",
+						)}
 						variant="image"
 					>
 						{item.cover ? (
@@ -166,17 +190,27 @@ function UnitRecommendationCard({
 								}}
 							/>
 						) : (
-							<div className="text-accent-foreground grid size-full place-items-center font-heading text-3xl font-black">
-								{(item.title ?? "R").slice(0, 1)}
+							<div className="text-accent-foreground grid size-full place-items-center">
+								<UnitIcon aria-hidden className="size-9" />
 							</div>
 						)}
 					</CardMedia>
 				</Link>
-				<CardContent className="flex min-h-32 flex-col gap-2 p-3">
+				<CardContent
+					className={cn(
+						"flex min-h-32 flex-col gap-2 p-3",
+						featuredMobile && "min-h-44 sm:min-h-32",
+					)}
+				>
 					<p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
 						{item.type}
 					</p>
-					<h3 className="line-clamp-2 text-sm font-semibold">
+					<h3
+						className={cn(
+							"line-clamp-2 text-sm font-semibold",
+							featuredMobile && "text-base sm:text-sm",
+						)}
+					>
 						{item.title ?? item.slug ?? t.ui.unnamed}
 					</h3>
 					{reason && <p className="text-primary line-clamp-1 text-xs">{reason}</p>}

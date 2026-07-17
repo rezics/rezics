@@ -10,16 +10,25 @@ export interface UiMessages {
 	retry: ReactNode;
 	searchPlaceholder: string;
 	editor: {
-		paragraph: ReactNode;
-		heading2: ReactNode;
-		heading3: ReactNode;
-		quote: ReactNode;
-		bold: ReactNode;
-		italic: ReactNode;
-		bulletList: ReactNode;
-		numberedList: ReactNode;
-		link: ReactNode;
+		paragraph: string;
+		heading2: string;
+		heading3: string;
+		quote: string;
+		bold: string;
+		italic: string;
+		bulletList: string;
+		numberedList: string;
+		link: string;
 		linkPrompt: string;
+		linkUrl: string;
+		openInNewTab: string;
+		addLink: string;
+		removeLink: string;
+		invalidLink: string;
+		undo: string;
+		redo: string;
+		style: string;
+		preview: string;
 	};
 }
 
@@ -62,6 +71,15 @@ const DefaultMessages = {
 		numberedList: "Numbered list",
 		link: "Link",
 		linkPrompt: "Enter a URL",
+		linkUrl: "URL",
+		openInNewTab: "Open in a new tab",
+		addLink: "Add link",
+		removeLink: "Remove link",
+		invalidLink: "Enter a supported URL.",
+		undo: "Undo",
+		redo: "Redo",
+		style: "Text style",
+		preview: "Preview",
 	},
 } satisfies UiMessages;
 

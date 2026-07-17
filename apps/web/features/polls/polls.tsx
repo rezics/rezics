@@ -22,10 +22,11 @@ import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { RadioGroup, RadioGroupItem } from "@rezics/ui";
+import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
-import { authClient } from "@/lib/auth-client";
+import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 const PollSearch = { query: "", limit: 50, sort: "createdAt:desc" as const };
 const PollSearchQueryKey = [{ url: "/api/search/polls" }, PollSearch] as const;
@@ -242,7 +243,7 @@ export function PollDetail({ id }: { id: string }) {
 	const vote = usePutApiPollsByPollIdVote();
 	const retract = useDeleteApiPollsByPollIdVote();
 	const queryClient = useQueryClient();
-	const { data: session } = authClient.useSession();
+	const { data: session } = useHydratedSession();
 	const { t } = useTranslation({ suspense: true });
 	const [selected, setSelected] = useState<string[]>([]);
 	useEffect(() => {
@@ -353,11 +354,9 @@ export function PollDetail({ id }: { id: string }) {
 								)}
 							</div>
 						) : (
-							<Button asChild>
-								<Link href={`/login?next=${encodeURIComponent(`/polls/${id}`)}`}>
-									{t.actions.login}
-								</Link>
-							</Button>
+							<SignInButton destination={`/polls/${id}`}>
+								{t.actions.login}
+							</SignInButton>
 						)}
 					</form>
 					<RequestFailure

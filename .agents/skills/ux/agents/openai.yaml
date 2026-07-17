@@ -1,0 +1,4 @@
+interface:
+  display_name: "UX"
+  short_description: "Improve every part the user can notice or feel."
+  default_prompt: "Use $ux to imagine that you are the user and improve every part of the full, live experience."

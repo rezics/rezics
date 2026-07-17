@@ -1,7 +1,7 @@
 import { type Static, t } from "elysia";
 import { PortableText } from "@rezics/portable-text";
 
-import { Uuid } from "../schema";
+import { LanguageTag, Uuid } from "../schema";
 
 export const ListPostsQuery = t.Object({
 	realmId: t.Optional(Uuid),
@@ -13,7 +13,7 @@ export type ListPostsQuery = Static<typeof ListPostsQuery>;
 export const CreatePostBody = t.Object({
 	title: t.String({ minLength: 1, maxLength: 500 }),
 	body: PortableText,
-	language: t.String({ minLength: 2, maxLength: 35 }),
+	language: LanguageTag,
 	realmId: t.Optional(Uuid),
 	subjectId: t.Optional(Uuid),
 });
@@ -50,7 +50,7 @@ export type ReplyThreadQuery = Static<typeof ReplyThreadQuery>;
 export const CreateReplyBody = t.Object({
 	parentPostId: t.Optional(Uuid),
 	realmId: t.Optional(Uuid),
-	language: t.String({ minLength: 2, maxLength: 35 }),
+	language: LanguageTag,
 	body: PortableText,
 });
 export type CreateReplyBody = Static<typeof CreateReplyBody>;

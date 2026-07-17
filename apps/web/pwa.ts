@@ -1,6 +1,8 @@
 import type { ManifestOptions } from "vite-plugin-pwa";
 import type { LanguageTag } from "@rezics/i18n";
 
+import { appTheme } from "./lib/theme";
+
 type LocalizedText = Readonly<Record<LanguageTag, string>>;
 type LocalizedManifestOptions = Partial<ManifestOptions> & {
 	name_localized: LocalizedText;
@@ -14,23 +16,23 @@ const localizedName = {
 } satisfies LocalizedText;
 
 const localizedDescription = {
-	"zh-CN": "inherited · create · spread",
-	"en-US": "inherited · create · spread",
+	"zh-CN": "发现作品，加入社区，展开深度讨论。",
+	"en-US": "Discover works, join communities, and take part in thoughtful discussion.",
 } satisfies LocalizedText;
 
 export const pwaManifest = {
 	id: "/",
 	name: "REZICS",
 	short_name: "REZICS",
-	description: "inherited · create · spread",
+	description: localizedDescription["zh-CN"],
 	name_localized: localizedName,
 	short_name_localized: localizedName,
 	description_localized: localizedDescription,
 	start_url: "/",
 	scope: "/",
 	display: "standalone",
-	background_color: "#fcfbfa",
-	theme_color: "#f23864",
+	background_color: appTheme.light.background,
+	theme_color: appTheme.light.primary,
 	dir: "ltr",
 	lang: "zh-CN",
 	categories: ["education", "social"],

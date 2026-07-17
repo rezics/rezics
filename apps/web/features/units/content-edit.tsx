@@ -1,6 +1,5 @@
 "use client";
 
-import type { PortableTextBlock } from "@portabletext/editor";
 import {
 	type GetApiUnitsBookByUnitIdContentNodesStatus200,
 	type PostApiUnitsBookByUnitIdContentNodesOptions,
@@ -9,22 +8,22 @@ import {
 	usePatchApiUnitsBookByUnitIdContentNodesByNodeId,
 	usePostApiUnitsBookByUnitIdContentNodes,
 } from "@rezics/openapi-tanstack-query";
+import { normalizePortableText, type PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 
 import { PageHeading } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
-import { PortableTextEditor } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
+import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
-import { toPortableTextFromEditor } from "@/lib/portable-text";
 import {
 	buildContentTree,
 	getContentMoveTargets,
@@ -73,7 +72,7 @@ function BookContentWorkspace({ bookId }: { bookId: string }) {
 	if (tree.isPending) return <QueryPending />;
 	if (tree.isError) return <QueryFailure error={tree.error} retry={() => void tree.refetch()} />;
 	return (
-		<main className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6">
+		<main className="mx-auto flex w-full max-w-[90rem] flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
 			<PageHeading
 				title={t.units.content.edit}
 				action={
@@ -137,7 +136,7 @@ function ContentCreateForm({
 }) {
 	const { t, locale } = useTranslation({ suspense: true });
 	const [kind, setKind] = useState<"chapter" | "group">("chapter");
-	const [content, setContent] = useState<PortableTextBlock[]>([]);
+	const [content, setContent] = useState<PortableTextValue>([]);
 	const [editorKey, setEditorKey] = useState(0);
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -154,7 +153,7 @@ function ContentCreateForm({
 					...(parentId ? { parentId } : {}),
 					...(kind === "chapter"
 						? {
-								content: toPortableTextFromEditor(content),
+								content: normalizePortableText(content),
 								status: form.get("status") === "draft" ? "draft" : "published",
 							}
 						: {}),
@@ -223,14 +222,13 @@ function ContentCreateForm({
 										</NativeSelectOption>
 									</NativeSelect>
 								</Field>
-								<Field>
-									<FieldLabel>{t.ui.chapterContent}</FieldLabel>
-									<PortableTextEditor
-										key={editorKey}
-										onChange={setContent}
-										value={content}
-									/>
-								</Field>
+								<PortableTextEditor
+									key={editorKey}
+									label={t.ui.chapterContent}
+									onChange={setContent}
+									value={content}
+									variant="document"
+								/>
 							</>
 						)}
 						<Button isLoading={pending} type="submit">

@@ -14,13 +14,13 @@ import { QueryFailure, QueryPending } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui";
-import { authClient } from "@/lib/auth-client";
+import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { useTranslation } from "@/i18n/client";
 
 export function ProfilePage({ id }: { id: string }) {
 	const { t } = useTranslation({ suspense: true });
 	const queryClient = useQueryClient();
-	const { data: session } = authClient.useSession();
+	const { data: session } = useHydratedSession();
 	const profile = useGetApiUsersById({ path: { id } });
 	const me = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
 	const follow = usePutApiUsersByIdFollow({

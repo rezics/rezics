@@ -12,11 +12,7 @@ export const RadioGroup = (props: React.ComponentProps<typeof ArkRadioGroup.Root
 
 	return (
 		<ArkRadioGroup.Root
-			className={cn(
-				"flex flex-col gap-3",
-				"data-invalid:text-destructive dark:data-invalid:text-destructive-foreground",
-				className,
-			)}
+			className={cn("flex flex-col gap-3", "data-invalid:text-destructive", className)}
 			data-slot="radio-group"
 			{...rest}
 		>
@@ -46,9 +42,8 @@ export const RadioGroupItem = (props: React.ComponentProps<typeof ArkRadioGroup.
 					"data-focus-visible:border-primary data-focus-visible:ring-[3px] data-focus-visible:ring-ring/32 data-focus-visible:ring-offset-1 data-focus-visible:ring-offset-background",
 					"data-focus-visible:data-invalid:border-destructive/64 data-focus-visible:data-invalid:ring-destructive/48",
 					"data-invalid:border-destructive data-invalid:text-destructive data-invalid:ring-[3px] data-invalid:ring-destructive/24",
-					"dark:data-invalid:border-destructive-foreground dark:data-invalid:text-destructive dark:data-invalid:ring-[3px] dark:data-invalid:ring-destructive-foreground/20",
 					"data-[state=checked]:bg-primary data-[state=checked]:before:bg-primary-foreground",
-					"data-invalid:data-[state=checked]:bg-transparent data-invalid:data-[state=checked]:before:bg-destructive-foreground",
+					"data-invalid:data-[state=checked]:bg-transparent data-invalid:data-[state=checked]:before:bg-destructive",
 				)}
 				data-slot="radio-group-item-control"
 			/>

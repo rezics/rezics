@@ -1,7 +1,7 @@
 import { type Static, t } from "elysia";
 
 import { AliasKindValues } from "../../database/schema/contract-values";
-import { LocalizationInput, Uuid } from "../schema";
+import { LanguageTag, LocalizationInput, Uuid } from "../schema";
 import { UnitType } from "../units/schema";
 
 export const CreateCatalogUnitBody = t.Object(
@@ -53,7 +53,7 @@ export type TagUnitBody = Static<typeof TagUnitBody>;
 export const AddUnitAliasBody = t.Object(
 	{
 		value: t.String({ minLength: 1, maxLength: 500 }),
-		language: t.Optional(t.String({ minLength: 2, maxLength: 35 })),
+		language: t.Optional(LanguageTag),
 		kind: t.Optional(t.Union(AliasKindValues.map((value) => t.Literal(value)))),
 		pinned: t.Optional(t.Boolean()),
 		position: t.Optional(t.String({ maxLength: 64 })),

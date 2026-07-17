@@ -1,7 +1,5 @@
 "use client";
 
-import type { PortableTextBlock } from "@portabletext/editor";
-import { PortableText } from "@portabletext/react";
 import {
 	type GetApiReviewsByReviewIdStatus200,
 	getApiReactionsUnitsByUnitIdQueryKey,
@@ -19,6 +17,7 @@ import {
 	usePutApiReactionsUnitsByUnitId,
 	usePutApiScoresByTargetId,
 } from "@rezics/openapi-tanstack-query";
+import { normalizePortableText, type PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -26,7 +25,7 @@ import { useState, type FormEvent } from "react";
 
 import { EntityPicker } from "@rezics/ui";
 import { PageHeading } from "@rezics/ui";
-import { PortableTextEditor } from "@rezics/ui";
+import { PortableTextContent } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import {
 	AlertDialog,
@@ -44,15 +43,12 @@ import { Button } from "@rezics/ui";
 import { Card, CardContent, CardHeader } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
+import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
+import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
-import { authClient } from "@/lib/auth-client";
-import {
-	toPortableTextFromEditor,
-	toPortableTextForEditor,
-	toPortableTextForReact,
-} from "@/lib/portable-text";
+import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 async function invalidateReviews(
 	queryClient: ReturnType<typeof useQueryClient>,
@@ -116,7 +112,7 @@ export function ReviewCreate() {
 	const { locale, t } = useTranslation({ suspense: true });
 	const [target, setTarget] = useState<{ id: string; label: string }>();
 	const [realm, setRealm] = useState<{ id: string; label: string }>();
-	const [body, setBody] = useState<PortableTextBlock[]>([]);
+	const [body, setBody] = useState<PortableTextValue>([]);
 	const [invalid, setInvalid] = useState(false);
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -141,7 +137,7 @@ export function ReviewCreate() {
 					...(String(form.get("summary") ?? "").trim()
 						? { summary: String(form.get("summary") ?? "").trim() }
 						: {}),
-					body: toPortableTextFromEditor(body),
+					body: normalizePortableText(body),
 					...(scoreValue ? { score: Number(scoreValue) } : {}),
 				},
 			});
@@ -177,10 +173,12 @@ export function ReviewCreate() {
 							<FieldLabel>{t.engagement.reviewScore}</FieldLabel>
 							<Input max={10} min={1} name="score" type="number" />
 						</Field>
-						<Field required>
-							<FieldLabel>{t.ui.body}</FieldLabel>
-							<PortableTextEditor onChange={setBody} value={body} />
-						</Field>
+						<PortableTextEditor
+							label={t.ui.body}
+							onChange={setBody}
+							required
+							value={body}
+						/>
 					</FieldGroup>
 					{invalid && <p className="text-destructive text-sm">{t.errors.invalid}</p>}
 					<RequestFailure error={create.error} fallback={t.ui.retryLater} />
@@ -264,7 +262,7 @@ export function ReviewDetail({ id }: { id: string }) {
 			{review.body && (
 				<Card>
 					<CardContent className="prose max-w-none py-2">
-						<PortableText value={toPortableTextForReact(review.body)} />
+						<PortableTextContent value={review.body} variant="article" />
 					</CardContent>
 				</Card>
 			)}
@@ -302,9 +300,7 @@ function ReviewEditForm({
 	const queryClient = useQueryClient();
 	const router = useRouter();
 	const { locale, t } = useTranslation({ suspense: true });
-	const [body, setBody] = useState<PortableTextBlock[]>(() =>
-		toPortableTextForEditor(review.body),
-	);
+	const [body, setBody] = useState<PortableTextValue>(() => normalizePortableText(review.body));
 	const [invalid, setInvalid] = useState(false);
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -323,7 +319,7 @@ function ReviewEditForm({
 					...(String(form.get("summary") ?? "").trim()
 						? { summary: String(form.get("summary") ?? "").trim() }
 						: {}),
-					body: toPortableTextFromEditor(body),
+					body: normalizePortableText(body),
 				},
 			});
 			await invalidateReviews(queryClient, reviewId);
@@ -355,10 +351,12 @@ function ReviewEditForm({
 								name="summary"
 							/>
 						</Field>
-						<Field required>
-							<FieldLabel>{t.ui.body}</FieldLabel>
-							<PortableTextEditor onChange={setBody} value={body} />
-						</Field>
+						<PortableTextEditor
+							label={t.ui.body}
+							onChange={setBody}
+							required
+							value={body}
+						/>
 					</FieldGroup>
 					{invalid && <p className="text-destructive text-sm">{t.errors.invalid}</p>}
 					<RequestFailure error={update.error} fallback={t.ui.retryLater} />
@@ -378,7 +376,7 @@ function ScorePanel({ targetId, realmId }: { targetId: string; realmId: string }
 	});
 	const setScore = usePutApiScoresByTargetId();
 	const queryClient = useQueryClient();
-	const { data: session } = authClient.useSession();
+	const { data: session } = useHydratedSession();
 	const { t } = useTranslation({ suspense: true });
 	const [score, setScoreValue] = useState("5");
 	const count = Number(aggregate.data?.totalCount ?? 0);
@@ -431,9 +429,9 @@ function ScorePanel({ targetId, realmId }: { targetId: string; realmId: string }
 						</Button>
 					</form>
 				) : (
-					<Button asChild size="sm" variant="outline">
-						<Link href="/login">{t.actions.login}</Link>
-					</Button>
+					<SignInButton size="sm" variant="outline">
+						{t.actions.login}
+					</SignInButton>
 				)}
 				<RequestFailure error={setScore.error} fallback={t.ui.retryLater} />
 			</CardContent>
@@ -446,7 +444,7 @@ function ReactionControls({ targetId }: { targetId: string }) {
 	const setReaction = usePutApiReactionsUnitsByUnitId();
 	const removeReaction = useDeleteApiReactionsUnitsByUnitId();
 	const queryClient = useQueryClient();
-	const { data: session } = authClient.useSession();
+	const { data: session } = useHydratedSession();
 	const { t } = useTranslation({ suspense: true });
 	const [selected, setSelected] = useState<"upvote" | "downvote" | null>(null);
 	const counts = new Map(reactions.data?.items.map((item) => [item.reaction, item.count]) ?? []);
@@ -496,9 +494,9 @@ function ReactionControls({ targetId }: { targetId: string }) {
 						</Button>
 					</>
 				) : (
-					<Button asChild size="sm" variant="outline">
-						<Link href="/login">{t.actions.login}</Link>
-					</Button>
+					<SignInButton size="sm" variant="outline">
+						{t.actions.login}
+					</SignInButton>
 				)}
 				<RequestFailure
 					error={reactions.error ?? setReaction.error ?? removeReaction.error}

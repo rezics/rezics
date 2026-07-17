@@ -88,15 +88,17 @@ tasks:
         cmds:
             - docker compose stop --timeout 30
 
-    dev:prepare:
-        internal: true
-        cmds:
-            - task: services:up
-            - task: main:db:migrate
-
     dev:
         desc: Enter full-stack development with initialized services, API, and web app.
         cmds:
             - defer: { task: services:stop }
-            - task: dev:prepare
-            - task --parallel --failfast main:dev web:dev
+            - task: services:up
+            - task: main:db:migrate
+            - task: dev:apps
+
+    dev:apps:
+        internal: true
+        deps:
+            - main:dev
+            - web:dev
+        failfast: true

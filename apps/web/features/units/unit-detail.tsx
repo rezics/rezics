@@ -1,6 +1,5 @@
 "use client";
 
-import { PortableText } from "@portabletext/react";
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
 import { BookOpen, Gamepad2, PlaySquare } from "lucide-react";
 import Link from "next/link";
@@ -8,11 +7,11 @@ import Link from "next/link";
 import { Card, CardContent } from "@rezics/ui";
 import { Badge } from "@rezics/ui";
 import { Button } from "@rezics/ui";
+import { PortableTextContent } from "@rezics/ui";
 import { DataList, DataListItem, DataListItemLabel, DataListItemValue } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
 import { selectLocalization } from "@/lib/localization";
-import { toPortableTextForReact } from "@/lib/portable-text";
 import { FavoriteToggle } from "@/features/collections/collections";
 import { ProgressRecordForm } from "@/features/progress/progress";
 import { UnitShelf } from "@/features/explore/unit-shelf";
@@ -93,7 +92,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 	] as const;
 
 	return (
-		<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-10">
+		<main className="mx-auto flex w-full max-w-[76rem] flex-col gap-8 px-4 py-6 sm:px-6 sm:py-10">
 			<section className="grid grid-cols-[7.5rem_minmax(0,1fr)] gap-4 border-b pb-8 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-6">
 				<div
 					className={
@@ -181,8 +180,9 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 							<CardContent className="p-6 leading-7 text-muted-foreground">
 								{localization?.description ? (
 									<div className="prose max-w-none">
-										<PortableText
-											value={toPortableTextForReact(localization.description)}
+										<PortableTextContent
+											value={localization.description}
+											variant="article"
 										/>
 									</div>
 								) : (

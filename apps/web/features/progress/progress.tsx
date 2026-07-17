@@ -32,11 +32,12 @@ import { Card, CardAction, CardContent, CardHeader } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
+import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
 import { useTranslation } from "@/i18n/client";
 import { hasErrorCode } from "@/i18n/errors";
 import { RequestFailure } from "@/i18n/request-failure";
-import { authClient } from "@/lib/auth-client";
+import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 const ProgressStatuses = ["backlog", "active", "paused", "completed", "dropped"] as const;
 type ProgressStatus = (typeof ProgressStatuses)[number];
@@ -159,7 +160,7 @@ function ProgressList() {
 }
 
 export function ProgressRecordForm({ unitId }: { unitId: string }) {
-	const { data: session } = authClient.useSession();
+	const { data: session } = useHydratedSession();
 	const record = useGetApiProgressByUnitId(
 		{ path: { unitId } },
 		{ query: { enabled: Boolean(session) } },
@@ -189,12 +190,7 @@ export function ProgressRecordForm({ unitId }: { unitId: string }) {
 			// The typed mutation state supplies the visible API error.
 		}
 	}
-	if (!session)
-		return (
-			<Button asChild variant="outline">
-				<Link href="/login">{t.actions.login}</Link>
-			</Button>
-		);
+	if (!session) return <SignInButton variant="outline">{t.actions.login}</SignInButton>;
 	const available = !record.isPending && (!record.isError || recordMissing);
 	return (
 		<Card>

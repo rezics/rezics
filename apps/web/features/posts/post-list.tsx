@@ -7,10 +7,10 @@ import {
 	useGetApiRecommendationsPostsByPostId,
 	usePutApiRecommendationsExclusionsByUnitId,
 } from "@rezics/openapi-tanstack-query";
-import { PortableText } from "@portabletext/react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import {
 	ArrowBigUp,
+	BookOpenIcon,
 	Bookmark,
 	ChevronRight,
 	Ellipsis,
@@ -19,7 +19,7 @@ import {
 	Share2,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
 	Alert,
@@ -40,29 +40,31 @@ import {
 	MenuContent,
 	MenuItem,
 	MenuTrigger,
+	PortableTextContent,
 	Skeleton,
 } from "@rezics/ui";
 import { useRecommendationTracking } from "@/features/recommendations/tracking";
 import { recommendationReasonLabel } from "@/features/recommendations/reason";
 import { invalidateRecommendationQueries } from "@/features/recommendations/query";
 import { useTranslation } from "@/i18n/client";
-import { authClient } from "@/lib/auth-client";
-import { toPortableTextForReact } from "@/lib/portable-text";
+import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 type FeedSort = "best" | "hot" | "new" | "top" | "rising";
 export type FeedPost = GetApiFeedStatus200["items"][number];
 
 export function PostList({
+	infinite = false,
 	realmId,
 	sort = "new",
 	personalized,
 }: {
+	infinite?: boolean;
 	realmId?: string;
 	sort?: FeedSort;
 	personalized?: boolean;
 }) {
 	const { t } = useTranslation({ suspense: true });
-	const { data: session } = authClient.useSession();
+	const { data: session } = useHydratedSession();
 	const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
 	const baseQuery = {
 		limit: 20,
@@ -82,6 +84,33 @@ export function PostList({
 		initialPageParam: "",
 		getNextPageParam: (page) => page.nextCursor ?? undefined,
 	});
+	const loadMoreRef = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		const element = loadMoreRef.current;
+		if (
+			!infinite ||
+			!element ||
+			!query.hasNextPage ||
+			query.isFetchingNextPage ||
+			query.isFetchNextPageError ||
+			typeof IntersectionObserver === "undefined"
+		)
+			return;
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (entry?.isIntersecting) void query.fetchNextPage();
+			},
+			{ rootMargin: "320px 0px" },
+		);
+		observer.observe(element);
+		return () => observer.disconnect();
+	}, [
+		infinite,
+		query.fetchNextPage,
+		query.hasNextPage,
+		query.isFetchingNextPage,
+		query.isFetchNextPageError,
+	]);
 	const items = query.data?.pages
 		.flatMap((page) => page.items)
 		.filter(({ id }) => !hidden.has(id));
@@ -100,7 +129,7 @@ export function PostList({
 				))}
 			</div>
 		);
-	if (query.isError)
+	if (query.isError && !query.data)
 		return (
 			<Alert className="m-3 sm:m-4" variant="destructive">
 				<AlertDescription>{t.state.error}</AlertDescription>
@@ -130,23 +159,50 @@ export function PostList({
 					onHiddenChange={(value) => setItemHidden(post.id, value)}
 				/>
 			))}
-			{query.hasNextPage && (
-				<Button
-					className="mx-auto mt-2 w-fit"
-					isLoading={query.isFetchingNextPage}
-					onClick={() => void query.fetchNextPage()}
-					variant="outline"
-				>
-					{t.actions.loadMore}
-				</Button>
-			)}
+			{query.isFetchNextPageError ? (
+				<Alert variant="destructive">
+					<AlertDescription>{t.state.error}</AlertDescription>
+					<AlertAction>
+						<Button
+							size="sm"
+							variant="ghost"
+							onClick={() => void query.fetchNextPage()}
+						>
+							{t.actions.retry}
+						</Button>
+					</AlertAction>
+				</Alert>
+			) : query.hasNextPage ? (
+				infinite ? (
+					<div
+						aria-live="polite"
+						className="grid min-h-10 place-items-center"
+						ref={loadMoreRef}
+					>
+						{query.isFetchingNextPage && (
+							<span className="text-muted-foreground text-sm">
+								{t.actions.loadMore}
+							</span>
+						)}
+					</div>
+				) : (
+					<Button
+						className="mx-auto mt-2 w-fit"
+						isLoading={query.isFetchingNextPage}
+						onClick={() => void query.fetchNextPage()}
+						variant="outline"
+					>
+						{t.actions.loadMore}
+					</Button>
+				)
+			) : null}
 		</div>
 	);
 }
 
 export function RelatedPostRecommendations({ postId }: { postId: string }) {
 	const { t } = useTranslation({ suspense: true });
-	const { data: session } = authClient.useSession();
+	const { data: session } = useHydratedSession();
 	const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
 	const query = useGetApiRecommendationsPostsByPostId({
 		path: { postId },
@@ -233,11 +289,14 @@ export function PostListItem({
 	return (
 		<Card
 			asChild
-			className="group [--space:--spacing(4)] [contain-intrinsic-size:auto_20rem] [content-visibility:auto] transition-colors hover:border-primary/25 sm:[--space:--spacing(5)]"
+			className="group w-full min-w-0 [--space:--spacing(4)] transition-colors hover:border-primary/25 sm:[--space:--spacing(5)]"
 		>
 			<article ref={elementRef}>
 				<CardContent className="flex gap-3">
-					<Link className="shrink-0" href={`/users/${post.authorId}`}>
+					<Link
+						className="grid size-11 shrink-0 place-items-center sm:size-9"
+						href={`/users/${post.authorId}`}
+					>
 						<Avatar className="size-9">
 							<AvatarFallback className="bg-accent text-accent-foreground">
 								{initial}
@@ -250,7 +309,7 @@ export function PostListItem({
 								<Badge variant="secondary">{t.posts.replyPost}</Badge>
 							)}
 							<Link
-								className="text-foreground font-semibold hover:underline"
+								className="inline-flex min-h-6 items-center text-foreground font-semibold hover:underline"
 								href={`/users/${post.authorId}`}
 							>
 								{post.authorName ?? t.posts.unknownAuthor}
@@ -261,7 +320,7 @@ export function PostListItem({
 								<>
 									<span>·</span>
 									<Link
-										className="text-primary font-medium hover:underline"
+										className="inline-flex min-h-6 items-center text-primary font-medium hover:underline"
 										href={`/realms/${post.realmId}`}
 									>
 										r/community
@@ -273,7 +332,7 @@ export function PostListItem({
 									<MenuTrigger asChild>
 										<Button
 											aria-label={t.feed.recommendationMenu}
-											className="ms-auto"
+											className="ms-auto size-11 sm:size-6"
 											pill
 											size="icon-xs"
 											variant="ghost"
@@ -299,7 +358,7 @@ export function PostListItem({
 						)}
 						{post.replyContext && (
 							<Link
-								className="text-muted-foreground mt-2 block truncate border-s-2 ps-2 text-xs hover:text-foreground"
+								className="text-muted-foreground mt-2 flex min-h-6 items-center truncate border-s-2 ps-2 text-xs hover:text-foreground"
 								href={`/posts/${post.replyContext.rootPostId}`}
 							>
 								{t.feed.replyingIn} {post.replyContext.title ?? t.posts.untitled}
@@ -311,8 +370,8 @@ export function PostListItem({
 									? t.posts.replyPost
 									: (post.title ?? t.posts.untitled)}
 							</h2>
-							<div className="prose prose-sm text-muted-foreground mt-2 line-clamp-3 max-w-none leading-6">
-								<PortableText value={toPortableTextForReact(post.body)} />
+							<div className="prose prose-sm text-muted-foreground mt-2 max-w-none leading-6">
+								<PortableTextContent value={post.body} variant="preview" />
 							</div>
 						</Link>
 						{post.subjectId && (
@@ -333,7 +392,7 @@ export function PostListItem({
 												}}
 											/>
 										) : (
-											"R"
+											<BookOpenIcon aria-hidden className="size-4" />
 										)}
 									</ItemMedia>
 									<ItemContent className="min-w-0">
@@ -352,20 +411,43 @@ export function PostListItem({
 							</Item>
 						)}
 						<div className="mt-3 flex items-center justify-between gap-1 border-t pt-2">
-							<Button className="text-xs" pill size="sm" variant="secondary">
+							<Button
+								className="min-h-11 text-xs sm:min-h-7"
+								pill
+								size="sm"
+								variant="secondary"
+							>
 								<ArrowBigUp aria-hidden data-icon="inline-start" />
 								{Number(post.reactions.upvote) - Number(post.reactions.downvote)}
 							</Button>
-							<Button asChild className="text-xs" pill size="sm" variant="ghost">
+							<Button
+								asChild
+								className="min-h-11 text-xs sm:min-h-7"
+								pill
+								size="sm"
+								variant="ghost"
+							>
 								<Link href={`/posts/${post.id}`} onClick={trackOpen}>
 									<MessageCircle aria-hidden data-icon="inline-start" />
 									{post.replyCount}
 								</Link>
 							</Button>
-							<Button aria-label="Save" pill size="icon-sm" variant="ghost">
+							<Button
+								aria-label="Save"
+								className="size-11 sm:size-7"
+								pill
+								size="icon-sm"
+								variant="ghost"
+							>
 								<Bookmark aria-hidden />
 							</Button>
-							<Button aria-label="Share" pill size="icon-sm" variant="ghost">
+							<Button
+								aria-label="Share"
+								className="size-11 sm:size-7"
+								pill
+								size="icon-sm"
+								variant="ghost"
+							>
 								<Share2 aria-hidden />
 							</Button>
 						</div>

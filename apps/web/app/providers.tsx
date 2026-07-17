@@ -2,12 +2,15 @@
 
 import { PostApiSearchByIndexIndex, postApiSearchByIndex } from "@rezics/openapi-tanstack-query";
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { UiProvider, type EntitySearch } from "@rezics/ui";
 
 import { authClient } from "@/lib/auth-client";
+import { AuthPortalProvider } from "@/features/auth/auth-portal";
 import { useTranslation, TranslationProvider } from "@/i18n/client";
 import { shouldRetry } from "@/lib/query-policy";
+import { urlStateOptions } from "@/lib/search-params";
 import { getErrorText } from "@/i18n/errors";
 import { PwaLifecycle } from "./pwa-lifecycle";
 
@@ -52,6 +55,15 @@ function TranslatedUiProvider({ children }: { children: ReactNode }) {
 					numberedList: t.editor.numberedList,
 					link: t.editor.link,
 					linkPrompt: t.editor.linkPrompt,
+					linkUrl: t.editor.linkUrl,
+					openInNewTab: t.editor.openInNewTab,
+					addLink: t.editor.addLink,
+					removeLink: t.editor.removeLink,
+					invalidLink: t.editor.invalidLink,
+					undo: t.editor.undo,
+					redo: t.editor.redo,
+					style: t.editor.style,
+					preview: t.editor.preview,
 				},
 			}}
 			searchEntities={searchEntities}
@@ -91,13 +103,17 @@ export function AppProviders({
 	);
 
 	return (
-		<TranslationProvider tags={localeTags}>
-			<TranslatedUiProvider>
-				<QueryClientProvider client={queryClient}>
-					<SessionCacheBoundary>{children}</SessionCacheBoundary>
-				</QueryClientProvider>
-				<PwaLifecycle />
-			</TranslatedUiProvider>
-		</TranslationProvider>
+		<NuqsAdapter defaultOptions={urlStateOptions}>
+			<TranslationProvider tags={localeTags}>
+				<TranslatedUiProvider>
+					<QueryClientProvider client={queryClient}>
+						<SessionCacheBoundary>
+							<AuthPortalProvider>{children}</AuthPortalProvider>
+						</SessionCacheBoundary>
+					</QueryClientProvider>
+					<PwaLifecycle />
+				</TranslatedUiProvider>
+			</TranslationProvider>
+		</NuqsAdapter>
 	);
 }

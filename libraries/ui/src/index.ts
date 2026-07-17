@@ -97,7 +97,7 @@ export * from "./custom/app-shell";
 export * from "./custom/entity-picker";
 export * from "./custom/logo";
 export * from "./custom/page-heading";
-export * from "./custom/portable-text-editor";
+export * from "./custom/portable-text-content";
 export * from "./custom/query-state";
 export * from "./custom/ui-provider";
 export * from "./custom/unit-list";

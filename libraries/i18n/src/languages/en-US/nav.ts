@@ -7,4 +7,7 @@ export default {
 	favorites: "Saved",
 	progress: "Progress",
 	me: "Me",
+	skipToContent: "Skip to main content",
+	navigation: "Navigation",
+	content: "Content",
 } satisfies typeof import("../zh-CN/nav").default;

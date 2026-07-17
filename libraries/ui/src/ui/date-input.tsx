@@ -159,9 +159,7 @@ const DateInputSegment = (props: React.ComponentProps<typeof ArkDateInput.Segmen
 				"outline-none",
 				"data-readonly:cursor-default",
 				"group-aria-invalid/date-input:text-destructive group-data-invalid/date-input:text-destructive",
-				"not-data-[type=literal]:focus:group-data-invalid/date-input:bg-destructive not-data-[type=literal]:focus:group-data-invalid/date-input:text-white",
-				"dark:group-data-invalid/date-input:text-destructive-foreground dark:group-aria-invalid/date-input:text-destructive-foreground",
-				"dark:not-data-[type=literal]:focus:group-data-invalid/date-input:bg-destructive-foreground dark:not-data-[type=literal]:focus:group-data-invalid/date-input:text-white",
+				"not-data-[type=literal]:focus:group-data-invalid/date-input:bg-destructive not-data-[type=literal]:focus:group-data-invalid/date-input:text-destructive-foreground",
 				className,
 			)}
 			data-slot="date-input-segment"

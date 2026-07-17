@@ -1,12 +1,19 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import socialCard from "@rezics/brand/social-card.png?url&no-inline";
 
 import { AppProviders } from "./providers";
 import { getLocaleTags, getTranslation } from "@/i18n/server";
+import { appTheme, appThemeCss } from "@/lib/theme";
 
 import "./styles.css";
 
+const frontendOrigin =
+	process.env.FRONTEND_URL ??
+	process.env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",").find((origin) => origin.trim());
+
 export const metadata: Metadata = {
+	metadataBase: new URL(frontendOrigin?.trim() || "http://localhost:3000"),
 	title: "REZICS",
 	description: "让对象、关系、讨论与知识一起生长。",
 	applicationName: "REZICS",
@@ -23,14 +30,21 @@ export const metadata: Metadata = {
 		],
 		apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
 	},
+	openGraph: {
+		title: "REZICS",
+		description: "让作品、社区与深度讨论彼此连接。",
+		images: [{ url: socialCard, width: 1200, height: 630, alt: "REZICS" }],
+	},
+	twitter: {
+		card: "summary_large_image",
+		title: "REZICS",
+		description: "让作品、社区与深度讨论彼此连接。",
+		images: [socialCard],
+	},
 };
 
 export const viewport: Viewport = {
 	colorScheme: "light dark",
-	themeColor: [
-		{ media: "(prefers-color-scheme: light)", color: "#fcfbfa" },
-		{ media: "(prefers-color-scheme: dark)", color: "#171513" },
-	],
 	viewportFit: "cover",
 };
 
@@ -40,9 +54,16 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 	return (
 		<html lang={locale.current} suppressHydrationWarning>
 			<head>
+				<style>{appThemeCss}</style>
+				<meta
+					content={appTheme.light.background}
+					data-dark={appTheme.dark.background}
+					data-light={appTheme.light.background}
+					name="theme-color"
+				/>
 				<script
 					dangerouslySetInnerHTML={{
-						__html: `(function(){try{var t=localStorage.getItem('rezics-theme');var d=t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d)}catch(e){}})()`,
+						__html: `(function(){try{var t=localStorage.getItem('rezics-theme');var d=t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=d?m.dataset.dark:m.dataset.light}catch(e){}})()`,
 					}}
 				/>
 			</head>

@@ -1,5 +1,1 @@
-<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
-  <defs><linearGradient id="surface" x1="92" y1="932" x2="932" y2="92" gradientUnits="userSpaceOnUse"><stop stop-color="#ef4444"/><stop offset="1" stop-color="#ef44ff"/></linearGradient></defs>
-  <rect width="1024" height="1024" rx="224" fill="url(#surface)"/>
-  <path fill="#fff" d="m176 560 432-288-48 192 288-192v192L416 752l48-192-288 192Z"/>
-</svg>
+../../../../packages/brand/dist/app-icon.svg

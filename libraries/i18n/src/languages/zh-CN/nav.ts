@@ -7,4 +7,7 @@ export default {
 	favorites: "收藏",
 	progress: "进度",
 	me: "我的",
+	skipToContent: "跳到主要内容",
+	navigation: "导航",
+	content: "内容",
 };

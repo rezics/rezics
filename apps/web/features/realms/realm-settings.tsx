@@ -18,14 +18,13 @@ import {
 	type GetApiRealmsByRealmIdRulesStatus200,
 	type GetApiRealmsByRealmIdStatus200,
 } from "@rezics/openapi-tanstack-query";
-import type { PortableTextBlock } from "@portabletext/editor";
+import { normalizePortableText, type PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { EntityPicker } from "@rezics/ui";
 import { PageHeading } from "@rezics/ui";
-import { PortableTextEditor } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
@@ -36,11 +35,11 @@ import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Skeleton } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
+import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { invalidatePostQueries } from "@/features/posts/query";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { selectLocalization } from "@/lib/localization";
-import { toPortableTextFromEditor, toPortableTextForEditor } from "@/lib/portable-text";
 import { canManageRealm } from "./realm-permissions";
 import { invalidateRealmDetails } from "./query";
 
@@ -49,7 +48,7 @@ const MemberStates = ["active", "pending", "muted", "removed", "banned"] as cons
 const ModerationStates = ["pending", "approved", "removed"] as const;
 
 type PickedEntity = { id: string; label: string };
-type RuleDraft = { language: string; title: string; content: PortableTextBlock[] };
+type RuleDraft = { language: string; title: string; content: PortableTextValue };
 type MemberRole = (typeof MemberRoles)[number];
 type MemberState = (typeof MemberStates)[number];
 
@@ -390,7 +389,7 @@ function RealmRules({
 				? data.items.map((rule) => ({
 						language: rule.language,
 						title: rule.title,
-						content: toPortableTextForEditor(rule.content),
+						content: normalizePortableText(rule.content),
 					}))
 				: [{ language: locale.target, title: "", content: [] }],
 		);
@@ -427,7 +426,7 @@ function RealmRules({
 					rules: rules.map((rule) => ({
 						language: rule.language,
 						title: rule.title.trim(),
-						content: toPortableTextFromEditor(rule.content),
+						content: normalizePortableText(rule.content),
 					})),
 				},
 			},
@@ -522,21 +521,17 @@ function RealmRules({
 										{t.realms.removeRule}
 									</Button>
 								</div>
-								<Field>
-									<FieldLabel>{t.realms.ruleContent}</FieldLabel>
-									<PortableTextEditor
-										value={rule.content}
-										onChange={(content) =>
-											setDrafts((current) =>
-												current?.map((item, itemIndex) =>
-													itemIndex === index
-														? { ...item, content }
-														: item,
-												),
-											)
-										}
-									/>
-								</Field>
+								<PortableTextEditor
+									label={t.realms.ruleContent}
+									value={rule.content}
+									onChange={(content) =>
+										setDrafts((current) =>
+											current?.map((item, itemIndex) =>
+												itemIndex === index ? { ...item, content } : item,
+											),
+										)
+									}
+								/>
 							</div>
 						))}
 						<div className="flex flex-wrap gap-2">

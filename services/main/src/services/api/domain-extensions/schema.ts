@@ -1,7 +1,7 @@
 import { JsonValue } from "@rezics/portable-text";
 import { t } from "elysia";
 
-import { DateTime, LocalizationInput, Uuid } from "../schema";
+import { DateTime, LanguageTag, LocalizationInput, Uuid } from "../schema";
 
 export const CreateSeriesBody = t.Object(
 	{
@@ -30,7 +30,7 @@ export const SystemRequirementBody = t.Object(
 	{
 		platformEntityId: t.Optional(t.Nullable(Uuid)),
 		tier: t.String({ minLength: 1, maxLength: 32 }),
-		language: t.Optional(t.Nullable(t.String({ minLength: 2, maxLength: 35 }))),
+		language: t.Optional(t.Nullable(LanguageTag)),
 		sourceLinkId: t.Optional(t.Nullable(Uuid)),
 		hardware: t.Record(t.String(), JsonValue),
 		rawText: t.Optional(t.Nullable(t.String({ maxLength: 20_000 }))),

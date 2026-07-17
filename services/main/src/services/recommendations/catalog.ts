@@ -43,7 +43,7 @@ function eligibleCatalogUnit(input: {
 		lte(unit.createdAt, input.asOf),
 		input.seedUnitId ? ne(unit.id, input.seedUnitId) : undefined,
 		input.viewer.contentRatings.length
-			? sql`${unit.contentRating}::text = any(${input.viewer.contentRatings}::text[])`
+			? inArray(unit.contentRating, input.viewer.contentRatings)
 			: undefined,
 		input.viewer.profileId
 			? sql`(${unit.id} = ${input.afterId ?? null}::uuid or not exists (

@@ -36,6 +36,12 @@
 			"sourceType": "github",
 			"skillPath": "skills/typesafe/SKILL.md",
 			"computedHash": "dfb300d2acdc1e9c2ab3bc92a3168d37e17210d2e826f755365ff1d2d8092b45"
+		},
+		"ux": {
+			"source": "nmnmcc/skills",
+			"sourceType": "github",
+			"skillPath": "skills/ux/SKILL.md",
+			"computedHash": "089b2827a574e1ddfbcb99a4f1590ef05b5368ff99336bd85809e7be94352917"
 		}
 	}
 }

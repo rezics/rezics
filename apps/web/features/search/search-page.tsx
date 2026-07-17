@@ -1,19 +1,68 @@
 "use client";
 
-import { postApiSearch, type PostApiSearchStatus200 } from "@rezics/openapi-tanstack-query";
-import { useQuery } from "@tanstack/react-query";
-import { Search } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Languages, type LanguageTag } from "@rezics/i18n";
+import {
+	postApiSearchByIndex,
+	type PostApiSearchByIndexIndex as SearchCategory,
+	type PostApiSearchByIndexStatus200,
+} from "@rezics/openapi-tanstack-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { Search, SlidersHorizontal } from "lucide-react";
+import { useQueryStates } from "nuqs";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import { PageHeading } from "@rezics/ui";
-import { UnitList } from "@rezics/ui";
-import { Button } from "@rezics/ui";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@rezics/ui";
+import {
+	Badge,
+	buttonVariants,
+	Button,
+	Checkbox,
+	CheckboxGroup,
+	Combobox,
+	ComboboxContent,
+	ComboboxEmpty,
+	ComboboxGroup,
+	ComboboxInput,
+	ComboboxItem,
+	ComboboxList,
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleIndicator,
+	CollapsibleTrigger,
+	createListCollection,
+	Field,
+	FieldGroup,
+	FieldLabel,
+	FieldLegend,
+	FieldSet,
+	InputGroup,
+	InputGroupAddon,
+	InputGroupInput,
+	PageHeading,
+	Spinner,
+	UnitList,
+} from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { searchParamsParsers, SearchScopes } from "@/lib/search-params";
 
-type SearchHit = PostApiSearchStatus200["groups"][number]["hits"][number];
+type SearchHit = PostApiSearchByIndexStatus200["hits"][number];
+
+const SearchCategories = SearchScopes;
+const SearchPageSize = 8;
+const AllLanguagesValue = "all";
+
+type SearchLanguage = LanguageTag | "";
+type ComboboxOption = { label: string; value: string };
+type SearchPageParam = { category: SearchCategory; offset: number };
+
+function readSearchLanguage(value: string | null): SearchLanguage {
+	return Languages.find(({ tag }) => tag === value)?.tag ?? "";
+}
+
+function readTotal(value: string | number): number {
+	const total = Number(value);
+	return Number.isSafeInteger(total) && total >= 0 ? total : 0;
+}
 
 function searchHitHref(index: string, hit: SearchHit) {
 	switch (index) {
@@ -42,73 +91,304 @@ function searchHitHref(index: string, hit: SearchHit) {
 
 export function SearchPage() {
 	const { t } = useTranslation({ suspense: true });
-	const params = useSearchParams();
-	const router = useRouter();
-	const routeQuery = params.get("q")?.trim() ?? "";
+	const [route, setRoute] = useQueryStates(searchParamsParsers);
+	const routeQuery = route.q.trim();
+	const routeCategories = route.scope;
+	const routeLanguage = route.language ?? "";
+	const hasSearch =
+		Boolean(routeQuery) ||
+		routeCategories.length < SearchCategories.length ||
+		Boolean(routeLanguage);
 	const [input, setInput] = useState(routeQuery);
-	useEffect(() => setInput(routeQuery), [routeQuery]);
-	const search = useQuery({
-		queryKey: ["search", routeQuery],
-		queryFn: async ({ signal }) => {
-			const { data } = await postApiSearch({
-				body: { query: routeQuery, limitPerIndex: 8 },
-				signal,
-			});
-			return data;
+	const [filtersOpen, setFiltersOpen] = useState(
+		routeCategories.length < SearchCategories.length || Boolean(routeLanguage),
+	);
+	const loadMoreRef = useRef<HTMLDivElement>(null);
+	const languageOptions = useMemo<ComboboxOption[]>(
+		() => [
+			{ label: t.search.allLanguages, value: AllLanguagesValue },
+			{ label: t.locale.zh, value: "zh-CN" },
+			{ label: t.locale.en, value: "en-US" },
+		],
+		[t.locale.en, t.locale.zh, t.search.allLanguages],
+	);
+	const languageCollection = useMemo(
+		() =>
+			createListCollection<ComboboxOption>({
+				items: languageOptions,
+				itemToString: (item) => item.label,
+				itemToValue: (item) => item.value,
+			}),
+		[languageOptions],
+	);
+	useEffect(() => {
+		setInput(routeQuery);
+	}, [routeQuery]);
+	const search = useInfiniteQuery({
+		queryKey: ["search", routeQuery, routeCategories, routeLanguage],
+		queryFn: async ({ pageParam, signal }) => {
+			const groups = await Promise.all(
+				pageParam.map(async ({ category, offset }) => {
+					const { data } = await postApiSearchByIndex({
+						path: { index: category },
+						body: {
+							query: routeQuery,
+							offset,
+							limit: SearchPageSize,
+							...(routeLanguage ? { Languages: [routeLanguage] } : {}),
+						},
+						signal,
+					});
+					const nextOffset = offset + data.hits.length;
+					return {
+						index: category,
+						hits: data.hits,
+						nextOffset:
+							data.hits.length > 0 && nextOffset < readTotal(data.total)
+								? nextOffset
+								: undefined,
+					};
+				}),
+			);
+			return { groups };
 		},
-		enabled: Boolean(routeQuery),
+		initialPageParam: routeCategories.map((category) => ({ category, offset: 0 })),
+		getNextPageParam: (page) => {
+			const nextPage: SearchPageParam[] = page.groups.flatMap(({ index, nextOffset }) =>
+				nextOffset === undefined ? [] : [{ category: index, offset: nextOffset }],
+			);
+			return nextPage.length ? nextPage : undefined;
+		},
+		enabled: hasSearch,
 	});
+	useEffect(() => {
+		const element = loadMoreRef.current;
+		if (
+			!element ||
+			!search.hasNextPage ||
+			search.isFetchingNextPage ||
+			search.isFetchNextPageError ||
+			typeof IntersectionObserver === "undefined"
+		)
+			return;
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (entry?.isIntersecting) void search.fetchNextPage();
+			},
+			{ rootMargin: "320px 0px" },
+		);
+		observer.observe(element);
+		return () => observer.disconnect();
+	}, [
+		search.fetchNextPage,
+		search.hasNextPage,
+		search.isFetchingNextPage,
+		search.isFetchNextPageError,
+	]);
+	const categoryLabels: Record<SearchCategory, string> = {
+		units: t.nav.units,
+		users: t.ui.profile,
+		entity: t.catalog.entities,
+		tags: t.catalog.tags,
+		posts: t.posts.title,
+		realms: t.realms.title,
+		collections: t.engagement.collections,
+		reviews: t.engagement.reviews,
+		polls: t.engagement.polls,
+	};
+	const activeFilterCount =
+		Number(routeCategories.length < SearchCategories.length) + Number(Boolean(routeLanguage));
+	const resultItems = search.data?.pages.flatMap((page) =>
+		page.groups.flatMap((group) =>
+			group.hits.map((hit) => ({
+				id: hit.id,
+				slug: hit.slug,
+				title: hit.titles[0] ?? hit.name ?? null,
+				summary: hit.summaries[0] ?? hit.summary,
+				href: searchHitHref(group.index, hit),
+			})),
+		),
+	);
 	return (
 		<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6">
 			<PageHeading title={t.search.title} />
 			<form
-				className="flex gap-2"
+				className="flex flex-col gap-3"
 				onSubmit={(event) => {
 					event.preventDefault();
-					const nextQuery = input.trim();
-					const next = new URLSearchParams(params.toString());
-					if (nextQuery) next.set("q", nextQuery);
-					else next.delete("q");
-					router.replace(next.size ? `/search?${next}` : "/search");
+					void setRoute({ q: input.trim() }, { history: "push" });
 				}}
 			>
-				<InputGroup className="min-w-0 flex-1">
-					<InputGroupAddon align="inline-start">
-						<Search aria-hidden className="size-4" />
-					</InputGroupAddon>
-					<InputGroupInput
-						aria-label={t.search.placeholder}
-						value={input}
-						onChange={(event) => setInput(event.currentTarget.value)}
-						placeholder={t.search.placeholder}
-						type="search"
-					/>
-				</InputGroup>
-				<Button type="submit" isLoading={search.isFetching}>
-					{t.actions.search}
-				</Button>
+				<FieldGroup>
+					<Field>
+						<FieldLabel className="sr-only">{t.search.placeholder}</FieldLabel>
+						<div className="flex flex-col gap-3 sm:flex-row">
+							<InputGroup className="h-14 min-w-0 sm:flex-1" size="lg">
+								<InputGroupAddon align="inline-start">
+									<Search aria-hidden />
+								</InputGroupAddon>
+								<InputGroupInput
+									aria-label={t.search.placeholder}
+									className="h-full"
+									maxLength={500}
+									value={input}
+									onChange={(event) => setInput(event.currentTarget.value)}
+									placeholder={t.search.placeholder}
+									type="search"
+								/>
+							</InputGroup>
+							<Button
+								className="h-14"
+								type="submit"
+								isLoading={search.isFetching && !search.isFetchingNextPage}
+								size="xl"
+							>
+								{t.actions.search}
+							</Button>
+						</div>
+					</Field>
+					<Collapsible
+						onOpenChange={({ open }) => setFiltersOpen(open)}
+						open={filtersOpen}
+					>
+						<CollapsibleTrigger
+							className={buttonVariants({ size: "sm", variant: "ghost" })}
+							type="button"
+						>
+							<SlidersHorizontal data-icon="inline-start" />
+							{t.search.advancedFilters}
+							{activeFilterCount > 0 && (
+								<Badge pill size="sm" variant="secondary">
+									{activeFilterCount}
+								</Badge>
+							)}
+							<CollapsibleIndicator />
+						</CollapsibleTrigger>
+						<CollapsibleContent className="pt-3">
+							<FieldGroup className="rounded-xl border bg-card p-4 sm:p-5">
+								<FieldSet>
+									<FieldLegend variant="label">{t.search.scope}</FieldLegend>
+									<CheckboxGroup className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+										{SearchCategories.map((category) => {
+											const checked = routeCategories.includes(category);
+											const disabled =
+												checked && routeCategories.length === 1;
+											return (
+												<Field
+													disabled={disabled}
+													key={category}
+													orientation="horizontal"
+												>
+													<Checkbox
+														checked={checked}
+														disabled={disabled}
+														onCheckedChange={({
+															checked: nextChecked,
+														}) => {
+															const scope = nextChecked
+																? SearchCategories.filter(
+																		(candidate) =>
+																			candidate ===
+																				category ||
+																			routeCategories.includes(
+																				candidate,
+																			),
+																	)
+																: routeCategories.filter(
+																		(candidate) =>
+																			candidate !== category,
+																	);
+															void setRoute({ scope });
+														}}
+													/>
+													<FieldLabel className="font-normal">
+														{categoryLabels[category]}
+													</FieldLabel>
+												</Field>
+											);
+										})}
+									</CheckboxGroup>
+								</FieldSet>
+								<Field className="max-w-md">
+									<FieldLabel>{t.search.language}</FieldLabel>
+									<Combobox
+										collection={languageCollection}
+										onValueChange={({ value }) => {
+											const language = readSearchLanguage(value[0] ?? null);
+											void setRoute({ language: language || null });
+										}}
+										value={[routeLanguage || AllLanguagesValue]}
+									>
+										<ComboboxInput aria-label={t.search.language} />
+										<ComboboxContent>
+											<ComboboxEmpty>{t.search.empty}</ComboboxEmpty>
+											<ComboboxList>
+												<ComboboxGroup>
+													{languageOptions.map((option) => (
+														<ComboboxItem
+															item={option}
+															key={option.value}
+														>
+															{option.label}
+														</ComboboxItem>
+													))}
+												</ComboboxGroup>
+											</ComboboxList>
+										</ComboboxContent>
+									</Combobox>
+								</Field>
+								<div className="flex justify-end">
+									<Button
+										onClick={() => {
+											void setRoute({
+												language: null,
+												scope: [...SearchCategories],
+											});
+										}}
+										size="sm"
+										type="button"
+										variant="ghost"
+									>
+										{t.search.resetFilters}
+									</Button>
+								</div>
+							</FieldGroup>
+						</CollapsibleContent>
+					</Collapsible>
+				</FieldGroup>
 			</form>
-			{search.isError ? (
+			{search.isError && !search.data ? (
 				<RequestFailure error={search.error} />
-			) : routeQuery && search.data ? (
-				<UnitList
-					items={search.data.groups.flatMap((group) =>
-						group.hits.map((hit) => ({
-							id: hit.id,
-							slug: hit.slug,
-							title: hit.titles[0] ?? hit.name ?? null,
-							summary: hit.summaries[0] ?? hit.summary,
-							href: searchHitHref(group.index, hit),
-						})),
+			) : hasSearch ? (
+				<>
+					{search.data && resultItems?.length === 0 && !search.isFetching ? (
+						<p className="text-muted-foreground text-sm">{t.search.empty}</p>
+					) : (
+						<UnitList items={resultItems} pending={search.isPending} error={false} />
 					)}
-					pending={search.isPending}
-					error={false}
-				/>
-			) : (
-				!search.isFetching && (
-					<p className="text-muted-foreground text-sm">{t.search.empty}</p>
-				)
-			)}
+					{search.hasNextPage && !search.isFetchNextPageError && (
+						<div
+							aria-live="polite"
+							className="grid min-h-10 place-items-center"
+							ref={loadMoreRef}
+						>
+							{search.isFetchingNextPage && <Spinner aria-label={t.state.loading} />}
+						</div>
+					)}
+					{search.isFetchNextPageError && (
+						<div className="flex flex-col items-start gap-3">
+							<RequestFailure error={search.error} />
+							<Button
+								onClick={() => void search.fetchNextPage()}
+								size="sm"
+								variant="outline"
+							>
+								{t.actions.retry}
+							</Button>
+						</div>
+					)}
+				</>
+			) : null}
 		</main>
 	);
 }

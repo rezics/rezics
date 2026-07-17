@@ -6994,6 +6994,8 @@ export type PostApiSeriesBody = {
 	 */
 	localization: {
 		/**
+		 * @description
+		 * Format: `bcp-47`
 		 * @minLength 2
 		 * @maxLength 35
 		 * @type string
@@ -7649,6 +7651,8 @@ export type PostApiZonesBody = {
 	 */
 	localization: {
 		/**
+		 * @description
+		 * Format: `bcp-47`
 		 * @minLength 2
 		 * @maxLength 35
 		 * @type string
@@ -11571,6 +11575,8 @@ export type PostApiUnitsByTypeBody = {
 	 */
 	localization: {
 		/**
+		 * @description
+		 * Format: `bcp-47`
 		 * @minLength 2
 		 * @maxLength 35
 		 * @type string
@@ -13005,6 +13011,8 @@ export type PatchApiUnitsByTypeByUnitIdBody = {
 	 */
 	unit?: {
 		/**
+		 * @description
+		 * Format: `bcp-47`
 		 * @minLength 2
 		 * @maxLength 35
 		 * @type string | undefined
@@ -13265,6 +13273,8 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguagePath = {
 	 */
 	unitId: string;
 	/**
+	 * @description
+	 * Format: `bcp-47`
 	 * @minLength 2
 	 * @maxLength 35
 	 * @type string
@@ -15445,6 +15455,8 @@ export type PostApiEntitiesBody = {
 	 */
 	localization: {
 		/**
+		 * @description
+		 * Format: `bcp-47`
 		 * @minLength 2
 		 * @maxLength 35
 		 * @type string
@@ -15919,6 +15931,8 @@ export type PostApiTagsBody = {
 	 */
 	localization: {
 		/**
+		 * @description
+		 * Format: `bcp-47`
 		 * @minLength 2
 		 * @maxLength 35
 		 * @type string
@@ -16217,6 +16231,8 @@ export type PostApiUnitsByTypeByUnitIdAliasesBody = {
 	 */
 	value: string;
 	/**
+	 * @description
+	 * Format: `bcp-47`
 	 * @minLength 2
 	 * @maxLength 35
 	 * @type string | undefined
@@ -18031,6 +18047,8 @@ export type PostApiUnitsBookByUnitIdContentNodesBody = {
 	 */
 	title: string;
 	/**
+	 * @description
+	 * Format: `bcp-47`
 	 * @minLength 2
 	 * @maxLength 35
 	 * @type string
@@ -18369,6 +18387,8 @@ export type GetApiChaptersByChapterIdPath = {
  */
 export type GetApiChaptersByChapterIdQuery = {
 	/**
+	 * @description
+	 * Format: `bcp-47`
 	 * @minLength 2
 	 * @maxLength 35
 	 * @type string
@@ -18592,6 +18612,8 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentPath = {
 	 */
 	chapterId: string;
 	/**
+	 * @description
+	 * Format: `bcp-47`
 	 * @minLength 2
 	 * @maxLength 35
 	 * @type string
@@ -19686,6 +19708,8 @@ export type PostApiCollectionsBody = {
 	 */
 	localization: {
 		/**
+		 * @description
+		 * Format: `bcp-47`
 		 * @minLength 2
 		 * @maxLength 35
 		 * @type string
@@ -20337,6 +20361,8 @@ export type PatchApiCollectionsByCollectionIdBody = {
 	 */
 	localization?: {
 		/**
+		 * @description
+		 * Format: `bcp-47`
 		 * @minLength 2
 		 * @maxLength 35
 		 * @type string
@@ -21240,6 +21266,8 @@ export type PostApiReviewsBody = {
 	 */
 	realmId?: string;
 	/**
+	 * @description
+	 * Format: `bcp-47`
 	 * @minLength 2
 	 * @maxLength 35
 	 * @type string
@@ -21699,6 +21727,8 @@ export type PatchApiReviewsByReviewIdStatus500 = InternalError;
  */
 export type PatchApiReviewsByReviewIdBody = {
 	/**
+	 * @description
+	 * Format: `bcp-47`
 	 * @minLength 2
 	 * @maxLength 35
 	 * @type string
@@ -22736,6 +22766,8 @@ export type PostApiPollsBody = {
 	 */
 	question: string;
 	/**
+	 * @description
+	 * Format: `bcp-47`
 	 * @minLength 2
 	 * @maxLength 35
 	 * @type string
@@ -23840,6 +23872,8 @@ export type PostApiPostsBody = {
 		  }
 	)[];
 	/**
+	 * @description
+	 * Format: `bcp-47`
 	 * @minLength 2
 	 * @maxLength 35
 	 * @type string
@@ -24910,6 +24944,8 @@ export type PostApiPostsByPostIdRepliesBody = {
 	 */
 	realmId?: string;
 	/**
+	 * @description
+	 * Format: `bcp-47`
 	 * @minLength 2
 	 * @maxLength 35
 	 * @type string
@@ -25847,6 +25883,8 @@ export type PostApiRealmsBody = {
 	 */
 	localization: {
 		/**
+		 * @description
+		 * Format: `bcp-47`
 		 * @minLength 2
 		 * @maxLength 35
 		 * @type string
@@ -26271,6 +26309,8 @@ export type PatchApiRealmsByRealmIdBody = {
 	 */
 	localization?: {
 		/**
+		 * @description
+		 * Format: `bcp-47`
 		 * @minLength 2
 		 * @maxLength 35
 		 * @type string
@@ -26678,6 +26718,8 @@ export type PutApiRealmsByRealmIdMembershipBody = {
 	 */
 	ruleRevisionId?: string;
 	/**
+	 * @description
+	 * Format: `bcp-47`
 	 * @minLength 2
 	 * @maxLength 35
 	 * @type string | undefined
@@ -27287,6 +27329,8 @@ export type PutApiRealmsByRealmIdRulesBody = {
 	 */
 	rules: {
 		/**
+		 * @description
+		 * Format: `bcp-47`
 		 * @minLength 2
 		 * @maxLength 35
 		 * @type string

@@ -1,5 +1,10 @@
 export default {
 	title: "Search",
-	placeholder: "Search units, entity entries, tags, posts, or users",
+	placeholder: "Search units, entities, tags, posts, realms, or users",
+	advancedFilters: "Advanced filters",
+	scope: "Search scope",
+	language: "Content language",
+	allLanguages: "All languages",
+	resetFilters: "Reset filters",
 	empty: "No matching results.",
 } satisfies typeof import("../zh-CN/search").default;

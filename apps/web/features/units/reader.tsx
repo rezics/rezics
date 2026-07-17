@@ -1,7 +1,5 @@
 "use client";
 
-import type { PortableTextBlock } from "@portabletext/editor";
-import { PortableText } from "@portabletext/react";
 import {
 	type GetApiChaptersByChapterIdStatus200,
 	useGetApiChaptersByChapterId,
@@ -9,19 +7,22 @@ import {
 	useGetApiUnitsByTypeByUnitId,
 	usePutApiChaptersByChapterIdLocalizationsByLanguageContent,
 } from "@rezics/openapi-tanstack-query";
+import { normalizePortableText, type PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
+import { ArrowLeftIcon, ListTreeIcon, MinusIcon, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
 import { PageHeading } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
-import { PortableTextEditor } from "@rezics/ui";
+import { PortableTextContent } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Skeleton } from "@rezics/ui";
+import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTrigger } from "@rezics/ui";
 import {
 	createTreeCollection,
 	type TreeNodeType,
@@ -35,15 +36,12 @@ import {
 	TreeViewNode,
 	TreeViewTree,
 } from "@rezics/ui";
+import { cn } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
+import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { hasErrorCode } from "@/i18n/errors";
-import {
-	toPortableTextFromEditor,
-	toPortableTextForEditor,
-	toPortableTextForReact,
-} from "@/lib/portable-text";
 import { buildContentTree, type ContentTreeNode } from "./content-tree";
 import { invalidateChapterContent } from "./unit-cache";
 
@@ -94,10 +92,14 @@ function ContentReadTree({
 	bookId,
 	label,
 	nodes,
+	currentChapterId,
+	className,
 }: {
 	bookId: string;
 	label: string;
 	nodes: readonly ContentTreeNode[];
+	currentChapterId?: string;
+	className?: string;
 }) {
 	const rootNode = {
 		children: toReadTreeNodes(nodes),
@@ -108,7 +110,7 @@ function ContentReadTree({
 	const collection = createTreeCollection<ReadTreeNode>({ rootNode });
 	return (
 		<TreeView
-			className="overflow-hidden rounded-xl border"
+			className={cn("overflow-hidden rounded-lg border", className)}
 			collection={collection}
 			defaultExpandedValue={getExpandedNodeIds(rootNode.children)}
 		>
@@ -117,6 +119,7 @@ function ContentReadTree({
 				{collection.rootNode.children?.map((node, index) => (
 					<ContentReadTreeNode
 						bookId={bookId}
+						currentChapterId={currentChapterId}
 						indexPath={[index]}
 						key={node.id}
 						node={node}
@@ -131,10 +134,12 @@ function ContentReadTreeNode({
 	bookId,
 	indexPath,
 	node,
+	currentChapterId,
 }: {
 	bookId: string;
 	indexPath: number[];
 	node: ReadTreeNode;
+	currentChapterId?: string;
 }) {
 	return (
 		<TreeViewNode indexPath={indexPath} node={node}>
@@ -147,6 +152,7 @@ function ContentReadTreeNode({
 						{node.children.map((child, index) => (
 							<ContentReadTreeNode
 								bookId={bookId}
+								currentChapterId={currentChapterId}
 								indexPath={[...indexPath, index]}
 								key={child.id}
 								node={child}
@@ -156,7 +162,13 @@ function ContentReadTreeNode({
 				</TreeViewBranch>
 			) : node.contentUnitId ? (
 				<TreeViewContent asChild>
-					<Link href={`/units/book/${bookId}/read/${node.contentUnitId}`}>
+					<Link
+						aria-current={node.contentUnitId === currentChapterId ? "page" : undefined}
+						className={cn(
+							node.contentUnitId === currentChapterId && "bg-primary/10 text-primary",
+						)}
+						href={`/units/book/${bookId}/read/${node.contentUnitId}`}
+					>
 						<TreeViewItem>{node.name}</TreeViewItem>
 					</Link>
 				</TreeViewContent>
@@ -186,53 +198,179 @@ function getExpandedNodeIds(nodes: readonly ReadTreeNode[]): string[] {
 
 export function Reader({ bookId, chapterId }: { bookId: string; chapterId: string }) {
 	const { t, locale } = useTranslation({ suspense: true });
+	const [fontSize, setFontSize] = useState(1);
 	const query = useGetApiChaptersByChapterId({
 		path: { chapterId },
 		query: { language: locale.target },
 	});
+	const outline = useGetApiUnitsBookByUnitIdContentNodes({ path: { unitId: bookId } });
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data) return <QueryPending />;
+	const tree = outline.data?.items.length ? buildContentTree(outline.data.items) : [];
+	const fontSizeClass = ["text-base sm:text-[1.05rem]", "text-lg", "text-xl"][fontSize];
 	return (
-		<main className="bg-background fixed inset-0 z-50 overflow-y-auto">
-			<div className="mx-auto flex min-h-svh w-full max-w-[48rem] flex-col gap-8 px-5 py-8 sm:px-10 sm:py-12">
-				<header className="border-b pb-6">
-					<Link
-						className="text-primary text-sm hover:underline"
-						href={`/units/book/${bookId}`}
-					>
-						{t.ui.backToUnit}
+		<main
+			className="fixed inset-0 z-50 grid grid-rows-[3.75rem_minmax(0,1fr)] overflow-hidden bg-background"
+			id="main-content"
+		>
+			<header className="flex min-w-0 items-center gap-2 border-b bg-background/95 px-3 backdrop-blur sm:px-5">
+				<Button asChild className="size-11 sm:size-10" size="icon-xl" variant="ghost">
+					<Link aria-label={t.ui.backToUnit} href={`/units/book/${bookId}`}>
+						<ArrowLeftIcon aria-hidden />
 					</Link>
-					<h1 className="mt-3 font-heading text-3xl font-bold">{query.data.title}</h1>
-				</header>
-				<article className="prose max-w-none text-[1.075rem] leading-8 sm:text-lg sm:leading-9">
-					<PortableText value={toPortableTextForReact(query.data.content)} />
-				</article>
-				<footer className="flex flex-wrap items-center justify-between gap-3 border-t pt-6">
-					{query.data.previousChapterId ? (
-						<Button asChild variant="outline">
-							<Link
-								href={`/units/book/${bookId}/read/${query.data.previousChapterId}`}
-							>
-								{t.ui.previousChapter}
-							</Link>
+				</Button>
+				<span className="hidden font-serif font-semibold text-primary sm:block">
+					REZICS
+				</span>
+				<span aria-hidden className="hidden h-5 w-px bg-border sm:block" />
+				<p className="min-w-0 flex-1 truncate font-medium text-sm">{query.data.title}</p>
+
+				<Sheet>
+					<SheetTrigger asChild>
+						<Button
+							aria-label={t.units.content.title}
+							className="size-11 sm:size-10 md:hidden"
+							size="icon-xl"
+							variant="ghost"
+						>
+							<ListTreeIcon aria-hidden />
 						</Button>
-					) : (
-						<span />
-					)}
-					{query.data.nextChapterId ? (
-						<Button asChild>
-							<Link href={`/units/book/${bookId}/read/${query.data.nextChapterId}`}>
-								{t.ui.nextChapter}
-							</Link>
-						</Button>
-					) : (
-						<span />
-					)}
-				</footer>
+					</SheetTrigger>
+					<SheetContent placement="left">
+						<SheetHeader title={t.units.content.title} />
+						<SheetBody>
+							<ReaderOutline
+								bookId={bookId}
+								className="border-0"
+								currentChapterId={chapterId}
+								outline={outline}
+								tree={tree}
+							/>
+						</SheetBody>
+					</SheetContent>
+				</Sheet>
+
+				<div className="flex items-center rounded-lg border bg-card">
+					<Button
+						aria-label="A−"
+						className="size-11 sm:size-10"
+						disabled={fontSize === 0}
+						onClick={() => setFontSize((value) => Math.max(0, value - 1))}
+						size="icon-xl"
+						variant="ghost"
+					>
+						<MinusIcon aria-hidden />
+					</Button>
+					<span className="min-w-8 text-center font-serif font-semibold text-sm">Aa</span>
+					<Button
+						aria-label="A+"
+						className="size-11 sm:size-10"
+						disabled={fontSize === 2}
+						onClick={() => setFontSize((value) => Math.min(2, value + 1))}
+						size="icon-xl"
+						variant="ghost"
+					>
+						<PlusIcon aria-hidden />
+					</Button>
+				</div>
+			</header>
+
+			<div className="grid min-h-0 md:grid-cols-[17rem_minmax(0,1fr)]">
+				<aside className="hidden min-h-0 overflow-y-auto border-e bg-card/45 p-4 md:block">
+					<p className="mb-3 px-2 font-serif font-semibold text-lg">
+						{t.units.content.title}
+					</p>
+					<ReaderOutline
+						bookId={bookId}
+						className="border-0 bg-transparent"
+						currentChapterId={chapterId}
+						outline={outline}
+						tree={tree}
+					/>
+				</aside>
+
+				<div className="min-h-0 overflow-y-auto scroll-smooth">
+					<div className="mx-auto flex min-h-full w-full max-w-[48rem] flex-col px-5 py-8 sm:px-10 sm:py-12">
+						<header className="border-b pb-7">
+							<p className="font-semibold text-primary text-xs uppercase tracking-[0.16em]">
+								{t.units.content.chapter}
+							</p>
+							<h1 className="mt-3 font-serif font-semibold text-3xl tracking-tight sm:text-4xl">
+								{query.data.title}
+							</h1>
+						</header>
+						<article
+							className={cn("flex-1 py-8 leading-8 sm:leading-9", fontSizeClass)}
+						>
+							<PortableTextContent value={query.data.content} variant="article" />
+						</article>
+						<footer className="flex flex-wrap items-center justify-between gap-3 border-t pt-6">
+							{query.data.previousChapterId ? (
+								<Button asChild className="min-h-11 sm:min-h-8" variant="outline">
+									<Link
+										href={`/units/book/${bookId}/read/${query.data.previousChapterId}`}
+									>
+										{t.ui.previousChapter}
+									</Link>
+								</Button>
+							) : (
+								<span />
+							)}
+							{query.data.nextChapterId ? (
+								<Button asChild className="min-h-11 sm:min-h-8">
+									<Link
+										href={`/units/book/${bookId}/read/${query.data.nextChapterId}`}
+									>
+										{t.ui.nextChapter}
+									</Link>
+								</Button>
+							) : (
+								<span />
+							)}
+						</footer>
+					</div>
+				</div>
 			</div>
 		</main>
+	);
+}
+
+function ReaderOutline({
+	bookId,
+	className,
+	currentChapterId,
+	outline,
+	tree,
+}: {
+	bookId: string;
+	className?: string;
+	currentChapterId: string;
+	outline: ReturnType<typeof useGetApiUnitsBookByUnitIdContentNodes>;
+	tree: readonly ContentTreeNode[];
+}) {
+	const { t } = useTranslation({ suspense: true });
+	if (outline.isPending) return <Skeleton className="h-60" />;
+	if (outline.isError)
+		return (
+			<div className="grid gap-3">
+				<RequestFailure error={outline.error} />
+				<Button className="w-fit" onClick={() => void outline.refetch()} variant="outline">
+					{t.actions.retry}
+				</Button>
+			</div>
+		);
+	if (!tree.length)
+		return <p className="px-2 text-muted-foreground text-sm">{t.units.content.noContent}</p>;
+	return (
+		<ContentReadTree
+			bookId={bookId}
+			className={className}
+			currentChapterId={currentChapterId}
+			label={t.units.content.title}
+			nodes={tree}
+		/>
 	);
 }
 
@@ -285,7 +423,7 @@ function ChapterLocalizationEditor({ bookId, chapterId }: { bookId: string; chap
 	if (query.isError && !missingLocalization)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	return (
-		<main className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-10 sm:px-6">
+		<main className="mx-auto flex w-full max-w-[90rem] flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
 			<PageHeading title={t.units.chapter.title} />
 			<Card>
 				<CardContent className="grid gap-6 p-6">
@@ -333,8 +471,8 @@ function ChapterLocalizationForm({
 }) {
 	const { t } = useTranslation({ suspense: true });
 	const queryClient = useQueryClient();
-	const [content, setContent] = useState<PortableTextBlock[]>(() =>
-		toPortableTextForEditor(chapter?.content),
+	const [content, setContent] = useState<PortableTextValue>(() =>
+		normalizePortableText(chapter?.content),
 	);
 	const update = usePutApiChaptersByChapterIdLocalizationsByLanguageContent({
 		mutation: {
@@ -349,7 +487,7 @@ function ChapterLocalizationForm({
 				path: { chapterId, language },
 				body: {
 					title: String(form.get("title") ?? "").trim(),
-					content: toPortableTextFromEditor(content),
+					content: normalizePortableText(content),
 					status:
 						form.get("status") === "published"
 							? "published"
@@ -382,10 +520,13 @@ function ChapterLocalizationForm({
 						<NativeSelectOption value="archived">{t.ui.archived}</NativeSelectOption>
 					</NativeSelect>
 				</Field>
-				<Field required>
-					<FieldLabel>{t.ui.body}</FieldLabel>
-					<PortableTextEditor onChange={setContent} value={content} />
-				</Field>
+				<PortableTextEditor
+					label={t.ui.body}
+					onChange={setContent}
+					required
+					value={content}
+					variant="document"
+				/>
 				<div className="flex flex-wrap gap-2">
 					<Button isLoading={update.isPending} type="submit">
 						{t.units.chapter.save}

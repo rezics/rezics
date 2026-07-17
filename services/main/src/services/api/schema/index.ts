@@ -1,5 +1,7 @@
 import { type Static, t } from "elysia";
+import { FormatRegistry } from "@sinclair/typebox";
 import { PortableText } from "@rezics/portable-text";
+import tags from "language-tags";
 
 import {
 	AiDisclosureValues,
@@ -7,6 +9,12 @@ import {
 	UnitStatusValues,
 	UnitVisibilityValues,
 } from "../../database/schema/contract-values";
+
+FormatRegistry.Set("bcp-47", tags.check);
+
+/** A well-formed BCP 47 language tag from the IANA language subtag registry. */
+export const LanguageTag = t.String({ format: "bcp-47", minLength: 2, maxLength: 35 });
+export type LanguageTag = Static<typeof LanguageTag>;
 
 export const DateTime = t
 	.Transform(t.String({ format: "date-time" }))
@@ -21,7 +29,7 @@ export type UnitIdParams = Static<typeof UnitIdParams>;
 
 export const LocalizationInput = t.Object(
 	{
-		language: t.String({ minLength: 2, maxLength: 35 }),
+		language: LanguageTag,
 		title: t.String({ minLength: 1, maxLength: 500 }),
 		summary: t.Optional(t.String({ maxLength: 2_000 })),
 		description: t.Optional(PortableText),

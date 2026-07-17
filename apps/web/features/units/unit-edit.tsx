@@ -1,6 +1,5 @@
 "use client";
 
-import type { PortableTextBlock } from "@portabletext/editor";
 import {
 	type GetApiUnitsByTypeByUnitIdStatus200,
 	useGetApiUnitsByTypeByUnitId,
@@ -11,6 +10,7 @@ import {
 	usePutApiUnitsByTypeByUnitIdTagsByTagId,
 	usePutApiUnitsByTypeByUnitIdVersionOfByCanonicalId,
 } from "@rezics/openapi-tanstack-query";
+import { normalizePortableText, type PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
@@ -18,7 +18,6 @@ import { useState, type FormEvent } from "react";
 import { EntityPicker } from "@rezics/ui";
 import { PageHeading } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
-import { PortableTextEditor } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
@@ -26,9 +25,9 @@ import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
+import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
-import { toPortableTextFromEditor, toPortableTextForEditor } from "@/lib/portable-text";
 import { invalidateUnitDetail } from "./unit-cache";
 import type { UnitType } from "./unit-types";
 
@@ -306,8 +305,8 @@ function UnitLocalizationForm({
 }) {
 	const { t } = useTranslation({ suspense: true });
 	const queryClient = useQueryClient();
-	const [description, setDescription] = useState<PortableTextBlock[]>(() =>
-		toPortableTextForEditor(localization?.description),
+	const [description, setDescription] = useState<PortableTextValue>(() =>
+		normalizePortableText(localization?.description),
 	);
 	const update = usePutApiUnitsByTypeByUnitIdLocalizationsByLanguage({
 		mutation: {
@@ -323,7 +322,7 @@ function UnitLocalizationForm({
 				body: {
 					title: String(form.get("title") ?? "").trim(),
 					summary: String(form.get("summary") ?? "").trim(),
-					description: toPortableTextFromEditor(description),
+					description: normalizePortableText(description),
 				},
 			});
 		} catch {
@@ -350,10 +349,11 @@ function UnitLocalizationForm({
 						name="summary"
 					/>
 				</Field>
-				<Field>
-					<FieldLabel>{t.ui.body}</FieldLabel>
-					<PortableTextEditor onChange={setDescription} value={description} />
-				</Field>
+				<PortableTextEditor
+					label={t.ui.body}
+					onChange={setDescription}
+					value={description}
+				/>
 				<Button isLoading={update.isPending} type="submit">
 					{t.ui.save}
 				</Button>

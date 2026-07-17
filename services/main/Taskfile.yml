@@ -15,8 +15,10 @@ tasks:
 
     dev:
         desc: Start the backend API and recommendation worker.
-        cmds:
-            - task --parallel --failfast dev:api dev:worker
+        deps:
+            - dev:api
+            - dev:worker
+        failfast: true
 
     dev:api:
         internal: true
@@ -70,8 +72,15 @@ tasks:
             - test -n "${DATABASE_ADMIN_URL:-${DATABASE_URL:-}}"
             - yarn exec tsx scripts/migrate.ts
 
+    db:seed:
+        desc: Seed an empty local database and build its recommendation snapshot.
+        cmds:
+            - yarn exec tsx scripts/seed.ts
+            - task: recommendations:refresh
+
     db:reset:
-        desc: Destructively rebuild a local development database, then migrate it.
+        desc: Destructively rebuild, migrate, and seed a local development database.
         cmds:
             - yarn exec tsx scripts/reset-database.ts {{.CLI_ARGS}}
             - task: db:migrate
+            - task: db:seed

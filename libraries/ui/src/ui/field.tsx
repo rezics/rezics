@@ -11,13 +11,7 @@ import { Separator } from "./separator";
 export const useField = useArkFieldContext;
 
 const fieldVariants = tv({
-	base: [
-		"group/field",
-		"w-full",
-		"flex gap-2",
-		"data-invalid:text-destructive",
-		"dark:data-invalid:text-destructive-foreground",
-	],
+	base: ["group/field", "w-full", "flex gap-2", "data-invalid:text-destructive"],
 	variants: {
 		orientation: {
 			vertical: ["flex-col *:w-full [&>.sr-only]:w-auto"],
@@ -168,11 +162,7 @@ export const FieldRequiredIndicator = (props: React.ComponentProps<typeof ark.sp
 	return (
 		<ArkField.RequiredIndicator
 			aria-hidden
-			className={cn(
-				"select-none text-destructive text-sm",
-				"dark:text-destructive-foreground",
-				className,
-			)}
+			className={cn("select-none text-destructive text-sm", className)}
 			data-slot="field-required-indicator"
 			{...rest}
 		>
@@ -272,11 +262,7 @@ export const FieldError = (props: React.ComponentProps<typeof ArkField.ErrorText
 
 	return (
 		<ArkField.ErrorText
-			className={cn(
-				"font-normal text-destructive text-sm",
-				"dark:text-destructive-foreground",
-				className,
-			)}
+			className={cn("font-normal text-destructive text-sm", className)}
 			data-slot="field-error"
 			{...rest}
 		/>

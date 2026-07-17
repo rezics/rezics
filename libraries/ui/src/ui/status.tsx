@@ -15,10 +15,10 @@ export const statusVariants = tv({
 	variants: {
 		variant: {
 			default: "bg-foreground text-background",
-			success: "bg-success text-white",
-			info: "bg-info text-white",
-			warning: "bg-warning text-white",
-			destructive: "bg-destructive text-white dark:bg-destructive-foreground",
+			success: "bg-success text-success-foreground",
+			info: "bg-info text-info-foreground",
+			warning: "bg-warning text-warning-foreground",
+			destructive: "bg-destructive text-destructive-foreground",
 		},
 		size: {
 			sm: "size-2 [&_svg:not([class*='size-'])]:size-1.5 [&_svg]:pointer-events-none [&_svg]:shrink-0",

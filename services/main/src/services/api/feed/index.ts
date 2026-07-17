@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { and, count, desc, eq, inArray, isNull, lte, sql, type SQL } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
 
 import { resolveIdentity } from "../../auth/session";
@@ -49,6 +50,8 @@ import {
 	type FeedQuery as FeedQueryType,
 	type FeedSort,
 } from "./schema";
+
+const preferredLocalization = alias(unitLocalization, "preferred_localization");
 
 const FeedCursor = t.Object(
 	{
@@ -133,7 +136,7 @@ export function getFeedEligibilityCondition(
 			: undefined,
 		query.subjectId ? eq(post.subjectUnitId, query.subjectId) : undefined,
 		viewer.contentRatings.length
-			? sql`${unit.contentRating}::text = any(${viewer.contentRatings}::text[])`
+			? inArray(unit.contentRating, viewer.contentRatings)
 			: undefined,
 		viewer.profileId
 			? sql`not exists (
@@ -384,9 +387,9 @@ export async function getFeedRankingCandidates(input: {
 		: sql`false`;
 	const preferredLanguage = input.viewer.preferredLanguages.length
 		? sql<boolean>`exists (
-			select 1 from unit_localization preferred_localization
-			where preferred_localization.unit_id = ${post.id}
-				and preferred_localization.language = any(${input.viewer.preferredLanguages}::text[])
+			select 1 from ${unitLocalization} ${preferredLocalization}
+			where ${preferredLocalization.unitId} = ${post.id}
+				and ${inArray(preferredLocalization.language, input.viewer.preferredLanguages)}
 		)`
 		: sql<boolean>`false`;
 	const rows = await database

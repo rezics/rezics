@@ -51,7 +51,7 @@ export const FileUploadDropzone = (props: React.ComponentProps<typeof ArkFileUpl
 				"cursor-pointer",
 				"data-cover:absolute data-cover:inset-0 data-cover:flex data-cover:items-center data-cover:justify-center",
 				"data-dragging:border-primary data-dragging:bg-primary/10",
-				"data-invalid:border-destructive dark:data-invalid:border-destructive-foreground",
+				"data-invalid:border-destructive",
 				className,
 			)}
 			data-slot="file-upload-dropzone"
@@ -183,7 +183,6 @@ export const FileUploadList = (props: FileUploadListProps) => {
 								className={cn(
 									"rounded-lg",
 									"hover:bg-destructive/10 hover:text-destructive",
-									"dark:hover:bg-destructive-foreground/10 dark:hover:text-destructive-foreground",
 								)}
 								size="icon-xs"
 								variant="ghost"

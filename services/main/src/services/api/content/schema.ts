@@ -1,7 +1,7 @@
 import { type Static, t } from "elysia";
 import { PortableText } from "@rezics/portable-text";
 
-import { Uuid } from "../schema";
+import { LanguageTag, Uuid } from "../schema";
 
 export const BookContentParams = t.Object({ unitId: Uuid });
 export type BookContentParams = Static<typeof BookContentParams>;
@@ -10,7 +10,7 @@ export const CreateContentNodeBody = t.Object(
 	{
 		parentId: t.Optional(Uuid),
 		title: t.String({ minLength: 1, maxLength: 500 }),
-		language: t.String({ minLength: 2, maxLength: 35 }),
+		language: LanguageTag,
 		position: t.String({ minLength: 1, maxLength: 64 }),
 		content: t.Optional(PortableText),
 		status: t.Optional(t.Union([t.Literal("draft"), t.Literal("published")])),
@@ -33,13 +33,13 @@ export const ChapterParams = t.Object({ chapterId: Uuid });
 export type ChapterParams = Static<typeof ChapterParams>;
 
 export const ReadChapterQuery = t.Object({
-	language: t.String({ minLength: 2, maxLength: 35 }),
+	language: LanguageTag,
 });
 export type ReadChapterQuery = Static<typeof ReadChapterQuery>;
 
 export const ChapterLocalizationParams = t.Object({
 	chapterId: Uuid,
-	language: t.String({ minLength: 2, maxLength: 35 }),
+	language: LanguageTag,
 });
 export type ChapterLocalizationParams = Static<typeof ChapterLocalizationParams>;
 
