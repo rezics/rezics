@@ -1,16 +1,16 @@
 # @rezics/about
 
-`about.rezics.com` 的静态多语言产品站，使用 React 19、Vike、`vike-react`、MDX 与 Tailwind CSS 构建。
+The static multilingual product site for `about.rezics.com`, built with React 19, Vike, `vike-react`, MDX, and Tailwind CSS.
 
-## 架构
+## Architecture
 
-- `src/content/`：六语言文案、产品注册表、页面事实和媒体清单。
-- `pages/`：Vike 文件路由；全局配置开启 SSR、客户端路由、尾斜线与全量 prerender。
-- `src/components/products/`：真实 React 页面与交互组件。
-- `pages/_error/+Page.mdx`：MDX 错误页；仓库内 MDX 可直接导入 React 组件。
-- `functions/_middleware.ts` 与 `public/_redirects`：Cloudflare 语言协商与旧 URL 永久重定向。
+- `src/content/`: Copy in six languages, the product registry, page facts, and the media inventory.
+- `pages/`: Vike file-based routes; global configuration enables SSR, client-side routing, trailing slashes, and full prerendering.
+- `src/components/products/`: React pages and interactive components.
+- `pages/_error/+Page.mdx`: MDX error page; MDX in this repository can import React components directly.
+- `functions/_middleware.ts` and `public/_redirects`: Cloudflare language negotiation and permanent redirects for legacy URLs.
 
-公开 URL 保持为：
+Public URLs remain:
 
 ```text
 /[locale]/
@@ -18,11 +18,11 @@
 /[locale]/products/[slug]/
 ```
 
-旧的单数 `product` 路径与 `entity-source` 会永久重定向。所有公开页面均由同一注册表生成 canonical、hreflang、Open Graph、JSON-LD 与 sitemap。
+The legacy singular `product` route and `entity-source` permanently redirect. A single registry generates canonical URLs, hreflang, Open Graph, JSON-LD, and the sitemap for every public page.
 
 ## Commands
 
-从仓库根目录运行：
+Run from the repository root:
 
 ```bash
 yarn task about:dev
@@ -33,4 +33,4 @@ yarn task about:test:dist
 yarn task about:preview
 ```
 
-Cloudflare Pages 的构建目录是 `apps/about/dist/client`。部署不依赖 `dist/server`。
+Cloudflare Pages uses `apps/about/dist/client` as its build output. Deployment does not depend on `dist/server`.

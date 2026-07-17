@@ -15,7 +15,7 @@ const frontendOrigin =
 export const metadata: Metadata = {
 	metadataBase: new URL(frontendOrigin?.trim() || "http://localhost:3000"),
 	title: "REZICS",
-	description: "让对象、关系、讨论与知识一起生长。",
+	description: "Where objects, relationships, discussion, and knowledge grow together.",
 	applicationName: "REZICS",
 	manifest: "/manifest.webmanifest",
 	appleWebApp: {
@@ -32,13 +32,13 @@ export const metadata: Metadata = {
 	},
 	openGraph: {
 		title: "REZICS",
-		description: "让作品、社区与深度讨论彼此连接。",
+		description: "Where works, communities, and thoughtful discussion connect.",
 		images: [{ url: socialCard, width: 1200, height: 630, alt: "REZICS" }],
 	},
 	twitter: {
 		card: "summary_large_image",
 		title: "REZICS",
-		description: "让作品、社区与深度讨论彼此连接。",
+		description: "Where works, communities, and thoughtful discussion connect.",
 		images: [socialCard],
 	},
 };

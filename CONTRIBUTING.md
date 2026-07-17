@@ -1,5 +1,13 @@
-# 贡献指南
+# Contributing
 
-- 封装必须压缩意义，而不只是缩短字面：它应收束不变量、协议、生命周期或确有复用的完整语义；仅转发、改名、代传参数，或只使用一次且内联后同样清楚的封装一律删除。框架入口、包公共入口、生成代码与上游镜像等外部契约边界不以调用次数判断，但边界内仍直接表达。
-- 数据库只使用 `public` schema；物理表名、列名、约束名与索引名使用 `snake_case`，TypeScript 导出使用小驼峰。
-- Drizzle 的 `relations` 仅在使用 `database.query` 的关系查询时按需声明；完整性由表定义中的外键承担，不预先维护双向关系元数据。
+- Inspect existing code before changing it. Make the smallest complete change within the relevant owner boundary; update internal call sites together unless the boundary is a real external contract.
+- Put durable knowledge where it belongs: types, tests, comments, or the commit. Write comments only for irreducible "why."
+- Do not hand-edit generated files or upstream mirrors.
+- Run the nearest relevant checks first, then broader checks affected by the change. Preserve unrelated worktree changes.
+- Maintainer-facing repository language is English. Keep localization content, test fixtures, and native-language names in their target language.
+
+## Existing conventions
+
+- Abstractions must compress meaning, not merely shorten syntax: they should capture invariants, protocols, lifecycles, or genuinely reusable complete semantics. Delete one-use wrappers that only forward, rename, or pass arguments when the inline form is equally clear. Framework entry points, public package entry points, generated code, and upstream mirrors are external-contract boundaries and are not judged by call count; within a boundary, still express intent directly.
+- Use only the `public` database schema. Use `snake_case` for physical table, column, constraint, and index names; use lower camel case for TypeScript exports.
+- Declare Drizzle `relations` only when a `database.query` relation query needs them. Table-definition foreign keys provide integrity; do not pre-maintain bidirectional relation metadata.

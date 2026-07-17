@@ -48,7 +48,7 @@ export async function ensureFavorites(ownerId: string) {
 				unitId: created.id,
 				language: DefaultLanguage,
 				isDefault: true,
-				title: "收藏",
+				title: "Favorites",
 			});
 			await tx.insert(unitCollaborator).values({
 				unitId: created.id,
