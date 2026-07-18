@@ -7,14 +7,6 @@
 	"installConfig": {
 		"hoistingLimits": "workspaces"
 	},
-	"scripts": {
-		"dev": "vike dev",
-		"build": "vike build && tsx ./scripts/write-static-files.ts",
-		"preview": "vike preview",
-		"check": "tsc --noEmit",
-		"test": "vitest run --config vitest.config.ts",
-		"test:dist": "vitest run --config vitest.dist.config.ts"
-	},
 	"devDependencies": {
 		"@mdx-js/react": "^3.1.1",
 		"@mdx-js/rollup": "^3.1.1",
