@@ -170,7 +170,7 @@ export default new Elysia()
 					return { id };
 				},
 				{
-					contribute: true,
+					access: "contribute:unit:create",
 					body: CreateReviewBody,
 					response: {
 						[StatusCodes.OK]: IdResponse,
@@ -187,7 +187,8 @@ export default new Elysia()
 			.get(
 				"/:reviewId",
 				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request.headers)).authorization;
+					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+						.authorization;
 					await authorization.unit.ensureCanRead(
 						params.reviewId,
 						() => new UnitNotFound("Review"),
@@ -280,7 +281,7 @@ export default new Elysia()
 					return { id: params.reviewId };
 				},
 				{
-					contribute: true,
+					access: "contribute:unit:update",
 					params: ReviewParams,
 					body: UpdateReviewBody,
 					response: {
@@ -309,7 +310,7 @@ export default new Elysia()
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
 				},
 				{
-					write: true,
+					access: "write:unit:delete",
 					params: ReviewParams,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
@@ -337,7 +338,7 @@ export default new Elysia()
 					return { scoreEntryId, score: body.score };
 				},
 				{
-					contribute: true,
+					access: "contribute:interaction:write",
 					params: ScoreTargetParams,
 					body: SetScoreBody,
 					response: {
@@ -354,7 +355,8 @@ export default new Elysia()
 			.get(
 				"/:targetId",
 				async ({ params, query, request }) => {
-					const authorization = (await resolveIdentity(request.headers)).authorization;
+					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+						.authorization;
 					await authorization.unit.ensureCanRead(params.targetId);
 					const condition = and(
 						eq(score.unitId, params.targetId),

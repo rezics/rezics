@@ -1,161 +1,189 @@
-import { createHash } from "node:crypto";
-
-import { and, eq, gt, isNull, or } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import Elysia from "elysia";
 import type { User } from "better-auth";
 
 import { Authorization } from "../authorization";
 import { database } from "../database";
+import { users } from "../database/schema";
+import type { ApiPermission } from "./api-permissions";
+import { fromApiKeyPermissions, isApiPermission } from "./api-permissions";
 import {
-	apiToken,
-	profile as profileTable,
-	unit,
-	unitLocalization,
-	users,
-} from "../database/schema";
-import { auth } from "./index";
-import { ApiTokenScopeRequired, AuthenticationRequired, EmailVerificationRequired } from "./errors";
+	ApiTokenPermissionRequired,
+	ApiTokenRateLimitExceeded,
+	AuthenticationRequired,
+	EmailVerificationRequired,
+	FreshSessionRequired,
+	InteractiveSessionRequired,
+} from "./errors";
+import { auth, CredentialControlFreshAgeSeconds } from "./index";
 import { ensureProfile, type SessionProfile } from "./profile";
 
-type SessionContext = {
+type BaseIdentity = {
 	user: User;
-	session: unknown;
 	profile: SessionProfile;
 	authorization: Authorization<string>;
-	tokenScopes: string[] | undefined;
 };
 
-async function resolveSession(headers: Headers): Promise<SessionContext | undefined> {
-	const session = await auth.api.getSession({ headers });
-	if (session) {
-		const profile = await ensureProfile(session.user);
-		return {
-			user: session.user,
-			session: session.session,
-			profile,
-			authorization: new Authorization(profile.unitId),
-			tokenScopes: undefined,
-		};
-	}
-	const authorization = headers.get("Authorization");
-	if (!authorization?.startsWith("Bearer rz_")) return undefined;
-	const raw = authorization.slice("Bearer ".length);
-	const hash = createHash("sha256").update(raw).digest("hex");
-	const now = new Date();
-	const [token] = await database
-		.select({
-			tokenId: apiToken.id,
-			scopes: apiToken.scopes,
-			unitId: profileTable.id,
-			slug: unit.slug,
-			profileName: unitLocalization.title,
-			authUserId: users.id,
-			authName: users.name,
-			email: users.email,
-			emailVerified: users.emailVerified,
-			image: users.image,
-			createdAt: users.createdAt,
-			updatedAt: users.updatedAt,
-		})
-		.from(apiToken)
-		.innerJoin(profileTable, eq(profileTable.id, apiToken.profileId))
-		.innerJoin(unit, eq(unit.id, profileTable.id))
-		.innerJoin(users, eq(users.id, profileTable.authUserId))
-		.leftJoin(
-			unitLocalization,
-			and(eq(unitLocalization.unitId, profileTable.id), eq(unitLocalization.isDefault, true)),
-		)
-		.where(
-			and(
-				eq(apiToken.tokenHash, hash),
-				isNull(apiToken.revokedAt),
-				or(isNull(apiToken.expiresAt), gt(apiToken.expiresAt, now)),
-			),
-		)
-		.limit(1);
-	if (!token?.slug || !token.scopes.includes("read")) return undefined;
-	await database.update(apiToken).set({ lastUsedAt: now }).where(eq(apiToken.id, token.tokenId));
-	const profile = {
-		unitId: token.unitId,
-		slug: token.slug,
-		name: token.profileName,
-		email: token.email,
+export type SessionIdentity = BaseIdentity & {
+	credential: {
+		kind: "session";
+		session: NonNullable<Awaited<ReturnType<typeof auth.api.getSession>>>["session"];
 	};
+	session: NonNullable<Awaited<ReturnType<typeof auth.api.getSession>>>["session"];
+};
+
+export type ApiKeyIdentity = BaseIdentity & {
+	credential: { kind: "apiKey"; id: string; permissions: readonly ApiPermission[] };
+	session: undefined;
+};
+
+export type AuthenticatedIdentity = BaseIdentity & {
+	credential: SessionIdentity["credential"] | ApiKeyIdentity["credential"];
+	session: SessionIdentity["session"] | undefined;
+};
+
+export type AccessPolicy =
+	| { credential: "session-only" | "fresh-session-only" }
+	| {
+			credential?: "session-or-api-key";
+			permission: ApiPermission;
+			account?: "authenticated" | "write" | "contribute";
+	  };
+
+export type AccessRequirement =
+	| ApiPermission
+	| `write:${ApiPermission}`
+	| `contribute:${ApiPermission}`
+	| "session-only"
+	| "fresh-session-only";
+
+function accessPolicy(requirement: AccessRequirement): AccessPolicy {
+	if (requirement === "session-only" || requirement === "fresh-session-only")
+		return { credential: requirement };
+	if (isApiPermission(requirement)) return { permission: requirement };
+	const separator = requirement.indexOf(":");
+	const account = requirement.slice(0, separator);
+	const permission = requirement.slice(separator + 1);
+	if ((account !== "write" && account !== "contribute") || !isApiPermission(permission))
+		throw new Error(`Invalid access requirement: ${requirement}`);
+	return { permission, account };
+}
+
+function bearerToken(headers: Headers) {
+	const authorization = headers.get("Authorization");
+	if (authorization === null) return undefined;
+	const match = /^Bearer (rz_api_[A-Za-z0-9_-]+)$/.exec(authorization);
+	if (!match?.[1]) throw new AuthenticationRequired();
+	return match[1];
+}
+
+async function resolveInteractiveSession(headers: Headers): Promise<SessionIdentity | undefined> {
+	const session = await auth.api.getSession({ headers });
+	if (!session) return undefined;
+	const profile = await ensureProfile(session.user);
 	return {
-		user: {
-			id: token.authUserId,
-			name: token.authName,
-			email: token.email,
-			emailVerified: token.emailVerified,
-			image: token.image,
-			createdAt: token.createdAt,
-			updatedAt: token.updatedAt,
-		},
+		user: session.user,
+		session: session.session,
+		profile,
+		authorization: new Authorization(profile.unitId),
+		credential: { kind: "session", session: session.session },
+	};
+}
+
+function rateLimitRetryAfter(error: unknown) {
+	if (typeof error !== "object" || error === null || !("details" in error)) return 60;
+	const { details } = error;
+	if (typeof details !== "object" || details === null || !("tryAgainIn" in details)) return 60;
+	const milliseconds = details.tryAgainIn;
+	return typeof milliseconds === "number" && Number.isFinite(milliseconds)
+		? Math.max(1, Math.ceil(milliseconds / 1_000))
+		: 60;
+}
+
+async function resolveApiKey(
+	key: string,
+	requiredPermission: ApiPermission,
+): Promise<ApiKeyIdentity> {
+	const verified = await auth.api.verifyApiKey({
+		body: { key },
+	});
+	if (!verified.valid || !verified.key) {
+		if (verified.error?.code === "RATE_LIMITED")
+			throw new ApiTokenRateLimitExceeded(rateLimitRetryAfter(verified.error));
+		throw new AuthenticationRequired();
+	}
+	const permissions = fromApiKeyPermissions(verified.key.permissions);
+	if (!permissions.includes(requiredPermission))
+		throw new ApiTokenPermissionRequired(requiredPermission);
+
+	const [user] = await database
+		.select()
+		.from(users)
+		.where(eq(users.id, verified.key.referenceId))
+		.limit(1);
+	if (!user) throw new AuthenticationRequired();
+	const profile = await ensureProfile(user);
+	return {
+		user,
 		session: undefined,
 		profile,
 		authorization: new Authorization(profile.unitId),
-		tokenScopes: token.scopes,
-	} satisfies SessionContext;
+		credential: {
+			kind: "apiKey",
+			id: verified.key.id,
+			permissions,
+		},
+	};
 }
 
-export async function resolveIdentity(headers: Headers) {
-	const context = await resolveSession(headers);
-	return context
-		? { profile: context.profile, authorization: context.authorization }
+async function requireAccess(
+	headers: Headers,
+	policy: AccessPolicy,
+): Promise<AuthenticatedIdentity> {
+	const token = bearerToken(headers);
+	if (!("permission" in policy)) {
+		if (token) throw new InteractiveSessionRequired();
+		const identity = await resolveInteractiveSession(headers);
+		if (!identity) throw new InteractiveSessionRequired();
+		if (
+			policy.credential === "fresh-session-only" &&
+			Date.now() - new Date(identity.session.createdAt).getTime() >=
+				CredentialControlFreshAgeSeconds * 1_000
+		)
+			throw new FreshSessionRequired();
+		return identity;
+	}
+
+	const identity = token
+		? await resolveApiKey(token, policy.permission)
+		: await resolveInteractiveSession(headers);
+	if (!identity) throw new AuthenticationRequired();
+	if (policy.account === "write" || policy.account === "contribute") {
+		if (!identity.user.emailVerified) throw new EmailVerificationRequired();
+		if (policy.account === "write") await identity.authorization.account.ensureCanWrite();
+		else await identity.authorization.account.ensureCanContribute();
+	}
+	return identity;
+}
+
+export async function resolveIdentity(headers: Headers, permission?: ApiPermission) {
+	const token = bearerToken(headers);
+	let identity: AuthenticatedIdentity | undefined;
+	if (token) {
+		if (!permission) throw new ApiTokenPermissionRequired("an explicit route permission");
+		identity = await resolveApiKey(token, permission);
+	} else {
+		identity = await resolveInteractiveSession(headers);
+	}
+	return identity
+		? { profile: identity.profile, authorization: identity.authorization }
 		: { profile: undefined, authorization: new Authorization(undefined) };
 }
 
-async function requireSession(headers: Headers, requiredScope?: string): Promise<SessionContext> {
-	const context = await resolveSession(headers);
-	if (!context) throw new AuthenticationRequired();
-	if (requiredScope && context.tokenScopes && !context.tokenScopes.includes(requiredScope))
-		throw new ApiTokenScopeRequired(requiredScope);
-	return context;
-}
-
-function writeScope(url: string) {
-	const path = new URL(url).pathname;
-	if (path.startsWith("/api/api-tokens") || path.startsWith("/api/users")) {
-		if (path.endsWith("/follow")) return "interaction:write";
-		return "profile:write";
-	}
-	if (path.startsWith("/api/notifications")) return "profile:write";
-	if (path.startsWith("/api/messages")) return "interaction:write";
-	if (path.startsWith("/api/recommendations")) return "interaction:write";
-	if (
-		path.startsWith("/api/reactions") ||
-		path.startsWith("/api/scores") ||
-		path.startsWith("/api/progress") ||
-		path.includes("/votes") ||
-		path.endsWith("/follow") ||
-		path.endsWith("/membership") ||
-		path.includes("/favorites")
-	)
-		return "interaction:write";
-	if (path.startsWith("/api/realms")) return "realm:manage";
-	return "content:write";
-}
-
 export default new Elysia({ name: "session-context" }).macro({
-	auth: {
-		async resolve({ request: { headers } }) {
-			return requireSession(headers, "read");
+	access: (requirement: AccessRequirement) => ({
+		async resolve({ request: { headers } }: { request: Request }) {
+			return requireAccess(headers, accessPolicy(requirement));
 		},
-	},
-	write: {
-		async resolve({ request: { headers, url } }) {
-			const context = await requireSession(headers, writeScope(url));
-			if (!context.user.emailVerified) throw new EmailVerificationRequired();
-			await context.authorization.account.ensureCanWrite();
-			return context;
-		},
-	},
-	contribute: {
-		async resolve({ request: { headers, url } }) {
-			const context = await requireSession(headers, writeScope(url));
-			if (!context.user.emailVerified) throw new EmailVerificationRequired();
-			await context.authorization.account.ensureCanContribute();
-			return context;
-		},
-	},
+	}),
 });

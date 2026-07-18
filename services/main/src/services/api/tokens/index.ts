@@ -1,128 +1,159 @@
 import { StatusCodes } from "http-status-codes";
-import { createHash, randomBytes } from "node:crypto";
 
-import { and, desc, eq, isNull } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
+import { fromApiKeyPermissions, toApiKeyPermissions } from "../../auth/api-permissions";
 import session from "../../auth/session";
-import { database } from "../../database";
-import { apiToken } from "../../database/schema";
+import { auth } from "../../auth";
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
+import { ApiTokenNotFound } from "./errors";
 import {
 	ApiTokenListResponse,
 	ApiTokenParams,
+	ApiTokenSummary,
 	CreatedApiTokenResponse,
 	CreateApiTokenBody,
+	UpdateApiTokenBody,
 } from "./schema";
-import { ApiTokenExpiryInvalid, ApiTokenNotFound, ApiTokenReadScopeRequired } from "./errors";
 
-const AuthenticationRequiredResponse = toApiErrorResponse(["AuthenticationRequired"]);
-const TokenWriteForbiddenResponse = toApiErrorResponse([
-	"ApiTokenScopeRequired",
-	"EmailVerificationRequired",
-	"AccountRestricted",
-]);
-const InvalidTokenResponse = toApiErrorResponse([
-	"ApiTokenReadScopeRequired",
-	"ApiTokenExpiryInvalid",
-]);
+const InteractiveSessionRequiredResponse = toApiErrorResponse(["InteractiveSessionRequired"]);
+const FreshSessionRequiredResponse = toApiErrorResponse(["FreshSessionRequired"]);
 const TokenNotFoundResponse = toApiErrorResponse(["ApiTokenNotFound"]);
 
 export default new Elysia({ prefix: "/api-tokens" })
 	.use(session)
 	.get(
 		"",
-		async ({ profile }) => ({
-			items: await database
-				.select({
-					id: apiToken.id,
-					name: apiToken.name,
-					tokenPrefix: apiToken.prefix,
-					scopes: apiToken.scopes,
-					expiresAt: apiToken.expiresAt,
-					lastUsedAt: apiToken.lastUsedAt,
-					revokedAt: apiToken.revokedAt,
-					createdAt: apiToken.createdAt,
-					updatedAt: apiToken.updatedAt,
-				})
-				.from(apiToken)
-				.where(eq(apiToken.profileId, profile.unitId))
-				.orderBy(desc(apiToken.createdAt), desc(apiToken.id)),
-		}),
+		async ({ request }) => {
+			const result = await auth.api.listApiKeys({
+				headers: request.headers,
+				query: { sortBy: "createdAt", sortDirection: "desc" },
+			});
+			return {
+				items: result.apiKeys.map((key) => ({
+					id: key.id,
+					name: key.name ?? "",
+					tokenPrefix: key.start ?? key.prefix ?? "",
+					permissions: fromApiKeyPermissions(key.permissions),
+					enabled: key.enabled,
+					expiresAt: key.expiresAt,
+					lastUsedAt: key.lastRequest,
+					createdAt: key.createdAt,
+					updatedAt: key.updatedAt,
+				})),
+			};
+		},
 		{
-			auth: true,
-			response: { [StatusCodes.OK]: ApiTokenListResponse },
+			access: "fresh-session-only",
+			response: {
+				[StatusCodes.OK]: ApiTokenListResponse,
+				[StatusCodes.UNAUTHORIZED]: InteractiveSessionRequiredResponse,
+				[StatusCodes.FORBIDDEN]: FreshSessionRequiredResponse,
+			},
 			detail: { summary: "List API tokens", tags: ["API Tokens"] },
 		},
 	)
 	.post(
 		"",
-		async ({ profile, body }) => {
-			if (!body.scopes.some((scope) => scope === "read"))
-				throw new ApiTokenReadScopeRequired();
-			const expiresAt = body.expiresAt ? new Date(body.expiresAt) : null;
-			if (expiresAt && expiresAt <= new Date()) throw new ApiTokenExpiryInvalid();
-			const raw = `rz_${randomBytes(32).toString("base64url")}`;
-			const tokenPrefix = raw.slice(0, 14);
-			const tokenHash = createHash("sha256").update(raw).digest("hex");
-			const [created] = await database
-				.insert(apiToken)
-				.values({
-					profileId: profile.unitId,
+		async ({ user, body }) => {
+			const created = await auth.api.createApiKey({
+				body: {
 					name: body.name,
-					prefix: tokenPrefix,
-					tokenHash,
-					scopes: body.scopes,
-					expiresAt,
-				})
-				.returning({
-					id: apiToken.id,
-					name: apiToken.name,
-					tokenPrefix: apiToken.prefix,
-					scopes: apiToken.scopes,
-					expiresAt: apiToken.expiresAt,
-					createdAt: apiToken.createdAt,
-				});
-			if (!created) throw new Error("API token insert did not return a row");
-			return { ...created, token: raw };
+					userId: user.id,
+					expiresIn: (body.expiresInDays ?? 90) * 24 * 60 * 60,
+					permissions: toApiKeyPermissions(body.permissions),
+				},
+			});
+			return {
+				id: created.id,
+				name: created.name ?? body.name,
+				token: created.key,
+				tokenPrefix: created.start ?? created.prefix ?? "",
+				permissions: fromApiKeyPermissions(created.permissions),
+				enabled: created.enabled,
+				expiresAt: created.expiresAt,
+				lastUsedAt: created.lastRequest,
+				createdAt: created.createdAt,
+				updatedAt: created.updatedAt,
+			};
 		},
 		{
-			write: true,
+			access: "fresh-session-only",
 			body: CreateApiTokenBody,
 			response: {
 				[StatusCodes.OK]: CreatedApiTokenResponse,
-				[StatusCodes.BAD_REQUEST]: InvalidTokenResponse,
-				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
-				[StatusCodes.FORBIDDEN]: TokenWriteForbiddenResponse,
+				[StatusCodes.UNAUTHORIZED]: InteractiveSessionRequiredResponse,
+				[StatusCodes.FORBIDDEN]: FreshSessionRequiredResponse,
 			},
 			detail: { summary: "Create API token (secret returned once)", tags: ["API Tokens"] },
 		},
 	)
+	.patch(
+		"/:tokenId",
+		async ({ user, params, body, request }) => {
+			const listed = await auth.api.listApiKeys({ headers: request.headers });
+			if (!listed.apiKeys.some((key) => key.id === params.tokenId))
+				throw new ApiTokenNotFound();
+			const updated = await auth.api.updateApiKey({
+				body: {
+					keyId: params.tokenId,
+					userId: user.id,
+					name: body.name,
+					permissions: body.permissions
+						? toApiKeyPermissions(body.permissions)
+						: undefined,
+					expiresIn:
+						body.expiresInDays === undefined
+							? undefined
+							: body.expiresInDays * 24 * 60 * 60,
+					enabled: body.enabled,
+				},
+			});
+			return {
+				id: updated.id,
+				name: updated.name ?? "",
+				tokenPrefix: updated.start ?? updated.prefix ?? "",
+				permissions: fromApiKeyPermissions(updated.permissions),
+				enabled: updated.enabled,
+				expiresAt: updated.expiresAt,
+				lastUsedAt: updated.lastRequest,
+				createdAt: updated.createdAt,
+				updatedAt: updated.updatedAt,
+			};
+		},
+		{
+			access: "fresh-session-only",
+			params: ApiTokenParams,
+			body: UpdateApiTokenBody,
+			response: {
+				[StatusCodes.OK]: ApiTokenSummary,
+				[StatusCodes.UNAUTHORIZED]: InteractiveSessionRequiredResponse,
+				[StatusCodes.FORBIDDEN]: FreshSessionRequiredResponse,
+				[StatusCodes.NOT_FOUND]: TokenNotFoundResponse,
+			},
+			detail: { summary: "Update API token", tags: ["API Tokens"] },
+		},
+	)
 	.delete(
 		"/:tokenId",
-		async ({ profile, params, status }) => {
-			const [revoked] = await database
-				.update(apiToken)
-				.set({ revokedAt: new Date() })
-				.where(
-					and(
-						eq(apiToken.id, params.tokenId),
-						eq(apiToken.profileId, profile.unitId),
-						isNull(apiToken.revokedAt),
-					),
-				)
-				.returning({ id: apiToken.id });
-			if (!revoked) throw new ApiTokenNotFound();
+		async ({ request, params, status }) => {
+			const listed = await auth.api.listApiKeys({ headers: request.headers });
+			if (!listed.apiKeys.some((key) => key.id === params.tokenId))
+				throw new ApiTokenNotFound();
+			await auth.api.deleteApiKey({
+				headers: request.headers,
+				body: { keyId: params.tokenId },
+			});
 			return status(StatusCodes.NO_CONTENT, undefined);
 		},
 		{
-			write: true,
+			access: "fresh-session-only",
 			params: ApiTokenParams,
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
-				[StatusCodes.FORBIDDEN]: TokenWriteForbiddenResponse,
+				[StatusCodes.UNAUTHORIZED]: InteractiveSessionRequiredResponse,
+				[StatusCodes.FORBIDDEN]: FreshSessionRequiredResponse,
 				[StatusCodes.NOT_FOUND]: TokenNotFoundResponse,
 			},
 			detail: {

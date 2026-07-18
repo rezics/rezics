@@ -35,6 +35,15 @@ let code = generated.code
 	)
 	.replaceAll("sessions_userId_idx", "sessions_user_id_idx")
 	.replaceAll("accounts_userId_idx", "accounts_user_id_idx")
+	.replaceAll("apikeys_configId_idx", "apikeys_config_id_idx")
+	.replaceAll("apikeys_referenceId_idx", "apikeys_reference_id_idx")
+	.replaceAll('index("apikeys_key_idx")', 'uniqueIndex("apikeys_key_key")')
+	.replace(
+		'referenceId: text("reference_id").notNull(),',
+		`referenceId: uuid("reference_id")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),`,
+	)
 	.replace(
 		'name: text("name").notNull(),',
 		'/** @UNIT_LOCALIZATION_EXEMPT Identity-provider source name, not the public Profile title. */\nname: text("name").notNull(),',

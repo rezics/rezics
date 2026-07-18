@@ -98,7 +98,7 @@ export default new Elysia({ prefix: "/polls" })
 			return { id };
 		},
 		{
-			contribute: true,
+			access: "contribute:unit:create",
 			body: CreatePollBody,
 			response: {
 				[StatusCodes.OK]: IdResponse,
@@ -135,7 +135,10 @@ export default new Elysia({ prefix: "/polls" })
 			const labelByOptionId = new Map(
 				content.options.map((option) => [option.optionId, option.label]),
 			);
-			const { profile: viewer, authorization } = await resolveIdentity(request.headers);
+			const { profile: viewer, authorization } = await resolveIdentity(
+				request.headers,
+				"unit:read",
+			);
 			await authorization.unit.ensureCanRead(params.pollId, () => new UnitNotFound("Poll"));
 			const viewerVotes = viewer
 				? await database
@@ -239,7 +242,7 @@ export default new Elysia({ prefix: "/polls" })
 			return { optionIds: body.optionIds };
 		},
 		{
-			contribute: true,
+			access: "contribute:unit:update",
 			params: PollParams,
 			body: VotePollBody,
 			response: {
@@ -289,7 +292,7 @@ export default new Elysia({ prefix: "/polls" })
 			return { optionIds: [] };
 		},
 		{
-			write: true,
+			access: "write:unit:delete",
 			params: PollParams,
 			response: {
 				[StatusCodes.OK]: PollVoteResponse,
@@ -323,7 +326,7 @@ export default new Elysia({ prefix: "/polls" })
 			return { id: params.pollId };
 		},
 		{
-			write: true,
+			access: "write:interaction:write",
 			params: PollParams,
 			response: {
 				[StatusCodes.OK]: IdResponse,

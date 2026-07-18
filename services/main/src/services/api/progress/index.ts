@@ -82,7 +82,7 @@ export default new Elysia({ prefix: "/progress" })
 			return { items: items.map(toProgressResponse) };
 		},
 		{
-			auth: true,
+			access: "interaction:read",
 			query: ListProgressQuery,
 			response: { [StatusCodes.OK]: ProgressListResponse },
 			detail: { summary: "List current profile progress", tags: ["Progress"] },
@@ -107,7 +107,7 @@ export default new Elysia({ prefix: "/progress" })
 			return toProgressResponse(result);
 		},
 		{
-			auth: true,
+			access: "interaction:read",
 			params: ProgressUnitParams,
 			response: {
 				[StatusCodes.OK]: ProgressResponse,
@@ -157,7 +157,7 @@ export default new Elysia({ prefix: "/progress" })
 			return toProgressResponse(progress);
 		},
 		{
-			write: true,
+			access: "write:interaction:write",
 			params: ProgressUnitParams,
 			body: UpsertProgressBody,
 			response: {
@@ -182,7 +182,7 @@ export default new Elysia({ prefix: "/progress" })
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 		{
-			write: true,
+			access: "write:interaction:write",
 			params: ProgressUnitParams,
 			detail: {
 				summary: "Delete progress",
@@ -213,7 +213,7 @@ export default new Elysia({ prefix: "/progress" })
 			return { completed: true };
 		},
 		{
-			write: true,
+			access: "write:interaction:write",
 			params: ProgressNodeParams,
 			response: {
 				[StatusCodes.OK]: CompletionStateResponse,
@@ -239,7 +239,7 @@ export default new Elysia({ prefix: "/progress" })
 			return { completed: false };
 		},
 		{
-			write: true,
+			access: "write:interaction:write",
 			params: ProgressNodeParams,
 			response: { [StatusCodes.OK]: CompletionStateResponse },
 			detail: { summary: "Uncomplete Content Structure node", tags: ["Progress"] },

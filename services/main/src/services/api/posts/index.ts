@@ -233,7 +233,7 @@ export default new Elysia()
 					return { id };
 				},
 				{
-					contribute: true,
+					access: "contribute:unit:create",
 					body: CreatePostBody,
 					response: {
 						[StatusCodes.OK]: IdResponse,
@@ -249,7 +249,8 @@ export default new Elysia()
 			.get(
 				"/:postId",
 				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request.headers)).authorization;
+					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+						.authorization;
 					await authorization.unit.ensureCanRead(
 						params.postId,
 						() => new UnitNotFound("Post"),
@@ -348,7 +349,7 @@ export default new Elysia()
 					return { id: params.postId };
 				},
 				{
-					contribute: true,
+					access: "contribute:unit:update",
 					params: PostParams,
 					body: UpdatePostBody,
 					response: {
@@ -383,7 +384,7 @@ export default new Elysia()
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
 				},
 				{
-					write: true,
+					access: "write:unit:delete",
 					params: PostParams,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
@@ -406,7 +407,8 @@ export default new Elysia()
 			.get(
 				"",
 				async ({ params, query, request }) => {
-					const authorization = (await resolveIdentity(request.headers)).authorization;
+					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+						.authorization;
 					await authorization.unit.ensureCanRead(
 						params.postId,
 						() => new UnitNotFound("Post"),
@@ -454,7 +456,7 @@ export default new Elysia()
 			.get(
 				"/thread",
 				async ({ params, query, request }) => {
-					const identity = await resolveIdentity(request.headers);
+					const identity = await resolveIdentity(request.headers, "unit:read");
 					await identity.authorization.unit.ensureCanRead(
 						params.postId,
 						() => new UnitNotFound("Post"),
@@ -666,7 +668,7 @@ export default new Elysia()
 					return { id: createdReply.id };
 				},
 				{
-					contribute: true,
+					access: "contribute:interaction:write",
 					params: RootPostParams,
 					body: CreateReplyBody,
 					response: {
@@ -725,7 +727,7 @@ export default new Elysia()
 					return { id: params.replyPostId };
 				},
 				{
-					contribute: true,
+					access: "contribute:interaction:write",
 					params: ReplyParams,
 					body: UpdateReplyBody,
 					response: {
@@ -770,7 +772,7 @@ export default new Elysia()
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
 				},
 				{
-					write: true,
+					access: "write:interaction:write",
 					params: ReplyParams,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),

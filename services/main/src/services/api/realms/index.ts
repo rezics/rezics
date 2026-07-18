@@ -99,7 +99,7 @@ async function ensureRealmVisible(realmId: string, headers: Headers) {
 		.where(eq(realm.id, realmId))
 		.limit(1);
 	if (!record) throw new RealmNotFound();
-	const { profile } = await resolveIdentity(headers);
+	const { profile } = await resolveIdentity(headers, "realm:read");
 	const membership = profile ? await findRealmMembership(realmId, profile.unitId) : undefined;
 	if (!isRealmVisible(record.status, record.visibility, membership?.state))
 		throw new RealmNotFound();
@@ -202,7 +202,7 @@ export default new Elysia({ prefix: "/realms" })
 			return { id };
 		},
 		{
-			contribute: true,
+			access: "contribute:unit:create",
 			body: CreateRealmBody,
 			response: { [StatusCodes.OK]: IdResponse },
 			detail: { summary: "Create Realm", tags: ["Realms"] },
@@ -324,7 +324,7 @@ export default new Elysia({ prefix: "/realms" })
 			return { id: params.realmId };
 		},
 		{
-			contribute: true,
+			access: "contribute:interaction:write",
 			params: RealmParams,
 			body: UpdateRealmBody,
 			response: {
@@ -346,7 +346,7 @@ export default new Elysia({ prefix: "/realms" })
 			return { following: true };
 		},
 		{
-			write: true,
+			access: "write:interaction:write",
 			params: RealmParams,
 			response: {
 				[StatusCodes.OK]: FollowResponse,
@@ -369,7 +369,7 @@ export default new Elysia({ prefix: "/realms" })
 			return { following: false };
 		},
 		{
-			write: true,
+			access: "write:interaction:write",
 			params: RealmParams,
 			response: { [StatusCodes.OK]: FollowResponse },
 			detail: { summary: "Unfollow Realm", tags: ["Realms"] },
@@ -433,7 +433,7 @@ export default new Elysia({ prefix: "/realms" })
 			return { state };
 		},
 		{
-			contribute: true,
+			access: "contribute:interaction:write",
 			params: RealmParams,
 			body: JoinRealmBody,
 			response: {
@@ -494,7 +494,7 @@ export default new Elysia({ prefix: "/realms" })
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 		{
-			write: true,
+			access: "write:realm:manage",
 			params: RealmParams,
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),
@@ -535,7 +535,7 @@ export default new Elysia({ prefix: "/realms" })
 			};
 		},
 		{
-			auth: true,
+			access: "realm:read",
 			params: RealmParams,
 			query: ListRealmMembersQuery,
 			response: {
@@ -591,7 +591,7 @@ export default new Elysia({ prefix: "/realms" })
 			return result.row;
 		},
 		{
-			contribute: true,
+			access: "contribute:realm:manage",
 			params: RealmMemberParams,
 			body: UpdateRealmMemberBody,
 			response: {
@@ -684,7 +684,7 @@ export default new Elysia({ prefix: "/realms" })
 			return { id: revision.id, version: revision.version };
 		},
 		{
-			write: true,
+			access: "write:realm:manage",
 			params: RealmParams,
 			body: PublishRealmRulesBody,
 			response: {
@@ -821,7 +821,7 @@ export default new Elysia({ prefix: "/realms" })
 			});
 		},
 		{
-			contribute: true,
+			access: "contribute:realm:manage",
 			params: RealmPinParams,
 			body: CreateRealmPinBody,
 			response: {
@@ -872,7 +872,7 @@ export default new Elysia({ prefix: "/realms" })
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 		{
-			write: true,
+			access: "write:realm:manage",
 			params: RealmPinParams,
 			query: RemoveRealmPinQuery,
 			response: {
@@ -963,7 +963,7 @@ export default new Elysia({ prefix: "/realms" })
 			return result.row;
 		},
 		{
-			contribute: true,
+			access: "contribute:unit:update",
 			params: RealmUnitParams,
 			body: ModerateRealmUnitBody,
 			response: {

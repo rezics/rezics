@@ -15,7 +15,6 @@ import {
 import { pgTable } from "./base";
 import {
 	AiDisclosureValues,
-	ApiTokenScopeValues,
 	CollaboratorRoleValues,
 	ContentRatingValues,
 	ContentStatusValues,
@@ -194,43 +193,6 @@ export const profilePreference = pgTable(
 		createJsonObjectConstraint(
 			"profile_preference_collection_config_json_object_check",
 			table.collectionConfig,
-		),
-	],
-);
-
-export const apiToken = pgTable(
-	"api_token",
-	{
-		id: createUuidv7PrimaryKey(),
-		profileId: uuid()
-			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
-		/** @UNIT_LOCALIZATION_EXEMPT Private operational label, not Unit content. */
-		name: text().notNull(),
-		prefix: text().notNull(),
-		tokenHash: text().notNull(),
-		scopes: text()
-			.array()
-			.default(sql`array[]::text[]`)
-			.notNull(),
-		expiresAt: createTimestampMsColumn(),
-		lastUsedAt: createTimestampMsColumn(),
-		revokedAt: createTimestampMsColumn(),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		unique("api_token_hash_key").on(table.tokenHash),
-		unique("api_token_prefix_key").on(table.prefix),
-		index("api_token_profile_created_at_idx").on(
-			table.profileId,
-			table.createdAt.desc(),
-			table.id.desc(),
-		),
-		check("api_token_name_not_blank", sql`btrim(${table.name}) <> ''`),
-		check(
-			"api_token_scopes_check",
-			sql`${table.scopes} <@ ${sql.raw(`array[${ApiTokenScopeValues.map((value) => `'${value}'`).join(",")}]::text[]`)}`,
 		),
 	],
 );

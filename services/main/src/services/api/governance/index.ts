@@ -410,7 +410,7 @@ export default new Elysia({ prefix: "/governance" })
 			};
 		},
 		{
-			auth: true,
+			access: "session-only",
 			query: ListModerationCasesQuery,
 			response: {
 				[StatusCodes.OK]: ModerationCaseListResponse,
@@ -432,7 +432,7 @@ export default new Elysia({ prefix: "/governance" })
 			return row;
 		},
 		{
-			auth: true,
+			access: "session-only",
 			params: ModerationCaseParams,
 			response: {
 				[StatusCodes.OK]: ModerationCaseResponse,
@@ -479,7 +479,7 @@ export default new Elysia({ prefix: "/governance" })
 			});
 		},
 		{
-			write: true,
+			access: "session-only",
 			params: ModerationCaseParams,
 			body: UpdateModerationCaseBody,
 			response: {
@@ -571,7 +571,7 @@ export default new Elysia({ prefix: "/governance" })
 			return result.created;
 		},
 		{
-			write: true,
+			access: "session-only",
 			body: CreateModerationActionBody,
 			response: {
 				[StatusCodes.OK]: ModerationActionResponse,
@@ -644,7 +644,7 @@ export default new Elysia({ prefix: "/governance" })
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 		{
-			write: true,
+			access: "session-only",
 			params: FeedbackParams,
 			body: ResolveFeedbackBody,
 			response: {
@@ -729,7 +729,7 @@ export default new Elysia({ prefix: "/governance" })
 			return result.created;
 		},
 		{
-			write: true,
+			access: "session-only",
 			body: CreateAccountEnforcementBody,
 			response: {
 				[StatusCodes.OK]: EnforcementResponse,
@@ -798,7 +798,7 @@ export default new Elysia({ prefix: "/governance" })
 			});
 		},
 		{
-			write: true,
+			access: "session-only",
 			params: AccountEnforcementParams,
 			body: RevokeAccountEnforcementBody,
 			response: {
@@ -839,7 +839,7 @@ export default new Elysia({ prefix: "/governance" })
 			};
 		},
 		{
-			auth: true,
+			access: "session-only",
 			query: ListGrantsQuery,
 			response: {
 				[StatusCodes.OK]: GrantListResponse,
@@ -924,7 +924,7 @@ export default new Elysia({ prefix: "/governance" })
 			});
 		},
 		{
-			write: true,
+			access: "session-only",
 			body: CreateGrantBody,
 			response: {
 				[StatusCodes.OK]: GrantResponse,
@@ -981,7 +981,7 @@ export default new Elysia({ prefix: "/governance" })
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 		{
-			write: true,
+			access: "session-only",
 			params: GrantParams,
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),
@@ -1012,7 +1012,7 @@ export default new Elysia({ prefix: "/governance" })
 			};
 		},
 		{
-			auth: true,
+			access: "session-only",
 			params: UnitGovernanceParams,
 			response: {
 				[StatusCodes.OK]: CollaboratorListResponse,
@@ -1054,7 +1054,7 @@ export default new Elysia({ prefix: "/governance" })
 			});
 		},
 		{
-			write: true,
+			access: "session-only",
 			params: UnitGovernanceParams,
 			body: AddUnitCollaboratorBody,
 			response: {
@@ -1120,7 +1120,7 @@ export default new Elysia({ prefix: "/governance" })
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 		{
-			write: true,
+			access: "session-only",
 			params: UnitCollaboratorParams,
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),
@@ -1154,7 +1154,7 @@ export default new Elysia({ prefix: "/governance" })
 			};
 		},
 		{
-			auth: true,
+			access: "session-only",
 			params: UnitGovernanceParams,
 			response: {
 				[StatusCodes.OK]: FieldLockListResponse,
@@ -1196,7 +1196,7 @@ export default new Elysia({ prefix: "/governance" })
 			});
 		},
 		{
-			write: true,
+			access: "session-only",
 			params: UnitGovernanceParams,
 			body: AddUnitFieldLockBody,
 			response: {
@@ -1238,7 +1238,7 @@ export default new Elysia({ prefix: "/governance" })
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 		{
-			write: true,
+			access: "session-only",
 			params: UnitFieldLockParams,
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),

@@ -118,13 +118,13 @@ function ensureRecommendationTracking(
 
 const RecommendationWriteUnauthorizedResponse = toApiErrorResponse(["AuthenticationRequired"]);
 const RecommendationWriteForbiddenResponse = toApiErrorResponse([
-	"ApiTokenScopeRequired",
+	"ApiTokenPermissionRequired",
 	"EmailVerificationRequired",
 	"AccountRestricted",
 ]);
 
 async function getEventProfileId(headers: Headers) {
-	const identity = await resolveIdentity(headers);
+	const identity = await resolveIdentity(headers, "recommendation:read");
 	const profileId = identity.profile?.unitId;
 	if (!profileId) return { identity, profileId: undefined };
 	const [preference] = await database
@@ -140,7 +140,7 @@ export default new Elysia({ prefix: "/recommendations" })
 	.get(
 		"/units",
 		async ({ query, request }) => {
-			const identity = await resolveIdentity(request.headers);
+			const identity = await resolveIdentity(request.headers, "recommendation:read");
 			const viewer = await resolveRecommendationViewer(
 				identity.profile?.unitId,
 				query.personalized,
@@ -215,7 +215,7 @@ export default new Elysia({ prefix: "/recommendations" })
 	.get(
 		"/posts/:postId",
 		async ({ params, query, request }) => {
-			const identity = await resolveIdentity(request.headers);
+			const identity = await resolveIdentity(request.headers, "recommendation:read");
 			const viewer = await resolveRecommendationViewer(
 				identity.profile?.unitId,
 				query.personalized,
@@ -366,7 +366,7 @@ export default new Elysia({ prefix: "/recommendations" })
 			return { excluded: true };
 		},
 		{
-			write: true,
+			access: "write:recommendation:write",
 			params: RecommendationExclusionParams,
 			body: RecommendationExclusionBody,
 			response: {
@@ -392,7 +392,7 @@ export default new Elysia({ prefix: "/recommendations" })
 			return { excluded: false };
 		},
 		{
-			write: true,
+			access: "write:recommendation:write",
 			params: RecommendationExclusionParams,
 			response: {
 				[StatusCodes.OK]: RecommendationExclusionResponse,

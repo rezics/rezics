@@ -119,7 +119,7 @@ export default new Elysia({ prefix: "/collections" })
 			return getCollection(id, profile.unitId);
 		},
 		{
-			write: true,
+			access: "write:unit:create",
 			body: CreateCollectionBody,
 			response: {
 				[StatusCodes.OK]: CollectionDetailResponse,
@@ -134,7 +134,7 @@ export default new Elysia({ prefix: "/collections" })
 			return getCollection(await ensureFavorites(profile.unitId), profile.unitId);
 		},
 		{
-			write: true,
+			access: "write:unit:read",
 			response: {
 				[StatusCodes.OK]: CollectionDetailResponse,
 				[StatusCodes.NOT_FOUND]: CollectionNotFoundResponse,
@@ -147,7 +147,7 @@ export default new Elysia({ prefix: "/collections" })
 		async ({ params, request }) => {
 			return getCollection(
 				params.collectionId,
-				(await resolveIdentity(request.headers)).profile?.unitId,
+				(await resolveIdentity(request.headers, "unit:read")).profile?.unitId,
 			);
 		},
 		{
@@ -213,7 +213,7 @@ export default new Elysia({ prefix: "/collections" })
 			return getCollection(params.collectionId, profile.unitId);
 		},
 		{
-			write: true,
+			access: "write:unit:update",
 			params: CollectionParams,
 			body: UpdateCollectionBody,
 			response: {
@@ -249,7 +249,7 @@ export default new Elysia({ prefix: "/collections" })
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 		{
-			write: true,
+			access: "write:unit:delete",
 			params: CollectionParams,
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),
@@ -291,7 +291,7 @@ export default new Elysia({ prefix: "/collections" })
 			return { saved: true };
 		},
 		{
-			write: true,
+			access: "write:unit:update",
 			params: CollectionItemParams,
 			body: SaveCollectionItemBody,
 			response: {
@@ -324,7 +324,7 @@ export default new Elysia({ prefix: "/collections" })
 			return { saved: false };
 		},
 		{
-			write: true,
+			access: "write:unit:update",
 			params: CollectionItemParams,
 			response: {
 				[StatusCodes.OK]: SavedResponse,
@@ -357,7 +357,7 @@ export default new Elysia({ prefix: "/collections" })
 			return { favorited: true, collectionId };
 		},
 		{
-			write: true,
+			access: "write:unit:update",
 			params: FavoriteItemParams,
 			response: {
 				[StatusCodes.OK]: FavoriteResponse,
@@ -388,7 +388,7 @@ export default new Elysia({ prefix: "/collections" })
 			return { favorited: false, collectionId };
 		},
 		{
-			write: true,
+			access: "write:unit:update",
 			params: FavoriteItemParams,
 			response: { [StatusCodes.OK]: FavoriteResponse },
 			detail: { summary: "Remove favorite unit", tags: ["Collections"] },

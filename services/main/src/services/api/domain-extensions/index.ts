@@ -137,7 +137,7 @@ export default new Elysia()
 					return { id };
 				},
 				{
-					contribute: true,
+					access: "contribute:unit:create",
 					body: CreateSeriesBody,
 					response: { [StatusCodes.OK]: IdResponse },
 					detail: { summary: "Create Series", tags: ["Series"] },
@@ -146,7 +146,8 @@ export default new Elysia()
 			.get(
 				"/:seriesId/releases",
 				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request.headers)).authorization;
+					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+						.authorization;
 					await authorization.unit.ensureCanRead(
 						params.seriesId,
 						() => new UnitNotFound("Series"),
@@ -204,7 +205,7 @@ export default new Elysia()
 					return created;
 				},
 				{
-					contribute: true,
+					access: "contribute:unit:update",
 					params: SeriesReleaseParams,
 					body: UpsertSeriesReleaseBody,
 					response: {
@@ -243,7 +244,7 @@ export default new Elysia()
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
 				},
 				{
-					write: true,
+					access: "write:unit:delete",
 					params: SeriesReleaseParams,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
@@ -299,7 +300,7 @@ export default new Elysia()
 					return { id };
 				},
 				{
-					contribute: true,
+					access: "contribute:unit:create",
 					body: CreateZoneBody,
 					response: {
 						[StatusCodes.OK]: IdResponse,
@@ -323,7 +324,7 @@ export default new Elysia()
 					return { following: true };
 				},
 				{
-					write: true,
+					access: "write:unit:update",
 					params: ZoneParams,
 					response: {
 						[StatusCodes.OK]: FollowResponse,
@@ -346,7 +347,7 @@ export default new Elysia()
 					return { following: false };
 				},
 				{
-					write: true,
+					access: "write:unit:delete",
 					params: ZoneParams,
 					response: { [StatusCodes.OK]: FollowResponse },
 					detail: { summary: "Unfollow Zone", tags: ["Zones"] },
@@ -358,7 +359,8 @@ export default new Elysia()
 			.get(
 				"/:softwareId/system-requirements",
 				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request.headers)).authorization;
+					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+						.authorization;
 					await authorization.unit.ensureCanRead(
 						params.softwareId,
 						() => new UnitNotFound("Software"),
@@ -422,7 +424,7 @@ export default new Elysia()
 					return created;
 				},
 				{
-					contribute: true,
+					access: "contribute:unit:update",
 					params: SoftwareParams,
 					body: SystemRequirementBody,
 					response: {
@@ -475,7 +477,7 @@ export default new Elysia()
 					});
 				},
 				{
-					contribute: true,
+					access: "contribute:unit:update",
 					params: SoftwareRequirementParams,
 					body: SystemRequirementBody,
 					response: {
@@ -520,7 +522,7 @@ export default new Elysia()
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
 				},
 				{
-					write: true,
+					access: "write:unit:delete",
 					params: SoftwareRequirementParams,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),

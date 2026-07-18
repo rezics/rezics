@@ -27,7 +27,7 @@ export default new Elysia({ prefix: "/reactions" })
 	.get(
 		"/units/:unitId",
 		async ({ params, query, request }) => {
-			const { authorization } = await resolveIdentity(request.headers);
+			const { authorization } = await resolveIdentity(request.headers, "interaction:read");
 			await authorization.unit.ensureCanRead(params.unitId);
 			if (query.realmId) {
 				await authorization.unit.ensureCanRead(query.realmId);
@@ -85,7 +85,7 @@ export default new Elysia({ prefix: "/reactions" })
 			return { reaction: body.reaction };
 		},
 		{
-			contribute: true,
+			access: "contribute:interaction:write",
 			params: UnitReactionParams,
 			body: SetReactionBody,
 			response: {
@@ -110,7 +110,7 @@ export default new Elysia({ prefix: "/reactions" })
 			return { reaction: null };
 		},
 		{
-			write: true,
+			access: "write:interaction:write",
 			params: UnitReactionParams,
 			body: SetReactionBody,
 			response: { [StatusCodes.OK]: ReactionResponse },
@@ -128,7 +128,7 @@ export default new Elysia({ prefix: "/reactions" })
 			return { shared: true };
 		},
 		{
-			contribute: true,
+			access: "contribute:interaction:write",
 			params: UnitReactionParams,
 			response: {
 				[StatusCodes.OK]: ShareResponse,
@@ -151,7 +151,7 @@ export default new Elysia({ prefix: "/reactions" })
 			return { shared: false };
 		},
 		{
-			write: true,
+			access: "write:interaction:write",
 			params: UnitReactionParams,
 			response: { [StatusCodes.OK]: ShareResponse },
 			detail: { summary: "Remove Unit share", tags: ["Reactions"] },

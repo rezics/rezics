@@ -53,6 +53,8 @@ import type {
 	GetApiApiTokensResponses,
 	PostApiApiTokensOptions,
 	PostApiApiTokensResponses,
+	PatchApiApiTokensByTokenIdOptions,
+	PatchApiApiTokensByTokenIdResponses,
 	GetApiFeedOptions,
 	GetApiFeedResponses,
 	GetApiFeedbackMeOptions,
@@ -695,6 +697,20 @@ export function postApiApiTokens<ThrowOnError extends boolean = true>(
 
 	return request({ method: "POST", url: "/api/api-tokens", ...config }) as Promise<
 		RequestResult<PostApiApiTokensResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Update API token
+ * {@link /api/api-tokens/:tokenId}
+ */
+export function patchApiApiTokensByTokenId<ThrowOnError extends boolean = true>(
+	options: Options<PatchApiApiTokensByTokenIdOptions, ThrowOnError>,
+): Promise<RequestResult<PatchApiApiTokensByTokenIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "PATCH", url: "/api/api-tokens/{tokenId}", ...config }) as Promise<
+		RequestResult<PatchApiApiTokensByTokenIdResponses, ThrowOnError>
 	>;
 }
 

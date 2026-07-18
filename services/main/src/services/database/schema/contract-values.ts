@@ -53,14 +53,6 @@ export const NotificationKindValues = [
 	"realm",
 	"system",
 ] as const;
-export const ApiTokenScopeValues = [
-	"read",
-	"profile:write",
-	"content:write",
-	"interaction:write",
-	"realm:manage",
-] as const;
-
 export const FeedbackKindValues = ["report", "bug", "feature", "other"] as const;
 export const EnforcementKindValues = [
 	"warning",

@@ -24,7 +24,7 @@ const allowedTypes = new Set(["image/avif", "image/gif", "image/jpeg", "image/pn
 
 const AuthenticationRequiredResponse = toApiErrorResponse(["AuthenticationRequired"]);
 const UploadForbiddenResponse = toApiErrorResponse([
-	"ApiTokenScopeRequired",
+	"ApiTokenPermissionRequired",
 	"EmailVerificationRequired",
 	"AccountRestricted",
 	"UploadKeyForbidden",
@@ -50,7 +50,7 @@ export default new Elysia({ prefix: "/uploads" })
 			return { key, url, expiresIn: 900 };
 		},
 		{
-			contribute: true,
+			access: "contribute:upload:write",
 			body: RequestUploadBody,
 			response: {
 				[StatusCodes.OK]: UploadRequestResponse,
@@ -88,7 +88,7 @@ export default new Elysia({ prefix: "/uploads" })
 			return { key: body.key, contentType: detected.mime, size: head.ContentLength };
 		},
 		{
-			contribute: true,
+			access: "contribute:upload:write",
 			body: UploadKeyBody,
 			response: {
 				[StatusCodes.OK]: UploadCompleteResponse,
@@ -107,13 +107,13 @@ export default new Elysia({ prefix: "/uploads" })
 			return { url: await storage.presignGet({ Key: query.key }) };
 		},
 		{
-			auth: true,
+			access: "upload:read",
 			query: UploadUrlQuery,
 			response: {
 				[StatusCodes.OK]: UploadUrlResponse,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"ApiTokenScopeRequired",
+					"ApiTokenPermissionRequired",
 					"UploadKeyForbidden",
 				]),
 			},
@@ -128,7 +128,7 @@ export default new Elysia({ prefix: "/uploads" })
 			return status(StatusCodes.NO_CONTENT, undefined);
 		},
 		{
-			write: true,
+			access: "write:upload:write",
 			body: UploadKeyBody,
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),

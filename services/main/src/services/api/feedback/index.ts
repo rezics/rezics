@@ -40,7 +40,7 @@ export default new Elysia({ prefix: "/feedback" })
 				.limit(query.limit ?? 30),
 		}),
 		{
-			auth: true,
+			access: "feedback:write",
 			query: ListFeedbackQuery,
 			response: { [StatusCodes.OK]: FeedbackListResponse },
 			detail: { summary: "List current user's feedback", tags: ["Feedback"] },
@@ -98,7 +98,7 @@ export default new Elysia({ prefix: "/feedback" })
 			return created;
 		},
 		{
-			write: true,
+			access: "write:feedback:write",
 			body: CreateFeedbackBody,
 			response: {
 				[StatusCodes.OK]: FeedbackResponse,

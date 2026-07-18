@@ -17,6 +17,7 @@
 		"@tanstack/react-query": "^5.83.0",
 		"@types/react": "19",
 		"kubb": "5.0.0-beta.96",
+		"prettier": "3",
 		"react": "19.2",
 		"typescript": "7"
 	}

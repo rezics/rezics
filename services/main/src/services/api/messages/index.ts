@@ -156,7 +156,7 @@ export default new Elysia({ prefix: "/messages" })
 			};
 		},
 		{
-			auth: true,
+			access: "message:read",
 			query: MessageCursorQuery,
 			response: {
 				[StatusCodes.OK]: ConversationListResponse,
@@ -226,7 +226,7 @@ export default new Elysia({ prefix: "/messages" })
 			return { id };
 		},
 		{
-			write: true,
+			access: "write:message:write",
 			body: CreateConversationBody,
 			response: {
 				[StatusCodes.OK]: IdResponse,
@@ -268,7 +268,7 @@ export default new Elysia({ prefix: "/messages" })
 			return row;
 		},
 		{
-			auth: true,
+			access: "message:read",
 			params: ConversationParams,
 			response: {
 				[StatusCodes.OK]: ConversationResponse,
@@ -319,7 +319,7 @@ export default new Elysia({ prefix: "/messages" })
 			};
 		},
 		{
-			auth: true,
+			access: "message:read",
 			params: ConversationParams,
 			query: MessageCursorQuery,
 			response: {
@@ -384,7 +384,7 @@ export default new Elysia({ prefix: "/messages" })
 			return result.created;
 		},
 		{
-			write: true,
+			access: "write:message:write",
 			params: ConversationParams,
 			body: SendMessageBody,
 			response: {
@@ -430,7 +430,7 @@ export default new Elysia({ prefix: "/messages" })
 			};
 		},
 		{
-			write: true,
+			access: "write:message:write",
 			params: ConversationParams,
 			body: MarkConversationReadBody,
 			response: {
@@ -461,7 +461,7 @@ export default new Elysia({ prefix: "/messages" })
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 		{
-			write: true,
+			access: "write:message:write",
 			params: MessageParams,
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),

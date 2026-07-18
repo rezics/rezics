@@ -7,15 +7,37 @@ export class AuthenticationRequired extends Data.TaggedError("AuthenticationRequ
 	readonly message = "Authentication required";
 }
 
-export class ApiTokenScopeRequired extends Data.TaggedError("ApiTokenScopeRequired") {
+export class ApiTokenPermissionRequired extends Data.TaggedError("ApiTokenPermissionRequired") {
 	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = ApiTokenScopeRequired.status;
+	readonly status = ApiTokenPermissionRequired.status;
 	readonly message: string;
 
-	constructor(readonly scope: string) {
+	constructor(readonly permission: string) {
 		super();
-		this.message = `API token requires scope: ${scope}`;
+		this.message = `API token requires permission: ${permission}`;
 	}
+}
+
+export class ApiTokenRateLimitExceeded extends Data.TaggedError("ApiTokenRateLimitExceeded") {
+	static readonly status = StatusCodes.TOO_MANY_REQUESTS as const;
+	readonly status = ApiTokenRateLimitExceeded.status;
+	readonly message = "API token rate limit exceeded";
+
+	constructor(readonly retryAfterSeconds: number) {
+		super();
+	}
+}
+
+export class InteractiveSessionRequired extends Data.TaggedError("InteractiveSessionRequired") {
+	static readonly status = StatusCodes.UNAUTHORIZED as const;
+	readonly status = InteractiveSessionRequired.status;
+	readonly message = "An interactive session is required";
+}
+
+export class FreshSessionRequired extends Data.TaggedError("FreshSessionRequired") {
+	static readonly status = StatusCodes.FORBIDDEN as const;
+	readonly status = FreshSessionRequired.status;
+	readonly message = "Please re-authenticate before managing credentials";
 }
 
 export class EmailVerificationRequired extends Data.TaggedError("EmailVerificationRequired") {
@@ -26,6 +48,9 @@ export class EmailVerificationRequired extends Data.TaggedError("EmailVerificati
 
 export const AuthErrors = [
 	AuthenticationRequired,
-	ApiTokenScopeRequired,
+	ApiTokenPermissionRequired,
+	ApiTokenRateLimitExceeded,
+	InteractiveSessionRequired,
+	FreshSessionRequired,
 	EmailVerificationRequired,
 ] as const;

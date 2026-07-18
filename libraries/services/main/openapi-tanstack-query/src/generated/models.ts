@@ -17,7 +17,10 @@ export const ApiErrorCode = {
 	ValidationError: "ValidationError",
 	InternalError: "InternalError",
 	AuthenticationRequired: "AuthenticationRequired",
-	ApiTokenScopeRequired: "ApiTokenScopeRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	ApiTokenRateLimitExceeded: "ApiTokenRateLimitExceeded",
+	InteractiveSessionRequired: "InteractiveSessionRequired",
+	FreshSessionRequired: "FreshSessionRequired",
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
 	RealmCapabilityRequired: "RealmCapabilityRequired",
@@ -41,8 +44,6 @@ export const ApiErrorCode = {
 	UploadNotFound: "UploadNotFound",
 	UploadInvalidSize: "UploadInvalidSize",
 	UploadContentMismatch: "UploadContentMismatch",
-	ApiTokenReadScopeRequired: "ApiTokenReadScopeRequired",
-	ApiTokenExpiryInvalid: "ApiTokenExpiryInvalid",
 	ApiTokenNotFound: "ApiTokenNotFound",
 	InvalidSearch: "InvalidSearch",
 	SearchUnavailable: "SearchUnavailable",
@@ -1767,7 +1768,7 @@ export type PutApiRecommendationsExclusionsByUnitIdStatus401 = {
 };
 
 export const PutApiRecommendationsExclusionsByUnitIdStatus403ErrorCodeEnum = {
-	ApiTokenScopeRequired: "ApiTokenScopeRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
 } as const;
@@ -1784,7 +1785,7 @@ export type PutApiRecommendationsExclusionsByUnitIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'ApiTokenScopeRequired'
+		 * @default 'ApiTokenPermissionRequired'
 		 * @type string
 		 */
 		code: PutApiRecommendationsExclusionsByUnitIdStatus403ErrorCodeEnum;
@@ -1981,7 +1982,7 @@ export type DeleteApiRecommendationsExclusionsByUnitIdStatus401 = {
 };
 
 export const DeleteApiRecommendationsExclusionsByUnitIdStatus403ErrorCodeEnum = {
-	ApiTokenScopeRequired: "ApiTokenScopeRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
 } as const;
@@ -1998,7 +1999,7 @@ export type DeleteApiRecommendationsExclusionsByUnitIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'ApiTokenScopeRequired'
+		 * @default 'ApiTokenPermissionRequired'
 		 * @type string
 		 */
 		code: DeleteApiRecommendationsExclusionsByUnitIdStatus403ErrorCodeEnum;
@@ -2979,6 +2980,31 @@ export type DeleteApiMessagesByMessageIdResponse =
 	| DeleteApiMessagesByMessageIdStatus422
 	| DeleteApiMessagesByMessageIdStatus500;
 
+export const GetApiApiTokensStatus200ItemsPermissionsEnum = {
+	"unit:read": "unit:read",
+	"unit:create": "unit:create",
+	"unit:update": "unit:update",
+	"unit:delete": "unit:delete",
+	"profile:read": "profile:read",
+	"profile:update": "profile:update",
+	"interaction:read": "interaction:read",
+	"interaction:write": "interaction:write",
+	"realm:read": "realm:read",
+	"realm:manage": "realm:manage",
+	"message:read": "message:read",
+	"message:write": "message:write",
+	"notification:read": "notification:read",
+	"notification:write": "notification:write",
+	"recommendation:read": "recommendation:read",
+	"recommendation:write": "recommendation:write",
+	"upload:read": "upload:read",
+	"upload:write": "upload:write",
+	"feedback:write": "feedback:write",
+} as const;
+
+export type GetApiApiTokensStatus200ItemsPermissionsEnum =
+	(typeof GetApiApiTokensStatus200ItemsPermissionsEnum)[keyof typeof GetApiApiTokensStatus200ItemsPermissionsEnum];
+
 /**
  * @type object
  */
@@ -3004,10 +3030,13 @@ export type GetApiApiTokensStatus200 = {
 		/**
 		 * @type array
 		 */
-		scopes: string[];
+		permissions: GetApiApiTokensStatus200ItemsPermissionsEnum[];
+		/**
+		 * @type boolean
+		 */
+		enabled: boolean;
 		expiresAt: (string | null) | null;
 		lastUsedAt: (string | null) | null;
-		revokedAt: (string | null) | null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -3021,6 +3050,62 @@ export type GetApiApiTokensStatus200 = {
 		 */
 		updatedAt: string;
 	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiApiTokensStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InteractiveSessionRequired'
+		 * @type string
+		 */
+		code: "InteractiveSessionRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiApiTokensStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'FreshSessionRequired'
+		 * @type string
+		 */
+		code: "FreshSessionRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
 };
 
 /**
@@ -3043,13 +3128,44 @@ export type GetApiApiTokensOptions = {
  */
 export type GetApiApiTokensResponses = {
 	"200": GetApiApiTokensStatus200;
+	"401": GetApiApiTokensStatus401;
+	"403": GetApiApiTokensStatus403;
 	"500": GetApiApiTokensStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type GetApiApiTokensResponse = GetApiApiTokensStatus200 | GetApiApiTokensStatus500;
+export type GetApiApiTokensResponse =
+	| GetApiApiTokensStatus200
+	| GetApiApiTokensStatus401
+	| GetApiApiTokensStatus403
+	| GetApiApiTokensStatus500;
+
+export const PostApiApiTokensStatus200PermissionsEnum = {
+	"unit:read": "unit:read",
+	"unit:create": "unit:create",
+	"unit:update": "unit:update",
+	"unit:delete": "unit:delete",
+	"profile:read": "profile:read",
+	"profile:update": "profile:update",
+	"interaction:read": "interaction:read",
+	"interaction:write": "interaction:write",
+	"realm:read": "realm:read",
+	"realm:manage": "realm:manage",
+	"message:read": "message:read",
+	"message:write": "message:write",
+	"notification:read": "notification:read",
+	"notification:write": "notification:write",
+	"recommendation:read": "recommendation:read",
+	"recommendation:write": "recommendation:write",
+	"upload:read": "upload:read",
+	"upload:write": "upload:write",
+	"feedback:write": "feedback:write",
+} as const;
+
+export type PostApiApiTokensStatus200PermissionsEnum =
+	(typeof PostApiApiTokensStatus200PermissionsEnum)[keyof typeof PostApiApiTokensStatus200PermissionsEnum];
 
 /**
  * @type object
@@ -3068,58 +3184,33 @@ export type PostApiApiTokensStatus200 = {
 	/**
 	 * @type string
 	 */
-	token: string;
-	/**
-	 * @type string
-	 */
 	tokenPrefix: string;
 	/**
 	 * @type array
 	 */
-	scopes: string[];
+	permissions: PostApiApiTokensStatus200PermissionsEnum[];
+	/**
+	 * @type boolean
+	 */
+	enabled: boolean;
 	expiresAt: (string | null) | null;
+	lastUsedAt: (string | null) | null;
 	/**
 	 * @description
 	 * Format: `date-time`
 	 * @type string
 	 */
 	createdAt: string;
-};
-
-export const PostApiApiTokensStatus400ErrorCodeEnum = {
-	ApiTokenReadScopeRequired: "ApiTokenReadScopeRequired",
-	ApiTokenExpiryInvalid: "ApiTokenExpiryInvalid",
-} as const;
-
-export type PostApiApiTokensStatus400ErrorCodeEnum =
-	(typeof PostApiApiTokensStatus400ErrorCodeEnum)[keyof typeof PostApiApiTokensStatus400ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PostApiApiTokensStatus400 = {
 	/**
-	 * @type object
+	 * @description
+	 * Format: `date-time`
+	 * @type string
 	 */
-	error: {
-		/**
-		 * @default 'ApiTokenReadScopeRequired'
-		 * @type string
-		 */
-		code: PostApiApiTokensStatus400ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
+	updatedAt: string;
 	/**
 	 * @type string
 	 */
-	requestId: string;
+	token: string;
 };
 
 /**
@@ -3131,10 +3222,10 @@ export type PostApiApiTokensStatus401 = {
 	 */
 	error: {
 		/**
-		 * @default 'AuthenticationRequired'
+		 * @default 'InteractiveSessionRequired'
 		 * @type string
 		 */
-		code: "AuthenticationRequired";
+		code: "InteractiveSessionRequired";
 		/**
 		 * @type string
 		 */
@@ -3150,15 +3241,6 @@ export type PostApiApiTokensStatus401 = {
 	requestId: string;
 };
 
-export const PostApiApiTokensStatus403ErrorCodeEnum = {
-	ApiTokenScopeRequired: "ApiTokenScopeRequired",
-	EmailVerificationRequired: "EmailVerificationRequired",
-	AccountRestricted: "AccountRestricted",
-} as const;
-
-export type PostApiApiTokensStatus403ErrorCodeEnum =
-	(typeof PostApiApiTokensStatus403ErrorCodeEnum)[keyof typeof PostApiApiTokensStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -3168,10 +3250,10 @@ export type PostApiApiTokensStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'ApiTokenScopeRequired'
+		 * @default 'FreshSessionRequired'
 		 * @type string
 		 */
-		code: PostApiApiTokensStatus403ErrorCodeEnum;
+		code: "FreshSessionRequired";
 		/**
 		 * @type string
 		 */
@@ -3197,16 +3279,30 @@ export type PostApiApiTokensStatus422 = ValidationError;
  */
 export type PostApiApiTokensStatus500 = InternalError;
 
-export const PostApiApiTokensRequestScopesEnum = {
-	read: "read",
-	"profile:write": "profile:write",
-	"content:write": "content:write",
+export const PostApiApiTokensRequestPermissionsEnum = {
+	"unit:read": "unit:read",
+	"unit:create": "unit:create",
+	"unit:update": "unit:update",
+	"unit:delete": "unit:delete",
+	"profile:read": "profile:read",
+	"profile:update": "profile:update",
+	"interaction:read": "interaction:read",
 	"interaction:write": "interaction:write",
+	"realm:read": "realm:read",
 	"realm:manage": "realm:manage",
+	"message:read": "message:read",
+	"message:write": "message:write",
+	"notification:read": "notification:read",
+	"notification:write": "notification:write",
+	"recommendation:read": "recommendation:read",
+	"recommendation:write": "recommendation:write",
+	"upload:read": "upload:read",
+	"upload:write": "upload:write",
+	"feedback:write": "feedback:write",
 } as const;
 
-export type PostApiApiTokensRequestScopesEnum =
-	(typeof PostApiApiTokensRequestScopesEnum)[keyof typeof PostApiApiTokensRequestScopesEnum];
+export type PostApiApiTokensRequestPermissionsEnum =
+	(typeof PostApiApiTokensRequestPermissionsEnum)[keyof typeof PostApiApiTokensRequestPermissionsEnum];
 
 /**
  * @type object
@@ -3221,8 +3317,11 @@ export type PostApiApiTokensBody = {
 	/**
 	 * @type array
 	 */
-	scopes: PostApiApiTokensRequestScopesEnum[];
-	expiresAt?: (string | null) | null;
+	permissions: PostApiApiTokensRequestPermissionsEnum[];
+	/**
+	 * @default 90
+	 */
+	expiresInDays?: string | number;
 };
 
 /**
@@ -3240,7 +3339,6 @@ export type PostApiApiTokensOptions = {
  */
 export type PostApiApiTokensResponses = {
 	"200": PostApiApiTokensStatus200;
-	"400": PostApiApiTokensStatus400;
 	"401": PostApiApiTokensStatus401;
 	"403": PostApiApiTokensStatus403;
 	"422": PostApiApiTokensStatus422;
@@ -3252,11 +3350,262 @@ export type PostApiApiTokensResponses = {
  */
 export type PostApiApiTokensResponse =
 	| PostApiApiTokensStatus200
-	| PostApiApiTokensStatus400
 	| PostApiApiTokensStatus401
 	| PostApiApiTokensStatus403
 	| PostApiApiTokensStatus422
 	| PostApiApiTokensStatus500;
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokensByTokenIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tokenId: string;
+};
+
+export const PatchApiApiTokensByTokenIdStatus200PermissionsEnum = {
+	"unit:read": "unit:read",
+	"unit:create": "unit:create",
+	"unit:update": "unit:update",
+	"unit:delete": "unit:delete",
+	"profile:read": "profile:read",
+	"profile:update": "profile:update",
+	"interaction:read": "interaction:read",
+	"interaction:write": "interaction:write",
+	"realm:read": "realm:read",
+	"realm:manage": "realm:manage",
+	"message:read": "message:read",
+	"message:write": "message:write",
+	"notification:read": "notification:read",
+	"notification:write": "notification:write",
+	"recommendation:read": "recommendation:read",
+	"recommendation:write": "recommendation:write",
+	"upload:read": "upload:read",
+	"upload:write": "upload:write",
+	"feedback:write": "feedback:write",
+} as const;
+
+export type PatchApiApiTokensByTokenIdStatus200PermissionsEnum =
+	(typeof PatchApiApiTokensByTokenIdStatus200PermissionsEnum)[keyof typeof PatchApiApiTokensByTokenIdStatus200PermissionsEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokensByTokenIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type string
+	 */
+	name: string;
+	/**
+	 * @type string
+	 */
+	tokenPrefix: string;
+	/**
+	 * @type array
+	 */
+	permissions: PatchApiApiTokensByTokenIdStatus200PermissionsEnum[];
+	/**
+	 * @type boolean
+	 */
+	enabled: boolean;
+	expiresAt: (string | null) | null;
+	lastUsedAt: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokensByTokenIdStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InteractiveSessionRequired'
+		 * @type string
+		 */
+		code: "InteractiveSessionRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokensByTokenIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'FreshSessionRequired'
+		 * @type string
+		 */
+		code: "FreshSessionRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokensByTokenIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenNotFound'
+		 * @type string
+		 */
+		code: "ApiTokenNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokensByTokenIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokensByTokenIdStatus500 = InternalError;
+
+export const PatchApiApiTokensByTokenIdRequestPermissionsEnum = {
+	"unit:read": "unit:read",
+	"unit:create": "unit:create",
+	"unit:update": "unit:update",
+	"unit:delete": "unit:delete",
+	"profile:read": "profile:read",
+	"profile:update": "profile:update",
+	"interaction:read": "interaction:read",
+	"interaction:write": "interaction:write",
+	"realm:read": "realm:read",
+	"realm:manage": "realm:manage",
+	"message:read": "message:read",
+	"message:write": "message:write",
+	"notification:read": "notification:read",
+	"notification:write": "notification:write",
+	"recommendation:read": "recommendation:read",
+	"recommendation:write": "recommendation:write",
+	"upload:read": "upload:read",
+	"upload:write": "upload:write",
+	"feedback:write": "feedback:write",
+} as const;
+
+export type PatchApiApiTokensByTokenIdRequestPermissionsEnum =
+	(typeof PatchApiApiTokensByTokenIdRequestPermissionsEnum)[keyof typeof PatchApiApiTokensByTokenIdRequestPermissionsEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokensByTokenIdBody = {
+	/**
+	 * @minLength 1
+	 * @maxLength 120
+	 * @type string | undefined
+	 */
+	name?: string;
+	/**
+	 * @type array | undefined
+	 */
+	permissions?: PatchApiApiTokensByTokenIdRequestPermissionsEnum[];
+	expiresInDays?: string | number;
+	/**
+	 * @type boolean | undefined
+	 */
+	enabled?: boolean;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokensByTokenIdOptions = {
+	body: PatchApiApiTokensByTokenIdBody;
+	path: PatchApiApiTokensByTokenIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokensByTokenIdResponses = {
+	"200": PatchApiApiTokensByTokenIdStatus200;
+	"401": PatchApiApiTokensByTokenIdStatus401;
+	"403": PatchApiApiTokensByTokenIdStatus403;
+	"404": PatchApiApiTokensByTokenIdStatus404;
+	"422": PatchApiApiTokensByTokenIdStatus422;
+	"500": PatchApiApiTokensByTokenIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PatchApiApiTokensByTokenIdResponse =
+	| PatchApiApiTokensByTokenIdStatus200
+	| PatchApiApiTokensByTokenIdStatus401
+	| PatchApiApiTokensByTokenIdStatus403
+	| PatchApiApiTokensByTokenIdStatus404
+	| PatchApiApiTokensByTokenIdStatus422
+	| PatchApiApiTokensByTokenIdStatus500;
 
 /**
  * @type object
@@ -3284,10 +3633,10 @@ export type DeleteApiApiTokensByTokenIdStatus401 = {
 	 */
 	error: {
 		/**
-		 * @default 'AuthenticationRequired'
+		 * @default 'InteractiveSessionRequired'
 		 * @type string
 		 */
-		code: "AuthenticationRequired";
+		code: "InteractiveSessionRequired";
 		/**
 		 * @type string
 		 */
@@ -3303,15 +3652,6 @@ export type DeleteApiApiTokensByTokenIdStatus401 = {
 	requestId: string;
 };
 
-export const DeleteApiApiTokensByTokenIdStatus403ErrorCodeEnum = {
-	ApiTokenScopeRequired: "ApiTokenScopeRequired",
-	EmailVerificationRequired: "EmailVerificationRequired",
-	AccountRestricted: "AccountRestricted",
-} as const;
-
-export type DeleteApiApiTokensByTokenIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiApiTokensByTokenIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiApiTokensByTokenIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -3321,10 +3661,10 @@ export type DeleteApiApiTokensByTokenIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'ApiTokenScopeRequired'
+		 * @default 'FreshSessionRequired'
 		 * @type string
 		 */
-		code: DeleteApiApiTokensByTokenIdStatus403ErrorCodeEnum;
+		code: "FreshSessionRequired";
 		/**
 		 * @type string
 		 */
@@ -10901,7 +11241,7 @@ export type PostApiUnitsByTypeStatus401 = {
 };
 
 export const PostApiUnitsByTypeStatus403ErrorCodeEnum = {
-	ApiTokenScopeRequired: "ApiTokenScopeRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
 	UnitCoverKeyForbidden: "UnitCoverKeyForbidden",
@@ -10919,7 +11259,7 @@ export type PostApiUnitsByTypeStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'ApiTokenScopeRequired'
+		 * @default 'ApiTokenPermissionRequired'
 		 * @type string
 		 */
 		code: PostApiUnitsByTypeStatus403ErrorCodeEnum;
@@ -12170,7 +12510,7 @@ export type PatchApiUnitsByTypeByUnitIdStatus401 = {
 };
 
 export const PatchApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum = {
-	ApiTokenScopeRequired: "ApiTokenScopeRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
 	UnitEditForbidden: "UnitEditForbidden",
@@ -12190,7 +12530,7 @@ export type PatchApiUnitsByTypeByUnitIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'ApiTokenScopeRequired'
+		 * @default 'ApiTokenPermissionRequired'
 		 * @type string
 		 */
 		code: PatchApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum;
@@ -12502,7 +12842,7 @@ export type DeleteApiUnitsByTypeByUnitIdStatus401 = {
 };
 
 export const DeleteApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum = {
-	ApiTokenScopeRequired: "ApiTokenScopeRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
 	UnitEditForbidden: "UnitEditForbidden",
@@ -12521,7 +12861,7 @@ export type DeleteApiUnitsByTypeByUnitIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'ApiTokenScopeRequired'
+		 * @default 'ApiTokenPermissionRequired'
 		 * @type string
 		 */
 		code: DeleteApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum;
@@ -13003,7 +13343,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus401 = {
 };
 
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum = {
-	ApiTokenScopeRequired: "ApiTokenScopeRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
 	UnitEditForbidden: "UnitEditForbidden",
@@ -13022,7 +13362,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'ApiTokenScopeRequired'
+		 * @default 'ApiTokenPermissionRequired'
 		 * @type string
 		 */
 		code: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum;
@@ -29588,7 +29928,7 @@ export type PostApiUploadsStatus401 = {
 };
 
 export const PostApiUploadsStatus403ErrorCodeEnum = {
-	ApiTokenScopeRequired: "ApiTokenScopeRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
 	UploadKeyForbidden: "UploadKeyForbidden",
@@ -29606,7 +29946,7 @@ export type PostApiUploadsStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'ApiTokenScopeRequired'
+		 * @default 'ApiTokenPermissionRequired'
 		 * @type string
 		 */
 		code: PostApiUploadsStatus403ErrorCodeEnum;
@@ -29749,7 +30089,7 @@ export type DeleteApiUploadsStatus401 = {
 };
 
 export const DeleteApiUploadsStatus403ErrorCodeEnum = {
-	ApiTokenScopeRequired: "ApiTokenScopeRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
 	UploadKeyForbidden: "UploadKeyForbidden",
@@ -29767,7 +30107,7 @@ export type DeleteApiUploadsStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'ApiTokenScopeRequired'
+		 * @default 'ApiTokenPermissionRequired'
 		 * @type string
 		 */
 		code: DeleteApiUploadsStatus403ErrorCodeEnum;
@@ -29883,7 +30223,7 @@ export type PostApiUploadsCompleteStatus401 = {
 };
 
 export const PostApiUploadsCompleteStatus403ErrorCodeEnum = {
-	ApiTokenScopeRequired: "ApiTokenScopeRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
 	UploadKeyForbidden: "UploadKeyForbidden",
@@ -29901,7 +30241,7 @@ export type PostApiUploadsCompleteStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'ApiTokenScopeRequired'
+		 * @default 'ApiTokenPermissionRequired'
 		 * @type string
 		 */
 		code: PostApiUploadsCompleteStatus403ErrorCodeEnum;
@@ -30084,7 +30424,7 @@ export type GetApiUploadsUrlStatus401 = {
 };
 
 export const GetApiUploadsUrlStatus403ErrorCodeEnum = {
-	ApiTokenScopeRequired: "ApiTokenScopeRequired",
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 	UploadKeyForbidden: "UploadKeyForbidden",
 } as const;
 
@@ -30100,7 +30440,7 @@ export type GetApiUploadsUrlStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'ApiTokenScopeRequired'
+		 * @default 'ApiTokenPermissionRequired'
 		 * @type string
 		 */
 		code: GetApiUploadsUrlStatus403ErrorCodeEnum;

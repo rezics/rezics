@@ -8,7 +8,7 @@ export const SeedValue = 20_260_715;
 export const DemoCredentials = {
 	email: "demo@rezics.test",
 	password: "rezics-demo-password",
-	apiToken: "rz_seed_demo_7f4fbe85d6f14af18d64c8c32de7e821",
+	apiToken: "rz_api_7f4fbe85d6f14af18d64c8c32de7e821",
 } as const;
 
 export const SeedPlan = {

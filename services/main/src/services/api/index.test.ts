@@ -59,4 +59,18 @@ describe("API root", () => {
 
 		expect(response.status).toBe(StatusCodes.NOT_FOUND);
 	});
+
+	it("never accepts API tokens on the credential control-plane", async () => {
+		const response = await api.handle(
+			new Request("http://localhost/api/api-tokens", {
+				headers: { Authorization: "Bearer rz_api_test_credential" },
+			}),
+		);
+
+		expect(response.status).toBe(StatusCodes.UNAUTHORIZED);
+		expect((await readErrorBody(response)).error).toEqual({
+			code: "InteractiveSessionRequired",
+			message: "An interactive session is required",
+		});
+	});
 });

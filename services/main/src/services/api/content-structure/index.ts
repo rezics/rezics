@@ -66,7 +66,7 @@ export default new Elysia()
 	.get(
 		"/units/book/:unitId/content-structure/nodes",
 		async ({ params, request }) => {
-			const { authorization } = await resolveIdentity(request.headers);
+			const { authorization } = await resolveIdentity(request.headers, "unit:read");
 			if (!(await authorization.unit.canRead(params.unitId))) throw new BookNotFound();
 			const canEditBook = await authorization.unit.canEdit(params.unitId);
 			const rows = await database
@@ -206,7 +206,7 @@ export default new Elysia()
 			);
 		},
 		{
-			contribute: true,
+			access: "contribute:unit:update",
 			params: BookContentStructureParams,
 			body: CreateContentStructureNodeBody,
 			response: {
@@ -293,7 +293,7 @@ export default new Elysia()
 			);
 		},
 		{
-			contribute: true,
+			access: "contribute:unit:update",
 			params: ContentStructureNodeParams,
 			body: UpdateContentStructureNodeBody,
 			response: {
@@ -313,7 +313,8 @@ export default new Elysia()
 	.get(
 		"/chapters/:chapterId",
 		async ({ params, query, request }) => {
-			const authorization = (await resolveIdentity(request.headers)).authorization;
+			const authorization = (await resolveIdentity(request.headers, "unit:read"))
+				.authorization;
 			const [node] = await database
 				.select({
 					nodeId: contentStructureNode.id,
@@ -455,7 +456,7 @@ export default new Elysia()
 			return { updated: true };
 		},
 		{
-			contribute: true,
+			access: "contribute:unit:update",
 			params: ChapterLocalizationParams,
 			body: UpsertChapterLocalizationBody,
 			response: {

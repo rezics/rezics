@@ -57,7 +57,7 @@ export default new Elysia({ prefix: "/users" })
 			};
 		},
 		{
-			auth: true,
+			access: "profile:read",
 			response: {
 				[StatusCodes.OK]: CurrentProfileResponse,
 				[StatusCodes.NOT_FOUND]: ProfileNotFoundResponse,
@@ -136,7 +136,7 @@ export default new Elysia({ prefix: "/users" })
 			return getProfile(profile.unitId);
 		},
 		{
-			write: true,
+			access: "write:unit:update",
 			body: UpdateProfileBody,
 			response: {
 				[StatusCodes.OK]: PublicProfileResponse,
@@ -167,7 +167,7 @@ export default new Elysia({ prefix: "/users" })
 			};
 		},
 		{
-			auth: true,
+			access: "profile:read",
 			response: {
 				[StatusCodes.OK]: PreferencesResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
@@ -200,7 +200,7 @@ export default new Elysia({ prefix: "/users" })
 			};
 		},
 		{
-			write: true,
+			access: "write:profile:update",
 			body: ReplacePreferencesBody,
 			response: {
 				[StatusCodes.OK]: PreferencesResponse,
@@ -234,7 +234,7 @@ export default new Elysia({ prefix: "/users" })
 				)
 				.limit(1);
 			if (!result) throw new UserNotFound();
-			const viewer = (await resolveIdentity(request.headers)).profile;
+			const viewer = (await resolveIdentity(request.headers, "unit:read")).profile;
 			const following = viewer
 				? Boolean(
 						(
@@ -309,7 +309,7 @@ export default new Elysia({ prefix: "/users" })
 			return { following: true };
 		},
 		{
-			contribute: true,
+			access: "contribute:interaction:write",
 			params: UserIdParams,
 			response: {
 				[StatusCodes.OK]: FollowResponse,
@@ -336,7 +336,7 @@ export default new Elysia({ prefix: "/users" })
 			return { following: false };
 		},
 		{
-			write: true,
+			access: "write:interaction:write",
 			params: UserIdParams,
 			response: { [StatusCodes.OK]: FollowResponse },
 			detail: { summary: "Unfollow user", tags: ["Users"] },
@@ -364,7 +364,7 @@ export default new Elysia({ prefix: "/users" })
 				.orderBy(profileBlock.createdAt, profileBlock.blockedProfileId),
 		}),
 		{
-			auth: true,
+			access: "interaction:read",
 			response: { [StatusCodes.OK]: UserBlockListResponse },
 			detail: { summary: "List blocked users", tags: ["Users"] },
 		},
@@ -397,7 +397,7 @@ export default new Elysia({ prefix: "/users" })
 			return { blocked: true };
 		},
 		{
-			write: true,
+			access: "write:interaction:write",
 			params: UserIdParams,
 			response: {
 				[StatusCodes.OK]: BlockResponse,
@@ -423,7 +423,7 @@ export default new Elysia({ prefix: "/users" })
 			return { blocked: false };
 		},
 		{
-			write: true,
+			access: "write:interaction:write",
 			params: UserIdParams,
 			response: { [StatusCodes.OK]: BlockResponse },
 			detail: { summary: "Unblock user", tags: ["Users"] },

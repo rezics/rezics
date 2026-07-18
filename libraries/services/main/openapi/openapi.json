@@ -25,7 +25,10 @@
 					"ValidationError",
 					"InternalError",
 					"AuthenticationRequired",
-					"ApiTokenScopeRequired",
+					"ApiTokenPermissionRequired",
+					"ApiTokenRateLimitExceeded",
+					"InteractiveSessionRequired",
+					"FreshSessionRequired",
 					"EmailVerificationRequired",
 					"AccountRestricted",
 					"RealmCapabilityRequired",
@@ -49,8 +52,6 @@
 					"UploadNotFound",
 					"UploadInvalidSize",
 					"UploadContentMismatch",
-					"ApiTokenReadScopeRequired",
-					"ApiTokenExpiryInvalid",
 					"ApiTokenNotFound",
 					"InvalidSearch",
 					"SearchUnavailable",
@@ -2145,10 +2146,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "ApiTokenScopeRequired",
+													"default": "ApiTokenPermissionRequired",
 													"type": "string",
 													"enum": [
-														"ApiTokenScopeRequired",
+														"ApiTokenPermissionRequired",
 														"EmailVerificationRequired",
 														"AccountRestricted"
 													]
@@ -2273,10 +2274,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "ApiTokenScopeRequired",
+													"default": "ApiTokenPermissionRequired",
 													"type": "string",
 													"enum": [
-														"ApiTokenScopeRequired",
+														"ApiTokenPermissionRequired",
 														"EmailVerificationRequired",
 														"AccountRestricted"
 													]
@@ -3202,10 +3203,10 @@
 													"id",
 													"name",
 													"tokenPrefix",
-													"scopes",
+													"permissions",
+													"enabled",
 													"expiresAt",
 													"lastUsedAt",
-													"revokedAt",
 													"createdAt",
 													"updatedAt"
 												],
@@ -3213,10 +3214,35 @@
 													"id": { "format": "uuid", "type": "string" },
 													"name": { "type": "string" },
 													"tokenPrefix": { "type": "string" },
-													"scopes": {
+													"permissions": {
 														"type": "array",
-														"items": { "type": "string" }
+														"items": {
+															"default": "unit:read",
+															"type": "string",
+															"enum": [
+																"unit:read",
+																"unit:create",
+																"unit:update",
+																"unit:delete",
+																"profile:read",
+																"profile:update",
+																"interaction:read",
+																"interaction:write",
+																"realm:read",
+																"realm:manage",
+																"message:read",
+																"message:write",
+																"notification:read",
+																"notification:write",
+																"recommendation:read",
+																"recommendation:write",
+																"upload:read",
+																"upload:write",
+																"feedback:write"
+															]
+														}
 													},
+													"enabled": { "type": "boolean" },
 													"expiresAt": {
 														"nullable": true,
 														"anyOf": [
@@ -3228,16 +3254,6 @@
 														]
 													},
 													"lastUsedAt": {
-														"nullable": true,
-														"anyOf": [
-															{
-																"format": "date-time",
-																"type": "string"
-															},
-															{ "type": "null" }
-														]
-													},
-													"revokedAt": {
 														"nullable": true,
 														"anyOf": [
 															{
@@ -3263,125 +3279,6 @@
 							}
 						}
 					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"operationId": "getApiApi-tokens"
-			},
-			"post": {
-				"summary": "Create API token (secret returned once)",
-				"tags": ["API Tokens"],
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"type": "object",
-								"required": ["name", "scopes"],
-								"properties": {
-									"name": { "minLength": 1, "maxLength": 120, "type": "string" },
-									"scopes": {
-										"minItems": 1,
-										"maxItems": 5,
-										"uniqueItems": true,
-										"type": "array",
-										"items": {
-											"type": "string",
-											"enum": [
-												"read",
-												"profile:write",
-												"content:write",
-												"interaction:write",
-												"realm:manage"
-											]
-										}
-									},
-									"expiresAt": {
-										"nullable": true,
-										"anyOf": [
-											{ "format": "date-time", "type": "string" },
-											{ "type": "null" }
-										]
-									}
-								}
-							}
-						}
-					},
-					"required": true
-				},
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": [
-										"id",
-										"name",
-										"token",
-										"tokenPrefix",
-										"scopes",
-										"expiresAt",
-										"createdAt"
-									],
-									"properties": {
-										"id": { "format": "uuid", "type": "string" },
-										"name": { "type": "string" },
-										"token": { "type": "string" },
-										"tokenPrefix": { "type": "string" },
-										"scopes": {
-											"type": "array",
-											"items": { "type": "string" }
-										},
-										"expiresAt": {
-											"nullable": true,
-											"anyOf": [
-												{ "format": "date-time", "type": "string" },
-												{ "type": "null" }
-											]
-										},
-										"createdAt": { "format": "date-time", "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Response for status 400",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "ApiTokenReadScopeRequired",
-													"type": "string",
-													"enum": [
-														"ApiTokenReadScopeRequired",
-														"ApiTokenExpiryInvalid"
-													]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
 					"401": {
 						"description": "Response for status 401",
 						"content": {
@@ -3395,9 +3292,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "AuthenticationRequired",
+													"default": "InteractiveSessionRequired",
 													"type": "string",
-													"enum": ["AuthenticationRequired"]
+													"enum": ["InteractiveSessionRequired"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -3422,13 +3319,210 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "ApiTokenScopeRequired",
+													"default": "FreshSessionRequired",
 													"type": "string",
-													"enum": [
-														"ApiTokenScopeRequired",
-														"EmailVerificationRequired",
-														"AccountRestricted"
-													]
+													"enum": ["FreshSessionRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiApi-tokens"
+			},
+			"post": {
+				"summary": "Create API token (secret returned once)",
+				"tags": ["API Tokens"],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"required": ["name", "permissions"],
+								"properties": {
+									"name": { "minLength": 1, "maxLength": 120, "type": "string" },
+									"permissions": {
+										"minItems": 1,
+										"maxItems": 19,
+										"uniqueItems": true,
+										"type": "array",
+										"items": {
+											"default": "unit:read",
+											"type": "string",
+											"enum": [
+												"unit:read",
+												"unit:create",
+												"unit:update",
+												"unit:delete",
+												"profile:read",
+												"profile:update",
+												"interaction:read",
+												"interaction:write",
+												"realm:read",
+												"realm:manage",
+												"message:read",
+												"message:write",
+												"notification:read",
+												"notification:write",
+												"recommendation:read",
+												"recommendation:write",
+												"upload:read",
+												"upload:write",
+												"feedback:write"
+											]
+										}
+									},
+									"expiresInDays": {
+										"minimum": 1,
+										"maximum": 365,
+										"default": 90,
+										"anyOf": [
+											{ "format": "integer", "default": 0, "type": "string" },
+											{
+												"minimum": 1,
+												"maximum": 365,
+												"default": 90,
+												"type": "integer"
+											}
+										]
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"name",
+										"tokenPrefix",
+										"permissions",
+										"enabled",
+										"expiresAt",
+										"lastUsedAt",
+										"createdAt",
+										"updatedAt",
+										"token"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"name": { "type": "string" },
+										"tokenPrefix": { "type": "string" },
+										"permissions": {
+											"type": "array",
+											"items": {
+												"default": "unit:read",
+												"type": "string",
+												"enum": [
+													"unit:read",
+													"unit:create",
+													"unit:update",
+													"unit:delete",
+													"profile:read",
+													"profile:update",
+													"interaction:read",
+													"interaction:write",
+													"realm:read",
+													"realm:manage",
+													"message:read",
+													"message:write",
+													"notification:read",
+													"notification:write",
+													"recommendation:read",
+													"recommendation:write",
+													"upload:read",
+													"upload:write",
+													"feedback:write"
+												]
+											}
+										},
+										"enabled": { "type": "boolean" },
+										"expiresAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"lastUsedAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" },
+										"token": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "InteractiveSessionRequired",
+													"type": "string",
+													"enum": ["InteractiveSessionRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "FreshSessionRequired",
+													"type": "string",
+													"enum": ["FreshSessionRequired"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -3461,13 +3555,142 @@
 			}
 		},
 		"/api/api-tokens/{tokenId}": {
-			"delete": {
-				"summary": "Revoke API token",
+			"patch": {
+				"summary": "Update API token",
 				"tags": ["API Tokens"],
+				"parameters": [
+					{
+						"name": "tokenId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"minProperties": 1,
+								"type": "object",
+								"properties": {
+									"name": { "minLength": 1, "maxLength": 120, "type": "string" },
+									"permissions": {
+										"minItems": 1,
+										"maxItems": 19,
+										"uniqueItems": true,
+										"type": "array",
+										"items": {
+											"default": "unit:read",
+											"type": "string",
+											"enum": [
+												"unit:read",
+												"unit:create",
+												"unit:update",
+												"unit:delete",
+												"profile:read",
+												"profile:update",
+												"interaction:read",
+												"interaction:write",
+												"realm:read",
+												"realm:manage",
+												"message:read",
+												"message:write",
+												"notification:read",
+												"notification:write",
+												"recommendation:read",
+												"recommendation:write",
+												"upload:read",
+												"upload:write",
+												"feedback:write"
+											]
+										}
+									},
+									"expiresInDays": {
+										"minimum": 1,
+										"maximum": 365,
+										"anyOf": [
+											{ "format": "integer", "default": 0, "type": "string" },
+											{ "minimum": 1, "maximum": 365, "type": "integer" }
+										]
+									},
+									"enabled": { "type": "boolean" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
 				"responses": {
-					"204": {
-						"description": "Response for status 204",
-						"content": { "type": "void" }
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"name",
+										"tokenPrefix",
+										"permissions",
+										"enabled",
+										"expiresAt",
+										"lastUsedAt",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"name": { "type": "string" },
+										"tokenPrefix": { "type": "string" },
+										"permissions": {
+											"type": "array",
+											"items": {
+												"default": "unit:read",
+												"type": "string",
+												"enum": [
+													"unit:read",
+													"unit:create",
+													"unit:update",
+													"unit:delete",
+													"profile:read",
+													"profile:update",
+													"interaction:read",
+													"interaction:write",
+													"realm:read",
+													"realm:manage",
+													"message:read",
+													"message:write",
+													"notification:read",
+													"notification:write",
+													"recommendation:read",
+													"recommendation:write",
+													"upload:read",
+													"upload:write",
+													"feedback:write"
+												]
+											}
+										},
+										"enabled": { "type": "boolean" },
+										"expiresAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"lastUsedAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
 					},
 					"401": {
 						"description": "Response for status 401",
@@ -3482,9 +3705,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "AuthenticationRequired",
+													"default": "InteractiveSessionRequired",
 													"type": "string",
-													"enum": ["AuthenticationRequired"]
+													"enum": ["InteractiveSessionRequired"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -3509,13 +3732,117 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "ApiTokenScopeRequired",
+													"default": "FreshSessionRequired",
 													"type": "string",
-													"enum": [
-														"ApiTokenScopeRequired",
-														"EmailVerificationRequired",
-														"AccountRestricted"
-													]
+													"enum": ["FreshSessionRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ApiTokenNotFound",
+													"type": "string",
+													"enum": ["ApiTokenNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "patchApiApi-tokensByTokenId"
+			},
+			"delete": {
+				"summary": "Revoke API token",
+				"tags": ["API Tokens"],
+				"responses": {
+					"204": {
+						"description": "Response for status 204",
+						"content": { "type": "void" }
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "InteractiveSessionRequired",
+													"type": "string",
+													"enum": ["InteractiveSessionRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "FreshSessionRequired",
+													"type": "string",
+													"enum": ["FreshSessionRequired"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -12329,10 +12656,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "ApiTokenScopeRequired",
+													"default": "ApiTokenPermissionRequired",
 													"type": "string",
 													"enum": [
-														"ApiTokenScopeRequired",
+														"ApiTokenPermissionRequired",
 														"EmailVerificationRequired",
 														"AccountRestricted",
 														"UnitCoverKeyForbidden"
@@ -14019,10 +14346,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "ApiTokenScopeRequired",
+													"default": "ApiTokenPermissionRequired",
 													"type": "string",
 													"enum": [
-														"ApiTokenScopeRequired",
+														"ApiTokenPermissionRequired",
 														"EmailVerificationRequired",
 														"AccountRestricted",
 														"UnitEditForbidden",
@@ -14161,10 +14488,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "ApiTokenScopeRequired",
+													"default": "ApiTokenPermissionRequired",
 													"type": "string",
 													"enum": [
-														"ApiTokenScopeRequired",
+														"ApiTokenPermissionRequired",
 														"EmailVerificationRequired",
 														"AccountRestricted",
 														"UnitEditForbidden",
@@ -15159,10 +15486,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "ApiTokenScopeRequired",
+													"default": "ApiTokenPermissionRequired",
 													"type": "string",
 													"enum": [
-														"ApiTokenScopeRequired",
+														"ApiTokenPermissionRequired",
 														"EmailVerificationRequired",
 														"AccountRestricted",
 														"UnitEditForbidden",
@@ -34032,10 +34359,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "ApiTokenScopeRequired",
+													"default": "ApiTokenPermissionRequired",
 													"type": "string",
 													"enum": [
-														"ApiTokenScopeRequired",
+														"ApiTokenPermissionRequired",
 														"EmailVerificationRequired",
 														"AccountRestricted",
 														"UploadKeyForbidden"
@@ -34145,10 +34472,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "ApiTokenScopeRequired",
+													"default": "ApiTokenPermissionRequired",
 													"type": "string",
 													"enum": [
-														"ApiTokenScopeRequired",
+														"ApiTokenPermissionRequired",
 														"EmailVerificationRequired",
 														"AccountRestricted",
 														"UploadKeyForbidden"
@@ -34282,10 +34609,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "ApiTokenScopeRequired",
+													"default": "ApiTokenPermissionRequired",
 													"type": "string",
 													"enum": [
-														"ApiTokenScopeRequired",
+														"ApiTokenPermissionRequired",
 														"EmailVerificationRequired",
 														"AccountRestricted",
 														"UploadKeyForbidden"
@@ -34440,10 +34767,10 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "ApiTokenScopeRequired",
+													"default": "ApiTokenPermissionRequired",
 													"type": "string",
 													"enum": [
-														"ApiTokenScopeRequired",
+														"ApiTokenPermissionRequired",
 														"UploadKeyForbidden"
 													]
 												},

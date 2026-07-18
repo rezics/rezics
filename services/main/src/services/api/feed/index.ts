@@ -704,7 +704,7 @@ export async function hydrateFeedItems(
 export default new Elysia({ prefix: "/feed" }).get(
 	"",
 	async ({ query, request }) => {
-		const identity = await resolveIdentity(request.headers);
+		const identity = await resolveIdentity(request.headers, "unit:read");
 		const viewer = await resolveRecommendationViewer(
 			identity.profile?.unitId,
 			query.personalized,

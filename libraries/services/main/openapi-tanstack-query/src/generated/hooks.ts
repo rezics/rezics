@@ -114,14 +114,22 @@ import type {
 	PutApiMessagesConversationsByConversationIdReadStatus422,
 	PutApiMessagesConversationsByConversationIdReadStatus500,
 	GetApiApiTokensStatus200,
+	GetApiApiTokensStatus401,
+	GetApiApiTokensStatus403,
 	GetApiApiTokensStatus500,
 	PostApiApiTokensOptions,
 	PostApiApiTokensStatus200,
-	PostApiApiTokensStatus400,
 	PostApiApiTokensStatus401,
 	PostApiApiTokensStatus403,
 	PostApiApiTokensStatus422,
 	PostApiApiTokensStatus500,
+	PatchApiApiTokensByTokenIdOptions,
+	PatchApiApiTokensByTokenIdStatus200,
+	PatchApiApiTokensByTokenIdStatus401,
+	PatchApiApiTokensByTokenIdStatus403,
+	PatchApiApiTokensByTokenIdStatus404,
+	PatchApiApiTokensByTokenIdStatus422,
+	PatchApiApiTokensByTokenIdStatus500,
 	GetApiFeedOptions,
 	GetApiFeedStatus200,
 	GetApiFeedStatus400,
@@ -940,6 +948,7 @@ import {
 	putApiMessagesConversationsByConversationIdRead,
 	getApiApiTokens,
 	postApiApiTokens,
+	patchApiApiTokensByTokenId,
 	getApiFeed,
 	getApiFeedbackMe,
 	postApiFeedback,
@@ -3008,7 +3017,9 @@ export function getApiApiTokensQueryOptions(
 	const queryKey = getApiApiTokensQueryKey();
 	return queryOptions<
 		GetApiApiTokensStatus200,
-		ResponseErrorConfig<GetApiApiTokensStatus500>,
+		ResponseErrorConfig<
+			GetApiApiTokensStatus401 | GetApiApiTokensStatus403 | GetApiApiTokensStatus500
+		>,
 		GetApiApiTokensStatus200,
 		typeof queryKey
 	>({
@@ -3037,7 +3048,9 @@ export function useGetApiApiTokens<
 		query?: Partial<
 			QueryObserverOptions<
 				GetApiApiTokensStatus200,
-				ResponseErrorConfig<GetApiApiTokensStatus500>,
+				ResponseErrorConfig<
+					GetApiApiTokensStatus401 | GetApiApiTokensStatus403 | GetApiApiTokensStatus500
+				>,
 				TData,
 				TQueryData,
 				TQueryKey
@@ -3057,9 +3070,12 @@ export function useGetApiApiTokens<
 			queryKey,
 		} as unknown as QueryObserverOptions,
 		queryClient,
-	) as UseQueryResult<TData, ResponseErrorConfig<GetApiApiTokensStatus500>> & {
-		queryKey: TQueryKey;
-	};
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			GetApiApiTokensStatus401 | GetApiApiTokensStatus403 | GetApiApiTokensStatus500
+		>
+	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
 
@@ -3075,7 +3091,6 @@ export function postApiApiTokensMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiApiTokensStatus200,
 		ResponseErrorConfig<
-			| PostApiApiTokensStatus400
 			| PostApiApiTokensStatus401
 			| PostApiApiTokensStatus403
 			| PostApiApiTokensStatus422
@@ -3101,7 +3116,6 @@ export function usePostApiApiTokens<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiApiTokensStatus200,
 			ResponseErrorConfig<
-				| PostApiApiTokensStatus400
 				| PostApiApiTokensStatus401
 				| PostApiApiTokensStatus403
 				| PostApiApiTokensStatus422
@@ -3120,7 +3134,6 @@ export function usePostApiApiTokens<TContext>(
 	const baseOptions = postApiApiTokensMutationOptions(config) as UseMutationOptions<
 		PostApiApiTokensStatus200,
 		ResponseErrorConfig<
-			| PostApiApiTokensStatus400
 			| PostApiApiTokensStatus401
 			| PostApiApiTokensStatus403
 			| PostApiApiTokensStatus422
@@ -3133,7 +3146,6 @@ export function usePostApiApiTokens<TContext>(
 	return useMutation<
 		PostApiApiTokensStatus200,
 		ResponseErrorConfig<
-			| PostApiApiTokensStatus400
 			| PostApiApiTokensStatus401
 			| PostApiApiTokensStatus403
 			| PostApiApiTokensStatus422
@@ -3151,13 +3163,114 @@ export function usePostApiApiTokens<TContext>(
 	) as UseMutationResult<
 		PostApiApiTokensStatus200,
 		ResponseErrorConfig<
-			| PostApiApiTokensStatus400
 			| PostApiApiTokensStatus401
 			| PostApiApiTokensStatus403
 			| PostApiApiTokensStatus422
 			| PostApiApiTokensStatus500
 		>,
 		PostApiApiTokensOptions,
+		TContext
+	>;
+}
+
+export const patchApiApiTokensByTokenIdMutationKey = () =>
+	[{ url: "/api/api-tokens/:tokenId" }] as const;
+
+export function patchApiApiTokensByTokenIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = patchApiApiTokensByTokenIdMutationKey();
+	return mutationOptions<
+		PatchApiApiTokensByTokenIdStatus200,
+		ResponseErrorConfig<
+			| PatchApiApiTokensByTokenIdStatus401
+			| PatchApiApiTokensByTokenIdStatus403
+			| PatchApiApiTokensByTokenIdStatus404
+			| PatchApiApiTokensByTokenIdStatus422
+			| PatchApiApiTokensByTokenIdStatus500
+		>,
+		PatchApiApiTokensByTokenIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await patchApiApiTokensByTokenId({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Update API token
+ * {@link /api/api-tokens/:tokenId}
+ */
+export function usePatchApiApiTokensByTokenId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PatchApiApiTokensByTokenIdStatus200,
+			ResponseErrorConfig<
+				| PatchApiApiTokensByTokenIdStatus401
+				| PatchApiApiTokensByTokenIdStatus403
+				| PatchApiApiTokensByTokenIdStatus404
+				| PatchApiApiTokensByTokenIdStatus422
+				| PatchApiApiTokensByTokenIdStatus500
+			>,
+			PatchApiApiTokensByTokenIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? patchApiApiTokensByTokenIdMutationKey();
+
+	const baseOptions = patchApiApiTokensByTokenIdMutationOptions(config) as UseMutationOptions<
+		PatchApiApiTokensByTokenIdStatus200,
+		ResponseErrorConfig<
+			| PatchApiApiTokensByTokenIdStatus401
+			| PatchApiApiTokensByTokenIdStatus403
+			| PatchApiApiTokensByTokenIdStatus404
+			| PatchApiApiTokensByTokenIdStatus422
+			| PatchApiApiTokensByTokenIdStatus500
+		>,
+		PatchApiApiTokensByTokenIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PatchApiApiTokensByTokenIdStatus200,
+		ResponseErrorConfig<
+			| PatchApiApiTokensByTokenIdStatus401
+			| PatchApiApiTokensByTokenIdStatus403
+			| PatchApiApiTokensByTokenIdStatus404
+			| PatchApiApiTokensByTokenIdStatus422
+			| PatchApiApiTokensByTokenIdStatus500
+		>,
+		PatchApiApiTokensByTokenIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PatchApiApiTokensByTokenIdStatus200,
+		ResponseErrorConfig<
+			| PatchApiApiTokensByTokenIdStatus401
+			| PatchApiApiTokensByTokenIdStatus403
+			| PatchApiApiTokensByTokenIdStatus404
+			| PatchApiApiTokensByTokenIdStatus422
+			| PatchApiApiTokensByTokenIdStatus500
+		>,
+		PatchApiApiTokensByTokenIdOptions,
 		TContext
 	>;
 }

@@ -143,7 +143,7 @@ export default new Elysia()
 					id: await createCatalogUnit("entity", profile.unitId, body),
 				}),
 				{
-					contribute: true,
+					access: "contribute:unit:create",
 					body: CreateCatalogUnitBody,
 					response: { [StatusCodes.OK]: IdResponse },
 					detail: { summary: "Create entity entry", tags: ["Entity"] },
@@ -251,7 +251,7 @@ export default new Elysia()
 					id: await createCatalogUnit("tag", profile.unitId, body),
 				}),
 				{
-					contribute: true,
+					access: "contribute:unit:create",
 					body: CreateCatalogUnitBody,
 					response: { [StatusCodes.OK]: IdResponse },
 					detail: { summary: "Create tag", tags: ["Tags"] },
@@ -293,7 +293,7 @@ export default new Elysia()
 					return { items };
 				},
 				{
-					auth: true,
+					access: "unit:read",
 					params: UnitAliasUnitParams,
 					response: { [StatusCodes.OK]: AliasListResponse },
 					detail: { summary: "List Unit aliases", tags: ["Units"] },
@@ -334,7 +334,7 @@ export default new Elysia()
 					return result;
 				},
 				{
-					contribute: true,
+					access: "contribute:unit:update",
 					params: UnitAliasUnitParams,
 					body: AddUnitAliasBody,
 					response: {
@@ -376,7 +376,7 @@ export default new Elysia()
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
 				},
 				{
-					write: true,
+					access: "write:interaction:write",
 					params: UnitAliasParams,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
@@ -424,7 +424,7 @@ export default new Elysia()
 					return getAliasVoteSummary(params.aliasId, body.value);
 				},
 				{
-					contribute: true,
+					access: "contribute:unit:update",
 					params: UnitAliasParams,
 					body: VoteBody,
 					response: {
@@ -465,7 +465,7 @@ export default new Elysia()
 					return getAliasVoteSummary(params.aliasId, null);
 				},
 				{
-					write: true,
+					access: "write:unit:update",
 					params: UnitAliasParams,
 					response: {
 						[StatusCodes.OK]: VoteResponse,
@@ -502,7 +502,7 @@ export default new Elysia()
 					return credit;
 				},
 				{
-					contribute: true,
+					access: "contribute:unit:update",
 					params: UnitUnitParams,
 					body: AddUnitCreditBody,
 					response: {
@@ -552,7 +552,7 @@ export default new Elysia()
 					return link;
 				},
 				{
-					contribute: true,
+					access: "contribute:unit:update",
 					params: UnitUnitParams,
 					body: AddUnitLinkBody,
 					response: {
@@ -590,7 +590,7 @@ export default new Elysia()
 					return { ...application, score: 0, voteCount: 0 };
 				},
 				{
-					contribute: true,
+					access: "contribute:unit:update",
 					params: UnitTagParams,
 					body: TagUnitBody,
 					response: {
@@ -629,7 +629,7 @@ export default new Elysia()
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
 				},
 				{
-					write: true,
+					access: "write:interaction:write",
 					params: UnitTagParams,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
@@ -673,7 +673,7 @@ export default new Elysia()
 					return getTagVoteSummary(params.unitId, application.tagId, body.value);
 				},
 				{
-					contribute: true,
+					access: "contribute:unit:update",
 					params: UnitTagParams,
 					body: VoteBody,
 					response: {
@@ -709,7 +709,7 @@ export default new Elysia()
 					return getTagVoteSummary(params.unitId, application.tagId, null);
 				},
 				{
-					write: true,
+					access: "write:unit:update",
 					params: UnitTagParams,
 					response: {
 						[StatusCodes.OK]: VoteResponse,
@@ -752,7 +752,7 @@ export default new Elysia()
 					});
 				},
 				{
-					contribute: true,
+					access: "contribute:unit:update",
 					params: UnitVersionParams,
 					response: {
 						[StatusCodes.OK]: UnitVersionResponse,

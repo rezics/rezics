@@ -9,15 +9,17 @@ import {
 	createZoneBoundaryDocument,
 	createZoneThemeDocument,
 } from "@rezics/content-structure";
+import { defaultKeyHasher } from "@better-auth/api-key";
 import { hashPassword } from "better-auth/crypto";
 import { and, eq } from "drizzle-orm";
 
 import { env } from "../src/services/config";
+import { ApiPermissionValues, toApiKeyPermissions } from "../src/services/auth/api-permissions";
 import { database, type DatabaseTransaction } from "../src/services/database";
 import {
 	accountEnforcement,
 	accounts,
-	apiToken,
+	apikeys,
 	auditEvent,
 	book,
 	capabilityGrant,
@@ -407,29 +409,22 @@ async function seedProfiles(
 		createdAt: demo.createdAt,
 		updatedAt: demo.createdAt,
 	});
-	const activeTokenHash = createHash("sha256").update(DemoCredentials.apiToken).digest("hex");
-	const revokedRaw = "rz_seed_revoked_1b8470ee23314a22a1f8545bf13abdad";
-	await tx.insert(apiToken).values([
-		{
-			profileId: demo.id,
-			name: "Seed demo token",
-			prefix: DemoCredentials.apiToken.slice(0, 14),
-			tokenHash: activeTokenHash,
-			scopes: ["read", "profile:write", "content:write", "interaction:write", "realm:manage"],
-			createdAt: demo.createdAt,
-			updatedAt: demo.createdAt,
-		},
-		{
-			profileId: demo.id,
-			name: "Revoked seed token",
-			prefix: revokedRaw.slice(0, 14),
-			tokenHash: createHash("sha256").update(revokedRaw).digest("hex"),
-			scopes: ["read"],
-			revokedAt: data.pastDate(30),
-			createdAt: demo.createdAt,
-			updatedAt: demo.createdAt,
-		},
-	]);
+	await tx.insert(apikeys).values({
+		configId: "default",
+		name: "Seed demo token",
+		start: DemoCredentials.apiToken.slice(0, 14),
+		referenceId: demo.authUserId,
+		prefix: "rz_api_",
+		key: await defaultKeyHasher(DemoCredentials.apiToken),
+		enabled: true,
+		rateLimitEnabled: true,
+		rateLimitTimeWindow: 60_000,
+		rateLimitMax: 300,
+		requestCount: 0,
+		permissions: JSON.stringify(toApiKeyPermissions(ApiPermissionValues)),
+		createdAt: demo.createdAt,
+		updatedAt: demo.createdAt,
+	});
 	return profiles;
 }
 

@@ -46,9 +46,13 @@ export default new Elysia()
 			allowedHeaders: ["Content-Type", "Authorization", "Accept-Language"],
 		}),
 	)
-	.onError(({ error, code, request, status }) => {
+	.onError(({ error, code, request, set, status }) => {
 		const requestId = crypto.randomUUID();
-		if (isApiError(error)) return status(error.status, toApiErrorBody(error, requestId));
+		if (isApiError(error)) {
+			if (error._tag === "ApiTokenRateLimitExceeded")
+				set.headers["Retry-After"] = String(error.retryAfterSeconds);
+			return status(error.status, toApiErrorBody(error, requestId));
+		}
 		if (code === "VALIDATION") {
 			const validationError = new ValidationError();
 			return status(validationError.status, toApiErrorBody(validationError, requestId));

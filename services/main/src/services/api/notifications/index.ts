@@ -173,7 +173,7 @@ export default new Elysia({ prefix: "/notifications" })
 			};
 		},
 		{
-			auth: true,
+			access: "notification:read",
 			query: NotificationCursorQuery,
 			response: {
 				[StatusCodes.OK]: NotificationListResponse,
@@ -198,7 +198,7 @@ export default new Elysia({ prefix: "/notifications" })
 			return { count: row?.value ?? 0 };
 		},
 		{
-			auth: true,
+			access: "notification:read",
 			response: { [StatusCodes.OK]: UnreadCountResponse },
 			detail: { summary: "Get unread notification count", tags: ["Notifications"] },
 		},
@@ -234,7 +234,7 @@ export default new Elysia({ prefix: "/notifications" })
 			return { updated: true };
 		},
 		{
-			write: true,
+			access: "write:notification:write",
 			body: ReadNotificationsBody,
 			response: {
 				[StatusCodes.OK]: t.Object({ updated: t.Boolean() }),
@@ -262,7 +262,7 @@ export default new Elysia({ prefix: "/notifications" })
 			return { updated: true };
 		},
 		{
-			write: true,
+			access: "write:notification:write",
 			params: NotificationParams,
 			response: {
 				[StatusCodes.OK]: t.Object({ updated: t.Boolean() }),
@@ -287,7 +287,7 @@ export default new Elysia({ prefix: "/notifications" })
 			};
 		},
 		{
-			auth: true,
+			access: "notification:read",
 			response: { [StatusCodes.OK]: NotificationPreferencesResponse },
 			detail: { summary: "Get notification preferences", tags: ["Notifications"] },
 		},
@@ -315,7 +315,7 @@ export default new Elysia({ prefix: "/notifications" })
 			};
 		},
 		{
-			write: true,
+			access: "write:notification:write",
 			body: ReplaceNotificationPreferencesBody,
 			response: { [StatusCodes.OK]: NotificationPreferencesResponse },
 			detail: { summary: "Update notification preferences", tags: ["Notifications"] },

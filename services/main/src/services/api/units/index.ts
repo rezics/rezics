@@ -34,7 +34,7 @@ const UnitCreateBadRequestResponse = toApiErrorResponse([
 	"UnitCoverContentMismatch",
 ]);
 const UnitCreateForbiddenResponse = toApiErrorResponse([
-	"ApiTokenScopeRequired",
+	"ApiTokenPermissionRequired",
 	"EmailVerificationRequired",
 	"AccountRestricted",
 	"UnitCoverKeyForbidden",
@@ -46,7 +46,7 @@ const UnitUpdateBadRequestResponse = toApiErrorResponse([
 	"UnitOriginalLanguageMissing",
 ]);
 const UnitMutationForbiddenResponse = toApiErrorResponse([
-	"ApiTokenScopeRequired",
+	"ApiTokenPermissionRequired",
 	"EmailVerificationRequired",
 	"AccountRestricted",
 	"UnitEditForbidden",
@@ -54,7 +54,7 @@ const UnitMutationForbiddenResponse = toApiErrorResponse([
 	"UnitCoverKeyForbidden",
 ]);
 const UnitAuthorizationForbiddenResponse = toApiErrorResponse([
-	"ApiTokenScopeRequired",
+	"ApiTokenPermissionRequired",
 	"EmailVerificationRequired",
 	"AccountRestricted",
 	"UnitEditForbidden",
@@ -94,7 +94,7 @@ export default new Elysia({ prefix: "/units" })
 			return createUnit(params.type, authorization, body);
 		},
 		{
-			contribute: true,
+			access: "contribute:unit:create",
 			params: UnitTypeParams,
 			body: CreateUnitBody,
 			response: {
@@ -128,7 +128,7 @@ export default new Elysia({ prefix: "/units" })
 			return getUnit(
 				params.type,
 				params.unitId,
-				(await resolveIdentity(request.headers)).authorization,
+				(await resolveIdentity(request.headers, "unit:read")).authorization,
 			);
 		},
 		{
@@ -146,7 +146,7 @@ export default new Elysia({ prefix: "/units" })
 			return updateUnit(params.type, params.unitId, authorization, body);
 		},
 		{
-			contribute: true,
+			access: "contribute:unit:update",
 			params: UnitUnitIdParams,
 			body: UpdateUnitBody,
 			response: {
@@ -167,7 +167,7 @@ export default new Elysia({ prefix: "/units" })
 			return status(StatusCodes.NO_CONTENT, undefined);
 		},
 		{
-			write: true,
+			access: "write:unit:delete",
 			params: UnitUnitIdParams,
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),
@@ -192,7 +192,7 @@ export default new Elysia({ prefix: "/units" })
 			return getUnit(params.type, params.unitId, authorization);
 		},
 		{
-			contribute: true,
+			access: "contribute:unit:update",
 			params: UnitLocalizationParams,
 			body: UnitLocalizationBody,
 			response: {
