@@ -6,10 +6,7 @@ import { z } from "zod";
 import {
 	CollectionDefinitionDocument,
 	CollectionPresentationDocument,
-	DockDocument,
 	ZoneBoundaryDocument,
-	ZoneMenuDocument,
-	ZonePageDocument,
 	ZoneThemeDocument,
 	isDocument,
 	isPortableTextDocument,
@@ -34,7 +31,6 @@ import {
 	post,
 	profile,
 	realm,
-	realmDock,
 	realmPin,
 	realmRule,
 	realmRuleRevision,
@@ -55,8 +51,6 @@ import {
 	unitTag,
 	unitVariant,
 	zone,
-	zoneMenu,
-	zonePage,
 } from "../database/schema";
 import { UnitRevisionConflict } from "./errors";
 
@@ -74,10 +68,7 @@ function createDocumentSchema<TSchemaValue extends TSchema>(schema: TSchemaValue
 const PortableTextDocumentSchema = z.custom<PortableTextDocumentValue>(isPortableTextDocument);
 const CollectionDefinitionDocumentSchema = createDocumentSchema(CollectionDefinitionDocument);
 const CollectionPresentationDocumentSchema = createDocumentSchema(CollectionPresentationDocument);
-const DockDocumentSchema = createDocumentSchema(DockDocument);
 const ZoneBoundaryDocumentSchema = createDocumentSchema(ZoneBoundaryDocument);
-const ZoneMenuDocumentSchema = createDocumentSchema(ZoneMenuDocument);
-const ZonePageDocumentSchema = createDocumentSchema(ZonePageDocument);
 const ZoneThemeDocumentSchema = createDocumentSchema(ZoneThemeDocument);
 const RuleSnapshotSchema = z.object({
 	requireOnJoin: z.boolean(),
@@ -108,13 +99,10 @@ const UnitSnapshotSchema = z.object({
 		variants: z.array(SnapshotRowSchema),
 		seriesReleases: z.array(SnapshotRowSchema),
 		softwareRequirements: z.array(SnapshotRowSchema),
-		zonePages: z.array(SnapshotRowSchema),
-		zoneMenus: z.array(SnapshotRowSchema).default([]),
 		collectionItems: z.array(SnapshotRowSchema),
 		contentStructureNodes: z.array(SnapshotRowSchema),
 		pollOptions: z.array(SnapshotRowSchema),
 		realmPins: z.array(SnapshotRowSchema),
-		realmDocks: z.array(SnapshotRowSchema).default([]),
 		realmUnit: z.array(SnapshotRowSchema),
 		realmRules: RuleSnapshotSchema.nullable(),
 	}),
@@ -123,20 +111,18 @@ type RuleSnapshot = z.infer<typeof RuleSnapshotSchema>;
 type UnitSnapshot = z.infer<typeof UnitSnapshotSchema>;
 
 const schemaFactory = createSchemaFactory({ coerce: { date: true } });
-const unitStateSchema = schemaFactory
-	.createSelectSchema(unit, { metadata: JsonObjectSchema.nullable() })
-	.omit({
-		id: true,
-		kind: true,
-		slug: true,
-		status: true,
-		visibility: true,
-		moderationStatus: true,
-		publishedAt: true,
-		deletedAt: true,
-		createdAt: true,
-		updatedAt: true,
-	});
+const unitStateSchema = schemaFactory.createSelectSchema(unit).omit({
+	id: true,
+	kind: true,
+	slug: true,
+	status: true,
+	visibility: true,
+	moderationStatus: true,
+	publishedAt: true,
+	deletedAt: true,
+	createdAt: true,
+	updatedAt: true,
+});
 const unitLocalizationStateSchema = schemaFactory
 	.createSelectSchema(unitLocalization, {
 		description: PortableTextDocumentSchema.nullable(),
@@ -144,7 +130,7 @@ const unitLocalizationStateSchema = schemaFactory
 	})
 	.omit({ unitId: true, createdAt: true, updatedAt: true });
 const profileStateSchema = schemaFactory
-	.createSelectSchema(profile, { description: PortableTextDocumentSchema.nullable() })
+	.createSelectSchema(profile)
 	.omit({ id: true, authUserId: true, joinedAt: true, createdAt: true, updatedAt: true });
 const bookStateSchema = schemaFactory
 	.createSelectSchema(book)
@@ -195,22 +181,10 @@ const seriesReleaseRowSchema = schemaFactory.createSelectSchema(seriesRelease);
 const softwareRequirementRowSchema = schemaFactory.createSelectSchema(softwareRequirement, {
 	hardware: JsonObjectSchema,
 });
-const zonePageRowSchema = schemaFactory.createSelectSchema(zonePage, {
-	document: ZonePageDocumentSchema,
-});
-const zoneMenuRowSchema = schemaFactory.createSelectSchema(zoneMenu, {
-	document: ZoneMenuDocumentSchema,
-});
 const collectionItemRowSchema = schemaFactory.createSelectSchema(collectionItem);
 const contentStructureNodeRowSchema = schemaFactory.createSelectSchema(contentStructureNode);
 const pollOptionRowSchema = schemaFactory.createSelectSchema(pollOption);
 const realmPinRowSchema = schemaFactory.createSelectSchema(realmPin);
-const realmDockRowSchema = schemaFactory.createSelectSchema(realmDock, {
-	document: DockDocumentSchema,
-});
-const realmRuleInsertSchema = schemaFactory.createInsertSchema(realmRule, {
-	content: PortableTextDocumentSchema,
-});
 
 function parseSnapshotState(
 	schema: { parse(value: unknown): SnapshotRow },
@@ -290,6 +264,7 @@ async function snapshotExtension(
 				(await tx.select().from(poll).where(eq(poll.id, unitId)).limit(1))[0],
 			);
 		case "tag":
+		case "realm_rule":
 			return null;
 	}
 }
@@ -305,11 +280,15 @@ async function snapshotRealmRules(tx: DatabaseTransaction, realmId: string) {
 	const rules = await tx
 		.select({
 			position: realmRule.position,
-			language: realmRule.language,
-			title: realmRule.title,
-			content: realmRule.content,
+			language: unitLocalization.language,
+			title: unitLocalization.title,
+			content: unitLocalization.content,
 		})
 		.from(realmRule)
+		.innerJoin(
+			unitLocalization,
+			and(eq(unitLocalization.unitId, realmRule.id), eq(unitLocalization.isDefault, true)),
+		)
 		.where(eq(realmRule.revisionId, revision.id))
 		.orderBy(realmRule.position, realmRule.id);
 	return RuleSnapshotSchema.parse({
@@ -383,26 +362,6 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 						.where(eq(softwareRequirement.softwareId, unitId))
 						.orderBy(softwareRequirement.id)
 				: empty,
-		zonePages:
-			record.kind === "zone"
-				? (
-						await tx
-							.select()
-							.from(zonePage)
-							.where(eq(zonePage.zoneId, unitId))
-							.orderBy(zonePage.position, zonePage.id)
-					).map((row) => zonePageRowSchema.parse(row))
-				: empty,
-		zoneMenus:
-			record.kind === "zone"
-				? (
-						await tx
-							.select()
-							.from(zoneMenu)
-							.where(eq(zoneMenu.zoneId, unitId))
-							.orderBy(zoneMenu.position, zoneMenu.id)
-					).map((row) => zoneMenuRowSchema.parse(row))
-				: empty,
 		collectionItems:
 			record.kind === "collection"
 				? await tx
@@ -431,16 +390,6 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 						.from(realmPin)
 						.where(eq(realmPin.realmId, unitId))
 						.orderBy(realmPin.kind, realmPin.position, realmPin.unitId)
-				: empty,
-		realmDocks:
-			record.kind === "realm"
-				? (
-						await tx
-							.select()
-							.from(realmDock)
-							.where(eq(realmDock.realmId, unitId))
-							.orderBy(realmDock.slot)
-					).map((row) => realmDockRowSchema.parse(row))
 				: empty,
 		realmUnit: empty,
 		realmRules: record.kind === "realm" ? await snapshotRealmRules(tx, unitId) : null,
@@ -588,14 +537,31 @@ async function restoreRealmRules(
 		})
 		.returning({ id: realmRuleRevision.id });
 	if (!revision) throw new Error("Realm rule restore did not return a revision");
-	if (value?.rules.length)
-		await tx
-			.insert(realmRule)
-			.values(
-				value.rules.map((rule) =>
-					realmRuleInsertSchema.parse({ revisionId: revision.id, ...rule }),
-				),
-			);
+	for (const rule of value?.rules ?? []) {
+		const [ruleUnit] = await tx
+			.insert(unit)
+			.values({
+				kind: "realm_rule",
+				status: "published",
+				visibility: "unlisted",
+				publishedAt: new Date(),
+			})
+			.returning({ id: unit.id });
+		if (!ruleUnit) throw new Error("Realm rule Unit restore did not return an id");
+		await tx.insert(unitLocalization).values({
+			unitId: ruleUnit.id,
+			language: rule.language,
+			isDefault: true,
+			title: rule.title,
+			content: rule.content,
+			contentStatus: "published",
+		});
+		await tx.insert(realmRule).values({
+			id: ruleUnit.id,
+			revisionId: revision.id,
+			position: rule.position,
+		});
+	}
 }
 
 export async function restoreUnitSnapshot(tx: DatabaseTransaction, unitId: string, value: unknown) {
@@ -670,18 +636,6 @@ export async function restoreUnitSnapshot(tx: DatabaseTransaction, unitId: strin
 					softwareRequirementRowSchema.parse(row),
 				),
 			);
-	if (snapshot.kind === "zone") {
-		await tx.delete(zonePage).where(eq(zonePage.zoneId, unitId));
-		await tx.delete(zoneMenu).where(eq(zoneMenu.zoneId, unitId));
-		if (snapshot.owned.zonePages.length)
-			await tx
-				.insert(zonePage)
-				.values(snapshot.owned.zonePages.map((row) => zonePageRowSchema.parse(row)));
-		if (snapshot.owned.zoneMenus.length)
-			await tx
-				.insert(zoneMenu)
-				.values(snapshot.owned.zoneMenus.map((row) => zoneMenuRowSchema.parse(row)));
-	}
 	if (snapshot.kind === "collection") {
 		await tx.delete(collectionItem).where(eq(collectionItem.collectionId, unitId));
 		if (snapshot.owned.collectionItems.length)
@@ -696,15 +650,10 @@ export async function restoreUnitSnapshot(tx: DatabaseTransaction, unitId: strin
 		await restoreSoftRows(tx, unitId, "pollOption", snapshot.owned.pollOptions);
 	if (snapshot.kind === "realm") {
 		await tx.delete(realmPin).where(eq(realmPin.realmId, unitId));
-		await tx.delete(realmDock).where(eq(realmDock.realmId, unitId));
 		if (snapshot.owned.realmPins.length)
 			await tx
 				.insert(realmPin)
 				.values(snapshot.owned.realmPins.map((row) => realmPinRowSchema.parse(row)));
-		if (snapshot.owned.realmDocks.length)
-			await tx
-				.insert(realmDock)
-				.values(snapshot.owned.realmDocks.map((row) => realmDockRowSchema.parse(row)));
 		await restoreRealmRules(tx, unitId, snapshot.owned.realmRules);
 	}
 }
@@ -775,13 +724,10 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 				version: 1,
 				seriesReleases: snapshot.owned.seriesReleases,
 				softwareRequirements: snapshot.owned.softwareRequirements,
-				zonePages: snapshot.owned.zonePages,
-				zoneMenus: snapshot.owned.zoneMenus,
 				collectionItems: snapshot.owned.collectionItems,
 				contentStructureNodes: snapshot.owned.contentStructureNodes,
 				pollOptions: snapshot.owned.pollOptions,
 				realmPins: snapshot.owned.realmPins,
-				realmDocks: snapshot.owned.realmDocks,
 			},
 		},
 	};
@@ -821,13 +767,10 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 			variants: relations.variants,
 			seriesReleases: structure.seriesReleases,
 			softwareRequirements: structure.softwareRequirements,
-			zonePages: structure.zonePages,
-			zoneMenus: structure.zoneMenus ?? [],
 			collectionItems: structure.collectionItems,
 			contentStructureNodes: structure.contentStructureNodes,
 			pollOptions: structure.pollOptions,
 			realmPins: structure.realmPins,
-			realmDocks: structure.realmDocks ?? [],
 			realmUnit: [],
 			realmRules: rules
 				? {

@@ -7224,7 +7224,6 @@ export type GetApiSeriesBySeriesIdReleasesStatus200 = {
 		 * @type string
 		 */
 		position: string;
-		label: (string | null) | null;
 		releasedOn: (string | null) | null;
 		/**
 		 * @description
@@ -7346,7 +7345,6 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus200 = {
 	 * @type string
 	 */
 	position: string;
-	label: (string | null) | null;
 	releasedOn: (string | null) | null;
 	/**
 	 * @description
@@ -7446,7 +7444,6 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdBody = {
 	 * @type string
 	 */
 	position: string;
-	label?: (string | null) | null;
 	releasedOn?: (string | null) | null;
 };
 
@@ -7881,102 +7878,6 @@ export type PostApiZonesBody = {
 					[key: string]: JsonValue;
 			  };
 	};
-	/**
-	 * @type object | undefined
-	 */
-	menuDocument?: {
-		/**
-		 * @type string
-		 */
-		_type: "zone-menu";
-		/**
-		 * @pattern ^[0-9a-f]{12}$
-		 * @type string
-		 */
-		_key: string;
-		/**
-		 * @type array
-		 */
-		menus: {
-			/**
-			 * @type string
-			 */
-			_type: "menu";
-			/**
-			 * @pattern ^[0-9a-f]{12}$
-			 * @type string
-			 */
-			_key: string;
-			/**
-			 * @type object | undefined
-			 */
-			label?: {
-				[key: string]: string;
-			};
-			/**
-			 * @type array
-			 */
-			items: {
-				/**
-				 * @type string
-				 */
-				_type: "menu-item";
-				/**
-				 * @pattern ^[0-9a-f]{12}$
-				 * @type string
-				 */
-				_key: string;
-				/**
-				 * @type object
-				 */
-				label: {
-					[key: string]: string;
-				};
-				target:
-					| {
-							/**
-							 * @type string
-							 */
-							type: "href";
-							/**
-							 * @minLength 1
-							 * @type string
-							 */
-							href: string;
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							type: "unit";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							unitId: string;
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							type: "page";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							pageId: string;
-					  };
-			}[];
-		}[];
-		/**
-		 * @type object | undefined
-		 */
-		configuration?: {
-			[key: string]: unknown;
-		};
-	};
 	startsAt?: (string | null) | null;
 	endsAt?: (string | null) | null;
 };
@@ -8011,2409 +7912,6 @@ export type PostApiZonesResponse =
 	| PostApiZonesStatus403
 	| PostApiZonesStatus422
 	| PostApiZonesStatus500;
-
-/**
- * @type object
- */
-export type GetApiZonesByZoneIdPagesPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiZonesByZoneIdPagesStatus200 = {
-	/**
-	 * @type array
-	 */
-	items: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		id: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		zoneId: string;
-		/**
-		 * @type string
-		 */
-		slug: string;
-		/**
-		 * @type object
-		 */
-		document: {
-			/**
-			 * @type string
-			 */
-			_type: "zone-page";
-			/**
-			 * @pattern ^[0-9a-f]{12}$
-			 * @type string
-			 */
-			_key: string;
-			/**
-			 * @type array
-			 */
-			blocks: (
-				| {
-						/**
-						 * @type string
-						 */
-						_type: "portable-text";
-						/**
-						 * @pattern ^[0-9a-f]{12}$
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type array
-						 */
-						content: (
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: "block";
-									/**
-									 * @type array
-									 */
-									children: (
-										| {
-												/**
-												 * @type string
-												 */
-												_key: string;
-												/**
-												 * @type string
-												 */
-												_type: "span";
-												/**
-												 * @type string
-												 */
-												text: string;
-												/**
-												 * @type array | undefined
-												 */
-												marks?: string[];
-										  }
-										| {
-												/**
-												 * @type string
-												 */
-												_key: string;
-												/**
-												 * @pattern ^(?!span$).+
-												 * @type string
-												 */
-												_type: string;
-												[key: string]: unknown;
-										  }
-									)[];
-									/**
-									 * @type array | undefined
-									 */
-									markDefs?: {
-										/**
-										 * @type string
-										 */
-										_key: string;
-										/**
-										 * @type string
-										 */
-										_type: string;
-										[key: string]: unknown;
-									}[];
-									/**
-									 * @type string | undefined
-									 */
-									listItem?: string;
-									/**
-									 * @type string | undefined
-									 */
-									style?: string;
-									/**
-									 * @minLength 1
-									 * @type integer | undefined
-									 */
-									level?: number;
-									[key: string]: unknown;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @pattern ^(?!block$).+
-									 * @type string
-									 */
-									_type: string;
-									[key: string]: unknown;
-							  }
-						)[];
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						_type: "post-ref";
-						/**
-						 * @pattern ^[0-9a-f]{12}$
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @description
-						 * Format: `uuid`
-						 * @type string
-						 */
-						postId: string;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						_type: "menu";
-						/**
-						 * @pattern ^[0-9a-f]{12}$
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type object | undefined
-						 */
-						label?: {
-							[key: string]: string;
-						};
-						/**
-						 * @type array
-						 */
-						items: {
-							/**
-							 * @type string
-							 */
-							_type: "menu-item";
-							/**
-							 * @pattern ^[0-9a-f]{12}$
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type object
-							 */
-							label: {
-								[key: string]: string;
-							};
-							target:
-								| {
-										/**
-										 * @type string
-										 */
-										type: "href";
-										/**
-										 * @minLength 1
-										 * @type string
-										 */
-										href: string;
-								  }
-								| {
-										/**
-										 * @type string
-										 */
-										type: "unit";
-										/**
-										 * @description
-										 * Format: `uuid`
-										 * @type string
-										 */
-										unitId: string;
-								  }
-								| {
-										/**
-										 * @type string
-										 */
-										type: "page";
-										/**
-										 * @description
-										 * Format: `uuid`
-										 * @type string
-										 */
-										pageId: string;
-								  };
-						}[];
-				  }
-			)[];
-			/**
-			 * @type object | undefined
-			 */
-			configuration?: {
-				[key: string]: unknown;
-			};
-		};
-		/**
-		 * @type string
-		 */
-		position: string;
-		/**
-		 * @type boolean
-		 */
-		home: boolean;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		createdAt: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		updatedAt: string;
-	}[];
-};
-
-/**
- * @type object
- */
-export type GetApiZonesByZoneIdPagesStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: "UnitNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiZonesByZoneIdPagesStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type GetApiZonesByZoneIdPagesStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type GetApiZonesByZoneIdPagesOptions = {
-	body?: never;
-	path: GetApiZonesByZoneIdPagesPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type GetApiZonesByZoneIdPagesResponses = {
-	"200": GetApiZonesByZoneIdPagesStatus200;
-	"404": GetApiZonesByZoneIdPagesStatus404;
-	"422": GetApiZonesByZoneIdPagesStatus422;
-	"500": GetApiZonesByZoneIdPagesStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type GetApiZonesByZoneIdPagesResponse =
-	| GetApiZonesByZoneIdPagesStatus200
-	| GetApiZonesByZoneIdPagesStatus404
-	| GetApiZonesByZoneIdPagesStatus422
-	| GetApiZonesByZoneIdPagesStatus500;
-
-/**
- * @type object
- */
-export type PostApiZonesByZoneIdPagesPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiZonesByZoneIdPagesStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	id: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-	/**
-	 * @type string
-	 */
-	slug: string;
-	/**
-	 * @type object
-	 */
-	document: {
-		/**
-		 * @type string
-		 */
-		_type: "zone-page";
-		/**
-		 * @pattern ^[0-9a-f]{12}$
-		 * @type string
-		 */
-		_key: string;
-		/**
-		 * @type array
-		 */
-		blocks: (
-			| {
-					/**
-					 * @type string
-					 */
-					_type: "portable-text";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type array
-					 */
-					content: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "block";
-								/**
-								 * @type array
-								 */
-								children: (
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "span";
-											/**
-											 * @type string
-											 */
-											text: string;
-											/**
-											 * @type array | undefined
-											 */
-											marks?: string[];
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @pattern ^(?!span$).+
-											 * @type string
-											 */
-											_type: string;
-											[key: string]: unknown;
-									  }
-								)[];
-								/**
-								 * @type array | undefined
-								 */
-								markDefs?: {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: string;
-									[key: string]: unknown;
-								}[];
-								/**
-								 * @type string | undefined
-								 */
-								listItem?: string;
-								/**
-								 * @type string | undefined
-								 */
-								style?: string;
-								/**
-								 * @minLength 1
-								 * @type integer | undefined
-								 */
-								level?: number;
-								[key: string]: unknown;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @pattern ^(?!block$).+
-								 * @type string
-								 */
-								_type: string;
-								[key: string]: unknown;
-						  }
-					)[];
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_type: "post-ref";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					postId: string;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_type: "menu";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type object | undefined
-					 */
-					label?: {
-						[key: string]: string;
-					};
-					/**
-					 * @type array
-					 */
-					items: {
-						/**
-						 * @type string
-						 */
-						_type: "menu-item";
-						/**
-						 * @pattern ^[0-9a-f]{12}$
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type object
-						 */
-						label: {
-							[key: string]: string;
-						};
-						target:
-							| {
-									/**
-									 * @type string
-									 */
-									type: "href";
-									/**
-									 * @minLength 1
-									 * @type string
-									 */
-									href: string;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									type: "unit";
-									/**
-									 * @description
-									 * Format: `uuid`
-									 * @type string
-									 */
-									unitId: string;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									type: "page";
-									/**
-									 * @description
-									 * Format: `uuid`
-									 * @type string
-									 */
-									pageId: string;
-							  };
-					}[];
-			  }
-		)[];
-		/**
-		 * @type object | undefined
-		 */
-		configuration?: {
-			[key: string]: unknown;
-		};
-	};
-	/**
-	 * @type string
-	 */
-	position: string;
-	/**
-	 * @type boolean
-	 */
-	home: boolean;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-};
-
-export const PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
-} as const;
-
-export type PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum =
-	(typeof PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum)[keyof typeof PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PostApiZonesByZoneIdPagesStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitEditForbidden'
-		 * @type string
-		 */
-		code: PostApiZonesByZoneIdPagesStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiZonesByZoneIdPagesStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: "UnitNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiZonesByZoneIdPagesStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type PostApiZonesByZoneIdPagesStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type PostApiZonesByZoneIdPagesBody = {
-	/**
-	 * @minLength 1
-	 * @maxLength 120
-	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-	 * @type string
-	 */
-	slug: string;
-	/**
-	 * @type object
-	 */
-	document: {
-		/**
-		 * @type string
-		 */
-		_type: "zone-page";
-		/**
-		 * @pattern ^[0-9a-f]{12}$
-		 * @type string
-		 */
-		_key: string;
-		/**
-		 * @type array
-		 */
-		blocks: (
-			| {
-					/**
-					 * @type string
-					 */
-					_type: "portable-text";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type array
-					 */
-					content: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "block";
-								/**
-								 * @type array
-								 */
-								children: (
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "span";
-											/**
-											 * @type string
-											 */
-											text: string;
-											/**
-											 * @type array | undefined
-											 */
-											marks?: string[];
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @pattern ^(?!span$).+
-											 * @type string
-											 */
-											_type: string;
-											[key: string]: unknown;
-									  }
-								)[];
-								/**
-								 * @type array | undefined
-								 */
-								markDefs?: {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: string;
-									[key: string]: unknown;
-								}[];
-								/**
-								 * @type string | undefined
-								 */
-								listItem?: string;
-								/**
-								 * @type string | undefined
-								 */
-								style?: string;
-								/**
-								 * @minLength 1
-								 * @type integer | undefined
-								 */
-								level?: number;
-								[key: string]: unknown;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @pattern ^(?!block$).+
-								 * @type string
-								 */
-								_type: string;
-								[key: string]: unknown;
-						  }
-					)[];
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_type: "post-ref";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					postId: string;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_type: "menu";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type object | undefined
-					 */
-					label?: {
-						[key: string]: string;
-					};
-					/**
-					 * @type array
-					 */
-					items: {
-						/**
-						 * @type string
-						 */
-						_type: "menu-item";
-						/**
-						 * @pattern ^[0-9a-f]{12}$
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type object
-						 */
-						label: {
-							[key: string]: string;
-						};
-						target:
-							| {
-									/**
-									 * @type string
-									 */
-									type: "href";
-									/**
-									 * @minLength 1
-									 * @type string
-									 */
-									href: string;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									type: "unit";
-									/**
-									 * @description
-									 * Format: `uuid`
-									 * @type string
-									 */
-									unitId: string;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									type: "page";
-									/**
-									 * @description
-									 * Format: `uuid`
-									 * @type string
-									 */
-									pageId: string;
-							  };
-					}[];
-			  }
-		)[];
-		/**
-		 * @type object | undefined
-		 */
-		configuration?: {
-			[key: string]: unknown;
-		};
-	};
-	/**
-	 * @minLength 1
-	 * @maxLength 64
-	 * @type string | undefined
-	 */
-	position?: string;
-	/**
-	 * @type boolean | undefined
-	 */
-	home?: boolean;
-};
-
-/**
- * @type object
- */
-export type PostApiZonesByZoneIdPagesOptions = {
-	body: PostApiZonesByZoneIdPagesBody;
-	path: PostApiZonesByZoneIdPagesPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PostApiZonesByZoneIdPagesResponses = {
-	"200": PostApiZonesByZoneIdPagesStatus200;
-	"403": PostApiZonesByZoneIdPagesStatus403;
-	"404": PostApiZonesByZoneIdPagesStatus404;
-	"422": PostApiZonesByZoneIdPagesStatus422;
-	"500": PostApiZonesByZoneIdPagesStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PostApiZonesByZoneIdPagesResponse =
-	| PostApiZonesByZoneIdPagesStatus200
-	| PostApiZonesByZoneIdPagesStatus403
-	| PostApiZonesByZoneIdPagesStatus404
-	| PostApiZonesByZoneIdPagesStatus422
-	| PostApiZonesByZoneIdPagesStatus500;
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdPagesByPageIdPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	pageId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdPagesByPageIdStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	id: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-	/**
-	 * @type string
-	 */
-	slug: string;
-	/**
-	 * @type object
-	 */
-	document: {
-		/**
-		 * @type string
-		 */
-		_type: "zone-page";
-		/**
-		 * @pattern ^[0-9a-f]{12}$
-		 * @type string
-		 */
-		_key: string;
-		/**
-		 * @type array
-		 */
-		blocks: (
-			| {
-					/**
-					 * @type string
-					 */
-					_type: "portable-text";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type array
-					 */
-					content: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "block";
-								/**
-								 * @type array
-								 */
-								children: (
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "span";
-											/**
-											 * @type string
-											 */
-											text: string;
-											/**
-											 * @type array | undefined
-											 */
-											marks?: string[];
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @pattern ^(?!span$).+
-											 * @type string
-											 */
-											_type: string;
-											[key: string]: unknown;
-									  }
-								)[];
-								/**
-								 * @type array | undefined
-								 */
-								markDefs?: {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: string;
-									[key: string]: unknown;
-								}[];
-								/**
-								 * @type string | undefined
-								 */
-								listItem?: string;
-								/**
-								 * @type string | undefined
-								 */
-								style?: string;
-								/**
-								 * @minLength 1
-								 * @type integer | undefined
-								 */
-								level?: number;
-								[key: string]: unknown;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @pattern ^(?!block$).+
-								 * @type string
-								 */
-								_type: string;
-								[key: string]: unknown;
-						  }
-					)[];
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_type: "post-ref";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					postId: string;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_type: "menu";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type object | undefined
-					 */
-					label?: {
-						[key: string]: string;
-					};
-					/**
-					 * @type array
-					 */
-					items: {
-						/**
-						 * @type string
-						 */
-						_type: "menu-item";
-						/**
-						 * @pattern ^[0-9a-f]{12}$
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type object
-						 */
-						label: {
-							[key: string]: string;
-						};
-						target:
-							| {
-									/**
-									 * @type string
-									 */
-									type: "href";
-									/**
-									 * @minLength 1
-									 * @type string
-									 */
-									href: string;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									type: "unit";
-									/**
-									 * @description
-									 * Format: `uuid`
-									 * @type string
-									 */
-									unitId: string;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									type: "page";
-									/**
-									 * @description
-									 * Format: `uuid`
-									 * @type string
-									 */
-									pageId: string;
-							  };
-					}[];
-			  }
-		)[];
-		/**
-		 * @type object | undefined
-		 */
-		configuration?: {
-			[key: string]: unknown;
-		};
-	};
-	/**
-	 * @type string
-	 */
-	position: string;
-	/**
-	 * @type boolean
-	 */
-	home: boolean;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-};
-
-export const PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
-} as const;
-
-export type PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum =
-	(typeof PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdPagesByPageIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitEditForbidden'
-		 * @type string
-		 */
-		code: PutApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const PutApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	ZonePageNotFound: "ZonePageNotFound",
-} as const;
-
-export type PutApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum =
-	(typeof PutApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdPagesByPageIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: PutApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdPagesByPageIdStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdPagesByPageIdStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdPagesByPageIdBody = {
-	/**
-	 * @minLength 1
-	 * @maxLength 120
-	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-	 * @type string
-	 */
-	slug: string;
-	/**
-	 * @type object
-	 */
-	document: {
-		/**
-		 * @type string
-		 */
-		_type: "zone-page";
-		/**
-		 * @pattern ^[0-9a-f]{12}$
-		 * @type string
-		 */
-		_key: string;
-		/**
-		 * @type array
-		 */
-		blocks: (
-			| {
-					/**
-					 * @type string
-					 */
-					_type: "portable-text";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type array
-					 */
-					content: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "block";
-								/**
-								 * @type array
-								 */
-								children: (
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "span";
-											/**
-											 * @type string
-											 */
-											text: string;
-											/**
-											 * @type array | undefined
-											 */
-											marks?: string[];
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @pattern ^(?!span$).+
-											 * @type string
-											 */
-											_type: string;
-											[key: string]: unknown;
-									  }
-								)[];
-								/**
-								 * @type array | undefined
-								 */
-								markDefs?: {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: string;
-									[key: string]: unknown;
-								}[];
-								/**
-								 * @type string | undefined
-								 */
-								listItem?: string;
-								/**
-								 * @type string | undefined
-								 */
-								style?: string;
-								/**
-								 * @minLength 1
-								 * @type integer | undefined
-								 */
-								level?: number;
-								[key: string]: unknown;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @pattern ^(?!block$).+
-								 * @type string
-								 */
-								_type: string;
-								[key: string]: unknown;
-						  }
-					)[];
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_type: "post-ref";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					postId: string;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_type: "menu";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type object | undefined
-					 */
-					label?: {
-						[key: string]: string;
-					};
-					/**
-					 * @type array
-					 */
-					items: {
-						/**
-						 * @type string
-						 */
-						_type: "menu-item";
-						/**
-						 * @pattern ^[0-9a-f]{12}$
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type object
-						 */
-						label: {
-							[key: string]: string;
-						};
-						target:
-							| {
-									/**
-									 * @type string
-									 */
-									type: "href";
-									/**
-									 * @minLength 1
-									 * @type string
-									 */
-									href: string;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									type: "unit";
-									/**
-									 * @description
-									 * Format: `uuid`
-									 * @type string
-									 */
-									unitId: string;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									type: "page";
-									/**
-									 * @description
-									 * Format: `uuid`
-									 * @type string
-									 */
-									pageId: string;
-							  };
-					}[];
-			  }
-		)[];
-		/**
-		 * @type object | undefined
-		 */
-		configuration?: {
-			[key: string]: unknown;
-		};
-	};
-	/**
-	 * @minLength 1
-	 * @maxLength 64
-	 * @type string | undefined
-	 */
-	position?: string;
-	/**
-	 * @type boolean | undefined
-	 */
-	home?: boolean;
-};
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdPagesByPageIdOptions = {
-	body: PutApiZonesByZoneIdPagesByPageIdBody;
-	path: PutApiZonesByZoneIdPagesByPageIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdPagesByPageIdResponses = {
-	"200": PutApiZonesByZoneIdPagesByPageIdStatus200;
-	"403": PutApiZonesByZoneIdPagesByPageIdStatus403;
-	"404": PutApiZonesByZoneIdPagesByPageIdStatus404;
-	"422": PutApiZonesByZoneIdPagesByPageIdStatus422;
-	"500": PutApiZonesByZoneIdPagesByPageIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PutApiZonesByZoneIdPagesByPageIdResponse =
-	| PutApiZonesByZoneIdPagesByPageIdStatus200
-	| PutApiZonesByZoneIdPagesByPageIdStatus403
-	| PutApiZonesByZoneIdPagesByPageIdStatus404
-	| PutApiZonesByZoneIdPagesByPageIdStatus422
-	| PutApiZonesByZoneIdPagesByPageIdStatus500;
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdPagesByPageIdPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	pageId: string;
-};
-
-/**
- * @type void
- */
-export type DeleteApiZonesByZoneIdPagesByPageIdStatus204 = void;
-
-export const DeleteApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
-} as const;
-
-export type DeleteApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdPagesByPageIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitEditForbidden'
-		 * @type string
-		 */
-		code: DeleteApiZonesByZoneIdPagesByPageIdStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const DeleteApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	ZonePageNotFound: "ZonePageNotFound",
-} as const;
-
-export type DeleteApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum =
-	(typeof DeleteApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdPagesByPageIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: DeleteApiZonesByZoneIdPagesByPageIdStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdPagesByPageIdStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdPagesByPageIdStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdPagesByPageIdOptions = {
-	body?: never;
-	path: DeleteApiZonesByZoneIdPagesByPageIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdPagesByPageIdResponses = {
-	"204": DeleteApiZonesByZoneIdPagesByPageIdStatus204;
-	"403": DeleteApiZonesByZoneIdPagesByPageIdStatus403;
-	"404": DeleteApiZonesByZoneIdPagesByPageIdStatus404;
-	"422": DeleteApiZonesByZoneIdPagesByPageIdStatus422;
-	"500": DeleteApiZonesByZoneIdPagesByPageIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiZonesByZoneIdPagesByPageIdResponse =
-	| DeleteApiZonesByZoneIdPagesByPageIdStatus204
-	| DeleteApiZonesByZoneIdPagesByPageIdStatus403
-	| DeleteApiZonesByZoneIdPagesByPageIdStatus404
-	| DeleteApiZonesByZoneIdPagesByPageIdStatus422
-	| DeleteApiZonesByZoneIdPagesByPageIdStatus500;
-
-/**
- * @type object
- */
-export type GetApiZonesByZoneIdMenusPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiZonesByZoneIdMenusStatus200 = {
-	/**
-	 * @type array
-	 */
-	items: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		id: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		zoneId: string;
-		/**
-		 * @type string
-		 */
-		slot: string;
-		/**
-		 * @type object
-		 */
-		document: {
-			/**
-			 * @type string
-			 */
-			_type: "zone-menu";
-			/**
-			 * @pattern ^[0-9a-f]{12}$
-			 * @type string
-			 */
-			_key: string;
-			/**
-			 * @type array
-			 */
-			menus: {
-				/**
-				 * @type string
-				 */
-				_type: "menu";
-				/**
-				 * @pattern ^[0-9a-f]{12}$
-				 * @type string
-				 */
-				_key: string;
-				/**
-				 * @type object | undefined
-				 */
-				label?: {
-					[key: string]: string;
-				};
-				/**
-				 * @type array
-				 */
-				items: {
-					/**
-					 * @type string
-					 */
-					_type: "menu-item";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type object
-					 */
-					label: {
-						[key: string]: string;
-					};
-					target:
-						| {
-								/**
-								 * @type string
-								 */
-								type: "href";
-								/**
-								 * @minLength 1
-								 * @type string
-								 */
-								href: string;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								type: "unit";
-								/**
-								 * @description
-								 * Format: `uuid`
-								 * @type string
-								 */
-								unitId: string;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								type: "page";
-								/**
-								 * @description
-								 * Format: `uuid`
-								 * @type string
-								 */
-								pageId: string;
-						  };
-				}[];
-			}[];
-			/**
-			 * @type object | undefined
-			 */
-			configuration?: {
-				[key: string]: unknown;
-			};
-		};
-		/**
-		 * @type string
-		 */
-		position: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		createdAt: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		updatedAt: string;
-	}[];
-};
-
-/**
- * @type object
- */
-export type GetApiZonesByZoneIdMenusStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: "UnitNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiZonesByZoneIdMenusStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type GetApiZonesByZoneIdMenusStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type GetApiZonesByZoneIdMenusOptions = {
-	body?: never;
-	path: GetApiZonesByZoneIdMenusPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type GetApiZonesByZoneIdMenusResponses = {
-	"200": GetApiZonesByZoneIdMenusStatus200;
-	"404": GetApiZonesByZoneIdMenusStatus404;
-	"422": GetApiZonesByZoneIdMenusStatus422;
-	"500": GetApiZonesByZoneIdMenusStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type GetApiZonesByZoneIdMenusResponse =
-	| GetApiZonesByZoneIdMenusStatus200
-	| GetApiZonesByZoneIdMenusStatus404
-	| GetApiZonesByZoneIdMenusStatus422
-	| GetApiZonesByZoneIdMenusStatus500;
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdMenusBySlotPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-	/**
-	 * @minLength 1
-	 * @maxLength 64
-	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-	 * @type string
-	 */
-	slot: string;
-};
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdMenusBySlotStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	id: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-	/**
-	 * @type string
-	 */
-	slot: string;
-	/**
-	 * @type object
-	 */
-	document: {
-		/**
-		 * @type string
-		 */
-		_type: "zone-menu";
-		/**
-		 * @pattern ^[0-9a-f]{12}$
-		 * @type string
-		 */
-		_key: string;
-		/**
-		 * @type array
-		 */
-		menus: {
-			/**
-			 * @type string
-			 */
-			_type: "menu";
-			/**
-			 * @pattern ^[0-9a-f]{12}$
-			 * @type string
-			 */
-			_key: string;
-			/**
-			 * @type object | undefined
-			 */
-			label?: {
-				[key: string]: string;
-			};
-			/**
-			 * @type array
-			 */
-			items: {
-				/**
-				 * @type string
-				 */
-				_type: "menu-item";
-				/**
-				 * @pattern ^[0-9a-f]{12}$
-				 * @type string
-				 */
-				_key: string;
-				/**
-				 * @type object
-				 */
-				label: {
-					[key: string]: string;
-				};
-				target:
-					| {
-							/**
-							 * @type string
-							 */
-							type: "href";
-							/**
-							 * @minLength 1
-							 * @type string
-							 */
-							href: string;
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							type: "unit";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							unitId: string;
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							type: "page";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							pageId: string;
-					  };
-			}[];
-		}[];
-		/**
-		 * @type object | undefined
-		 */
-		configuration?: {
-			[key: string]: unknown;
-		};
-	};
-	/**
-	 * @type string
-	 */
-	position: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-};
-
-export const PutApiZonesByZoneIdMenusBySlotStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
-} as const;
-
-export type PutApiZonesByZoneIdMenusBySlotStatus403ErrorCodeEnum =
-	(typeof PutApiZonesByZoneIdMenusBySlotStatus403ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdMenusBySlotStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdMenusBySlotStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitEditForbidden'
-		 * @type string
-		 */
-		code: PutApiZonesByZoneIdMenusBySlotStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdMenusBySlotStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: "UnitNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdMenusBySlotStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdMenusBySlotStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdMenusBySlotBody = {
-	/**
-	 * @type object
-	 */
-	document: {
-		/**
-		 * @type string
-		 */
-		_type: "zone-menu";
-		/**
-		 * @pattern ^[0-9a-f]{12}$
-		 * @type string
-		 */
-		_key: string;
-		/**
-		 * @type array
-		 */
-		menus: {
-			/**
-			 * @type string
-			 */
-			_type: "menu";
-			/**
-			 * @pattern ^[0-9a-f]{12}$
-			 * @type string
-			 */
-			_key: string;
-			/**
-			 * @type object | undefined
-			 */
-			label?: {
-				[key: string]: string;
-			};
-			/**
-			 * @type array
-			 */
-			items: {
-				/**
-				 * @type string
-				 */
-				_type: "menu-item";
-				/**
-				 * @pattern ^[0-9a-f]{12}$
-				 * @type string
-				 */
-				_key: string;
-				/**
-				 * @type object
-				 */
-				label: {
-					[key: string]: string;
-				};
-				target:
-					| {
-							/**
-							 * @type string
-							 */
-							type: "href";
-							/**
-							 * @minLength 1
-							 * @type string
-							 */
-							href: string;
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							type: "unit";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							unitId: string;
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							type: "page";
-							/**
-							 * @description
-							 * Format: `uuid`
-							 * @type string
-							 */
-							pageId: string;
-					  };
-			}[];
-		}[];
-		/**
-		 * @type object | undefined
-		 */
-		configuration?: {
-			[key: string]: unknown;
-		};
-	};
-	/**
-	 * @minLength 1
-	 * @maxLength 64
-	 * @type string | undefined
-	 */
-	position?: string;
-};
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdMenusBySlotOptions = {
-	body: PutApiZonesByZoneIdMenusBySlotBody;
-	path: PutApiZonesByZoneIdMenusBySlotPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdMenusBySlotResponses = {
-	"200": PutApiZonesByZoneIdMenusBySlotStatus200;
-	"403": PutApiZonesByZoneIdMenusBySlotStatus403;
-	"404": PutApiZonesByZoneIdMenusBySlotStatus404;
-	"422": PutApiZonesByZoneIdMenusBySlotStatus422;
-	"500": PutApiZonesByZoneIdMenusBySlotStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PutApiZonesByZoneIdMenusBySlotResponse =
-	| PutApiZonesByZoneIdMenusBySlotStatus200
-	| PutApiZonesByZoneIdMenusBySlotStatus403
-	| PutApiZonesByZoneIdMenusBySlotStatus404
-	| PutApiZonesByZoneIdMenusBySlotStatus422
-	| PutApiZonesByZoneIdMenusBySlotStatus500;
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdMenusBySlotPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-	/**
-	 * @minLength 1
-	 * @maxLength 64
-	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-	 * @type string
-	 */
-	slot: string;
-};
-
-/**
- * @type void
- */
-export type DeleteApiZonesByZoneIdMenusBySlotStatus204 = void;
-
-export const DeleteApiZonesByZoneIdMenusBySlotStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
-} as const;
-
-export type DeleteApiZonesByZoneIdMenusBySlotStatus403ErrorCodeEnum =
-	(typeof DeleteApiZonesByZoneIdMenusBySlotStatus403ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdMenusBySlotStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdMenusBySlotStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitEditForbidden'
-		 * @type string
-		 */
-		code: DeleteApiZonesByZoneIdMenusBySlotStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdMenusBySlotStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdMenusBySlotStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdMenusBySlotOptions = {
-	body?: never;
-	path: DeleteApiZonesByZoneIdMenusBySlotPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdMenusBySlotResponses = {
-	"204": DeleteApiZonesByZoneIdMenusBySlotStatus204;
-	"403": DeleteApiZonesByZoneIdMenusBySlotStatus403;
-	"422": DeleteApiZonesByZoneIdMenusBySlotStatus422;
-	"500": DeleteApiZonesByZoneIdMenusBySlotStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiZonesByZoneIdMenusBySlotResponse =
-	| DeleteApiZonesByZoneIdMenusBySlotStatus204
-	| DeleteApiZonesByZoneIdMenusBySlotStatus403
-	| DeleteApiZonesByZoneIdMenusBySlotStatus422
-	| DeleteApiZonesByZoneIdMenusBySlotStatus500;
 
 /**
  * @type object
@@ -10600,13 +8098,11 @@ export type GetApiSoftwareBySoftwareIdSystemRequirementsStatus200 = {
 		 * @type string
 		 */
 		tier: string;
-		language: (string | null) | null;
 		sourceLinkId: (string | null) | null;
 		/**
 		 * @type void
 		 */
 		hardware: void;
-		rawText: (string | null) | null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -10722,13 +8218,11 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus200 = {
 	 * @type string
 	 */
 	tier: string;
-	language: (string | null) | null;
 	sourceLinkId: (string | null) | null;
 	/**
 	 * @type void
 	 */
 	hardware: void;
-	rawText: (string | null) | null;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -10864,7 +8358,6 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsBody = {
 	 * @type string
 	 */
 	tier: string;
-	language?: (string | null) | null;
 	sourceLinkId?: (string | null) | null;
 	/**
 	 * @type object
@@ -10880,7 +8373,6 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsBody = {
 					[key: string]: JsonValue;
 			  };
 	};
-	rawText?: (string | null) | null;
 };
 
 /**
@@ -10955,13 +8447,11 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus200
 	 * @type string
 	 */
 	tier: string;
-	language: (string | null) | null;
 	sourceLinkId: (string | null) | null;
 	/**
 	 * @type void
 	 */
 	hardware: void;
-	rawText: (string | null) | null;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -11097,7 +8587,6 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdBody = {
 	 * @type string
 	 */
 	tier: string;
-	language?: (string | null) | null;
 	sourceLinkId?: (string | null) | null;
 	/**
 	 * @type object
@@ -11113,7 +8602,6 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdBody = {
 					[key: string]: JsonValue;
 			  };
 	};
-	rawText?: (string | null) | null;
 };
 
 /**
@@ -13225,60 +10713,6 @@ export type PostApiUnitsByTypeStatus200 = {
 	/**
 	 * @type array
 	 */
-	aliases: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		id: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		unitId: string;
-		/**
-		 * @type string
-		 */
-		value: string;
-		/**
-		 * @type string
-		 */
-		normalizedValue: string;
-		language: (string | null) | null;
-		/**
-		 * @type string
-		 */
-		kind: string;
-		/**
-		 * @type string
-		 */
-		status: string;
-		score: string | number;
-		voteCount: string | number;
-		/**
-		 * @type boolean
-		 */
-		pinned: boolean;
-		position: (string | null) | null;
-		createdById: (string | null) | null;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		createdAt: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		updatedAt: string;
-	}[];
-	/**
-	 * @type array
-	 */
 	credits: {
 		/**
 		 * @description
@@ -13328,7 +10762,6 @@ export type PostApiUnitsByTypeStatus200 = {
 		 * @type string
 		 */
 		url: string;
-		label: (string | null) | null;
 		sourceEntityEntryId: (string | null) | null;
 		normalizedUrl: (string | null) | null;
 		normalizedUrlHash: (string | null) | null;
@@ -13725,20 +11158,6 @@ export type PostApiUnitsByTypeBody = {
 	 */
 	aiDisclosure?: PostApiUnitsByTypeRequestAiDisclosureEnum;
 	license?: (string | null) | null;
-	/**
-	 * @type object | undefined
-	 */
-	metadata?: {
-		[key: string]:
-			| null
-			| boolean
-			| number
-			| string
-			| JsonValue[]
-			| {
-					[key: string]: JsonValue;
-			  };
-	};
 	cover?:
 		| ({
 				/**
@@ -14140,60 +11559,6 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 	/**
 	 * @type array
 	 */
-	aliases: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		id: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		unitId: string;
-		/**
-		 * @type string
-		 */
-		value: string;
-		/**
-		 * @type string
-		 */
-		normalizedValue: string;
-		language: (string | null) | null;
-		/**
-		 * @type string
-		 */
-		kind: string;
-		/**
-		 * @type string
-		 */
-		status: string;
-		score: string | number;
-		voteCount: string | number;
-		/**
-		 * @type boolean
-		 */
-		pinned: boolean;
-		position: (string | null) | null;
-		createdById: (string | null) | null;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		createdAt: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		updatedAt: string;
-	}[];
-	/**
-	 * @type array
-	 */
 	credits: {
 		/**
 		 * @description
@@ -14243,7 +11608,6 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		 * @type string
 		 */
 		url: string;
-		label: (string | null) | null;
 		sourceEntityEntryId: (string | null) | null;
 		normalizedUrl: (string | null) | null;
 		normalizedUrlHash: (string | null) | null;
@@ -14617,60 +11981,6 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 	/**
 	 * @type array
 	 */
-	aliases: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		id: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		unitId: string;
-		/**
-		 * @type string
-		 */
-		value: string;
-		/**
-		 * @type string
-		 */
-		normalizedValue: string;
-		language: (string | null) | null;
-		/**
-		 * @type string
-		 */
-		kind: string;
-		/**
-		 * @type string
-		 */
-		status: string;
-		score: string | number;
-		voteCount: string | number;
-		/**
-		 * @type boolean
-		 */
-		pinned: boolean;
-		position: (string | null) | null;
-		createdById: (string | null) | null;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		createdAt: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		updatedAt: string;
-	}[];
-	/**
-	 * @type array
-	 */
 	credits: {
 		/**
 		 * @description
@@ -14720,7 +12030,6 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		 * @type string
 		 */
 		url: string;
-		label: (string | null) | null;
 		sourceEntityEntryId: (string | null) | null;
 		normalizedUrl: (string | null) | null;
 		normalizedUrlHash: (string | null) | null;
@@ -15032,20 +12341,6 @@ export type PatchApiUnitsByTypeByUnitIdBody = {
 	 */
 	aiDisclosure?: PatchApiUnitsByTypeByUnitIdRequestAiDisclosureEnum;
 	license?: (string | null) | null;
-	/**
-	 * @type object | undefined
-	 */
-	metadata?: {
-		[key: string]:
-			| null
-			| boolean
-			| number
-			| string
-			| JsonValue[]
-			| {
-					[key: string]: JsonValue;
-			  };
-	};
 	cover?:
 		| ({
 				/**
@@ -15557,60 +12852,6 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 	/**
 	 * @type array
 	 */
-	aliases: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		id: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		unitId: string;
-		/**
-		 * @type string
-		 */
-		value: string;
-		/**
-		 * @type string
-		 */
-		normalizedValue: string;
-		language: (string | null) | null;
-		/**
-		 * @type string
-		 */
-		kind: string;
-		/**
-		 * @type string
-		 */
-		status: string;
-		score: string | number;
-		voteCount: string | number;
-		/**
-		 * @type boolean
-		 */
-		pinned: boolean;
-		position: (string | null) | null;
-		createdById: (string | null) | null;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		createdAt: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		updatedAt: string;
-	}[];
-	/**
-	 * @type array
-	 */
 	credits: {
 		/**
 		 * @description
@@ -15660,7 +12901,6 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 * @type string
 		 */
 		url: string;
-		label: (string | null) | null;
 		sourceEntityEntryId: (string | null) | null;
 		normalizedUrl: (string | null) | null;
 		normalizedUrlHash: (string | null) | null;
@@ -18230,10 +15470,149 @@ export type PostApiTagsResponses = {
 export type PostApiTagsResponse =
 	PostApiTagsStatus200 | PostApiTagsStatus422 | PostApiTagsStatus500;
 
-export const PostApiUnitsByTypeByUnitIdAliasesType = {
+export const GetApiUnitsByTypeByUnitIdAliasesType = {
+	profile: "profile",
 	book: "book",
 	software: "software",
 	media: "media",
+	release: "release",
+	entity: "entity",
+	tag: "tag",
+	series: "series",
+	zone: "zone",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdAliasesType =
+	(typeof GetApiUnitsByTypeByUnitIdAliasesType)[keyof typeof GetApiUnitsByTypeByUnitIdAliasesType];
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdAliasesPath = {
+	/**
+	 * @type string
+	 */
+	type: GetApiUnitsByTypeByUnitIdAliasesType;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdAliasesStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @type string
+		 */
+		term: string;
+		/**
+		 * @type string
+		 */
+		normalizedTerm: string;
+		language: (string | null) | null;
+		/**
+		 * @type string
+		 */
+		kind: string;
+		createdByProfileId: (string | null) | null;
+		score: string | number;
+		voteCount: string | number;
+		/**
+		 * @type boolean
+		 */
+		searchable: boolean;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdAliasesStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdAliasesStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdAliasesOptions = {
+	body?: never;
+	path: GetApiUnitsByTypeByUnitIdAliasesPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByTypeByUnitIdAliasesResponses = {
+	"200": GetApiUnitsByTypeByUnitIdAliasesStatus200;
+	"422": GetApiUnitsByTypeByUnitIdAliasesStatus422;
+	"500": GetApiUnitsByTypeByUnitIdAliasesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiUnitsByTypeByUnitIdAliasesResponse =
+	| GetApiUnitsByTypeByUnitIdAliasesStatus200
+	| GetApiUnitsByTypeByUnitIdAliasesStatus422
+	| GetApiUnitsByTypeByUnitIdAliasesStatus500;
+
+export const PostApiUnitsByTypeByUnitIdAliasesType = {
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	tag: "tag",
+	series: "series",
+	zone: "zone",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
 } as const;
 
 export type PostApiUnitsByTypeByUnitIdAliasesType =
@@ -18274,22 +15653,23 @@ export type PostApiUnitsByTypeByUnitIdAliasesStatus200 = {
 	/**
 	 * @type string
 	 */
-	value: string;
+	term: string;
 	/**
 	 * @type string
 	 */
-	normalizedValue: string;
+	normalizedTerm: string;
 	language: (string | null) | null;
 	/**
 	 * @type string
 	 */
 	kind: string;
+	createdByProfileId: (string | null) | null;
+	score: string | number;
+	voteCount: string | number;
 	/**
 	 * @type boolean
 	 */
-	pinned: boolean;
-	position: (string | null) | null;
-	createdByProfileId: (string | null) | null;
+	searchable: boolean;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -18400,7 +15780,7 @@ export type PostApiUnitsByTypeByUnitIdAliasesBody = {
 	 * @maxLength 500
 	 * @type string
 	 */
-	value: string;
+	term: string;
 	/**
 	 * @description
 	 * Format: `bcp-47`
@@ -18413,15 +15793,6 @@ export type PostApiUnitsByTypeByUnitIdAliasesBody = {
 	 * @type string | undefined
 	 */
 	kind?: PostApiUnitsByTypeByUnitIdAliasesRequestKindEnum;
-	/**
-	 * @type boolean | undefined
-	 */
-	pinned?: boolean;
-	/**
-	 * @maxLength 64
-	 * @type string | undefined
-	 */
-	position?: string;
 };
 
 /**
@@ -18456,9 +15827,20 @@ export type PostApiUnitsByTypeByUnitIdAliasesResponse =
 	| PostApiUnitsByTypeByUnitIdAliasesStatus500;
 
 export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdType = {
+	profile: "profile",
 	book: "book",
 	software: "software",
 	media: "media",
+	release: "release",
+	entity: "entity",
+	tag: "tag",
+	series: "series",
+	zone: "zone",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
 } as const;
 
 export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdType =
@@ -18605,9 +15987,20 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponse =
 	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500;
 
 export const PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteType = {
+	profile: "profile",
 	book: "book",
 	software: "software",
 	media: "media",
+	release: "release",
+	entity: "entity",
+	tag: "tag",
+	series: "series",
+	zone: "zone",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
 } as const;
 
 export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteType =
@@ -18738,9 +16131,20 @@ export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponse =
 	| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500;
 
 export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteType = {
+	profile: "profile",
 	book: "book",
 	software: "software",
 	media: "media",
+	release: "release",
+	entity: "entity",
+	tag: "tag",
+	series: "series",
+	zone: "zone",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
 } as const;
 
 export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteType =
@@ -18777,6 +16181,42 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200 = {
 	voteCount: string | number;
 };
 
+export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	AliasNotFound: "AliasNotFound",
+} as const;
+
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404ErrorCodeEnum =
+	(typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 /**
  * @type object
  */
@@ -18802,6 +16242,7 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions = {
  */
 export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses = {
 	"200": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200;
+	"404": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404;
 	"422": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422;
 	"500": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500;
 };
@@ -18811,6 +16252,7 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses = {
  */
 export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponse =
 	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200
+	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
 	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500;
 
@@ -19056,7 +16498,6 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus200 = {
 	 * @type string
 	 */
 	role: string;
-	label: (string | null) | null;
 	/**
 	 * @type string
 	 */
@@ -19171,7 +16612,6 @@ export type PostApiUnitsByTypeByUnitIdLinksBody = {
 	 * @type string | undefined
 	 */
 	role?: string;
-	label?: (string | null) | null;
 	/**
 	 * @maxLength 64
 	 * @type string | undefined
@@ -19971,6 +17411,14 @@ export type GetApiUnitsBookByUnitIdContentStructureNodesPath = {
 	unitId: string;
 };
 
+export const GetApiUnitsBookByUnitIdContentStructureNodesStatus200ItemsContentKindEnum = {
+	chapter: "chapter",
+	chapter_group: "chapter_group",
+} as const;
+
+export type GetApiUnitsBookByUnitIdContentStructureNodesStatus200ItemsContentKindEnum =
+	(typeof GetApiUnitsBookByUnitIdContentStructureNodesStatus200ItemsContentKindEnum)[keyof typeof GetApiUnitsBookByUnitIdContentStructureNodesStatus200ItemsContentKindEnum];
+
 /**
  * @type object
  */
@@ -19986,8 +17434,20 @@ export type GetApiUnitsBookByUnitIdContentStructureNodesStatus200 = {
 		 */
 		id: string;
 		parentId: (string | null) | null;
-		contentUnitId: (string | null) | null;
-		language: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		contentUnitId: string;
+		/**
+		 * @type string
+		 */
+		contentKind: GetApiUnitsBookByUnitIdContentStructureNodesStatus200ItemsContentKindEnum;
+		/**
+		 * @type string
+		 */
+		language: string;
 		/**
 		 * @type string
 		 */
@@ -20078,6 +17538,14 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesPath = {
 	unitId: string;
 };
 
+export const PostApiUnitsBookByUnitIdContentStructureNodesStatus200ContentKindEnum = {
+	chapter: "chapter",
+	chapter_group: "chapter_group",
+} as const;
+
+export type PostApiUnitsBookByUnitIdContentStructureNodesStatus200ContentKindEnum =
+	(typeof PostApiUnitsBookByUnitIdContentStructureNodesStatus200ContentKindEnum)[keyof typeof PostApiUnitsBookByUnitIdContentStructureNodesStatus200ContentKindEnum];
+
 /**
  * @type object
  */
@@ -20095,8 +17563,20 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesStatus200 = {
 	 */
 	unitId: string;
 	parentId: (string | null) | null;
-	contentUnitId: (string | null) | null;
-	language: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	contentUnitId: string;
+	/**
+	 * @type string
+	 */
+	contentKind: PostApiUnitsBookByUnitIdContentStructureNodesStatus200ContentKindEnum;
+	/**
+	 * @type string
+	 */
+	language: string;
 	/**
 	 * @type string
 	 */
@@ -20390,6 +17870,14 @@ export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdPath = {
 	nodeId: string;
 };
 
+export const PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200ContentKindEnum = {
+	chapter: "chapter",
+	chapter_group: "chapter_group",
+} as const;
+
+export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200ContentKindEnum =
+	(typeof PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200ContentKindEnum)[keyof typeof PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200ContentKindEnum];
+
 /**
  * @type object
  */
@@ -20407,8 +17895,20 @@ export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200 = {
 	 */
 	unitId: string;
 	parentId: (string | null) | null;
-	contentUnitId: (string | null) | null;
-	language: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	contentUnitId: string;
+	/**
+	 * @type string
+	 */
+	contentKind: PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200ContentKindEnum;
+	/**
+	 * @type string
+	 */
+	language: string;
 	/**
 	 * @type string
 	 */
@@ -20520,16 +18020,16 @@ export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdBody = {
 	parentId?: (string | null) | null;
 	/**
 	 * @minLength 1
-	 * @maxLength 500
-	 * @type string | undefined
-	 */
-	title?: string;
-	/**
-	 * @minLength 1
 	 * @maxLength 64
 	 * @type string | undefined
 	 */
 	position?: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 500
+	 * @type string | undefined
+	 */
+	title?: string;
 };
 
 /**
@@ -31306,973 +28806,6 @@ export type DeleteApiRealmsByRealmIdPinsByUnitIdResponse =
 	| DeleteApiRealmsByRealmIdPinsByUnitIdStatus403
 	| DeleteApiRealmsByRealmIdPinsByUnitIdStatus422
 	| DeleteApiRealmsByRealmIdPinsByUnitIdStatus500;
-
-/**
- * @type object
- */
-export type GetApiRealmsByRealmIdDocksPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiRealmsByRealmIdDocksStatus200 = {
-	/**
-	 * @type array
-	 */
-	items: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		realmId: string;
-		/**
-		 * @type string
-		 */
-		slot: string;
-		/**
-		 * @type object
-		 */
-		document: {
-			/**
-			 * @type string
-			 */
-			_type: "dock";
-			/**
-			 * @pattern ^[0-9a-f]{12}$
-			 * @type string
-			 */
-			_key: string;
-			/**
-			 * @type array
-			 */
-			blocks: (
-				| {
-						/**
-						 * @type string
-						 */
-						_type: "portable-text";
-						/**
-						 * @pattern ^[0-9a-f]{12}$
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type array
-						 */
-						content: (
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: "block";
-									/**
-									 * @type array
-									 */
-									children: (
-										| {
-												/**
-												 * @type string
-												 */
-												_key: string;
-												/**
-												 * @type string
-												 */
-												_type: "span";
-												/**
-												 * @type string
-												 */
-												text: string;
-												/**
-												 * @type array | undefined
-												 */
-												marks?: string[];
-										  }
-										| {
-												/**
-												 * @type string
-												 */
-												_key: string;
-												/**
-												 * @pattern ^(?!span$).+
-												 * @type string
-												 */
-												_type: string;
-												[key: string]: unknown;
-										  }
-									)[];
-									/**
-									 * @type array | undefined
-									 */
-									markDefs?: {
-										/**
-										 * @type string
-										 */
-										_key: string;
-										/**
-										 * @type string
-										 */
-										_type: string;
-										[key: string]: unknown;
-									}[];
-									/**
-									 * @type string | undefined
-									 */
-									listItem?: string;
-									/**
-									 * @type string | undefined
-									 */
-									style?: string;
-									/**
-									 * @minLength 1
-									 * @type integer | undefined
-									 */
-									level?: number;
-									[key: string]: unknown;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @pattern ^(?!block$).+
-									 * @type string
-									 */
-									_type: string;
-									[key: string]: unknown;
-							  }
-						)[];
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						_type: "post-ref";
-						/**
-						 * @pattern ^[0-9a-f]{12}$
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @description
-						 * Format: `uuid`
-						 * @type string
-						 */
-						postId: string;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						_type: "menu";
-						/**
-						 * @pattern ^[0-9a-f]{12}$
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type object | undefined
-						 */
-						label?: {
-							[key: string]: string;
-						};
-						/**
-						 * @type array
-						 */
-						items: {
-							/**
-							 * @type string
-							 */
-							_type: "menu-item";
-							/**
-							 * @pattern ^[0-9a-f]{12}$
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type object
-							 */
-							label: {
-								[key: string]: string;
-							};
-							target:
-								| {
-										/**
-										 * @type string
-										 */
-										type: "href";
-										/**
-										 * @minLength 1
-										 * @type string
-										 */
-										href: string;
-								  }
-								| {
-										/**
-										 * @type string
-										 */
-										type: "unit";
-										/**
-										 * @description
-										 * Format: `uuid`
-										 * @type string
-										 */
-										unitId: string;
-								  }
-								| {
-										/**
-										 * @type string
-										 */
-										type: "page";
-										/**
-										 * @description
-										 * Format: `uuid`
-										 * @type string
-										 */
-										pageId: string;
-								  };
-						}[];
-				  }
-			)[];
-		};
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		createdAt: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		updatedAt: string;
-	}[];
-};
-
-/**
- * @type object
- */
-export type GetApiRealmsByRealmIdDocksStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmNotFound'
-		 * @type string
-		 */
-		code: "RealmNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiRealmsByRealmIdDocksStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type GetApiRealmsByRealmIdDocksStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type GetApiRealmsByRealmIdDocksOptions = {
-	body?: never;
-	path: GetApiRealmsByRealmIdDocksPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type GetApiRealmsByRealmIdDocksResponses = {
-	"200": GetApiRealmsByRealmIdDocksStatus200;
-	"404": GetApiRealmsByRealmIdDocksStatus404;
-	"422": GetApiRealmsByRealmIdDocksStatus422;
-	"500": GetApiRealmsByRealmIdDocksStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type GetApiRealmsByRealmIdDocksResponse =
-	| GetApiRealmsByRealmIdDocksStatus200
-	| GetApiRealmsByRealmIdDocksStatus404
-	| GetApiRealmsByRealmIdDocksStatus422
-	| GetApiRealmsByRealmIdDocksStatus500;
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdDocksBySlotPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-	/**
-	 * @minLength 1
-	 * @maxLength 128
-	 * @type string
-	 */
-	slot: string;
-};
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdDocksBySlotStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-	/**
-	 * @type string
-	 */
-	slot: string;
-	/**
-	 * @type object
-	 */
-	document: {
-		/**
-		 * @type string
-		 */
-		_type: "dock";
-		/**
-		 * @pattern ^[0-9a-f]{12}$
-		 * @type string
-		 */
-		_key: string;
-		/**
-		 * @type array
-		 */
-		blocks: (
-			| {
-					/**
-					 * @type string
-					 */
-					_type: "portable-text";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type array
-					 */
-					content: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "block";
-								/**
-								 * @type array
-								 */
-								children: (
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "span";
-											/**
-											 * @type string
-											 */
-											text: string;
-											/**
-											 * @type array | undefined
-											 */
-											marks?: string[];
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @pattern ^(?!span$).+
-											 * @type string
-											 */
-											_type: string;
-											[key: string]: unknown;
-									  }
-								)[];
-								/**
-								 * @type array | undefined
-								 */
-								markDefs?: {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: string;
-									[key: string]: unknown;
-								}[];
-								/**
-								 * @type string | undefined
-								 */
-								listItem?: string;
-								/**
-								 * @type string | undefined
-								 */
-								style?: string;
-								/**
-								 * @minLength 1
-								 * @type integer | undefined
-								 */
-								level?: number;
-								[key: string]: unknown;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @pattern ^(?!block$).+
-								 * @type string
-								 */
-								_type: string;
-								[key: string]: unknown;
-						  }
-					)[];
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_type: "post-ref";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					postId: string;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_type: "menu";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type object | undefined
-					 */
-					label?: {
-						[key: string]: string;
-					};
-					/**
-					 * @type array
-					 */
-					items: {
-						/**
-						 * @type string
-						 */
-						_type: "menu-item";
-						/**
-						 * @pattern ^[0-9a-f]{12}$
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type object
-						 */
-						label: {
-							[key: string]: string;
-						};
-						target:
-							| {
-									/**
-									 * @type string
-									 */
-									type: "href";
-									/**
-									 * @minLength 1
-									 * @type string
-									 */
-									href: string;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									type: "unit";
-									/**
-									 * @description
-									 * Format: `uuid`
-									 * @type string
-									 */
-									unitId: string;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									type: "page";
-									/**
-									 * @description
-									 * Format: `uuid`
-									 * @type string
-									 */
-									pageId: string;
-							  };
-					}[];
-			  }
-		)[];
-	};
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-};
-
-export const PutApiRealmsByRealmIdDocksBySlotStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	UnitFieldLocked: "UnitFieldLocked",
-} as const;
-
-export type PutApiRealmsByRealmIdDocksBySlotStatus403ErrorCodeEnum =
-	(typeof PutApiRealmsByRealmIdDocksBySlotStatus403ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdDocksBySlotStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdDocksBySlotStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmCapabilityRequired'
-		 * @type string
-		 */
-		code: PutApiRealmsByRealmIdDocksBySlotStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdDocksBySlotStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdDocksBySlotStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdDocksBySlotBody = {
-	/**
-	 * @type object
-	 */
-	document: {
-		/**
-		 * @type string
-		 */
-		_type: "dock";
-		/**
-		 * @pattern ^[0-9a-f]{12}$
-		 * @type string
-		 */
-		_key: string;
-		/**
-		 * @type array
-		 */
-		blocks: (
-			| {
-					/**
-					 * @type string
-					 */
-					_type: "portable-text";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type array
-					 */
-					content: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "block";
-								/**
-								 * @type array
-								 */
-								children: (
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "span";
-											/**
-											 * @type string
-											 */
-											text: string;
-											/**
-											 * @type array | undefined
-											 */
-											marks?: string[];
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @pattern ^(?!span$).+
-											 * @type string
-											 */
-											_type: string;
-											[key: string]: unknown;
-									  }
-								)[];
-								/**
-								 * @type array | undefined
-								 */
-								markDefs?: {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: string;
-									[key: string]: unknown;
-								}[];
-								/**
-								 * @type string | undefined
-								 */
-								listItem?: string;
-								/**
-								 * @type string | undefined
-								 */
-								style?: string;
-								/**
-								 * @minLength 1
-								 * @type integer | undefined
-								 */
-								level?: number;
-								[key: string]: unknown;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @pattern ^(?!block$).+
-								 * @type string
-								 */
-								_type: string;
-								[key: string]: unknown;
-						  }
-					)[];
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_type: "post-ref";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					postId: string;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_type: "menu";
-					/**
-					 * @pattern ^[0-9a-f]{12}$
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type object | undefined
-					 */
-					label?: {
-						[key: string]: string;
-					};
-					/**
-					 * @type array
-					 */
-					items: {
-						/**
-						 * @type string
-						 */
-						_type: "menu-item";
-						/**
-						 * @pattern ^[0-9a-f]{12}$
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type object
-						 */
-						label: {
-							[key: string]: string;
-						};
-						target:
-							| {
-									/**
-									 * @type string
-									 */
-									type: "href";
-									/**
-									 * @minLength 1
-									 * @type string
-									 */
-									href: string;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									type: "unit";
-									/**
-									 * @description
-									 * Format: `uuid`
-									 * @type string
-									 */
-									unitId: string;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									type: "page";
-									/**
-									 * @description
-									 * Format: `uuid`
-									 * @type string
-									 */
-									pageId: string;
-							  };
-					}[];
-			  }
-		)[];
-	};
-};
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdDocksBySlotOptions = {
-	body: PutApiRealmsByRealmIdDocksBySlotBody;
-	path: PutApiRealmsByRealmIdDocksBySlotPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdDocksBySlotResponses = {
-	"200": PutApiRealmsByRealmIdDocksBySlotStatus200;
-	"403": PutApiRealmsByRealmIdDocksBySlotStatus403;
-	"422": PutApiRealmsByRealmIdDocksBySlotStatus422;
-	"500": PutApiRealmsByRealmIdDocksBySlotStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PutApiRealmsByRealmIdDocksBySlotResponse =
-	| PutApiRealmsByRealmIdDocksBySlotStatus200
-	| PutApiRealmsByRealmIdDocksBySlotStatus403
-	| PutApiRealmsByRealmIdDocksBySlotStatus422
-	| PutApiRealmsByRealmIdDocksBySlotStatus500;
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdDocksBySlotPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-	/**
-	 * @minLength 1
-	 * @maxLength 128
-	 * @type string
-	 */
-	slot: string;
-};
-
-/**
- * @type void
- */
-export type DeleteApiRealmsByRealmIdDocksBySlotStatus204 = void;
-
-export const DeleteApiRealmsByRealmIdDocksBySlotStatus403ErrorCodeEnum = {
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-	UnitFieldLocked: "UnitFieldLocked",
-} as const;
-
-export type DeleteApiRealmsByRealmIdDocksBySlotStatus403ErrorCodeEnum =
-	(typeof DeleteApiRealmsByRealmIdDocksBySlotStatus403ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdDocksBySlotStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdDocksBySlotStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmCapabilityRequired'
-		 * @type string
-		 */
-		code: DeleteApiRealmsByRealmIdDocksBySlotStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdDocksBySlotStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdDocksBySlotStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdDocksBySlotOptions = {
-	body?: never;
-	path: DeleteApiRealmsByRealmIdDocksBySlotPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdDocksBySlotResponses = {
-	"204": DeleteApiRealmsByRealmIdDocksBySlotStatus204;
-	"403": DeleteApiRealmsByRealmIdDocksBySlotStatus403;
-	"422": DeleteApiRealmsByRealmIdDocksBySlotStatus422;
-	"500": DeleteApiRealmsByRealmIdDocksBySlotStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiRealmsByRealmIdDocksBySlotResponse =
-	| DeleteApiRealmsByRealmIdDocksBySlotStatus204
-	| DeleteApiRealmsByRealmIdDocksBySlotStatus403
-	| DeleteApiRealmsByRealmIdDocksBySlotStatus422
-	| DeleteApiRealmsByRealmIdDocksBySlotStatus500;
 
 /**
  * @type object

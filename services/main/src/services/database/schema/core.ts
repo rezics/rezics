@@ -57,7 +57,6 @@ export const unit = pgTable(
 		contentRating: contentRating().default("general").notNull(),
 		aiDisclosure: aiDisclosure().default("unknown").notNull(),
 		license: text(),
-		metadata: createJsonObjectColumn(),
 		coverKey: text(),
 		coverFocalX: doublePrecision(),
 		coverFocalY: doublePrecision(),
@@ -94,7 +93,6 @@ export const unit = pgTable(
 			"unit_deleted_at_check",
 			sql`${table.deletedAt} is null or ${table.deletedAt} >= ${table.createdAt}`,
 		),
-		createJsonObjectConstraint("unit_metadata_json_object_check", table.metadata),
 	],
 );
 
@@ -155,24 +153,12 @@ export const profile = pgTable(
 		authUserId: uuid()
 			.notNull()
 			.references(() => users.id, { onDelete: "restrict" }),
-		name: text(),
 		avatar: text(),
-		summary: text(),
-		description: createJsonDocumentColumn(),
 		joinedAt: createTimestampMsColumn().defaultNow().notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
-	(table) => [
-		unique("profile_auth_user_id_key").on(table.authUserId),
-		index("profile_name_search_idx").using("pgroonga", table.name),
-		index("profile_summary_search_idx").using("pgroonga", table.summary),
-		index("profile_description_search_idx").using(
-			"pgroonga",
-			table.description.op("pgroonga_jsonb_full_text_search_ops_v2"),
-		),
-		check("profile_name_not_blank", sql`${table.name} is null or btrim(${table.name}) <> ''`),
-	],
+	(table) => [unique("profile_auth_user_id_key").on(table.authUserId)],
 );
 
 export const profilePreference = pgTable(
@@ -219,6 +205,7 @@ export const apiToken = pgTable(
 		profileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "cascade" }),
+		/** @UNIT_LOCALIZATION_EXEMPT Private operational label, not Unit content. */
 		name: text().notNull(),
 		prefix: text().notNull(),
 		tokenHash: text().notNull(),
@@ -282,6 +269,7 @@ export const unitFieldLock = pgTable(
 		lockedByProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
+		/** @UNIT_LOCALIZATION_EXEMPT Point-in-time administrative reason. */
 		reason: text(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),

@@ -1,8 +1,8 @@
-import { eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { PortableTextDocument, parseNullableDocument } from "@rezics/content-structure";
 
 import { database } from "../../database";
-import { profile as profileTable, unit } from "../../database/schema";
+import { profile as profileTable, unit, unitLocalization } from "../../database/schema";
 import { storage } from "../../storage";
 import { isManagedUploadKey } from "../../authorization/upload/authorization";
 import { ProfileNotFound } from "./errors";
@@ -12,11 +12,11 @@ export const PublicProfileSelection = {
 	slug: unit.slug,
 	status: unit.status,
 	visibility: unit.visibility,
-	language: sql<string | null>`null`,
-	name: profileTable.name,
+	language: unitLocalization.language,
+	name: unitLocalization.title,
 	avatar: profileTable.avatar,
-	summary: profileTable.summary,
-	description: profileTable.description,
+	summary: unitLocalization.summary,
+	description: unitLocalization.description,
 	createdAt: unit.createdAt,
 	updatedAt: unit.updatedAt,
 };
@@ -27,6 +27,13 @@ export async function getProfile(unitId: string) {
 			.select(PublicProfileSelection)
 			.from(profileTable)
 			.innerJoin(unit, eq(unit.id, profileTable.id))
+			.leftJoin(
+				unitLocalization,
+				and(
+					eq(unitLocalization.unitId, profileTable.id),
+					eq(unitLocalization.isDefault, true),
+				),
+			)
 			.where(eq(profileTable.id, unitId))
 			.limit(1)
 	)[0];

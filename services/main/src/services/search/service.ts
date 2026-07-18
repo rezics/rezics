@@ -6,7 +6,6 @@ import {
 	collection,
 	entity,
 	poll,
-	pollOption,
 	post,
 	postReply,
 	profile,
@@ -15,8 +14,11 @@ import {
 	realmUnit,
 	realmSubscription,
 	unit,
+	unitAlias,
+	unitAliasVote,
 	unitLocalization,
 } from "../database/schema";
+import { AliasSearchScoreThreshold } from "../database/schema/contract-values";
 import { InvalidSearch } from "./errors";
 import {
 	SearchCategoryRules,
@@ -104,16 +106,15 @@ function getUnitCandidateIds(query: string): SQL {
 				AND ${unitLocalization.content} &@~ pgroonga_query_escape(${query})
 			)
 		UNION
-		SELECT ${profile.id}
-		FROM ${profile}
-		WHERE ${profile.name} &@~ pgroonga_query_escape(${query})
-			OR ${profile.summary} &@~ pgroonga_query_escape(${query})
-			OR ${profile.description} &@~ pgroonga_query_escape(${query})
-		UNION
-		SELECT ${pollOption.pollId}
-		FROM ${pollOption}
-		WHERE ${pollOption.deletedAt} IS NULL
-			AND ${pollOption.label} &@~ pgroonga_query_escape(${query})
+		SELECT ${unitAlias.unitId}
+		FROM ${unitAlias}
+		WHERE ${unitAlias.deletedAt} IS NULL
+			AND ${unitAlias.term} &@~ pgroonga_query_escape(${query})
+			AND (
+				SELECT coalesce(sum(${unitAliasVote.value}), 0)
+				FROM ${unitAliasVote}
+				WHERE ${unitAliasVote.aliasId} = ${unitAlias.id}
+			) >= ${AliasSearchScoreThreshold}
 		UNION
 		SELECT ${unit.id}
 		FROM ${unit}
@@ -261,9 +262,7 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 					FILTER (WHERE ${unitLocalization.summary} IS NOT NULL)
 				FROM ${unitLocalization}
 				WHERE ${unitLocalization.unitId} = ${unit.id}
-			), '[]'::jsonb),
-			'name', ${profile.name},
-			'summary', ${profile.summary}
+			), '[]'::jsonb)
 		)) AS hit, count(*) OVER ()::text AS total
 		FROM ${unit}
 		LEFT JOIN ${profile} ON ${profile.id} = ${unit.id}

@@ -5,7 +5,6 @@ import {
 	parseNullableDocument,
 	type PortableTextDocument as PortableTextDocumentValue,
 } from "@rezics/content-structure";
-import type { JsonValue } from "@rezics/portable-text";
 import type { Static } from "elysia";
 
 import type { Authorization } from "../authorization";
@@ -18,8 +17,6 @@ import {
 	software,
 	media,
 	unit,
-	unitAlias,
-	unitAliasVote,
 	unitCollaborator,
 	creditAttribution,
 	unitLink,
@@ -56,7 +53,6 @@ export interface CreateUnitInput {
 	contentRating?: "general" | "r15" | "r18" | "r18g";
 	aiDisclosure?: "unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
 	license?: string | null;
-	metadata?: Record<string, unknown>;
 	cover?: CoverAssetInput | null;
 }
 
@@ -72,7 +68,6 @@ export interface UpdateUnitInput {
 	contentRating?: "general" | "r15" | "r18" | "r18g";
 	aiDisclosure?: "unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
 	license?: string | null;
-	metadata?: Record<string, JsonValue>;
 	cover?: CoverAssetInput | null;
 	unit?: {
 		originalLanguage?: string;
@@ -163,7 +158,6 @@ export async function createUnit(
 				contentRating: input.contentRating ?? "general",
 				aiDisclosure: input.aiDisclosure ?? "unknown",
 				license: input.license,
-				metadata: input.metadata,
 				coverKey: input.cover?.key,
 				coverFocalX: input.cover?.focalPoint.x,
 				coverFocalY: input.cover?.focalPoint.y,
@@ -246,25 +240,6 @@ export async function getUnit(
 		.from(unitLocalization)
 		.where(eq(unitLocalization.unitId, base.id))
 		.orderBy(desc(unitLocalization.isDefault), unitLocalization.language);
-	const aliases = await database
-		.select({
-			id: unitAlias.id,
-			unitId: unitAlias.unitId,
-			value: unitAlias.value,
-			normalizedValue: unitAlias.normalizedValue,
-			language: unitAlias.language,
-			kind: unitAlias.kind,
-			score: sql<number>`coalesce((select sum(${unitAliasVote.value}) from ${unitAliasVote} where ${unitAliasVote.aliasId} = ${unitAlias.id}), 0)::int`,
-			voteCount: sql<number>`(select count(*) from ${unitAliasVote} where ${unitAliasVote.aliasId} = ${unitAlias.id})::int`,
-			pinned: unitAlias.pinned,
-			position: unitAlias.position,
-			createdById: unitAlias.createdByProfileId,
-			createdAt: unitAlias.createdAt,
-			updatedAt: unitAlias.updatedAt,
-		})
-		.from(unitAlias)
-		.where(and(eq(unitAlias.unitId, base.id), isNull(unitAlias.deletedAt)))
-		.orderBy(desc(unitAlias.pinned), unitAlias.position, unitAlias.value);
 	const defaultLanguage = localizations.find(({ isDefault }) => isDefault)?.language ?? null;
 	const credits = await database
 		.select({
@@ -346,7 +321,6 @@ export async function getUnit(
 				description: parseNullableDocument(PortableTextDocument, description),
 			}),
 		),
-		aliases: aliases.map((alias) => ({ ...alias, status: "active" })),
 		credits: credits.map((credit) => ({ ...credit, evidenceUrl: null, note: null })),
 		links: links.map((link) => ({
 			...link,
@@ -432,7 +406,6 @@ export async function updateUnit(
 				contentRating: body.contentRating,
 				aiDisclosure: body.aiDisclosure,
 				...(Object.hasOwn(body, "license") ? { license: body.license } : {}),
-				...(Object.hasOwn(body, "metadata") ? { metadata: body.metadata ?? null } : {}),
 				...(Object.hasOwn(body, "cover")
 					? {
 							coverKey: cover?.key ?? null,

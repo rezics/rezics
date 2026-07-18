@@ -49,6 +49,7 @@ export const recommendationSnapshot = pgTable(
 		sourceWatermark: createTimestampMsColumn(),
 		startedAt: createCreatedAtColumn(),
 		completedAt: createTimestampMsColumn(),
+		/** @UNIT_LOCALIZATION_EXEMPT Machine diagnostic captured for a failed snapshot. */
 		error: text(),
 	},
 	(table) => [

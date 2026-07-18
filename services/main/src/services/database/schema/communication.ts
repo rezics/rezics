@@ -47,6 +47,7 @@ export const notification = pgTable(
 		readAt: createTimestampMsColumn(),
 		emailStatus: notificationEmailStatus().default("not_requested").notNull(),
 		emailedAt: createTimestampMsColumn(),
+		/** @UNIT_LOCALIZATION_EXEMPT Machine diagnostic captured at delivery time. */
 		emailError: text(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -133,6 +134,7 @@ export const message = pgTable(
 		senderProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
+		/** @UNIT_LOCALIZATION_EXEMPT Original point-in-time direct message. */
 		content: text(),
 		deletedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),

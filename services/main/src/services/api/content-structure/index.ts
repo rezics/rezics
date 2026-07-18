@@ -41,14 +41,20 @@ import { toApiErrorResponse } from "../schema/response";
 const UnitForbiddenResponse = toApiErrorResponse(["UnitEditForbidden", "UnitFieldLocked"]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 
-function toContentStructureNodeResponse(node: typeof contentStructureNode.$inferSelect) {
+function toContentStructureNodeResponse(
+	node: typeof contentStructureNode.$inferSelect,
+	language: string,
+	title: string,
+	contentKind: "chapter" | "chapter_group",
+) {
 	return {
 		id: node.id,
 		unitId: node.ownerUnitId,
 		parentId: node.parentId,
 		contentUnitId: node.contentUnitId,
-		language: null,
-		title: node.title,
+		contentKind,
+		language,
+		title,
 		position: node.position,
 		createdAt: node.createdAt,
 		updatedAt: node.updatedAt,
@@ -68,15 +74,18 @@ export default new Elysia()
 					id: contentStructureNode.id,
 					parentId: contentStructureNode.parentId,
 					contentUnitId: contentStructureNode.contentUnitId,
-					title: contentStructureNode.title,
+					contentKind: post.kind,
+					language: unitLocalization.language,
+					title: unitLocalization.title,
 					position: contentStructureNode.position,
 					unitStatus: unit.status,
 					unitVisibility: unit.visibility,
 					contentStatus: unitLocalization.contentStatus,
 				})
 				.from(contentStructureNode)
-				.leftJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
-				.leftJoin(
+				.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+				.innerJoin(post, eq(post.id, contentStructureNode.contentUnitId))
+				.innerJoin(
 					unitLocalization,
 					and(
 						eq(unitLocalization.unitId, contentStructureNode.contentUnitId),
@@ -92,15 +101,13 @@ export default new Elysia()
 				.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
 			return {
 				items: rows
-					.filter(
-						(row) =>
-							!row.contentUnitId ||
-							isContentStructureNodeReadable(
-								canEditBook,
-								row.unitStatus,
-								row.unitVisibility,
-								row.contentStatus,
-							),
+					.filter((row) =>
+						isContentStructureNodeReadable(
+							canEditBook,
+							row.unitStatus,
+							row.unitVisibility,
+							row.contentStatus,
+						),
 					)
 					.map(
 						({
@@ -110,7 +117,9 @@ export default new Elysia()
 							...node
 						}) => ({
 							...node,
-							language: null,
+							contentKind:
+								node.contentKind === "chapter" ? "chapter" : "chapter_group",
+							title: node.title ?? "",
 						}),
 					),
 			};
@@ -135,53 +144,49 @@ export default new Elysia()
 				"/contentStructureNodes",
 			]);
 			const node = await database.transaction(async (tx) => {
-				let contentUnitId: string | undefined;
-				if (body.content !== undefined) {
-					const published = body.status === "published";
-					const [chapter] = await tx
-						.insert(unit)
-						.values({
-							kind: "post",
-							status: published ? "published" : "draft",
-							visibility: "public",
-							publishedAt: published ? new Date() : null,
-						})
-						.returning({ id: unit.id });
-					if (!chapter) throw new Error("Chapter insertion did not return an id");
-					contentUnitId = chapter.id;
-					await tx.insert(post).values({
-						id: chapter.id,
-						authorProfileId: profile.unitId,
-						subjectUnitId: params.unitId,
-						kind: "chapter",
-					});
-					await tx.insert(unitLocalization).values({
-						unitId: chapter.id,
-						language: body.language,
-						isDefault: true,
-						title: body.title,
-						content: body.content,
-						contentStatus: body.status ?? "draft",
-					});
-					await tx.insert(unitCollaborator).values({
-						unitId: chapter.id,
-						profileId: profile.unitId,
-						role: "owner",
-						addedByProfileId: profile.unitId,
-					});
-					await recordUnitRevision(tx, {
-						unitId: chapter.id,
-						actorProfileId: profile.unitId,
-						event: "create",
-					});
-				}
+				const hasContent = body.content !== undefined;
+				const published = hasContent ? body.status === "published" : true;
+				const [contentUnit] = await tx
+					.insert(unit)
+					.values({
+						kind: "post",
+						status: published ? "published" : "draft",
+						visibility: "public",
+						publishedAt: published ? new Date() : null,
+					})
+					.returning({ id: unit.id });
+				if (!contentUnit) throw new Error("Content Unit insertion did not return an id");
+				await tx.insert(post).values({
+					id: contentUnit.id,
+					authorProfileId: profile.unitId,
+					subjectUnitId: params.unitId,
+					kind: hasContent ? "chapter" : "chapter_group",
+				});
+				await tx.insert(unitLocalization).values({
+					unitId: contentUnit.id,
+					language: body.language,
+					isDefault: true,
+					title: body.title,
+					content: body.content,
+					contentStatus: hasContent ? (body.status ?? "draft") : undefined,
+				});
+				await tx.insert(unitCollaborator).values({
+					unitId: contentUnit.id,
+					profileId: profile.unitId,
+					role: "owner",
+					addedByProfileId: profile.unitId,
+				});
+				await recordUnitRevision(tx, {
+					unitId: contentUnit.id,
+					actorProfileId: profile.unitId,
+					event: "create",
+				});
 				const [created] = await tx
 					.insert(contentStructureNode)
 					.values({
 						ownerUnitId: params.unitId,
 						parentId: body.parentId,
-						contentUnitId,
-						title: body.title,
+						contentUnitId: contentUnit.id,
 						position: body.position,
 					})
 					.returning();
@@ -193,7 +198,12 @@ export default new Elysia()
 				});
 				return created;
 			});
-			return toContentStructureNodeResponse(node);
+			return toContentStructureNodeResponse(
+				node,
+				body.language,
+				body.title,
+				body.content !== undefined ? "chapter" : "chapter_group",
+			);
 		},
 		{
 			contribute: true,
@@ -215,18 +225,38 @@ export default new Elysia()
 				"/contentStructureNodes",
 			]);
 			const node = await database.transaction(async (tx) => {
-				const [updated] = await tx
-					.update(contentStructureNode)
-					.set(body)
-					.where(
-						and(
-							eq(contentStructureNode.id, params.nodeId),
-							eq(contentStructureNode.ownerUnitId, params.unitId),
-							isNull(contentStructureNode.deletedAt),
-						),
-					)
-					.returning();
+				const condition = and(
+					eq(contentStructureNode.id, params.nodeId),
+					eq(contentStructureNode.ownerUnitId, params.unitId),
+					isNull(contentStructureNode.deletedAt),
+				);
+				const [updated] =
+					body.parentId !== undefined || body.position !== undefined
+						? await tx
+								.update(contentStructureNode)
+								.set({ parentId: body.parentId, position: body.position })
+								.where(condition)
+								.returning()
+						: await tx.select().from(contentStructureNode).where(condition).limit(1);
 				if (!updated) throw new ContentStructureNodeNotFound();
+				if (body.title !== undefined) {
+					const localized = await tx
+						.update(unitLocalization)
+						.set({ title: body.title })
+						.where(
+							and(
+								eq(unitLocalization.unitId, updated.contentUnitId),
+								eq(unitLocalization.isDefault, true),
+							),
+						)
+						.returning({ unitId: unitLocalization.unitId });
+					if (!localized.length) throw new ContentStructureNodeNotFound();
+					await recordUnitRevision(tx, {
+						unitId: updated.contentUnitId,
+						actorProfileId: profile.unitId,
+						event: "update",
+					});
+				}
 				await recordUnitRevision(tx, {
 					unitId: params.unitId,
 					actorProfileId: profile.unitId,
@@ -234,7 +264,33 @@ export default new Elysia()
 				});
 				return updated;
 			});
-			return toContentStructureNodeResponse(node);
+			const [localization] = await database
+				.select({
+					language: unitLocalization.language,
+					title: unitLocalization.title,
+					contentKind: post.kind,
+				})
+				.from(unitLocalization)
+				.innerJoin(post, eq(post.id, unitLocalization.unitId))
+				.where(
+					and(
+						eq(unitLocalization.unitId, node.contentUnitId),
+						eq(unitLocalization.isDefault, true),
+					),
+				)
+				.limit(1);
+			if (
+				!localization?.title ||
+				(localization.contentKind !== "chapter" &&
+					localization.contentKind !== "chapter_group")
+			)
+				throw new ContentStructureNodeNotFound();
+			return toContentStructureNodeResponse(
+				node,
+				localization.language,
+				localization.title,
+				localization.contentKind,
+			);
 		},
 		{
 			contribute: true,
@@ -263,7 +319,6 @@ export default new Elysia()
 					nodeId: contentStructureNode.id,
 					bookId: contentStructureNode.ownerUnitId,
 					chapterId: contentStructureNode.contentUnitId,
-					title: contentStructureNode.title,
 					position: contentStructureNode.position,
 				})
 				.from(contentStructureNode)
@@ -280,6 +335,7 @@ export default new Elysia()
 			const [content] = await database
 				.select({
 					language: unitLocalization.language,
+					title: unitLocalization.title,
 					content: unitLocalization.content,
 					status: unitLocalization.contentStatus,
 					updatedAt: unitLocalization.updatedAt,
@@ -326,6 +382,7 @@ export default new Elysia()
 				.where(
 					and(
 						eq(contentStructureNode.ownerUnitId, node.bookId),
+						eq(post.kind, "chapter"),
 						isNull(contentStructureNode.deletedAt),
 					),
 				)
@@ -342,6 +399,7 @@ export default new Elysia()
 			return {
 				...node,
 				chapterId: node.chapterId,
+				title: content.title ?? "",
 				language: content.language,
 				content: toPortableTextResponse(content.content),
 				status: content.status,

@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { createHash } from "node:crypto";
 
-import { and, count, desc, eq, sum } from "drizzle-orm";
+import { and, count, desc, eq, isNull, sql, sum } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session from "../../auth/session";
@@ -19,6 +19,7 @@ import {
 	unitLocalization,
 	unitVariant,
 } from "../../database/schema";
+import { AliasSearchScoreThreshold } from "../../database/schema/contract-values";
 import {
 	AddUnitAliasBody,
 	AddUnitCreditBody,
@@ -28,6 +29,7 @@ import {
 	ListTagsQuery,
 	TagUnitBody,
 	UnitAliasParams,
+	UnitAliasUnitParams,
 	UnitUnitParams,
 	UnitTagParams,
 	UnitVersionParams,
@@ -40,6 +42,7 @@ import { UnitIdParams } from "../schema";
 import {
 	toApiErrorResponse,
 	AliasResponse,
+	AliasListResponse,
 	CreditAttributionResponse,
 	EntityDetailResponse,
 	EntityListResponse,
@@ -75,6 +78,10 @@ async function getAliasVoteSummary(aliasId: string, value: number | null) {
 		.from(unitAliasVote)
 		.where(eq(unitAliasVote.aliasId, aliasId));
 	return { value, score: Number(totals?.score ?? 0), voteCount: totals?.voteCount ?? 0 };
+}
+
+function normalizeAliasTerm(term: string): string {
+	return term.trim().normalize("NFKC").toLowerCase().replace(/\s+/g, " ");
 }
 
 async function getTagVoteSummary(unitId: string, tagId: string, value: number | null) {
@@ -253,27 +260,61 @@ export default new Elysia()
 	)
 	.group("/units/:type/:unitId", (app) =>
 		app
+			.get(
+				"/aliases",
+				async ({ params, authorization }) => {
+					await checkUnitType(params.unitId, params.type);
+					await authorization.unit.ensureCanRead(params.unitId);
+					const items = await database
+						.select({
+							id: unitAlias.id,
+							unitId: unitAlias.unitId,
+							term: unitAlias.term,
+							normalizedTerm: unitAlias.normalizedTerm,
+							language: unitAlias.language,
+							kind: unitAlias.kind,
+							createdByProfileId: unitAlias.createdByProfileId,
+							score: sql<number>`coalesce((select sum(${unitAliasVote.value}) from ${unitAliasVote} where ${unitAliasVote.aliasId} = ${unitAlias.id}), 0)::int`,
+							voteCount: sql<number>`(select count(*) from ${unitAliasVote} where ${unitAliasVote.aliasId} = ${unitAlias.id})::int`,
+							searchable: sql<boolean>`coalesce((select sum(${unitAliasVote.value}) from ${unitAliasVote} where ${unitAliasVote.aliasId} = ${unitAlias.id}), 0) >= ${AliasSearchScoreThreshold}`,
+							createdAt: unitAlias.createdAt,
+							updatedAt: unitAlias.updatedAt,
+						})
+						.from(unitAlias)
+						.where(
+							and(eq(unitAlias.unitId, params.unitId), isNull(unitAlias.deletedAt)),
+						)
+						.orderBy(
+							desc(
+								sql`coalesce((select sum(${unitAliasVote.value}) from ${unitAliasVote} where ${unitAliasVote.aliasId} = ${unitAlias.id}), 0)`,
+							),
+							unitAlias.term,
+						);
+					return { items };
+				},
+				{
+					auth: true,
+					params: UnitAliasUnitParams,
+					response: { [StatusCodes.OK]: AliasListResponse },
+					detail: { summary: "List Unit aliases", tags: ["Units"] },
+				},
+			)
 			.post(
 				"/aliases",
 				async ({ params, profile, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
-					await ensureUnitMutationAuthorized(
-						authorization.unit,
-						params.unitId,
-						"/aliases",
-					);
-					const normalizedValue = body.value.trim().normalize("NFKC").toLocaleLowerCase();
+					await authorization.unit.ensureCanRead(params.unitId);
+					const term = body.term.trim();
+					const normalizedTerm = normalizeAliasTerm(term);
 					const result = await database.transaction(async (tx) => {
 						const [created] = await tx
 							.insert(unitAlias)
 							.values({
 								unitId: params.unitId,
-								value: body.value.trim(),
-								normalizedValue,
+								term,
+								normalizedTerm,
 								language: body.language,
 								kind: body.kind,
-								pinned: body.pinned,
-								position: body.position,
 								createdByProfileId: profile.unitId,
 							})
 							.returning();
@@ -283,13 +324,18 @@ export default new Elysia()
 							actorProfileId: profile.unitId,
 							event: "update",
 						});
-						return created;
+						return {
+							...created,
+							score: 0,
+							voteCount: 0,
+							searchable: false,
+						};
 					});
 					return result;
 				},
 				{
 					contribute: true,
-					params: UnitUnitParams,
+					params: UnitAliasUnitParams,
 					body: AddUnitAliasBody,
 					response: {
 						[StatusCodes.OK]: AliasResponse,
@@ -310,11 +356,13 @@ export default new Elysia()
 					);
 					await database.transaction(async (tx) => {
 						const deleted = await tx
-							.delete(unitAlias)
+							.update(unitAlias)
+							.set({ deletedAt: new Date() })
 							.where(
 								and(
 									eq(unitAlias.id, params.aliasId),
 									eq(unitAlias.unitId, params.unitId),
+									isNull(unitAlias.deletedAt),
 								),
 							)
 							.returning({ id: unitAlias.id });
@@ -348,6 +396,7 @@ export default new Elysia()
 			.put(
 				"/aliases/:aliasId/vote",
 				async ({ params, profile, authorization, body }) => {
+					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
 					const [target] = await database
 						.select({ id: unitAlias.id })
@@ -356,6 +405,7 @@ export default new Elysia()
 							and(
 								eq(unitAlias.id, params.aliasId),
 								eq(unitAlias.unitId, params.unitId),
+								isNull(unitAlias.deletedAt),
 							),
 						)
 						.limit(1);
@@ -389,7 +439,21 @@ export default new Elysia()
 			)
 			.delete(
 				"/aliases/:aliasId/vote",
-				async ({ params, profile }) => {
+				async ({ params, profile, authorization }) => {
+					await checkUnitType(params.unitId, params.type);
+					await authorization.unit.ensureCanRead(params.unitId);
+					const [target] = await database
+						.select({ id: unitAlias.id })
+						.from(unitAlias)
+						.where(
+							and(
+								eq(unitAlias.id, params.aliasId),
+								eq(unitAlias.unitId, params.unitId),
+								isNull(unitAlias.deletedAt),
+							),
+						)
+						.limit(1);
+					if (!target) throw new AliasNotFound();
 					await database
 						.delete(unitAliasVote)
 						.where(
@@ -403,7 +467,13 @@ export default new Elysia()
 				{
 					write: true,
 					params: UnitAliasParams,
-					response: { [StatusCodes.OK]: VoteResponse },
+					response: {
+						[StatusCodes.OK]: VoteResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"AliasNotFound",
+						]),
+					},
 					detail: { summary: "Remove Unit alias vote", tags: ["Units"] },
 				},
 			)
@@ -464,7 +534,6 @@ export default new Elysia()
 								sourceEntityId: body.sourceEntityUnitId,
 								url: body.url,
 								role: body.role,
-								label: body.label,
 								position: body.position,
 								normalizedUrl,
 								normalizedUrlHash: createHash("sha256")

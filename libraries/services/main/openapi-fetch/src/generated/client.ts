@@ -101,20 +101,6 @@ import type {
 	DeleteApiSeriesBySeriesIdReleasesByReleaseIdResponses,
 	PostApiZonesOptions,
 	PostApiZonesResponses,
-	GetApiZonesByZoneIdPagesOptions,
-	GetApiZonesByZoneIdPagesResponses,
-	PostApiZonesByZoneIdPagesOptions,
-	PostApiZonesByZoneIdPagesResponses,
-	PutApiZonesByZoneIdPagesByPageIdOptions,
-	PutApiZonesByZoneIdPagesByPageIdResponses,
-	DeleteApiZonesByZoneIdPagesByPageIdOptions,
-	DeleteApiZonesByZoneIdPagesByPageIdResponses,
-	GetApiZonesByZoneIdMenusOptions,
-	GetApiZonesByZoneIdMenusResponses,
-	PutApiZonesByZoneIdMenusBySlotOptions,
-	PutApiZonesByZoneIdMenusBySlotResponses,
-	DeleteApiZonesByZoneIdMenusBySlotOptions,
-	DeleteApiZonesByZoneIdMenusBySlotResponses,
 	PutApiZonesByZoneIdFollowOptions,
 	PutApiZonesByZoneIdFollowResponses,
 	DeleteApiZonesByZoneIdFollowOptions,
@@ -189,6 +175,8 @@ import type {
 	GetApiTagsResponses,
 	PostApiTagsOptions,
 	PostApiTagsResponses,
+	GetApiUnitsByTypeByUnitIdAliasesOptions,
+	GetApiUnitsByTypeByUnitIdAliasesResponses,
 	PostApiUnitsByTypeByUnitIdAliasesOptions,
 	PostApiUnitsByTypeByUnitIdAliasesResponses,
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdOptions,
@@ -337,12 +325,6 @@ import type {
 	PutApiRealmsByRealmIdPinsByUnitIdResponses,
 	DeleteApiRealmsByRealmIdPinsByUnitIdOptions,
 	DeleteApiRealmsByRealmIdPinsByUnitIdResponses,
-	GetApiRealmsByRealmIdDocksOptions,
-	GetApiRealmsByRealmIdDocksResponses,
-	PutApiRealmsByRealmIdDocksBySlotOptions,
-	PutApiRealmsByRealmIdDocksBySlotResponses,
-	DeleteApiRealmsByRealmIdDocksBySlotOptions,
-	DeleteApiRealmsByRealmIdDocksBySlotResponses,
 	PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
 	PatchApiRealmsByRealmIdUnitsByUnitIdResponses,
 	PostApiSearchOptions,
@@ -1133,112 +1115,6 @@ export function postApiZones<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary List Zone pages
- * {@link /api/zones/:zoneId/pages}
- */
-export function getApiZonesByZoneIdPages<ThrowOnError extends boolean = true>(
-	options: Options<GetApiZonesByZoneIdPagesOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiZonesByZoneIdPagesResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({ method: "GET", url: "/api/zones/{zoneId}/pages", ...config }) as Promise<
-		RequestResult<GetApiZonesByZoneIdPagesResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary Create Zone page
- * {@link /api/zones/:zoneId/pages}
- */
-export function postApiZonesByZoneIdPages<ThrowOnError extends boolean = true>(
-	options: Options<PostApiZonesByZoneIdPagesOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiZonesByZoneIdPagesResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({ method: "POST", url: "/api/zones/{zoneId}/pages", ...config }) as Promise<
-		RequestResult<PostApiZonesByZoneIdPagesResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary Replace Zone page
- * {@link /api/zones/:zoneId/pages/:pageId}
- */
-export function putApiZonesByZoneIdPagesByPageId<ThrowOnError extends boolean = true>(
-	options: Options<PutApiZonesByZoneIdPagesByPageIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PUT",
-		url: "/api/zones/{zoneId}/pages/{pageId}",
-		...config,
-	}) as Promise<RequestResult<PutApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Delete Zone page
- * {@link /api/zones/:zoneId/pages/:pageId}
- */
-export function deleteApiZonesByZoneIdPagesByPageId<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiZonesByZoneIdPagesByPageIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "DELETE",
-		url: "/api/zones/{zoneId}/pages/{pageId}",
-		...config,
-	}) as Promise<RequestResult<DeleteApiZonesByZoneIdPagesByPageIdResponses, ThrowOnError>>;
-}
-
-/**
- * @summary List Zone menus
- * {@link /api/zones/:zoneId/menus}
- */
-export function getApiZonesByZoneIdMenus<ThrowOnError extends boolean = true>(
-	options: Options<GetApiZonesByZoneIdMenusOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiZonesByZoneIdMenusResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({ method: "GET", url: "/api/zones/{zoneId}/menus", ...config }) as Promise<
-		RequestResult<GetApiZonesByZoneIdMenusResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary Create or replace Zone menu
- * {@link /api/zones/:zoneId/menus/:slot}
- */
-export function putApiZonesByZoneIdMenusBySlot<ThrowOnError extends boolean = true>(
-	options: Options<PutApiZonesByZoneIdMenusBySlotOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiZonesByZoneIdMenusBySlotResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PUT",
-		url: "/api/zones/{zoneId}/menus/{slot}",
-		...config,
-	}) as Promise<RequestResult<PutApiZonesByZoneIdMenusBySlotResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Delete Zone menu
- * {@link /api/zones/:zoneId/menus/:slot}
- */
-export function deleteApiZonesByZoneIdMenusBySlot<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiZonesByZoneIdMenusBySlotOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiZonesByZoneIdMenusBySlotResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "DELETE",
-		url: "/api/zones/{zoneId}/menus/{slot}",
-		...config,
-	}) as Promise<RequestResult<DeleteApiZonesByZoneIdMenusBySlotResponses, ThrowOnError>>;
-}
-
-/**
  * @summary Follow Zone
  * {@link /api/zones/:zoneId/follow}
  */
@@ -1839,6 +1715,22 @@ export function postApiTags<ThrowOnError extends boolean = true>(
 	return request({ method: "POST", url: "/api/tags", ...config }) as Promise<
 		RequestResult<PostApiTagsResponses, ThrowOnError>
 	>;
+}
+
+/**
+ * @summary List Unit aliases
+ * {@link /api/units/:type/:unitId/aliases}
+ */
+export function getApiUnitsByTypeByUnitIdAliases<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitsByTypeByUnitIdAliasesOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitsByTypeByUnitIdAliasesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/units/{type}/{unitId}/aliases",
+		...config,
+	}) as Promise<RequestResult<GetApiUnitsByTypeByUnitIdAliasesResponses, ThrowOnError>>;
 }
 
 /**
@@ -2984,52 +2876,6 @@ export function deleteApiRealmsByRealmIdPinsByUnitId<ThrowOnError extends boolea
 		url: "/api/realms/{realmId}/pins/{unitId}",
 		...config,
 	}) as Promise<RequestResult<DeleteApiRealmsByRealmIdPinsByUnitIdResponses, ThrowOnError>>;
-}
-
-/**
- * @summary List Realm docks
- * {@link /api/realms/:realmId/docks}
- */
-export function getApiRealmsByRealmIdDocks<ThrowOnError extends boolean = true>(
-	options: Options<GetApiRealmsByRealmIdDocksOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiRealmsByRealmIdDocksResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({ method: "GET", url: "/api/realms/{realmId}/docks", ...config }) as Promise<
-		RequestResult<GetApiRealmsByRealmIdDocksResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary Create or replace Realm dock
- * {@link /api/realms/:realmId/docks/:slot}
- */
-export function putApiRealmsByRealmIdDocksBySlot<ThrowOnError extends boolean = true>(
-	options: Options<PutApiRealmsByRealmIdDocksBySlotOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiRealmsByRealmIdDocksBySlotResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PUT",
-		url: "/api/realms/{realmId}/docks/{slot}",
-		...config,
-	}) as Promise<RequestResult<PutApiRealmsByRealmIdDocksBySlotResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Delete Realm dock
- * {@link /api/realms/:realmId/docks/:slot}
- */
-export function deleteApiRealmsByRealmIdDocksBySlot<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiRealmsByRealmIdDocksBySlotOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiRealmsByRealmIdDocksBySlotResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "DELETE",
-		url: "/api/realms/{realmId}/docks/{slot}",
-		...config,
-	}) as Promise<RequestResult<DeleteApiRealmsByRealmIdDocksBySlotResponses, ThrowOnError>>;
 }
 
 /**

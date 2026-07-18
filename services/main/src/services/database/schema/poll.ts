@@ -61,7 +61,6 @@ export const pollOption = pgTable(
 		pollId: uuid()
 			.notNull()
 			.references(() => poll.id, { onDelete: "cascade" }),
-		label: text().notNull(),
 		position: text().notNull(),
 		deletedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
@@ -72,10 +71,6 @@ export const pollOption = pgTable(
 		index("poll_option_poll_position_idx")
 			.on(table.pollId, table.position, table.id)
 			.where(sql`${table.deletedAt} is null`),
-		index("poll_option_label_search_idx")
-			.using("pgroonga", table.label)
-			.where(sql`${table.deletedAt} is null`),
-		check("poll_option_label_not_blank", sql`btrim(${table.label}) <> ''`),
 		check(
 			"poll_option_deleted_at_check",
 			sql`${table.deletedAt} is null or ${table.deletedAt} >= ${table.createdAt}`,

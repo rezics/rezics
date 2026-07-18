@@ -1,6 +1,6 @@
 import { type Static, t } from "elysia";
 
-import { AliasKindValues } from "../../database/schema/contract-values";
+import { AliasKindValues, UnitKindValues } from "../../database/schema/contract-values";
 import { LanguageTag, LocalizationInput, Uuid } from "../schema";
 import { UnitType } from "../units/schema";
 
@@ -36,7 +36,6 @@ export const AddUnitLinkBody = t.Object({
 	url: t.String({ format: "uri" }),
 	sourceEntityUnitId: Uuid,
 	role: t.Optional(t.String({ minLength: 1, maxLength: 32 })),
-	label: t.Optional(t.Nullable(t.String({ maxLength: 200 }))),
 	position: t.Optional(t.String({ maxLength: 64 })),
 });
 export type AddUnitLinkBody = Static<typeof AddUnitLinkBody>;
@@ -52,18 +51,22 @@ export type TagUnitBody = Static<typeof TagUnitBody>;
 
 export const AddUnitAliasBody = t.Object(
 	{
-		value: t.String({ minLength: 1, maxLength: 500 }),
+		term: t.String({ minLength: 1, maxLength: 500 }),
 		language: t.Optional(LanguageTag),
 		kind: t.Optional(t.Union(AliasKindValues.map((value) => t.Literal(value)))),
-		pinned: t.Optional(t.Boolean()),
-		position: t.Optional(t.String({ maxLength: 64 })),
 	},
 	{ additionalProperties: false },
 );
 export type AddUnitAliasBody = Static<typeof AddUnitAliasBody>;
 
+export const UnitAliasUnitParams = t.Object({
+	type: t.Union(UnitKindValues.map((value) => t.Literal(value))),
+	unitId: Uuid,
+});
+export type UnitAliasUnitParams = Static<typeof UnitAliasUnitParams>;
+
 export const UnitAliasParams = t.Object({
-	type: UnitType,
+	type: t.Union(UnitKindValues.map((value) => t.Literal(value))),
 	unitId: Uuid,
 	aliasId: Uuid,
 });

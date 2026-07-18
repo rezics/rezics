@@ -107,9 +107,9 @@ function BookContentStructureWorkspace({ bookId }: { bookId: string }) {
 									body: { parentId },
 								});
 							}}
-							onRename={async (nodeId, title) => {
+							onRename={async (node, title) => {
 								await update.mutateAsync({
-									path: { unitId: bookId, nodeId },
+									path: { unitId: bookId, nodeId: node.id },
 									body: { title },
 								});
 							}}
@@ -262,7 +262,7 @@ function ContentStructureEditorTree({
 	nodes: readonly ContentStructureNode[];
 	flatNodes: readonly FlattenedContentStructureTreeNode[];
 	pending: boolean;
-	onRename: (nodeId: string, title: string) => Promise<void>;
+	onRename: (node: ContentStructureNode, title: string) => Promise<void>;
 	onMove: (nodeId: string, parentId: string | null) => Promise<void>;
 }) {
 	return (
@@ -300,7 +300,7 @@ function ContentStructureEditorRow({
 	flatNodes: readonly FlattenedContentStructureTreeNode[];
 	depth: number;
 	pending: boolean;
-	onRename: (nodeId: string, title: string) => Promise<void>;
+	onRename: (node: ContentStructureNode, title: string) => Promise<void>;
 	onMove: (nodeId: string, parentId: string | null) => Promise<void>;
 }) {
 	const { t } = useTranslation({ suspense: true });
@@ -324,7 +324,7 @@ function ContentStructureEditorRow({
 						).trim();
 						if (!title) return;
 						try {
-							await onRename(node.id, title);
+							await onRename(node, title);
 							setRenaming(false);
 						} catch {
 							// The parent mutation state renders the API error.
@@ -396,7 +396,7 @@ function ContentStructureEditorRow({
 				<div className="flex min-w-0 flex-wrap items-center gap-2">
 					<span className="min-w-0 flex-1 break-words font-medium">{node.title}</span>
 					<div className="flex shrink-0 flex-wrap gap-1">
-						{node.contentUnitId && (
+						{node.contentKind === "chapter" && (
 							<Button asChild size="xs" variant="ghost">
 								<Link
 									href={`/units/book/${bookId}/edit/chapters/${node.contentUnitId}`}

@@ -5,7 +5,6 @@ import { entity, unit, unitCollaborator, unitLocalization } from "../../database
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import type { CreateCatalogUnitBody } from "./schema";
-import type { UnitType } from "../units/schema";
 
 export async function createCatalogUnit(
 	type: "entity" | "tag",
@@ -54,7 +53,7 @@ export async function createCatalogUnit(
 	});
 }
 
-export async function checkUnitType(unitId: string, type: UnitType) {
+export async function checkUnitType(unitId: string, type: (typeof unit.$inferSelect)["kind"]) {
 	const [unitRecord] = await database
 		.select({ type: unit.kind })
 		.from(unit)

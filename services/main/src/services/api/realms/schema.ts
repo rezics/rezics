@@ -1,5 +1,5 @@
 import { type Static, t } from "elysia";
-import { DockDocument, PortableTextDocument } from "@rezics/content-structure";
+import { PortableTextDocument } from "@rezics/content-structure";
 
 import {
 	RealmJoinPolicyValues,
@@ -9,7 +9,7 @@ import {
 	UnitStatusValues,
 	UnitVisibilityValues,
 } from "../../database/schema/contract-values";
-import { DateTime, LanguageTag, LocalizationInput, Uuid } from "../schema";
+import { LanguageTag, LocalizationInput, Uuid } from "../schema";
 
 const RealmVisibility = t.Union(UnitVisibilityValues.map((value) => t.Literal(value)));
 
@@ -103,30 +103,6 @@ export const RemoveRealmPinQuery = t.Object({
 	kind: t.Optional(RealmPinKind),
 });
 export type RemoveRealmPinQuery = Static<typeof RemoveRealmPinQuery>;
-
-export const RealmDockParams = t.Object({
-	realmId: Uuid,
-	slot: t.String({ minLength: 1, maxLength: 128 }),
-});
-export type RealmDockParams = Static<typeof RealmDockParams>;
-
-export const UpsertRealmDockBody = t.Object(
-	{ document: DockDocument },
-	{ additionalProperties: false },
-);
-export type UpsertRealmDockBody = Static<typeof UpsertRealmDockBody>;
-
-export const RealmDockResponse = t.Object({
-	realmId: Uuid,
-	slot: t.String(),
-	document: DockDocument,
-	createdAt: DateTime,
-	updatedAt: DateTime,
-});
-
-export const RealmDockListResponse = t.Object({
-	items: t.Array(RealmDockResponse),
-});
 
 export const RealmUnitParams = t.Object({ realmId: Uuid, unitId: Uuid });
 export type RealmUnitParams = Static<typeof RealmUnitParams>;

@@ -24,8 +24,8 @@ export type ContentStructureNodeParams = Static<typeof ContentStructureNodeParam
 
 export const UpdateContentStructureNodeBody = t.Object({
 	parentId: t.Optional(t.Nullable(Uuid)),
-	title: t.Optional(t.String({ minLength: 1, maxLength: 500 })),
 	position: t.Optional(t.String({ minLength: 1, maxLength: 64 })),
+	title: t.Optional(t.String({ minLength: 1, maxLength: 500 })),
 });
 export type UpdateContentStructureNodeBody = Static<typeof UpdateContentStructureNodeBody>;
 

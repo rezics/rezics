@@ -14,6 +14,7 @@ export const UnitKindValues = [
 	"post",
 	"poll",
 	"realm",
+	"realm_rule",
 ] as const;
 
 export const UnitStatusValues = ["draft", "published", "archived"] as const;
@@ -28,7 +29,15 @@ export const AiDisclosureValues = [
 ] as const;
 export const ModerationStatusValues = ["approved", "pending", "removed"] as const;
 export const ContentStatusValues = ["draft", "published", "archived"] as const;
-export const PostKindValues = ["post", "reply", "review", "chapter", "wiki", "picture"] as const;
+export const PostKindValues = [
+	"post",
+	"reply",
+	"review",
+	"chapter",
+	"chapter_group",
+	"wiki",
+	"picture",
+] as const;
 export const ProgressStatusValues = [
 	"backlog",
 	"active",
@@ -76,6 +85,7 @@ export const AliasKindValues = [
 	"misspelling",
 	"other",
 ] as const;
+export const AliasSearchScoreThreshold = 3;
 export const PollModeValues = ["single", "multiple"] as const;
 export const PollResultVisibilityValues = ["live", "after_close"] as const;
 export const ReactionKindValues = ["upvote", "downvote"] as const;

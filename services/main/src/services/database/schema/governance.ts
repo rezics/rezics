@@ -76,9 +76,11 @@ export const feedback = pgTable(
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
 		kind: feedbackKind().default("report").notNull(),
+		/** @UNIT_LOCALIZATION_EXEMPT Original user-authored feedback record. */
 		content: text().notNull(),
 		url: text(),
 		subjectUnitId: uuid().references(() => unit.id, { onDelete: "set null" }),
+		/** @UNIT_LOCALIZATION_EXEMPT Point-in-time staff resolution record. */
 		resolution: text(),
 		resolvedByProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
 		resolvedAt: createTimestampMsColumn(),
@@ -117,7 +119,9 @@ export const moderationCase = pgTable(
 		reporterProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
 		assignedProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
 		duplicateOfCaseId: uuid(),
+		/** @UNIT_LOCALIZATION_EXEMPT Point-in-time moderation evidence. */
 		reason: text(),
+		/** @UNIT_LOCALIZATION_EXEMPT Point-in-time moderation summary. */
 		safeSummary: text(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -182,7 +186,9 @@ export const moderationAction = pgTable(
 		resultingStatus: moderationStatus(),
 		resultingLocked: boolean(),
 		reasonCode: text().notNull(),
+		/** @UNIT_LOCALIZATION_EXEMPT Immutable moderation decision rationale. */
 		reason: text(),
+		/** @UNIT_LOCALIZATION_EXEMPT Public copy recorded with one moderation decision. */
 		publicMessage: text(),
 		reversesActionId: uuid(),
 		requestId: text(),
@@ -263,6 +269,7 @@ export const auditEvent = pgTable(
 		action: text().notNull(),
 		decisionCode: text().notNull(),
 		requestId: text(),
+		/** @UNIT_LOCALIZATION_EXEMPT Immutable audit explanation. */
 		reason: text().notNull(),
 		subjectKind: text(),
 		subjectId: uuid(),

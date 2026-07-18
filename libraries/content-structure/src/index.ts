@@ -33,145 +33,6 @@ export const PortableTextDocument = Type.Object(
 );
 export type PortableTextDocument = Static<typeof PortableTextDocument>;
 
-export const PostReferenceBlock = Type.Object(
-	{
-		_type: Type.Literal("post-ref"),
-		_key: BlockKey,
-		postId: Type.String({ format: "uuid" }),
-	},
-	{
-		additionalProperties: false,
-		$id: "PostReferenceBlock",
-	},
-);
-export type PostReferenceBlock = Static<typeof PostReferenceBlock>;
-
-export const LocalizedLabel = Type.Record(Type.String({ minLength: 1 }), Type.String(), {
-	$id: "LocalizedLabel",
-});
-export type LocalizedLabel = Static<typeof LocalizedLabel>;
-
-export const MenuItemTarget = Type.Union(
-	[
-		Type.Object(
-			{
-				type: Type.Literal("href"),
-				href: Type.String({ minLength: 1 }),
-			},
-			{ additionalProperties: false },
-		),
-		Type.Object(
-			{
-				type: Type.Literal("unit"),
-				unitId: Type.String({ format: "uuid" }),
-			},
-			{ additionalProperties: false },
-		),
-		Type.Object(
-			{
-				type: Type.Literal("page"),
-				pageId: Type.String({ format: "uuid" }),
-			},
-			{ additionalProperties: false },
-		),
-	],
-	{ $id: "MenuItemTarget" },
-);
-export type MenuItemTarget = Static<typeof MenuItemTarget>;
-
-export const MenuItem = Type.Object(
-	{
-		_type: Type.Literal("menu-item"),
-		_key: BlockKey,
-		label: LocalizedLabel,
-		target: MenuItemTarget,
-	},
-	{
-		additionalProperties: false,
-		$id: "MenuItem",
-	},
-);
-export type MenuItem = Static<typeof MenuItem>;
-
-export const MenuBlock = Type.Object(
-	{
-		_type: Type.Literal("menu"),
-		_key: BlockKey,
-		label: Type.Optional(LocalizedLabel),
-		items: Type.Array(MenuItem),
-	},
-	{
-		additionalProperties: false,
-		$id: "MenuBlock",
-	},
-);
-export type MenuBlock = Static<typeof MenuBlock>;
-
-export const Block = Type.Union([PortableTextDocument, PostReferenceBlock, MenuBlock], {
-	$id: "Block",
-});
-export type Block = Static<typeof Block>;
-
-function createBlockDocument<const TType extends string>(type: TType) {
-	return Type.Object(
-		{
-			_type: Type.Literal(type),
-			_key: BlockKey,
-			blocks: Type.Array(Block),
-		},
-		{ additionalProperties: false },
-	);
-}
-
-export const ContentStructureDocument = Type.Object(
-	{
-		_type: Type.Literal("content-structure"),
-		_key: BlockKey,
-		blocks: Type.Array(Block),
-	},
-	{
-		additionalProperties: false,
-		$id: "ContentStructureDocument",
-	},
-);
-export type ContentStructureDocument = Static<typeof ContentStructureDocument>;
-
-export const DockDocument = createBlockDocument("dock");
-export type DockDocument = Static<typeof DockDocument>;
-
-export const RealmDockDocument = DockDocument;
-export type RealmDockDocument = DockDocument;
-
-const ZoneConfiguration = Type.Record(Type.String(), Type.Unknown());
-
-export const ZonePageDocument = Type.Object(
-	{
-		_type: Type.Literal("zone-page"),
-		_key: BlockKey,
-		blocks: Type.Array(Block),
-		configuration: Type.Optional(ZoneConfiguration),
-	},
-	{
-		additionalProperties: false,
-		$id: "ZonePageDocument",
-	},
-);
-export type ZonePageDocument = Static<typeof ZonePageDocument>;
-
-export const ZoneMenuDocument = Type.Object(
-	{
-		_type: Type.Literal("zone-menu"),
-		_key: BlockKey,
-		menus: Type.Array(MenuBlock),
-		configuration: Type.Optional(ZoneConfiguration),
-	},
-	{
-		additionalProperties: false,
-		$id: "ZoneMenuDocument",
-	},
-);
-export type ZoneMenuDocument = Static<typeof ZoneMenuDocument>;
-
 export const ZoneBoundaryDocument = Type.Object(
 	{
 		_type: Type.Literal("zone-boundary"),
@@ -197,6 +58,25 @@ export const ZoneThemeDocument = Type.Object(
 	},
 );
 export type ZoneThemeDocument = Static<typeof ZoneThemeDocument>;
+
+export const PollOptionLocalization = Type.Object(
+	{
+		optionId: Type.String({ format: "uuid" }),
+		label: Type.String({ minLength: 1, maxLength: 500 }),
+	},
+	{ additionalProperties: false },
+);
+export type PollOptionLocalization = Static<typeof PollOptionLocalization>;
+
+export const PollContentDocument = Type.Object(
+	{
+		_type: Type.Literal("poll-content"),
+		_key: BlockKey,
+		options: Type.Array(PollOptionLocalization, { minItems: 2, maxItems: 50 }),
+	},
+	{ additionalProperties: false, $id: "PollContentDocument" },
+);
+export type PollContentDocument = Static<typeof PollContentDocument>;
 
 export const CollectionDefinitionDocument = Type.Union(
 	[
@@ -278,33 +158,6 @@ export function getPortableTextContent(value: unknown): PortableTextValue {
 	return value.content;
 }
 
-export function createDockDocument(
-	blocks: Block[] = [],
-	key: BlockKey = createBlockKey(),
-): DockDocument {
-	return { _type: "dock", _key: key, blocks };
-}
-
-export function createZonePageDocument(
-	blocks: Block[] = [],
-	key: BlockKey = createBlockKey(),
-	configuration?: Record<string, unknown>,
-): ZonePageDocument {
-	return configuration === undefined
-		? { _type: "zone-page", _key: key, blocks }
-		: { _type: "zone-page", _key: key, blocks, configuration };
-}
-
-export function createZoneMenuDocument(
-	menus: MenuBlock[] = [],
-	key: BlockKey = createBlockKey(),
-	configuration?: Record<string, unknown>,
-): ZoneMenuDocument {
-	return configuration === undefined
-		? { _type: "zone-menu", _key: key, menus }
-		: { _type: "zone-menu", _key: key, menus, configuration };
-}
-
 export function createZoneBoundaryDocument(
 	definition: JsonValue,
 	key: BlockKey = createBlockKey(),
@@ -317,6 +170,13 @@ export function createZoneThemeDocument(
 	key: BlockKey = createBlockKey(),
 ): ZoneThemeDocument {
 	return { _type: "zone-theme", _key: key, tokens };
+}
+
+export function createPollContentDocument(
+	options: PollOptionLocalization[],
+	key: BlockKey = createBlockKey(),
+): PollContentDocument {
+	return { _type: "poll-content", _key: key, options };
 }
 
 export function createManualCollectionDefinitionDocument(

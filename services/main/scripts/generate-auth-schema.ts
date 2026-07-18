@@ -36,6 +36,10 @@ let code = generated.code
 	.replaceAll("sessions_userId_idx", "sessions_user_id_idx")
 	.replaceAll("accounts_userId_idx", "accounts_user_id_idx")
 	.replace(
+		'name: text("name").notNull(),',
+		'/** @UNIT_LOCALIZATION_EXEMPT Identity-provider source name, not the public Profile title. */\nname: text("name").notNull(),',
+	)
+	.replace(
 		'(table) => [index("accounts_user_id_idx").on(table.userId)],',
 		`(table) => [
 		uniqueIndex("accounts_provider_id_account_id_key").on(

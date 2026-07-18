@@ -1,5 +1,4 @@
 import { type Static, t } from "elysia";
-import { JsonValue } from "@rezics/portable-text";
 
 import { LanguageTag, LifecycleInput, LocalizationInput, Uuid } from "../schema";
 
@@ -32,7 +31,6 @@ export const CreateUnitBody = t.Object(
 		contentRating: LifecycleInput.contentRating,
 		aiDisclosure: LifecycleInput.aiDisclosure,
 		license: LifecycleInput.license,
-		metadata: t.Optional(t.Record(t.String(), JsonValue)),
 		cover: t.Optional(CoverAssetInput),
 	},
 	{ additionalProperties: false },
@@ -59,7 +57,6 @@ export const UpdateUnitBody = t.Object(
 	{
 		updatedAt: t.String({ format: "date-time" }),
 		...LifecycleInput,
-		metadata: t.Optional(t.Record(t.String(), JsonValue)),
 		cover: t.Optional(CoverAssetInput),
 		unit: t.Optional(
 			t.Object(

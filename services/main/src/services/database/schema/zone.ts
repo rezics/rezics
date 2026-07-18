@@ -1,14 +1,5 @@
 import { sql } from "drizzle-orm";
-import {
-	boolean,
-	check,
-	index,
-	primaryKey,
-	text,
-	unique,
-	uniqueIndex,
-	uuid,
-} from "drizzle-orm/pg-core";
+import { check, index, primaryKey, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import {
@@ -16,7 +7,6 @@ import {
 	createJsonDocumentColumn,
 	createTimestampMsColumn,
 	createUpdatedAtColumn,
-	createUuidv7PrimaryKey,
 } from "./columns";
 import { profile, unit } from "./core";
 import { realm } from "./realm";
@@ -30,7 +20,9 @@ export const zone = pgTable(
 		managingRealmId: uuid().references(() => realm.id, {
 			onDelete: "set null",
 		}),
+		/** @UNIT_LOCALIZATION_EXEMPT Machine-readable Zone membership boundary. */
 		boundaryDocument: createJsonDocumentColumn().notNull(),
+		/** @UNIT_LOCALIZATION_EXEMPT Visual theme configuration without localized copy. */
 		themeDocument: createJsonDocumentColumn().notNull(),
 		startsAt: createTimestampMsColumn(),
 		endsAt: createTimestampMsColumn(),
@@ -47,50 +39,6 @@ export const zone = pgTable(
 			"zone_time_range_check",
 			sql`${table.endsAt} is null or ${table.startsAt} is null or ${table.endsAt} > ${table.startsAt}`,
 		),
-	],
-);
-
-export const zonePage = pgTable(
-	"zone_page",
-	{
-		id: createUuidv7PrimaryKey(),
-		zoneId: uuid()
-			.notNull()
-			.references(() => zone.id, { onDelete: "cascade" }),
-		slug: text().notNull(),
-		document: createJsonDocumentColumn().notNull(),
-		position: text().default("V").notNull(),
-		home: boolean().default(false).notNull(),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		unique("zone_page_zone_slug_key").on(table.zoneId, table.slug),
-		uniqueIndex("zone_page_one_home_key")
-			.on(table.zoneId)
-			.where(sql`${table.home}`),
-		index("zone_page_zone_position_idx").on(table.zoneId, table.position, table.id),
-		check("zone_page_slug_not_blank", sql`btrim(${table.slug}) <> ''`),
-	],
-);
-
-export const zoneMenu = pgTable(
-	"zone_menu",
-	{
-		id: createUuidv7PrimaryKey(),
-		zoneId: uuid()
-			.notNull()
-			.references(() => zone.id, { onDelete: "cascade" }),
-		slot: text().default("primary").notNull(),
-		document: createJsonDocumentColumn().notNull(),
-		position: text().default("V").notNull(),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		unique("zone_menu_zone_slot_key").on(table.zoneId, table.slot),
-		index("zone_menu_zone_position_idx").on(table.zoneId, table.position, table.id),
-		check("zone_menu_slot_not_blank", sql`btrim(${table.slot}) <> ''`),
 	],
 );
 

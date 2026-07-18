@@ -37,8 +37,6 @@ export interface SearchHit {
 	slug?: string | null;
 	titles: string[];
 	summaries: string[];
-	name?: string | null;
-	summary?: string | null;
 }
 
 export interface DomainSearchRequest {

@@ -1,6 +1,5 @@
 import { sql } from "drizzle-orm";
 import {
-	boolean,
 	check,
 	index,
 	integer,
@@ -32,12 +31,11 @@ export const unitAlias = pgTable(
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
-		value: text().notNull(),
-		normalizedValue: text().notNull(),
+		/** @UNIT_LOCALIZATION_EXEMPT Many-per-language search synonym, never canonical Unit content. */
+		term: text().notNull(),
+		normalizedTerm: text().notNull(),
 		language: text(),
 		kind: aliasKind().default("common").notNull(),
-		pinned: boolean().default(false).notNull(),
-		position: text(),
 		createdByProfileId: uuid().references(() => profile.id, {
 			onDelete: "set null",
 		}),
@@ -46,17 +44,17 @@ export const unitAlias = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		uniqueIndex("unit_alias_unit_normalized_key")
-			.on(table.unitId, table.normalizedValue)
+		uniqueIndex("unit_alias_unit_language_normalized_key")
+			.on(table.unitId, sql`coalesce(${table.language}, '')`, table.normalizedTerm)
 			.where(sql`${table.deletedAt} is null`),
-		index("unit_alias_unit_pinned_position_idx")
-			.on(table.unitId, table.pinned, table.position, table.id)
+		index("unit_alias_normalized_idx").on(table.normalizedTerm),
+		index("unit_alias_term_search_idx")
+			.using("pgroonga", table.term)
 			.where(sql`${table.deletedAt} is null`),
-		index("unit_alias_normalized_idx").on(table.normalizedValue),
 		index("unit_alias_created_by_idx").on(table.createdByProfileId),
 		check(
-			"unit_alias_value_not_blank",
-			sql`btrim(${table.value}) <> '' and btrim(${table.normalizedValue}) <> ''`,
+			"unit_alias_term_not_blank",
+			sql`btrim(${table.term}) <> '' and btrim(${table.normalizedTerm}) <> ''`,
 		),
 		check(
 			"unit_alias_deleted_at_check",
@@ -85,12 +83,6 @@ export const unitAliasVote = pgTable(
 	],
 );
 
-/**
- * Legacy external-link relation.
- *
- * Its shape is intentionally unchanged: replacing it with Entity Source is a
- * separate product decision and is outside this refactor.
- */
 export const unitLink = pgTable(
 	"unit_link",
 	{
@@ -105,7 +97,6 @@ export const unitLink = pgTable(
 		normalizedUrl: text().notNull(),
 		normalizedUrlHash: text().notNull(),
 		role: text().default("related").notNull(),
-		label: text(),
 		position: text().default("V").notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),

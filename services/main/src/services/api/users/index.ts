@@ -10,6 +10,7 @@ import {
 	profileBlock,
 	profileFollow,
 	profilePreference,
+	unitLocalization,
 } from "../../database/schema";
 import { createNotification, deliverNotificationEmail } from "../../notifications/service";
 import { storage } from "../../storage";
@@ -102,12 +103,22 @@ export default new Elysia({ prefix: "/users" })
 				await tx
 					.update(profileTable)
 					.set({
-						name: body.name,
 						avatar: body.avatar,
+					})
+					.where(eq(profileTable.id, profile.unitId));
+				await tx
+					.update(unitLocalization)
+					.set({
+						title: body.name,
 						summary: body.summary,
 						description: body.description,
 					})
-					.where(eq(profileTable.id, profile.unitId));
+					.where(
+						and(
+							eq(unitLocalization.unitId, profile.unitId),
+							eq(unitLocalization.isDefault, true),
+						),
+					);
 				await recordUnitRevision(tx, {
 					unitId: profile.unitId,
 					actorProfileId: profile.unitId,
@@ -206,6 +217,13 @@ export default new Elysia({ prefix: "/users" })
 				.select(PublicProfileSelection)
 				.from(profileTable)
 				.innerJoin(unit, eq(unit.id, profileTable.id))
+				.leftJoin(
+					unitLocalization,
+					and(
+						eq(unitLocalization.unitId, profileTable.id),
+						eq(unitLocalization.isDefault, true),
+					),
+				)
 				.where(
 					and(
 						eq(unit.id, params.id),
@@ -330,11 +348,18 @@ export default new Elysia({ prefix: "/users" })
 			items: await database
 				.select({
 					userId: profileBlock.blockedProfileId,
-					name: profileTable.name,
+					name: unitLocalization.title,
 					createdAt: profileBlock.createdAt,
 				})
 				.from(profileBlock)
 				.innerJoin(profileTable, eq(profileTable.id, profileBlock.blockedProfileId))
+				.leftJoin(
+					unitLocalization,
+					and(
+						eq(unitLocalization.unitId, profileTable.id),
+						eq(unitLocalization.isDefault, true),
+					),
+				)
 				.where(eq(profileBlock.blockerProfileId, profile.unitId))
 				.orderBy(profileBlock.createdAt, profileBlock.blockedProfileId),
 		}),

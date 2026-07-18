@@ -203,8 +203,8 @@ export function SearchPage() {
 			group.hits.map((hit) => ({
 				id: hit.id,
 				slug: hit.slug,
-				title: hit.titles[0] ?? hit.name ?? null,
-				summary: hit.summaries[0] ?? hit.summary,
+				title: hit.titles[0] ?? null,
+				summary: hit.summaries[0],
 				href: searchHitHref(group.index, hit),
 			})),
 		),

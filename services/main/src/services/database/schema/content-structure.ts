@@ -24,8 +24,9 @@ export const contentStructureNode = pgTable(
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
 		parentId: uuid(),
-		contentUnitId: uuid().references(() => unit.id, { onDelete: "restrict" }),
-		title: text().notNull(),
+		contentUnitId: uuid()
+			.notNull()
+			.references(() => unit.id, { onDelete: "restrict" }),
 		position: text().notNull(),
 		contentRating: contentRating(),
 		deletedAt: createTimestampMsColumn(),
@@ -44,7 +45,6 @@ export const contentStructureNode = pgTable(
 			.where(sql`${table.deletedAt} is null`),
 		index("content_structure_node_parent_idx").on(table.parentId),
 		index("content_structure_node_content_unit_idx").on(table.contentUnitId),
-		check("content_structure_node_title_not_blank", sql`btrim(${table.title}) <> ''`),
 		check(
 			"content_structure_node_not_self_parent",
 			sql`${table.parentId} is null or ${table.parentId} <> ${table.id}`,

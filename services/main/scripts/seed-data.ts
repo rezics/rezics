@@ -56,7 +56,6 @@ export const SeedPlan = {
 	realmPins: 72,
 	realmUnits: 600,
 	capabilityGrants: 80,
-	zonePages: 24,
 	zoneSubscriptions: 150,
 	conversations: 100,
 	messages: 1_000,

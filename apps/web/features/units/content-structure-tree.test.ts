@@ -10,9 +10,10 @@ import {
 const part: ContentStructureNode = {
 	id: "part",
 	parentId: null,
-	contentUnitId: null,
-	language: null,
+	contentUnitId: "part-unit",
+	language: "en",
 	title: "Part",
+	contentKind: "chapter_group",
 	position: "A",
 };
 
@@ -22,16 +23,18 @@ const nodes: ContentStructureNode[] = [
 		id: "chapter",
 		parentId: "part",
 		contentUnitId: "chapter-unit",
-		language: null,
+		language: "en",
 		title: "Chapter",
+		contentKind: "chapter",
 		position: "A",
 	},
 	{
 		id: "appendix",
 		parentId: null,
-		contentUnitId: null,
-		language: null,
+		contentUnitId: "appendix-unit",
+		language: "en",
 		title: "Appendix",
+		contentKind: "chapter_group",
 		position: "B",
 	},
 ];

@@ -273,7 +273,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 											rel="noreferrer"
 											target="_blank"
 										>
-											{link.label ?? link.url}
+											{link.url}
 										</a>
 									))}
 								</CardContent>
@@ -310,18 +310,6 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 									))}
 								</CardContent>
 							</Card>
-						</DetailSection>
-					)}
-
-					{item.aliases.length > 0 && (
-						<DetailSection title={t.units.detail.aliases}>
-							<div className="flex flex-wrap gap-2">
-								{item.aliases.map((alias) => (
-									<Badge key={alias.id} variant="outline">
-										{alias.value}
-									</Badge>
-								))}
-							</div>
 						</DetailSection>
 					)}
 				</aside>

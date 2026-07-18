@@ -39,18 +39,16 @@ export const softwareRequirement = pgTable(
 			onDelete: "set null",
 		}),
 		tier: text().notNull(),
-		language: text(),
 		sourceLinkId: uuid().references(() => unitLink.id, {
 			onDelete: "set null",
 		}),
 		hardware: createJsonObjectColumn().notNull(),
-		rawText: text(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
 		unique("software_requirement_identity_key")
-			.on(table.softwareId, table.platformEntityId, table.tier, table.language)
+			.on(table.softwareId, table.platformEntityId, table.tier)
 			.nullsNotDistinct(),
 		index("software_requirement_platform_idx").on(table.platformEntityId),
 		index("software_requirement_source_link_idx").on(table.sourceLinkId),

@@ -6,7 +6,13 @@ import type { User } from "better-auth";
 
 import { Authorization } from "../authorization";
 import { database } from "../database";
-import { apiToken, profile as profileTable, unit, users } from "../database/schema";
+import {
+	apiToken,
+	profile as profileTable,
+	unit,
+	unitLocalization,
+	users,
+} from "../database/schema";
 import { auth } from "./index";
 import { ApiTokenScopeRequired, AuthenticationRequired, EmailVerificationRequired } from "./errors";
 import { ensureProfile, type SessionProfile } from "./profile";
@@ -42,7 +48,7 @@ async function resolveSession(headers: Headers): Promise<SessionContext | undefi
 			scopes: apiToken.scopes,
 			unitId: profileTable.id,
 			slug: unit.slug,
-			profileName: profileTable.name,
+			profileName: unitLocalization.title,
 			authUserId: users.id,
 			authName: users.name,
 			email: users.email,
@@ -55,6 +61,10 @@ async function resolveSession(headers: Headers): Promise<SessionContext | undefi
 		.innerJoin(profileTable, eq(profileTable.id, apiToken.profileId))
 		.innerJoin(unit, eq(unit.id, profileTable.id))
 		.innerJoin(users, eq(users.id, profileTable.authUserId))
+		.leftJoin(
+			unitLocalization,
+			and(eq(unitLocalization.unitId, profileTable.id), eq(unitLocalization.isDefault, true)),
+		)
 		.where(
 			and(
 				eq(apiToken.tokenHash, hash),

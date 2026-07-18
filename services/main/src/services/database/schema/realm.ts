@@ -96,23 +96,6 @@ export const realmSubscription = pgTable(
 	],
 );
 
-export const realmDock = pgTable(
-	"realm_dock",
-	{
-		realmId: uuid()
-			.notNull()
-			.references(() => realm.id, { onDelete: "cascade" }),
-		slot: text().default("primary").notNull(),
-		document: createJsonDocumentColumn().notNull(),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		primaryKey({ columns: [table.realmId, table.slot] }),
-		check("realm_dock_slot_not_blank", sql`btrim(${table.slot}) <> ''`),
-	],
-);
-
 export const realmRuleRevision = pgTable(
 	"realm_rule_revision",
 	{
@@ -138,23 +121,17 @@ export const realmRuleRevision = pgTable(
 export const realmRule = pgTable(
 	"realm_rule",
 	{
-		id: createUuidv7PrimaryKey(),
+		id: uuid()
+			.primaryKey()
+			.references(() => unit.id, { onDelete: "cascade" }),
 		revisionId: uuid()
 			.notNull()
 			.references(() => realmRuleRevision.id, { onDelete: "cascade" }),
 		position: text().notNull(),
-		language: text().notNull(),
-		title: text().notNull(),
-		content: createJsonDocumentColumn().notNull(),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
 		index("realm_rule_revision_position_idx").on(table.revisionId, table.position, table.id),
-		check(
-			"realm_rule_language_check",
-			sql`btrim(${table.language}) <> '' and char_length(${table.language}) <= 35`,
-		),
-		check("realm_rule_title_not_blank", sql`btrim(${table.title}) <> ''`),
 	],
 );
 
@@ -243,6 +220,7 @@ export const realmUnitStatusEvent = pgTable(
 		changedByProfileId: uuid().references(() => profile.id, {
 			onDelete: "set null",
 		}),
+		/** @UNIT_LOCALIZATION_EXEMPT Immutable point-in-time moderation annotation. */
 		annotationDocument: createJsonDocumentColumn(),
 		createdAt: createCreatedAtColumn(),
 	},

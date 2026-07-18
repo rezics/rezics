@@ -3,14 +3,6 @@
  * Do not edit manually.
  */
 
-import type {
-	QueryKey,
-	QueryClient,
-	QueryObserverOptions,
-	UseQueryResult,
-	UseMutationOptions,
-	UseMutationResult,
-} from "@tanstack/react-query";
 import type { RequestConfig, ResponseErrorConfig } from "./.kubb/client";
 import type {
 	DeleteApiApiTokensByTokenIdOptions,
@@ -272,45 +264,6 @@ import type {
 	PostApiZonesStatus403,
 	PostApiZonesStatus422,
 	PostApiZonesStatus500,
-	GetApiZonesByZoneIdPagesOptions,
-	GetApiZonesByZoneIdPagesStatus200,
-	GetApiZonesByZoneIdPagesStatus404,
-	GetApiZonesByZoneIdPagesStatus422,
-	GetApiZonesByZoneIdPagesStatus500,
-	PostApiZonesByZoneIdPagesOptions,
-	PostApiZonesByZoneIdPagesStatus200,
-	PostApiZonesByZoneIdPagesStatus403,
-	PostApiZonesByZoneIdPagesStatus404,
-	PostApiZonesByZoneIdPagesStatus422,
-	PostApiZonesByZoneIdPagesStatus500,
-	PutApiZonesByZoneIdPagesByPageIdOptions,
-	PutApiZonesByZoneIdPagesByPageIdStatus200,
-	PutApiZonesByZoneIdPagesByPageIdStatus403,
-	PutApiZonesByZoneIdPagesByPageIdStatus404,
-	PutApiZonesByZoneIdPagesByPageIdStatus422,
-	PutApiZonesByZoneIdPagesByPageIdStatus500,
-	DeleteApiZonesByZoneIdPagesByPageIdOptions,
-	DeleteApiZonesByZoneIdPagesByPageIdStatus204,
-	DeleteApiZonesByZoneIdPagesByPageIdStatus403,
-	DeleteApiZonesByZoneIdPagesByPageIdStatus404,
-	DeleteApiZonesByZoneIdPagesByPageIdStatus422,
-	DeleteApiZonesByZoneIdPagesByPageIdStatus500,
-	GetApiZonesByZoneIdMenusOptions,
-	GetApiZonesByZoneIdMenusStatus200,
-	GetApiZonesByZoneIdMenusStatus404,
-	GetApiZonesByZoneIdMenusStatus422,
-	GetApiZonesByZoneIdMenusStatus500,
-	PutApiZonesByZoneIdMenusBySlotOptions,
-	PutApiZonesByZoneIdMenusBySlotStatus200,
-	PutApiZonesByZoneIdMenusBySlotStatus403,
-	PutApiZonesByZoneIdMenusBySlotStatus404,
-	PutApiZonesByZoneIdMenusBySlotStatus422,
-	PutApiZonesByZoneIdMenusBySlotStatus500,
-	DeleteApiZonesByZoneIdMenusBySlotOptions,
-	DeleteApiZonesByZoneIdMenusBySlotStatus204,
-	DeleteApiZonesByZoneIdMenusBySlotStatus403,
-	DeleteApiZonesByZoneIdMenusBySlotStatus422,
-	DeleteApiZonesByZoneIdMenusBySlotStatus500,
 	PutApiZonesByZoneIdFollowOptions,
 	PutApiZonesByZoneIdFollowStatus200,
 	PutApiZonesByZoneIdFollowStatus404,
@@ -507,6 +460,10 @@ import type {
 	PostApiTagsStatus200,
 	PostApiTagsStatus422,
 	PostApiTagsStatus500,
+	GetApiUnitsByTypeByUnitIdAliasesOptions,
+	GetApiUnitsByTypeByUnitIdAliasesStatus200,
+	GetApiUnitsByTypeByUnitIdAliasesStatus422,
+	GetApiUnitsByTypeByUnitIdAliasesStatus500,
 	PostApiUnitsByTypeByUnitIdAliasesOptions,
 	PostApiUnitsByTypeByUnitIdAliasesStatus200,
 	PostApiUnitsByTypeByUnitIdAliasesStatus403,
@@ -526,6 +483,7 @@ import type {
 	PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500,
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions,
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200,
+	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404,
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422,
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500,
 	PostApiUnitsByTypeByUnitIdCreditsOptions,
@@ -906,21 +864,6 @@ import type {
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus403,
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus422,
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus500,
-	GetApiRealmsByRealmIdDocksOptions,
-	GetApiRealmsByRealmIdDocksStatus200,
-	GetApiRealmsByRealmIdDocksStatus404,
-	GetApiRealmsByRealmIdDocksStatus422,
-	GetApiRealmsByRealmIdDocksStatus500,
-	PutApiRealmsByRealmIdDocksBySlotOptions,
-	PutApiRealmsByRealmIdDocksBySlotStatus200,
-	PutApiRealmsByRealmIdDocksBySlotStatus403,
-	PutApiRealmsByRealmIdDocksBySlotStatus422,
-	PutApiRealmsByRealmIdDocksBySlotStatus500,
-	DeleteApiRealmsByRealmIdDocksBySlotOptions,
-	DeleteApiRealmsByRealmIdDocksBySlotStatus204,
-	DeleteApiRealmsByRealmIdDocksBySlotStatus403,
-	DeleteApiRealmsByRealmIdDocksBySlotStatus422,
-	DeleteApiRealmsByRealmIdDocksBySlotStatus500,
 	PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus200,
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus403,
@@ -964,7 +907,14 @@ import type {
 	GetApiUploadsUrlStatus422,
 	GetApiUploadsUrlStatus500,
 } from "./models";
-import { mutationOptions, queryOptions, useQuery, useMutation } from "@tanstack/react-query";
+import type {
+	QueryKey,
+	QueryClient,
+	QueryObserverOptions,
+	UseQueryResult,
+	UseMutationOptions,
+	UseMutationResult,
+} from "@tanstack/react-query";
 import {
 	deleteApiApiTokensByTokenId,
 	deleteApiMessagesByMessageId,
@@ -1014,13 +964,6 @@ import {
 	putApiSeriesBySeriesIdReleasesByReleaseId,
 	deleteApiSeriesBySeriesIdReleasesByReleaseId,
 	postApiZones,
-	getApiZonesByZoneIdPages,
-	postApiZonesByZoneIdPages,
-	putApiZonesByZoneIdPagesByPageId,
-	deleteApiZonesByZoneIdPagesByPageId,
-	getApiZonesByZoneIdMenus,
-	putApiZonesByZoneIdMenusBySlot,
-	deleteApiZonesByZoneIdMenusBySlot,
 	putApiZonesByZoneIdFollow,
 	deleteApiZonesByZoneIdFollow,
 	getApiSoftwareBySoftwareIdSystemRequirements,
@@ -1058,6 +1001,7 @@ import {
 	getApiEntitiesByUnitId,
 	getApiTags,
 	postApiTags,
+	getApiUnitsByTypeByUnitIdAliases,
 	postApiUnitsByTypeByUnitIdAliases,
 	deleteApiUnitsByTypeByUnitIdAliasesByAliasId,
 	putApiUnitsByTypeByUnitIdAliasesByAliasIdVote,
@@ -1132,9 +1076,6 @@ import {
 	getApiRealmsByRealmIdPins,
 	putApiRealmsByRealmIdPinsByUnitId,
 	deleteApiRealmsByRealmIdPinsByUnitId,
-	getApiRealmsByRealmIdDocks,
-	putApiRealmsByRealmIdDocksBySlot,
-	deleteApiRealmsByRealmIdDocksBySlot,
 	patchApiRealmsByRealmIdUnitsByUnitId,
 	postApiSearch,
 	postApiSearchByIndex,
@@ -1143,6 +1084,7 @@ import {
 	postApiUploadsComplete,
 	getApiUploadsUrl,
 } from "./client";
+import { mutationOptions, queryOptions, useQuery, useMutation } from "@tanstack/react-query";
 
 export const getApiHealthQueryKey = () => [{ url: "/api/health" }] as const;
 
@@ -5629,681 +5571,6 @@ export function usePostApiZones<TContext>(
 	>;
 }
 
-export const getApiZonesByZoneIdPagesQueryKey = ({
-	path,
-}: Omit<GetApiZonesByZoneIdPagesOptions, "headers">) =>
-	[{ url: "/api/zones/:zoneId/pages", params: path }] as const;
-
-type GetApiZonesByZoneIdPagesQueryKey = ReturnType<typeof getApiZonesByZoneIdPagesQueryKey>;
-
-export function getApiZonesByZoneIdPagesQueryOptions(
-	{ path }: GetApiZonesByZoneIdPagesOptions,
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const queryKey = getApiZonesByZoneIdPagesQueryKey({ path });
-	return queryOptions<
-		GetApiZonesByZoneIdPagesStatus200,
-		ResponseErrorConfig<
-			| GetApiZonesByZoneIdPagesStatus404
-			| GetApiZonesByZoneIdPagesStatus422
-			| GetApiZonesByZoneIdPagesStatus500
-		>,
-		GetApiZonesByZoneIdPagesStatus200,
-		typeof queryKey
-	>({
-		queryKey,
-		queryFn: async ({ signal }) => {
-			const { data } = await getApiZonesByZoneIdPages({
-				...config,
-				path,
-				signal: config.signal ?? signal,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary List Zone pages
- * {@link /api/zones/:zoneId/pages}
- */
-export function useGetApiZonesByZoneIdPages<
-	TData = GetApiZonesByZoneIdPagesStatus200,
-	TQueryData = GetApiZonesByZoneIdPagesStatus200,
-	TQueryKey extends QueryKey = GetApiZonesByZoneIdPagesQueryKey,
->(
-	{
-		path,
-	}: {
-		path:
-			| GetApiZonesByZoneIdPagesOptions["path"]
-			| (() => GetApiZonesByZoneIdPagesOptions["path"]);
-	},
-	options: {
-		query?: Partial<
-			QueryObserverOptions<
-				GetApiZonesByZoneIdPagesStatus200,
-				ResponseErrorConfig<
-					| GetApiZonesByZoneIdPagesStatus404
-					| GetApiZonesByZoneIdPagesStatus422
-					| GetApiZonesByZoneIdPagesStatus500
-				>,
-				TData,
-				TQueryData,
-				TQueryKey
-			>
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { query: queryConfig = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { path: typeof path === "function" ? path() : path };
-	const queryKey = resolvedOptions?.queryKey ?? getApiZonesByZoneIdPagesQueryKey(resolvedParams);
-
-	const queryResult = useQuery(
-		{
-			...getApiZonesByZoneIdPagesQueryOptions(resolvedParams, config),
-			...resolvedOptions,
-			queryKey,
-		} as unknown as QueryObserverOptions,
-		queryClient,
-	) as UseQueryResult<
-		TData,
-		ResponseErrorConfig<
-			| GetApiZonesByZoneIdPagesStatus404
-			| GetApiZonesByZoneIdPagesStatus422
-			| GetApiZonesByZoneIdPagesStatus500
-		>
-	> & { queryKey: TQueryKey };
-
-	queryResult.queryKey = queryKey as TQueryKey;
-
-	return queryResult;
-}
-
-export const postApiZonesByZoneIdPagesMutationKey = () =>
-	[{ url: "/api/zones/:zoneId/pages" }] as const;
-
-export function postApiZonesByZoneIdPagesMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = postApiZonesByZoneIdPagesMutationKey();
-	return mutationOptions<
-		PostApiZonesByZoneIdPagesStatus200,
-		ResponseErrorConfig<
-			| PostApiZonesByZoneIdPagesStatus403
-			| PostApiZonesByZoneIdPagesStatus404
-			| PostApiZonesByZoneIdPagesStatus422
-			| PostApiZonesByZoneIdPagesStatus500
-		>,
-		PostApiZonesByZoneIdPagesOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiZonesByZoneIdPages({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Create Zone page
- * {@link /api/zones/:zoneId/pages}
- */
-export function usePostApiZonesByZoneIdPages<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PostApiZonesByZoneIdPagesStatus200,
-			ResponseErrorConfig<
-				| PostApiZonesByZoneIdPagesStatus403
-				| PostApiZonesByZoneIdPagesStatus404
-				| PostApiZonesByZoneIdPagesStatus422
-				| PostApiZonesByZoneIdPagesStatus500
-			>,
-			PostApiZonesByZoneIdPagesOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? postApiZonesByZoneIdPagesMutationKey();
-
-	const baseOptions = postApiZonesByZoneIdPagesMutationOptions(config) as UseMutationOptions<
-		PostApiZonesByZoneIdPagesStatus200,
-		ResponseErrorConfig<
-			| PostApiZonesByZoneIdPagesStatus403
-			| PostApiZonesByZoneIdPagesStatus404
-			| PostApiZonesByZoneIdPagesStatus422
-			| PostApiZonesByZoneIdPagesStatus500
-		>,
-		PostApiZonesByZoneIdPagesOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PostApiZonesByZoneIdPagesStatus200,
-		ResponseErrorConfig<
-			| PostApiZonesByZoneIdPagesStatus403
-			| PostApiZonesByZoneIdPagesStatus404
-			| PostApiZonesByZoneIdPagesStatus422
-			| PostApiZonesByZoneIdPagesStatus500
-		>,
-		PostApiZonesByZoneIdPagesOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PostApiZonesByZoneIdPagesStatus200,
-		ResponseErrorConfig<
-			| PostApiZonesByZoneIdPagesStatus403
-			| PostApiZonesByZoneIdPagesStatus404
-			| PostApiZonesByZoneIdPagesStatus422
-			| PostApiZonesByZoneIdPagesStatus500
-		>,
-		PostApiZonesByZoneIdPagesOptions,
-		TContext
-	>;
-}
-
-export const putApiZonesByZoneIdPagesByPageIdMutationKey = () =>
-	[{ url: "/api/zones/:zoneId/pages/:pageId" }] as const;
-
-export function putApiZonesByZoneIdPagesByPageIdMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = putApiZonesByZoneIdPagesByPageIdMutationKey();
-	return mutationOptions<
-		PutApiZonesByZoneIdPagesByPageIdStatus200,
-		ResponseErrorConfig<
-			| PutApiZonesByZoneIdPagesByPageIdStatus403
-			| PutApiZonesByZoneIdPagesByPageIdStatus404
-			| PutApiZonesByZoneIdPagesByPageIdStatus422
-			| PutApiZonesByZoneIdPagesByPageIdStatus500
-		>,
-		PutApiZonesByZoneIdPagesByPageIdOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiZonesByZoneIdPagesByPageId({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Replace Zone page
- * {@link /api/zones/:zoneId/pages/:pageId}
- */
-export function usePutApiZonesByZoneIdPagesByPageId<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PutApiZonesByZoneIdPagesByPageIdStatus200,
-			ResponseErrorConfig<
-				| PutApiZonesByZoneIdPagesByPageIdStatus403
-				| PutApiZonesByZoneIdPagesByPageIdStatus404
-				| PutApiZonesByZoneIdPagesByPageIdStatus422
-				| PutApiZonesByZoneIdPagesByPageIdStatus500
-			>,
-			PutApiZonesByZoneIdPagesByPageIdOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? putApiZonesByZoneIdPagesByPageIdMutationKey();
-
-	const baseOptions = putApiZonesByZoneIdPagesByPageIdMutationOptions(
-		config,
-	) as UseMutationOptions<
-		PutApiZonesByZoneIdPagesByPageIdStatus200,
-		ResponseErrorConfig<
-			| PutApiZonesByZoneIdPagesByPageIdStatus403
-			| PutApiZonesByZoneIdPagesByPageIdStatus404
-			| PutApiZonesByZoneIdPagesByPageIdStatus422
-			| PutApiZonesByZoneIdPagesByPageIdStatus500
-		>,
-		PutApiZonesByZoneIdPagesByPageIdOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PutApiZonesByZoneIdPagesByPageIdStatus200,
-		ResponseErrorConfig<
-			| PutApiZonesByZoneIdPagesByPageIdStatus403
-			| PutApiZonesByZoneIdPagesByPageIdStatus404
-			| PutApiZonesByZoneIdPagesByPageIdStatus422
-			| PutApiZonesByZoneIdPagesByPageIdStatus500
-		>,
-		PutApiZonesByZoneIdPagesByPageIdOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PutApiZonesByZoneIdPagesByPageIdStatus200,
-		ResponseErrorConfig<
-			| PutApiZonesByZoneIdPagesByPageIdStatus403
-			| PutApiZonesByZoneIdPagesByPageIdStatus404
-			| PutApiZonesByZoneIdPagesByPageIdStatus422
-			| PutApiZonesByZoneIdPagesByPageIdStatus500
-		>,
-		PutApiZonesByZoneIdPagesByPageIdOptions,
-		TContext
-	>;
-}
-
-export const deleteApiZonesByZoneIdPagesByPageIdMutationKey = () =>
-	[{ url: "/api/zones/:zoneId/pages/:pageId" }] as const;
-
-export function deleteApiZonesByZoneIdPagesByPageIdMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = deleteApiZonesByZoneIdPagesByPageIdMutationKey();
-	return mutationOptions<
-		DeleteApiZonesByZoneIdPagesByPageIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiZonesByZoneIdPagesByPageIdStatus403
-			| DeleteApiZonesByZoneIdPagesByPageIdStatus404
-			| DeleteApiZonesByZoneIdPagesByPageIdStatus422
-			| DeleteApiZonesByZoneIdPagesByPageIdStatus500
-		>,
-		DeleteApiZonesByZoneIdPagesByPageIdOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiZonesByZoneIdPagesByPageId({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Delete Zone page
- * {@link /api/zones/:zoneId/pages/:pageId}
- */
-export function useDeleteApiZonesByZoneIdPagesByPageId<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			DeleteApiZonesByZoneIdPagesByPageIdStatus204,
-			ResponseErrorConfig<
-				| DeleteApiZonesByZoneIdPagesByPageIdStatus403
-				| DeleteApiZonesByZoneIdPagesByPageIdStatus404
-				| DeleteApiZonesByZoneIdPagesByPageIdStatus422
-				| DeleteApiZonesByZoneIdPagesByPageIdStatus500
-			>,
-			DeleteApiZonesByZoneIdPagesByPageIdOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? deleteApiZonesByZoneIdPagesByPageIdMutationKey();
-
-	const baseOptions = deleteApiZonesByZoneIdPagesByPageIdMutationOptions(
-		config,
-	) as UseMutationOptions<
-		DeleteApiZonesByZoneIdPagesByPageIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiZonesByZoneIdPagesByPageIdStatus403
-			| DeleteApiZonesByZoneIdPagesByPageIdStatus404
-			| DeleteApiZonesByZoneIdPagesByPageIdStatus422
-			| DeleteApiZonesByZoneIdPagesByPageIdStatus500
-		>,
-		DeleteApiZonesByZoneIdPagesByPageIdOptions,
-		TContext
-	>;
-
-	return useMutation<
-		DeleteApiZonesByZoneIdPagesByPageIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiZonesByZoneIdPagesByPageIdStatus403
-			| DeleteApiZonesByZoneIdPagesByPageIdStatus404
-			| DeleteApiZonesByZoneIdPagesByPageIdStatus422
-			| DeleteApiZonesByZoneIdPagesByPageIdStatus500
-		>,
-		DeleteApiZonesByZoneIdPagesByPageIdOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		DeleteApiZonesByZoneIdPagesByPageIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiZonesByZoneIdPagesByPageIdStatus403
-			| DeleteApiZonesByZoneIdPagesByPageIdStatus404
-			| DeleteApiZonesByZoneIdPagesByPageIdStatus422
-			| DeleteApiZonesByZoneIdPagesByPageIdStatus500
-		>,
-		DeleteApiZonesByZoneIdPagesByPageIdOptions,
-		TContext
-	>;
-}
-
-export const getApiZonesByZoneIdMenusQueryKey = ({
-	path,
-}: Omit<GetApiZonesByZoneIdMenusOptions, "headers">) =>
-	[{ url: "/api/zones/:zoneId/menus", params: path }] as const;
-
-type GetApiZonesByZoneIdMenusQueryKey = ReturnType<typeof getApiZonesByZoneIdMenusQueryKey>;
-
-export function getApiZonesByZoneIdMenusQueryOptions(
-	{ path }: GetApiZonesByZoneIdMenusOptions,
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const queryKey = getApiZonesByZoneIdMenusQueryKey({ path });
-	return queryOptions<
-		GetApiZonesByZoneIdMenusStatus200,
-		ResponseErrorConfig<
-			| GetApiZonesByZoneIdMenusStatus404
-			| GetApiZonesByZoneIdMenusStatus422
-			| GetApiZonesByZoneIdMenusStatus500
-		>,
-		GetApiZonesByZoneIdMenusStatus200,
-		typeof queryKey
-	>({
-		queryKey,
-		queryFn: async ({ signal }) => {
-			const { data } = await getApiZonesByZoneIdMenus({
-				...config,
-				path,
-				signal: config.signal ?? signal,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary List Zone menus
- * {@link /api/zones/:zoneId/menus}
- */
-export function useGetApiZonesByZoneIdMenus<
-	TData = GetApiZonesByZoneIdMenusStatus200,
-	TQueryData = GetApiZonesByZoneIdMenusStatus200,
-	TQueryKey extends QueryKey = GetApiZonesByZoneIdMenusQueryKey,
->(
-	{
-		path,
-	}: {
-		path:
-			| GetApiZonesByZoneIdMenusOptions["path"]
-			| (() => GetApiZonesByZoneIdMenusOptions["path"]);
-	},
-	options: {
-		query?: Partial<
-			QueryObserverOptions<
-				GetApiZonesByZoneIdMenusStatus200,
-				ResponseErrorConfig<
-					| GetApiZonesByZoneIdMenusStatus404
-					| GetApiZonesByZoneIdMenusStatus422
-					| GetApiZonesByZoneIdMenusStatus500
-				>,
-				TData,
-				TQueryData,
-				TQueryKey
-			>
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { query: queryConfig = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { path: typeof path === "function" ? path() : path };
-	const queryKey = resolvedOptions?.queryKey ?? getApiZonesByZoneIdMenusQueryKey(resolvedParams);
-
-	const queryResult = useQuery(
-		{
-			...getApiZonesByZoneIdMenusQueryOptions(resolvedParams, config),
-			...resolvedOptions,
-			queryKey,
-		} as unknown as QueryObserverOptions,
-		queryClient,
-	) as UseQueryResult<
-		TData,
-		ResponseErrorConfig<
-			| GetApiZonesByZoneIdMenusStatus404
-			| GetApiZonesByZoneIdMenusStatus422
-			| GetApiZonesByZoneIdMenusStatus500
-		>
-	> & { queryKey: TQueryKey };
-
-	queryResult.queryKey = queryKey as TQueryKey;
-
-	return queryResult;
-}
-
-export const putApiZonesByZoneIdMenusBySlotMutationKey = () =>
-	[{ url: "/api/zones/:zoneId/menus/:slot" }] as const;
-
-export function putApiZonesByZoneIdMenusBySlotMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = putApiZonesByZoneIdMenusBySlotMutationKey();
-	return mutationOptions<
-		PutApiZonesByZoneIdMenusBySlotStatus200,
-		ResponseErrorConfig<
-			| PutApiZonesByZoneIdMenusBySlotStatus403
-			| PutApiZonesByZoneIdMenusBySlotStatus404
-			| PutApiZonesByZoneIdMenusBySlotStatus422
-			| PutApiZonesByZoneIdMenusBySlotStatus500
-		>,
-		PutApiZonesByZoneIdMenusBySlotOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiZonesByZoneIdMenusBySlot({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Create or replace Zone menu
- * {@link /api/zones/:zoneId/menus/:slot}
- */
-export function usePutApiZonesByZoneIdMenusBySlot<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PutApiZonesByZoneIdMenusBySlotStatus200,
-			ResponseErrorConfig<
-				| PutApiZonesByZoneIdMenusBySlotStatus403
-				| PutApiZonesByZoneIdMenusBySlotStatus404
-				| PutApiZonesByZoneIdMenusBySlotStatus422
-				| PutApiZonesByZoneIdMenusBySlotStatus500
-			>,
-			PutApiZonesByZoneIdMenusBySlotOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? putApiZonesByZoneIdMenusBySlotMutationKey();
-
-	const baseOptions = putApiZonesByZoneIdMenusBySlotMutationOptions(config) as UseMutationOptions<
-		PutApiZonesByZoneIdMenusBySlotStatus200,
-		ResponseErrorConfig<
-			| PutApiZonesByZoneIdMenusBySlotStatus403
-			| PutApiZonesByZoneIdMenusBySlotStatus404
-			| PutApiZonesByZoneIdMenusBySlotStatus422
-			| PutApiZonesByZoneIdMenusBySlotStatus500
-		>,
-		PutApiZonesByZoneIdMenusBySlotOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PutApiZonesByZoneIdMenusBySlotStatus200,
-		ResponseErrorConfig<
-			| PutApiZonesByZoneIdMenusBySlotStatus403
-			| PutApiZonesByZoneIdMenusBySlotStatus404
-			| PutApiZonesByZoneIdMenusBySlotStatus422
-			| PutApiZonesByZoneIdMenusBySlotStatus500
-		>,
-		PutApiZonesByZoneIdMenusBySlotOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PutApiZonesByZoneIdMenusBySlotStatus200,
-		ResponseErrorConfig<
-			| PutApiZonesByZoneIdMenusBySlotStatus403
-			| PutApiZonesByZoneIdMenusBySlotStatus404
-			| PutApiZonesByZoneIdMenusBySlotStatus422
-			| PutApiZonesByZoneIdMenusBySlotStatus500
-		>,
-		PutApiZonesByZoneIdMenusBySlotOptions,
-		TContext
-	>;
-}
-
-export const deleteApiZonesByZoneIdMenusBySlotMutationKey = () =>
-	[{ url: "/api/zones/:zoneId/menus/:slot" }] as const;
-
-export function deleteApiZonesByZoneIdMenusBySlotMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = deleteApiZonesByZoneIdMenusBySlotMutationKey();
-	return mutationOptions<
-		DeleteApiZonesByZoneIdMenusBySlotStatus204,
-		ResponseErrorConfig<
-			| DeleteApiZonesByZoneIdMenusBySlotStatus403
-			| DeleteApiZonesByZoneIdMenusBySlotStatus422
-			| DeleteApiZonesByZoneIdMenusBySlotStatus500
-		>,
-		DeleteApiZonesByZoneIdMenusBySlotOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiZonesByZoneIdMenusBySlot({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Delete Zone menu
- * {@link /api/zones/:zoneId/menus/:slot}
- */
-export function useDeleteApiZonesByZoneIdMenusBySlot<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			DeleteApiZonesByZoneIdMenusBySlotStatus204,
-			ResponseErrorConfig<
-				| DeleteApiZonesByZoneIdMenusBySlotStatus403
-				| DeleteApiZonesByZoneIdMenusBySlotStatus422
-				| DeleteApiZonesByZoneIdMenusBySlotStatus500
-			>,
-			DeleteApiZonesByZoneIdMenusBySlotOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? deleteApiZonesByZoneIdMenusBySlotMutationKey();
-
-	const baseOptions = deleteApiZonesByZoneIdMenusBySlotMutationOptions(
-		config,
-	) as UseMutationOptions<
-		DeleteApiZonesByZoneIdMenusBySlotStatus204,
-		ResponseErrorConfig<
-			| DeleteApiZonesByZoneIdMenusBySlotStatus403
-			| DeleteApiZonesByZoneIdMenusBySlotStatus422
-			| DeleteApiZonesByZoneIdMenusBySlotStatus500
-		>,
-		DeleteApiZonesByZoneIdMenusBySlotOptions,
-		TContext
-	>;
-
-	return useMutation<
-		DeleteApiZonesByZoneIdMenusBySlotStatus204,
-		ResponseErrorConfig<
-			| DeleteApiZonesByZoneIdMenusBySlotStatus403
-			| DeleteApiZonesByZoneIdMenusBySlotStatus422
-			| DeleteApiZonesByZoneIdMenusBySlotStatus500
-		>,
-		DeleteApiZonesByZoneIdMenusBySlotOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		DeleteApiZonesByZoneIdMenusBySlotStatus204,
-		ResponseErrorConfig<
-			| DeleteApiZonesByZoneIdMenusBySlotStatus403
-			| DeleteApiZonesByZoneIdMenusBySlotStatus422
-			| DeleteApiZonesByZoneIdMenusBySlotStatus500
-		>,
-		DeleteApiZonesByZoneIdMenusBySlotOptions,
-		TContext
-	>;
-}
-
 export const putApiZonesByZoneIdFollowMutationKey = () =>
 	[{ url: "/api/zones/:zoneId/follow" }] as const;
 
@@ -9682,6 +8949,98 @@ export function usePostApiTags<TContext>(
 	>;
 }
 
+export const getApiUnitsByTypeByUnitIdAliasesQueryKey = ({
+	path,
+}: Omit<GetApiUnitsByTypeByUnitIdAliasesOptions, "headers">) =>
+	[{ url: "/api/units/:type/:unitId/aliases", params: path }] as const;
+
+type GetApiUnitsByTypeByUnitIdAliasesQueryKey = ReturnType<
+	typeof getApiUnitsByTypeByUnitIdAliasesQueryKey
+>;
+
+export function getApiUnitsByTypeByUnitIdAliasesQueryOptions(
+	{ path }: GetApiUnitsByTypeByUnitIdAliasesOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiUnitsByTypeByUnitIdAliasesQueryKey({ path });
+	return queryOptions<
+		GetApiUnitsByTypeByUnitIdAliasesStatus200,
+		ResponseErrorConfig<
+			GetApiUnitsByTypeByUnitIdAliasesStatus422 | GetApiUnitsByTypeByUnitIdAliasesStatus500
+		>,
+		GetApiUnitsByTypeByUnitIdAliasesStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiUnitsByTypeByUnitIdAliases({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List Unit aliases
+ * {@link /api/units/:type/:unitId/aliases}
+ */
+export function useGetApiUnitsByTypeByUnitIdAliases<
+	TData = GetApiUnitsByTypeByUnitIdAliasesStatus200,
+	TQueryData = GetApiUnitsByTypeByUnitIdAliasesStatus200,
+	TQueryKey extends QueryKey = GetApiUnitsByTypeByUnitIdAliasesQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiUnitsByTypeByUnitIdAliasesOptions["path"]
+			| (() => GetApiUnitsByTypeByUnitIdAliasesOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiUnitsByTypeByUnitIdAliasesStatus200,
+				ResponseErrorConfig<
+					| GetApiUnitsByTypeByUnitIdAliasesStatus422
+					| GetApiUnitsByTypeByUnitIdAliasesStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiUnitsByTypeByUnitIdAliasesQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiUnitsByTypeByUnitIdAliasesQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			GetApiUnitsByTypeByUnitIdAliasesStatus422 | GetApiUnitsByTypeByUnitIdAliasesStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
 export const postApiUnitsByTypeByUnitIdAliasesMutationKey = () =>
 	[{ url: "/api/units/:type/:unitId/aliases" }] as const;
 
@@ -9986,6 +9345,7 @@ export function deleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteMutationOptions<
 	return mutationOptions<
 		DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500
 		>,
@@ -10013,6 +9373,7 @@ export function useDeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200,
 			ResponseErrorConfig<
+				| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 				| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
 				| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500
 			>,
@@ -10033,6 +9394,7 @@ export function useDeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 	) as UseMutationOptions<
 		DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500
 		>,
@@ -10043,6 +9405,7 @@ export function useDeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 	return useMutation<
 		DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500
 		>,
@@ -10058,6 +9421,7 @@ export function useDeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 	) as UseMutationResult<
 		DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200,
 		ResponseErrorConfig<
+			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500
 		>,
@@ -16627,290 +15991,6 @@ export function useDeleteApiRealmsByRealmIdPinsByUnitId<TContext>(
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus500
 		>,
 		DeleteApiRealmsByRealmIdPinsByUnitIdOptions,
-		TContext
-	>;
-}
-
-export const getApiRealmsByRealmIdDocksQueryKey = ({
-	path,
-}: Omit<GetApiRealmsByRealmIdDocksOptions, "headers">) =>
-	[{ url: "/api/realms/:realmId/docks", params: path }] as const;
-
-type GetApiRealmsByRealmIdDocksQueryKey = ReturnType<typeof getApiRealmsByRealmIdDocksQueryKey>;
-
-export function getApiRealmsByRealmIdDocksQueryOptions(
-	{ path }: GetApiRealmsByRealmIdDocksOptions,
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const queryKey = getApiRealmsByRealmIdDocksQueryKey({ path });
-	return queryOptions<
-		GetApiRealmsByRealmIdDocksStatus200,
-		ResponseErrorConfig<
-			| GetApiRealmsByRealmIdDocksStatus404
-			| GetApiRealmsByRealmIdDocksStatus422
-			| GetApiRealmsByRealmIdDocksStatus500
-		>,
-		GetApiRealmsByRealmIdDocksStatus200,
-		typeof queryKey
-	>({
-		queryKey,
-		queryFn: async ({ signal }) => {
-			const { data } = await getApiRealmsByRealmIdDocks({
-				...config,
-				path,
-				signal: config.signal ?? signal,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary List Realm docks
- * {@link /api/realms/:realmId/docks}
- */
-export function useGetApiRealmsByRealmIdDocks<
-	TData = GetApiRealmsByRealmIdDocksStatus200,
-	TQueryData = GetApiRealmsByRealmIdDocksStatus200,
-	TQueryKey extends QueryKey = GetApiRealmsByRealmIdDocksQueryKey,
->(
-	{
-		path,
-	}: {
-		path:
-			| GetApiRealmsByRealmIdDocksOptions["path"]
-			| (() => GetApiRealmsByRealmIdDocksOptions["path"]);
-	},
-	options: {
-		query?: Partial<
-			QueryObserverOptions<
-				GetApiRealmsByRealmIdDocksStatus200,
-				ResponseErrorConfig<
-					| GetApiRealmsByRealmIdDocksStatus404
-					| GetApiRealmsByRealmIdDocksStatus422
-					| GetApiRealmsByRealmIdDocksStatus500
-				>,
-				TData,
-				TQueryData,
-				TQueryKey
-			>
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { query: queryConfig = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { path: typeof path === "function" ? path() : path };
-	const queryKey =
-		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdDocksQueryKey(resolvedParams);
-
-	const queryResult = useQuery(
-		{
-			...getApiRealmsByRealmIdDocksQueryOptions(resolvedParams, config),
-			...resolvedOptions,
-			queryKey,
-		} as unknown as QueryObserverOptions,
-		queryClient,
-	) as UseQueryResult<
-		TData,
-		ResponseErrorConfig<
-			| GetApiRealmsByRealmIdDocksStatus404
-			| GetApiRealmsByRealmIdDocksStatus422
-			| GetApiRealmsByRealmIdDocksStatus500
-		>
-	> & { queryKey: TQueryKey };
-
-	queryResult.queryKey = queryKey as TQueryKey;
-
-	return queryResult;
-}
-
-export const putApiRealmsByRealmIdDocksBySlotMutationKey = () =>
-	[{ url: "/api/realms/:realmId/docks/:slot" }] as const;
-
-export function putApiRealmsByRealmIdDocksBySlotMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = putApiRealmsByRealmIdDocksBySlotMutationKey();
-	return mutationOptions<
-		PutApiRealmsByRealmIdDocksBySlotStatus200,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdDocksBySlotStatus403
-			| PutApiRealmsByRealmIdDocksBySlotStatus422
-			| PutApiRealmsByRealmIdDocksBySlotStatus500
-		>,
-		PutApiRealmsByRealmIdDocksBySlotOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiRealmsByRealmIdDocksBySlot({
-				...config,
-				path,
-				body,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Create or replace Realm dock
- * {@link /api/realms/:realmId/docks/:slot}
- */
-export function usePutApiRealmsByRealmIdDocksBySlot<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PutApiRealmsByRealmIdDocksBySlotStatus200,
-			ResponseErrorConfig<
-				| PutApiRealmsByRealmIdDocksBySlotStatus403
-				| PutApiRealmsByRealmIdDocksBySlotStatus422
-				| PutApiRealmsByRealmIdDocksBySlotStatus500
-			>,
-			PutApiRealmsByRealmIdDocksBySlotOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? putApiRealmsByRealmIdDocksBySlotMutationKey();
-
-	const baseOptions = putApiRealmsByRealmIdDocksBySlotMutationOptions(
-		config,
-	) as UseMutationOptions<
-		PutApiRealmsByRealmIdDocksBySlotStatus200,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdDocksBySlotStatus403
-			| PutApiRealmsByRealmIdDocksBySlotStatus422
-			| PutApiRealmsByRealmIdDocksBySlotStatus500
-		>,
-		PutApiRealmsByRealmIdDocksBySlotOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PutApiRealmsByRealmIdDocksBySlotStatus200,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdDocksBySlotStatus403
-			| PutApiRealmsByRealmIdDocksBySlotStatus422
-			| PutApiRealmsByRealmIdDocksBySlotStatus500
-		>,
-		PutApiRealmsByRealmIdDocksBySlotOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PutApiRealmsByRealmIdDocksBySlotStatus200,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdDocksBySlotStatus403
-			| PutApiRealmsByRealmIdDocksBySlotStatus422
-			| PutApiRealmsByRealmIdDocksBySlotStatus500
-		>,
-		PutApiRealmsByRealmIdDocksBySlotOptions,
-		TContext
-	>;
-}
-
-export const deleteApiRealmsByRealmIdDocksBySlotMutationKey = () =>
-	[{ url: "/api/realms/:realmId/docks/:slot" }] as const;
-
-export function deleteApiRealmsByRealmIdDocksBySlotMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = deleteApiRealmsByRealmIdDocksBySlotMutationKey();
-	return mutationOptions<
-		DeleteApiRealmsByRealmIdDocksBySlotStatus204,
-		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdDocksBySlotStatus403
-			| DeleteApiRealmsByRealmIdDocksBySlotStatus422
-			| DeleteApiRealmsByRealmIdDocksBySlotStatus500
-		>,
-		DeleteApiRealmsByRealmIdDocksBySlotOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiRealmsByRealmIdDocksBySlot({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Delete Realm dock
- * {@link /api/realms/:realmId/docks/:slot}
- */
-export function useDeleteApiRealmsByRealmIdDocksBySlot<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			DeleteApiRealmsByRealmIdDocksBySlotStatus204,
-			ResponseErrorConfig<
-				| DeleteApiRealmsByRealmIdDocksBySlotStatus403
-				| DeleteApiRealmsByRealmIdDocksBySlotStatus422
-				| DeleteApiRealmsByRealmIdDocksBySlotStatus500
-			>,
-			DeleteApiRealmsByRealmIdDocksBySlotOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey =
-		mutationOptions.mutationKey ?? deleteApiRealmsByRealmIdDocksBySlotMutationKey();
-
-	const baseOptions = deleteApiRealmsByRealmIdDocksBySlotMutationOptions(
-		config,
-	) as UseMutationOptions<
-		DeleteApiRealmsByRealmIdDocksBySlotStatus204,
-		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdDocksBySlotStatus403
-			| DeleteApiRealmsByRealmIdDocksBySlotStatus422
-			| DeleteApiRealmsByRealmIdDocksBySlotStatus500
-		>,
-		DeleteApiRealmsByRealmIdDocksBySlotOptions,
-		TContext
-	>;
-
-	return useMutation<
-		DeleteApiRealmsByRealmIdDocksBySlotStatus204,
-		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdDocksBySlotStatus403
-			| DeleteApiRealmsByRealmIdDocksBySlotStatus422
-			| DeleteApiRealmsByRealmIdDocksBySlotStatus500
-		>,
-		DeleteApiRealmsByRealmIdDocksBySlotOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		DeleteApiRealmsByRealmIdDocksBySlotStatus204,
-		ResponseErrorConfig<
-			| DeleteApiRealmsByRealmIdDocksBySlotStatus403
-			| DeleteApiRealmsByRealmIdDocksBySlotStatus422
-			| DeleteApiRealmsByRealmIdDocksBySlotStatus500
-		>,
-		DeleteApiRealmsByRealmIdDocksBySlotOptions,
 		TContext
 	>;
 }

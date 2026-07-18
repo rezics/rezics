@@ -31,7 +31,6 @@ export const seriesRelease = pgTable(
 			.notNull()
 			.references(() => unit.id, { onDelete: "restrict" }),
 		position: text().notNull(),
-		label: text(),
 		releasedOn: date(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),

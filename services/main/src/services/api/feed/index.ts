@@ -5,6 +5,7 @@ import Elysia, { t } from "elysia";
 
 import { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
+import { defaultUnitTitle } from "../../database/localization";
 import {
 	post,
 	postReply,
@@ -485,7 +486,7 @@ export async function hydrateFeedItems(
 			id: post.id,
 			postKind: post.kind,
 			authorId: post.authorProfileId,
-			authorName: profileTable.name,
+			authorName: defaultUnitTitle(profileTable.id),
 			subjectId: post.subjectUnitId,
 			rootPostId: postReply.rootPostId,
 			parentPostId: postReply.parentPostId,
@@ -608,7 +609,7 @@ export async function hydrateFeedItems(
 							rootPostId: post.id,
 							title: unitLocalization.title,
 							authorId: post.authorProfileId,
-							authorName: profileTable.name,
+							authorName: defaultUnitTitle(profileTable.id),
 							subjectId: post.subjectUnitId,
 						})
 						.from(post)

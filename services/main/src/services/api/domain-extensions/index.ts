@@ -1,12 +1,7 @@
 import { StatusCodes } from "http-status-codes";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import Elysia, { t } from "elysia";
-import {
-	ZoneMenuDocument,
-	ZonePageDocument,
-	assertDocument,
-	type PortableTextDocument,
-} from "@rezics/content-structure";
+import { type PortableTextDocument } from "@rezics/content-structure";
 
 import session, { resolveIdentity } from "../../auth/session";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
@@ -21,8 +16,6 @@ import {
 	unitLink,
 	unitLocalization,
 	zone,
-	zoneMenu,
-	zonePage,
 	zoneSubscription,
 } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
@@ -43,14 +36,6 @@ import {
 	SystemRequirementListResponse,
 	SystemRequirementResponse,
 	UpsertSeriesReleaseBody,
-	ZonePageBody,
-	ZonePageListResponse,
-	ZonePageParams,
-	ZonePageResponse,
-	ZoneMenuBody,
-	ZoneMenuListResponse,
-	ZoneMenuParams,
-	ZoneMenuResponse,
 	ZoneParams,
 } from "./schema";
 import {
@@ -58,24 +43,11 @@ import {
 	SoftwareSystemRequirementSourceInvalid,
 	SeriesReleaseNotFound,
 	SystemRequirementNotFound,
-	ZonePageNotFound,
 	ZoneTimeRangeInvalid,
 } from "./errors";
 
 const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitEditForbidden", "UnitFieldLocked"]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
-
-function toZonePageResponse(row: typeof zonePage.$inferSelect) {
-	const document = row.document;
-	assertDocument(ZonePageDocument, document);
-	return { ...row, document };
-}
-
-function toZoneMenuResponse(row: typeof zoneMenu.$inferSelect) {
-	const document = row.document;
-	assertDocument(ZoneMenuDocument, document);
-	return { ...row, document };
-}
 
 async function ensureUnitMutationAuthorized(
 	authorization: UnitAuthorization<string>,
@@ -317,12 +289,6 @@ export default new Elysia()
 							startsAt,
 							endsAt,
 						});
-						if (body.menuDocument)
-							await tx.insert(zoneMenu).values({
-								zoneId: unitId,
-								slot: "primary",
-								document: body.menuDocument,
-							});
 						await recordUnitRevision(tx, {
 							unitId,
 							actorProfileId: profile.unitId,
@@ -341,265 +307,6 @@ export default new Elysia()
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
 					},
 					detail: { summary: "Create Zone", tags: ["Zones"] },
-				},
-			)
-			.get(
-				"/:zoneId/pages",
-				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request.headers)).authorization;
-					await authorization.unit.ensureCanRead(
-						params.zoneId,
-						() => new UnitNotFound("Zone"),
-					);
-					const items = await database
-						.select()
-						.from(zonePage)
-						.where(eq(zonePage.zoneId, params.zoneId))
-						.orderBy(zonePage.position, zonePage.id);
-					return { items: items.map(toZonePageResponse) };
-				},
-				{
-					params: ZoneParams,
-					response: {
-						[StatusCodes.OK]: ZonePageListResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-					},
-					detail: { summary: "List Zone pages", tags: ["Zones"] },
-				},
-			)
-			.post(
-				"/:zoneId/pages",
-				async ({ params, profile, authorization, body }) => {
-					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, "/pages");
-					const [created] = await database.transaction(async (tx) => {
-						await tx.execute(
-							sql`select pg_advisory_xact_lock(hashtextextended(${params.zoneId}::text, 0))`,
-						);
-						if (body.home)
-							await tx
-								.update(zonePage)
-								.set({ home: false })
-								.where(eq(zonePage.zoneId, params.zoneId));
-						const rows = await tx
-							.insert(zonePage)
-							.values({ zoneId: params.zoneId, ...body })
-							.returning();
-						await recordUnitRevision(tx, {
-							unitId: params.zoneId,
-							actorProfileId: profile.unitId,
-							event: "update",
-						});
-						return rows;
-					});
-					if (!created) throw new Error("Zone page insertion did not return a row");
-					return toZonePageResponse(created);
-				},
-				{
-					contribute: true,
-					params: ZoneParams,
-					body: ZonePageBody,
-					response: {
-						[StatusCodes.OK]: ZonePageResponse,
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-					},
-					detail: { summary: "Create Zone page", tags: ["Zones"] },
-				},
-			)
-			.put(
-				"/:zoneId/pages/:pageId",
-				async ({ params, profile, authorization, body }) => {
-					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, "/pages");
-					return database.transaction(async (tx) => {
-						await tx.execute(
-							sql`select pg_advisory_xact_lock(hashtextextended(${params.zoneId}::text, 0))`,
-						);
-						if (body.home)
-							await tx
-								.update(zonePage)
-								.set({ home: false })
-								.where(
-									and(
-										eq(zonePage.zoneId, params.zoneId),
-										sql`${zonePage.id} <> ${params.pageId}`,
-									),
-								);
-						const rows = await tx
-							.update(zonePage)
-							.set(body)
-							.where(
-								and(
-									eq(zonePage.id, params.pageId),
-									eq(zonePage.zoneId, params.zoneId),
-								),
-							)
-							.returning();
-						const [updated] = rows;
-						if (!updated) throw new ZonePageNotFound();
-						await recordUnitRevision(tx, {
-							unitId: params.zoneId,
-							actorProfileId: profile.unitId,
-							event: "update",
-						});
-						return toZonePageResponse(updated);
-					});
-				},
-				{
-					contribute: true,
-					params: ZonePageParams,
-					body: ZonePageBody,
-					response: {
-						[StatusCodes.OK]: ZonePageResponse,
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"ZonePageNotFound",
-						]),
-					},
-					detail: { summary: "Replace Zone page", tags: ["Zones"] },
-				},
-			)
-			.delete(
-				"/:zoneId/pages/:pageId",
-				async ({ params, profile, authorization }) => {
-					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, "/pages");
-					await database.transaction(async (tx) => {
-						const deleted = await tx
-							.delete(zonePage)
-							.where(
-								and(
-									eq(zonePage.id, params.pageId),
-									eq(zonePage.zoneId, params.zoneId),
-								),
-							)
-							.returning({ id: zonePage.id });
-						if (!deleted.length) throw new ZonePageNotFound();
-						await recordUnitRevision(tx, {
-							unitId: params.zoneId,
-							actorProfileId: profile.unitId,
-							event: "update",
-						});
-					});
-					return new Response(null, { status: StatusCodes.NO_CONTENT });
-				},
-				{
-					write: true,
-					params: ZonePageParams,
-					response: {
-						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"ZonePageNotFound",
-						]),
-					},
-					detail: {
-						summary: "Delete Zone page",
-						tags: ["Zones"],
-						responses: NoContentResponse,
-					},
-				},
-			)
-			.get(
-				"/:zoneId/menus",
-				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request.headers)).authorization;
-					await authorization.unit.ensureCanRead(
-						params.zoneId,
-						() => new UnitNotFound("Zone"),
-					);
-					const items = await database
-						.select()
-						.from(zoneMenu)
-						.where(eq(zoneMenu.zoneId, params.zoneId))
-						.orderBy(zoneMenu.position, zoneMenu.id);
-					return { items: items.map(toZoneMenuResponse) };
-				},
-				{
-					params: ZoneParams,
-					response: {
-						[StatusCodes.OK]: ZoneMenuListResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-					},
-					detail: { summary: "List Zone menus", tags: ["Zones"] },
-				},
-			)
-			.put(
-				"/:zoneId/menus/:slot",
-				async ({ params, profile, authorization, body }) => {
-					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, "/menus");
-					const [saved] = await database.transaction(async (tx) => {
-						const rows = await tx
-							.insert(zoneMenu)
-							.values({
-								zoneId: params.zoneId,
-								slot: params.slot,
-								document: body.document,
-								position: body.position,
-							})
-							.onConflictDoUpdate({
-								target: [zoneMenu.zoneId, zoneMenu.slot],
-								set: {
-									document: body.document,
-									position: body.position,
-								},
-							})
-							.returning();
-						await recordUnitRevision(tx, {
-							unitId: params.zoneId,
-							actorProfileId: profile.unitId,
-							event: "update",
-						});
-						return rows;
-					});
-					if (!saved) throw new Error("Zone menu upsert did not return a row");
-					return toZoneMenuResponse(saved);
-				},
-				{
-					contribute: true,
-					params: ZoneMenuParams,
-					body: ZoneMenuBody,
-					response: {
-						[StatusCodes.OK]: ZoneMenuResponse,
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-					},
-					detail: { summary: "Create or replace Zone menu", tags: ["Zones"] },
-				},
-			)
-			.delete(
-				"/:zoneId/menus/:slot",
-				async ({ params, profile, authorization }) => {
-					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, "/menus");
-					await database.transaction(async (tx) => {
-						await tx
-							.delete(zoneMenu)
-							.where(
-								and(
-									eq(zoneMenu.zoneId, params.zoneId),
-									eq(zoneMenu.slot, params.slot),
-								),
-							);
-						await recordUnitRevision(tx, {
-							unitId: params.zoneId,
-							actorProfileId: profile.unitId,
-							event: "update",
-						});
-					});
-					return new Response(null, { status: StatusCodes.NO_CONTENT });
-				},
-				{
-					write: true,
-					params: ZoneMenuParams,
-					response: {
-						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-					},
-					detail: {
-						summary: "Delete Zone menu",
-						tags: ["Zones"],
-						responses: NoContentResponse,
-					},
 				},
 			)
 			.put(
@@ -664,7 +371,6 @@ export default new Elysia()
 							.orderBy(
 								softwareRequirement.platformEntityId,
 								softwareRequirement.tier,
-								softwareRequirement.language,
 								softwareRequirement.id,
 							),
 					};
@@ -700,10 +406,8 @@ export default new Elysia()
 								softwareId: params.softwareId,
 								platformEntityId: body.platformEntityId,
 								tier: body.tier,
-								language: body.language,
 								sourceLinkId: body.sourceLinkId,
 								hardware: body.hardware,
-								rawText: body.rawText,
 							})
 							.returning();
 						await recordUnitRevision(tx, {
@@ -750,10 +454,8 @@ export default new Elysia()
 							.set({
 								platformEntityId: body.platformEntityId,
 								tier: body.tier,
-								language: body.language,
 								sourceLinkId: body.sourceLinkId,
 								hardware: body.hardware,
-								rawText: body.rawText,
 							})
 							.where(
 								and(

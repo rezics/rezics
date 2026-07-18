@@ -1,18 +1,12 @@
 import {
 	BlockKey,
 	CollectionDefinitionDocument,
-	DockDocument,
 	PortableTextDocument,
-	ZoneMenuDocument,
-	ZonePageDocument,
 	assertDocument,
 	createBlockKey,
-	createDockDocument,
 	createManualCollectionDefinitionDocument,
 	createPortableTextDocument,
 	createSystemCollectionDefinitionDocument,
-	createZoneMenuDocument,
-	createZonePageDocument,
 	isDocument,
 	isPortableTextDocument,
 	updatePortableTextDocument,
@@ -53,19 +47,6 @@ describe("Content Structure document contracts", () => {
 		expect(updated).not.toBe(original);
 		expect(updated._key).toBe(original._key);
 		expect(updated.content).toBe(nextContent);
-	});
-
-	test("validates Realm Dock and Zone documents as Block Schema documents", () => {
-		const portableText = createPortableTextDocument([], "000000000001");
-		const dock = createDockDocument([portableText], "000000000002");
-		const page = createZonePageDocument([portableText], "000000000003", { columns: 2 });
-		const menu = createZoneMenuDocument([], "000000000004", {
-			placement: "primary",
-		});
-
-		expect(isDocument(DockDocument, dock)).toBe(true);
-		expect(isDocument(ZonePageDocument, page)).toBe(true);
-		expect(isDocument(ZoneMenuDocument, menu)).toBe(true);
 	});
 
 	test("keeps Collection source variants mutually exclusive", () => {

@@ -2,7 +2,7 @@ import { type SQL } from "drizzle-orm";
 import { getTableConfig, PgDialect } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 
-import { pollOption, profile, unit, unitLocalization } from "./schema";
+import { unit, unitAlias, unitLocalization } from "./schema";
 
 const dialect = new PgDialect();
 
@@ -12,16 +12,13 @@ describe("database schema contracts", () => {
 	});
 
 	it("tracks every PGroonga search index in the schema", () => {
-		const indexes = [unit, unitLocalization, profile, pollOption]
+		const indexes = [unit, unitAlias, unitLocalization]
 			.flatMap((table) => getTableConfig(table).indexes)
 			.filter((index) => index.config.method === "pgroonga");
 
 		expect(indexes.map((index) => index.config.name).sort()).toEqual(
 			[
-				"poll_option_label_search_idx",
-				"profile_description_search_idx",
-				"profile_name_search_idx",
-				"profile_summary_search_idx",
+				"unit_alias_term_search_idx",
 				"unit_localization_content_search_idx",
 				"unit_localization_description_search_idx",
 				"unit_localization_summary_search_idx",
@@ -30,7 +27,6 @@ describe("database schema contracts", () => {
 			].sort(),
 		);
 		for (const name of [
-			"profile_description_search_idx",
 			"unit_localization_content_search_idx",
 			"unit_localization_description_search_idx",
 		]) {
@@ -44,7 +40,7 @@ describe("database schema contracts", () => {
 			indexes.find((index) => index.config.name === "unit_slug_search_idx")?.config.where,
 		).toBeDefined();
 		expect(
-			indexes.find((index) => index.config.name === "poll_option_label_search_idx")?.config
+			indexes.find((index) => index.config.name === "unit_alias_term_search_idx")?.config
 				.where,
 		).toBeDefined();
 	});

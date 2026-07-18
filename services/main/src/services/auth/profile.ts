@@ -1,8 +1,9 @@
 import type { User } from "better-auth";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { database } from "../database";
-import { profile, profilePreference, unit, users } from "../database/schema";
+import { profile, profilePreference, unit, unitLocalization, users } from "../database/schema";
+import { DefaultLanguage } from "../database/schema/contract-values";
 import { recordUnitRevision } from "../units/history";
 
 export interface SessionProfile {
@@ -17,12 +18,16 @@ async function findProfile(authUserId: string): Promise<SessionProfile | undefin
 		.select({
 			unitId: profile.id,
 			slug: unit.slug,
-			name: profile.name,
+			name: unitLocalization.title,
 			email: users.email,
 		})
 		.from(profile)
 		.innerJoin(unit, eq(unit.id, profile.id))
 		.innerJoin(users, eq(users.id, profile.authUserId))
+		.leftJoin(
+			unitLocalization,
+			and(eq(unitLocalization.unitId, profile.id), eq(unitLocalization.isDefault, true)),
+		)
 		.where(eq(profile.authUserId, authUserId))
 		.limit(1);
 	return record?.slug ? { ...record, slug: record.slug } : undefined;
@@ -55,8 +60,13 @@ export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name"
 			await tx.insert(profile).values({
 				id: profileUnit.id,
 				authUserId: authUser.id,
-				name: authUser.name,
 				avatar: authUser.image,
+			});
+			await tx.insert(unitLocalization).values({
+				unitId: profileUnit.id,
+				language: DefaultLanguage,
+				isDefault: true,
+				title: authUser.name,
 			});
 			await tx.insert(profilePreference).values({ profileId: profileUnit.id });
 			await recordUnitRevision(tx, {

@@ -4,6 +4,7 @@ import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
+import { defaultUnitTitle } from "../../database/localization";
 import {
 	post,
 	profile as profileTable,
@@ -60,7 +61,7 @@ export default new Elysia()
 						.select({
 							id: post.id,
 							authorId: post.authorProfileId,
-							authorName: profileTable.name,
+							authorName: defaultUnitTitle(profileTable.id),
 							targetId: post.subjectUnitId,
 							realmId: primaryRealmId,
 							title: unitLocalization.title,

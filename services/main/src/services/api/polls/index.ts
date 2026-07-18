@@ -1,4 +1,9 @@
 import { StatusCodes } from "http-status-codes";
+import {
+	createPollContentDocument,
+	parseDocument,
+	PollContentDocument,
+} from "@rezics/content-structure";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import Elysia from "elysia";
 
@@ -55,17 +60,26 @@ export default new Elysia({ prefix: "/polls" })
 					resultVisibility: body.resultsVisibility,
 					closesAt: body.closesAt ? new Date(body.closesAt) : undefined,
 				});
-				await tx.insert(pollOption).values(
-					body.options.map((label, position) => ({
-						pollId: pollUnit.id,
-						label,
-						position: String(position).padStart(8, "0"),
-					})),
-				);
+				const options = await tx
+					.insert(pollOption)
+					.values(
+						body.options.map((_, position) => ({
+							pollId: pollUnit.id,
+							position: String(position).padStart(8, "0"),
+						})),
+					)
+					.returning({ id: pollOption.id, position: pollOption.position });
 				await tx.insert(unitLocalization).values({
 					unitId: pollUnit.id,
 					language: body.language,
 					title: body.question,
+					content: createPollContentDocument(
+						options.map((option) => ({
+							optionId: option.id,
+							label: body.options[Number(option.position)] ?? "",
+						})),
+					),
+					contentStatus: "published",
 					isDefault: true,
 				});
 				await tx.insert(unitCollaborator).values({
@@ -100,6 +114,7 @@ export default new Elysia({ prefix: "/polls" })
 				.select({
 					id: poll.id,
 					question: unitLocalization.title,
+					content: unitLocalization.content,
 					voteMode: poll.mode,
 					anonymous: poll.anonymous,
 					resultsVisibility: poll.resultVisibility,
@@ -116,6 +131,10 @@ export default new Elysia({ prefix: "/polls" })
 				.where(eq(poll.id, params.pollId))
 				.limit(1);
 			if (!pollRecord) throw new PollNotFound();
+			const content = parseDocument(PollContentDocument, pollRecord.content);
+			const labelByOptionId = new Map(
+				content.options.map((option) => [option.optionId, option.label]),
+			);
 			const { profile: viewer, authorization } = await resolveIdentity(request.headers);
 			await authorization.unit.ensureCanRead(params.pollId, () => new UnitNotFound("Poll"));
 			const viewerVotes = viewer
@@ -135,10 +154,10 @@ export default new Elysia({ prefix: "/polls" })
 			const showResults =
 				pollRecord.resultsVisibility === "live" ||
 				(pollRecord.resultsVisibility === "after_close" && closed);
+			const { content: _content, ...presentedPoll } = pollRecord;
 			const options = await database
 				.select({
 					id: pollOption.id,
-					label: pollOption.label,
 					position: pollOption.position,
 					voteCount: sql<number>`(select count(*) from ${pollVote} where ${pollVote.optionId} = ${pollOption.id})::int`,
 				})
@@ -146,7 +165,7 @@ export default new Elysia({ prefix: "/polls" })
 				.where(eq(pollOption.pollId, params.pollId))
 				.orderBy(pollOption.position);
 			return {
-				...pollRecord,
+				...presentedPoll,
 				question: pollRecord.question ?? "",
 				voteMode: pollRecord.voteMode,
 				resultsVisibility: pollRecord.resultsVisibility,
@@ -154,7 +173,7 @@ export default new Elysia({ prefix: "/polls" })
 				viewerOptionIds: viewerVotes.map((vote) => vote.optionId),
 				options: options.map((option) => ({
 					...option,
-					label: option.label ?? "",
+					label: labelByOptionId.get(option.id) ?? "",
 					voteCount: showResults ? option.voteCount : null,
 				})),
 			};
