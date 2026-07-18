@@ -22,7 +22,12 @@ import {
 	RecommendationSurfaceValues,
 	toEnumValues,
 } from "./contract-values";
-import { createCreatedAtColumn, createTimestampMsColumn, createUuidv7PrimaryKey } from "./columns";
+import {
+	createCreatedAtColumn,
+	createTimestampMsColumn,
+	createUuidv7PrimaryKey,
+	displayPosition,
+} from "./columns";
 import { profile, unit } from "./core";
 import { realm } from "./realm";
 
@@ -86,7 +91,7 @@ export const recommendationEvent = pgTable(
 		targetUnitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
-		position: integer().notNull(),
+		position: displayPosition().notNull(),
 		policyVersion: text().notNull(),
 		occurredAt: createTimestampMsColumn().notNull(),
 		createdAt: createCreatedAtColumn(),

@@ -2,7 +2,22 @@ import { TypeCompiler } from "@sinclair/typebox/compiler";
 import Elysia, { t } from "elysia";
 import { describe, expect, it } from "vitest";
 
-import { LanguageTag } from ".";
+import { DisplayPosition, FractionalPosition, LanguageTag, OrdinalPosition } from ".";
+
+describe("position schemas", () => {
+	it("keep fractional, ordinal, and display position contracts distinct", () => {
+		const fractional = TypeCompiler.Compile(FractionalPosition);
+		const ordinal = TypeCompiler.Compile(OrdinalPosition);
+		const display = TypeCompiler.Compile(DisplayPosition);
+
+		expect(fractional.Check("a0V")).toBe(true);
+		expect(fractional.Check("V")).toBe(false);
+		expect(ordinal.Check(1_000)).toBe(true);
+		expect(ordinal.Check(-1)).toBe(false);
+		expect(display.Check(999)).toBe(true);
+		expect(display.Check(1_000)).toBe(false);
+	});
+});
 
 describe("LanguageTag", () => {
 	it("accepts IANA BCP 47 language tags", () => {

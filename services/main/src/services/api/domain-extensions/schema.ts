@@ -2,7 +2,7 @@ import { JsonValue } from "@rezics/portable-text";
 import { ZoneBoundaryDocument, ZoneThemeDocument } from "@rezics/content-structure";
 import { t } from "elysia";
 
-import { DateTime, LocalizationInput, Uuid } from "../schema";
+import { DateTime, FractionalPosition, LocalizationInput, Uuid } from "../schema";
 
 export const CreateSeriesBody = t.Object(
 	{
@@ -18,7 +18,7 @@ export const SeriesParams = t.Object({ seriesId: Uuid });
 export const SeriesReleaseParams = t.Object({ seriesId: Uuid, releaseId: Uuid });
 export const UpsertSeriesReleaseBody = t.Object(
 	{
-		position: t.String({ minLength: 1, maxLength: 64 }),
+		position: FractionalPosition,
 		releasedOn: t.Optional(t.Nullable(t.String({ format: "date" }))),
 	},
 	{ additionalProperties: false },
@@ -58,7 +58,7 @@ export const ZoneParams = t.Object({ zoneId: Uuid });
 export const SeriesReleaseResponse = t.Object({
 	seriesId: Uuid,
 	releaseUnitId: Uuid,
-	position: t.String(),
+	position: FractionalPosition,
 	releasedOn: t.Nullable(t.String()),
 	createdAt: DateTime,
 	updatedAt: DateTime,

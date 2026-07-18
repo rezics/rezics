@@ -6,7 +6,7 @@ import {
 	parseDocument,
 	type PortableTextDocument as PortableTextDocumentValue,
 } from "@rezics/content-structure";
-import { DateTime, Uuid } from ".";
+import { DateTime, FractionalPosition, OrdinalPosition, Uuid } from ".";
 import {
 	RecommendationReasonSchema,
 	RecommendationTrackingSchema,
@@ -36,7 +36,7 @@ export const ReadinessResponse = t.Object({
 const LocalizationResponse = t.Object({
 	unitId: Uuid,
 	language: t.String(),
-	position: t.String(),
+	position: FractionalPosition,
 	title: NullableText,
 	summary: NullableText,
 	description: t.Nullable(PortableTextDocument),
@@ -85,7 +85,7 @@ export const UnitDetailResponse = t.Object({
 			id: Uuid,
 			entityEntryId: Uuid,
 			role: t.String(),
-			position: t.String(),
+			position: FractionalPosition,
 			evidenceUrl: NullableText,
 			note: NullableText,
 			title: NullableText,
@@ -100,7 +100,7 @@ export const UnitDetailResponse = t.Object({
 			sourceEntityEntryId: t.Nullable(Uuid),
 			normalizedUrl: NullableText,
 			normalizedUrlHash: NullableText,
-			position: t.String(),
+			position: FractionalPosition,
 			createdAt: DateTime,
 			updatedAt: DateTime,
 		}),
@@ -113,7 +113,7 @@ export const UnitDetailResponse = t.Object({
 			score: t.Integer(),
 			voteCount: t.Integer(),
 			pinned: t.Boolean(),
-			position: NullableText,
+			position: t.Nullable(FractionalPosition),
 			title: NullableText,
 		}),
 	),
@@ -356,7 +356,7 @@ export const PollDetailResponse = t.Object({
 		t.Object({
 			id: Uuid,
 			label: t.String(),
-			position: t.String(),
+			position: OrdinalPosition,
 			voteCount: t.Nullable(t.Integer()),
 		}),
 	),
@@ -397,7 +397,7 @@ export const CollectionDetailResponse = t.Object({
 			targetId: Uuid,
 			kind: t.String(),
 			parentTargetId: t.Nullable(Uuid),
-			position: t.Nullable(t.String()),
+			position: FractionalPosition,
 			type: t.String(),
 			slug: NullableText,
 			title: NullableText,
@@ -455,7 +455,7 @@ export const ContentStructureNodeListResponse = t.Object({
 			contentKind: t.Union([t.Literal("chapter"), t.Literal("chapter_group")]),
 			language: t.String(),
 			title: t.String(),
-			position: t.String(),
+			position: FractionalPosition,
 		}),
 	),
 });
@@ -467,7 +467,7 @@ export const ContentStructureNodeResponse = t.Object({
 	contentKind: t.Union([t.Literal("chapter"), t.Literal("chapter_group")]),
 	language: t.String(),
 	title: t.String(),
-	position: t.String(),
+	position: FractionalPosition,
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
@@ -476,7 +476,7 @@ export const ChapterDetailResponse = t.Object({
 	bookId: Uuid,
 	chapterId: Uuid,
 	title: t.String(),
-	position: t.String(),
+	position: FractionalPosition,
 	language: t.String(),
 	content: PortableTextDocument,
 	status: t.String(),
@@ -531,7 +531,7 @@ export const CreditAttributionResponse = t.Object({
 	unitId: Uuid,
 	entityId: Uuid,
 	role: t.String(),
-	position: t.String(),
+	position: FractionalPosition,
 });
 export const ExternalLinkResponse = t.Object({
 	id: Uuid,
@@ -541,7 +541,7 @@ export const ExternalLinkResponse = t.Object({
 	normalizedUrl: t.String(),
 	normalizedUrlHash: t.String(),
 	role: t.String(),
-	position: t.String(),
+	position: FractionalPosition,
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
@@ -551,7 +551,7 @@ export const TagApplicationResponse = t.Object({
 	score: t.Integer(),
 	voteCount: t.Integer(),
 	pinned: t.Boolean(),
-	position: NullableText,
+	position: t.Nullable(FractionalPosition),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });

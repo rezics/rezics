@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { t } from "elysia";
 import { PortableTextDocument } from "@rezics/content-structure";
-import { DateTime, Uuid } from ".";
+import { DateTime, FractionalPosition, OrdinalPosition, Uuid } from ".";
 
 const NullableUuid = t.Nullable(Uuid);
 
@@ -69,7 +69,7 @@ export const RealmRulesResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			id: Uuid,
-			position: t.String(),
+			position: OrdinalPosition,
 			language: t.String(),
 			title: t.String(),
 			content: PortableTextDocument,
@@ -80,7 +80,7 @@ export const RealmPinResponse = t.Object({
 	realmId: Uuid,
 	unitId: Uuid,
 	kind: t.String(),
-	position: t.String(),
+	position: FractionalPosition,
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });

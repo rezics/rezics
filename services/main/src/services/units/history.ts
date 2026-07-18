@@ -54,6 +54,7 @@ import {
 	unitVariant,
 	zone,
 } from "../database/schema";
+import { isFractionalPosition } from "../ordering/position";
 import { UnitRevisionConflict } from "./errors";
 
 export type UnitRevisionEvent = "create" | "update" | "delete" | "restore";
@@ -77,13 +78,14 @@ const CollectionDefinitionDocumentSchema = createDocumentSchema(CollectionDefini
 const CollectionPresentationDocumentSchema = createDocumentSchema(CollectionPresentationDocument);
 const ZoneBoundaryDocumentSchema = createDocumentSchema(ZoneBoundaryDocument);
 const ZoneThemeDocumentSchema = createDocumentSchema(ZoneThemeDocument);
+const FractionalPositionSchema = z.string().refine(isFractionalPosition);
 const RuleSnapshotSchema = z.object({
 	requireOnJoin: z.boolean(),
 	requireOnPost: z.boolean(),
 	requireOnUpdate: z.boolean(),
 	rules: z.array(
 		z.object({
-			position: z.string(),
+			position: z.int().nonnegative(),
 			language: z.string(),
 			title: z.string(),
 			content: PortableTextDocumentSchema,
@@ -132,6 +134,7 @@ const unitStateSchema = schemaFactory.createSelectSchema(unit).omit({
 });
 const unitLocalizationStateSchema = schemaFactory
 	.createSelectSchema(unitLocalization, {
+		position: FractionalPositionSchema,
 		description: PortableTextDocumentSchema.nullable(),
 		content: UnitLocalizationContentDocumentSchema.nullable(),
 	})
@@ -179,19 +182,37 @@ const pollStateSchema = schemaFactory
 	.createSelectSchema(poll)
 	.omit({ id: true, closedAt: true, createdAt: true, updatedAt: true });
 const unitAliasRowSchema = schemaFactory.createSelectSchema(unitAlias);
-const creditAttributionRowSchema = schemaFactory.createSelectSchema(creditAttribution);
-const subjectAttributionRowSchema = schemaFactory.createSelectSchema(subjectAttribution);
-const unitLinkRowSchema = schemaFactory.createSelectSchema(unitLink);
-const unitTagRowSchema = schemaFactory.createSelectSchema(unitTag);
+const creditAttributionRowSchema = schemaFactory.createSelectSchema(creditAttribution, {
+	position: FractionalPositionSchema,
+});
+const subjectAttributionRowSchema = schemaFactory.createSelectSchema(subjectAttribution, {
+	position: FractionalPositionSchema,
+});
+const unitLinkRowSchema = schemaFactory.createSelectSchema(unitLink, {
+	position: FractionalPositionSchema,
+});
+const unitTagRowSchema = schemaFactory.createSelectSchema(unitTag, {
+	position: FractionalPositionSchema.nullable(),
+});
 const unitVariantRowSchema = schemaFactory.createSelectSchema(unitVariant);
-const seriesReleaseRowSchema = schemaFactory.createSelectSchema(seriesRelease);
+const seriesReleaseRowSchema = schemaFactory.createSelectSchema(seriesRelease, {
+	position: FractionalPositionSchema,
+});
 const softwareRequirementRowSchema = schemaFactory.createSelectSchema(softwareRequirement, {
 	hardware: JsonObjectSchema,
 });
-const collectionItemRowSchema = schemaFactory.createSelectSchema(collectionItem);
-const contentStructureNodeRowSchema = schemaFactory.createSelectSchema(contentStructureNode);
-const pollOptionRowSchema = schemaFactory.createSelectSchema(pollOption);
-const realmPinRowSchema = schemaFactory.createSelectSchema(realmPin);
+const collectionItemRowSchema = schemaFactory.createSelectSchema(collectionItem, {
+	position: FractionalPositionSchema,
+});
+const contentStructureNodeRowSchema = schemaFactory.createSelectSchema(contentStructureNode, {
+	position: FractionalPositionSchema,
+});
+const pollOptionRowSchema = schemaFactory.createSelectSchema(pollOption, {
+	position: z.int().nonnegative(),
+});
+const realmPinRowSchema = schemaFactory.createSelectSchema(realmPin, {
+	position: FractionalPositionSchema,
+});
 
 function parseSnapshotState(
 	schema: { parse(value: unknown): SnapshotRow },

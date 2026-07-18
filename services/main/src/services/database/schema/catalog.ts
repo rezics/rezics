@@ -18,6 +18,7 @@ import {
 	createTimestampMsColumn,
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
+	fractionalIndexPosition,
 } from "./columns";
 import { profile, unit } from "./core";
 import { entity } from "./entity";
@@ -97,7 +98,9 @@ export const unitLink = pgTable(
 		normalizedUrl: text().notNull(),
 		normalizedUrlHash: text().notNull(),
 		role: text().default("related").notNull(),
-		position: text().default("V").notNull(),
+		position: fractionalIndexPosition()
+			.default(sql`'a0'::text`)
+			.notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},

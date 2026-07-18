@@ -36,6 +36,7 @@ import {
 	createTimestampMsColumn,
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
+	fractionalIndexPosition,
 } from "./columns";
 import { users } from "./auth";
 
@@ -100,8 +101,12 @@ export const unitLocalization = pgTable(
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
 		language: text().notNull(),
-		position: text()
-			.default(sql`uuidv7()::text`)
+		/**
+		 * Fractional index in the Unit's localization sequence. The first item is
+		 * primary; fallback selection is one consumer of this general ordering.
+		 */
+		position: fractionalIndexPosition()
+			.default(sql`('a0' || replace(uuidv7()::text, '-', '') || 'V')`)
 			.notNull(),
 		/** Cover is fixed product terminology across every Unit kind. */
 		coverAssetId: uuid().references((): AnyPgColumn => imageAsset.id, {

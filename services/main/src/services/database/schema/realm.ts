@@ -24,6 +24,8 @@ import {
 import {
 	createCreatedAtColumn,
 	createJsonDocumentColumn,
+	fractionalIndexPosition,
+	ordinalPosition,
 	createTimestampMsColumn,
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
@@ -127,7 +129,7 @@ export const realmRule = pgTable(
 		revisionId: uuid()
 			.notNull()
 			.references(() => realmRuleRevision.id, { onDelete: "cascade" }),
-		position: text().notNull(),
+		position: ordinalPosition().notNull(),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
@@ -163,7 +165,9 @@ export const realmPin = pgTable(
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
 		kind: realmPinKind().default("pinned").notNull(),
-		position: text().default("V").notNull(),
+		position: fractionalIndexPosition()
+			.default(sql`'a0'::text`)
+			.notNull(),
 		createdByProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),

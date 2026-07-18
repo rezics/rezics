@@ -8,6 +8,7 @@ import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
+import { fractionalPositionBetween } from "../../ordering/position";
 import {
 	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
@@ -276,18 +277,31 @@ export default new Elysia({ prefix: "/collections" })
 			await authorization.collection.ensureOwner(params.collectionId);
 			await authorization.unit.ensureCanRead(params.targetId);
 			await database.transaction(async (tx) => {
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${params.collectionId}::text, 0))`,
+				);
+				const [last] = await tx
+					.select({ position: collectionItem.position })
+					.from(collectionItem)
+					.where(eq(collectionItem.collectionId, params.collectionId))
+					.orderBy(desc(collectionItem.position), desc(collectionItem.unitId))
+					.limit(1);
+				const position = body.position ?? fractionalPositionBetween(last?.position, null);
 				await tx
 					.insert(collectionItem)
 					.values({
 						collectionId: params.collectionId,
 						unitId: params.targetId,
 						role: body.kind ?? "item",
-						position: body.position ?? "V",
+						position,
 						addedByProfileId: profile.unitId,
 					})
 					.onConflictDoUpdate({
 						target: [collectionItem.collectionId, collectionItem.unitId],
-						set: { role: body.kind ?? "item", position: body.position ?? "V" },
+						set:
+							body.position === undefined
+								? { role: body.kind ?? "item" }
+								: { role: body.kind ?? "item", position },
 					});
 				await recordUnitRevision(tx, {
 					unitId: params.collectionId,
@@ -346,12 +360,22 @@ export default new Elysia({ prefix: "/collections" })
 			await authorization.unit.ensureCanRead(params.targetId);
 			const collectionId = await ensureFavorites(profile.unitId);
 			await database.transaction(async (tx) => {
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${collectionId}::text, 0))`,
+				);
+				const [last] = await tx
+					.select({ position: collectionItem.position })
+					.from(collectionItem)
+					.where(eq(collectionItem.collectionId, collectionId))
+					.orderBy(desc(collectionItem.position), desc(collectionItem.unitId))
+					.limit(1);
 				await tx
 					.insert(collectionItem)
 					.values({
 						collectionId,
 						unitId: params.targetId,
 						role: "favorite",
+						position: fractionalPositionBetween(last?.position, null),
 						addedByProfileId: profile.unitId,
 					})
 					.onConflictDoNothing();

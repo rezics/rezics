@@ -2,7 +2,12 @@ import { sql } from "drizzle-orm";
 import { check, index, pgEnum, primaryKey, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { createCreatedAtColumn, createJsonDocumentColumn, createUpdatedAtColumn } from "./columns";
+import {
+	createCreatedAtColumn,
+	createJsonDocumentColumn,
+	createUpdatedAtColumn,
+	fractionalIndexPosition,
+} from "./columns";
 import { profile, unit } from "./core";
 
 export const collectionSource = pgEnum("collection_source", ["manual", "dynamic", "system"]);
@@ -52,7 +57,9 @@ export const collectionItem = pgTable(
 			.notNull()
 			.references(() => unit.id, { onDelete: "restrict" }),
 		role: text().default("item").notNull(),
-		position: text().default("V").notNull(),
+		position: fractionalIndexPosition()
+			.default(sql`'a0'::text`)
+			.notNull(),
 		addedByProfileId: uuid().references(() => profile.id, {
 			onDelete: "set null",
 		}),

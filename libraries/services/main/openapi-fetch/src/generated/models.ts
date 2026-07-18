@@ -7683,6 +7683,10 @@ export type GetApiSeriesBySeriesIdReleasesStatus200 = {
 		 */
 		releaseUnitId: string;
 		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
 		 * @type string
 		 */
 		position: string;
@@ -7804,6 +7808,10 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus200 = {
 	 */
 	releaseUnitId: string;
 	/**
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
 	 * @type string
 	 */
 	position: string;
@@ -7901,8 +7909,10 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus500 = InternalError;
  */
 export type PutApiSeriesBySeriesIdReleasesByReleaseIdBody = {
 	/**
-	 * @minLength 1
-	 * @maxLength 64
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
 	 * @type string
 	 */
 	position: string;
@@ -11144,6 +11154,10 @@ export type PostApiUnitsByTypeStatus200 = {
 		 */
 		language: string;
 		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
 		 * @type string
 		 */
 		position: string;
@@ -11323,6 +11337,10 @@ export type PostApiUnitsByTypeStatus200 = {
 		 */
 		role: string;
 		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
 		 * @type string
 		 */
 		position: string;
@@ -11358,6 +11376,10 @@ export type PostApiUnitsByTypeStatus200 = {
 		normalizedUrl: (string | null) | null;
 		normalizedUrlHash: (string | null) | null;
 		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
 		 * @type string
 		 */
 		position: string;
@@ -11985,6 +12007,10 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		 */
 		language: string;
 		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
 		 * @type string
 		 */
 		position: string;
@@ -12164,6 +12190,10 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		 */
 		role: string;
 		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
 		 * @type string
 		 */
 		position: string;
@@ -12199,6 +12229,10 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		normalizedUrl: (string | null) | null;
 		normalizedUrlHash: (string | null) | null;
 		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
 		 * @type string
 		 */
 		position: string;
@@ -12437,6 +12471,10 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		 */
 		language: string;
 		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
 		 * @type string
 		 */
 		position: string;
@@ -12616,6 +12654,10 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		 */
 		role: string;
 		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
 		 * @type string
 		 */
 		position: string;
@@ -12651,6 +12693,10 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		normalizedUrl: (string | null) | null;
 		normalizedUrlHash: (string | null) | null;
 		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
 		 * @type string
 		 */
 		position: string;
@@ -13308,6 +13354,10 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 */
 		language: string;
 		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
 		 * @type string
 		 */
 		position: string;
@@ -13487,6 +13537,10 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 */
 		role: string;
 		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
 		 * @type string
 		 */
 		position: string;
@@ -13522,6 +13576,10 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		normalizedUrl: (string | null) | null;
 		normalizedUrlHash: (string | null) | null;
 		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
 		 * @type string
 		 */
 		position: string;
@@ -15684,6 +15742,10 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 		 */
 		language: string;
 		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
 		 * @type string
 		 */
 		position: string;
@@ -17038,6 +17100,10 @@ export type PostApiUnitsByTypeByUnitIdCreditsStatus200 = {
 	 */
 	role: string;
 	/**
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
 	 * @type string
 	 */
 	position: string;
@@ -17134,7 +17200,10 @@ export type PostApiUnitsByTypeByUnitIdCreditsBody = {
 	 */
 	role: string;
 	/**
-	 * @maxLength 64
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
 	 * @type string | undefined
 	 */
 	position?: string;
@@ -17235,6 +17304,10 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus200 = {
 	 */
 	role: string;
 	/**
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
 	 * @type string
 	 */
 	position: string;
@@ -17349,7 +17422,10 @@ export type PostApiUnitsByTypeByUnitIdLinksBody = {
 	 */
 	role?: string;
 	/**
-	 * @maxLength 64
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
 	 * @type string | undefined
 	 */
 	position?: string;
@@ -18189,6 +18265,10 @@ export type GetApiUnitsBookByUnitIdContentStructureNodesStatus200 = {
 		 */
 		title: string;
 		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
 		 * @type string
 		 */
 		position: string;
@@ -18318,6 +18398,10 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesStatus200 = {
 	 */
 	title: string;
 	/**
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
 	 * @type string
 	 */
 	position: string;
@@ -18442,11 +18526,13 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesBody = {
 	 */
 	language: string;
 	/**
-	 * @minLength 1
-	 * @maxLength 64
-	 * @type string
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
+	 * @type string | undefined
 	 */
-	position: string;
+	position?: string;
 	/**
 	 * @type object | undefined
 	 */
@@ -18673,6 +18759,10 @@ export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200 = {
 	 */
 	title: string;
 	/**
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
 	 * @type string
 	 */
 	position: string;
@@ -18778,8 +18868,10 @@ export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500 = In
 export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdBody = {
 	parentId?: (string | null) | null;
 	/**
-	 * @minLength 1
-	 * @maxLength 64
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
 	 * @type string | undefined
 	 */
 	position?: string;
@@ -18875,6 +18967,10 @@ export type GetApiChaptersByChapterIdStatus200 = {
 	 */
 	title: string;
 	/**
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
 	 * @type string
 	 */
 	position: string;
@@ -20284,7 +20380,14 @@ export type PostApiCollectionsStatus200 = {
 		 */
 		kind: string;
 		parentTargetId: (string | null) | null;
-		position: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
 		/**
 		 * @type string
 		 */
@@ -20808,7 +20911,14 @@ export type GetApiCollectionsFavoritesStatus200 = {
 		 */
 		kind: string;
 		parentTargetId: (string | null) | null;
-		position: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
 		/**
 		 * @type string
 		 */
@@ -21065,7 +21175,14 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 		 */
 		kind: string;
 		parentTargetId: (string | null) | null;
-		position: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
 		/**
 		 * @type string
 		 */
@@ -21329,7 +21446,14 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 		 */
 		kind: string;
 		parentTargetId: (string | null) | null;
-		position: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
 		/**
 		 * @type string
 		 */
@@ -21964,7 +22088,10 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdBody = {
 	kind?: string;
 	parentTargetId?: (string | null) | null;
 	/**
-	 * @maxLength 128
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
 	 * @type string | undefined
 	 */
 	position?: string;
@@ -24271,10 +24398,7 @@ export type GetApiPollsByPollIdStatus200 = {
 		 * @type string
 		 */
 		label: string;
-		/**
-		 * @type string
-		 */
-		position: string;
+		position: string | number;
 		voteCount: ((string | number) | null) | null;
 	}[];
 };
@@ -29371,10 +29495,7 @@ export type GetApiRealmsByRealmIdRulesStatus200 = {
 		 * @type string
 		 */
 		id: string;
-		/**
-		 * @type string
-		 */
-		position: string;
+		position: string | number;
 		/**
 		 * @type string
 		 */
@@ -29617,6 +29738,10 @@ export type GetApiRealmsByRealmIdPinsStatus200 = {
 		 */
 		kind: string;
 		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
 		 * @type string
 		 */
 		position: string;
@@ -29741,6 +29866,10 @@ export type PutApiRealmsByRealmIdPinsByUnitIdStatus200 = {
 	 */
 	kind: string;
 	/**
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
 	 * @type string
 	 */
 	position: string;
@@ -29849,8 +29978,10 @@ export type PutApiRealmsByRealmIdPinsByUnitIdBody = {
 	 */
 	kind?: PutApiRealmsByRealmIdPinsByUnitIdRequestKindEnum;
 	/**
-	 * @maxLength 128
-	 * @default 'V'
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
 	 * @type string | undefined
 	 */
 	position?: string;

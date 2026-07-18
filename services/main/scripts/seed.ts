@@ -83,6 +83,7 @@ import {
 	zoneSubscription,
 } from "../src/services/database/schema";
 import { RecommendationPolicyVersion } from "../src/services/recommendations/policy";
+import { fractionalPositionAt } from "../src/services/ordering/position";
 import { recordUnitRevision, restoreUnitRevision } from "../src/services/units/history";
 import {
 	assertLocalDatabaseUrl,
@@ -253,7 +254,7 @@ function localizationRows(data: SeedData, value: CreatedUnit) {
 		const base = {
 			unitId: value.id,
 			language,
-			position: String(index).padStart(6, "0"),
+			position: fractionalPositionAt(index),
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		};
@@ -376,7 +377,7 @@ async function seedProfiles(
 			return {
 				unitId: value.id,
 				language,
-				position: "000000",
+				position: fractionalPositionAt(0),
 				title: value.name,
 				summary: data.summary(language),
 				description: createPortableTextDocument(data.portableText(language, 2)),
@@ -717,7 +718,7 @@ async function seedCatalog(
 			unitId: itemAt(works, Math.floor(index / 2)).id,
 			entityId: itemAt(entities, index * 7).id,
 			role: itemAt(["author", "developer", "director", "publisher"], index),
-			position: position(index),
+			position: fractionalPositionAt(index),
 		})),
 		(batch) => tx.insert(creditAttribution).values(batch),
 	);
@@ -731,7 +732,7 @@ async function seedCatalog(
 			normalizedUrl: url,
 			normalizedUrlHash: createHash("sha256").update(url).digest("hex"),
 			role: "official",
-			position: position(index),
+			position: fractionalPositionAt(index),
 		};
 	});
 	const links: CreatedLink[] = [];
@@ -747,7 +748,7 @@ async function seedCatalog(
 		unitId: itemAt(works, Math.floor(index / 5)).id,
 		tagId: itemAt(tags, index * 7).id,
 		pinned: index % 11 === 0,
-		position: position(index),
+		position: fractionalPositionAt(index),
 	}));
 	await writeBatches(tagRows, (batch) => tx.insert(unitTag).values(batch));
 	await writeBatches(
@@ -773,7 +774,7 @@ async function seedCatalog(
 		Array.from({ length: SeedPlan.seriesReleases }, (_, index) => ({
 			seriesId: itemAt(seriesItems, Math.floor(index / 6)).id,
 			releaseUnitId: itemAt(works, index * 7).id,
-			position: position(index % 6),
+			position: fractionalPositionAt(index % 6),
 			releasedOn: dateOnly(data.pastDate(3_650)),
 		})),
 		(batch) => tx.insert(seriesRelease).values(batch),
@@ -795,13 +796,13 @@ async function seedCatalog(
 		}),
 		(batch) => tx.insert(softwareRequirement).values(batch),
 	);
-	const createdPollOptions: { id: string; pollId: string; position: string }[] = [];
+	const createdPollOptions: { id: string; pollId: string; position: number }[] = [];
 	for (const batch of chunks(
 		Array.from({ length: SeedPlan.pollOptions }, (_, index) => {
 			const pollUnit = itemAt(polls, Math.floor(index / 4));
 			return {
 				pollId: pollUnit.id,
-				position: position(index % 4),
+				position: index % 4,
 				createdAt: pollUnit.createdAt,
 				updatedAt: pollUnit.updatedAt,
 			};
@@ -818,7 +819,7 @@ async function seedCatalog(
 	for (const pollUnit of polls) {
 		const options = createdPollOptions
 			.filter((option) => option.pollId === pollUnit.id)
-			.sort((left, right) => left.position.localeCompare(right.position));
+			.sort((left, right) => left.position - right.position);
 		for (const language of data.languages(Number(pollUnit.slug.match(/\d+$/)?.[0] ?? 0))) {
 			await tx
 				.update(unitLocalization)
@@ -1009,7 +1010,7 @@ async function seedContent(
 		ownerUnitId: bookUnit.id,
 		parentId: null,
 		contentUnitId: itemAt(rootGroups, index).id,
-		position: position(0),
+		position: fractionalPositionAt(0),
 		contentRating: index % 8 === 0 ? ("r15" as const) : ("general" as const),
 		createdAt: bookUnit.createdAt,
 		updatedAt: bookUnit.updatedAt,
@@ -1039,7 +1040,7 @@ async function seedContent(
 					index < chapters.length
 						? itemAt(chapters, index).id
 						: itemAt(childGroups, index - chapters.length).id,
-				position: position(1 + Math.floor(index / catalog.books.length)),
+				position: fractionalPositionAt(1 + Math.floor(index / catalog.books.length)),
 				contentRating: index % 11 === 0 ? ("r15" as const) : ("general" as const),
 				createdAt: bookUnit.createdAt,
 				updatedAt: bookUnit.updatedAt,
@@ -1093,7 +1094,7 @@ async function seedStructure(
 						collectionId: collectionUnit.id,
 						unitId: target.id,
 						role: index % 5 === 0 ? "featured" : "item",
-						position: position(index),
+						position: fractionalPositionAt(index),
 						addedByProfileId: collectionUnit.ownerProfileId,
 						createdAt: collectionUnit.createdAt,
 						updatedAt: collectionUnit.updatedAt,
@@ -1195,7 +1196,7 @@ async function seedStructure(
 		if (!ownerProfileId) throw new Error("Seed Realm rule revision has no creator");
 		return Array.from({ length: SeedPlan.realmRules / revisions.length }, (_, index) => ({
 			revision,
-			position: position(index),
+			position: index,
 			descriptor: createDescriptor(data, {
 				kind: "realm_rule",
 				slug: `seed-realm-rule-${position(revisionIndex)}-${position(index)}`,
@@ -1252,7 +1253,7 @@ async function seedStructure(
 				realmId: realmUnit.id,
 				unitId: itemAt(realmTargets, realmIndex * 37 + index).id,
 				kind: index % 3 === 0 ? ("highlight" as const) : ("pinned" as const),
-				position: position(index),
+				position: fractionalPositionAt(index),
 				createdByProfileId: realmUnit.ownerProfileId,
 				createdAt: realmUnit.createdAt,
 				updatedAt: realmUnit.updatedAt,

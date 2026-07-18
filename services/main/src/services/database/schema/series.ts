@@ -2,7 +2,7 @@ import { sql } from "drizzle-orm";
 import { check, date, index, primaryKey, text, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { createCreatedAtColumn, createUpdatedAtColumn } from "./columns";
+import { createCreatedAtColumn, createUpdatedAtColumn, fractionalIndexPosition } from "./columns";
 import { unit } from "./core";
 
 export const series = pgTable(
@@ -30,7 +30,7 @@ export const seriesRelease = pgTable(
 		releaseUnitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "restrict" }),
-		position: text().notNull(),
+		position: fractionalIndexPosition().notNull(),
 		releasedOn: date(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),

@@ -6,7 +6,6 @@ import {
 	index,
 	pgEnum,
 	primaryKey,
-	text,
 	unique,
 	uuid,
 } from "drizzle-orm/pg-core";
@@ -15,6 +14,7 @@ import { pgTable } from "./base";
 import { PollModeValues, PollResultVisibilityValues, toEnumValues } from "./contract-values";
 import {
 	createCreatedAtColumn,
+	ordinalPosition,
 	createTimestampMsColumn,
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
@@ -61,7 +61,7 @@ export const pollOption = pgTable(
 		pollId: uuid()
 			.notNull()
 			.references(() => poll.id, { onDelete: "cascade" }),
-		position: text().notNull(),
+		position: ordinalPosition().notNull(),
 		deletedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),

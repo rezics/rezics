@@ -11,6 +11,7 @@ import {
 	type RealmCapability,
 } from "../../authorization/realm/policy";
 import { database } from "../../database";
+import { fractionalPositionBetween } from "../../ordering/position";
 import {
 	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
@@ -669,7 +670,7 @@ export default new Elysia({ prefix: "/realms" })
 					await tx.insert(realmRule).values({
 						id: ruleUnit.id,
 						revisionId: created.id,
-						position: String(index).padStart(8, "0"),
+						position: index,
 					});
 				}
 				await recordUnitRevision(tx, {
@@ -792,18 +793,29 @@ export default new Elysia({ prefix: "/realms" })
 			);
 			await authorization.unit.ensureCanRead(params.unitId);
 			return database.transaction(async (tx) => {
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${params.realmId}::text, 0))`,
+				);
+				const kind = body.kind ?? "pinned";
+				const [last] = await tx
+					.select({ position: realmPin.position })
+					.from(realmPin)
+					.where(and(eq(realmPin.realmId, params.realmId), eq(realmPin.kind, kind)))
+					.orderBy(desc(realmPin.position), desc(realmPin.unitId))
+					.limit(1);
+				const position = body.position ?? fractionalPositionBetween(last?.position, null);
 				const [entry] = await tx
 					.insert(realmPin)
 					.values({
 						realmId: params.realmId,
 						unitId: params.unitId,
-						kind: body.kind ?? "pinned",
-						position: body.position ?? "V",
+						kind,
+						position,
 						createdByProfileId: profile.unitId,
 					})
 					.onConflictDoUpdate({
 						target: [realmPin.realmId, realmPin.unitId],
-						set: { kind: body.kind ?? "pinned", position: body.position ?? "V" },
+						set: body.position === undefined ? { kind } : { kind, position },
 					})
 					.returning();
 				if (!entry) throw new Error("Realm pin upsert did not return a row");

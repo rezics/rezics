@@ -1,7 +1,7 @@
 import { type Static, t } from "elysia";
 
 import { AliasKindValues, UnitKindValues } from "../../database/schema/contract-values";
-import { LanguageTag, LocalizationInput, Uuid } from "../schema";
+import { FractionalPosition, LanguageTag, LocalizationInput, Uuid } from "../schema";
 import { UnitType } from "../units/schema";
 
 export const CreateCatalogUnitBody = t.Object(
@@ -28,7 +28,7 @@ export type ListTagsQuery = Static<typeof ListTagsQuery>;
 export const AddUnitCreditBody = t.Object({
 	entityId: Uuid,
 	role: t.String({ minLength: 1, maxLength: 64 }),
-	position: t.Optional(t.String({ maxLength: 64 })),
+	position: t.Optional(FractionalPosition),
 });
 export type AddUnitCreditBody = Static<typeof AddUnitCreditBody>;
 
@@ -36,7 +36,7 @@ export const AddUnitLinkBody = t.Object({
 	url: t.String({ format: "uri" }),
 	sourceEntityUnitId: Uuid,
 	role: t.Optional(t.String({ minLength: 1, maxLength: 32 })),
-	position: t.Optional(t.String({ maxLength: 64 })),
+	position: t.Optional(FractionalPosition),
 });
 export type AddUnitLinkBody = Static<typeof AddUnitLinkBody>;
 

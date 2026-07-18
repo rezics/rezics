@@ -1,17 +1,8 @@
 import { sql } from "drizzle-orm";
-import {
-	boolean,
-	check,
-	foreignKey,
-	index,
-	integer,
-	primaryKey,
-	text,
-	uuid,
-} from "drizzle-orm/pg-core";
+import { boolean, check, foreignKey, index, integer, primaryKey, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { createCreatedAtColumn, createUpdatedAtColumn } from "./columns";
+import { createCreatedAtColumn, createUpdatedAtColumn, fractionalIndexPosition } from "./columns";
 import { profile, unit } from "./core";
 import { post } from "./post";
 import { realm, realmUnit } from "./realm";
@@ -36,7 +27,7 @@ export const unitTag = pgTable(
 			.notNull()
 			.references(() => tag.id, { onDelete: "cascade" }),
 		pinned: boolean().default(false).notNull(),
-		position: text(),
+		position: fractionalIndexPosition(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
@@ -161,7 +152,9 @@ export const realmUnitTag = pgTable(
 		tagId: uuid()
 			.notNull()
 			.references(() => tag.id, { onDelete: "cascade" }),
-		position: text().default("V").notNull(),
+		position: fractionalIndexPosition()
+			.default(sql`'a0'::text`)
+			.notNull(),
 		createdByProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
@@ -193,7 +186,9 @@ export const profileUnitTag = pgTable(
 		tagId: uuid()
 			.notNull()
 			.references(() => tag.id, { onDelete: "cascade" }),
-		position: text().default("V").notNull(),
+		position: fractionalIndexPosition()
+			.default(sql`'a0'::text`)
+			.notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},

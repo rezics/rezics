@@ -608,12 +608,13 @@ function RealmPins({
 		event.preventDefault();
 		if (!target) return;
 		const data = new FormData(event.currentTarget);
+		const position = String(data.get("position") ?? "").trim();
 		pin.mutate(
 			{
 				path: { realmId, unitId: target.id },
 				body: {
 					kind: data.get("kind") === "highlight" ? "highlight" : "pinned",
-					position: String(data.get("position") ?? "V"),
+					...(position ? { position } : {}),
 				},
 			},
 			{
@@ -649,7 +650,7 @@ function RealmPins({
 							</Field>
 							<Field>
 								<FieldLabel>{t.realms.pinPosition}</FieldLabel>
-								<Input name="position" maxLength={128} defaultValue="V" />
+								<Input name="position" maxLength={512} />
 							</Field>
 						</div>
 						<RequestFailure error={pin.error} />

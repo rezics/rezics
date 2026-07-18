@@ -2,7 +2,12 @@ import { sql } from "drizzle-orm";
 import { boolean, check, index, text, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { createCreatedAtColumn, createUpdatedAtColumn, createUuidv7PrimaryKey } from "./columns";
+import {
+	createCreatedAtColumn,
+	createUpdatedAtColumn,
+	createUuidv7PrimaryKey,
+	fractionalIndexPosition,
+} from "./columns";
 import { imageAsset, unit } from "./core";
 
 export const entity = pgTable(
@@ -35,7 +40,9 @@ export const creditAttribution = pgTable(
 			.notNull()
 			.references(() => entity.id, { onDelete: "restrict" }),
 		role: text().notNull(),
-		position: text().default("V").notNull(),
+		position: fractionalIndexPosition()
+			.default(sql`'a0'::text`)
+			.notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
@@ -64,7 +71,9 @@ export const subjectAttribution = pgTable(
 			.notNull()
 			.references(() => entity.id, { onDelete: "restrict" }),
 		role: text().notNull(),
-		position: text().default("V").notNull(),
+		position: fractionalIndexPosition()
+			.default(sql`'a0'::text`)
+			.notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},

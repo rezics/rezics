@@ -5,7 +5,7 @@ import {
 	RecommendationReasonValues,
 	RecommendationSurfaceValues,
 } from "../../database/schema/contract-values";
-import { DateTime, Uuid } from "../schema";
+import { DateTime, DisplayPosition, Uuid } from "../schema";
 import { UnitType } from "../units/schema";
 
 export const RecommendationSurfaceSchema = t.UnionEnum(RecommendationSurfaceValues);
@@ -24,7 +24,7 @@ export const RecommendationTrackingSchema = t.Object(
 	{
 		requestId: Uuid,
 		surface: RecommendationSurfaceSchema,
-		position: t.Integer({ minimum: 0, maximum: 999 }),
+		position: DisplayPosition,
 		policyVersion: RecommendationPolicyVersionSchema,
 		signature: t.String({
 			minLength: 43,

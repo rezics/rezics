@@ -2,6 +2,7 @@ import { and, desc, eq, inArray, isNull, lte, ne, sql } from "drizzle-orm";
 
 import { database } from "../database";
 import { unitCoverAssetId } from "../database/localization";
+import { compareFractionalPositions } from "../ordering/position";
 import {
 	recommendationProfileInterest,
 	recommendationUnitEdge,
@@ -84,7 +85,7 @@ function selectLocalization(
 		const rightRank = rightPreferred >= 0 ? rightPreferred : 10_000;
 		return (
 			leftRank - rightRank ||
-			left.position.localeCompare(right.position) ||
+			compareFractionalPositions(left.position, right.position) ||
 			left.language.localeCompare(right.language)
 		);
 	})[0];

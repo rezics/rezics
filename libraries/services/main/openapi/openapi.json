@@ -7899,7 +7899,12 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"position": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
 													"releasedOn": {
 														"nullable": true,
 														"anyOf": [
@@ -7997,8 +8002,9 @@
 								"required": ["position"],
 								"properties": {
 									"position": {
-										"minLength": 1,
-										"maxLength": 64,
+										"format": "fractional-position",
+										"minLength": 2,
+										"maxLength": 512,
 										"type": "string"
 									},
 									"releasedOn": {
@@ -8032,7 +8038,12 @@
 									"properties": {
 										"seriesId": { "format": "uuid", "type": "string" },
 										"releaseUnitId": { "format": "uuid", "type": "string" },
-										"position": { "type": "string" },
+										"position": {
+											"format": "fractional-position",
+											"minLength": 2,
+											"maxLength": 512,
+											"type": "string"
+										},
 										"releasedOn": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -12341,7 +12352,12 @@
 														"type": "string"
 													},
 													"language": { "type": "string" },
-													"position": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -12708,7 +12724,12 @@
 														"type": "string"
 													},
 													"role": { "type": "string" },
-													"position": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
 													"evidenceUrl": {
 														"nullable": true,
 														"anyOf": [
@@ -12778,7 +12799,12 @@
 															{ "type": "null" }
 														]
 													},
-													"position": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
 													"createdAt": {
 														"format": "date-time",
 														"type": "string"
@@ -12838,7 +12864,12 @@
 													"position": {
 														"nullable": true,
 														"anyOf": [
-															{ "type": "string" },
+															{
+																"format": "fractional-position",
+																"minLength": 2,
+																"maxLength": 512,
+																"type": "string"
+															},
 															{ "type": "null" }
 														]
 													},
@@ -13185,7 +13216,12 @@
 														"type": "string"
 													},
 													"language": { "type": "string" },
-													"position": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -13552,7 +13588,12 @@
 														"type": "string"
 													},
 													"role": { "type": "string" },
-													"position": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
 													"evidenceUrl": {
 														"nullable": true,
 														"anyOf": [
@@ -13622,7 +13663,12 @@
 															{ "type": "null" }
 														]
 													},
-													"position": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
 													"createdAt": {
 														"format": "date-time",
 														"type": "string"
@@ -13682,7 +13728,12 @@
 													"position": {
 														"nullable": true,
 														"anyOf": [
-															{ "type": "string" },
+															{
+																"format": "fractional-position",
+																"minLength": 2,
+																"maxLength": 512,
+																"type": "string"
+															},
 															{ "type": "null" }
 														]
 													},
@@ -14052,7 +14103,12 @@
 														"type": "string"
 													},
 													"language": { "type": "string" },
-													"position": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -14419,7 +14475,12 @@
 														"type": "string"
 													},
 													"role": { "type": "string" },
-													"position": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
 													"evidenceUrl": {
 														"nullable": true,
 														"anyOf": [
@@ -14489,7 +14550,12 @@
 															{ "type": "null" }
 														]
 													},
-													"position": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
 													"createdAt": {
 														"format": "date-time",
 														"type": "string"
@@ -14549,7 +14615,12 @@
 													"position": {
 														"nullable": true,
 														"anyOf": [
-															{ "type": "string" },
+															{
+																"format": "fractional-position",
+																"minLength": 2,
+																"maxLength": 512,
+																"type": "string"
+															},
 															{ "type": "null" }
 														]
 													},
@@ -15292,7 +15363,12 @@
 														"type": "string"
 													},
 													"language": { "type": "string" },
-													"position": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -15659,7 +15735,12 @@
 														"type": "string"
 													},
 													"role": { "type": "string" },
-													"position": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
 													"evidenceUrl": {
 														"nullable": true,
 														"anyOf": [
@@ -15729,7 +15810,12 @@
 															{ "type": "null" }
 														]
 													},
-													"position": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
 													"createdAt": {
 														"format": "date-time",
 														"type": "string"
@@ -15789,7 +15875,12 @@
 													"position": {
 														"nullable": true,
 														"anyOf": [
-															{ "type": "string" },
+															{
+																"format": "fractional-position",
+																"minLength": 2,
+																"maxLength": 512,
+																"type": "string"
+															},
 															{ "type": "null" }
 														]
 													},
@@ -17915,7 +18006,12 @@
 														"type": "string"
 													},
 													"language": { "type": "string" },
-													"position": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -19543,7 +19639,12 @@
 								"properties": {
 									"entityId": { "format": "uuid", "type": "string" },
 									"role": { "minLength": 1, "maxLength": 64, "type": "string" },
-									"position": { "maxLength": 64, "type": "string" }
+									"position": {
+										"format": "fractional-position",
+										"minLength": 2,
+										"maxLength": 512,
+										"type": "string"
+									}
 								}
 							}
 						}
@@ -19562,7 +19663,12 @@
 										"unitId": { "format": "uuid", "type": "string" },
 										"entityId": { "format": "uuid", "type": "string" },
 										"role": { "type": "string" },
-										"position": { "type": "string" }
+										"position": {
+											"format": "fractional-position",
+											"minLength": 2,
+											"maxLength": 512,
+											"type": "string"
+										}
 									}
 								}
 							}
@@ -19670,7 +19776,12 @@
 									"url": { "format": "uri", "type": "string" },
 									"sourceEntityUnitId": { "format": "uuid", "type": "string" },
 									"role": { "minLength": 1, "maxLength": 32, "type": "string" },
-									"position": { "maxLength": 64, "type": "string" }
+									"position": {
+										"format": "fractional-position",
+										"minLength": 2,
+										"maxLength": 512,
+										"type": "string"
+									}
 								}
 							}
 						}
@@ -19704,7 +19815,12 @@
 										"normalizedUrl": { "type": "string" },
 										"normalizedUrlHash": { "type": "string" },
 										"role": { "type": "string" },
-										"position": { "type": "string" },
+										"position": {
+											"format": "fractional-position",
+											"minLength": 2,
+											"maxLength": 512,
+											"type": "string"
+										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" }
 									}
@@ -19865,7 +19981,15 @@
 										"pinned": { "type": "boolean" },
 										"position": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"format": "fractional-position",
+													"minLength": 2,
+													"maxLength": 512,
+													"type": "string"
+												},
+												{ "type": "null" }
+											]
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" }
@@ -20485,7 +20609,12 @@
 													},
 													"language": { "type": "string" },
 													"title": { "type": "string" },
-													"position": { "type": "string" }
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													}
 												}
 											}
 										}
@@ -20557,7 +20686,7 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["title", "language", "position"],
+								"required": ["title", "language"],
 								"properties": {
 									"parentId": { "format": "uuid", "type": "string" },
 									"title": { "minLength": 1, "maxLength": 500, "type": "string" },
@@ -20568,8 +20697,9 @@
 										"type": "string"
 									},
 									"position": {
-										"minLength": 1,
-										"maxLength": 64,
+										"format": "fractional-position",
+										"minLength": 2,
+										"maxLength": 512,
 										"type": "string"
 									},
 									"content": {
@@ -20871,7 +21001,12 @@
 										},
 										"language": { "type": "string" },
 										"title": { "type": "string" },
-										"position": { "type": "string" },
+										"position": {
+											"format": "fractional-position",
+											"minLength": 2,
+											"maxLength": 512,
+											"type": "string"
+										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" }
 									}
@@ -20985,8 +21120,9 @@
 										]
 									},
 									"position": {
-										"minLength": 1,
-										"maxLength": 64,
+										"format": "fractional-position",
+										"minLength": 2,
+										"maxLength": 512,
 										"type": "string"
 									},
 									"title": { "minLength": 1, "maxLength": 500, "type": "string" }
@@ -21032,7 +21168,12 @@
 										},
 										"language": { "type": "string" },
 										"title": { "type": "string" },
-										"position": { "type": "string" },
+										"position": {
+											"format": "fractional-position",
+											"minLength": 2,
+											"maxLength": 512,
+											"type": "string"
+										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" }
 									}
@@ -21165,7 +21306,12 @@
 										"bookId": { "format": "uuid", "type": "string" },
 										"chapterId": { "format": "uuid", "type": "string" },
 										"title": { "type": "string" },
-										"position": { "type": "string" },
+										"position": {
+											"format": "fractional-position",
+											"minLength": 2,
+											"maxLength": 512,
+											"type": "string"
+										},
 										"language": { "type": "string" },
 										"content": {
 											"additionalProperties": false,
@@ -23241,11 +23387,10 @@
 														]
 													},
 													"position": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
 													},
 													"type": { "type": "string" },
 													"slug": {
@@ -23540,11 +23685,10 @@
 														]
 													},
 													"position": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
 													},
 													"type": { "type": "string" },
 													"slug": {
@@ -23839,11 +23983,10 @@
 														]
 													},
 													"position": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
 													},
 													"type": { "type": "string" },
 													"slug": {
@@ -24559,11 +24702,10 @@
 														]
 													},
 													"position": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
 													},
 													"type": { "type": "string" },
 													"slug": {
@@ -24810,7 +24952,12 @@
 											{ "type": "null" }
 										]
 									},
-									"position": { "maxLength": 128, "type": "string" },
+									"position": {
+										"format": "fractional-position",
+										"minLength": 2,
+										"maxLength": 512,
+										"type": "string"
+									},
 									"searchText": { "maxLength": 1000, "type": "string" }
 								}
 							}
@@ -27357,7 +27504,17 @@
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
 													"label": { "type": "string" },
-													"position": { "type": "string" },
+													"position": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
 													"voteCount": {
 														"nullable": true,
 														"anyOf": [
@@ -33639,7 +33796,17 @@
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
-													"position": { "type": "string" },
+													"position": {
+														"minimum": 0,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 0, "type": "integer" }
+														]
+													},
 													"language": { "type": "string" },
 													"title": { "type": "string" },
 													"content": {
@@ -34034,7 +34201,12 @@
 														"type": "string"
 													},
 													"kind": { "type": "string" },
-													"position": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
 													"createdAt": {
 														"format": "date-time",
 														"type": "string"
@@ -34124,8 +34296,9 @@
 								"properties": {
 									"kind": { "type": "string", "enum": ["pinned", "highlight"] },
 									"position": {
-										"maxLength": 128,
-										"default": "V",
+										"format": "fractional-position",
+										"minLength": 2,
+										"maxLength": 512,
 										"type": "string"
 									}
 								}
@@ -34153,7 +34326,12 @@
 										"realmId": { "format": "uuid", "type": "string" },
 										"unitId": { "format": "uuid", "type": "string" },
 										"kind": { "type": "string" },
-										"position": { "type": "string" },
+										"position": {
+											"format": "fractional-position",
+											"minLength": 2,
+											"maxLength": 512,
+											"type": "string"
+										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" }
 									}

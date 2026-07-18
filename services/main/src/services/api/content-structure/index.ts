@@ -1,11 +1,12 @@
 import { StatusCodes } from "http-status-codes";
-import { and, asc, eq, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
 import Elysia from "elysia";
 
 import { isContentStructureNodeReadable } from "../../authorization/content-structure/policy";
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
 import { isPrimaryUnitLocalization } from "../../database/localization";
+import { fractionalPositionBetween } from "../../ordering/position";
 import {
 	contentStructureNode,
 	post,
@@ -181,13 +182,31 @@ export default new Elysia()
 					actorProfileId: profile.unitId,
 					event: "create",
 				});
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${params.unitId}::text, 0))`,
+				);
+				const parentId = body.parentId ?? null;
+				const [last] = await tx
+					.select({ position: contentStructureNode.position })
+					.from(contentStructureNode)
+					.where(
+						and(
+							eq(contentStructureNode.ownerUnitId, params.unitId),
+							parentId === null
+								? isNull(contentStructureNode.parentId)
+								: eq(contentStructureNode.parentId, parentId),
+							isNull(contentStructureNode.deletedAt),
+						),
+					)
+					.orderBy(desc(contentStructureNode.position), desc(contentStructureNode.id))
+					.limit(1);
 				const [created] = await tx
 					.insert(contentStructureNode)
 					.values({
 						ownerUnitId: params.unitId,
-						parentId: body.parentId,
+						parentId,
 						contentUnitId: contentUnit.id,
-						position: body.position,
+						position: body.position ?? fractionalPositionBetween(last?.position, null),
 					})
 					.returning();
 				if (!created) throw new Error("Content node insertion did not return a row");

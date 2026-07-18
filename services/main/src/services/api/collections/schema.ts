@@ -3,7 +3,7 @@ import {
 	CollectionDefinitionDocument,
 	CollectionPresentationDocument,
 } from "@rezics/content-structure";
-import { LifecycleInput, LocalizationInput, Uuid } from "../schema";
+import { FractionalPosition, LifecycleInput, LocalizationInput, Uuid } from "../schema";
 
 export const ListCollectionsQuery = t.Object({
 	ownerId: t.Optional(Uuid),
@@ -38,7 +38,7 @@ export type CollectionItemParams = Static<typeof CollectionItemParams>;
 export const SaveCollectionItemBody = t.Object({
 	kind: t.Optional(t.String({ maxLength: 32 })),
 	parentTargetId: t.Optional(t.Nullable(Uuid)),
-	position: t.Optional(t.String({ maxLength: 128 })),
+	position: t.Optional(FractionalPosition),
 	searchText: t.Optional(t.String({ maxLength: 1_000 })),
 });
 export type SaveCollectionItemBody = Static<typeof SaveCollectionItemBody>;

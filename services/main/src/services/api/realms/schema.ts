@@ -9,7 +9,7 @@ import {
 	UnitStatusValues,
 	UnitVisibilityValues,
 } from "../../database/schema/contract-values";
-import { LanguageTag, LocalizationInput, Uuid } from "../schema";
+import { FractionalPosition, LanguageTag, LocalizationInput, Uuid } from "../schema";
 
 const RealmVisibility = t.Union(UnitVisibilityValues.map((value) => t.Literal(value)));
 
@@ -95,7 +95,7 @@ const RealmPinKind = t.Union(RealmPinKindValues.map((value) => t.Literal(value))
 
 export const CreateRealmPinBody = t.Object({
 	kind: t.Optional(RealmPinKind),
-	position: t.Optional(t.String({ maxLength: 128, default: "V" })),
+	position: t.Optional(FractionalPosition),
 });
 export type CreateRealmPinBody = Static<typeof CreateRealmPinBody>;
 

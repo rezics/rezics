@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, foreignKey, index, text, unique, uuid } from "drizzle-orm/pg-core";
+import { check, foreignKey, index, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import {
@@ -7,6 +7,7 @@ import {
 	createTimestampMsColumn,
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
+	fractionalIndexPosition,
 } from "./columns";
 import { contentRating, unit } from "./core";
 
@@ -27,7 +28,7 @@ export const contentStructureNode = pgTable(
 		contentUnitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "restrict" }),
-		position: text().notNull(),
+		position: fractionalIndexPosition().notNull(),
 		contentRating: contentRating(),
 		deletedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),

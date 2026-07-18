@@ -155,7 +155,6 @@ function ContentCreateForm({
 				body: {
 					title: String(form.get("title") ?? "").trim(),
 					language: locale.target,
-					position: "V",
 					...(parentId ? { parentId } : {}),
 					...(kind === "chapter"
 						? {

@@ -3389,6 +3389,7 @@ __metadata:
     effect: "npm:^3.21.4"
     elysia: "npm:^1.4.29"
     file-type: "npm:^21.0.0"
+    fractional-indexing: "npm:^4.0.0"
     http-status-codes: "npm:^2.3.0"
     jose: "npm:^6.2.3"
     kysely: "npm:^0.29.0"
@@ -8183,6 +8184,13 @@ __metadata:
     cross-spawn: "npm:^7.0.6"
     signal-exit: "npm:^4.0.1"
   checksum: 10c0/8986e4af2430896e65bc2788d6679067294d6aee9545daefc84923a0a4b399ad9c7a3ea7bd8c0b2b80fdf4a92de4c69df3f628233ff3224260e9c1541a9e9ed3
+  languageName: node
+  linkType: hard
+
+"fractional-indexing@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "fractional-indexing@npm:4.0.0"
+  checksum: 10c0/1b081fb507a147583714b8bb8f8199801b9ef17499523aafd12e4811dd173f377bc5f320fd27e1a1aead67e397f4b8a5ca64d3eb5efe7f027ac255de17ccb839
   languageName: node
   linkType: hard
 

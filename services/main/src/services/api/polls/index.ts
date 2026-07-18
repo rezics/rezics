@@ -66,7 +66,7 @@ export default new Elysia({ prefix: "/polls" })
 					.values(
 						body.options.map((_, position) => ({
 							pollId: pollUnit.id,
-							position: String(position).padStart(8, "0"),
+							position,
 						})),
 					)
 					.returning({ id: pollOption.id, position: pollOption.position });
@@ -77,7 +77,7 @@ export default new Elysia({ prefix: "/polls" })
 					content: createPollContentDocument(
 						options.map((option) => ({
 							optionId: option.id,
-							label: body.options[Number(option.position)] ?? "",
+							label: body.options[option.position] ?? "",
 						})),
 					),
 					contentStatus: "published",

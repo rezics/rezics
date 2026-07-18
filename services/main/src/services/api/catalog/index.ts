@@ -8,6 +8,7 @@ import session from "../../auth/session";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
 import { database } from "../../database";
 import { isPrimaryUnitLocalization } from "../../database/localization";
+import { fractionalPositionBetween } from "../../ordering/position";
 import {
 	creditAttribution,
 	entity,
@@ -502,9 +503,24 @@ export default new Elysia()
 						"/credits",
 					);
 					const credit = await database.transaction(async (tx) => {
+						await tx.execute(
+							sql`select pg_advisory_xact_lock(hashtextextended(${params.unitId}::text, 0))`,
+						);
+						const [last] = await tx
+							.select({ position: creditAttribution.position })
+							.from(creditAttribution)
+							.where(eq(creditAttribution.unitId, params.unitId))
+							.orderBy(desc(creditAttribution.position), desc(creditAttribution.id))
+							.limit(1);
 						const [created] = await tx
 							.insert(creditAttribution)
-							.values({ unitId: params.unitId, ...body })
+							.values({
+								unitId: params.unitId,
+								...body,
+								position:
+									body.position ??
+									fractionalPositionBetween(last?.position, null),
+							})
 							.returning();
 						await recordUnitRevision(tx, {
 							unitId: params.unitId,
@@ -542,6 +558,15 @@ export default new Elysia()
 					normalized.searchParams.sort();
 					const normalizedUrl = normalized.toString();
 					const link = await database.transaction(async (tx) => {
+						await tx.execute(
+							sql`select pg_advisory_xact_lock(hashtextextended(${params.unitId}::text, 0))`,
+						);
+						const [last] = await tx
+							.select({ position: unitLink.position })
+							.from(unitLink)
+							.where(eq(unitLink.unitId, params.unitId))
+							.orderBy(desc(unitLink.position), desc(unitLink.id))
+							.limit(1);
 						const [created] = await tx
 							.insert(unitLink)
 							.values({
@@ -549,7 +574,9 @@ export default new Elysia()
 								sourceEntityId: body.sourceEntityUnitId,
 								url: body.url,
 								role: body.role,
-								position: body.position,
+								position:
+									body.position ??
+									fractionalPositionBetween(last?.position, null),
 								normalizedUrl,
 								normalizedUrlHash: createHash("sha256")
 									.update(normalizedUrl)

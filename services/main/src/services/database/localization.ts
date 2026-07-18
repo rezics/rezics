@@ -1,9 +1,10 @@
 import { and, eq, sql, type SQL, type SQLWrapper } from "drizzle-orm";
 
+import { fractionalPositionBetween } from "../ordering/position";
 import type { DatabaseTransaction } from ".";
 import { unitLocalization } from "./schema";
 
-/** The first localization position is the Unit's primary fallback localization. */
+/** Return the first position in the Unit's ordered localization sequence. */
 export function primaryUnitLocalizationPosition(unitId: SQLWrapper): SQL<string> {
 	return sql<string>`(
 		select "primary_localization"."position"
@@ -30,7 +31,10 @@ export function unitCoverAssetId(unitId: SQLWrapper): SQL<string | null> {
 	)`;
 }
 
-/** Move an existing localization to the first position without changing other ordering. */
+/**
+ * Move an existing localization to the first position without changing the
+ * relative order of the remaining localizations.
+ */
 export async function makePrimaryUnitLocalization(
 	tx: DatabaseTransaction,
 	unitId: string,
@@ -47,28 +51,10 @@ export async function makePrimaryUnitLocalization(
 		throw new Error(`Cannot make missing localization ${language} primary for Unit ${unitId}`);
 	if (primary.language === selected.language) return;
 
-	const temporaryPosition = `~${crypto.randomUUID()}`;
+	const firstPosition = fractionalPositionBetween(null, primary.position);
 	await tx
 		.update(unitLocalization)
-		.set({ position: temporaryPosition })
-		.where(
-			and(
-				eq(unitLocalization.unitId, unitId),
-				eq(unitLocalization.language, selected.language),
-			),
-		);
-	await tx
-		.update(unitLocalization)
-		.set({ position: selected.position })
-		.where(
-			and(
-				eq(unitLocalization.unitId, unitId),
-				eq(unitLocalization.language, primary.language),
-			),
-		);
-	await tx
-		.update(unitLocalization)
-		.set({ position: primary.position })
+		.set({ position: firstPosition })
 		.where(
 			and(
 				eq(unitLocalization.unitId, unitId),
