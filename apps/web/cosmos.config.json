@@ -1,0 +1,10 @@
+{
+	"$schema": "./node_modules/react-cosmos/config.schema.json",
+	"plugins": ["react-cosmos-plugin-vite"],
+	"exportPath": "../../.temp/cosmos-export",
+	"globalImports": ["./app/styles.css"],
+	"staticPath": "public",
+	"vite": {
+		"configPath": "./cosmos.vite.config.ts"
+	}
+}

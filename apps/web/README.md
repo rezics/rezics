@@ -20,6 +20,24 @@ task frontend:build
 task frontend:typecheck
 ```
 
+## Component workspace
+
+Run React Cosmos from the repository root:
+
+```sh
+yarn workspace @rezics/frontend cosmos
+```
+
+Cosmos opens on `http://localhost:5000`. Add colocated `*.fixture.tsx` files for
+the component states you want to develop or debug. The workspace loads the app's
+global Tailwind styles and resolves the same `@/` imports as the frontend.
+
+Keep each product component and its fixture together under the owning feature,
+for example `features/content-feed/feed-card.tsx` and
+`features/content-feed/feed-card.fixture.tsx`. Reserve `cosmos.decorator.tsx`
+files for shared fixture providers or canvas setup; Cosmos does not own product
+components.
+
 ## Authentication development
 
 The frontend accesses Better Auth through `/api/auth`. The development server proxies that path to `http://localhost:3001`, keeping session cookies first-party. Start the backend alongside the frontend, and configure an equivalent reverse proxy for `/api/auth` in deployed environments.
