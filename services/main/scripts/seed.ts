@@ -2066,7 +2066,7 @@ async function seed(): Promise<void> {
 			const [existingUnit] = await tx.select({ id: unit.id }).from(unit).limit(1);
 			if (existingUser || existingUnit) {
 				throw new Error(
-					"Seed requires an empty database; run `task main:db:reset -- --yes`",
+					"Seed requires an empty database; run `task services-main:db:reset -- --yes`",
 				);
 			}
 

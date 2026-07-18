@@ -25,12 +25,12 @@ The legacy singular `product` route permanently redirects. A single registry gen
 Run from the repository root:
 
 ```bash
-yarn task about:dev
-yarn task about:check
-yarn task about:test
-yarn task about:build
-yarn task about:test:dist
-yarn task about:preview
+yarn task apps-about:dev
+yarn task apps-about:check
+yarn task apps-about:test
+yarn task apps-about:build
+yarn task apps-about:test:dist
+yarn task apps-about:preview
 ```
 
 Cloudflare Pages uses `apps/about/dist/client` as its build output. Deployment does not depend on `dist/server`.

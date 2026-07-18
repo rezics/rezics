@@ -1,4 +1,4 @@
-# @rezics/about — Vike/React site. Aggregated by the root Taskfile as about:*.
+# @rezics/about — Vike/React site. Aggregated by the root Taskfile as apps-about:*.
 version: "3"
 
 tasks:

@@ -56,8 +56,8 @@ yarn task format:check
 yarn task openapi:check
 yarn task typecheck
 yarn task test
-yarn task web:build
-yarn task about:build
+yarn task apps-web:build
+yarn task apps-about:build
 ```
 
 OpenAPI documents and generated clients are updated through

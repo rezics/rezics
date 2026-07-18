@@ -5,13 +5,13 @@ dotenv:
     - .env.example
 
 includes:
-    main:
+    services-main:
         taskfile: ./services/main/Taskfile.yml
         dir: ./services/main
-    web:
+    apps-web:
         taskfile: ./apps/web/Taskfile.yml
         dir: ./apps/web
-    about:
+    apps-about:
         taskfile: ./apps/about/Taskfile.yml
         dir: ./apps/about
     libraries:
@@ -43,17 +43,17 @@ tasks:
     typecheck:
         desc: Type-check every application, service, and library workspace.
         cmds:
-            - task: main:typecheck
-            - task: web:typecheck
-            - task: about:check
+            - task: services-main:typecheck
+            - task: apps-web:typecheck
+            - task: apps-about:check
             - task: libraries:typecheck
 
     test:
         desc: Run behavior tests for every application and service workspace.
         cmds:
-            - task: main:test
-            - task: web:test
-            - task: about:test
+            - task: services-main:test
+            - task: apps-web:test
+            - task: apps-about:test
 
     test:coverage:
         desc: Generate a local behavior-test coverage report without enforcing thresholds.
@@ -93,12 +93,12 @@ tasks:
         cmds:
             - defer: { task: services:stop }
             - task: services:up
-            - task: main:db:migrate
+            - task: services-main:db:migrate
             - task: dev:apps
 
     dev:apps:
         internal: true
         deps:
-            - main:dev
-            - web:dev
+            - services-main:dev
+            - apps-web:dev
         failfast: true
