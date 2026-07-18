@@ -1,12 +1,12 @@
 import { and, eq, sql, type SQL, type SQLWrapper } from "drizzle-orm";
 
+import type { DatabaseTransaction } from "../database";
+import { unitLocalization } from "../database/schema";
 import { fractionalPositionBetween } from "../ordering/position";
-import type { DatabaseTransaction } from ".";
-import { unitLocalization } from "./schema";
 
 /** Return the first position in the Unit's ordered localization sequence. */
-export function primaryUnitLocalizationPosition(unitId: SQLWrapper): SQL<string> {
-	return sql<string>`(
+function primaryUnitLocalizationPosition(unitId: SQLWrapper): SQL<string | null> {
+	return sql<string | null>`(
 		select "primary_localization"."position"
 		from "unit_localization" as "primary_localization"
 		where "primary_localization"."unit_id" = ${unitId}
@@ -20,7 +20,7 @@ export function isPrimaryUnitLocalization(unitId: SQLWrapper): SQL {
 }
 
 /** Resolve the first localization-specific cover, preserving localization order. */
-export function unitCoverAssetId(unitId: SQLWrapper): SQL<string | null> {
+export function firstUnitLocalizationCoverAssetId(unitId: SQLWrapper): SQL<string | null> {
 	return sql<string | null>`(
 		select "cover_localization"."cover_asset_id"
 		from "unit_localization" as "cover_localization"
@@ -64,7 +64,7 @@ export async function makePrimaryUnitLocalization(
 }
 
 /** Select the primary display title without joining a second localization role. */
-export function defaultUnitTitle(unitId: SQLWrapper) {
+export function primaryUnitTitle(unitId: SQLWrapper): SQL<string | null> {
 	return sql<string | null>`(
 		select ${unitLocalization.title}
 		from ${unitLocalization}

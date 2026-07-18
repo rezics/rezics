@@ -2,7 +2,7 @@ import type { User } from "better-auth";
 import { and, eq } from "drizzle-orm";
 
 import { database } from "../database";
-import { isPrimaryUnitLocalization } from "../database/localization";
+import { isPrimaryUnitLocalization } from "../units/localization";
 import { profile, profilePreference, unit, unitLocalization, users } from "../database/schema";
 import { DefaultLanguage } from "../database/schema/contract-values";
 import { recordUnitRevision } from "../units/history";

@@ -2,7 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { PortableTextDocument, parseNullableDocument } from "@rezics/content-structure";
 
 import { database } from "../../database";
-import { isPrimaryUnitLocalization } from "../../database/localization";
+import { isPrimaryUnitLocalization } from "../../units/localization";
 import { profile as profileTable, unit, unitLocalization } from "../../database/schema";
 import { imageAssetContentUrl } from "../image-assets/service";
 import { ProfileNotFound } from "./errors";

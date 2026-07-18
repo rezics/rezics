@@ -1,7 +1,7 @@
 import { and, desc, eq, inArray, isNull, lte, ne, sql } from "drizzle-orm";
 
 import { database } from "../database";
-import { unitCoverAssetId } from "../database/localization";
+import { firstUnitLocalizationCoverAssetId } from "../units/localization";
 import { compareFractionalPositions } from "../ordering/position";
 import {
 	recommendationProfileInterest,
@@ -275,7 +275,7 @@ export async function recommendUnits(input: {
 				publishedAt: unit.publishedAt,
 				createdAt: unit.createdAt,
 				updatedAt: unit.updatedAt,
-				coverAssetId: unitCoverAssetId(unit.id),
+				coverAssetId: firstUnitLocalizationCoverAssetId(unit.id),
 			})
 			.from(unit)
 			.where(and(inArray(unit.id, pageIds), condition)),

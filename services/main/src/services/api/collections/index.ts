@@ -9,10 +9,7 @@ import Elysia, { t } from "elysia";
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
 import { fractionalPositionBetween } from "../../ordering/position";
-import {
-	isPrimaryUnitLocalization,
-	makePrimaryUnitLocalization,
-} from "../../database/localization";
+import { isPrimaryUnitLocalization, makePrimaryUnitLocalization } from "../../units/localization";
 import {
 	collection,
 	collectionItem,

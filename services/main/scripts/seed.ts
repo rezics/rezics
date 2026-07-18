@@ -16,7 +16,7 @@ import { and, eq } from "drizzle-orm";
 import { env } from "../src/services/config";
 import { ApiPermissionValues, toApiKeyPermissions } from "../src/services/auth/api-permissions";
 import { database, type DatabaseTransaction } from "../src/services/database";
-import { isPrimaryUnitLocalization } from "../src/services/database/localization";
+import { isPrimaryUnitLocalization } from "../src/services/units/localization";
 import {
 	accountEnforcement,
 	accounts,

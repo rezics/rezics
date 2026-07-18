@@ -4,7 +4,7 @@ import Elysia, { t } from "elysia";
 
 import session from "../../auth/session";
 import { database } from "../../database";
-import { defaultUnitTitle } from "../../database/localization";
+import { primaryUnitTitle } from "../../units/localization";
 import {
 	conversation,
 	conversationRead,
@@ -245,7 +245,7 @@ export default new Elysia({ prefix: "/messages" })
 				.select({
 					id: conversation.id,
 					otherProfileId: sql<string>`${otherProfileId}`,
-					otherUserName: defaultUnitTitle(profileTable.id),
+					otherUserName: primaryUnitTitle(profileTable.id),
 					lastMessageAt: sql<Date | null>`(select max(m.created_at) from message m where m.conversation_id = ${conversation.id})`,
 					lastMessage: sql<string | null>`(
 						select m.content from message m where m.conversation_id = ${conversation.id}

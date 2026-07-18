@@ -7,8 +7,8 @@ import { database } from "../../database";
 import {
 	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
-} from "../../database/localization";
-import { defaultUnitTitle } from "../../database/localization";
+	primaryUnitTitle,
+} from "../../units/localization";
 import {
 	post,
 	profile as profileTable,
@@ -65,7 +65,7 @@ export default new Elysia()
 						.select({
 							id: post.id,
 							authorId: post.authorProfileId,
-							authorName: defaultUnitTitle(profileTable.id),
+							authorName: primaryUnitTitle(profileTable.id),
 							targetId: post.subjectUnitId,
 							realmId: primaryRealmId,
 							title: unitLocalization.title,

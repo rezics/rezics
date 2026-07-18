@@ -7,7 +7,7 @@ import Elysia, { t } from "elysia";
 import session from "../../auth/session";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
 import { database } from "../../database";
-import { isPrimaryUnitLocalization } from "../../database/localization";
+import { isPrimaryUnitLocalization } from "../../units/localization";
 import { fractionalPositionBetween } from "../../ordering/position";
 import {
 	creditAttribution,

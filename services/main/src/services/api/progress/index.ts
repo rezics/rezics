@@ -5,7 +5,7 @@ import Elysia from "elysia";
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import session from "../../auth/session";
 import { database } from "../../database";
-import { isPrimaryUnitLocalization } from "../../database/localization";
+import { isPrimaryUnitLocalization } from "../../units/localization";
 import {
 	contentStructureNodeProgress,
 	contentStructureNode,

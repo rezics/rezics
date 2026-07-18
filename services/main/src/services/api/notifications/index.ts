@@ -5,7 +5,7 @@ import Elysia, { t } from "elysia";
 
 import session from "../../auth/session";
 import { database } from "../../database";
-import { defaultUnitTitle } from "../../database/localization";
+import { primaryUnitTitle } from "../../units/localization";
 import {
 	notification,
 	profile as profileTable,
@@ -111,7 +111,7 @@ export default new Elysia({ prefix: "/notifications" })
 					id: notification.id,
 					kind: notification.kind,
 					actorProfileId: notification.actorProfileId,
-					actorName: defaultUnitTitle(actor.id),
+					actorName: primaryUnitTitle(actor.id),
 					subjectUnitId: notification.subjectUnitId,
 					payload: notification.payload,
 					readAt: notification.readAt,

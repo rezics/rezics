@@ -5,7 +5,7 @@ import Elysia from "elysia";
 import { isContentStructureNodeReadable } from "../../authorization/content-structure/policy";
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
-import { isPrimaryUnitLocalization } from "../../database/localization";
+import { isPrimaryUnitLocalization } from "../../units/localization";
 import { fractionalPositionBetween } from "../../ordering/position";
 import {
 	contentStructureNode,

@@ -15,8 +15,8 @@ import { fractionalPositionBetween } from "../../ordering/position";
 import {
 	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
-} from "../../database/localization";
-import { defaultUnitTitle } from "../../database/localization";
+	primaryUnitTitle,
+} from "../../units/localization";
 import {
 	auditEvent,
 	profile as profileTable,
@@ -524,7 +524,7 @@ export default new Elysia({ prefix: "/realms" })
 				items: await database
 					.select({
 						profileId: realmMember.profileId,
-						name: defaultUnitTitle(profileTable.id),
+						name: primaryUnitTitle(profileTable.id),
 						role: realmMember.role,
 						state: realmMember.state,
 						joinedAt: realmMember.joinedAt,

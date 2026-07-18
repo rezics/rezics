@@ -6,10 +6,10 @@ import Elysia, { t } from "elysia";
 import { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
 import {
-	defaultUnitTitle,
+	primaryUnitTitle,
 	isPrimaryUnitLocalization,
-	unitCoverAssetId,
-} from "../../database/localization";
+	firstUnitLocalizationCoverAssetId,
+} from "../../units/localization";
 import {
 	post,
 	postReply,
@@ -490,7 +490,7 @@ export async function hydrateFeedItems(
 			id: post.id,
 			postKind: post.kind,
 			authorId: post.authorProfileId,
-			authorName: defaultUnitTitle(profileTable.id),
+			authorName: primaryUnitTitle(profileTable.id),
 			subjectId: post.subjectUnitId,
 			rootPostId: postReply.rootPostId,
 			parentPostId: postReply.parentPostId,
@@ -588,7 +588,7 @@ export async function hydrateFeedItems(
 							type: unit.kind,
 							slug: unit.slug,
 							title: unitLocalization.title,
-							coverAssetId: unitCoverAssetId(unit.id),
+							coverAssetId: firstUnitLocalizationCoverAssetId(unit.id),
 						})
 						.from(unit)
 						.leftJoin(
@@ -614,7 +614,7 @@ export async function hydrateFeedItems(
 							rootPostId: post.id,
 							title: unitLocalization.title,
 							authorId: post.authorProfileId,
-							authorName: defaultUnitTitle(profileTable.id),
+							authorName: primaryUnitTitle(profileTable.id),
 							subjectId: post.subjectUnitId,
 						})
 						.from(post)

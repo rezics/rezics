@@ -4,7 +4,7 @@ import Elysia from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
-import { isPrimaryUnitLocalization } from "../../database/localization";
+import { isPrimaryUnitLocalization } from "../../units/localization";
 import {
 	unit,
 	profile as profileTable,

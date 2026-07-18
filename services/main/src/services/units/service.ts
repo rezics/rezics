@@ -12,8 +12,8 @@ import { database } from "../database";
 import {
 	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
-	unitCoverAssetId,
-} from "../database/localization";
+	firstUnitLocalizationCoverAssetId,
+} from "./localization";
 import {
 	book,
 	entity,
@@ -300,7 +300,7 @@ export async function listUnits(kind: UnitKind, cursor?: [string, string], limit
 			updatedAt: unit.updatedAt,
 			title: unitLocalization.title,
 			summary: unitLocalization.summary,
-			coverAssetId: unitCoverAssetId(unit.id),
+			coverAssetId: firstUnitLocalizationCoverAssetId(unit.id),
 		})
 		.from(unit)
 		.leftJoin(

@@ -17,7 +17,7 @@ import type { JsonValue } from "@rezics/portable-text";
 import type { Static, TSchema } from "@sinclair/typebox";
 
 import type { DatabaseTransaction } from "../database";
-import { isPrimaryUnitLocalization } from "../database/localization";
+import { isPrimaryUnitLocalization } from "./localization";
 import {
 	auditEvent,
 	book,

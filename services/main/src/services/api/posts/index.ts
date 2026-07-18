@@ -4,8 +4,7 @@ import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
-import { isPrimaryUnitLocalization } from "../../database/localization";
-import { defaultUnitTitle } from "../../database/localization";
+import { isPrimaryUnitLocalization, primaryUnitTitle } from "../../units/localization";
 import {
 	post,
 	postReply,
@@ -109,7 +108,7 @@ function toReplyResponse<
 const replySelection = {
 	id: postReply.postId,
 	authorId: post.authorProfileId,
-	authorName: defaultUnitTitle(profileTable.id),
+	authorName: primaryUnitTitle(profileTable.id),
 	rootPostId: postReply.rootPostId,
 	parentPostId: postReply.parentPostId,
 	contextRealmId: postReply.contextRealmId,
@@ -135,7 +134,7 @@ export default new Elysia()
 								id: post.id,
 								postKind: ordinaryPostKind,
 								authorId: post.authorProfileId,
-								authorName: defaultUnitTitle(profileTable.id),
+								authorName: primaryUnitTitle(profileTable.id),
 								realmId: primaryRealmId,
 								subjectId: post.subjectUnitId,
 								rootPostId: postReply.rootPostId,

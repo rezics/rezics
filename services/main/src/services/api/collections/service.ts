@@ -10,7 +10,7 @@ import {
 
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import { database } from "../../database";
-import { isPrimaryUnitLocalization } from "../../database/localization";
+import { isPrimaryUnitLocalization } from "../../units/localization";
 import {
 	collection as collectionTable,
 	collectionItem,
