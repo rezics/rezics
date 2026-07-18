@@ -35,7 +35,8 @@ async function buildUnitStats(tx: DatabaseTransaction, snapshotId: string) {
 		), favorite_stats AS (
 			SELECT ci.unit_id, count(*)::int AS favorites
 			FROM collection_item ci
-			JOIN collection c ON c.id = ci.collection_id AND c.kind = 'favorites'
+			JOIN collection c ON c.id = ci.collection_id
+				AND c.source = 'system' AND c.system_key = 'favorites'
 			GROUP BY ci.unit_id
 		), share_stats AS (
 			SELECT unit_id, count(*)::int AS shares
@@ -70,7 +71,8 @@ async function buildUnitStats(tx: DatabaseTransaction, snapshotId: string) {
 			UNION ALL
 			SELECT ci.unit_id, ci.created_at, 5::double precision
 			FROM collection_item ci
-			JOIN collection c ON c.id = ci.collection_id AND c.kind = 'favorites'
+			JOIN collection c ON c.id = ci.collection_id
+				AND c.source = 'system' AND c.system_key = 'favorites'
 			UNION ALL
 			SELECT unit_id, created_at, 4::double precision FROM unit_share
 			UNION ALL
@@ -127,7 +129,8 @@ async function buildProfileInterests(tx: DatabaseTransaction, snapshotId: string
 			UNION ALL
 			SELECT ci.added_by_profile_id, ci.unit_id, 5::double precision, ci.created_at
 			FROM collection_item ci
-			JOIN collection c ON c.id = ci.collection_id AND c.kind = 'favorites'
+			JOIN collection c ON c.id = ci.collection_id
+				AND c.source = 'system' AND c.system_key = 'favorites'
 			WHERE ci.added_by_profile_id IS NOT NULL
 			UNION ALL
 			SELECT profile_id, unit_id, 4::double precision, created_at FROM unit_share
@@ -223,7 +226,8 @@ async function buildUnitEdges(tx: DatabaseTransaction, snapshotId: string) {
 			FROM unit_reaction WHERE reaction = 'upvote'
 			UNION ALL
 			SELECT ci.added_by_profile_id, ci.unit_id, 5::double precision, ci.created_at
-			FROM collection_item ci JOIN collection c ON c.id = ci.collection_id AND c.kind = 'favorites'
+			FROM collection_item ci JOIN collection c ON c.id = ci.collection_id
+				AND c.source = 'system' AND c.system_key = 'favorites'
 			WHERE ci.added_by_profile_id IS NOT NULL
 			UNION ALL SELECT profile_id, unit_id, 4::double precision, created_at FROM unit_share
 			UNION ALL SELECT profile_id, unit_id,

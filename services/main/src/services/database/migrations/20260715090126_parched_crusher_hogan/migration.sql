@@ -1,1 +1,0 @@
-CREATE INDEX "unit_revision_parent_idx" ON "unit_revision" ("parent_revision_id");

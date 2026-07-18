@@ -59,9 +59,14 @@ export const ZoneThemeDocument = Type.Object(
 );
 export type ZoneThemeDocument = Static<typeof ZoneThemeDocument>;
 
+const Uuid = Type.String({
+	pattern:
+		"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+});
+
 export const PollOptionLocalization = Type.Object(
 	{
-		optionId: Type.String({ format: "uuid" }),
+		optionId: Uuid,
 		label: Type.String({ minLength: 1, maxLength: 500 }),
 	},
 	{ additionalProperties: false },

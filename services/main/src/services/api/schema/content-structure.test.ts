@@ -1,10 +1,12 @@
 import {
 	BlockKey,
 	CollectionDefinitionDocument,
+	PollContentDocument,
 	PortableTextDocument,
 	assertDocument,
 	createBlockKey,
 	createManualCollectionDefinitionDocument,
+	createPollContentDocument,
 	createPortableTextDocument,
 	createSystemCollectionDefinitionDocument,
 	isDocument,
@@ -60,6 +62,24 @@ describe("Content Structure document contracts", () => {
 				_type: "collection-definition",
 				_key: "000000000007",
 				source: "system",
+			}),
+		).toBe(false);
+	});
+
+	test("validates Poll option identifiers without external format registration", () => {
+		const document = createPollContentDocument(
+			[
+				{ optionId: "019b0000-0000-7000-8000-000000000001", label: "First" },
+				{ optionId: "019b0000-0000-7000-8000-000000000002", label: "Second" },
+			],
+			"000000000008",
+		);
+
+		expect(isDocument(PollContentDocument, document)).toBe(true);
+		expect(
+			isDocument(PollContentDocument, {
+				...document,
+				options: [{ optionId: "not-a-uuid", label: "Invalid" }, document.options[1]],
 			}),
 		).toBe(false);
 	});

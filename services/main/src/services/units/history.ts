@@ -6,6 +6,7 @@ import { z } from "zod";
 import {
 	CollectionDefinitionDocument,
 	CollectionPresentationDocument,
+	PollContentDocument,
 	ZoneBoundaryDocument,
 	ZoneThemeDocument,
 	isDocument,
@@ -66,6 +67,11 @@ function createDocumentSchema<TSchemaValue extends TSchema>(schema: TSchemaValue
 	);
 }
 const PortableTextDocumentSchema = z.custom<PortableTextDocumentValue>(isPortableTextDocument);
+const PollContentDocumentSchema = createDocumentSchema(PollContentDocument);
+const UnitLocalizationContentDocumentSchema = z.union([
+	PortableTextDocumentSchema,
+	PollContentDocumentSchema,
+]);
 const CollectionDefinitionDocumentSchema = createDocumentSchema(CollectionDefinitionDocument);
 const CollectionPresentationDocumentSchema = createDocumentSchema(CollectionPresentationDocument);
 const ZoneBoundaryDocumentSchema = createDocumentSchema(ZoneBoundaryDocument);
@@ -126,7 +132,7 @@ const unitStateSchema = schemaFactory.createSelectSchema(unit).omit({
 const unitLocalizationStateSchema = schemaFactory
 	.createSelectSchema(unitLocalization, {
 		description: PortableTextDocumentSchema.nullable(),
-		content: PortableTextDocumentSchema.nullable(),
+		content: UnitLocalizationContentDocumentSchema.nullable(),
 	})
 	.omit({ unitId: true, createdAt: true, updatedAt: true });
 const profileStateSchema = schemaFactory
