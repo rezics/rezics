@@ -1,11 +1,66 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "7ace5acc-a721-48be-bc31-8373ee50bf2a",
+  "id": "90f71f43-591f-4a94-8f01-c3ebf43af691",
   "prevIds": [
-    "f50b18a4-0fa6-411e-b9b4-84657264a7e1"
+    "00000000-0000-0000-0000-000000000000"
   ],
   "ddl": [
+    {
+      "values": [
+        "member",
+        "content_editor",
+        "governor"
+      ],
+      "name": "unit_access_realm_relation",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "viewer",
+        "editor",
+        "publisher",
+        "maintainer",
+        "owner"
+      ],
+      "name": "unit_access_role",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "profile",
+        "realm",
+        "authenticated"
+      ],
+      "name": "unit_access_subject_kind",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "unit.read",
+        "unit.update",
+        "unit.publish",
+        "unit.history.restore",
+        "unit.access.manage",
+        "unit.protection.manage",
+        "unit.delete"
+      ],
+      "name": "unit_permission",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "frozen",
+        "owner_only"
+      ],
+      "name": "unit_protection_mode",
+      "entityType": "enums",
+      "schema": "public"
+    },
     {
       "values": [
         "common",
@@ -23,7 +78,7 @@
     {
       "values": [
         "manual",
-        "dynamic",
+        "search",
         "system"
       ],
       "name": "collection_source",
@@ -71,15 +126,6 @@
         "machine_generated"
       ],
       "name": "ai_disclosure",
-      "entityType": "enums",
-      "schema": "public"
-    },
-    {
-      "values": [
-        "owner",
-        "editor"
-      ],
-      "name": "collaborator_role",
       "entityType": "enums",
       "schema": "public"
     },
@@ -205,8 +251,8 @@
         "restore",
         "lock",
         "unlock",
-        "field_lock",
-        "field_unlock",
+        "protect",
+        "unprotect",
         "warning",
         "silence",
         "suspension",
@@ -456,6 +502,24 @@
     },
     {
       "isRlsEnabled": false,
+      "name": "unit_access_binding",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "unit_access_restriction",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "unit_protection",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
       "name": "book",
       "entityType": "tables",
       "schema": "public"
@@ -558,12 +622,6 @@
     },
     {
       "isRlsEnabled": false,
-      "name": "profile_follow",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
       "name": "profile_preference",
       "entityType": "tables",
       "schema": "public"
@@ -576,13 +634,7 @@
     },
     {
       "isRlsEnabled": false,
-      "name": "unit_collaborator",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
-      "name": "unit_field_lock",
+      "name": "unit_follow",
       "entityType": "tables",
       "schema": "public"
     },
@@ -774,12 +826,6 @@
     },
     {
       "isRlsEnabled": false,
-      "name": "realm_subscription",
-      "entityType": "tables",
-      "schema": "public"
-    },
-    {
-      "isRlsEnabled": false,
       "name": "realm_unit",
       "entityType": "tables",
       "schema": "public"
@@ -918,7 +964,13 @@
     },
     {
       "isRlsEnabled": false,
-      "name": "zone_subscription",
+      "name": "zone_navigation",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "zone_page",
       "entityType": "tables",
       "schema": "public"
     },
@@ -1649,6 +1701,487 @@
       "entityType": "columns",
       "schema": "public",
       "table": "verifications"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "uuidv7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "unit_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "type": "unit_access_subject_kind",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "subject_kind",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "profile_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "realm_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "type": "unit_access_realm_relation",
+      "typeSchema": "public",
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "realm_relation",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "type": "unit_access_role",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "role",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 1,
+      "default": "array[]",
+      "generated": null,
+      "identity": null,
+      "name": "scope",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "granted_by_profile_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "expires_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "revoked_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "revoked_by_profile_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "uuidv7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "unit_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "profile_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "type": "unit_permission",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "permission",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 1,
+      "default": "array[]",
+      "generated": null,
+      "identity": null,
+      "name": "scope",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "reason",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "created_by_profile_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "expires_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "revoked_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "revoked_by_profile_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "uuidv7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_protection"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "unit_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_protection"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 1,
+      "default": "array[]",
+      "generated": null,
+      "identity": null,
+      "name": "scope",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_protection"
+    },
+    {
+      "type": "unit_protection_mode",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "mode",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_protection"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "reason",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_protection"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "created_by_profile_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_protection"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "expires_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_protection"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "revoked_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_protection"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "revoked_by_profile_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_protection"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_protection"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "unit_protection"
     },
     {
       "type": "uuid",
@@ -3244,45 +3777,6 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "follower_profile_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "profile_follow"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "followed_profile_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "profile_follow"
-    },
-    {
-      "type": "timestamp(3) with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "created_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "profile_follow"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
       "name": "profile_id",
       "entityType": "columns",
       "schema": "public",
@@ -3569,88 +4063,10 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "unit_id",
+      "name": "follower_profile_id",
       "entityType": "columns",
       "schema": "public",
-      "table": "unit_collaborator"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "profile_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "unit_collaborator"
-    },
-    {
-      "type": "collaborator_role",
-      "typeSchema": "public",
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "role",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "unit_collaborator"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "added_by_profile_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "unit_collaborator"
-    },
-    {
-      "type": "timestamp(3) with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "created_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "unit_collaborator"
-    },
-    {
-      "type": "timestamp(3) with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "updated_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "unit_collaborator"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "uuidv7()",
-      "generated": null,
-      "identity": null,
-      "name": "id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "unit_field_lock"
+      "table": "unit_follow"
     },
     {
       "type": "uuid",
@@ -3663,46 +4079,7 @@
       "name": "unit_id",
       "entityType": "columns",
       "schema": "public",
-      "table": "unit_field_lock"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "path",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "unit_field_lock"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "locked_by_profile_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "unit_field_lock"
-    },
-    {
-      "type": "text",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "reason",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "unit_field_lock"
+      "table": "unit_follow"
     },
     {
       "type": "timestamp(3) with time zone",
@@ -3715,20 +4092,7 @@
       "name": "created_at",
       "entityType": "columns",
       "schema": "public",
-      "table": "unit_field_lock"
-    },
-    {
-      "type": "timestamp(3) with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "updated_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "unit_field_lock"
+      "table": "unit_follow"
     },
     {
       "type": "uuid",
@@ -6689,45 +7053,6 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "profile_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "realm_subscription"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "realm_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "realm_subscription"
-    },
-    {
-      "type": "timestamp(3) with time zone",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "now()",
-      "generated": null,
-      "identity": null,
-      "name": "created_at",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "realm_subscription"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
       "name": "realm_id",
       "entityType": "columns",
       "schema": "public",
@@ -8749,19 +9074,6 @@
       "table": "zone"
     },
     {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": false,
-      "dimensions": 0,
-      "default": null,
-      "generated": null,
-      "identity": null,
-      "name": "managing_realm_id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "zone"
-    },
-    {
       "type": "jsonb",
       "typeSchema": null,
       "notNull": true,
@@ -8783,6 +9095,19 @@
       "generated": null,
       "identity": null,
       "name": "theme_document",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "zone"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "dock_document",
       "entityType": "columns",
       "schema": "public",
       "table": "zone"
@@ -8844,13 +9169,13 @@
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
-      "default": null,
+      "default": "uuidv7()",
       "generated": null,
       "identity": null,
-      "name": "profile_id",
+      "name": "id",
       "entityType": "columns",
       "schema": "public",
-      "table": "zone_subscription"
+      "table": "zone_navigation"
     },
     {
       "type": "uuid",
@@ -8863,7 +9188,46 @@
       "name": "zone_id",
       "entityType": "columns",
       "schema": "public",
-      "table": "zone_subscription"
+      "table": "zone_navigation"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "key",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "zone_navigation"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "document",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "zone_navigation"
+    },
+    {
+      "type": "text collate \"C\"",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "position",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "zone_navigation"
     },
     {
       "type": "timestamp(3) with time zone",
@@ -8876,7 +9240,137 @@
       "name": "created_at",
       "entityType": "columns",
       "schema": "public",
-      "table": "zone_subscription"
+      "table": "zone_navigation"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "zone_navigation"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "uuidv7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "zone_page"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "zone_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "zone_page"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "slug",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "zone_page"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "title_unit_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "zone_page"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "document",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "zone_page"
+    },
+    {
+      "type": "text collate \"C\"",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "position",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "zone_page"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "false",
+      "generated": null,
+      "identity": null,
+      "name": "home",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "zone_page"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "zone_page"
+    },
+    {
+      "type": "timestamp(3) with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "zone_page"
     },
     {
       "nameExplicit": true,
@@ -9031,6 +9525,356 @@
       "entityType": "indexes",
       "schema": "public",
       "table": "verifications"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "unit_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "profile_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "scope",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": "\"revoked_at\" is null and \"subject_kind\" = 'profile'",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "unit_access_binding_active_profile_scope_key",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "unit_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "realm_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "realm_relation",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "scope",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": "\"revoked_at\" is null and \"subject_kind\" = 'realm'",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "unit_access_binding_active_realm_scope_key",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "unit_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "scope",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": "\"revoked_at\" is null and \"subject_kind\" = 'authenticated'",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "unit_access_binding_active_authenticated_scope_key",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "profile_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "unit_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "role",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": "\"revoked_at\" is null",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "unit_access_binding_profile_active_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "realm_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "unit_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "realm_relation",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "role",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": "\"revoked_at\" is null",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "unit_access_binding_realm_active_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "granted_by_profile_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "unit_access_binding_granted_by_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "unit_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "profile_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "permission",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "scope",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": "\"revoked_at\" is null",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "unit_access_restriction_active_subject_scope_key",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "profile_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "unit_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "permission",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": "\"revoked_at\" is null",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "unit_access_restriction_profile_active_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "created_by_profile_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "unit_access_restriction_created_by_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "unit_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "scope",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": "\"revoked_at\" is null",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "unit_protection_active_scope_key",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "unit_protection"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "created_by_profile_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "unit_protection_created_by_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "unit_protection"
     },
     {
       "nameExplicit": true,
@@ -9904,41 +10748,6 @@
       "nameExplicit": true,
       "columns": [
         {
-          "value": "followed_profile_id",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        },
-        {
-          "value": "created_at",
-          "isExpression": false,
-          "asc": false,
-          "nullsFirst": false,
-          "opclass": null
-        },
-        {
-          "value": "follower_profile_id",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        }
-      ],
-      "isUnique": false,
-      "where": null,
-      "with": "",
-      "method": "btree",
-      "concurrently": false,
-      "name": "profile_follow_followed_created_at_idx",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "profile_follow"
-    },
-    {
-      "nameExplicit": true,
-      "columns": [
-        {
           "value": "kind",
           "isExpression": false,
           "asc": true,
@@ -10093,35 +10902,21 @@
       "nameExplicit": true,
       "columns": [
         {
-          "value": "profile_id",
+          "value": "unit_id",
           "isExpression": false,
           "asc": true,
           "nullsFirst": false,
           "opclass": null
         },
         {
-          "value": "role",
+          "value": "created_at",
           "isExpression": false,
-          "asc": true,
+          "asc": false,
           "nullsFirst": false,
           "opclass": null
-        }
-      ],
-      "isUnique": false,
-      "where": null,
-      "with": "",
-      "method": "btree",
-      "concurrently": false,
-      "name": "unit_collaborator_profile_role_idx",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "unit_collaborator"
-    },
-    {
-      "nameExplicit": true,
-      "columns": [
+        },
         {
-          "value": "added_by_profile_id",
+          "value": "follower_profile_id",
           "isExpression": false,
           "asc": true,
           "nullsFirst": false,
@@ -10133,31 +10928,10 @@
       "with": "",
       "method": "btree",
       "concurrently": false,
-      "name": "unit_collaborator_added_by_idx",
+      "name": "unit_follow_unit_created_at_idx",
       "entityType": "indexes",
       "schema": "public",
-      "table": "unit_collaborator"
-    },
-    {
-      "nameExplicit": true,
-      "columns": [
-        {
-          "value": "locked_by_profile_id",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        }
-      ],
-      "isUnique": false,
-      "where": null,
-      "with": "",
-      "method": "btree",
-      "concurrently": false,
-      "name": "unit_field_lock_locked_by_idx",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "unit_field_lock"
+      "table": "unit_follow"
     },
     {
       "nameExplicit": true,
@@ -12157,41 +12931,6 @@
           "opclass": null
         },
         {
-          "value": "created_at",
-          "isExpression": false,
-          "asc": false,
-          "nullsFirst": false,
-          "opclass": null
-        },
-        {
-          "value": "profile_id",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        }
-      ],
-      "isUnique": false,
-      "where": null,
-      "with": "",
-      "method": "btree",
-      "concurrently": false,
-      "name": "realm_subscription_realm_created_at_idx",
-      "entityType": "indexes",
-      "schema": "public",
-      "table": "realm_subscription"
-    },
-    {
-      "nameExplicit": true,
-      "columns": [
-        {
-          "value": "realm_id",
-          "isExpression": false,
-          "asc": true,
-          "nullsFirst": false,
-          "opclass": null
-        },
-        {
           "value": "status",
           "isExpression": false,
           "asc": true,
@@ -13102,7 +13841,21 @@
       "nameExplicit": true,
       "columns": [
         {
-          "value": "managing_realm_id",
+          "value": "zone_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "position",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "id",
           "isExpression": false,
           "asc": true,
           "nullsFirst": false,
@@ -13114,10 +13867,31 @@
       "with": "",
       "method": "btree",
       "concurrently": false,
-      "name": "zone_managing_realm_idx",
+      "name": "zone_navigation_zone_position_idx",
       "entityType": "indexes",
       "schema": "public",
-      "table": "zone"
+      "table": "zone_navigation"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "zone_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": "\"home\"",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "zone_page_one_home_key",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "zone_page"
     },
     {
       "nameExplicit": true,
@@ -13130,14 +13904,14 @@
           "opclass": null
         },
         {
-          "value": "created_at",
+          "value": "position",
           "isExpression": false,
-          "asc": false,
+          "asc": true,
           "nullsFirst": false,
           "opclass": null
         },
         {
-          "value": "profile_id",
+          "value": "id",
           "isExpression": false,
           "asc": true,
           "nullsFirst": false,
@@ -13149,10 +13923,31 @@
       "with": "",
       "method": "btree",
       "concurrently": false,
-      "name": "zone_subscription_zone_created_at_idx",
+      "name": "zone_page_zone_position_idx",
       "entityType": "indexes",
       "schema": "public",
-      "table": "zone_subscription"
+      "table": "zone_page"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "title_unit_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "zone_page_title_unit_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "zone_page"
     },
     {
       "nameExplicit": false,
@@ -13204,6 +13999,210 @@
       "entityType": "fks",
       "schema": "public",
       "table": "sessions"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "unit_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "unit",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "unit_access_binding_unit_id_unit_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "profile_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "profile",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "unit_access_binding_profile_id_profile_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "realm_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "realm",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "unit_access_binding_realm_id_realm_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "granted_by_profile_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "profile",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "name": "unit_access_binding_granted_by_profile_id_profile_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "revoked_by_profile_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "profile",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "name": "unit_access_binding_revoked_by_profile_id_profile_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "unit_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "unit",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "unit_access_restriction_unit_id_unit_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "profile_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "profile",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "unit_access_restriction_profile_id_profile_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "created_by_profile_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "profile",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "name": "unit_access_restriction_created_by_profile_id_profile_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "revoked_by_profile_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "profile",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "name": "unit_access_restriction_revoked_by_profile_id_profile_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "unit_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "unit",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "unit_protection_unit_id_unit_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "unit_protection"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "created_by_profile_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "profile",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "name": "unit_protection_created_by_profile_id_profile_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "unit_protection"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "revoked_by_profile_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "profile",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "name": "unit_protection_revoked_by_profile_id_profile_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "unit_protection"
     },
     {
       "nameExplicit": false,
@@ -13822,40 +14821,6 @@
     {
       "nameExplicit": false,
       "columns": [
-        "follower_profile_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "profile",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "profile_follow_follower_profile_id_profile_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "profile_follow"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "followed_profile_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "profile",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "profile_follow_followed_profile_id_profile_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "profile_follow"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
         "profile_id"
       ],
       "schemaTo": "public",
@@ -13873,24 +14838,7 @@
     {
       "nameExplicit": false,
       "columns": [
-        "unit_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "unit",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "unit_collaborator_unit_id_unit_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "unit_collaborator"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "profile_id"
+        "follower_profile_id"
       ],
       "schemaTo": "public",
       "tableTo": "profile",
@@ -13899,27 +14847,10 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "unit_collaborator_profile_id_profile_id_fkey",
+      "name": "unit_follow_follower_profile_id_profile_id_fkey",
       "entityType": "fks",
       "schema": "public",
-      "table": "unit_collaborator"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "added_by_profile_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "profile",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "RESTRICT",
-      "name": "unit_collaborator_added_by_profile_id_profile_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "unit_collaborator"
+      "table": "unit_follow"
     },
     {
       "nameExplicit": false,
@@ -13933,27 +14864,10 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "unit_field_lock_unit_id_unit_id_fkey",
+      "name": "unit_follow_unit_id_unit_id_fkey",
       "entityType": "fks",
       "schema": "public",
-      "table": "unit_field_lock"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "locked_by_profile_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "profile",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "RESTRICT",
-      "name": "unit_field_lock_locked_by_profile_id_profile_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "unit_field_lock"
+      "table": "unit_follow"
     },
     {
       "nameExplicit": false,
@@ -15179,40 +16093,6 @@
     {
       "nameExplicit": false,
       "columns": [
-        "profile_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "profile",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "realm_subscription_profile_id_profile_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "realm_subscription"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "realm_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "realm",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "CASCADE",
-      "name": "realm_subscription_realm_id_realm_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "realm_subscription"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
         "realm_id"
       ],
       "schemaTo": "public",
@@ -16092,36 +16972,19 @@
     {
       "nameExplicit": false,
       "columns": [
-        "managing_realm_id"
+        "zone_id"
       ],
       "schemaTo": "public",
-      "tableTo": "realm",
-      "columnsTo": [
-        "id"
-      ],
-      "onUpdate": "NO ACTION",
-      "onDelete": "SET NULL",
-      "name": "zone_managing_realm_id_realm_id_fkey",
-      "entityType": "fks",
-      "schema": "public",
-      "table": "zone"
-    },
-    {
-      "nameExplicit": false,
-      "columns": [
-        "profile_id"
-      ],
-      "schemaTo": "public",
-      "tableTo": "profile",
+      "tableTo": "zone",
       "columnsTo": [
         "id"
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "zone_subscription_profile_id_profile_id_fkey",
+      "name": "zone_navigation_zone_id_zone_id_fkey",
       "entityType": "fks",
       "schema": "public",
-      "table": "zone_subscription"
+      "table": "zone_navigation"
     },
     {
       "nameExplicit": false,
@@ -16135,10 +16998,27 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "zone_subscription_zone_id_zone_id_fkey",
+      "name": "zone_page_zone_id_zone_id_fkey",
       "entityType": "fks",
       "schema": "public",
-      "table": "zone_subscription"
+      "table": "zone_page"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "title_unit_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "unit",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "name": "zone_page_title_unit_id_unit_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "zone_page"
     },
     {
       "columns": [
@@ -16198,24 +17078,13 @@
     {
       "columns": [
         "follower_profile_id",
-        "followed_profile_id"
+        "unit_id"
       ],
       "nameExplicit": false,
-      "name": "profile_follow_pkey",
+      "name": "unit_follow_pkey",
       "entityType": "pks",
       "schema": "public",
-      "table": "profile_follow"
-    },
-    {
-      "columns": [
-        "unit_id",
-        "profile_id"
-      ],
-      "nameExplicit": false,
-      "name": "unit_collaborator_pkey",
-      "entityType": "pks",
-      "schema": "public",
-      "table": "unit_collaborator"
+      "table": "unit_follow"
     },
     {
       "columns": [
@@ -16327,17 +17196,6 @@
       "entityType": "pks",
       "schema": "public",
       "table": "realm_rule_acceptance"
-    },
-    {
-      "columns": [
-        "profile_id",
-        "realm_id"
-      ],
-      "nameExplicit": false,
-      "name": "realm_subscription_pkey",
-      "entityType": "pks",
-      "schema": "public",
-      "table": "realm_subscription"
     },
     {
       "columns": [
@@ -16494,17 +17352,6 @@
     },
     {
       "columns": [
-        "profile_id",
-        "zone_id"
-      ],
-      "nameExplicit": false,
-      "name": "zone_subscription_pkey",
-      "entityType": "pks",
-      "schema": "public",
-      "table": "zone_subscription"
-    },
-    {
-      "columns": [
         "id"
       ],
       "nameExplicit": false,
@@ -16551,6 +17398,36 @@
       "name": "verifications_pkey",
       "schema": "public",
       "table": "verifications",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "unit_access_binding_pkey",
+      "schema": "public",
+      "table": "unit_access_binding",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "unit_access_restriction_pkey",
+      "schema": "public",
+      "table": "unit_access_restriction",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "unit_protection_pkey",
+      "schema": "public",
+      "table": "unit_protection",
       "entityType": "pks"
     },
     {
@@ -16691,16 +17568,6 @@
       "name": "unit_pkey",
       "schema": "public",
       "table": "unit",
-      "entityType": "pks"
-    },
-    {
-      "columns": [
-        "id"
-      ],
-      "nameExplicit": false,
-      "name": "unit_field_lock_pkey",
-      "schema": "public",
-      "table": "unit_field_lock",
       "entityType": "pks"
     },
     {
@@ -17014,6 +17881,26 @@
       "entityType": "pks"
     },
     {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "zone_navigation_pkey",
+      "schema": "public",
+      "table": "zone_navigation",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "zone_page_pkey",
+      "schema": "public",
+      "table": "zone_page",
+      "entityType": "pks"
+    },
+    {
       "nameExplicit": true,
       "columns": [
         "unit_id",
@@ -17082,18 +17969,6 @@
       "entityType": "uniques",
       "schema": "public",
       "table": "profile"
-    },
-    {
-      "nameExplicit": true,
-      "columns": [
-        "unit_id",
-        "path"
-      ],
-      "nullsNotDistinct": false,
-      "name": "unit_field_lock_unit_path_key",
-      "entityType": "uniques",
-      "schema": "public",
-      "table": "unit_field_lock"
     },
     {
       "nameExplicit": true,
@@ -17294,6 +18169,30 @@
       "table": "software_requirement"
     },
     {
+      "nameExplicit": true,
+      "columns": [
+        "zone_id",
+        "key"
+      ],
+      "nullsNotDistinct": false,
+      "name": "zone_navigation_zone_key",
+      "entityType": "uniques",
+      "schema": "public",
+      "table": "zone_navigation"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "zone_id",
+        "slug"
+      ],
+      "nullsNotDistinct": false,
+      "name": "zone_page_zone_slug_key",
+      "entityType": "uniques",
+      "schema": "public",
+      "table": "zone_page"
+    },
+    {
       "nameExplicit": false,
       "columns": [
         "token"
@@ -17314,6 +18213,90 @@
       "schema": "public",
       "table": "users",
       "entityType": "uniques"
+    },
+    {
+      "value": "(\n\t\t\t\t\"subject_kind\" = 'profile' and \"profile_id\" is not null and \"realm_id\" is null and \"realm_relation\" is null\n\t\t\t) or (\n\t\t\t\t\"subject_kind\" = 'realm' and \"profile_id\" is null and \"realm_id\" is not null and \"realm_relation\" is not null\n\t\t\t) or (\n\t\t\t\t\"subject_kind\" = 'authenticated' and \"profile_id\" is null and \"realm_id\" is null and \"realm_relation\" is null\n\t\t\t)",
+      "name": "unit_access_binding_subject_shape_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "value": "cardinality(\"scope\") <= 8 and (\n\t\tcardinality(\"scope\") = 0 or\n\t\tarray_to_string(\"scope\", '/') ~ '^[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9-]*)*$'\n\t)",
+      "name": "unit_access_binding_scope_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "value": "\"expires_at\" is null or \"expires_at\" > \"created_at\"",
+      "name": "unit_access_binding_expiry_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "value": "(\"revoked_at\" is null) = (\"revoked_by_profile_id\" is null)",
+      "name": "unit_access_binding_revocation_shape_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "unit_access_binding"
+    },
+    {
+      "value": "cardinality(\"scope\") <= 8 and (\n\t\tcardinality(\"scope\") = 0 or\n\t\tarray_to_string(\"scope\", '/') ~ '^[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9-]*)*$'\n\t)",
+      "name": "unit_access_restriction_scope_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "value": "btrim(\"reason\") <> ''",
+      "name": "unit_access_restriction_reason_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "value": "\"expires_at\" is null or \"expires_at\" > \"created_at\"",
+      "name": "unit_access_restriction_expiry_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "value": "(\"revoked_at\" is null) = (\"revoked_by_profile_id\" is null)",
+      "name": "unit_access_restriction_revocation_shape_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "unit_access_restriction"
+    },
+    {
+      "value": "cardinality(\"scope\") <= 8 and (\n\t\tcardinality(\"scope\") = 0 or\n\t\tarray_to_string(\"scope\", '/') ~ '^[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9-]*)*$'\n\t)",
+      "name": "unit_protection_scope_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "unit_protection"
+    },
+    {
+      "value": "btrim(\"reason\") <> ''",
+      "name": "unit_protection_reason_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "unit_protection"
+    },
+    {
+      "value": "\"expires_at\" is null or \"expires_at\" > \"created_at\"",
+      "name": "unit_protection_expiry_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "unit_protection"
+    },
+    {
+      "value": "(\"revoked_at\" is null) = (\"revoked_by_profile_id\" is null)",
+      "name": "unit_protection_revocation_shape_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "unit_protection"
     },
     {
       "value": "\"isbn13\" is null or \"isbn13\" ~ '^[0-9]{13}$'",
@@ -17491,13 +18474,6 @@
       "table": "profile_block"
     },
     {
-      "value": "\"follower_profile_id\" <> \"followed_profile_id\"",
-      "name": "profile_follow_not_self_check",
-      "entityType": "checks",
-      "schema": "public",
-      "table": "profile_follow"
-    },
-    {
       "value": "\"default_license\" is null or btrim(\"default_license\") <> ''",
       "name": "profile_preference_default_license_check",
       "entityType": "checks",
@@ -17540,11 +18516,11 @@
       "table": "unit"
     },
     {
-      "value": "\"path\" ~ '^/'",
-      "name": "unit_field_lock_path_check",
+      "value": "\"follower_profile_id\" <> \"unit_id\"",
+      "name": "unit_follow_not_self_check",
       "entityType": "checks",
       "schema": "public",
-      "table": "unit_field_lock"
+      "table": "unit_follow"
     },
     {
       "value": "btrim(\"language\") <> '' and char_length(\"language\") <= 35",
@@ -18107,18 +19083,25 @@
       "table": "unit_tag_vote"
     },
     {
-      "value": "\"managing_realm_id\" is null or \"id\" <> \"managing_realm_id\"",
-      "name": "zone_not_managing_realm_check",
-      "entityType": "checks",
-      "schema": "public",
-      "table": "zone"
-    },
-    {
       "value": "\"ends_at\" is null or \"starts_at\" is null or \"ends_at\" > \"starts_at\"",
       "name": "zone_time_range_check",
       "entityType": "checks",
       "schema": "public",
       "table": "zone"
+    },
+    {
+      "value": "\"key\" ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and char_length(\"key\") <= 64",
+      "name": "zone_navigation_key_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "zone_navigation"
+    },
+    {
+      "value": "\"slug\" ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and char_length(\"slug\") <= 100",
+      "name": "zone_page_slug_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "zone_page"
     }
   ],
   "renames": []

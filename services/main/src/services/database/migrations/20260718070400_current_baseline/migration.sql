@@ -1,19 +1,25 @@
+CREATE TYPE "unit_access_realm_relation" AS ENUM('member', 'content_editor', 'governor');--> statement-breakpoint
+CREATE TYPE "unit_access_role" AS ENUM('viewer', 'editor', 'publisher', 'maintainer', 'owner');--> statement-breakpoint
+CREATE TYPE "unit_access_subject_kind" AS ENUM('profile', 'realm', 'authenticated');--> statement-breakpoint
+CREATE TYPE "unit_permission" AS ENUM('unit.read', 'unit.update', 'unit.publish', 'unit.history.restore', 'unit.access.manage', 'unit.protection.manage', 'unit.delete');--> statement-breakpoint
+CREATE TYPE "unit_protection_mode" AS ENUM('frozen', 'owner_only');--> statement-breakpoint
 CREATE TYPE "alias_kind" AS ENUM('common', 'abbreviation', 'transliteration', 'alternate_title', 'legacy_title', 'misspelling', 'other');--> statement-breakpoint
-CREATE TYPE "collection_source" AS ENUM('manual', 'dynamic', 'system');--> statement-breakpoint
+CREATE TYPE "collection_source" AS ENUM('manual', 'search', 'system');--> statement-breakpoint
 CREATE TYPE "collection_system_key" AS ENUM('favorites');--> statement-breakpoint
 CREATE TYPE "notification_email_status" AS ENUM('not_requested', 'pending', 'sent', 'failed');--> statement-breakpoint
 CREATE TYPE "notification_kind" AS ENUM('reply', 'follow', 'direct_message', 'moderation', 'realm', 'system');--> statement-breakpoint
 CREATE TYPE "ai_disclosure" AS ENUM('unknown', 'none', 'ai_assisted', 'ai_originated', 'machine_generated');--> statement-breakpoint
-CREATE TYPE "collaborator_role" AS ENUM('owner', 'editor');--> statement-breakpoint
 CREATE TYPE "content_rating" AS ENUM('general', 'r15', 'r18', 'r18g');--> statement-breakpoint
 CREATE TYPE "content_status" AS ENUM('draft', 'published', 'archived');--> statement-breakpoint
+CREATE TYPE "image_asset_access" AS ENUM('private', 'public');--> statement-breakpoint
+CREATE TYPE "image_asset_status" AS ENUM('pending', 'ready', 'failed');--> statement-breakpoint
 CREATE TYPE "moderation_status" AS ENUM('approved', 'pending', 'removed');--> statement-breakpoint
 CREATE TYPE "unit_kind" AS ENUM('profile', 'book', 'software', 'media', 'release', 'entity', 'tag', 'series', 'zone', 'collection', 'post', 'poll', 'realm', 'realm_rule');--> statement-breakpoint
 CREATE TYPE "unit_status" AS ENUM('draft', 'published', 'archived');--> statement-breakpoint
 CREATE TYPE "unit_visibility" AS ENUM('public', 'unlisted', 'private');--> statement-breakpoint
 CREATE TYPE "enforcement_kind" AS ENUM('warning', 'silence', 'suspension', 'ban', 'rate_limit', 'trust_restriction');--> statement-breakpoint
 CREATE TYPE "feedback_kind" AS ENUM('report', 'bug', 'feature', 'other');--> statement-breakpoint
-CREATE TYPE "moderation_action_kind" AS ENUM('approve', 'remove', 'restore', 'lock', 'unlock', 'field_lock', 'field_unlock', 'warning', 'silence', 'suspension', 'ban', 'rate_limit', 'trust_restriction', 'revoke_enforcement', 'mute_member', 'remove_member', 'ban_member', 'restore_member', 'escalate', 'reverse', 'note');--> statement-breakpoint
+CREATE TYPE "moderation_action_kind" AS ENUM('approve', 'remove', 'restore', 'lock', 'unlock', 'protect', 'unprotect', 'warning', 'silence', 'suspension', 'ban', 'rate_limit', 'trust_restriction', 'revoke_enforcement', 'mute_member', 'remove_member', 'ban_member', 'restore_member', 'escalate', 'reverse', 'note');--> statement-breakpoint
 CREATE TYPE "moderation_authority" AS ENUM('platform', 'realm');--> statement-breakpoint
 CREATE TYPE "moderation_case_state" AS ENUM('new', 'triaged', 'assigned', 'actioned', 'resolved', 'duplicate', 'rejected', 'escalated', 'reviewing');--> statement-breakpoint
 CREATE TYPE "moderation_target_kind" AS ENUM('unit', 'unit_field', 'profile', 'realm_unit', 'realm_member', 'feedback');--> statement-breakpoint
@@ -103,6 +109,79 @@ CREATE TABLE "verifications" (
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "unit_access_binding" (
+	"id" uuid PRIMARY KEY DEFAULT uuidv7(),
+	"unit_id" uuid NOT NULL,
+	"subject_kind" "unit_access_subject_kind" NOT NULL,
+	"profile_id" uuid,
+	"realm_id" uuid,
+	"realm_relation" "unit_access_realm_relation",
+	"role" "unit_access_role" NOT NULL,
+	"scope" text[] DEFAULT array[]::text[] NOT NULL,
+	"granted_by_profile_id" uuid NOT NULL,
+	"expires_at" timestamp(3) with time zone,
+	"revoked_at" timestamp(3) with time zone,
+	"revoked_by_profile_id" uuid,
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "unit_access_binding_subject_shape_check" CHECK ((
+				"subject_kind" = 'profile' and "profile_id" is not null and "realm_id" is null and "realm_relation" is null
+			) or (
+				"subject_kind" = 'realm' and "profile_id" is null and "realm_id" is not null and "realm_relation" is not null
+			) or (
+				"subject_kind" = 'authenticated' and "profile_id" is null and "realm_id" is null and "realm_relation" is null
+			)),
+	CONSTRAINT "unit_access_binding_scope_check" CHECK (cardinality("scope") <= 8 and (
+		cardinality("scope") = 0 or
+		array_to_string("scope", '/') ~ '^[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9-]*)*$'
+	)),
+	CONSTRAINT "unit_access_binding_expiry_check" CHECK ("expires_at" is null or "expires_at" > "created_at"),
+	CONSTRAINT "unit_access_binding_revocation_shape_check" CHECK (("revoked_at" is null) = ("revoked_by_profile_id" is null))
+);
+--> statement-breakpoint
+CREATE TABLE "unit_access_restriction" (
+	"id" uuid PRIMARY KEY DEFAULT uuidv7(),
+	"unit_id" uuid NOT NULL,
+	"profile_id" uuid NOT NULL,
+	"permission" "unit_permission" NOT NULL,
+	"scope" text[] DEFAULT array[]::text[] NOT NULL,
+	"reason" text NOT NULL,
+	"created_by_profile_id" uuid NOT NULL,
+	"expires_at" timestamp(3) with time zone,
+	"revoked_at" timestamp(3) with time zone,
+	"revoked_by_profile_id" uuid,
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "unit_access_restriction_scope_check" CHECK (cardinality("scope") <= 8 and (
+		cardinality("scope") = 0 or
+		array_to_string("scope", '/') ~ '^[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9-]*)*$'
+	)),
+	CONSTRAINT "unit_access_restriction_reason_check" CHECK (btrim("reason") <> ''),
+	CONSTRAINT "unit_access_restriction_expiry_check" CHECK ("expires_at" is null or "expires_at" > "created_at"),
+	CONSTRAINT "unit_access_restriction_revocation_shape_check" CHECK (("revoked_at" is null) = ("revoked_by_profile_id" is null))
+);
+--> statement-breakpoint
+CREATE TABLE "unit_protection" (
+	"id" uuid PRIMARY KEY DEFAULT uuidv7(),
+	"unit_id" uuid NOT NULL,
+	"scope" text[] DEFAULT array[]::text[] NOT NULL,
+	"mode" "unit_protection_mode" NOT NULL,
+	"reason" text NOT NULL,
+	"created_by_profile_id" uuid NOT NULL,
+	"expires_at" timestamp(3) with time zone,
+	"revoked_at" timestamp(3) with time zone,
+	"revoked_by_profile_id" uuid,
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "unit_protection_scope_check" CHECK (cardinality("scope") <= 8 and (
+		cardinality("scope") = 0 or
+		array_to_string("scope", '/') ~ '^[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9-]*)*$'
+	)),
+	CONSTRAINT "unit_protection_reason_check" CHECK (btrim("reason") <> ''),
+	CONSTRAINT "unit_protection_expiry_check" CHECK ("expires_at" is null or "expires_at" > "created_at"),
+	CONSTRAINT "unit_protection_revocation_shape_check" CHECK (("revoked_at" is null) = ("revoked_by_profile_id" is null))
+);
+--> statement-breakpoint
 CREATE TABLE "book" (
 	"id" uuid PRIMARY KEY,
 	"isbn13" text,
@@ -149,7 +228,7 @@ CREATE TABLE "unit_link" (
 	"normalized_url" text NOT NULL,
 	"normalized_url_hash" text NOT NULL,
 	"role" text DEFAULT 'related' NOT NULL,
-	"position" text DEFAULT 'V' NOT NULL,
+	"position" text collate "C" DEFAULT 'a0' NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "unit_link_unit_source_hash_key" UNIQUE("unit_id","source_entity_id","normalized_url_hash"),
@@ -182,7 +261,7 @@ CREATE TABLE "collection_item" (
 	"collection_id" uuid,
 	"unit_id" uuid,
 	"role" text DEFAULT 'item' NOT NULL,
-	"position" text DEFAULT 'V' NOT NULL,
+	"position" text collate "C" DEFAULT 'a0' NOT NULL,
 	"added_by_profile_id" uuid,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
@@ -258,7 +337,7 @@ CREATE TABLE "content_structure_node" (
 	"owner_unit_id" uuid NOT NULL,
 	"parent_id" uuid,
 	"content_unit_id" uuid NOT NULL,
-	"position" text NOT NULL,
+	"position" text collate "C" NOT NULL,
 	"content_rating" "content_rating",
 	"deleted_at" timestamp(3) with time zone,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
@@ -268,10 +347,34 @@ CREATE TABLE "content_structure_node" (
 	CONSTRAINT "content_structure_node_deleted_at_check" CHECK ("deleted_at" is null or "deleted_at" >= "created_at")
 );
 --> statement-breakpoint
+CREATE TABLE "image_asset" (
+	"id" uuid PRIMARY KEY DEFAULT uuidv7(),
+	"uploader_profile_id" uuid NOT NULL,
+	"owner_profile_id" uuid NOT NULL,
+	"status" "image_asset_status" DEFAULT 'pending'::"image_asset_status" NOT NULL,
+	"access" "image_asset_access" DEFAULT 'private'::"image_asset_access" NOT NULL,
+	"deleted_at" timestamp(3) with time zone,
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "image_asset_deleted_at_check" CHECK ("deleted_at" is null or "deleted_at" >= "created_at")
+);
+--> statement-breakpoint
+CREATE TABLE "image_object" (
+	"id" uuid PRIMARY KEY DEFAULT uuidv7(),
+	"asset_id" uuid NOT NULL CONSTRAINT "image_object_asset_id_key" UNIQUE,
+	"storage_key" text NOT NULL CONSTRAINT "image_object_storage_key_key" UNIQUE,
+	"media_type" text,
+	"byte_size" bigint,
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "image_object_storage_key_not_blank" CHECK (btrim("storage_key") <> ''),
+	CONSTRAINT "image_object_metadata_shape_check" CHECK (("media_type" is null and "byte_size" is null) or ("media_type" is not null and "byte_size" > 0))
+);
+--> statement-breakpoint
 CREATE TABLE "profile" (
 	"id" uuid PRIMARY KEY,
 	"auth_user_id" uuid NOT NULL CONSTRAINT "profile_auth_user_id_key" UNIQUE,
-	"avatar" text,
+	"avatar_asset_id" uuid,
 	"joined_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
@@ -283,14 +386,6 @@ CREATE TABLE "profile_block" (
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "profile_block_pkey" PRIMARY KEY("blocker_profile_id","blocked_profile_id"),
 	CONSTRAINT "profile_block_not_self_check" CHECK ("blocker_profile_id" <> "blocked_profile_id")
-);
---> statement-breakpoint
-CREATE TABLE "profile_follow" (
-	"follower_profile_id" uuid,
-	"followed_profile_id" uuid,
-	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "profile_follow_pkey" PRIMARY KEY("follower_profile_id","followed_profile_id"),
-	CONSTRAINT "profile_follow_not_self_check" CHECK ("follower_profile_id" <> "followed_profile_id")
 );
 --> statement-breakpoint
 CREATE TABLE "profile_preference" (
@@ -317,46 +412,29 @@ CREATE TABLE "unit" (
 	"content_rating" "content_rating" DEFAULT 'general'::"content_rating" NOT NULL,
 	"ai_disclosure" "ai_disclosure" DEFAULT 'unknown'::"ai_disclosure" NOT NULL,
 	"license" text,
-	"cover_key" text,
-	"cover_focal_x" double precision,
-	"cover_focal_y" double precision,
 	"moderation_status" "moderation_status" DEFAULT 'approved'::"moderation_status" NOT NULL,
 	"published_at" timestamp(3) with time zone,
 	"deleted_at" timestamp(3) with time zone,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "unit_slug_not_blank" CHECK ("slug" is null or btrim("slug") <> ''),
-	CONSTRAINT "unit_cover_shape_check" CHECK (("cover_key" is null and "cover_focal_x" is null and "cover_focal_y" is null) or ("cover_key" is not null and "cover_focal_x" between 0 and 1 and "cover_focal_y" between 0 and 1)),
 	CONSTRAINT "unit_publication_check" CHECK ("status" <> 'published'::unit_status or "published_at" is not null),
 	CONSTRAINT "unit_deleted_at_check" CHECK ("deleted_at" is null or "deleted_at" >= "created_at")
 );
 --> statement-breakpoint
-CREATE TABLE "unit_collaborator" (
+CREATE TABLE "unit_follow" (
+	"follower_profile_id" uuid,
 	"unit_id" uuid,
-	"profile_id" uuid,
-	"role" "collaborator_role" NOT NULL,
-	"added_by_profile_id" uuid NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "unit_collaborator_pkey" PRIMARY KEY("unit_id","profile_id")
-);
---> statement-breakpoint
-CREATE TABLE "unit_field_lock" (
-	"id" uuid PRIMARY KEY DEFAULT uuidv7(),
-	"unit_id" uuid NOT NULL,
-	"path" text NOT NULL,
-	"locked_by_profile_id" uuid NOT NULL,
-	"reason" text,
-	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "unit_field_lock_unit_path_key" UNIQUE("unit_id","path"),
-	CONSTRAINT "unit_field_lock_path_check" CHECK ("path" ~ '^/')
+	CONSTRAINT "unit_follow_pkey" PRIMARY KEY("follower_profile_id","unit_id"),
+	CONSTRAINT "unit_follow_not_self_check" CHECK ("follower_profile_id" <> "unit_id")
 );
 --> statement-breakpoint
 CREATE TABLE "unit_localization" (
 	"unit_id" uuid,
 	"language" text,
-	"is_default" boolean DEFAULT false NOT NULL,
+	"position" text collate "C" DEFAULT ('a0' || replace(uuidv7()::text, '-', '') || 'V') NOT NULL,
+	"cover_asset_id" uuid,
 	"title" text,
 	"summary" text,
 	"description" jsonb,
@@ -365,6 +443,7 @@ CREATE TABLE "unit_localization" (
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "unit_localization_pkey" PRIMARY KEY("unit_id","language"),
+	CONSTRAINT "unit_localization_unit_position_key" UNIQUE("unit_id","position"),
 	CONSTRAINT "unit_localization_language_check" CHECK (btrim("language") <> '' and char_length("language") <= 35),
 	CONSTRAINT "unit_localization_value_check" CHECK ("title" is not null or "summary" is not null or "description" is not null or "content" is not null),
 	CONSTRAINT "unit_localization_content_state_check" CHECK (("content" is null) = ("content_status" is null))
@@ -375,7 +454,7 @@ CREATE TABLE "credit_attribution" (
 	"unit_id" uuid NOT NULL,
 	"entity_id" uuid NOT NULL,
 	"role" text NOT NULL,
-	"position" text DEFAULT 'V' NOT NULL,
+	"position" text collate "C" DEFAULT 'a0' NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "credit_attribution_unit_entity_role_key" UNIQUE("unit_id","entity_id","role"),
@@ -387,7 +466,7 @@ CREATE TABLE "entity" (
 	"id" uuid PRIMARY KEY,
 	"kind" text NOT NULL,
 	"verified" boolean DEFAULT false NOT NULL,
-	"avatar" text,
+	"avatar_asset_id" uuid,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "entity_kind_not_blank" CHECK (btrim("kind") <> '')
@@ -398,7 +477,7 @@ CREATE TABLE "subject_attribution" (
 	"unit_id" uuid NOT NULL,
 	"subject_entity_id" uuid NOT NULL,
 	"role" text NOT NULL,
-	"position" text DEFAULT 'V' NOT NULL,
+	"position" text collate "C" DEFAULT 'a0' NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "subject_attribution_unit_entity_role_key" UNIQUE("unit_id","subject_entity_id","role"),
@@ -580,7 +659,7 @@ CREATE TABLE "poll" (
 CREATE TABLE "poll_option" (
 	"id" uuid PRIMARY KEY DEFAULT uuidv7(),
 	"poll_id" uuid NOT NULL,
-	"position" text NOT NULL,
+	"position" integer NOT NULL,
 	"deleted_at" timestamp(3) with time zone,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
@@ -707,7 +786,7 @@ CREATE TABLE "realm_pin" (
 	"realm_id" uuid,
 	"unit_id" uuid,
 	"kind" "realm_pin_kind" DEFAULT 'pinned'::"realm_pin_kind" NOT NULL,
-	"position" text DEFAULT 'V' NOT NULL,
+	"position" text collate "C" DEFAULT 'a0' NOT NULL,
 	"created_by_profile_id" uuid,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
@@ -718,7 +797,7 @@ CREATE TABLE "realm_pin" (
 CREATE TABLE "realm_rule" (
 	"id" uuid PRIMARY KEY,
 	"revision_id" uuid NOT NULL,
-	"position" text NOT NULL,
+	"position" integer NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
@@ -741,13 +820,6 @@ CREATE TABLE "realm_rule_revision" (
 	"published_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "realm_rule_revision_realm_version_key" UNIQUE("realm_id","version"),
 	CONSTRAINT "realm_rule_revision_version_check" CHECK ("version" > 0)
-);
---> statement-breakpoint
-CREATE TABLE "realm_subscription" (
-	"profile_id" uuid,
-	"realm_id" uuid,
-	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "realm_subscription_pkey" PRIMARY KEY("profile_id","realm_id")
 );
 --> statement-breakpoint
 CREATE TABLE "realm_unit" (
@@ -909,7 +981,7 @@ CREATE TABLE "series" (
 CREATE TABLE "series_release" (
 	"series_id" uuid,
 	"release_unit_id" uuid,
-	"position" text NOT NULL,
+	"position" text collate "C" NOT NULL,
 	"released_on" date,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
@@ -944,7 +1016,7 @@ CREATE TABLE "profile_unit_tag" (
 	"profile_id" uuid,
 	"unit_id" uuid,
 	"tag_id" uuid,
-	"position" text DEFAULT 'V' NOT NULL,
+	"position" text collate "C" DEFAULT 'a0' NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "profile_unit_tag_pkey" PRIMARY KEY("profile_id","unit_id","tag_id"),
@@ -979,7 +1051,7 @@ CREATE TABLE "realm_unit_tag" (
 	"realm_id" uuid,
 	"unit_id" uuid,
 	"tag_id" uuid,
-	"position" text DEFAULT 'V' NOT NULL,
+	"position" text collate "C" DEFAULT 'a0' NOT NULL,
 	"created_by_profile_id" uuid NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
@@ -997,7 +1069,7 @@ CREATE TABLE "unit_tag" (
 	"unit_id" uuid,
 	"tag_id" uuid,
 	"pinned" boolean DEFAULT false NOT NULL,
-	"position" text,
+	"position" text collate "C",
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "unit_tag_pkey" PRIMARY KEY("unit_id","tag_id"),
@@ -1018,22 +1090,40 @@ CREATE TABLE "unit_tag_vote" (
 --> statement-breakpoint
 CREATE TABLE "zone" (
 	"id" uuid PRIMARY KEY,
-	"managing_realm_id" uuid,
 	"boundary_document" jsonb NOT NULL,
 	"theme_document" jsonb NOT NULL,
+	"dock_document" jsonb NOT NULL,
 	"starts_at" timestamp(3) with time zone,
 	"ends_at" timestamp(3) with time zone,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "zone_not_managing_realm_check" CHECK ("managing_realm_id" is null or "id" <> "managing_realm_id"),
 	CONSTRAINT "zone_time_range_check" CHECK ("ends_at" is null or "starts_at" is null or "ends_at" > "starts_at")
 );
 --> statement-breakpoint
-CREATE TABLE "zone_subscription" (
-	"profile_id" uuid,
-	"zone_id" uuid,
+CREATE TABLE "zone_navigation" (
+	"id" uuid PRIMARY KEY DEFAULT uuidv7(),
+	"zone_id" uuid NOT NULL,
+	"key" text NOT NULL,
+	"document" jsonb NOT NULL,
+	"position" text collate "C" NOT NULL,
 	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "zone_subscription_pkey" PRIMARY KEY("profile_id","zone_id")
+	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "zone_navigation_zone_key" UNIQUE("zone_id","key"),
+	CONSTRAINT "zone_navigation_key_check" CHECK ("key" ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and char_length("key") <= 64)
+);
+--> statement-breakpoint
+CREATE TABLE "zone_page" (
+	"id" uuid PRIMARY KEY DEFAULT uuidv7(),
+	"zone_id" uuid NOT NULL,
+	"slug" text NOT NULL,
+	"title_unit_id" uuid NOT NULL,
+	"document" jsonb NOT NULL,
+	"position" text collate "C" NOT NULL,
+	"home" boolean DEFAULT false NOT NULL,
+	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "zone_page_zone_slug_key" UNIQUE("zone_id","slug"),
+	CONSTRAINT "zone_page_slug_check" CHECK ("slug" ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and char_length("slug") <= 100)
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX "accounts_provider_id_account_id_key" ON "accounts" ("provider_id","account_id");--> statement-breakpoint
@@ -1043,6 +1133,17 @@ CREATE INDEX "apikeys_reference_id_idx" ON "apikeys" ("reference_id");--> statem
 CREATE UNIQUE INDEX "apikeys_key_key" ON "apikeys" ("key");--> statement-breakpoint
 CREATE INDEX "sessions_user_id_idx" ON "sessions" ("user_id");--> statement-breakpoint
 CREATE INDEX "verifications_identifier_idx" ON "verifications" ("identifier");--> statement-breakpoint
+CREATE UNIQUE INDEX "unit_access_binding_active_profile_scope_key" ON "unit_access_binding" ("unit_id","profile_id","scope") WHERE "revoked_at" is null and "subject_kind" = 'profile';--> statement-breakpoint
+CREATE UNIQUE INDEX "unit_access_binding_active_realm_scope_key" ON "unit_access_binding" ("unit_id","realm_id","realm_relation","scope") WHERE "revoked_at" is null and "subject_kind" = 'realm';--> statement-breakpoint
+CREATE UNIQUE INDEX "unit_access_binding_active_authenticated_scope_key" ON "unit_access_binding" ("unit_id","scope") WHERE "revoked_at" is null and "subject_kind" = 'authenticated';--> statement-breakpoint
+CREATE INDEX "unit_access_binding_profile_active_idx" ON "unit_access_binding" ("profile_id","unit_id","role") WHERE "revoked_at" is null;--> statement-breakpoint
+CREATE INDEX "unit_access_binding_realm_active_idx" ON "unit_access_binding" ("realm_id","unit_id","realm_relation","role") WHERE "revoked_at" is null;--> statement-breakpoint
+CREATE INDEX "unit_access_binding_granted_by_idx" ON "unit_access_binding" ("granted_by_profile_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "unit_access_restriction_active_subject_scope_key" ON "unit_access_restriction" ("unit_id","profile_id","permission","scope") WHERE "revoked_at" is null;--> statement-breakpoint
+CREATE INDEX "unit_access_restriction_profile_active_idx" ON "unit_access_restriction" ("profile_id","unit_id","permission") WHERE "revoked_at" is null;--> statement-breakpoint
+CREATE INDEX "unit_access_restriction_created_by_idx" ON "unit_access_restriction" ("created_by_profile_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "unit_protection_active_scope_key" ON "unit_protection" ("unit_id","scope") WHERE "revoked_at" is null;--> statement-breakpoint
+CREATE INDEX "unit_protection_created_by_idx" ON "unit_protection" ("created_by_profile_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "book_isbn13_key" ON "book" ("isbn13") WHERE "isbn13" is not null;--> statement-breakpoint
 CREATE INDEX "book_publication_date_idx" ON "book" ("publication_date");--> statement-breakpoint
 CREATE UNIQUE INDEX "unit_alias_unit_language_normalized_key" ON "unit_alias" ("unit_id",coalesce("language", ''),"normalized_term") WHERE "deleted_at" is null;--> statement-breakpoint
@@ -1073,17 +1174,16 @@ CREATE INDEX "notification_preference_kind_idx" ON "notification_preference" ("k
 CREATE INDEX "content_structure_node_owner_parent_position_idx" ON "content_structure_node" ("owner_unit_id","parent_id","position","id") WHERE "deleted_at" is null;--> statement-breakpoint
 CREATE INDEX "content_structure_node_parent_idx" ON "content_structure_node" ("parent_id");--> statement-breakpoint
 CREATE INDEX "content_structure_node_content_unit_idx" ON "content_structure_node" ("content_unit_id");--> statement-breakpoint
+CREATE INDEX "image_asset_uploader_status_idx" ON "image_asset" ("uploader_profile_id","status","created_at");--> statement-breakpoint
+CREATE INDEX "image_asset_owner_status_idx" ON "image_asset" ("owner_profile_id","status","created_at");--> statement-breakpoint
 CREATE INDEX "profile_block_blocked_idx" ON "profile_block" ("blocked_profile_id");--> statement-breakpoint
-CREATE INDEX "profile_follow_followed_created_at_idx" ON "profile_follow" ("followed_profile_id","created_at" DESC NULLS LAST,"follower_profile_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "unit_kind_slug_key" ON "unit" ("kind","slug") WHERE "slug" is not null;--> statement-breakpoint
 CREATE INDEX "unit_kind_status_created_at_idx" ON "unit" ("kind","status","created_at" DESC NULLS LAST,"id" DESC NULLS LAST) WHERE "deleted_at" is null;--> statement-breakpoint
 CREATE INDEX "unit_status_visibility_created_at_idx" ON "unit" ("status","visibility","created_at" DESC NULLS LAST,"id" DESC NULLS LAST) WHERE "deleted_at" is null;--> statement-breakpoint
 CREATE INDEX "unit_moderation_status_idx" ON "unit" ("moderation_status");--> statement-breakpoint
 CREATE INDEX "unit_slug_search_idx" ON "unit" USING pgroonga ("slug") WHERE "deleted_at" is null;--> statement-breakpoint
-CREATE INDEX "unit_collaborator_profile_role_idx" ON "unit_collaborator" ("profile_id","role");--> statement-breakpoint
-CREATE INDEX "unit_collaborator_added_by_idx" ON "unit_collaborator" ("added_by_profile_id");--> statement-breakpoint
-CREATE INDEX "unit_field_lock_locked_by_idx" ON "unit_field_lock" ("locked_by_profile_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "unit_localization_one_default_key" ON "unit_localization" ("unit_id") WHERE "is_default";--> statement-breakpoint
+CREATE INDEX "unit_follow_unit_created_at_idx" ON "unit_follow" ("unit_id","created_at" DESC NULLS LAST,"follower_profile_id");--> statement-breakpoint
+CREATE INDEX "unit_localization_unit_position_idx" ON "unit_localization" ("unit_id","position","language");--> statement-breakpoint
 CREATE INDEX "unit_localization_language_unit_idx" ON "unit_localization" ("language","unit_id");--> statement-breakpoint
 CREATE INDEX "unit_localization_content_status_idx" ON "unit_localization" ("content_status","updated_at");--> statement-breakpoint
 CREATE INDEX "unit_localization_title_search_idx" ON "unit_localization" USING pgroonga ("title");--> statement-breakpoint
@@ -1153,7 +1253,6 @@ CREATE INDEX "realm_rule_revision_position_idx" ON "realm_rule" ("revision_id","
 CREATE INDEX "realm_rule_acceptance_profile_idx" ON "realm_rule_acceptance" ("profile_id","accepted_at" DESC NULLS LAST);--> statement-breakpoint
 CREATE INDEX "realm_rule_revision_realm_published_idx" ON "realm_rule_revision" ("realm_id","version" DESC NULLS LAST);--> statement-breakpoint
 CREATE INDEX "realm_rule_revision_created_by_idx" ON "realm_rule_revision" ("created_by_profile_id");--> statement-breakpoint
-CREATE INDEX "realm_subscription_realm_created_at_idx" ON "realm_subscription" ("realm_id","created_at" DESC NULLS LAST,"profile_id");--> statement-breakpoint
 CREATE INDEX "realm_unit_realm_status_created_idx" ON "realm_unit" ("realm_id","status","created_at" DESC NULLS LAST,"unit_id");--> statement-breakpoint
 CREATE INDEX "realm_unit_unit_idx" ON "realm_unit" ("unit_id");--> statement-breakpoint
 CREATE INDEX "realm_unit_status_event_history_idx" ON "realm_unit_status_event" ("realm_id","unit_id","created_at" DESC NULLS LAST,"id" DESC NULLS LAST);--> statement-breakpoint
@@ -1187,11 +1286,25 @@ CREATE INDEX "unit_tag_tag_idx" ON "unit_tag" ("tag_id");--> statement-breakpoin
 CREATE INDEX "unit_tag_unit_position_idx" ON "unit_tag" ("unit_id","pinned","position","tag_id");--> statement-breakpoint
 CREATE INDEX "unit_tag_vote_tag_idx" ON "unit_tag_vote" ("tag_id");--> statement-breakpoint
 CREATE INDEX "unit_tag_vote_profile_idx" ON "unit_tag_vote" ("profile_id");--> statement-breakpoint
-CREATE INDEX "zone_managing_realm_idx" ON "zone" ("managing_realm_id");--> statement-breakpoint
-CREATE INDEX "zone_subscription_zone_created_at_idx" ON "zone_subscription" ("zone_id","created_at" DESC NULLS LAST,"profile_id");--> statement-breakpoint
+CREATE INDEX "zone_navigation_zone_position_idx" ON "zone_navigation" ("zone_id","position","id");--> statement-breakpoint
+CREATE UNIQUE INDEX "zone_page_one_home_key" ON "zone_page" ("zone_id") WHERE "home";--> statement-breakpoint
+CREATE INDEX "zone_page_zone_position_idx" ON "zone_page" ("zone_id","position","id");--> statement-breakpoint
+CREATE INDEX "zone_page_title_unit_idx" ON "zone_page" ("title_unit_id");--> statement-breakpoint
 ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "apikeys" ADD CONSTRAINT "apikeys_reference_id_users_id_fkey" FOREIGN KEY ("reference_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "unit_access_binding" ADD CONSTRAINT "unit_access_binding_unit_id_unit_id_fkey" FOREIGN KEY ("unit_id") REFERENCES "unit"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "unit_access_binding" ADD CONSTRAINT "unit_access_binding_profile_id_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "profile"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "unit_access_binding" ADD CONSTRAINT "unit_access_binding_realm_id_realm_id_fkey" FOREIGN KEY ("realm_id") REFERENCES "realm"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "unit_access_binding" ADD CONSTRAINT "unit_access_binding_granted_by_profile_id_profile_id_fkey" FOREIGN KEY ("granted_by_profile_id") REFERENCES "profile"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "unit_access_binding" ADD CONSTRAINT "unit_access_binding_revoked_by_profile_id_profile_id_fkey" FOREIGN KEY ("revoked_by_profile_id") REFERENCES "profile"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "unit_access_restriction" ADD CONSTRAINT "unit_access_restriction_unit_id_unit_id_fkey" FOREIGN KEY ("unit_id") REFERENCES "unit"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "unit_access_restriction" ADD CONSTRAINT "unit_access_restriction_profile_id_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "profile"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "unit_access_restriction" ADD CONSTRAINT "unit_access_restriction_created_by_profile_id_profile_id_fkey" FOREIGN KEY ("created_by_profile_id") REFERENCES "profile"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "unit_access_restriction" ADD CONSTRAINT "unit_access_restriction_revoked_by_profile_id_profile_id_fkey" FOREIGN KEY ("revoked_by_profile_id") REFERENCES "profile"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "unit_protection" ADD CONSTRAINT "unit_protection_unit_id_unit_id_fkey" FOREIGN KEY ("unit_id") REFERENCES "unit"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "unit_protection" ADD CONSTRAINT "unit_protection_created_by_profile_id_profile_id_fkey" FOREIGN KEY ("created_by_profile_id") REFERENCES "profile"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "unit_protection" ADD CONSTRAINT "unit_protection_revoked_by_profile_id_profile_id_fkey" FOREIGN KEY ("revoked_by_profile_id") REFERENCES "profile"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "book" ADD CONSTRAINT "book_id_unit_id_fkey" FOREIGN KEY ("id") REFERENCES "unit"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "unit_alias" ADD CONSTRAINT "unit_alias_unit_id_unit_id_fkey" FOREIGN KEY ("unit_id") REFERENCES "unit"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "unit_alias" ADD CONSTRAINT "unit_alias_created_by_profile_id_profile_id_fkey" FOREIGN KEY ("created_by_profile_id") REFERENCES "profile"("id") ON DELETE SET NULL;--> statement-breakpoint
@@ -1220,22 +1333,23 @@ ALTER TABLE "notification_preference" ADD CONSTRAINT "notification_preference_pr
 ALTER TABLE "content_structure_node" ADD CONSTRAINT "content_structure_node_owner_unit_id_unit_id_fkey" FOREIGN KEY ("owner_unit_id") REFERENCES "unit"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "content_structure_node" ADD CONSTRAINT "content_structure_node_content_unit_id_unit_id_fkey" FOREIGN KEY ("content_unit_id") REFERENCES "unit"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "content_structure_node" ADD CONSTRAINT "content_structure_node_parent_owner_fkey" FOREIGN KEY ("parent_id","owner_unit_id") REFERENCES "content_structure_node"("id","owner_unit_id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "image_asset" ADD CONSTRAINT "image_asset_uploader_profile_id_profile_id_fkey" FOREIGN KEY ("uploader_profile_id") REFERENCES "profile"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "image_asset" ADD CONSTRAINT "image_asset_owner_profile_id_profile_id_fkey" FOREIGN KEY ("owner_profile_id") REFERENCES "profile"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "image_object" ADD CONSTRAINT "image_object_asset_id_image_asset_id_fkey" FOREIGN KEY ("asset_id") REFERENCES "image_asset"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "profile" ADD CONSTRAINT "profile_id_unit_id_fkey" FOREIGN KEY ("id") REFERENCES "unit"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "profile" ADD CONSTRAINT "profile_auth_user_id_users_id_fkey" FOREIGN KEY ("auth_user_id") REFERENCES "users"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "profile" ADD CONSTRAINT "profile_avatar_asset_id_image_asset_id_fkey" FOREIGN KEY ("avatar_asset_id") REFERENCES "image_asset"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "profile_block" ADD CONSTRAINT "profile_block_blocker_profile_id_profile_id_fkey" FOREIGN KEY ("blocker_profile_id") REFERENCES "profile"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "profile_block" ADD CONSTRAINT "profile_block_blocked_profile_id_profile_id_fkey" FOREIGN KEY ("blocked_profile_id") REFERENCES "profile"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "profile_follow" ADD CONSTRAINT "profile_follow_follower_profile_id_profile_id_fkey" FOREIGN KEY ("follower_profile_id") REFERENCES "profile"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "profile_follow" ADD CONSTRAINT "profile_follow_followed_profile_id_profile_id_fkey" FOREIGN KEY ("followed_profile_id") REFERENCES "profile"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "profile_preference" ADD CONSTRAINT "profile_preference_profile_id_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "profile"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "unit_collaborator" ADD CONSTRAINT "unit_collaborator_unit_id_unit_id_fkey" FOREIGN KEY ("unit_id") REFERENCES "unit"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "unit_collaborator" ADD CONSTRAINT "unit_collaborator_profile_id_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "profile"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "unit_collaborator" ADD CONSTRAINT "unit_collaborator_added_by_profile_id_profile_id_fkey" FOREIGN KEY ("added_by_profile_id") REFERENCES "profile"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "unit_field_lock" ADD CONSTRAINT "unit_field_lock_unit_id_unit_id_fkey" FOREIGN KEY ("unit_id") REFERENCES "unit"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "unit_field_lock" ADD CONSTRAINT "unit_field_lock_locked_by_profile_id_profile_id_fkey" FOREIGN KEY ("locked_by_profile_id") REFERENCES "profile"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "unit_follow" ADD CONSTRAINT "unit_follow_follower_profile_id_profile_id_fkey" FOREIGN KEY ("follower_profile_id") REFERENCES "profile"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "unit_follow" ADD CONSTRAINT "unit_follow_unit_id_unit_id_fkey" FOREIGN KEY ("unit_id") REFERENCES "unit"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "unit_localization" ADD CONSTRAINT "unit_localization_unit_id_unit_id_fkey" FOREIGN KEY ("unit_id") REFERENCES "unit"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "unit_localization" ADD CONSTRAINT "unit_localization_cover_asset_id_image_asset_id_fkey" FOREIGN KEY ("cover_asset_id") REFERENCES "image_asset"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "credit_attribution" ADD CONSTRAINT "credit_attribution_unit_id_unit_id_fkey" FOREIGN KEY ("unit_id") REFERENCES "unit"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "credit_attribution" ADD CONSTRAINT "credit_attribution_entity_id_entity_id_fkey" FOREIGN KEY ("entity_id") REFERENCES "entity"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "entity" ADD CONSTRAINT "entity_id_unit_id_fkey" FOREIGN KEY ("id") REFERENCES "unit"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "entity" ADD CONSTRAINT "entity_avatar_asset_id_image_asset_id_fkey" FOREIGN KEY ("avatar_asset_id") REFERENCES "image_asset"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "subject_attribution" ADD CONSTRAINT "subject_attribution_unit_id_unit_id_fkey" FOREIGN KEY ("unit_id") REFERENCES "unit"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "subject_attribution" ADD CONSTRAINT "subject_attribution_subject_entity_id_entity_id_fkey" FOREIGN KEY ("subject_entity_id") REFERENCES "entity"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "account_enforcement" ADD CONSTRAINT "account_enforcement_profile_id_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "profile"("id") ON DELETE CASCADE;--> statement-breakpoint
@@ -1301,8 +1415,6 @@ ALTER TABLE "realm_rule_acceptance" ADD CONSTRAINT "realm_rule_acceptance_revisi
 ALTER TABLE "realm_rule_acceptance" ADD CONSTRAINT "realm_rule_acceptance_profile_id_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "profile"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "realm_rule_revision" ADD CONSTRAINT "realm_rule_revision_realm_id_realm_id_fkey" FOREIGN KEY ("realm_id") REFERENCES "realm"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "realm_rule_revision" ADD CONSTRAINT "realm_rule_revision_created_by_profile_id_profile_id_fkey" FOREIGN KEY ("created_by_profile_id") REFERENCES "profile"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "realm_subscription" ADD CONSTRAINT "realm_subscription_profile_id_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "profile"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "realm_subscription" ADD CONSTRAINT "realm_subscription_realm_id_realm_id_fkey" FOREIGN KEY ("realm_id") REFERENCES "realm"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "realm_unit" ADD CONSTRAINT "realm_unit_realm_id_realm_id_fkey" FOREIGN KEY ("realm_id") REFERENCES "realm"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "realm_unit" ADD CONSTRAINT "realm_unit_unit_id_unit_id_fkey" FOREIGN KEY ("unit_id") REFERENCES "unit"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "realm_unit_status_event" ADD CONSTRAINT "realm_unit_status_event_changed_by_profile_id_profile_id_fkey" FOREIGN KEY ("changed_by_profile_id") REFERENCES "profile"("id") ON DELETE SET NULL;--> statement-breakpoint
@@ -1354,6 +1466,6 @@ ALTER TABLE "unit_tag_vote" ADD CONSTRAINT "unit_tag_vote_tag_id_tag_id_fkey" FO
 ALTER TABLE "unit_tag_vote" ADD CONSTRAINT "unit_tag_vote_profile_id_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "profile"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "unit_tag_vote" ADD CONSTRAINT "unit_tag_vote_unit_tag_fkey" FOREIGN KEY ("unit_id","tag_id") REFERENCES "unit_tag"("unit_id","tag_id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "zone" ADD CONSTRAINT "zone_id_unit_id_fkey" FOREIGN KEY ("id") REFERENCES "unit"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "zone" ADD CONSTRAINT "zone_managing_realm_id_realm_id_fkey" FOREIGN KEY ("managing_realm_id") REFERENCES "realm"("id") ON DELETE SET NULL;--> statement-breakpoint
-ALTER TABLE "zone_subscription" ADD CONSTRAINT "zone_subscription_profile_id_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "profile"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "zone_subscription" ADD CONSTRAINT "zone_subscription_zone_id_zone_id_fkey" FOREIGN KEY ("zone_id") REFERENCES "zone"("id") ON DELETE CASCADE;
+ALTER TABLE "zone_navigation" ADD CONSTRAINT "zone_navigation_zone_id_zone_id_fkey" FOREIGN KEY ("zone_id") REFERENCES "zone"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "zone_page" ADD CONSTRAINT "zone_page_zone_id_zone_id_fkey" FOREIGN KEY ("zone_id") REFERENCES "zone"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "zone_page" ADD CONSTRAINT "zone_page_title_unit_id_unit_id_fkey" FOREIGN KEY ("title_unit_id") REFERENCES "unit"("id") ON DELETE RESTRICT;

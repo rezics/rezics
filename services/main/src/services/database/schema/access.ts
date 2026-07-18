@@ -78,16 +78,15 @@ export const unitAccessBinding = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		uniqueIndex("unit_access_binding_active_subject_scope_key")
-			.on(
-				table.unitId,
-				table.subjectKind,
-				sql`coalesce(${table.profileId}, '00000000-0000-0000-0000-000000000000'::uuid)`,
-				sql`coalesce(${table.realmId}, '00000000-0000-0000-0000-000000000000'::uuid)`,
-				sql`coalesce(${table.realmRelation}::text, '')`,
-				table.scope,
-			)
-			.where(sql`${table.revokedAt} is null`),
+		uniqueIndex("unit_access_binding_active_profile_scope_key")
+			.on(table.unitId, table.profileId, table.scope)
+			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'profile'`),
+		uniqueIndex("unit_access_binding_active_realm_scope_key")
+			.on(table.unitId, table.realmId, table.realmRelation, table.scope)
+			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'realm'`),
+		uniqueIndex("unit_access_binding_active_authenticated_scope_key")
+			.on(table.unitId, table.scope)
+			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'authenticated'`),
 		index("unit_access_binding_profile_active_idx")
 			.on(table.profileId, table.unitId, table.role)
 			.where(sql`${table.revokedAt} is null`),
