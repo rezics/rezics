@@ -23,7 +23,10 @@
 			"path": "./libraries/portable-text"
 		},
 		{
-			"path": "./libraries/content-structure"
+			"path": "./libraries/block"
+		},
+		{
+			"path": "./libraries/search"
 		},
 		{
 			"path": "./libraries/ui"
