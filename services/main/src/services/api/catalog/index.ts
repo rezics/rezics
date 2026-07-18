@@ -7,6 +7,7 @@ import Elysia, { t } from "elysia";
 import session from "../../auth/session";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
 import { database } from "../../database";
+import { isPrimaryUnitLocalization } from "../../database/localization";
 import {
 	creditAttribution,
 	entity,
@@ -37,6 +38,7 @@ import {
 } from "./schema";
 import { checkUnitType, createCatalogUnit } from "./service";
 import { recordUnitRevision } from "../../units/history";
+import { presentImageAsset } from "../../units/service";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
 import { UnitIdParams } from "../schema";
 import {
@@ -105,7 +107,7 @@ export default new Elysia()
 							slug: unit.slug,
 							kind: entity.kind,
 							verified: entity.verified,
-							avatar: entity.avatar,
+							avatarAssetId: entity.avatarAssetId,
 							title: unitLocalization.title,
 							summary: unitLocalization.summary,
 						})
@@ -115,7 +117,7 @@ export default new Elysia()
 							unitLocalization,
 							and(
 								eq(unitLocalization.unitId, unit.id),
-								eq(unitLocalization.isDefault, true),
+								isPrimaryUnitLocalization(unitLocalization.unitId),
 							),
 						)
 						.where(
@@ -128,7 +130,11 @@ export default new Elysia()
 						.orderBy(desc(unit.createdAt))
 						.limit(query.limit ?? 20);
 					return {
-						items: items.map((item) => ({ ...item, kind: item.kind ?? "unknown" })),
+						items: items.map(({ avatarAssetId, ...item }) => ({
+							...item,
+							kind: item.kind ?? "unknown",
+							avatar: presentImageAsset(avatarAssetId)?.url ?? null,
+						})),
 					};
 				},
 				{
@@ -158,7 +164,7 @@ export default new Elysia()
 							slug: unit.slug,
 							kind: entity.kind,
 							verified: entity.verified,
-							avatar: entity.avatar,
+							avatarAssetId: entity.avatarAssetId,
 							createdAt: unit.createdAt,
 							updatedAt: unit.updatedAt,
 						})
@@ -181,12 +187,14 @@ export default new Elysia()
 					).map((row) => ({
 						unitId: row.unitId,
 						language: row.language,
+						position: row.position,
 						title: row.title,
 						summary: row.summary,
 						description:
 							row.description === null
 								? null
 								: toPortableTextResponse(row.description),
+						cover: presentImageAsset(row.coverAssetId),
 						createdAt: row.createdAt,
 						updatedAt: row.updatedAt,
 					}));
@@ -197,7 +205,14 @@ export default new Elysia()
 						})
 						.from(creditAttribution)
 						.where(eq(creditAttribution.entityId, params.unitId));
-					return { ...entry, kind: entry.kind ?? "unknown", localizations, credits };
+					const { avatarAssetId, ...entityEntry } = entry;
+					return {
+						...entityEntry,
+						kind: entry.kind ?? "unknown",
+						avatar: presentImageAsset(avatarAssetId)?.url ?? null,
+						localizations,
+						credits,
+					};
 				},
 				{
 					params: UnitIdParams,
@@ -226,7 +241,7 @@ export default new Elysia()
 							unitLocalization,
 							and(
 								eq(unitLocalization.unitId, unit.id),
-								eq(unitLocalization.isDefault, true),
+								isPrimaryUnitLocalization(unitLocalization.unitId),
 							),
 						)
 						.where(

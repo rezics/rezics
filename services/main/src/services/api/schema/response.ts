@@ -36,19 +36,15 @@ export const ReadinessResponse = t.Object({
 const LocalizationResponse = t.Object({
 	unitId: Uuid,
 	language: t.String(),
+	position: t.String(),
 	title: NullableText,
 	summary: NullableText,
 	description: t.Nullable(PortableTextDocument),
+	cover: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
-const CoverAssetResponse = t.Nullable(
-	t.Object({
-		url: t.String(),
-		focalPoint: t.Object({ x: t.Number(), y: t.Number() }),
-		key: t.Optional(t.String()),
-	}),
-);
+const CoverAssetResponse = t.Nullable(t.Object({ id: Uuid, url: t.String() }));
 
 export const UnitListResponse = t.Object({
 	items: t.Array(
@@ -80,7 +76,7 @@ export const UnitDetailResponse = t.Object({
 	publishedAt: t.Nullable(DateTime),
 	createdAt: DateTime,
 	updatedAt: DateTime,
-	originalLanguage: NullableText,
+	primaryLanguage: NullableText,
 	releasedOn: t.Nullable(t.String()),
 	cover: CoverAssetResponse,
 	localizations: t.Array(LocalizationResponse),
@@ -293,7 +289,7 @@ export const PublicProfileResponse = t.Object({
 	language: NullableText,
 	name: NullableText,
 	avatar: NullableText,
-	avatarKey: t.Optional(NullableText),
+	avatarAssetId: t.Optional(t.Nullable(Uuid)),
 	summary: NullableText,
 	description: t.Nullable(PortableTextDocument),
 	createdAt: DateTime,
@@ -530,17 +526,6 @@ export const ReplyThreadResponse = t.Object({
 	),
 	nextCursor: NullableText,
 });
-export const UploadRequestResponse = t.Object({
-	key: t.String(),
-	url: t.String(),
-	expiresIn: t.Integer(),
-});
-export const UploadCompleteResponse = t.Object({
-	key: t.String(),
-	contentType: t.String(),
-	size: t.Integer(),
-});
-export const UploadUrlResponse = t.Object({ url: t.String() });
 
 export const CreditAttributionResponse = t.Object({
 	unitId: Uuid,

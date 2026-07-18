@@ -2,12 +2,14 @@ import { StatusCodes } from "http-status-codes";
 import {
 	DeleteObjectCommand,
 	GetObjectCommand,
+	GetObjectTaggingCommand,
 	HeadBucketCommand,
 	HeadObjectCommand,
 	PutObjectCommand,
 	S3Client,
 	type DeleteObjectCommandInput,
 	type GetObjectCommandInput,
+	type GetObjectTaggingCommandInput,
 	type HeadObjectCommandInput,
 	type PutObjectCommandInput,
 } from "@aws-sdk/client-s3";
@@ -39,6 +41,10 @@ export const storage = {
 		return storageClient.send(new GetObjectCommand({ ...input, Bucket: env.S3_BUCKET }));
 	},
 
+	getTags(input: WithoutBucket<GetObjectTaggingCommandInput>) {
+		return storageClient.send(new GetObjectTaggingCommand({ ...input, Bucket: env.S3_BUCKET }));
+	},
+
 	head(input: WithoutBucket<HeadObjectCommandInput>) {
 		return storageClient.send(new HeadObjectCommand({ ...input, Bucket: env.S3_BUCKET }));
 	},
@@ -48,10 +54,14 @@ export const storage = {
 	},
 
 	presignPut(input: WithoutBucket<PutObjectCommandInput>, expiresIn = env.S3_PRESIGN_EXPIRES_IN) {
+		const unhoistableHeaders = new Set([
+			...(input.Tagging ? ["x-amz-tagging"] : []),
+			...Object.keys(input.Metadata ?? {}).map((key) => `x-amz-meta-${key.toLowerCase()}`),
+		]);
 		return getSignedUrl(
 			storageClient,
 			new PutObjectCommand({ ...input, Bucket: env.S3_BUCKET }),
-			{ expiresIn },
+			{ expiresIn, unhoistableHeaders },
 		);
 	},
 

@@ -2,6 +2,7 @@ import { PortableText, type PortableTextComponents } from "@portabletext/react";
 import {
 	normalizePortableText,
 	normalizePortableTextUrl,
+	type PortableTextImageBlock,
 	type PortableTextValueBlock,
 } from "@rezics/portable-text";
 
@@ -40,7 +41,15 @@ const components = {
 			);
 		},
 	},
-} satisfies PortableTextComponents<PortableTextValueBlock>;
+	types: {
+		image: ({ value }) => (
+			<figure>
+				<img alt={value.alt ?? ""} src={`/image-assets/${value.assetId}/content`} />
+				{value.caption && <figcaption>{value.caption}</figcaption>}
+			</figure>
+		),
+	},
+} satisfies PortableTextComponents<PortableTextValueBlock | PortableTextImageBlock>;
 
 const previewComponents = {
 	...components,
@@ -48,7 +57,7 @@ const previewComponents = {
 		...components.marks,
 		link: ({ children }) => <>{children}</>,
 	},
-} satisfies PortableTextComponents<PortableTextValueBlock>;
+} satisfies PortableTextComponents<PortableTextValueBlock | PortableTextImageBlock>;
 
 const variantClasses: Record<PortableTextContentVariant, string> = {
 	compact:

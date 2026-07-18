@@ -6,6 +6,26 @@ import {
 import { describe, expect, it } from "vitest";
 
 describe("Portable Text boundaries", () => {
+	it("keeps image asset identity without accepting delivery URLs", () => {
+		expect(
+			normalizePortableText([
+				{
+					_type: "image",
+					_key: "cover",
+					assetId: "019f73cb-926e-7e50-9a7f-da67701accb3",
+					src: "https://example.invalid/image.jpg",
+					alt: "Example",
+				},
+			]),
+		).toEqual([
+			{
+				_type: "image",
+				_key: "cover",
+				assetId: "019f73cb-926e-7e50-9a7f-da67701accb3",
+				alt: "Example",
+			},
+		]);
+	});
 	it("keeps supported documents, lists, and links round-trippable", () => {
 		const document: PortableTextValue = [
 			{
@@ -76,9 +96,11 @@ describe("Portable Text boundaries", () => {
 
 	it("creates stable fallback keys for valid unkeyed text", () => {
 		const value = [{ _type: "block", children: [{ _type: "span", text: "Hello" }] }];
-		expect(normalizePortableText(value)).toEqual(normalizePortableText(value));
-		expect(normalizePortableText(value)[0]?._key).toBe("block-0");
-		expect(normalizePortableText(value)[0]?.children[0]?._key).toBe("span-0-0");
+		const normalized = normalizePortableText(value);
+		expect(normalized).toEqual(normalizePortableText(value));
+		const block = normalized[0];
+		expect(block?._key).toBe("block-0");
+		expect(block?._type === "block" ? block.children[0]?._key : undefined).toBe("span-0-0");
 	});
 
 	it.each([

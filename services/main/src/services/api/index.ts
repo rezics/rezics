@@ -9,6 +9,8 @@ import contentStructure from "./content-structure";
 import posts from "./posts";
 import health from "./health";
 import history from "./history";
+import imageAssetContent from "./image-assets/content";
+import imageAssets from "./image-assets";
 import messages from "./messages";
 import notifications from "./notifications";
 import recommendations from "./recommendations";
@@ -22,7 +24,6 @@ import reactions from "./reactions";
 import reviews from "./reviews";
 import search from "./search";
 import tokens from "./tokens";
-import uploads from "./uploads";
 import users from "./users";
 import units from "./units";
 import { auth } from "../auth";
@@ -67,6 +68,7 @@ export default new Elysia()
 		return status(internalError.status, toApiErrorBody(internalError, requestId));
 	})
 	.mount(auth.handler)
+	.use(imageAssetContent)
 	.group("/api", (api) =>
 		api.guard({ parse: "json" }, (api) =>
 			api
@@ -92,6 +94,6 @@ export default new Elysia()
 				.use(posts)
 				.use(realms)
 				.use(search)
-				.use(uploads),
+				.use(imageAssets),
 		),
 	);

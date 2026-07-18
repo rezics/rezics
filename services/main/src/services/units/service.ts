@@ -1,5 +1,4 @@
 import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
-import { fileTypeFromBuffer } from "file-type";
 import {
 	PortableTextDocument,
 	parseNullableDocument,
@@ -8,9 +7,13 @@ import {
 import type { Static } from "elysia";
 
 import type { Authorization } from "../authorization";
-import type { UploadAuthorization } from "../authorization/upload/authorization";
 import { isPubliclyReadableUnit } from "../authorization/unit/policy";
 import { database } from "../database";
+import {
+	isPrimaryUnitLocalization,
+	makePrimaryUnitLocalization,
+	unitCoverAssetId,
+} from "../database/localization";
 import {
 	book,
 	entity,
@@ -25,17 +28,9 @@ import {
 	unitTagVote,
 	unitVariant,
 } from "../database/schema";
-import { isStorageNotFound, storage } from "../storage";
+import { ensureImageAssetAttachable, imageAssetContentUrl } from "../api/image-assets/service";
 import { UnitDetailResponse } from "../api/schema/response";
-import {
-	UnitChanged,
-	UnitCoverContentMismatch,
-	UnitCoverIncomplete,
-	UnitCoverKeyForbidden,
-	UnitCoverUnsupported,
-	UnitNotFound,
-	UnitOriginalLanguageMissing,
-} from "./errors";
+import { UnitChanged, UnitNotFound, UnitPrimaryLanguageMissing } from "./errors";
 import { recordUnitRevision } from "./history";
 
 export type UnitKind = "book" | "software" | "media";
@@ -47,18 +42,13 @@ export interface CreateUnitInput {
 		title: string;
 		summary?: string;
 		description?: PortableTextDocumentValue;
+		coverAssetId?: string | null;
 	};
 	slug?: string;
 	visibility?: "public" | "unlisted" | "private";
 	contentRating?: "general" | "r15" | "r18" | "r18g";
 	aiDisclosure?: "unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
 	license?: string | null;
-	cover?: CoverAssetInput | null;
-}
-
-interface CoverAssetInput {
-	key: string;
-	focalPoint: { x: number; y: number };
 }
 
 export interface UpdateUnitInput {
@@ -68,9 +58,8 @@ export interface UpdateUnitInput {
 	contentRating?: "general" | "r15" | "r18" | "r18g";
 	aiDisclosure?: "unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
 	license?: string | null;
-	cover?: CoverAssetInput | null;
 	unit?: {
-		originalLanguage?: string;
+		primaryLanguage?: string;
 		releasedOn?: string | null;
 	};
 	details?: {
@@ -87,41 +76,8 @@ export interface UpdateUnitInput {
 	};
 }
 
-async function ensureAttachableCover(
-	authorization: UploadAuthorization<string>,
-	cover?: CoverAssetInput | null,
-): Promise<void> {
-	if (!cover) return;
-	if (!authorization.owns(cover.key)) throw new UnitCoverKeyForbidden();
-	try {
-		const object = await storage.head({ Key: cover.key });
-		if (
-			!object.ContentLength ||
-			object.ContentLength > 10_485_760 ||
-			!object.ContentType ||
-			!["image/avif", "image/jpeg", "image/png", "image/webp"].includes(object.ContentType)
-		)
-			throw new UnitCoverUnsupported();
-		const stored = await storage.get({ Key: cover.key, Range: "bytes=0-4095" });
-		const bytes = await stored.Body?.transformToByteArray();
-		const detected = bytes ? await fileTypeFromBuffer(bytes) : undefined;
-		if (!detected || detected.mime !== object.ContentType) throw new UnitCoverContentMismatch();
-	} catch (error) {
-		if (isStorageNotFound(error)) throw new UnitCoverIncomplete();
-		throw error;
-	}
-}
-
-export async function presentUnitCover(
-	cover: { key: string | null; x: number | null; y: number | null },
-	includeKey = false,
-) {
-	if (!cover.key || cover.x === null || cover.y === null) return null;
-	return {
-		url: await storage.presignGet({ Key: cover.key }),
-		focalPoint: { x: cover.x, y: cover.y },
-		...(includeKey ? { key: cover.key } : {}),
-	};
+export function presentImageAsset(assetId: string | null) {
+	return assetId ? { id: assetId, url: imageAssetContentUrl(assetId) } : null;
 }
 
 export async function resolveUnitSlug(kind: UnitKind, slug: string) {
@@ -139,9 +95,9 @@ export async function createUnit(
 	authorization: Authorization<string>,
 	input: CreateUnitInput,
 ): Promise<UnitDetail> {
-	await ensureAttachableCover(authorization.upload, input.cover);
 	const ownerId = authorization.profileId;
 	const unitId = await database.transaction(async (tx) => {
+		await ensureImageAssetAttachable(tx, ownerId, input.localization.coverAssetId);
 		const stem = input.localization.title
 			.normalize("NFKD")
 			.toLowerCase()
@@ -158,9 +114,6 @@ export async function createUnit(
 				contentRating: input.contentRating ?? "general",
 				aiDisclosure: input.aiDisclosure ?? "unknown",
 				license: input.license,
-				coverKey: input.cover?.key,
-				coverFocalX: input.cover?.focalPoint.x,
-				coverFocalY: input.cover?.focalPoint.y,
 			})
 			.returning({ id: unit.id });
 		if (!created) throw new Error("Unit insertion did not return an id");
@@ -170,7 +123,6 @@ export async function createUnit(
 		await tx.insert(unitLocalization).values({
 			unitId: created.id,
 			...input.localization,
-			isDefault: true,
 		});
 		await tx.insert(unitCollaborator).values({
 			unitId: created.id,
@@ -239,8 +191,8 @@ export async function getUnit(
 		.select()
 		.from(unitLocalization)
 		.where(eq(unitLocalization.unitId, base.id))
-		.orderBy(desc(unitLocalization.isDefault), unitLocalization.language);
-	const defaultLanguage = localizations.find(({ isDefault }) => isDefault)?.language ?? null;
+		.orderBy(unitLocalization.position, unitLocalization.language);
+	const primaryLanguage = localizations[0]?.language ?? null;
 	const credits = await database
 		.select({
 			id: creditAttribution.id,
@@ -255,7 +207,7 @@ export async function getUnit(
 			unitLocalization,
 			and(
 				eq(unitLocalization.unitId, entity.id),
-				eq(unitLocalization.language, defaultLanguage ?? ""),
+				eq(unitLocalization.language, primaryLanguage ?? ""),
 			),
 		)
 		.where(eq(creditAttribution.unitId, base.id))
@@ -279,7 +231,7 @@ export async function getUnit(
 			unitLocalization,
 			and(
 				eq(unitLocalization.unitId, unitTag.tagId),
-				eq(unitLocalization.language, defaultLanguage ?? ""),
+				eq(unitLocalization.language, primaryLanguage ?? ""),
 			),
 		)
 		.where(eq(unitTag.unitId, base.id))
@@ -296,29 +248,23 @@ export async function getUnit(
 		slug: base.slug,
 		status: base.status,
 		visibility: base.visibility,
-		language: defaultLanguage,
+		language: primaryLanguage,
 		contentRating: base.contentRating,
 		aiDisclosure: base.aiDisclosure,
 		license: base.license,
 		publishedAt: base.publishedAt,
 		createdAt: base.createdAt,
 		updatedAt: base.updatedAt,
-		originalLanguage: defaultLanguage,
+		primaryLanguage,
 		releasedOn: await getReleaseDate(kind, base.id),
-		cover: await presentUnitCover(
-			{ key: base.coverKey, x: base.coverFocalX, y: base.coverFocalY },
-			canEdit,
+		cover: presentImageAsset(
+			localizations.find(({ coverAssetId }) => coverAssetId)?.coverAssetId ?? null,
 		),
 		localizations: localizations.map(
-			({
-				isDefault: _default,
-				content: _content,
-				contentStatus: _status,
-				description,
-				...row
-			}) => ({
+			({ content: _content, contentStatus: _status, description, coverAssetId, ...row }) => ({
 				...row,
 				description: parseNullableDocument(PortableTextDocument, description),
+				cover: presentImageAsset(coverAssetId),
 			}),
 		),
 		credits: credits.map((credit) => ({ ...credit, evidenceUrl: null, note: null })),
@@ -354,14 +300,12 @@ export async function listUnits(kind: UnitKind, cursor?: [string, string], limit
 			updatedAt: unit.updatedAt,
 			title: unitLocalization.title,
 			summary: unitLocalization.summary,
-			coverKey: unit.coverKey,
-			coverFocalX: unit.coverFocalX,
-			coverFocalY: unit.coverFocalY,
+			coverAssetId: unitCoverAssetId(unit.id),
 		})
 		.from(unit)
 		.leftJoin(
 			unitLocalization,
-			and(eq(unitLocalization.unitId, unit.id), eq(unitLocalization.isDefault, true)),
+			and(eq(unitLocalization.unitId, unit.id), isPrimaryUnitLocalization(unit.id)),
 		)
 		.where(
 			and(
@@ -380,9 +324,9 @@ export async function listUnits(kind: UnitKind, cursor?: [string, string], limit
 		.orderBy(desc(unit.createdAt), desc(unit.id))
 		.limit(limit + 1);
 	return Promise.all(
-		rows.map(async ({ coverKey, coverFocalX, coverFocalY, ...row }) => ({
+		rows.map(async ({ coverAssetId, ...row }) => ({
 			...row,
-			cover: await presentUnitCover({ key: coverKey, x: coverFocalX, y: coverFocalY }),
+			cover: presentImageAsset(coverAssetId),
 		})),
 	);
 }
@@ -395,9 +339,7 @@ export async function updateUnit(
 ): Promise<UnitDetail> {
 	await authorization.unit.ensureCanEdit(unitId);
 	await authorization.unit.ensureFieldsUnlocked(unitId, ["/unit", `/${kind}`]);
-	await ensureAttachableCover(authorization.upload, body.cover);
 	await database.transaction(async (tx) => {
-		const cover = body.cover;
 		const [updated] = await tx
 			.update(unit)
 			.set({
@@ -406,13 +348,6 @@ export async function updateUnit(
 				contentRating: body.contentRating,
 				aiDisclosure: body.aiDisclosure,
 				...(Object.hasOwn(body, "license") ? { license: body.license } : {}),
-				...(Object.hasOwn(body, "cover")
-					? {
-							coverKey: cover?.key ?? null,
-							coverFocalX: cover?.focalPoint.x ?? null,
-							coverFocalY: cover?.focalPoint.y ?? null,
-						}
-					: {}),
 				...(body.status === "published" ? { publishedAt: new Date() } : {}),
 			})
 			.where(
@@ -440,8 +375,8 @@ export async function updateUnit(
 				: common.releasedOn === null
 					? null
 					: common.releasedOn;
-		if (common.originalLanguage) {
-			const language = common.originalLanguage;
+		if (common.primaryLanguage) {
+			const language = common.primaryLanguage;
 			const [localization] = await tx
 				.select({ language: unitLocalization.language })
 				.from(unitLocalization)
@@ -452,20 +387,8 @@ export async function updateUnit(
 					),
 				)
 				.limit(1);
-			if (!localization) throw new UnitOriginalLanguageMissing();
-			await tx
-				.update(unitLocalization)
-				.set({ isDefault: false })
-				.where(eq(unitLocalization.unitId, unitId));
-			await tx
-				.update(unitLocalization)
-				.set({ isDefault: true })
-				.where(
-					and(
-						eq(unitLocalization.unitId, unitId),
-						eq(unitLocalization.language, language),
-					),
-				);
+			if (!localization) throw new UnitPrimaryLanguageMissing();
+			await makePrimaryUnitLocalization(tx, unitId, language);
 		}
 		if (kind === "book")
 			await tx
@@ -541,17 +464,26 @@ export async function upsertLocalization(
 		title: string;
 		summary?: string;
 		description?: PortableTextDocumentValue;
+		coverAssetId?: string | null;
 	},
 ): Promise<void> {
 	await authorization.unit.ensureCanEdit(unitId);
 	await authorization.unit.ensureFieldsUnlocked(unitId, [`/localizations/${input.language}`]);
 	await database.transaction(async (tx) => {
+		await ensureImageAssetAttachable(tx, authorization.profileId, input.coverAssetId);
 		await tx
 			.insert(unitLocalization)
 			.values({ unitId, ...input })
 			.onConflictDoUpdate({
 				target: [unitLocalization.unitId, unitLocalization.language],
-				set: { title: input.title, summary: input.summary, description: input.description },
+				set: {
+					title: input.title,
+					summary: input.summary,
+					description: input.description,
+					...(Object.hasOwn(input, "coverAssetId")
+						? { coverAssetId: input.coverAssetId }
+						: {}),
+				},
 			});
 		await recordUnitRevision(tx, {
 			unitId,

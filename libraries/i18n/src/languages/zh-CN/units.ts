@@ -8,7 +8,7 @@ export default {
 		tags: "标签",
 		versions: "版本",
 		aliases: "别名",
-		originalLanguage: "原始语言",
+		primaryLanguage: "主要语言",
 		releasedOn: "发布日期",
 		license: "许可",
 		aiDisclosure: "AI 披露",

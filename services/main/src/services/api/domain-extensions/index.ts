@@ -90,9 +90,7 @@ async function createBaseUnit(
 		})
 		.returning({ id: unit.id });
 	if (!created) throw new Error("Unit insertion did not return an id");
-	await tx
-		.insert(unitLocalization)
-		.values({ unitId: created.id, ...input.localization, isDefault: true });
+	await tx.insert(unitLocalization).values({ unitId: created.id, ...input.localization });
 	await tx.insert(unitCollaborator).values({
 		unitId: created.id,
 		profileId: input.ownerId,

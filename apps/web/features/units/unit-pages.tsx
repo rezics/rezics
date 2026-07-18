@@ -102,6 +102,7 @@ export function UnitCreatePage({ type }: { type: UnitType }) {
 						language: locale.target,
 						title: String(form.get("title") ?? "").trim(),
 						...(summary ? { summary } : {}),
+						coverAssetId: cover?.id ?? null,
 					},
 					...(slug ? { slug } : {}),
 					visibility:
@@ -129,7 +130,6 @@ export function UnitCreatePage({ type }: { type: UnitType }) {
 										? "machine_generated"
 										: "unknown",
 					license: String(form.get("license") ?? "").trim() || null,
-					cover,
 				},
 			});
 		} catch {

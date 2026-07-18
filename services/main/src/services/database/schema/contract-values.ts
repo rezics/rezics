@@ -29,6 +29,8 @@ export const AiDisclosureValues = [
 ] as const;
 export const ModerationStatusValues = ["approved", "pending", "removed"] as const;
 export const ContentStatusValues = ["draft", "published", "archived"] as const;
+export const ImageAssetStatusValues = ["pending", "ready", "failed"] as const;
+export const ImageAssetAccessValues = ["private", "public"] as const;
 export const PostKindValues = [
 	"post",
 	"reply",

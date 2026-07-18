@@ -5,6 +5,7 @@ import Elysia from "elysia";
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import session from "../../auth/session";
 import { database } from "../../database";
+import { isPrimaryUnitLocalization } from "../../database/localization";
 import {
 	contentStructureNodeProgress,
 	contentStructureNode,
@@ -67,7 +68,10 @@ export default new Elysia({ prefix: "/progress" })
 				.innerJoin(unit, eq(unit.id, unitProgress.unitId))
 				.leftJoin(
 					unitLocalization,
-					and(eq(unitLocalization.unitId, unit.id), eq(unitLocalization.isDefault, true)),
+					and(
+						eq(unitLocalization.unitId, unit.id),
+						isPrimaryUnitLocalization(unitLocalization.unitId),
+					),
 				)
 				.where(
 					and(

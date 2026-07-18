@@ -66,14 +66,32 @@ export type PortableTextTextBlock = Static<typeof PortableTextTextBlock> &
 const PortableTextCustomBlock = Type.Object(
 	{
 		_key: Type.String(),
-		_type: Type.String({ pattern: "^(?!block$).+" }),
+		_type: Type.String({ pattern: "^(?!(?:block|image)$).+" }),
 	},
 	{ additionalProperties: JsonValue },
 );
 
-export const PortableTextBlock = Type.Union([PortableTextTextBlock, PortableTextCustomBlock], {
-	$id: "PortableTextBlock",
-});
+export const PortableTextImage = Type.Object(
+	{
+		_key: Type.String(),
+		_type: Type.Literal("image"),
+		assetId: Type.String({
+			pattern:
+				"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+		}),
+		alt: Type.Optional(Type.String()),
+		caption: Type.Optional(Type.String()),
+	},
+	{ additionalProperties: false, $id: "PortableTextImage" },
+);
+export type PortableTextImageBlock = Static<typeof PortableTextImage>;
+
+export const PortableTextBlock = Type.Union(
+	[PortableTextTextBlock, PortableTextImage, PortableTextCustomBlock],
+	{
+		$id: "PortableTextBlock",
+	},
+);
 export type PortableTextBlock = Static<typeof PortableTextBlock>;
 
 export const PortableText = Type.Array(PortableTextBlock, {
@@ -121,7 +139,7 @@ export interface PortableTextValueBlock {
 }
 
 /** The Portable Text vocabulary supported by every REZICS editor and renderer. */
-export type PortableTextValue = PortableTextValueBlock[];
+export type PortableTextValue = (PortableTextValueBlock | PortableTextImageBlock)[];
 
 const controlCharacters = /[\u0000-\u001f\u007f]/;
 const absoluteScheme = /^([a-z][a-z\d+.-]*):/i;
@@ -166,7 +184,27 @@ function keyOr(value: unknown, fallback: string): string {
 export function normalizePortableText(value: unknown): PortableTextValue {
 	if (!Array.isArray(value)) return [];
 
-	return value.flatMap((candidate, blockIndex): PortableTextValueBlock[] => {
+	return value.flatMap((candidate, blockIndex): PortableTextValue => {
+		if (
+			isRecord(candidate) &&
+			candidate._type === "image" &&
+			typeof candidate.assetId === "string" &&
+			/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+				candidate.assetId,
+			)
+		) {
+			return [
+				{
+					_key: keyOr(candidate._key, `image-${blockIndex}`),
+					_type: "image",
+					assetId: candidate.assetId,
+					...(typeof candidate.alt === "string" ? { alt: candidate.alt } : {}),
+					...(typeof candidate.caption === "string"
+						? { caption: candidate.caption }
+						: {}),
+				},
+			];
+		}
 		if (!isRecord(candidate) || candidate._type !== "block") return [];
 
 		const markDefs = Array.isArray(candidate.markDefs)

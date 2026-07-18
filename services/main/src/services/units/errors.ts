@@ -64,34 +64,10 @@ export class UnitRevisionConflict extends Data.TaggedError("UnitRevisionConflict
 	}
 }
 
-export class UnitCoverKeyForbidden extends Data.TaggedError("UnitCoverKeyForbidden") {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = UnitCoverKeyForbidden.status;
-	readonly message = "Cover upload does not belong to this user";
-}
-
-export class UnitCoverIncomplete extends Data.TaggedError("UnitCoverIncomplete") {
+export class UnitPrimaryLanguageMissing extends Data.TaggedError("UnitPrimaryLanguageMissing") {
 	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = UnitCoverIncomplete.status;
-	readonly message = "Cover upload has not been completed";
-}
-
-export class UnitCoverUnsupported extends Data.TaggedError("UnitCoverUnsupported") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = UnitCoverUnsupported.status;
-	readonly message = "Cover upload is not a supported image";
-}
-
-export class UnitCoverContentMismatch extends Data.TaggedError("UnitCoverContentMismatch") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = UnitCoverContentMismatch.status;
-	readonly message = "Cover upload content does not match its declared type";
-}
-
-export class UnitOriginalLanguageMissing extends Data.TaggedError("UnitOriginalLanguageMissing") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = UnitOriginalLanguageMissing.status;
-	readonly message = "Original language must have an existing Unit localization";
+	readonly status = UnitPrimaryLanguageMissing.status;
+	readonly message = "Primary language must have an existing Unit localization";
 }
 
 export const UnitErrors = [
@@ -101,9 +77,5 @@ export const UnitErrors = [
 	UnitFieldLocked,
 	UnitChanged,
 	UnitRevisionConflict,
-	UnitCoverKeyForbidden,
-	UnitCoverIncomplete,
-	UnitCoverUnsupported,
-	UnitCoverContentMismatch,
-	UnitOriginalLanguageMissing,
+	UnitPrimaryLanguageMissing,
 ] as const;

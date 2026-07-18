@@ -1,8 +1,9 @@
 import { sql } from "drizzle-orm";
 import {
 	boolean,
+	bigint,
 	check,
-	doublePrecision,
+	type AnyPgColumn,
 	index,
 	pgEnum,
 	primaryKey,
@@ -19,6 +20,8 @@ import {
 	ContentRatingValues,
 	ContentStatusValues,
 	DefaultLanguage,
+	ImageAssetAccessValues,
+	ImageAssetStatusValues,
 	ModerationStatusValues,
 	UnitKindValues,
 	UnitStatusValues,
@@ -44,6 +47,8 @@ export const aiDisclosure = pgEnum("ai_disclosure", toEnumValues(AiDisclosureVal
 export const moderationStatus = pgEnum("moderation_status", toEnumValues(ModerationStatusValues));
 export const contentStatus = pgEnum("content_status", toEnumValues(ContentStatusValues));
 export const collaboratorRole = pgEnum("collaborator_role", toEnumValues(CollaboratorRoleValues));
+export const imageAssetStatus = pgEnum("image_asset_status", toEnumValues(ImageAssetStatusValues));
+export const imageAssetAccess = pgEnum("image_asset_access", toEnumValues(ImageAssetAccessValues));
 
 export const unit = pgTable(
 	"unit",
@@ -56,9 +61,6 @@ export const unit = pgTable(
 		contentRating: contentRating().default("general").notNull(),
 		aiDisclosure: aiDisclosure().default("unknown").notNull(),
 		license: text(),
-		coverKey: text(),
-		coverFocalX: doublePrecision(),
-		coverFocalY: doublePrecision(),
 		moderationStatus: moderationStatus().default("approved").notNull(),
 		publishedAt: createTimestampMsColumn(),
 		deletedAt: createTimestampMsColumn(),
@@ -81,10 +83,6 @@ export const unit = pgTable(
 			.where(sql`${table.deletedAt} is null`),
 		check("unit_slug_not_blank", sql`${table.slug} is null or btrim(${table.slug}) <> ''`),
 		check(
-			"unit_cover_shape_check",
-			sql`(${table.coverKey} is null and ${table.coverFocalX} is null and ${table.coverFocalY} is null) or (${table.coverKey} is not null and ${table.coverFocalX} between 0 and 1 and ${table.coverFocalY} between 0 and 1)`,
-		),
-		check(
 			"unit_publication_check",
 			sql`${table.status} <> 'published'::unit_status or ${table.publishedAt} is not null`,
 		),
@@ -102,7 +100,13 @@ export const unitLocalization = pgTable(
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
 		language: text().notNull(),
-		isDefault: boolean().default(false).notNull(),
+		position: text()
+			.default(sql`uuidv7()::text`)
+			.notNull(),
+		/** Cover is fixed product terminology across every Unit kind. */
+		coverAssetId: uuid().references((): AnyPgColumn => imageAsset.id, {
+			onDelete: "set null",
+		}),
 		title: text(),
 		summary: text(),
 		description: createJsonDocumentColumn(),
@@ -113,9 +117,12 @@ export const unitLocalization = pgTable(
 	},
 	(table) => [
 		primaryKey({ columns: [table.unitId, table.language] }),
-		uniqueIndex("unit_localization_one_default_key")
-			.on(table.unitId)
-			.where(sql`${table.isDefault}`),
+		unique("unit_localization_unit_position_key").on(table.unitId, table.position),
+		index("unit_localization_unit_position_idx").on(
+			table.unitId,
+			table.position,
+			table.language,
+		),
 		index("unit_localization_language_unit_idx").on(table.language, table.unitId),
 		index("unit_localization_content_status_idx").on(table.contentStatus, table.updatedAt),
 		index("unit_localization_title_search_idx").using("pgroonga", table.title),
@@ -152,12 +159,74 @@ export const profile = pgTable(
 		authUserId: uuid()
 			.notNull()
 			.references(() => users.id, { onDelete: "restrict" }),
-		avatar: text(),
+		avatarAssetId: uuid().references((): AnyPgColumn => imageAsset.id, {
+			onDelete: "set null",
+		}),
 		joinedAt: createTimestampMsColumn().defaultNow().notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [unique("profile_auth_user_id_key").on(table.authUserId)],
+);
+
+/** Stable logical identity for one immutable image content version. */
+export const imageAsset = pgTable(
+	"image_asset",
+	{
+		id: createUuidv7PrimaryKey(),
+		uploaderProfileId: uuid()
+			.notNull()
+			.references(() => profile.id, { onDelete: "restrict" }),
+		ownerProfileId: uuid()
+			.notNull()
+			.references(() => profile.id, { onDelete: "restrict" }),
+		status: imageAssetStatus().default("pending").notNull(),
+		access: imageAssetAccess().default("private").notNull(),
+		deletedAt: createTimestampMsColumn(),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		index("image_asset_uploader_status_idx").on(
+			table.uploaderProfileId,
+			table.status,
+			table.createdAt,
+		),
+		index("image_asset_owner_status_idx").on(
+			table.ownerProfileId,
+			table.status,
+			table.createdAt,
+		),
+		check(
+			"image_asset_deleted_at_check",
+			sql`${table.deletedAt} is null or ${table.deletedAt} >= ${table.createdAt}`,
+		),
+	],
+);
+
+/** Physical object backing an image asset; V1 permits exactly one object per asset. */
+export const imageObject = pgTable(
+	"image_object",
+	{
+		id: createUuidv7PrimaryKey(),
+		assetId: uuid()
+			.notNull()
+			.references(() => imageAsset.id, { onDelete: "cascade" }),
+		storageKey: text().notNull(),
+		mediaType: text(),
+		byteSize: bigint({ mode: "number" }),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		unique("image_object_asset_id_key").on(table.assetId),
+		unique("image_object_storage_key_key").on(table.storageKey),
+		check("image_object_storage_key_not_blank", sql`btrim(${table.storageKey}) <> ''`),
+		check(
+			"image_object_metadata_shape_check",
+			sql`(${table.mediaType} is null and ${table.byteSize} is null) or (${table.mediaType} is not null and ${table.byteSize} > 0)`,
+		),
+	],
 );
 
 export const profilePreference = pgTable(

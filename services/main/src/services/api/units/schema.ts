@@ -8,22 +8,17 @@ export type UnitType = Static<typeof UnitType>;
 export const UnitTypeParams = t.Object({ type: UnitType });
 export type UnitTypeParams = Static<typeof UnitTypeParams>;
 
-const CoverAssetInput = t.Nullable(
-	t.Object(
-		{
-			key: t.String({ minLength: 1, maxLength: 1_000 }),
-			focalPoint: t.Object({
-				x: t.Number({ minimum: 0, maximum: 1 }),
-				y: t.Number({ minimum: 0, maximum: 1 }),
-			}),
-		},
-		{ additionalProperties: false },
-	),
+const UnitLocalizationInput = t.Object(
+	{
+		...LocalizationInput.properties,
+		coverAssetId: t.Optional(t.Nullable(Uuid)),
+	},
+	{ additionalProperties: false },
 );
 
 export const CreateUnitBody = t.Object(
 	{
-		localization: LocalizationInput,
+		localization: UnitLocalizationInput,
 		slug: t.Optional(
 			t.String({ minLength: 3, maxLength: 72, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
 		),
@@ -31,7 +26,6 @@ export const CreateUnitBody = t.Object(
 		contentRating: LifecycleInput.contentRating,
 		aiDisclosure: LifecycleInput.aiDisclosure,
 		license: LifecycleInput.license,
-		cover: t.Optional(CoverAssetInput),
 	},
 	{ additionalProperties: false },
 );
@@ -57,11 +51,10 @@ export const UpdateUnitBody = t.Object(
 	{
 		updatedAt: t.String({ format: "date-time" }),
 		...LifecycleInput,
-		cover: t.Optional(CoverAssetInput),
 		unit: t.Optional(
 			t.Object(
 				{
-					originalLanguage: t.Optional(LanguageTag),
+					primaryLanguage: t.Optional(LanguageTag),
 					releasedOn: t.Optional(t.Nullable(t.String({ format: "date" }))),
 				},
 				{ additionalProperties: false },
@@ -95,7 +88,7 @@ export const UnitLocalizationParams = t.Object({
 });
 export type UnitLocalizationParams = Static<typeof UnitLocalizationParams>;
 
-export const UnitLocalizationBody = t.Omit(LocalizationInput, ["language"]);
+export const UnitLocalizationBody = t.Omit(UnitLocalizationInput, ["language"]);
 export type UnitLocalizationBody = Static<typeof UnitLocalizationBody>;
 
 export const UnitSlugResolverParams = t.Object({

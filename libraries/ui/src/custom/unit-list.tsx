@@ -12,7 +12,7 @@ export interface UnitListItem {
 	title: string | null;
 	summary?: string | null;
 	href?: string;
-	cover?: { url: string; focalPoint: { x: number; y: number } } | null;
+	cover?: { id: string; url: string } | null;
 }
 
 export function UnitList({
@@ -62,9 +62,6 @@ export function UnitList({
 										alt=""
 										className="size-full object-cover"
 										src={item.cover.url}
-										style={{
-											objectPosition: `${item.cover.focalPoint.x * 100}% ${item.cover.focalPoint.y * 100}%`,
-										}}
 									/>
 								) : (
 									(item.title ?? item.slug ?? "R").slice(0, 1)

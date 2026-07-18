@@ -16,6 +16,7 @@ import { and, eq } from "drizzle-orm";
 import { env } from "../src/services/config";
 import { ApiPermissionValues, toApiKeyPermissions } from "../src/services/auth/api-permissions";
 import { database, type DatabaseTransaction } from "../src/services/database";
+import { isPrimaryUnitLocalization } from "../src/services/database/localization";
 import {
 	accountEnforcement,
 	accounts,
@@ -252,7 +253,7 @@ function localizationRows(data: SeedData, value: CreatedUnit) {
 		const base = {
 			unitId: value.id,
 			language,
-			isDefault: index === 0,
+			position: String(index).padStart(6, "0"),
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		};
@@ -358,11 +359,10 @@ async function seedProfiles(
 		};
 	});
 	await writeBatches(
-		profiles.map((value, index) => {
+		profiles.map((value) => {
 			return {
 				id: value.id,
 				authUserId: value.authUserId,
-				avatar: itemAt(userInputs, index).image,
 				joinedAt: value.createdAt,
 				createdAt: value.createdAt,
 				updatedAt: value.createdAt,
@@ -376,7 +376,7 @@ async function seedProfiles(
 			return {
 				unitId: value.id,
 				language,
-				isDefault: true,
+				position: "000000",
 				title: value.name,
 				summary: data.summary(language),
 				description: createPortableTextDocument(data.portableText(language, 2)),
@@ -2027,7 +2027,10 @@ async function seedHistory(
 				updatedAt: data.referenceTime,
 			})
 			.where(
-				and(eq(unitLocalization.unitId, value.id), eq(unitLocalization.isDefault, true)),
+				and(
+					eq(unitLocalization.unitId, value.id),
+					isPrimaryUnitLocalization(unitLocalization.unitId),
+				),
 			);
 		const baseRevisionId = initialRevisionByUnit.get(value.id);
 		if (!baseRevisionId) throw new Error(`Missing initial seed revision for Unit ${value.id}`);

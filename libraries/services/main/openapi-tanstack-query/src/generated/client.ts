@@ -13,6 +13,8 @@ import type {
 	DeleteApiRecommendationsExclusionsByUnitIdResponses,
 	GetApiHealthOptions,
 	GetApiHealthResponses,
+	GetImageAssetsByIdContentOptions,
+	GetImageAssetsByIdContentResponses,
 	HeadApiHealthOptions,
 	HeadApiHealthResponses,
 	GetApiReadyOptions,
@@ -333,16 +335,30 @@ import type {
 	PostApiSearchResponses,
 	PostApiSearchByIndexOptions,
 	PostApiSearchByIndexResponses,
-	PostApiUploadsOptions,
-	PostApiUploadsResponses,
-	DeleteApiUploadsOptions,
-	DeleteApiUploadsResponses,
-	PostApiUploadsCompleteOptions,
-	PostApiUploadsCompleteResponses,
-	GetApiUploadsUrlOptions,
-	GetApiUploadsUrlResponses,
+	PostApiImageAssetsOptions,
+	PostApiImageAssetsResponses,
+	PostApiImageAssetsByIdCompleteOptions,
+	PostApiImageAssetsByIdCompleteResponses,
+	GetApiImageAssetsByIdOptions,
+	GetApiImageAssetsByIdResponses,
+	DeleteApiImageAssetsByIdOptions,
+	DeleteApiImageAssetsByIdResponses,
 } from "./models";
 import { client } from "./.kubb/client";
+
+/**
+ * @summary Resolve image asset content
+ * {@link /image-assets/:id/content}
+ */
+export function getImageAssetsByIdContent<ThrowOnError extends boolean = true>(
+	options: Options<GetImageAssetsByIdContentOptions, ThrowOnError>,
+): Promise<RequestResult<GetImageAssetsByIdContentResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/image-assets/{id}/content", ...config }) as Promise<
+		RequestResult<GetImageAssetsByIdContentResponses, ThrowOnError>
+	>;
+}
 
 /**
  * @summary Process health
@@ -2939,57 +2955,59 @@ export function postApiSearchByIndex<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary Create upload URL
- * {@link /api/uploads}
+ * @summary Create image asset upload
+ * {@link /api/image-assets}
  */
-export function postApiUploads<ThrowOnError extends boolean = true>(
-	options: Options<PostApiUploadsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiUploadsResponses, ThrowOnError>> {
+export function postApiImageAssets<ThrowOnError extends boolean = true>(
+	options: Options<PostApiImageAssetsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiImageAssetsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/uploads", ...config }) as Promise<
-		RequestResult<PostApiUploadsResponses, ThrowOnError>
+	return request({ method: "POST", url: "/api/image-assets", ...config }) as Promise<
+		RequestResult<PostApiImageAssetsResponses, ThrowOnError>
 	>;
 }
 
 /**
- * @summary Delete upload
- * {@link /api/uploads}
+ * @summary Complete image asset upload
+ * {@link /api/image-assets/:id/complete}
  */
-export function deleteApiUploads<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiUploadsOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiUploadsResponses, ThrowOnError>> {
+export function postApiImageAssetsByIdComplete<ThrowOnError extends boolean = true>(
+	options: Options<PostApiImageAssetsByIdCompleteOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiImageAssetsByIdCompleteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "DELETE", url: "/api/uploads", ...config }) as Promise<
-		RequestResult<DeleteApiUploadsResponses, ThrowOnError>
+	return request({
+		method: "POST",
+		url: "/api/image-assets/{id}/complete",
+		...config,
+	}) as Promise<RequestResult<PostApiImageAssetsByIdCompleteResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get image asset
+ * {@link /api/image-assets/:id}
+ */
+export function getApiImageAssetsById<ThrowOnError extends boolean = true>(
+	options: Options<GetApiImageAssetsByIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiImageAssetsByIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/image-assets/{id}", ...config }) as Promise<
+		RequestResult<GetApiImageAssetsByIdResponses, ThrowOnError>
 	>;
 }
 
 /**
- * @summary Validate completed upload
- * {@link /api/uploads/complete}
+ * @summary Delete incomplete image asset
+ * {@link /api/image-assets/:id}
  */
-export function postApiUploadsComplete<ThrowOnError extends boolean = true>(
-	options: Options<PostApiUploadsCompleteOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiUploadsCompleteResponses, ThrowOnError>> {
+export function deleteApiImageAssetsById<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiImageAssetsByIdOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiImageAssetsByIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/uploads/complete", ...config }) as Promise<
-		RequestResult<PostApiUploadsCompleteResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary Create download URL
- * {@link /api/uploads/url}
- */
-export function getApiUploadsUrl<ThrowOnError extends boolean = true>(
-	options: Options<GetApiUploadsUrlOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUploadsUrlResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({ method: "GET", url: "/api/uploads/url", ...config }) as Promise<
-		RequestResult<GetApiUploadsUrlResponses, ThrowOnError>
+	return request({ method: "DELETE", url: "/api/image-assets/{id}", ...config }) as Promise<
+		RequestResult<DeleteApiImageAssetsByIdResponses, ThrowOnError>
 	>;
 }

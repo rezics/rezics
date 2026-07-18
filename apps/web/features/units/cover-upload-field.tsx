@@ -2,9 +2,9 @@
 import { StatusCodes } from "http-status-codes";
 
 import {
-	useDeleteApiUploads,
-	usePostApiUploads,
-	usePostApiUploadsComplete,
+	useDeleteApiImageAssetsById,
+	usePostApiImageAssets,
+	usePostApiImageAssetsByIdComplete,
 } from "@rezics/openapi-tanstack-query";
 import { ImagePlus, RefreshCw, Trash2, UploadCloud, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -17,6 +17,8 @@ import {
 	FileUploadHelper,
 	FileUploadTitle,
 	FileUploadTrigger,
+	NativeSelect,
+	NativeSelectOption,
 	Progress,
 	ProgressValue,
 	cn,
@@ -24,8 +26,12 @@ import {
 import { useTranslation } from "@/i18n/client";
 
 export interface CoverAssetValue {
-	key: string;
-	focalPoint: { x: number; y: number };
+	id: string;
+	url: string;
+}
+
+export interface CoverAssetOption extends CoverAssetValue {
+	label: string;
 }
 
 const AcceptedTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"];
@@ -33,21 +39,26 @@ const AcceptedTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 export function CoverUploadField({
 	value,
 	onChange,
+	fallback = null,
+	options = [],
 	landscape = false,
 }: {
 	value: CoverAssetValue | null;
 	onChange: (value: CoverAssetValue | null) => void;
+	fallback?: CoverAssetValue | null;
+	options?: readonly CoverAssetOption[];
 	landscape?: boolean;
 }) {
 	const { t } = useTranslation({ suspense: true });
-	const requestUpload = usePostApiUploads();
-	const completeUpload = usePostApiUploadsComplete();
-	const deleteUpload = useDeleteApiUploads();
+	const requestUpload = usePostApiImageAssets();
+	const completeUpload = usePostApiImageAssetsByIdComplete();
+	const deleteUpload = useDeleteApiImageAssetsById();
 	const xhr = useRef<XMLHttpRequest | null>(null);
 	const [files, setFiles] = useState<File[]>([]);
 	const [preview, setPreview] = useState<string>();
 	const [progress, setProgress] = useState(0);
 	const [error, setError] = useState<string>();
+	const displayed = preview ?? value?.url ?? fallback?.url;
 
 	useEffect(
 		() => () => {
@@ -66,17 +77,18 @@ export function CoverUploadField({
 		}
 		if (preview) URL.revokeObjectURL(preview);
 		setPreview(URL.createObjectURL(file));
-		let key: string | undefined;
+		let assetId: string | undefined;
 		try {
-			const upload = await requestUpload.mutateAsync({
-				body: { filename: file.name, contentType: file.type, size: file.size },
+			const asset = await requestUpload.mutateAsync({
+				body: { contentType: file.type, size: file.size, access: "public" },
 			});
-			key = upload.key;
-			await uploadFile(upload.url, file, setProgress, xhr);
-			await completeUpload.mutateAsync({ body: { key } });
-			onChange({ key, focalPoint: { x: 0.5, y: 0.5 } });
+			assetId = asset.id;
+			await uploadFile(asset.upload.url, asset.upload.headers, file, setProgress, xhr);
+			const completed = await completeUpload.mutateAsync({ path: { id: asset.id } });
+			onChange({ id: completed.id, url: completed.contentUrl });
 		} catch {
-			if (key) await deleteUpload.mutateAsync({ body: { key } }).catch(() => undefined);
+			if (assetId)
+				await deleteUpload.mutateAsync({ path: { id: assetId } }).catch(() => undefined);
 			setError(t.cover.failed);
 			setProgress(0);
 		} finally {
@@ -84,13 +96,12 @@ export function CoverUploadField({
 		}
 	}
 
-	async function remove() {
+	function remove() {
 		xhr.current?.abort();
-		if (value?.key)
-			await deleteUpload.mutateAsync({ body: { key: value.key } }).catch(() => undefined);
 		onChange(null);
 		setProgress(0);
 		setFiles([]);
+		if (preview) URL.revokeObjectURL(preview);
 		setPreview(undefined);
 		setError(undefined);
 	}
@@ -109,12 +120,29 @@ export function CoverUploadField({
 			onFileChange={({ acceptedFiles }) => setFiles(acceptedFiles)}
 			onFileReject={() => setError(t.cover.invalid)}
 		>
+			{options.length > 0 && (
+				<NativeSelect
+					value={value?.id ?? ""}
+					onChange={(event) => {
+						const selected = options.find(({ id }) => id === event.currentTarget.value);
+						onChange(selected ? { id: selected.id, url: selected.url } : null);
+						setPreview(undefined);
+					}}
+				>
+					<NativeSelectOption value="">{t.cover.inherit}</NativeSelectOption>
+					{options.map((option) => (
+						<NativeSelectOption key={`${option.label}:${option.id}`} value={option.id}>
+							{option.label}
+						</NativeSelectOption>
+					))}
+				</NativeSelect>
+			)}
 			<FileUploadDropzone
 				className={cn(
 					"group bg-muted/45 relative grid max-w-md place-items-center overflow-hidden border-dashed p-0 transition-colors",
 					landscape ? "aspect-video" : "aspect-[2/3] max-h-96",
 				)}
-				disableClick={Boolean(preview)}
+				disableClick={Boolean(displayed)}
 				onPaste={(event) => {
 					const file = Array.from(event.clipboardData.files).find(({ type }) =>
 						type.startsWith("image/"),
@@ -122,42 +150,8 @@ export function CoverUploadField({
 					if (file) void choose(file);
 				}}
 			>
-				{preview ? (
-					<Button
-						aria-label={t.cover.focal}
-						className="absolute inset-0 size-full rounded-none p-0 hover:bg-transparent"
-						onClick={(event) => {
-							if (!value) return;
-							const box = event.currentTarget.getBoundingClientRect();
-							onChange({
-								...value,
-								focalPoint: {
-									x: (event.clientX - box.left) / box.width,
-									y: (event.clientY - box.top) / box.height,
-								},
-							});
-						}}
-						type="button"
-						variant="ghost"
-					>
-						<img
-							alt=""
-							className="size-full object-cover"
-							src={preview}
-							style={{
-								objectPosition: `${(value?.focalPoint.x ?? 0.5) * 100}% ${(value?.focalPoint.y ?? 0.5) * 100}%`,
-							}}
-						/>
-						{value && (
-							<span
-								className="ring-primary pointer-events-none absolute size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-primary/35 ring-1"
-								style={{
-									left: `${value.focalPoint.x * 100}%`,
-									top: `${value.focalPoint.y * 100}%`,
-								}}
-							/>
-						)}
-					</Button>
+				{displayed ? (
+					<img alt="" className="size-full object-cover" src={displayed} />
 				) : (
 					<>
 						<FileUploadDropzoneIcon>
@@ -178,12 +172,12 @@ export function CoverUploadField({
 			<div className="flex flex-wrap gap-2">
 				<FileUploadTrigger asChild>
 					<Button disabled={busy} size="sm" type="button" variant="outline">
-						{value ? (
+						{displayed ? (
 							<RefreshCw aria-hidden className="size-3.5" />
 						) : (
 							<UploadCloud aria-hidden className="size-3.5" />
 						)}
-						{value ? t.cover.replace : t.cover.upload}
+						{displayed ? t.cover.replace : t.cover.upload}
 					</Button>
 				</FileUploadTrigger>
 				{busy && (
@@ -197,21 +191,21 @@ export function CoverUploadField({
 						{t.cover.cancel}
 					</Button>
 				)}
-				{(value || preview) && (
-					<Button onClick={() => void remove()} size="sm" type="button" variant="ghost">
+				{value && (
+					<Button onClick={remove} size="sm" type="button" variant="ghost">
 						<Trash2 aria-hidden className="size-3.5" />
 						{t.cover.remove}
 					</Button>
 				)}
 			</div>
 			{error && <p className="text-destructive text-sm">{error}</p>}
-			{value && <p className="text-muted-foreground text-xs">{t.cover.focalHint}</p>}
 		</FileUpload>
 	);
 }
 
 function uploadFile(
 	url: string,
+	headers: Record<string, string>,
 	file: File,
 	progress: (value: number) => void,
 	reference: React.MutableRefObject<XMLHttpRequest | null>,
@@ -220,7 +214,7 @@ function uploadFile(
 		const request = new XMLHttpRequest();
 		reference.current = request;
 		request.open("PUT", url);
-		request.setRequestHeader("Content-Type", file.type);
+		for (const [name, value] of Object.entries(headers)) request.setRequestHeader(name, value);
 		request.upload.onprogress = (event) =>
 			event.lengthComputable && progress(Math.round((event.loaded / event.total) * 100));
 		request.onload = () =>

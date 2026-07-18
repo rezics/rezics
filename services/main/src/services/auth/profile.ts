@@ -2,6 +2,7 @@ import type { User } from "better-auth";
 import { and, eq } from "drizzle-orm";
 
 import { database } from "../database";
+import { isPrimaryUnitLocalization } from "../database/localization";
 import { profile, profilePreference, unit, unitLocalization, users } from "../database/schema";
 import { DefaultLanguage } from "../database/schema/contract-values";
 import { recordUnitRevision } from "../units/history";
@@ -26,7 +27,10 @@ async function findProfile(authUserId: string): Promise<SessionProfile | undefin
 		.innerJoin(users, eq(users.id, profile.authUserId))
 		.leftJoin(
 			unitLocalization,
-			and(eq(unitLocalization.unitId, profile.id), eq(unitLocalization.isDefault, true)),
+			and(
+				eq(unitLocalization.unitId, profile.id),
+				isPrimaryUnitLocalization(unitLocalization.unitId),
+			),
 		)
 		.where(eq(profile.authUserId, authUserId))
 		.limit(1);
@@ -60,12 +64,10 @@ export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name"
 			await tx.insert(profile).values({
 				id: profileUnit.id,
 				authUserId: authUser.id,
-				avatar: authUser.image,
 			});
 			await tx.insert(unitLocalization).values({
 				unitId: profileUnit.id,
 				language: DefaultLanguage,
-				isDefault: true,
 				title: authUser.name,
 			});
 			await tx.insert(profilePreference).values({ profileId: profileUnit.id });

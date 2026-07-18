@@ -5,6 +5,7 @@ import Elysia from "elysia";
 import { isContentStructureNodeReadable } from "../../authorization/content-structure/policy";
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
+import { isPrimaryUnitLocalization } from "../../database/localization";
 import {
 	contentStructureNode,
 	post,
@@ -89,7 +90,7 @@ export default new Elysia()
 					unitLocalization,
 					and(
 						eq(unitLocalization.unitId, contentStructureNode.contentUnitId),
-						eq(unitLocalization.isDefault, true),
+						isPrimaryUnitLocalization(unitLocalization.unitId),
 					),
 				)
 				.where(
@@ -165,7 +166,6 @@ export default new Elysia()
 				await tx.insert(unitLocalization).values({
 					unitId: contentUnit.id,
 					language: body.language,
-					isDefault: true,
 					title: body.title,
 					content: body.content,
 					contentStatus: hasContent ? (body.status ?? "draft") : undefined,
@@ -246,7 +246,7 @@ export default new Elysia()
 						.where(
 							and(
 								eq(unitLocalization.unitId, updated.contentUnitId),
-								eq(unitLocalization.isDefault, true),
+								isPrimaryUnitLocalization(unitLocalization.unitId),
 							),
 						)
 						.returning({ unitId: unitLocalization.unitId });
@@ -275,7 +275,7 @@ export default new Elysia()
 				.where(
 					and(
 						eq(unitLocalization.unitId, node.contentUnitId),
-						eq(unitLocalization.isDefault, true),
+						isPrimaryUnitLocalization(unitLocalization.unitId),
 					),
 				)
 				.limit(1);

@@ -4,6 +4,7 @@ import Elysia from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
+import { isPrimaryUnitLocalization } from "../../database/localization";
 import {
 	unit,
 	profile as profileTable,
@@ -13,7 +14,7 @@ import {
 	unitLocalization,
 } from "../../database/schema";
 import { createNotification, deliverNotificationEmail } from "../../notifications/service";
-import { storage } from "../../storage";
+import { ensureImageAssetAttachable } from "../image-assets/service";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import { BlockResponse, FollowResponse, UserBlockListResponse } from "../schema/action-response";
@@ -41,7 +42,11 @@ import {
 } from "./errors";
 
 const ProfileNotFoundResponse = toApiErrorResponse(["ProfileNotFound"]);
-const UnitForbiddenResponse = toApiErrorResponse(["UnitFieldLocked", "UploadKeyForbidden"]);
+const ProfileMutationNotFoundResponse = toApiErrorResponse([
+	"ProfileNotFound",
+	"ImageAssetNotFound",
+]);
+const UnitForbiddenResponse = toApiErrorResponse(["UnitFieldLocked"]);
 const UserNotFoundResponse = toApiErrorResponse(["UnitNotFound", "UserNotFound"]);
 
 export default new Elysia({ prefix: "/users" })
@@ -68,14 +73,14 @@ export default new Elysia({ prefix: "/users" })
 	.patch(
 		"/me",
 		async ({ profile, authorization, body }) => {
-			if (body.avatar !== undefined) authorization.upload.ensureOwn(body.avatar);
 			await authorization.unit.ensureFieldsUnlocked(profile.unitId, [
 				"/unit/slug",
 				"/profile",
 			]);
-			const previousAvatar = await database.transaction(async (tx) => {
+			await database.transaction(async (tx) => {
+				await ensureImageAssetAttachable(tx, profile.unitId, body.avatarAssetId);
 				const [current] = await tx
-					.select({ avatar: profileTable.avatar })
+					.select({ id: profileTable.id })
 					.from(profileTable)
 					.where(eq(profileTable.id, profile.unitId))
 					.limit(1);
@@ -103,7 +108,7 @@ export default new Elysia({ prefix: "/users" })
 				await tx
 					.update(profileTable)
 					.set({
-						avatar: body.avatar,
+						avatarAssetId: body.avatarAssetId,
 					})
 					.where(eq(profileTable.id, profile.unitId));
 				await tx
@@ -116,7 +121,7 @@ export default new Elysia({ prefix: "/users" })
 					.where(
 						and(
 							eq(unitLocalization.unitId, profile.unitId),
-							eq(unitLocalization.isDefault, true),
+							isPrimaryUnitLocalization(unitLocalization.unitId),
 						),
 					);
 				await recordUnitRevision(tx, {
@@ -124,15 +129,7 @@ export default new Elysia({ prefix: "/users" })
 					actorProfileId: profile.unitId,
 					event: "update",
 				});
-				return current.avatar;
 			});
-			if (
-				body.avatar !== undefined &&
-				previousAvatar !== null &&
-				authorization.upload.owns(previousAvatar) &&
-				previousAvatar !== body.avatar
-			)
-				await storage.delete({ Key: previousAvatar });
 			return getProfile(profile.unitId);
 		},
 		{
@@ -141,7 +138,7 @@ export default new Elysia({ prefix: "/users" })
 			response: {
 				[StatusCodes.OK]: PublicProfileResponse,
 				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: ProfileNotFoundResponse,
+				[StatusCodes.NOT_FOUND]: ProfileMutationNotFoundResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["ProfileChanged"]),
 			},
 			detail: { summary: "Update current profile", tags: ["Users"] },
@@ -221,7 +218,7 @@ export default new Elysia({ prefix: "/users" })
 					unitLocalization,
 					and(
 						eq(unitLocalization.unitId, profileTable.id),
-						eq(unitLocalization.isDefault, true),
+						isPrimaryUnitLocalization(unitLocalization.unitId),
 					),
 				)
 				.where(
@@ -357,7 +354,7 @@ export default new Elysia({ prefix: "/users" })
 					unitLocalization,
 					and(
 						eq(unitLocalization.unitId, profileTable.id),
-						eq(unitLocalization.isDefault, true),
+						isPrimaryUnitLocalization(unitLocalization.unitId),
 					),
 				)
 				.where(eq(profileBlock.blockerProfileId, profile.unitId))

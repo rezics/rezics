@@ -1,6 +1,7 @@
 import { and, desc, eq, inArray, isNull, lte, ne, sql } from "drizzle-orm";
 
 import { database } from "../database";
+import { unitCoverAssetId } from "../database/localization";
 import {
 	recommendationProfileInterest,
 	recommendationUnitEdge,
@@ -9,7 +10,7 @@ import {
 	unitLocalization,
 } from "../database/schema";
 import type { RecommendationReason, RecommendationSurface } from "../api/recommendations/schema";
-import { presentUnitCover } from "../units/service";
+import { presentImageAsset } from "../units/service";
 import type { RecommendationSnapshotContext, RecommendationViewer } from "./context";
 import { RecommendationPolicy, RecommendationPolicyVersion } from "./policy";
 import {
@@ -70,7 +71,7 @@ function selectLocalization(
 	rows: readonly {
 		unitId: string;
 		language: string;
-		isDefault: boolean;
+		position: string;
 		title: string | null;
 		summary: string | null;
 	}[],
@@ -79,9 +80,13 @@ function selectLocalization(
 	return [...rows].sort((left, right) => {
 		const leftPreferred = preferredLanguages.indexOf(left.language);
 		const rightPreferred = preferredLanguages.indexOf(right.language);
-		const leftRank = leftPreferred >= 0 ? leftPreferred : left.isDefault ? 10_000 : 20_000;
-		const rightRank = rightPreferred >= 0 ? rightPreferred : right.isDefault ? 10_000 : 20_000;
-		return leftRank - rightRank || left.language.localeCompare(right.language);
+		const leftRank = leftPreferred >= 0 ? leftPreferred : 10_000;
+		const rightRank = rightPreferred >= 0 ? rightPreferred : 10_000;
+		return (
+			leftRank - rightRank ||
+			left.position.localeCompare(right.position) ||
+			left.language.localeCompare(right.language)
+		);
 	})[0];
 }
 
@@ -269,9 +274,7 @@ export async function recommendUnits(input: {
 				publishedAt: unit.publishedAt,
 				createdAt: unit.createdAt,
 				updatedAt: unit.updatedAt,
-				coverKey: unit.coverKey,
-				coverFocalX: unit.coverFocalX,
-				coverFocalY: unit.coverFocalY,
+				coverAssetId: unitCoverAssetId(unit.id),
 			})
 			.from(unit)
 			.where(and(inArray(unit.id, pageIds), condition)),
@@ -279,7 +282,7 @@ export async function recommendUnits(input: {
 			.select({
 				unitId: unitLocalization.unitId,
 				language: unitLocalization.language,
-				isDefault: unitLocalization.isDefault,
+				position: unitLocalization.position,
 				title: unitLocalization.title,
 				summary: unitLocalization.summary,
 			})
@@ -314,11 +317,7 @@ export async function recommendUnits(input: {
 					updatedAt: detail.updatedAt,
 					title: localization?.title ?? null,
 					summary: localization?.summary ?? null,
-					cover: await presentUnitCover({
-						key: detail.coverKey,
-						x: detail.coverFocalX,
-						y: detail.coverFocalY,
-					}),
+					cover: presentImageAsset(detail.coverAssetId),
 					recommendationReason: reasons.get(detail.id) ?? null,
 					tracking: createRecommendationTracking(detail.id, {
 						requestId: input.requestId,

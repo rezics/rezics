@@ -5,7 +5,11 @@ import Elysia, { t } from "elysia";
 
 import { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
-import { defaultUnitTitle } from "../../database/localization";
+import {
+	defaultUnitTitle,
+	isPrimaryUnitLocalization,
+	unitCoverAssetId,
+} from "../../database/localization";
 import {
 	post,
 	postReply,
@@ -37,7 +41,7 @@ import {
 } from "../../recommendations/ranking";
 import { recommendationObjectiveExpression } from "../../recommendations/sql-ranking";
 import { createRecommendationTracking } from "../../recommendations/tracking";
-import { presentUnitCover } from "../../units/service";
+import { presentImageAsset } from "../../units/service";
 import {
 	RecommendationPolicyVersionSchema,
 	type RecommendationReason,
@@ -503,7 +507,10 @@ export async function hydrateFeedItems(
 		.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, post.id))
 		.leftJoin(
 			unitLocalization,
-			and(eq(unitLocalization.unitId, post.id), eq(unitLocalization.isDefault, true)),
+			and(
+				eq(unitLocalization.unitId, post.id),
+				isPrimaryUnitLocalization(unitLocalization.unitId),
+			),
 		)
 		.where(and(inArray(post.id, pageIds), getFeedEligibilityCondition(viewer, query, asOf)));
 	if (!rows.length) return [];
@@ -581,16 +588,14 @@ export async function hydrateFeedItems(
 							type: unit.kind,
 							slug: unit.slug,
 							title: unitLocalization.title,
-							coverKey: unit.coverKey,
-							coverFocalX: unit.coverFocalX,
-							coverFocalY: unit.coverFocalY,
+							coverAssetId: unitCoverAssetId(unit.id),
 						})
 						.from(unit)
 						.leftJoin(
 							unitLocalization,
 							and(
 								eq(unitLocalization.unitId, unit.id),
-								eq(unitLocalization.isDefault, true),
+								isPrimaryUnitLocalization(unitLocalization.unitId),
 							),
 						)
 						.where(
@@ -619,7 +624,7 @@ export async function hydrateFeedItems(
 							unitLocalization,
 							and(
 								eq(unitLocalization.unitId, post.id),
-								eq(unitLocalization.isDefault, true),
+								isPrimaryUnitLocalization(unitLocalization.unitId),
 							),
 						)
 						.where(
@@ -633,16 +638,12 @@ export async function hydrateFeedItems(
 	const subjects = new Map(
 		await Promise.all(
 			subjectRows.map(
-				async ({ coverKey, coverFocalX, coverFocalY, ...subject }) =>
+				async ({ coverAssetId, ...subject }) =>
 					[
 						subject.id,
 						{
 							...subject,
-							cover: await presentUnitCover({
-								key: coverKey,
-								x: coverFocalX,
-								y: coverFocalY,
-							}),
+							cover: presentImageAsset(coverAssetId),
 						},
 					] as const,
 			),

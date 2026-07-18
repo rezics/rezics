@@ -25,6 +25,11 @@ import type {
 	DeleteApiRecommendationsExclusionsByUnitIdStatus500,
 	GetApiHealthStatus200,
 	GetApiHealthStatus500,
+	GetImageAssetsByIdContentOptions,
+	GetImageAssetsByIdContentResponse,
+	GetImageAssetsByIdContentStatus404,
+	GetImageAssetsByIdContentStatus422,
+	GetImageAssetsByIdContentStatus500,
 	HeadApiHealthStatus204,
 	HeadApiHealthStatus422,
 	HeadApiHealthStatus500,
@@ -359,7 +364,6 @@ import type {
 	GetApiUnitsByTypeStatus500,
 	PostApiUnitsByTypeOptions,
 	PostApiUnitsByTypeStatus200,
-	PostApiUnitsByTypeStatus400,
 	PostApiUnitsByTypeStatus401,
 	PostApiUnitsByTypeStatus403,
 	PostApiUnitsByTypeStatus404,
@@ -888,32 +892,32 @@ import type {
 	PostApiSearchByIndexStatus422,
 	PostApiSearchByIndexStatus500,
 	PostApiSearchByIndexStatus503,
-	PostApiUploadsOptions,
-	PostApiUploadsStatus200,
-	PostApiUploadsStatus401,
-	PostApiUploadsStatus403,
-	PostApiUploadsStatus415,
-	PostApiUploadsStatus422,
-	PostApiUploadsStatus500,
-	DeleteApiUploadsOptions,
-	DeleteApiUploadsStatus204,
-	DeleteApiUploadsStatus401,
-	DeleteApiUploadsStatus403,
-	DeleteApiUploadsStatus422,
-	DeleteApiUploadsStatus500,
-	PostApiUploadsCompleteOptions,
-	PostApiUploadsCompleteStatus200,
-	PostApiUploadsCompleteStatus401,
-	PostApiUploadsCompleteStatus403,
-	PostApiUploadsCompleteStatus404,
-	PostApiUploadsCompleteStatus422,
-	PostApiUploadsCompleteStatus500,
-	GetApiUploadsUrlOptions,
-	GetApiUploadsUrlStatus200,
-	GetApiUploadsUrlStatus401,
-	GetApiUploadsUrlStatus403,
-	GetApiUploadsUrlStatus422,
-	GetApiUploadsUrlStatus500,
+	PostApiImageAssetsOptions,
+	PostApiImageAssetsStatus200,
+	PostApiImageAssetsStatus401,
+	PostApiImageAssetsStatus415,
+	PostApiImageAssetsStatus422,
+	PostApiImageAssetsStatus500,
+	PostApiImageAssetsByIdCompleteOptions,
+	PostApiImageAssetsByIdCompleteStatus200,
+	PostApiImageAssetsByIdCompleteStatus401,
+	PostApiImageAssetsByIdCompleteStatus404,
+	PostApiImageAssetsByIdCompleteStatus409,
+	PostApiImageAssetsByIdCompleteStatus422,
+	PostApiImageAssetsByIdCompleteStatus500,
+	GetApiImageAssetsByIdOptions,
+	GetApiImageAssetsByIdStatus200,
+	GetApiImageAssetsByIdStatus401,
+	GetApiImageAssetsByIdStatus404,
+	GetApiImageAssetsByIdStatus422,
+	GetApiImageAssetsByIdStatus500,
+	DeleteApiImageAssetsByIdOptions,
+	DeleteApiImageAssetsByIdStatus204,
+	DeleteApiImageAssetsByIdStatus401,
+	DeleteApiImageAssetsByIdStatus404,
+	DeleteApiImageAssetsByIdStatus409,
+	DeleteApiImageAssetsByIdStatus422,
+	DeleteApiImageAssetsByIdStatus500,
 } from "./models";
 import type {
 	QueryKey,
@@ -928,6 +932,7 @@ import {
 	deleteApiMessagesByMessageId,
 	deleteApiRecommendationsExclusionsByUnitId,
 	getApiHealth,
+	getImageAssetsByIdContent,
 	headApiHealth,
 	getApiReady,
 	getApiNotifications,
@@ -1088,12 +1093,106 @@ import {
 	patchApiRealmsByRealmIdUnitsByUnitId,
 	postApiSearch,
 	postApiSearchByIndex,
-	postApiUploads,
-	deleteApiUploads,
-	postApiUploadsComplete,
-	getApiUploadsUrl,
+	postApiImageAssets,
+	postApiImageAssetsByIdComplete,
+	getApiImageAssetsById,
+	deleteApiImageAssetsById,
 } from "./client";
 import { mutationOptions, queryOptions, useQuery, useMutation } from "@tanstack/react-query";
+
+export const getImageAssetsByIdContentQueryKey = ({
+	path,
+}: Omit<GetImageAssetsByIdContentOptions, "headers">) =>
+	[{ url: "/image-assets/:id/content", params: path }] as const;
+
+type GetImageAssetsByIdContentQueryKey = ReturnType<typeof getImageAssetsByIdContentQueryKey>;
+
+export function getImageAssetsByIdContentQueryOptions(
+	{ path }: GetImageAssetsByIdContentOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getImageAssetsByIdContentQueryKey({ path });
+	return queryOptions<
+		GetImageAssetsByIdContentResponse,
+		ResponseErrorConfig<
+			| GetImageAssetsByIdContentStatus404
+			| GetImageAssetsByIdContentStatus422
+			| GetImageAssetsByIdContentStatus500
+		>,
+		GetImageAssetsByIdContentResponse,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getImageAssetsByIdContent({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Resolve image asset content
+ * {@link /image-assets/:id/content}
+ */
+export function useGetImageAssetsByIdContent<
+	TData = GetImageAssetsByIdContentResponse,
+	TQueryData = GetImageAssetsByIdContentResponse,
+	TQueryKey extends QueryKey = GetImageAssetsByIdContentQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetImageAssetsByIdContentOptions["path"]
+			| (() => GetImageAssetsByIdContentOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetImageAssetsByIdContentResponse,
+				ResponseErrorConfig<
+					| GetImageAssetsByIdContentStatus404
+					| GetImageAssetsByIdContentStatus422
+					| GetImageAssetsByIdContentStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey = resolvedOptions?.queryKey ?? getImageAssetsByIdContentQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getImageAssetsByIdContentQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetImageAssetsByIdContentStatus404
+			| GetImageAssetsByIdContentStatus422
+			| GetImageAssetsByIdContentStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
 
 export const getApiHealthQueryKey = () => [{ url: "/api/health" }] as const;
 
@@ -7174,7 +7273,6 @@ export function postApiUnitsByTypeMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiUnitsByTypeStatus200,
 		ResponseErrorConfig<
-			| PostApiUnitsByTypeStatus400
 			| PostApiUnitsByTypeStatus401
 			| PostApiUnitsByTypeStatus403
 			| PostApiUnitsByTypeStatus404
@@ -7206,7 +7304,6 @@ export function usePostApiUnitsByType<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiUnitsByTypeStatus200,
 			ResponseErrorConfig<
-				| PostApiUnitsByTypeStatus400
 				| PostApiUnitsByTypeStatus401
 				| PostApiUnitsByTypeStatus403
 				| PostApiUnitsByTypeStatus404
@@ -7226,7 +7323,6 @@ export function usePostApiUnitsByType<TContext>(
 	const baseOptions = postApiUnitsByTypeMutationOptions(config) as UseMutationOptions<
 		PostApiUnitsByTypeStatus200,
 		ResponseErrorConfig<
-			| PostApiUnitsByTypeStatus400
 			| PostApiUnitsByTypeStatus401
 			| PostApiUnitsByTypeStatus403
 			| PostApiUnitsByTypeStatus404
@@ -7240,7 +7336,6 @@ export function usePostApiUnitsByType<TContext>(
 	return useMutation<
 		PostApiUnitsByTypeStatus200,
 		ResponseErrorConfig<
-			| PostApiUnitsByTypeStatus400
 			| PostApiUnitsByTypeStatus401
 			| PostApiUnitsByTypeStatus403
 			| PostApiUnitsByTypeStatus404
@@ -7259,7 +7354,6 @@ export function usePostApiUnitsByType<TContext>(
 	) as UseMutationResult<
 		PostApiUnitsByTypeStatus200,
 		ResponseErrorConfig<
-			| PostApiUnitsByTypeStatus400
 			| PostApiUnitsByTypeStatus401
 			| PostApiUnitsByTypeStatus403
 			| PostApiUnitsByTypeStatus404
@@ -16375,48 +16469,46 @@ export function usePostApiSearchByIndex<TContext>(
 	>;
 }
 
-export const postApiUploadsMutationKey = () => [{ url: "/api/uploads" }] as const;
+export const postApiImageAssetsMutationKey = () => [{ url: "/api/image-assets" }] as const;
 
-export function postApiUploadsMutationOptions<TContext = unknown>(
+export function postApiImageAssetsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = postApiUploadsMutationKey();
+	const mutationKey = postApiImageAssetsMutationKey();
 	return mutationOptions<
-		PostApiUploadsStatus200,
+		PostApiImageAssetsStatus200,
 		ResponseErrorConfig<
-			| PostApiUploadsStatus401
-			| PostApiUploadsStatus403
-			| PostApiUploadsStatus415
-			| PostApiUploadsStatus422
-			| PostApiUploadsStatus500
+			| PostApiImageAssetsStatus401
+			| PostApiImageAssetsStatus415
+			| PostApiImageAssetsStatus422
+			| PostApiImageAssetsStatus500
 		>,
-		PostApiUploadsOptions,
+		PostApiImageAssetsOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ body }) => {
-			const { data } = await postApiUploads({ ...config, body, throwOnError: true });
+			const { data } = await postApiImageAssets({ ...config, body, throwOnError: true });
 			return data;
 		},
 	});
 }
 
 /**
- * @summary Create upload URL
- * {@link /api/uploads}
+ * @summary Create image asset upload
+ * {@link /api/image-assets}
  */
-export function usePostApiUploads<TContext>(
+export function usePostApiImageAssets<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PostApiUploadsStatus200,
+			PostApiImageAssetsStatus200,
 			ResponseErrorConfig<
-				| PostApiUploadsStatus401
-				| PostApiUploadsStatus403
-				| PostApiUploadsStatus415
-				| PostApiUploadsStatus422
-				| PostApiUploadsStatus500
+				| PostApiImageAssetsStatus401
+				| PostApiImageAssetsStatus415
+				| PostApiImageAssetsStatus422
+				| PostApiImageAssetsStatus500
 			>,
-			PostApiUploadsOptions,
+			PostApiImageAssetsOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -16424,31 +16516,29 @@ export function usePostApiUploads<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? postApiUploadsMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? postApiImageAssetsMutationKey();
 
-	const baseOptions = postApiUploadsMutationOptions(config) as UseMutationOptions<
-		PostApiUploadsStatus200,
+	const baseOptions = postApiImageAssetsMutationOptions(config) as UseMutationOptions<
+		PostApiImageAssetsStatus200,
 		ResponseErrorConfig<
-			| PostApiUploadsStatus401
-			| PostApiUploadsStatus403
-			| PostApiUploadsStatus415
-			| PostApiUploadsStatus422
-			| PostApiUploadsStatus500
+			| PostApiImageAssetsStatus401
+			| PostApiImageAssetsStatus415
+			| PostApiImageAssetsStatus422
+			| PostApiImageAssetsStatus500
 		>,
-		PostApiUploadsOptions,
+		PostApiImageAssetsOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PostApiUploadsStatus200,
+		PostApiImageAssetsStatus200,
 		ResponseErrorConfig<
-			| PostApiUploadsStatus401
-			| PostApiUploadsStatus403
-			| PostApiUploadsStatus415
-			| PostApiUploadsStatus422
-			| PostApiUploadsStatus500
+			| PostApiImageAssetsStatus401
+			| PostApiImageAssetsStatus415
+			| PostApiImageAssetsStatus422
+			| PostApiImageAssetsStatus500
 		>,
-		PostApiUploadsOptions,
+		PostApiImageAssetsOptions,
 		TContext
 	>(
 		{
@@ -16458,59 +16548,65 @@ export function usePostApiUploads<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PostApiUploadsStatus200,
+		PostApiImageAssetsStatus200,
 		ResponseErrorConfig<
-			| PostApiUploadsStatus401
-			| PostApiUploadsStatus403
-			| PostApiUploadsStatus415
-			| PostApiUploadsStatus422
-			| PostApiUploadsStatus500
+			| PostApiImageAssetsStatus401
+			| PostApiImageAssetsStatus415
+			| PostApiImageAssetsStatus422
+			| PostApiImageAssetsStatus500
 		>,
-		PostApiUploadsOptions,
+		PostApiImageAssetsOptions,
 		TContext
 	>;
 }
 
-export const deleteApiUploadsMutationKey = () => [{ url: "/api/uploads" }] as const;
+export const postApiImageAssetsByIdCompleteMutationKey = () =>
+	[{ url: "/api/image-assets/:id/complete" }] as const;
 
-export function deleteApiUploadsMutationOptions<TContext = unknown>(
+export function postApiImageAssetsByIdCompleteMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = deleteApiUploadsMutationKey();
+	const mutationKey = postApiImageAssetsByIdCompleteMutationKey();
 	return mutationOptions<
-		DeleteApiUploadsStatus204,
+		PostApiImageAssetsByIdCompleteStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUploadsStatus401
-			| DeleteApiUploadsStatus403
-			| DeleteApiUploadsStatus422
-			| DeleteApiUploadsStatus500
+			| PostApiImageAssetsByIdCompleteStatus401
+			| PostApiImageAssetsByIdCompleteStatus404
+			| PostApiImageAssetsByIdCompleteStatus409
+			| PostApiImageAssetsByIdCompleteStatus422
+			| PostApiImageAssetsByIdCompleteStatus500
 		>,
-		DeleteApiUploadsOptions,
+		PostApiImageAssetsByIdCompleteOptions,
 		TContext
 	>({
 		mutationKey,
-		mutationFn: async ({ body }) => {
-			const { data } = await deleteApiUploads({ ...config, body, throwOnError: true });
+		mutationFn: async ({ path }) => {
+			const { data } = await postApiImageAssetsByIdComplete({
+				...config,
+				path,
+				throwOnError: true,
+			});
 			return data;
 		},
 	});
 }
 
 /**
- * @summary Delete upload
- * {@link /api/uploads}
+ * @summary Complete image asset upload
+ * {@link /api/image-assets/:id/complete}
  */
-export function useDeleteApiUploads<TContext>(
+export function usePostApiImageAssetsByIdComplete<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			DeleteApiUploadsStatus204,
+			PostApiImageAssetsByIdCompleteStatus200,
 			ResponseErrorConfig<
-				| DeleteApiUploadsStatus401
-				| DeleteApiUploadsStatus403
-				| DeleteApiUploadsStatus422
-				| DeleteApiUploadsStatus500
+				| PostApiImageAssetsByIdCompleteStatus401
+				| PostApiImageAssetsByIdCompleteStatus404
+				| PostApiImageAssetsByIdCompleteStatus409
+				| PostApiImageAssetsByIdCompleteStatus422
+				| PostApiImageAssetsByIdCompleteStatus500
 			>,
-			DeleteApiUploadsOptions,
+			PostApiImageAssetsByIdCompleteOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -16518,29 +16614,31 @@ export function useDeleteApiUploads<TContext>(
 ) {
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? deleteApiUploadsMutationKey();
+	const mutationKey = mutationOptions.mutationKey ?? postApiImageAssetsByIdCompleteMutationKey();
 
-	const baseOptions = deleteApiUploadsMutationOptions(config) as UseMutationOptions<
-		DeleteApiUploadsStatus204,
+	const baseOptions = postApiImageAssetsByIdCompleteMutationOptions(config) as UseMutationOptions<
+		PostApiImageAssetsByIdCompleteStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUploadsStatus401
-			| DeleteApiUploadsStatus403
-			| DeleteApiUploadsStatus422
-			| DeleteApiUploadsStatus500
+			| PostApiImageAssetsByIdCompleteStatus401
+			| PostApiImageAssetsByIdCompleteStatus404
+			| PostApiImageAssetsByIdCompleteStatus409
+			| PostApiImageAssetsByIdCompleteStatus422
+			| PostApiImageAssetsByIdCompleteStatus500
 		>,
-		DeleteApiUploadsOptions,
+		PostApiImageAssetsByIdCompleteOptions,
 		TContext
 	>;
 
 	return useMutation<
-		DeleteApiUploadsStatus204,
+		PostApiImageAssetsByIdCompleteStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUploadsStatus401
-			| DeleteApiUploadsStatus403
-			| DeleteApiUploadsStatus422
-			| DeleteApiUploadsStatus500
+			| PostApiImageAssetsByIdCompleteStatus401
+			| PostApiImageAssetsByIdCompleteStatus404
+			| PostApiImageAssetsByIdCompleteStatus409
+			| PostApiImageAssetsByIdCompleteStatus422
+			| PostApiImageAssetsByIdCompleteStatus500
 		>,
-		DeleteApiUploadsOptions,
+		PostApiImageAssetsByIdCompleteOptions,
 		TContext
 	>(
 		{
@@ -16550,140 +16648,47 @@ export function useDeleteApiUploads<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		DeleteApiUploadsStatus204,
+		PostApiImageAssetsByIdCompleteStatus200,
 		ResponseErrorConfig<
-			| DeleteApiUploadsStatus401
-			| DeleteApiUploadsStatus403
-			| DeleteApiUploadsStatus422
-			| DeleteApiUploadsStatus500
+			| PostApiImageAssetsByIdCompleteStatus401
+			| PostApiImageAssetsByIdCompleteStatus404
+			| PostApiImageAssetsByIdCompleteStatus409
+			| PostApiImageAssetsByIdCompleteStatus422
+			| PostApiImageAssetsByIdCompleteStatus500
 		>,
-		DeleteApiUploadsOptions,
+		PostApiImageAssetsByIdCompleteOptions,
 		TContext
 	>;
 }
 
-export const postApiUploadsCompleteMutationKey = () => [{ url: "/api/uploads/complete" }] as const;
+export const getApiImageAssetsByIdQueryKey = ({
+	path,
+}: Omit<GetApiImageAssetsByIdOptions, "headers">) =>
+	[{ url: "/api/image-assets/:id", params: path }] as const;
 
-export function postApiUploadsCompleteMutationOptions<TContext = unknown>(
+type GetApiImageAssetsByIdQueryKey = ReturnType<typeof getApiImageAssetsByIdQueryKey>;
+
+export function getApiImageAssetsByIdQueryOptions(
+	{ path }: GetApiImageAssetsByIdOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = postApiUploadsCompleteMutationKey();
-	return mutationOptions<
-		PostApiUploadsCompleteStatus200,
-		ResponseErrorConfig<
-			| PostApiUploadsCompleteStatus401
-			| PostApiUploadsCompleteStatus403
-			| PostApiUploadsCompleteStatus404
-			| PostApiUploadsCompleteStatus422
-			| PostApiUploadsCompleteStatus500
-		>,
-		PostApiUploadsCompleteOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ body }) => {
-			const { data } = await postApiUploadsComplete({ ...config, body, throwOnError: true });
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Validate completed upload
- * {@link /api/uploads/complete}
- */
-export function usePostApiUploadsComplete<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PostApiUploadsCompleteStatus200,
-			ResponseErrorConfig<
-				| PostApiUploadsCompleteStatus401
-				| PostApiUploadsCompleteStatus403
-				| PostApiUploadsCompleteStatus404
-				| PostApiUploadsCompleteStatus422
-				| PostApiUploadsCompleteStatus500
-			>,
-			PostApiUploadsCompleteOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? postApiUploadsCompleteMutationKey();
-
-	const baseOptions = postApiUploadsCompleteMutationOptions(config) as UseMutationOptions<
-		PostApiUploadsCompleteStatus200,
-		ResponseErrorConfig<
-			| PostApiUploadsCompleteStatus401
-			| PostApiUploadsCompleteStatus403
-			| PostApiUploadsCompleteStatus404
-			| PostApiUploadsCompleteStatus422
-			| PostApiUploadsCompleteStatus500
-		>,
-		PostApiUploadsCompleteOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PostApiUploadsCompleteStatus200,
-		ResponseErrorConfig<
-			| PostApiUploadsCompleteStatus401
-			| PostApiUploadsCompleteStatus403
-			| PostApiUploadsCompleteStatus404
-			| PostApiUploadsCompleteStatus422
-			| PostApiUploadsCompleteStatus500
-		>,
-		PostApiUploadsCompleteOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PostApiUploadsCompleteStatus200,
-		ResponseErrorConfig<
-			| PostApiUploadsCompleteStatus401
-			| PostApiUploadsCompleteStatus403
-			| PostApiUploadsCompleteStatus404
-			| PostApiUploadsCompleteStatus422
-			| PostApiUploadsCompleteStatus500
-		>,
-		PostApiUploadsCompleteOptions,
-		TContext
-	>;
-}
-
-export const getApiUploadsUrlQueryKey = ({ query }: Omit<GetApiUploadsUrlOptions, "headers">) =>
-	[{ url: "/api/uploads/url" }, ...(query ? [query] : [])] as const;
-
-type GetApiUploadsUrlQueryKey = ReturnType<typeof getApiUploadsUrlQueryKey>;
-
-export function getApiUploadsUrlQueryOptions(
-	{ query }: GetApiUploadsUrlOptions,
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const queryKey = getApiUploadsUrlQueryKey({ query });
+	const queryKey = getApiImageAssetsByIdQueryKey({ path });
 	return queryOptions<
-		GetApiUploadsUrlStatus200,
+		GetApiImageAssetsByIdStatus200,
 		ResponseErrorConfig<
-			| GetApiUploadsUrlStatus401
-			| GetApiUploadsUrlStatus403
-			| GetApiUploadsUrlStatus422
-			| GetApiUploadsUrlStatus500
+			| GetApiImageAssetsByIdStatus401
+			| GetApiImageAssetsByIdStatus404
+			| GetApiImageAssetsByIdStatus422
+			| GetApiImageAssetsByIdStatus500
 		>,
-		GetApiUploadsUrlStatus200,
+		GetApiImageAssetsByIdStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUploadsUrl({
+			const { data } = await getApiImageAssetsById({
 				...config,
-				query,
+				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -16693,26 +16698,28 @@ export function getApiUploadsUrlQueryOptions(
 }
 
 /**
- * @summary Create download URL
- * {@link /api/uploads/url}
+ * @summary Get image asset
+ * {@link /api/image-assets/:id}
  */
-export function useGetApiUploadsUrl<
-	TData = GetApiUploadsUrlStatus200,
-	TQueryData = GetApiUploadsUrlStatus200,
-	TQueryKey extends QueryKey = GetApiUploadsUrlQueryKey,
+export function useGetApiImageAssetsById<
+	TData = GetApiImageAssetsByIdStatus200,
+	TQueryData = GetApiImageAssetsByIdStatus200,
+	TQueryKey extends QueryKey = GetApiImageAssetsByIdQueryKey,
 >(
 	{
-		query,
-	}: { query: GetApiUploadsUrlOptions["query"] | (() => GetApiUploadsUrlOptions["query"]) },
+		path,
+	}: {
+		path: GetApiImageAssetsByIdOptions["path"] | (() => GetApiImageAssetsByIdOptions["path"]);
+	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiUploadsUrlStatus200,
+				GetApiImageAssetsByIdStatus200,
 				ResponseErrorConfig<
-					| GetApiUploadsUrlStatus401
-					| GetApiUploadsUrlStatus403
-					| GetApiUploadsUrlStatus422
-					| GetApiUploadsUrlStatus500
+					| GetApiImageAssetsByIdStatus401
+					| GetApiImageAssetsByIdStatus404
+					| GetApiImageAssetsByIdStatus422
+					| GetApiImageAssetsByIdStatus500
 				>,
 				TData,
 				TQueryData,
@@ -16724,12 +16731,12 @@ export function useGetApiUploadsUrl<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { query: typeof query === "function" ? query() : query };
-	const queryKey = resolvedOptions?.queryKey ?? getApiUploadsUrlQueryKey(resolvedParams);
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey = resolvedOptions?.queryKey ?? getApiImageAssetsByIdQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiUploadsUrlQueryOptions(resolvedParams, config),
+			...getApiImageAssetsByIdQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -16737,14 +16744,115 @@ export function useGetApiUploadsUrl<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiUploadsUrlStatus401
-			| GetApiUploadsUrlStatus403
-			| GetApiUploadsUrlStatus422
-			| GetApiUploadsUrlStatus500
+			| GetApiImageAssetsByIdStatus401
+			| GetApiImageAssetsByIdStatus404
+			| GetApiImageAssetsByIdStatus422
+			| GetApiImageAssetsByIdStatus500
 		>
 	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
+}
+
+export const deleteApiImageAssetsByIdMutationKey = () =>
+	[{ url: "/api/image-assets/:id" }] as const;
+
+export function deleteApiImageAssetsByIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = deleteApiImageAssetsByIdMutationKey();
+	return mutationOptions<
+		DeleteApiImageAssetsByIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiImageAssetsByIdStatus401
+			| DeleteApiImageAssetsByIdStatus404
+			| DeleteApiImageAssetsByIdStatus409
+			| DeleteApiImageAssetsByIdStatus422
+			| DeleteApiImageAssetsByIdStatus500
+		>,
+		DeleteApiImageAssetsByIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiImageAssetsById({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Delete incomplete image asset
+ * {@link /api/image-assets/:id}
+ */
+export function useDeleteApiImageAssetsById<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiImageAssetsByIdStatus204,
+			ResponseErrorConfig<
+				| DeleteApiImageAssetsByIdStatus401
+				| DeleteApiImageAssetsByIdStatus404
+				| DeleteApiImageAssetsByIdStatus409
+				| DeleteApiImageAssetsByIdStatus422
+				| DeleteApiImageAssetsByIdStatus500
+			>,
+			DeleteApiImageAssetsByIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? deleteApiImageAssetsByIdMutationKey();
+
+	const baseOptions = deleteApiImageAssetsByIdMutationOptions(config) as UseMutationOptions<
+		DeleteApiImageAssetsByIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiImageAssetsByIdStatus401
+			| DeleteApiImageAssetsByIdStatus404
+			| DeleteApiImageAssetsByIdStatus409
+			| DeleteApiImageAssetsByIdStatus422
+			| DeleteApiImageAssetsByIdStatus500
+		>,
+		DeleteApiImageAssetsByIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiImageAssetsByIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiImageAssetsByIdStatus401
+			| DeleteApiImageAssetsByIdStatus404
+			| DeleteApiImageAssetsByIdStatus409
+			| DeleteApiImageAssetsByIdStatus422
+			| DeleteApiImageAssetsByIdStatus500
+		>,
+		DeleteApiImageAssetsByIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiImageAssetsByIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiImageAssetsByIdStatus401
+			| DeleteApiImageAssetsByIdStatus404
+			| DeleteApiImageAssetsByIdStatus409
+			| DeleteApiImageAssetsByIdStatus422
+			| DeleteApiImageAssetsByIdStatus500
+		>,
+		DeleteApiImageAssetsByIdOptions,
+		TContext
+	>;
 }

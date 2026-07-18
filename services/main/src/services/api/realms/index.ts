@@ -11,6 +11,10 @@ import {
 	type RealmCapability,
 } from "../../authorization/realm/policy";
 import { database } from "../../database";
+import {
+	isPrimaryUnitLocalization,
+	makePrimaryUnitLocalization,
+} from "../../database/localization";
 import { defaultUnitTitle } from "../../database/localization";
 import {
 	auditEvent,
@@ -144,7 +148,10 @@ export default new Elysia({ prefix: "/realms" })
 				.innerJoin(unit, eq(unit.id, realm.id))
 				.leftJoin(
 					unitLocalization,
-					and(eq(unitLocalization.unitId, unit.id), eq(unitLocalization.isDefault, true)),
+					and(
+						eq(unitLocalization.unitId, unit.id),
+						isPrimaryUnitLocalization(unitLocalization.unitId),
+					),
 				)
 				.where(and(eq(unit.status, "published"), eq(unit.visibility, "public")))
 				.orderBy(desc(unit.createdAt), desc(unit.id))
@@ -175,7 +182,6 @@ export default new Elysia({ prefix: "/realms" })
 				await tx.insert(unitLocalization).values({
 					unitId: created.id,
 					...body.localization,
-					isDefault: true,
 				});
 				await tx.insert(unitCollaborator).values({
 					unitId: created.id,
@@ -232,11 +238,10 @@ export default new Elysia({ prefix: "/realms" })
 					language: unitLocalization.language,
 					title: unitLocalization.title,
 					summary: unitLocalization.summary,
-					isDefault: unitLocalization.isDefault,
 				})
 				.from(unitLocalization)
 				.where(eq(unitLocalization.unitId, params.realmId))
-				.orderBy(desc(unitLocalization.isDefault), unitLocalization.language);
+				.orderBy(unitLocalization.position, unitLocalization.language);
 			const [viewerMembership, subscriptions] = viewer
 				? await Promise.all([
 						findRealmMembership(params.realmId, viewer.unitId),
@@ -253,8 +258,8 @@ export default new Elysia({ prefix: "/realms" })
 				: [undefined, []];
 			return {
 				...record,
-				language: localizations.find(({ isDefault }) => isDefault)?.language ?? null,
-				localizations: localizations.map(({ isDefault: _isDefault, ...item }) => item),
+				language: localizations[0]?.language ?? null,
+				localizations,
 				viewerMembership: viewerMembership
 					? { role: viewerMembership.role, state: viewerMembership.state }
 					: undefined,
@@ -297,16 +302,17 @@ export default new Elysia({ prefix: "/realms" })
 						.where(eq(realm.id, params.realmId));
 				if (body.localization) {
 					await tx
-						.update(unitLocalization)
-						.set({ isDefault: false })
-						.where(eq(unitLocalization.unitId, params.realmId));
-					await tx
 						.insert(unitLocalization)
-						.values({ unitId: params.realmId, ...body.localization, isDefault: true })
+						.values({ unitId: params.realmId, ...body.localization })
 						.onConflictDoUpdate({
 							target: [unitLocalization.unitId, unitLocalization.language],
-							set: { ...body.localization, isDefault: true },
+							set: { ...body.localization },
 						});
+					await makePrimaryUnitLocalization(
+						tx,
+						params.realmId,
+						body.localization.language,
+					);
 				}
 				await recordUnitRevision(tx, {
 					unitId: params.realmId,
@@ -650,7 +656,6 @@ export default new Elysia({ prefix: "/realms" })
 					await tx.insert(unitLocalization).values({
 						unitId: ruleUnit.id,
 						language: rule.language,
-						isDefault: true,
 						title: rule.title,
 						content: rule.content,
 						contentStatus: "published",
@@ -721,7 +726,7 @@ export default new Elysia({ prefix: "/realms" })
 					unitLocalization,
 					and(
 						eq(unitLocalization.unitId, realmRule.id),
-						eq(unitLocalization.isDefault, true),
+						isPrimaryUnitLocalization(unitLocalization.unitId),
 					),
 				)
 				.where(eq(realmRule.revisionId, current.revisionId))

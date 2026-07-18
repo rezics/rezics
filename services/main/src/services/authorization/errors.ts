@@ -50,19 +50,6 @@ export class CollectionOwnershipRequired extends Data.TaggedError("CollectionOwn
 	readonly message = "You do not own this collection";
 }
 
-export class UploadKeyForbidden extends Data.TaggedError("UploadKeyForbidden") {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = UploadKeyForbidden.status;
-	readonly message: string;
-
-	constructor(upload = false) {
-		super();
-		this.message = upload
-			? "Upload does not belong to this user"
-			: "Upload key is not owned by this user";
-	}
-}
-
 export const AuthorizationErrors = [
 	AccountRestricted,
 	RealmCapabilityRequired,
@@ -70,5 +57,4 @@ export const AuthorizationErrors = [
 	RealmRoleManagementForbidden,
 	PlatformCapabilityRequired,
 	CollectionOwnershipRequired,
-	UploadKeyForbidden,
 ] as const;

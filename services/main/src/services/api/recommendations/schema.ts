@@ -93,8 +93,8 @@ export const RecommendationExclusionResponse = t.Object({ excluded: t.Boolean() 
 
 const RecommendationCoverResponse = t.Nullable(
 	t.Object({
+		id: Uuid,
 		url: t.String(),
-		focalPoint: t.Object({ x: t.Number(), y: t.Number() }),
 	}),
 );
 

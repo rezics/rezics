@@ -252,13 +252,13 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 			'type', ${hitType},
 			'slug', ${unit.slug},
 			'titles', coalesce((
-				SELECT jsonb_agg(${unitLocalization.title} ORDER BY ${unitLocalization.isDefault} DESC, ${unitLocalization.language})
+				SELECT jsonb_agg(${unitLocalization.title} ORDER BY ${unitLocalization.position}, ${unitLocalization.language})
 					FILTER (WHERE ${unitLocalization.title} IS NOT NULL)
 				FROM ${unitLocalization}
 				WHERE ${unitLocalization.unitId} = ${unit.id}
 			), '[]'::jsonb),
 			'summaries', coalesce((
-				SELECT jsonb_agg(${unitLocalization.summary} ORDER BY ${unitLocalization.isDefault} DESC, ${unitLocalization.language})
+				SELECT jsonb_agg(${unitLocalization.summary} ORDER BY ${unitLocalization.position}, ${unitLocalization.language})
 					FILTER (WHERE ${unitLocalization.summary} IS NOT NULL)
 				FROM ${unitLocalization}
 				WHERE ${unitLocalization.unitId} = ${unit.id}

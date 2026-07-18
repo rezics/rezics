@@ -388,13 +388,7 @@ export function PostListItem({
 										variant="image"
 									>
 										{post.subject?.cover ? (
-											<img
-												alt=""
-												src={post.subject.cover.url}
-												style={{
-													objectPosition: `${post.subject.cover.focalPoint.x * 100}% ${post.subject.cover.focalPoint.y * 100}%`,
-												}}
-											/>
+											<img alt="" src={post.subject.cover.url} />
 										) : (
 											<BookOpenIcon aria-hidden className="size-4" />
 										)}

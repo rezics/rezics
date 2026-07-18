@@ -3,7 +3,7 @@ import { boolean, check, index, text, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUpdatedAtColumn, createUuidv7PrimaryKey } from "./columns";
-import { unit } from "./core";
+import { imageAsset, unit } from "./core";
 
 export const entity = pgTable(
 	"entity",
@@ -13,7 +13,7 @@ export const entity = pgTable(
 			.references(() => unit.id, { onDelete: "cascade" }),
 		kind: text().notNull(),
 		verified: boolean().default(false).notNull(),
-		avatar: text(),
+		avatarAssetId: uuid().references(() => imageAsset.id, { onDelete: "set null" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},

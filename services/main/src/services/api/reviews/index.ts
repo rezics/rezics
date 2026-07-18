@@ -4,6 +4,10 @@ import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
+import {
+	isPrimaryUnitLocalization,
+	makePrimaryUnitLocalization,
+} from "../../database/localization";
 import { defaultUnitTitle } from "../../database/localization";
 import {
 	post,
@@ -76,7 +80,7 @@ export default new Elysia()
 							unitLocalization,
 							and(
 								eq(unitLocalization.unitId, post.id),
-								eq(unitLocalization.isDefault, true),
+								isPrimaryUnitLocalization(unitLocalization.unitId),
 							),
 						)
 						.where(
@@ -144,7 +148,6 @@ export default new Elysia()
 						await tx.insert(unitLocalization).values({
 							unitId: created.id,
 							language: body.language,
-							isDefault: true,
 							title: body.title,
 							summary: body.summary,
 							content: body.body,
@@ -212,7 +215,7 @@ export default new Elysia()
 							unitLocalization,
 							and(
 								eq(unitLocalization.unitId, post.id),
-								eq(unitLocalization.isDefault, true),
+								isPrimaryUnitLocalization(unitLocalization.unitId),
 							),
 						)
 						.where(and(eq(post.id, params.reviewId), eq(post.kind, "review")))
@@ -248,15 +251,10 @@ export default new Elysia()
 					]);
 					await database.transaction(async (tx) => {
 						await tx
-							.update(unitLocalization)
-							.set({ isDefault: false })
-							.where(eq(unitLocalization.unitId, params.reviewId));
-						await tx
 							.insert(unitLocalization)
 							.values({
 								unitId: params.reviewId,
 								language: body.language,
-								isDefault: true,
 								title: body.title,
 								summary: body.summary,
 								content: body.body,
@@ -265,13 +263,13 @@ export default new Elysia()
 							.onConflictDoUpdate({
 								target: [unitLocalization.unitId, unitLocalization.language],
 								set: {
-									isDefault: true,
 									title: body.title,
 									summary: body.summary,
 									content: body.body,
 									contentStatus: "published",
 								},
 							});
+						await makePrimaryUnitLocalization(tx, params.reviewId, body.language);
 						await recordUnitRevision(tx, {
 							unitId: params.reviewId,
 							actorProfileId: profile.unitId,

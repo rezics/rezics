@@ -35,9 +35,7 @@ export async function createCatalogUnit(
 		if (!created) throw new Error("Catalog Unit insertion did not return an id");
 		if (type === "entity")
 			await tx.insert(entity).values({ id: created.id, kind: body.kind ?? "person" });
-		await tx
-			.insert(unitLocalization)
-			.values({ unitId: created.id, ...body.localization, isDefault: true });
+		await tx.insert(unitLocalization).values({ unitId: created.id, ...body.localization });
 		await tx.insert(unitCollaborator).values({
 			unitId: created.id,
 			profileId: ownerId,

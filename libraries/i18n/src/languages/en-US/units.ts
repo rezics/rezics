@@ -8,7 +8,7 @@ export default {
 		tags: "Tags",
 		versions: "Versions",
 		aliases: "Aliases",
-		originalLanguage: "Original language",
+		primaryLanguage: "Primary language",
 		releasedOn: "Release date",
 		license: "License",
 		aiDisclosure: "AI disclosure",

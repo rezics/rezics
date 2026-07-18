@@ -189,9 +189,6 @@ function UnitRecommendationCard({
 								alt=""
 								className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
 								src={item.cover.url}
-								style={{
-									objectPosition: `${item.cover.focalPoint.x * 100}% ${item.cover.focalPoint.y * 100}%`,
-								}}
 							/>
 						) : (
 							<div className="text-accent-foreground grid size-full place-items-center">

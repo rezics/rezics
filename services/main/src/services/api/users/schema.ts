@@ -15,7 +15,7 @@ export const UpdateProfileBody = t.Object(
 			}),
 		),
 		name: t.Optional(t.String({ minLength: 1, maxLength: 120 })),
-		avatar: t.Optional(t.String({ maxLength: 1_000 })),
+		avatarAssetId: t.Optional(t.Nullable(Uuid)),
 		summary: t.Optional(t.String({ maxLength: 500 })),
 		description: t.Optional(PortableTextDocument),
 	},

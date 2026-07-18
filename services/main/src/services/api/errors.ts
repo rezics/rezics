@@ -15,6 +15,7 @@ import { FeedbackErrors } from "./feedback/errors";
 import { FeedErrors } from "./feed/errors";
 import { GovernanceErrors } from "./governance/errors";
 import { HistoryErrors } from "./history/errors";
+import { ImageAssetErrors } from "./image-assets/errors";
 import { MessageErrors } from "./messages/errors";
 import { NotificationErrors } from "./notifications/errors";
 import { PollErrors } from "./polls/errors";
@@ -23,7 +24,6 @@ import { ProgressErrors } from "./progress/errors";
 import { RealmErrors } from "./realms/errors";
 import { ReviewErrors } from "./reviews/errors";
 import { TokenErrors } from "./tokens/errors";
-import { UploadErrors } from "./uploads/errors";
 import { UserErrors } from "./users/errors";
 
 export class ValidationError extends Data.TaggedError("ValidationError") {
@@ -52,7 +52,7 @@ export const ApiErrors = [
 	...AuthErrors,
 	...AuthorizationErrors,
 	...UnitErrors,
-	...UploadErrors,
+	...ImageAssetErrors,
 	...TokenErrors,
 	...SearchErrors,
 	...PaginationErrors,

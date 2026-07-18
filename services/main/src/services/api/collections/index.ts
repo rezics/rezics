@@ -9,6 +9,10 @@ import Elysia, { t } from "elysia";
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
 import {
+	isPrimaryUnitLocalization,
+	makePrimaryUnitLocalization,
+} from "../../database/localization";
+import {
 	collection,
 	collectionItem,
 	unit,
@@ -59,7 +63,10 @@ export default new Elysia({ prefix: "/collections" })
 				.innerJoin(unit, eq(unit.id, collection.id))
 				.leftJoin(
 					unitLocalization,
-					and(eq(unitLocalization.unitId, unit.id), eq(unitLocalization.isDefault, true)),
+					and(
+						eq(unitLocalization.unitId, unit.id),
+						isPrimaryUnitLocalization(unitLocalization.unitId),
+					),
 				)
 				.where(
 					and(
@@ -102,7 +109,7 @@ export default new Elysia({ prefix: "/collections" })
 				});
 				await tx
 					.insert(unitLocalization)
-					.values({ unitId: created.id, ...body.localization, isDefault: true });
+					.values({ unitId: created.id, ...body.localization });
 				await tx.insert(unitCollaborator).values({
 					unitId: created.id,
 					profileId: profile.unitId,
@@ -189,20 +196,20 @@ export default new Elysia({ prefix: "/collections" })
 				}
 				if (body.localization) {
 					await tx
-						.update(unitLocalization)
-						.set({ isDefault: false })
-						.where(eq(unitLocalization.unitId, params.collectionId));
-					await tx
 						.insert(unitLocalization)
 						.values({
 							unitId: params.collectionId,
 							...body.localization,
-							isDefault: true,
 						})
 						.onConflictDoUpdate({
 							target: [unitLocalization.unitId, unitLocalization.language],
-							set: { ...body.localization, isDefault: true },
+							set: { ...body.localization },
 						});
+					await makePrimaryUnitLocalization(
+						tx,
+						params.collectionId,
+						body.localization.language,
+					);
 				}
 				await recordUnitRevision(tx, {
 					unitId: params.collectionId,

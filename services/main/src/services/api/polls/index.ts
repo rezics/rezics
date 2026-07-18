@@ -9,6 +9,7 @@ import Elysia from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
+import { isPrimaryUnitLocalization } from "../../database/localization";
 import {
 	pollOption,
 	poll,
@@ -80,7 +81,6 @@ export default new Elysia({ prefix: "/polls" })
 						})),
 					),
 					contentStatus: "published",
-					isDefault: true,
 				});
 				await tx.insert(unitCollaborator).values({
 					unitId: pollUnit.id,
@@ -126,7 +126,10 @@ export default new Elysia({ prefix: "/polls" })
 				.innerJoin(unit, eq(unit.id, poll.id))
 				.innerJoin(
 					unitLocalization,
-					and(eq(unitLocalization.unitId, poll.id), eq(unitLocalization.isDefault, true)),
+					and(
+						eq(unitLocalization.unitId, poll.id),
+						isPrimaryUnitLocalization(unitLocalization.unitId),
+					),
 				)
 				.where(eq(poll.id, params.pollId))
 				.limit(1);

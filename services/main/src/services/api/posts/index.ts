@@ -4,6 +4,7 @@ import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
+import { isPrimaryUnitLocalization } from "../../database/localization";
 import { defaultUnitTitle } from "../../database/localization";
 import {
 	post,
@@ -155,7 +156,7 @@ export default new Elysia()
 								unitLocalization,
 								and(
 									eq(unitLocalization.unitId, post.id),
-									eq(unitLocalization.isDefault, true),
+									isPrimaryUnitLocalization(unitLocalization.unitId),
 								),
 							)
 							.where(
@@ -208,7 +209,6 @@ export default new Elysia()
 						await tx.insert(unitLocalization).values({
 							unitId: created.id,
 							language: body.language,
-							isDefault: true,
 							title: body.title,
 							content: body.body,
 							contentStatus: "published",
@@ -279,7 +279,7 @@ export default new Elysia()
 							unitLocalization,
 							and(
 								eq(unitLocalization.unitId, post.id),
-								eq(unitLocalization.isDefault, true),
+								isPrimaryUnitLocalization(unitLocalization.unitId),
 							),
 						)
 						.where(
@@ -323,7 +323,7 @@ export default new Elysia()
 							.where(
 								and(
 									eq(unitLocalization.unitId, params.postId),
-									eq(unitLocalization.isDefault, true),
+									isPrimaryUnitLocalization(unitLocalization.unitId),
 								),
 							)
 							.limit(1);
@@ -424,7 +424,7 @@ export default new Elysia()
 							unitLocalization,
 							and(
 								eq(unitLocalization.unitId, postReply.postId),
-								eq(unitLocalization.isDefault, true),
+								isPrimaryUnitLocalization(unitLocalization.unitId),
 							),
 						)
 						.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, postReply.postId))
@@ -495,7 +495,7 @@ export default new Elysia()
 							unitLocalization,
 							and(
 								eq(unitLocalization.unitId, postReply.postId),
-								eq(unitLocalization.isDefault, true),
+								isPrimaryUnitLocalization(unitLocalization.unitId),
 							),
 						)
 						.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, postReply.postId))
@@ -636,7 +636,6 @@ export default new Elysia()
 						await tx.insert(unitLocalization).values({
 							unitId: created.id,
 							language: body.language,
-							isDefault: true,
 							content: body.body,
 							contentStatus: "published",
 						});
@@ -712,7 +711,7 @@ export default new Elysia()
 							.where(
 								and(
 									eq(unitLocalization.unitId, params.replyPostId),
-									eq(unitLocalization.isDefault, true),
+									isPrimaryUnitLocalization(unitLocalization.unitId),
 								),
 							);
 						await recordUnitRevision(tx, {

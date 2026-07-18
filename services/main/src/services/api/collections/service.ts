@@ -10,6 +10,7 @@ import {
 
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import { database } from "../../database";
+import { isPrimaryUnitLocalization } from "../../database/localization";
 import {
 	collection as collectionTable,
 	collectionItem,
@@ -61,7 +62,6 @@ export async function ensureFavorites(ownerId: string) {
 			await tx.insert(unitLocalization).values({
 				unitId: created.id,
 				language: DefaultLanguage,
-				isDefault: true,
 				title: "Favorites",
 			});
 			await tx.insert(unitCollaborator).values({
@@ -108,7 +108,10 @@ export async function getCollection(
 		.innerJoin(unit, eq(unit.id, collectionTable.id))
 		.leftJoin(
 			unitLocalization,
-			and(eq(unitLocalization.unitId, unit.id), eq(unitLocalization.isDefault, true)),
+			and(
+				eq(unitLocalization.unitId, unit.id),
+				isPrimaryUnitLocalization(unitLocalization.unitId),
+			),
 		)
 		.where(eq(collectionTable.id, collectionId))
 		.limit(1);
@@ -148,7 +151,10 @@ export async function getCollection(
 		.innerJoin(unit, eq(unit.id, collectionItem.unitId))
 		.leftJoin(
 			unitLocalization,
-			and(eq(unitLocalization.unitId, unit.id), eq(unitLocalization.isDefault, true)),
+			and(
+				eq(unitLocalization.unitId, unit.id),
+				isPrimaryUnitLocalization(unitLocalization.unitId),
+			),
 		)
 		.where(and(eq(collectionItem.collectionId, collectionId), getUnitReadCondition(viewerId)))
 		.orderBy(collectionItem.position, collectionItem.unitId);

@@ -28,30 +28,19 @@ import { toApiErrorResponse, UnitDetailResponse, UnitListResponse } from "../sch
 
 const AuthenticationRequiredResponse = toApiErrorResponse(["AuthenticationRequired"]);
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
-const UnitCreateBadRequestResponse = toApiErrorResponse([
-	"UnitCoverIncomplete",
-	"UnitCoverUnsupported",
-	"UnitCoverContentMismatch",
-]);
+const UnitMutationNotFoundResponse = toApiErrorResponse(["UnitNotFound", "ImageAssetNotFound"]);
 const UnitCreateForbiddenResponse = toApiErrorResponse([
 	"ApiTokenPermissionRequired",
 	"EmailVerificationRequired",
 	"AccountRestricted",
-	"UnitCoverKeyForbidden",
 ]);
-const UnitUpdateBadRequestResponse = toApiErrorResponse([
-	"UnitCoverIncomplete",
-	"UnitCoverUnsupported",
-	"UnitCoverContentMismatch",
-	"UnitOriginalLanguageMissing",
-]);
+const UnitUpdateBadRequestResponse = toApiErrorResponse(["UnitPrimaryLanguageMissing"]);
 const UnitMutationForbiddenResponse = toApiErrorResponse([
 	"ApiTokenPermissionRequired",
 	"EmailVerificationRequired",
 	"AccountRestricted",
 	"UnitEditForbidden",
 	"UnitFieldLocked",
-	"UnitCoverKeyForbidden",
 ]);
 const UnitAuthorizationForbiddenResponse = toApiErrorResponse([
 	"ApiTokenPermissionRequired",
@@ -99,10 +88,9 @@ export default new Elysia({ prefix: "/units" })
 			body: CreateUnitBody,
 			response: {
 				[StatusCodes.OK]: UnitDetailResponse,
-				[StatusCodes.BAD_REQUEST]: UnitCreateBadRequestResponse,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: UnitCreateForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+				[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 			},
 			detail: { summary: "Create unit", tags: ["Units"] },
 		},
@@ -154,7 +142,7 @@ export default new Elysia({ prefix: "/units" })
 				[StatusCodes.BAD_REQUEST]: UnitUpdateBadRequestResponse,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+				[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 				[StatusCodes.CONFLICT]: UnitChangedResponse,
 			},
 			detail: { summary: "Update unit", tags: ["Units"] },
@@ -199,7 +187,7 @@ export default new Elysia({ prefix: "/units" })
 				[StatusCodes.OK]: UnitDetailResponse,
 				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
 				[StatusCodes.FORBIDDEN]: UnitAuthorizationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+				[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 			},
 			detail: { summary: "Create or replace unit localization", tags: ["Units"] },
 		},

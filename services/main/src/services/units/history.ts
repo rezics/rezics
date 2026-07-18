@@ -17,6 +17,7 @@ import type { JsonValue } from "@rezics/portable-text";
 import type { Static, TSchema } from "@sinclair/typebox";
 
 import type { DatabaseTransaction } from "../database";
+import { isPrimaryUnitLocalization } from "../database/localization";
 import {
 	auditEvent,
 	book,
@@ -293,7 +294,10 @@ async function snapshotRealmRules(tx: DatabaseTransaction, realmId: string) {
 		.from(realmRule)
 		.innerJoin(
 			unitLocalization,
-			and(eq(unitLocalization.unitId, realmRule.id), eq(unitLocalization.isDefault, true)),
+			and(
+				eq(unitLocalization.unitId, realmRule.id),
+				isPrimaryUnitLocalization(unitLocalization.unitId),
+			),
 		)
 		.where(eq(realmRule.revisionId, revision.id))
 		.orderBy(realmRule.position, realmRule.id);
@@ -557,7 +561,6 @@ async function restoreRealmRules(
 		await tx.insert(unitLocalization).values({
 			unitId: ruleUnit.id,
 			language: rule.language,
-			isDefault: true,
 			title: rule.title,
 			content: rule.content,
 			contentStatus: "published",

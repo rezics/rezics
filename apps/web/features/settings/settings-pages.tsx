@@ -4,12 +4,12 @@ import {
 	getApiUsersByIdQueryKey,
 	getApiUsersMePreferencesQueryKey,
 	getApiUsersMeQueryKey,
-	useDeleteApiUploads,
+	useDeleteApiImageAssetsById,
 	useGetApiUsersMe,
 	useGetApiUsersMePreferences,
 	usePatchApiUsersMe,
-	usePostApiUploads,
-	usePostApiUploadsComplete,
+	usePostApiImageAssets,
+	usePostApiImageAssetsByIdComplete,
 	usePutApiUsersMePreferences,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
@@ -65,9 +65,9 @@ export function ProfileSettings() {
 				]),
 		},
 	});
-	const requestUpload = usePostApiUploads();
-	const completeUpload = usePostApiUploadsComplete();
-	const deleteUpload = useDeleteApiUploads();
+	const requestUpload = usePostApiImageAssets();
+	const completeUpload = usePostApiImageAssetsByIdComplete();
+	const deleteUpload = useDeleteApiImageAssetsById();
 	const [saved, setSaved] = useState(false);
 	const [avatarFiles, setAvatarFiles] = useState<File[]>([]);
 	const [uploadError, setUploadError] = useState(false);
@@ -76,23 +76,26 @@ export function ProfileSettings() {
 		return <QueryFailure error={profile.error} retry={() => void profile.refetch()} />;
 	const current = profile.data;
 	async function uploadAvatar(file: File) {
-		let key: string | undefined;
+		let assetId: string | undefined;
 		setUploadError(false);
 		try {
-			const upload = await requestUpload.mutateAsync({
-				body: { filename: file.name, contentType: file.type, size: file.size },
+			const asset = await requestUpload.mutateAsync({
+				body: { contentType: file.type, size: file.size, access: "public" },
 			});
-			key = upload.key;
-			const response = await fetch(upload.url, {
+			assetId = asset.id;
+			const response = await fetch(asset.upload.url, {
 				method: "PUT",
-				headers: { "Content-Type": file.type },
+				headers: asset.upload.headers,
 				body: file,
 			});
 			if (!response.ok) throw new Error("Upload failed");
-			await completeUpload.mutateAsync({ body: { key } });
-			await update.mutateAsync({ body: { updatedAt: current.updatedAt, avatar: key } });
+			await completeUpload.mutateAsync({ path: { id: asset.id } });
+			await update.mutateAsync({
+				body: { updatedAt: current.updatedAt, avatarAssetId: asset.id },
+			});
 		} catch {
-			if (key) await deleteUpload.mutateAsync({ body: { key } }).catch(() => undefined);
+			if (assetId)
+				await deleteUpload.mutateAsync({ path: { id: assetId } }).catch(() => undefined);
 			setUploadError(true);
 		} finally {
 			setAvatarFiles([]);

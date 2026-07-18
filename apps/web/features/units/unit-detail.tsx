@@ -86,7 +86,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 		],
 		[t.ui.contentRating, rating],
 		[t.units.detail.aiDisclosure, aiDisclosure],
-		[t.units.detail.originalLanguage, item.originalLanguage],
+		[t.units.detail.primaryLanguage, item.primaryLanguage],
 		[t.units.detail.releasedOn, formatDate(item.releasedOn, locale.current)],
 		[t.units.detail.license, item.license],
 		[t.units.detail.updatedAt, formatDate(item.updatedAt, locale.current)],
@@ -103,14 +103,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 					}
 				>
 					{item.cover ? (
-						<img
-							alt=""
-							className="size-full object-cover"
-							src={item.cover.url}
-							style={{
-								objectPosition: `${item.cover.focalPoint.x * 100}% ${item.cover.focalPoint.y * 100}%`,
-							}}
-						/>
+						<img alt="" className="size-full object-cover" src={item.cover.url} />
 					) : (
 						<div className="text-accent-foreground grid size-full place-items-center">
 							<Icon className="size-9" />

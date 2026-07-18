@@ -2,9 +2,9 @@ import { and, eq } from "drizzle-orm";
 import { PortableTextDocument, parseNullableDocument } from "@rezics/content-structure";
 
 import { database } from "../../database";
+import { isPrimaryUnitLocalization } from "../../database/localization";
 import { profile as profileTable, unit, unitLocalization } from "../../database/schema";
-import { storage } from "../../storage";
-import { isManagedUploadKey } from "../../authorization/upload/authorization";
+import { imageAssetContentUrl } from "../image-assets/service";
 import { ProfileNotFound } from "./errors";
 
 export const PublicProfileSelection = {
@@ -14,7 +14,7 @@ export const PublicProfileSelection = {
 	visibility: unit.visibility,
 	language: unitLocalization.language,
 	name: unitLocalization.title,
-	avatar: profileTable.avatar,
+	avatarAssetId: profileTable.avatarAssetId,
 	summary: unitLocalization.summary,
 	description: unitLocalization.description,
 	createdAt: unit.createdAt,
@@ -31,7 +31,7 @@ export async function getProfile(unitId: string) {
 				unitLocalization,
 				and(
 					eq(unitLocalization.unitId, profileTable.id),
-					eq(unitLocalization.isDefault, true),
+					isPrimaryUnitLocalization(unitLocalization.unitId),
 				),
 			)
 			.where(eq(profileTable.id, unitId))
@@ -43,19 +43,18 @@ export async function getProfile(unitId: string) {
 
 export async function presentProfile<
 	T extends {
-		avatar: string | null;
+		avatarAssetId: string | null;
 		status: string;
 		visibility: string;
 		description: unknown;
 	},
 >(profile: T, includeKey = false) {
-	const avatarKey = profile.avatar && isManagedUploadKey(profile.avatar) ? profile.avatar : null;
 	return {
 		...profile,
 		status: profile.status.toLowerCase(),
 		visibility: profile.visibility.toLowerCase(),
 		description: parseNullableDocument(PortableTextDocument, profile.description),
-		avatar: avatarKey ? await storage.presignGet({ Key: avatarKey }) : profile.avatar,
-		...(includeKey ? { avatarKey } : {}),
+		avatar: profile.avatarAssetId ? imageAssetContentUrl(profile.avatarAssetId) : null,
+		...(includeKey ? { avatarAssetId: profile.avatarAssetId } : {}),
 	};
 }

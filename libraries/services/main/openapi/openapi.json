@@ -36,22 +36,20 @@
 					"RealmRoleManagementForbidden",
 					"PlatformCapabilityRequired",
 					"CollectionOwnershipRequired",
-					"UploadKeyForbidden",
 					"UnitNotFound",
 					"UnitEditForbidden",
 					"UnitRestoreForbidden",
 					"UnitFieldLocked",
 					"UnitChanged",
 					"UnitRevisionConflict",
-					"UnitCoverKeyForbidden",
-					"UnitCoverIncomplete",
-					"UnitCoverUnsupported",
-					"UnitCoverContentMismatch",
-					"UnitOriginalLanguageMissing",
-					"UploadUnsupportedType",
-					"UploadNotFound",
-					"UploadInvalidSize",
-					"UploadContentMismatch",
+					"UnitPrimaryLanguageMissing",
+					"ImageAssetNotFound",
+					"ImageAssetUploadNotFound",
+					"ImageAssetUnsupportedType",
+					"ImageAssetInvalidSize",
+					"ImageAssetContentMismatch",
+					"ImageAssetInvalidState",
+					"ImageAssetInUse",
 					"ApiTokenNotFound",
 					"InvalidSearch",
 					"SearchUnavailable",
@@ -167,6 +165,70 @@
 		}
 	},
 	"paths": {
+		"/image-assets/{id}/content": {
+			"get": {
+				"summary": "Resolve image asset content",
+				"tags": ["Image Assets"],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"302": {
+						"description": "Response for status 302",
+						"content": { "type": "void" }
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ImageAssetNotFound",
+													"type": "string",
+													"enum": ["ImageAssetNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getImage-assetsByIdContent"
+			}
+		},
 		"/api/health": {
 			"get": {
 				"summary": "Process health",
@@ -945,21 +1007,13 @@
 														"anyOf": [
 															{
 																"type": "object",
-																"required": ["url", "focalPoint"],
+																"required": ["id", "url"],
 																"properties": {
-																	"url": { "type": "string" },
-																	"focalPoint": {
-																		"type": "object",
-																		"required": ["x", "y"],
-																		"properties": {
-																			"x": {
-																				"type": "number"
-																			},
-																			"y": {
-																				"type": "number"
-																			}
-																		}
-																	}
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
 																}
 															},
 															{ "type": "null" }
@@ -1458,6 +1512,35 @@
 																			}
 																		},
 																		{
+																			"additionalProperties": false,
+																			"$id": "PortableTextImage",
+																			"type": "object",
+																			"required": [
+																				"_key",
+																				"_type",
+																				"assetId"
+																			],
+																			"properties": {
+																				"_key": {
+																					"type": "string"
+																				},
+																				"_type": {
+																					"const": "image",
+																					"type": "string"
+																				},
+																				"assetId": {
+																					"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																					"type": "string"
+																				},
+																				"alt": {
+																					"type": "string"
+																				},
+																				"caption": {
+																					"type": "string"
+																				}
+																			}
+																		},
+																		{
 																			"additionalProperties": {
 																				"$id": "#/components/schemas/JsonValue",
 																				"anyOf": [
@@ -1499,7 +1582,7 @@
 																					"type": "string"
 																				},
 																				"_type": {
-																					"pattern": "^(?!block$).+",
+																					"pattern": "^(?!(?:block|image)$).+",
 																					"type": "string"
 																				}
 																			}
@@ -1621,29 +1704,15 @@
 																			{
 																				"type": "object",
 																				"required": [
-																					"url",
-																					"focalPoint"
+																					"id",
+																					"url"
 																				],
 																				"properties": {
-																					"url": {
+																					"id": {
+																						"format": "uuid",
 																						"type": "string"
 																					},
-																					"focalPoint": {
-																						"type": "object",
-																						"required": [
-																							"x",
-																							"y"
-																						],
-																						"properties": {
-																							"x": {
-																								"type": "number"
-																							},
-																							"y": {
-																								"type": "number"
-																							}
-																						}
-																					},
-																					"key": {
+																					"url": {
 																						"type": "string"
 																					}
 																				}
@@ -4257,6 +4326,35 @@
 																			}
 																		},
 																		{
+																			"additionalProperties": false,
+																			"$id": "PortableTextImage",
+																			"type": "object",
+																			"required": [
+																				"_key",
+																				"_type",
+																				"assetId"
+																			],
+																			"properties": {
+																				"_key": {
+																					"type": "string"
+																				},
+																				"_type": {
+																					"const": "image",
+																					"type": "string"
+																				},
+																				"assetId": {
+																					"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																					"type": "string"
+																				},
+																				"alt": {
+																					"type": "string"
+																				},
+																				"caption": {
+																					"type": "string"
+																				}
+																			}
+																		},
+																		{
 																			"additionalProperties": {
 																				"$id": "#/components/schemas/JsonValue",
 																				"anyOf": [
@@ -4298,7 +4396,7 @@
 																					"type": "string"
 																				},
 																				"_type": {
-																					"pattern": "^(?!block$).+",
+																					"pattern": "^(?!(?:block|image)$).+",
 																					"type": "string"
 																				}
 																			}
@@ -4420,29 +4518,15 @@
 																			{
 																				"type": "object",
 																				"required": [
-																					"url",
-																					"focalPoint"
+																					"id",
+																					"url"
 																				],
 																				"properties": {
-																					"url": {
+																					"id": {
+																						"format": "uuid",
 																						"type": "string"
 																					},
-																					"focalPoint": {
-																						"type": "object",
-																						"required": [
-																							"x",
-																							"y"
-																						],
-																						"properties": {
-																							"x": {
-																								"type": "number"
-																							},
-																							"y": {
-																								"type": "number"
-																							}
-																						}
-																					},
-																					"key": {
+																					"url": {
 																						"type": "string"
 																					}
 																				}
@@ -7665,6 +7749,33 @@
 																	}
 																},
 																{
+																	"additionalProperties": false,
+																	"$id": "PortableTextImage",
+																	"type": "object",
+																	"required": [
+																		"_key",
+																		"_type",
+																		"assetId"
+																	],
+																	"properties": {
+																		"_key": {
+																			"type": "string"
+																		},
+																		"_type": {
+																			"const": "image",
+																			"type": "string"
+																		},
+																		"assetId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"alt": { "type": "string" },
+																		"caption": {
+																			"type": "string"
+																		}
+																	}
+																},
+																{
 																	"additionalProperties": {
 																		"$id": "#/components/schemas/JsonValue",
 																		"anyOf": [
@@ -7695,7 +7806,7 @@
 																			"type": "string"
 																		},
 																		"_type": {
-																			"pattern": "^(?!block$).+",
+																			"pattern": "^(?!(?:block|image)$).+",
 																			"type": "string"
 																		}
 																	}
@@ -8353,6 +8464,33 @@
 																	}
 																},
 																{
+																	"additionalProperties": false,
+																	"$id": "PortableTextImage",
+																	"type": "object",
+																	"required": [
+																		"_key",
+																		"_type",
+																		"assetId"
+																	],
+																	"properties": {
+																		"_key": {
+																			"type": "string"
+																		},
+																		"_type": {
+																			"const": "image",
+																			"type": "string"
+																		},
+																		"assetId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"alt": { "type": "string" },
+																		"caption": {
+																			"type": "string"
+																		}
+																	}
+																},
+																{
 																	"additionalProperties": {
 																		"$id": "#/components/schemas/JsonValue",
 																		"anyOf": [
@@ -8383,7 +8521,7 @@
 																			"type": "string"
 																		},
 																		"_type": {
-																			"pattern": "^(?!block$).+",
+																			"pattern": "^(?!(?:block|image)$).+",
 																			"type": "string"
 																		}
 																	}
@@ -9405,10 +9543,10 @@
 														{ "type": "null" }
 													]
 												},
-												"avatarKey": {
+												"avatarAssetId": {
 													"nullable": true,
 													"anyOf": [
-														{ "type": "string" },
+														{ "format": "uuid", "type": "string" },
 														{ "type": "null" }
 													]
 												},
@@ -9640,6 +9778,35 @@
 																				}
 																			},
 																			{
+																				"additionalProperties": false,
+																				"$id": "PortableTextImage",
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type",
+																					"assetId"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"const": "image",
+																						"type": "string"
+																					},
+																					"assetId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"alt": {
+																						"type": "string"
+																					},
+																					"caption": {
+																						"type": "string"
+																					}
+																				}
+																			},
+																			{
 																				"additionalProperties": {
 																					"$id": "#/components/schemas/JsonValue",
 																					"anyOf": [
@@ -9681,7 +9848,7 @@
 																						"type": "string"
 																					},
 																					"_type": {
-																						"pattern": "^(?!block$).+",
+																						"pattern": "^(?!(?:block|image)$).+",
 																						"type": "string"
 																					}
 																				}
@@ -9776,7 +9943,13 @@
 										"type": "string"
 									},
 									"name": { "minLength": 1, "maxLength": 120, "type": "string" },
-									"avatar": { "maxLength": 1000, "type": "string" },
+									"avatarAssetId": {
+										"nullable": true,
+										"anyOf": [
+											{ "format": "uuid", "type": "string" },
+											{ "type": "null" }
+										]
+									},
 									"summary": { "maxLength": 500, "type": "string" },
 									"description": {
 										"additionalProperties": false,
@@ -9973,6 +10146,29 @@
 															}
 														},
 														{
+															"additionalProperties": false,
+															"$id": "PortableTextImage",
+															"type": "object",
+															"required": [
+																"_key",
+																"_type",
+																"assetId"
+															],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"const": "image",
+																	"type": "string"
+																},
+																"assetId": {
+																	"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																	"type": "string"
+																},
+																"alt": { "type": "string" },
+																"caption": { "type": "string" }
+															}
+														},
+														{
 															"additionalProperties": {
 																"$id": "#/components/schemas/JsonValue",
 																"anyOf": [
@@ -10001,7 +10197,7 @@
 															"properties": {
 																"_key": { "type": "string" },
 																"_type": {
-																	"pattern": "^(?!block$).+",
+																	"pattern": "^(?!(?:block|image)$).+",
 																	"type": "string"
 																}
 															}
@@ -10057,9 +10253,12 @@
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
-										"avatarKey": {
+										"avatarAssetId": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
 										},
 										"summary": {
 											"nullable": true,
@@ -10280,6 +10479,35 @@
 																		}
 																	},
 																	{
+																		"additionalProperties": false,
+																		"$id": "PortableTextImage",
+																		"type": "object",
+																		"required": [
+																			"_key",
+																			"_type",
+																			"assetId"
+																		],
+																		"properties": {
+																			"_key": {
+																				"type": "string"
+																			},
+																			"_type": {
+																				"const": "image",
+																				"type": "string"
+																			},
+																			"assetId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"alt": {
+																				"type": "string"
+																			},
+																			"caption": {
+																				"type": "string"
+																			}
+																		}
+																	},
+																	{
 																		"additionalProperties": {
 																			"$id": "#/components/schemas/JsonValue",
 																			"anyOf": [
@@ -10319,7 +10547,7 @@
 																				"type": "string"
 																			},
 																			"_type": {
-																				"pattern": "^(?!block$).+",
+																				"pattern": "^(?!(?:block|image)$).+",
 																				"type": "string"
 																			}
 																		}
@@ -10355,10 +10583,7 @@
 												"code": {
 													"default": "UnitFieldLocked",
 													"type": "string",
-													"enum": [
-														"UnitFieldLocked",
-														"UploadKeyForbidden"
-													]
+													"enum": ["UnitFieldLocked"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -10385,7 +10610,10 @@
 												"code": {
 													"default": "ProfileNotFound",
 													"type": "string",
-													"enum": ["ProfileNotFound"]
+													"enum": [
+														"ProfileNotFound",
+														"ImageAssetNotFound"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -10770,9 +10998,12 @@
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
-										"avatarKey": {
+										"avatarAssetId": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
 										},
 										"summary": {
 											"nullable": true,
@@ -10993,6 +11224,35 @@
 																		}
 																	},
 																	{
+																		"additionalProperties": false,
+																		"$id": "PortableTextImage",
+																		"type": "object",
+																		"required": [
+																			"_key",
+																			"_type",
+																			"assetId"
+																		],
+																		"properties": {
+																			"_key": {
+																				"type": "string"
+																			},
+																			"_type": {
+																				"const": "image",
+																				"type": "string"
+																			},
+																			"assetId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"alt": {
+																				"type": "string"
+																			},
+																			"caption": {
+																				"type": "string"
+																			}
+																		}
+																	},
+																	{
 																		"additionalProperties": {
 																			"$id": "#/components/schemas/JsonValue",
 																			"anyOf": [
@@ -11032,7 +11292,7 @@
 																				"type": "string"
 																			},
 																			"_type": {
-																				"pattern": "^(?!block$).+",
+																				"pattern": "^(?!(?:block|image)$).+",
 																				"type": "string"
 																			}
 																		}
@@ -11552,22 +11812,13 @@
 														"anyOf": [
 															{
 																"type": "object",
-																"required": ["url", "focalPoint"],
+																"required": ["id", "url"],
 																"properties": {
-																	"url": { "type": "string" },
-																	"focalPoint": {
-																		"type": "object",
-																		"required": ["x", "y"],
-																		"properties": {
-																			"x": {
-																				"type": "number"
-																			},
-																			"y": {
-																				"type": "number"
-																			}
-																		}
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
 																	},
-																	"key": { "type": "string" }
+																	"url": { "type": "string" }
 																}
 															},
 															{ "type": "null" }
@@ -11873,6 +12124,33 @@
 																	}
 																},
 																{
+																	"additionalProperties": false,
+																	"$id": "PortableTextImage",
+																	"type": "object",
+																	"required": [
+																		"_key",
+																		"_type",
+																		"assetId"
+																	],
+																	"properties": {
+																		"_key": {
+																			"type": "string"
+																		},
+																		"_type": {
+																			"const": "image",
+																			"type": "string"
+																		},
+																		"assetId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"alt": { "type": "string" },
+																		"caption": {
+																			"type": "string"
+																		}
+																	}
+																},
+																{
 																	"additionalProperties": {
 																		"$id": "#/components/schemas/JsonValue",
 																		"anyOf": [
@@ -11903,7 +12181,7 @@
 																			"type": "string"
 																		},
 																		"_type": {
-																			"pattern": "^(?!block$).+",
+																			"pattern": "^(?!(?:block|image)$).+",
 																			"type": "string"
 																		}
 																	}
@@ -11912,6 +12190,13 @@
 														}
 													}
 												}
+											},
+											"coverAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
 											}
 										}
 									},
@@ -11945,40 +12230,6 @@
 											{ "maxLength": 64, "type": "string" },
 											{ "type": "null" }
 										]
-									},
-									"cover": {
-										"nullable": true,
-										"anyOf": [
-											{
-												"additionalProperties": false,
-												"type": "object",
-												"required": ["key", "focalPoint"],
-												"properties": {
-													"key": {
-														"minLength": 1,
-														"maxLength": 1000,
-														"type": "string"
-													},
-													"focalPoint": {
-														"type": "object",
-														"required": ["x", "y"],
-														"properties": {
-															"x": {
-																"minimum": 0,
-																"maximum": 1,
-																"type": "number"
-															},
-															"y": {
-																"minimum": 0,
-																"maximum": 1,
-																"type": "number"
-															}
-														}
-													}
-												}
-											},
-											{ "type": "null" }
-										]
 									}
 								}
 							}
@@ -12006,7 +12257,7 @@
 										"publishedAt",
 										"createdAt",
 										"updatedAt",
-										"originalLanguage",
+										"primaryLanguage",
 										"releasedOn",
 										"cover",
 										"localizations",
@@ -12044,7 +12295,7 @@
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
-										"originalLanguage": {
+										"primaryLanguage": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
@@ -12057,18 +12308,13 @@
 											"anyOf": [
 												{
 													"type": "object",
-													"required": ["url", "focalPoint"],
+													"required": ["id", "url"],
 													"properties": {
-														"url": { "type": "string" },
-														"focalPoint": {
-															"type": "object",
-															"required": ["x", "y"],
-															"properties": {
-																"x": { "type": "number" },
-																"y": { "type": "number" }
-															}
+														"id": {
+															"format": "uuid",
+															"type": "string"
 														},
-														"key": { "type": "string" }
+														"url": { "type": "string" }
 													}
 												},
 												{ "type": "null" }
@@ -12081,9 +12327,11 @@
 												"required": [
 													"unitId",
 													"language",
+													"position",
 													"title",
 													"summary",
 													"description",
+													"cover",
 													"createdAt",
 													"updatedAt"
 												],
@@ -12093,6 +12341,7 @@
 														"type": "string"
 													},
 													"language": { "type": "string" },
+													"position": { "type": "string" },
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -12328,6 +12577,35 @@
 																					}
 																				},
 																				{
+																					"additionalProperties": false,
+																					"$id": "PortableTextImage",
+																					"type": "object",
+																					"required": [
+																						"_key",
+																						"_type",
+																						"assetId"
+																					],
+																					"properties": {
+																						"_key": {
+																							"type": "string"
+																						},
+																						"_type": {
+																							"const": "image",
+																							"type": "string"
+																						},
+																						"assetId": {
+																							"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																							"type": "string"
+																						},
+																						"alt": {
+																							"type": "string"
+																						},
+																						"caption": {
+																							"type": "string"
+																						}
+																					}
+																				},
+																				{
 																					"additionalProperties": {
 																						"$id": "#/components/schemas/JsonValue",
 																						"anyOf": [
@@ -12369,7 +12647,7 @@
 																							"type": "string"
 																						},
 																						"_type": {
-																							"pattern": "^(?!block$).+",
+																							"pattern": "^(?!(?:block|image)$).+",
 																							"type": "string"
 																						}
 																					}
@@ -12377,6 +12655,23 @@
 																			]
 																		}
 																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
 																}
 															},
 															{ "type": "null" }
@@ -12585,37 +12880,6 @@
 							}
 						}
 					},
-					"400": {
-						"description": "Response for status 400",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitCoverIncomplete",
-													"type": "string",
-													"enum": [
-														"UnitCoverIncomplete",
-														"UnitCoverUnsupported",
-														"UnitCoverContentMismatch"
-													]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
 					"401": {
 						"description": "Response for status 401",
 						"content": {
@@ -12661,8 +12925,7 @@
 													"enum": [
 														"ApiTokenPermissionRequired",
 														"EmailVerificationRequired",
-														"AccountRestricted",
-														"UnitCoverKeyForbidden"
+														"AccountRestricted"
 													]
 												},
 												"message": { "type": "string" },
@@ -12690,7 +12953,7 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": ["UnitNotFound"]
+													"enum": ["UnitNotFound", "ImageAssetNotFound"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -12838,7 +13101,7 @@
 										"publishedAt",
 										"createdAt",
 										"updatedAt",
-										"originalLanguage",
+										"primaryLanguage",
 										"releasedOn",
 										"cover",
 										"localizations",
@@ -12876,7 +13139,7 @@
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
-										"originalLanguage": {
+										"primaryLanguage": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
@@ -12889,18 +13152,13 @@
 											"anyOf": [
 												{
 													"type": "object",
-													"required": ["url", "focalPoint"],
+													"required": ["id", "url"],
 													"properties": {
-														"url": { "type": "string" },
-														"focalPoint": {
-															"type": "object",
-															"required": ["x", "y"],
-															"properties": {
-																"x": { "type": "number" },
-																"y": { "type": "number" }
-															}
+														"id": {
+															"format": "uuid",
+															"type": "string"
 														},
-														"key": { "type": "string" }
+														"url": { "type": "string" }
 													}
 												},
 												{ "type": "null" }
@@ -12913,9 +13171,11 @@
 												"required": [
 													"unitId",
 													"language",
+													"position",
 													"title",
 													"summary",
 													"description",
+													"cover",
 													"createdAt",
 													"updatedAt"
 												],
@@ -12925,6 +13185,7 @@
 														"type": "string"
 													},
 													"language": { "type": "string" },
+													"position": { "type": "string" },
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -13160,6 +13421,35 @@
 																					}
 																				},
 																				{
+																					"additionalProperties": false,
+																					"$id": "PortableTextImage",
+																					"type": "object",
+																					"required": [
+																						"_key",
+																						"_type",
+																						"assetId"
+																					],
+																					"properties": {
+																						"_key": {
+																							"type": "string"
+																						},
+																						"_type": {
+																							"const": "image",
+																							"type": "string"
+																						},
+																						"assetId": {
+																							"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																							"type": "string"
+																						},
+																						"alt": {
+																							"type": "string"
+																						},
+																						"caption": {
+																							"type": "string"
+																						}
+																					}
+																				},
+																				{
 																					"additionalProperties": {
 																						"$id": "#/components/schemas/JsonValue",
 																						"anyOf": [
@@ -13201,7 +13491,7 @@
 																							"type": "string"
 																						},
 																						"_type": {
-																							"pattern": "^(?!block$).+",
+																							"pattern": "^(?!(?:block|image)$).+",
 																							"type": "string"
 																						}
 																					}
@@ -13209,6 +13499,23 @@
 																			]
 																		}
 																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
 																}
 															},
 															{ "type": "null" }
@@ -13518,45 +13825,11 @@
 											{ "type": "null" }
 										]
 									},
-									"cover": {
-										"nullable": true,
-										"anyOf": [
-											{
-												"additionalProperties": false,
-												"type": "object",
-												"required": ["key", "focalPoint"],
-												"properties": {
-													"key": {
-														"minLength": 1,
-														"maxLength": 1000,
-														"type": "string"
-													},
-													"focalPoint": {
-														"type": "object",
-														"required": ["x", "y"],
-														"properties": {
-															"x": {
-																"minimum": 0,
-																"maximum": 1,
-																"type": "number"
-															},
-															"y": {
-																"minimum": 0,
-																"maximum": 1,
-																"type": "number"
-															}
-														}
-													}
-												}
-											},
-											{ "type": "null" }
-										]
-									},
 									"unit": {
 										"additionalProperties": false,
 										"type": "object",
 										"properties": {
-											"originalLanguage": {
+											"primaryLanguage": {
 												"format": "bcp-47",
 												"minLength": 2,
 												"maxLength": 35,
@@ -13695,7 +13968,7 @@
 										"publishedAt",
 										"createdAt",
 										"updatedAt",
-										"originalLanguage",
+										"primaryLanguage",
 										"releasedOn",
 										"cover",
 										"localizations",
@@ -13733,7 +14006,7 @@
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
-										"originalLanguage": {
+										"primaryLanguage": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
@@ -13746,18 +14019,13 @@
 											"anyOf": [
 												{
 													"type": "object",
-													"required": ["url", "focalPoint"],
+													"required": ["id", "url"],
 													"properties": {
-														"url": { "type": "string" },
-														"focalPoint": {
-															"type": "object",
-															"required": ["x", "y"],
-															"properties": {
-																"x": { "type": "number" },
-																"y": { "type": "number" }
-															}
+														"id": {
+															"format": "uuid",
+															"type": "string"
 														},
-														"key": { "type": "string" }
+														"url": { "type": "string" }
 													}
 												},
 												{ "type": "null" }
@@ -13770,9 +14038,11 @@
 												"required": [
 													"unitId",
 													"language",
+													"position",
 													"title",
 													"summary",
 													"description",
+													"cover",
 													"createdAt",
 													"updatedAt"
 												],
@@ -13782,6 +14052,7 @@
 														"type": "string"
 													},
 													"language": { "type": "string" },
+													"position": { "type": "string" },
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -14017,6 +14288,35 @@
 																					}
 																				},
 																				{
+																					"additionalProperties": false,
+																					"$id": "PortableTextImage",
+																					"type": "object",
+																					"required": [
+																						"_key",
+																						"_type",
+																						"assetId"
+																					],
+																					"properties": {
+																						"_key": {
+																							"type": "string"
+																						},
+																						"_type": {
+																							"const": "image",
+																							"type": "string"
+																						},
+																						"assetId": {
+																							"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																							"type": "string"
+																						},
+																						"alt": {
+																							"type": "string"
+																						},
+																						"caption": {
+																							"type": "string"
+																						}
+																					}
+																				},
+																				{
 																					"additionalProperties": {
 																						"$id": "#/components/schemas/JsonValue",
 																						"anyOf": [
@@ -14058,7 +14358,7 @@
 																							"type": "string"
 																						},
 																						"_type": {
-																							"pattern": "^(?!block$).+",
+																							"pattern": "^(?!(?:block|image)$).+",
 																							"type": "string"
 																						}
 																					}
@@ -14066,6 +14366,23 @@
 																			]
 																		}
 																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
 																}
 															},
 															{ "type": "null" }
@@ -14287,14 +14604,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UnitCoverIncomplete",
+													"default": "UnitPrimaryLanguageMissing",
 													"type": "string",
-													"enum": [
-														"UnitCoverIncomplete",
-														"UnitCoverUnsupported",
-														"UnitCoverContentMismatch",
-														"UnitOriginalLanguageMissing"
-													]
+													"enum": ["UnitPrimaryLanguageMissing"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -14353,8 +14665,7 @@
 														"EmailVerificationRequired",
 														"AccountRestricted",
 														"UnitEditForbidden",
-														"UnitFieldLocked",
-														"UnitCoverKeyForbidden"
+														"UnitFieldLocked"
 													]
 												},
 												"message": { "type": "string" },
@@ -14382,7 +14693,7 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": ["UnitNotFound"]
+													"enum": ["UnitNotFound", "ImageAssetNotFound"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -14803,6 +15114,29 @@
 															}
 														},
 														{
+															"additionalProperties": false,
+															"$id": "PortableTextImage",
+															"type": "object",
+															"required": [
+																"_key",
+																"_type",
+																"assetId"
+															],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"const": "image",
+																	"type": "string"
+																},
+																"assetId": {
+																	"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																	"type": "string"
+																},
+																"alt": { "type": "string" },
+																"caption": { "type": "string" }
+															}
+														},
+														{
 															"additionalProperties": {
 																"$id": "#/components/schemas/JsonValue",
 																"anyOf": [
@@ -14831,7 +15165,7 @@
 															"properties": {
 																"_key": { "type": "string" },
 																"_type": {
-																	"pattern": "^(?!block$).+",
+																	"pattern": "^(?!(?:block|image)$).+",
 																	"type": "string"
 																}
 															}
@@ -14840,6 +15174,13 @@
 												}
 											}
 										}
+									},
+									"coverAssetId": {
+										"nullable": true,
+										"anyOf": [
+											{ "format": "uuid", "type": "string" },
+											{ "type": "null" }
+										]
 									}
 								}
 							}
@@ -14867,7 +15208,7 @@
 										"publishedAt",
 										"createdAt",
 										"updatedAt",
-										"originalLanguage",
+										"primaryLanguage",
 										"releasedOn",
 										"cover",
 										"localizations",
@@ -14905,7 +15246,7 @@
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
-										"originalLanguage": {
+										"primaryLanguage": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
@@ -14918,18 +15259,13 @@
 											"anyOf": [
 												{
 													"type": "object",
-													"required": ["url", "focalPoint"],
+													"required": ["id", "url"],
 													"properties": {
-														"url": { "type": "string" },
-														"focalPoint": {
-															"type": "object",
-															"required": ["x", "y"],
-															"properties": {
-																"x": { "type": "number" },
-																"y": { "type": "number" }
-															}
+														"id": {
+															"format": "uuid",
+															"type": "string"
 														},
-														"key": { "type": "string" }
+														"url": { "type": "string" }
 													}
 												},
 												{ "type": "null" }
@@ -14942,9 +15278,11 @@
 												"required": [
 													"unitId",
 													"language",
+													"position",
 													"title",
 													"summary",
 													"description",
+													"cover",
 													"createdAt",
 													"updatedAt"
 												],
@@ -14954,6 +15292,7 @@
 														"type": "string"
 													},
 													"language": { "type": "string" },
+													"position": { "type": "string" },
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -15189,6 +15528,35 @@
 																					}
 																				},
 																				{
+																					"additionalProperties": false,
+																					"$id": "PortableTextImage",
+																					"type": "object",
+																					"required": [
+																						"_key",
+																						"_type",
+																						"assetId"
+																					],
+																					"properties": {
+																						"_key": {
+																							"type": "string"
+																						},
+																						"_type": {
+																							"const": "image",
+																							"type": "string"
+																						},
+																						"assetId": {
+																							"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																							"type": "string"
+																						},
+																						"alt": {
+																							"type": "string"
+																						},
+																						"caption": {
+																							"type": "string"
+																						}
+																					}
+																				},
+																				{
 																					"additionalProperties": {
 																						"$id": "#/components/schemas/JsonValue",
 																						"anyOf": [
@@ -15230,7 +15598,7 @@
 																							"type": "string"
 																						},
 																						"_type": {
-																							"pattern": "^(?!block$).+",
+																							"pattern": "^(?!(?:block|image)$).+",
 																							"type": "string"
 																						}
 																					}
@@ -15238,6 +15606,23 @@
 																			]
 																		}
 																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
 																}
 															},
 															{ "type": "null" }
@@ -15521,7 +15906,7 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": ["UnitNotFound"]
+													"enum": ["UnitNotFound", "ImageAssetNotFound"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -17357,6 +17742,33 @@
 																	}
 																},
 																{
+																	"additionalProperties": false,
+																	"$id": "PortableTextImage",
+																	"type": "object",
+																	"required": [
+																		"_key",
+																		"_type",
+																		"assetId"
+																	],
+																	"properties": {
+																		"_key": {
+																			"type": "string"
+																		},
+																		"_type": {
+																			"const": "image",
+																			"type": "string"
+																		},
+																		"assetId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"alt": { "type": "string" },
+																		"caption": {
+																			"type": "string"
+																		}
+																	}
+																},
+																{
 																	"additionalProperties": {
 																		"$id": "#/components/schemas/JsonValue",
 																		"anyOf": [
@@ -17387,7 +17799,7 @@
 																			"type": "string"
 																		},
 																		"_type": {
-																			"pattern": "^(?!block$).+",
+																			"pattern": "^(?!(?:block|image)$).+",
 																			"type": "string"
 																		}
 																	}
@@ -17489,9 +17901,11 @@
 												"required": [
 													"unitId",
 													"language",
+													"position",
 													"title",
 													"summary",
 													"description",
+													"cover",
 													"createdAt",
 													"updatedAt"
 												],
@@ -17501,6 +17915,7 @@
 														"type": "string"
 													},
 													"language": { "type": "string" },
+													"position": { "type": "string" },
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -17736,6 +18151,35 @@
 																					}
 																				},
 																				{
+																					"additionalProperties": false,
+																					"$id": "PortableTextImage",
+																					"type": "object",
+																					"required": [
+																						"_key",
+																						"_type",
+																						"assetId"
+																					],
+																					"properties": {
+																						"_key": {
+																							"type": "string"
+																						},
+																						"_type": {
+																							"const": "image",
+																							"type": "string"
+																						},
+																						"assetId": {
+																							"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																							"type": "string"
+																						},
+																						"alt": {
+																							"type": "string"
+																						},
+																						"caption": {
+																							"type": "string"
+																						}
+																					}
+																				},
+																				{
 																					"additionalProperties": {
 																						"$id": "#/components/schemas/JsonValue",
 																						"anyOf": [
@@ -17777,7 +18221,7 @@
 																							"type": "string"
 																						},
 																						"_type": {
-																							"pattern": "^(?!block$).+",
+																							"pattern": "^(?!(?:block|image)$).+",
 																							"type": "string"
 																						}
 																					}
@@ -17785,6 +18229,23 @@
 																			]
 																		}
 																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
 																}
 															},
 															{ "type": "null" }
@@ -18187,6 +18648,33 @@
 																	}
 																},
 																{
+																	"additionalProperties": false,
+																	"$id": "PortableTextImage",
+																	"type": "object",
+																	"required": [
+																		"_key",
+																		"_type",
+																		"assetId"
+																	],
+																	"properties": {
+																		"_key": {
+																			"type": "string"
+																		},
+																		"_type": {
+																			"const": "image",
+																			"type": "string"
+																		},
+																		"assetId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"alt": { "type": "string" },
+																		"caption": {
+																			"type": "string"
+																		}
+																	}
+																},
+																{
 																	"additionalProperties": {
 																		"$id": "#/components/schemas/JsonValue",
 																		"anyOf": [
@@ -18217,7 +18705,7 @@
 																			"type": "string"
 																		},
 																		"_type": {
-																			"pattern": "^(?!block$).+",
+																			"pattern": "^(?!(?:block|image)$).+",
 																			"type": "string"
 																		}
 																	}
@@ -20279,6 +20767,29 @@
 															}
 														},
 														{
+															"additionalProperties": false,
+															"$id": "PortableTextImage",
+															"type": "object",
+															"required": [
+																"_key",
+																"_type",
+																"assetId"
+															],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"const": "image",
+																	"type": "string"
+																},
+																"assetId": {
+																	"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																	"type": "string"
+																},
+																"alt": { "type": "string" },
+																"caption": { "type": "string" }
+															}
+														},
+														{
 															"additionalProperties": {
 																"$id": "#/components/schemas/JsonValue",
 																"anyOf": [
@@ -20307,7 +20818,7 @@
 															"properties": {
 																"_key": { "type": "string" },
 																"_type": {
-																	"pattern": "^(?!block$).+",
+																	"pattern": "^(?!(?:block|image)$).+",
 																	"type": "string"
 																}
 															}
@@ -20858,6 +21369,29 @@
 																}
 															},
 															{
+																"additionalProperties": false,
+																"$id": "PortableTextImage",
+																"type": "object",
+																"required": [
+																	"_key",
+																	"_type",
+																	"assetId"
+																],
+																"properties": {
+																	"_key": { "type": "string" },
+																	"_type": {
+																		"const": "image",
+																		"type": "string"
+																	},
+																	"assetId": {
+																		"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																		"type": "string"
+																	},
+																	"alt": { "type": "string" },
+																	"caption": { "type": "string" }
+																}
+															},
+															{
 																"additionalProperties": {
 																	"$id": "#/components/schemas/JsonValue",
 																	"anyOf": [
@@ -20886,7 +21420,7 @@
 																"properties": {
 																	"_key": { "type": "string" },
 																	"_type": {
-																		"pattern": "^(?!block$).+",
+																		"pattern": "^(?!(?:block|image)$).+",
 																		"type": "string"
 																	}
 																}
@@ -21193,6 +21727,29 @@
 															}
 														},
 														{
+															"additionalProperties": false,
+															"$id": "PortableTextImage",
+															"type": "object",
+															"required": [
+																"_key",
+																"_type",
+																"assetId"
+															],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"const": "image",
+																	"type": "string"
+																},
+																"assetId": {
+																	"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																	"type": "string"
+																},
+																"alt": { "type": "string" },
+																"caption": { "type": "string" }
+															}
+														},
+														{
 															"additionalProperties": {
 																"$id": "#/components/schemas/JsonValue",
 																"anyOf": [
@@ -21221,7 +21778,7 @@
 															"properties": {
 																"_key": { "type": "string" },
 																"_type": {
-																	"pattern": "^(?!block$).+",
+																	"pattern": "^(?!(?:block|image)$).+",
 																	"type": "string"
 																}
 															}
@@ -22283,6 +22840,33 @@
 																	}
 																},
 																{
+																	"additionalProperties": false,
+																	"$id": "PortableTextImage",
+																	"type": "object",
+																	"required": [
+																		"_key",
+																		"_type",
+																		"assetId"
+																	],
+																	"properties": {
+																		"_key": {
+																			"type": "string"
+																		},
+																		"_type": {
+																			"const": "image",
+																			"type": "string"
+																		},
+																		"assetId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"alt": { "type": "string" },
+																		"caption": {
+																			"type": "string"
+																		}
+																	}
+																},
+																{
 																	"additionalProperties": {
 																		"$id": "#/components/schemas/JsonValue",
 																		"anyOf": [
@@ -22313,7 +22897,7 @@
 																			"type": "string"
 																		},
 																		"_type": {
-																			"pattern": "^(?!block$).+",
+																			"pattern": "^(?!(?:block|image)$).+",
 																			"type": "string"
 																		}
 																	}
@@ -23578,6 +24162,33 @@
 																	}
 																},
 																{
+																	"additionalProperties": false,
+																	"$id": "PortableTextImage",
+																	"type": "object",
+																	"required": [
+																		"_key",
+																		"_type",
+																		"assetId"
+																	],
+																	"properties": {
+																		"_key": {
+																			"type": "string"
+																		},
+																		"_type": {
+																			"const": "image",
+																			"type": "string"
+																		},
+																		"assetId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"alt": { "type": "string" },
+																		"caption": {
+																			"type": "string"
+																		}
+																	}
+																},
+																{
 																	"additionalProperties": {
 																		"$id": "#/components/schemas/JsonValue",
 																		"anyOf": [
@@ -23608,7 +24219,7 @@
 																			"type": "string"
 																		},
 																		"_type": {
-																			"pattern": "^(?!block$).+",
+																			"pattern": "^(?!(?:block|image)$).+",
 																			"type": "string"
 																		}
 																	}
@@ -24835,6 +25446,29 @@
 															}
 														},
 														{
+															"additionalProperties": false,
+															"$id": "PortableTextImage",
+															"type": "object",
+															"required": [
+																"_key",
+																"_type",
+																"assetId"
+															],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"const": "image",
+																	"type": "string"
+																},
+																"assetId": {
+																	"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																	"type": "string"
+																},
+																"alt": { "type": "string" },
+																"caption": { "type": "string" }
+															}
+														},
+														{
 															"additionalProperties": {
 																"$id": "#/components/schemas/JsonValue",
 																"anyOf": [
@@ -24863,7 +25497,7 @@
 															"properties": {
 																"_key": { "type": "string" },
 																"_type": {
-																	"pattern": "^(?!block$).+",
+																	"pattern": "^(?!(?:block|image)$).+",
 																	"type": "string"
 																}
 															}
@@ -25298,6 +25932,35 @@
 																		}
 																	},
 																	{
+																		"additionalProperties": false,
+																		"$id": "PortableTextImage",
+																		"type": "object",
+																		"required": [
+																			"_key",
+																			"_type",
+																			"assetId"
+																		],
+																		"properties": {
+																			"_key": {
+																				"type": "string"
+																			},
+																			"_type": {
+																				"const": "image",
+																				"type": "string"
+																			},
+																			"assetId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"alt": {
+																				"type": "string"
+																			},
+																			"caption": {
+																				"type": "string"
+																			}
+																		}
+																	},
+																	{
 																		"additionalProperties": {
 																			"$id": "#/components/schemas/JsonValue",
 																			"anyOf": [
@@ -25337,7 +26000,7 @@
 																				"type": "string"
 																			},
 																			"_type": {
-																				"pattern": "^(?!block$).+",
+																				"pattern": "^(?!(?:block|image)$).+",
 																				"type": "string"
 																			}
 																		}
@@ -25629,6 +26292,29 @@
 															}
 														},
 														{
+															"additionalProperties": false,
+															"$id": "PortableTextImage",
+															"type": "object",
+															"required": [
+																"_key",
+																"_type",
+																"assetId"
+															],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"const": "image",
+																	"type": "string"
+																},
+																"assetId": {
+																	"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																	"type": "string"
+																},
+																"alt": { "type": "string" },
+																"caption": { "type": "string" }
+															}
+														},
+														{
 															"additionalProperties": {
 																"$id": "#/components/schemas/JsonValue",
 																"anyOf": [
@@ -25657,7 +26343,7 @@
 															"properties": {
 																"_key": { "type": "string" },
 																"_type": {
-																	"pattern": "^(?!block$).+",
+																	"pattern": "^(?!(?:block|image)$).+",
 																	"type": "string"
 																}
 															}
@@ -27475,6 +28161,35 @@
 																			}
 																		},
 																		{
+																			"additionalProperties": false,
+																			"$id": "PortableTextImage",
+																			"type": "object",
+																			"required": [
+																				"_key",
+																				"_type",
+																				"assetId"
+																			],
+																			"properties": {
+																				"_key": {
+																					"type": "string"
+																				},
+																				"_type": {
+																					"const": "image",
+																					"type": "string"
+																				},
+																				"assetId": {
+																					"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																					"type": "string"
+																				},
+																				"alt": {
+																					"type": "string"
+																				},
+																				"caption": {
+																					"type": "string"
+																				}
+																			}
+																		},
+																		{
 																			"additionalProperties": {
 																				"$id": "#/components/schemas/JsonValue",
 																				"anyOf": [
@@ -27516,7 +28231,7 @@
 																					"type": "string"
 																				},
 																				"_type": {
-																					"pattern": "^(?!block$).+",
+																					"pattern": "^(?!(?:block|image)$).+",
 																					"type": "string"
 																				}
 																			}
@@ -27791,6 +28506,29 @@
 															}
 														},
 														{
+															"additionalProperties": false,
+															"$id": "PortableTextImage",
+															"type": "object",
+															"required": [
+																"_key",
+																"_type",
+																"assetId"
+															],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"const": "image",
+																	"type": "string"
+																},
+																"assetId": {
+																	"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																	"type": "string"
+																},
+																"alt": { "type": "string" },
+																"caption": { "type": "string" }
+															}
+														},
+														{
 															"additionalProperties": {
 																"$id": "#/components/schemas/JsonValue",
 																"anyOf": [
@@ -27819,7 +28557,7 @@
 															"properties": {
 																"_key": { "type": "string" },
 																"_type": {
-																	"pattern": "^(?!block$).+",
+																	"pattern": "^(?!(?:block|image)$).+",
 																	"type": "string"
 																}
 															}
@@ -28240,6 +28978,29 @@
 																}
 															},
 															{
+																"additionalProperties": false,
+																"$id": "PortableTextImage",
+																"type": "object",
+																"required": [
+																	"_key",
+																	"_type",
+																	"assetId"
+																],
+																"properties": {
+																	"_key": { "type": "string" },
+																	"_type": {
+																		"const": "image",
+																		"type": "string"
+																	},
+																	"assetId": {
+																		"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																		"type": "string"
+																	},
+																	"alt": { "type": "string" },
+																	"caption": { "type": "string" }
+																}
+															},
+															{
 																"additionalProperties": {
 																	"$id": "#/components/schemas/JsonValue",
 																	"anyOf": [
@@ -28268,7 +29029,7 @@
 																"properties": {
 																	"_key": { "type": "string" },
 																	"_type": {
-																		"pattern": "^(?!block$).+",
+																		"pattern": "^(?!(?:block|image)$).+",
 																		"type": "string"
 																	}
 																}
@@ -28557,6 +29318,29 @@
 															}
 														},
 														{
+															"additionalProperties": false,
+															"$id": "PortableTextImage",
+															"type": "object",
+															"required": [
+																"_key",
+																"_type",
+																"assetId"
+															],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"const": "image",
+																	"type": "string"
+																},
+																"assetId": {
+																	"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																	"type": "string"
+																},
+																"alt": { "type": "string" },
+																"caption": { "type": "string" }
+															}
+														},
+														{
 															"additionalProperties": {
 																"$id": "#/components/schemas/JsonValue",
 																"anyOf": [
@@ -28585,7 +29369,7 @@
 															"properties": {
 																"_key": { "type": "string" },
 																"_type": {
-																	"pattern": "^(?!block$).+",
+																	"pattern": "^(?!(?:block|image)$).+",
 																	"type": "string"
 																}
 															}
@@ -29130,6 +29914,35 @@
 																			}
 																		},
 																		{
+																			"additionalProperties": false,
+																			"$id": "PortableTextImage",
+																			"type": "object",
+																			"required": [
+																				"_key",
+																				"_type",
+																				"assetId"
+																			],
+																			"properties": {
+																				"_key": {
+																					"type": "string"
+																				},
+																				"_type": {
+																					"const": "image",
+																					"type": "string"
+																				},
+																				"assetId": {
+																					"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																					"type": "string"
+																				},
+																				"alt": {
+																					"type": "string"
+																				},
+																				"caption": {
+																					"type": "string"
+																				}
+																			}
+																		},
+																		{
 																			"additionalProperties": {
 																				"$id": "#/components/schemas/JsonValue",
 																				"anyOf": [
@@ -29171,7 +29984,7 @@
 																					"type": "string"
 																				},
 																				"_type": {
-																					"pattern": "^(?!block$).+",
+																					"pattern": "^(?!(?:block|image)$).+",
 																					"type": "string"
 																				}
 																			}
@@ -29472,6 +30285,29 @@
 															}
 														},
 														{
+															"additionalProperties": false,
+															"$id": "PortableTextImage",
+															"type": "object",
+															"required": [
+																"_key",
+																"_type",
+																"assetId"
+															],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"const": "image",
+																	"type": "string"
+																},
+																"assetId": {
+																	"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																	"type": "string"
+																},
+																"alt": { "type": "string" },
+																"caption": { "type": "string" }
+															}
+														},
+														{
 															"additionalProperties": {
 																"$id": "#/components/schemas/JsonValue",
 																"anyOf": [
@@ -29500,7 +30336,7 @@
 															"properties": {
 																"_key": { "type": "string" },
 																"_type": {
-																	"pattern": "^(?!block$).+",
+																	"pattern": "^(?!(?:block|image)$).+",
 																	"type": "string"
 																}
 															}
@@ -29972,6 +30808,35 @@
 																			}
 																		},
 																		{
+																			"additionalProperties": false,
+																			"$id": "PortableTextImage",
+																			"type": "object",
+																			"required": [
+																				"_key",
+																				"_type",
+																				"assetId"
+																			],
+																			"properties": {
+																				"_key": {
+																					"type": "string"
+																				},
+																				"_type": {
+																					"const": "image",
+																					"type": "string"
+																				},
+																				"assetId": {
+																					"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																					"type": "string"
+																				},
+																				"alt": {
+																					"type": "string"
+																				},
+																				"caption": {
+																					"type": "string"
+																				}
+																			}
+																		},
+																		{
 																			"additionalProperties": {
 																				"$id": "#/components/schemas/JsonValue",
 																				"anyOf": [
@@ -30013,7 +30878,7 @@
 																					"type": "string"
 																				},
 																				"_type": {
-																					"pattern": "^(?!block$).+",
+																					"pattern": "^(?!(?:block|image)$).+",
 																					"type": "string"
 																				}
 																			}
@@ -30361,6 +31226,29 @@
 															}
 														},
 														{
+															"additionalProperties": false,
+															"$id": "PortableTextImage",
+															"type": "object",
+															"required": [
+																"_key",
+																"_type",
+																"assetId"
+															],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"const": "image",
+																	"type": "string"
+																},
+																"assetId": {
+																	"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																	"type": "string"
+																},
+																"alt": { "type": "string" },
+																"caption": { "type": "string" }
+															}
+														},
+														{
 															"additionalProperties": {
 																"$id": "#/components/schemas/JsonValue",
 																"anyOf": [
@@ -30389,7 +31277,7 @@
 															"properties": {
 																"_key": { "type": "string" },
 																"_type": {
-																	"pattern": "^(?!block$).+",
+																	"pattern": "^(?!(?:block|image)$).+",
 																	"type": "string"
 																}
 															}
@@ -30959,6 +31847,33 @@
 																	}
 																},
 																{
+																	"additionalProperties": false,
+																	"$id": "PortableTextImage",
+																	"type": "object",
+																	"required": [
+																		"_key",
+																		"_type",
+																		"assetId"
+																	],
+																	"properties": {
+																		"_key": {
+																			"type": "string"
+																		},
+																		"_type": {
+																			"const": "image",
+																			"type": "string"
+																		},
+																		"assetId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"alt": { "type": "string" },
+																		"caption": {
+																			"type": "string"
+																		}
+																	}
+																},
+																{
 																	"additionalProperties": {
 																		"$id": "#/components/schemas/JsonValue",
 																		"anyOf": [
@@ -30989,7 +31904,7 @@
 																			"type": "string"
 																		},
 																		"_type": {
-																			"pattern": "^(?!block$).+",
+																			"pattern": "^(?!(?:block|image)$).+",
 																			"type": "string"
 																		}
 																	}
@@ -31427,6 +32342,33 @@
 																	}
 																},
 																{
+																	"additionalProperties": false,
+																	"$id": "PortableTextImage",
+																	"type": "object",
+																	"required": [
+																		"_key",
+																		"_type",
+																		"assetId"
+																	],
+																	"properties": {
+																		"_key": {
+																			"type": "string"
+																		},
+																		"_type": {
+																			"const": "image",
+																			"type": "string"
+																		},
+																		"assetId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"alt": { "type": "string" },
+																		"caption": {
+																			"type": "string"
+																		}
+																	}
+																},
+																{
 																	"additionalProperties": {
 																		"$id": "#/components/schemas/JsonValue",
 																		"anyOf": [
@@ -31457,7 +32399,7 @@
 																			"type": "string"
 																		},
 																		"_type": {
-																			"pattern": "^(?!block$).+",
+																			"pattern": "^(?!(?:block|image)$).+",
 																			"type": "string"
 																		}
 																	}
@@ -32470,6 +33412,35 @@
 																		}
 																	},
 																	{
+																		"additionalProperties": false,
+																		"$id": "PortableTextImage",
+																		"type": "object",
+																		"required": [
+																			"_key",
+																			"_type",
+																			"assetId"
+																		],
+																		"properties": {
+																			"_key": {
+																				"type": "string"
+																			},
+																			"_type": {
+																				"const": "image",
+																				"type": "string"
+																			},
+																			"assetId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"alt": {
+																				"type": "string"
+																			},
+																			"caption": {
+																				"type": "string"
+																			}
+																		}
+																	},
+																	{
 																		"additionalProperties": {
 																			"$id": "#/components/schemas/JsonValue",
 																			"anyOf": [
@@ -32509,7 +33480,7 @@
 																				"type": "string"
 																			},
 																			"_type": {
-																				"pattern": "^(?!block$).+",
+																				"pattern": "^(?!(?:block|image)$).+",
 																				"type": "string"
 																			}
 																		}
@@ -32885,6 +33856,35 @@
 																			}
 																		},
 																		{
+																			"additionalProperties": false,
+																			"$id": "PortableTextImage",
+																			"type": "object",
+																			"required": [
+																				"_key",
+																				"_type",
+																				"assetId"
+																			],
+																			"properties": {
+																				"_key": {
+																					"type": "string"
+																				},
+																				"_type": {
+																					"const": "image",
+																					"type": "string"
+																				},
+																				"assetId": {
+																					"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																					"type": "string"
+																				},
+																				"alt": {
+																					"type": "string"
+																				},
+																				"caption": {
+																					"type": "string"
+																				}
+																			}
+																		},
+																		{
 																			"additionalProperties": {
 																				"$id": "#/components/schemas/JsonValue",
 																				"anyOf": [
@@ -32926,7 +33926,7 @@
 																					"type": "string"
 																				},
 																				"_type": {
-																					"pattern": "^(?!block$).+",
+																					"pattern": "^(?!(?:block|image)$).+",
 																					"type": "string"
 																				}
 																			}
@@ -33558,6 +34558,33 @@
 																	}
 																},
 																{
+																	"additionalProperties": false,
+																	"$id": "PortableTextImage",
+																	"type": "object",
+																	"required": [
+																		"_key",
+																		"_type",
+																		"assetId"
+																	],
+																	"properties": {
+																		"_key": {
+																			"type": "string"
+																		},
+																		"_type": {
+																			"const": "image",
+																			"type": "string"
+																		},
+																		"assetId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"alt": { "type": "string" },
+																		"caption": {
+																			"type": "string"
+																		}
+																	}
+																},
+																{
 																	"additionalProperties": {
 																		"$id": "#/components/schemas/JsonValue",
 																		"anyOf": [
@@ -33588,7 +34615,7 @@
 																			"type": "string"
 																		},
 																		"_type": {
-																			"pattern": "^(?!block$).+",
+																			"pattern": "^(?!(?:block|image)$).+",
 																			"type": "string"
 																		}
 																	}
@@ -34258,22 +35285,18 @@
 				"operationId": "postApiSearchByIndex"
 			}
 		},
-		"/api/uploads": {
+		"/api/image-assets": {
 			"post": {
-				"summary": "Create upload URL",
-				"tags": ["Uploads"],
+				"summary": "Create image asset upload",
+				"tags": ["Image Assets"],
 				"requestBody": {
 					"content": {
 						"application/json": {
 							"schema": {
+								"additionalProperties": false,
 								"type": "object",
-								"required": ["filename", "contentType", "size"],
+								"required": ["contentType", "size"],
 								"properties": {
-									"filename": {
-										"minLength": 1,
-										"maxLength": 255,
-										"type": "string"
-									},
 									"contentType": {
 										"minLength": 1,
 										"maxLength": 100,
@@ -34286,7 +35309,8 @@
 											{ "format": "integer", "default": 0, "type": "string" },
 											{ "minimum": 1, "maximum": 10485760, "type": "integer" }
 										]
-									}
+									},
+									"access": { "type": "string", "enum": ["private", "public"] }
 								}
 							}
 						}
@@ -34300,18 +35324,258 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["key", "url", "expiresIn"],
+									"allOf": [
+										{
+											"type": "object",
+											"required": [
+												"id",
+												"status",
+												"access",
+												"contentType",
+												"size",
+												"contentUrl",
+												"createdAt",
+												"updatedAt"
+											],
+											"properties": {
+												"id": { "format": "uuid", "type": "string" },
+												"status": {
+													"anyOf": [
+														{ "const": "pending", "type": "string" },
+														{ "const": "ready", "type": "string" },
+														{ "const": "failed", "type": "string" }
+													]
+												},
+												"access": {
+													"anyOf": [
+														{ "const": "private", "type": "string" },
+														{ "const": "public", "type": "string" }
+													]
+												},
+												"contentType": {
+													"nullable": true,
+													"anyOf": [
+														{ "type": "string" },
+														{ "type": "null" }
+													]
+												},
+												"size": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "type": "integer" }
+															]
+														},
+														{ "type": "null" }
+													]
+												},
+												"contentUrl": { "type": "string" },
+												"createdAt": {
+													"anyOf": [
+														{ "type": "Date" },
+														{ "format": "date-time", "type": "string" },
+														{ "format": "date", "type": "string" },
+														{ "type": "number" }
+													]
+												},
+												"updatedAt": {
+													"anyOf": [
+														{ "type": "Date" },
+														{ "format": "date-time", "type": "string" },
+														{ "format": "date", "type": "string" },
+														{ "type": "number" }
+													]
+												}
+											}
+										},
+										{
+											"type": "object",
+											"required": ["upload"],
+											"properties": {
+												"upload": {
+													"type": "object",
+													"required": ["url", "expiresIn", "headers"],
+													"properties": {
+														"url": { "type": "string" },
+														"expiresIn": {
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "type": "integer" }
+															]
+														},
+														"headers": {
+															"type": "object",
+															"patternProperties": {
+																"^(.*)$": { "type": "string" }
+															}
+														}
+													}
+												}
+											}
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
 									"properties": {
-										"key": { "type": "string" },
-										"url": { "type": "string" },
-										"expiresIn": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": ["AuthenticationRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"415": {
+						"description": "Response for status 415",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ImageAssetUnsupportedType",
+													"type": "string",
+													"enum": ["ImageAssetUnsupportedType"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiImage-assets"
+			}
+		},
+		"/api/image-assets/{id}/complete": {
+			"post": {
+				"summary": "Complete image asset upload",
+				"tags": ["Image Assets"],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"status",
+										"access",
+										"contentType",
+										"size",
+										"contentUrl",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"status": {
+											"type": "string",
+											"enum": ["pending", "ready", "failed"]
+										},
+										"access": {
+											"type": "string",
+											"enum": ["private", "public"]
+										},
+										"contentType": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"size": {
+											"nullable": true,
 											"anyOf": [
 												{
-													"format": "integer",
-													"default": 0,
-													"type": "string"
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "type": "integer" }
+													]
 												},
-												{ "type": "integer" }
+												{ "type": "null" }
+											]
+										},
+										"contentUrl": { "type": "string" },
+										"createdAt": {
+											"anyOf": [
+												{ "type": "Date" },
+												{ "format": "date-time", "type": "string" },
+												{ "format": "date", "type": "string" },
+												{ "type": "number" }
+											]
+										},
+										"updatedAt": {
+											"anyOf": [
+												{ "type": "Date" },
+												{ "format": "date-time", "type": "string" },
+												{ "format": "date", "type": "string" },
+												{ "type": "number" }
 											]
 										}
 									}
@@ -34346,8 +35610,8 @@
 							}
 						}
 					},
-					"403": {
-						"description": "Response for status 403",
+					"404": {
+						"description": "Response for status 404",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -34359,13 +35623,11 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "ApiTokenPermissionRequired",
+													"default": "ImageAssetNotFound",
 													"type": "string",
 													"enum": [
-														"ApiTokenPermissionRequired",
-														"EmailVerificationRequired",
-														"AccountRestricted",
-														"UploadKeyForbidden"
+														"ImageAssetNotFound",
+														"ImageAssetUploadNotFound"
 													]
 												},
 												"message": { "type": "string" },
@@ -34378,8 +35640,8 @@
 							}
 						}
 					},
-					"415": {
-						"description": "Response for status 415",
+					"409": {
+						"description": "Response for status 409",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -34391,9 +35653,191 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UploadUnsupportedType",
+													"default": "ImageAssetInvalidState",
 													"type": "string",
-													"enum": ["UploadUnsupportedType"]
+													"enum": ["ImageAssetInvalidState"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ImageAssetInvalidSize",
+															"type": "string",
+															"enum": [
+																"ImageAssetInvalidSize",
+																"ImageAssetContentMismatch"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiImage-assetsByIdComplete"
+			}
+		},
+		"/api/image-assets/{id}": {
+			"get": {
+				"summary": "Get image asset",
+				"tags": ["Image Assets"],
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"status",
+										"access",
+										"contentType",
+										"size",
+										"contentUrl",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"status": {
+											"type": "string",
+											"enum": ["pending", "ready", "failed"]
+										},
+										"access": {
+											"type": "string",
+											"enum": ["private", "public"]
+										},
+										"contentType": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"size": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{
+															"format": "integer",
+															"default": 0,
+															"type": "string"
+														},
+														{ "type": "integer" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"contentUrl": { "type": "string" },
+										"createdAt": {
+											"anyOf": [
+												{ "type": "Date" },
+												{ "format": "date-time", "type": "string" },
+												{ "format": "date", "type": "string" },
+												{ "type": "number" }
+											]
+										},
+										"updatedAt": {
+											"anyOf": [
+												{ "type": "Date" },
+												{ "format": "date-time", "type": "string" },
+												{ "format": "date", "type": "string" },
+												{ "type": "number" }
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": ["AuthenticationRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ImageAssetNotFound",
+													"type": "string",
+													"enum": ["ImageAssetNotFound"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -34422,11 +35866,11 @@
 						}
 					}
 				},
-				"operationId": "postApiUploads"
+				"operationId": "getApiImage-assetsById"
 			},
 			"delete": {
-				"summary": "Delete upload",
-				"tags": ["Uploads"],
+				"summary": "Delete incomplete image asset",
+				"tags": ["Image Assets"],
 				"responses": {
 					"204": {
 						"description": "Response for status 204",
@@ -34459,175 +35903,6 @@
 							}
 						}
 					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "ApiTokenPermissionRequired",
-													"type": "string",
-													"enum": [
-														"ApiTokenPermissionRequired",
-														"EmailVerificationRequired",
-														"AccountRestricted",
-														"UploadKeyForbidden"
-													]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"type": "object",
-								"required": ["key"],
-								"properties": {
-									"key": { "minLength": 1, "maxLength": 1000, "type": "string" }
-								}
-							}
-						}
-					},
-					"required": true
-				},
-				"operationId": "deleteApiUploads"
-			}
-		},
-		"/api/uploads/complete": {
-			"post": {
-				"summary": "Validate completed upload",
-				"tags": ["Uploads"],
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"type": "object",
-								"required": ["key"],
-								"properties": {
-									"key": { "minLength": 1, "maxLength": 1000, "type": "string" }
-								}
-							}
-						}
-					},
-					"required": true
-				},
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["key", "contentType", "size"],
-									"properties": {
-										"key": { "type": "string" },
-										"contentType": { "type": "string" },
-										"size": {
-											"anyOf": [
-												{
-													"format": "integer",
-													"default": 0,
-													"type": "string"
-												},
-												{ "type": "integer" }
-											]
-										}
-									}
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Response for status 401",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "AuthenticationRequired",
-													"type": "string",
-													"enum": ["AuthenticationRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "ApiTokenPermissionRequired",
-													"type": "string",
-													"enum": [
-														"ApiTokenPermissionRequired",
-														"EmailVerificationRequired",
-														"AccountRestricted",
-														"UploadKeyForbidden"
-													]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
 					"404": {
 						"description": "Response for status 404",
 						"content": {
@@ -34641,9 +35916,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "UploadNotFound",
+													"default": "ImageAssetNotFound",
 													"type": "string",
-													"enum": ["UploadNotFound"]
+													"enum": ["ImageAssetNotFound"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -34655,80 +35930,8 @@
 							}
 						}
 					},
-					"422": {
-						"description": "Response for status 422",
-						"content": {
-							"application/json": {
-								"schema": {
-									"oneOf": [
-										{
-											"type": "object",
-											"required": ["error", "requestId"],
-											"properties": {
-												"error": {
-													"type": "object",
-													"required": ["code", "message"],
-													"properties": {
-														"code": {
-															"default": "UploadInvalidSize",
-															"type": "string",
-															"enum": [
-																"UploadInvalidSize",
-																"UploadContentMismatch"
-															]
-														},
-														"message": { "type": "string" },
-														"details": {}
-													}
-												},
-												"requestId": { "type": "string" }
-											}
-										},
-										{ "$ref": "#/components/schemas/ValidationError" }
-									]
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"operationId": "postApiUploadsComplete"
-			}
-		},
-		"/api/uploads/url": {
-			"get": {
-				"summary": "Create download URL",
-				"tags": ["Uploads"],
-				"parameters": [
-					{
-						"name": "key",
-						"in": "query",
-						"required": true,
-						"schema": { "minLength": 1, "maxLength": 1000, "type": "string" }
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["url"],
-									"properties": { "url": { "type": "string" } }
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "Response for status 401",
+					"409": {
+						"description": "Response for status 409",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -34740,39 +35943,9 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "AuthenticationRequired",
+													"default": "ImageAssetInUse",
 													"type": "string",
-													"enum": ["AuthenticationRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"403": {
-						"description": "Response for status 403",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "ApiTokenPermissionRequired",
-													"type": "string",
-													"enum": [
-														"ApiTokenPermissionRequired",
-														"UploadKeyForbidden"
-													]
+													"enum": ["ImageAssetInUse"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -34801,7 +35974,15 @@
 						}
 					}
 				},
-				"operationId": "getApiUploadsUrl"
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"operationId": "deleteApiImage-assetsById"
 			}
 		}
 	}
