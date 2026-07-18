@@ -9,7 +9,7 @@ export default defineProject({
 		name: "main",
 		environment: "node",
 		include: ["src/**/*.test.ts", "scripts/**/*.test.ts"],
-		setupFiles: ["./vitest.setup.ts"],
+		setupFiles: ["./src/vitest.setup.ts"],
 		globals: false,
 		restoreMocks: true,
 		expect: { requireAssertions: true },
