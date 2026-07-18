@@ -23,9 +23,18 @@ being authorized.
 Unit access is one mechanism for ordinary Units including Zones, Books, Posts, Wikis, and
 Collections. A binding subject is a Profile, a Realm relationship (`member`, `content_editor`, or
 `governor`), or every authenticated Profile. Roles expand into permissions; an empty scope is the
-Unit root and an ancestor scope covers descendants. Profile restrictions override non-platform
-grants, which supports open editing plus a targeted deny-list. Protections are independent
-guardrails (`frozen` or `owner_only`) and do not grant access by themselves.
+Unit root and an ancestor scope covers descendants. Profile restrictions and restrictions on the
+active members of a Realm override non-platform grants, which supports open editing plus a targeted
+deny-list. A direct Profile owner bypasses Realm-derived restrictions so a later membership change
+cannot remove the Unit's recovery path; direct Profile restrictions remain authoritative. Dynamic
+Realm subjects cannot own Units. Protections are independent guardrails (`frozen` or `owner_only`)
+and do not grant access by themselves.
+
+For an existing Unit, access precedence is platform `unit.edit`, direct Profile restriction, Realm
+restriction unless the actor is a direct Profile owner, public or binding access, then protection.
+Platform authority is the recovery boundary and deliberately overrides every access restriction and
+protection. Missing or deleted Units are rejected before this precedence is evaluated. The policy
+tests are the executable contract for this order.
 
 Governance mutation is itself scope-aware: a maintainer delegated to `zone/page/welcome` may grant,
 restrict, or protect that subtree but cannot manage a sibling or the Unit root. Owner and

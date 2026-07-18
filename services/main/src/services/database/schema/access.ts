@@ -12,6 +12,7 @@ import {
 import { pgTable } from "./base";
 import {
 	UnitAccessRealmRelationValues,
+	UnitAccessRestrictionSubjectKindValues,
 	UnitAccessRoleValues,
 	UnitAccessSubjectKindValues,
 	UnitPermissionValues,
@@ -34,6 +35,10 @@ export const unitAccessSubjectKind = pgEnum(
 export const unitAccessRealmRelation = pgEnum(
 	"unit_access_realm_relation",
 	toEnumValues(UnitAccessRealmRelationValues),
+);
+export const unitAccessRestrictionSubjectKind = pgEnum(
+	"unit_access_restriction_subject_kind",
+	toEnumValues(UnitAccessRestrictionSubjectKindValues),
 );
 export const unitAccessRole = pgEnum("unit_access_role", toEnumValues(UnitAccessRoleValues));
 export const unitPermission = pgEnum("unit_permission", toEnumValues(UnitPermissionValues));
@@ -104,6 +109,14 @@ export const unitAccessBinding = pgTable(
 				${table.subjectKind} = 'authenticated' and ${table.profileId} is null and ${table.realmId} is null and ${table.realmRelation} is null
 			)`,
 		),
+		check(
+			"unit_access_binding_subject_role_check",
+			sql`(
+				${table.subjectKind} = 'profile' or ${table.role} <> 'owner'
+			) and (
+				${table.subjectKind} <> 'authenticated' or ${table.role} in ('viewer', 'editor')
+			)`,
+		),
 		check("unit_access_binding_scope_check", scopeCheck(table.scope)),
 		check(
 			"unit_access_binding_expiry_check",
@@ -116,7 +129,7 @@ export const unitAccessBinding = pgTable(
 	],
 );
 
-/** Profile-specific deny rules override every non-platform grant. */
+/** Profile and active Realm-member deny rules override every non-platform grant. */
 export const unitAccessRestriction = pgTable(
 	"unit_access_restriction",
 	{
@@ -124,9 +137,9 @@ export const unitAccessRestriction = pgTable(
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
-		profileId: uuid()
-			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+		subjectKind: unitAccessRestrictionSubjectKind().notNull(),
+		profileId: uuid().references(() => profile.id, { onDelete: "cascade" }),
+		realmId: uuid().references(() => realm.id, { onDelete: "cascade" }),
 		permission: unitPermission().notNull(),
 		scope: text()
 			.array()
@@ -143,13 +156,27 @@ export const unitAccessRestriction = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		uniqueIndex("unit_access_restriction_active_subject_scope_key")
+		uniqueIndex("unit_access_restriction_active_profile_scope_key")
 			.on(table.unitId, table.profileId, table.permission, table.scope)
-			.where(sql`${table.revokedAt} is null`),
+			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'profile'`),
+		uniqueIndex("unit_access_restriction_active_realm_scope_key")
+			.on(table.unitId, table.realmId, table.permission, table.scope)
+			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'realm'`),
 		index("unit_access_restriction_profile_active_idx")
 			.on(table.profileId, table.unitId, table.permission)
-			.where(sql`${table.revokedAt} is null`),
+			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'profile'`),
+		index("unit_access_restriction_realm_active_idx")
+			.on(table.realmId, table.unitId, table.permission)
+			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'realm'`),
 		index("unit_access_restriction_created_by_idx").on(table.createdByProfileId),
+		check(
+			"unit_access_restriction_subject_shape_check",
+			sql`(
+				${table.subjectKind} = 'profile' and ${table.profileId} is not null and ${table.realmId} is null
+			) or (
+				${table.subjectKind} = 'realm' and ${table.profileId} is null and ${table.realmId} is not null
+			)`,
+		),
 		check("unit_access_restriction_scope_check", scopeCheck(table.scope)),
 		check("unit_access_restriction_reason_check", sql`btrim(${table.reason}) <> ''`),
 		check(

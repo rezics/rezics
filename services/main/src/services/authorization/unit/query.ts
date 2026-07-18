@@ -1,4 +1,4 @@
-import { and, eq, exists, inArray, isNull, or, sql } from "drizzle-orm";
+import { and, eq, exists, inArray, isNull, not, or, sql } from "drizzle-orm";
 
 import { database } from "../../database";
 import {
@@ -30,15 +30,64 @@ export function getUnitReadCondition(
 	);
 	if (!profileId) return visible;
 
-	const notReadRestricted = sql`not exists (
-		select 1 from ${unitAccessRestriction}
-		where ${unitAccessRestriction.unitId} = ${unit.id}
-			and ${unitAccessRestriction.profileId} = ${profileId}::uuid
-			and ${unitAccessRestriction.permission} = 'unit.read'
-			and cardinality(${unitAccessRestriction.scope}) = 0
-			and ${unitAccessRestriction.revokedAt} is null
-			and (${unitAccessRestriction.expiresAt} is null or ${unitAccessRestriction.expiresAt} > now())
-	)`;
+	const directProfileOwner = exists(
+		database
+			.select({ id: unitAccessBinding.id })
+			.from(unitAccessBinding)
+			.where(
+				and(
+					eq(unitAccessBinding.unitId, unit.id),
+					eq(unitAccessBinding.subjectKind, "profile"),
+					eq(unitAccessBinding.profileId, profileId),
+					eq(unitAccessBinding.role, "owner"),
+					activeBinding(),
+				),
+			),
+	);
+	const notReadRestricted = not(
+		exists(
+			database
+				.select({ id: unitAccessRestriction.id })
+				.from(unitAccessRestriction)
+				.where(
+					and(
+						eq(unitAccessRestriction.unitId, unit.id),
+						eq(unitAccessRestriction.permission, "unit.read"),
+						sql`cardinality(${unitAccessRestriction.scope}) = 0`,
+						isNull(unitAccessRestriction.revokedAt),
+						or(
+							isNull(unitAccessRestriction.expiresAt),
+							sql`${unitAccessRestriction.expiresAt} > now()`,
+						),
+						or(
+							and(
+								eq(unitAccessRestriction.subjectKind, "profile"),
+								eq(unitAccessRestriction.profileId, profileId),
+							),
+							and(
+								eq(unitAccessRestriction.subjectKind, "realm"),
+								not(directProfileOwner),
+								exists(
+									database
+										.select({ profileId: realmMember.profileId })
+										.from(realmMember)
+										.where(
+											and(
+												eq(
+													realmMember.realmId,
+													unitAccessRestriction.realmId,
+												),
+												eq(realmMember.profileId, profileId),
+												eq(realmMember.state, "active"),
+											),
+										),
+								),
+							),
+						),
+					),
+				),
+		),
+	);
 	const platformSubject = exists(
 		database
 			.select({ id: capabilityGrant.id })

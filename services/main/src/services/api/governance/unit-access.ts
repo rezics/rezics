@@ -69,6 +69,29 @@ function parseExpiry(value: string | undefined): Date | null {
 	return expiresAt;
 }
 
+function toUnitAccessRestrictionResponse(record: typeof unitAccessRestriction.$inferSelect) {
+	const subject =
+		record.subjectKind === "profile" && record.profileId && record.realmId === null
+			? { kind: "profile" as const, profileId: record.profileId }
+			: record.subjectKind === "realm" && record.realmId && record.profileId === null
+				? { kind: "realm" as const, realmId: record.realmId }
+				: undefined;
+	if (!subject) throw new Error(`Invalid Unit access restriction subject shape: ${record.id}`);
+	return {
+		id: record.id,
+		unitId: record.unitId,
+		subject,
+		permission: record.permission,
+		scope: record.scope,
+		reason: record.reason,
+		createdByProfileId: record.createdByProfileId,
+		expiresAt: record.expiresAt,
+		revokedAt: record.revokedAt,
+		createdAt: record.createdAt,
+		updatedAt: record.updatedAt,
+	};
+}
+
 async function ensureOwnerOrPlatform(
 	authorization: Authorization<string>,
 	unitId: string,
@@ -80,7 +103,10 @@ async function ensureOwnerOrPlatform(
 }
 
 async function ensureSubjectExists(
-	subject: typeof CreateUnitAccessBindingBody.static.subject,
+	subject:
+		| { readonly kind: "profile"; readonly profileId: string }
+		| { readonly kind: "realm"; readonly realmId: string }
+		| { readonly kind: "authenticated" },
 ): Promise<void> {
 	if (subject.kind === "profile") {
 		const [profile] = await database
@@ -182,9 +208,10 @@ export default new Elysia({ prefix: "/unit" })
 		async ({ authorization, profile, params, body }) => {
 			await authorization.unit.ensure(params.unitId, "unit.access.manage", body.scope);
 			if (
-				body.subject.kind === "authenticated" &&
-				body.role !== "viewer" &&
-				body.role !== "editor"
+				(body.subject.kind === "authenticated" &&
+					body.role !== "viewer" &&
+					body.role !== "editor") ||
+				(body.subject.kind === "realm" && body.role === "owner")
 			)
 				throw new UnitAccessSubjectRoleInvalid();
 			if (body.role === "owner" || body.role === "maintainer")
@@ -354,16 +381,23 @@ export default new Elysia({ prefix: "/unit" })
 		async ({ authorization, params }) => {
 			await authorization.unit.ensure(params.unitId, "unit.access.manage");
 			return {
-				items: await database
-					.select()
-					.from(unitAccessRestriction)
-					.where(
-						and(
-							eq(unitAccessRestriction.unitId, params.unitId),
-							isNull(unitAccessRestriction.revokedAt),
-						),
-					)
-					.orderBy(unitAccessRestriction.scope, unitAccessRestriction.permission),
+				items: (
+					await database
+						.select()
+						.from(unitAccessRestriction)
+						.where(
+							and(
+								eq(unitAccessRestriction.unitId, params.unitId),
+								isNull(unitAccessRestriction.revokedAt),
+							),
+						)
+						.orderBy(
+							unitAccessRestriction.scope,
+							unitAccessRestriction.permission,
+							unitAccessRestriction.subjectKind,
+							unitAccessRestriction.id,
+						)
+				).map(toUnitAccessRestrictionResponse),
 			};
 		},
 		{
@@ -382,37 +416,44 @@ export default new Elysia({ prefix: "/unit" })
 		async ({ authorization, profile, params, body }) => {
 			await authorization.unit.ensure(params.unitId, "unit.access.manage", body.scope);
 			const expiresAt = parseExpiry(body.expiresAt);
-			const [targetProfile] = await database
-				.select({ id: profileTable.id })
-				.from(profileTable)
-				.where(eq(profileTable.id, body.profileId))
-				.limit(1);
-			if (!targetProfile) throw new ProfileNotFound();
-			const [created] = await database.transaction(async (tx) => {
+			await ensureSubjectExists(body.subject);
+			const created = await database.transaction(async (tx) => {
 				await tx.execute(
 					sql`select pg_advisory_xact_lock(hashtextextended(${`unit-access:${params.unitId}`}::text, 0))`,
 				);
-				const [owner] = await tx
-					.select({ id: unitAccessBinding.id })
-					.from(unitAccessBinding)
-					.where(
-						and(
-							eq(unitAccessBinding.unitId, params.unitId),
-							eq(unitAccessBinding.subjectKind, "profile"),
-							eq(unitAccessBinding.profileId, body.profileId),
-							eq(unitAccessBinding.role, "owner"),
-							active(unitAccessBinding.revokedAt, unitAccessBinding.expiresAt),
-						),
-					)
-					.limit(1);
-				if (owner) throw new UnitOwnerRestrictionForbidden();
+				if (body.subject.kind === "profile") {
+					const [owner] = await tx
+						.select({ id: unitAccessBinding.id })
+						.from(unitAccessBinding)
+						.where(
+							and(
+								eq(unitAccessBinding.unitId, params.unitId),
+								eq(unitAccessBinding.subjectKind, "profile"),
+								eq(unitAccessBinding.profileId, body.subject.profileId),
+								eq(unitAccessBinding.role, "owner"),
+								active(unitAccessBinding.revokedAt, unitAccessBinding.expiresAt),
+							),
+						)
+						.limit(1);
+					if (owner) throw new UnitOwnerRestrictionForbidden();
+				}
+				const subjectCondition =
+					body.subject.kind === "profile"
+						? and(
+								eq(unitAccessRestriction.subjectKind, "profile"),
+								eq(unitAccessRestriction.profileId, body.subject.profileId),
+							)
+						: and(
+								eq(unitAccessRestriction.subjectKind, "realm"),
+								eq(unitAccessRestriction.realmId, body.subject.realmId),
+							);
 				const [duplicate] = await tx
 					.select({ id: unitAccessRestriction.id })
 					.from(unitAccessRestriction)
 					.where(
 						and(
 							eq(unitAccessRestriction.unitId, params.unitId),
-							eq(unitAccessRestriction.profileId, body.profileId),
+							subjectCondition,
 							eq(unitAccessRestriction.permission, body.permission),
 							eq(unitAccessRestriction.scope, body.scope),
 							isNull(unitAccessRestriction.revokedAt),
@@ -420,11 +461,21 @@ export default new Elysia({ prefix: "/unit" })
 					)
 					.limit(1);
 				if (duplicate) throw new UnitAccessRestrictionConflict();
-				const rows = await tx
+				const subjectColumns =
+					body.subject.kind === "profile"
+						? {
+								subjectKind: "profile" as const,
+								profileId: body.subject.profileId,
+							}
+						: {
+								subjectKind: "realm" as const,
+								realmId: body.subject.realmId,
+							};
+				const [row] = await tx
 					.insert(unitAccessRestriction)
 					.values({
 						unitId: params.unitId,
-						profileId: body.profileId,
+						...subjectColumns,
 						permission: body.permission,
 						scope: body.scope,
 						reason: body.reason,
@@ -432,17 +483,17 @@ export default new Elysia({ prefix: "/unit" })
 						createdByProfileId: profile.unitId,
 					})
 					.returning();
+				if (!row) throw new Error("Unit access restriction insertion returned no row");
 				await recordAccessAudit(tx, {
 					actorProfileId: profile.unitId,
 					action: "unit.access_restriction.create",
 					unitId: params.unitId,
 					reason: body.reason,
-					metadata: { restrictionId: rows[0]?.id, targetProfileId: body.profileId },
+					metadata: { restrictionId: row.id, subject: body.subject },
 				});
-				return rows;
+				return row;
 			});
-			if (!created) throw new Error("Unit access restriction insertion returned no row");
-			return created;
+			return toUnitAccessRestrictionResponse(created);
 		},
 		{
 			access: "session-only",
@@ -452,13 +503,17 @@ export default new Elysia({ prefix: "/unit" })
 				[StatusCodes.OK]: UnitAccessRestrictionResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["UnitAccessExpiryInvalid"]),
 				[StatusCodes.FORBIDDEN]: UnitGovernanceForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ProfileNotFound"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ProfileNotFound",
+					"RealmNotFound",
+				]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse([
 					"UnitOwnerRestrictionForbidden",
 					"UnitAccessRestrictionConflict",
 				]),
 			},
-			detail: { summary: "Restrict Profile access to a Unit scope", tags: ["Governance"] },
+			detail: { summary: "Restrict subject access to a Unit scope", tags: ["Governance"] },
 		},
 	)
 	.delete(

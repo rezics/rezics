@@ -4401,7 +4401,7 @@ export function postApiGovernanceUnitByUnitIdAccessRestrictionsMutationOptions<T
 }
 
 /**
- * @summary Restrict Profile access to a Unit scope
+ * @summary Restrict subject access to a Unit scope
  * {@link /api/governance/unit/:unitId/access-restrictions}
  */
 export function usePostApiGovernanceUnitByUnitIdAccessRestrictions<TContext>(

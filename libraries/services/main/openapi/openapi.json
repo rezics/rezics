@@ -11043,11 +11043,43 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "restricted",
+																						"const": "ungranted",
+																						"type": "string"
+																					}
+																				]
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"type": "object",
+																		"required": [
+																			"allowed",
+																			"reason",
+																			"restrictionId",
+																			"subjectKind"
+																		],
+																		"properties": {
+																			"allowed": {
+																				"const": false,
+																				"type": "boolean"
+																			},
+																			"reason": {
+																				"const": "restricted",
+																				"type": "string"
+																			},
+																			"restrictionId": {
+																				"format": "uuid",
+																				"type": "string"
+																			},
+																			"subjectKind": {
+																				"anyOf": [
+																					{
+																						"const": "profile",
 																						"type": "string"
 																					},
 																					{
-																						"const": "ungranted",
+																						"const": "realm",
 																						"type": "string"
 																					}
 																				]
@@ -11797,7 +11829,7 @@
 												"required": [
 													"id",
 													"unitId",
-													"profileId",
+													"subject",
 													"permission",
 													"scope",
 													"reason",
@@ -11813,9 +11845,39 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"profileId": {
-														"format": "uuid",
-														"type": "string"
+													"subject": {
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["kind", "profileId"],
+																"properties": {
+																	"kind": {
+																		"const": "profile",
+																		"type": "string"
+																	},
+																	"profileId": {
+																		"format": "uuid",
+																		"type": "string"
+																	}
+																}
+															},
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": ["kind", "realmId"],
+																"properties": {
+																	"kind": {
+																		"const": "realm",
+																		"type": "string"
+																	},
+																	"realmId": {
+																		"format": "uuid",
+																		"type": "string"
+																	}
+																}
+															}
+														]
 													},
 													"permission": { "type": "string" },
 													"scope": {
@@ -11947,7 +12009,7 @@
 				"operationId": "getApiGovernanceUnitByUnitIdAccess-restrictions"
 			},
 			"post": {
-				"summary": "Restrict Profile access to a Unit scope",
+				"summary": "Restrict subject access to a Unit scope",
 				"tags": ["Governance"],
 				"parameters": [
 					{
@@ -11963,9 +12025,39 @@
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["profileId", "permission", "scope", "reason"],
+								"required": ["subject", "permission", "scope", "reason"],
 								"properties": {
-									"profileId": { "format": "uuid", "type": "string" },
+									"subject": {
+										"anyOf": [
+											{
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["kind", "profileId"],
+												"properties": {
+													"kind": {
+														"const": "profile",
+														"type": "string"
+													},
+													"profileId": {
+														"format": "uuid",
+														"type": "string"
+													}
+												}
+											},
+											{
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["kind", "realmId"],
+												"properties": {
+													"kind": { "const": "realm", "type": "string" },
+													"realmId": {
+														"format": "uuid",
+														"type": "string"
+													}
+												}
+											}
+										]
+									},
 									"permission": {
 										"default": "unit.read",
 										"type": "string",
@@ -12011,7 +12103,7 @@
 									"required": [
 										"id",
 										"unitId",
-										"profileId",
+										"subject",
 										"permission",
 										"scope",
 										"reason",
@@ -12024,7 +12116,40 @@
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
 										"unitId": { "format": "uuid", "type": "string" },
-										"profileId": { "format": "uuid", "type": "string" },
+										"subject": {
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "profileId"],
+													"properties": {
+														"kind": {
+															"const": "profile",
+															"type": "string"
+														},
+														"profileId": {
+															"format": "uuid",
+															"type": "string"
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "realmId"],
+													"properties": {
+														"kind": {
+															"const": "realm",
+															"type": "string"
+														},
+														"realmId": {
+															"format": "uuid",
+															"type": "string"
+														}
+													}
+												}
+											]
+										},
 										"permission": { "type": "string" },
 										"scope": {
 											"maxItems": 8,
@@ -12135,7 +12260,11 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": ["UnitNotFound", "ProfileNotFound"]
+													"enum": [
+														"UnitNotFound",
+														"ProfileNotFound",
+														"RealmNotFound"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}

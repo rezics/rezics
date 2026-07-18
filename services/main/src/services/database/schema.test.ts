@@ -2,7 +2,13 @@ import { type SQL } from "drizzle-orm";
 import { getTableConfig, PgDialect } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 
-import { unit, unitAlias, unitLocalization } from "./schema";
+import {
+	unit,
+	unitAccessBinding,
+	unitAccessRestriction,
+	unitAlias,
+	unitLocalization,
+} from "./schema";
 
 const dialect = new PgDialect();
 
@@ -43,5 +49,24 @@ describe("database schema contracts", () => {
 			indexes.find((index) => index.config.name === "unit_alias_term_search_idx")?.config
 				.where,
 		).toBeDefined();
+	});
+
+	it("enforces Unit access subject invariants at the database boundary", () => {
+		const binding = getTableConfig(unitAccessBinding);
+		const restriction = getTableConfig(unitAccessRestriction);
+
+		expect(binding.checks.map((constraint) => constraint.name)).toContain(
+			"unit_access_binding_subject_role_check",
+		);
+		expect(restriction.checks.map((constraint) => constraint.name)).toContain(
+			"unit_access_restriction_subject_shape_check",
+		);
+		expect(restriction.indexes.map((index) => index.config.name)).toEqual(
+			expect.arrayContaining([
+				"unit_access_restriction_active_profile_scope_key",
+				"unit_access_restriction_active_realm_scope_key",
+			]),
+		);
+		expect(unitAccessRestriction.subjectKind.enumValues).toEqual(["profile", "realm"]);
 	});
 });

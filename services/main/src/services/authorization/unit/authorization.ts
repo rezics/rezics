@@ -1,4 +1,4 @@
-import { and, eq, isNull, or, sql } from "drizzle-orm";
+import { and, eq, exists, isNull, or, sql } from "drizzle-orm";
 
 import { database } from "../../database";
 import {
@@ -17,7 +17,12 @@ import {
 } from "../../units/errors";
 import type { PlatformAuthorization } from "../platform/authorization";
 import { canRealmRolePerform, type RealmCapability } from "../realm/policy";
-import { roleAllows, type UnitAccessRole, type UnitPermission } from "./policy";
+import {
+	resolveUnitAccessOverride,
+	roleAllows,
+	type UnitAccessRole,
+	type UnitPermission,
+} from "./policy";
 import { getUnitReadCondition } from "./query";
 import { scopeCovers, scopeKey, type UnitScope } from "./scope";
 
@@ -31,7 +36,13 @@ export type UnitAccessDecision =
 	  }
 	| {
 			readonly allowed: false;
-			readonly reason: "missing" | "anonymous" | "restricted" | "ungranted";
+			readonly reason: "missing" | "anonymous" | "ungranted";
+	  }
+	| {
+			readonly allowed: false;
+			readonly reason: "restricted";
+			readonly restrictionId: string;
+			readonly subjectKind: "profile" | "realm";
 	  }
 	| {
 			readonly allowed: false;
@@ -153,27 +164,90 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 			.limit(1);
 		if (!record || record.deletedAt) return { allowed: false, reason: "missing" };
 
-		if (this.profileId && (await this.platform.hasCapability("unit.edit")))
-			return { allowed: true, source: "platform" };
-
 		if (this.profileId) {
-			const restrictions = await database
-				.select({ scope: unitAccessRestriction.scope })
-				.from(unitAccessRestriction)
-				.where(
-					and(
-						eq(unitAccessRestriction.unitId, unitId),
-						eq(unitAccessRestriction.profileId, this.profileId),
-						eq(unitAccessRestriction.permission, permission),
-						isNull(unitAccessRestriction.revokedAt),
-						or(
-							isNull(unitAccessRestriction.expiresAt),
-							sql`${unitAccessRestriction.expiresAt} > now()`,
+			const [platformOverride, restrictions, directOwnerBindings] = await Promise.all([
+				this.platform.hasCapability("unit.edit"),
+				database
+					.select({
+						id: unitAccessRestriction.id,
+						subjectKind: unitAccessRestriction.subjectKind,
+						scope: unitAccessRestriction.scope,
+					})
+					.from(unitAccessRestriction)
+					.where(
+						and(
+							eq(unitAccessRestriction.unitId, unitId),
+							eq(unitAccessRestriction.permission, permission),
+							or(
+								and(
+									eq(unitAccessRestriction.subjectKind, "profile"),
+									eq(unitAccessRestriction.profileId, this.profileId),
+								),
+								and(
+									eq(unitAccessRestriction.subjectKind, "realm"),
+									exists(
+										database
+											.select({ profileId: realmMember.profileId })
+											.from(realmMember)
+											.where(
+												and(
+													eq(
+														realmMember.realmId,
+														unitAccessRestriction.realmId,
+													),
+													eq(realmMember.profileId, this.profileId),
+													eq(realmMember.state, "active"),
+												),
+											),
+									),
+								),
+							),
+							isNull(unitAccessRestriction.revokedAt),
+							or(
+								isNull(unitAccessRestriction.expiresAt),
+								sql`${unitAccessRestriction.expiresAt} > now()`,
+							),
 						),
 					),
+				database
+					.select({ scope: unitAccessBinding.scope })
+					.from(unitAccessBinding)
+					.where(
+						and(
+							eq(unitAccessBinding.unitId, unitId),
+							eq(unitAccessBinding.subjectKind, "profile"),
+							eq(unitAccessBinding.profileId, this.profileId),
+							eq(unitAccessBinding.role, "owner"),
+							isNull(unitAccessBinding.revokedAt),
+							or(
+								isNull(unitAccessBinding.expiresAt),
+								sql`${unitAccessBinding.expiresAt} > now()`,
+							),
+						),
+					),
+			]);
+			const applicableRestrictions = restrictions
+				.filter((restriction) => scopeCovers(restriction.scope, scope))
+				.sort(
+					(left, right) =>
+						right.scope.length - left.scope.length || left.id.localeCompare(right.id),
 				);
-			if (restrictions.some((restriction) => scopeCovers(restriction.scope, scope)))
-				return { allowed: false, reason: "restricted" };
+			const hasDirectProfileOwner = directOwnerBindings.some(
+				(binding) => permission === "unit.read" || scopeCovers(binding.scope, scope),
+			);
+			const override = resolveUnitAccessOverride({
+				platformOverride,
+				hasDirectProfileOwner,
+				restrictions: applicableRestrictions,
+			});
+			if (override?.kind === "platform") return { allowed: true, source: "platform" };
+			if (override?.kind === "restriction")
+				return {
+					allowed: false,
+					reason: "restricted",
+					restrictionId: override.restriction.id,
+					subjectKind: override.restriction.subjectKind,
+				};
 		}
 
 		if (

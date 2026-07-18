@@ -918,7 +918,7 @@ export function getApiGovernanceUnitByUnitIdAccessRestrictions<ThrowOnError exte
 }
 
 /**
- * @summary Restrict Profile access to a Unit scope
+ * @summary Restrict subject access to a Unit scope
  * {@link /api/governance/unit/:unitId/access-restrictions}
  */
 export function postApiGovernanceUnitByUnitIdAccessRestrictions<

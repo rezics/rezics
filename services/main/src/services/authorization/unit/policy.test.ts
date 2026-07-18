@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isPubliclyReadableUnit, roleAllows } from "./policy";
+import { isPubliclyReadableUnit, resolveUnitAccessOverride, roleAllows } from "./policy";
 import { scopeCovers, unitScope } from "./scope";
 
 describe("unit visibility", () => {
@@ -36,5 +36,38 @@ describe("unit access policy", () => {
 			"page",
 			"2026-highlights",
 		]);
+	});
+
+	it("keeps the platform recovery boundary above every restriction", () => {
+		expect(
+			resolveUnitAccessOverride({
+				platformOverride: true,
+				hasDirectProfileOwner: false,
+				restrictions: [
+					{ id: "profile-restriction", subjectKind: "profile" },
+					{ id: "realm-restriction", subjectKind: "realm" },
+				],
+			}),
+		).toEqual({ kind: "platform" });
+	});
+
+	it("lets direct Profile owners bypass only Realm-derived restrictions", () => {
+		expect(
+			resolveUnitAccessOverride({
+				platformOverride: false,
+				hasDirectProfileOwner: true,
+				restrictions: [{ id: "realm-restriction", subjectKind: "realm" }],
+			}),
+		).toBeUndefined();
+		expect(
+			resolveUnitAccessOverride({
+				platformOverride: false,
+				hasDirectProfileOwner: true,
+				restrictions: [{ id: "profile-restriction", subjectKind: "profile" }],
+			}),
+		).toEqual({
+			kind: "restriction",
+			restriction: { id: "profile-restriction", subjectKind: "profile" },
+		});
 	});
 });

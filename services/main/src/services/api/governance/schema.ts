@@ -149,9 +149,13 @@ export const CreateUnitAccessBindingBody = t.Object(
 	{ additionalProperties: false },
 );
 export const UnitAccessRestrictionParams = t.Object({ unitId: Uuid, restrictionId: Uuid });
+export const UnitAccessRestrictionSubject = t.Union([
+	t.Object({ kind: t.Literal("profile"), profileId: Uuid }, { additionalProperties: false }),
+	t.Object({ kind: t.Literal("realm"), realmId: Uuid }, { additionalProperties: false }),
+]);
 export const CreateUnitAccessRestrictionBody = t.Object(
 	{
-		profileId: Uuid,
+		subject: UnitAccessRestrictionSubject,
 		permission: t.UnionEnum(UnitPermissionValues),
 		scope: UnitScope,
 		reason: t.String({ minLength: 1, maxLength: 2_000 }),
@@ -248,7 +252,7 @@ export const UnitAccessBindingListResponse = t.Object({
 export const UnitAccessRestrictionResponse = t.Object({
 	id: Uuid,
 	unitId: Uuid,
-	profileId: Uuid,
+	subject: UnitAccessRestrictionSubject,
 	permission: t.String(),
 	scope: UnitScope,
 	reason: t.String(),
@@ -294,12 +298,16 @@ const UnitDeniedDecisionResponse = t.Union([
 	t.Object(
 		{
 			allowed: t.Literal(false),
-			reason: t.Union([
-				t.Literal("missing"),
-				t.Literal("anonymous"),
-				t.Literal("restricted"),
-				t.Literal("ungranted"),
-			]),
+			reason: t.Union([t.Literal("missing"), t.Literal("anonymous"), t.Literal("ungranted")]),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			allowed: t.Literal(false),
+			reason: t.Literal("restricted"),
+			restrictionId: Uuid,
+			subjectKind: t.Union([t.Literal("profile"), t.Literal("realm")]),
 		},
 		{ additionalProperties: false },
 	),

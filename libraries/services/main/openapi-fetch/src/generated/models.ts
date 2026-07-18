@@ -6782,7 +6782,24 @@ export type GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200 = {
 							 * @type boolean
 							 */
 							allowed: false;
-							reason: "missing" | "anonymous" | "restricted" | "ungranted";
+							reason: "missing" | "anonymous" | "ungranted";
+					  }
+					| {
+							/**
+							 * @type boolean
+							 */
+							allowed: false;
+							/**
+							 * @type string
+							 */
+							reason: "restricted";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							restrictionId: string;
+							subjectKind: "profile" | "realm";
 					  }
 					| {
 							/**
@@ -7560,12 +7577,31 @@ export type GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus200 = {
 		 * @type string
 		 */
 		unitId: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		profileId: string;
+		subject:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "profile";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					profileId: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "realm";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					realmId: string;
+			  };
 		/**
 		 * @type string
 		 */
@@ -7735,12 +7771,31 @@ export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus200 = {
 	 * @type string
 	 */
 	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	profileId: string;
+	subject:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "profile";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				profileId: string;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "realm";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				realmId: string;
+		  };
 	/**
 	 * @type string
 	 */
@@ -7843,6 +7898,7 @@ export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus403 = {
 export const PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	ProfileNotFound: "ProfileNotFound",
+	RealmNotFound: "RealmNotFound",
 } as const;
 
 export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus404ErrorCodeEnum =
@@ -7939,12 +7995,31 @@ export type PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestPermissionEnum
  * @type object
  */
 export type PostApiGovernanceUnitByUnitIdAccessRestrictionsBody = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	profileId: string;
+	subject:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "profile";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				profileId: string;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "realm";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				realmId: string;
+		  };
 	/**
 	 * @default 'unit.read'
 	 * @type string

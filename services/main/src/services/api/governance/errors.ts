@@ -136,7 +136,8 @@ export class UnitAccessBindingConflict extends Data.TaggedError("UnitAccessBindi
 export class UnitAccessSubjectRoleInvalid extends Data.TaggedError("UnitAccessSubjectRoleInvalid") {
 	static readonly status = StatusCodes.BAD_REQUEST as const;
 	readonly status = UnitAccessSubjectRoleInvalid.status;
-	readonly message = "Authenticated access can only receive viewer or editor roles";
+	readonly message =
+		"Authenticated access can only receive viewer or editor roles, and Realm access cannot own a Unit";
 }
 
 export class UnitAccessRestrictionConflict extends Data.TaggedError(
@@ -145,7 +146,7 @@ export class UnitAccessRestrictionConflict extends Data.TaggedError(
 	static readonly status = StatusCodes.CONFLICT as const;
 	readonly status = UnitAccessRestrictionConflict.status;
 	readonly message =
-		"An active restriction already exists for this Profile, permission, and scope";
+		"An active restriction already exists for this subject, permission, and scope";
 }
 
 export class UnitOwnerRestrictionForbidden extends Data.TaggedError(

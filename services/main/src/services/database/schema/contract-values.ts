@@ -66,6 +66,7 @@ export const EnforcementKindValues = [
 ] as const;
 export const CapabilityAuthorityValues = ["platform", "realm"] as const;
 export const UnitAccessSubjectKindValues = ["profile", "realm", "authenticated"] as const;
+export const UnitAccessRestrictionSubjectKindValues = ["profile", "realm"] as const;
 export const UnitAccessRealmRelationValues = ["member", "content_editor", "governor"] as const;
 export const UnitAccessRoleValues = [
 	"viewer",
