@@ -77,27 +77,6 @@ export const realmMember = pgTable(
 	],
 );
 
-export const realmSubscription = pgTable(
-	"realm_subscription",
-	{
-		profileId: uuid()
-			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
-		realmId: uuid()
-			.notNull()
-			.references(() => realm.id, { onDelete: "cascade" }),
-		createdAt: createCreatedAtColumn(),
-	},
-	(table) => [
-		primaryKey({ columns: [table.profileId, table.realmId] }),
-		index("realm_subscription_realm_created_at_idx").on(
-			table.realmId,
-			table.createdAt.desc(),
-			table.profileId,
-		),
-	],
-);
-
 export const realmRuleRevision = pgTable(
 	"realm_rule_revision",
 	{

@@ -11,7 +11,7 @@ import {
 	profile as profileTable,
 	realmUnit,
 	unit,
-	unitCollaborator,
+	unitAccessBinding,
 	unitLocalization,
 	unitRevisionHead,
 } from "../../database/schema";
@@ -50,7 +50,10 @@ import {
 } from "./errors";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
-const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitEditForbidden", "UnitFieldLocked"]);
+const UnitMutationForbiddenResponse = toApiErrorResponse([
+	"UnitPermissionForbidden",
+	"UnitProtected",
+]);
 const ordinaryPostKind = sql<"post" | "reply">`${post.kind}::text`;
 
 const primaryRealmId = sql<string | null>`(
@@ -212,11 +215,13 @@ export default new Elysia()
 							content: body.body,
 							contentStatus: "published",
 						});
-						await tx.insert(unitCollaborator).values({
+						await tx.insert(unitAccessBinding).values({
 							unitId: created.id,
+							subjectKind: "profile",
 							profileId: profile.unitId,
 							role: "owner",
-							addedByProfileId: profile.unitId,
+							scope: [],
+							grantedByProfileId: profile.unitId,
 						});
 						if (body.realmId)
 							await tx
@@ -292,7 +297,7 @@ export default new Elysia()
 					return {
 						...row,
 						body: toPortableTextResponse(row.body),
-						capabilities: { canEdit: await authorization.unit.canEdit(row.id) },
+						capabilities: { canEdit: await authorization.unit.canUpdate(row.id) },
 					};
 				},
 				{
@@ -311,10 +316,7 @@ export default new Elysia()
 				"/:postId",
 				async ({ params, profile, authorization, body }) => {
 					await ensureOrdinaryPost(params.postId);
-					await authorization.unit.ensureCanEdit(params.postId);
-					await authorization.unit.ensureFieldsUnlocked(params.postId, [
-						"/localizations",
-					]);
+					await authorization.unit.ensureCanUpdate(params.postId, [["localizations"]]);
 					await database.transaction(async (tx) => {
 						const [current] = await tx
 							.select({ language: unitLocalization.language })
@@ -368,7 +370,7 @@ export default new Elysia()
 				"/:postId",
 				async ({ params, profile, authorization }) => {
 					await ensureOrdinaryPost(params.postId);
-					await authorization.unit.ensureCanEdit(params.postId);
+					await authorization.unit.ensure(params.postId, "unit.delete");
 					await database.transaction(async (tx) => {
 						await tx
 							.update(unit)
@@ -387,7 +389,7 @@ export default new Elysia()
 					params: PostParams,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitEditForbidden"]),
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"PostNotFound",
@@ -638,11 +640,13 @@ export default new Elysia()
 							content: body.body,
 							contentStatus: "published",
 						});
-						await tx.insert(unitCollaborator).values({
+						await tx.insert(unitAccessBinding).values({
 							unitId: created.id,
+							subjectKind: "profile",
 							profileId: profile.unitId,
 							role: "owner",
-							addedByProfileId: profile.unitId,
+							scope: [],
+							grantedByProfileId: profile.unitId,
 						});
 						if (realm)
 							await tx.insert(realmUnit).values({
@@ -692,16 +696,19 @@ export default new Elysia()
 				"/:replyPostId",
 				async ({ params, profile, authorization, body }) => {
 					const row = await getReplyPost(params.postId, params.replyPostId);
-					if (!(await authorization.unit.canEdit(params.replyPostId))) {
+					if (!(await authorization.unit.canUpdate(params.replyPostId))) {
 						if (row.contextRealmId)
 							await authorization.realm.ensureCapability(
 								row.contextRealmId,
 								"realm.units.moderate",
 							);
-						else await authorization.unit.ensureCanEdit(params.replyPostId);
+						else
+							await authorization.unit.ensureCanUpdate(params.replyPostId, [
+								["localizations"],
+							]);
 					}
-					await authorization.unit.ensureFieldsUnlocked(params.replyPostId, [
-						"/localizations",
+					await authorization.unit.ensureOperationAllowed(params.replyPostId, [
+						"localizations",
 					]);
 					await database.transaction(async (tx) => {
 						await tx
@@ -731,8 +738,8 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: IdResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-							"UnitEditForbidden",
-							"UnitFieldLocked",
+							"UnitPermissionForbidden",
+							"UnitProtected",
 							"RealmCapabilityRequired",
 						]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
@@ -748,14 +755,15 @@ export default new Elysia()
 				"/:replyPostId",
 				async ({ params, profile, authorization }) => {
 					const row = await getReplyPost(params.postId, params.replyPostId);
-					if (!(await authorization.unit.canEdit(params.replyPostId))) {
+					if (!(await authorization.unit.canUpdate(params.replyPostId))) {
 						if (row.contextRealmId)
 							await authorization.realm.ensureCapability(
 								row.contextRealmId,
 								"realm.units.moderate",
 							);
-						else await authorization.unit.ensureCanEdit(params.replyPostId);
+						else await authorization.unit.ensure(params.replyPostId, "unit.delete");
 					}
+					await authorization.unit.ensureOperationAllowed(params.replyPostId, ["unit"]);
 					await database.transaction(async (tx) => {
 						await tx
 							.update(unit)
@@ -775,7 +783,7 @@ export default new Elysia()
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-							"UnitEditForbidden",
+							"UnitPermissionForbidden",
 							"RealmCapabilityRequired",
 						]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([

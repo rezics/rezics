@@ -16,7 +16,6 @@ import {
 import { pgTable } from "./base";
 import {
 	AiDisclosureValues,
-	CollaboratorRoleValues,
 	ContentRatingValues,
 	ContentStatusValues,
 	DefaultLanguage,
@@ -47,7 +46,6 @@ export const contentRating = pgEnum("content_rating", toEnumValues(ContentRating
 export const aiDisclosure = pgEnum("ai_disclosure", toEnumValues(AiDisclosureValues));
 export const moderationStatus = pgEnum("moderation_status", toEnumValues(ModerationStatusValues));
 export const contentStatus = pgEnum("content_status", toEnumValues(ContentStatusValues));
-export const collaboratorRole = pgEnum("collaborator_role", toEnumValues(CollaboratorRoleValues));
 export const imageAssetStatus = pgEnum("image_asset_status", toEnumValues(ImageAssetStatusValues));
 export const imageAssetAccess = pgEnum("image_asset_access", toEnumValues(ImageAssetAccessValues));
 
@@ -271,74 +269,25 @@ export const profilePreference = pgTable(
 	],
 );
 
-export const unitCollaborator = pgTable(
-	"unit_collaborator",
-	{
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
-		profileId: uuid()
-			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
-		role: collaboratorRole().notNull(),
-		addedByProfileId: uuid()
-			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		primaryKey({ columns: [table.unitId, table.profileId] }),
-		index("unit_collaborator_profile_role_idx").on(table.profileId, table.role),
-		index("unit_collaborator_added_by_idx").on(table.addedByProfileId),
-	],
-);
-
-export const unitFieldLock = pgTable(
-	"unit_field_lock",
-	{
-		id: createUuidv7PrimaryKey(),
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
-		path: text().notNull(),
-		lockedByProfileId: uuid()
-			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
-		/** @UNIT_LOCALIZATION_EXEMPT Point-in-time administrative reason. */
-		reason: text(),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		unique("unit_field_lock_unit_path_key").on(table.unitId, table.path),
-		index("unit_field_lock_locked_by_idx").on(table.lockedByProfileId),
-		check("unit_field_lock_path_check", sql`${table.path} ~ '^/'`),
-	],
-);
-
-export const profileFollow = pgTable(
-	"profile_follow",
+export const unitFollow = pgTable(
+	"unit_follow",
 	{
 		followerProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "cascade" }),
-		followedProfileId: uuid()
+		unitId: uuid()
 			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+			.references(() => unit.id, { onDelete: "cascade" }),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.followerProfileId, table.followedProfileId] }),
-		index("profile_follow_followed_created_at_idx").on(
-			table.followedProfileId,
+		primaryKey({ columns: [table.followerProfileId, table.unitId] }),
+		index("unit_follow_unit_created_at_idx").on(
+			table.unitId,
 			table.createdAt.desc(),
 			table.followerProfileId,
 		),
-		check(
-			"profile_follow_not_self_check",
-			sql`${table.followerProfileId} <> ${table.followedProfileId}`,
-		),
+		check("unit_follow_not_self_check", sql`${table.followerProfileId} <> ${table.unitId}`),
 	],
 );
 

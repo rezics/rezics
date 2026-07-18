@@ -1,22 +1,42 @@
 import { StatusCodes } from "http-status-codes";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
-import { type PortableTextDocument } from "@rezics/content-structure";
+import {
+	BlockDocument,
+	DefaultBlockHostPolicy,
+	NavigationDocument,
+	ZoneBoundaryDocument,
+	ZoneDockBlockHostPolicy,
+	ZoneThemeDocument,
+	assertBlockDocument,
+	assertNavigationDocument,
+	assertResolvedBlockReferences,
+	assertResolvedNavigationReferences,
+	collectBlockReferences,
+	collectNavigationReferences,
+	parseDocument,
+	type BlockReferenceResolver,
+	type PortableTextDocument,
+} from "@rezics/block";
 
 import session, { resolveIdentity } from "../../auth/session";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
+import { getUnitReadCondition } from "../../authorization/unit/query";
 import { database } from "../../database";
 import {
 	software,
 	softwareRequirement,
+	imageAsset,
 	series,
 	seriesRelease,
 	unit,
-	unitCollaborator,
+	unitAccessBinding,
 	unitLink,
 	unitLocalization,
 	zone,
-	zoneSubscription,
+	zoneNavigation,
+	zonePage,
+	unitFollow,
 } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import type { DatabaseTransaction } from "../../database";
@@ -35,27 +55,44 @@ import {
 	SystemRequirementBody,
 	SystemRequirementListResponse,
 	SystemRequirementResponse,
+	UpdateZoneBody,
 	UpsertSeriesReleaseBody,
+	ZoneNavigationBody,
+	ZoneNavigationListResponse,
+	ZoneNavigationParams,
+	ZoneNavigationResponse,
+	ZonePageBody,
+	ZonePageListResponse,
+	ZonePageParams,
+	ZonePageResponse,
 	ZoneParams,
+	ZoneResponse,
 } from "./schema";
 import {
 	SoftwareNotFound,
 	SoftwareSystemRequirementSourceInvalid,
 	SeriesReleaseNotFound,
 	SystemRequirementNotFound,
+	ZoneDocumentInvalid,
+	ZoneNavigationInUse,
+	ZoneNavigationNotFound,
+	ZonePageNotFound,
+	ZonePageInUse,
 	ZoneTimeRangeInvalid,
 } from "./errors";
 
-const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitEditForbidden", "UnitFieldLocked"]);
+const UnitMutationForbiddenResponse = toApiErrorResponse([
+	"UnitPermissionForbidden",
+	"UnitProtected",
+]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 
 async function ensureUnitMutationAuthorized(
 	authorization: UnitAuthorization<string>,
 	unitId: string,
-	path: string,
+	scope: readonly string[],
 ): Promise<void> {
-	await authorization.ensureCanEdit(unitId);
-	await authorization.ensureFieldsUnlocked(unitId, [path]);
+	await authorization.ensureCanUpdate(unitId, [scope]);
 }
 
 async function createBaseUnit(
@@ -91,11 +128,13 @@ async function createBaseUnit(
 		.returning({ id: unit.id });
 	if (!created) throw new Error("Unit insertion did not return an id");
 	await tx.insert(unitLocalization).values({ unitId: created.id, ...input.localization });
-	await tx.insert(unitCollaborator).values({
+	await tx.insert(unitAccessBinding).values({
 		unitId: created.id,
+		subjectKind: "profile",
 		profileId: input.ownerId,
 		role: "owner",
-		addedByProfileId: input.ownerId,
+		scope: [],
+		grantedByProfileId: input.ownerId,
 	});
 	return created.id;
 }
@@ -110,7 +149,149 @@ async function ensureRequirementSource(softwareId: string, sourceExternalLinkId?
 	if (!source) throw new SoftwareSystemRequirementSourceInvalid();
 }
 
+async function getZone(zoneId: string) {
+	const [record] = await database.select().from(zone).where(eq(zone.id, zoneId)).limit(1);
+	if (!record) throw new UnitNotFound("Zone");
+	return record;
+}
+
+function toZoneResponse(record: Awaited<ReturnType<typeof getZone>>) {
+	return {
+		...record,
+		boundaryDocument: parseDocument(ZoneBoundaryDocument, record.boundaryDocument),
+		themeDocument: parseDocument(ZoneThemeDocument, record.themeDocument),
+		dockDocument: parseDocument(BlockDocument, record.dockDocument),
+	} satisfies typeof ZoneResponse.static;
+}
+
+function toZonePageResponse(record: typeof zonePage.$inferSelect) {
+	return {
+		...record,
+		document: parseDocument(BlockDocument, record.document),
+	} satisfies typeof ZonePageResponse.static;
+}
+
+function toZoneNavigationResponse(record: typeof zoneNavigation.$inferSelect) {
+	return {
+		...record,
+		document: parseDocument(NavigationDocument, record.document),
+	} satisfies typeof ZoneNavigationResponse.static;
+}
+
+function ensureZoneBlockDocument(value: unknown, dock = false): void {
+	try {
+		assertBlockDocument(value, dock ? ZoneDockBlockHostPolicy : DefaultBlockHostPolicy);
+	} catch {
+		throw new ZoneDocumentInvalid();
+	}
+}
+
+function ensureZoneNavigationDocument(value: unknown): void {
+	try {
+		assertNavigationDocument(value, { allowExternalNavigation: true });
+	} catch {
+		throw new ZoneDocumentInvalid();
+	}
+}
+
+function createZoneReferenceResolver(
+	tx: DatabaseTransaction,
+	input: {
+		readonly zoneId: string;
+		readonly profileId: string;
+		readonly additionalPageSlugs?: readonly string[];
+	},
+): BlockReferenceResolver {
+	return {
+		async resolve(kind, identifiers) {
+			if (!identifiers.length) return new Set<string>();
+			if (kind === "unit") {
+				const rows = await tx
+					.select({ id: unit.id })
+					.from(unit)
+					.where(
+						and(
+							inArray(unit.id, [...identifiers]),
+							getUnitReadCondition(input.profileId),
+						),
+					);
+				return new Set(rows.map((row) => row.id));
+			}
+			if (kind === "asset") {
+				const rows = await tx
+					.select({ id: imageAsset.id })
+					.from(imageAsset)
+					.where(
+						and(
+							inArray(imageAsset.id, [...identifiers]),
+							eq(imageAsset.status, "ready"),
+							isNull(imageAsset.deletedAt),
+							or(
+								eq(imageAsset.access, "public"),
+								eq(imageAsset.ownerProfileId, input.profileId),
+							),
+						),
+					);
+				return new Set(rows.map((row) => row.id));
+			}
+			if (kind === "navigation") {
+				const rows = await tx
+					.select({ id: zoneNavigation.id })
+					.from(zoneNavigation)
+					.where(
+						and(
+							eq(zoneNavigation.zoneId, input.zoneId),
+							inArray(zoneNavigation.id, [...identifiers]),
+						),
+					);
+				return new Set(rows.map((row) => row.id));
+			}
+			const rows = await tx
+				.select({ slug: zonePage.slug })
+				.from(zonePage)
+				.where(
+					and(
+						eq(zonePage.zoneId, input.zoneId),
+						inArray(zonePage.slug, [...identifiers]),
+					),
+				);
+			return new Set([...rows.map((row) => row.slug), ...(input.additionalPageSlugs ?? [])]);
+		},
+	};
+}
+
+async function ensureZoneBlockReferences(
+	tx: DatabaseTransaction,
+	document: unknown,
+	input: Parameters<typeof createZoneReferenceResolver>[1],
+): Promise<void> {
+	try {
+		await assertResolvedBlockReferences(
+			parseDocument(BlockDocument, document),
+			createZoneReferenceResolver(tx, input),
+		);
+	} catch {
+		throw new ZoneDocumentInvalid();
+	}
+}
+
+async function ensureZoneNavigationReferences(
+	tx: DatabaseTransaction,
+	document: unknown,
+	input: Parameters<typeof createZoneReferenceResolver>[1],
+): Promise<void> {
+	try {
+		await assertResolvedNavigationReferences(
+			parseDocument(NavigationDocument, document),
+			createZoneReferenceResolver(tx, input),
+		);
+	} catch {
+		throw new ZoneDocumentInvalid();
+	}
+}
+
 export default new Elysia()
+	.model({ BlockDocument, NavigationDocument, ZoneBoundaryDocument, ZoneThemeDocument })
 	.use(session)
 	.group("/series", (app) =>
 		app
@@ -166,15 +347,503 @@ export default new Elysia()
 					},
 					detail: { summary: "List Series releases", tags: ["Series"] },
 				},
+			),
+	)
+	.group("/zones", (app) =>
+		app
+			.get(
+				"/:zoneId",
+				async ({ params, request }) => {
+					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+						.authorization;
+					await authorization.unit.ensureCanRead(
+						params.zoneId,
+						() => new UnitNotFound("Zone"),
+					);
+					return toZoneResponse(await getZone(params.zoneId));
+				},
+				{
+					params: ZoneParams,
+					response: {
+						[StatusCodes.OK]: ZoneResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+					},
+					detail: { summary: "Get Zone configuration", tags: ["Zones"] },
+				},
 			)
+			.patch(
+				"/:zoneId",
+				async ({ params, profile, authorization, body }) => {
+					const scopes: string[][] = [];
+					if (body.boundaryDocument) scopes.push(["zone", "boundary"]);
+					if (body.themeDocument) scopes.push(["zone", "theme"]);
+					if (body.dockDocument) scopes.push(["zone", "dock"]);
+					if (body.startsAt !== undefined || body.endsAt !== undefined)
+						scopes.push(["zone", "settings"]);
+					for (const scope of scopes)
+						await ensureUnitMutationAuthorized(
+							authorization.unit,
+							params.zoneId,
+							scope,
+						);
+					const current = await getZone(params.zoneId);
+					if (body.dockDocument) ensureZoneBlockDocument(body.dockDocument, true);
+					const startsAt =
+						body.startsAt === undefined
+							? current.startsAt
+							: body.startsAt === null
+								? null
+								: new Date(body.startsAt);
+					const endsAt =
+						body.endsAt === undefined
+							? current.endsAt
+							: body.endsAt === null
+								? null
+								: new Date(body.endsAt);
+					if (startsAt && endsAt && endsAt <= startsAt) throw new ZoneTimeRangeInvalid();
+					return database.transaction(async (tx) => {
+						await tx.execute(
+							sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${params.zoneId}`}::text, 0))`,
+						);
+						if (body.dockDocument)
+							await ensureZoneBlockReferences(tx, body.dockDocument, {
+								zoneId: params.zoneId,
+								profileId: profile.unitId,
+							});
+						const [updated] = await tx
+							.update(zone)
+							.set({
+								...(body.boundaryDocument
+									? { boundaryDocument: body.boundaryDocument }
+									: {}),
+								...(body.themeDocument
+									? { themeDocument: body.themeDocument }
+									: {}),
+								...(body.dockDocument ? { dockDocument: body.dockDocument } : {}),
+								...(body.startsAt !== undefined ? { startsAt } : {}),
+								...(body.endsAt !== undefined ? { endsAt } : {}),
+							})
+							.where(eq(zone.id, params.zoneId))
+							.returning();
+						if (!updated) throw new UnitNotFound("Zone");
+						await recordUnitRevision(tx, {
+							unitId: params.zoneId,
+							actorProfileId: profile.unitId,
+							event: "update",
+						});
+						return toZoneResponse(updated);
+					});
+				},
+				{
+					access: "contribute:unit:update",
+					params: ZoneParams,
+					body: UpdateZoneBody,
+					response: {
+						[StatusCodes.OK]: ZoneResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"ZoneTimeRangeInvalid",
+							"ZoneDocumentInvalid",
+						]),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+					},
+					detail: { summary: "Update Zone configuration", tags: ["Zones"] },
+				},
+			)
+			.get(
+				"/:zoneId/pages",
+				async ({ params, request }) => {
+					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+						.authorization;
+					await authorization.unit.ensureCanRead(
+						params.zoneId,
+						() => new UnitNotFound("Zone"),
+					);
+					await getZone(params.zoneId);
+					return {
+						items: (
+							await database
+								.select()
+								.from(zonePage)
+								.where(eq(zonePage.zoneId, params.zoneId))
+								.orderBy(zonePage.position, zonePage.id)
+						).map(toZonePageResponse),
+					};
+				},
+				{
+					params: ZoneParams,
+					response: {
+						[StatusCodes.OK]: ZonePageListResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+					},
+					detail: { summary: "List Zone pages", tags: ["Zones"] },
+				},
+			)
+			.get(
+				"/:zoneId/pages/:slug",
+				async ({ params, request }) => {
+					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+						.authorization;
+					await authorization.unit.ensureCanRead(
+						params.zoneId,
+						() => new UnitNotFound("Zone"),
+					);
+					await getZone(params.zoneId);
+					const [page] = await database
+						.select()
+						.from(zonePage)
+						.where(
+							and(eq(zonePage.zoneId, params.zoneId), eq(zonePage.slug, params.slug)),
+						)
+						.limit(1);
+					if (!page) throw new ZonePageNotFound();
+					return toZonePageResponse(page);
+				},
+				{
+					params: ZonePageParams,
+					response: {
+						[StatusCodes.OK]: ZonePageResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"ZonePageNotFound",
+						]),
+					},
+					detail: { summary: "Get Zone page", tags: ["Zones"] },
+				},
+			)
+			.put(
+				"/:zoneId/pages/:slug",
+				async ({ params, profile, authorization, body }) => {
+					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
+						"zone",
+						"page",
+						params.slug,
+					]);
+					await getZone(params.zoneId);
+					await authorization.unit.ensureCanRead(
+						body.titleUnitId,
+						() => new UnitNotFound("Zone page title Unit"),
+					);
+					ensureZoneBlockDocument(body.document);
+					return database.transaction(async (tx) => {
+						await tx.execute(
+							sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${params.zoneId}`}::text, 0))`,
+						);
+						await ensureZoneBlockReferences(tx, body.document, {
+							zoneId: params.zoneId,
+							profileId: profile.unitId,
+							additionalPageSlugs: [params.slug],
+						});
+						if (body.home)
+							await tx
+								.update(zonePage)
+								.set({ home: false })
+								.where(eq(zonePage.zoneId, params.zoneId));
+						const [saved] = await tx
+							.insert(zonePage)
+							.values({ zoneId: params.zoneId, slug: params.slug, ...body })
+							.onConflictDoUpdate({
+								target: [zonePage.zoneId, zonePage.slug],
+								set: body,
+							})
+							.returning();
+						if (!saved) throw new Error("Zone page upsert returned no row");
+						await recordUnitRevision(tx, {
+							unitId: params.zoneId,
+							actorProfileId: profile.unitId,
+							event: "update",
+						});
+						return toZonePageResponse(saved);
+					});
+				},
+				{
+					access: "contribute:unit:update",
+					params: ZonePageParams,
+					body: ZonePageBody,
+					response: {
+						[StatusCodes.OK]: ZonePageResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ZoneDocumentInvalid"]),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+					},
+					detail: { summary: "Create or replace Zone page", tags: ["Zones"] },
+				},
+			)
+			.delete(
+				"/:zoneId/pages/:slug",
+				async ({ params, profile, authorization }) => {
+					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
+						"zone",
+						"page",
+						params.slug,
+					]);
+					await database.transaction(async (tx) => {
+						await tx.execute(
+							sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${params.zoneId}`}::text, 0))`,
+						);
+						const [target] = await tx
+							.select({ id: zonePage.id })
+							.from(zonePage)
+							.where(
+								and(
+									eq(zonePage.zoneId, params.zoneId),
+									eq(zonePage.slug, params.slug),
+								),
+							)
+							.limit(1);
+						if (!target) throw new ZonePageNotFound();
+						const [zoneRecord] = await tx
+							.select({ dockDocument: zone.dockDocument })
+							.from(zone)
+							.where(eq(zone.id, params.zoneId))
+							.limit(1);
+						if (!zoneRecord) throw new UnitNotFound("Zone");
+						const pages = await tx
+							.select({ id: zonePage.id, document: zonePage.document })
+							.from(zonePage)
+							.where(eq(zonePage.zoneId, params.zoneId));
+						const navigations = await tx
+							.select({ document: zoneNavigation.document })
+							.from(zoneNavigation)
+							.where(eq(zoneNavigation.zoneId, params.zoneId));
+						const referencedByBlock = [
+							zoneRecord.dockDocument,
+							...pages
+								.filter((page) => page.id !== target.id)
+								.map((page) => page.document),
+						].some((document) =>
+							collectBlockReferences(
+								parseDocument(BlockDocument, document),
+							).zonePageSlugs.has(params.slug),
+						);
+						const referencedByNavigation = navigations.some((navigation) =>
+							collectNavigationReferences(
+								parseDocument(NavigationDocument, navigation.document),
+							).zonePageSlugs.has(params.slug),
+						);
+						if (referencedByBlock || referencedByNavigation) throw new ZonePageInUse();
+						await tx.delete(zonePage).where(eq(zonePage.id, target.id));
+						await recordUnitRevision(tx, {
+							unitId: params.zoneId,
+							actorProfileId: profile.unitId,
+							event: "update",
+						});
+					});
+					return new Response(null, { status: StatusCodes.NO_CONTENT });
+				},
+				{
+					access: "write:unit:delete",
+					params: ZonePageParams,
+					response: {
+						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"ZonePageNotFound",
+						]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse(["ZonePageInUse"]),
+					},
+					detail: {
+						summary: "Delete Zone page",
+						tags: ["Zones"],
+						responses: NoContentResponse,
+					},
+				},
+			)
+			.get(
+				"/:zoneId/navigation",
+				async ({ params, request }) => {
+					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+						.authorization;
+					await authorization.unit.ensureCanRead(
+						params.zoneId,
+						() => new UnitNotFound("Zone"),
+					);
+					await getZone(params.zoneId);
+					return {
+						items: (
+							await database
+								.select()
+								.from(zoneNavigation)
+								.where(eq(zoneNavigation.zoneId, params.zoneId))
+								.orderBy(zoneNavigation.position, zoneNavigation.id)
+						).map(toZoneNavigationResponse),
+					};
+				},
+				{
+					params: ZoneParams,
+					response: {
+						[StatusCodes.OK]: ZoneNavigationListResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+					},
+					detail: { summary: "List Zone navigation resources", tags: ["Zones"] },
+				},
+			)
+			.get(
+				"/:zoneId/navigation/:key",
+				async ({ params, request }) => {
+					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+						.authorization;
+					await authorization.unit.ensureCanRead(
+						params.zoneId,
+						() => new UnitNotFound("Zone"),
+					);
+					await getZone(params.zoneId);
+					const [navigation] = await database
+						.select()
+						.from(zoneNavigation)
+						.where(
+							and(
+								eq(zoneNavigation.zoneId, params.zoneId),
+								eq(zoneNavigation.key, params.key),
+							),
+						)
+						.limit(1);
+					if (!navigation) throw new ZoneNavigationNotFound();
+					return toZoneNavigationResponse(navigation);
+				},
+				{
+					params: ZoneNavigationParams,
+					response: {
+						[StatusCodes.OK]: ZoneNavigationResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"ZoneNavigationNotFound",
+						]),
+					},
+					detail: { summary: "Get Zone navigation resource", tags: ["Zones"] },
+				},
+			)
+			.put(
+				"/:zoneId/navigation/:key",
+				async ({ params, profile, authorization, body }) => {
+					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
+						"zone",
+						"navigation",
+						params.key,
+					]);
+					await getZone(params.zoneId);
+					ensureZoneNavigationDocument(body.document);
+					return database.transaction(async (tx) => {
+						await tx.execute(
+							sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${params.zoneId}`}::text, 0))`,
+						);
+						await ensureZoneNavigationReferences(tx, body.document, {
+							zoneId: params.zoneId,
+							profileId: profile.unitId,
+						});
+						const [saved] = await tx
+							.insert(zoneNavigation)
+							.values({ zoneId: params.zoneId, key: params.key, ...body })
+							.onConflictDoUpdate({
+								target: [zoneNavigation.zoneId, zoneNavigation.key],
+								set: body,
+							})
+							.returning();
+						if (!saved) throw new Error("Zone navigation upsert returned no row");
+						await recordUnitRevision(tx, {
+							unitId: params.zoneId,
+							actorProfileId: profile.unitId,
+							event: "update",
+						});
+						return toZoneNavigationResponse(saved);
+					});
+				},
+				{
+					access: "contribute:unit:update",
+					params: ZoneNavigationParams,
+					body: ZoneNavigationBody,
+					response: {
+						[StatusCodes.OK]: ZoneNavigationResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ZoneDocumentInvalid"]),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+					},
+					detail: { summary: "Create or replace Zone navigation", tags: ["Zones"] },
+				},
+			)
+			.delete(
+				"/:zoneId/navigation/:key",
+				async ({ params, profile, authorization }) => {
+					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
+						"zone",
+						"navigation",
+						params.key,
+					]);
+					await database.transaction(async (tx) => {
+						await tx.execute(
+							sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${params.zoneId}`}::text, 0))`,
+						);
+						const [target] = await tx
+							.select({ id: zoneNavigation.id })
+							.from(zoneNavigation)
+							.where(
+								and(
+									eq(zoneNavigation.zoneId, params.zoneId),
+									eq(zoneNavigation.key, params.key),
+								),
+							)
+							.limit(1);
+						if (!target) throw new ZoneNavigationNotFound();
+						const [zoneRecord] = await tx
+							.select({ dockDocument: zone.dockDocument })
+							.from(zone)
+							.where(eq(zone.id, params.zoneId))
+							.limit(1);
+						if (!zoneRecord) throw new UnitNotFound("Zone");
+						const pages = await tx
+							.select({ document: zonePage.document })
+							.from(zonePage)
+							.where(eq(zonePage.zoneId, params.zoneId));
+						const documents = [
+							zoneRecord.dockDocument,
+							...pages.map((page) => page.document),
+						];
+						if (
+							documents.some((document) =>
+								collectBlockReferences(
+									parseDocument(BlockDocument, document),
+								).navigationIds.has(target.id),
+							)
+						)
+							throw new ZoneNavigationInUse();
+						await tx.delete(zoneNavigation).where(eq(zoneNavigation.id, target.id));
+						await recordUnitRevision(tx, {
+							unitId: params.zoneId,
+							actorProfileId: profile.unitId,
+							event: "update",
+						});
+					});
+					return new Response(null, { status: StatusCodes.NO_CONTENT });
+				},
+				{
+					access: "write:unit:delete",
+					params: ZoneNavigationParams,
+					response: {
+						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"ZoneNavigationNotFound",
+						]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse(["ZoneNavigationInUse"]),
+					},
+					detail: {
+						summary: "Delete Zone navigation resource",
+						tags: ["Zones"],
+						responses: NoContentResponse,
+					},
+				},
+			),
+	)
+	.group("/series", (app) =>
+		app
 			.put(
 				"/:seriesId/releases/:releaseId",
 				async ({ params, profile, authorization, body }) => {
-					await ensureUnitMutationAuthorized(
-						authorization.unit,
-						params.seriesId,
-						"/releases",
-					);
+					await ensureUnitMutationAuthorized(authorization.unit, params.seriesId, [
+						"releases",
+					]);
 					await authorization.unit.ensureCanRead(
 						params.releaseId,
 						() => new UnitNotFound("Release Unit"),
@@ -217,11 +886,9 @@ export default new Elysia()
 			.delete(
 				"/:seriesId/releases/:releaseId",
 				async ({ params, profile, authorization }) => {
-					await ensureUnitMutationAuthorized(
-						authorization.unit,
-						params.seriesId,
-						"/releases",
-					);
+					await ensureUnitMutationAuthorized(authorization.unit, params.seriesId, [
+						"releases",
+					]);
 					await database.transaction(async (tx) => {
 						const deleted = await tx
 							.delete(seriesRelease)
@@ -264,12 +931,8 @@ export default new Elysia()
 		app
 			.post(
 				"",
-				async ({ profile, authorization, body }) => {
-					if (body.managingRealmId)
-						await authorization.realm.ensureCapability(
-							body.managingRealmId,
-							"realm.settings.update",
-						);
+				async ({ profile, body }) => {
+					ensureZoneBlockDocument(body.dockDocument, true);
 					const startsAt = body.startsAt ? new Date(body.startsAt) : null;
 					const endsAt = body.endsAt ? new Date(body.endsAt) : null;
 					if (startsAt && endsAt && endsAt <= startsAt) throw new ZoneTimeRangeInvalid();
@@ -282,11 +945,15 @@ export default new Elysia()
 						});
 						await tx.insert(zone).values({
 							id: unitId,
-							managingRealmId: body.managingRealmId,
 							boundaryDocument: body.boundaryDocument,
 							themeDocument: body.themeDocument,
+							dockDocument: body.dockDocument,
 							startsAt,
 							endsAt,
+						});
+						await ensureZoneBlockReferences(tx, body.dockDocument, {
+							zoneId: unitId,
+							profileId: profile.unitId,
 						});
 						await recordUnitRevision(tx, {
 							unitId,
@@ -302,8 +969,10 @@ export default new Elysia()
 					body: CreateZoneBody,
 					response: {
 						[StatusCodes.OK]: IdResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ZoneTimeRangeInvalid"]),
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"ZoneTimeRangeInvalid",
+							"ZoneDocumentInvalid",
+						]),
 					},
 					detail: { summary: "Create Zone", tags: ["Zones"] },
 				},
@@ -315,9 +984,10 @@ export default new Elysia()
 						params.zoneId,
 						() => new UnitNotFound("Zone"),
 					);
+					await getZone(params.zoneId);
 					await database
-						.insert(zoneSubscription)
-						.values({ profileId: profile.unitId, zoneId: params.zoneId })
+						.insert(unitFollow)
+						.values({ followerProfileId: profile.unitId, unitId: params.zoneId })
 						.onConflictDoNothing();
 					return { following: true };
 				},
@@ -335,11 +1005,11 @@ export default new Elysia()
 				"/:zoneId/follow",
 				async ({ params, profile }) => {
 					await database
-						.delete(zoneSubscription)
+						.delete(unitFollow)
 						.where(
 							and(
-								eq(zoneSubscription.profileId, profile.unitId),
-								eq(zoneSubscription.zoneId, params.zoneId),
+								eq(unitFollow.followerProfileId, profile.unitId),
+								eq(unitFollow.unitId, params.zoneId),
 							),
 						);
 					return { following: false };
@@ -387,11 +1057,9 @@ export default new Elysia()
 			.post(
 				"/:softwareId/system-requirements",
 				async ({ params, profile, authorization, body }) => {
-					await ensureUnitMutationAuthorized(
-						authorization.unit,
-						params.softwareId,
-						"/systemRequirements",
-					);
+					await ensureUnitMutationAuthorized(authorization.unit, params.softwareId, [
+						"system-requirements",
+					]);
 					await ensureRequirementSource(params.softwareId, body.sourceLinkId);
 					const [softwareRecord] = await database
 						.select({ id: software.id })
@@ -442,11 +1110,9 @@ export default new Elysia()
 			.put(
 				"/:softwareId/system-requirements/:requirementId",
 				async ({ params, profile, authorization, body }) => {
-					await ensureUnitMutationAuthorized(
-						authorization.unit,
-						params.softwareId,
-						"/systemRequirements",
-					);
+					await ensureUnitMutationAuthorized(authorization.unit, params.softwareId, [
+						"system-requirements",
+					]);
 					await ensureRequirementSource(params.softwareId, body.sourceLinkId);
 					return database.transaction(async (tx) => {
 						const rows = await tx
@@ -495,11 +1161,9 @@ export default new Elysia()
 			.delete(
 				"/:softwareId/system-requirements/:requirementId",
 				async ({ params, profile, authorization }) => {
-					await ensureUnitMutationAuthorized(
-						authorization.unit,
-						params.softwareId,
-						"/systemRequirements",
-					);
+					await ensureUnitMutationAuthorized(authorization.unit, params.softwareId, [
+						"system-requirements",
+					]);
 					await database.transaction(async (tx) => {
 						const deleted = await tx
 							.delete(softwareRequirement)

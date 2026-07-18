@@ -15,7 +15,7 @@ import {
 	realmUnit,
 	score,
 	unit,
-	unitCollaborator,
+	unitAccessBinding,
 	unitLocalization,
 } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
@@ -45,7 +45,10 @@ import { upsertScore } from "./service";
 import { ReviewNotFound, ReviewRealmRequired } from "./errors";
 
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
-const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitEditForbidden", "UnitFieldLocked"]);
+const UnitMutationForbiddenResponse = toApiErrorResponse([
+	"UnitPermissionForbidden",
+	"UnitProtected",
+]);
 
 const primaryRealmId = sql<string | null>`(
 	select rc.realm_id from realm_unit rc
@@ -153,11 +156,13 @@ export default new Elysia()
 							content: body.body,
 							contentStatus: "published",
 						});
-						await tx.insert(unitCollaborator).values({
+						await tx.insert(unitAccessBinding).values({
 							unitId: created.id,
+							subjectKind: "profile",
 							profileId: profile.unitId,
 							role: "owner",
-							addedByProfileId: profile.unitId,
+							scope: [],
+							grantedByProfileId: profile.unitId,
 						});
 						if (body.realmId)
 							await tx
@@ -226,7 +231,7 @@ export default new Elysia()
 						targetId: review.targetId,
 						body: review.body === null ? null : toPortableTextResponse(review.body),
 						capabilities: {
-							canEdit: await authorization.unit.canEdit(params.reviewId),
+							canEdit: await authorization.unit.canUpdate(params.reviewId),
 						},
 					};
 				},
@@ -245,10 +250,7 @@ export default new Elysia()
 			.patch(
 				"/:reviewId",
 				async ({ params, profile, authorization, body }) => {
-					await authorization.unit.ensureCanEdit(params.reviewId);
-					await authorization.unit.ensureFieldsUnlocked(params.reviewId, [
-						"/localizations",
-					]);
+					await authorization.unit.ensureCanUpdate(params.reviewId, [["localizations"]]);
 					await database.transaction(async (tx) => {
 						await tx
 							.insert(unitLocalization)
@@ -293,7 +295,7 @@ export default new Elysia()
 			.delete(
 				"/:reviewId",
 				async ({ params, profile, authorization }) => {
-					await authorization.unit.ensureCanEdit(params.reviewId);
+					await authorization.unit.ensure(params.reviewId, "unit.delete");
 					await database.transaction(async (tx) => {
 						await tx
 							.update(unit)
@@ -312,7 +314,7 @@ export default new Elysia()
 					params: ReviewParams,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitEditForbidden"]),
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
 						[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
 					},
 					detail: {

@@ -2,11 +2,15 @@ import { t } from "elysia";
 
 import {
 	CapabilityAuthorityValues,
-	CollaboratorRoleValues,
 	EnforcementKindValues,
 	ModerationCaseStateValues,
 	ModerationStatusValues,
 	PlatformCapabilityValues,
+	UnitAccessRealmRelationValues,
+	UnitAccessRoleValues,
+	UnitAccessSubjectKindValues,
+	UnitPermissionValues,
+	UnitProtectionModeValues,
 } from "../../database/schema/contract-values";
 import { DateTime, Uuid } from "../schema";
 
@@ -20,8 +24,8 @@ const ModerationActionKind = t.Union([
 	t.Literal("restore"),
 	t.Literal("lock"),
 	t.Literal("unlock"),
-	t.Literal("field_lock"),
-	t.Literal("field_unlock"),
+	t.Literal("protect"),
+	t.Literal("unprotect"),
 	t.Literal("mute_member"),
 	t.Literal("remove_member"),
 	t.Literal("ban_member"),
@@ -56,6 +60,12 @@ export const CreateModerationActionBody = t.Object(
 			t.Union(ModerationStatusValues.map((value) => t.Literal(value))),
 		),
 		resultingLocked: t.Optional(t.Boolean()),
+		scope: t.Optional(
+			t.Array(t.String({ minLength: 1, maxLength: 64, pattern: "^[a-z0-9][a-z0-9-]*$" }), {
+				maxItems: 8,
+			}),
+		),
+		protectionMode: t.Optional(t.UnionEnum(UnitProtectionModeValues)),
 		reasonCode: t.String({ minLength: 1, maxLength: 64 }),
 		reason: t.Optional(t.String({ maxLength: 10_000 })),
 		publicMessage: t.Optional(t.String({ maxLength: 2_000 })),
@@ -108,22 +118,57 @@ export const CreateGrantBody = t.Object(
 export const GrantParams = t.Object({ grantId: Uuid });
 
 export const UnitGovernanceParams = t.Object({ unitId: Uuid });
-export const UnitCollaboratorParams = t.Object({ unitId: Uuid, profileId: Uuid });
-export const AddUnitCollaboratorBody = t.Object(
+export const UnitAccessBindingParams = t.Object({ unitId: Uuid, bindingId: Uuid });
+const UnitScope = t.Array(
+	t.String({ minLength: 1, maxLength: 64, pattern: "^[a-z0-9][a-z0-9-]*$" }),
+	{ maxItems: 8 },
+);
+export const UnitEffectiveAccessQuery = t.Object(
+	{ scope: t.Optional(UnitScope) },
+	{ additionalProperties: false },
+);
+const UnitAccessSubject = t.Union([
+	t.Object({ kind: t.Literal("profile"), profileId: Uuid }, { additionalProperties: false }),
+	t.Object(
+		{
+			kind: t.Literal("realm"),
+			realmId: Uuid,
+			relation: t.UnionEnum(UnitAccessRealmRelationValues),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object({ kind: t.Literal("authenticated") }, { additionalProperties: false }),
+]);
+export const CreateUnitAccessBindingBody = t.Object(
+	{
+		subject: UnitAccessSubject,
+		role: t.UnionEnum(UnitAccessRoleValues),
+		scope: UnitScope,
+		expiresAt: t.Optional(t.String({ format: "date-time" })),
+	},
+	{ additionalProperties: false },
+);
+export const UnitAccessRestrictionParams = t.Object({ unitId: Uuid, restrictionId: Uuid });
+export const CreateUnitAccessRestrictionBody = t.Object(
 	{
 		profileId: Uuid,
-		role: t.Union(CollaboratorRoleValues.map((value) => t.Literal(value))),
+		permission: t.UnionEnum(UnitPermissionValues),
+		scope: UnitScope,
+		reason: t.String({ minLength: 1, maxLength: 2_000 }),
+		expiresAt: t.Optional(t.String({ format: "date-time" })),
 	},
 	{ additionalProperties: false },
 );
-export const AddUnitFieldLockBody = t.Object(
+export const UnitProtectionParams = t.Object({ unitId: Uuid, protectionId: Uuid });
+export const CreateUnitProtectionBody = t.Object(
 	{
-		path: t.String({ minLength: 1, maxLength: 256, pattern: "^/" }),
-		reason: t.Optional(t.String({ maxLength: 2_000 })),
+		scope: UnitScope,
+		mode: t.UnionEnum(UnitProtectionModeValues),
+		reason: t.String({ minLength: 1, maxLength: 2_000 }),
+		expiresAt: t.Optional(t.String({ format: "date-time" })),
 	},
 	{ additionalProperties: false },
 );
-export const UnitFieldLockParams = t.Object({ unitId: Uuid, lockId: Uuid });
 
 export const ModerationCaseResponse = t.Object({
 	id: Uuid,
@@ -182,22 +227,98 @@ export const GrantResponse = t.Object({
 });
 export const GrantListResponse = t.Object({ items: t.Array(GrantResponse) });
 
-export const CollaboratorResponse = t.Object({
-	unitId: Uuid,
-	profileId: Uuid,
-	role: t.String(),
-	addedByProfileId: Uuid,
-	createdAt: DateTime,
-	updatedAt: DateTime,
-});
-export const CollaboratorListResponse = t.Object({ items: t.Array(CollaboratorResponse) });
-export const FieldLockResponse = t.Object({
+export const UnitAccessBindingResponse = t.Object({
 	id: Uuid,
 	unitId: Uuid,
-	path: t.String(),
-	lockedByProfileId: Uuid,
-	reason: t.Nullable(t.String()),
+	subjectKind: t.UnionEnum(UnitAccessSubjectKindValues),
+	profileId: t.Nullable(Uuid),
+	realmId: t.Nullable(Uuid),
+	realmRelation: t.Nullable(t.String()),
+	role: t.String(),
+	scope: UnitScope,
+	grantedByProfileId: Uuid,
+	expiresAt: t.Nullable(DateTime),
+	revokedAt: t.Nullable(DateTime),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
-export const FieldLockListResponse = t.Object({ items: t.Array(FieldLockResponse) });
+export const UnitAccessBindingListResponse = t.Object({
+	items: t.Array(UnitAccessBindingResponse),
+});
+export const UnitAccessRestrictionResponse = t.Object({
+	id: Uuid,
+	unitId: Uuid,
+	profileId: Uuid,
+	permission: t.String(),
+	scope: UnitScope,
+	reason: t.String(),
+	createdByProfileId: Uuid,
+	expiresAt: t.Nullable(DateTime),
+	revokedAt: t.Nullable(DateTime),
+	createdAt: DateTime,
+	updatedAt: DateTime,
+});
+export const UnitAccessRestrictionListResponse = t.Object({
+	items: t.Array(UnitAccessRestrictionResponse),
+});
+export const UnitProtectionResponse = t.Object({
+	id: Uuid,
+	unitId: Uuid,
+	scope: UnitScope,
+	mode: t.String(),
+	reason: t.String(),
+	createdByProfileId: Uuid,
+	expiresAt: t.Nullable(DateTime),
+	revokedAt: t.Nullable(DateTime),
+	createdAt: DateTime,
+	updatedAt: DateTime,
+});
+export const UnitProtectionListResponse = t.Object({ items: t.Array(UnitProtectionResponse) });
+
+const UnitAllowedDecisionResponse = t.Union([
+	t.Object(
+		{ allowed: t.Literal(true), source: t.Union([t.Literal("public"), t.Literal("platform")]) },
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			allowed: t.Literal(true),
+			source: t.Literal("binding"),
+			bindingId: Uuid,
+			role: t.UnionEnum(UnitAccessRoleValues),
+		},
+		{ additionalProperties: false },
+	),
+]);
+const UnitDeniedDecisionResponse = t.Union([
+	t.Object(
+		{
+			allowed: t.Literal(false),
+			reason: t.Union([
+				t.Literal("missing"),
+				t.Literal("anonymous"),
+				t.Literal("restricted"),
+				t.Literal("ungranted"),
+			]),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			allowed: t.Literal(false),
+			reason: t.Literal("protected"),
+			mode: t.UnionEnum(UnitProtectionModeValues),
+		},
+		{ additionalProperties: false },
+	),
+]);
+export const UnitEffectiveAccessResponse = t.Object({
+	unitId: Uuid,
+	scope: UnitScope,
+	decisions: t.Array(
+		t.Object({
+			permission: t.UnionEnum(UnitPermissionValues),
+			decision: t.Union([UnitAllowedDecisionResponse, UnitDeniedDecisionResponse]),
+		}),
+	),
+});

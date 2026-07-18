@@ -5,7 +5,7 @@ import {
 	PortableTextDocument,
 	parseDocument,
 	type PortableTextDocument as PortableTextDocumentValue,
-} from "@rezics/content-structure";
+} from "@rezics/block";
 import { DateTime, FractionalPosition, OrdinalPosition, Uuid } from ".";
 import {
 	RecommendationReasonSchema,
@@ -139,6 +139,15 @@ const SearchHit = t.Object({
 });
 export const SearchResponse = t.Object({
 	query: t.String(),
+	nextCursor: t.Optional(t.String({ pattern: "^s_[0-9a-z]+$" })),
+	facets: t.Optional(
+		t.Array(
+			t.Object({
+				field: t.String(),
+				options: t.Array(t.Object({ value: t.String(), count: t.Integer() })),
+			}),
+		),
+	),
 	groups: t.Array(
 		t.Object({
 			index: t.String(),
@@ -383,7 +392,7 @@ export const CollectionDetailResponse = t.Object({
 	status: t.String(),
 	visibility: t.String(),
 	language: NullableText,
-	source: t.Union([t.Literal("manual"), t.Literal("dynamic"), t.Literal("system")]),
+	source: t.Union([t.Literal("manual"), t.Literal("search"), t.Literal("system")]),
 	systemKey: t.Nullable(t.Literal("favorites")),
 	definitionDocument: CollectionDefinitionDocument,
 	presentationDocument: CollectionPresentationDocument,

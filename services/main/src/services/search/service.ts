@@ -1,22 +1,25 @@
 import { sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
+import type { SearchExpression, SearchFilter, SearchScalar } from "@rezics/search";
 
+import { getUnitReadCondition } from "../authorization/unit/query";
 import { database } from "../database";
 import {
 	collection,
+	contentStructureNode,
 	entity,
 	poll,
 	post,
 	postReply,
 	profile,
-	profileFollow,
+	unitFollow,
 	realm,
 	realmUnit,
-	realmSubscription,
 	unit,
 	unitAlias,
 	unitAliasVote,
 	unitLocalization,
+	unitTag,
 } from "../database/schema";
 import { AliasSearchScoreThreshold } from "../database/schema/contract-values";
 import { InvalidSearch } from "./errors";
@@ -29,6 +32,9 @@ import {
 } from "./schema";
 
 const subjectUnit = alias(unit, "subject_unit");
+const facetLocalization = alias(unitLocalization, "facet_unit_localization");
+const facetUnitTag = alias(unitTag, "facet_unit_tag");
+const facetRealmUnit = alias(realmUnit, "facet_realm_unit");
 
 const categoryKinds: Record<SearchCategory, readonly string[]> = {
 	units: ["book", "software", "media"],
@@ -47,6 +53,22 @@ function toTextArray(values: readonly string[]): SQL {
 		values.map((value) => sql`${value}`),
 		sql`, `,
 	)}]::text[]`;
+}
+
+function toUuidArray(values: readonly string[]): SQL {
+	if (
+		values.some(
+			(value) =>
+				!/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(
+					value,
+				),
+		)
+	)
+		throw new InvalidSearch("Search filter requires UUID values");
+	return sql`ARRAY[${sql.join(
+		values.map((value) => sql`${value}::uuid`),
+		sql`, `,
+	)}]::uuid[]`;
 }
 
 function addList(conditions: SQL[], column: SQL, values: string[] | undefined): void {
@@ -92,6 +114,173 @@ function validateRequest(category: SearchCategory, request: DomainSearchRequest)
 	const attribute = sort.split(":", 1)[0]!;
 	if (sort !== "relevance" && !supportsSort(category, attribute))
 		throw new InvalidSearch(`${sort} is not supported by the ${category} category`);
+}
+
+function scalarStrings(values: readonly SearchScalar[], field: string): string[] {
+	if (values.some((value) => typeof value !== "string"))
+		throw new InvalidSearch(`${field} requires string values`);
+	return values as string[];
+}
+
+function filterValues(filter: SearchFilter): readonly SearchScalar[] {
+	if ("values" in filter) return filter.values;
+	if ("value" in filter) return [filter.value];
+	return [filter.lower, filter.upper].filter(
+		(value): value is SearchScalar => value !== undefined,
+	);
+}
+
+function scalarColumnCondition(column: SQL, filter: SearchFilter): SQL {
+	if (filter.operator === "exists")
+		return filter.value ? sql`${column} is not null` : sql`${column} is null`;
+	if (filter.operator === "range") {
+		if (filter.lower !== undefined && typeof filter.lower !== "string")
+			throw new InvalidSearch("Date range lower bound must be an ISO date-time");
+		if (filter.upper !== undefined && typeof filter.upper !== "string")
+			throw new InvalidSearch("Date range upper bound must be an ISO date-time");
+		const bounds: SQL[] = [];
+		if (filter.lower !== undefined) bounds.push(sql`${column} >= ${filter.lower}::timestamptz`);
+		if (filter.upper !== undefined) bounds.push(sql`${column} <= ${filter.upper}::timestamptz`);
+		return sql`(${sql.join(bounds, sql` and `)})`;
+	}
+	const values = scalarStrings(filterValues(filter), filter.field);
+	if (filter.operator === "all-of" && values.length > 1)
+		throw new InvalidSearch(`${filter.field} cannot equal multiple values`);
+	const match = sql`(${column})::text = any(${toTextArray(values)})`;
+	return filter.operator === "not-equals" || filter.operator === "none-of"
+		? sql`not (${match})`
+		: match;
+}
+
+function compileFilter(category: SearchCategory, filter: SearchFilter): SQL {
+	if (filter.field === "category") {
+		const values = scalarStrings(filterValues(filter), filter.field);
+		const matches = values.includes(category);
+		if (filter.operator === "not-equals" || filter.operator === "none-of")
+			return sql`${!matches}`;
+		return sql`${matches}`;
+	}
+
+	const fieldAttribute: Partial<Record<SearchFilter["field"], string>> = {
+		language: "Languages",
+		type: "type",
+		"content-rating": "contentRating",
+		"ai-disclosure": "aiDisclosure",
+		license: "license",
+		tag: "tagId",
+		author: "authorId",
+		realm: "realmId",
+		subject: "subjectId",
+		target: "targetId",
+		root: "rootId",
+		parent: "parentId",
+		owner: "ownerId",
+		"join-policy": "joinPolicy",
+		multiple: "multiple",
+		"results-visibility": "resultsVisibility",
+		closed: "closesAt",
+	};
+	const attribute = fieldAttribute[filter.field];
+	const dateField = ["created-at", "updated-at", "published-at", "closes-at"].includes(
+		filter.field,
+	);
+	if (filter.field === "closes-at" && category !== "polls")
+		throw new InvalidSearch(`closes-at is not supported by the ${category} category`);
+	if (!dateField && (!attribute || !supportsFilter(category, attribute)))
+		throw new InvalidSearch(`${filter.field} is not supported by the ${category} category`);
+
+	if (filter.field === "language") {
+		const values = scalarStrings(filterValues(filter), filter.field);
+		const match =
+			filter.operator === "all-of"
+				? sql`array(
+					select ${unitLocalization.language}
+					from ${unitLocalization}
+					where ${unitLocalization.unitId} = ${unit.id}
+				) @> ${toTextArray(values)}`
+				: sql`exists (
+					select 1 from ${unitLocalization}
+					where ${unitLocalization.unitId} = ${unit.id}
+						and ${unitLocalization.language} = any(${toTextArray(values)})
+				)`;
+		return filter.operator === "not-equals" || filter.operator === "none-of"
+			? sql`not (${match})`
+			: match;
+	}
+	if (filter.field === "tag") {
+		const values = scalarStrings(filterValues(filter), filter.field);
+		const match =
+			filter.operator === "all-of"
+				? sql`array(
+					select ${unitTag.tagId} from ${unitTag} where ${unitTag.unitId} = ${unit.id}
+				) @> ${toUuidArray(values)}`
+				: sql`exists (
+					select 1 from ${unitTag}
+					where ${unitTag.unitId} = ${unit.id}
+						and ${unitTag.tagId} = any(${toUuidArray(values)})
+				)`;
+		return filter.operator === "not-equals" || filter.operator === "none-of"
+			? sql`not (${match})`
+			: match;
+	}
+	if (filter.field === "realm") {
+		const values = scalarStrings(filterValues(filter), filter.field);
+		const match = sql`exists (
+			select 1 from ${realmUnit}
+			where ${realmUnit.unitId} = ${unit.id}
+				and ${realmUnit.realmId} = any(${toUuidArray(values)})
+				and ${realmUnit.status} = 'visible'
+		)`;
+		return filter.operator === "not-equals" || filter.operator === "none-of"
+			? sql`not (${match})`
+			: match;
+	}
+	if (filter.field === "multiple" || filter.field === "closed") {
+		if (!("value" in filter) || typeof filter.value !== "boolean")
+			throw new InvalidSearch(`${filter.field} requires an equals boolean filter`);
+		const match =
+			filter.field === "multiple"
+				? sql`(${poll.mode} = 'multiple') = ${filter.value}`
+				: filter.value
+					? sql`(${poll.closedAt} is not null or ${poll.closesAt} <= now())`
+					: sql`(${poll.closedAt} is null and (${poll.closesAt} is null or ${poll.closesAt} > now()))`;
+		return filter.operator === "not-equals" ? sql`not (${match})` : match;
+	}
+
+	const columnByField: Partial<Record<SearchFilter["field"], SQL>> = {
+		type:
+			category === "entity"
+				? sql`${entity.kind}`
+				: category === "reviews"
+					? sql`${subjectUnit.kind}`
+					: sql`${unit.kind}`,
+		"content-rating": sql`${unit.contentRating}`,
+		"ai-disclosure": sql`${unit.aiDisclosure}`,
+		license: sql`${unit.license}`,
+		author: sql`${post.authorProfileId}`,
+		subject: sql`${post.subjectUnitId}`,
+		target: sql`${post.subjectUnitId}`,
+		root: sql`${postReply.rootPostId}`,
+		parent: sql`${postReply.parentPostId}`,
+		owner: sql`${collection.ownerProfileId}`,
+		"join-policy": sql`${realm.joinPolicy}`,
+		"results-visibility": sql`${poll.resultVisibility}`,
+		"created-at": sql`${unit.createdAt}`,
+		"updated-at": sql`${unit.updatedAt}`,
+		"published-at": sql`${unit.publishedAt}`,
+		"closes-at": sql`${poll.closesAt}`,
+	};
+	const column = columnByField[filter.field];
+	if (!column) throw new InvalidSearch(`${filter.field} is not implemented`);
+	return scalarColumnCondition(column, filter);
+}
+
+function compileExpression(category: SearchCategory, expression: SearchExpression): SQL {
+	if ("field" in expression) return compileFilter(category, expression);
+	if (expression.operator === "not")
+		return sql`not (${compileExpression(category, expression.clause)})`;
+	const clauses = expression.clauses.map((clause) => compileExpression(category, clause));
+	return sql`(${sql.join(clauses, expression.operator === "all" ? sql` and ` : sql` or `)})`;
 }
 
 function getUnitCandidateIds(query: string): SQL {
@@ -144,26 +333,25 @@ function getSort(category: SearchCategory, sort: SearchSort): SQL {
 	if (sort.startsWith("subscriberCount:") && category === "users")
 		return sql`(
 			SELECT count(*)
-			FROM ${profileFollow}
-			WHERE ${profileFollow.followedProfileId} = ${unit.id}
+			FROM ${unitFollow}
+			WHERE ${unitFollow.unitId} = ${unit.id}
 		) ${direction}`;
 	if (sort.startsWith("subscriberCount:") && category === "realms")
 		return sql`(
 			SELECT count(*)
-			FROM ${realmSubscription}
-			WHERE ${realmSubscription.realmId} = ${unit.id}
+			FROM ${unitFollow}
+			WHERE ${unitFollow.unitId} = ${unit.id}
 		) ${direction}`;
 	throw new InvalidSearch(`${sort} is not supported by the ${category} category`);
 }
 
-export async function searchDomain(category: SearchCategory, request: DomainSearchRequest) {
-	const startedAt = performance.now();
+function buildSearchConditions(category: SearchCategory, request: DomainSearchRequest): SQL[] {
 	validateRequest(category, request);
+	const readCondition = getUnitReadCondition(request.profileId, { discoverableOnly: true });
+	if (!readCondition) throw new Error("Unit read policy produced no SQL condition");
 
 	const conditions: SQL[] = [
-		sql`${unit.status} = 'published'`,
-		sql`${unit.visibility} = 'public'`,
-		sql`${unit.deletedAt} IS NULL`,
+		readCondition,
 		sql`${unit.kind}::text = ANY(${toTextArray(categoryKinds[category])})`,
 	];
 	if (category === "posts")
@@ -229,6 +417,20 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 				AND ${realmUnit.status} = 'visible'
 		)`);
 	}
+	if (request.scopeUnitId) {
+		const direct = sql`${unit.id} = ${request.scopeUnitId}::uuid`;
+		conditions.push(
+			request.includeScopeDescendants
+				? sql`(${direct} or exists (
+					select 1 from ${contentStructureNode}
+					where ${contentStructureNode.ownerUnitId} = ${request.scopeUnitId}::uuid
+						and ${contentStructureNode.contentUnitId} = ${unit.id}
+						and ${contentStructureNode.deletedAt} is null
+				))`
+				: direct,
+		);
+	}
+	if (request.expression) conditions.push(compileExpression(category, request.expression));
 	if (request.multiple !== undefined) {
 		conditions.push(sql`(${poll.mode} = 'multiple') = ${request.multiple}`);
 	}
@@ -239,6 +441,12 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 				: sql`(${poll.closedAt} IS NULL AND (${poll.closesAt} IS NULL OR ${poll.closesAt} > now()))`,
 		);
 	}
+	return conditions;
+}
+
+export async function searchDomain(category: SearchCategory, request: DomainSearchRequest) {
+	const startedAt = performance.now();
+	const conditions = buildSearchConditions(category, request);
 
 	const sort = request.sort ?? "relevance";
 	const order = getSort(category, sort);
@@ -286,7 +494,116 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 	};
 }
 
+export interface SearchFacet {
+	readonly field: string;
+	readonly options: readonly { readonly value: string; readonly count: number }[];
+}
+
+function facetSpec(
+	category: SearchCategory,
+	field: string,
+): { readonly value: SQL; readonly join: SQL } | undefined {
+	const none = sql``;
+	if (field === "category") return { value: sql`${category}::text`, join: none };
+	if (field === "language")
+		return {
+			value: sql`${facetLocalization.language}`,
+			join: sql`join ${facetLocalization} on ${facetLocalization.unitId} = ${unit.id}`,
+		};
+	if (field === "tag")
+		return {
+			value: sql`${facetUnitTag.tagId}`,
+			join: sql`join ${facetUnitTag} on ${facetUnitTag.unitId} = ${unit.id}`,
+		};
+	if (field === "realm")
+		return {
+			value: sql`${facetRealmUnit.realmId}`,
+			join: sql`join ${facetRealmUnit} on ${facetRealmUnit.unitId} = ${unit.id} and ${facetRealmUnit.status} = 'visible'`,
+		};
+	if (field === "type")
+		return {
+			value:
+				category === "entity"
+					? sql`${entity.kind}`
+					: category === "reviews"
+						? sql`${subjectUnit.kind}`
+						: category === "posts"
+							? sql`${post.kind}`
+							: sql`${unit.kind}`,
+			join: none,
+		};
+	const scalar: Partial<Record<string, { readonly attribute: string; readonly value: SQL }>> = {
+		"content-rating": { attribute: "contentRating", value: sql`${unit.contentRating}` },
+		"ai-disclosure": { attribute: "aiDisclosure", value: sql`${unit.aiDisclosure}` },
+		license: { attribute: "license", value: sql`${unit.license}` },
+		author: { attribute: "authorId", value: sql`${post.authorProfileId}` },
+		owner: { attribute: "ownerId", value: sql`${collection.ownerProfileId}` },
+		"join-policy": { attribute: "joinPolicy", value: sql`${realm.joinPolicy}` },
+		multiple: { attribute: "multiple", value: sql`${poll.mode} = 'multiple'` },
+		"results-visibility": {
+			attribute: "resultsVisibility",
+			value: sql`${poll.resultVisibility}`,
+		},
+		closed: {
+			attribute: "closesAt",
+			value: sql`${poll.closedAt} is not null or ${poll.closesAt} <= now()`,
+		},
+	};
+	const spec = scalar[field];
+	return spec && supportsFilter(category, spec.attribute)
+		? { value: spec.value, join: none }
+		: undefined;
+}
+
+/** Conjunctive facet counts for the effective configured request, batched per category. */
+export async function searchDomainFacets(
+	category: SearchCategory,
+	request: DomainSearchRequest,
+	fields: readonly string[],
+): Promise<SearchFacet[]> {
+	const conditions = buildSearchConditions(category, request);
+	const queries = fields.flatMap((field) => {
+		const spec = facetSpec(category, field);
+		if (!spec) return [];
+		return [
+			sql`(
+			select ${field}::text as field, (${spec.value})::text as value,
+				count(distinct ${unit.id})::text as count
+			from ${unit}
+			left join ${profile} on ${profile.id} = ${unit.id}
+			left join ${entity} on ${entity.id} = ${unit.id}
+			left join ${post} on ${post.id} = ${unit.id}
+			left join ${postReply} on ${postReply.postId} = ${unit.id}
+			left join ${unit} as ${subjectUnit} on ${subjectUnit.id} = ${post.subjectUnitId}
+			left join ${realm} on ${realm.id} = ${unit.id}
+			left join ${collection} on ${collection.id} = ${unit.id}
+			left join ${poll} on ${poll.id} = ${unit.id}
+			${spec.join}
+			where ${sql.join(conditions, sql` and `)} and (${spec.value}) is not null
+			group by (${spec.value})
+			order by count(distinct ${unit.id}) desc, (${spec.value})::text
+			limit 100
+		)`,
+		];
+	});
+	if (!queries.length) return [];
+	const result = await database.execute<{ field: string; value: string; count: string }>(
+		sql.join(queries, sql` union all `),
+	);
+	const byField = new Map<string, { value: string; count: number }[]>();
+	for (const row of result.rows) {
+		const options = byField.get(row.field) ?? [];
+		options.push({ value: row.value, count: Number(row.count) });
+		byField.set(row.field, options);
+	}
+	return fields.flatMap((field) => {
+		const options = byField.get(field);
+		return options ? [{ field, options }] : [];
+	});
+}
+
 export async function searchGrouped(request: {
+	profileId?: string;
 	query?: string;
 	indexes: SearchCategory[];
 	Languages?: string[];
@@ -295,6 +612,7 @@ export async function searchGrouped(request: {
 	const groups = [];
 	for (const category of request.indexes) {
 		const result = await searchDomain(category, {
+			profileId: request.profileId,
 			query: request.query,
 			Languages: request.Languages,
 			limit: request.limitPerIndex ?? 5,

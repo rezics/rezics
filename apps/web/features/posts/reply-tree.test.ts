@@ -1,5 +1,5 @@
 import type { GetApiPostsByPostIdRepliesStatus200 } from "@rezics/openapi-tanstack-query";
-import { createPortableTextDocument } from "@rezics/content-structure";
+import { createPortableTextDocument } from "@rezics/block";
 import { describe, expect, it } from "vitest";
 
 import { buildReplyPostTree } from "./reply-tree";

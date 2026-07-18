@@ -1,8 +1,5 @@
 import { type Static, t } from "elysia";
-import {
-	CollectionDefinitionDocument,
-	CollectionPresentationDocument,
-} from "@rezics/content-structure";
+import { CollectionDefinitionDocument, CollectionPresentationDocument } from "@rezics/block";
 import { FractionalPosition, LifecycleInput, LocalizationInput, Uuid } from "../schema";
 
 export const ListCollectionsQuery = t.Object({

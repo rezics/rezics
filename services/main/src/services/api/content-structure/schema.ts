@@ -1,5 +1,5 @@
 import { type Static, t } from "elysia";
-import { PortableTextDocument } from "@rezics/content-structure";
+import { PortableTextDocument } from "@rezics/block";
 
 import { FractionalPosition, LanguageTag, Uuid } from "../schema";
 

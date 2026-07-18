@@ -19,8 +19,8 @@ import {
 	realmMember,
 	RealmCapabilityValues,
 	unit,
-	unitCollaborator,
-	unitFieldLock,
+	unitAccessBinding,
+	unitProtection,
 } from "../../database/schema";
 import { createNotification, deliverNotificationEmail } from "../../notifications/service";
 import type { DatabaseTransaction } from "../../database";
@@ -31,17 +31,11 @@ import { RealmMemberNotFound } from "../realms/errors";
 import { ProfileNotFound } from "../users/errors";
 import {
 	AccountEnforcementParams,
-	AddUnitCollaboratorBody,
-	AddUnitFieldLockBody,
-	CollaboratorListResponse,
-	CollaboratorResponse,
 	CreateAccountEnforcementBody,
 	CreateGrantBody,
 	CreateModerationActionBody,
 	EnforcementResponse,
 	FeedbackParams,
-	FieldLockListResponse,
-	FieldLockResponse,
 	GrantListResponse,
 	GrantParams,
 	GrantResponse,
@@ -53,38 +47,31 @@ import {
 	ModerationCaseResponse,
 	ResolveFeedbackBody,
 	RevokeAccountEnforcementBody,
-	UnitCollaboratorParams,
-	UnitFieldLockParams,
-	UnitGovernanceParams,
 	UpdateModerationCaseBody,
 } from "./schema";
 import {
 	CapabilityGrantExpiryInvalid,
 	CapabilityGrantNotFound,
-	CollaboratorNotFound,
 	EnforcementAlreadyRevoked,
 	EnforcementChanged,
 	EnforcementExpiryInvalid,
 	EnforcementNotFound,
-	FieldLockNotFound,
 	ModerationCaseNotFound,
 	ModerationRealmMissing,
 	ModerationReversalInvalid,
 	ModerationReversedActionInvalid,
 	ModerationTargetNotFound,
-	ModerationTargetPathRequired,
+	ModerationTargetScopeRequired,
 	PlatformGrantRealmForbidden,
 	RealmGrantCapabilityInvalid,
 	RealmGrantRealmRequired,
-	UnitOwnerRequired,
 } from "./errors";
+import unitAccessRoutes from "./unit-access";
 
 const CapabilityForbiddenResponse = toApiErrorResponse([
 	"RealmCapabilityRequired",
 	"PlatformCapabilityRequired",
 ]);
-const UnitEditFailureResponse = toApiErrorResponse(["UnitEditForbidden"]);
-const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 
 const caseSelection = {
 	id: moderationCase.id,
@@ -173,25 +160,6 @@ async function ensureCaseAccess(
 	await authorization.platform.ensureCapability("platform.moderate");
 }
 
-async function ensureUnitGovernanceOwner(
-	authorization: Authorization<string>,
-	unitId: string,
-): Promise<void> {
-	await authorization.unit.ensureCanEdit(unitId);
-	const [owner] = await database
-		.select({ profileId: unitCollaborator.profileId })
-		.from(unitCollaborator)
-		.where(
-			and(
-				eq(unitCollaborator.unitId, unitId),
-				eq(unitCollaborator.profileId, authorization.profileId),
-				eq(unitCollaborator.role, "owner"),
-			),
-		)
-		.limit(1);
-	if (!owner) await authorization.platform.ensureCapability("unit.edit");
-}
-
 async function recordAuditEvent(
 	tx: DatabaseTransaction,
 	input: {
@@ -229,11 +197,13 @@ async function getModerationTargetContext(
 		if (!target) throw new ModerationTargetNotFound();
 		subjectUnitId = target.id;
 		const [owner] = await tx
-			.select({ profileId: unitCollaborator.profileId })
-			.from(unitCollaborator)
-			.where(and(eq(unitCollaborator.unitId, target.id), eq(unitCollaborator.role, "owner")))
+			.select({ profileId: unitAccessBinding.profileId })
+			.from(unitAccessBinding)
+			.where(
+				and(eq(unitAccessBinding.unitId, target.id), eq(unitAccessBinding.role, "owner")),
+			)
 			.limit(1);
-		recipientProfileId = owner?.profileId;
+		recipientProfileId = owner?.profileId ?? undefined;
 	}
 	if (row.targetKind === "profile") {
 		const [target] = await tx
@@ -255,13 +225,16 @@ async function getModerationTargetContext(
 		if (!target) throw new ModerationTargetNotFound();
 		subjectUnitId = target.unitId;
 		const [owner] = await tx
-			.select({ profileId: unitCollaborator.profileId })
-			.from(unitCollaborator)
+			.select({ profileId: unitAccessBinding.profileId })
+			.from(unitAccessBinding)
 			.where(
-				and(eq(unitCollaborator.unitId, target.unitId), eq(unitCollaborator.role, "owner")),
+				and(
+					eq(unitAccessBinding.unitId, target.unitId),
+					eq(unitAccessBinding.role, "owner"),
+				),
 			)
 			.limit(1);
-		recipientProfileId = owner?.profileId;
+		recipientProfileId = owner?.profileId ?? undefined;
 	}
 	if (row.targetKind === "realm_member") {
 		if (!row.realmId) throw new ModerationRealmMissing();
@@ -311,30 +284,39 @@ async function applyAction(
 				.where(eq(unit.id, row.targetId));
 		if (locked !== undefined)
 			await tx.update(post).set({ locked }).where(eq(post.id, row.targetId));
-		if (body.kind === "field_lock") {
-			if (!row.targetPath) throw new ModerationTargetPathRequired();
+		if (body.kind === "protect") {
+			if (!body.scope || !body.protectionMode) throw new ModerationTargetScopeRequired();
 			await tx
-				.insert(unitFieldLock)
-				.values({
-					unitId: row.targetId,
-					path: row.targetPath,
-					lockedByProfileId: actorProfileId,
-					reason: body.reason,
-				})
-				.onConflictDoUpdate({
-					target: [unitFieldLock.unitId, unitFieldLock.path],
-					set: { lockedByProfileId: actorProfileId, reason: body.reason },
-				});
-		}
-		if (body.kind === "field_unlock" && row.targetPath)
-			await tx
-				.delete(unitFieldLock)
+				.update(unitProtection)
+				.set({ revokedAt: new Date(), revokedByProfileId: actorProfileId })
 				.where(
 					and(
-						eq(unitFieldLock.unitId, row.targetId),
-						eq(unitFieldLock.path, row.targetPath),
+						eq(unitProtection.unitId, row.targetId),
+						eq(unitProtection.scope, body.scope),
+						isNull(unitProtection.revokedAt),
 					),
 				);
+			await tx.insert(unitProtection).values({
+				unitId: row.targetId,
+				scope: body.scope,
+				mode: body.protectionMode,
+				createdByProfileId: actorProfileId,
+				reason: body.reason ?? body.reasonCode,
+			});
+		}
+		if (body.kind === "unprotect") {
+			if (!body.scope) throw new ModerationTargetScopeRequired();
+			await tx
+				.update(unitProtection)
+				.set({ revokedAt: new Date(), revokedByProfileId: actorProfileId })
+				.where(
+					and(
+						eq(unitProtection.unitId, row.targetId),
+						eq(unitProtection.scope, body.scope),
+						isNull(unitProtection.revokedAt),
+					),
+				);
+		}
 	}
 	if (row.targetKind === "realm_unit") {
 		if (!row.realmId) throw new ModerationRealmMissing();
@@ -388,6 +370,7 @@ async function applyAction(
 
 export default new Elysia({ prefix: "/governance" })
 	.use(session)
+	.use(unitAccessRoutes)
 	.get(
 		"/moderation/cases",
 		async ({ authorization, query }) => {
@@ -579,7 +562,7 @@ export default new Elysia({ prefix: "/governance" })
 					"ModerationReversalInvalid",
 					"ModerationReversedActionInvalid",
 					"ModerationRealmMissing",
-					"ModerationTargetPathRequired",
+					"ModerationTargetScopeRequired",
 				]),
 				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
@@ -990,266 +973,6 @@ export default new Elysia({ prefix: "/governance" })
 			},
 			detail: {
 				summary: "Revoke capability grant",
-				tags: ["Governance"],
-				responses: NoContentResponse,
-			},
-		},
-	)
-	.get(
-		"/unit/:unitId/collaborators",
-		async ({ authorization, params }) => {
-			await authorization.unit.ensureCanEdit(params.unitId);
-			return {
-				items: await database
-					.select()
-					.from(unitCollaborator)
-					.where(eq(unitCollaborator.unitId, params.unitId))
-					.orderBy(
-						unitCollaborator.role,
-						unitCollaborator.createdAt,
-						unitCollaborator.profileId,
-					),
-			};
-		},
-		{
-			access: "session-only",
-			params: UnitGovernanceParams,
-			response: {
-				[StatusCodes.OK]: CollaboratorListResponse,
-				[StatusCodes.FORBIDDEN]: UnitEditFailureResponse,
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-			},
-			detail: { summary: "List Unit collaborators", tags: ["Governance"] },
-		},
-	)
-	.put(
-		"/unit/:unitId/collaborators",
-		async ({ authorization, profile, params, body }) => {
-			await ensureUnitGovernanceOwner(authorization, params.unitId);
-			return database.transaction(async (tx) => {
-				const [created] = await tx
-					.insert(unitCollaborator)
-					.values({
-						unitId: params.unitId,
-						profileId: body.profileId,
-						role: body.role,
-						addedByProfileId: profile.unitId,
-					})
-					.onConflictDoUpdate({
-						target: [unitCollaborator.unitId, unitCollaborator.profileId],
-						set: { role: body.role, addedByProfileId: profile.unitId },
-					})
-					.returning();
-				if (!created) throw new Error("Collaborator upsert did not return a row");
-				await recordAuditEvent(tx, {
-					actorProfileId: profile.unitId,
-					action: "unit.collaborator.upsert",
-					decisionCode: "allowed",
-					reason: `Set collaborator role to ${body.role}`,
-					subjectKind: "unit",
-					subjectId: params.unitId,
-					metadata: { profileId: body.profileId },
-				});
-				return created;
-			});
-		},
-		{
-			access: "session-only",
-			params: UnitGovernanceParams,
-			body: AddUnitCollaboratorBody,
-			response: {
-				[StatusCodes.OK]: CollaboratorResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"UnitEditForbidden",
-					"PlatformCapabilityRequired",
-				]),
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-			},
-			detail: { summary: "Add or update Unit collaborator", tags: ["Governance"] },
-		},
-	)
-	.delete(
-		"/unit/:unitId/collaborators/:profileId",
-		async ({ authorization, profile, params }) => {
-			await ensureUnitGovernanceOwner(authorization, params.unitId);
-			await database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${`collaborators:${params.unitId}`}::text, 0))`,
-				);
-				const [target] = await tx
-					.select({ role: unitCollaborator.role })
-					.from(unitCollaborator)
-					.where(
-						and(
-							eq(unitCollaborator.unitId, params.unitId),
-							eq(unitCollaborator.profileId, params.profileId),
-						),
-					)
-					.limit(1);
-				if (!target) throw new CollaboratorNotFound();
-				if (target.role === "owner") {
-					const owners = await tx
-						.select({ profileId: unitCollaborator.profileId })
-						.from(unitCollaborator)
-						.where(
-							and(
-								eq(unitCollaborator.unitId, params.unitId),
-								eq(unitCollaborator.role, "owner"),
-							),
-						);
-					if (owners.length <= 1) throw new UnitOwnerRequired();
-				}
-				await tx
-					.delete(unitCollaborator)
-					.where(
-						and(
-							eq(unitCollaborator.unitId, params.unitId),
-							eq(unitCollaborator.profileId, params.profileId),
-						),
-					);
-				await recordAuditEvent(tx, {
-					actorProfileId: profile.unitId,
-					action: "unit.collaborator.delete",
-					decisionCode: "allowed",
-					reason: "Collaborator removed",
-					subjectKind: "unit",
-					subjectId: params.unitId,
-					metadata: { profileId: params.profileId },
-				});
-			});
-			return new Response(null, { status: StatusCodes.NO_CONTENT });
-		},
-		{
-			access: "session-only",
-			params: UnitCollaboratorParams,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"UnitEditForbidden",
-					"PlatformCapabilityRequired",
-				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"CollaboratorNotFound",
-				]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitOwnerRequired"]),
-			},
-			detail: {
-				summary: "Remove Unit collaborator",
-				tags: ["Governance"],
-				responses: NoContentResponse,
-			},
-		},
-	)
-	.get(
-		"/unit/:unitId/field-locks",
-		async ({ authorization, params }) => {
-			await authorization.unit.ensureCanEdit(params.unitId);
-			return {
-				items: await database
-					.select()
-					.from(unitFieldLock)
-					.where(eq(unitFieldLock.unitId, params.unitId))
-					.orderBy(unitFieldLock.path, unitFieldLock.id),
-			};
-		},
-		{
-			access: "session-only",
-			params: UnitGovernanceParams,
-			response: {
-				[StatusCodes.OK]: FieldLockListResponse,
-				[StatusCodes.FORBIDDEN]: UnitEditFailureResponse,
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-			},
-			detail: { summary: "List Unit field locks", tags: ["Governance"] },
-		},
-	)
-	.post(
-		"/unit/:unitId/field-locks",
-		async ({ authorization, profile, params, body }) => {
-			await ensureUnitGovernanceOwner(authorization, params.unitId);
-			return database.transaction(async (tx) => {
-				const [created] = await tx
-					.insert(unitFieldLock)
-					.values({
-						unitId: params.unitId,
-						path: body.path,
-						lockedByProfileId: profile.unitId,
-						reason: body.reason,
-					})
-					.onConflictDoUpdate({
-						target: [unitFieldLock.unitId, unitFieldLock.path],
-						set: { lockedByProfileId: profile.unitId, reason: body.reason },
-					})
-					.returning();
-				if (!created) throw new Error("Field lock upsert did not return a row");
-				await recordAuditEvent(tx, {
-					actorProfileId: profile.unitId,
-					action: "unit.field_lock.upsert",
-					decisionCode: "allowed",
-					reason: body.reason ?? "Unit field locked",
-					subjectKind: "unit",
-					subjectId: params.unitId,
-					subjectPath: body.path,
-				});
-				return created;
-			});
-		},
-		{
-			access: "session-only",
-			params: UnitGovernanceParams,
-			body: AddUnitFieldLockBody,
-			response: {
-				[StatusCodes.OK]: FieldLockResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"UnitEditForbidden",
-					"PlatformCapabilityRequired",
-				]),
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-			},
-			detail: { summary: "Lock Unit field", tags: ["Governance"] },
-		},
-	)
-	.delete(
-		"/unit/:unitId/field-locks/:lockId",
-		async ({ authorization, profile, params }) => {
-			await ensureUnitGovernanceOwner(authorization, params.unitId);
-			await database.transaction(async (tx) => {
-				const [deleted] = await tx
-					.delete(unitFieldLock)
-					.where(
-						and(
-							eq(unitFieldLock.id, params.lockId),
-							eq(unitFieldLock.unitId, params.unitId),
-						),
-					)
-					.returning({ path: unitFieldLock.path });
-				if (!deleted) throw new FieldLockNotFound();
-				await recordAuditEvent(tx, {
-					actorProfileId: profile.unitId,
-					action: "unit.field_lock.delete",
-					decisionCode: "allowed",
-					reason: "Unit field unlocked",
-					subjectKind: "unit",
-					subjectId: params.unitId,
-					subjectPath: deleted.path,
-				});
-			});
-			return new Response(null, { status: StatusCodes.NO_CONTENT });
-		},
-		{
-			access: "session-only",
-			params: UnitFieldLockParams,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"UnitEditForbidden",
-					"PlatformCapabilityRequired",
-				]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "FieldLockNotFound"]),
-			},
-			detail: {
-				summary: "Unlock Unit field",
 				tags: ["Governance"],
 				responses: NoContentResponse,
 			},

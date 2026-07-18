@@ -1,8 +1,32 @@
 import { JsonValue } from "@rezics/portable-text";
-import { ZoneBoundaryDocument, ZoneThemeDocument } from "@rezics/content-structure";
+import {
+	BlockDocument,
+	NavigationDocument,
+	ZoneBoundaryDocument,
+	ZoneThemeDocument,
+} from "@rezics/block";
+import { type Static, Type } from "@sinclair/typebox";
 import { t } from "elysia";
 
 import { DateTime, FractionalPosition, LocalizationInput, Uuid } from "../schema";
+
+// Exact models are registered by the Zone route plugin. References keep one
+// OpenAPI component and prevent recursive Block static types from expanding
+// through the entire Elysia route chain.
+const ZoneBoundaryResponseDocument = Type.Unsafe<unknown>(Type.Ref("ZoneBoundaryDocument"));
+const ZoneThemeResponseDocument = Type.Unsafe<unknown>(Type.Ref("ZoneThemeDocument"));
+const BlockResponseDocument = Type.Unsafe<unknown>(Type.Ref("BlockDocument"));
+const NavigationResponseDocument = Type.Unsafe<unknown>(Type.Ref("NavigationDocument"));
+const ZoneBoundaryInputDocument = Type.Unsafe<Static<typeof ZoneBoundaryDocument>>(
+	Type.Ref("ZoneBoundaryDocument"),
+);
+const ZoneThemeInputDocument = Type.Unsafe<Static<typeof ZoneThemeDocument>>(
+	Type.Ref("ZoneThemeDocument"),
+);
+const BlockInputDocument = Type.Unsafe<Static<typeof BlockDocument>>(Type.Ref("BlockDocument"));
+const NavigationInputDocument = Type.Unsafe<Static<typeof NavigationDocument>>(
+	Type.Ref("NavigationDocument"),
+);
 
 export const CreateSeriesBody = t.Object(
 	{
@@ -41,19 +65,53 @@ export const SystemRequirementBody = t.Object(
 
 export const CreateZoneBody = t.Object(
 	{
-		managingRealmId: t.Optional(t.Nullable(Uuid)),
 		slug: t.Optional(
 			t.String({ minLength: 3, maxLength: 72, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
 		),
 		localization: LocalizationInput,
-		boundaryDocument: ZoneBoundaryDocument,
-		themeDocument: ZoneThemeDocument,
+		boundaryDocument: ZoneBoundaryInputDocument,
+		themeDocument: ZoneThemeInputDocument,
+		dockDocument: BlockInputDocument,
 		startsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 		endsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 	},
 	{ additionalProperties: false },
 );
 export const ZoneParams = t.Object({ zoneId: Uuid });
+export const ZonePageParams = t.Object({
+	zoneId: Uuid,
+	slug: t.String({ minLength: 1, maxLength: 100, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
+});
+export const ZoneNavigationParams = t.Object({
+	zoneId: Uuid,
+	key: t.String({ minLength: 1, maxLength: 64, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
+});
+export const UpdateZoneBody = t.Object(
+	{
+		boundaryDocument: t.Optional(ZoneBoundaryInputDocument),
+		themeDocument: t.Optional(ZoneThemeInputDocument),
+		dockDocument: t.Optional(BlockInputDocument),
+		startsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
+		endsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
+	},
+	{ minProperties: 1, additionalProperties: false },
+);
+export const ZonePageBody = t.Object(
+	{
+		titleUnitId: Uuid,
+		document: BlockInputDocument,
+		position: FractionalPosition,
+		home: t.Boolean(),
+	},
+	{ additionalProperties: false },
+);
+export const ZoneNavigationBody = t.Object(
+	{
+		document: NavigationInputDocument,
+		position: FractionalPosition,
+	},
+	{ additionalProperties: false },
+);
 
 export const SeriesReleaseResponse = t.Object({
 	seriesId: Uuid,
@@ -78,3 +136,36 @@ export const SystemRequirementResponse = t.Object({
 export const SystemRequirementListResponse = t.Object({
 	items: t.Array(SystemRequirementResponse),
 });
+
+export const ZoneResponse = t.Object({
+	id: Uuid,
+	boundaryDocument: ZoneBoundaryResponseDocument,
+	themeDocument: ZoneThemeResponseDocument,
+	dockDocument: BlockResponseDocument,
+	startsAt: t.Nullable(DateTime),
+	endsAt: t.Nullable(DateTime),
+	createdAt: DateTime,
+	updatedAt: DateTime,
+});
+export const ZonePageResponse = t.Object({
+	id: Uuid,
+	zoneId: Uuid,
+	slug: t.String(),
+	titleUnitId: Uuid,
+	document: BlockResponseDocument,
+	position: FractionalPosition,
+	home: t.Boolean(),
+	createdAt: DateTime,
+	updatedAt: DateTime,
+});
+export const ZonePageListResponse = t.Object({ items: t.Array(ZonePageResponse) });
+export const ZoneNavigationResponse = t.Object({
+	id: Uuid,
+	zoneId: Uuid,
+	key: t.String(),
+	document: NavigationResponseDocument,
+	position: FractionalPosition,
+	createdAt: DateTime,
+	updatedAt: DateTime,
+});
+export const ZoneNavigationListResponse = t.Object({ items: t.Array(ZoneNavigationResponse) });

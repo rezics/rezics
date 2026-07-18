@@ -38,7 +38,7 @@ import { RequireSession } from "@/features/auth/require-session";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
-import { readPortableText, writePortableText } from "@/lib/content-structure";
+import { readPortableText, writePortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
 import { ReplyPostThread } from "./reply-thread";
 import { PostList, RelatedPostRecommendations } from "./post-list";

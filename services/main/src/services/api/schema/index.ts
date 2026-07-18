@@ -1,6 +1,6 @@
 import { type Static, t } from "elysia";
 import { FormatRegistry } from "@sinclair/typebox";
-import { PortableTextDocument } from "@rezics/content-structure";
+import { PortableTextDocument } from "@rezics/block";
 import tags from "language-tags";
 
 import {

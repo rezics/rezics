@@ -24,7 +24,7 @@ import { RequireSession } from "@/features/auth/require-session";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
-import { writePortableText } from "@/lib/content-structure";
+import { writePortableText } from "@/lib/block";
 import {
 	buildContentStructureTree,
 	getContentStructureMoveTargets,

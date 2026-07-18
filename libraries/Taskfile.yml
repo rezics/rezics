@@ -1,9 +1,12 @@
 version: "3"
 
 includes:
-    content-structure:
-        taskfile: ./content-structure/Taskfile.yml
-        dir: ./content-structure
+    block:
+        taskfile: ./block/Taskfile.yml
+        dir: ./block
+    search:
+        taskfile: ./search/Taskfile.yml
+        dir: ./search
     i18n:
         taskfile: ./i18n/Taskfile.yml
         dir: ./i18n
@@ -34,7 +37,8 @@ tasks:
     typecheck:
         desc: Type-check library packages.
         cmds:
-            - task: content-structure:typecheck
+            - task: block:typecheck
+            - task: search:typecheck
             - task: i18n:typecheck
             - task: ui:typecheck
             - task: portable-text:typecheck

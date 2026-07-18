@@ -2,7 +2,7 @@ import {
 	createPortableTextDocument,
 	type PortableTextDocument,
 	updatePortableTextDocument,
-} from "@rezics/content-structure";
+} from "@rezics/block";
 import { normalizePortableText, type PortableTextValue } from "@rezics/portable-text";
 
 export function readPortableText(

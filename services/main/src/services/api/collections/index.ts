@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import {
 	createCollectionPresentationDocument,
 	createManualCollectionDefinitionDocument,
-} from "@rezics/content-structure";
+} from "@rezics/block";
 import { and, desc, eq, ne, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
@@ -14,7 +14,7 @@ import {
 	collection,
 	collectionItem,
 	unit,
-	unitCollaborator,
+	unitAccessBinding,
 	unitLocalization,
 } from "../../database/schema";
 import { recordUnitRevision } from "../../units/history";
@@ -87,6 +87,8 @@ export default new Elysia({ prefix: "/collections" })
 		"",
 		async ({ profile, body }) => {
 			const id = await database.transaction(async (tx) => {
+				const definitionDocument =
+					body.definitionDocument ?? createManualCollectionDefinitionDocument();
 				const [created] = await tx
 					.insert(unit)
 					.values({
@@ -99,20 +101,21 @@ export default new Elysia({ prefix: "/collections" })
 				await tx.insert(collection).values({
 					id: created.id,
 					ownerProfileId: profile.unitId,
-					source: "manual",
-					definitionDocument:
-						body.definitionDocument ?? createManualCollectionDefinitionDocument(),
+					source: definitionDocument.source,
+					definitionDocument,
 					presentationDocument:
 						body.presentationDocument ?? createCollectionPresentationDocument(),
 				});
 				await tx
 					.insert(unitLocalization)
 					.values({ unitId: created.id, ...body.localization });
-				await tx.insert(unitCollaborator).values({
+				await tx.insert(unitAccessBinding).values({
 					unitId: created.id,
+					subjectKind: "profile",
 					profileId: profile.unitId,
 					role: "owner",
-					addedByProfileId: profile.unitId,
+					scope: [],
+					grantedByProfileId: profile.unitId,
 				});
 				await recordUnitRevision(tx, {
 					unitId: created.id,
@@ -187,6 +190,7 @@ export default new Elysia({ prefix: "/collections" })
 					await tx
 						.update(collection)
 						.set({
+							source: body.definitionDocument?.source,
 							definitionDocument: body.definitionDocument,
 							presentationDocument: body.presentationDocument,
 						})

@@ -10,7 +10,7 @@ import {
 } from "./columns";
 import { profile, unit } from "./core";
 
-export const collectionSource = pgEnum("collection_source", ["manual", "dynamic", "system"]);
+export const collectionSource = pgEnum("collection_source", ["manual", "search", "system"]);
 export const collectionSystemKey = pgEnum("collection_system_key", ["favorites"]);
 
 export const collection = pgTable(

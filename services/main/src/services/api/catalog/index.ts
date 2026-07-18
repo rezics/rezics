@@ -64,15 +64,17 @@ import {
 } from "./errors";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
-const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitEditForbidden", "UnitFieldLocked"]);
+const UnitMutationForbiddenResponse = toApiErrorResponse([
+	"UnitPermissionForbidden",
+	"UnitProtected",
+]);
 
 async function ensureUnitMutationAuthorized(
 	authorization: UnitAuthorization<string>,
 	unitId: string,
-	path: string,
+	scope: readonly string[],
 ): Promise<void> {
-	await authorization.ensureCanEdit(unitId);
-	await authorization.ensureFieldsUnlocked(unitId, [path]);
+	await authorization.ensureCanUpdate(unitId, [scope]);
 }
 
 async function getAliasVoteSummary(aliasId: string, value: number | null) {
@@ -365,11 +367,9 @@ export default new Elysia()
 				"/aliases/:aliasId",
 				async ({ params, profile, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
-					await ensureUnitMutationAuthorized(
-						authorization.unit,
-						params.unitId,
-						"/aliases",
-					);
+					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
+						"aliases",
+					]);
 					await database.transaction(async (tx) => {
 						const deleted = await tx
 							.update(unitAlias)
@@ -497,11 +497,9 @@ export default new Elysia()
 				"/credits",
 				async ({ params, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
-					await ensureUnitMutationAuthorized(
-						authorization.unit,
-						params.unitId,
-						"/credits",
-					);
+					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
+						"credits",
+					]);
 					const credit = await database.transaction(async (tx) => {
 						await tx.execute(
 							sql`select pg_advisory_xact_lock(hashtextextended(${params.unitId}::text, 0))`,
@@ -548,11 +546,9 @@ export default new Elysia()
 				"/links",
 				async ({ params, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
-					await ensureUnitMutationAuthorized(
-						authorization.unit,
-						params.unitId,
-						"/externalLinks",
-					);
+					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
+						"external-links",
+					]);
 					const normalized = new URL(body.url);
 					normalized.hash = "";
 					normalized.searchParams.sort();
@@ -609,7 +605,7 @@ export default new Elysia()
 				"/tags/:tagId",
 				async ({ params, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
-					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, "/tags");
+					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, ["tags"]);
 					await database.transaction(async (tx) => {
 						await tx
 							.insert(unitTag)
@@ -650,7 +646,7 @@ export default new Elysia()
 				"/tags/:tagId",
 				async ({ params, profile, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
-					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, "/tags");
+					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, ["tags"]);
 					await database.transaction(async (tx) => {
 						const deleted = await tx
 							.delete(unitTag)
@@ -765,11 +761,9 @@ export default new Elysia()
 				async ({ params, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await checkUnitType(params.canonicalId, params.type);
-					await ensureUnitMutationAuthorized(
-						authorization.unit,
-						params.unitId,
-						"/variant",
-					);
+					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
+						"variant",
+					]);
 					return database.transaction(async (tx) => {
 						const [created] = await tx
 							.insert(unitVariant)

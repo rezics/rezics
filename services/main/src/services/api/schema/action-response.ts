@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { t } from "elysia";
-import { PortableTextDocument } from "@rezics/content-structure";
+import { PortableTextDocument } from "@rezics/block";
 import { DateTime, FractionalPosition, OrdinalPosition, Uuid } from ".";
 
 const NullableUuid = t.Nullable(Uuid);

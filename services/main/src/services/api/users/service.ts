@@ -1,5 +1,5 @@
 import { and, eq } from "drizzle-orm";
-import { PortableTextDocument, parseNullableDocument } from "@rezics/content-structure";
+import { PortableTextDocument, parseNullableDocument } from "@rezics/block";
 
 import { database } from "../../database";
 import { isPrimaryUnitLocalization } from "../../units/localization";

@@ -11,7 +11,7 @@ import { PortableTextContent } from "@rezics/ui";
 import { DataList, DataListItem, DataListItemLabel, DataListItemValue } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
-import { readPortableText } from "@/lib/content-structure";
+import { readPortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
 import { FavoriteToggle } from "@/features/collections/collections";
 import { ProgressRecordForm } from "@/features/progress/progress";

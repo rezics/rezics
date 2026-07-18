@@ -63,6 +63,26 @@ import type {
 	GetApiFeedbackMeResponses,
 	PostApiFeedbackOptions,
 	PostApiFeedbackResponses,
+	GetApiGovernanceUnitByUnitIdAccessEffectiveOptions,
+	GetApiGovernanceUnitByUnitIdAccessEffectiveResponses,
+	GetApiGovernanceUnitByUnitIdAccessBindingsOptions,
+	GetApiGovernanceUnitByUnitIdAccessBindingsResponses,
+	PostApiGovernanceUnitByUnitIdAccessBindingsOptions,
+	PostApiGovernanceUnitByUnitIdAccessBindingsResponses,
+	DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdOptions,
+	DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdResponses,
+	GetApiGovernanceUnitByUnitIdAccessRestrictionsOptions,
+	GetApiGovernanceUnitByUnitIdAccessRestrictionsResponses,
+	PostApiGovernanceUnitByUnitIdAccessRestrictionsOptions,
+	PostApiGovernanceUnitByUnitIdAccessRestrictionsResponses,
+	DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdOptions,
+	DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdResponses,
+	GetApiGovernanceUnitByUnitIdProtectionsOptions,
+	GetApiGovernanceUnitByUnitIdProtectionsResponses,
+	PostApiGovernanceUnitByUnitIdProtectionsOptions,
+	PostApiGovernanceUnitByUnitIdProtectionsResponses,
+	DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdOptions,
+	DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdResponses,
 	GetApiGovernanceModerationCasesOptions,
 	GetApiGovernanceModerationCasesResponses,
 	GetApiGovernanceModerationCasesByCaseIdOptions,
@@ -83,22 +103,30 @@ import type {
 	PostApiGovernanceGrantsResponses,
 	DeleteApiGovernanceGrantsByGrantIdOptions,
 	DeleteApiGovernanceGrantsByGrantIdResponses,
-	GetApiGovernanceUnitByUnitIdCollaboratorsOptions,
-	GetApiGovernanceUnitByUnitIdCollaboratorsResponses,
-	PutApiGovernanceUnitByUnitIdCollaboratorsOptions,
-	PutApiGovernanceUnitByUnitIdCollaboratorsResponses,
-	DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdOptions,
-	DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdResponses,
-	GetApiGovernanceUnitByUnitIdFieldLocksOptions,
-	GetApiGovernanceUnitByUnitIdFieldLocksResponses,
-	PostApiGovernanceUnitByUnitIdFieldLocksOptions,
-	PostApiGovernanceUnitByUnitIdFieldLocksResponses,
-	DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdOptions,
-	DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdResponses,
 	PostApiSeriesOptions,
 	PostApiSeriesResponses,
 	GetApiSeriesBySeriesIdReleasesOptions,
 	GetApiSeriesBySeriesIdReleasesResponses,
+	GetApiZonesByZoneIdOptions,
+	GetApiZonesByZoneIdResponses,
+	PatchApiZonesByZoneIdOptions,
+	PatchApiZonesByZoneIdResponses,
+	GetApiZonesByZoneIdPagesOptions,
+	GetApiZonesByZoneIdPagesResponses,
+	GetApiZonesByZoneIdPagesBySlugOptions,
+	GetApiZonesByZoneIdPagesBySlugResponses,
+	PutApiZonesByZoneIdPagesBySlugOptions,
+	PutApiZonesByZoneIdPagesBySlugResponses,
+	DeleteApiZonesByZoneIdPagesBySlugOptions,
+	DeleteApiZonesByZoneIdPagesBySlugResponses,
+	GetApiZonesByZoneIdNavigationOptions,
+	GetApiZonesByZoneIdNavigationResponses,
+	GetApiZonesByZoneIdNavigationByKeyOptions,
+	GetApiZonesByZoneIdNavigationByKeyResponses,
+	PutApiZonesByZoneIdNavigationByKeyOptions,
+	PutApiZonesByZoneIdNavigationByKeyResponses,
+	DeleteApiZonesByZoneIdNavigationByKeyOptions,
+	DeleteApiZonesByZoneIdNavigationByKeyResponses,
 	PutApiSeriesBySeriesIdReleasesByReleaseIdOptions,
 	PutApiSeriesBySeriesIdReleasesByReleaseIdResponses,
 	DeleteApiSeriesBySeriesIdReleasesByReleaseIdOptions,
@@ -331,6 +359,14 @@ import type {
 	DeleteApiRealmsByRealmIdPinsByUnitIdResponses,
 	PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
 	PatchApiRealmsByRealmIdUnitsByUnitIdResponses,
+	GetApiSearchConfigurationOptions,
+	GetApiSearchConfigurationResponses,
+	PostApiSearchExecuteOptions,
+	PostApiSearchExecuteResponses,
+	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteOptions,
+	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponses,
+	PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteOptions,
+	PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteResponses,
 	PostApiSearchOptions,
 	PostApiSearchResponses,
 	PostApiSearchByIndexOptions,
@@ -787,6 +823,209 @@ export function postApiFeedback<ThrowOnError extends boolean = true>(
 }
 
 /**
+ * @summary Resolve effective Unit access for the current Profile
+ * {@link /api/governance/unit/:unitId/access/effective}
+ */
+export function getApiGovernanceUnitByUnitIdAccessEffective<ThrowOnError extends boolean = true>(
+	options: Options<GetApiGovernanceUnitByUnitIdAccessEffectiveOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessEffectiveResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/governance/unit/{unitId}/access/effective",
+		...config,
+	}) as Promise<
+		RequestResult<GetApiGovernanceUnitByUnitIdAccessEffectiveResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary List Unit access bindings
+ * {@link /api/governance/unit/:unitId/access-bindings}
+ */
+export function getApiGovernanceUnitByUnitIdAccessBindings<ThrowOnError extends boolean = true>(
+	options: Options<GetApiGovernanceUnitByUnitIdAccessBindingsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessBindingsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/governance/unit/{unitId}/access-bindings",
+		...config,
+	}) as Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessBindingsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Create Unit access binding
+ * {@link /api/governance/unit/:unitId/access-bindings}
+ */
+export function postApiGovernanceUnitByUnitIdAccessBindings<ThrowOnError extends boolean = true>(
+	options: Options<PostApiGovernanceUnitByUnitIdAccessBindingsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiGovernanceUnitByUnitIdAccessBindingsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/governance/unit/{unitId}/access-bindings",
+		...config,
+	}) as Promise<
+		RequestResult<PostApiGovernanceUnitByUnitIdAccessBindingsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Revoke Unit access binding
+ * {@link /api/governance/unit/:unitId/access-bindings/:bindingId}
+ */
+export function deleteApiGovernanceUnitByUnitIdAccessBindingsByBindingId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdOptions, ThrowOnError>,
+): Promise<
+	RequestResult<DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/governance/unit/{unitId}/access-bindings/{bindingId}",
+		...config,
+	}) as Promise<
+		RequestResult<
+			DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary List Unit access restrictions
+ * {@link /api/governance/unit/:unitId/access-restrictions}
+ */
+export function getApiGovernanceUnitByUnitIdAccessRestrictions<ThrowOnError extends boolean = true>(
+	options: Options<GetApiGovernanceUnitByUnitIdAccessRestrictionsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessRestrictionsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/governance/unit/{unitId}/access-restrictions",
+		...config,
+	}) as Promise<
+		RequestResult<GetApiGovernanceUnitByUnitIdAccessRestrictionsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Restrict Profile access to a Unit scope
+ * {@link /api/governance/unit/:unitId/access-restrictions}
+ */
+export function postApiGovernanceUnitByUnitIdAccessRestrictions<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PostApiGovernanceUnitByUnitIdAccessRestrictionsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiGovernanceUnitByUnitIdAccessRestrictionsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/governance/unit/{unitId}/access-restrictions",
+		...config,
+	}) as Promise<
+		RequestResult<PostApiGovernanceUnitByUnitIdAccessRestrictionsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Revoke Unit access restriction
+ * {@link /api/governance/unit/:unitId/access-restrictions/:restrictionId}
+ */
+export function deleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/governance/unit/{unitId}/access-restrictions/{restrictionId}",
+		...config,
+	}) as Promise<
+		RequestResult<
+			DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary List Unit protections
+ * {@link /api/governance/unit/:unitId/protections}
+ */
+export function getApiGovernanceUnitByUnitIdProtections<ThrowOnError extends boolean = true>(
+	options: Options<GetApiGovernanceUnitByUnitIdProtectionsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiGovernanceUnitByUnitIdProtectionsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/governance/unit/{unitId}/protections",
+		...config,
+	}) as Promise<RequestResult<GetApiGovernanceUnitByUnitIdProtectionsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Protect Unit scope
+ * {@link /api/governance/unit/:unitId/protections}
+ */
+export function postApiGovernanceUnitByUnitIdProtections<ThrowOnError extends boolean = true>(
+	options: Options<PostApiGovernanceUnitByUnitIdProtectionsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiGovernanceUnitByUnitIdProtectionsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/governance/unit/{unitId}/protections",
+		...config,
+	}) as Promise<RequestResult<PostApiGovernanceUnitByUnitIdProtectionsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Revoke Unit protection
+ * {@link /api/governance/unit/:unitId/protections/:protectionId}
+ */
+export function deleteApiGovernanceUnitByUnitIdProtectionsByProtectionId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdOptions, ThrowOnError>,
+): Promise<
+	RequestResult<DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/governance/unit/{unitId}/protections/{protectionId}",
+		...config,
+	}) as Promise<
+		RequestResult<
+			DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
  * @summary List moderation cases
  * {@link /api/governance/moderation/cases}
  */
@@ -960,117 +1199,6 @@ export function deleteApiGovernanceGrantsByGrantId<ThrowOnError extends boolean 
 }
 
 /**
- * @summary List Unit collaborators
- * {@link /api/governance/unit/:unitId/collaborators}
- */
-export function getApiGovernanceUnitByUnitIdCollaborators<ThrowOnError extends boolean = true>(
-	options: Options<GetApiGovernanceUnitByUnitIdCollaboratorsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiGovernanceUnitByUnitIdCollaboratorsResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "GET",
-		url: "/api/governance/unit/{unitId}/collaborators",
-		...config,
-	}) as Promise<RequestResult<GetApiGovernanceUnitByUnitIdCollaboratorsResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Add or update Unit collaborator
- * {@link /api/governance/unit/:unitId/collaborators}
- */
-export function putApiGovernanceUnitByUnitIdCollaborators<ThrowOnError extends boolean = true>(
-	options: Options<PutApiGovernanceUnitByUnitIdCollaboratorsOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiGovernanceUnitByUnitIdCollaboratorsResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "PUT",
-		url: "/api/governance/unit/{unitId}/collaborators",
-		...config,
-	}) as Promise<RequestResult<PutApiGovernanceUnitByUnitIdCollaboratorsResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Remove Unit collaborator
- * {@link /api/governance/unit/:unitId/collaborators/:profileId}
- */
-export function deleteApiGovernanceUnitByUnitIdCollaboratorsByProfileId<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdOptions, ThrowOnError>,
-): Promise<
-	RequestResult<DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdResponses, ThrowOnError>
-> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "DELETE",
-		url: "/api/governance/unit/{unitId}/collaborators/{profileId}",
-		...config,
-	}) as Promise<
-		RequestResult<
-			DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdResponses,
-			ThrowOnError
-		>
-	>;
-}
-
-/**
- * @summary List Unit field locks
- * {@link /api/governance/unit/:unitId/field-locks}
- */
-export function getApiGovernanceUnitByUnitIdFieldLocks<ThrowOnError extends boolean = true>(
-	options: Options<GetApiGovernanceUnitByUnitIdFieldLocksOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiGovernanceUnitByUnitIdFieldLocksResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "GET",
-		url: "/api/governance/unit/{unitId}/field-locks",
-		...config,
-	}) as Promise<RequestResult<GetApiGovernanceUnitByUnitIdFieldLocksResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Lock Unit field
- * {@link /api/governance/unit/:unitId/field-locks}
- */
-export function postApiGovernanceUnitByUnitIdFieldLocks<ThrowOnError extends boolean = true>(
-	options: Options<PostApiGovernanceUnitByUnitIdFieldLocksOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiGovernanceUnitByUnitIdFieldLocksResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "POST",
-		url: "/api/governance/unit/{unitId}/field-locks",
-		...config,
-	}) as Promise<RequestResult<PostApiGovernanceUnitByUnitIdFieldLocksResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Unlock Unit field
- * {@link /api/governance/unit/:unitId/field-locks/:lockId}
- */
-export function deleteApiGovernanceUnitByUnitIdFieldLocksByLockId<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdOptions, ThrowOnError>,
-): Promise<
-	RequestResult<DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdResponses, ThrowOnError>
-> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "DELETE",
-		url: "/api/governance/unit/{unitId}/field-locks/{lockId}",
-		...config,
-	}) as Promise<
-		RequestResult<DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdResponses, ThrowOnError>
-	>;
-}
-
-/**
  * @summary Create Series
  * {@link /api/series}
  */
@@ -1096,6 +1224,158 @@ export function getApiSeriesBySeriesIdReleases<ThrowOnError extends boolean = tr
 	return request({ method: "GET", url: "/api/series/{seriesId}/releases", ...config }) as Promise<
 		RequestResult<GetApiSeriesBySeriesIdReleasesResponses, ThrowOnError>
 	>;
+}
+
+/**
+ * @summary Get Zone configuration
+ * {@link /api/zones/:zoneId}
+ */
+export function getApiZonesByZoneId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiZonesByZoneIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiZonesByZoneIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/zones/{zoneId}", ...config }) as Promise<
+		RequestResult<GetApiZonesByZoneIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Update Zone configuration
+ * {@link /api/zones/:zoneId}
+ */
+export function patchApiZonesByZoneId<ThrowOnError extends boolean = true>(
+	options: Options<PatchApiZonesByZoneIdOptions, ThrowOnError>,
+): Promise<RequestResult<PatchApiZonesByZoneIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "PATCH", url: "/api/zones/{zoneId}", ...config }) as Promise<
+		RequestResult<PatchApiZonesByZoneIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary List Zone pages
+ * {@link /api/zones/:zoneId/pages}
+ */
+export function getApiZonesByZoneIdPages<ThrowOnError extends boolean = true>(
+	options: Options<GetApiZonesByZoneIdPagesOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiZonesByZoneIdPagesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/zones/{zoneId}/pages", ...config }) as Promise<
+		RequestResult<GetApiZonesByZoneIdPagesResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Get Zone page
+ * {@link /api/zones/:zoneId/pages/:slug}
+ */
+export function getApiZonesByZoneIdPagesBySlug<ThrowOnError extends boolean = true>(
+	options: Options<GetApiZonesByZoneIdPagesBySlugOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiZonesByZoneIdPagesBySlugResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/zones/{zoneId}/pages/{slug}",
+		...config,
+	}) as Promise<RequestResult<GetApiZonesByZoneIdPagesBySlugResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Create or replace Zone page
+ * {@link /api/zones/:zoneId/pages/:slug}
+ */
+export function putApiZonesByZoneIdPagesBySlug<ThrowOnError extends boolean = true>(
+	options: Options<PutApiZonesByZoneIdPagesBySlugOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiZonesByZoneIdPagesBySlugResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/zones/{zoneId}/pages/{slug}",
+		...config,
+	}) as Promise<RequestResult<PutApiZonesByZoneIdPagesBySlugResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Delete Zone page
+ * {@link /api/zones/:zoneId/pages/:slug}
+ */
+export function deleteApiZonesByZoneIdPagesBySlug<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiZonesByZoneIdPagesBySlugOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiZonesByZoneIdPagesBySlugResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/zones/{zoneId}/pages/{slug}",
+		...config,
+	}) as Promise<RequestResult<DeleteApiZonesByZoneIdPagesBySlugResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List Zone navigation resources
+ * {@link /api/zones/:zoneId/navigation}
+ */
+export function getApiZonesByZoneIdNavigation<ThrowOnError extends boolean = true>(
+	options: Options<GetApiZonesByZoneIdNavigationOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiZonesByZoneIdNavigationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/zones/{zoneId}/navigation", ...config }) as Promise<
+		RequestResult<GetApiZonesByZoneIdNavigationResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Get Zone navigation resource
+ * {@link /api/zones/:zoneId/navigation/:key}
+ */
+export function getApiZonesByZoneIdNavigationByKey<ThrowOnError extends boolean = true>(
+	options: Options<GetApiZonesByZoneIdNavigationByKeyOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiZonesByZoneIdNavigationByKeyResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/zones/{zoneId}/navigation/{key}",
+		...config,
+	}) as Promise<RequestResult<GetApiZonesByZoneIdNavigationByKeyResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Create or replace Zone navigation
+ * {@link /api/zones/:zoneId/navigation/:key}
+ */
+export function putApiZonesByZoneIdNavigationByKey<ThrowOnError extends boolean = true>(
+	options: Options<PutApiZonesByZoneIdNavigationByKeyOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiZonesByZoneIdNavigationByKeyResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/zones/{zoneId}/navigation/{key}",
+		...config,
+	}) as Promise<RequestResult<PutApiZonesByZoneIdNavigationByKeyResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Delete Zone navigation resource
+ * {@link /api/zones/:zoneId/navigation/:key}
+ */
+export function deleteApiZonesByZoneIdNavigationByKey<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiZonesByZoneIdNavigationByKeyOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiZonesByZoneIdNavigationByKeyResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/zones/{zoneId}/navigation/{key}",
+		...config,
+	}) as Promise<RequestResult<DeleteApiZonesByZoneIdNavigationByKeyResponses, ThrowOnError>>;
 }
 
 /**
@@ -2924,6 +3204,87 @@ export function patchApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolea
 		url: "/api/realms/{realmId}/units/{unitId}",
 		...config,
 	}) as Promise<RequestResult<PatchApiRealmsByRealmIdUnitsByUnitIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get global Search feature configuration
+ * {@link /api/search/configuration}
+ */
+export function getApiSearchConfiguration<ThrowOnError extends boolean = true>(
+	options: Options<GetApiSearchConfigurationOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiSearchConfigurationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/search/configuration", ...config }) as Promise<
+		RequestResult<GetApiSearchConfigurationResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Execute configured global Search
+ * {@link /api/search/execute}
+ */
+export function postApiSearchExecute<ThrowOnError extends boolean = true>(
+	options: Options<PostApiSearchExecuteOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiSearchExecuteResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "POST", url: "/api/search/execute", ...config }) as Promise<
+		RequestResult<PostApiSearchExecuteResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Execute a trusted Zone Dock Search Block
+ * {@link /api/search/zones/:zoneId/dock/blocks/:blockKey/execute}
+ */
+export function postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/search/zones/{zoneId}/dock/blocks/{blockKey}/execute",
+		...config,
+	}) as Promise<
+		RequestResult<PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Execute a trusted Zone Page Search Block
+ * {@link /api/search/zones/:zoneId/pages/:slug/blocks/:blockKey/execute}
+ */
+export function postApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/search/zones/{zoneId}/pages/{slug}/blocks/{blockKey}/execute",
+		...config,
+	}) as Promise<
+		RequestResult<
+			PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteResponses,
+			ThrowOnError
+		>
+	>;
 }
 
 /**

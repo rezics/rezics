@@ -4,7 +4,7 @@
 	"type": "module",
 	"dependencies": {
 		"@nmnmcc/intee": "^3.2.0",
-		"@rezics/content-structure": "workspace:*",
+		"@rezics/block": "workspace:*",
 		"@rezics/i18n": "workspace:*",
 		"@rezics/openapi-tanstack-query": "workspace:*",
 		"@rezics/portable-text": "workspace:*",

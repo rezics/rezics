@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
 import { database } from "../../database";
-import { entity, unit, unitCollaborator, unitLocalization } from "../../database/schema";
+import { entity, unit, unitAccessBinding, unitLocalization } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import type { CreateCatalogUnitBody } from "./schema";
@@ -36,11 +36,13 @@ export async function createCatalogUnit(
 		if (type === "entity")
 			await tx.insert(entity).values({ id: created.id, kind: body.kind ?? "person" });
 		await tx.insert(unitLocalization).values({ unitId: created.id, ...body.localization });
-		await tx.insert(unitCollaborator).values({
+		await tx.insert(unitAccessBinding).values({
 			unitId: created.id,
+			subjectKind: "profile",
 			profileId: ownerId,
 			role: "owner",
-			addedByProfileId: ownerId,
+			scope: [],
+			grantedByProfileId: ownerId,
 		});
 		await recordUnitRevision(tx, {
 			unitId: created.id,

@@ -21,6 +21,30 @@ export class ZonePageNotFound extends Data.TaggedError("ZonePageNotFound") {
 	readonly message = "Zone page not found";
 }
 
+export class ZonePageInUse extends Data.TaggedError("ZonePageInUse") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = ZonePageInUse.status;
+	readonly message = "Zone page is still referenced by a Block or navigation document";
+}
+
+export class ZoneNavigationNotFound extends Data.TaggedError("ZoneNavigationNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = ZoneNavigationNotFound.status;
+	readonly message = "Zone navigation not found";
+}
+
+export class ZoneNavigationInUse extends Data.TaggedError("ZoneNavigationInUse") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = ZoneNavigationInUse.status;
+	readonly message = "Zone navigation is still referenced by a Block document";
+}
+
+export class ZoneDocumentInvalid extends Data.TaggedError("ZoneDocumentInvalid") {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = ZoneDocumentInvalid.status;
+	readonly message = "Zone Block or navigation document is invalid";
+}
+
 export class ZoneTimeRangeInvalid extends Data.TaggedError("ZoneTimeRangeInvalid") {
 	static readonly status = StatusCodes.BAD_REQUEST as const;
 	readonly status = ZoneTimeRangeInvalid.status;
@@ -43,6 +67,10 @@ export const DomainExtensionErrors = [
 	SoftwareSystemRequirementSourceInvalid,
 	SeriesReleaseNotFound,
 	ZonePageNotFound,
+	ZonePageInUse,
+	ZoneNavigationNotFound,
+	ZoneNavigationInUse,
+	ZoneDocumentInvalid,
 	ZoneTimeRangeInvalid,
 	SoftwareNotFound,
 	SystemRequirementNotFound,

@@ -35,7 +35,7 @@ import { PostList } from "@/features/posts/post-list";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { selectLocalization } from "@/lib/localization";
 import { useTranslation } from "@/i18n/client";
-import { readPortableText } from "@/lib/content-structure";
+import { readPortableText } from "@/lib/block";
 import { RequestFailure } from "@/i18n/request-failure";
 import { canManageRealm, isRealmOwner } from "./realm-permissions";
 import { invalidateRealmDetails } from "./query";

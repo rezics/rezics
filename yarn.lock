@@ -3373,9 +3373,10 @@ __metadata:
     "@elysiajs/openapi": "npm:^1.4.15"
     "@faker-js/faker": "npm:^10.5.0"
     "@nmnmcc/intee": "npm:^3.2.0"
-    "@rezics/content-structure": "workspace:*"
+    "@rezics/block": "workspace:*"
     "@rezics/i18n": "workspace:*"
     "@rezics/portable-text": "workspace:*"
+    "@rezics/search": "workspace:*"
     "@sinclair/typebox": "npm:^0.34.41"
     "@t3-oss/env-core": "npm:^0.13.11"
     "@types/language-tags": "npm:^1.0.4"
@@ -3405,6 +3406,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@rezics/block@workspace:*, @rezics/block@workspace:libraries/block":
+  version: 0.0.0-use.local
+  resolution: "@rezics/block@workspace:libraries/block"
+  dependencies:
+    "@rezics/portable-text": "workspace:*"
+    "@rezics/search": "workspace:*"
+    "@sinclair/typebox": "npm:^0.34.41"
+    typescript: "npm:7"
+  languageName: unknown
+  linkType: soft
+
 "@rezics/brand@workspace:*, @rezics/brand@workspace:packages/brand":
   version: 0.0.0-use.local
   resolution: "@rezics/brand@workspace:packages/brand"
@@ -3413,22 +3425,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@rezics/content-structure@workspace:*, @rezics/content-structure@workspace:libraries/content-structure":
-  version: 0.0.0-use.local
-  resolution: "@rezics/content-structure@workspace:libraries/content-structure"
-  dependencies:
-    "@rezics/portable-text": "workspace:*"
-    "@sinclair/typebox": "npm:^0.34.41"
-    typescript: "npm:7"
-  languageName: unknown
-  linkType: soft
-
 "@rezics/frontend@workspace:apps/web":
   version: 0.0.0-use.local
   resolution: "@rezics/frontend@workspace:apps/web"
   dependencies:
     "@nmnmcc/intee": "npm:^3.2.0"
-    "@rezics/content-structure": "workspace:*"
+    "@rezics/block": "workspace:*"
     "@rezics/i18n": "workspace:*"
     "@rezics/openapi-tanstack-query": "workspace:*"
     "@rezics/portable-text": "workspace:*"
@@ -3507,6 +3509,15 @@ __metadata:
 "@rezics/portable-text@workspace:*, @rezics/portable-text@workspace:libraries/portable-text":
   version: 0.0.0-use.local
   resolution: "@rezics/portable-text@workspace:libraries/portable-text"
+  dependencies:
+    "@sinclair/typebox": "npm:^0.34.41"
+    typescript: "npm:7"
+  languageName: unknown
+  linkType: soft
+
+"@rezics/search@workspace:*, @rezics/search@workspace:libraries/search":
+  version: 0.0.0-use.local
+  resolution: "@rezics/search@workspace:libraries/search"
   dependencies:
     "@sinclair/typebox": "npm:^0.34.41"
     typescript: "npm:7"

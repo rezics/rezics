@@ -12,28 +12,35 @@ export class UnitNotFound extends Data.TaggedError("UnitNotFound") {
 	}
 }
 
-export class UnitEditForbidden extends Data.TaggedError("UnitEditForbidden") {
+export class UnitPermissionForbidden extends Data.TaggedError("UnitPermissionForbidden") {
 	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = UnitEditForbidden.status;
-	readonly message = "You cannot edit this unit";
-}
-
-export class UnitRestoreForbidden extends Data.TaggedError("UnitRestoreForbidden") {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = UnitRestoreForbidden.status;
-	readonly message = "You cannot restore this unit";
-}
-
-export class UnitFieldLocked extends Data.TaggedError("UnitFieldLocked") {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = UnitFieldLocked.status;
+	readonly status = UnitPermissionForbidden.status;
 	readonly message: string;
-	readonly details: { readonly path: string };
+	readonly details: { readonly permission: string; readonly scope: string[] };
 
-	constructor(readonly path: string) {
+	constructor(permission: string, scope: readonly string[]) {
 		super();
-		this.message = `Unit field is locked: ${path}`;
-		this.details = { path };
+		this.message = `Unit permission required: ${permission}`;
+		this.details = { permission, scope: [...scope] };
+	}
+}
+
+export class UnitAccessRestricted extends Data.TaggedError("UnitAccessRestricted") {
+	static readonly status = StatusCodes.FORBIDDEN as const;
+	readonly status = UnitAccessRestricted.status;
+	readonly message = "Your access to this Unit scope is restricted";
+}
+
+export class UnitProtected extends Data.TaggedError("UnitProtected") {
+	static readonly status = StatusCodes.FORBIDDEN as const;
+	readonly status = UnitProtected.status;
+	readonly message: string;
+	readonly details: { readonly scope: string[]; readonly mode: string };
+
+	constructor(scope: readonly string[], mode: string) {
+		super();
+		this.message = `Unit scope is protected: ${scope.join("/") || "root"}`;
+		this.details = { scope: [...scope], mode };
 	}
 }
 
@@ -72,9 +79,9 @@ export class UnitPrimaryLanguageMissing extends Data.TaggedError("UnitPrimaryLan
 
 export const UnitErrors = [
 	UnitNotFound,
-	UnitEditForbidden,
-	UnitRestoreForbidden,
-	UnitFieldLocked,
+	UnitPermissionForbidden,
+	UnitAccessRestricted,
+	UnitProtected,
 	UnitChanged,
 	UnitRevisionConflict,
 	UnitPrimaryLanguageMissing,

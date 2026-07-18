@@ -8,7 +8,7 @@ vi.mock("../database", () => ({ database: { execute } }));
 
 import { InvalidSearch } from "./errors";
 import { SearchCategories } from "./schema";
-import { searchDomain } from "./service";
+import { searchDomain, searchDomainFacets } from "./service";
 
 const dialect = new PgDialect();
 
@@ -46,6 +46,9 @@ describe("domain search SQL", () => {
 			"target_unit_id",
 			"join_requires_approval",
 			"vote_mode",
+			"profile_follow",
+			"realm_subscription",
+			"zone_subscription",
 		])
 			expect(queries).not.toContain(legacyIdentifier);
 		expect(queries).toContain('"unit_localization"');
@@ -66,7 +69,7 @@ describe("domain search SQL", () => {
 		expect(lastQuery()).toContain('"unit"."published_at" DESC NULLS LAST');
 
 		await searchDomain("users", { sort: "subscriberCount:desc" });
-		expect(lastQuery()).toContain('"profile_follow"."followed_profile_id" = "unit"."id"');
+		expect(lastQuery()).toContain('"unit_follow"."unit_id" = "unit"."id"');
 
 		await searchDomain("entity", { types: ["person"] });
 		expect(lastQuery()).toContain('("entity"."kind")::text');
@@ -91,7 +94,7 @@ describe("domain search SQL", () => {
 			joinPolicies: ["approval"],
 			sort: "subscriberCount:asc",
 		});
-		expect(lastQuery()).toContain('"realm_subscription"."realm_id" = "unit"."id"');
+		expect(lastQuery()).toContain('"unit_follow"."unit_id" = "unit"."id"');
 
 		await searchDomain("collections", {
 			ownerId: "11111111-1111-1111-1111-111111111111",
@@ -123,9 +126,36 @@ describe("domain search SQL", () => {
 		await expect(searchDomain("tags", { multiple: true })).rejects.toBeInstanceOf(
 			InvalidSearch,
 		);
-		await expect(searchDomain("posts", { contentRatings: ["general"] })).rejects.toBeInstanceOf(
+		await expect(searchDomain("posts", { joinPolicies: ["open"] })).rejects.toBeInstanceOf(
 			InvalidSearch,
 		);
 		expect(execute).not.toHaveBeenCalled();
+	});
+
+	it("batches bounded facet counts and omits unsupported category facets", async () => {
+		execute.mockResolvedValueOnce({
+			rows: [
+				{ field: "category", value: "units", count: "12" },
+				{ field: "language", value: "zh-hant", count: "8" },
+			],
+		});
+
+		const facets = await searchDomainFacets("units", {}, [
+			"category",
+			"language",
+			"tag",
+			"join-policy",
+		]);
+		const query = lastQuery();
+
+		expect(facets).toEqual([
+			{ field: "category", options: [{ value: "units", count: 12 }] },
+			{ field: "language", options: [{ value: "zh-hant", count: 8 }] },
+		]);
+		expect(query).toContain("union all");
+		expect(query).toContain('"facet_unit_localization"');
+		expect(query).toContain('"facet_unit_tag"');
+		expect(query).not.toContain('"realm"."join_policy"');
+		expect(query.match(/limit 100/g)).toHaveLength(3);
 	});
 });

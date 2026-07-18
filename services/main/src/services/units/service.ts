@@ -3,7 +3,7 @@ import {
 	PortableTextDocument,
 	parseNullableDocument,
 	type PortableTextDocument as PortableTextDocumentValue,
-} from "@rezics/content-structure";
+} from "@rezics/block";
 import type { Static } from "elysia";
 
 import type { Authorization } from "../authorization";
@@ -20,7 +20,7 @@ import {
 	software,
 	media,
 	unit,
-	unitCollaborator,
+	unitAccessBinding,
 	creditAttribution,
 	unitLink,
 	unitLocalization,
@@ -124,11 +124,13 @@ export async function createUnit(
 			unitId: created.id,
 			...input.localization,
 		});
-		await tx.insert(unitCollaborator).values({
+		await tx.insert(unitAccessBinding).values({
 			unitId: created.id,
+			subjectKind: "profile",
 			profileId: ownerId,
 			role: "owner",
-			addedByProfileId: ownerId,
+			scope: [],
+			grantedByProfileId: ownerId,
 		});
 		await recordUnitRevision(tx, {
 			unitId: created.id,
@@ -241,7 +243,7 @@ export async function getUnit(
 		.from(unitVariant)
 		.where(or(eq(unitVariant.unitId, base.id), eq(unitVariant.canonicalUnitId, base.id)))
 		.orderBy(unitVariant.createdAt);
-	const canEdit = await authorization.unit.canEdit(base.id);
+	const canEdit = await authorization.unit.canUpdate(base.id);
 	return {
 		id: base.id,
 		type: base.kind,
@@ -337,8 +339,7 @@ export async function updateUnit(
 	authorization: Authorization<string>,
 	body: UpdateUnitInput,
 ): Promise<UnitDetail> {
-	await authorization.unit.ensureCanEdit(unitId);
-	await authorization.unit.ensureFieldsUnlocked(unitId, ["/unit", `/${kind}`]);
+	await authorization.unit.ensureCanUpdate(unitId, [["unit"], [kind]]);
 	await database.transaction(async (tx) => {
 		const [updated] = await tx
 			.update(unit)
@@ -439,8 +440,7 @@ export async function deleteUnit(
 	unitId: string,
 	authorization: Authorization<string>,
 ): Promise<void> {
-	await authorization.unit.ensureCanEdit(unitId);
-	await authorization.unit.ensureFieldsUnlocked(unitId, ["/unit/status"]);
+	await authorization.unit.ensure(unitId, "unit.delete");
 	await database.transaction(async (tx) => {
 		const [deleted] = await tx
 			.update(unit)
@@ -467,8 +467,7 @@ export async function upsertLocalization(
 		coverAssetId?: string | null;
 	},
 ): Promise<void> {
-	await authorization.unit.ensureCanEdit(unitId);
-	await authorization.unit.ensureFieldsUnlocked(unitId, [`/localizations/${input.language}`]);
+	await authorization.unit.ensureCanUpdate(unitId, [["localizations", input.language]]);
 	await database.transaction(async (tx) => {
 		await ensureImageAssetAttachable(tx, authorization.profileId, input.coverAssetId);
 		await tx

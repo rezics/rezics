@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, index, primaryKey, uuid } from "drizzle-orm/pg-core";
+import { boolean, check, index, text, unique, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import {
@@ -7,9 +7,10 @@ import {
 	createJsonDocumentColumn,
 	createTimestampMsColumn,
 	createUpdatedAtColumn,
+	createUuidv7PrimaryKey,
+	fractionalIndexPosition,
 } from "./columns";
-import { profile, unit } from "./core";
-import { realm } from "./realm";
+import { unit } from "./core";
 
 export const zone = pgTable(
 	"zone",
@@ -17,24 +18,18 @@ export const zone = pgTable(
 		id: uuid()
 			.primaryKey()
 			.references(() => unit.id, { onDelete: "cascade" }),
-		managingRealmId: uuid().references(() => realm.id, {
-			onDelete: "set null",
-		}),
 		/** @UNIT_LOCALIZATION_EXEMPT Machine-readable Zone membership boundary. */
 		boundaryDocument: createJsonDocumentColumn().notNull(),
 		/** @UNIT_LOCALIZATION_EXEMPT Visual theme configuration without localized copy. */
 		themeDocument: createJsonDocumentColumn().notNull(),
+		/** @UNIT_LOCALIZATION_EXEMPT Renderable dock; localized copy is referenced through Units. */
+		dockDocument: createJsonDocumentColumn().notNull(),
 		startsAt: createTimestampMsColumn(),
 		endsAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		index("zone_managing_realm_idx").on(table.managingRealmId),
-		check(
-			"zone_not_managing_realm_check",
-			sql`${table.managingRealmId} is null or ${table.id} <> ${table.managingRealmId}`,
-		),
 		check(
 			"zone_time_range_check",
 			sql`${table.endsAt} is null or ${table.startsAt} is null or ${table.endsAt} > ${table.startsAt}`,
@@ -42,23 +37,58 @@ export const zone = pgTable(
 	],
 );
 
-export const zoneSubscription = pgTable(
-	"zone_subscription",
+/** A Zone route composes existing Units and features; it does not own wiki/content data. */
+export const zonePage = pgTable(
+	"zone_page",
 	{
-		profileId: uuid()
-			.notNull()
-			.references(() => profile.id, { onDelete: "cascade" }),
+		id: createUuidv7PrimaryKey(),
 		zoneId: uuid()
 			.notNull()
 			.references(() => zone.id, { onDelete: "cascade" }),
+		slug: text().notNull(),
+		titleUnitId: uuid()
+			.notNull()
+			.references(() => unit.id, { onDelete: "restrict" }),
+		document: createJsonDocumentColumn().notNull(),
+		position: fractionalIndexPosition().notNull(),
+		home: boolean().default(false).notNull(),
 		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.profileId, table.zoneId] }),
-		index("zone_subscription_zone_created_at_idx").on(
-			table.zoneId,
-			table.createdAt.desc(),
-			table.profileId,
+		unique("zone_page_zone_slug_key").on(table.zoneId, table.slug),
+		uniqueIndex("zone_page_one_home_key")
+			.on(table.zoneId)
+			.where(sql`${table.home}`),
+		index("zone_page_zone_position_idx").on(table.zoneId, table.position, table.id),
+		index("zone_page_title_unit_idx").on(table.titleUnitId),
+		check(
+			"zone_page_slug_check",
+			sql`${table.slug} ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and char_length(${table.slug}) <= 100`,
+		),
+	],
+);
+
+/** Menu content is independent from Menu Block presentation and can be reused by many pages. */
+export const zoneNavigation = pgTable(
+	"zone_navigation",
+	{
+		id: createUuidv7PrimaryKey(),
+		zoneId: uuid()
+			.notNull()
+			.references(() => zone.id, { onDelete: "cascade" }),
+		key: text().notNull(),
+		document: createJsonDocumentColumn().notNull(),
+		position: fractionalIndexPosition().notNull(),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		unique("zone_navigation_zone_key").on(table.zoneId, table.key),
+		index("zone_navigation_zone_position_idx").on(table.zoneId, table.position, table.id),
+		check(
+			"zone_navigation_key_check",
+			sql`${table.key} ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and char_length(${table.key}) <= 64`,
 		),
 	],
 );

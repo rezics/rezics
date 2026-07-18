@@ -65,7 +65,25 @@ export const EnforcementKindValues = [
 	"trust_restriction",
 ] as const;
 export const CapabilityAuthorityValues = ["platform", "realm"] as const;
-export const CollaboratorRoleValues = ["owner", "editor"] as const;
+export const UnitAccessSubjectKindValues = ["profile", "realm", "authenticated"] as const;
+export const UnitAccessRealmRelationValues = ["member", "content_editor", "governor"] as const;
+export const UnitAccessRoleValues = [
+	"viewer",
+	"editor",
+	"publisher",
+	"maintainer",
+	"owner",
+] as const;
+export const UnitPermissionValues = [
+	"unit.read",
+	"unit.update",
+	"unit.publish",
+	"unit.history.restore",
+	"unit.access.manage",
+	"unit.protection.manage",
+	"unit.delete",
+] as const;
+export const UnitProtectionModeValues = ["frozen", "owner_only"] as const;
 export const RealmJoinPolicyValues = ["open", "approval"] as const;
 export const RealmMemberRoleValues = ["owner", "admin", "moderator", "member"] as const;
 export const RealmMemberStateValues = ["active", "pending", "muted", "removed", "banned"] as const;

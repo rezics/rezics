@@ -6,7 +6,7 @@ import {
 	createCollectionPresentationDocument,
 	createSystemCollectionDefinitionDocument,
 	parseDocument,
-} from "@rezics/content-structure";
+} from "@rezics/block";
 
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import { database } from "../../database";
@@ -15,7 +15,7 @@ import {
 	collection as collectionTable,
 	collectionItem,
 	unit,
-	unitCollaborator,
+	unitAccessBinding,
 	unitLocalization,
 } from "../../database/schema";
 import { recordUnitRevision } from "../../units/history";
@@ -64,11 +64,13 @@ export async function ensureFavorites(ownerId: string) {
 				language: DefaultLanguage,
 				title: "Favorites",
 			});
-			await tx.insert(unitCollaborator).values({
+			await tx.insert(unitAccessBinding).values({
 				unitId: created.id,
+				subjectKind: "profile",
 				profileId: ownerId,
 				role: "owner",
-				addedByProfileId: ownerId,
+				scope: [],
+				grantedByProfileId: ownerId,
 			});
 			await recordUnitRevision(tx, {
 				unitId: created.id,

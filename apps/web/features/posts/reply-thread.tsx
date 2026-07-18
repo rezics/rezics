@@ -33,7 +33,7 @@ import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
-import { readPortableText, writePortableText } from "@/lib/content-structure";
+import { readPortableText, writePortableText } from "@/lib/block";
 import { buildReplyPostTree, findReplyPost, type ReplyPostTreeNode } from "./reply-tree";
 import { invalidatePostQueries } from "./query";
 

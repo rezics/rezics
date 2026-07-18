@@ -9,7 +9,7 @@ import {
 	unit,
 	profile as profileTable,
 	profileBlock,
-	profileFollow,
+	unitFollow,
 	profilePreference,
 	unitLocalization,
 } from "../../database/schema";
@@ -46,7 +46,7 @@ const ProfileMutationNotFoundResponse = toApiErrorResponse([
 	"ProfileNotFound",
 	"ImageAssetNotFound",
 ]);
-const UnitForbiddenResponse = toApiErrorResponse(["UnitFieldLocked"]);
+const UnitForbiddenResponse = toApiErrorResponse(["UnitProtected"]);
 const UserNotFoundResponse = toApiErrorResponse(["UnitNotFound", "UserNotFound"]);
 
 export default new Elysia({ prefix: "/users" })
@@ -73,9 +73,9 @@ export default new Elysia({ prefix: "/users" })
 	.patch(
 		"/me",
 		async ({ profile, authorization, body }) => {
-			await authorization.unit.ensureFieldsUnlocked(profile.unitId, [
-				"/unit/slug",
-				"/profile",
+			await authorization.unit.ensureCanUpdate(profile.unitId, [
+				["unit", "slug"],
+				["profile"],
 			]);
 			await database.transaction(async (tx) => {
 				await ensureImageAssetAttachable(tx, profile.unitId, body.avatarAssetId);
@@ -175,7 +175,7 @@ export default new Elysia({ prefix: "/users" })
 	.put(
 		"/me/preferences",
 		async ({ profile, authorization, body }) => {
-			await authorization.unit.ensureFieldsUnlocked(profile.unitId, ["/preferences"]);
+			await authorization.unit.ensureCanUpdate(profile.unitId, [["preferences"]]);
 			await database.transaction(async (tx) => {
 				const [preference] = await tx
 					.update(profilePreference)
@@ -201,7 +201,7 @@ export default new Elysia({ prefix: "/users" })
 			body: ReplacePreferencesBody,
 			response: {
 				[StatusCodes.OK]: PreferencesResponse,
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitFieldLocked"]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitProtected"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
 			},
 			detail: { summary: "Replace current user preferences", tags: ["Users"] },
@@ -236,12 +236,12 @@ export default new Elysia({ prefix: "/users" })
 				? Boolean(
 						(
 							await database
-								.select({ id: profileFollow.followedProfileId })
-								.from(profileFollow)
+								.select({ id: unitFollow.unitId })
+								.from(unitFollow)
 								.where(
 									and(
-										eq(profileFollow.followerProfileId, viewer.unitId),
-										eq(profileFollow.followedProfileId, result.id),
+										eq(unitFollow.followerProfileId, viewer.unitId),
+										eq(unitFollow.unitId, result.id),
 									),
 								)
 								.limit(1)
@@ -289,10 +289,10 @@ export default new Elysia({ prefix: "/users" })
 			if (blocked) throw new UserFollowBlocked();
 			const notificationId = await database.transaction(async (tx) => {
 				const [inserted] = await tx
-					.insert(profileFollow)
-					.values({ followerProfileId: profile.unitId, followedProfileId: params.id })
+					.insert(unitFollow)
+					.values({ followerProfileId: profile.unitId, unitId: params.id })
 					.onConflictDoNothing()
-					.returning({ id: profileFollow.followedProfileId });
+					.returning({ id: unitFollow.unitId });
 				if (!inserted) return undefined;
 				return createNotification(tx, {
 					recipientProfileId: params.id,
@@ -323,11 +323,11 @@ export default new Elysia({ prefix: "/users" })
 		"/:id/follow",
 		async ({ profile, params }) => {
 			await database
-				.delete(profileFollow)
+				.delete(unitFollow)
 				.where(
 					and(
-						eq(profileFollow.followerProfileId, profile.unitId),
-						eq(profileFollow.followedProfileId, params.id),
+						eq(unitFollow.followerProfileId, profile.unitId),
+						eq(unitFollow.unitId, params.id),
 					),
 				);
 			return { following: false };
@@ -377,16 +377,16 @@ export default new Elysia({ prefix: "/users" })
 					.values({ blockerProfileId: profile.unitId, blockedProfileId: params.id })
 					.onConflictDoNothing();
 				await tx
-					.delete(profileFollow)
+					.delete(unitFollow)
 					.where(
 						or(
 							and(
-								eq(profileFollow.followerProfileId, profile.unitId),
-								eq(profileFollow.followedProfileId, params.id),
+								eq(unitFollow.followerProfileId, profile.unitId),
+								eq(unitFollow.unitId, params.id),
 							),
 							and(
-								eq(profileFollow.followerProfileId, params.id),
-								eq(profileFollow.followedProfileId, profile.unitId),
+								eq(unitFollow.followerProfileId, params.id),
+								eq(unitFollow.unitId, profile.unitId),
 							),
 						),
 					);

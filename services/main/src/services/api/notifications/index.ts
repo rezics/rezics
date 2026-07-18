@@ -206,8 +206,8 @@ export default new Elysia({ prefix: "/notifications" })
 	.put(
 		"/read-all",
 		async ({ profile, authorization, body }) => {
-			await authorization.unit.ensureFieldsUnlocked(profile.unitId, [
-				"/notificationPreferences",
+			await authorization.unit.ensureCanUpdate(profile.unitId, [
+				["notification-preferences"],
 			]);
 			const through = decodeCursor(body.through, false);
 			const boundary = through;
@@ -239,7 +239,7 @@ export default new Elysia({ prefix: "/notifications" })
 			response: {
 				[StatusCodes.OK]: t.Object({ updated: t.Boolean() }),
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidNotificationCursor"]),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitFieldLocked"]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitProtected"]),
 			},
 			detail: { summary: "Mark notifications read", tags: ["Notifications"] },
 		},

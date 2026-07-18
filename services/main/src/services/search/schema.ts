@@ -1,34 +1,15 @@
-export const SearchCategories = [
-	"units",
-	"users",
-	"entity",
-	"tags",
-	"posts",
-	"realms",
-	"collections",
-	"reviews",
-	"polls",
-] as const;
+import {
+	SearchCategoryValues,
+	SearchSortValues,
+	type SearchCategory,
+	type SearchExpression,
+	type SearchSort,
+} from "@rezics/search";
 
-export type SearchCategory = (typeof SearchCategories)[number];
-
-export const SearchSorts = [
-	"relevance",
-	"createdAt:asc",
-	"createdAt:desc",
-	"updatedAt:asc",
-	"updatedAt:desc",
-	"publishedAt:asc",
-	"publishedAt:desc",
-	"subscriberCount:asc",
-	"subscriberCount:desc",
-	"replyCount:asc",
-	"replyCount:desc",
-	"closesAt:asc",
-	"closesAt:desc",
-] as const;
-
-export type SearchSort = (typeof SearchSorts)[number];
+export const SearchCategories = SearchCategoryValues;
+export type { SearchCategory };
+export const SearchSorts = SearchSortValues;
+export type { SearchSort };
 
 export interface SearchHit {
 	id: string;
@@ -40,6 +21,8 @@ export interface SearchHit {
 }
 
 export interface DomainSearchRequest {
+	/** Resolved server-side identity; never accepted from an API request body. */
+	profileId?: string;
 	query?: string;
 	offset?: number;
 	limit?: number;
@@ -60,52 +43,67 @@ export interface DomainSearchRequest {
 	resultsVisibilities?: string[];
 	closed?: boolean;
 	sort?: SearchSort;
+	scopeUnitId?: string;
+	includeScopeDescendants?: boolean;
+	expression?: SearchExpression;
 }
 
 const CommonSortableAttributes = ["createdAt", "updatedAt"];
+const CommonFilterableAttributes = [
+	"Languages",
+	"realmId",
+	"tagId",
+	"contentRating",
+	"aiDisclosure",
+	"license",
+];
 
 export const SearchCategoryRules = {
 	units: {
-		filterableAttributes: ["type", "Languages", "contentRating", "aiDisclosure", "license"],
+		filterableAttributes: [...CommonFilterableAttributes, "type"],
 		sortableAttributes: [...CommonSortableAttributes, "publishedAt"],
 	},
 	users: {
-		filterableAttributes: ["Languages"],
+		filterableAttributes: CommonFilterableAttributes,
 		sortableAttributes: [...CommonSortableAttributes, "subscriberCount"],
 	},
 	entity: {
-		filterableAttributes: ["type", "Languages"],
+		filterableAttributes: [...CommonFilterableAttributes, "type"],
 		sortableAttributes: CommonSortableAttributes,
 	},
 	tags: {
-		filterableAttributes: ["Languages"],
+		filterableAttributes: CommonFilterableAttributes,
 		sortableAttributes: CommonSortableAttributes,
 	},
 	posts: {
 		filterableAttributes: [
 			"authorId",
-			"realmId",
+			...CommonFilterableAttributes,
 			"subjectId",
 			"rootId",
 			"parentId",
-			"Languages",
 		],
 		sortableAttributes: [...CommonSortableAttributes, "replyCount"],
 	},
 	realms: {
-		filterableAttributes: ["joinPolicy", "Languages"],
+		filterableAttributes: [...CommonFilterableAttributes, "joinPolicy"],
 		sortableAttributes: [...CommonSortableAttributes, "subscriberCount"],
 	},
 	collections: {
-		filterableAttributes: ["ownerId", "Languages"],
+		filterableAttributes: [...CommonFilterableAttributes, "ownerId"],
 		sortableAttributes: CommonSortableAttributes,
 	},
 	reviews: {
-		filterableAttributes: ["authorId", "targetId", "realmId", "type", "Languages"],
+		filterableAttributes: [...CommonFilterableAttributes, "authorId", "targetId", "type"],
 		sortableAttributes: CommonSortableAttributes,
 	},
 	polls: {
-		filterableAttributes: ["multiple", "resultsVisibility", "closesAt", "Languages"],
+		filterableAttributes: [
+			...CommonFilterableAttributes,
+			"multiple",
+			"resultsVisibility",
+			"closesAt",
+		],
 		sortableAttributes: [...CommonSortableAttributes, "closesAt"],
 	},
 };

@@ -2,13 +2,14 @@ import { createHash } from "node:crypto";
 
 import {
 	createCollectionPresentationDocument,
+	createBlockDocument,
 	createManualCollectionDefinitionDocument,
 	createPollContentDocument,
 	createPortableTextDocument,
 	createSystemCollectionDefinitionDocument,
 	createZoneBoundaryDocument,
 	createZoneThemeDocument,
-} from "@rezics/content-structure";
+} from "@rezics/block";
 import { defaultKeyHasher } from "@better-auth/api-key";
 import { hashPassword } from "better-auth/crypto";
 import { and, eq } from "drizzle-orm";
@@ -48,7 +49,7 @@ import {
 	postReply,
 	profile,
 	profileBlock,
-	profileFollow,
+	unitFollow,
 	profilePreference,
 	realm,
 	realmUnit,
@@ -57,7 +58,6 @@ import {
 	realmRule,
 	realmRuleAcceptance,
 	realmRuleRevision,
-	realmSubscription,
 	recommendationEvent,
 	recommendationExclusion,
 	score,
@@ -67,9 +67,9 @@ import {
 	unit,
 	unitAlias,
 	unitAliasVote,
-	unitCollaborator,
+	unitAccessBinding,
 	creditAttribution,
-	unitFieldLock,
+	unitProtection,
 	unitLink,
 	unitLocalization,
 	unitProgress,
@@ -80,7 +80,6 @@ import {
 	unitVariant,
 	users,
 	zone,
-	zoneSubscription,
 } from "../src/services/database/schema";
 import { RecommendationPolicyVersion } from "../src/services/recommendations/policy";
 import { fractionalPositionAt } from "../src/services/ordering/position";
@@ -300,13 +299,15 @@ async function insertUnitDetails(
 	await writeBatches(
 		values.map((value) => ({
 			unitId: value.id,
+			subjectKind: "profile" as const,
 			profileId: value.ownerProfileId,
 			role: "owner" as const,
-			addedByProfileId: value.ownerProfileId,
+			scope: [],
+			grantedByProfileId: value.ownerProfileId,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
-		(batch) => tx.insert(unitCollaborator).values(batch),
+		(batch) => tx.insert(unitAccessBinding).values(batch),
 	);
 }
 
@@ -620,14 +621,11 @@ async function seedCatalog(
 	await writeBatches(
 		zones.map((value, index) => ({
 			id: value.id,
-			managingRealmId: itemAt(realms, index).id,
-			boundaryDocument: createZoneBoundaryDocument({
-				kind: "catalog",
-				index,
-			}),
+			boundaryDocument: createZoneBoundaryDocument(["units"]),
 			themeDocument: createZoneThemeDocument({
-				accent: itemAt(["amber", "blue", "violet"], index),
+				accent: itemAt(["#f59e0b", "#3b82f6", "#8b5cf6"], index),
 			}),
+			dockDocument: createBlockDocument(),
 			startsAt: index % 3 === 0 ? data.pastDate(180) : null,
 			endsAt: index % 3 === 0 ? data.futureDate(180) : null,
 			createdAt: value.createdAt,
@@ -1115,25 +1113,28 @@ async function seedStructure(
 			);
 			return {
 				unitId: target.id,
+				subjectKind: "profile" as const,
 				profileId: editor.id,
 				role: "editor" as const,
-				addedByProfileId: target.ownerProfileId,
+				scope: [],
+				grantedByProfileId: target.ownerProfileId,
 				createdAt: target.createdAt,
 				updatedAt: target.updatedAt,
 			};
 		}),
-		(batch) => tx.insert(unitCollaborator).values(batch),
+		(batch) => tx.insert(unitAccessBinding).values(batch),
 	);
 	await writeBatches(
-		Array.from({ length: SeedPlan.fieldLocks }, (_, index) => ({
+		Array.from({ length: SeedPlan.unitProtections }, (_, index) => ({
 			unitId: itemAt(catalog.works, index).id,
-			path: `/localizations/${itemAt(data.languages(index), 0)}/title`,
-			lockedByProfileId: itemAt(profiles, index * 11).id,
+			scope: ["localizations", itemAt(data.languages(index), 0), "title"],
+			mode: "frozen" as const,
+			createdByProfileId: itemAt(profiles, index * 11).id,
 			reason: "Seeded moderation lock",
 			createdAt: data.pastDate(180),
 			updatedAt: data.pastDate(30),
 		})),
-		(batch) => tx.insert(unitFieldLock).values(batch),
+		(batch) => tx.insert(unitProtection).values(batch),
 	);
 
 	const memberRows = catalog.realms.flatMap((realmUnit, realmIndex) => {
@@ -1166,15 +1167,15 @@ async function seedStructure(
 	await writeBatches(
 		catalog.realms.flatMap((realmUnit, realmIndex) =>
 			Array.from(
-				{ length: SeedPlan.realmSubscriptions / catalog.realms.length },
+				{ length: SeedPlan.realmUnitFollows / catalog.realms.length },
 				(_, index) => ({
-					profileId: itemAt(profiles, realmIndex * 5 + index).id,
-					realmId: realmUnit.id,
+					followerProfileId: itemAt(profiles, realmIndex * 5 + index).id,
+					unitId: realmUnit.id,
 					createdAt: realmUnit.createdAt,
 				}),
 			),
 		),
-		(batch) => tx.insert(realmSubscription).values(batch),
+		(batch) => tx.insert(unitFollow).values(batch),
 	);
 
 	const revisions: (typeof realmRuleRevision.$inferSelect)[] = [];
@@ -1311,16 +1312,13 @@ async function seedStructure(
 	);
 	await writeBatches(
 		catalog.zones.flatMap((zoneUnit, zoneIndex) =>
-			Array.from(
-				{ length: SeedPlan.zoneSubscriptions / catalog.zones.length },
-				(_, index) => ({
-					zoneId: zoneUnit.id,
-					profileId: itemAt(profiles, zoneIndex * 7 + index).id,
-					createdAt: zoneUnit.createdAt,
-				}),
-			),
+			Array.from({ length: SeedPlan.zoneUnitFollows / catalog.zones.length }, (_, index) => ({
+				unitId: zoneUnit.id,
+				followerProfileId: itemAt(profiles, zoneIndex * 7 + index).id,
+				createdAt: zoneUnit.createdAt,
+			})),
 		),
-		(batch) => tx.insert(zoneSubscription).values(batch),
+		(batch) => tx.insert(unitFollow).values(batch),
 	);
 
 	return { realmMembers: memberRows, realmUnits: realmUnitRows };
@@ -1336,20 +1334,23 @@ async function seedInteractions(
 	await writeBatches(
 		profiles.flatMap((follower, followerIndex) => {
 			const candidates = profiles.filter((value) => value.id !== follower.id);
-			return Array.from({ length: SeedPlan.profileFollows / profiles.length }, (_, index) => {
-				const followed = itemAt(candidates, followerIndex * 7 + index);
-				return {
-					followerProfileId: follower.id,
-					followedProfileId: followed.id,
-					createdAt: latestDate(
-						data.pastDate(365),
-						follower.createdAt,
-						followed.createdAt,
-					),
-				};
-			});
+			return Array.from(
+				{ length: SeedPlan.profileUnitFollows / profiles.length },
+				(_, index) => {
+					const followed = itemAt(candidates, followerIndex * 7 + index);
+					return {
+						followerProfileId: follower.id,
+						unitId: followed.id,
+						createdAt: latestDate(
+							data.pastDate(365),
+							follower.createdAt,
+							followed.createdAt,
+						),
+					};
+				},
+			);
 		}),
-		(batch) => tx.insert(profileFollow).values(batch),
+		(batch) => tx.insert(unitFollow).values(batch),
 	);
 	await writeBatches(
 		profiles.map((blocker, index) => {
@@ -1793,8 +1794,8 @@ async function seedGovernance(
 		"restore",
 		"lock",
 		"unlock",
-		"field_lock",
-		"field_unlock",
+		"protect",
+		"unprotect",
 		"warning",
 		"silence",
 		"suspension",

@@ -14,9 +14,8 @@ import {
 	post,
 	postReply,
 	profile as profileTable,
-	profileFollow,
+	unitFollow,
 	realmUnit,
-	realmSubscription,
 	recommendationProfileInterest,
 	recommendationUnitEdge,
 	recommendationUnitStat,
@@ -251,10 +250,10 @@ async function getCandidateSources(input: {
 					.from(post)
 					.innerJoin(unit, eq(unit.id, post.id))
 					.innerJoin(
-						profileFollow,
+						unitFollow,
 						and(
-							eq(profileFollow.followerProfileId, input.viewer.profileId),
-							eq(profileFollow.followedProfileId, post.authorProfileId),
+							eq(unitFollow.followerProfileId, input.viewer.profileId),
+							eq(unitFollow.unitId, post.authorProfileId),
 						),
 					)
 					.where(condition)
@@ -272,10 +271,10 @@ async function getCandidateSources(input: {
 						and(eq(realmUnit.unitId, post.id), eq(realmUnit.status, "visible")),
 					)
 					.innerJoin(
-						realmSubscription,
+						unitFollow,
 						and(
-							eq(realmSubscription.profileId, input.viewer.profileId),
-							eq(realmSubscription.realmId, realmUnit.realmId),
+							eq(unitFollow.followerProfileId, input.viewer.profileId),
+							eq(unitFollow.unitId, realmUnit.realmId),
 						),
 					)
 					.where(condition)

@@ -36,6 +36,6 @@ describe("API response values", () => {
 				_key: "not-a-block-key",
 				content: [],
 			}),
-		).toThrow("Invalid Content Structure document");
+		).toThrow("Invalid Block document");
 	});
 });

@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { describe, expect, it } from "vitest";
 
 import { SearchUnavailable } from "../search/errors";
-import { UnitFieldLocked } from "../units/errors";
+import { UnitProtected } from "../units/errors";
 import {
 	ApiErrorCodes,
 	ApiErrorRegistry,
@@ -14,17 +14,17 @@ import {
 
 describe("API errors", () => {
 	it("serializes typed failures without exposing their cause", () => {
-		const failure = new UnitFieldLocked("/title");
+		const failure = new UnitProtected(["title"], "frozen");
 
 		expect(failure).toBeInstanceOf(Error);
-		expect(failure._tag).toBe("UnitFieldLocked");
+		expect(failure._tag).toBe("UnitProtected");
 		expect(isApiError(failure)).toBe(true);
 		expect(failure.status).toBe(StatusCodes.FORBIDDEN);
 		expect(toApiErrorBody(failure, "request-1")).toEqual({
 			error: {
-				code: "UnitFieldLocked",
-				message: "Unit field is locked: /title",
-				details: { path: "/title" },
+				code: "UnitProtected",
+				message: "Unit scope is protected: title",
+				details: { scope: ["title"], mode: "frozen" },
 			},
 			requestId: "request-1",
 		});

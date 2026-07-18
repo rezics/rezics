@@ -1,5 +1,5 @@
 import { type Static, t } from "elysia";
-import { PortableTextDocument } from "@rezics/content-structure";
+import { PortableTextDocument } from "@rezics/block";
 
 import { ContentRatingValues } from "../../database/schema/contract-values";
 import { LanguageTag, Uuid } from "../schema";

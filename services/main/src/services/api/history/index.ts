@@ -314,7 +314,7 @@ export default new Elysia({ prefix: "/history" })
 	.post(
 		"/units/:unitId/revisions/:revisionId/restore",
 		async ({ params, body, profile, authorization }) => {
-			await authorization.unit.ensureCanRestore(params.unitId);
+			await authorization.unit.ensure(params.unitId, "unit.history.restore");
 			const source = await findSummary(params.revisionId);
 			if (source.unitId !== params.unitId) throw new UnitRevisionNotFound();
 			const access = await getVisibilityAccess(authorization);
@@ -339,7 +339,7 @@ export default new Elysia({ prefix: "/history" })
 			response: {
 				[StatusCodes.OK]: RevisionActionResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitRestoreForbidden"]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
 					"UnitRevisionNotFound",
@@ -351,7 +351,7 @@ export default new Elysia({ prefix: "/history" })
 	.post(
 		"/units/:unitId/revisions/:revisionId/undo",
 		async ({ params, body, profile, authorization }) => {
-			await authorization.unit.ensureCanRestore(params.unitId);
+			await authorization.unit.ensure(params.unitId, "unit.history.restore");
 			const target = await findSummary(params.revisionId);
 			if (target.unitId !== params.unitId) throw new UnitRevisionNotFound();
 			const access = await getVisibilityAccess(authorization);
@@ -381,7 +381,7 @@ export default new Elysia({ prefix: "/history" })
 			response: {
 				[StatusCodes.OK]: RevisionActionResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitRestoreForbidden"]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
 					"UnitRevisionNotFound",

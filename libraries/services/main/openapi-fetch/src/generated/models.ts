@@ -13,6 +13,2150 @@ export type JsonValue =
 			[key: string]: JsonValue;
 	  };
 
+/**
+ * @type object
+ */
+export type BlockDocument = {
+	/**
+	 * @type string
+	 */
+	_type: "block-document";
+	/**
+	 * @pattern ^[0-9a-f]{12}$
+	 * @type string
+	 */
+	_key: string;
+	/**
+	 * @type array
+	 */
+	blocks: (
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "portable-text";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type array
+				 */
+				content: (
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "block";
+							/**
+							 * @type array
+							 */
+							children: (
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "span";
+										/**
+										 * @type string
+										 */
+										text: string;
+										/**
+										 * @type array | undefined
+										 */
+										marks?: string[];
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @pattern ^(?!span$).+
+										 * @type string
+										 */
+										_type: string;
+										[key: string]: unknown;
+								  }
+							)[];
+							/**
+							 * @type array | undefined
+							 */
+							markDefs?: {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+							}[];
+							/**
+							 * @type string | undefined
+							 */
+							listItem?: string;
+							/**
+							 * @type string | undefined
+							 */
+							style?: string;
+							/**
+							 * @minLength 1
+							 * @type integer | undefined
+							 */
+							level?: number;
+							[key: string]: unknown;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "image";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							assetId: string;
+							/**
+							 * @type string | undefined
+							 */
+							alt?: string;
+							/**
+							 * @type string | undefined
+							 */
+							caption?: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @pattern ^(?!(?:block|image)$).+
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+					  }
+				)[];
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "unit-ref";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+				 * @type string
+				 */
+				unitId: string;
+				appearance: "inline" | "card" | "cover" | "hero";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "unit-list";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				source:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "units";
+							/**
+							 * @type array
+							 */
+							unitIds: string[];
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "collection";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							collectionId: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "search";
+							/**
+							 * @type object
+							 */
+							configuration: {
+								scope:
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "global";
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "unit";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											unitId: string;
+											/**
+											 * @default false
+											 * @type boolean
+											 */
+											includeDescendants: boolean;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "realm";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											realmId: string;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											kind: "zone";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											zoneId: string;
+									  };
+								/**
+								 * @type array
+								 */
+								categories: (
+									| "units"
+									| "users"
+									| "entity"
+									| "tags"
+									| "posts"
+									| "realms"
+									| "collections"
+									| "reviews"
+									| "polls"
+								)[];
+								/**
+								 * @type object
+								 */
+								modes: {
+									/**
+									 * @type array
+									 */
+									available: ("basic" | "advanced")[];
+									default: "basic" | "advanced";
+								};
+								/**
+								 * @type object
+								 */
+								query: {
+									/**
+									 * @default true
+									 * @type boolean
+									 */
+									enabled: boolean;
+									/**
+									 * @default false
+									 * @type boolean | undefined
+									 */
+									required?: boolean;
+									/**
+									 * @maxLength 500
+									 * @type string | undefined
+									 */
+									initial?: string;
+								};
+								/**
+								 * @type array
+								 */
+								constraints: (
+									| {
+											field:
+												| "category"
+												| "type"
+												| "language"
+												| "content-rating"
+												| "ai-disclosure"
+												| "license"
+												| "tag"
+												| "author"
+												| "realm"
+												| "zone"
+												| "subject"
+												| "target"
+												| "root"
+												| "parent"
+												| "owner"
+												| "join-policy"
+												| "multiple"
+												| "results-visibility"
+												| "closed"
+												| "created-at"
+												| "updated-at"
+												| "published-at"
+												| "closes-at";
+											/**
+											 * @type string
+											 */
+											operator: "equals";
+											value: string | number | boolean;
+									  }
+									| {
+											field:
+												| "category"
+												| "type"
+												| "language"
+												| "content-rating"
+												| "ai-disclosure"
+												| "license"
+												| "tag"
+												| "author"
+												| "realm"
+												| "zone"
+												| "subject"
+												| "target"
+												| "root"
+												| "parent"
+												| "owner"
+												| "join-policy"
+												| "multiple"
+												| "results-visibility"
+												| "closed"
+												| "created-at"
+												| "updated-at"
+												| "published-at"
+												| "closes-at";
+											/**
+											 * @type string
+											 */
+											operator: "not-equals";
+											value: string | number | boolean;
+									  }
+									| {
+											field:
+												| "category"
+												| "type"
+												| "language"
+												| "content-rating"
+												| "ai-disclosure"
+												| "license"
+												| "tag"
+												| "author"
+												| "realm"
+												| "zone"
+												| "subject"
+												| "target"
+												| "root"
+												| "parent"
+												| "owner"
+												| "join-policy"
+												| "multiple"
+												| "results-visibility"
+												| "closed"
+												| "created-at"
+												| "updated-at"
+												| "published-at"
+												| "closes-at";
+											operator: "any-of" | "all-of" | "none-of";
+											/**
+											 * @type array
+											 */
+											values: (string | number | boolean)[];
+									  }
+									| (
+											| {
+													field:
+														| "category"
+														| "type"
+														| "language"
+														| "content-rating"
+														| "ai-disclosure"
+														| "license"
+														| "tag"
+														| "author"
+														| "realm"
+														| "zone"
+														| "subject"
+														| "target"
+														| "root"
+														| "parent"
+														| "owner"
+														| "join-policy"
+														| "multiple"
+														| "results-visibility"
+														| "closed"
+														| "created-at"
+														| "updated-at"
+														| "published-at"
+														| "closes-at";
+													/**
+													 * @type string
+													 */
+													operator: "range";
+													lower: string | number | boolean;
+													upper?: string | number | boolean;
+											  }
+											| {
+													field:
+														| "category"
+														| "type"
+														| "language"
+														| "content-rating"
+														| "ai-disclosure"
+														| "license"
+														| "tag"
+														| "author"
+														| "realm"
+														| "zone"
+														| "subject"
+														| "target"
+														| "root"
+														| "parent"
+														| "owner"
+														| "join-policy"
+														| "multiple"
+														| "results-visibility"
+														| "closed"
+														| "created-at"
+														| "updated-at"
+														| "published-at"
+														| "closes-at";
+													/**
+													 * @type string
+													 */
+													operator: "range";
+													lower?: string | number | boolean;
+													upper: string | number | boolean;
+											  }
+									  )
+									| {
+											field:
+												| "category"
+												| "type"
+												| "language"
+												| "content-rating"
+												| "ai-disclosure"
+												| "license"
+												| "tag"
+												| "author"
+												| "realm"
+												| "zone"
+												| "subject"
+												| "target"
+												| "root"
+												| "parent"
+												| "owner"
+												| "join-policy"
+												| "multiple"
+												| "results-visibility"
+												| "closed"
+												| "created-at"
+												| "updated-at"
+												| "published-at"
+												| "closes-at";
+											/**
+											 * @type string
+											 */
+											operator: "exists";
+											/**
+											 * @type boolean
+											 */
+											value: boolean;
+									  }
+								)[];
+								/**
+								 * @type array
+								 */
+								defaults: (
+									| {
+											field:
+												| "category"
+												| "type"
+												| "language"
+												| "content-rating"
+												| "ai-disclosure"
+												| "license"
+												| "tag"
+												| "author"
+												| "realm"
+												| "zone"
+												| "subject"
+												| "target"
+												| "root"
+												| "parent"
+												| "owner"
+												| "join-policy"
+												| "multiple"
+												| "results-visibility"
+												| "closed"
+												| "created-at"
+												| "updated-at"
+												| "published-at"
+												| "closes-at";
+											/**
+											 * @type string
+											 */
+											operator: "equals";
+											value: string | number | boolean;
+									  }
+									| {
+											field:
+												| "category"
+												| "type"
+												| "language"
+												| "content-rating"
+												| "ai-disclosure"
+												| "license"
+												| "tag"
+												| "author"
+												| "realm"
+												| "zone"
+												| "subject"
+												| "target"
+												| "root"
+												| "parent"
+												| "owner"
+												| "join-policy"
+												| "multiple"
+												| "results-visibility"
+												| "closed"
+												| "created-at"
+												| "updated-at"
+												| "published-at"
+												| "closes-at";
+											/**
+											 * @type string
+											 */
+											operator: "not-equals";
+											value: string | number | boolean;
+									  }
+									| {
+											field:
+												| "category"
+												| "type"
+												| "language"
+												| "content-rating"
+												| "ai-disclosure"
+												| "license"
+												| "tag"
+												| "author"
+												| "realm"
+												| "zone"
+												| "subject"
+												| "target"
+												| "root"
+												| "parent"
+												| "owner"
+												| "join-policy"
+												| "multiple"
+												| "results-visibility"
+												| "closed"
+												| "created-at"
+												| "updated-at"
+												| "published-at"
+												| "closes-at";
+											operator: "any-of" | "all-of" | "none-of";
+											/**
+											 * @type array
+											 */
+											values: (string | number | boolean)[];
+									  }
+									| (
+											| {
+													field:
+														| "category"
+														| "type"
+														| "language"
+														| "content-rating"
+														| "ai-disclosure"
+														| "license"
+														| "tag"
+														| "author"
+														| "realm"
+														| "zone"
+														| "subject"
+														| "target"
+														| "root"
+														| "parent"
+														| "owner"
+														| "join-policy"
+														| "multiple"
+														| "results-visibility"
+														| "closed"
+														| "created-at"
+														| "updated-at"
+														| "published-at"
+														| "closes-at";
+													/**
+													 * @type string
+													 */
+													operator: "range";
+													lower: string | number | boolean;
+													upper?: string | number | boolean;
+											  }
+											| {
+													field:
+														| "category"
+														| "type"
+														| "language"
+														| "content-rating"
+														| "ai-disclosure"
+														| "license"
+														| "tag"
+														| "author"
+														| "realm"
+														| "zone"
+														| "subject"
+														| "target"
+														| "root"
+														| "parent"
+														| "owner"
+														| "join-policy"
+														| "multiple"
+														| "results-visibility"
+														| "closed"
+														| "created-at"
+														| "updated-at"
+														| "published-at"
+														| "closes-at";
+													/**
+													 * @type string
+													 */
+													operator: "range";
+													lower?: string | number | boolean;
+													upper: string | number | boolean;
+											  }
+									  )
+									| {
+											field:
+												| "category"
+												| "type"
+												| "language"
+												| "content-rating"
+												| "ai-disclosure"
+												| "license"
+												| "tag"
+												| "author"
+												| "realm"
+												| "zone"
+												| "subject"
+												| "target"
+												| "root"
+												| "parent"
+												| "owner"
+												| "join-policy"
+												| "multiple"
+												| "results-visibility"
+												| "closed"
+												| "created-at"
+												| "updated-at"
+												| "published-at"
+												| "closes-at";
+											/**
+											 * @type string
+											 */
+											operator: "exists";
+											/**
+											 * @type boolean
+											 */
+											value: boolean;
+									  }
+								)[];
+								/**
+								 * @type array
+								 */
+								controls: {
+									/**
+									 * @minLength 1
+									 * @maxLength 64
+									 * @pattern ^[a-z][a-z0-9-]*$
+									 * @type string
+									 */
+									key: string;
+									field:
+										| "category"
+										| "type"
+										| "language"
+										| "content-rating"
+										| "ai-disclosure"
+										| "license"
+										| "tag"
+										| "author"
+										| "realm"
+										| "zone"
+										| "subject"
+										| "target"
+										| "root"
+										| "parent"
+										| "owner"
+										| "join-policy"
+										| "multiple"
+										| "results-visibility"
+										| "closed"
+										| "created-at"
+										| "updated-at"
+										| "published-at"
+										| "closes-at";
+									component:
+										| "select"
+										| "multi-select"
+										| "toggle"
+										| "date-range"
+										| "value-range";
+									/**
+									 * @type array
+									 */
+									modes: ("basic" | "advanced")[];
+									/**
+									 * @type array
+									 */
+									operators: (
+										| "equals"
+										| "not-equals"
+										| "any-of"
+										| "all-of"
+										| "none-of"
+										| "range"
+										| "exists"
+									)[];
+									optionSource?:
+										| {
+												/**
+												 * @type string
+												 */
+												kind: "facet";
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												kind: "static";
+												/**
+												 * @type array
+												 */
+												options: {
+													value: string | number | boolean;
+													/**
+													 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+													 * @type string | undefined
+													 */
+													labelUnitId?: string;
+												}[];
+										  };
+									optionPolicy?:
+										| {
+												/**
+												 * @type string
+												 */
+												kind: "all";
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												kind: "include";
+												/**
+												 * @type array
+												 */
+												values: (string | number | boolean)[];
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												kind: "exclude";
+												/**
+												 * @type array
+												 */
+												values: (string | number | boolean)[];
+										  };
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string | undefined
+									 */
+									labelUnitId?: string;
+									/**
+									 * @default false
+									 * @type boolean | undefined
+									 */
+									required?: boolean;
+								}[];
+								/**
+								 * @type object
+								 */
+								sort: {
+									default:
+										| "relevance"
+										| "createdAt:asc"
+										| "createdAt:desc"
+										| "updatedAt:asc"
+										| "updatedAt:desc"
+										| "publishedAt:asc"
+										| "publishedAt:desc"
+										| "subscriberCount:asc"
+										| "subscriberCount:desc"
+										| "replyCount:asc"
+										| "replyCount:desc"
+										| "closesAt:asc"
+										| "closesAt:desc";
+									/**
+									 * @type array
+									 */
+									options: (
+										| "relevance"
+										| "createdAt:asc"
+										| "createdAt:desc"
+										| "updatedAt:asc"
+										| "updatedAt:desc"
+										| "publishedAt:asc"
+										| "publishedAt:desc"
+										| "subscriberCount:asc"
+										| "subscriberCount:desc"
+										| "replyCount:asc"
+										| "replyCount:desc"
+										| "closesAt:asc"
+										| "closesAt:desc"
+									)[];
+								};
+								/**
+								 * @type object
+								 */
+								results: {
+									/**
+									 * @minLength 1
+									 * @maxLength 50
+									 * @type integer
+									 */
+									pageSize: number;
+									/**
+									 * @minLength 1
+									 * @maxLength 100
+									 * @type integer
+									 */
+									maxPageSize: number;
+									/**
+									 * @minLength 1
+									 * @maxLength 100000
+									 * @type integer
+									 */
+									maxResultWindow: number;
+									/**
+									 * @type array
+									 */
+									facets: (
+										| "category"
+										| "type"
+										| "language"
+										| "content-rating"
+										| "ai-disclosure"
+										| "license"
+										| "tag"
+										| "author"
+										| "realm"
+										| "zone"
+										| "subject"
+										| "target"
+										| "root"
+										| "parent"
+										| "owner"
+										| "join-policy"
+										| "multiple"
+										| "results-visibility"
+										| "closed"
+										| "created-at"
+										| "updated-at"
+										| "published-at"
+										| "closes-at"
+									)[];
+								};
+							};
+					  };
+				layout: "list" | "grid" | "carousel";
+				/**
+				 * @minLength 1
+				 * @maxLength 100
+				 * @type integer
+				 */
+				limit: number;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "search";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type object
+				 */
+				configuration: {
+					scope:
+						| {
+								/**
+								 * @type string
+								 */
+								kind: "global";
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								kind: "unit";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								unitId: string;
+								/**
+								 * @default false
+								 * @type boolean
+								 */
+								includeDescendants: boolean;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								kind: "realm";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								realmId: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								kind: "zone";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								zoneId: string;
+						  };
+					/**
+					 * @type array
+					 */
+					categories: (
+						| "units"
+						| "users"
+						| "entity"
+						| "tags"
+						| "posts"
+						| "realms"
+						| "collections"
+						| "reviews"
+						| "polls"
+					)[];
+					/**
+					 * @type object
+					 */
+					modes: {
+						/**
+						 * @type array
+						 */
+						available: ("basic" | "advanced")[];
+						default: "basic" | "advanced";
+					};
+					/**
+					 * @type object
+					 */
+					query: {
+						/**
+						 * @default true
+						 * @type boolean
+						 */
+						enabled: boolean;
+						/**
+						 * @default false
+						 * @type boolean | undefined
+						 */
+						required?: boolean;
+						/**
+						 * @maxLength 500
+						 * @type string | undefined
+						 */
+						initial?: string;
+					};
+					/**
+					 * @type array
+					 */
+					constraints: (
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "equals";
+								value: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "not-equals";
+								value: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								operator: "any-of" | "all-of" | "none-of";
+								/**
+								 * @type array
+								 */
+								values: (string | number | boolean)[];
+						  }
+						| (
+								| {
+										field:
+											| "category"
+											| "type"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "author"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at";
+										/**
+										 * @type string
+										 */
+										operator: "range";
+										lower: string | number | boolean;
+										upper?: string | number | boolean;
+								  }
+								| {
+										field:
+											| "category"
+											| "type"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "author"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at";
+										/**
+										 * @type string
+										 */
+										operator: "range";
+										lower?: string | number | boolean;
+										upper: string | number | boolean;
+								  }
+						  )
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "exists";
+								/**
+								 * @type boolean
+								 */
+								value: boolean;
+						  }
+					)[];
+					/**
+					 * @type array
+					 */
+					defaults: (
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "equals";
+								value: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "not-equals";
+								value: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								operator: "any-of" | "all-of" | "none-of";
+								/**
+								 * @type array
+								 */
+								values: (string | number | boolean)[];
+						  }
+						| (
+								| {
+										field:
+											| "category"
+											| "type"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "author"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at";
+										/**
+										 * @type string
+										 */
+										operator: "range";
+										lower: string | number | boolean;
+										upper?: string | number | boolean;
+								  }
+								| {
+										field:
+											| "category"
+											| "type"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "author"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at";
+										/**
+										 * @type string
+										 */
+										operator: "range";
+										lower?: string | number | boolean;
+										upper: string | number | boolean;
+								  }
+						  )
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "exists";
+								/**
+								 * @type boolean
+								 */
+								value: boolean;
+						  }
+					)[];
+					/**
+					 * @type array
+					 */
+					controls: {
+						/**
+						 * @minLength 1
+						 * @maxLength 64
+						 * @pattern ^[a-z][a-z0-9-]*$
+						 * @type string
+						 */
+						key: string;
+						field:
+							| "category"
+							| "type"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "author"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at";
+						component:
+							"select" | "multi-select" | "toggle" | "date-range" | "value-range";
+						/**
+						 * @type array
+						 */
+						modes: ("basic" | "advanced")[];
+						/**
+						 * @type array
+						 */
+						operators: (
+							| "equals"
+							| "not-equals"
+							| "any-of"
+							| "all-of"
+							| "none-of"
+							| "range"
+							| "exists"
+						)[];
+						optionSource?:
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "facet";
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "static";
+									/**
+									 * @type array
+									 */
+									options: {
+										value: string | number | boolean;
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string | undefined
+										 */
+										labelUnitId?: string;
+									}[];
+							  };
+						optionPolicy?:
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "all";
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "include";
+									/**
+									 * @type array
+									 */
+									values: (string | number | boolean)[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									kind: "exclude";
+									/**
+									 * @type array
+									 */
+									values: (string | number | boolean)[];
+							  };
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string | undefined
+						 */
+						labelUnitId?: string;
+						/**
+						 * @default false
+						 * @type boolean | undefined
+						 */
+						required?: boolean;
+					}[];
+					/**
+					 * @type object
+					 */
+					sort: {
+						default:
+							| "relevance"
+							| "createdAt:asc"
+							| "createdAt:desc"
+							| "updatedAt:asc"
+							| "updatedAt:desc"
+							| "publishedAt:asc"
+							| "publishedAt:desc"
+							| "subscriberCount:asc"
+							| "subscriberCount:desc"
+							| "replyCount:asc"
+							| "replyCount:desc"
+							| "closesAt:asc"
+							| "closesAt:desc";
+						/**
+						 * @type array
+						 */
+						options: (
+							| "relevance"
+							| "createdAt:asc"
+							| "createdAt:desc"
+							| "updatedAt:asc"
+							| "updatedAt:desc"
+							| "publishedAt:asc"
+							| "publishedAt:desc"
+							| "subscriberCount:asc"
+							| "subscriberCount:desc"
+							| "replyCount:asc"
+							| "replyCount:desc"
+							| "closesAt:asc"
+							| "closesAt:desc"
+						)[];
+					};
+					/**
+					 * @type object
+					 */
+					results: {
+						/**
+						 * @minLength 1
+						 * @maxLength 50
+						 * @type integer
+						 */
+						pageSize: number;
+						/**
+						 * @minLength 1
+						 * @maxLength 100
+						 * @type integer
+						 */
+						maxPageSize: number;
+						/**
+						 * @minLength 1
+						 * @maxLength 100000
+						 * @type integer
+						 */
+						maxResultWindow: number;
+						/**
+						 * @type array
+						 */
+						facets: (
+							| "category"
+							| "type"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "author"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at"
+						)[];
+					};
+				};
+				/**
+				 * @type object
+				 */
+				presentation: {
+					results: "list" | "grid" | "compact";
+					/**
+					 * @type boolean
+					 */
+					showResultCount: boolean;
+				};
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "menu";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+				 * @type string
+				 */
+				navigationId: string;
+				orientation: "horizontal" | "vertical";
+				appearance: "links" | "buttons" | "tabs" | "drawer";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "media";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+				 * @type string
+				 */
+				assetId: string;
+				/**
+				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+				 * @type string
+				 */
+				altUnitId: string;
+				/**
+				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+				 * @type string | undefined
+				 */
+				captionUnitId?: string;
+				target?:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "unit";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							unitId: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "zone-page";
+							/**
+							 * @minLength 1
+							 * @maxLength 100
+							 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+							 * @type string
+							 */
+							slug: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "external";
+							/**
+							 * @minLength 1
+							 * @maxLength 2000
+							 * @pattern ^https://
+							 * @type string
+							 */
+							url: string;
+					  };
+				appearance: "content" | "cover" | "banner" | "avatar";
+				fit: "contain" | "cover";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "divider";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				style: "line" | "space" | "section";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "group";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				layout: "stack" | "row" | "grid";
+				/**
+				 * @type array
+				 */
+				blocks: unknown[];
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "callout";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				tone: "neutral" | "info" | "success" | "warning" | "danger";
+				/**
+				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+				 * @type string | undefined
+				 */
+				labelUnitId?: string;
+				/**
+				 * @type array
+				 */
+				blocks: unknown[];
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "tabs";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type array
+				 */
+				tabs: {
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+					 * @type string
+					 */
+					labelUnitId: string;
+					/**
+					 * @type array
+					 */
+					blocks: unknown[];
+				}[];
+		  }
+	)[];
+};
+
+/**
+ * @type object
+ */
+export type NavigationDocument = {
+	/**
+	 * @type string
+	 */
+	_type: "navigation-document";
+	/**
+	 * @pattern ^[0-9a-f]{12}$
+	 * @type string
+	 */
+	_key: string;
+	/**
+	 * @type array
+	 */
+	items: (
+		| {
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+				 * @type string
+				 */
+				labelUnitId: string;
+				target:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "unit";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							unitId: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "zone-page";
+							/**
+							 * @minLength 1
+							 * @maxLength 100
+							 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+							 * @type string
+							 */
+							slug: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "external";
+							/**
+							 * @minLength 1
+							 * @maxLength 2000
+							 * @pattern ^https://
+							 * @type string
+							 */
+							url: string;
+					  };
+		  }
+		| {
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+				 * @type string
+				 */
+				labelUnitId: string;
+				/**
+				 * @type array
+				 */
+				children: unknown[];
+		  }
+	)[];
+};
+
+export const ZoneBoundaryDocumentCategoriesEnum = {
+	units: "units",
+	users: "users",
+	entity: "entity",
+	tags: "tags",
+	posts: "posts",
+	realms: "realms",
+	collections: "collections",
+	reviews: "reviews",
+	polls: "polls",
+} as const;
+
+export type ZoneBoundaryDocumentCategoriesEnum =
+	(typeof ZoneBoundaryDocumentCategoriesEnum)[keyof typeof ZoneBoundaryDocumentCategoriesEnum];
+
+/**
+ * @type object
+ */
+export type ZoneBoundaryDocument = {
+	/**
+	 * @type string
+	 */
+	_type: "zone-boundary";
+	/**
+	 * @pattern ^[0-9a-f]{12}$
+	 * @type string
+	 */
+	_key: string;
+	/**
+	 * @type array
+	 */
+	categories: ZoneBoundaryDocumentCategoriesEnum[];
+	/**
+	 * @type array
+	 */
+	filters: (
+		| {
+				field:
+					| "category"
+					| "type"
+					| "language"
+					| "content-rating"
+					| "ai-disclosure"
+					| "license"
+					| "tag"
+					| "author"
+					| "realm"
+					| "zone"
+					| "subject"
+					| "target"
+					| "root"
+					| "parent"
+					| "owner"
+					| "join-policy"
+					| "multiple"
+					| "results-visibility"
+					| "closed"
+					| "created-at"
+					| "updated-at"
+					| "published-at"
+					| "closes-at";
+				/**
+				 * @type string
+				 */
+				operator: "equals";
+				value: string | number | boolean;
+		  }
+		| {
+				field:
+					| "category"
+					| "type"
+					| "language"
+					| "content-rating"
+					| "ai-disclosure"
+					| "license"
+					| "tag"
+					| "author"
+					| "realm"
+					| "zone"
+					| "subject"
+					| "target"
+					| "root"
+					| "parent"
+					| "owner"
+					| "join-policy"
+					| "multiple"
+					| "results-visibility"
+					| "closed"
+					| "created-at"
+					| "updated-at"
+					| "published-at"
+					| "closes-at";
+				/**
+				 * @type string
+				 */
+				operator: "not-equals";
+				value: string | number | boolean;
+		  }
+		| {
+				field:
+					| "category"
+					| "type"
+					| "language"
+					| "content-rating"
+					| "ai-disclosure"
+					| "license"
+					| "tag"
+					| "author"
+					| "realm"
+					| "zone"
+					| "subject"
+					| "target"
+					| "root"
+					| "parent"
+					| "owner"
+					| "join-policy"
+					| "multiple"
+					| "results-visibility"
+					| "closed"
+					| "created-at"
+					| "updated-at"
+					| "published-at"
+					| "closes-at";
+				operator: "any-of" | "all-of" | "none-of";
+				/**
+				 * @type array
+				 */
+				values: (string | number | boolean)[];
+		  }
+		| (
+				| {
+						field:
+							| "category"
+							| "type"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "author"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at";
+						/**
+						 * @type string
+						 */
+						operator: "range";
+						lower: string | number | boolean;
+						upper?: string | number | boolean;
+				  }
+				| {
+						field:
+							| "category"
+							| "type"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "author"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at";
+						/**
+						 * @type string
+						 */
+						operator: "range";
+						lower?: string | number | boolean;
+						upper: string | number | boolean;
+				  }
+		  )
+		| {
+				field:
+					| "category"
+					| "type"
+					| "language"
+					| "content-rating"
+					| "ai-disclosure"
+					| "license"
+					| "tag"
+					| "author"
+					| "realm"
+					| "zone"
+					| "subject"
+					| "target"
+					| "root"
+					| "parent"
+					| "owner"
+					| "join-policy"
+					| "multiple"
+					| "results-visibility"
+					| "closed"
+					| "created-at"
+					| "updated-at"
+					| "published-at"
+					| "closes-at";
+				/**
+				 * @type string
+				 */
+				operator: "exists";
+				/**
+				 * @type boolean
+				 */
+				value: boolean;
+		  }
+	)[];
+};
+
+export const ZoneThemeDocumentColorSchemeEnum = {
+	system: "system",
+	light: "light",
+	dark: "dark",
+} as const;
+
+export type ZoneThemeDocumentColorSchemeEnum =
+	(typeof ZoneThemeDocumentColorSchemeEnum)[keyof typeof ZoneThemeDocumentColorSchemeEnum];
+
+export const ZoneThemeDocumentDensityEnum = {
+	comfortable: "comfortable",
+	compact: "compact",
+} as const;
+
+export type ZoneThemeDocumentDensityEnum =
+	(typeof ZoneThemeDocumentDensityEnum)[keyof typeof ZoneThemeDocumentDensityEnum];
+
+/**
+ * @type object
+ */
+export type ZoneThemeDocument = {
+	/**
+	 * @type string
+	 */
+	_type: "zone-theme";
+	/**
+	 * @pattern ^[0-9a-f]{12}$
+	 * @type string
+	 */
+	_key: string;
+	/**
+	 * @type string
+	 */
+	colorScheme: ZoneThemeDocumentColorSchemeEnum;
+	/**
+	 * @pattern ^#[0-9a-fA-F]{6}$
+	 * @type string
+	 */
+	accent: string;
+	/**
+	 * @type string
+	 */
+	density: ZoneThemeDocumentDensityEnum;
+};
+
 export const ApiErrorCode = {
 	ValidationError: "ValidationError",
 	InternalError: "InternalError",
@@ -29,9 +2173,9 @@ export const ApiErrorCode = {
 	PlatformCapabilityRequired: "PlatformCapabilityRequired",
 	CollectionOwnershipRequired: "CollectionOwnershipRequired",
 	UnitNotFound: "UnitNotFound",
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitRestoreForbidden: "UnitRestoreForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitProtected: "UnitProtected",
 	UnitChanged: "UnitChanged",
 	UnitRevisionConflict: "UnitRevisionConflict",
 	UnitPrimaryLanguageMissing: "UnitPrimaryLanguageMissing",
@@ -56,6 +2200,10 @@ export const ApiErrorCode = {
 	SoftwareSystemRequirementSourceInvalid: "SoftwareSystemRequirementSourceInvalid",
 	SeriesReleaseNotFound: "SeriesReleaseNotFound",
 	ZonePageNotFound: "ZonePageNotFound",
+	ZonePageInUse: "ZonePageInUse",
+	ZoneNavigationNotFound: "ZoneNavigationNotFound",
+	ZoneNavigationInUse: "ZoneNavigationInUse",
+	ZoneDocumentInvalid: "ZoneDocumentInvalid",
 	ZoneTimeRangeInvalid: "ZoneTimeRangeInvalid",
 	SoftwareNotFound: "SoftwareNotFound",
 	SystemRequirementNotFound: "SystemRequirementNotFound",
@@ -74,7 +2222,7 @@ export const ApiErrorCode = {
 	ReviewNotFound: "ReviewNotFound",
 	ModerationTargetNotFound: "ModerationTargetNotFound",
 	ModerationRealmMissing: "ModerationRealmMissing",
-	ModerationTargetPathRequired: "ModerationTargetPathRequired",
+	ModerationTargetScopeRequired: "ModerationTargetScopeRequired",
 	ModerationCaseNotFound: "ModerationCaseNotFound",
 	ModerationReversalInvalid: "ModerationReversalInvalid",
 	ModerationReversedActionInvalid: "ModerationReversedActionInvalid",
@@ -87,9 +2235,15 @@ export const ApiErrorCode = {
 	RealmGrantCapabilityInvalid: "RealmGrantCapabilityInvalid",
 	CapabilityGrantExpiryInvalid: "CapabilityGrantExpiryInvalid",
 	CapabilityGrantNotFound: "CapabilityGrantNotFound",
-	CollaboratorNotFound: "CollaboratorNotFound",
+	UnitAccessBindingNotFound: "UnitAccessBindingNotFound",
 	UnitOwnerRequired: "UnitOwnerRequired",
-	FieldLockNotFound: "FieldLockNotFound",
+	UnitAccessRestrictionNotFound: "UnitAccessRestrictionNotFound",
+	UnitProtectionNotFound: "UnitProtectionNotFound",
+	UnitAccessExpiryInvalid: "UnitAccessExpiryInvalid",
+	UnitAccessBindingConflict: "UnitAccessBindingConflict",
+	UnitAccessSubjectRoleInvalid: "UnitAccessSubjectRoleInvalid",
+	UnitAccessRestrictionConflict: "UnitAccessRestrictionConflict",
+	UnitOwnerRestrictionForbidden: "UnitOwnerRestrictionForbidden",
 	FeedbackRealmMismatch: "FeedbackRealmMismatch",
 	FeedbackNotFound: "FeedbackNotFound",
 	PostNotFound: "PostNotFound",
@@ -659,10 +2813,10 @@ export type PutApiNotificationsReadAllStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitFieldLocked'
+		 * @default 'UnitProtected'
 		 * @type string
 		 */
-		code: "UnitFieldLocked";
+		code: "UnitProtected";
 		/**
 		 * @type string
 		 */
@@ -4514,6 +6668,2025 @@ export type PostApiFeedbackResponse =
 	| PostApiFeedbackStatus422
 	| PostApiFeedbackStatus500;
 
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessEffectivePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessEffectiveQuery = {
+	/**
+	 * @type array | undefined
+	 */
+	scope?: string[];
+};
+
+export const GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsPermissionEnum = {
+	"unit.read": "unit.read",
+	"unit.update": "unit.update",
+	"unit.publish": "unit.publish",
+	"unit.history.restore": "unit.history.restore",
+	"unit.access.manage": "unit.access.manage",
+	"unit.protection.manage": "unit.protection.manage",
+	"unit.delete": "unit.delete",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsPermissionEnum =
+	(typeof GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsPermissionEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsPermissionEnum];
+
+export const GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionRoleEnum = {
+	viewer: "viewer",
+	editor: "editor",
+	publisher: "publisher",
+	maintainer: "maintainer",
+	owner: "owner",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionRoleEnum =
+	(typeof GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionRoleEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionRoleEnum];
+
+export const GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionModeEnum = {
+	frozen: "frozen",
+	owner_only: "owner_only",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionModeEnum =
+	(typeof GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionModeEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionModeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @type array
+	 */
+	scope: string[];
+	/**
+	 * @type array
+	 */
+	decisions: {
+		/**
+		 * @default 'unit.read'
+		 * @type string
+		 */
+		permission: GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsPermissionEnum;
+		decision:
+			| (
+					| {
+							/**
+							 * @type boolean
+							 */
+							allowed: true;
+							source: "public" | "platform";
+					  }
+					| {
+							/**
+							 * @type boolean
+							 */
+							allowed: true;
+							/**
+							 * @type string
+							 */
+							source: "binding";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							bindingId: string;
+							/**
+							 * @default 'viewer'
+							 * @type string
+							 */
+							role: GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionRoleEnum;
+					  }
+			  )
+			| (
+					| {
+							/**
+							 * @type boolean
+							 */
+							allowed: false;
+							reason: "missing" | "anonymous" | "restricted" | "ungranted";
+					  }
+					| {
+							/**
+							 * @type boolean
+							 */
+							allowed: false;
+							/**
+							 * @type string
+							 */
+							reason: "protected";
+							/**
+							 * @default 'frozen'
+							 * @type string
+							 */
+							mode: GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionModeEnum;
+					  }
+			  );
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessEffectiveStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessEffectiveStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessEffectiveOptions = {
+	body?: never;
+	path: GetApiGovernanceUnitByUnitIdAccessEffectivePath;
+	query?: GetApiGovernanceUnitByUnitIdAccessEffectiveQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessEffectiveResponses = {
+	"200": GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200;
+	"422": GetApiGovernanceUnitByUnitIdAccessEffectiveStatus422;
+	"500": GetApiGovernanceUnitByUnitIdAccessEffectiveStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiGovernanceUnitByUnitIdAccessEffectiveResponse =
+	| GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200
+	| GetApiGovernanceUnitByUnitIdAccessEffectiveStatus422
+	| GetApiGovernanceUnitByUnitIdAccessEffectiveStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessBindingsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const GetApiGovernanceUnitByUnitIdAccessBindingsStatus200ItemsSubjectKindEnum = {
+	profile: "profile",
+	realm: "realm",
+	authenticated: "authenticated",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdAccessBindingsStatus200ItemsSubjectKindEnum =
+	(typeof GetApiGovernanceUnitByUnitIdAccessBindingsStatus200ItemsSubjectKindEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessBindingsStatus200ItemsSubjectKindEnum];
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessBindingsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @default 'profile'
+		 * @type string
+		 */
+		subjectKind: GetApiGovernanceUnitByUnitIdAccessBindingsStatus200ItemsSubjectKindEnum;
+		profileId: (string | null) | null;
+		realmId: (string | null) | null;
+		realmRelation: (string | null) | null;
+		/**
+		 * @type string
+		 */
+		role: string;
+		/**
+		 * @type array
+		 */
+		scope: string[];
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		grantedByProfileId: string;
+		expiresAt: (string | null) | null;
+		revokedAt: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+};
+
+export const GetApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum =
+	(typeof GetApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessBindingsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: GetApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessBindingsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessBindingsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessBindingsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessBindingsOptions = {
+	body?: never;
+	path: GetApiGovernanceUnitByUnitIdAccessBindingsPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessBindingsResponses = {
+	"200": GetApiGovernanceUnitByUnitIdAccessBindingsStatus200;
+	"403": GetApiGovernanceUnitByUnitIdAccessBindingsStatus403;
+	"404": GetApiGovernanceUnitByUnitIdAccessBindingsStatus404;
+	"422": GetApiGovernanceUnitByUnitIdAccessBindingsStatus422;
+	"500": GetApiGovernanceUnitByUnitIdAccessBindingsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiGovernanceUnitByUnitIdAccessBindingsResponse =
+	| GetApiGovernanceUnitByUnitIdAccessBindingsStatus200
+	| GetApiGovernanceUnitByUnitIdAccessBindingsStatus403
+	| GetApiGovernanceUnitByUnitIdAccessBindingsStatus404
+	| GetApiGovernanceUnitByUnitIdAccessBindingsStatus422
+	| GetApiGovernanceUnitByUnitIdAccessBindingsStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessBindingsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const PostApiGovernanceUnitByUnitIdAccessBindingsStatus200SubjectKindEnum = {
+	profile: "profile",
+	realm: "realm",
+	authenticated: "authenticated",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus200SubjectKindEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessBindingsStatus200SubjectKindEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessBindingsStatus200SubjectKindEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @default 'profile'
+	 * @type string
+	 */
+	subjectKind: PostApiGovernanceUnitByUnitIdAccessBindingsStatus200SubjectKindEnum;
+	profileId: (string | null) | null;
+	realmId: (string | null) | null;
+	realmRelation: (string | null) | null;
+	/**
+	 * @type string
+	 */
+	role: string;
+	/**
+	 * @type array
+	 */
+	scope: string[];
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	grantedByProfileId: string;
+	expiresAt: (string | null) | null;
+	revokedAt: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export const PostApiGovernanceUnitByUnitIdAccessBindingsStatus400ErrorCodeEnum = {
+	UnitAccessExpiryInvalid: "UnitAccessExpiryInvalid",
+	UnitAccessSubjectRoleInvalid: "UnitAccessSubjectRoleInvalid",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus400ErrorCodeEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessBindingsStatus400ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessBindingsStatus400ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitAccessExpiryInvalid'
+		 * @type string
+		 */
+		code: PostApiGovernanceUnitByUnitIdAccessBindingsStatus400ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PostApiGovernanceUnitByUnitIdAccessBindingsStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernanceUnitByUnitIdAccessBindingsStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ProfileNotFound: "ProfileNotFound",
+	RealmNotFound: "RealmNotFound",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus404ErrorCodeEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessBindingsStatus404ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessBindingsStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiGovernanceUnitByUnitIdAccessBindingsStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitAccessBindingConflict'
+		 * @type string
+		 */
+		code: "UnitAccessBindingConflict";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus500 = InternalError;
+
+export const PostApiGovernanceUnitByUnitIdAccessBindingsRequestSubjectRelationEnum = {
+	member: "member",
+	content_editor: "content_editor",
+	governor: "governor",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessBindingsRequestSubjectRelationEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessBindingsRequestSubjectRelationEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessBindingsRequestSubjectRelationEnum];
+
+export const PostApiGovernanceUnitByUnitIdAccessBindingsRequestRoleEnum = {
+	viewer: "viewer",
+	editor: "editor",
+	publisher: "publisher",
+	maintainer: "maintainer",
+	owner: "owner",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessBindingsRequestRoleEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessBindingsRequestRoleEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessBindingsRequestRoleEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessBindingsBody = {
+	subject:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "profile";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				profileId: string;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "realm";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				realmId: string;
+				/**
+				 * @default 'member'
+				 * @type string
+				 */
+				relation: PostApiGovernanceUnitByUnitIdAccessBindingsRequestSubjectRelationEnum;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "authenticated";
+		  };
+	/**
+	 * @default 'viewer'
+	 * @type string
+	 */
+	role: PostApiGovernanceUnitByUnitIdAccessBindingsRequestRoleEnum;
+	/**
+	 * @type array
+	 */
+	scope: string[];
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string | undefined
+	 */
+	expiresAt?: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessBindingsOptions = {
+	body: PostApiGovernanceUnitByUnitIdAccessBindingsBody;
+	path: PostApiGovernanceUnitByUnitIdAccessBindingsPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessBindingsResponses = {
+	"200": PostApiGovernanceUnitByUnitIdAccessBindingsStatus200;
+	"400": PostApiGovernanceUnitByUnitIdAccessBindingsStatus400;
+	"403": PostApiGovernanceUnitByUnitIdAccessBindingsStatus403;
+	"404": PostApiGovernanceUnitByUnitIdAccessBindingsStatus404;
+	"409": PostApiGovernanceUnitByUnitIdAccessBindingsStatus409;
+	"422": PostApiGovernanceUnitByUnitIdAccessBindingsStatus422;
+	"500": PostApiGovernanceUnitByUnitIdAccessBindingsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiGovernanceUnitByUnitIdAccessBindingsResponse =
+	| PostApiGovernanceUnitByUnitIdAccessBindingsStatus200
+	| PostApiGovernanceUnitByUnitIdAccessBindingsStatus400
+	| PostApiGovernanceUnitByUnitIdAccessBindingsStatus403
+	| PostApiGovernanceUnitByUnitIdAccessBindingsStatus404
+	| PostApiGovernanceUnitByUnitIdAccessBindingsStatus409
+	| PostApiGovernanceUnitByUnitIdAccessBindingsStatus422
+	| PostApiGovernanceUnitByUnitIdAccessBindingsStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	bindingId: string;
+};
+
+/**
+ * @type void
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus204 = void;
+
+export const DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	UnitAccessBindingNotFound: "UnitAccessBindingNotFound",
+} as const;
+
+export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus404ErrorCodeEnum =
+	(typeof DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitOwnerRequired'
+		 * @type string
+		 */
+		code: "UnitOwnerRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdOptions = {
+	body?: never;
+	path: DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdResponses = {
+	"204": DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus204;
+	"403": DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus403;
+	"404": DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus404;
+	"409": DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus409;
+	"422": DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus422;
+	"500": DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdResponse =
+	| DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus204
+	| DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus403
+	| DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus404
+	| DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus409
+	| DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus422
+	| DeleteApiGovernanceUnitByUnitIdAccessBindingsByBindingIdStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessRestrictionsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		/**
+		 * @type string
+		 */
+		permission: string;
+		/**
+		 * @type array
+		 */
+		scope: string[];
+		/**
+		 * @type string
+		 */
+		reason: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		createdByProfileId: string;
+		expiresAt: (string | null) | null;
+		revokedAt: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+};
+
+export const GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum =
+	(typeof GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessRestrictionsOptions = {
+	body?: never;
+	path: GetApiGovernanceUnitByUnitIdAccessRestrictionsPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessRestrictionsResponses = {
+	"200": GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus200;
+	"403": GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus403;
+	"404": GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus404;
+	"422": GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus422;
+	"500": GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiGovernanceUnitByUnitIdAccessRestrictionsResponse =
+	| GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus200
+	| GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus403
+	| GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus404
+	| GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus422
+	| GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessRestrictionsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	profileId: string;
+	/**
+	 * @type string
+	 */
+	permission: string;
+	/**
+	 * @type array
+	 */
+	scope: string[];
+	/**
+	 * @type string
+	 */
+	reason: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	createdByProfileId: string;
+	expiresAt: (string | null) | null;
+	revokedAt: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitAccessExpiryInvalid'
+		 * @type string
+		 */
+		code: "UnitAccessExpiryInvalid";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ProfileNotFound: "ProfileNotFound",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus404ErrorCodeEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus404ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus409ErrorCodeEnum = {
+	UnitOwnerRestrictionForbidden: "UnitOwnerRestrictionForbidden",
+	UnitAccessRestrictionConflict: "UnitAccessRestrictionConflict",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus409ErrorCodeEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus409ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitOwnerRestrictionForbidden'
+		 * @type string
+		 */
+		code: PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus500 = InternalError;
+
+export const PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestPermissionEnum = {
+	"unit.read": "unit.read",
+	"unit.update": "unit.update",
+	"unit.publish": "unit.publish",
+	"unit.history.restore": "unit.history.restore",
+	"unit.access.manage": "unit.access.manage",
+	"unit.protection.manage": "unit.protection.manage",
+	"unit.delete": "unit.delete",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestPermissionEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestPermissionEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestPermissionEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessRestrictionsBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	profileId: string;
+	/**
+	 * @default 'unit.read'
+	 * @type string
+	 */
+	permission: PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestPermissionEnum;
+	/**
+	 * @type array
+	 */
+	scope: string[];
+	/**
+	 * @minLength 1
+	 * @maxLength 2000
+	 * @type string
+	 */
+	reason: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string | undefined
+	 */
+	expiresAt?: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessRestrictionsOptions = {
+	body: PostApiGovernanceUnitByUnitIdAccessRestrictionsBody;
+	path: PostApiGovernanceUnitByUnitIdAccessRestrictionsPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessRestrictionsResponses = {
+	"200": PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus200;
+	"400": PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus400;
+	"403": PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus403;
+	"404": PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus404;
+	"409": PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus409;
+	"422": PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus422;
+	"500": PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiGovernanceUnitByUnitIdAccessRestrictionsResponse =
+	| PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus200
+	| PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus400
+	| PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus403
+	| PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus404
+	| PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus409
+	| PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus422
+	| PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	restrictionId: string;
+};
+
+/**
+ * @type void
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus204 = void;
+
+export const DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus403ErrorCodeEnum =
+	{
+		UnitPermissionForbidden: "UnitPermissionForbidden",
+		UnitAccessRestricted: "UnitAccessRestricted",
+		PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	} as const;
+
+export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus404ErrorCodeEnum =
+	{
+		UnitNotFound: "UnitNotFound",
+		UnitAccessRestrictionNotFound: "UnitAccessRestrictionNotFound",
+	} as const;
+
+export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus404ErrorCodeEnum =
+	(typeof DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus422 =
+	ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus500 =
+	InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdOptions = {
+	body?: never;
+	path: DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdResponses = {
+	"204": DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus204;
+	"403": DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus403;
+	"404": DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus404;
+	"422": DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus422;
+	"500": DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdResponse =
+	| DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus204
+	| DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus403
+	| DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus404
+	| DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus422
+	| DeleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionIdStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdProtectionsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdProtectionsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @type array
+		 */
+		scope: string[];
+		/**
+		 * @type string
+		 */
+		mode: string;
+		/**
+		 * @type string
+		 */
+		reason: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		createdByProfileId: string;
+		expiresAt: (string | null) | null;
+		revokedAt: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+};
+
+export const GetApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum =
+	(typeof GetApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum)[keyof typeof GetApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdProtectionsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: GetApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdProtectionsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdProtectionsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdProtectionsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdProtectionsOptions = {
+	body?: never;
+	path: GetApiGovernanceUnitByUnitIdProtectionsPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdProtectionsResponses = {
+	"200": GetApiGovernanceUnitByUnitIdProtectionsStatus200;
+	"403": GetApiGovernanceUnitByUnitIdProtectionsStatus403;
+	"404": GetApiGovernanceUnitByUnitIdProtectionsStatus404;
+	"422": GetApiGovernanceUnitByUnitIdProtectionsStatus422;
+	"500": GetApiGovernanceUnitByUnitIdProtectionsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiGovernanceUnitByUnitIdProtectionsResponse =
+	| GetApiGovernanceUnitByUnitIdProtectionsStatus200
+	| GetApiGovernanceUnitByUnitIdProtectionsStatus403
+	| GetApiGovernanceUnitByUnitIdProtectionsStatus404
+	| GetApiGovernanceUnitByUnitIdProtectionsStatus422
+	| GetApiGovernanceUnitByUnitIdProtectionsStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdProtectionsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdProtectionsStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @type array
+	 */
+	scope: string[];
+	/**
+	 * @type string
+	 */
+	mode: string;
+	/**
+	 * @type string
+	 */
+	reason: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	createdByProfileId: string;
+	expiresAt: (string | null) | null;
+	revokedAt: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdProtectionsStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitAccessExpiryInvalid'
+		 * @type string
+		 */
+		code: "UnitAccessExpiryInvalid";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum =
+	(typeof PostApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdProtectionsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PostApiGovernanceUnitByUnitIdProtectionsStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdProtectionsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdProtectionsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdProtectionsStatus500 = InternalError;
+
+export const PostApiGovernanceUnitByUnitIdProtectionsRequestModeEnum = {
+	frozen: "frozen",
+	owner_only: "owner_only",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdProtectionsRequestModeEnum =
+	(typeof PostApiGovernanceUnitByUnitIdProtectionsRequestModeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdProtectionsRequestModeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdProtectionsBody = {
+	/**
+	 * @type array
+	 */
+	scope: string[];
+	/**
+	 * @default 'frozen'
+	 * @type string
+	 */
+	mode: PostApiGovernanceUnitByUnitIdProtectionsRequestModeEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 2000
+	 * @type string
+	 */
+	reason: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string | undefined
+	 */
+	expiresAt?: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdProtectionsOptions = {
+	body: PostApiGovernanceUnitByUnitIdProtectionsBody;
+	path: PostApiGovernanceUnitByUnitIdProtectionsPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdProtectionsResponses = {
+	"200": PostApiGovernanceUnitByUnitIdProtectionsStatus200;
+	"400": PostApiGovernanceUnitByUnitIdProtectionsStatus400;
+	"403": PostApiGovernanceUnitByUnitIdProtectionsStatus403;
+	"404": PostApiGovernanceUnitByUnitIdProtectionsStatus404;
+	"422": PostApiGovernanceUnitByUnitIdProtectionsStatus422;
+	"500": PostApiGovernanceUnitByUnitIdProtectionsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiGovernanceUnitByUnitIdProtectionsResponse =
+	| PostApiGovernanceUnitByUnitIdProtectionsStatus200
+	| PostApiGovernanceUnitByUnitIdProtectionsStatus400
+	| PostApiGovernanceUnitByUnitIdProtectionsStatus403
+	| PostApiGovernanceUnitByUnitIdProtectionsStatus404
+	| PostApiGovernanceUnitByUnitIdProtectionsStatus422
+	| PostApiGovernanceUnitByUnitIdProtectionsStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	protectionId: string;
+};
+
+/**
+ * @type void
+ */
+export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus204 = void;
+
+export const DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	UnitProtectionNotFound: "UnitProtectionNotFound",
+} as const;
+
+export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus404ErrorCodeEnum =
+	(typeof DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdOptions = {
+	body?: never;
+	path: DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdResponses = {
+	"204": DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus204;
+	"403": DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus403;
+	"404": DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus404;
+	"422": DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus422;
+	"500": DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdResponse =
+	| DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus204
+	| DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus403
+	| DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus404
+	| DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus422
+	| DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus500;
+
 export const GetApiGovernanceModerationCasesState = {
 	new: "new",
 	triaged: "triaged",
@@ -5084,7 +9257,7 @@ export const PostApiGovernanceModerationActionsStatus400ErrorCodeEnum = {
 	ModerationReversalInvalid: "ModerationReversalInvalid",
 	ModerationReversedActionInvalid: "ModerationReversedActionInvalid",
 	ModerationRealmMissing: "ModerationRealmMissing",
-	ModerationTargetPathRequired: "ModerationTargetPathRequired",
+	ModerationTargetScopeRequired: "ModerationTargetScopeRequired",
 } as const;
 
 export type PostApiGovernanceModerationActionsStatus400ErrorCodeEnum =
@@ -5206,8 +9379,8 @@ export const PostApiGovernanceModerationActionsRequestKindEnum = {
 	restore: "restore",
 	lock: "lock",
 	unlock: "unlock",
-	field_lock: "field_lock",
-	field_unlock: "field_unlock",
+	protect: "protect",
+	unprotect: "unprotect",
 	mute_member: "mute_member",
 	remove_member: "remove_member",
 	ban_member: "ban_member",
@@ -5228,6 +9401,14 @@ export const PostApiGovernanceModerationActionsRequestResultingStatusEnum = {
 
 export type PostApiGovernanceModerationActionsRequestResultingStatusEnum =
 	(typeof PostApiGovernanceModerationActionsRequestResultingStatusEnum)[keyof typeof PostApiGovernanceModerationActionsRequestResultingStatusEnum];
+
+export const PostApiGovernanceModerationActionsRequestProtectionModeEnum = {
+	frozen: "frozen",
+	owner_only: "owner_only",
+} as const;
+
+export type PostApiGovernanceModerationActionsRequestProtectionModeEnum =
+	(typeof PostApiGovernanceModerationActionsRequestProtectionModeEnum)[keyof typeof PostApiGovernanceModerationActionsRequestProtectionModeEnum];
 
 /**
  * @type object
@@ -5251,6 +9432,15 @@ export type PostApiGovernanceModerationActionsBody = {
 	 * @type boolean | undefined
 	 */
 	resultingLocked?: boolean;
+	/**
+	 * @type array | undefined
+	 */
+	scope?: string[];
+	/**
+	 * @default 'frozen'
+	 * @type string | undefined
+	 */
+	protectionMode?: PostApiGovernanceModerationActionsRequestProtectionModeEnum;
 	/**
 	 * @minLength 1
 	 * @maxLength 64
@@ -6468,974 +10658,6 @@ export type DeleteApiGovernanceGrantsByGrantIdResponse =
 /**
  * @type object
  */
-export type GetApiGovernanceUnitByUnitIdCollaboratorsPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdCollaboratorsStatus200 = {
-	/**
-	 * @type array
-	 */
-	items: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		unitId: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		profileId: string;
-		/**
-		 * @type string
-		 */
-		role: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		addedByProfileId: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		createdAt: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		updatedAt: string;
-	}[];
-};
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdCollaboratorsStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitEditForbidden'
-		 * @type string
-		 */
-		code: "UnitEditForbidden";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdCollaboratorsStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: "UnitNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdCollaboratorsStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdCollaboratorsStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdCollaboratorsOptions = {
-	body?: never;
-	path: GetApiGovernanceUnitByUnitIdCollaboratorsPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdCollaboratorsResponses = {
-	"200": GetApiGovernanceUnitByUnitIdCollaboratorsStatus200;
-	"403": GetApiGovernanceUnitByUnitIdCollaboratorsStatus403;
-	"404": GetApiGovernanceUnitByUnitIdCollaboratorsStatus404;
-	"422": GetApiGovernanceUnitByUnitIdCollaboratorsStatus422;
-	"500": GetApiGovernanceUnitByUnitIdCollaboratorsStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type GetApiGovernanceUnitByUnitIdCollaboratorsResponse =
-	| GetApiGovernanceUnitByUnitIdCollaboratorsStatus200
-	| GetApiGovernanceUnitByUnitIdCollaboratorsStatus403
-	| GetApiGovernanceUnitByUnitIdCollaboratorsStatus404
-	| GetApiGovernanceUnitByUnitIdCollaboratorsStatus422
-	| GetApiGovernanceUnitByUnitIdCollaboratorsStatus500;
-
-/**
- * @type object
- */
-export type PutApiGovernanceUnitByUnitIdCollaboratorsPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiGovernanceUnitByUnitIdCollaboratorsStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	profileId: string;
-	/**
-	 * @type string
-	 */
-	role: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	addedByProfileId: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-};
-
-export const PutApiGovernanceUnitByUnitIdCollaboratorsStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-} as const;
-
-export type PutApiGovernanceUnitByUnitIdCollaboratorsStatus403ErrorCodeEnum =
-	(typeof PutApiGovernanceUnitByUnitIdCollaboratorsStatus403ErrorCodeEnum)[keyof typeof PutApiGovernanceUnitByUnitIdCollaboratorsStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PutApiGovernanceUnitByUnitIdCollaboratorsStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitEditForbidden'
-		 * @type string
-		 */
-		code: PutApiGovernanceUnitByUnitIdCollaboratorsStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiGovernanceUnitByUnitIdCollaboratorsStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: "UnitNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiGovernanceUnitByUnitIdCollaboratorsStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type PutApiGovernanceUnitByUnitIdCollaboratorsStatus500 = InternalError;
-
-export const PutApiGovernanceUnitByUnitIdCollaboratorsRequestRoleEnum = {
-	owner: "owner",
-	editor: "editor",
-} as const;
-
-export type PutApiGovernanceUnitByUnitIdCollaboratorsRequestRoleEnum =
-	(typeof PutApiGovernanceUnitByUnitIdCollaboratorsRequestRoleEnum)[keyof typeof PutApiGovernanceUnitByUnitIdCollaboratorsRequestRoleEnum];
-
-/**
- * @type object
- */
-export type PutApiGovernanceUnitByUnitIdCollaboratorsBody = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	profileId: string;
-	/**
-	 * @type string
-	 */
-	role: PutApiGovernanceUnitByUnitIdCollaboratorsRequestRoleEnum;
-};
-
-/**
- * @type object
- */
-export type PutApiGovernanceUnitByUnitIdCollaboratorsOptions = {
-	body: PutApiGovernanceUnitByUnitIdCollaboratorsBody;
-	path: PutApiGovernanceUnitByUnitIdCollaboratorsPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PutApiGovernanceUnitByUnitIdCollaboratorsResponses = {
-	"200": PutApiGovernanceUnitByUnitIdCollaboratorsStatus200;
-	"403": PutApiGovernanceUnitByUnitIdCollaboratorsStatus403;
-	"404": PutApiGovernanceUnitByUnitIdCollaboratorsStatus404;
-	"422": PutApiGovernanceUnitByUnitIdCollaboratorsStatus422;
-	"500": PutApiGovernanceUnitByUnitIdCollaboratorsStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PutApiGovernanceUnitByUnitIdCollaboratorsResponse =
-	| PutApiGovernanceUnitByUnitIdCollaboratorsStatus200
-	| PutApiGovernanceUnitByUnitIdCollaboratorsStatus403
-	| PutApiGovernanceUnitByUnitIdCollaboratorsStatus404
-	| PutApiGovernanceUnitByUnitIdCollaboratorsStatus422
-	| PutApiGovernanceUnitByUnitIdCollaboratorsStatus500;
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	profileId: string;
-};
-
-/**
- * @type void
- */
-export type DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus204 = void;
-
-export const DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-} as const;
-
-export type DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitEditForbidden'
-		 * @type string
-		 */
-		code: DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	CollaboratorNotFound: "CollaboratorNotFound",
-} as const;
-
-export type DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus404ErrorCodeEnum =
-	(typeof DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitOwnerRequired'
-		 * @type string
-		 */
-		code: "UnitOwnerRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdOptions = {
-	body?: never;
-	path: DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdResponses = {
-	"204": DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus204;
-	"403": DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus403;
-	"404": DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus404;
-	"409": DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus409;
-	"422": DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus422;
-	"500": DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdResponse =
-	| DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus204
-	| DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus403
-	| DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus404
-	| DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus409
-	| DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus422
-	| DeleteApiGovernanceUnitByUnitIdCollaboratorsByProfileIdStatus500;
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdFieldLocksPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdFieldLocksStatus200 = {
-	/**
-	 * @type array
-	 */
-	items: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		id: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		unitId: string;
-		/**
-		 * @type string
-		 */
-		path: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		lockedByProfileId: string;
-		reason: (string | null) | null;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		createdAt: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		updatedAt: string;
-	}[];
-};
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdFieldLocksStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitEditForbidden'
-		 * @type string
-		 */
-		code: "UnitEditForbidden";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdFieldLocksStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: "UnitNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdFieldLocksStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdFieldLocksStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdFieldLocksOptions = {
-	body?: never;
-	path: GetApiGovernanceUnitByUnitIdFieldLocksPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type GetApiGovernanceUnitByUnitIdFieldLocksResponses = {
-	"200": GetApiGovernanceUnitByUnitIdFieldLocksStatus200;
-	"403": GetApiGovernanceUnitByUnitIdFieldLocksStatus403;
-	"404": GetApiGovernanceUnitByUnitIdFieldLocksStatus404;
-	"422": GetApiGovernanceUnitByUnitIdFieldLocksStatus422;
-	"500": GetApiGovernanceUnitByUnitIdFieldLocksStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type GetApiGovernanceUnitByUnitIdFieldLocksResponse =
-	| GetApiGovernanceUnitByUnitIdFieldLocksStatus200
-	| GetApiGovernanceUnitByUnitIdFieldLocksStatus403
-	| GetApiGovernanceUnitByUnitIdFieldLocksStatus404
-	| GetApiGovernanceUnitByUnitIdFieldLocksStatus422
-	| GetApiGovernanceUnitByUnitIdFieldLocksStatus500;
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdFieldLocksPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdFieldLocksStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	id: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @type string
-	 */
-	path: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	lockedByProfileId: string;
-	reason: (string | null) | null;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
-};
-
-export const PostApiGovernanceUnitByUnitIdFieldLocksStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-} as const;
-
-export type PostApiGovernanceUnitByUnitIdFieldLocksStatus403ErrorCodeEnum =
-	(typeof PostApiGovernanceUnitByUnitIdFieldLocksStatus403ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdFieldLocksStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdFieldLocksStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitEditForbidden'
-		 * @type string
-		 */
-		code: PostApiGovernanceUnitByUnitIdFieldLocksStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdFieldLocksStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: "UnitNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdFieldLocksStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdFieldLocksStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdFieldLocksBody = {
-	/**
-	 * @minLength 1
-	 * @maxLength 256
-	 * @pattern ^/
-	 * @type string
-	 */
-	path: string;
-	/**
-	 * @maxLength 2000
-	 * @type string | undefined
-	 */
-	reason?: string;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdFieldLocksOptions = {
-	body: PostApiGovernanceUnitByUnitIdFieldLocksBody;
-	path: PostApiGovernanceUnitByUnitIdFieldLocksPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PostApiGovernanceUnitByUnitIdFieldLocksResponses = {
-	"200": PostApiGovernanceUnitByUnitIdFieldLocksStatus200;
-	"403": PostApiGovernanceUnitByUnitIdFieldLocksStatus403;
-	"404": PostApiGovernanceUnitByUnitIdFieldLocksStatus404;
-	"422": PostApiGovernanceUnitByUnitIdFieldLocksStatus422;
-	"500": PostApiGovernanceUnitByUnitIdFieldLocksStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PostApiGovernanceUnitByUnitIdFieldLocksResponse =
-	| PostApiGovernanceUnitByUnitIdFieldLocksStatus200
-	| PostApiGovernanceUnitByUnitIdFieldLocksStatus403
-	| PostApiGovernanceUnitByUnitIdFieldLocksStatus404
-	| PostApiGovernanceUnitByUnitIdFieldLocksStatus422
-	| PostApiGovernanceUnitByUnitIdFieldLocksStatus500;
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	lockId: string;
-};
-
-/**
- * @type void
- */
-export type DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus204 = void;
-
-export const DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-} as const;
-
-export type DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus403ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitEditForbidden'
-		 * @type string
-		 */
-		code: DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus403ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	FieldLockNotFound: "FieldLockNotFound",
-} as const;
-
-export type DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus404ErrorCodeEnum =
-	(typeof DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdOptions = {
-	body?: never;
-	path: DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdResponses = {
-	"204": DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus204;
-	"403": DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus403;
-	"404": DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus404;
-	"422": DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus422;
-	"500": DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdResponse =
-	| DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus204
-	| DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus403
-	| DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus404
-	| DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus422
-	| DeleteApiGovernanceUnitByUnitIdFieldLocksByLockIdStatus500;
-
-/**
- * @type object
- */
 export type PostApiSeriesStatus200 = {
 	/**
 	 * @description
@@ -7776,6 +10998,1686 @@ export type GetApiSeriesBySeriesIdReleasesResponse =
 /**
  * @type object
  */
+export type GetApiZonesByZoneIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type unknown
+	 */
+	boundaryDocument: unknown;
+	/**
+	 * @type unknown
+	 */
+	themeDocument: unknown;
+	/**
+	 * @type unknown
+	 */
+	dockDocument: unknown;
+	startsAt: (string | null) | null;
+	endsAt: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdOptions = {
+	body?: never;
+	path: GetApiZonesByZoneIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdResponses = {
+	"200": GetApiZonesByZoneIdStatus200;
+	"404": GetApiZonesByZoneIdStatus404;
+	"422": GetApiZonesByZoneIdStatus422;
+	"500": GetApiZonesByZoneIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiZonesByZoneIdResponse =
+	| GetApiZonesByZoneIdStatus200
+	| GetApiZonesByZoneIdStatus404
+	| GetApiZonesByZoneIdStatus422
+	| GetApiZonesByZoneIdStatus500;
+
+/**
+ * @type object
+ */
+export type PatchApiZonesByZoneIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiZonesByZoneIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type unknown
+	 */
+	boundaryDocument: unknown;
+	/**
+	 * @type unknown
+	 */
+	themeDocument: unknown;
+	/**
+	 * @type unknown
+	 */
+	dockDocument: unknown;
+	startsAt: (string | null) | null;
+	endsAt: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export const PatchApiZonesByZoneIdStatus400ErrorCodeEnum = {
+	ZoneTimeRangeInvalid: "ZoneTimeRangeInvalid",
+	ZoneDocumentInvalid: "ZoneDocumentInvalid",
+} as const;
+
+export type PatchApiZonesByZoneIdStatus400ErrorCodeEnum =
+	(typeof PatchApiZonesByZoneIdStatus400ErrorCodeEnum)[keyof typeof PatchApiZonesByZoneIdStatus400ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiZonesByZoneIdStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ZoneTimeRangeInvalid'
+		 * @type string
+		 */
+		code: PatchApiZonesByZoneIdStatus400ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PatchApiZonesByZoneIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type PatchApiZonesByZoneIdStatus403ErrorCodeEnum =
+	(typeof PatchApiZonesByZoneIdStatus403ErrorCodeEnum)[keyof typeof PatchApiZonesByZoneIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiZonesByZoneIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PatchApiZonesByZoneIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiZonesByZoneIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiZonesByZoneIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PatchApiZonesByZoneIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PatchApiZonesByZoneIdBody = {
+	/**
+	 * @type unknown | undefined
+	 */
+	boundaryDocument?: unknown;
+	/**
+	 * @type unknown | undefined
+	 */
+	themeDocument?: unknown;
+	/**
+	 * @type unknown | undefined
+	 */
+	dockDocument?: unknown;
+	startsAt?: (string | null) | null;
+	endsAt?: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiZonesByZoneIdOptions = {
+	body: PatchApiZonesByZoneIdBody;
+	path: PatchApiZonesByZoneIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiZonesByZoneIdResponses = {
+	"200": PatchApiZonesByZoneIdStatus200;
+	"400": PatchApiZonesByZoneIdStatus400;
+	"403": PatchApiZonesByZoneIdStatus403;
+	"404": PatchApiZonesByZoneIdStatus404;
+	"422": PatchApiZonesByZoneIdStatus422;
+	"500": PatchApiZonesByZoneIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PatchApiZonesByZoneIdResponse =
+	| PatchApiZonesByZoneIdStatus200
+	| PatchApiZonesByZoneIdStatus400
+	| PatchApiZonesByZoneIdStatus403
+	| PatchApiZonesByZoneIdStatus404
+	| PatchApiZonesByZoneIdStatus422
+	| PatchApiZonesByZoneIdStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdPagesPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdPagesStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		zoneId: string;
+		/**
+		 * @type string
+		 */
+		slug: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		titleUnitId: string;
+		/**
+		 * @type unknown
+		 */
+		document: unknown;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		/**
+		 * @type boolean
+		 */
+		home: boolean;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdPagesStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdPagesStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdPagesStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdPagesOptions = {
+	body?: never;
+	path: GetApiZonesByZoneIdPagesPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdPagesResponses = {
+	"200": GetApiZonesByZoneIdPagesStatus200;
+	"404": GetApiZonesByZoneIdPagesStatus404;
+	"422": GetApiZonesByZoneIdPagesStatus422;
+	"500": GetApiZonesByZoneIdPagesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiZonesByZoneIdPagesResponse =
+	| GetApiZonesByZoneIdPagesStatus200
+	| GetApiZonesByZoneIdPagesStatus404
+	| GetApiZonesByZoneIdPagesStatus422
+	| GetApiZonesByZoneIdPagesStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdPagesBySlugPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 100
+	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+	 * @type string
+	 */
+	slug: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdPagesBySlugStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @type string
+	 */
+	slug: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	titleUnitId: string;
+	/**
+	 * @type unknown
+	 */
+	document: unknown;
+	/**
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
+	 * @type string
+	 */
+	position: string;
+	/**
+	 * @type boolean
+	 */
+	home: boolean;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export const GetApiZonesByZoneIdPagesBySlugStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ZonePageNotFound: "ZonePageNotFound",
+} as const;
+
+export type GetApiZonesByZoneIdPagesBySlugStatus404ErrorCodeEnum =
+	(typeof GetApiZonesByZoneIdPagesBySlugStatus404ErrorCodeEnum)[keyof typeof GetApiZonesByZoneIdPagesBySlugStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdPagesBySlugStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: GetApiZonesByZoneIdPagesBySlugStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdPagesBySlugStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdPagesBySlugStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdPagesBySlugOptions = {
+	body?: never;
+	path: GetApiZonesByZoneIdPagesBySlugPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdPagesBySlugResponses = {
+	"200": GetApiZonesByZoneIdPagesBySlugStatus200;
+	"404": GetApiZonesByZoneIdPagesBySlugStatus404;
+	"422": GetApiZonesByZoneIdPagesBySlugStatus422;
+	"500": GetApiZonesByZoneIdPagesBySlugStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiZonesByZoneIdPagesBySlugResponse =
+	| GetApiZonesByZoneIdPagesBySlugStatus200
+	| GetApiZonesByZoneIdPagesBySlugStatus404
+	| GetApiZonesByZoneIdPagesBySlugStatus422
+	| GetApiZonesByZoneIdPagesBySlugStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesBySlugPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 100
+	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+	 * @type string
+	 */
+	slug: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesBySlugStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @type string
+	 */
+	slug: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	titleUnitId: string;
+	/**
+	 * @type unknown
+	 */
+	document: unknown;
+	/**
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
+	 * @type string
+	 */
+	position: string;
+	/**
+	 * @type boolean
+	 */
+	home: boolean;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesBySlugStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ZoneDocumentInvalid'
+		 * @type string
+		 */
+		code: "ZoneDocumentInvalid";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type PutApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum =
+	(typeof PutApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesBySlugStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PutApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesBySlugStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesBySlugStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesBySlugStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesBySlugBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	titleUnitId: string;
+	/**
+	 * @type unknown
+	 */
+	document: unknown;
+	/**
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
+	 * @type string
+	 */
+	position: string;
+	/**
+	 * @type boolean
+	 */
+	home: boolean;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesBySlugOptions = {
+	body: PutApiZonesByZoneIdPagesBySlugBody;
+	path: PutApiZonesByZoneIdPagesBySlugPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdPagesBySlugResponses = {
+	"200": PutApiZonesByZoneIdPagesBySlugStatus200;
+	"400": PutApiZonesByZoneIdPagesBySlugStatus400;
+	"403": PutApiZonesByZoneIdPagesBySlugStatus403;
+	"404": PutApiZonesByZoneIdPagesBySlugStatus404;
+	"422": PutApiZonesByZoneIdPagesBySlugStatus422;
+	"500": PutApiZonesByZoneIdPagesBySlugStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiZonesByZoneIdPagesBySlugResponse =
+	| PutApiZonesByZoneIdPagesBySlugStatus200
+	| PutApiZonesByZoneIdPagesBySlugStatus400
+	| PutApiZonesByZoneIdPagesBySlugStatus403
+	| PutApiZonesByZoneIdPagesBySlugStatus404
+	| PutApiZonesByZoneIdPagesBySlugStatus422
+	| PutApiZonesByZoneIdPagesBySlugStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesBySlugPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 100
+	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+	 * @type string
+	 */
+	slug: string;
+};
+
+/**
+ * @type void
+ */
+export type DeleteApiZonesByZoneIdPagesBySlugStatus204 = void;
+
+export const DeleteApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type DeleteApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum =
+	(typeof DeleteApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesBySlugStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: DeleteApiZonesByZoneIdPagesBySlugStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiZonesByZoneIdPagesBySlugStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ZonePageNotFound: "ZonePageNotFound",
+} as const;
+
+export type DeleteApiZonesByZoneIdPagesBySlugStatus404ErrorCodeEnum =
+	(typeof DeleteApiZonesByZoneIdPagesBySlugStatus404ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdPagesBySlugStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesBySlugStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiZonesByZoneIdPagesBySlugStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesBySlugStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ZonePageInUse'
+		 * @type string
+		 */
+		code: "ZonePageInUse";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesBySlugStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesBySlugStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesBySlugOptions = {
+	body?: never;
+	path: DeleteApiZonesByZoneIdPagesBySlugPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdPagesBySlugResponses = {
+	"204": DeleteApiZonesByZoneIdPagesBySlugStatus204;
+	"403": DeleteApiZonesByZoneIdPagesBySlugStatus403;
+	"404": DeleteApiZonesByZoneIdPagesBySlugStatus404;
+	"409": DeleteApiZonesByZoneIdPagesBySlugStatus409;
+	"422": DeleteApiZonesByZoneIdPagesBySlugStatus422;
+	"500": DeleteApiZonesByZoneIdPagesBySlugStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiZonesByZoneIdPagesBySlugResponse =
+	| DeleteApiZonesByZoneIdPagesBySlugStatus204
+	| DeleteApiZonesByZoneIdPagesBySlugStatus403
+	| DeleteApiZonesByZoneIdPagesBySlugStatus404
+	| DeleteApiZonesByZoneIdPagesBySlugStatus409
+	| DeleteApiZonesByZoneIdPagesBySlugStatus422
+	| DeleteApiZonesByZoneIdPagesBySlugStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdNavigationPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdNavigationStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		zoneId: string;
+		/**
+		 * @type string
+		 */
+		key: string;
+		/**
+		 * @type unknown
+		 */
+		document: unknown;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdNavigationStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdNavigationStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdNavigationStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdNavigationOptions = {
+	body?: never;
+	path: GetApiZonesByZoneIdNavigationPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdNavigationResponses = {
+	"200": GetApiZonesByZoneIdNavigationStatus200;
+	"404": GetApiZonesByZoneIdNavigationStatus404;
+	"422": GetApiZonesByZoneIdNavigationStatus422;
+	"500": GetApiZonesByZoneIdNavigationStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiZonesByZoneIdNavigationResponse =
+	| GetApiZonesByZoneIdNavigationStatus200
+	| GetApiZonesByZoneIdNavigationStatus404
+	| GetApiZonesByZoneIdNavigationStatus422
+	| GetApiZonesByZoneIdNavigationStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdNavigationByKeyPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 64
+	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+	 * @type string
+	 */
+	key: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdNavigationByKeyStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @type string
+	 */
+	key: string;
+	/**
+	 * @type unknown
+	 */
+	document: unknown;
+	/**
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
+	 * @type string
+	 */
+	position: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export const GetApiZonesByZoneIdNavigationByKeyStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ZoneNavigationNotFound: "ZoneNavigationNotFound",
+} as const;
+
+export type GetApiZonesByZoneIdNavigationByKeyStatus404ErrorCodeEnum =
+	(typeof GetApiZonesByZoneIdNavigationByKeyStatus404ErrorCodeEnum)[keyof typeof GetApiZonesByZoneIdNavigationByKeyStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdNavigationByKeyStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: GetApiZonesByZoneIdNavigationByKeyStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdNavigationByKeyStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdNavigationByKeyStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdNavigationByKeyOptions = {
+	body?: never;
+	path: GetApiZonesByZoneIdNavigationByKeyPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdNavigationByKeyResponses = {
+	"200": GetApiZonesByZoneIdNavigationByKeyStatus200;
+	"404": GetApiZonesByZoneIdNavigationByKeyStatus404;
+	"422": GetApiZonesByZoneIdNavigationByKeyStatus422;
+	"500": GetApiZonesByZoneIdNavigationByKeyStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiZonesByZoneIdNavigationByKeyResponse =
+	| GetApiZonesByZoneIdNavigationByKeyStatus200
+	| GetApiZonesByZoneIdNavigationByKeyStatus404
+	| GetApiZonesByZoneIdNavigationByKeyStatus422
+	| GetApiZonesByZoneIdNavigationByKeyStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdNavigationByKeyPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 64
+	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+	 * @type string
+	 */
+	key: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdNavigationByKeyStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @type string
+	 */
+	key: string;
+	/**
+	 * @type unknown
+	 */
+	document: unknown;
+	/**
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
+	 * @type string
+	 */
+	position: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdNavigationByKeyStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ZoneDocumentInvalid'
+		 * @type string
+		 */
+		code: "ZoneDocumentInvalid";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiZonesByZoneIdNavigationByKeyStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type PutApiZonesByZoneIdNavigationByKeyStatus403ErrorCodeEnum =
+	(typeof PutApiZonesByZoneIdNavigationByKeyStatus403ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdNavigationByKeyStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdNavigationByKeyStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PutApiZonesByZoneIdNavigationByKeyStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdNavigationByKeyStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdNavigationByKeyStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdNavigationByKeyStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdNavigationByKeyBody = {
+	/**
+	 * @type unknown
+	 */
+	document: unknown;
+	/**
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
+	 * @type string
+	 */
+	position: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdNavigationByKeyOptions = {
+	body: PutApiZonesByZoneIdNavigationByKeyBody;
+	path: PutApiZonesByZoneIdNavigationByKeyPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdNavigationByKeyResponses = {
+	"200": PutApiZonesByZoneIdNavigationByKeyStatus200;
+	"400": PutApiZonesByZoneIdNavigationByKeyStatus400;
+	"403": PutApiZonesByZoneIdNavigationByKeyStatus403;
+	"404": PutApiZonesByZoneIdNavigationByKeyStatus404;
+	"422": PutApiZonesByZoneIdNavigationByKeyStatus422;
+	"500": PutApiZonesByZoneIdNavigationByKeyStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiZonesByZoneIdNavigationByKeyResponse =
+	| PutApiZonesByZoneIdNavigationByKeyStatus200
+	| PutApiZonesByZoneIdNavigationByKeyStatus400
+	| PutApiZonesByZoneIdNavigationByKeyStatus403
+	| PutApiZonesByZoneIdNavigationByKeyStatus404
+	| PutApiZonesByZoneIdNavigationByKeyStatus422
+	| PutApiZonesByZoneIdNavigationByKeyStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdNavigationByKeyPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 64
+	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+	 * @type string
+	 */
+	key: string;
+};
+
+/**
+ * @type void
+ */
+export type DeleteApiZonesByZoneIdNavigationByKeyStatus204 = void;
+
+export const DeleteApiZonesByZoneIdNavigationByKeyStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type DeleteApiZonesByZoneIdNavigationByKeyStatus403ErrorCodeEnum =
+	(typeof DeleteApiZonesByZoneIdNavigationByKeyStatus403ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdNavigationByKeyStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdNavigationByKeyStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: DeleteApiZonesByZoneIdNavigationByKeyStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiZonesByZoneIdNavigationByKeyStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ZoneNavigationNotFound: "ZoneNavigationNotFound",
+} as const;
+
+export type DeleteApiZonesByZoneIdNavigationByKeyStatus404ErrorCodeEnum =
+	(typeof DeleteApiZonesByZoneIdNavigationByKeyStatus404ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdNavigationByKeyStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdNavigationByKeyStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiZonesByZoneIdNavigationByKeyStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdNavigationByKeyStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ZoneNavigationInUse'
+		 * @type string
+		 */
+		code: "ZoneNavigationInUse";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdNavigationByKeyStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdNavigationByKeyStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdNavigationByKeyOptions = {
+	body?: never;
+	path: DeleteApiZonesByZoneIdNavigationByKeyPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdNavigationByKeyResponses = {
+	"204": DeleteApiZonesByZoneIdNavigationByKeyStatus204;
+	"403": DeleteApiZonesByZoneIdNavigationByKeyStatus403;
+	"404": DeleteApiZonesByZoneIdNavigationByKeyStatus404;
+	"409": DeleteApiZonesByZoneIdNavigationByKeyStatus409;
+	"422": DeleteApiZonesByZoneIdNavigationByKeyStatus422;
+	"500": DeleteApiZonesByZoneIdNavigationByKeyStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiZonesByZoneIdNavigationByKeyResponse =
+	| DeleteApiZonesByZoneIdNavigationByKeyStatus204
+	| DeleteApiZonesByZoneIdNavigationByKeyStatus403
+	| DeleteApiZonesByZoneIdNavigationByKeyStatus404
+	| DeleteApiZonesByZoneIdNavigationByKeyStatus409
+	| DeleteApiZonesByZoneIdNavigationByKeyStatus422
+	| DeleteApiZonesByZoneIdNavigationByKeyStatus500;
+
+/**
+ * @type object
+ */
 export type PutApiSeriesBySeriesIdReleasesByReleaseIdPath = {
 	/**
 	 * @description
@@ -7831,8 +12733,8 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus200 = {
 };
 
 export const PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum =
@@ -7847,7 +12749,7 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum;
@@ -7974,8 +12876,8 @@ export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdPath = {
 export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus204 = void;
 
 export const DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum =
@@ -7990,7 +12892,7 @@ export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403ErrorCodeEnum;
@@ -8098,6 +13000,14 @@ export type PostApiZonesStatus200 = {
 	id: string;
 };
 
+export const PostApiZonesStatus400ErrorCodeEnum = {
+	ZoneTimeRangeInvalid: "ZoneTimeRangeInvalid",
+	ZoneDocumentInvalid: "ZoneDocumentInvalid",
+} as const;
+
+export type PostApiZonesStatus400ErrorCodeEnum =
+	(typeof PostApiZonesStatus400ErrorCodeEnum)[keyof typeof PostApiZonesStatus400ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -8110,35 +13020,7 @@ export type PostApiZonesStatus400 = {
 		 * @default 'ZoneTimeRangeInvalid'
 		 * @type string
 		 */
-		code: "ZoneTimeRangeInvalid";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PostApiZonesStatus403 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmCapabilityRequired'
-		 * @type string
-		 */
-		code: "RealmCapabilityRequired";
+		code: PostApiZonesStatus400ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -8168,7 +13050,6 @@ export type PostApiZonesStatus500 = InternalError;
  * @type object
  */
 export type PostApiZonesBody = {
-	managingRealmId?: (string | null) | null;
 	/**
 	 * @minLength 3
 	 * @maxLength 72
@@ -8328,51 +13209,17 @@ export type PostApiZonesBody = {
 		};
 	};
 	/**
-	 * @type object
+	 * @type unknown
 	 */
-	boundaryDocument: {
-		/**
-		 * @type string
-		 */
-		_type: "zone-boundary";
-		/**
-		 * @pattern ^[0-9a-f]{12}$
-		 * @type string
-		 */
-		_key: string;
-		definition:
-			| null
-			| boolean
-			| number
-			| string
-			| JsonValue[]
-			| {
-					[key: string]: JsonValue;
-			  };
-	};
+	boundaryDocument: unknown;
 	/**
-	 * @type object
+	 * @type unknown
 	 */
-	themeDocument: {
-		/**
-		 * @type string
-		 */
-		_type: "zone-theme";
-		/**
-		 * @pattern ^[0-9a-f]{12}$
-		 * @type string
-		 */
-		_key: string;
-		tokens:
-			| null
-			| boolean
-			| number
-			| string
-			| JsonValue[]
-			| {
-					[key: string]: JsonValue;
-			  };
-	};
+	themeDocument: unknown;
+	/**
+	 * @type unknown
+	 */
+	dockDocument: unknown;
 	startsAt?: (string | null) | null;
 	endsAt?: (string | null) | null;
 };
@@ -8393,7 +13240,6 @@ export type PostApiZonesOptions = {
 export type PostApiZonesResponses = {
 	"200": PostApiZonesStatus200;
 	"400": PostApiZonesStatus400;
-	"403": PostApiZonesStatus403;
 	"422": PostApiZonesStatus422;
 	"500": PostApiZonesStatus500;
 };
@@ -8402,11 +13248,7 @@ export type PostApiZonesResponses = {
  * @description Union of all possible responses
  */
 export type PostApiZonesResponse =
-	| PostApiZonesStatus200
-	| PostApiZonesStatus400
-	| PostApiZonesStatus403
-	| PostApiZonesStatus422
-	| PostApiZonesStatus500;
+	PostApiZonesStatus200 | PostApiZonesStatus400 | PostApiZonesStatus422 | PostApiZonesStatus500;
 
 /**
  * @type object
@@ -8761,8 +13603,8 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus400 = {
 };
 
 export const PostApiSoftwareBySoftwareIdSystemRequirementsStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus403ErrorCodeEnum =
@@ -8777,7 +13619,7 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: PostApiSoftwareBySoftwareIdSystemRequirementsStatus403ErrorCodeEnum;
@@ -8990,8 +13832,8 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400
 };
 
 export const PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum =
@@ -9006,7 +13848,7 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum;
@@ -9157,8 +13999,8 @@ export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus
 
 export const DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum =
 	{
-		UnitEditForbidden: "UnitEditForbidden",
-		UnitFieldLocked: "UnitFieldLocked",
+		UnitPermissionForbidden: "UnitPermissionForbidden",
+		UnitProtected: "UnitProtected",
 	} as const;
 
 export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum =
@@ -9173,7 +14015,7 @@ export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum;
@@ -9684,10 +14526,10 @@ export type PatchApiUsersMeStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitFieldLocked'
+		 * @default 'UnitProtected'
 		 * @type string
 		 */
-		code: "UnitFieldLocked";
+		code: "UnitProtected";
 		/**
 		 * @type string
 		 */
@@ -10105,10 +14947,10 @@ export type PutApiUsersMePreferencesStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitFieldLocked'
+		 * @default 'UnitProtected'
 		 * @type string
 		 */
-		code: "UnitFieldLocked";
+		code: "UnitProtected";
 		/**
 		 * @type string
 		 */
@@ -12826,8 +17668,8 @@ export const PatchApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum = {
 	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type PatchApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum =
@@ -13138,8 +17980,8 @@ export const DeleteApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum = {
 	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type DeleteApiUnitsByTypeByUnitIdStatus403ErrorCodeEnum =
@@ -13681,8 +18523,8 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403ErrorCodeE
 	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
 	EmailVerificationRequired: "EmailVerificationRequired",
 	AccountRestricted: "AccountRestricted",
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum =
@@ -14487,10 +19329,10 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitRestoreForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "UnitRestoreForbidden";
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -14684,10 +19526,10 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitRestoreForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "UnitRestoreForbidden";
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -16483,8 +21325,8 @@ export type PostApiUnitsByTypeByUnitIdAliasesStatus200 = {
 };
 
 export const PostApiUnitsByTypeByUnitIdAliasesStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type PostApiUnitsByTypeByUnitIdAliasesStatus403ErrorCodeEnum =
@@ -16499,7 +21341,7 @@ export type PostApiUnitsByTypeByUnitIdAliasesStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: PostApiUnitsByTypeByUnitIdAliasesStatus403ErrorCodeEnum;
@@ -16672,8 +21514,8 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdPath = {
 export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus204 = void;
 
 export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum =
@@ -16688,7 +21530,7 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403ErrorCodeEnum;
@@ -17110,8 +21952,8 @@ export type PostApiUnitsByTypeByUnitIdCreditsStatus200 = {
 };
 
 export const PostApiUnitsByTypeByUnitIdCreditsStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type PostApiUnitsByTypeByUnitIdCreditsStatus403ErrorCodeEnum =
@@ -17126,7 +21968,7 @@ export type PostApiUnitsByTypeByUnitIdCreditsStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: PostApiUnitsByTypeByUnitIdCreditsStatus403ErrorCodeEnum;
@@ -17326,8 +22168,8 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus200 = {
 };
 
 export const PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum =
@@ -17342,7 +22184,7 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: PostApiUnitsByTypeByUnitIdLinksStatus403ErrorCodeEnum;
@@ -17531,8 +22373,8 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus200 = {
 };
 
 export const PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum =
@@ -17547,7 +22389,7 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum;
@@ -17685,8 +22527,8 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdPath = {
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus204 = void;
 
 export const DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum =
@@ -17701,7 +22543,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403ErrorCodeEnum;
@@ -18099,8 +22941,8 @@ export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus200 = {
 };
 
 export const PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403ErrorCodeEnum =
@@ -18115,7 +22957,7 @@ export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403ErrorCodeEnum;
@@ -18420,8 +23262,8 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesStatus200 = {
 };
 
 export const PostApiUnitsBookByUnitIdContentStructureNodesStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type PostApiUnitsBookByUnitIdContentStructureNodesStatus403ErrorCodeEnum =
@@ -18436,7 +23278,7 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: PostApiUnitsBookByUnitIdContentStructureNodesStatus403ErrorCodeEnum;
@@ -18781,8 +23623,8 @@ export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200 = {
 };
 
 export const PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403ErrorCodeEnum =
@@ -18797,7 +23639,7 @@ export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403ErrorCodeEnum;
@@ -19225,8 +24067,8 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus200 = {
 };
 
 export const PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403ErrorCodeEnum =
@@ -19241,7 +24083,7 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403ErrorCodeEnum;
@@ -20207,7 +25049,7 @@ export type GetApiCollectionsResponse =
 
 export const PostApiCollectionsStatus200SourceEnum = {
 	manual: "manual",
-	dynamic: "dynamic",
+	search: "search",
 	system: "system",
 } as const;
 
@@ -20286,13 +25128,219 @@ export type PostApiCollectionsStatus200 = {
 				/**
 				 * @type string
 				 */
-				source: "dynamic";
+				source: "search";
 				/**
-				 * @type object
+				 * @type array
 				 */
-				query: {
-					[key: string]: unknown;
-				};
+				categories: (
+					| "units"
+					| "users"
+					| "entity"
+					| "tags"
+					| "posts"
+					| "realms"
+					| "collections"
+					| "reviews"
+					| "polls"
+				)[];
+				/**
+				 * @type array
+				 */
+				filters: (
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							/**
+							 * @type string
+							 */
+							operator: "equals";
+							value: string | number | boolean;
+					  }
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							/**
+							 * @type string
+							 */
+							operator: "not-equals";
+							value: string | number | boolean;
+					  }
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							operator: "any-of" | "all-of" | "none-of";
+							/**
+							 * @type array
+							 */
+							values: (string | number | boolean)[];
+					  }
+					| (
+							| {
+									field:
+										| "category"
+										| "type"
+										| "language"
+										| "content-rating"
+										| "ai-disclosure"
+										| "license"
+										| "tag"
+										| "author"
+										| "realm"
+										| "zone"
+										| "subject"
+										| "target"
+										| "root"
+										| "parent"
+										| "owner"
+										| "join-policy"
+										| "multiple"
+										| "results-visibility"
+										| "closed"
+										| "created-at"
+										| "updated-at"
+										| "published-at"
+										| "closes-at";
+									/**
+									 * @type string
+									 */
+									operator: "range";
+									lower: string | number | boolean;
+									upper?: string | number | boolean;
+							  }
+							| {
+									field:
+										| "category"
+										| "type"
+										| "language"
+										| "content-rating"
+										| "ai-disclosure"
+										| "license"
+										| "tag"
+										| "author"
+										| "realm"
+										| "zone"
+										| "subject"
+										| "target"
+										| "root"
+										| "parent"
+										| "owner"
+										| "join-policy"
+										| "multiple"
+										| "results-visibility"
+										| "closed"
+										| "created-at"
+										| "updated-at"
+										| "published-at"
+										| "closes-at";
+									/**
+									 * @type string
+									 */
+									operator: "range";
+									lower?: string | number | boolean;
+									upper: string | number | boolean;
+							  }
+					  )
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							/**
+							 * @type string
+							 */
+							operator: "exists";
+							/**
+							 * @type boolean
+							 */
+							value: boolean;
+					  }
+				)[];
 		  }
 		| {
 				/**
@@ -20656,13 +25704,219 @@ export type PostApiCollectionsBody = {
 				/**
 				 * @type string
 				 */
-				source: "dynamic";
+				source: "search";
 				/**
-				 * @type object
+				 * @type array
 				 */
-				query: {
-					[key: string]: unknown;
-				};
+				categories: (
+					| "units"
+					| "users"
+					| "entity"
+					| "tags"
+					| "posts"
+					| "realms"
+					| "collections"
+					| "reviews"
+					| "polls"
+				)[];
+				/**
+				 * @type array
+				 */
+				filters: (
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							/**
+							 * @type string
+							 */
+							operator: "equals";
+							value: string | number | boolean;
+					  }
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							/**
+							 * @type string
+							 */
+							operator: "not-equals";
+							value: string | number | boolean;
+					  }
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							operator: "any-of" | "all-of" | "none-of";
+							/**
+							 * @type array
+							 */
+							values: (string | number | boolean)[];
+					  }
+					| (
+							| {
+									field:
+										| "category"
+										| "type"
+										| "language"
+										| "content-rating"
+										| "ai-disclosure"
+										| "license"
+										| "tag"
+										| "author"
+										| "realm"
+										| "zone"
+										| "subject"
+										| "target"
+										| "root"
+										| "parent"
+										| "owner"
+										| "join-policy"
+										| "multiple"
+										| "results-visibility"
+										| "closed"
+										| "created-at"
+										| "updated-at"
+										| "published-at"
+										| "closes-at";
+									/**
+									 * @type string
+									 */
+									operator: "range";
+									lower: string | number | boolean;
+									upper?: string | number | boolean;
+							  }
+							| {
+									field:
+										| "category"
+										| "type"
+										| "language"
+										| "content-rating"
+										| "ai-disclosure"
+										| "license"
+										| "tag"
+										| "author"
+										| "realm"
+										| "zone"
+										| "subject"
+										| "target"
+										| "root"
+										| "parent"
+										| "owner"
+										| "join-policy"
+										| "multiple"
+										| "results-visibility"
+										| "closed"
+										| "created-at"
+										| "updated-at"
+										| "published-at"
+										| "closes-at";
+									/**
+									 * @type string
+									 */
+									operator: "range";
+									lower?: string | number | boolean;
+									upper: string | number | boolean;
+							  }
+					  )
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							/**
+							 * @type string
+							 */
+							operator: "exists";
+							/**
+							 * @type boolean
+							 */
+							value: boolean;
+					  }
+				)[];
 		  }
 		| {
 				/**
@@ -20738,7 +25992,7 @@ export type PostApiCollectionsResponse =
 
 export const GetApiCollectionsFavoritesStatus200SourceEnum = {
 	manual: "manual",
-	dynamic: "dynamic",
+	search: "search",
 	system: "system",
 } as const;
 
@@ -20817,13 +26071,219 @@ export type GetApiCollectionsFavoritesStatus200 = {
 				/**
 				 * @type string
 				 */
-				source: "dynamic";
+				source: "search";
 				/**
-				 * @type object
+				 * @type array
 				 */
-				query: {
-					[key: string]: unknown;
-				};
+				categories: (
+					| "units"
+					| "users"
+					| "entity"
+					| "tags"
+					| "posts"
+					| "realms"
+					| "collections"
+					| "reviews"
+					| "polls"
+				)[];
+				/**
+				 * @type array
+				 */
+				filters: (
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							/**
+							 * @type string
+							 */
+							operator: "equals";
+							value: string | number | boolean;
+					  }
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							/**
+							 * @type string
+							 */
+							operator: "not-equals";
+							value: string | number | boolean;
+					  }
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							operator: "any-of" | "all-of" | "none-of";
+							/**
+							 * @type array
+							 */
+							values: (string | number | boolean)[];
+					  }
+					| (
+							| {
+									field:
+										| "category"
+										| "type"
+										| "language"
+										| "content-rating"
+										| "ai-disclosure"
+										| "license"
+										| "tag"
+										| "author"
+										| "realm"
+										| "zone"
+										| "subject"
+										| "target"
+										| "root"
+										| "parent"
+										| "owner"
+										| "join-policy"
+										| "multiple"
+										| "results-visibility"
+										| "closed"
+										| "created-at"
+										| "updated-at"
+										| "published-at"
+										| "closes-at";
+									/**
+									 * @type string
+									 */
+									operator: "range";
+									lower: string | number | boolean;
+									upper?: string | number | boolean;
+							  }
+							| {
+									field:
+										| "category"
+										| "type"
+										| "language"
+										| "content-rating"
+										| "ai-disclosure"
+										| "license"
+										| "tag"
+										| "author"
+										| "realm"
+										| "zone"
+										| "subject"
+										| "target"
+										| "root"
+										| "parent"
+										| "owner"
+										| "join-policy"
+										| "multiple"
+										| "results-visibility"
+										| "closed"
+										| "created-at"
+										| "updated-at"
+										| "published-at"
+										| "closes-at";
+									/**
+									 * @type string
+									 */
+									operator: "range";
+									lower?: string | number | boolean;
+									upper: string | number | boolean;
+							  }
+					  )
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							/**
+							 * @type string
+							 */
+							operator: "exists";
+							/**
+							 * @type boolean
+							 */
+							value: boolean;
+					  }
+				)[];
 		  }
 		| {
 				/**
@@ -21002,7 +26462,7 @@ export type GetApiCollectionsByCollectionIdPath = {
 
 export const GetApiCollectionsByCollectionIdStatus200SourceEnum = {
 	manual: "manual",
-	dynamic: "dynamic",
+	search: "search",
 	system: "system",
 } as const;
 
@@ -21081,13 +26541,219 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 				/**
 				 * @type string
 				 */
-				source: "dynamic";
+				source: "search";
 				/**
-				 * @type object
+				 * @type array
 				 */
-				query: {
-					[key: string]: unknown;
-				};
+				categories: (
+					| "units"
+					| "users"
+					| "entity"
+					| "tags"
+					| "posts"
+					| "realms"
+					| "collections"
+					| "reviews"
+					| "polls"
+				)[];
+				/**
+				 * @type array
+				 */
+				filters: (
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							/**
+							 * @type string
+							 */
+							operator: "equals";
+							value: string | number | boolean;
+					  }
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							/**
+							 * @type string
+							 */
+							operator: "not-equals";
+							value: string | number | boolean;
+					  }
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							operator: "any-of" | "all-of" | "none-of";
+							/**
+							 * @type array
+							 */
+							values: (string | number | boolean)[];
+					  }
+					| (
+							| {
+									field:
+										| "category"
+										| "type"
+										| "language"
+										| "content-rating"
+										| "ai-disclosure"
+										| "license"
+										| "tag"
+										| "author"
+										| "realm"
+										| "zone"
+										| "subject"
+										| "target"
+										| "root"
+										| "parent"
+										| "owner"
+										| "join-policy"
+										| "multiple"
+										| "results-visibility"
+										| "closed"
+										| "created-at"
+										| "updated-at"
+										| "published-at"
+										| "closes-at";
+									/**
+									 * @type string
+									 */
+									operator: "range";
+									lower: string | number | boolean;
+									upper?: string | number | boolean;
+							  }
+							| {
+									field:
+										| "category"
+										| "type"
+										| "language"
+										| "content-rating"
+										| "ai-disclosure"
+										| "license"
+										| "tag"
+										| "author"
+										| "realm"
+										| "zone"
+										| "subject"
+										| "target"
+										| "root"
+										| "parent"
+										| "owner"
+										| "join-policy"
+										| "multiple"
+										| "results-visibility"
+										| "closed"
+										| "created-at"
+										| "updated-at"
+										| "published-at"
+										| "closes-at";
+									/**
+									 * @type string
+									 */
+									operator: "range";
+									lower?: string | number | boolean;
+									upper: string | number | boolean;
+							  }
+					  )
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							/**
+							 * @type string
+							 */
+							operator: "exists";
+							/**
+							 * @type boolean
+							 */
+							value: boolean;
+					  }
+				)[];
 		  }
 		| {
 				/**
@@ -21273,7 +26939,7 @@ export type PatchApiCollectionsByCollectionIdPath = {
 
 export const PatchApiCollectionsByCollectionIdStatus200SourceEnum = {
 	manual: "manual",
-	dynamic: "dynamic",
+	search: "search",
 	system: "system",
 } as const;
 
@@ -21352,13 +27018,219 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 				/**
 				 * @type string
 				 */
-				source: "dynamic";
+				source: "search";
 				/**
-				 * @type object
+				 * @type array
 				 */
-				query: {
-					[key: string]: unknown;
-				};
+				categories: (
+					| "units"
+					| "users"
+					| "entity"
+					| "tags"
+					| "posts"
+					| "realms"
+					| "collections"
+					| "reviews"
+					| "polls"
+				)[];
+				/**
+				 * @type array
+				 */
+				filters: (
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							/**
+							 * @type string
+							 */
+							operator: "equals";
+							value: string | number | boolean;
+					  }
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							/**
+							 * @type string
+							 */
+							operator: "not-equals";
+							value: string | number | boolean;
+					  }
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							operator: "any-of" | "all-of" | "none-of";
+							/**
+							 * @type array
+							 */
+							values: (string | number | boolean)[];
+					  }
+					| (
+							| {
+									field:
+										| "category"
+										| "type"
+										| "language"
+										| "content-rating"
+										| "ai-disclosure"
+										| "license"
+										| "tag"
+										| "author"
+										| "realm"
+										| "zone"
+										| "subject"
+										| "target"
+										| "root"
+										| "parent"
+										| "owner"
+										| "join-policy"
+										| "multiple"
+										| "results-visibility"
+										| "closed"
+										| "created-at"
+										| "updated-at"
+										| "published-at"
+										| "closes-at";
+									/**
+									 * @type string
+									 */
+									operator: "range";
+									lower: string | number | boolean;
+									upper?: string | number | boolean;
+							  }
+							| {
+									field:
+										| "category"
+										| "type"
+										| "language"
+										| "content-rating"
+										| "ai-disclosure"
+										| "license"
+										| "tag"
+										| "author"
+										| "realm"
+										| "zone"
+										| "subject"
+										| "target"
+										| "root"
+										| "parent"
+										| "owner"
+										| "join-policy"
+										| "multiple"
+										| "results-visibility"
+										| "closed"
+										| "created-at"
+										| "updated-at"
+										| "published-at"
+										| "closes-at";
+									/**
+									 * @type string
+									 */
+									operator: "range";
+									lower?: string | number | boolean;
+									upper: string | number | boolean;
+							  }
+					  )
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							/**
+							 * @type string
+							 */
+							operator: "exists";
+							/**
+							 * @type boolean
+							 */
+							value: boolean;
+					  }
+				)[];
 		  }
 		| {
 				/**
@@ -21785,13 +27657,219 @@ export type PatchApiCollectionsByCollectionIdBody = {
 				/**
 				 * @type string
 				 */
-				source: "dynamic";
+				source: "search";
 				/**
-				 * @type object
+				 * @type array
 				 */
-				query: {
-					[key: string]: unknown;
-				};
+				categories: (
+					| "units"
+					| "users"
+					| "entity"
+					| "tags"
+					| "posts"
+					| "realms"
+					| "collections"
+					| "reviews"
+					| "polls"
+				)[];
+				/**
+				 * @type array
+				 */
+				filters: (
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							/**
+							 * @type string
+							 */
+							operator: "equals";
+							value: string | number | boolean;
+					  }
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							/**
+							 * @type string
+							 */
+							operator: "not-equals";
+							value: string | number | boolean;
+					  }
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							operator: "any-of" | "all-of" | "none-of";
+							/**
+							 * @type array
+							 */
+							values: (string | number | boolean)[];
+					  }
+					| (
+							| {
+									field:
+										| "category"
+										| "type"
+										| "language"
+										| "content-rating"
+										| "ai-disclosure"
+										| "license"
+										| "tag"
+										| "author"
+										| "realm"
+										| "zone"
+										| "subject"
+										| "target"
+										| "root"
+										| "parent"
+										| "owner"
+										| "join-policy"
+										| "multiple"
+										| "results-visibility"
+										| "closed"
+										| "created-at"
+										| "updated-at"
+										| "published-at"
+										| "closes-at";
+									/**
+									 * @type string
+									 */
+									operator: "range";
+									lower: string | number | boolean;
+									upper?: string | number | boolean;
+							  }
+							| {
+									field:
+										| "category"
+										| "type"
+										| "language"
+										| "content-rating"
+										| "ai-disclosure"
+										| "license"
+										| "tag"
+										| "author"
+										| "realm"
+										| "zone"
+										| "subject"
+										| "target"
+										| "root"
+										| "parent"
+										| "owner"
+										| "join-policy"
+										| "multiple"
+										| "results-visibility"
+										| "closed"
+										| "created-at"
+										| "updated-at"
+										| "published-at"
+										| "closes-at";
+									/**
+									 * @type string
+									 */
+									operator: "range";
+									lower?: string | number | boolean;
+									upper: string | number | boolean;
+							  }
+					  )
+					| {
+							field:
+								| "category"
+								| "type"
+								| "language"
+								| "content-rating"
+								| "ai-disclosure"
+								| "license"
+								| "tag"
+								| "author"
+								| "realm"
+								| "zone"
+								| "subject"
+								| "target"
+								| "root"
+								| "parent"
+								| "owner"
+								| "join-policy"
+								| "multiple"
+								| "results-visibility"
+								| "closed"
+								| "created-at"
+								| "updated-at"
+								| "published-at"
+								| "closes-at";
+							/**
+							 * @type string
+							 */
+							operator: "exists";
+							/**
+							 * @type boolean
+							 */
+							value: boolean;
+					  }
+				)[];
 		  }
 		| {
 				/**
@@ -23111,8 +29189,8 @@ export type PatchApiReviewsByReviewIdStatus200 = {
 };
 
 export const PatchApiReviewsByReviewIdStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type PatchApiReviewsByReviewIdStatus403ErrorCodeEnum =
@@ -23127,7 +29205,7 @@ export type PatchApiReviewsByReviewIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: PatchApiReviewsByReviewIdStatus403ErrorCodeEnum;
@@ -23393,10 +29471,10 @@ export type DeleteApiReviewsByReviewIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "UnitEditForbidden";
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -24849,8 +30927,8 @@ export type PostApiPollsByPollIdCloseStatus200 = {
 };
 
 export const PostApiPollsByPollIdCloseStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type PostApiPollsByPollIdCloseStatus403ErrorCodeEnum =
@@ -24865,7 +30943,7 @@ export type PostApiPollsByPollIdCloseStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: PostApiPollsByPollIdCloseStatus403ErrorCodeEnum;
@@ -25817,8 +31895,8 @@ export type PatchApiPostsByPostIdStatus200 = {
 };
 
 export const PatchApiPostsByPostIdStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type PatchApiPostsByPostIdStatus403ErrorCodeEnum =
@@ -25833,7 +31911,7 @@ export type PatchApiPostsByPostIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: PatchApiPostsByPostIdStatus403ErrorCodeEnum;
@@ -26140,10 +32218,10 @@ export type DeleteApiPostsByPostIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: "UnitEditForbidden";
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -27185,8 +33263,8 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus200 = {
 };
 
 export const PatchApiPostsByPostIdRepliesByReplyPostIdStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
 	RealmCapabilityRequired: "RealmCapabilityRequired",
 } as const;
 
@@ -27202,7 +33280,7 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: PatchApiPostsByPostIdRepliesByReplyPostIdStatus403ErrorCodeEnum;
@@ -27500,7 +33578,7 @@ export type DeleteApiPostsByPostIdRepliesByReplyPostIdPath = {
 export type DeleteApiPostsByPostIdRepliesByReplyPostIdStatus204 = void;
 
 export const DeleteApiPostsByPostIdRepliesByReplyPostIdStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
 	RealmCapabilityRequired: "RealmCapabilityRequired",
 } as const;
 
@@ -27516,7 +33594,7 @@ export type DeleteApiPostsByPostIdRepliesByReplyPostIdStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitEditForbidden'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: DeleteApiPostsByPostIdRepliesByReplyPostIdStatus403ErrorCodeEnum;
@@ -28099,7 +34177,7 @@ export type PatchApiRealmsByRealmIdStatus200 = {
 
 export const PatchApiRealmsByRealmIdStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type PatchApiRealmsByRealmIdStatus403ErrorCodeEnum =
@@ -28576,10 +34654,10 @@ export type PutApiRealmsByRealmIdMembershipStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitFieldLocked'
+		 * @default 'UnitProtected'
 		 * @type string
 		 */
-		code: "UnitFieldLocked";
+		code: "UnitProtected";
 		/**
 		 * @type string
 		 */
@@ -28740,10 +34818,10 @@ export type DeleteApiRealmsByRealmIdMembershipStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'UnitFieldLocked'
+		 * @default 'UnitProtected'
 		 * @type string
 		 */
-		code: "UnitFieldLocked";
+		code: "UnitProtected";
 		/**
 		 * @type string
 		 */
@@ -29052,7 +35130,7 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdStatus200 = {
 
 export const PatchApiRealmsByRealmIdMembersByProfileIdStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitProtected: "UnitProtected",
 	RealmRoleManagementForbidden: "RealmRoleManagementForbidden",
 } as const;
 
@@ -29218,7 +35296,7 @@ export type PutApiRealmsByRealmIdRulesStatus200 = {
 
 export const PutApiRealmsByRealmIdRulesStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type PutApiRealmsByRealmIdRulesStatus403ErrorCodeEnum =
@@ -29889,7 +35967,7 @@ export type PutApiRealmsByRealmIdPinsByUnitIdStatus200 = {
 
 export const PutApiRealmsByRealmIdPinsByUnitIdStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type PutApiRealmsByRealmIdPinsByUnitIdStatus403ErrorCodeEnum =
@@ -30061,7 +36139,7 @@ export type DeleteApiRealmsByRealmIdPinsByUnitIdStatus204 = void;
 
 export const DeleteApiRealmsByRealmIdPinsByUnitIdStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
-	UnitFieldLocked: "UnitFieldLocked",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type DeleteApiRealmsByRealmIdPinsByUnitIdStatus403ErrorCodeEnum =
@@ -30439,6 +36517,2884 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdResponse =
 	| PatchApiRealmsByRealmIdUnitsByUnitIdStatus422
 	| PatchApiRealmsByRealmIdUnitsByUnitIdStatus500;
 
+export const GetApiSearchConfigurationStatus200CategoriesEnum = {
+	units: "units",
+	users: "users",
+	entity: "entity",
+	tags: "tags",
+	posts: "posts",
+	realms: "realms",
+	collections: "collections",
+	reviews: "reviews",
+	polls: "polls",
+} as const;
+
+export type GetApiSearchConfigurationStatus200CategoriesEnum =
+	(typeof GetApiSearchConfigurationStatus200CategoriesEnum)[keyof typeof GetApiSearchConfigurationStatus200CategoriesEnum];
+
+export const GetApiSearchConfigurationStatus200ModesAvailableEnum = {
+	basic: "basic",
+	advanced: "advanced",
+} as const;
+
+export type GetApiSearchConfigurationStatus200ModesAvailableEnum =
+	(typeof GetApiSearchConfigurationStatus200ModesAvailableEnum)[keyof typeof GetApiSearchConfigurationStatus200ModesAvailableEnum];
+
+export const GetApiSearchConfigurationStatus200ModesDefaultEnum = {
+	basic: "basic",
+	advanced: "advanced",
+} as const;
+
+export type GetApiSearchConfigurationStatus200ModesDefaultEnum =
+	(typeof GetApiSearchConfigurationStatus200ModesDefaultEnum)[keyof typeof GetApiSearchConfigurationStatus200ModesDefaultEnum];
+
+export const GetApiSearchConfigurationStatus200ControlsFieldEnum = {
+	category: "category",
+	type: "type",
+	language: "language",
+	"content-rating": "content-rating",
+	"ai-disclosure": "ai-disclosure",
+	license: "license",
+	tag: "tag",
+	author: "author",
+	realm: "realm",
+	zone: "zone",
+	subject: "subject",
+	target: "target",
+	root: "root",
+	parent: "parent",
+	owner: "owner",
+	"join-policy": "join-policy",
+	multiple: "multiple",
+	"results-visibility": "results-visibility",
+	closed: "closed",
+	"created-at": "created-at",
+	"updated-at": "updated-at",
+	"published-at": "published-at",
+	"closes-at": "closes-at",
+} as const;
+
+export type GetApiSearchConfigurationStatus200ControlsFieldEnum =
+	(typeof GetApiSearchConfigurationStatus200ControlsFieldEnum)[keyof typeof GetApiSearchConfigurationStatus200ControlsFieldEnum];
+
+export const GetApiSearchConfigurationStatus200ControlsComponentEnum = {
+	select: "select",
+	"multi-select": "multi-select",
+	toggle: "toggle",
+	"date-range": "date-range",
+	"value-range": "value-range",
+} as const;
+
+export type GetApiSearchConfigurationStatus200ControlsComponentEnum =
+	(typeof GetApiSearchConfigurationStatus200ControlsComponentEnum)[keyof typeof GetApiSearchConfigurationStatus200ControlsComponentEnum];
+
+export const GetApiSearchConfigurationStatus200ControlsModesEnum = {
+	basic: "basic",
+	advanced: "advanced",
+} as const;
+
+export type GetApiSearchConfigurationStatus200ControlsModesEnum =
+	(typeof GetApiSearchConfigurationStatus200ControlsModesEnum)[keyof typeof GetApiSearchConfigurationStatus200ControlsModesEnum];
+
+export const GetApiSearchConfigurationStatus200ControlsOperatorsEnum = {
+	equals: "equals",
+	"not-equals": "not-equals",
+	"any-of": "any-of",
+	"all-of": "all-of",
+	"none-of": "none-of",
+	range: "range",
+	exists: "exists",
+} as const;
+
+export type GetApiSearchConfigurationStatus200ControlsOperatorsEnum =
+	(typeof GetApiSearchConfigurationStatus200ControlsOperatorsEnum)[keyof typeof GetApiSearchConfigurationStatus200ControlsOperatorsEnum];
+
+export const GetApiSearchConfigurationStatus200SortDefaultEnum = {
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"subscriberCount:asc": "subscriberCount:asc",
+	"subscriberCount:desc": "subscriberCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+} as const;
+
+export type GetApiSearchConfigurationStatus200SortDefaultEnum =
+	(typeof GetApiSearchConfigurationStatus200SortDefaultEnum)[keyof typeof GetApiSearchConfigurationStatus200SortDefaultEnum];
+
+export const GetApiSearchConfigurationStatus200SortOptionsEnum = {
+	relevance: "relevance",
+	"createdAt:asc": "createdAt:asc",
+	"createdAt:desc": "createdAt:desc",
+	"updatedAt:asc": "updatedAt:asc",
+	"updatedAt:desc": "updatedAt:desc",
+	"publishedAt:asc": "publishedAt:asc",
+	"publishedAt:desc": "publishedAt:desc",
+	"subscriberCount:asc": "subscriberCount:asc",
+	"subscriberCount:desc": "subscriberCount:desc",
+	"replyCount:asc": "replyCount:asc",
+	"replyCount:desc": "replyCount:desc",
+	"closesAt:asc": "closesAt:asc",
+	"closesAt:desc": "closesAt:desc",
+} as const;
+
+export type GetApiSearchConfigurationStatus200SortOptionsEnum =
+	(typeof GetApiSearchConfigurationStatus200SortOptionsEnum)[keyof typeof GetApiSearchConfigurationStatus200SortOptionsEnum];
+
+export const GetApiSearchConfigurationStatus200ResultsFacetsEnum = {
+	category: "category",
+	type: "type",
+	language: "language",
+	"content-rating": "content-rating",
+	"ai-disclosure": "ai-disclosure",
+	license: "license",
+	tag: "tag",
+	author: "author",
+	realm: "realm",
+	zone: "zone",
+	subject: "subject",
+	target: "target",
+	root: "root",
+	parent: "parent",
+	owner: "owner",
+	"join-policy": "join-policy",
+	multiple: "multiple",
+	"results-visibility": "results-visibility",
+	closed: "closed",
+	"created-at": "created-at",
+	"updated-at": "updated-at",
+	"published-at": "published-at",
+	"closes-at": "closes-at",
+} as const;
+
+export type GetApiSearchConfigurationStatus200ResultsFacetsEnum =
+	(typeof GetApiSearchConfigurationStatus200ResultsFacetsEnum)[keyof typeof GetApiSearchConfigurationStatus200ResultsFacetsEnum];
+
+/**
+ * @type object
+ */
+export type GetApiSearchConfigurationStatus200 = {
+	scope:
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "global";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "unit";
+				/**
+				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+				 * @type string
+				 */
+				unitId: string;
+				/**
+				 * @default false
+				 * @type boolean
+				 */
+				includeDescendants: boolean;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "realm";
+				/**
+				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+				 * @type string
+				 */
+				realmId: string;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				kind: "zone";
+				/**
+				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+				 * @type string
+				 */
+				zoneId: string;
+		  };
+	/**
+	 * @type array
+	 */
+	categories: GetApiSearchConfigurationStatus200CategoriesEnum[];
+	/**
+	 * @type object
+	 */
+	modes: {
+		/**
+		 * @type array
+		 */
+		available: GetApiSearchConfigurationStatus200ModesAvailableEnum[];
+		/**
+		 * @type string
+		 */
+		default: GetApiSearchConfigurationStatus200ModesDefaultEnum;
+	};
+	/**
+	 * @type object
+	 */
+	query: {
+		/**
+		 * @default true
+		 * @type boolean
+		 */
+		enabled: boolean;
+		/**
+		 * @default false
+		 * @type boolean | undefined
+		 */
+		required?: boolean;
+		/**
+		 * @maxLength 500
+		 * @type string | undefined
+		 */
+		initial?: string;
+	};
+	/**
+	 * @type array
+	 */
+	constraints: (
+		| {
+				field:
+					| "category"
+					| "type"
+					| "language"
+					| "content-rating"
+					| "ai-disclosure"
+					| "license"
+					| "tag"
+					| "author"
+					| "realm"
+					| "zone"
+					| "subject"
+					| "target"
+					| "root"
+					| "parent"
+					| "owner"
+					| "join-policy"
+					| "multiple"
+					| "results-visibility"
+					| "closed"
+					| "created-at"
+					| "updated-at"
+					| "published-at"
+					| "closes-at";
+				/**
+				 * @type string
+				 */
+				operator: "equals";
+				value: string | number | boolean;
+		  }
+		| {
+				field:
+					| "category"
+					| "type"
+					| "language"
+					| "content-rating"
+					| "ai-disclosure"
+					| "license"
+					| "tag"
+					| "author"
+					| "realm"
+					| "zone"
+					| "subject"
+					| "target"
+					| "root"
+					| "parent"
+					| "owner"
+					| "join-policy"
+					| "multiple"
+					| "results-visibility"
+					| "closed"
+					| "created-at"
+					| "updated-at"
+					| "published-at"
+					| "closes-at";
+				/**
+				 * @type string
+				 */
+				operator: "not-equals";
+				value: string | number | boolean;
+		  }
+		| {
+				field:
+					| "category"
+					| "type"
+					| "language"
+					| "content-rating"
+					| "ai-disclosure"
+					| "license"
+					| "tag"
+					| "author"
+					| "realm"
+					| "zone"
+					| "subject"
+					| "target"
+					| "root"
+					| "parent"
+					| "owner"
+					| "join-policy"
+					| "multiple"
+					| "results-visibility"
+					| "closed"
+					| "created-at"
+					| "updated-at"
+					| "published-at"
+					| "closes-at";
+				operator: "any-of" | "all-of" | "none-of";
+				/**
+				 * @type array
+				 */
+				values: (string | number | boolean)[];
+		  }
+		| (
+				| {
+						field:
+							| "category"
+							| "type"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "author"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at";
+						/**
+						 * @type string
+						 */
+						operator: "range";
+						lower: string | number | boolean;
+						upper?: string | number | boolean;
+				  }
+				| {
+						field:
+							| "category"
+							| "type"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "author"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at";
+						/**
+						 * @type string
+						 */
+						operator: "range";
+						lower?: string | number | boolean;
+						upper: string | number | boolean;
+				  }
+		  )
+		| {
+				field:
+					| "category"
+					| "type"
+					| "language"
+					| "content-rating"
+					| "ai-disclosure"
+					| "license"
+					| "tag"
+					| "author"
+					| "realm"
+					| "zone"
+					| "subject"
+					| "target"
+					| "root"
+					| "parent"
+					| "owner"
+					| "join-policy"
+					| "multiple"
+					| "results-visibility"
+					| "closed"
+					| "created-at"
+					| "updated-at"
+					| "published-at"
+					| "closes-at";
+				/**
+				 * @type string
+				 */
+				operator: "exists";
+				/**
+				 * @type boolean
+				 */
+				value: boolean;
+		  }
+	)[];
+	/**
+	 * @type array
+	 */
+	defaults: (
+		| {
+				field:
+					| "category"
+					| "type"
+					| "language"
+					| "content-rating"
+					| "ai-disclosure"
+					| "license"
+					| "tag"
+					| "author"
+					| "realm"
+					| "zone"
+					| "subject"
+					| "target"
+					| "root"
+					| "parent"
+					| "owner"
+					| "join-policy"
+					| "multiple"
+					| "results-visibility"
+					| "closed"
+					| "created-at"
+					| "updated-at"
+					| "published-at"
+					| "closes-at";
+				/**
+				 * @type string
+				 */
+				operator: "equals";
+				value: string | number | boolean;
+		  }
+		| {
+				field:
+					| "category"
+					| "type"
+					| "language"
+					| "content-rating"
+					| "ai-disclosure"
+					| "license"
+					| "tag"
+					| "author"
+					| "realm"
+					| "zone"
+					| "subject"
+					| "target"
+					| "root"
+					| "parent"
+					| "owner"
+					| "join-policy"
+					| "multiple"
+					| "results-visibility"
+					| "closed"
+					| "created-at"
+					| "updated-at"
+					| "published-at"
+					| "closes-at";
+				/**
+				 * @type string
+				 */
+				operator: "not-equals";
+				value: string | number | boolean;
+		  }
+		| {
+				field:
+					| "category"
+					| "type"
+					| "language"
+					| "content-rating"
+					| "ai-disclosure"
+					| "license"
+					| "tag"
+					| "author"
+					| "realm"
+					| "zone"
+					| "subject"
+					| "target"
+					| "root"
+					| "parent"
+					| "owner"
+					| "join-policy"
+					| "multiple"
+					| "results-visibility"
+					| "closed"
+					| "created-at"
+					| "updated-at"
+					| "published-at"
+					| "closes-at";
+				operator: "any-of" | "all-of" | "none-of";
+				/**
+				 * @type array
+				 */
+				values: (string | number | boolean)[];
+		  }
+		| (
+				| {
+						field:
+							| "category"
+							| "type"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "author"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at";
+						/**
+						 * @type string
+						 */
+						operator: "range";
+						lower: string | number | boolean;
+						upper?: string | number | boolean;
+				  }
+				| {
+						field:
+							| "category"
+							| "type"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "author"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at";
+						/**
+						 * @type string
+						 */
+						operator: "range";
+						lower?: string | number | boolean;
+						upper: string | number | boolean;
+				  }
+		  )
+		| {
+				field:
+					| "category"
+					| "type"
+					| "language"
+					| "content-rating"
+					| "ai-disclosure"
+					| "license"
+					| "tag"
+					| "author"
+					| "realm"
+					| "zone"
+					| "subject"
+					| "target"
+					| "root"
+					| "parent"
+					| "owner"
+					| "join-policy"
+					| "multiple"
+					| "results-visibility"
+					| "closed"
+					| "created-at"
+					| "updated-at"
+					| "published-at"
+					| "closes-at";
+				/**
+				 * @type string
+				 */
+				operator: "exists";
+				/**
+				 * @type boolean
+				 */
+				value: boolean;
+		  }
+	)[];
+	/**
+	 * @type array
+	 */
+	controls: {
+		/**
+		 * @minLength 1
+		 * @maxLength 64
+		 * @pattern ^[a-z][a-z0-9-]*$
+		 * @type string
+		 */
+		key: string;
+		/**
+		 * @type string
+		 */
+		field: GetApiSearchConfigurationStatus200ControlsFieldEnum;
+		/**
+		 * @type string
+		 */
+		component: GetApiSearchConfigurationStatus200ControlsComponentEnum;
+		/**
+		 * @type array
+		 */
+		modes: GetApiSearchConfigurationStatus200ControlsModesEnum[];
+		/**
+		 * @type array
+		 */
+		operators: GetApiSearchConfigurationStatus200ControlsOperatorsEnum[];
+		optionSource?:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "facet";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "static";
+					/**
+					 * @type array
+					 */
+					options: {
+						value: string | number | boolean;
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string | undefined
+						 */
+						labelUnitId?: string;
+					}[];
+			  };
+		optionPolicy?:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "all";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "include";
+					/**
+					 * @type array
+					 */
+					values: (string | number | boolean)[];
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "exclude";
+					/**
+					 * @type array
+					 */
+					values: (string | number | boolean)[];
+			  };
+		/**
+		 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+		 * @type string | undefined
+		 */
+		labelUnitId?: string;
+		/**
+		 * @default false
+		 * @type boolean | undefined
+		 */
+		required?: boolean;
+	}[];
+	/**
+	 * @type object
+	 */
+	sort: {
+		/**
+		 * @type string
+		 */
+		default: GetApiSearchConfigurationStatus200SortDefaultEnum;
+		/**
+		 * @type array
+		 */
+		options: GetApiSearchConfigurationStatus200SortOptionsEnum[];
+	};
+	/**
+	 * @type object
+	 */
+	results: {
+		/**
+		 * @minLength 1
+		 * @maxLength 50
+		 * @type integer
+		 */
+		pageSize: number;
+		/**
+		 * @minLength 1
+		 * @maxLength 100
+		 * @type integer
+		 */
+		maxPageSize: number;
+		/**
+		 * @minLength 1
+		 * @maxLength 100000
+		 * @type integer
+		 */
+		maxResultWindow: number;
+		/**
+		 * @type array
+		 */
+		facets: GetApiSearchConfigurationStatus200ResultsFacetsEnum[];
+	};
+};
+
+/**
+ * @type object
+ */
+export type GetApiSearchConfigurationStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiSearchConfigurationOptions = {
+	body?: never;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiSearchConfigurationResponses = {
+	"200": GetApiSearchConfigurationStatus200;
+	"500": GetApiSearchConfigurationStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiSearchConfigurationResponse =
+	GetApiSearchConfigurationStatus200 | GetApiSearchConfigurationStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiSearchExecuteStatus200 = {
+	/**
+	 * @type string
+	 */
+	query: string;
+	/**
+	 * @pattern ^s_[0-9a-z]+$
+	 * @type string | undefined
+	 */
+	nextCursor?: string;
+	/**
+	 * @type array | undefined
+	 */
+	facets?: {
+		/**
+		 * @type string
+		 */
+		field: string;
+		/**
+		 * @type array
+		 */
+		options: {
+			/**
+			 * @type string
+			 */
+			value: string;
+			count: string | number;
+		}[];
+	}[];
+	/**
+	 * @type array
+	 */
+	groups: {
+		/**
+		 * @type string
+		 */
+		index: string;
+		/**
+		 * @type array
+		 */
+		hits: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @type string
+			 */
+			kind: string;
+			/**
+			 * @type string
+			 */
+			type: string;
+			slug?: (string | null) | null;
+			/**
+			 * @type array
+			 */
+			titles: string[];
+			/**
+			 * @type array
+			 */
+			summaries: string[];
+			name?: (string | null) | null;
+			summary?: (string | null) | null;
+		}[];
+		total: string | number;
+		offset: string | number;
+		limit: string | number;
+		/**
+		 * @type number
+		 */
+		processingTimeMs: number;
+	}[];
+};
+
+export type PostApiSearchExecuteStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidSearch'
+				 * @type string
+				 */
+				code: "InvalidSearch";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiSearchExecuteStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiSearchExecuteStatus503 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'SearchUnavailable'
+		 * @type string
+		 */
+		code: "SearchUnavailable";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiSearchExecuteBody =
+	| {
+			/**
+			 * @maxLength 500
+			 * @type string | undefined
+			 */
+			query?: string;
+			sort?:
+				| "relevance"
+				| "createdAt:asc"
+				| "createdAt:desc"
+				| "updatedAt:asc"
+				| "updatedAt:desc"
+				| "publishedAt:asc"
+				| "publishedAt:desc"
+				| "subscriberCount:asc"
+				| "subscriberCount:desc"
+				| "replyCount:asc"
+				| "replyCount:desc"
+				| "closesAt:asc"
+				| "closesAt:desc";
+			/**
+			 * @minLength 1
+			 * @maxLength 100
+			 * @type integer | undefined
+			 */
+			pageSize?: number;
+			/**
+			 * @maxLength 32
+			 * @pattern ^s_[0-9a-z]+$
+			 * @type string | undefined
+			 */
+			cursor?: string;
+			/**
+			 * @type string
+			 */
+			mode: "basic";
+			/**
+			 * @type array
+			 */
+			filters: (
+				| {
+						field:
+							| "category"
+							| "type"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "author"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at";
+						/**
+						 * @type string
+						 */
+						operator: "equals";
+						value: string | number | boolean;
+				  }
+				| {
+						field:
+							| "category"
+							| "type"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "author"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at";
+						/**
+						 * @type string
+						 */
+						operator: "not-equals";
+						value: string | number | boolean;
+				  }
+				| {
+						field:
+							| "category"
+							| "type"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "author"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at";
+						operator: "any-of" | "all-of" | "none-of";
+						/**
+						 * @type array
+						 */
+						values: (string | number | boolean)[];
+				  }
+				| (
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "range";
+								lower: string | number | boolean;
+								upper?: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "range";
+								lower?: string | number | boolean;
+								upper: string | number | boolean;
+						  }
+				  )
+				| {
+						field:
+							| "category"
+							| "type"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "author"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at";
+						/**
+						 * @type string
+						 */
+						operator: "exists";
+						/**
+						 * @type boolean
+						 */
+						value: boolean;
+				  }
+			)[];
+	  }
+	| {
+			/**
+			 * @maxLength 500
+			 * @type string | undefined
+			 */
+			query?: string;
+			sort?:
+				| "relevance"
+				| "createdAt:asc"
+				| "createdAt:desc"
+				| "updatedAt:asc"
+				| "updatedAt:desc"
+				| "publishedAt:asc"
+				| "publishedAt:desc"
+				| "subscriberCount:asc"
+				| "subscriberCount:desc"
+				| "replyCount:asc"
+				| "replyCount:desc"
+				| "closesAt:asc"
+				| "closesAt:desc";
+			/**
+			 * @minLength 1
+			 * @maxLength 100
+			 * @type integer | undefined
+			 */
+			pageSize?: number;
+			/**
+			 * @maxLength 32
+			 * @pattern ^s_[0-9a-z]+$
+			 * @type string | undefined
+			 */
+			cursor?: string;
+			/**
+			 * @type string
+			 */
+			mode: "advanced";
+			expression?:
+				| (
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "equals";
+								value: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "not-equals";
+								value: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								operator: "any-of" | "all-of" | "none-of";
+								/**
+								 * @type array
+								 */
+								values: (string | number | boolean)[];
+						  }
+						| (
+								| {
+										field:
+											| "category"
+											| "type"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "author"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at";
+										/**
+										 * @type string
+										 */
+										operator: "range";
+										lower: string | number | boolean;
+										upper?: string | number | boolean;
+								  }
+								| {
+										field:
+											| "category"
+											| "type"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "author"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at";
+										/**
+										 * @type string
+										 */
+										operator: "range";
+										lower?: string | number | boolean;
+										upper: string | number | boolean;
+								  }
+						  )
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "exists";
+								/**
+								 * @type boolean
+								 */
+								value: boolean;
+						  }
+				  )
+				| {
+						operator: "all" | "any";
+						/**
+						 * @type array
+						 */
+						clauses: unknown[];
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						operator: "not";
+						/**
+						 * @type unknown
+						 */
+						clause: unknown;
+				  };
+	  };
+
+/**
+ * @type object
+ */
+export type PostApiSearchExecuteOptions = {
+	body: PostApiSearchExecuteBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiSearchExecuteResponses = {
+	"200": PostApiSearchExecuteStatus200;
+	"422": PostApiSearchExecuteStatus422;
+	"500": PostApiSearchExecuteStatus500;
+	"503": PostApiSearchExecuteStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiSearchExecuteResponse =
+	| PostApiSearchExecuteStatus200
+	| PostApiSearchExecuteStatus422
+	| PostApiSearchExecuteStatus500
+	| PostApiSearchExecuteStatus503;
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecutePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @pattern ^[0-9a-f]{12}$
+	 * @type string
+	 */
+	blockKey: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200 = {
+	/**
+	 * @type string
+	 */
+	query: string;
+	/**
+	 * @pattern ^s_[0-9a-z]+$
+	 * @type string | undefined
+	 */
+	nextCursor?: string;
+	/**
+	 * @type array | undefined
+	 */
+	facets?: {
+		/**
+		 * @type string
+		 */
+		field: string;
+		/**
+		 * @type array
+		 */
+		options: {
+			/**
+			 * @type string
+			 */
+			value: string;
+			count: string | number;
+		}[];
+	}[];
+	/**
+	 * @type array
+	 */
+	groups: {
+		/**
+		 * @type string
+		 */
+		index: string;
+		/**
+		 * @type array
+		 */
+		hits: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @type string
+			 */
+			kind: string;
+			/**
+			 * @type string
+			 */
+			type: string;
+			slug?: (string | null) | null;
+			/**
+			 * @type array
+			 */
+			titles: string[];
+			/**
+			 * @type array
+			 */
+			summaries: string[];
+			name?: (string | null) | null;
+			summary?: (string | null) | null;
+		}[];
+		total: string | number;
+		offset: string | number;
+		limit: string | number;
+		/**
+		 * @type number
+		 */
+		processingTimeMs: number;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidSearch'
+				 * @type string
+				 */
+				code: "InvalidSearch";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus503 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'SearchUnavailable'
+		 * @type string
+		 */
+		code: "SearchUnavailable";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
+	| {
+			/**
+			 * @maxLength 500
+			 * @type string | undefined
+			 */
+			query?: string;
+			sort?:
+				| "relevance"
+				| "createdAt:asc"
+				| "createdAt:desc"
+				| "updatedAt:asc"
+				| "updatedAt:desc"
+				| "publishedAt:asc"
+				| "publishedAt:desc"
+				| "subscriberCount:asc"
+				| "subscriberCount:desc"
+				| "replyCount:asc"
+				| "replyCount:desc"
+				| "closesAt:asc"
+				| "closesAt:desc";
+			/**
+			 * @minLength 1
+			 * @maxLength 100
+			 * @type integer | undefined
+			 */
+			pageSize?: number;
+			/**
+			 * @maxLength 32
+			 * @pattern ^s_[0-9a-z]+$
+			 * @type string | undefined
+			 */
+			cursor?: string;
+			/**
+			 * @type string
+			 */
+			mode: "basic";
+			/**
+			 * @type array
+			 */
+			filters: (
+				| {
+						field:
+							| "category"
+							| "type"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "author"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at";
+						/**
+						 * @type string
+						 */
+						operator: "equals";
+						value: string | number | boolean;
+				  }
+				| {
+						field:
+							| "category"
+							| "type"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "author"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at";
+						/**
+						 * @type string
+						 */
+						operator: "not-equals";
+						value: string | number | boolean;
+				  }
+				| {
+						field:
+							| "category"
+							| "type"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "author"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at";
+						operator: "any-of" | "all-of" | "none-of";
+						/**
+						 * @type array
+						 */
+						values: (string | number | boolean)[];
+				  }
+				| (
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "range";
+								lower: string | number | boolean;
+								upper?: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "range";
+								lower?: string | number | boolean;
+								upper: string | number | boolean;
+						  }
+				  )
+				| {
+						field:
+							| "category"
+							| "type"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "author"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at";
+						/**
+						 * @type string
+						 */
+						operator: "exists";
+						/**
+						 * @type boolean
+						 */
+						value: boolean;
+				  }
+			)[];
+	  }
+	| {
+			/**
+			 * @maxLength 500
+			 * @type string | undefined
+			 */
+			query?: string;
+			sort?:
+				| "relevance"
+				| "createdAt:asc"
+				| "createdAt:desc"
+				| "updatedAt:asc"
+				| "updatedAt:desc"
+				| "publishedAt:asc"
+				| "publishedAt:desc"
+				| "subscriberCount:asc"
+				| "subscriberCount:desc"
+				| "replyCount:asc"
+				| "replyCount:desc"
+				| "closesAt:asc"
+				| "closesAt:desc";
+			/**
+			 * @minLength 1
+			 * @maxLength 100
+			 * @type integer | undefined
+			 */
+			pageSize?: number;
+			/**
+			 * @maxLength 32
+			 * @pattern ^s_[0-9a-z]+$
+			 * @type string | undefined
+			 */
+			cursor?: string;
+			/**
+			 * @type string
+			 */
+			mode: "advanced";
+			expression?:
+				| (
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "equals";
+								value: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "not-equals";
+								value: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								operator: "any-of" | "all-of" | "none-of";
+								/**
+								 * @type array
+								 */
+								values: (string | number | boolean)[];
+						  }
+						| (
+								| {
+										field:
+											| "category"
+											| "type"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "author"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at";
+										/**
+										 * @type string
+										 */
+										operator: "range";
+										lower: string | number | boolean;
+										upper?: string | number | boolean;
+								  }
+								| {
+										field:
+											| "category"
+											| "type"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "author"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at";
+										/**
+										 * @type string
+										 */
+										operator: "range";
+										lower?: string | number | boolean;
+										upper: string | number | boolean;
+								  }
+						  )
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "exists";
+								/**
+								 * @type boolean
+								 */
+								value: boolean;
+						  }
+				  )
+				| {
+						operator: "all" | "any";
+						/**
+						 * @type array
+						 */
+						clauses: unknown[];
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						operator: "not";
+						/**
+						 * @type unknown
+						 */
+						clause: unknown;
+				  };
+	  };
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteOptions = {
+	body: PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody;
+	path: PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecutePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponses = {
+	"200": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200;
+	"404": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404;
+	"422": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422;
+	"500": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500;
+	"503": PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponse =
+	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200
+	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404
+	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus422
+	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus500
+	| PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus503;
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecutePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 100
+	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+	 * @type string
+	 */
+	slug: string;
+	/**
+	 * @pattern ^[0-9a-f]{12}$
+	 * @type string
+	 */
+	blockKey: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200 = {
+	/**
+	 * @type string
+	 */
+	query: string;
+	/**
+	 * @pattern ^s_[0-9a-z]+$
+	 * @type string | undefined
+	 */
+	nextCursor?: string;
+	/**
+	 * @type array | undefined
+	 */
+	facets?: {
+		/**
+		 * @type string
+		 */
+		field: string;
+		/**
+		 * @type array
+		 */
+		options: {
+			/**
+			 * @type string
+			 */
+			value: string;
+			count: string | number;
+		}[];
+	}[];
+	/**
+	 * @type array
+	 */
+	groups: {
+		/**
+		 * @type string
+		 */
+		index: string;
+		/**
+		 * @type array
+		 */
+		hits: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			/**
+			 * @type string
+			 */
+			kind: string;
+			/**
+			 * @type string
+			 */
+			type: string;
+			slug?: (string | null) | null;
+			/**
+			 * @type array
+			 */
+			titles: string[];
+			/**
+			 * @type array
+			 */
+			summaries: string[];
+			name?: (string | null) | null;
+			summary?: (string | null) | null;
+		}[];
+		total: string | number;
+		offset: string | number;
+		limit: string | number;
+		/**
+		 * @type number
+		 */
+		processingTimeMs: number;
+	}[];
+};
+
+export const PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ZonePageNotFound: "ZonePageNotFound",
+} as const;
+
+export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404ErrorCodeEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404ErrorCodeEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'InvalidSearch'
+				 * @type string
+				 */
+				code: "InvalidSearch";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus503 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'SearchUnavailable'
+		 * @type string
+		 */
+		code: "SearchUnavailable";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
+	| {
+			/**
+			 * @maxLength 500
+			 * @type string | undefined
+			 */
+			query?: string;
+			sort?:
+				| "relevance"
+				| "createdAt:asc"
+				| "createdAt:desc"
+				| "updatedAt:asc"
+				| "updatedAt:desc"
+				| "publishedAt:asc"
+				| "publishedAt:desc"
+				| "subscriberCount:asc"
+				| "subscriberCount:desc"
+				| "replyCount:asc"
+				| "replyCount:desc"
+				| "closesAt:asc"
+				| "closesAt:desc";
+			/**
+			 * @minLength 1
+			 * @maxLength 100
+			 * @type integer | undefined
+			 */
+			pageSize?: number;
+			/**
+			 * @maxLength 32
+			 * @pattern ^s_[0-9a-z]+$
+			 * @type string | undefined
+			 */
+			cursor?: string;
+			/**
+			 * @type string
+			 */
+			mode: "basic";
+			/**
+			 * @type array
+			 */
+			filters: (
+				| {
+						field:
+							| "category"
+							| "type"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "author"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at";
+						/**
+						 * @type string
+						 */
+						operator: "equals";
+						value: string | number | boolean;
+				  }
+				| {
+						field:
+							| "category"
+							| "type"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "author"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at";
+						/**
+						 * @type string
+						 */
+						operator: "not-equals";
+						value: string | number | boolean;
+				  }
+				| {
+						field:
+							| "category"
+							| "type"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "author"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at";
+						operator: "any-of" | "all-of" | "none-of";
+						/**
+						 * @type array
+						 */
+						values: (string | number | boolean)[];
+				  }
+				| (
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "range";
+								lower: string | number | boolean;
+								upper?: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "range";
+								lower?: string | number | boolean;
+								upper: string | number | boolean;
+						  }
+				  )
+				| {
+						field:
+							| "category"
+							| "type"
+							| "language"
+							| "content-rating"
+							| "ai-disclosure"
+							| "license"
+							| "tag"
+							| "author"
+							| "realm"
+							| "zone"
+							| "subject"
+							| "target"
+							| "root"
+							| "parent"
+							| "owner"
+							| "join-policy"
+							| "multiple"
+							| "results-visibility"
+							| "closed"
+							| "created-at"
+							| "updated-at"
+							| "published-at"
+							| "closes-at";
+						/**
+						 * @type string
+						 */
+						operator: "exists";
+						/**
+						 * @type boolean
+						 */
+						value: boolean;
+				  }
+			)[];
+	  }
+	| {
+			/**
+			 * @maxLength 500
+			 * @type string | undefined
+			 */
+			query?: string;
+			sort?:
+				| "relevance"
+				| "createdAt:asc"
+				| "createdAt:desc"
+				| "updatedAt:asc"
+				| "updatedAt:desc"
+				| "publishedAt:asc"
+				| "publishedAt:desc"
+				| "subscriberCount:asc"
+				| "subscriberCount:desc"
+				| "replyCount:asc"
+				| "replyCount:desc"
+				| "closesAt:asc"
+				| "closesAt:desc";
+			/**
+			 * @minLength 1
+			 * @maxLength 100
+			 * @type integer | undefined
+			 */
+			pageSize?: number;
+			/**
+			 * @maxLength 32
+			 * @pattern ^s_[0-9a-z]+$
+			 * @type string | undefined
+			 */
+			cursor?: string;
+			/**
+			 * @type string
+			 */
+			mode: "advanced";
+			expression?:
+				| (
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "equals";
+								value: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "not-equals";
+								value: string | number | boolean;
+						  }
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								operator: "any-of" | "all-of" | "none-of";
+								/**
+								 * @type array
+								 */
+								values: (string | number | boolean)[];
+						  }
+						| (
+								| {
+										field:
+											| "category"
+											| "type"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "author"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at";
+										/**
+										 * @type string
+										 */
+										operator: "range";
+										lower: string | number | boolean;
+										upper?: string | number | boolean;
+								  }
+								| {
+										field:
+											| "category"
+											| "type"
+											| "language"
+											| "content-rating"
+											| "ai-disclosure"
+											| "license"
+											| "tag"
+											| "author"
+											| "realm"
+											| "zone"
+											| "subject"
+											| "target"
+											| "root"
+											| "parent"
+											| "owner"
+											| "join-policy"
+											| "multiple"
+											| "results-visibility"
+											| "closed"
+											| "created-at"
+											| "updated-at"
+											| "published-at"
+											| "closes-at";
+										/**
+										 * @type string
+										 */
+										operator: "range";
+										lower?: string | number | boolean;
+										upper: string | number | boolean;
+								  }
+						  )
+						| {
+								field:
+									| "category"
+									| "type"
+									| "language"
+									| "content-rating"
+									| "ai-disclosure"
+									| "license"
+									| "tag"
+									| "author"
+									| "realm"
+									| "zone"
+									| "subject"
+									| "target"
+									| "root"
+									| "parent"
+									| "owner"
+									| "join-policy"
+									| "multiple"
+									| "results-visibility"
+									| "closed"
+									| "created-at"
+									| "updated-at"
+									| "published-at"
+									| "closes-at";
+								/**
+								 * @type string
+								 */
+								operator: "exists";
+								/**
+								 * @type boolean
+								 */
+								value: boolean;
+						  }
+				  )
+				| {
+						operator: "all" | "any";
+						/**
+						 * @type array
+						 */
+						clauses: unknown[];
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						operator: "not";
+						/**
+						 * @type unknown
+						 */
+						clause: unknown;
+				  };
+	  };
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteOptions = {
+	body: PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody;
+	path: PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecutePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteResponses = {
+	"200": PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200;
+	"404": PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404;
+	"422": PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus422;
+	"500": PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus500;
+	"503": PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus503;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteResponse =
+	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200
+	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus404
+	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus422
+	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus500
+	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus503;
+
 /**
  * @type object
  */
@@ -30447,6 +39403,30 @@ export type PostApiSearchStatus200 = {
 	 * @type string
 	 */
 	query: string;
+	/**
+	 * @pattern ^s_[0-9a-z]+$
+	 * @type string | undefined
+	 */
+	nextCursor?: string;
+	/**
+	 * @type array | undefined
+	 */
+	facets?: {
+		/**
+		 * @type string
+		 */
+		field: string;
+		/**
+		 * @type array
+		 */
+		options: {
+			/**
+			 * @type string
+			 */
+			value: string;
+			count: string | number;
+		}[];
+	}[];
 	/**
 	 * @type array
 	 */

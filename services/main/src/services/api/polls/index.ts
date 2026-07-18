@@ -1,9 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import {
-	createPollContentDocument,
-	parseDocument,
-	PollContentDocument,
-} from "@rezics/content-structure";
+import { createPollContentDocument, parseDocument, PollContentDocument } from "@rezics/block";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import Elysia from "elysia";
 
@@ -14,7 +10,7 @@ import {
 	pollOption,
 	poll,
 	pollVote,
-	unitCollaborator,
+	unitAccessBinding,
 	unitLocalization,
 	unit,
 } from "../../database/schema";
@@ -82,11 +78,13 @@ export default new Elysia({ prefix: "/polls" })
 					),
 					contentStatus: "published",
 				});
-				await tx.insert(unitCollaborator).values({
+				await tx.insert(unitAccessBinding).values({
 					unitId: pollUnit.id,
+					subjectKind: "profile",
 					profileId: profile.unitId,
 					role: "owner",
-					addedByProfileId: profile.unitId,
+					scope: [],
+					grantedByProfileId: profile.unitId,
 				});
 				await recordUnitRevision(tx, {
 					unitId: pollUnit.id,
@@ -308,8 +306,7 @@ export default new Elysia({ prefix: "/polls" })
 	.post(
 		"/:pollId/close",
 		async ({ params, profile, authorization }) => {
-			await authorization.unit.ensureCanEdit(params.pollId);
-			await authorization.unit.ensureFieldsUnlocked(params.pollId, ["/poll/closedAt"]);
+			await authorization.unit.ensureCanUpdate(params.pollId, [["poll", "closed-at"]]);
 			await database.transaction(async (tx) => {
 				await tx.execute(
 					sql`select pg_advisory_xact_lock(hashtextextended(${`poll:${params.pollId}`}::text, 0))`,
@@ -334,8 +331,8 @@ export default new Elysia({ prefix: "/polls" })
 			response: {
 				[StatusCodes.OK]: IdResponse,
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-					"UnitEditForbidden",
-					"UnitFieldLocked",
+					"UnitPermissionForbidden",
+					"UnitProtected",
 				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["PollAlreadyClosed"]),

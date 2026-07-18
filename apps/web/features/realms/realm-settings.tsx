@@ -18,7 +18,7 @@ import {
 	type GetApiRealmsByRealmIdRulesStatus200,
 	type GetApiRealmsByRealmIdStatus200,
 } from "@rezics/openapi-tanstack-query";
-import type { PortableTextDocument } from "@rezics/content-structure";
+import type { PortableTextDocument } from "@rezics/block";
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -40,7 +40,7 @@ import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { invalidatePostQueries } from "@/features/posts/query";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
-import { readPortableText, writePortableText } from "@/lib/content-structure";
+import { readPortableText, writePortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
 import { canManageRealm } from "./realm-permissions";
 import { invalidateRealmDetails } from "./query";

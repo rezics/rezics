@@ -47,7 +47,7 @@ import { useRecommendationTracking } from "@/features/recommendations/tracking";
 import { recommendationReasonLabel } from "@/features/recommendations/reason";
 import { invalidateRecommendationQueries } from "@/features/recommendations/query";
 import { useTranslation } from "@/i18n/client";
-import { readPortableText } from "@/lib/content-structure";
+import { readPortableText } from "@/lib/block";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 type FeedSort = "best" | "hot" | "new" | "top" | "rising";

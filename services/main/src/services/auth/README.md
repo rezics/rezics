@@ -36,8 +36,8 @@ Catalog objects use `unit:read`, `unit:create`, `unit:update`, and `unit:delete`
 there is intentionally no parallel `catalog:*` namespace.
 
 API-key permission is only an API entry capability. It does not prove that the
-actor may edit a particular object. Unit ownership and collaborators, profile
-ownership, locks, Realm membership and capabilities, bans, and visibility all
+actor may edit a particular object. Unit access bindings, scoped restrictions and protections,
+Profile ownership, Realm membership and capabilities, bans, and visibility all
 remain domain authorization decisions. Those checks are identical for session
 and API-key identities.
 

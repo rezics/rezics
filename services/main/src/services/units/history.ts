@@ -4,15 +4,17 @@ import { and, desc, eq, max, sql } from "drizzle-orm";
 import { createSchemaFactory } from "drizzle-orm/zod";
 import { z } from "zod";
 import {
+	BlockDocument,
 	CollectionDefinitionDocument,
 	CollectionPresentationDocument,
+	NavigationDocument,
 	PollContentDocument,
 	ZoneBoundaryDocument,
 	ZoneThemeDocument,
 	isDocument,
 	isPortableTextDocument,
 	type PortableTextDocument as PortableTextDocumentValue,
-} from "@rezics/content-structure";
+} from "@rezics/block";
 import type { JsonValue } from "@rezics/portable-text";
 import type { Static, TSchema } from "@sinclair/typebox";
 
@@ -53,6 +55,8 @@ import {
 	unitTag,
 	unitVariant,
 	zone,
+	zoneNavigation,
+	zonePage,
 } from "../database/schema";
 import { isFractionalPosition } from "../ordering/position";
 import { UnitRevisionConflict } from "./errors";
@@ -78,6 +82,8 @@ const CollectionDefinitionDocumentSchema = createDocumentSchema(CollectionDefini
 const CollectionPresentationDocumentSchema = createDocumentSchema(CollectionPresentationDocument);
 const ZoneBoundaryDocumentSchema = createDocumentSchema(ZoneBoundaryDocument);
 const ZoneThemeDocumentSchema = createDocumentSchema(ZoneThemeDocument);
+const BlockDocumentSchema = createDocumentSchema(BlockDocument);
+const NavigationDocumentSchema = createDocumentSchema(NavigationDocument);
 const FractionalPositionSchema = z.string().refine(isFractionalPosition);
 const RuleSnapshotSchema = z.object({
 	requireOnJoin: z.boolean(),
@@ -112,6 +118,8 @@ const UnitSnapshotSchema = z.object({
 		contentStructureNodes: z.array(SnapshotRowSchema),
 		pollOptions: z.array(SnapshotRowSchema),
 		realmPins: z.array(SnapshotRowSchema),
+		zonePages: z.array(SnapshotRowSchema),
+		zoneNavigations: z.array(SnapshotRowSchema),
 		realmUnit: z.array(SnapshotRowSchema),
 		realmRules: RuleSnapshotSchema.nullable(),
 	}),
@@ -170,6 +178,7 @@ const zoneStateSchema = schemaFactory
 	.createSelectSchema(zone, {
 		boundaryDocument: ZoneBoundaryDocumentSchema,
 		themeDocument: ZoneThemeDocumentSchema,
+		dockDocument: BlockDocumentSchema,
 	})
 	.omit({ id: true, createdAt: true, updatedAt: true });
 const collectionStateSchema = schemaFactory
@@ -211,6 +220,14 @@ const pollOptionRowSchema = schemaFactory.createSelectSchema(pollOption, {
 	position: z.int().nonnegative(),
 });
 const realmPinRowSchema = schemaFactory.createSelectSchema(realmPin, {
+	position: FractionalPositionSchema,
+});
+const zonePageRowSchema = schemaFactory.createSelectSchema(zonePage, {
+	document: BlockDocumentSchema,
+	position: FractionalPositionSchema,
+});
+const zoneNavigationRowSchema = schemaFactory.createSelectSchema(zoneNavigation, {
+	document: NavigationDocumentSchema,
 	position: FractionalPositionSchema,
 });
 
@@ -421,6 +438,22 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 						.from(realmPin)
 						.where(eq(realmPin.realmId, unitId))
 						.orderBy(realmPin.kind, realmPin.position, realmPin.unitId)
+				: empty,
+		zonePages:
+			record.kind === "zone"
+				? await tx
+						.select()
+						.from(zonePage)
+						.where(eq(zonePage.zoneId, unitId))
+						.orderBy(zonePage.position, zonePage.id)
+				: empty,
+		zoneNavigations:
+			record.kind === "zone"
+				? await tx
+						.select()
+						.from(zoneNavigation)
+						.where(eq(zoneNavigation.zoneId, unitId))
+						.orderBy(zoneNavigation.position, zoneNavigation.id)
 				: empty,
 		realmUnit: empty,
 		realmRules: record.kind === "realm" ? await snapshotRealmRules(tx, unitId) : null,
@@ -686,6 +719,20 @@ export async function restoreUnitSnapshot(tx: DatabaseTransaction, unitId: strin
 				.values(snapshot.owned.realmPins.map((row) => realmPinRowSchema.parse(row)));
 		await restoreRealmRules(tx, unitId, snapshot.owned.realmRules);
 	}
+	if (snapshot.kind === "zone") {
+		await tx.delete(zonePage).where(eq(zonePage.zoneId, unitId));
+		await tx.delete(zoneNavigation).where(eq(zoneNavigation.zoneId, unitId));
+		if (snapshot.owned.zonePages.length)
+			await tx
+				.insert(zonePage)
+				.values(snapshot.owned.zonePages.map((row) => zonePageRowSchema.parse(row)));
+		if (snapshot.owned.zoneNavigations.length)
+			await tx
+				.insert(zoneNavigation)
+				.values(
+					snapshot.owned.zoneNavigations.map((row) => zoneNavigationRowSchema.parse(row)),
+				);
+	}
 }
 
 export const UnitRevisionChangeTags = ["mw-undo", "mw-manual-revert"] as const;
@@ -758,6 +805,8 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 				contentStructureNodes: snapshot.owned.contentStructureNodes,
 				pollOptions: snapshot.owned.pollOptions,
 				realmPins: snapshot.owned.realmPins,
+				zonePages: snapshot.owned.zonePages,
+				zoneNavigations: snapshot.owned.zoneNavigations,
 			},
 		},
 	};
@@ -801,6 +850,8 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 			contentStructureNodes: structure.contentStructureNodes,
 			pollOptions: structure.pollOptions,
 			realmPins: structure.realmPins,
+			zonePages: structure.zonePages,
+			zoneNavigations: structure.zoneNavigations,
 			realmUnit: [],
 			realmRules: rules
 				? {

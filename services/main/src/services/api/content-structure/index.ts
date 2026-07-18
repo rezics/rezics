@@ -11,7 +11,7 @@ import {
 	contentStructureNode,
 	post,
 	unit,
-	unitCollaborator,
+	unitAccessBinding,
 	unitLocalization,
 } from "../../database/schema";
 import { recordUnitRevision } from "../../units/history";
@@ -40,7 +40,7 @@ import {
 } from "../schema/response";
 import { toApiErrorResponse } from "../schema/response";
 
-const UnitForbiddenResponse = toApiErrorResponse(["UnitEditForbidden", "UnitFieldLocked"]);
+const UnitForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden", "UnitProtected"]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 
 function toContentStructureNodeResponse(
@@ -70,7 +70,7 @@ export default new Elysia()
 		async ({ params, request }) => {
 			const { authorization } = await resolveIdentity(request.headers, "unit:read");
 			if (!(await authorization.unit.canRead(params.unitId))) throw new BookNotFound();
-			const canEditBook = await authorization.unit.canEdit(params.unitId);
+			const canEditBook = await authorization.unit.canUpdate(params.unitId);
 			const rows = await database
 				.select({
 					id: contentStructureNode.id,
@@ -141,10 +141,7 @@ export default new Elysia()
 	.post(
 		"/units/book/:unitId/content-structure/nodes",
 		async ({ params, profile, authorization, body }) => {
-			await authorization.unit.ensureCanEdit(params.unitId);
-			await authorization.unit.ensureFieldsUnlocked(params.unitId, [
-				"/contentStructureNodes",
-			]);
+			await authorization.unit.ensureCanUpdate(params.unitId, [["content-structure"]]);
 			const node = await database.transaction(async (tx) => {
 				const hasContent = body.content !== undefined;
 				const published = hasContent ? body.status === "published" : true;
@@ -171,11 +168,13 @@ export default new Elysia()
 					content: body.content,
 					contentStatus: hasContent ? (body.status ?? "draft") : undefined,
 				});
-				await tx.insert(unitCollaborator).values({
+				await tx.insert(unitAccessBinding).values({
 					unitId: contentUnit.id,
+					subjectKind: "profile",
 					profileId: profile.unitId,
 					role: "owner",
-					addedByProfileId: profile.unitId,
+					scope: [],
+					grantedByProfileId: profile.unitId,
 				});
 				await recordUnitRevision(tx, {
 					unitId: contentUnit.id,
@@ -239,10 +238,7 @@ export default new Elysia()
 	.patch(
 		"/units/book/:unitId/content-structure/nodes/:nodeId",
 		async ({ params, profile, authorization, body }) => {
-			await authorization.unit.ensureCanEdit(params.unitId);
-			await authorization.unit.ensureFieldsUnlocked(params.unitId, [
-				"/contentStructureNodes",
-			]);
+			await authorization.unit.ensureCanUpdate(params.unitId, [["content-structure"]]);
 			const node = await database.transaction(async (tx) => {
 				const condition = and(
 					eq(contentStructureNode.id, params.nodeId),
@@ -351,7 +347,7 @@ export default new Elysia()
 				.limit(1);
 			if (!node?.chapterId || !(await authorization.unit.canRead(node.bookId)))
 				throw new ChapterNotFound();
-			const canEditBook = await authorization.unit.canEdit(node.bookId);
+			const canEditBook = await authorization.unit.canUpdate(node.bookId);
 			const [content] = await database
 				.select({
 					language: unitLocalization.language,
@@ -444,9 +440,8 @@ export default new Elysia()
 	.put(
 		"/chapters/:chapterId/localizations/:language/content",
 		async ({ params, profile, authorization, body }) => {
-			await authorization.unit.ensureCanEdit(params.chapterId);
-			await authorization.unit.ensureFieldsUnlocked(params.chapterId, [
-				`/localizations/${params.language}`,
+			await authorization.unit.ensureCanUpdate(params.chapterId, [
+				["localizations", params.language],
 			]);
 			await database.transaction(async (tx) => {
 				await tx

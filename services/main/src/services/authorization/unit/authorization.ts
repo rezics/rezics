@@ -1,49 +1,275 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, isNull, or, sql } from "drizzle-orm";
 
 import { database } from "../../database";
-import { unit, unitCollaborator, unitFieldLock } from "../../database/schema";
 import {
-	UnitEditForbidden,
-	UnitFieldLocked,
+	capabilityGrant,
+	realmMember,
+	unit,
+	unitAccessBinding,
+	unitAccessRestriction,
+	unitProtection,
+} from "../../database/schema";
+import {
+	UnitAccessRestricted,
 	UnitNotFound,
-	UnitRestoreForbidden,
+	UnitPermissionForbidden,
+	UnitProtected,
 } from "../../units/errors";
 import type { PlatformAuthorization } from "../platform/authorization";
+import { canRealmRolePerform, type RealmCapability } from "../realm/policy";
+import { roleAllows, type UnitAccessRole, type UnitPermission } from "./policy";
 import { getUnitReadCondition } from "./query";
+import { scopeCovers, scopeKey, type UnitScope } from "./scope";
 
-const UnitEditorRoles = ["owner", "editor"] as const;
+export type UnitAccessDecision =
+	| { readonly allowed: true; readonly source: "public" | "platform" }
+	| {
+			readonly allowed: true;
+			readonly source: "binding";
+			readonly bindingId: string;
+			readonly role: UnitAccessRole;
+	  }
+	| {
+			readonly allowed: false;
+			readonly reason: "missing" | "anonymous" | "restricted" | "ungranted";
+	  }
+	| {
+			readonly allowed: false;
+			readonly reason: "protected";
+			readonly mode: "frozen" | "owner_only";
+	  };
 
 async function canReadUnit(unitId: string, profileId?: string) {
-	const [unitRecord] = await database
+	const [record] = await database
 		.select({ id: unit.id })
 		.from(unit)
 		.where(and(eq(unit.id, unitId), getUnitReadCondition(profileId)))
 		.limit(1);
-	return Boolean(unitRecord);
+	return Boolean(record);
 }
 
+async function hasRealmCapability(
+	realmId: string,
+	profileId: string,
+	capability: RealmCapability,
+): Promise<boolean> {
+	const [membership] = await database
+		.select({ role: realmMember.role })
+		.from(realmMember)
+		.where(
+			and(
+				eq(realmMember.realmId, realmId),
+				eq(realmMember.profileId, profileId),
+				eq(realmMember.state, "active"),
+			),
+		)
+		.limit(1);
+	if (!membership) return false;
+	if (canRealmRolePerform(membership.role, capability)) return true;
+	const [grant] = await database
+		.select({ id: capabilityGrant.id })
+		.from(capabilityGrant)
+		.where(
+			and(
+				eq(capabilityGrant.authority, "realm"),
+				eq(capabilityGrant.realmId, realmId),
+				eq(capabilityGrant.profileId, profileId),
+				eq(capabilityGrant.capability, capability),
+				isNull(capabilityGrant.revokedAt),
+				or(isNull(capabilityGrant.expiresAt), sql`${capabilityGrant.expiresAt} > now()`),
+			),
+		)
+		.limit(1);
+	return Boolean(grant);
+}
+
+async function realmBindingMatches(
+	binding: {
+		realmId: string | null;
+		realmRelation: "member" | "content_editor" | "governor" | null;
+	},
+	profileId: string,
+): Promise<boolean> {
+	if (!binding.realmId || !binding.realmRelation) return false;
+	const capability =
+		binding.realmRelation === "governor"
+			? "realm.settings.update"
+			: binding.realmRelation === "content_editor"
+				? "realm.contribute"
+				: undefined;
+	if (capability) return hasRealmCapability(binding.realmId, profileId, capability);
+	const [membership] = await database
+		.select({ profileId: realmMember.profileId })
+		.from(realmMember)
+		.where(
+			and(
+				eq(realmMember.realmId, binding.realmId),
+				eq(realmMember.profileId, profileId),
+				eq(realmMember.state, "active"),
+			),
+		)
+		.limit(1);
+	return Boolean(membership);
+}
+
+const MutatingPermissions: readonly UnitPermission[] = [
+	"unit.update",
+	"unit.publish",
+	"unit.history.restore",
+	"unit.delete",
+];
+
 export class UnitAuthorization<ProfileId extends string | undefined> {
-	readonly #booleanDecisions = new Map<string, Promise<boolean>>();
+	readonly #decisions = new Map<string, Promise<UnitAccessDecision>>();
 
 	constructor(
 		readonly profileId: ProfileId,
 		private readonly platform: PlatformAuthorization<ProfileId>,
 	) {}
 
-	#onceBoolean(key: string, decide: () => Promise<boolean>): Promise<boolean> {
-		const current = this.#booleanDecisions.get(key);
+	decide(unitId: string, permission: UnitPermission, scope: UnitScope = []) {
+		const key = `unit:${unitId}:${permission}:${scopeKey(scope)}`;
+		const current = this.#decisions.get(key);
 		if (current) return current;
-		const decision = decide();
-		this.#booleanDecisions.set(key, decision);
+		const decision = this.#decide(unitId, permission, scope);
+		this.#decisions.set(key, decision);
 		return decision;
 	}
 
-	canRead(unitId: string) {
-		return this.#onceBoolean(`unit:${unitId}:read`, () => canReadUnit(unitId, this.profileId));
+	async #decide(
+		unitId: string,
+		permission: UnitPermission,
+		scope: UnitScope,
+	): Promise<UnitAccessDecision> {
+		const [record] = await database
+			.select({
+				status: unit.status,
+				visibility: unit.visibility,
+				moderationStatus: unit.moderationStatus,
+				deletedAt: unit.deletedAt,
+			})
+			.from(unit)
+			.where(eq(unit.id, unitId))
+			.limit(1);
+		if (!record || record.deletedAt) return { allowed: false, reason: "missing" };
+
+		if (this.profileId && (await this.platform.hasCapability("unit.edit")))
+			return { allowed: true, source: "platform" };
+
+		if (this.profileId) {
+			const restrictions = await database
+				.select({ scope: unitAccessRestriction.scope })
+				.from(unitAccessRestriction)
+				.where(
+					and(
+						eq(unitAccessRestriction.unitId, unitId),
+						eq(unitAccessRestriction.profileId, this.profileId),
+						eq(unitAccessRestriction.permission, permission),
+						isNull(unitAccessRestriction.revokedAt),
+						or(
+							isNull(unitAccessRestriction.expiresAt),
+							sql`${unitAccessRestriction.expiresAt} > now()`,
+						),
+					),
+				);
+			if (restrictions.some((restriction) => scopeCovers(restriction.scope, scope)))
+				return { allowed: false, reason: "restricted" };
+		}
+
+		if (
+			permission === "unit.read" &&
+			record.status === "published" &&
+			record.moderationStatus === "approved" &&
+			(record.visibility === "public" || record.visibility === "unlisted")
+		)
+			return { allowed: true, source: "public" };
+		if (!this.profileId) return { allowed: false, reason: "anonymous" };
+
+		const bindings = await database
+			.select({
+				id: unitAccessBinding.id,
+				subjectKind: unitAccessBinding.subjectKind,
+				profileId: unitAccessBinding.profileId,
+				realmId: unitAccessBinding.realmId,
+				realmRelation: unitAccessBinding.realmRelation,
+				role: unitAccessBinding.role,
+				scope: unitAccessBinding.scope,
+			})
+			.from(unitAccessBinding)
+			.where(
+				and(
+					eq(unitAccessBinding.unitId, unitId),
+					isNull(unitAccessBinding.revokedAt),
+					or(
+						isNull(unitAccessBinding.expiresAt),
+						sql`${unitAccessBinding.expiresAt} > now()`,
+					),
+				),
+			);
+
+		let matched:
+			| { readonly id: string; readonly role: UnitAccessRole; readonly scope: string[] }
+			| undefined;
+		for (const binding of bindings) {
+			if (!roleAllows(binding.role, permission)) continue;
+			if (permission !== "unit.read" && !scopeCovers(binding.scope, scope)) continue;
+			const subjectMatches =
+				binding.subjectKind === "authenticated" ||
+				(binding.subjectKind === "profile" && binding.profileId === this.profileId) ||
+				(binding.subjectKind === "realm" &&
+					(await realmBindingMatches(binding, this.profileId)));
+			if (!subjectMatches) continue;
+			if (!matched || binding.scope.length > matched.scope.length)
+				matched = { id: binding.id, role: binding.role, scope: binding.scope };
+		}
+		if (!matched) return { allowed: false, reason: "ungranted" };
+
+		if (MutatingPermissions.includes(permission)) {
+			const protections = await database
+				.select({ scope: unitProtection.scope, mode: unitProtection.mode })
+				.from(unitProtection)
+				.where(
+					and(
+						eq(unitProtection.unitId, unitId),
+						isNull(unitProtection.revokedAt),
+						or(
+							isNull(unitProtection.expiresAt),
+							sql`${unitProtection.expiresAt} > now()`,
+						),
+					),
+				);
+			const protection = protections
+				.filter((candidate) => scopeCovers(candidate.scope, scope))
+				.sort((left, right) => right.scope.length - left.scope.length)[0];
+			if (protection?.mode === "frozen")
+				return { allowed: false, reason: "protected", mode: protection.mode };
+			if (protection?.mode === "owner_only" && matched.role !== "owner")
+				return { allowed: false, reason: "protected", mode: protection.mode };
+		}
+
+		return {
+			allowed: true,
+			source: "binding",
+			bindingId: matched.id,
+			role: matched.role,
+		};
 	}
 
-	ensureCanRead(unitId: string): Promise<void>;
-	ensureCanRead<E extends Error>(unitId: string, onDenied: () => E): Promise<void>;
+	async ensure(unitId: string, permission: UnitPermission, scope: UnitScope = []): Promise<void> {
+		const decision = await this.decide(unitId, permission, scope);
+		if (decision.allowed) return;
+		if (decision.reason === "missing") throw new UnitNotFound();
+		if (decision.reason === "restricted") throw new UnitAccessRestricted();
+		if (decision.reason === "protected") throw new UnitProtected(scope, decision.mode);
+		throw new UnitPermissionForbidden(permission, scope);
+	}
+
+	canRead(unitId: string): Promise<boolean> {
+		return canReadUnit(unitId, this.profileId);
+	}
+
+	async ensureCanRead(unitId: string): Promise<void>;
+	async ensureCanRead<E extends Error>(unitId: string, onDenied: () => E): Promise<void>;
 	async ensureCanRead<E extends Error>(
 		unitId: string,
 		onDenied: () => E | UnitNotFound = () => new UnitNotFound(),
@@ -51,85 +277,43 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		if (!(await this.canRead(unitId))) throw onDenied();
 	}
 
-	async ensureCanEdit(this: UnitAuthorization<string>, unitId: string): Promise<void> {
-		const decision = await this.#getEditDecision(unitId);
-		if (decision === "missing") throw new UnitNotFound();
-		if (decision === "denied") throw new UnitEditForbidden();
+	async canUpdate(unitId: string, scope: UnitScope = []): Promise<boolean> {
+		return (await this.decide(unitId, "unit.update", scope)).allowed;
 	}
 
-	async ensureFieldsUnlocked(
-		this: UnitAuthorization<string>,
-		unitId: string,
-		changedPaths: readonly string[],
-	): Promise<void> {
-		if (await this.platform.hasCapability("unit.edit")) return;
-		const locks = await database
-			.select({ path: unitFieldLock.path, lockedById: unitFieldLock.lockedByProfileId })
-			.from(unitFieldLock)
-			.where(eq(unitFieldLock.unitId, unitId));
-		const blocked = locks.find(
-			(lock) =>
-				lock.lockedById !== this.profileId &&
-				changedPaths.some(
-					(path) =>
-						path === lock.path ||
-						path.startsWith(`${lock.path}/`) ||
-						lock.path.startsWith(`${path}/`) ||
-						path === "/",
-				),
-		);
-		if (blocked) throw new UnitFieldLocked(blocked.path);
+	async ensureCanUpdate(unitId: string, scopes: readonly UnitScope[]): Promise<void> {
+		for (const scope of scopes.length ? scopes : [[]])
+			await this.ensure(unitId, "unit.update", scope);
 	}
 
-	async ensureCanRestore(this: UnitAuthorization<string>, unitId: string): Promise<void> {
-		const [unitRecord] = await database
+	/** Apply Unit protection to domain-authorized operations such as Realm self-service membership. */
+	async ensureOperationAllowed(unitId: string, scope: UnitScope): Promise<void> {
+		if (this.profileId && (await this.platform.hasCapability("unit.edit"))) return;
+		const [record] = await database
 			.select({ id: unit.id })
 			.from(unit)
-			.where(eq(unit.id, unitId))
+			.where(and(eq(unit.id, unitId), isNull(unit.deletedAt)))
 			.limit(1);
-		if (!unitRecord) throw new UnitNotFound();
-		if (await this.platform.hasCapability("unit.edit")) return;
-		const [permission] = await database
-			.select({ unitId: unitCollaborator.unitId })
-			.from(unitCollaborator)
+		if (!record) throw new UnitNotFound();
+		const protections = await database
+			.select({ scope: unitProtection.scope, mode: unitProtection.mode })
+			.from(unitProtection)
 			.where(
 				and(
-					eq(unitCollaborator.unitId, unitId),
-					eq(unitCollaborator.profileId, this.profileId),
-					inArray(unitCollaborator.role, UnitEditorRoles),
+					eq(unitProtection.unitId, unitId),
+					isNull(unitProtection.revokedAt),
+					or(isNull(unitProtection.expiresAt), sql`${unitProtection.expiresAt} > now()`),
 				),
-			)
-			.limit(1);
-		if (!permission) throw new UnitRestoreForbidden();
-	}
-
-	canEdit(unitId: string) {
-		return this.#onceBoolean(`unit:${unitId}:can-edit`, async () => {
-			if (!this.profileId) return false;
-			return (await this.#getEditDecision(unitId)) === "allowed";
-		});
-	}
-
-	async #getEditDecision(unitId: string) {
-		if (!this.profileId) return "denied" as const;
-		const [unitRecord] = await database
-			.select({ status: unit.status })
-			.from(unit)
-			.where(eq(unit.id, unitId))
-			.limit(1);
-		if (!unitRecord) return "missing" as const;
-		if (await this.platform.hasCapability("unit.edit")) return "allowed" as const;
-		const [permission] = await database
-			.select({ role: unitCollaborator.role })
-			.from(unitCollaborator)
-			.where(
-				and(
-					eq(unitCollaborator.unitId, unitId),
-					eq(unitCollaborator.profileId, this.profileId),
-					inArray(unitCollaborator.role, UnitEditorRoles),
-				),
-			)
-			.limit(1);
-		return permission ? ("allowed" as const) : ("denied" as const);
+			);
+		const protection = protections
+			.filter((candidate) => scopeCovers(candidate.scope, scope))
+			.sort((left, right) => right.scope.length - left.scope.length)[0];
+		if (!protection) return;
+		if (
+			protection.mode === "owner_only" &&
+			(await this.decide(unitId, "unit.update", scope)).allowed
+		)
+			return;
+		throw new UnitProtected(scope, protection.mode);
 	}
 }
