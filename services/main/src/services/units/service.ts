@@ -1,6 +1,11 @@
 import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 import { fileTypeFromBuffer } from "file-type";
-import type { JsonValue, PortableText } from "@rezics/portable-text";
+import {
+	PortableTextDocument,
+	parseNullableDocument,
+	type PortableTextDocument as PortableTextDocumentValue,
+} from "@rezics/content-structure";
+import type { JsonValue } from "@rezics/portable-text";
 import type { Static } from "elysia";
 
 import type { Authorization } from "../authorization";
@@ -10,13 +15,13 @@ import { database } from "../database";
 import {
 	book,
 	entity,
-	game,
+	software,
 	media,
 	unit,
 	unitAlias,
 	unitAliasVote,
 	unitCollaborator,
-	unitCredit,
+	creditAttribution,
 	unitLink,
 	unitLocalization,
 	unitTag,
@@ -36,7 +41,7 @@ import {
 } from "./errors";
 import { recordUnitRevision } from "./history";
 
-export type UnitKind = "book" | "game" | "media";
+export type UnitKind = "book" | "software" | "media";
 export type UnitDetail = Static<typeof UnitDetailResponse>;
 
 export interface CreateUnitInput {
@@ -44,7 +49,7 @@ export interface CreateUnitInput {
 		language: string;
 		title: string;
 		summary?: string;
-		description?: PortableText;
+		description?: PortableTextDocumentValue;
 	};
 	slug?: string;
 	visibility?: "public" | "unlisted" | "private";
@@ -166,7 +171,7 @@ export async function createUnit(
 			.returning({ id: unit.id });
 		if (!created) throw new Error("Unit insertion did not return an id");
 		if (kind === "book") await tx.insert(book).values({ id: created.id });
-		if (kind === "game") await tx.insert(game).values({ id: created.id });
+		if (kind === "software") await tx.insert(software).values({ id: created.id });
 		if (kind === "media") await tx.insert(media).values({ id: created.id, kind: "other" });
 		await tx.insert(unitLocalization).values({
 			unitId: created.id,
@@ -200,13 +205,13 @@ async function getReleaseDate(kind: UnitKind, unitId: string) {
 					.limit(1)
 			)[0]?.value ?? null
 		);
-	if (kind === "game")
+	if (kind === "software")
 		return (
 			(
 				await database
-					.select({ value: game.releaseDate })
-					.from(game)
-					.where(eq(game.id, unitId))
+					.select({ value: software.releaseDate })
+					.from(software)
+					.where(eq(software.id, unitId))
 					.limit(1)
 			)[0]?.value ?? null
 		);
@@ -263,14 +268,14 @@ export async function getUnit(
 	const defaultLanguage = localizations.find(({ isDefault }) => isDefault)?.language ?? null;
 	const credits = await database
 		.select({
-			id: unitCredit.id,
-			entityEntryId: unitCredit.entityId,
-			role: unitCredit.role,
-			position: unitCredit.position,
+			id: creditAttribution.id,
+			entityEntryId: creditAttribution.entityId,
+			role: creditAttribution.role,
+			position: creditAttribution.position,
 			title: unitLocalization.title,
 		})
-		.from(unitCredit)
-		.innerJoin(entity, eq(entity.id, unitCredit.entityId))
+		.from(creditAttribution)
+		.innerJoin(entity, eq(entity.id, creditAttribution.entityId))
 		.leftJoin(
 			unitLocalization,
 			and(
@@ -278,8 +283,8 @@ export async function getUnit(
 				eq(unitLocalization.language, defaultLanguage ?? ""),
 			),
 		)
-		.where(eq(unitCredit.unitId, base.id))
-		.orderBy(unitCredit.position, unitCredit.id);
+		.where(eq(creditAttribution.unitId, base.id))
+		.orderBy(creditAttribution.position, creditAttribution.id);
 	const links = await database
 		.select()
 		.from(unitLink)
@@ -330,7 +335,16 @@ export async function getUnit(
 			canEdit,
 		),
 		localizations: localizations.map(
-			({ isDefault: _default, content: _content, contentStatus: _status, ...row }) => row,
+			({
+				isDefault: _default,
+				content: _content,
+				contentStatus: _status,
+				description,
+				...row
+			}) => ({
+				...row,
+				description: parseNullableDocument(PortableTextDocument, description),
+			}),
 		),
 		aliases: aliases.map((alias) => ({ ...alias, status: "active" })),
 		credits: credits.map((credit) => ({ ...credit, evidenceUrl: null, note: null })),
@@ -494,15 +508,15 @@ export async function updateUnit(
 					licensed: details.licensed,
 				})
 				.where(eq(book.id, unitId));
-		if (kind === "game")
+		if (kind === "software")
 			await tx
-				.update(game)
+				.update(software)
 				.set({
 					releaseDate: releasedOn,
 					versionLabel: details.versionLabel,
 					licensed: details.licensed,
 				})
-				.where(eq(game.id, unitId));
+				.where(eq(software.id, unitId));
 		if (kind === "media")
 			await tx
 				.update(media)
@@ -549,7 +563,12 @@ export async function deleteUnit(
 export async function upsertLocalization(
 	unitId: string,
 	authorization: Authorization<string>,
-	input: { language: string; title: string; summary?: string; description?: PortableText },
+	input: {
+		language: string;
+		title: string;
+		summary?: string;
+		description?: PortableTextDocumentValue;
+	},
 ): Promise<void> {
 	await authorization.unit.ensureCanEdit(unitId);
 	await authorization.unit.ensureFieldsUnlocked(unitId, [`/localizations/${input.language}`]);

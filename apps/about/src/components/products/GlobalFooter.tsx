@@ -23,18 +23,18 @@ export function GlobalFooter({
 					<nav aria-label={copy.footer.productLinks}>
 						<h2>{copy.footer.productLinks}</h2>
 						<a href={getProductPath(locale, "book")}>Book</a>
-						<a href={getProductPath(locale, "gamebook")}>GameBook</a>
-						<a href={getProductPath(locale, "post")}>Post</a>
+						<a href={getProductPath(locale, "content-structure")}>Content Structure</a>
+						<a href={getProductPath(locale, "collection")}>Collection</a>
+						<a href={getProductPath(locale, "entity")}>Entity</a>
 						<a href={getProductPath(locale, "zone")}>Zone</a>
 						<a href={getProductsPath(locale)}>{copy.labels.viewAll}</a>
 					</nav>
 					<nav aria-label={copy.footer.platformLinks}>
 						<h2>{copy.footer.platformLinks}</h2>
-						<a href={getProductPath(locale, "content-structure")}>Content Structure</a>
 						<a href={getProductPath(locale, "history")}>History</a>
-						<a href={getProductPath(locale, "entity-attribution")}>
-							Entity & Attribution
-						</a>
+						<a href={getProductPath(locale, "editor")}>Editor</a>
+						<a href={getProductPath(locale, "feed")}>Feed</a>
+						<a href={getProductPath(locale, "progress")}>Progress</a>
 						<a href={getProductPath(locale, "api-oauth")}>API & OAuth</a>
 					</nav>
 					<nav aria-label={copy.footer.openLinks}>

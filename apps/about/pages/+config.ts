@@ -11,8 +11,6 @@ const redirects = Object.fromEntries(
 			"/" + locale + "/product/" + product.slug + "/",
 			getProductPath(locale, product.slug),
 		]),
-		["/" + locale + "/products/entity-source/", getProductPath(locale, "entity-attribution")],
-		["/" + locale + "/product/entity-source/", getProductPath(locale, "entity-attribution")],
 	]),
 );
 

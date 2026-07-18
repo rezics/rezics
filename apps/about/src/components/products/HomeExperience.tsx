@@ -18,14 +18,8 @@ export function HomeExperience({ locale }: { locale: AboutLocale }) {
 			if (!product) throw new Error("Unknown product: " + id);
 			return product;
 		});
-	const products = select(["catalog", "book", "gamebook", "post", "shelf", "zone"]);
-	const platform = select([
-		"content-structure",
-		"history",
-		"entity-attribution",
-		"feed",
-		"editor",
-	]);
+	const products = select(["content-structure", "collection", "realm", "zone", "tag", "entity"]);
+	const platform = select(["history", "editor", "feed", "progress", "api-oauth"]);
 	const formulas = [
 		["Book", "ContentStructure", home.labels.formulaResults.chapters],
 		["Book", "GameContentStructure", "GameBook"],

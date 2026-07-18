@@ -1,1 +1,1 @@
-由 Shelf(mode=LIBRARY) 形成的個人收藏產品形態。
+由 Collection[] 形成的個人收藏產品形態。

@@ -54,11 +54,11 @@ export const ApiErrorCode = {
 	UserSelfFollowForbidden: "UserSelfFollowForbidden",
 	UserFollowBlocked: "UserFollowBlocked",
 	UserSelfBlockForbidden: "UserSelfBlockForbidden",
-	GameSystemRequirementSourceInvalid: "GameSystemRequirementSourceInvalid",
+	SoftwareSystemRequirementSourceInvalid: "SoftwareSystemRequirementSourceInvalid",
 	SeriesReleaseNotFound: "SeriesReleaseNotFound",
-	SeriesReleaseRangeInvalid: "SeriesReleaseRangeInvalid",
 	ZonePageNotFound: "ZonePageNotFound",
-	GameNotFound: "GameNotFound",
+	ZoneTimeRangeInvalid: "ZoneTimeRangeInvalid",
+	SoftwareNotFound: "SoftwareNotFound",
 	SystemRequirementNotFound: "SystemRequirementNotFound",
 	PollOptionsDuplicated: "PollOptionsDuplicated",
 	PollNotFound: "PollNotFound",
@@ -68,7 +68,7 @@ export const ApiErrorCode = {
 	PollAlreadyClosed: "PollAlreadyClosed",
 	ProgressNotFound: "ProgressNotFound",
 	BookNotFound: "BookNotFound",
-	ContentNodeNotFound: "ContentNodeNotFound",
+	ContentStructureNodeNotFound: "ContentStructureNodeNotFound",
 	ChapterNotFound: "ChapterNotFound",
 	ChapterLanguageNotFound: "ChapterLanguageNotFound",
 	ReviewRealmRequired: "ReviewRealmRequired",
@@ -117,7 +117,7 @@ export const ApiErrorCode = {
 	RealmMembershipNotFound: "RealmMembershipNotFound",
 	RealmOwnerLeaveForbidden: "RealmOwnerLeaveForbidden",
 	RealmMemberNotFound: "RealmMemberNotFound",
-	RealmContentNotFound: "RealmContentNotFound",
+	RealmUnitNotFound: "RealmUnitNotFound",
 	InvalidFeedCursor: "InvalidFeedCursor",
 	InvalidHistoryCursor: "InvalidHistoryCursor",
 	UnitRevisionNotFound: "UnitRevisionNotFound",
@@ -885,7 +885,7 @@ export type PutApiNotificationsPreferencesResponse =
 
 export const GetApiRecommendationsUnitsType = {
 	book: "book",
-	game: "game",
+	software: "software",
 	media: "media",
 } as const;
 
@@ -923,7 +923,7 @@ export type GetApiRecommendationsUnitsQuery = {
 
 export const GetApiRecommendationsUnitsStatus200ItemsTypeEnum = {
 	book: "book",
-	game: "game",
+	software: "software",
 	media: "media",
 } as const;
 
@@ -945,7 +945,7 @@ export type GetApiRecommendationsUnitsStatus200ItemsRecommendationReason =
 export const GetApiRecommendationsUnitsStatus200ItemsTrackingSurfaceEnum = {
 	home_feed: "home_feed",
 	home_book: "home_book",
-	home_game: "home_game",
+	home_software: "home_software",
 	home_media: "home_media",
 	unit_related: "unit_related",
 	post_related: "post_related",
@@ -1202,7 +1202,7 @@ export type GetApiRecommendationsPostsByPostIdStatus200ItemsRecommendationReason
 export const GetApiRecommendationsPostsByPostIdStatus200ItemsTrackingSurfaceEnum = {
 	home_feed: "home_feed",
 	home_book: "home_book",
-	home_game: "home_game",
+	home_software: "home_software",
 	home_media: "home_media",
 	unit_related: "unit_related",
 	post_related: "post_related",
@@ -1241,53 +1241,23 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 		rootPostId: (string | null) | null;
 		parentPostId: (string | null) | null;
 		/**
-		 * @type array
+		 * @type object
 		 */
-		body: (
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
-					 * @type array
-					 */
-					children: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "span";
-								/**
-								 * @type string
-								 */
-								text: string;
-								/**
-								 * @type array | undefined
-								 */
-								marks?: string[];
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								_type: string & void;
-								[key: string]: unknown;
-						  }
-					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
+		body: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
 						/**
 						 * @type string
 						 */
@@ -1295,33 +1265,85 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 						/**
 						 * @type string
 						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!block$).+
+						 * @type string
+						 */
 						_type: string;
 						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
-					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					_type: string & void;
-					[key: string]: unknown;
-			  }
-		)[];
+				  }
+			)[];
+		};
 		replyCount: string | number;
 		title: (string | null) | null;
 		latestRevisionId: (string | null) | null;
@@ -1596,7 +1618,7 @@ export type PostApiRecommendationsEventsRequestEventsTypeEnum =
 export const PostApiRecommendationsEventsRequestEventsSurfaceEnum = {
 	home_feed: "home_feed",
 	home_book: "home_book",
-	home_game: "home_game",
+	home_software: "home_software",
 	home_media: "home_media",
 	unit_related: "unit_related",
 	post_related: "post_related",
@@ -1822,7 +1844,7 @@ export type PutApiRecommendationsExclusionsByUnitIdStatus500 = InternalError;
 export const PutApiRecommendationsExclusionsByUnitIdRequestSurfaceEnum = {
 	home_feed: "home_feed",
 	home_book: "home_book",
-	home_game: "home_game",
+	home_software: "home_software",
 	home_media: "home_media",
 	unit_related: "unit_related",
 	post_related: "post_related",
@@ -3458,7 +3480,7 @@ export type GetApiFeedStatus200ItemsRecommendationReason =
 export const GetApiFeedStatus200ItemsTrackingSurfaceEnum = {
 	home_feed: "home_feed",
 	home_book: "home_book",
-	home_game: "home_game",
+	home_software: "home_software",
 	home_media: "home_media",
 	unit_related: "unit_related",
 	post_related: "post_related",
@@ -3497,53 +3519,23 @@ export type GetApiFeedStatus200 = {
 		rootPostId: (string | null) | null;
 		parentPostId: (string | null) | null;
 		/**
-		 * @type array
+		 * @type object
 		 */
-		body: (
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
-					 * @type array
-					 */
-					children: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "span";
-								/**
-								 * @type string
-								 */
-								text: string;
-								/**
-								 * @type array | undefined
-								 */
-								marks?: string[];
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								_type: string & void;
-								[key: string]: unknown;
-						  }
-					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
+		body: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
 						/**
 						 * @type string
 						 */
@@ -3551,33 +3543,85 @@ export type GetApiFeedStatus200 = {
 						/**
 						 * @type string
 						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!block$).+
+						 * @type string
+						 */
 						_type: string;
 						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
-					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					_type: string & void;
-					[key: string]: unknown;
-			  }
-		)[];
+				  }
+			)[];
+		};
 		replyCount: string | number;
 		title: (string | null) | null;
 		latestRevisionId: (string | null) | null;
@@ -5789,7 +5833,7 @@ export const PostApiGovernanceGrantsRequestCapabilityEnum = {
 	"realm.members.manage": "realm.members.manage",
 	"realm.rules.publish": "realm.rules.publish",
 	"realm.pins.manage": "realm.pins.manage",
-	"realm.content.moderate": "realm.content.moderate",
+	"realm.units.moderate": "realm.units.moderate",
 } as const;
 
 export type PostApiGovernanceGrantsRequestCapabilityEnum =
@@ -7013,53 +7057,23 @@ export type PostApiSeriesBody = {
 		 */
 		summary?: string;
 		/**
-		 * @type array | undefined
+		 * @type object | undefined
 		 */
-		description?: (
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
-					 * @type array
-					 */
-					children: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "span";
-								/**
-								 * @type string
-								 */
-								text: string;
-								/**
-								 * @type array | undefined
-								 */
-								marks?: string[];
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								_type: string & void;
-								[key: string]: unknown;
-						  }
-					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
+		description?: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
 						/**
 						 * @type string
 						 */
@@ -7067,33 +7081,85 @@ export type PostApiSeriesBody = {
 						/**
 						 * @type string
 						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!block$).+
+						 * @type string
+						 */
 						_type: string;
 						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
-					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					_type: string & void;
-					[key: string]: unknown;
-			  }
-		)[];
+				  }
+			)[];
+		};
 	};
 };
 
@@ -7572,10 +7638,10 @@ export type PostApiZonesStatus400 = {
 	 */
 	error: {
 		/**
-		 * @default 'SeriesReleaseRangeInvalid'
+		 * @default 'ZoneTimeRangeInvalid'
 		 * @type string
 		 */
-		code: "SeriesReleaseRangeInvalid";
+		code: "ZoneTimeRangeInvalid";
 		/**
 		 * @type string
 		 */
@@ -7633,12 +7699,7 @@ export type PostApiZonesStatus500 = InternalError;
  * @type object
  */
 export type PostApiZonesBody = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	ownerRealmId: string;
+	managingRealmId?: (string | null) | null;
 	/**
 	 * @minLength 3
 	 * @maxLength 72
@@ -7670,53 +7731,23 @@ export type PostApiZonesBody = {
 		 */
 		summary?: string;
 		/**
-		 * @type array | undefined
+		 * @type object | undefined
 		 */
-		description?: (
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
-					 * @type array
-					 */
-					children: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "span";
-								/**
-								 * @type string
-								 */
-								text: string;
-								/**
-								 * @type array | undefined
-								 */
-								marks?: string[];
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								_type: string & void;
-								[key: string]: unknown;
-						  }
-					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
+		description?: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
 						/**
 						 * @type string
 						 */
@@ -7724,39 +7755,100 @@ export type PostApiZonesBody = {
 						/**
 						 * @type string
 						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!block$).+
+						 * @type string
+						 */
 						_type: string;
 						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
-					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					_type: string & void;
-					[key: string]: unknown;
-			  }
-		)[];
+				  }
+			)[];
+		};
 	};
 	/**
 	 * @type object
 	 */
-	boundary: {
-		[key: string]:
+	boundaryDocument: {
+		/**
+		 * @type string
+		 */
+		_type: "zone-boundary";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		definition:
 			| null
 			| boolean
 			| number
@@ -7769,8 +7861,17 @@ export type PostApiZonesBody = {
 	/**
 	 * @type object
 	 */
-	nav: {
-		[key: string]:
+	themeDocument: {
+		/**
+		 * @type string
+		 */
+		_type: "zone-theme";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		tokens:
 			| null
 			| boolean
 			| number
@@ -7781,18 +7882,100 @@ export type PostApiZonesBody = {
 			  };
 	};
 	/**
-	 * @type object
+	 * @type object | undefined
 	 */
-	theme: {
-		[key: string]:
-			| null
-			| boolean
-			| number
-			| string
-			| JsonValue[]
-			| {
-					[key: string]: JsonValue;
-			  };
+	menuDocument?: {
+		/**
+		 * @type string
+		 */
+		_type: "zone-menu";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		menus: {
+			/**
+			 * @type string
+			 */
+			_type: "menu";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type object | undefined
+			 */
+			label?: {
+				[key: string]: string;
+			};
+			/**
+			 * @type array
+			 */
+			items: {
+				/**
+				 * @type string
+				 */
+				_type: "menu-item";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type object
+				 */
+				label: {
+					[key: string]: string;
+				};
+				target:
+					| {
+							/**
+							 * @type string
+							 */
+							type: "href";
+							/**
+							 * @minLength 1
+							 * @type string
+							 */
+							href: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							type: "unit";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							unitId: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							type: "page";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							pageId: string;
+					  };
+			}[];
+		}[];
+		/**
+		 * @type object | undefined
+		 */
+		configuration?: {
+			[key: string]: unknown;
+		};
 	};
 	startsAt?: (string | null) | null;
 	endsAt?: (string | null) | null;
@@ -7866,9 +8049,221 @@ export type GetApiZonesByZoneIdPagesStatus200 = {
 		 */
 		slug: string;
 		/**
-		 * @type void
+		 * @type object
 		 */
-		config: void;
+		document: {
+			/**
+			 * @type string
+			 */
+			_type: "zone-page";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			blocks: (
+				| {
+						/**
+						 * @type string
+						 */
+						_type: "portable-text";
+						/**
+						 * @pattern ^[0-9a-f]{12}$
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type array
+						 */
+						content: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "block";
+									/**
+									 * @type array
+									 */
+									children: (
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @type string
+												 */
+												_type: "span";
+												/**
+												 * @type string
+												 */
+												text: string;
+												/**
+												 * @type array | undefined
+												 */
+												marks?: string[];
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @pattern ^(?!span$).+
+												 * @type string
+												 */
+												_type: string;
+												[key: string]: unknown;
+										  }
+									)[];
+									/**
+									 * @type array | undefined
+									 */
+									markDefs?: {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: string;
+										[key: string]: unknown;
+									}[];
+									/**
+									 * @type string | undefined
+									 */
+									listItem?: string;
+									/**
+									 * @type string | undefined
+									 */
+									style?: string;
+									/**
+									 * @minLength 1
+									 * @type integer | undefined
+									 */
+									level?: number;
+									[key: string]: unknown;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!block$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_type: "post-ref";
+						/**
+						 * @pattern ^[0-9a-f]{12}$
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						postId: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_type: "menu";
+						/**
+						 * @pattern ^[0-9a-f]{12}$
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type object | undefined
+						 */
+						label?: {
+							[key: string]: string;
+						};
+						/**
+						 * @type array
+						 */
+						items: {
+							/**
+							 * @type string
+							 */
+							_type: "menu-item";
+							/**
+							 * @pattern ^[0-9a-f]{12}$
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type object
+							 */
+							label: {
+								[key: string]: string;
+							};
+							target:
+								| {
+										/**
+										 * @type string
+										 */
+										type: "href";
+										/**
+										 * @minLength 1
+										 * @type string
+										 */
+										href: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "unit";
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										unitId: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "page";
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										pageId: string;
+								  };
+						}[];
+				  }
+			)[];
+			/**
+			 * @type object | undefined
+			 */
+			configuration?: {
+				[key: string]: unknown;
+			};
+		};
 		/**
 		 * @type string
 		 */
@@ -7992,9 +8387,221 @@ export type PostApiZonesByZoneIdPagesStatus200 = {
 	 */
 	slug: string;
 	/**
-	 * @type void
+	 * @type object
 	 */
-	config: void;
+	document: {
+		/**
+		 * @type string
+		 */
+		_type: "zone-page";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		blocks: (
+			| {
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!block$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_type: "post-ref";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					postId: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_type: "menu";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type object | undefined
+					 */
+					label?: {
+						[key: string]: string;
+					};
+					/**
+					 * @type array
+					 */
+					items: {
+						/**
+						 * @type string
+						 */
+						_type: "menu-item";
+						/**
+						 * @pattern ^[0-9a-f]{12}$
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type object
+						 */
+						label: {
+							[key: string]: string;
+						};
+						target:
+							| {
+									/**
+									 * @type string
+									 */
+									type: "href";
+									/**
+									 * @minLength 1
+									 * @type string
+									 */
+									href: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "unit";
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									unitId: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "page";
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									pageId: string;
+							  };
+					}[];
+			  }
+		)[];
+		/**
+		 * @type object | undefined
+		 */
+		configuration?: {
+			[key: string]: unknown;
+		};
+	};
 	/**
 	 * @type string
 	 */
@@ -8105,16 +8712,218 @@ export type PostApiZonesByZoneIdPagesBody = {
 	/**
 	 * @type object
 	 */
-	config: {
-		[key: string]:
-			| null
-			| boolean
-			| number
-			| string
-			| JsonValue[]
+	document: {
+		/**
+		 * @type string
+		 */
+		_type: "zone-page";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		blocks: (
 			| {
-					[key: string]: JsonValue;
-			  };
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!block$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_type: "post-ref";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					postId: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_type: "menu";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type object | undefined
+					 */
+					label?: {
+						[key: string]: string;
+					};
+					/**
+					 * @type array
+					 */
+					items: {
+						/**
+						 * @type string
+						 */
+						_type: "menu-item";
+						/**
+						 * @pattern ^[0-9a-f]{12}$
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type object
+						 */
+						label: {
+							[key: string]: string;
+						};
+						target:
+							| {
+									/**
+									 * @type string
+									 */
+									type: "href";
+									/**
+									 * @minLength 1
+									 * @type string
+									 */
+									href: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "unit";
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									unitId: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "page";
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									pageId: string;
+							  };
+					}[];
+			  }
+		)[];
+		/**
+		 * @type object | undefined
+		 */
+		configuration?: {
+			[key: string]: unknown;
+		};
 	};
 	/**
 	 * @minLength 1
@@ -8198,9 +9007,221 @@ export type PutApiZonesByZoneIdPagesByPageIdStatus200 = {
 	 */
 	slug: string;
 	/**
-	 * @type void
+	 * @type object
 	 */
-	config: void;
+	document: {
+		/**
+		 * @type string
+		 */
+		_type: "zone-page";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		blocks: (
+			| {
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!block$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_type: "post-ref";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					postId: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_type: "menu";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type object | undefined
+					 */
+					label?: {
+						[key: string]: string;
+					};
+					/**
+					 * @type array
+					 */
+					items: {
+						/**
+						 * @type string
+						 */
+						_type: "menu-item";
+						/**
+						 * @pattern ^[0-9a-f]{12}$
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type object
+						 */
+						label: {
+							[key: string]: string;
+						};
+						target:
+							| {
+									/**
+									 * @type string
+									 */
+									type: "href";
+									/**
+									 * @minLength 1
+									 * @type string
+									 */
+									href: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "unit";
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									unitId: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "page";
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									pageId: string;
+							  };
+					}[];
+			  }
+		)[];
+		/**
+		 * @type object | undefined
+		 */
+		configuration?: {
+			[key: string]: unknown;
+		};
+	};
 	/**
 	 * @type string
 	 */
@@ -8319,16 +9340,218 @@ export type PutApiZonesByZoneIdPagesByPageIdBody = {
 	/**
 	 * @type object
 	 */
-	config: {
-		[key: string]:
-			| null
-			| boolean
-			| number
-			| string
-			| JsonValue[]
+	document: {
+		/**
+		 * @type string
+		 */
+		_type: "zone-page";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		blocks: (
 			| {
-					[key: string]: JsonValue;
-			  };
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!block$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_type: "post-ref";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					postId: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_type: "menu";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type object | undefined
+					 */
+					label?: {
+						[key: string]: string;
+					};
+					/**
+					 * @type array
+					 */
+					items: {
+						/**
+						 * @type string
+						 */
+						_type: "menu-item";
+						/**
+						 * @pattern ^[0-9a-f]{12}$
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type object
+						 */
+						label: {
+							[key: string]: string;
+						};
+						target:
+							| {
+									/**
+									 * @type string
+									 */
+									type: "href";
+									/**
+									 * @minLength 1
+									 * @type string
+									 */
+									href: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "unit";
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									unitId: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "page";
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									pageId: string;
+							  };
+					}[];
+			  }
+		)[];
+		/**
+		 * @type object | undefined
+		 */
+		configuration?: {
+			[key: string]: unknown;
+		};
 	};
 	/**
 	 * @minLength 1
@@ -8512,6 +9735,689 @@ export type DeleteApiZonesByZoneIdPagesByPageIdResponse =
 /**
  * @type object
  */
+export type GetApiZonesByZoneIdMenusPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdMenusStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		zoneId: string;
+		/**
+		 * @type string
+		 */
+		slot: string;
+		/**
+		 * @type object
+		 */
+		document: {
+			/**
+			 * @type string
+			 */
+			_type: "zone-menu";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			menus: {
+				/**
+				 * @type string
+				 */
+				_type: "menu";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type object | undefined
+				 */
+				label?: {
+					[key: string]: string;
+				};
+				/**
+				 * @type array
+				 */
+				items: {
+					/**
+					 * @type string
+					 */
+					_type: "menu-item";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type object
+					 */
+					label: {
+						[key: string]: string;
+					};
+					target:
+						| {
+								/**
+								 * @type string
+								 */
+								type: "href";
+								/**
+								 * @minLength 1
+								 * @type string
+								 */
+								href: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "unit";
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								unitId: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "page";
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								pageId: string;
+						  };
+				}[];
+			}[];
+			/**
+			 * @type object | undefined
+			 */
+			configuration?: {
+				[key: string]: unknown;
+			};
+		};
+		/**
+		 * @type string
+		 */
+		position: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdMenusStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdMenusStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdMenusStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdMenusOptions = {
+	body?: never;
+	path: GetApiZonesByZoneIdMenusPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiZonesByZoneIdMenusResponses = {
+	"200": GetApiZonesByZoneIdMenusStatus200;
+	"404": GetApiZonesByZoneIdMenusStatus404;
+	"422": GetApiZonesByZoneIdMenusStatus422;
+	"500": GetApiZonesByZoneIdMenusStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiZonesByZoneIdMenusResponse =
+	| GetApiZonesByZoneIdMenusStatus200
+	| GetApiZonesByZoneIdMenusStatus404
+	| GetApiZonesByZoneIdMenusStatus422
+	| GetApiZonesByZoneIdMenusStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdMenusBySlotPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 64
+	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+	 * @type string
+	 */
+	slot: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdMenusBySlotStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @type string
+	 */
+	slot: string;
+	/**
+	 * @type object
+	 */
+	document: {
+		/**
+		 * @type string
+		 */
+		_type: "zone-menu";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		menus: {
+			/**
+			 * @type string
+			 */
+			_type: "menu";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type object | undefined
+			 */
+			label?: {
+				[key: string]: string;
+			};
+			/**
+			 * @type array
+			 */
+			items: {
+				/**
+				 * @type string
+				 */
+				_type: "menu-item";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type object
+				 */
+				label: {
+					[key: string]: string;
+				};
+				target:
+					| {
+							/**
+							 * @type string
+							 */
+							type: "href";
+							/**
+							 * @minLength 1
+							 * @type string
+							 */
+							href: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							type: "unit";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							unitId: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							type: "page";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							pageId: string;
+					  };
+			}[];
+		}[];
+		/**
+		 * @type object | undefined
+		 */
+		configuration?: {
+			[key: string]: unknown;
+		};
+	};
+	/**
+	 * @type string
+	 */
+	position: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export const PutApiZonesByZoneIdMenusBySlotStatus403ErrorCodeEnum = {
+	UnitEditForbidden: "UnitEditForbidden",
+	UnitFieldLocked: "UnitFieldLocked",
+} as const;
+
+export type PutApiZonesByZoneIdMenusBySlotStatus403ErrorCodeEnum =
+	(typeof PutApiZonesByZoneIdMenusBySlotStatus403ErrorCodeEnum)[keyof typeof PutApiZonesByZoneIdMenusBySlotStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdMenusBySlotStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitEditForbidden'
+		 * @type string
+		 */
+		code: PutApiZonesByZoneIdMenusBySlotStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdMenusBySlotStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdMenusBySlotStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdMenusBySlotStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdMenusBySlotBody = {
+	/**
+	 * @type object
+	 */
+	document: {
+		/**
+		 * @type string
+		 */
+		_type: "zone-menu";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		menus: {
+			/**
+			 * @type string
+			 */
+			_type: "menu";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type object | undefined
+			 */
+			label?: {
+				[key: string]: string;
+			};
+			/**
+			 * @type array
+			 */
+			items: {
+				/**
+				 * @type string
+				 */
+				_type: "menu-item";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type object
+				 */
+				label: {
+					[key: string]: string;
+				};
+				target:
+					| {
+							/**
+							 * @type string
+							 */
+							type: "href";
+							/**
+							 * @minLength 1
+							 * @type string
+							 */
+							href: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							type: "unit";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							unitId: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							type: "page";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							pageId: string;
+					  };
+			}[];
+		}[];
+		/**
+		 * @type object | undefined
+		 */
+		configuration?: {
+			[key: string]: unknown;
+		};
+	};
+	/**
+	 * @minLength 1
+	 * @maxLength 64
+	 * @type string | undefined
+	 */
+	position?: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdMenusBySlotOptions = {
+	body: PutApiZonesByZoneIdMenusBySlotBody;
+	path: PutApiZonesByZoneIdMenusBySlotPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiZonesByZoneIdMenusBySlotResponses = {
+	"200": PutApiZonesByZoneIdMenusBySlotStatus200;
+	"403": PutApiZonesByZoneIdMenusBySlotStatus403;
+	"404": PutApiZonesByZoneIdMenusBySlotStatus404;
+	"422": PutApiZonesByZoneIdMenusBySlotStatus422;
+	"500": PutApiZonesByZoneIdMenusBySlotStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiZonesByZoneIdMenusBySlotResponse =
+	| PutApiZonesByZoneIdMenusBySlotStatus200
+	| PutApiZonesByZoneIdMenusBySlotStatus403
+	| PutApiZonesByZoneIdMenusBySlotStatus404
+	| PutApiZonesByZoneIdMenusBySlotStatus422
+	| PutApiZonesByZoneIdMenusBySlotStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdMenusBySlotPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 64
+	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+	 * @type string
+	 */
+	slot: string;
+};
+
+/**
+ * @type void
+ */
+export type DeleteApiZonesByZoneIdMenusBySlotStatus204 = void;
+
+export const DeleteApiZonesByZoneIdMenusBySlotStatus403ErrorCodeEnum = {
+	UnitEditForbidden: "UnitEditForbidden",
+	UnitFieldLocked: "UnitFieldLocked",
+} as const;
+
+export type DeleteApiZonesByZoneIdMenusBySlotStatus403ErrorCodeEnum =
+	(typeof DeleteApiZonesByZoneIdMenusBySlotStatus403ErrorCodeEnum)[keyof typeof DeleteApiZonesByZoneIdMenusBySlotStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdMenusBySlotStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitEditForbidden'
+		 * @type string
+		 */
+		code: DeleteApiZonesByZoneIdMenusBySlotStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdMenusBySlotStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdMenusBySlotStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdMenusBySlotOptions = {
+	body?: never;
+	path: DeleteApiZonesByZoneIdMenusBySlotPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiZonesByZoneIdMenusBySlotResponses = {
+	"204": DeleteApiZonesByZoneIdMenusBySlotStatus204;
+	"403": DeleteApiZonesByZoneIdMenusBySlotStatus403;
+	"422": DeleteApiZonesByZoneIdMenusBySlotStatus422;
+	"500": DeleteApiZonesByZoneIdMenusBySlotStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiZonesByZoneIdMenusBySlotResponse =
+	| DeleteApiZonesByZoneIdMenusBySlotStatus204
+	| DeleteApiZonesByZoneIdMenusBySlotStatus403
+	| DeleteApiZonesByZoneIdMenusBySlotStatus422
+	| DeleteApiZonesByZoneIdMenusBySlotStatus500;
+
+/**
+ * @type object
+ */
 export type PutApiZonesByZoneIdFollowPath = {
 	/**
 	 * @description
@@ -8660,19 +10566,19 @@ export type DeleteApiZonesByZoneIdFollowResponse =
 /**
  * @type object
  */
-export type GetApiGamesByGameIdSystemRequirementsPath = {
+export type GetApiSoftwareBySoftwareIdSystemRequirementsPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
-	gameId: string;
+	softwareId: string;
 };
 
 /**
  * @type object
  */
-export type GetApiGamesByGameIdSystemRequirementsStatus200 = {
+export type GetApiSoftwareBySoftwareIdSystemRequirementsStatus200 = {
 	/**
 	 * @type array
 	 */
@@ -8688,7 +10594,7 @@ export type GetApiGamesByGameIdSystemRequirementsStatus200 = {
 		 * Format: `uuid`
 		 * @type string
 		 */
-		gameId: string;
+		softwareId: string;
 		platformEntityId: (string | null) | null;
 		/**
 		 * @type string
@@ -8719,7 +10625,7 @@ export type GetApiGamesByGameIdSystemRequirementsStatus200 = {
 /**
  * @type object
  */
-export type GetApiGamesByGameIdSystemRequirementsStatus404 = {
+export type GetApiSoftwareBySoftwareIdSystemRequirementsStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -8747,19 +10653,19 @@ export type GetApiGamesByGameIdSystemRequirementsStatus404 = {
 /**
  * @type object
  */
-export type GetApiGamesByGameIdSystemRequirementsStatus422 = ValidationError;
+export type GetApiSoftwareBySoftwareIdSystemRequirementsStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type GetApiGamesByGameIdSystemRequirementsStatus500 = InternalError;
+export type GetApiSoftwareBySoftwareIdSystemRequirementsStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type GetApiGamesByGameIdSystemRequirementsOptions = {
+export type GetApiSoftwareBySoftwareIdSystemRequirementsOptions = {
 	body?: never;
-	path: GetApiGamesByGameIdSystemRequirementsPath;
+	path: GetApiSoftwareBySoftwareIdSystemRequirementsPath;
 	query?: never;
 	headers?: never;
 };
@@ -8767,38 +10673,38 @@ export type GetApiGamesByGameIdSystemRequirementsOptions = {
 /**
  * @type object
  */
-export type GetApiGamesByGameIdSystemRequirementsResponses = {
-	"200": GetApiGamesByGameIdSystemRequirementsStatus200;
-	"404": GetApiGamesByGameIdSystemRequirementsStatus404;
-	"422": GetApiGamesByGameIdSystemRequirementsStatus422;
-	"500": GetApiGamesByGameIdSystemRequirementsStatus500;
+export type GetApiSoftwareBySoftwareIdSystemRequirementsResponses = {
+	"200": GetApiSoftwareBySoftwareIdSystemRequirementsStatus200;
+	"404": GetApiSoftwareBySoftwareIdSystemRequirementsStatus404;
+	"422": GetApiSoftwareBySoftwareIdSystemRequirementsStatus422;
+	"500": GetApiSoftwareBySoftwareIdSystemRequirementsStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type GetApiGamesByGameIdSystemRequirementsResponse =
-	| GetApiGamesByGameIdSystemRequirementsStatus200
-	| GetApiGamesByGameIdSystemRequirementsStatus404
-	| GetApiGamesByGameIdSystemRequirementsStatus422
-	| GetApiGamesByGameIdSystemRequirementsStatus500;
+export type GetApiSoftwareBySoftwareIdSystemRequirementsResponse =
+	| GetApiSoftwareBySoftwareIdSystemRequirementsStatus200
+	| GetApiSoftwareBySoftwareIdSystemRequirementsStatus404
+	| GetApiSoftwareBySoftwareIdSystemRequirementsStatus422
+	| GetApiSoftwareBySoftwareIdSystemRequirementsStatus500;
 
 /**
  * @type object
  */
-export type PostApiGamesByGameIdSystemRequirementsPath = {
+export type PostApiSoftwareBySoftwareIdSystemRequirementsPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
-	gameId: string;
+	softwareId: string;
 };
 
 /**
  * @type object
  */
-export type PostApiGamesByGameIdSystemRequirementsStatus200 = {
+export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -8810,7 +10716,7 @@ export type PostApiGamesByGameIdSystemRequirementsStatus200 = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	gameId: string;
+	softwareId: string;
 	platformEntityId: (string | null) | null;
 	/**
 	 * @type string
@@ -8840,16 +10746,16 @@ export type PostApiGamesByGameIdSystemRequirementsStatus200 = {
 /**
  * @type object
  */
-export type PostApiGamesByGameIdSystemRequirementsStatus400 = {
+export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus400 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'GameSystemRequirementSourceInvalid'
+		 * @default 'SoftwareSystemRequirementSourceInvalid'
 		 * @type string
 		 */
-		code: "GameSystemRequirementSourceInvalid";
+		code: "SoftwareSystemRequirementSourceInvalid";
 		/**
 		 * @type string
 		 */
@@ -8865,18 +10771,18 @@ export type PostApiGamesByGameIdSystemRequirementsStatus400 = {
 	requestId: string;
 };
 
-export const PostApiGamesByGameIdSystemRequirementsStatus403ErrorCodeEnum = {
+export const PostApiSoftwareBySoftwareIdSystemRequirementsStatus403ErrorCodeEnum = {
 	UnitEditForbidden: "UnitEditForbidden",
 	UnitFieldLocked: "UnitFieldLocked",
 } as const;
 
-export type PostApiGamesByGameIdSystemRequirementsStatus403ErrorCodeEnum =
-	(typeof PostApiGamesByGameIdSystemRequirementsStatus403ErrorCodeEnum)[keyof typeof PostApiGamesByGameIdSystemRequirementsStatus403ErrorCodeEnum];
+export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus403ErrorCodeEnum =
+	(typeof PostApiSoftwareBySoftwareIdSystemRequirementsStatus403ErrorCodeEnum)[keyof typeof PostApiSoftwareBySoftwareIdSystemRequirementsStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PostApiGamesByGameIdSystemRequirementsStatus403 = {
+export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -8885,7 +10791,7 @@ export type PostApiGamesByGameIdSystemRequirementsStatus403 = {
 		 * @default 'UnitEditForbidden'
 		 * @type string
 		 */
-		code: PostApiGamesByGameIdSystemRequirementsStatus403ErrorCodeEnum;
+		code: PostApiSoftwareBySoftwareIdSystemRequirementsStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -8901,18 +10807,18 @@ export type PostApiGamesByGameIdSystemRequirementsStatus403 = {
 	requestId: string;
 };
 
-export const PostApiGamesByGameIdSystemRequirementsStatus404ErrorCodeEnum = {
+export const PostApiSoftwareBySoftwareIdSystemRequirementsStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
-	GameNotFound: "GameNotFound",
+	SoftwareNotFound: "SoftwareNotFound",
 } as const;
 
-export type PostApiGamesByGameIdSystemRequirementsStatus404ErrorCodeEnum =
-	(typeof PostApiGamesByGameIdSystemRequirementsStatus404ErrorCodeEnum)[keyof typeof PostApiGamesByGameIdSystemRequirementsStatus404ErrorCodeEnum];
+export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus404ErrorCodeEnum =
+	(typeof PostApiSoftwareBySoftwareIdSystemRequirementsStatus404ErrorCodeEnum)[keyof typeof PostApiSoftwareBySoftwareIdSystemRequirementsStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PostApiGamesByGameIdSystemRequirementsStatus404 = {
+export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -8921,7 +10827,7 @@ export type PostApiGamesByGameIdSystemRequirementsStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: PostApiGamesByGameIdSystemRequirementsStatus404ErrorCodeEnum;
+		code: PostApiSoftwareBySoftwareIdSystemRequirementsStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -8940,17 +10846,17 @@ export type PostApiGamesByGameIdSystemRequirementsStatus404 = {
 /**
  * @type object
  */
-export type PostApiGamesByGameIdSystemRequirementsStatus422 = ValidationError;
+export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type PostApiGamesByGameIdSystemRequirementsStatus500 = InternalError;
+export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PostApiGamesByGameIdSystemRequirementsBody = {
+export type PostApiSoftwareBySoftwareIdSystemRequirementsBody = {
 	platformEntityId?: (string | null) | null;
 	/**
 	 * @minLength 1
@@ -8980,9 +10886,9 @@ export type PostApiGamesByGameIdSystemRequirementsBody = {
 /**
  * @type object
  */
-export type PostApiGamesByGameIdSystemRequirementsOptions = {
-	body: PostApiGamesByGameIdSystemRequirementsBody;
-	path: PostApiGamesByGameIdSystemRequirementsPath;
+export type PostApiSoftwareBySoftwareIdSystemRequirementsOptions = {
+	body: PostApiSoftwareBySoftwareIdSystemRequirementsBody;
+	path: PostApiSoftwareBySoftwareIdSystemRequirementsPath;
 	query?: never;
 	headers?: never;
 };
@@ -8990,36 +10896,36 @@ export type PostApiGamesByGameIdSystemRequirementsOptions = {
 /**
  * @type object
  */
-export type PostApiGamesByGameIdSystemRequirementsResponses = {
-	"200": PostApiGamesByGameIdSystemRequirementsStatus200;
-	"400": PostApiGamesByGameIdSystemRequirementsStatus400;
-	"403": PostApiGamesByGameIdSystemRequirementsStatus403;
-	"404": PostApiGamesByGameIdSystemRequirementsStatus404;
-	"422": PostApiGamesByGameIdSystemRequirementsStatus422;
-	"500": PostApiGamesByGameIdSystemRequirementsStatus500;
+export type PostApiSoftwareBySoftwareIdSystemRequirementsResponses = {
+	"200": PostApiSoftwareBySoftwareIdSystemRequirementsStatus200;
+	"400": PostApiSoftwareBySoftwareIdSystemRequirementsStatus400;
+	"403": PostApiSoftwareBySoftwareIdSystemRequirementsStatus403;
+	"404": PostApiSoftwareBySoftwareIdSystemRequirementsStatus404;
+	"422": PostApiSoftwareBySoftwareIdSystemRequirementsStatus422;
+	"500": PostApiSoftwareBySoftwareIdSystemRequirementsStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PostApiGamesByGameIdSystemRequirementsResponse =
-	| PostApiGamesByGameIdSystemRequirementsStatus200
-	| PostApiGamesByGameIdSystemRequirementsStatus400
-	| PostApiGamesByGameIdSystemRequirementsStatus403
-	| PostApiGamesByGameIdSystemRequirementsStatus404
-	| PostApiGamesByGameIdSystemRequirementsStatus422
-	| PostApiGamesByGameIdSystemRequirementsStatus500;
+export type PostApiSoftwareBySoftwareIdSystemRequirementsResponse =
+	| PostApiSoftwareBySoftwareIdSystemRequirementsStatus200
+	| PostApiSoftwareBySoftwareIdSystemRequirementsStatus400
+	| PostApiSoftwareBySoftwareIdSystemRequirementsStatus403
+	| PostApiSoftwareBySoftwareIdSystemRequirementsStatus404
+	| PostApiSoftwareBySoftwareIdSystemRequirementsStatus422
+	| PostApiSoftwareBySoftwareIdSystemRequirementsStatus500;
 
 /**
  * @type object
  */
-export type PutApiGamesByGameIdSystemRequirementsByRequirementIdPath = {
+export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
-	gameId: string;
+	softwareId: string;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -9031,7 +10937,7 @@ export type PutApiGamesByGameIdSystemRequirementsByRequirementIdPath = {
 /**
  * @type object
  */
-export type PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus200 = {
+export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -9043,7 +10949,7 @@ export type PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus200 = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	gameId: string;
+	softwareId: string;
 	platformEntityId: (string | null) | null;
 	/**
 	 * @type string
@@ -9073,16 +10979,16 @@ export type PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus200 = {
 /**
  * @type object
  */
-export type PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus400 = {
+export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'GameSystemRequirementSourceInvalid'
+		 * @default 'SoftwareSystemRequirementSourceInvalid'
 		 * @type string
 		 */
-		code: "GameSystemRequirementSourceInvalid";
+		code: "SoftwareSystemRequirementSourceInvalid";
 		/**
 		 * @type string
 		 */
@@ -9098,18 +11004,18 @@ export type PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus400 = {
 	requestId: string;
 };
 
-export const PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum = {
+export const PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum = {
 	UnitEditForbidden: "UnitEditForbidden",
 	UnitFieldLocked: "UnitFieldLocked",
 } as const;
 
-export type PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum =
-	(typeof PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum)[keyof typeof PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum];
+export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum =
+	(typeof PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum)[keyof typeof PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus403 = {
+export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -9118,7 +11024,7 @@ export type PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus403 = {
 		 * @default 'UnitEditForbidden'
 		 * @type string
 		 */
-		code: PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum;
+		code: PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -9134,18 +11040,18 @@ export type PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus403 = {
 	requestId: string;
 };
 
-export const PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus404ErrorCodeEnum = {
+export const PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
 	SystemRequirementNotFound: "SystemRequirementNotFound",
 } as const;
 
-export type PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus404ErrorCodeEnum =
-	(typeof PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus404ErrorCodeEnum)[keyof typeof PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus404ErrorCodeEnum];
+export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404ErrorCodeEnum =
+	(typeof PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404ErrorCodeEnum)[keyof typeof PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus404 = {
+export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -9154,7 +11060,7 @@ export type PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus404ErrorCodeEnum;
+		code: PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -9173,17 +11079,17 @@ export type PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus404 = {
 /**
  * @type object
  */
-export type PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus422 = ValidationError;
+export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus500 = InternalError;
+export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PutApiGamesByGameIdSystemRequirementsByRequirementIdBody = {
+export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdBody = {
 	platformEntityId?: (string | null) | null;
 	/**
 	 * @minLength 1
@@ -9213,9 +11119,9 @@ export type PutApiGamesByGameIdSystemRequirementsByRequirementIdBody = {
 /**
  * @type object
  */
-export type PutApiGamesByGameIdSystemRequirementsByRequirementIdOptions = {
-	body: PutApiGamesByGameIdSystemRequirementsByRequirementIdBody;
-	path: PutApiGamesByGameIdSystemRequirementsByRequirementIdPath;
+export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions = {
+	body: PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdBody;
+	path: PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdPath;
 	query?: never;
 	headers?: never;
 };
@@ -9223,36 +11129,36 @@ export type PutApiGamesByGameIdSystemRequirementsByRequirementIdOptions = {
 /**
  * @type object
  */
-export type PutApiGamesByGameIdSystemRequirementsByRequirementIdResponses = {
-	"200": PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus200;
-	"400": PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus400;
-	"403": PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus403;
-	"404": PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus404;
-	"422": PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus422;
-	"500": PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus500;
+export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses = {
+	"200": PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus200;
+	"400": PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400;
+	"403": PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403;
+	"404": PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404;
+	"422": PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422;
+	"500": PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PutApiGamesByGameIdSystemRequirementsByRequirementIdResponse =
-	| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus200
-	| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus400
-	| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus403
-	| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus404
-	| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus422
-	| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus500;
+export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponse =
+	| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus200
+	| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400
+	| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
+	| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
+	| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+	| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500;
 
 /**
  * @type object
  */
-export type DeleteApiGamesByGameIdSystemRequirementsByRequirementIdPath = {
+export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
-	gameId: string;
+	softwareId: string;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -9264,20 +11170,21 @@ export type DeleteApiGamesByGameIdSystemRequirementsByRequirementIdPath = {
 /**
  * @type void
  */
-export type DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus204 = void;
+export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204 = void;
 
-export const DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum = {
-	UnitEditForbidden: "UnitEditForbidden",
-	UnitFieldLocked: "UnitFieldLocked",
-} as const;
+export const DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum =
+	{
+		UnitEditForbidden: "UnitEditForbidden",
+		UnitFieldLocked: "UnitFieldLocked",
+	} as const;
 
-export type DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum];
+export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus403 = {
+export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -9286,7 +11193,7 @@ export type DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus403 = {
 		 * @default 'UnitEditForbidden'
 		 * @type string
 		 */
-		code: DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum;
+		code: DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -9302,18 +11209,19 @@ export type DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus403 = {
 	requestId: string;
 };
 
-export const DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	SystemRequirementNotFound: "SystemRequirementNotFound",
-} as const;
+export const DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404ErrorCodeEnum =
+	{
+		UnitNotFound: "UnitNotFound",
+		SystemRequirementNotFound: "SystemRequirementNotFound",
+	} as const;
 
-export type DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus404ErrorCodeEnum =
-	(typeof DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus404ErrorCodeEnum];
+export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404ErrorCodeEnum =
+	(typeof DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus404 = {
+export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -9322,7 +11230,7 @@ export type DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus404ErrorCodeEnum;
+		code: DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -9341,19 +11249,20 @@ export type DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus404 = {
 /**
  * @type object
  */
-export type DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus422 = ValidationError;
+export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422 =
+	ValidationError;
 
 /**
  * @type object
  */
-export type DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus500 = InternalError;
+export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type DeleteApiGamesByGameIdSystemRequirementsByRequirementIdOptions = {
+export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions = {
 	body?: never;
-	path: DeleteApiGamesByGameIdSystemRequirementsByRequirementIdPath;
+	path: DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdPath;
 	query?: never;
 	headers?: never;
 };
@@ -9361,23 +11270,23 @@ export type DeleteApiGamesByGameIdSystemRequirementsByRequirementIdOptions = {
 /**
  * @type object
  */
-export type DeleteApiGamesByGameIdSystemRequirementsByRequirementIdResponses = {
-	"204": DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus204;
-	"403": DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus403;
-	"404": DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus404;
-	"422": DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus422;
-	"500": DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus500;
+export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses = {
+	"204": DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204;
+	"403": DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403;
+	"404": DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404;
+	"422": DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422;
+	"500": DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type DeleteApiGamesByGameIdSystemRequirementsByRequirementIdResponse =
-	| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus204
-	| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus403
-	| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus404
-	| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus422
-	| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus500;
+export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponse =
+	| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204
+	| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
+	| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
+	| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+	| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500;
 
 export type GetApiUsersMeStatus200 = {
 	/**
@@ -9401,9 +11310,68 @@ export type GetApiUsersMeStatus200 = {
 	avatarKey?: (string | null) | null;
 	summary: (string | null) | null;
 	description:
-		| (
-				| (
-						| {
+		| ({
+				/**
+				 * @type string
+				 */
+				_type: "portable-text";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type array
+				 */
+				content: (
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "block";
+							/**
+							 * @type array
+							 */
+							children: (
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "span";
+										/**
+										 * @type string
+										 */
+										text: string;
+										/**
+										 * @type array | undefined
+										 */
+										marks?: string[];
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @pattern ^(?!span$).+
+										 * @type string
+										 */
+										_type: string;
+										[key: string]: unknown;
+								  }
+							)[];
+							/**
+							 * @type array | undefined
+							 */
+							markDefs?: {
 								/**
 								 * @type string
 								 */
@@ -9411,78 +11379,38 @@ export type GetApiUsersMeStatus200 = {
 								/**
 								 * @type string
 								 */
-								_type: "block";
-								/**
-								 * @type array
-								 */
-								children: (
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "span";
-											/**
-											 * @type string
-											 */
-											text: string;
-											/**
-											 * @type array | undefined
-											 */
-											marks?: string[];
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											_type: string & void;
-											[key: string]: unknown;
-									  }
-								)[];
-								/**
-								 * @type array | undefined
-								 */
-								markDefs?: {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: string;
-									[key: string]: unknown;
-								}[];
-								/**
-								 * @type string | undefined
-								 */
-								listItem?: string;
-								/**
-								 * @type string | undefined
-								 */
-								style?: string;
-								/**
-								 * @minLength 1
-								 * @type integer | undefined
-								 */
-								level?: number;
+								_type: string;
 								[key: string]: unknown;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								_type: string & void;
-								[key: string]: unknown;
-						  }
-				  )[]
-				| null
-		  )
+							}[];
+							/**
+							 * @type string | undefined
+							 */
+							listItem?: string;
+							/**
+							 * @type string | undefined
+							 */
+							style?: string;
+							/**
+							 * @minLength 1
+							 * @type integer | undefined
+							 */
+							level?: number;
+							[key: string]: unknown;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @pattern ^(?!block$).+
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+					  }
+				)[];
+		  } | null)
 		| null;
 	/**
 	 * @description
@@ -9598,9 +11526,68 @@ export type PatchApiUsersMeStatus200 = {
 	avatarKey?: (string | null) | null;
 	summary: (string | null) | null;
 	description:
-		| (
-				| (
-						| {
+		| ({
+				/**
+				 * @type string
+				 */
+				_type: "portable-text";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type array
+				 */
+				content: (
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "block";
+							/**
+							 * @type array
+							 */
+							children: (
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "span";
+										/**
+										 * @type string
+										 */
+										text: string;
+										/**
+										 * @type array | undefined
+										 */
+										marks?: string[];
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @pattern ^(?!span$).+
+										 * @type string
+										 */
+										_type: string;
+										[key: string]: unknown;
+								  }
+							)[];
+							/**
+							 * @type array | undefined
+							 */
+							markDefs?: {
 								/**
 								 * @type string
 								 */
@@ -9608,78 +11595,38 @@ export type PatchApiUsersMeStatus200 = {
 								/**
 								 * @type string
 								 */
-								_type: "block";
-								/**
-								 * @type array
-								 */
-								children: (
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "span";
-											/**
-											 * @type string
-											 */
-											text: string;
-											/**
-											 * @type array | undefined
-											 */
-											marks?: string[];
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											_type: string & void;
-											[key: string]: unknown;
-									  }
-								)[];
-								/**
-								 * @type array | undefined
-								 */
-								markDefs?: {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: string;
-									[key: string]: unknown;
-								}[];
-								/**
-								 * @type string | undefined
-								 */
-								listItem?: string;
-								/**
-								 * @type string | undefined
-								 */
-								style?: string;
-								/**
-								 * @minLength 1
-								 * @type integer | undefined
-								 */
-								level?: number;
+								_type: string;
 								[key: string]: unknown;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								_type: string & void;
-								[key: string]: unknown;
-						  }
-				  )[]
-				| null
-		  )
+							}[];
+							/**
+							 * @type string | undefined
+							 */
+							listItem?: string;
+							/**
+							 * @type string | undefined
+							 */
+							style?: string;
+							/**
+							 * @minLength 1
+							 * @type integer | undefined
+							 */
+							level?: number;
+							[key: string]: unknown;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @pattern ^(?!block$).+
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+					  }
+				)[];
+		  } | null)
 		| null;
 	/**
 	 * @description
@@ -9835,53 +11782,23 @@ export type PatchApiUsersMeBody = {
 	 */
 	summary?: string;
 	/**
-	 * @type array | undefined
+	 * @type object | undefined
 	 */
-	description?: (
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				/**
-				 * @type string
-				 */
-				_type: "block";
-				/**
-				 * @type array
-				 */
-				children: (
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: "span";
-							/**
-							 * @type string
-							 */
-							text: string;
-							/**
-							 * @type array | undefined
-							 */
-							marks?: string[];
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							_type: string & void;
-							[key: string]: unknown;
-					  }
-				)[];
-				/**
-				 * @type array | undefined
-				 */
-				markDefs?: {
+	description?: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
 					/**
 					 * @type string
 					 */
@@ -9889,33 +11806,85 @@ export type PatchApiUsersMeBody = {
 					/**
 					 * @type string
 					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!span$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!block$).+
+					 * @type string
+					 */
 					_type: string;
 					[key: string]: unknown;
-				}[];
-				/**
-				 * @type string | undefined
-				 */
-				listItem?: string;
-				/**
-				 * @type string | undefined
-				 */
-				style?: string;
-				/**
-				 * @minLength 1
-				 * @type integer | undefined
-				 */
-				level?: number;
-				[key: string]: unknown;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				_type: string & void;
-				[key: string]: unknown;
-		  }
-	)[];
+			  }
+		)[];
+	};
 };
 
 /**
@@ -10253,9 +12222,68 @@ export type GetApiUsersByIdStatus200 = {
 	avatarKey?: (string | null) | null;
 	summary: (string | null) | null;
 	description:
-		| (
-				| (
-						| {
+		| ({
+				/**
+				 * @type string
+				 */
+				_type: "portable-text";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type array
+				 */
+				content: (
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "block";
+							/**
+							 * @type array
+							 */
+							children: (
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "span";
+										/**
+										 * @type string
+										 */
+										text: string;
+										/**
+										 * @type array | undefined
+										 */
+										marks?: string[];
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @pattern ^(?!span$).+
+										 * @type string
+										 */
+										_type: string;
+										[key: string]: unknown;
+								  }
+							)[];
+							/**
+							 * @type array | undefined
+							 */
+							markDefs?: {
 								/**
 								 * @type string
 								 */
@@ -10263,78 +12291,38 @@ export type GetApiUsersByIdStatus200 = {
 								/**
 								 * @type string
 								 */
-								_type: "block";
-								/**
-								 * @type array
-								 */
-								children: (
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "span";
-											/**
-											 * @type string
-											 */
-											text: string;
-											/**
-											 * @type array | undefined
-											 */
-											marks?: string[];
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											_type: string & void;
-											[key: string]: unknown;
-									  }
-								)[];
-								/**
-								 * @type array | undefined
-								 */
-								markDefs?: {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: string;
-									[key: string]: unknown;
-								}[];
-								/**
-								 * @type string | undefined
-								 */
-								listItem?: string;
-								/**
-								 * @type string | undefined
-								 */
-								style?: string;
-								/**
-								 * @minLength 1
-								 * @type integer | undefined
-								 */
-								level?: number;
+								_type: string;
 								[key: string]: unknown;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								_type: string & void;
-								[key: string]: unknown;
-						  }
-				  )[]
-				| null
-		  )
+							}[];
+							/**
+							 * @type string | undefined
+							 */
+							listItem?: string;
+							/**
+							 * @type string | undefined
+							 */
+							style?: string;
+							/**
+							 * @minLength 1
+							 * @type integer | undefined
+							 */
+							level?: number;
+							[key: string]: unknown;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @pattern ^(?!block$).+
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+					  }
+				)[];
+		  } | null)
 		| null;
 	/**
 	 * @description
@@ -10848,7 +12836,7 @@ export type DeleteApiUsersByIdBlockResponse =
 
 export const GetApiUnitsByTypeType = {
 	book: "book",
-	game: "game",
+	software: "software",
 	media: "media",
 } as const;
 
@@ -11012,7 +13000,7 @@ export type GetApiUnitsByTypeResponse =
 
 export const PostApiUnitsByTypeType = {
 	book: "book",
-	game: "game",
+	software: "software",
 	media: "media",
 } as const;
 
@@ -11119,9 +13107,68 @@ export type PostApiUnitsByTypeStatus200 = {
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		description:
-			| (
-					| (
-							| {
+			| ({
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
 									/**
 									 * @type string
 									 */
@@ -11129,78 +13176,38 @@ export type PostApiUnitsByTypeStatus200 = {
 									/**
 									 * @type string
 									 */
-									_type: "block";
-									/**
-									 * @type array
-									 */
-									children: (
-										| {
-												/**
-												 * @type string
-												 */
-												_key: string;
-												/**
-												 * @type string
-												 */
-												_type: "span";
-												/**
-												 * @type string
-												 */
-												text: string;
-												/**
-												 * @type array | undefined
-												 */
-												marks?: string[];
-										  }
-										| {
-												/**
-												 * @type string
-												 */
-												_key: string;
-												_type: string & void;
-												[key: string]: unknown;
-										  }
-									)[];
-									/**
-									 * @type array | undefined
-									 */
-									markDefs?: {
-										/**
-										 * @type string
-										 */
-										_key: string;
-										/**
-										 * @type string
-										 */
-										_type: string;
-										[key: string]: unknown;
-									}[];
-									/**
-									 * @type string | undefined
-									 */
-									listItem?: string;
-									/**
-									 * @type string | undefined
-									 */
-									style?: string;
-									/**
-									 * @minLength 1
-									 * @type integer | undefined
-									 */
-									level?: number;
+									_type: string;
 									[key: string]: unknown;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									_type: string & void;
-									[key: string]: unknown;
-							  }
-					  )[]
-					| null
-			  )
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!block$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+			  } | null)
 			| null;
 		/**
 		 * @description
@@ -11594,53 +13601,23 @@ export type PostApiUnitsByTypeBody = {
 		 */
 		summary?: string;
 		/**
-		 * @type array | undefined
+		 * @type object | undefined
 		 */
-		description?: (
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
-					 * @type array
-					 */
-					children: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "span";
-								/**
-								 * @type string
-								 */
-								text: string;
-								/**
-								 * @type array | undefined
-								 */
-								marks?: string[];
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								_type: string & void;
-								[key: string]: unknown;
-						  }
-					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
+		description?: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
 						/**
 						 * @type string
 						 */
@@ -11648,33 +13625,85 @@ export type PostApiUnitsByTypeBody = {
 						/**
 						 * @type string
 						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!block$).+
+						 * @type string
+						 */
 						_type: string;
 						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
-					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					_type: string & void;
-					[key: string]: unknown;
-			  }
-		)[];
+				  }
+			)[];
+		};
 	};
 	/**
 	 * @minLength 3
@@ -11776,7 +13805,7 @@ export type PostApiUnitsByTypeResponse =
 
 export const GetApiUnitsResolveByScopeBySlugScope = {
 	book: "book",
-	game: "game",
+	software: "software",
 	media: "media",
 } as const;
 
@@ -11880,7 +13909,7 @@ export type GetApiUnitsResolveByScopeBySlugResponse =
 
 export const GetApiUnitsByTypeByUnitIdType = {
 	book: "book",
-	game: "game",
+	software: "software",
 	media: "media",
 } as const;
 
@@ -11993,9 +14022,68 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		description:
-			| (
-					| (
-							| {
+			| ({
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
 									/**
 									 * @type string
 									 */
@@ -12003,78 +14091,38 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 									/**
 									 * @type string
 									 */
-									_type: "block";
-									/**
-									 * @type array
-									 */
-									children: (
-										| {
-												/**
-												 * @type string
-												 */
-												_key: string;
-												/**
-												 * @type string
-												 */
-												_type: "span";
-												/**
-												 * @type string
-												 */
-												text: string;
-												/**
-												 * @type array | undefined
-												 */
-												marks?: string[];
-										  }
-										| {
-												/**
-												 * @type string
-												 */
-												_key: string;
-												_type: string & void;
-												[key: string]: unknown;
-										  }
-									)[];
-									/**
-									 * @type array | undefined
-									 */
-									markDefs?: {
-										/**
-										 * @type string
-										 */
-										_key: string;
-										/**
-										 * @type string
-										 */
-										_type: string;
-										[key: string]: unknown;
-									}[];
-									/**
-									 * @type string | undefined
-									 */
-									listItem?: string;
-									/**
-									 * @type string | undefined
-									 */
-									style?: string;
-									/**
-									 * @minLength 1
-									 * @type integer | undefined
-									 */
-									level?: number;
+									_type: string;
 									[key: string]: unknown;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									_type: string & void;
-									[key: string]: unknown;
-							  }
-					  )[]
-					| null
-			  )
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!block$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+			  } | null)
 			| null;
 		/**
 		 * @description
@@ -12338,7 +14386,7 @@ export type GetApiUnitsByTypeByUnitIdResponse =
 
 export const PatchApiUnitsByTypeByUnitIdType = {
 	book: "book",
-	game: "game",
+	software: "software",
 	media: "media",
 } as const;
 
@@ -12451,9 +14499,68 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		description:
-			| (
-					| (
-							| {
+			| ({
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
 									/**
 									 * @type string
 									 */
@@ -12461,78 +14568,38 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 									/**
 									 * @type string
 									 */
-									_type: "block";
-									/**
-									 * @type array
-									 */
-									children: (
-										| {
-												/**
-												 * @type string
-												 */
-												_key: string;
-												/**
-												 * @type string
-												 */
-												_type: "span";
-												/**
-												 * @type string
-												 */
-												text: string;
-												/**
-												 * @type array | undefined
-												 */
-												marks?: string[];
-										  }
-										| {
-												/**
-												 * @type string
-												 */
-												_key: string;
-												_type: string & void;
-												[key: string]: unknown;
-										  }
-									)[];
-									/**
-									 * @type array | undefined
-									 */
-									markDefs?: {
-										/**
-										 * @type string
-										 */
-										_key: string;
-										/**
-										 * @type string
-										 */
-										_type: string;
-										[key: string]: unknown;
-									}[];
-									/**
-									 * @type string | undefined
-									 */
-									listItem?: string;
-									/**
-									 * @type string | undefined
-									 */
-									style?: string;
-									/**
-									 * @minLength 1
-									 * @type integer | undefined
-									 */
-									level?: number;
+									_type: string;
 									[key: string]: unknown;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									_type: string & void;
-									[key: string]: unknown;
-							  }
-					  )[]
-					| null
-			  )
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!block$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+			  } | null)
 			| null;
 		/**
 		 * @description
@@ -13083,7 +15150,7 @@ export type PatchApiUnitsByTypeByUnitIdResponse =
 
 export const DeleteApiUnitsByTypeByUnitIdType = {
 	book: "book",
-	game: "game",
+	software: "software",
 	media: "media",
 } as const;
 
@@ -13251,7 +15318,7 @@ export type DeleteApiUnitsByTypeByUnitIdResponse =
 
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageType = {
 	book: "book",
-	game: "game",
+	software: "software",
 	media: "media",
 } as const;
 
@@ -13372,9 +15439,68 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		description:
-			| (
-					| (
-							| {
+			| ({
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
 									/**
 									 * @type string
 									 */
@@ -13382,78 +15508,38 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 									/**
 									 * @type string
 									 */
-									_type: "block";
-									/**
-									 * @type array
-									 */
-									children: (
-										| {
-												/**
-												 * @type string
-												 */
-												_key: string;
-												/**
-												 * @type string
-												 */
-												_type: "span";
-												/**
-												 * @type string
-												 */
-												text: string;
-												/**
-												 * @type array | undefined
-												 */
-												marks?: string[];
-										  }
-										| {
-												/**
-												 * @type string
-												 */
-												_key: string;
-												_type: string & void;
-												[key: string]: unknown;
-										  }
-									)[];
-									/**
-									 * @type array | undefined
-									 */
-									markDefs?: {
-										/**
-										 * @type string
-										 */
-										_key: string;
-										/**
-										 * @type string
-										 */
-										_type: string;
-										[key: string]: unknown;
-									}[];
-									/**
-									 * @type string | undefined
-									 */
-									listItem?: string;
-									/**
-									 * @type string | undefined
-									 */
-									style?: string;
-									/**
-									 * @minLength 1
-									 * @type integer | undefined
-									 */
-									level?: number;
+									_type: string;
 									[key: string]: unknown;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									_type: string & void;
-									[key: string]: unknown;
-							  }
-					  )[]
-					| null
-			  )
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!block$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+			  } | null)
 			| null;
 		/**
 		 * @description
@@ -13769,53 +15855,23 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageBody = {
 	 */
 	summary?: string;
 	/**
-	 * @type array | undefined
+	 * @type object | undefined
 	 */
-	description?: (
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				/**
-				 * @type string
-				 */
-				_type: "block";
-				/**
-				 * @type array
-				 */
-				children: (
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: "span";
-							/**
-							 * @type string
-							 */
-							text: string;
-							/**
-							 * @type array | undefined
-							 */
-							marks?: string[];
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							_type: string & void;
-							[key: string]: unknown;
-					  }
-				)[];
-				/**
-				 * @type array | undefined
-				 */
-				markDefs?: {
+	description?: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
 					/**
 					 * @type string
 					 */
@@ -13823,33 +15879,85 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageBody = {
 					/**
 					 * @type string
 					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!span$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!block$).+
+					 * @type string
+					 */
 					_type: string;
 					[key: string]: unknown;
-				}[];
-				/**
-				 * @type string | undefined
-				 */
-				listItem?: string;
-				/**
-				 * @type string | undefined
-				 */
-				style?: string;
-				/**
-				 * @minLength 1
-				 * @type integer | undefined
-				 */
-				level?: number;
-				[key: string]: unknown;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				_type: string & void;
-				[key: string]: unknown;
-		  }
-	)[];
+			  }
+		)[];
+	};
 };
 
 /**
@@ -15474,53 +17582,23 @@ export type PostApiEntitiesBody = {
 		 */
 		summary?: string;
 		/**
-		 * @type array | undefined
+		 * @type object | undefined
 		 */
-		description?: (
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
-					 * @type array
-					 */
-					children: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "span";
-								/**
-								 * @type string
-								 */
-								text: string;
-								/**
-								 * @type array | undefined
-								 */
-								marks?: string[];
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								_type: string & void;
-								[key: string]: unknown;
-						  }
-					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
+		description?: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
 						/**
 						 * @type string
 						 */
@@ -15528,33 +17606,85 @@ export type PostApiEntitiesBody = {
 						/**
 						 * @type string
 						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!block$).+
+						 * @type string
+						 */
 						_type: string;
 						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
-					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					_type: string & void;
-					[key: string]: unknown;
-			  }
-		)[];
+				  }
+			)[];
+		};
 	};
 };
 
@@ -15644,9 +17774,68 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		description:
-			| (
-					| (
-							| {
+			| ({
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
 									/**
 									 * @type string
 									 */
@@ -15654,78 +17843,38 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 									/**
 									 * @type string
 									 */
-									_type: "block";
-									/**
-									 * @type array
-									 */
-									children: (
-										| {
-												/**
-												 * @type string
-												 */
-												_key: string;
-												/**
-												 * @type string
-												 */
-												_type: "span";
-												/**
-												 * @type string
-												 */
-												text: string;
-												/**
-												 * @type array | undefined
-												 */
-												marks?: string[];
-										  }
-										| {
-												/**
-												 * @type string
-												 */
-												_key: string;
-												_type: string & void;
-												[key: string]: unknown;
-										  }
-									)[];
-									/**
-									 * @type array | undefined
-									 */
-									markDefs?: {
-										/**
-										 * @type string
-										 */
-										_key: string;
-										/**
-										 * @type string
-										 */
-										_type: string;
-										[key: string]: unknown;
-									}[];
-									/**
-									 * @type string | undefined
-									 */
-									listItem?: string;
-									/**
-									 * @type string | undefined
-									 */
-									style?: string;
-									/**
-									 * @minLength 1
-									 * @type integer | undefined
-									 */
-									level?: number;
+									_type: string;
 									[key: string]: unknown;
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									_type: string & void;
-									[key: string]: unknown;
-							  }
-					  )[]
-					| null
-			  )
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!block$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+			  } | null)
 			| null;
 		/**
 		 * @description
@@ -15950,53 +18099,23 @@ export type PostApiTagsBody = {
 		 */
 		summary?: string;
 		/**
-		 * @type array | undefined
+		 * @type object | undefined
 		 */
-		description?: (
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
-					 * @type array
-					 */
-					children: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "span";
-								/**
-								 * @type string
-								 */
-								text: string;
-								/**
-								 * @type array | undefined
-								 */
-								marks?: string[];
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								_type: string & void;
-								[key: string]: unknown;
-						  }
-					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
+		description?: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
 						/**
 						 * @type string
 						 */
@@ -16004,33 +18123,85 @@ export type PostApiTagsBody = {
 						/**
 						 * @type string
 						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!block$).+
+						 * @type string
+						 */
 						_type: string;
 						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
-					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					_type: string & void;
-					[key: string]: unknown;
-			  }
-		)[];
+				  }
+			)[];
+		};
 	};
 };
 
@@ -16061,7 +18232,7 @@ export type PostApiTagsResponse =
 
 export const PostApiUnitsByTypeByUnitIdAliasesType = {
 	book: "book",
-	game: "game",
+	software: "software",
 	media: "media",
 } as const;
 
@@ -16286,7 +18457,7 @@ export type PostApiUnitsByTypeByUnitIdAliasesResponse =
 
 export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdType = {
 	book: "book",
-	game: "game",
+	software: "software",
 	media: "media",
 } as const;
 
@@ -16435,7 +18606,7 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponse =
 
 export const PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteType = {
 	book: "book",
-	game: "game",
+	software: "software",
 	media: "media",
 } as const;
 
@@ -16568,7 +18739,7 @@ export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponse =
 
 export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteType = {
 	book: "book",
-	game: "game",
+	software: "software",
 	media: "media",
 } as const;
 
@@ -16645,7 +18816,7 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponse =
 
 export const PostApiUnitsByTypeByUnitIdCreditsType = {
 	book: "book",
-	game: "game",
+	software: "software",
 	media: "media",
 } as const;
 
@@ -16824,7 +18995,7 @@ export type PostApiUnitsByTypeByUnitIdCreditsResponse =
 
 export const PostApiUnitsByTypeByUnitIdLinksType = {
 	book: "book",
-	game: "game",
+	software: "software",
 	media: "media",
 } as const;
 
@@ -17041,7 +19212,7 @@ export type PostApiUnitsByTypeByUnitIdLinksResponse =
 
 export const PutApiUnitsByTypeByUnitIdTagsByTagIdType = {
 	book: "book",
-	game: "game",
+	software: "software",
 	media: "media",
 } as const;
 
@@ -17227,7 +19398,7 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdResponse =
 
 export const DeleteApiUnitsByTypeByUnitIdTagsByTagIdType = {
 	book: "book",
-	game: "game",
+	software: "software",
 	media: "media",
 } as const;
 
@@ -17376,7 +19547,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdResponse =
 
 export const PutApiUnitsByTypeByUnitIdTagsByTagIdVoteType = {
 	book: "book",
-	game: "game",
+	software: "software",
 	media: "media",
 } as const;
 
@@ -17509,7 +19680,7 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteResponse =
 
 export const DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteType = {
 	book: "book",
-	game: "game",
+	software: "software",
 	media: "media",
 } as const;
 
@@ -17616,7 +19787,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteResponse =
 
 export const PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdType = {
 	book: "book",
-	game: "game",
+	software: "software",
 	media: "media",
 } as const;
 
@@ -17791,7 +19962,7 @@ export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdResponse =
 /**
  * @type object
  */
-export type GetApiUnitsBookByUnitIdContentNodesPath = {
+export type GetApiUnitsBookByUnitIdContentStructureNodesPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -17803,7 +19974,7 @@ export type GetApiUnitsBookByUnitIdContentNodesPath = {
 /**
  * @type object
  */
-export type GetApiUnitsBookByUnitIdContentNodesStatus200 = {
+export type GetApiUnitsBookByUnitIdContentStructureNodesStatus200 = {
 	/**
 	 * @type array
 	 */
@@ -17831,7 +20002,7 @@ export type GetApiUnitsBookByUnitIdContentNodesStatus200 = {
 /**
  * @type object
  */
-export type GetApiUnitsBookByUnitIdContentNodesStatus404 = {
+export type GetApiUnitsBookByUnitIdContentStructureNodesStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -17859,19 +20030,19 @@ export type GetApiUnitsBookByUnitIdContentNodesStatus404 = {
 /**
  * @type object
  */
-export type GetApiUnitsBookByUnitIdContentNodesStatus422 = ValidationError;
+export type GetApiUnitsBookByUnitIdContentStructureNodesStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type GetApiUnitsBookByUnitIdContentNodesStatus500 = InternalError;
+export type GetApiUnitsBookByUnitIdContentStructureNodesStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type GetApiUnitsBookByUnitIdContentNodesOptions = {
+export type GetApiUnitsBookByUnitIdContentStructureNodesOptions = {
 	body?: never;
-	path: GetApiUnitsBookByUnitIdContentNodesPath;
+	path: GetApiUnitsBookByUnitIdContentStructureNodesPath;
 	query?: never;
 	headers?: never;
 };
@@ -17879,26 +20050,26 @@ export type GetApiUnitsBookByUnitIdContentNodesOptions = {
 /**
  * @type object
  */
-export type GetApiUnitsBookByUnitIdContentNodesResponses = {
-	"200": GetApiUnitsBookByUnitIdContentNodesStatus200;
-	"404": GetApiUnitsBookByUnitIdContentNodesStatus404;
-	"422": GetApiUnitsBookByUnitIdContentNodesStatus422;
-	"500": GetApiUnitsBookByUnitIdContentNodesStatus500;
+export type GetApiUnitsBookByUnitIdContentStructureNodesResponses = {
+	"200": GetApiUnitsBookByUnitIdContentStructureNodesStatus200;
+	"404": GetApiUnitsBookByUnitIdContentStructureNodesStatus404;
+	"422": GetApiUnitsBookByUnitIdContentStructureNodesStatus422;
+	"500": GetApiUnitsBookByUnitIdContentStructureNodesStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type GetApiUnitsBookByUnitIdContentNodesResponse =
-	| GetApiUnitsBookByUnitIdContentNodesStatus200
-	| GetApiUnitsBookByUnitIdContentNodesStatus404
-	| GetApiUnitsBookByUnitIdContentNodesStatus422
-	| GetApiUnitsBookByUnitIdContentNodesStatus500;
+export type GetApiUnitsBookByUnitIdContentStructureNodesResponse =
+	| GetApiUnitsBookByUnitIdContentStructureNodesStatus200
+	| GetApiUnitsBookByUnitIdContentStructureNodesStatus404
+	| GetApiUnitsBookByUnitIdContentStructureNodesStatus422
+	| GetApiUnitsBookByUnitIdContentStructureNodesStatus500;
 
 /**
  * @type object
  */
-export type PostApiUnitsBookByUnitIdContentNodesPath = {
+export type PostApiUnitsBookByUnitIdContentStructureNodesPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -17910,7 +20081,7 @@ export type PostApiUnitsBookByUnitIdContentNodesPath = {
 /**
  * @type object
  */
-export type PostApiUnitsBookByUnitIdContentNodesStatus200 = {
+export type PostApiUnitsBookByUnitIdContentStructureNodesStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -17948,18 +20119,18 @@ export type PostApiUnitsBookByUnitIdContentNodesStatus200 = {
 	updatedAt: string;
 };
 
-export const PostApiUnitsBookByUnitIdContentNodesStatus403ErrorCodeEnum = {
+export const PostApiUnitsBookByUnitIdContentStructureNodesStatus403ErrorCodeEnum = {
 	UnitEditForbidden: "UnitEditForbidden",
 	UnitFieldLocked: "UnitFieldLocked",
 } as const;
 
-export type PostApiUnitsBookByUnitIdContentNodesStatus403ErrorCodeEnum =
-	(typeof PostApiUnitsBookByUnitIdContentNodesStatus403ErrorCodeEnum)[keyof typeof PostApiUnitsBookByUnitIdContentNodesStatus403ErrorCodeEnum];
+export type PostApiUnitsBookByUnitIdContentStructureNodesStatus403ErrorCodeEnum =
+	(typeof PostApiUnitsBookByUnitIdContentStructureNodesStatus403ErrorCodeEnum)[keyof typeof PostApiUnitsBookByUnitIdContentStructureNodesStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PostApiUnitsBookByUnitIdContentNodesStatus403 = {
+export type PostApiUnitsBookByUnitIdContentStructureNodesStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -17968,7 +20139,7 @@ export type PostApiUnitsBookByUnitIdContentNodesStatus403 = {
 		 * @default 'UnitEditForbidden'
 		 * @type string
 		 */
-		code: PostApiUnitsBookByUnitIdContentNodesStatus403ErrorCodeEnum;
+		code: PostApiUnitsBookByUnitIdContentStructureNodesStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -17987,7 +20158,7 @@ export type PostApiUnitsBookByUnitIdContentNodesStatus403 = {
 /**
  * @type object
  */
-export type PostApiUnitsBookByUnitIdContentNodesStatus404 = {
+export type PostApiUnitsBookByUnitIdContentStructureNodesStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -18015,25 +20186,25 @@ export type PostApiUnitsBookByUnitIdContentNodesStatus404 = {
 /**
  * @type object
  */
-export type PostApiUnitsBookByUnitIdContentNodesStatus422 = ValidationError;
+export type PostApiUnitsBookByUnitIdContentStructureNodesStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type PostApiUnitsBookByUnitIdContentNodesStatus500 = InternalError;
+export type PostApiUnitsBookByUnitIdContentStructureNodesStatus500 = InternalError;
 
-export const PostApiUnitsBookByUnitIdContentNodesRequestStatusEnum = {
+export const PostApiUnitsBookByUnitIdContentStructureNodesRequestStatusEnum = {
 	draft: "draft",
 	published: "published",
 } as const;
 
-export type PostApiUnitsBookByUnitIdContentNodesRequestStatusEnum =
-	(typeof PostApiUnitsBookByUnitIdContentNodesRequestStatusEnum)[keyof typeof PostApiUnitsBookByUnitIdContentNodesRequestStatusEnum];
+export type PostApiUnitsBookByUnitIdContentStructureNodesRequestStatusEnum =
+	(typeof PostApiUnitsBookByUnitIdContentStructureNodesRequestStatusEnum)[keyof typeof PostApiUnitsBookByUnitIdContentStructureNodesRequestStatusEnum];
 
 /**
  * @type object
  */
-export type PostApiUnitsBookByUnitIdContentNodesBody = {
+export type PostApiUnitsBookByUnitIdContentStructureNodesBody = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -18061,53 +20232,23 @@ export type PostApiUnitsBookByUnitIdContentNodesBody = {
 	 */
 	position: string;
 	/**
-	 * @type array | undefined
+	 * @type object | undefined
 	 */
-	content?: (
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				/**
-				 * @type string
-				 */
-				_type: "block";
-				/**
-				 * @type array
-				 */
-				children: (
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: "span";
-							/**
-							 * @type string
-							 */
-							text: string;
-							/**
-							 * @type array | undefined
-							 */
-							marks?: string[];
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							_type: string & void;
-							[key: string]: unknown;
-					  }
-				)[];
-				/**
-				 * @type array | undefined
-				 */
-				markDefs?: {
+	content?: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
 					/**
 					 * @type string
 					 */
@@ -18115,45 +20256,97 @@ export type PostApiUnitsBookByUnitIdContentNodesBody = {
 					/**
 					 * @type string
 					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!span$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!block$).+
+					 * @type string
+					 */
 					_type: string;
 					[key: string]: unknown;
-				}[];
-				/**
-				 * @type string | undefined
-				 */
-				listItem?: string;
-				/**
-				 * @type string | undefined
-				 */
-				style?: string;
-				/**
-				 * @minLength 1
-				 * @type integer | undefined
-				 */
-				level?: number;
-				[key: string]: unknown;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				_type: string & void;
-				[key: string]: unknown;
-		  }
-	)[];
+			  }
+		)[];
+	};
 	/**
 	 * @type string | undefined
 	 */
-	status?: PostApiUnitsBookByUnitIdContentNodesRequestStatusEnum;
+	status?: PostApiUnitsBookByUnitIdContentStructureNodesRequestStatusEnum;
 };
 
 /**
  * @type object
  */
-export type PostApiUnitsBookByUnitIdContentNodesOptions = {
-	body: PostApiUnitsBookByUnitIdContentNodesBody;
-	path: PostApiUnitsBookByUnitIdContentNodesPath;
+export type PostApiUnitsBookByUnitIdContentStructureNodesOptions = {
+	body: PostApiUnitsBookByUnitIdContentStructureNodesBody;
+	path: PostApiUnitsBookByUnitIdContentStructureNodesPath;
 	query?: never;
 	headers?: never;
 };
@@ -18161,28 +20354,28 @@ export type PostApiUnitsBookByUnitIdContentNodesOptions = {
 /**
  * @type object
  */
-export type PostApiUnitsBookByUnitIdContentNodesResponses = {
-	"200": PostApiUnitsBookByUnitIdContentNodesStatus200;
-	"403": PostApiUnitsBookByUnitIdContentNodesStatus403;
-	"404": PostApiUnitsBookByUnitIdContentNodesStatus404;
-	"422": PostApiUnitsBookByUnitIdContentNodesStatus422;
-	"500": PostApiUnitsBookByUnitIdContentNodesStatus500;
+export type PostApiUnitsBookByUnitIdContentStructureNodesResponses = {
+	"200": PostApiUnitsBookByUnitIdContentStructureNodesStatus200;
+	"403": PostApiUnitsBookByUnitIdContentStructureNodesStatus403;
+	"404": PostApiUnitsBookByUnitIdContentStructureNodesStatus404;
+	"422": PostApiUnitsBookByUnitIdContentStructureNodesStatus422;
+	"500": PostApiUnitsBookByUnitIdContentStructureNodesStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PostApiUnitsBookByUnitIdContentNodesResponse =
-	| PostApiUnitsBookByUnitIdContentNodesStatus200
-	| PostApiUnitsBookByUnitIdContentNodesStatus403
-	| PostApiUnitsBookByUnitIdContentNodesStatus404
-	| PostApiUnitsBookByUnitIdContentNodesStatus422
-	| PostApiUnitsBookByUnitIdContentNodesStatus500;
+export type PostApiUnitsBookByUnitIdContentStructureNodesResponse =
+	| PostApiUnitsBookByUnitIdContentStructureNodesStatus200
+	| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
+	| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
+	| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
+	| PostApiUnitsBookByUnitIdContentStructureNodesStatus500;
 
 /**
  * @type object
  */
-export type PatchApiUnitsBookByUnitIdContentNodesByNodeIdPath = {
+export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -18200,7 +20393,7 @@ export type PatchApiUnitsBookByUnitIdContentNodesByNodeIdPath = {
 /**
  * @type object
  */
-export type PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus200 = {
+export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -18238,18 +20431,18 @@ export type PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus200 = {
 	updatedAt: string;
 };
 
-export const PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus403ErrorCodeEnum = {
+export const PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403ErrorCodeEnum = {
 	UnitEditForbidden: "UnitEditForbidden",
 	UnitFieldLocked: "UnitFieldLocked",
 } as const;
 
-export type PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus403ErrorCodeEnum =
-	(typeof PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus403ErrorCodeEnum)[keyof typeof PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus403ErrorCodeEnum];
+export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403ErrorCodeEnum =
+	(typeof PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403ErrorCodeEnum)[keyof typeof PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus403 = {
+export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -18258,7 +20451,7 @@ export type PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus403 = {
 		 * @default 'UnitEditForbidden'
 		 * @type string
 		 */
-		code: PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus403ErrorCodeEnum;
+		code: PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -18274,18 +20467,18 @@ export type PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus403 = {
 	requestId: string;
 };
 
-export const PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus404ErrorCodeEnum = {
+export const PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
-	ContentNodeNotFound: "ContentNodeNotFound",
+	ContentStructureNodeNotFound: "ContentStructureNodeNotFound",
 } as const;
 
-export type PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus404ErrorCodeEnum =
-	(typeof PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus404ErrorCodeEnum)[keyof typeof PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus404ErrorCodeEnum];
+export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404ErrorCodeEnum =
+	(typeof PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404ErrorCodeEnum)[keyof typeof PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus404 = {
+export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -18294,7 +20487,7 @@ export type PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus404ErrorCodeEnum;
+		code: PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -18313,17 +20506,17 @@ export type PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus404 = {
 /**
  * @type object
  */
-export type PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus422 = ValidationError;
+export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus500 = InternalError;
+export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PatchApiUnitsBookByUnitIdContentNodesByNodeIdBody = {
+export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdBody = {
 	parentId?: (string | null) | null;
 	/**
 	 * @minLength 1
@@ -18342,9 +20535,9 @@ export type PatchApiUnitsBookByUnitIdContentNodesByNodeIdBody = {
 /**
  * @type object
  */
-export type PatchApiUnitsBookByUnitIdContentNodesByNodeIdOptions = {
-	body: PatchApiUnitsBookByUnitIdContentNodesByNodeIdBody;
-	path: PatchApiUnitsBookByUnitIdContentNodesByNodeIdPath;
+export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions = {
+	body: PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdBody;
+	path: PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdPath;
 	query?: never;
 	headers?: never;
 };
@@ -18352,23 +20545,23 @@ export type PatchApiUnitsBookByUnitIdContentNodesByNodeIdOptions = {
 /**
  * @type object
  */
-export type PatchApiUnitsBookByUnitIdContentNodesByNodeIdResponses = {
-	"200": PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus200;
-	"403": PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus403;
-	"404": PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus404;
-	"422": PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus422;
-	"500": PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus500;
+export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdResponses = {
+	"200": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200;
+	"403": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403;
+	"404": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404;
+	"422": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422;
+	"500": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PatchApiUnitsBookByUnitIdContentNodesByNodeIdResponse =
-	| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus200
-	| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus403
-	| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus404
-	| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus422
-	| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus500;
+export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdResponse =
+	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200
+	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403
+	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
+	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422
+	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500;
 
 /**
  * @type object
@@ -18431,53 +20624,23 @@ export type GetApiChaptersByChapterIdStatus200 = {
 	 */
 	language: string;
 	/**
-	 * @type array
+	 * @type object
 	 */
-	content: (
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				/**
-				 * @type string
-				 */
-				_type: "block";
-				/**
-				 * @type array
-				 */
-				children: (
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: "span";
-							/**
-							 * @type string
-							 */
-							text: string;
-							/**
-							 * @type array | undefined
-							 */
-							marks?: string[];
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							_type: string & void;
-							[key: string]: unknown;
-					  }
-				)[];
-				/**
-				 * @type array | undefined
-				 */
-				markDefs?: {
+	content: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
 					/**
 					 * @type string
 					 */
@@ -18485,33 +20648,85 @@ export type GetApiChaptersByChapterIdStatus200 = {
 					/**
 					 * @type string
 					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!span$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!block$).+
+					 * @type string
+					 */
 					_type: string;
 					[key: string]: unknown;
-				}[];
-				/**
-				 * @type string | undefined
-				 */
-				listItem?: string;
-				/**
-				 * @type string | undefined
-				 */
-				style?: string;
-				/**
-				 * @minLength 1
-				 * @type integer | undefined
-				 */
-				level?: number;
-				[key: string]: unknown;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				_type: string & void;
-				[key: string]: unknown;
-		  }
-	)[];
+			  }
+		)[];
+	};
 	/**
 	 * @type string
 	 */
@@ -18725,53 +20940,23 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentBody = {
 	 */
 	title: string;
 	/**
-	 * @type array
+	 * @type object
 	 */
-	content: (
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				/**
-				 * @type string
-				 */
-				_type: "block";
-				/**
-				 * @type array
-				 */
-				children: (
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: "span";
-							/**
-							 * @type string
-							 */
-							text: string;
-							/**
-							 * @type array | undefined
-							 */
-							marks?: string[];
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							_type: string & void;
-							[key: string]: unknown;
-					  }
-				)[];
-				/**
-				 * @type array | undefined
-				 */
-				markDefs?: {
+	content: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
 					/**
 					 * @type string
 					 */
@@ -18779,33 +20964,85 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentBody = {
 					/**
 					 * @type string
 					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!span$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!block$).+
+					 * @type string
+					 */
 					_type: string;
 					[key: string]: unknown;
-				}[];
-				/**
-				 * @type string | undefined
-				 */
-				listItem?: string;
-				/**
-				 * @type string | undefined
-				 */
-				style?: string;
-				/**
-				 * @minLength 1
-				 * @type integer | undefined
-				 */
-				level?: number;
-				[key: string]: unknown;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				_type: string & void;
-				[key: string]: unknown;
-		  }
-	)[];
+			  }
+		)[];
+	};
 	/**
 	 * @type string
 	 */
@@ -18903,7 +21140,7 @@ export type GetApiProgressStatus200 = {
 		 * @type string
 		 */
 		lastSeenAt: string;
-		lastReadNodeId: (string | null) | null;
+		lastContentStructureNodeId: (string | null) | null;
 		lastReadAnchor: (void | null) | null;
 		/**
 		 * @type string
@@ -19003,7 +21240,7 @@ export type GetApiProgressByUnitIdStatus200 = {
 	 * @type string
 	 */
 	lastSeenAt: string;
-	lastReadNodeId: (string | null) | null;
+	lastContentStructureNodeId: (string | null) | null;
 	lastReadAnchor: (void | null) | null;
 	/**
 	 * @description
@@ -19148,7 +21385,7 @@ export type PutApiProgressByUnitIdStatus200 = {
 	 * @type string
 	 */
 	lastSeenAt: string;
-	lastReadNodeId: (string | null) | null;
+	lastContentStructureNodeId: (string | null) | null;
 	lastReadAnchor: (void | null) | null;
 	/**
 	 * @description
@@ -19229,7 +21466,7 @@ export type PutApiProgressByUnitIdBody = {
 	progress?: number;
 	completedCount?: string | number;
 	totalTimeMs?: string | number;
-	lastReadNodeId?: (string | null) | null;
+	lastContentStructureNodeId?: (string | null) | null;
 };
 
 /**
@@ -19345,7 +21582,7 @@ export type PutApiProgressByUnitIdNodesByNodeIdStatus200 = {
 
 export const PutApiProgressByUnitIdNodesByNodeIdStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
-	ContentNodeNotFound: "ContentNodeNotFound",
+	ContentStructureNodeNotFound: "ContentStructureNodeNotFound",
 } as const;
 
 export type PutApiProgressByUnitIdNodesByNodeIdStatus404ErrorCodeEnum =
@@ -19567,6 +21804,33 @@ export type GetApiCollectionsResponses = {
 export type GetApiCollectionsResponse =
 	GetApiCollectionsStatus200 | GetApiCollectionsStatus422 | GetApiCollectionsStatus500;
 
+export const PostApiCollectionsStatus200SourceEnum = {
+	manual: "manual",
+	dynamic: "dynamic",
+	system: "system",
+} as const;
+
+export type PostApiCollectionsStatus200SourceEnum =
+	(typeof PostApiCollectionsStatus200SourceEnum)[keyof typeof PostApiCollectionsStatus200SourceEnum];
+
+export const PostApiCollectionsStatus200PresentationDocumentLayoutEnum = {
+	flat: "flat",
+	nested: "nested",
+	shelf: "shelf",
+} as const;
+
+export type PostApiCollectionsStatus200PresentationDocumentLayoutEnum =
+	(typeof PostApiCollectionsStatus200PresentationDocumentLayoutEnum)[keyof typeof PostApiCollectionsStatus200PresentationDocumentLayoutEnum];
+
+export const PostApiCollectionsStatus200PresentationDocumentOrderEnum = {
+	manual: "manual",
+	name: "name",
+	"added-at": "added-at",
+} as const;
+
+export type PostApiCollectionsStatus200PresentationDocumentOrderEnum =
+	(typeof PostApiCollectionsStatus200PresentationDocumentOrderEnum)[keyof typeof PostApiCollectionsStatus200PresentationDocumentOrderEnum];
+
 /**
  * @type object
  */
@@ -19590,7 +21854,86 @@ export type PostApiCollectionsStatus200 = {
 	/**
 	 * @type string
 	 */
-	kind: string;
+	source: PostApiCollectionsStatus200SourceEnum;
+	systemKey: ("favorites" | null) | null;
+	definitionDocument:
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "collection-definition";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type string
+				 */
+				source: "manual";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "collection-definition";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type string
+				 */
+				source: "dynamic";
+				/**
+				 * @type object
+				 */
+				query: {
+					[key: string]: unknown;
+				};
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "collection-definition";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type string
+				 */
+				source: "system";
+				/**
+				 * @type string
+				 */
+				systemKey: "favorites";
+		  };
+	/**
+	 * @type object
+	 */
+	presentationDocument: {
+		/**
+		 * @type string
+		 */
+		_type: "collection-presentation";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type string
+		 */
+		layout: PostApiCollectionsStatus200PresentationDocumentLayoutEnum;
+		/**
+		 * @type string
+		 */
+		order: PostApiCollectionsStatus200PresentationDocumentOrderEnum;
+	};
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -19693,6 +22036,24 @@ export const PostApiCollectionsRequestVisibilityEnum = {
 export type PostApiCollectionsRequestVisibilityEnum =
 	(typeof PostApiCollectionsRequestVisibilityEnum)[keyof typeof PostApiCollectionsRequestVisibilityEnum];
 
+export const PostApiCollectionsRequestPresentationDocumentLayoutEnum = {
+	flat: "flat",
+	nested: "nested",
+	shelf: "shelf",
+} as const;
+
+export type PostApiCollectionsRequestPresentationDocumentLayoutEnum =
+	(typeof PostApiCollectionsRequestPresentationDocumentLayoutEnum)[keyof typeof PostApiCollectionsRequestPresentationDocumentLayoutEnum];
+
+export const PostApiCollectionsRequestPresentationDocumentOrderEnum = {
+	manual: "manual",
+	name: "name",
+	"added-at": "added-at",
+} as const;
+
+export type PostApiCollectionsRequestPresentationDocumentOrderEnum =
+	(typeof PostApiCollectionsRequestPresentationDocumentOrderEnum)[keyof typeof PostApiCollectionsRequestPresentationDocumentOrderEnum];
+
 /**
  * @type object
  */
@@ -19727,53 +22088,23 @@ export type PostApiCollectionsBody = {
 		 */
 		summary?: string;
 		/**
-		 * @type array | undefined
+		 * @type object | undefined
 		 */
-		description?: (
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
-					 * @type array
-					 */
-					children: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "span";
-								/**
-								 * @type string
-								 */
-								text: string;
-								/**
-								 * @type array | undefined
-								 */
-								marks?: string[];
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								_type: string & void;
-								[key: string]: unknown;
-						  }
-					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
+		description?: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
 						/**
 						 * @type string
 						 */
@@ -19781,38 +22112,168 @@ export type PostApiCollectionsBody = {
 						/**
 						 * @type string
 						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!block$).+
+						 * @type string
+						 */
 						_type: string;
 						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
-					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					_type: string & void;
-					[key: string]: unknown;
-			  }
-		)[];
+				  }
+			)[];
+		};
 	};
 	/**
 	 * @type string | undefined
 	 */
 	visibility?: PostApiCollectionsRequestVisibilityEnum;
+	definitionDocument?:
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "collection-definition";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type string
+				 */
+				source: "manual";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "collection-definition";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type string
+				 */
+				source: "dynamic";
+				/**
+				 * @type object
+				 */
+				query: {
+					[key: string]: unknown;
+				};
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "collection-definition";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type string
+				 */
+				source: "system";
+				/**
+				 * @type string
+				 */
+				systemKey: "favorites";
+		  };
+	/**
+	 * @type object | undefined
+	 */
+	presentationDocument?: {
+		/**
+		 * @type string
+		 */
+		_type: "collection-presentation";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type string
+		 */
+		layout: PostApiCollectionsRequestPresentationDocumentLayoutEnum;
+		/**
+		 * @type string
+		 */
+		order: PostApiCollectionsRequestPresentationDocumentOrderEnum;
+	};
 };
 
 /**
@@ -19844,6 +22305,33 @@ export type PostApiCollectionsResponse =
 	| PostApiCollectionsStatus422
 	| PostApiCollectionsStatus500;
 
+export const GetApiCollectionsFavoritesStatus200SourceEnum = {
+	manual: "manual",
+	dynamic: "dynamic",
+	system: "system",
+} as const;
+
+export type GetApiCollectionsFavoritesStatus200SourceEnum =
+	(typeof GetApiCollectionsFavoritesStatus200SourceEnum)[keyof typeof GetApiCollectionsFavoritesStatus200SourceEnum];
+
+export const GetApiCollectionsFavoritesStatus200PresentationDocumentLayoutEnum = {
+	flat: "flat",
+	nested: "nested",
+	shelf: "shelf",
+} as const;
+
+export type GetApiCollectionsFavoritesStatus200PresentationDocumentLayoutEnum =
+	(typeof GetApiCollectionsFavoritesStatus200PresentationDocumentLayoutEnum)[keyof typeof GetApiCollectionsFavoritesStatus200PresentationDocumentLayoutEnum];
+
+export const GetApiCollectionsFavoritesStatus200PresentationDocumentOrderEnum = {
+	manual: "manual",
+	name: "name",
+	"added-at": "added-at",
+} as const;
+
+export type GetApiCollectionsFavoritesStatus200PresentationDocumentOrderEnum =
+	(typeof GetApiCollectionsFavoritesStatus200PresentationDocumentOrderEnum)[keyof typeof GetApiCollectionsFavoritesStatus200PresentationDocumentOrderEnum];
+
 /**
  * @type object
  */
@@ -19867,7 +22355,86 @@ export type GetApiCollectionsFavoritesStatus200 = {
 	/**
 	 * @type string
 	 */
-	kind: string;
+	source: GetApiCollectionsFavoritesStatus200SourceEnum;
+	systemKey: ("favorites" | null) | null;
+	definitionDocument:
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "collection-definition";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type string
+				 */
+				source: "manual";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "collection-definition";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type string
+				 */
+				source: "dynamic";
+				/**
+				 * @type object
+				 */
+				query: {
+					[key: string]: unknown;
+				};
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "collection-definition";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type string
+				 */
+				source: "system";
+				/**
+				 * @type string
+				 */
+				systemKey: "favorites";
+		  };
+	/**
+	 * @type object
+	 */
+	presentationDocument: {
+		/**
+		 * @type string
+		 */
+		_type: "collection-presentation";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type string
+		 */
+		layout: GetApiCollectionsFavoritesStatus200PresentationDocumentLayoutEnum;
+		/**
+		 * @type string
+		 */
+		order: GetApiCollectionsFavoritesStatus200PresentationDocumentOrderEnum;
+	};
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -19995,6 +22562,33 @@ export type GetApiCollectionsByCollectionIdPath = {
 	collectionId: string;
 };
 
+export const GetApiCollectionsByCollectionIdStatus200SourceEnum = {
+	manual: "manual",
+	dynamic: "dynamic",
+	system: "system",
+} as const;
+
+export type GetApiCollectionsByCollectionIdStatus200SourceEnum =
+	(typeof GetApiCollectionsByCollectionIdStatus200SourceEnum)[keyof typeof GetApiCollectionsByCollectionIdStatus200SourceEnum];
+
+export const GetApiCollectionsByCollectionIdStatus200PresentationDocumentLayoutEnum = {
+	flat: "flat",
+	nested: "nested",
+	shelf: "shelf",
+} as const;
+
+export type GetApiCollectionsByCollectionIdStatus200PresentationDocumentLayoutEnum =
+	(typeof GetApiCollectionsByCollectionIdStatus200PresentationDocumentLayoutEnum)[keyof typeof GetApiCollectionsByCollectionIdStatus200PresentationDocumentLayoutEnum];
+
+export const GetApiCollectionsByCollectionIdStatus200PresentationDocumentOrderEnum = {
+	manual: "manual",
+	name: "name",
+	"added-at": "added-at",
+} as const;
+
+export type GetApiCollectionsByCollectionIdStatus200PresentationDocumentOrderEnum =
+	(typeof GetApiCollectionsByCollectionIdStatus200PresentationDocumentOrderEnum)[keyof typeof GetApiCollectionsByCollectionIdStatus200PresentationDocumentOrderEnum];
+
 /**
  * @type object
  */
@@ -20018,7 +22612,86 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 	/**
 	 * @type string
 	 */
-	kind: string;
+	source: GetApiCollectionsByCollectionIdStatus200SourceEnum;
+	systemKey: ("favorites" | null) | null;
+	definitionDocument:
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "collection-definition";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type string
+				 */
+				source: "manual";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "collection-definition";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type string
+				 */
+				source: "dynamic";
+				/**
+				 * @type object
+				 */
+				query: {
+					[key: string]: unknown;
+				};
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "collection-definition";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type string
+				 */
+				source: "system";
+				/**
+				 * @type string
+				 */
+				systemKey: "favorites";
+		  };
+	/**
+	 * @type object
+	 */
+	presentationDocument: {
+		/**
+		 * @type string
+		 */
+		_type: "collection-presentation";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type string
+		 */
+		layout: GetApiCollectionsByCollectionIdStatus200PresentationDocumentLayoutEnum;
+		/**
+		 * @type string
+		 */
+		order: GetApiCollectionsByCollectionIdStatus200PresentationDocumentOrderEnum;
+	};
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -20153,6 +22826,33 @@ export type PatchApiCollectionsByCollectionIdPath = {
 	collectionId: string;
 };
 
+export const PatchApiCollectionsByCollectionIdStatus200SourceEnum = {
+	manual: "manual",
+	dynamic: "dynamic",
+	system: "system",
+} as const;
+
+export type PatchApiCollectionsByCollectionIdStatus200SourceEnum =
+	(typeof PatchApiCollectionsByCollectionIdStatus200SourceEnum)[keyof typeof PatchApiCollectionsByCollectionIdStatus200SourceEnum];
+
+export const PatchApiCollectionsByCollectionIdStatus200PresentationDocumentLayoutEnum = {
+	flat: "flat",
+	nested: "nested",
+	shelf: "shelf",
+} as const;
+
+export type PatchApiCollectionsByCollectionIdStatus200PresentationDocumentLayoutEnum =
+	(typeof PatchApiCollectionsByCollectionIdStatus200PresentationDocumentLayoutEnum)[keyof typeof PatchApiCollectionsByCollectionIdStatus200PresentationDocumentLayoutEnum];
+
+export const PatchApiCollectionsByCollectionIdStatus200PresentationDocumentOrderEnum = {
+	manual: "manual",
+	name: "name",
+	"added-at": "added-at",
+} as const;
+
+export type PatchApiCollectionsByCollectionIdStatus200PresentationDocumentOrderEnum =
+	(typeof PatchApiCollectionsByCollectionIdStatus200PresentationDocumentOrderEnum)[keyof typeof PatchApiCollectionsByCollectionIdStatus200PresentationDocumentOrderEnum];
+
 /**
  * @type object
  */
@@ -20176,7 +22876,86 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 	/**
 	 * @type string
 	 */
-	kind: string;
+	source: PatchApiCollectionsByCollectionIdStatus200SourceEnum;
+	systemKey: ("favorites" | null) | null;
+	definitionDocument:
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "collection-definition";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type string
+				 */
+				source: "manual";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "collection-definition";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type string
+				 */
+				source: "dynamic";
+				/**
+				 * @type object
+				 */
+				query: {
+					[key: string]: unknown;
+				};
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "collection-definition";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type string
+				 */
+				source: "system";
+				/**
+				 * @type string
+				 */
+				systemKey: "favorites";
+		  };
+	/**
+	 * @type object
+	 */
+	presentationDocument: {
+		/**
+		 * @type string
+		 */
+		_type: "collection-presentation";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type string
+		 */
+		layout: PatchApiCollectionsByCollectionIdStatus200PresentationDocumentLayoutEnum;
+		/**
+		 * @type string
+		 */
+		order: PatchApiCollectionsByCollectionIdStatus200PresentationDocumentOrderEnum;
+	};
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -20344,6 +23123,24 @@ export const PatchApiCollectionsByCollectionIdRequestVisibilityEnum = {
 export type PatchApiCollectionsByCollectionIdRequestVisibilityEnum =
 	(typeof PatchApiCollectionsByCollectionIdRequestVisibilityEnum)[keyof typeof PatchApiCollectionsByCollectionIdRequestVisibilityEnum];
 
+export const PatchApiCollectionsByCollectionIdRequestPresentationDocumentLayoutEnum = {
+	flat: "flat",
+	nested: "nested",
+	shelf: "shelf",
+} as const;
+
+export type PatchApiCollectionsByCollectionIdRequestPresentationDocumentLayoutEnum =
+	(typeof PatchApiCollectionsByCollectionIdRequestPresentationDocumentLayoutEnum)[keyof typeof PatchApiCollectionsByCollectionIdRequestPresentationDocumentLayoutEnum];
+
+export const PatchApiCollectionsByCollectionIdRequestPresentationDocumentOrderEnum = {
+	manual: "manual",
+	name: "name",
+	"added-at": "added-at",
+} as const;
+
+export type PatchApiCollectionsByCollectionIdRequestPresentationDocumentOrderEnum =
+	(typeof PatchApiCollectionsByCollectionIdRequestPresentationDocumentOrderEnum)[keyof typeof PatchApiCollectionsByCollectionIdRequestPresentationDocumentOrderEnum];
+
 /**
  * @type object
  */
@@ -20380,53 +23177,23 @@ export type PatchApiCollectionsByCollectionIdBody = {
 		 */
 		summary?: string;
 		/**
-		 * @type array | undefined
+		 * @type object | undefined
 		 */
-		description?: (
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
-					 * @type array
-					 */
-					children: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "span";
-								/**
-								 * @type string
-								 */
-								text: string;
-								/**
-								 * @type array | undefined
-								 */
-								marks?: string[];
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								_type: string & void;
-								[key: string]: unknown;
-						  }
-					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
+		description?: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
 						/**
 						 * @type string
 						 */
@@ -20434,33 +23201,163 @@ export type PatchApiCollectionsByCollectionIdBody = {
 						/**
 						 * @type string
 						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!block$).+
+						 * @type string
+						 */
 						_type: string;
 						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
+				  }
+			)[];
+		};
+	};
+	definitionDocument?:
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "collection-definition";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type string
+				 */
+				source: "manual";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "collection-definition";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type string
+				 */
+				source: "dynamic";
+				/**
+				 * @type object
+				 */
+				query: {
 					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					_type: string & void;
-					[key: string]: unknown;
-			  }
-		)[];
+				};
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				_type: "collection-definition";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type string
+				 */
+				source: "system";
+				/**
+				 * @type string
+				 */
+				systemKey: "favorites";
+		  };
+	/**
+	 * @type object | undefined
+	 */
+	presentationDocument?: {
+		/**
+		 * @type string
+		 */
+		_type: "collection-presentation";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type string
+		 */
+		layout: PatchApiCollectionsByCollectionIdRequestPresentationDocumentLayoutEnum;
+		/**
+		 * @type string
+		 */
+		order: PatchApiCollectionsByCollectionIdRequestPresentationDocumentOrderEnum;
 	};
 };
 
@@ -21285,53 +24182,23 @@ export type PostApiReviewsBody = {
 	 */
 	summary?: string;
 	/**
-	 * @type array
+	 * @type object
 	 */
-	body: (
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				/**
-				 * @type string
-				 */
-				_type: "block";
-				/**
-				 * @type array
-				 */
-				children: (
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: "span";
-							/**
-							 * @type string
-							 */
-							text: string;
-							/**
-							 * @type array | undefined
-							 */
-							marks?: string[];
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							_type: string & void;
-							[key: string]: unknown;
-					  }
-				)[];
-				/**
-				 * @type array | undefined
-				 */
-				markDefs?: {
+	body: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
 					/**
 					 * @type string
 					 */
@@ -21339,33 +24206,85 @@ export type PostApiReviewsBody = {
 					/**
 					 * @type string
 					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!span$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!block$).+
+					 * @type string
+					 */
 					_type: string;
 					[key: string]: unknown;
-				}[];
-				/**
-				 * @type string | undefined
-				 */
-				listItem?: string;
-				/**
-				 * @type string | undefined
-				 */
-				style?: string;
-				/**
-				 * @minLength 1
-				 * @type integer | undefined
-				 */
-				level?: number;
-				[key: string]: unknown;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				_type: string & void;
-				[key: string]: unknown;
-		  }
-	)[];
+			  }
+		)[];
+	};
 	score?: string | number;
 };
 
@@ -21443,9 +24362,68 @@ export type GetApiReviewsByReviewIdStatus200 = {
 	summary: (string | null) | null;
 	language: (string | null) | null;
 	body:
-		| (
-				| (
-						| {
+		| ({
+				/**
+				 * @type string
+				 */
+				_type: "portable-text";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type array
+				 */
+				content: (
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "block";
+							/**
+							 * @type array
+							 */
+							children: (
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "span";
+										/**
+										 * @type string
+										 */
+										text: string;
+										/**
+										 * @type array | undefined
+										 */
+										marks?: string[];
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @pattern ^(?!span$).+
+										 * @type string
+										 */
+										_type: string;
+										[key: string]: unknown;
+								  }
+							)[];
+							/**
+							 * @type array | undefined
+							 */
+							markDefs?: {
 								/**
 								 * @type string
 								 */
@@ -21453,78 +24431,38 @@ export type GetApiReviewsByReviewIdStatus200 = {
 								/**
 								 * @type string
 								 */
-								_type: "block";
-								/**
-								 * @type array
-								 */
-								children: (
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											/**
-											 * @type string
-											 */
-											_type: "span";
-											/**
-											 * @type string
-											 */
-											text: string;
-											/**
-											 * @type array | undefined
-											 */
-											marks?: string[];
-									  }
-									| {
-											/**
-											 * @type string
-											 */
-											_key: string;
-											_type: string & void;
-											[key: string]: unknown;
-									  }
-								)[];
-								/**
-								 * @type array | undefined
-								 */
-								markDefs?: {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: string;
-									[key: string]: unknown;
-								}[];
-								/**
-								 * @type string | undefined
-								 */
-								listItem?: string;
-								/**
-								 * @type string | undefined
-								 */
-								style?: string;
-								/**
-								 * @minLength 1
-								 * @type integer | undefined
-								 */
-								level?: number;
+								_type: string;
 								[key: string]: unknown;
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								_type: string & void;
-								[key: string]: unknown;
-						  }
-				  )[]
-				| null
-		  )
+							}[];
+							/**
+							 * @type string | undefined
+							 */
+							listItem?: string;
+							/**
+							 * @type string | undefined
+							 */
+							style?: string;
+							/**
+							 * @minLength 1
+							 * @type integer | undefined
+							 */
+							level?: number;
+							[key: string]: unknown;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @pattern ^(?!block$).+
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+					  }
+				)[];
+		  } | null)
 		| null;
 	/**
 	 * @description
@@ -21746,53 +24684,23 @@ export type PatchApiReviewsByReviewIdBody = {
 	 */
 	summary?: string;
 	/**
-	 * @type array
+	 * @type object
 	 */
-	body: (
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				/**
-				 * @type string
-				 */
-				_type: "block";
-				/**
-				 * @type array
-				 */
-				children: (
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: "span";
-							/**
-							 * @type string
-							 */
-							text: string;
-							/**
-							 * @type array | undefined
-							 */
-							marks?: string[];
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							_type: string & void;
-							[key: string]: unknown;
-					  }
-				)[];
-				/**
-				 * @type array | undefined
-				 */
-				markDefs?: {
+	body: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
 					/**
 					 * @type string
 					 */
@@ -21800,33 +24708,85 @@ export type PatchApiReviewsByReviewIdBody = {
 					/**
 					 * @type string
 					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!span$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!block$).+
+					 * @type string
+					 */
 					_type: string;
 					[key: string]: unknown;
-				}[];
-				/**
-				 * @type string | undefined
-				 */
-				listItem?: string;
-				/**
-				 * @type string | undefined
-				 */
-				style?: string;
-				/**
-				 * @minLength 1
-				 * @type integer | undefined
-				 */
-				level?: number;
-				[key: string]: unknown;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				_type: string & void;
-				[key: string]: unknown;
-		  }
-	)[];
+			  }
+		)[];
+	};
 };
 
 /**
@@ -23539,53 +26499,23 @@ export type GetApiPostsStatus200 = {
 		rootPostId: (string | null) | null;
 		parentPostId: (string | null) | null;
 		/**
-		 * @type array
+		 * @type object
 		 */
-		body: (
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
-					 * @type array
-					 */
-					children: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "span";
-								/**
-								 * @type string
-								 */
-								text: string;
-								/**
-								 * @type array | undefined
-								 */
-								marks?: string[];
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								_type: string & void;
-								[key: string]: unknown;
-						  }
-					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
+		body: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
 						/**
 						 * @type string
 						 */
@@ -23593,33 +26523,85 @@ export type GetApiPostsStatus200 = {
 						/**
 						 * @type string
 						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!block$).+
+						 * @type string
+						 */
 						_type: string;
 						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
-					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					_type: string & void;
-					[key: string]: unknown;
-			  }
-		)[];
+				  }
+			)[];
+		};
 		replyCount: string | number;
 		title: (string | null) | null;
 		latestRevisionId: (string | null) | null;
@@ -23790,53 +26772,23 @@ export type PostApiPostsBody = {
 	 */
 	title: string;
 	/**
-	 * @type array
+	 * @type object
 	 */
-	body: (
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				/**
-				 * @type string
-				 */
-				_type: "block";
-				/**
-				 * @type array
-				 */
-				children: (
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: "span";
-							/**
-							 * @type string
-							 */
-							text: string;
-							/**
-							 * @type array | undefined
-							 */
-							marks?: string[];
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							_type: string & void;
-							[key: string]: unknown;
-					  }
-				)[];
-				/**
-				 * @type array | undefined
-				 */
-				markDefs?: {
+	body: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
 					/**
 					 * @type string
 					 */
@@ -23844,33 +26796,85 @@ export type PostApiPostsBody = {
 					/**
 					 * @type string
 					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!span$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!block$).+
+					 * @type string
+					 */
 					_type: string;
 					[key: string]: unknown;
-				}[];
-				/**
-				 * @type string | undefined
-				 */
-				listItem?: string;
-				/**
-				 * @type string | undefined
-				 */
-				style?: string;
-				/**
-				 * @minLength 1
-				 * @type integer | undefined
-				 */
-				level?: number;
-				[key: string]: unknown;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				_type: string & void;
-				[key: string]: unknown;
-		  }
-	)[];
+			  }
+		)[];
+	};
 	/**
 	 * @description
 	 * Format: `bcp-47`
@@ -23973,53 +26977,23 @@ export type GetApiPostsByPostIdStatus200 = {
 	replyCount: string | number;
 	title: (string | null) | null;
 	/**
-	 * @type array
+	 * @type object
 	 */
-	body: (
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				/**
-				 * @type string
-				 */
-				_type: "block";
-				/**
-				 * @type array
-				 */
-				children: (
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: "span";
-							/**
-							 * @type string
-							 */
-							text: string;
-							/**
-							 * @type array | undefined
-							 */
-							marks?: string[];
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							_type: string & void;
-							[key: string]: unknown;
-					  }
-				)[];
-				/**
-				 * @type array | undefined
-				 */
-				markDefs?: {
+	body: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
 					/**
 					 * @type string
 					 */
@@ -24027,33 +27001,85 @@ export type GetApiPostsByPostIdStatus200 = {
 					/**
 					 * @type string
 					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!span$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!block$).+
+					 * @type string
+					 */
 					_type: string;
 					[key: string]: unknown;
-				}[];
-				/**
-				 * @type string | undefined
-				 */
-				listItem?: string;
-				/**
-				 * @type string | undefined
-				 */
-				style?: string;
-				/**
-				 * @minLength 1
-				 * @type integer | undefined
-				 */
-				level?: number;
-				[key: string]: unknown;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				_type: string & void;
-				[key: string]: unknown;
-		  }
-	)[];
+			  }
+		)[];
+	};
 	latestRevisionId: (string | null) | null;
 	/**
 	 * @description
@@ -24299,53 +27325,23 @@ export type PatchApiPostsByPostIdBody = {
 	 */
 	title: string;
 	/**
-	 * @type array
+	 * @type object
 	 */
-	body: (
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				/**
-				 * @type string
-				 */
-				_type: "block";
-				/**
-				 * @type array
-				 */
-				children: (
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: "span";
-							/**
-							 * @type string
-							 */
-							text: string;
-							/**
-							 * @type array | undefined
-							 */
-							marks?: string[];
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							_type: string & void;
-							[key: string]: unknown;
-					  }
-				)[];
-				/**
-				 * @type array | undefined
-				 */
-				markDefs?: {
+	body: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
 					/**
 					 * @type string
 					 */
@@ -24353,33 +27349,85 @@ export type PatchApiPostsByPostIdBody = {
 					/**
 					 * @type string
 					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!span$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!block$).+
+					 * @type string
+					 */
 					_type: string;
 					[key: string]: unknown;
-				}[];
-				/**
-				 * @type string | undefined
-				 */
-				listItem?: string;
-				/**
-				 * @type string | undefined
-				 */
-				style?: string;
-				/**
-				 * @minLength 1
-				 * @type integer | undefined
-				 */
-				level?: number;
-				[key: string]: unknown;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				_type: string & void;
-				[key: string]: unknown;
-		  }
-	)[];
+			  }
+		)[];
+	};
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -24615,53 +27663,23 @@ export type GetApiPostsByPostIdRepliesStatus200 = {
 		contextRealmId: (string | null) | null;
 		depth: string | number;
 		/**
-		 * @type array
+		 * @type object
 		 */
-		body: (
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
-					 * @type array
-					 */
-					children: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "span";
-								/**
-								 * @type string
-								 */
-								text: string;
-								/**
-								 * @type array | undefined
-								 */
-								marks?: string[];
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								_type: string & void;
-								[key: string]: unknown;
-						  }
-					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
+		body: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
 						/**
 						 * @type string
 						 */
@@ -24669,33 +27687,85 @@ export type GetApiPostsByPostIdRepliesStatus200 = {
 						/**
 						 * @type string
 						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!block$).+
+						 * @type string
+						 */
 						_type: string;
 						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
-					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					_type: string & void;
-					[key: string]: unknown;
-			  }
-		)[];
+				  }
+			)[];
+		};
 		/**
 		 * @type string
 		 */
@@ -24952,53 +28022,23 @@ export type PostApiPostsByPostIdRepliesBody = {
 	 */
 	language: string;
 	/**
-	 * @type array
+	 * @type object
 	 */
-	body: (
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				/**
-				 * @type string
-				 */
-				_type: "block";
-				/**
-				 * @type array
-				 */
-				children: (
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: "span";
-							/**
-							 * @type string
-							 */
-							text: string;
-							/**
-							 * @type array | undefined
-							 */
-							marks?: string[];
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							_type: string & void;
-							[key: string]: unknown;
-					  }
-				)[];
-				/**
-				 * @type array | undefined
-				 */
-				markDefs?: {
+	body: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
 					/**
 					 * @type string
 					 */
@@ -25006,33 +28046,85 @@ export type PostApiPostsByPostIdRepliesBody = {
 					/**
 					 * @type string
 					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!span$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!block$).+
+					 * @type string
+					 */
 					_type: string;
 					[key: string]: unknown;
-				}[];
-				/**
-				 * @type string | undefined
-				 */
-				listItem?: string;
-				/**
-				 * @type string | undefined
-				 */
-				style?: string;
-				/**
-				 * @minLength 1
-				 * @type integer | undefined
-				 */
-				level?: number;
-				[key: string]: unknown;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				_type: string & void;
-				[key: string]: unknown;
-		  }
-	)[];
+			  }
+		)[];
+	};
 };
 
 /**
@@ -25149,53 +28241,23 @@ export type GetApiPostsByPostIdRepliesThreadStatus200 = {
 		contextRealmId: (string | null) | null;
 		depth: string | number;
 		/**
-		 * @type array
+		 * @type object
 		 */
-		body: (
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
-					 * @type array
-					 */
-					children: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "span";
-								/**
-								 * @type string
-								 */
-								text: string;
-								/**
-								 * @type array | undefined
-								 */
-								marks?: string[];
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								_type: string & void;
-								[key: string]: unknown;
-						  }
-					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
+		body: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
 						/**
 						 * @type string
 						 */
@@ -25203,33 +28265,85 @@ export type GetApiPostsByPostIdRepliesThreadStatus200 = {
 						/**
 						 * @type string
 						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!block$).+
+						 * @type string
+						 */
 						_type: string;
 						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
-					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					_type: string & void;
-					[key: string]: unknown;
-			  }
-		)[];
+				  }
+			)[];
+		};
 		/**
 		 * @type string
 		 */
@@ -25481,53 +28595,23 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus500 = InternalError;
  */
 export type PatchApiPostsByPostIdRepliesByReplyPostIdBody = {
 	/**
-	 * @type array
+	 * @type object
 	 */
-	body: (
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				/**
-				 * @type string
-				 */
-				_type: "block";
-				/**
-				 * @type array
-				 */
-				children: (
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: "span";
-							/**
-							 * @type string
-							 */
-							text: string;
-							/**
-							 * @type array | undefined
-							 */
-							marks?: string[];
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							_type: string & void;
-							[key: string]: unknown;
-					  }
-				)[];
-				/**
-				 * @type array | undefined
-				 */
-				markDefs?: {
+	body: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
 					/**
 					 * @type string
 					 */
@@ -25535,33 +28619,85 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdBody = {
 					/**
 					 * @type string
 					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!span$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!block$).+
+					 * @type string
+					 */
 					_type: string;
 					[key: string]: unknown;
-				}[];
-				/**
-				 * @type string | undefined
-				 */
-				listItem?: string;
-				/**
-				 * @type string | undefined
-				 */
-				style?: string;
-				/**
-				 * @minLength 1
-				 * @type integer | undefined
-				 */
-				level?: number;
-				[key: string]: unknown;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				_key: string;
-				_type: string & void;
-				[key: string]: unknown;
-		  }
-	)[];
+			  }
+		)[];
+	};
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -25902,53 +29038,23 @@ export type PostApiRealmsBody = {
 		 */
 		summary?: string;
 		/**
-		 * @type array | undefined
+		 * @type object | undefined
 		 */
-		description?: (
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
-					 * @type array
-					 */
-					children: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "span";
-								/**
-								 * @type string
-								 */
-								text: string;
-								/**
-								 * @type array | undefined
-								 */
-								marks?: string[];
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								_type: string & void;
-								[key: string]: unknown;
-						  }
-					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
+		description?: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
 						/**
 						 * @type string
 						 */
@@ -25956,33 +29062,85 @@ export type PostApiRealmsBody = {
 						/**
 						 * @type string
 						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!block$).+
+						 * @type string
+						 */
 						_type: string;
 						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
-					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					_type: string & void;
-					[key: string]: unknown;
-			  }
-		)[];
+				  }
+			)[];
+		};
 	};
 	/**
 	 * @type string
@@ -26328,53 +29486,23 @@ export type PatchApiRealmsByRealmIdBody = {
 		 */
 		summary?: string;
 		/**
-		 * @type array | undefined
+		 * @type object | undefined
 		 */
-		description?: (
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
-					 * @type array
-					 */
-					children: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "span";
-								/**
-								 * @type string
-								 */
-								text: string;
-								/**
-								 * @type array | undefined
-								 */
-								marks?: string[];
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								_type: string & void;
-								[key: string]: unknown;
-						  }
-					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
+		description?: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
 						/**
 						 * @type string
 						 */
@@ -26382,33 +29510,85 @@ export type PatchApiRealmsByRealmIdBody = {
 						/**
 						 * @type string
 						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!block$).+
+						 * @type string
+						 */
 						_type: string;
 						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
-					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					_type: string & void;
-					[key: string]: unknown;
-			  }
-		)[];
+				  }
+			)[];
+		};
 	};
 };
 
@@ -27343,53 +30523,23 @@ export type PutApiRealmsByRealmIdRulesBody = {
 		 */
 		title: string;
 		/**
-		 * @type array
+		 * @type object
 		 */
-		content: (
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
-					 * @type array
-					 */
-					children: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "span";
-								/**
-								 * @type string
-								 */
-								text: string;
-								/**
-								 * @type array | undefined
-								 */
-								marks?: string[];
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								_type: string & void;
-								[key: string]: unknown;
-						  }
-					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
+		content: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
 						/**
 						 * @type string
 						 */
@@ -27397,33 +30547,85 @@ export type PutApiRealmsByRealmIdRulesBody = {
 						/**
 						 * @type string
 						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!block$).+
+						 * @type string
+						 */
 						_type: string;
 						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
-					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					_type: string & void;
-					[key: string]: unknown;
-			  }
-		)[];
+				  }
+			)[];
+		};
 	}[];
 };
 
@@ -27509,53 +30711,23 @@ export type GetApiRealmsByRealmIdRulesStatus200 = {
 		 */
 		title: string;
 		/**
-		 * @type array
+		 * @type object
 		 */
-		content: (
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					/**
-					 * @type string
-					 */
-					_type: "block";
-					/**
-					 * @type array
-					 */
-					children: (
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: "span";
-								/**
-								 * @type string
-								 */
-								text: string;
-								/**
-								 * @type array | undefined
-								 */
-								marks?: string[];
-						  }
-						| {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								_type: string & void;
-								[key: string]: unknown;
-						  }
-					)[];
-					/**
-					 * @type array | undefined
-					 */
-					markDefs?: {
+		content: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
 						/**
 						 * @type string
 						 */
@@ -27563,33 +30735,85 @@ export type GetApiRealmsByRealmIdRulesStatus200 = {
 						/**
 						 * @type string
 						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!block$).+
+						 * @type string
+						 */
 						_type: string;
 						[key: string]: unknown;
-					}[];
-					/**
-					 * @type string | undefined
-					 */
-					listItem?: string;
-					/**
-					 * @type string | undefined
-					 */
-					style?: string;
-					/**
-					 * @minLength 1
-					 * @type integer | undefined
-					 */
-					level?: number;
-					[key: string]: unknown;
-			  }
-			| {
-					/**
-					 * @type string
-					 */
-					_key: string;
-					_type: string & void;
-					[key: string]: unknown;
-			  }
-		)[];
+				  }
+			)[];
+		};
 	}[];
 };
 
@@ -28086,7 +31310,974 @@ export type DeleteApiRealmsByRealmIdPinsByUnitIdResponse =
 /**
  * @type object
  */
-export type PatchApiRealmsByRealmIdContentByUnitIdPath = {
+export type GetApiRealmsByRealmIdDocksPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdDocksStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		realmId: string;
+		/**
+		 * @type string
+		 */
+		slot: string;
+		/**
+		 * @type object
+		 */
+		document: {
+			/**
+			 * @type string
+			 */
+			_type: "dock";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			blocks: (
+				| {
+						/**
+						 * @type string
+						 */
+						_type: "portable-text";
+						/**
+						 * @pattern ^[0-9a-f]{12}$
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type array
+						 */
+						content: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "block";
+									/**
+									 * @type array
+									 */
+									children: (
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @type string
+												 */
+												_type: "span";
+												/**
+												 * @type string
+												 */
+												text: string;
+												/**
+												 * @type array | undefined
+												 */
+												marks?: string[];
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @pattern ^(?!span$).+
+												 * @type string
+												 */
+												_type: string;
+												[key: string]: unknown;
+										  }
+									)[];
+									/**
+									 * @type array | undefined
+									 */
+									markDefs?: {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: string;
+										[key: string]: unknown;
+									}[];
+									/**
+									 * @type string | undefined
+									 */
+									listItem?: string;
+									/**
+									 * @type string | undefined
+									 */
+									style?: string;
+									/**
+									 * @minLength 1
+									 * @type integer | undefined
+									 */
+									level?: number;
+									[key: string]: unknown;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!block$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_type: "post-ref";
+						/**
+						 * @pattern ^[0-9a-f]{12}$
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						postId: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_type: "menu";
+						/**
+						 * @pattern ^[0-9a-f]{12}$
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type object | undefined
+						 */
+						label?: {
+							[key: string]: string;
+						};
+						/**
+						 * @type array
+						 */
+						items: {
+							/**
+							 * @type string
+							 */
+							_type: "menu-item";
+							/**
+							 * @pattern ^[0-9a-f]{12}$
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type object
+							 */
+							label: {
+								[key: string]: string;
+							};
+							target:
+								| {
+										/**
+										 * @type string
+										 */
+										type: "href";
+										/**
+										 * @minLength 1
+										 * @type string
+										 */
+										href: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "unit";
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										unitId: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "page";
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										pageId: string;
+								  };
+						}[];
+				  }
+			)[];
+		};
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdDocksStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmNotFound'
+		 * @type string
+		 */
+		code: "RealmNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdDocksStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdDocksStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdDocksOptions = {
+	body?: never;
+	path: GetApiRealmsByRealmIdDocksPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdDocksResponses = {
+	"200": GetApiRealmsByRealmIdDocksStatus200;
+	"404": GetApiRealmsByRealmIdDocksStatus404;
+	"422": GetApiRealmsByRealmIdDocksStatus422;
+	"500": GetApiRealmsByRealmIdDocksStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiRealmsByRealmIdDocksResponse =
+	| GetApiRealmsByRealmIdDocksStatus200
+	| GetApiRealmsByRealmIdDocksStatus404
+	| GetApiRealmsByRealmIdDocksStatus422
+	| GetApiRealmsByRealmIdDocksStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdDocksBySlotPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 128
+	 * @type string
+	 */
+	slot: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdDocksBySlotStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @type string
+	 */
+	slot: string;
+	/**
+	 * @type object
+	 */
+	document: {
+		/**
+		 * @type string
+		 */
+		_type: "dock";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		blocks: (
+			| {
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!block$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_type: "post-ref";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					postId: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_type: "menu";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type object | undefined
+					 */
+					label?: {
+						[key: string]: string;
+					};
+					/**
+					 * @type array
+					 */
+					items: {
+						/**
+						 * @type string
+						 */
+						_type: "menu-item";
+						/**
+						 * @pattern ^[0-9a-f]{12}$
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type object
+						 */
+						label: {
+							[key: string]: string;
+						};
+						target:
+							| {
+									/**
+									 * @type string
+									 */
+									type: "href";
+									/**
+									 * @minLength 1
+									 * @type string
+									 */
+									href: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "unit";
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									unitId: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "page";
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									pageId: string;
+							  };
+					}[];
+			  }
+		)[];
+	};
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export const PutApiRealmsByRealmIdDocksBySlotStatus403ErrorCodeEnum = {
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+	UnitFieldLocked: "UnitFieldLocked",
+} as const;
+
+export type PutApiRealmsByRealmIdDocksBySlotStatus403ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdDocksBySlotStatus403ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdDocksBySlotStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdDocksBySlotStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: PutApiRealmsByRealmIdDocksBySlotStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdDocksBySlotStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdDocksBySlotStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdDocksBySlotBody = {
+	/**
+	 * @type object
+	 */
+	document: {
+		/**
+		 * @type string
+		 */
+		_type: "dock";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		blocks: (
+			| {
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!block$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_type: "post-ref";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					postId: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_type: "menu";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type object | undefined
+					 */
+					label?: {
+						[key: string]: string;
+					};
+					/**
+					 * @type array
+					 */
+					items: {
+						/**
+						 * @type string
+						 */
+						_type: "menu-item";
+						/**
+						 * @pattern ^[0-9a-f]{12}$
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type object
+						 */
+						label: {
+							[key: string]: string;
+						};
+						target:
+							| {
+									/**
+									 * @type string
+									 */
+									type: "href";
+									/**
+									 * @minLength 1
+									 * @type string
+									 */
+									href: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "unit";
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									unitId: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "page";
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									pageId: string;
+							  };
+					}[];
+			  }
+		)[];
+	};
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdDocksBySlotOptions = {
+	body: PutApiRealmsByRealmIdDocksBySlotBody;
+	path: PutApiRealmsByRealmIdDocksBySlotPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdDocksBySlotResponses = {
+	"200": PutApiRealmsByRealmIdDocksBySlotStatus200;
+	"403": PutApiRealmsByRealmIdDocksBySlotStatus403;
+	"422": PutApiRealmsByRealmIdDocksBySlotStatus422;
+	"500": PutApiRealmsByRealmIdDocksBySlotStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiRealmsByRealmIdDocksBySlotResponse =
+	| PutApiRealmsByRealmIdDocksBySlotStatus200
+	| PutApiRealmsByRealmIdDocksBySlotStatus403
+	| PutApiRealmsByRealmIdDocksBySlotStatus422
+	| PutApiRealmsByRealmIdDocksBySlotStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdDocksBySlotPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 128
+	 * @type string
+	 */
+	slot: string;
+};
+
+/**
+ * @type void
+ */
+export type DeleteApiRealmsByRealmIdDocksBySlotStatus204 = void;
+
+export const DeleteApiRealmsByRealmIdDocksBySlotStatus403ErrorCodeEnum = {
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+	UnitFieldLocked: "UnitFieldLocked",
+} as const;
+
+export type DeleteApiRealmsByRealmIdDocksBySlotStatus403ErrorCodeEnum =
+	(typeof DeleteApiRealmsByRealmIdDocksBySlotStatus403ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdDocksBySlotStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdDocksBySlotStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: DeleteApiRealmsByRealmIdDocksBySlotStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdDocksBySlotStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdDocksBySlotStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdDocksBySlotOptions = {
+	body?: never;
+	path: DeleteApiRealmsByRealmIdDocksBySlotPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdDocksBySlotResponses = {
+	"204": DeleteApiRealmsByRealmIdDocksBySlotStatus204;
+	"403": DeleteApiRealmsByRealmIdDocksBySlotStatus403;
+	"422": DeleteApiRealmsByRealmIdDocksBySlotStatus422;
+	"500": DeleteApiRealmsByRealmIdDocksBySlotStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiRealmsByRealmIdDocksBySlotResponse =
+	| DeleteApiRealmsByRealmIdDocksBySlotStatus204
+	| DeleteApiRealmsByRealmIdDocksBySlotStatus403
+	| DeleteApiRealmsByRealmIdDocksBySlotStatus422
+	| DeleteApiRealmsByRealmIdDocksBySlotStatus500;
+
+/**
+ * @type object
+ */
+export type PatchApiRealmsByRealmIdUnitsByUnitIdPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -28101,10 +32292,20 @@ export type PatchApiRealmsByRealmIdContentByUnitIdPath = {
 	unitId: string;
 };
 
+export const PatchApiRealmsByRealmIdUnitsByUnitIdStatus200StatusEnum = {
+	pending: "pending",
+	visible: "visible",
+	hidden: "hidden",
+	removed: "removed",
+} as const;
+
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200StatusEnum =
+	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200StatusEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200StatusEnum];
+
 /**
  * @type object
  */
-export type PatchApiRealmsByRealmIdContentByUnitIdStatus200 = {
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -28120,7 +32321,7 @@ export type PatchApiRealmsByRealmIdContentByUnitIdStatus200 = {
 	/**
 	 * @type string
 	 */
-	moderationStatus: string;
+	status: PatchApiRealmsByRealmIdUnitsByUnitIdStatus200StatusEnum;
 	/**
 	 * @type boolean
 	 */
@@ -28131,12 +32332,18 @@ export type PatchApiRealmsByRealmIdContentByUnitIdStatus200 = {
 	 * @type string
 	 */
 	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
 };
 
 /**
  * @type object
  */
-export type PatchApiRealmsByRealmIdContentByUnitIdStatus403 = {
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -28164,16 +32371,16 @@ export type PatchApiRealmsByRealmIdContentByUnitIdStatus403 = {
 /**
  * @type object
  */
-export type PatchApiRealmsByRealmIdContentByUnitIdStatus404 = {
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus404 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'RealmContentNotFound'
+		 * @default 'RealmUnitNotFound'
 		 * @type string
 		 */
-		code: "RealmContentNotFound";
+		code: "RealmUnitNotFound";
 		/**
 		 * @type string
 		 */
@@ -28192,42 +32399,138 @@ export type PatchApiRealmsByRealmIdContentByUnitIdStatus404 = {
 /**
  * @type object
  */
-export type PatchApiRealmsByRealmIdContentByUnitIdStatus422 = ValidationError;
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type PatchApiRealmsByRealmIdContentByUnitIdStatus500 = InternalError;
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus500 = InternalError;
 
-export const PatchApiRealmsByRealmIdContentByUnitIdRequestStatusEnum = {
-	pending: "pending",
-	approved: "approved",
-	removed: "removed",
-} as const;
-
-export type PatchApiRealmsByRealmIdContentByUnitIdRequestStatusEnum =
-	(typeof PatchApiRealmsByRealmIdContentByUnitIdRequestStatusEnum)[keyof typeof PatchApiRealmsByRealmIdContentByUnitIdRequestStatusEnum];
+export type PatchApiRealmsByRealmIdUnitsByUnitIdBody =
+	| {
+			status: "pending" | "visible" | "hidden" | "removed";
+			/**
+			 * @type boolean | undefined
+			 */
+			locked?: boolean;
+			/**
+			 * @type object | undefined
+			 */
+			annotationDocument?: {
+				/**
+				 * @type string
+				 */
+				_type: "portable-text";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type array
+				 */
+				content: (
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "block";
+							/**
+							 * @type array
+							 */
+							children: (
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "span";
+										/**
+										 * @type string
+										 */
+										text: string;
+										/**
+										 * @type array | undefined
+										 */
+										marks?: string[];
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @pattern ^(?!span$).+
+										 * @type string
+										 */
+										_type: string;
+										[key: string]: unknown;
+								  }
+							)[];
+							/**
+							 * @type array | undefined
+							 */
+							markDefs?: {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+							}[];
+							/**
+							 * @type string | undefined
+							 */
+							listItem?: string;
+							/**
+							 * @type string | undefined
+							 */
+							style?: string;
+							/**
+							 * @minLength 1
+							 * @type integer | undefined
+							 */
+							level?: number;
+							[key: string]: unknown;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @pattern ^(?!block$).+
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+					  }
+				)[];
+			};
+	  }
+	| {
+			/**
+			 * @type boolean
+			 */
+			locked: boolean;
+	  };
 
 /**
  * @type object
  */
-export type PatchApiRealmsByRealmIdContentByUnitIdBody = {
-	/**
-	 * @type string | undefined
-	 */
-	status?: PatchApiRealmsByRealmIdContentByUnitIdRequestStatusEnum;
-	/**
-	 * @type boolean | undefined
-	 */
-	locked?: boolean;
-};
-
-/**
- * @type object
- */
-export type PatchApiRealmsByRealmIdContentByUnitIdOptions = {
-	body: PatchApiRealmsByRealmIdContentByUnitIdBody;
-	path: PatchApiRealmsByRealmIdContentByUnitIdPath;
+export type PatchApiRealmsByRealmIdUnitsByUnitIdOptions = {
+	body: PatchApiRealmsByRealmIdUnitsByUnitIdBody;
+	path: PatchApiRealmsByRealmIdUnitsByUnitIdPath;
 	query?: never;
 	headers?: never;
 };
@@ -28235,23 +32538,23 @@ export type PatchApiRealmsByRealmIdContentByUnitIdOptions = {
 /**
  * @type object
  */
-export type PatchApiRealmsByRealmIdContentByUnitIdResponses = {
-	"200": PatchApiRealmsByRealmIdContentByUnitIdStatus200;
-	"403": PatchApiRealmsByRealmIdContentByUnitIdStatus403;
-	"404": PatchApiRealmsByRealmIdContentByUnitIdStatus404;
-	"422": PatchApiRealmsByRealmIdContentByUnitIdStatus422;
-	"500": PatchApiRealmsByRealmIdContentByUnitIdStatus500;
+export type PatchApiRealmsByRealmIdUnitsByUnitIdResponses = {
+	"200": PatchApiRealmsByRealmIdUnitsByUnitIdStatus200;
+	"403": PatchApiRealmsByRealmIdUnitsByUnitIdStatus403;
+	"404": PatchApiRealmsByRealmIdUnitsByUnitIdStatus404;
+	"422": PatchApiRealmsByRealmIdUnitsByUnitIdStatus422;
+	"500": PatchApiRealmsByRealmIdUnitsByUnitIdStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PatchApiRealmsByRealmIdContentByUnitIdResponse =
-	| PatchApiRealmsByRealmIdContentByUnitIdStatus200
-	| PatchApiRealmsByRealmIdContentByUnitIdStatus403
-	| PatchApiRealmsByRealmIdContentByUnitIdStatus404
-	| PatchApiRealmsByRealmIdContentByUnitIdStatus422
-	| PatchApiRealmsByRealmIdContentByUnitIdStatus500;
+export type PatchApiRealmsByRealmIdUnitsByUnitIdResponse =
+	| PatchApiRealmsByRealmIdUnitsByUnitIdStatus200
+	| PatchApiRealmsByRealmIdUnitsByUnitIdStatus403
+	| PatchApiRealmsByRealmIdUnitsByUnitIdStatus404
+	| PatchApiRealmsByRealmIdUnitsByUnitIdStatus422
+	| PatchApiRealmsByRealmIdUnitsByUnitIdStatus500;
 
 /**
  * @type object

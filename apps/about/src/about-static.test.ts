@@ -90,21 +90,22 @@ describe("product fact registry", () => {
 		expect(PRODUCT_DEFINITIONS.map(({ pageClass }) => String(pageClass))).not.toContain(
 			"protocol",
 		);
-		expect(PRODUCT_GROUPS.products).toHaveLength(17);
-		expect(PRODUCT_GROUPS.platform).toHaveLength(8);
+		expect(PRODUCT_GROUPS.products).toHaveLength(20);
+		expect(PRODUCT_GROUPS.platform).toHaveLength(5);
 	});
 
 	test("encodes manifestations and shared capabilities without changing parentage", () => {
 		const gamebook = requireProduct("gamebook");
 		const structure = requireProduct("content-structure");
 		const history = requireProduct("history");
-		const entity = requireProduct("entity-attribution");
+		const entity = requireProduct("entity");
 
 		expect(gamebook.pageClass).toBe("manifestation");
 		expect(gamebook.canonicalParentId).toBe("book");
 		expect(gamebook.manifestation?.formula).toBe("Book + GameContentStructure → GameBook");
 
-		expect(structure.pageClass).toBe("capability");
+		expect(structure.pageClass).toBe("surface");
+		expect(structure.navGroup).toBe("products");
 		expect(structure.canonicalParentId).toBeUndefined();
 		expect(structure.capabilityModes).toEqual(["ContentStructure", "GameContentStructure"]);
 		expect(gamebook.canonicalParentId).not.toBe(structure.id);
@@ -112,12 +113,13 @@ describe("product fact registry", () => {
 		for (const id of ["wiki", "picture", "review"]) {
 			expect(requireProduct(id).canonicalParentId).toBe("post");
 		}
-		expect(requireProduct("library").canonicalParentId).toBe("shelf");
+		expect(requireProduct("library").canonicalParentId).toBe("collection");
 
 		expect(history.canonicalParentId).toBeUndefined();
 		expect(history.consumesCapabilities).not.toContain("editor");
 
 		expect(entity.canonicalParentId).toBeUndefined();
+		expect(entity.pageClass).toBe("surface");
 		expect(entity.implementationStatus).toBe("implemented");
 		expect(entity.capabilityModes).toEqual([
 			"Entity",
@@ -165,9 +167,8 @@ describe("confirmed product claims", () => {
 		expect(claimStatus["entity-implemented"]).toBe("confirmed");
 		expect(claimStatus["credit-attribution"]).toBe("confirmed");
 		expect(claimStatus["subject-attribution"]).toBe("confirmed");
-		expect(claimStatus["source-provenance-future"]).toBe("planned");
 
-		const publicText = await readProductMarkdown("zh-hant", "entity-attribution");
+		const publicText = await readProductMarkdown("zh-hant", "entity");
 		for (const fact of [
 			"Entity",
 			"CreditAttribution",
@@ -180,7 +181,6 @@ describe("confirmed product claims", () => {
 			"二創",
 			"Unit",
 			"Tag",
-			"Source / Provenance",
 		]) {
 			expect(publicText).toContain(fact);
 		}
@@ -283,9 +283,7 @@ describe("public routes, redirects, and discovery", () => {
 
 		expect(urls).toHaveLength(ABOUT_LOCALES.length * (PRODUCT_DEFINITIONS.length + 2));
 		expect(sitemap).toContain("<loc>https://about.rezics.com/zh-hant/products/gamebook/</loc>");
-		expect(sitemap).toContain(
-			"<loc>https://about.rezics.com/de/products/entity-attribution/</loc>",
-		);
+		expect(sitemap).toContain("<loc>https://about.rezics.com/de/products/entity/</loc>");
 	});
 
 	test("negotiates neutral legacy and plural entry paths", async () => {
@@ -316,16 +314,6 @@ describe("public routes, redirects, and discovery", () => {
 			"https://about.rezics.com/de/products/gamebook/",
 		);
 
-		const renamedRedirect = await languageMiddleware({
-			request: new Request("https://about.rezics.com/products/entity-source/?from=old", {
-				headers: { "accept-language": "zh-CN" },
-			}),
-			next,
-		});
-		expect(renamedRedirect.headers.get("location")).toBe(
-			"https://about.rezics.com/zh-hans/products/entity-attribution/?from=old",
-		);
-
 		const permanentRedirect = await languageMiddleware({
 			request: new Request("https://about.rezics.com/ja/product/gamebook/?from=old"),
 			next,
@@ -336,20 +324,8 @@ describe("public routes, redirects, and discovery", () => {
 		);
 		expect(permanentRedirect.headers.get("cache-control")).toContain("public");
 
-		const localizedRenamedRedirect = await languageMiddleware({
-			request: new Request("https://about.rezics.com/de/products/entity-source/"),
-			next,
-		});
-		expect(localizedRenamedRedirect.status).toBe(301);
-		expect(localizedRenamedRedirect.headers.get("location")).toBe(
-			"https://about.rezics.com/de/products/entity-attribution/",
-		);
-
 		const redirects = await readFile(join(workspaceRoot, "public", "_redirects"), "utf8");
 		expect(redirects).toContain("/:locale/product/:slug/ /:locale/products/:slug/ 301");
-		expect(redirects.indexOf("product/entity-source")).toBeLessThan(
-			redirects.indexOf("product/:slug"),
-		);
 
 		const localized = await languageMiddleware({
 			request: new Request("https://about.rezics.com/en/products/history/", {

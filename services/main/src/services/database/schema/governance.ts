@@ -12,7 +12,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { realm } from "./catalog";
+import { realm } from "./realm";
 import {
 	EnforcementKindValues,
 	FeedbackKindValues,
@@ -39,7 +39,7 @@ export const moderationTargetKind = pgEnum("moderation_target_kind", [
 	"unit",
 	"unit_field",
 	"profile",
-	"realm_content",
+	"realm_unit",
 	"realm_member",
 	"feedback",
 ]);

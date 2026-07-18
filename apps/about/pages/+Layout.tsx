@@ -6,6 +6,7 @@ import { useData } from "vike-react/useData";
 import { GlobalFooter } from "../src/components/products/GlobalFooter";
 import { GlobalHeader } from "../src/components/products/GlobalHeader";
 import { getLocaleContent } from "../src/content/locales";
+import { getProductById } from "../src/content/productRegistry";
 import { ABOUT_LOCALE_META, ABOUT_SITE_ORIGIN, DEFAULT_LOCALE } from "../src/i18n/locales";
 import { mdxComponents } from "../src/mdxComponents";
 import type { AboutPageData } from "../src/pageData";
@@ -32,15 +33,12 @@ export default function Layout({ children }: { children: ReactNode }) {
 	}, [locale]);
 
 	const canonical = new URL(meta.canonicalPath, ABOUT_SITE_ORIGIN).toString();
+	const product = data.kind === "product" ? getProductById(data.productId) : undefined;
 	const active =
 		data.kind === "product" && data.productId === "history"
 			? "history"
 			: data.kind === "product"
-				? data.productId === "content-structure" ||
-					data.productId === "entity-attribution" ||
-					data.productId === "feed" ||
-					data.productId === "editor" ||
-					data.productId === "api-oauth"
+				? product?.navGroup === "platform"
 					? "platform"
 					: "products"
 				: data.kind === "products"

@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
 	boolean,
 	check,
+	foreignKey,
 	index,
 	integer,
 	pgEnum,
@@ -10,12 +11,11 @@ import {
 	unique,
 	uuid,
 } from "drizzle-orm/pg-core";
-import type { PortableText } from "@rezics/portable-text";
 
 import { pgTable } from "./base";
-import { realm } from "./catalog";
 import {
 	CapabilityAuthorityValues,
+	RealmJoinPolicyValues,
 	RealmMemberRoleValues,
 	RealmMemberStateValues,
 	RealmPinKindValues,
@@ -23,21 +23,36 @@ import {
 } from "./contract-values";
 import {
 	createCreatedAtColumn,
-	createJsonArrayConstraint,
 	createJsonDocumentColumn,
 	createTimestampMsColumn,
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
 } from "./columns";
-import { moderationStatus, profile, unit } from "./core";
+import { profile, unit } from "./core";
 
+export const realmJoinPolicy = pgEnum("realm_join_policy", toEnumValues(RealmJoinPolicyValues));
 export const realmMemberRole = pgEnum("realm_member_role", toEnumValues(RealmMemberRoleValues));
 export const realmMemberState = pgEnum("realm_member_state", toEnumValues(RealmMemberStateValues));
 export const realmPinKind = pgEnum("realm_pin_kind", toEnumValues(RealmPinKindValues));
+export const realmUnitStatus = pgEnum("realm_unit_status", [
+	"pending",
+	"visible",
+	"hidden",
+	"removed",
+]);
 export const capabilityAuthority = pgEnum(
 	"capability_authority",
 	toEnumValues(CapabilityAuthorityValues),
 );
+
+export const realm = pgTable("realm", {
+	id: uuid()
+		.primaryKey()
+		.references(() => unit.id, { onDelete: "cascade" }),
+	joinPolicy: realmJoinPolicy().default("open").notNull(),
+	createdAt: createCreatedAtColumn(),
+	updatedAt: createUpdatedAtColumn(),
+});
 
 export const realmMember = pgTable(
 	"realm_member",
@@ -81,6 +96,23 @@ export const realmSubscription = pgTable(
 	],
 );
 
+export const realmDock = pgTable(
+	"realm_dock",
+	{
+		realmId: uuid()
+			.notNull()
+			.references(() => realm.id, { onDelete: "cascade" }),
+		slot: text().default("primary").notNull(),
+		document: createJsonDocumentColumn().notNull(),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.realmId, table.slot] }),
+		check("realm_dock_slot_not_blank", sql`btrim(${table.slot}) <> ''`),
+	],
+);
+
 export const realmRuleRevision = pgTable(
 	"realm_rule_revision",
 	{
@@ -113,7 +145,7 @@ export const realmRule = pgTable(
 		position: text().notNull(),
 		language: text().notNull(),
 		title: text().notNull(),
-		content: createJsonDocumentColumn<PortableText>().notNull(),
+		content: createJsonDocumentColumn().notNull(),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
@@ -123,7 +155,6 @@ export const realmRule = pgTable(
 			sql`btrim(${table.language}) <> '' and char_length(${table.language}) <= 35`,
 		),
 		check("realm_rule_title_not_blank", sql`btrim(${table.title}) <> ''`),
-		createJsonArrayConstraint("realm_rule_content_json_array_check", table.content),
 	],
 );
 
@@ -174,8 +205,8 @@ export const realmPin = pgTable(
 	],
 );
 
-export const realmContent = pgTable(
-	"realm_content",
+export const realmUnit = pgTable(
+	"realm_unit",
 	{
 		realmId: uuid()
 			.notNull()
@@ -184,20 +215,54 @@ export const realmContent = pgTable(
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
 		locked: boolean().default(false).notNull(),
-		moderationStatus: moderationStatus().default("approved").notNull(),
+		status: realmUnitStatus().default("visible").notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
 		primaryKey({ columns: [table.realmId, table.unitId] }),
-		index("realm_content_realm_status_created_idx").on(
+		index("realm_unit_realm_status_created_idx").on(
 			table.realmId,
-			table.moderationStatus,
+			table.status,
 			table.createdAt.desc(),
 			table.unitId,
 		),
-		index("realm_content_unit_idx").on(table.unitId),
-		check("realm_content_not_self_check", sql`${table.realmId} <> ${table.unitId}`),
+		index("realm_unit_unit_idx").on(table.unitId),
+		check("realm_unit_not_self_check", sql`${table.realmId} <> ${table.unitId}`),
+	],
+);
+
+export const realmUnitStatusEvent = pgTable(
+	"realm_unit_status_event",
+	{
+		id: createUuidv7PrimaryKey(),
+		realmId: uuid().notNull(),
+		unitId: uuid().notNull(),
+		fromStatus: realmUnitStatus(),
+		toStatus: realmUnitStatus().notNull(),
+		changedByProfileId: uuid().references(() => profile.id, {
+			onDelete: "set null",
+		}),
+		annotationDocument: createJsonDocumentColumn(),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.realmId, table.unitId],
+			foreignColumns: [realmUnit.realmId, realmUnit.unitId],
+			name: "realm_unit_status_event_realm_unit_fkey",
+		}).onDelete("cascade"),
+		index("realm_unit_status_event_history_idx").on(
+			table.realmId,
+			table.unitId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		index("realm_unit_status_event_actor_idx").on(table.changedByProfileId),
+		check(
+			"realm_unit_status_event_transition_check",
+			sql`${table.fromStatus} is null or ${table.fromStatus} <> ${table.toStatus}`,
+		),
 	],
 );
 

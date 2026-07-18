@@ -6,13 +6,13 @@ import { getUnitReadCondition } from "../../authorization/unit/query";
 import session from "../../auth/session";
 import { database } from "../../database";
 import {
-	contentNodeProgress,
-	contentNode,
+	contentStructureNodeProgress,
+	contentStructureNode,
 	unitLocalization,
 	unit,
 	unitProgress,
 } from "../../database/schema";
-import { ContentNodeNotFound } from "../content/errors";
+import { ContentStructureNodeNotFound } from "../content-structure/errors";
 import { ProgressNotFound } from "./errors";
 import {
 	ListProgressQuery,
@@ -57,7 +57,7 @@ export default new Elysia({ prefix: "/progress" })
 					totalTimeMs: unitProgress.totalTimeMs,
 					firstSeenAt: unitProgress.firstSeenAt,
 					lastSeenAt: unitProgress.lastSeenAt,
-					lastReadNodeId: unitProgress.lastReadNodeId,
+					lastContentStructureNodeId: unitProgress.lastContentStructureNodeId,
 					deletedAt: unitProgress.deletedAt,
 					type: unit.kind,
 					slug: unit.slug,
@@ -132,7 +132,7 @@ export default new Elysia({ prefix: "/progress" })
 						completedCount: body.completedCount,
 						totalTimeMs:
 							body.totalTimeMs === undefined ? undefined : BigInt(body.totalTimeMs),
-						lastReadNodeId: body.lastReadNodeId,
+						lastContentStructureNodeId: body.lastContentStructureNodeId,
 						deletedAt: null,
 						lastSeenAt: now,
 					})
@@ -146,7 +146,7 @@ export default new Elysia({ prefix: "/progress" })
 								body.totalTimeMs === undefined
 									? undefined
 									: BigInt(body.totalTimeMs),
-							lastReadNodeId: body.lastReadNodeId,
+							lastContentStructureNodeId: body.lastContentStructureNodeId,
 							deletedAt: null,
 							lastSeenAt: now,
 						},
@@ -196,15 +196,18 @@ export default new Elysia({ prefix: "/progress" })
 		async ({ profile, authorization, params }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
 			const [node] = await database
-				.select({ id: contentNode.id })
-				.from(contentNode)
+				.select({ id: contentStructureNode.id })
+				.from(contentStructureNode)
 				.where(
-					and(eq(contentNode.id, params.nodeId), eq(contentNode.bookId, params.unitId)),
+					and(
+						eq(contentStructureNode.id, params.nodeId),
+						eq(contentStructureNode.ownerUnitId, params.unitId),
+					),
 				)
 				.limit(1);
-			if (!node) throw new ContentNodeNotFound();
+			if (!node) throw new ContentStructureNodeNotFound();
 			await database
-				.insert(contentNodeProgress)
+				.insert(contentStructureNodeProgress)
 				.values({ profileId: profile.unitId, nodeId: params.nodeId })
 				.onConflictDoNothing();
 			return { completed: true };
@@ -216,21 +219,21 @@ export default new Elysia({ prefix: "/progress" })
 				[StatusCodes.OK]: CompletionStateResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
-					"ContentNodeNotFound",
+					"ContentStructureNodeNotFound",
 				]),
 			},
-			detail: { summary: "Complete content node", tags: ["Progress"] },
+			detail: { summary: "Complete Content Structure node", tags: ["Progress"] },
 		},
 	)
 	.delete(
 		"/:unitId/nodes/:nodeId",
 		async ({ profile, params }) => {
 			await database
-				.delete(contentNodeProgress)
+				.delete(contentStructureNodeProgress)
 				.where(
 					and(
-						eq(contentNodeProgress.profileId, profile.unitId),
-						eq(contentNodeProgress.nodeId, params.nodeId),
+						eq(contentStructureNodeProgress.profileId, profile.unitId),
+						eq(contentStructureNodeProgress.nodeId, params.nodeId),
 					),
 				);
 			return { completed: false };
@@ -239,6 +242,6 @@ export default new Elysia({ prefix: "/progress" })
 			write: true,
 			params: ProgressNodeParams,
 			response: { [StatusCodes.OK]: CompletionStateResponse },
-			detail: { summary: "Uncomplete content node", tags: ["Progress"] },
+			detail: { summary: "Uncomplete Content Structure node", tags: ["Progress"] },
 		},
 	);

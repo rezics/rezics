@@ -15,17 +15,27 @@ describe("API response values", () => {
 	});
 
 	it("accepts proven Portable Text and rejects malformed persisted data", () => {
-		const value = [
-			{
-				_key: "block-1",
-				_type: "block",
-				children: [{ _key: "span-1", _type: "span", text: "Safe by construction" }],
-			},
-		];
+		const value = {
+			_type: "portable-text" as const,
+			_key: "001122aabbcc",
+			content: [
+				{
+					_key: "block-1",
+					_type: "block" as const,
+					children: [
+						{ _key: "span-1", _type: "span" as const, text: "Safe by construction" },
+					],
+				},
+			],
+		};
 
 		expect(toPortableTextResponse(value)).toBe(value);
 		expect(() =>
-			toPortableTextResponse([{ _key: "block-1", _type: "block", children: [{}] }]),
-		).toThrow("Persisted Portable Text is invalid");
+			toPortableTextResponse({
+				_type: "portable-text",
+				_key: "not-a-block-key",
+				content: [],
+			}),
+		).toThrow("Invalid Content Structure document");
 	});
 });

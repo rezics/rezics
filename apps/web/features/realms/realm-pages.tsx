@@ -35,6 +35,7 @@ import { PostList } from "@/features/posts/post-list";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { selectLocalization } from "@/lib/localization";
 import { useTranslation } from "@/i18n/client";
+import { readPortableText } from "@/lib/content-structure";
 import { RequestFailure } from "@/i18n/request-failure";
 import { canManageRealm, isRealmOwner } from "./realm-permissions";
 import { invalidateRealmDetails } from "./query";
@@ -268,7 +269,7 @@ export function RealmDetailPage({ id }: { id: string }) {
 											{index + 1}. {rule.title}
 										</h3>
 										<PortableTextContent
-											value={rule.content}
+											value={readPortableText(rule.content)}
 											variant="compact"
 										/>
 									</section>

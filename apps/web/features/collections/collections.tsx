@@ -59,7 +59,7 @@ function getCollectionVisibility(value: FormDataEntryValue | null) {
 function getItemHref(type: string, id: string) {
 	switch (type.toLowerCase()) {
 		case "book":
-		case "game":
+		case "software":
 		case "media":
 			return `/units/${type.toLowerCase()}/${id}`;
 		case "entity":
@@ -72,7 +72,7 @@ function getItemHref(type: string, id: string) {
 			return `/polls/${id}`;
 		case "review":
 			return `/reviews/${id}`;
-		case "shelf":
+		case "collection":
 			return `/collections/${id}`;
 		default:
 			return undefined;

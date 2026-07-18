@@ -12,7 +12,7 @@ import {
 	profile,
 	profileFollow,
 	realm,
-	realmContent,
+	realmUnit,
 	realmSubscription,
 	unit,
 	unitLocalization,
@@ -29,7 +29,7 @@ import {
 const subjectUnit = alias(unit, "subject_unit");
 
 const categoryKinds: Record<SearchCategory, readonly string[]> = {
-	units: ["book", "game", "media"],
+	units: ["book", "software", "media"],
 	users: ["profile"],
 	entity: ["entity"],
 	tags: ["tag"],
@@ -222,9 +222,10 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 	}
 	if (request.realmId) {
 		conditions.push(sql`EXISTS (
-			SELECT 1 FROM ${realmContent}
-			WHERE ${realmContent.unitId} = ${unit.id}
-				AND ${realmContent.realmId} = ${request.realmId}::uuid
+			SELECT 1 FROM ${realmUnit}
+			WHERE ${realmUnit.unitId} = ${unit.id}
+				AND ${realmUnit.realmId} = ${request.realmId}::uuid
+				AND ${realmUnit.status} = 'visible'
 		)`);
 	}
 	if (request.multiple !== undefined) {

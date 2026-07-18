@@ -38,7 +38,7 @@ export type PortableTextSpan = Static<typeof PortableTextSpan>;
 const PortableTextInlineObject = Type.Object(
 	{
 		_key: Type.String(),
-		_type: Type.Intersect([Type.String(), Type.Not(Type.Literal("span"))]),
+		_type: Type.String({ pattern: "^(?!span$).+" }),
 	},
 	{ additionalProperties: JsonValue },
 );
@@ -66,7 +66,7 @@ export type PortableTextTextBlock = Static<typeof PortableTextTextBlock> &
 const PortableTextCustomBlock = Type.Object(
 	{
 		_key: Type.String(),
-		_type: Type.Intersect([Type.String(), Type.Not(Type.Literal("block"))]),
+		_type: Type.String({ pattern: "^(?!block$).+" }),
 	},
 	{ additionalProperties: JsonValue },
 );

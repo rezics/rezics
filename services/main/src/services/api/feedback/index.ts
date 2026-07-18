@@ -4,7 +4,7 @@ import Elysia from "elysia";
 
 import session from "../../auth/session";
 import { database } from "../../database";
-import { feedback, moderationCase, realmContent } from "../../database/schema";
+import { feedback, moderationCase, realmUnit } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import { FeedbackRealmMismatch } from "./errors";
 import {
@@ -60,12 +60,12 @@ export default new Elysia({ prefix: "/feedback" })
 				);
 				if (subjectUnitId && subjectUnitId !== body.realmId) {
 					const [association] = await database
-						.select({ id: realmContent.unitId })
-						.from(realmContent)
+						.select({ id: realmUnit.unitId })
+						.from(realmUnit)
 						.where(
 							and(
-								eq(realmContent.realmId, body.realmId),
-								eq(realmContent.unitId, subjectUnitId),
+								eq(realmUnit.realmId, body.realmId),
+								eq(realmUnit.unitId, subjectUnitId),
 							),
 						)
 						.limit(1);

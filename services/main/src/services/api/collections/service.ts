@@ -1,4 +1,12 @@
 import { and, eq, sql } from "drizzle-orm";
+import type { UnwrapSchema } from "elysia";
+import {
+	CollectionDefinitionDocument,
+	CollectionPresentationDocument,
+	createCollectionPresentationDocument,
+	createSystemCollectionDefinitionDocument,
+	parseDocument,
+} from "@rezics/content-structure";
 
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import { database } from "../../database";
@@ -12,6 +20,7 @@ import {
 import { recordUnitRevision } from "../../units/history";
 import { DefaultLanguage } from "../../database/schema/contract-values";
 import { CollectionNotFound } from "./errors";
+import { CollectionDetailResponse } from "../schema/response";
 
 export async function ensureFavorites(ownerId: string) {
 	const find = () =>
@@ -21,7 +30,7 @@ export async function ensureFavorites(ownerId: string) {
 			.where(
 				and(
 					eq(collectionTable.ownerProfileId, ownerId),
-					eq(collectionTable.kind, "favorites"),
+					eq(collectionTable.systemKey, "favorites"),
 				),
 			)
 			.limit(1);
@@ -41,9 +50,14 @@ export async function ensureFavorites(ownerId: string) {
 				})
 				.returning({ id: unit.id });
 			if (!created) throw new Error("Favorites insertion did not return an id");
-			await tx
-				.insert(collectionTable)
-				.values({ id: created.id, ownerProfileId: ownerId, kind: "favorites" });
+			await tx.insert(collectionTable).values({
+				id: created.id,
+				ownerProfileId: ownerId,
+				source: "system",
+				systemKey: "favorites",
+				definitionDocument: createSystemCollectionDefinitionDocument("favorites"),
+				presentationDocument: createCollectionPresentationDocument("flat", "added-at"),
+			});
 			await tx.insert(unitLocalization).values({
 				unitId: created.id,
 				language: DefaultLanguage,
@@ -70,7 +84,10 @@ export async function ensureFavorites(ownerId: string) {
 	}
 }
 
-export async function getCollection(collectionId: string, viewerId?: string) {
+export async function getCollection(
+	collectionId: string,
+	viewerId?: string,
+): Promise<UnwrapSchema<typeof CollectionDetailResponse>> {
 	const [record] = await database
 		.select({
 			id: unit.id,
@@ -79,7 +96,10 @@ export async function getCollection(collectionId: string, viewerId?: string) {
 			visibility: unit.visibility,
 			language: unitLocalization.language,
 			ownerId: collectionTable.ownerProfileId,
-			kind: collectionTable.kind,
+			source: collectionTable.source,
+			systemKey: collectionTable.systemKey,
+			definitionDocument: collectionTable.definitionDocument,
+			presentationDocument: collectionTable.presentationDocument,
 			itemCount: sql<number>`(select count(*) from ${collectionItem} where ${collectionItem.collectionId} = ${collectionTable.id})::int`,
 			createdAt: unit.createdAt,
 			updatedAt: unit.updatedAt,
@@ -98,6 +118,14 @@ export async function getCollection(collectionId: string, viewerId?: string) {
 			!(record.status === "published" && ["public", "unlisted"].includes(record.visibility)))
 	)
 		throw new CollectionNotFound();
+	const definitionDocument = parseDocument(
+		CollectionDefinitionDocument,
+		record.definitionDocument,
+	);
+	const presentationDocument = parseDocument(
+		CollectionPresentationDocument,
+		record.presentationDocument,
+	);
 
 	const localizations = await database
 		.select({
@@ -126,6 +154,8 @@ export async function getCollection(collectionId: string, viewerId?: string) {
 		.orderBy(collectionItem.position, collectionItem.unitId);
 	return {
 		...record,
+		definitionDocument,
+		presentationDocument,
 		localizations,
 		items: items.map((item) => ({ ...item, parentTargetId: null })),
 	};

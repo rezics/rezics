@@ -8,7 +8,7 @@ import session from "../../auth/session";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
 import { database } from "../../database";
 import {
-	unitCredit,
+	creditAttribution,
 	entity,
 	unit,
 	unitAlias,
@@ -46,6 +46,7 @@ import {
 	ExternalLinkResponse,
 	TagApplicationResponse,
 	TagListResponse,
+	toPortableTextResponse,
 	UnitVersionResponse,
 	VoteResponse,
 } from "../schema/response";
@@ -170,14 +171,25 @@ export default new Elysia()
 							.select()
 							.from(unitLocalization)
 							.where(eq(unitLocalization.unitId, params.unitId))
-					).map(({ unitId, ...row }) => ({ unitId: unitId, ...row }));
+					).map((row) => ({
+						unitId: row.unitId,
+						language: row.language,
+						title: row.title,
+						summary: row.summary,
+						description:
+							row.description === null
+								? null
+								: toPortableTextResponse(row.description),
+						createdAt: row.createdAt,
+						updatedAt: row.updatedAt,
+					}));
 					const credits = await database
 						.select({
-							unitId: unitCredit.unitId,
-							role: unitCredit.role,
+							unitId: creditAttribution.unitId,
+							role: creditAttribution.role,
 						})
-						.from(unitCredit)
-						.where(eq(unitCredit.entityId, params.unitId));
+						.from(creditAttribution)
+						.where(eq(creditAttribution.entityId, params.unitId));
 					return { ...entry, kind: entry.kind ?? "unknown", localizations, credits };
 				},
 				{
@@ -406,7 +418,7 @@ export default new Elysia()
 					);
 					const credit = await database.transaction(async (tx) => {
 						const [created] = await tx
-							.insert(unitCredit)
+							.insert(creditAttribution)
 							.values({ unitId: params.unitId, ...body })
 							.returning();
 						await recordUnitRevision(tx, {

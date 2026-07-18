@@ -1,1 +1,1 @@
-A personal collection manifestation formed by Shelf(mode=LIBRARY).
+A personal collection manifestation formed by Collection[].

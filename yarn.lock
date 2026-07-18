@@ -3355,6 +3355,7 @@ __metadata:
     "@elysiajs/openapi": "npm:^1.4.15"
     "@faker-js/faker": "npm:^10.5.0"
     "@nmnmcc/intee": "npm:^3.2.0"
+    "@rezics/content-structure": "workspace:*"
     "@rezics/i18n": "workspace:*"
     "@rezics/portable-text": "workspace:*"
     "@sinclair/typebox": "npm:^0.34.41"
@@ -3389,11 +3390,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@rezics/content-structure@workspace:*, @rezics/content-structure@workspace:libraries/content-structure":
+  version: 0.0.0-use.local
+  resolution: "@rezics/content-structure@workspace:libraries/content-structure"
+  dependencies:
+    "@rezics/portable-text": "workspace:*"
+    "@sinclair/typebox": "npm:^0.34.41"
+    typescript: "npm:7"
+  languageName: unknown
+  linkType: soft
+
 "@rezics/frontend@workspace:apps/web":
   version: 0.0.0-use.local
   resolution: "@rezics/frontend@workspace:apps/web"
   dependencies:
     "@nmnmcc/intee": "npm:^3.2.0"
+    "@rezics/content-structure": "workspace:*"
     "@rezics/i18n": "workspace:*"
     "@rezics/openapi-tanstack-query": "workspace:*"
     "@rezics/portable-text": "workspace:*"

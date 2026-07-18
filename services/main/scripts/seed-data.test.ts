@@ -87,7 +87,7 @@ describe("seed data", () => {
 	it("derives Realm moderation targets from existing relationship rows", () => {
 		const targets = {
 			members: [{ realmId: "realm-a", profileId: "profile-a" }],
-			contents: [{ realmId: "realm-b", unitId: "unit-b" }],
+			units: [{ realmId: "realm-b", unitId: "unit-b" }],
 		};
 
 		expect(selectSeedRealmModerationTarget("realm_member", 0, targets)).toEqual({
@@ -96,16 +96,16 @@ describe("seed data", () => {
 			targetKind: "realm_member",
 			targetId: "profile-a",
 		});
-		expect(selectSeedRealmModerationTarget("realm_content", 0, targets)).toEqual({
+		expect(selectSeedRealmModerationTarget("realm_unit", 0, targets)).toEqual({
 			authority: "realm",
 			realmId: "realm-b",
-			targetKind: "realm_content",
+			targetKind: "realm_unit",
 			targetId: "unit-b",
 		});
 		expect(() =>
 			selectSeedRealmModerationTarget("realm_member", 0, {
 				members: [],
-				contents: targets.contents,
+				units: targets.units,
 			}),
 		).toThrow(/cycle must not be empty/);
 	});

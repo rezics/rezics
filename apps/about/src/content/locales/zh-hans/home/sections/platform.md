@@ -1,1 +1,1 @@
-Content Structure、History 与 Entity & Attribution 拥有独立工作流，并说明由哪些产品使用。
+共享平台能力拥有独立工作流，并明确说明由哪些产品使用。

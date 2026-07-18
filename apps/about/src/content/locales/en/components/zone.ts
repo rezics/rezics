@@ -8,7 +8,7 @@ const content = {
 	blockSchema: "Block Schema",
 	headerBlock: "Header block",
 	feedBlock: "Feed block · query: recent",
-	shelfBlock: "Shelf block · reference",
+	collectionBlock: "Collection block · reference",
 	feedResult: "Feed result",
 	postCard: "Post card",
 	catalogResult: "Catalog result",

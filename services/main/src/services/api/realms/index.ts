@@ -1,4 +1,5 @@
 import { StatusCodes } from "http-status-codes";
+import { DockDocument, parseDocument } from "@rezics/content-structure";
 import { and, desc, eq, inArray, max, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
@@ -15,7 +16,9 @@ import {
 	auditEvent,
 	profile as profileTable,
 	realm,
-	realmContent,
+	realmDock,
+	realmUnit,
+	realmUnitStatusEvent,
 	realmMember,
 	realmPin,
 	realmRule,
@@ -35,7 +38,7 @@ import {
 	IdResponse,
 	MembershipResponse,
 	NoContentResponse,
-	RealmContentResponse,
+	RealmUnitResponse,
 	RealmMemberListResponse,
 	RealmMemberResponse,
 	RealmPinListResponse,
@@ -55,18 +58,22 @@ import {
 	JoinRealmBody,
 	ListRealmMembersQuery,
 	ListRealmsQuery,
-	ModerateRealmContentBody,
+	ModerateRealmUnitBody,
 	PublishRealmRulesBody,
-	RealmContentParams,
+	RealmUnitParams,
+	RealmDockListResponse,
+	RealmDockParams,
+	RealmDockResponse,
 	RealmMemberParams,
 	RealmParams,
 	RealmPinParams,
 	RemoveRealmPinQuery,
 	UpdateRealmBody,
 	UpdateRealmMemberBody,
+	UpsertRealmDockBody,
 } from "./schema";
 import {
-	RealmContentNotFound,
+	RealmUnitNotFound,
 	RealmMemberNotFound,
 	RealmMembershipNotFound,
 	RealmNotFound,
@@ -78,6 +85,13 @@ const RealmMutationForbiddenResponse = toApiErrorResponse([
 	"RealmCapabilityRequired",
 	"UnitFieldLocked",
 ]);
+
+function toRealmDockResponse(row: typeof realmDock.$inferSelect) {
+	return {
+		...row,
+		document: parseDocument(DockDocument, row.document),
+	};
+}
 
 async function ensureRealmFieldsAuthorized(
 	authorization: Authorization<string>,
@@ -841,22 +855,147 @@ export default new Elysia({ prefix: "/realms" })
 			},
 		},
 	)
-	.patch(
-		"/:realmId/content/:unitId",
+	.get(
+		"/:realmId/docks",
+		async ({ params, request }) => {
+			await ensureRealmVisible(params.realmId, request.headers);
+			const rows = await database
+				.select()
+				.from(realmDock)
+				.where(eq(realmDock.realmId, params.realmId))
+				.orderBy(realmDock.slot);
+			return { items: rows.map(toRealmDockResponse) };
+		},
+		{
+			params: RealmParams,
+			response: {
+				[StatusCodes.OK]: RealmDockListResponse,
+				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
+			},
+			detail: { summary: "List Realm docks", tags: ["Realms"] },
+		},
+	)
+	.put(
+		"/:realmId/docks/:slot",
 		async ({ params, profile, authorization, body }) => {
-			await authorization.realm.ensureCapability(params.realmId, "realm.content.moderate");
+			await ensureRealmFieldsAuthorized(
+				authorization,
+				params.realmId,
+				"realm.settings.update",
+				"/docks",
+			);
+			return database.transaction(async (tx) => {
+				const [saved] = await tx
+					.insert(realmDock)
+					.values({
+						realmId: params.realmId,
+						slot: params.slot,
+						document: body.document,
+					})
+					.onConflictDoUpdate({
+						target: [realmDock.realmId, realmDock.slot],
+						set: { document: body.document },
+					})
+					.returning();
+				if (!saved) throw new Error("Realm dock upsert did not return a row");
+				await recordUnitRevision(tx, {
+					unitId: params.realmId,
+					actorProfileId: profile.unitId,
+					event: "update",
+				});
+				return toRealmDockResponse(saved);
+			});
+		},
+		{
+			write: true,
+			params: RealmDockParams,
+			body: UpsertRealmDockBody,
+			response: {
+				[StatusCodes.OK]: RealmDockResponse,
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+			},
+			detail: { summary: "Create or replace Realm dock", tags: ["Realms"] },
+		},
+	)
+	.delete(
+		"/:realmId/docks/:slot",
+		async ({ params, profile, authorization }) => {
+			await ensureRealmFieldsAuthorized(
+				authorization,
+				params.realmId,
+				"realm.settings.update",
+				"/docks",
+			);
+			await database.transaction(async (tx) => {
+				const deleted = await tx
+					.delete(realmDock)
+					.where(
+						and(eq(realmDock.realmId, params.realmId), eq(realmDock.slot, params.slot)),
+					)
+					.returning({ slot: realmDock.slot });
+				if (!deleted.length) return;
+				await recordUnitRevision(tx, {
+					unitId: params.realmId,
+					actorProfileId: profile.unitId,
+					event: "update",
+				});
+			});
+			return new Response(null, { status: StatusCodes.NO_CONTENT });
+		},
+		{
+			write: true,
+			params: RealmDockParams,
+			response: {
+				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+			},
+			detail: {
+				summary: "Delete Realm dock",
+				tags: ["Realms"],
+				responses: NoContentResponse,
+			},
+		},
+	)
+	.patch(
+		"/:realmId/units/:unitId",
+		async ({ params, profile, authorization, body }) => {
+			await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
 			const result = await database.transaction(async (tx) => {
-				const [row] = await tx
-					.update(realmContent)
-					.set({ moderationStatus: body.status, locked: body.locked })
+				const [current] = await tx
+					.select({
+						status: realmUnit.status,
+					})
+					.from(realmUnit)
 					.where(
 						and(
-							eq(realmContent.realmId, params.realmId),
-							eq(realmContent.unitId, params.unitId),
+							eq(realmUnit.realmId, params.realmId),
+							eq(realmUnit.unitId, params.unitId),
+						),
+					)
+					.limit(1);
+				if (!current) throw new RealmUnitNotFound();
+				const status = "status" in body ? body.status : undefined;
+				const annotationDocument = "status" in body ? body.annotationDocument : undefined;
+				const [row] = await tx
+					.update(realmUnit)
+					.set({ status, locked: body.locked })
+					.where(
+						and(
+							eq(realmUnit.realmId, params.realmId),
+							eq(realmUnit.unitId, params.unitId),
 						),
 					)
 					.returning();
-				if (!row) throw new RealmContentNotFound();
+				if (!row) throw new RealmUnitNotFound();
+				if (status && status !== current.status)
+					await tx.insert(realmUnitStatusEvent).values({
+						realmId: params.realmId,
+						unitId: params.unitId,
+						fromStatus: current.status,
+						toStatus: status,
+						changedByProfileId: profile.unitId,
+						annotationDocument,
+					});
 				const owners = await tx
 					.select({ profileId: unitCollaborator.profileId })
 					.from(unitCollaborator)
@@ -873,19 +1012,19 @@ export default new Elysia({ prefix: "/realms" })
 							actorProfileId: profile.unitId,
 							kind: "moderation",
 							subjectUnitId: params.unitId,
-							payload: { realmId: params.realmId, status: row.moderationStatus },
+							payload: { realmId: params.realmId, status: row.status },
 						}),
 					),
 				);
 				await recordAuditEvent(
 					tx,
 					profile.unitId,
-					"realm.content.moderate",
+					"realm.units.moderate",
 					params.unitId,
-					"Realm content moderation updated",
+					"Realm Unit moderation updated",
 					{
 						realmId: params.realmId,
-						status: row.moderationStatus,
+						status: row.status,
 					},
 				);
 				return { row, notificationIds };
@@ -895,13 +1034,13 @@ export default new Elysia({ prefix: "/realms" })
 		},
 		{
 			contribute: true,
-			params: RealmContentParams,
-			body: ModerateRealmContentBody,
+			params: RealmUnitParams,
+			body: ModerateRealmUnitBody,
 			response: {
-				[StatusCodes.OK]: RealmContentResponse,
+				[StatusCodes.OK]: RealmUnitResponse,
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmContentNotFound"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmUnitNotFound"]),
 			},
-			detail: { summary: "Moderate Realm content", tags: ["Realms"] },
+			detail: { summary: "Update Realm Unit status", tags: ["Realms"] },
 		},
 	);

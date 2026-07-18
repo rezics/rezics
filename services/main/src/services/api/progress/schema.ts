@@ -20,7 +20,7 @@ export const UpsertProgressBody = t.Object(
 		progress: t.Optional(t.Number({ minimum: 0, maximum: 1 })),
 		completedCount: t.Optional(t.Integer({ minimum: 0 })),
 		totalTimeMs: t.Optional(t.Integer({ minimum: 0 })),
-		lastReadNodeId: t.Optional(t.Nullable(Uuid)),
+		lastContentStructureNodeId: t.Optional(t.Nullable(Uuid)),
 	},
 	{ additionalProperties: false },
 );

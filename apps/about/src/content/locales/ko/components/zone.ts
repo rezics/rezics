@@ -8,7 +8,7 @@ const content = {
 	blockSchema: "블록 스키마",
 	headerBlock: "헤더 블록",
 	feedBlock: "Feed 블록 · query: recent",
-	shelfBlock: "Shelf 블록 · 참조",
+	collectionBlock: "Collection 블록 · 참조",
 	feedResult: "Feed 결과",
 	postCard: "Post 카드",
 	catalogResult: "Catalog 결과",

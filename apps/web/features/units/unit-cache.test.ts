@@ -2,7 +2,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { describe, expect, it, vi } from "vitest";
 
 import {
-	invalidateBookContentTree,
+	invalidateBookContentStructure,
 	invalidateChapterContent,
 	invalidateUnitDetail,
 } from "./unit-cache";
@@ -44,15 +44,18 @@ describe("unit cache invalidation", () => {
 		});
 	});
 
-	it("targets the content queries changed by book and chapter edits", async () => {
+	it("targets Content Structure and chapter content changed by edits", async () => {
 		const { queryClient, invalidateQueries } = createQueryClient();
 
-		await invalidateBookContentTree(queryClient, "book-1");
+		await invalidateBookContentStructure(queryClient, "book-1");
 		await invalidateChapterContent(queryClient, "chapter-1", "zh-CN");
 
 		expect(invalidateQueries).toHaveBeenNthCalledWith(1, {
 			queryKey: [
-				{ url: "/api/units/book/:unitId/content-nodes", params: { unitId: "book-1" } },
+				{
+					url: "/api/units/book/:unitId/content-structure/nodes",
+					params: { unitId: "book-1" },
+				},
 			],
 		});
 		expect(invalidateQueries).toHaveBeenNthCalledWith(2, {

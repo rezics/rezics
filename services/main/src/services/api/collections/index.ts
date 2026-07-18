@@ -1,5 +1,9 @@
 import { StatusCodes } from "http-status-codes";
-import { and, desc, eq, sql } from "drizzle-orm";
+import {
+	createCollectionPresentationDocument,
+	createManualCollectionDefinitionDocument,
+} from "@rezics/content-structure";
+import { and, desc, eq, ne, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -61,7 +65,7 @@ export default new Elysia({ prefix: "/collections" })
 					and(
 						eq(unit.status, "published"),
 						eq(unit.visibility, "public"),
-						eq(collection.kind, "custom"),
+						ne(collection.source, "system"),
 						query.ownerId ? eq(collection.ownerProfileId, query.ownerId) : undefined,
 					),
 				)
@@ -87,9 +91,15 @@ export default new Elysia({ prefix: "/collections" })
 					})
 					.returning({ id: unit.id });
 				if (!created) throw new Error("Collection insertion did not return an id");
-				await tx
-					.insert(collection)
-					.values({ id: created.id, ownerProfileId: profile.unitId });
+				await tx.insert(collection).values({
+					id: created.id,
+					ownerProfileId: profile.unitId,
+					source: "manual",
+					definitionDocument:
+						body.definitionDocument ?? createManualCollectionDefinitionDocument(),
+					presentationDocument:
+						body.presentationDocument ?? createCollectionPresentationDocument(),
+				});
 				await tx
 					.insert(unitLocalization)
 					.values({ unitId: created.id, ...body.localization, isDefault: true });
@@ -154,11 +164,11 @@ export default new Elysia({ prefix: "/collections" })
 		async ({ params, profile, authorization, body }) => {
 			await authorization.collection.ensureOwner(params.collectionId);
 			const [current] = await database
-				.select({ kind: collection.kind })
+				.select({ systemKey: collection.systemKey })
 				.from(collection)
 				.where(eq(collection.id, params.collectionId))
 				.limit(1);
-			if (current?.kind === "favorites") throw new FavoritesEditForbidden();
+			if (current?.systemKey === "favorites") throw new FavoritesEditForbidden();
 			await database.transaction(async (tx) => {
 				await tx
 					.update(unit)
@@ -168,6 +178,15 @@ export default new Elysia({ prefix: "/collections" })
 						...(body.status === "published" ? { publishedAt: new Date() } : {}),
 					})
 					.where(eq(unit.id, params.collectionId));
+				if (body.definitionDocument || body.presentationDocument) {
+					await tx
+						.update(collection)
+						.set({
+							definitionDocument: body.definitionDocument,
+							presentationDocument: body.presentationDocument,
+						})
+						.where(eq(collection.id, params.collectionId));
+				}
 				if (body.localization) {
 					await tx
 						.update(unitLocalization)
@@ -211,11 +230,11 @@ export default new Elysia({ prefix: "/collections" })
 		async ({ params, profile, authorization }) => {
 			await authorization.collection.ensureOwner(params.collectionId);
 			const [current] = await database
-				.select({ kind: collection.kind })
+				.select({ systemKey: collection.systemKey })
 				.from(collection)
 				.where(eq(collection.id, params.collectionId))
 				.limit(1);
-			if (current?.kind === "favorites") throw new FavoritesDeleteForbidden();
+			if (current?.systemKey === "favorites") throw new FavoritesDeleteForbidden();
 			await database.transaction(async (tx) => {
 				await tx
 					.update(unit)

@@ -3,7 +3,7 @@ export default {
 	description: "Choose the type of content to create.",
 	items: {
 		book: "Book",
-		game: "Game",
+		software: "Software",
 		media: "Media",
 		entity: "Catalog entry",
 		tag: "Tag",

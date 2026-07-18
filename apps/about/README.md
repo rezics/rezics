@@ -18,7 +18,7 @@ Public URLs remain:
 /[locale]/products/[slug]/
 ```
 
-The legacy singular `product` route and `entity-source` permanently redirect. A single registry generates canonical URLs, hreflang, Open Graph, JSON-LD, and the sitemap for every public page.
+The legacy singular `product` route permanently redirects. A single registry generates canonical URLs, hreflang, Open Graph, JSON-LD, and the sitemap for every public page.
 
 ## Commands
 

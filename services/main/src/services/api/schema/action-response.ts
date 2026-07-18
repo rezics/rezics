@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { t } from "elysia";
-import { PortableText } from "@rezics/portable-text";
+import { PortableTextDocument } from "@rezics/content-structure";
 import { DateTime, Uuid } from ".";
 
 const NullableUuid = t.Nullable(Uuid);
@@ -72,7 +72,7 @@ export const RealmRulesResponse = t.Object({
 			position: t.String(),
 			language: t.String(),
 			title: t.String(),
-			content: PortableText,
+			content: PortableTextDocument,
 		}),
 	),
 });
@@ -85,10 +85,16 @@ export const RealmPinResponse = t.Object({
 	updatedAt: DateTime,
 });
 export const RealmPinListResponse = t.Object({ items: t.Array(RealmPinResponse) });
-export const RealmContentResponse = t.Object({
+export const RealmUnitResponse = t.Object({
 	realmId: Uuid,
 	unitId: Uuid,
-	moderationStatus: t.String(),
+	status: t.Union([
+		t.Literal("pending"),
+		t.Literal("visible"),
+		t.Literal("hidden"),
+		t.Literal("removed"),
+	]),
 	locked: t.Boolean(),
 	createdAt: DateTime,
+	updatedAt: DateTime,
 });

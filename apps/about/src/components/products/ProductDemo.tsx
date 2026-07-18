@@ -658,7 +658,7 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 											{zone.headerBlock}
 										</div>
 										<div className="demo-tree__row">{zone.feedBlock}</div>
-										<div className="demo-tree__row">{zone.shelfBlock}</div>
+										<div className="demo-tree__row">{zone.collectionBlock}</div>
 									</div>
 								</section>
 								<section className="demo-panel">

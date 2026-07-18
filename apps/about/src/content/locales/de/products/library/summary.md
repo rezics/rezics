@@ -1,1 +1,1 @@
-Eine persönliche Sammlung aus Shelf(mode=LIBRARY).
+Eine persönliche Sammlung aus Collection[].

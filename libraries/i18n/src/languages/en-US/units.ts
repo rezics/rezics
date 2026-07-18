@@ -1,5 +1,5 @@
 export default {
-	types: { book: "Book", game: "Game", media: "Media" },
+	types: { book: "Book", software: "Software", media: "Media" },
 	detail: {
 		information: "Unit information",
 		localizations: "Localizations",

@@ -1,5 +1,11 @@
 import { t } from "elysia";
-import { isPortableText, PortableText } from "@rezics/portable-text";
+import {
+	CollectionDefinitionDocument,
+	CollectionPresentationDocument,
+	PortableTextDocument,
+	parseDocument,
+	type PortableTextDocument as PortableTextDocumentValue,
+} from "@rezics/content-structure";
 import { DateTime, Uuid } from ".";
 import {
 	RecommendationReasonSchema,
@@ -10,9 +16,8 @@ export { toApiErrorResponse } from "./error-response";
 const NullableText = t.Nullable(t.String());
 const OrdinaryPostKindResponse = t.Union([t.Literal("post"), t.Literal("reply")]);
 
-export function toPortableTextResponse(value: unknown): PortableText {
-	if (!isPortableText(value)) throw new Error("Persisted Portable Text is invalid");
-	return value;
+export function toPortableTextResponse(value: unknown): PortableTextDocumentValue {
+	return parseDocument(PortableTextDocument, value);
 }
 
 export const CompletionStateResponse = t.Object({ completed: t.Boolean() });
@@ -33,7 +38,7 @@ const LocalizationResponse = t.Object({
 	language: t.String(),
 	title: NullableText,
 	summary: NullableText,
-	description: t.Nullable(PortableText),
+	description: t.Nullable(PortableTextDocument),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
@@ -231,7 +236,7 @@ export const PostListResponse = t.Object({
 			subjectId: t.Nullable(Uuid),
 			rootPostId: t.Nullable(Uuid),
 			parentPostId: t.Nullable(Uuid),
-			body: PortableText,
+			body: PortableTextDocument,
 			replyCount: t.Integer(),
 			title: NullableText,
 			latestRevisionId: t.Nullable(Uuid),
@@ -251,7 +256,7 @@ export const FeedResponse = t.Object({
 			subjectId: t.Nullable(Uuid),
 			rootPostId: t.Nullable(Uuid),
 			parentPostId: t.Nullable(Uuid),
-			body: PortableText,
+			body: PortableTextDocument,
 			replyCount: t.Integer(),
 			title: NullableText,
 			latestRevisionId: t.Nullable(Uuid),
@@ -309,7 +314,7 @@ export const PublicProfileResponse = t.Object({
 	avatar: NullableText,
 	avatarKey: t.Optional(NullableText),
 	summary: NullableText,
-	description: t.Nullable(PortableText),
+	description: t.Nullable(PortableTextDocument),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 	viewerFollowing: t.Optional(t.Boolean()),
@@ -337,7 +342,7 @@ export const ProgressListResponse = t.Object({
 			totalTimeMs: t.Integer(),
 			firstSeenAt: DateTime,
 			lastSeenAt: DateTime,
-			lastReadNodeId: t.Nullable(Uuid),
+			lastContentStructureNodeId: t.Nullable(Uuid),
 			lastReadAnchor: t.Nullable(t.Unknown()),
 			type: t.String(),
 			slug: NullableText,
@@ -355,7 +360,7 @@ export const ProgressResponse = t.Object({
 	totalTimeMs: t.Integer(),
 	firstSeenAt: DateTime,
 	lastSeenAt: DateTime,
-	lastReadNodeId: t.Nullable(Uuid),
+	lastContentStructureNodeId: t.Nullable(Uuid),
 	lastReadAnchor: t.Nullable(t.Unknown()),
 	createdAt: DateTime,
 	updatedAt: DateTime,
@@ -401,7 +406,10 @@ export const CollectionDetailResponse = t.Object({
 	status: t.String(),
 	visibility: t.String(),
 	language: NullableText,
-	kind: t.String(),
+	source: t.Union([t.Literal("manual"), t.Literal("dynamic"), t.Literal("system")]),
+	systemKey: t.Nullable(t.Literal("favorites")),
+	definitionDocument: CollectionDefinitionDocument,
+	presentationDocument: CollectionPresentationDocument,
 	ownerId: Uuid,
 	itemCount: t.Integer(),
 	createdAt: DateTime,
@@ -442,7 +450,7 @@ export const PostDetailResponse = t.Object({
 	parentPostId: t.Nullable(Uuid),
 	replyCount: t.Integer(),
 	title: NullableText,
-	body: PortableText,
+	body: PortableTextDocument,
 	latestRevisionId: t.Nullable(Uuid),
 	createdAt: DateTime,
 	updatedAt: DateTime,
@@ -456,12 +464,12 @@ export const ReviewDetailResponse = t.Object({
 	title: NullableText,
 	summary: NullableText,
 	language: NullableText,
-	body: t.Nullable(PortableText),
+	body: t.Nullable(PortableTextDocument),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 	capabilities: t.Object({ canEdit: t.Boolean() }),
 });
-export const ContentNodeListResponse = t.Object({
+export const ContentStructureNodeListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			id: Uuid,
@@ -473,7 +481,7 @@ export const ContentNodeListResponse = t.Object({
 		}),
 	),
 });
-export const ContentNodeResponse = t.Object({
+export const ContentStructureNodeResponse = t.Object({
 	id: Uuid,
 	unitId: Uuid,
 	parentId: t.Nullable(Uuid),
@@ -491,7 +499,7 @@ export const ChapterDetailResponse = t.Object({
 	title: t.String(),
 	position: t.String(),
 	language: t.String(),
-	content: PortableText,
+	content: PortableTextDocument,
 	status: t.String(),
 	updatedAt: DateTime,
 	previousChapterId: t.Nullable(Uuid),
@@ -508,7 +516,7 @@ export const ReplyListResponse = t.Object({
 			parentPostId: t.Nullable(Uuid),
 			contextRealmId: t.Nullable(Uuid),
 			depth: t.Integer(),
-			body: PortableText,
+			body: PortableTextDocument,
 			status: t.String(),
 			latestRevisionId: t.Nullable(Uuid),
 			createdAt: DateTime,
@@ -527,7 +535,7 @@ export const ReplyThreadResponse = t.Object({
 			parentPostId: t.Nullable(Uuid),
 			contextRealmId: t.Nullable(Uuid),
 			depth: t.Integer(),
-			body: PortableText,
+			body: PortableTextDocument,
 			status: t.String(),
 			latestRevisionId: t.Nullable(Uuid),
 			childCount: t.Integer(),

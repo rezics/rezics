@@ -5,7 +5,7 @@ import Elysia from "elysia";
 import catalog from "./catalog";
 import collections from "./collections";
 import realms from "./realms";
-import content from "./content";
+import contentStructure from "./content-structure";
 import posts from "./posts";
 import health from "./health";
 import history from "./history";
@@ -79,7 +79,7 @@ export default new Elysia()
 				.use(units)
 				.use(history)
 				.use(catalog)
-				.use(content)
+				.use(contentStructure)
 				.use(progress)
 				.use(collections)
 				.use(reviews)

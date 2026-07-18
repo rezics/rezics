@@ -1,6 +1,6 @@
 import {
 	getApiChaptersByChapterIdQueryKey,
-	getApiUnitsBookByUnitIdContentNodesQueryKey,
+	getApiUnitsBookByUnitIdContentStructureNodesQueryKey,
 	getApiUnitsByTypeByUnitIdQueryKey,
 	getApiUnitsByTypeQueryKey,
 } from "@rezics/openapi-tanstack-query";
@@ -28,9 +28,11 @@ export async function invalidateUnitDetail(
 	]);
 }
 
-export async function invalidateBookContentTree(queryClient: QueryClient, bookId: string) {
+export async function invalidateBookContentStructure(queryClient: QueryClient, bookId: string) {
 	await queryClient.invalidateQueries({
-		queryKey: getApiUnitsBookByUnitIdContentNodesQueryKey({ path: { unitId: bookId } }),
+		queryKey: getApiUnitsBookByUnitIdContentStructureNodesQueryKey({
+			path: { unitId: bookId },
+		}),
 	});
 }
 

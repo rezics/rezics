@@ -11,14 +11,15 @@ import {
 	useGetApiRealmsByRealmIdPins,
 	useGetApiRealmsByRealmIdRules,
 	usePatchApiRealmsByRealmId,
-	usePatchApiRealmsByRealmIdContentByUnitId,
+	usePatchApiRealmsByRealmIdUnitsByUnitId,
 	usePatchApiRealmsByRealmIdMembersByProfileId,
 	usePutApiRealmsByRealmIdPinsByUnitId,
 	usePutApiRealmsByRealmIdRules,
 	type GetApiRealmsByRealmIdRulesStatus200,
 	type GetApiRealmsByRealmIdStatus200,
 } from "@rezics/openapi-tanstack-query";
-import { normalizePortableText, type PortableTextValue } from "@rezics/portable-text";
+import type { PortableTextDocument } from "@rezics/content-structure";
+import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
@@ -39,16 +40,22 @@ import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { invalidatePostQueries } from "@/features/posts/query";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { readPortableText, writePortableText } from "@/lib/content-structure";
 import { selectLocalization } from "@/lib/localization";
 import { canManageRealm } from "./realm-permissions";
 import { invalidateRealmDetails } from "./query";
 
 const MemberRoles = ["owner", "admin", "moderator", "member"] as const;
 const MemberStates = ["active", "pending", "muted", "removed", "banned"] as const;
-const ModerationStates = ["pending", "approved", "removed"] as const;
+const RealmUnitStates = ["pending", "visible", "hidden", "removed"] as const;
 
 type PickedEntity = { id: string; label: string };
-type RuleDraft = { language: string; title: string; content: PortableTextValue };
+type RuleDraft = {
+	language: string;
+	title: string;
+	content: PortableTextValue;
+	document?: PortableTextDocument;
+};
 type MemberRole = (typeof MemberRoles)[number];
 type MemberState = (typeof MemberStates)[number];
 
@@ -389,7 +396,8 @@ function RealmRules({
 				? data.items.map((rule) => ({
 						language: rule.language,
 						title: rule.title,
-						content: normalizePortableText(rule.content),
+						content: readPortableText(rule.content),
+						document: rule.content,
 					}))
 				: [{ language: locale.target, title: "", content: [] }],
 		);
@@ -426,7 +434,7 @@ function RealmRules({
 					rules: rules.map((rule) => ({
 						language: rule.language,
 						title: rule.title.trim(),
-						content: normalizePortableText(rule.content),
+						content: writePortableText(rule.content, rule.document),
 					})),
 				},
 			},
@@ -754,8 +762,15 @@ function RealmModerationRow({
 }) {
 	const { t } = useTranslation({ suspense: true });
 	const queryClient = useQueryClient();
-	const moderate = usePatchApiRealmsByRealmIdContentByUnitId();
-	function update(data: { status?: (typeof ModerationStates)[number]; locked?: boolean }) {
+	const moderate = usePatchApiRealmsByRealmIdUnitsByUnitId();
+	function update(
+		data:
+			| {
+					status: (typeof RealmUnitStates)[number];
+					locked?: boolean;
+			  }
+			| { locked: boolean },
+	) {
 		moderate.mutate(
 			{ path: { realmId, unitId: post.id }, body: data },
 			{
@@ -768,7 +783,7 @@ function RealmModerationRow({
 			<CardContent className="grid gap-3 p-5 sm:grid-cols-[1fr_auto] sm:items-center">
 				<p className="font-medium">{post.title ?? t.posts.untitled}</p>
 				<div className="flex flex-wrap gap-2">
-					{ModerationStates.map((status) => (
+					{RealmUnitStates.map((status) => (
 						<Button
 							key={status}
 							type="button"

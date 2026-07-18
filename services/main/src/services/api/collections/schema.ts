@@ -1,4 +1,8 @@
 import { type Static, t } from "elysia";
+import {
+	CollectionDefinitionDocument,
+	CollectionPresentationDocument,
+} from "@rezics/content-structure";
 import { LifecycleInput, LocalizationInput, Uuid } from "../schema";
 
 export const ListCollectionsQuery = t.Object({
@@ -11,6 +15,8 @@ export const CreateCollectionBody = t.Object({
 	slug: t.String({ minLength: 3, maxLength: 72 }),
 	localization: LocalizationInput,
 	visibility: LifecycleInput.visibility,
+	definitionDocument: t.Optional(CollectionDefinitionDocument),
+	presentationDocument: t.Optional(CollectionPresentationDocument),
 });
 export type CreateCollectionBody = Static<typeof CreateCollectionBody>;
 
@@ -21,6 +27,8 @@ export const UpdateCollectionBody = t.Object({
 	status: LifecycleInput.status,
 	visibility: LifecycleInput.visibility,
 	localization: t.Optional(LocalizationInput),
+	definitionDocument: t.Optional(CollectionDefinitionDocument),
+	presentationDocument: t.Optional(CollectionPresentationDocument),
 });
 export type UpdateCollectionBody = Static<typeof UpdateCollectionBody>;
 

@@ -7,7 +7,7 @@ import { database } from "../../database";
 import {
 	post,
 	profile as profileTable,
-	realmContent,
+	realmUnit,
 	score,
 	unit,
 	unitCollaborator,
@@ -43,8 +43,9 @@ const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
 const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitEditForbidden", "UnitFieldLocked"]);
 
 const primaryRealmId = sql<string | null>`(
-	select rc.realm_id from realm_content rc
+	select rc.realm_id from realm_unit rc
 	where rc.unit_id = ${post.id}
+		and rc.status = 'visible'
 	order by rc.created_at, rc.realm_id limit 1
 )`;
 
@@ -85,7 +86,7 @@ export default new Elysia()
 								isNull(unit.deletedAt),
 								query.targetId ? eq(post.subjectUnitId, query.targetId) : undefined,
 								query.realmId
-									? sql`exists(select 1 from realm_content rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId})`
+									? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible')`
 									: undefined,
 							),
 						)
@@ -156,7 +157,7 @@ export default new Elysia()
 						});
 						if (body.realmId)
 							await tx
-								.insert(realmContent)
+								.insert(realmUnit)
 								.values({ realmId: body.realmId, unitId: created.id });
 						await recordUnitRevision(tx, {
 							unitId: created.id,

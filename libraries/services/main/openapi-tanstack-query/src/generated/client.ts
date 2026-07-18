@@ -109,18 +109,24 @@ import type {
 	PutApiZonesByZoneIdPagesByPageIdResponses,
 	DeleteApiZonesByZoneIdPagesByPageIdOptions,
 	DeleteApiZonesByZoneIdPagesByPageIdResponses,
+	GetApiZonesByZoneIdMenusOptions,
+	GetApiZonesByZoneIdMenusResponses,
+	PutApiZonesByZoneIdMenusBySlotOptions,
+	PutApiZonesByZoneIdMenusBySlotResponses,
+	DeleteApiZonesByZoneIdMenusBySlotOptions,
+	DeleteApiZonesByZoneIdMenusBySlotResponses,
 	PutApiZonesByZoneIdFollowOptions,
 	PutApiZonesByZoneIdFollowResponses,
 	DeleteApiZonesByZoneIdFollowOptions,
 	DeleteApiZonesByZoneIdFollowResponses,
-	GetApiGamesByGameIdSystemRequirementsOptions,
-	GetApiGamesByGameIdSystemRequirementsResponses,
-	PostApiGamesByGameIdSystemRequirementsOptions,
-	PostApiGamesByGameIdSystemRequirementsResponses,
-	PutApiGamesByGameIdSystemRequirementsByRequirementIdOptions,
-	PutApiGamesByGameIdSystemRequirementsByRequirementIdResponses,
-	DeleteApiGamesByGameIdSystemRequirementsByRequirementIdOptions,
-	DeleteApiGamesByGameIdSystemRequirementsByRequirementIdResponses,
+	GetApiSoftwareBySoftwareIdSystemRequirementsOptions,
+	GetApiSoftwareBySoftwareIdSystemRequirementsResponses,
+	PostApiSoftwareBySoftwareIdSystemRequirementsOptions,
+	PostApiSoftwareBySoftwareIdSystemRequirementsResponses,
+	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
+	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses,
+	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
+	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses,
 	GetApiUsersMeOptions,
 	GetApiUsersMeResponses,
 	PatchApiUsersMeOptions,
@@ -205,12 +211,12 @@ import type {
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses,
 	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdOptions,
 	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdResponses,
-	GetApiUnitsBookByUnitIdContentNodesOptions,
-	GetApiUnitsBookByUnitIdContentNodesResponses,
-	PostApiUnitsBookByUnitIdContentNodesOptions,
-	PostApiUnitsBookByUnitIdContentNodesResponses,
-	PatchApiUnitsBookByUnitIdContentNodesByNodeIdOptions,
-	PatchApiUnitsBookByUnitIdContentNodesByNodeIdResponses,
+	GetApiUnitsBookByUnitIdContentStructureNodesOptions,
+	GetApiUnitsBookByUnitIdContentStructureNodesResponses,
+	PostApiUnitsBookByUnitIdContentStructureNodesOptions,
+	PostApiUnitsBookByUnitIdContentStructureNodesResponses,
+	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
+	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdResponses,
 	GetApiChaptersByChapterIdOptions,
 	GetApiChaptersByChapterIdResponses,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentOptions,
@@ -331,8 +337,14 @@ import type {
 	PutApiRealmsByRealmIdPinsByUnitIdResponses,
 	DeleteApiRealmsByRealmIdPinsByUnitIdOptions,
 	DeleteApiRealmsByRealmIdPinsByUnitIdResponses,
-	PatchApiRealmsByRealmIdContentByUnitIdOptions,
-	PatchApiRealmsByRealmIdContentByUnitIdResponses,
+	GetApiRealmsByRealmIdDocksOptions,
+	GetApiRealmsByRealmIdDocksResponses,
+	PutApiRealmsByRealmIdDocksBySlotOptions,
+	PutApiRealmsByRealmIdDocksBySlotResponses,
+	DeleteApiRealmsByRealmIdDocksBySlotOptions,
+	DeleteApiRealmsByRealmIdDocksBySlotResponses,
+	PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
+	PatchApiRealmsByRealmIdUnitsByUnitIdResponses,
 	PostApiSearchOptions,
 	PostApiSearchResponses,
 	PostApiSearchByIndexOptions,
@@ -1181,6 +1193,52 @@ export function deleteApiZonesByZoneIdPagesByPageId<ThrowOnError extends boolean
 }
 
 /**
+ * @summary List Zone menus
+ * {@link /api/zones/:zoneId/menus}
+ */
+export function getApiZonesByZoneIdMenus<ThrowOnError extends boolean = true>(
+	options: Options<GetApiZonesByZoneIdMenusOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiZonesByZoneIdMenusResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/zones/{zoneId}/menus", ...config }) as Promise<
+		RequestResult<GetApiZonesByZoneIdMenusResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Create or replace Zone menu
+ * {@link /api/zones/:zoneId/menus/:slot}
+ */
+export function putApiZonesByZoneIdMenusBySlot<ThrowOnError extends boolean = true>(
+	options: Options<PutApiZonesByZoneIdMenusBySlotOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiZonesByZoneIdMenusBySlotResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/zones/{zoneId}/menus/{slot}",
+		...config,
+	}) as Promise<RequestResult<PutApiZonesByZoneIdMenusBySlotResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Delete Zone menu
+ * {@link /api/zones/:zoneId/menus/:slot}
+ */
+export function deleteApiZonesByZoneIdMenusBySlot<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiZonesByZoneIdMenusBySlotOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiZonesByZoneIdMenusBySlotResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/zones/{zoneId}/menus/{slot}",
+		...config,
+	}) as Promise<RequestResult<DeleteApiZonesByZoneIdMenusBySlotResponses, ThrowOnError>>;
+}
+
+/**
  * @summary Follow Zone
  * {@link /api/zones/:zoneId/follow}
  */
@@ -1209,79 +1267,98 @@ export function deleteApiZonesByZoneIdFollow<ThrowOnError extends boolean = true
 }
 
 /**
- * @summary List Game system requirements
- * {@link /api/games/:gameId/system-requirements}
+ * @summary List Software system requirements
+ * {@link /api/software/:softwareId/system-requirements}
  */
-export function getApiGamesByGameIdSystemRequirements<ThrowOnError extends boolean = true>(
-	options: Options<GetApiGamesByGameIdSystemRequirementsOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiGamesByGameIdSystemRequirementsResponses, ThrowOnError>> {
+export function getApiSoftwareBySoftwareIdSystemRequirements<ThrowOnError extends boolean = true>(
+	options: Options<GetApiSoftwareBySoftwareIdSystemRequirementsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiSoftwareBySoftwareIdSystemRequirementsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/games/{gameId}/system-requirements",
+		url: "/api/software/{softwareId}/system-requirements",
 		...config,
-	}) as Promise<RequestResult<GetApiGamesByGameIdSystemRequirementsResponses, ThrowOnError>>;
+	}) as Promise<
+		RequestResult<GetApiSoftwareBySoftwareIdSystemRequirementsResponses, ThrowOnError>
+	>;
 }
 
 /**
- * @summary Create Game system requirement
- * {@link /api/games/:gameId/system-requirements}
+ * @summary Create Software system requirement
+ * {@link /api/software/:softwareId/system-requirements}
  */
-export function postApiGamesByGameIdSystemRequirements<ThrowOnError extends boolean = true>(
-	options: Options<PostApiGamesByGameIdSystemRequirementsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiGamesByGameIdSystemRequirementsResponses, ThrowOnError>> {
+export function postApiSoftwareBySoftwareIdSystemRequirements<ThrowOnError extends boolean = true>(
+	options: Options<PostApiSoftwareBySoftwareIdSystemRequirementsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiSoftwareBySoftwareIdSystemRequirementsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/games/{gameId}/system-requirements",
+		url: "/api/software/{softwareId}/system-requirements",
 		...config,
-	}) as Promise<RequestResult<PostApiGamesByGameIdSystemRequirementsResponses, ThrowOnError>>;
+	}) as Promise<
+		RequestResult<PostApiSoftwareBySoftwareIdSystemRequirementsResponses, ThrowOnError>
+	>;
 }
 
 /**
- * @summary Replace Game system requirement
- * {@link /api/games/:gameId/system-requirements/:requirementId}
+ * @summary Replace Software system requirement
+ * {@link /api/software/:softwareId/system-requirements/:requirementId}
  */
-export function putApiGamesByGameIdSystemRequirementsByRequirementId<
+export function putApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<PutApiGamesByGameIdSystemRequirementsByRequirementIdOptions, ThrowOnError>,
+	options: Options<
+		PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
+		ThrowOnError
+	>,
 ): Promise<
-	RequestResult<PutApiGamesByGameIdSystemRequirementsByRequirementIdResponses, ThrowOnError>
+	RequestResult<
+		PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses,
+		ThrowOnError
+	>
 > {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/games/{gameId}/system-requirements/{requirementId}",
+		url: "/api/software/{softwareId}/system-requirements/{requirementId}",
 		...config,
 	}) as Promise<
-		RequestResult<PutApiGamesByGameIdSystemRequirementsByRequirementIdResponses, ThrowOnError>
+		RequestResult<
+			PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses,
+			ThrowOnError
+		>
 	>;
 }
 
 /**
- * @summary Delete Game system requirement
- * {@link /api/games/:gameId/system-requirements/:requirementId}
+ * @summary Delete Software system requirement
+ * {@link /api/software/:softwareId/system-requirements/:requirementId}
  */
-export function deleteApiGamesByGameIdSystemRequirementsByRequirementId<
+export function deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<
 	ThrowOnError extends boolean = true,
 >(
-	options: Options<DeleteApiGamesByGameIdSystemRequirementsByRequirementIdOptions, ThrowOnError>,
+	options: Options<
+		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
+		ThrowOnError
+	>,
 ): Promise<
-	RequestResult<DeleteApiGamesByGameIdSystemRequirementsByRequirementIdResponses, ThrowOnError>
+	RequestResult<
+		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses,
+		ThrowOnError
+	>
 > {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "DELETE",
-		url: "/api/games/{gameId}/system-requirements/{requirementId}",
+		url: "/api/software/{softwareId}/system-requirements/{requirementId}",
 		...config,
 	}) as Promise<
 		RequestResult<
-			DeleteApiGamesByGameIdSystemRequirementsByRequirementIdResponses,
+			DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses,
 			ThrowOnError
 		>
 	>;
@@ -1955,52 +2032,60 @@ export function putApiUnitsByTypeByUnitIdVersionOfByCanonicalId<
 }
 
 /**
- * @summary List book content tree
- * {@link /api/units/book/:unitId/content-nodes}
+ * @summary List book Content Structure nodes
+ * {@link /api/units/book/:unitId/content-structure/nodes}
  */
-export function getApiUnitsBookByUnitIdContentNodes<ThrowOnError extends boolean = true>(
-	options: Options<GetApiUnitsBookByUnitIdContentNodesOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsBookByUnitIdContentNodesResponses, ThrowOnError>> {
+export function getApiUnitsBookByUnitIdContentStructureNodes<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitsBookByUnitIdContentStructureNodesOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitsBookByUnitIdContentStructureNodesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/units/book/{unitId}/content-nodes",
+		url: "/api/units/book/{unitId}/content-structure/nodes",
 		...config,
-	}) as Promise<RequestResult<GetApiUnitsBookByUnitIdContentNodesResponses, ThrowOnError>>;
+	}) as Promise<
+		RequestResult<GetApiUnitsBookByUnitIdContentStructureNodesResponses, ThrowOnError>
+	>;
 }
 
 /**
  * @summary Create book group or chapter
- * {@link /api/units/book/:unitId/content-nodes}
+ * {@link /api/units/book/:unitId/content-structure/nodes}
  */
-export function postApiUnitsBookByUnitIdContentNodes<ThrowOnError extends boolean = true>(
-	options: Options<PostApiUnitsBookByUnitIdContentNodesOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiUnitsBookByUnitIdContentNodesResponses, ThrowOnError>> {
+export function postApiUnitsBookByUnitIdContentStructureNodes<ThrowOnError extends boolean = true>(
+	options: Options<PostApiUnitsBookByUnitIdContentStructureNodesOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiUnitsBookByUnitIdContentStructureNodesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/units/book/{unitId}/content-nodes",
+		url: "/api/units/book/{unitId}/content-structure/nodes",
 		...config,
-	}) as Promise<RequestResult<PostApiUnitsBookByUnitIdContentNodesResponses, ThrowOnError>>;
+	}) as Promise<
+		RequestResult<PostApiUnitsBookByUnitIdContentStructureNodesResponses, ThrowOnError>
+	>;
 }
 
 /**
- * @summary Move or rename content node
- * {@link /api/units/book/:unitId/content-nodes/:nodeId}
+ * @summary Move or rename Content Structure node
+ * {@link /api/units/book/:unitId/content-structure/nodes/:nodeId}
  */
-export function patchApiUnitsBookByUnitIdContentNodesByNodeId<ThrowOnError extends boolean = true>(
-	options: Options<PatchApiUnitsBookByUnitIdContentNodesByNodeIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiUnitsBookByUnitIdContentNodesByNodeIdResponses, ThrowOnError>> {
+export function patchApiUnitsBookByUnitIdContentStructureNodesByNodeId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdResponses, ThrowOnError>
+> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PATCH",
-		url: "/api/units/book/{unitId}/content-nodes/{nodeId}",
+		url: "/api/units/book/{unitId}/content-structure/nodes/{nodeId}",
 		...config,
 	}) as Promise<
-		RequestResult<PatchApiUnitsBookByUnitIdContentNodesByNodeIdResponses, ThrowOnError>
+		RequestResult<PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdResponses, ThrowOnError>
 	>;
 }
 
@@ -2100,7 +2185,7 @@ export function deleteApiProgressByUnitId<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary Complete content node
+ * @summary Complete Content Structure node
  * {@link /api/progress/:unitId/nodes/:nodeId}
  */
 export function putApiProgressByUnitIdNodesByNodeId<ThrowOnError extends boolean = true>(
@@ -2116,7 +2201,7 @@ export function putApiProgressByUnitIdNodesByNodeId<ThrowOnError extends boolean
 }
 
 /**
- * @summary Uncomplete content node
+ * @summary Uncomplete Content Structure node
  * {@link /api/progress/:unitId/nodes/:nodeId}
  */
 export function deleteApiProgressByUnitIdNodesByNodeId<ThrowOnError extends boolean = true>(
@@ -2902,19 +2987,65 @@ export function deleteApiRealmsByRealmIdPinsByUnitId<ThrowOnError extends boolea
 }
 
 /**
- * @summary Moderate Realm content
- * {@link /api/realms/:realmId/content/:unitId}
+ * @summary List Realm docks
+ * {@link /api/realms/:realmId/docks}
  */
-export function patchApiRealmsByRealmIdContentByUnitId<ThrowOnError extends boolean = true>(
-	options: Options<PatchApiRealmsByRealmIdContentByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiRealmsByRealmIdContentByUnitIdResponses, ThrowOnError>> {
+export function getApiRealmsByRealmIdDocks<ThrowOnError extends boolean = true>(
+	options: Options<GetApiRealmsByRealmIdDocksOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiRealmsByRealmIdDocksResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/realms/{realmId}/docks", ...config }) as Promise<
+		RequestResult<GetApiRealmsByRealmIdDocksResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Create or replace Realm dock
+ * {@link /api/realms/:realmId/docks/:slot}
+ */
+export function putApiRealmsByRealmIdDocksBySlot<ThrowOnError extends boolean = true>(
+	options: Options<PutApiRealmsByRealmIdDocksBySlotOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiRealmsByRealmIdDocksBySlotResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/realms/{realmId}/docks/{slot}",
+		...config,
+	}) as Promise<RequestResult<PutApiRealmsByRealmIdDocksBySlotResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Delete Realm dock
+ * {@link /api/realms/:realmId/docks/:slot}
+ */
+export function deleteApiRealmsByRealmIdDocksBySlot<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiRealmsByRealmIdDocksBySlotOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiRealmsByRealmIdDocksBySlotResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/realms/{realmId}/docks/{slot}",
+		...config,
+	}) as Promise<RequestResult<DeleteApiRealmsByRealmIdDocksBySlotResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Update Realm Unit status
+ * {@link /api/realms/:realmId/units/:unitId}
+ */
+export function patchApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolean = true>(
+	options: Options<PatchApiRealmsByRealmIdUnitsByUnitIdOptions, ThrowOnError>,
+): Promise<RequestResult<PatchApiRealmsByRealmIdUnitsByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PATCH",
-		url: "/api/realms/{realmId}/content/{unitId}",
+		url: "/api/realms/{realmId}/units/{unitId}",
 		...config,
-	}) as Promise<RequestResult<PatchApiRealmsByRealmIdContentByUnitIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PatchApiRealmsByRealmIdUnitsByUnitIdResponses, ThrowOnError>>;
 }
 
 /**

@@ -3,8 +3,9 @@ export const DefaultLanguage = "zh-hant";
 export const UnitKindValues = [
 	"profile",
 	"book",
-	"game",
+	"software",
 	"media",
+	"release",
 	"entity",
 	"tag",
 	"series",
@@ -27,7 +28,7 @@ export const AiDisclosureValues = [
 ] as const;
 export const ModerationStatusValues = ["approved", "pending", "removed"] as const;
 export const ContentStatusValues = ["draft", "published", "archived"] as const;
-export const PostKindValues = ["post", "reply", "review", "chapter"] as const;
+export const PostKindValues = ["post", "reply", "review", "chapter", "wiki", "picture"] as const;
 export const ProgressStatusValues = [
 	"backlog",
 	"active",
@@ -82,7 +83,7 @@ export const FeedSortValues = ["best", "hot", "new", "top", "rising"] as const;
 export const RecommendationSurfaceValues = [
 	"home_feed",
 	"home_book",
-	"home_game",
+	"home_software",
 	"home_media",
 	"unit_related",
 	"post_related",
@@ -120,7 +121,7 @@ export const RealmCapabilityValues = [
 	"realm.members.manage",
 	"realm.rules.publish",
 	"realm.pins.manage",
-	"realm.content.moderate",
+	"realm.units.moderate",
 ] as const;
 export const PlatformCapabilityValues = [
 	"unit.edit",

@@ -1,4 +1,4 @@
-const UnitTypes = ["book", "game", "media"] as const;
+const UnitTypes = ["book", "software", "media"] as const;
 
 export type UnitType = (typeof UnitTypes)[number];
 

@@ -12,7 +12,7 @@ import post from "./post";
 import wiki from "./wiki";
 import picture from "./picture";
 import review from "./review";
-import shelf from "./shelf";
+import collection from "./collection";
 import library from "./library";
 import realm from "./realm";
 import zone from "./zone";
@@ -22,9 +22,9 @@ import contentStructure from "./content-structure";
 import history from "./history";
 import editor from "./editor";
 import feed from "./feed";
-import tags from "./tags";
+import tag from "./tag";
 import progress from "./progress";
-import entityAttribution from "./entity-attribution";
+import entity from "./entity";
 import apiOauth from "./api-oauth";
 
 const byId = {
@@ -39,7 +39,7 @@ const byId = {
 	wiki: wiki,
 	picture: picture,
 	review: review,
-	shelf: shelf,
+	collection: collection,
 	library: library,
 	realm: realm,
 	zone: zone,
@@ -49,9 +49,9 @@ const byId = {
 	history: history,
 	editor: editor,
 	feed: feed,
-	tags: tags,
+	tag: tag,
 	progress: progress,
-	"entity-attribution": entityAttribution,
+	entity: entity,
 	"api-oauth": apiOauth,
 } satisfies Record<ProductId, typeof book>;
 

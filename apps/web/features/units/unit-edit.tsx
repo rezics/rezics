@@ -10,7 +10,7 @@ import {
 	usePutApiUnitsByTypeByUnitIdTagsByTagId,
 	usePutApiUnitsByTypeByUnitIdVersionOfByCanonicalId,
 } from "@rezics/openapi-tanstack-query";
-import { normalizePortableText, type PortableTextValue } from "@rezics/portable-text";
+import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
@@ -28,6 +28,7 @@ import { RequireSession } from "@/features/auth/require-session";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { readPortableText, writePortableText } from "@/lib/content-structure";
 import { invalidateUnitDetail } from "./unit-cache";
 import type { UnitType } from "./unit-types";
 
@@ -306,7 +307,7 @@ function UnitLocalizationForm({
 	const { t } = useTranslation({ suspense: true });
 	const queryClient = useQueryClient();
 	const [description, setDescription] = useState<PortableTextValue>(() =>
-		normalizePortableText(localization?.description),
+		readPortableText(localization?.description),
 	);
 	const update = usePutApiUnitsByTypeByUnitIdLocalizationsByLanguage({
 		mutation: {
@@ -322,7 +323,7 @@ function UnitLocalizationForm({
 				body: {
 					title: String(form.get("title") ?? "").trim(),
 					summary: String(form.get("summary") ?? "").trim(),
-					description: normalizePortableText(description),
+					description: writePortableText(description, localization?.description),
 				},
 			});
 		} catch {

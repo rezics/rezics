@@ -14,7 +14,8 @@ import {
 	moderationCase,
 	post,
 	profile as profileTable,
-	realmContent,
+	realmUnit,
+	realmUnitStatusEvent,
 	realmMember,
 	RealmCapabilityValues,
 	unit,
@@ -166,7 +167,7 @@ async function ensureCaseAccess(
 	row: Pick<CaseRecord, "authority" | "realmId">,
 ): Promise<void> {
 	if (row.authority === "realm" && row.realmId) {
-		await authorization.realm.ensureCapability(row.realmId, "realm.content.moderate");
+		await authorization.realm.ensureCapability(row.realmId, "realm.units.moderate");
 		return;
 	}
 	await authorization.platform.ensureCapability("platform.moderate");
@@ -244,14 +245,12 @@ async function getModerationTargetContext(
 		recipientProfileId = target.id;
 		subjectUnitId = target.id;
 	}
-	if (row.targetKind === "realm_content") {
+	if (row.targetKind === "realm_unit") {
 		if (!row.realmId) throw new ModerationRealmMissing();
 		const [target] = await tx
-			.select({ unitId: realmContent.unitId })
-			.from(realmContent)
-			.where(
-				and(eq(realmContent.realmId, row.realmId), eq(realmContent.unitId, row.targetId)),
-			)
+			.select({ unitId: realmUnit.unitId })
+			.from(realmUnit)
+			.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetId)))
 			.limit(1);
 		if (!target) throw new ModerationTargetNotFound();
 		subjectUnitId = target.unitId;
@@ -337,14 +336,38 @@ async function applyAction(
 					),
 				);
 	}
-	if (row.targetKind === "realm_content") {
+	if (row.targetKind === "realm_unit") {
 		if (!row.realmId) throw new ModerationRealmMissing();
-		await tx
-			.update(realmContent)
-			.set({ moderationStatus: status, locked })
-			.where(
-				and(eq(realmContent.realmId, row.realmId), eq(realmContent.unitId, row.targetId)),
-			);
+		const [current] = await tx
+			.select({ status: realmUnit.status })
+			.from(realmUnit)
+			.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetId)))
+			.limit(1);
+		if (!current) throw new ModerationTargetNotFound();
+		const nextStatus = status === "approved" ? "visible" : status;
+		if (nextStatus && locked !== undefined)
+			await tx
+				.update(realmUnit)
+				.set({ status: nextStatus, locked })
+				.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetId)));
+		else if (nextStatus)
+			await tx
+				.update(realmUnit)
+				.set({ status: nextStatus })
+				.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetId)));
+		else if (locked !== undefined)
+			await tx
+				.update(realmUnit)
+				.set({ locked })
+				.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetId)));
+		if (nextStatus && nextStatus !== current.status)
+			await tx.insert(realmUnitStatusEvent).values({
+				realmId: row.realmId,
+				unitId: row.targetId,
+				fromStatus: current.status,
+				toStatus: nextStatus,
+				changedByProfileId: actorProfileId,
+			});
 	}
 	if (row.targetKind === "realm_member") {
 		if (!row.realmId) throw new ModerationRealmMissing();

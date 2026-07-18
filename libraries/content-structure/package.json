@@ -1,0 +1,16 @@
+{
+	"name": "@rezics/content-structure",
+	"private": true,
+	"type": "module",
+	"sideEffects": false,
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"dependencies": {
+		"@rezics/portable-text": "workspace:*",
+		"@sinclair/typebox": "^0.34.41"
+	},
+	"devDependencies": {
+		"typescript": "7"
+	}
+}

@@ -3,7 +3,20 @@ import { createHash } from "node:crypto";
 import { and, desc, eq, max, sql } from "drizzle-orm";
 import { createSchemaFactory } from "drizzle-orm/zod";
 import { z } from "zod";
-import { isPortableText, type JsonValue, type PortableText } from "@rezics/portable-text";
+import {
+	CollectionDefinitionDocument,
+	CollectionPresentationDocument,
+	DockDocument,
+	ZoneBoundaryDocument,
+	ZoneMenuDocument,
+	ZonePageDocument,
+	ZoneThemeDocument,
+	isDocument,
+	isPortableTextDocument,
+	type PortableTextDocument as PortableTextDocumentValue,
+} from "@rezics/content-structure";
+import type { JsonValue } from "@rezics/portable-text";
+import type { Static, TSchema } from "@sinclair/typebox";
 
 import type { DatabaseTransaction } from "../database";
 import {
@@ -11,23 +24,28 @@ import {
 	book,
 	collection,
 	collectionItem,
-	contentNode,
+	contentStructureNode,
 	entity,
-	game,
-	gameRequirement,
+	software,
+	softwareRequirement,
 	media,
 	poll,
 	pollOption,
+	post,
 	profile,
+	realm,
+	realmDock,
 	realmPin,
 	realmRule,
 	realmRuleRevision,
+	release,
 	revisionContent,
 	series,
 	seriesRelease,
+	subjectAttribution,
 	unit,
 	unitAlias,
-	unitCredit,
+	creditAttribution,
 	unitLink,
 	unitLocalization,
 	unitRevision,
@@ -37,6 +55,7 @@ import {
 	unitTag,
 	unitVariant,
 	zone,
+	zoneMenu,
 	zonePage,
 } from "../database/schema";
 import { UnitRevisionConflict } from "./errors";
@@ -47,7 +66,19 @@ type SnapshotRow = Record<string, unknown>;
 
 const SnapshotRowSchema = z.record(z.string(), z.unknown());
 const JsonObjectSchema = z.record(z.string(), z.unknown());
-const PortableTextSchema = z.custom<PortableText>(isPortableText);
+function createDocumentSchema<TSchemaValue extends TSchema>(schema: TSchemaValue) {
+	return z.custom<Static<TSchemaValue>>((value): value is Static<TSchemaValue> =>
+		isDocument(schema, value),
+	);
+}
+const PortableTextDocumentSchema = z.custom<PortableTextDocumentValue>(isPortableTextDocument);
+const CollectionDefinitionDocumentSchema = createDocumentSchema(CollectionDefinitionDocument);
+const CollectionPresentationDocumentSchema = createDocumentSchema(CollectionPresentationDocument);
+const DockDocumentSchema = createDocumentSchema(DockDocument);
+const ZoneBoundaryDocumentSchema = createDocumentSchema(ZoneBoundaryDocument);
+const ZoneMenuDocumentSchema = createDocumentSchema(ZoneMenuDocument);
+const ZonePageDocumentSchema = createDocumentSchema(ZonePageDocument);
+const ZoneThemeDocumentSchema = createDocumentSchema(ZoneThemeDocument);
 const RuleSnapshotSchema = z.object({
 	requireOnJoin: z.boolean(),
 	requireOnPost: z.boolean(),
@@ -57,7 +88,7 @@ const RuleSnapshotSchema = z.object({
 			position: z.string(),
 			language: z.string(),
 			title: z.string(),
-			content: PortableTextSchema,
+			content: PortableTextDocumentSchema,
 		}),
 	),
 });
@@ -71,17 +102,20 @@ const UnitSnapshotSchema = z.object({
 	owned: z.object({
 		aliases: z.array(SnapshotRowSchema),
 		credits: z.array(SnapshotRowSchema),
+		subjectAttributions: z.array(SnapshotRowSchema).default([]),
 		links: z.array(SnapshotRowSchema),
 		tags: z.array(SnapshotRowSchema),
 		variants: z.array(SnapshotRowSchema),
 		seriesReleases: z.array(SnapshotRowSchema),
-		gameRequirements: z.array(SnapshotRowSchema),
+		softwareRequirements: z.array(SnapshotRowSchema),
 		zonePages: z.array(SnapshotRowSchema),
+		zoneMenus: z.array(SnapshotRowSchema).default([]),
 		collectionItems: z.array(SnapshotRowSchema),
-		contentNodes: z.array(SnapshotRowSchema),
+		contentStructureNodes: z.array(SnapshotRowSchema),
 		pollOptions: z.array(SnapshotRowSchema),
 		realmPins: z.array(SnapshotRowSchema),
-		realmContent: z.array(SnapshotRowSchema),
+		realmDocks: z.array(SnapshotRowSchema).default([]),
+		realmUnit: z.array(SnapshotRowSchema),
 		realmRules: RuleSnapshotSchema.nullable(),
 	}),
 });
@@ -105,18 +139,18 @@ const unitStateSchema = schemaFactory
 	});
 const unitLocalizationStateSchema = schemaFactory
 	.createSelectSchema(unitLocalization, {
-		description: PortableTextSchema.nullable(),
-		content: PortableTextSchema.nullable(),
+		description: PortableTextDocumentSchema.nullable(),
+		content: PortableTextDocumentSchema.nullable(),
 	})
 	.omit({ unitId: true, createdAt: true, updatedAt: true });
 const profileStateSchema = schemaFactory
-	.createSelectSchema(profile, { description: PortableTextSchema.nullable() })
+	.createSelectSchema(profile, { description: PortableTextDocumentSchema.nullable() })
 	.omit({ id: true, authUserId: true, joinedAt: true, createdAt: true, updatedAt: true });
 const bookStateSchema = schemaFactory
 	.createSelectSchema(book)
 	.omit({ id: true, createdAt: true, updatedAt: true });
-const gameStateSchema = schemaFactory
-	.createSelectSchema(game)
+const softwareStateSchema = schemaFactory
+	.createSelectSchema(software)
 	.omit({ id: true, createdAt: true, updatedAt: true });
 const mediaStateSchema = schemaFactory
 	.createSelectSchema(media)
@@ -127,37 +161,55 @@ const entityStateSchema = schemaFactory
 const seriesStateSchema = schemaFactory
 	.createSelectSchema(series)
 	.omit({ id: true, createdAt: true, updatedAt: true });
+const releaseStateSchema = schemaFactory
+	.createSelectSchema(release)
+	.omit({ id: true, createdAt: true, updatedAt: true });
+const postStateSchema = schemaFactory
+	.createSelectSchema(post)
+	.omit({ id: true, createdAt: true, updatedAt: true });
+const realmStateSchema = schemaFactory
+	.createSelectSchema(realm)
+	.omit({ id: true, createdAt: true, updatedAt: true });
 const zoneStateSchema = schemaFactory
 	.createSelectSchema(zone, {
-		boundary: JsonObjectSchema,
-		nav: JsonObjectSchema,
-		theme: JsonObjectSchema,
+		boundaryDocument: ZoneBoundaryDocumentSchema,
+		themeDocument: ZoneThemeDocumentSchema,
 	})
-	.omit({ id: true, ownerRealmId: true, createdAt: true, updatedAt: true });
+	.omit({ id: true, createdAt: true, updatedAt: true });
 const collectionStateSchema = schemaFactory
-	.createSelectSchema(collection)
+	.createSelectSchema(collection, {
+		definitionDocument: CollectionDefinitionDocumentSchema,
+		presentationDocument: CollectionPresentationDocumentSchema,
+	})
 	.omit({ id: true, ownerProfileId: true, createdAt: true, updatedAt: true });
 const pollStateSchema = schemaFactory
 	.createSelectSchema(poll)
 	.omit({ id: true, closedAt: true, createdAt: true, updatedAt: true });
 const unitAliasRowSchema = schemaFactory.createSelectSchema(unitAlias);
-const unitCreditRowSchema = schemaFactory.createSelectSchema(unitCredit);
+const creditAttributionRowSchema = schemaFactory.createSelectSchema(creditAttribution);
+const subjectAttributionRowSchema = schemaFactory.createSelectSchema(subjectAttribution);
 const unitLinkRowSchema = schemaFactory.createSelectSchema(unitLink);
 const unitTagRowSchema = schemaFactory.createSelectSchema(unitTag);
 const unitVariantRowSchema = schemaFactory.createSelectSchema(unitVariant);
 const seriesReleaseRowSchema = schemaFactory.createSelectSchema(seriesRelease);
-const gameRequirementRowSchema = schemaFactory.createSelectSchema(gameRequirement, {
+const softwareRequirementRowSchema = schemaFactory.createSelectSchema(softwareRequirement, {
 	hardware: JsonObjectSchema,
 });
 const zonePageRowSchema = schemaFactory.createSelectSchema(zonePage, {
-	config: JsonObjectSchema,
+	document: ZonePageDocumentSchema,
+});
+const zoneMenuRowSchema = schemaFactory.createSelectSchema(zoneMenu, {
+	document: ZoneMenuDocumentSchema,
 });
 const collectionItemRowSchema = schemaFactory.createSelectSchema(collectionItem);
-const contentNodeRowSchema = schemaFactory.createSelectSchema(contentNode);
+const contentStructureNodeRowSchema = schemaFactory.createSelectSchema(contentStructureNode);
 const pollOptionRowSchema = schemaFactory.createSelectSchema(pollOption);
 const realmPinRowSchema = schemaFactory.createSelectSchema(realmPin);
+const realmDockRowSchema = schemaFactory.createSelectSchema(realmDock, {
+	document: DockDocumentSchema,
+});
 const realmRuleInsertSchema = schemaFactory.createInsertSchema(realmRule, {
-	content: PortableTextSchema,
+	content: PortableTextDocumentSchema,
 });
 
 function parseSnapshotState(
@@ -187,10 +239,10 @@ async function snapshotExtension(
 				bookStateSchema,
 				(await tx.select().from(book).where(eq(book.id, unitId)).limit(1))[0],
 			);
-		case "game":
+		case "software":
 			return parseSnapshotState(
-				gameStateSchema,
-				(await tx.select().from(game).where(eq(game.id, unitId)).limit(1))[0],
+				softwareStateSchema,
+				(await tx.select().from(software).where(eq(software.id, unitId)).limit(1))[0],
 			);
 		case "media":
 			return parseSnapshotState(
@@ -207,6 +259,21 @@ async function snapshotExtension(
 				seriesStateSchema,
 				(await tx.select().from(series).where(eq(series.id, unitId)).limit(1))[0],
 			);
+		case "release":
+			return parseSnapshotState(
+				releaseStateSchema,
+				(await tx.select().from(release).where(eq(release.id, unitId)).limit(1))[0],
+			);
+		case "post":
+			return parseSnapshotState(
+				postStateSchema,
+				(await tx.select().from(post).where(eq(post.id, unitId)).limit(1))[0],
+			);
+		case "realm":
+			return parseSnapshotState(
+				realmStateSchema,
+				(await tx.select().from(realm).where(eq(realm.id, unitId)).limit(1))[0],
+			);
 		case "zone":
 			return parseSnapshotState(
 				zoneStateSchema,
@@ -217,14 +284,11 @@ async function snapshotExtension(
 				collectionStateSchema,
 				(await tx.select().from(collection).where(eq(collection.id, unitId)).limit(1))[0],
 			);
-		case "post":
-			return null;
 		case "poll":
 			return parseSnapshotState(
 				pollStateSchema,
 				(await tx.select().from(poll).where(eq(poll.id, unitId)).limit(1))[0],
 			);
-		case "realm":
 		case "tag":
 			return null;
 	}
@@ -248,12 +312,12 @@ async function snapshotRealmRules(tx: DatabaseTransaction, realmId: string) {
 		.from(realmRule)
 		.where(eq(realmRule.revisionId, revision.id))
 		.orderBy(realmRule.position, realmRule.id);
-	return {
+	return RuleSnapshotSchema.parse({
 		requireOnJoin: revision.requireOnJoin,
 		requireOnPost: revision.requireOnPost,
 		requireOnUpdate: revision.requireOnUpdate,
 		rules,
-	} satisfies RuleSnapshot;
+	});
 }
 
 async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
@@ -271,9 +335,14 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		.orderBy(unitAlias.id);
 	const credits = await tx
 		.select()
-		.from(unitCredit)
-		.where(eq(unitCredit.unitId, unitId))
-		.orderBy(unitCredit.id);
+		.from(creditAttribution)
+		.where(eq(creditAttribution.unitId, unitId))
+		.orderBy(creditAttribution.id);
+	const subjectAttributions = await tx
+		.select()
+		.from(subjectAttribution)
+		.where(eq(subjectAttribution.unitId, unitId))
+		.orderBy(subjectAttribution.id);
 	const links = await tx
 		.select()
 		.from(unitLink)
@@ -294,6 +363,7 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 	const owned: UnitSnapshot["owned"] = {
 		aliases,
 		credits,
+		subjectAttributions,
 		links,
 		tags,
 		variants,
@@ -305,21 +375,33 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 						.where(eq(seriesRelease.seriesId, unitId))
 						.orderBy(seriesRelease.position, seriesRelease.releaseUnitId)
 				: empty,
-		gameRequirements:
-			record.kind === "game"
+		softwareRequirements:
+			record.kind === "software"
 				? await tx
 						.select()
-						.from(gameRequirement)
-						.where(eq(gameRequirement.gameId, unitId))
-						.orderBy(gameRequirement.id)
+						.from(softwareRequirement)
+						.where(eq(softwareRequirement.softwareId, unitId))
+						.orderBy(softwareRequirement.id)
 				: empty,
 		zonePages:
 			record.kind === "zone"
-				? await tx
-						.select()
-						.from(zonePage)
-						.where(eq(zonePage.zoneId, unitId))
-						.orderBy(zonePage.position, zonePage.id)
+				? (
+						await tx
+							.select()
+							.from(zonePage)
+							.where(eq(zonePage.zoneId, unitId))
+							.orderBy(zonePage.position, zonePage.id)
+					).map((row) => zonePageRowSchema.parse(row))
+				: empty,
+		zoneMenus:
+			record.kind === "zone"
+				? (
+						await tx
+							.select()
+							.from(zoneMenu)
+							.where(eq(zoneMenu.zoneId, unitId))
+							.orderBy(zoneMenu.position, zoneMenu.id)
+					).map((row) => zoneMenuRowSchema.parse(row))
 				: empty,
 		collectionItems:
 			record.kind === "collection"
@@ -329,14 +411,11 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 						.where(eq(collectionItem.collectionId, unitId))
 						.orderBy(collectionItem.position, collectionItem.unitId)
 				: empty,
-		contentNodes:
-			record.kind === "book"
-				? await tx
-						.select()
-						.from(contentNode)
-						.where(eq(contentNode.bookId, unitId))
-						.orderBy(contentNode.position, contentNode.id)
-				: empty,
+		contentStructureNodes: await tx
+			.select()
+			.from(contentStructureNode)
+			.where(eq(contentStructureNode.ownerUnitId, unitId))
+			.orderBy(contentStructureNode.position, contentStructureNode.id),
 		pollOptions:
 			record.kind === "poll"
 				? await tx
@@ -353,7 +432,17 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 						.where(eq(realmPin.realmId, unitId))
 						.orderBy(realmPin.kind, realmPin.position, realmPin.unitId)
 				: empty,
-		realmContent: empty,
+		realmDocks:
+			record.kind === "realm"
+				? (
+						await tx
+							.select()
+							.from(realmDock)
+							.where(eq(realmDock.realmId, unitId))
+							.orderBy(realmDock.slot)
+					).map((row) => realmDockRowSchema.parse(row))
+				: empty,
+		realmUnit: empty,
 		realmRules: record.kind === "realm" ? await snapshotRealmRules(tx, unitId) : null,
 	};
 	return {
@@ -375,7 +464,7 @@ async function restoreExtension(
 	kind: UnitSnapshot["kind"],
 	value: SnapshotRow | null,
 ) {
-	if (kind === "post" || kind === "realm" || kind === "tag") return;
+	if (kind === "tag") return;
 	if (!value) throw new Error(`Missing ${kind} extension in Unit snapshot`);
 	switch (kind) {
 		case "profile":
@@ -387,8 +476,11 @@ async function restoreExtension(
 		case "book":
 			await tx.update(book).set(bookStateSchema.parse(value)).where(eq(book.id, unitId));
 			break;
-		case "game":
-			await tx.update(game).set(gameStateSchema.parse(value)).where(eq(game.id, unitId));
+		case "software":
+			await tx
+				.update(software)
+				.set(softwareStateSchema.parse(value))
+				.where(eq(software.id, unitId));
 			break;
 		case "media":
 			await tx.update(media).set(mediaStateSchema.parse(value)).where(eq(media.id, unitId));
@@ -404,6 +496,18 @@ async function restoreExtension(
 				.update(series)
 				.set(seriesStateSchema.parse(value))
 				.where(eq(series.id, unitId));
+			break;
+		case "release":
+			await tx
+				.update(release)
+				.set(releaseStateSchema.parse(value))
+				.where(eq(release.id, unitId));
+			break;
+		case "post":
+			await tx.update(post).set(postStateSchema.parse(value)).where(eq(post.id, unitId));
+			break;
+		case "realm":
+			await tx.update(realm).set(realmStateSchema.parse(value)).where(eq(realm.id, unitId));
 			break;
 		case "zone":
 			await tx.update(zone).set(zoneStateSchema.parse(value)).where(eq(zone.id, unitId));
@@ -435,21 +539,21 @@ async function restoreAliases(tx: DatabaseTransaction, unitId: string, rows: Sna
 async function restoreSoftRows(
 	tx: DatabaseTransaction,
 	unitId: string,
-	table: "contentNode" | "pollOption",
+	table: "contentStructureNode" | "pollOption",
 	rows: SnapshotRow[],
 ) {
-	if (table === "contentNode") {
+	if (table === "contentStructureNode") {
 		await tx
-			.update(contentNode)
+			.update(contentStructureNode)
 			.set({ deletedAt: new Date() })
-			.where(eq(contentNode.bookId, unitId));
+			.where(eq(contentStructureNode.ownerUnitId, unitId));
 		for (const value of rows) {
-			const row = contentNodeRowSchema.parse(value);
+			const row = contentStructureNodeRowSchema.parse(value);
 			const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...state } = row;
 			await tx
-				.insert(contentNode)
+				.insert(contentStructureNode)
 				.values(row)
-				.onConflictDoUpdate({ target: contentNode.id, set: state });
+				.onConflictDoUpdate({ target: contentStructureNode.id, set: state });
 		}
 		return;
 	}
@@ -517,16 +621,25 @@ export async function restoreUnitSnapshot(tx: DatabaseTransaction, unitId: strin
 	await restoreExtension(tx, unitId, snapshot.kind, snapshot.extension);
 
 	await restoreAliases(tx, unitId, snapshot.owned.aliases);
-	if (snapshot.kind === "game")
-		await tx.delete(gameRequirement).where(eq(gameRequirement.gameId, unitId));
-	await tx.delete(unitCredit).where(eq(unitCredit.unitId, unitId));
+	if (snapshot.kind === "software")
+		await tx.delete(softwareRequirement).where(eq(softwareRequirement.softwareId, unitId));
+	await tx.delete(creditAttribution).where(eq(creditAttribution.unitId, unitId));
+	await tx.delete(subjectAttribution).where(eq(subjectAttribution.unitId, unitId));
 	await tx.delete(unitLink).where(eq(unitLink.unitId, unitId));
 	await tx.delete(unitTag).where(eq(unitTag.unitId, unitId));
 	await tx.delete(unitVariant).where(eq(unitVariant.unitId, unitId));
 	if (snapshot.owned.credits.length)
 		await tx
-			.insert(unitCredit)
-			.values(snapshot.owned.credits.map((row) => unitCreditRowSchema.parse(row)));
+			.insert(creditAttribution)
+			.values(snapshot.owned.credits.map((row) => creditAttributionRowSchema.parse(row)));
+	if (snapshot.owned.subjectAttributions.length)
+		await tx
+			.insert(subjectAttribution)
+			.values(
+				snapshot.owned.subjectAttributions.map((row) =>
+					subjectAttributionRowSchema.parse(row),
+				),
+			);
 	if (snapshot.owned.links.length)
 		await tx
 			.insert(unitLink)
@@ -549,18 +662,25 @@ export async function restoreUnitSnapshot(tx: DatabaseTransaction, unitId: strin
 					snapshot.owned.seriesReleases.map((row) => seriesReleaseRowSchema.parse(row)),
 				);
 	}
-	if (snapshot.kind === "game" && snapshot.owned.gameRequirements.length)
+	if (snapshot.kind === "software" && snapshot.owned.softwareRequirements.length)
 		await tx
-			.insert(gameRequirement)
+			.insert(softwareRequirement)
 			.values(
-				snapshot.owned.gameRequirements.map((row) => gameRequirementRowSchema.parse(row)),
+				snapshot.owned.softwareRequirements.map((row) =>
+					softwareRequirementRowSchema.parse(row),
+				),
 			);
 	if (snapshot.kind === "zone") {
 		await tx.delete(zonePage).where(eq(zonePage.zoneId, unitId));
+		await tx.delete(zoneMenu).where(eq(zoneMenu.zoneId, unitId));
 		if (snapshot.owned.zonePages.length)
 			await tx
 				.insert(zonePage)
 				.values(snapshot.owned.zonePages.map((row) => zonePageRowSchema.parse(row)));
+		if (snapshot.owned.zoneMenus.length)
+			await tx
+				.insert(zoneMenu)
+				.values(snapshot.owned.zoneMenus.map((row) => zoneMenuRowSchema.parse(row)));
 	}
 	if (snapshot.kind === "collection") {
 		await tx.delete(collectionItem).where(eq(collectionItem.collectionId, unitId));
@@ -571,16 +691,20 @@ export async function restoreUnitSnapshot(tx: DatabaseTransaction, unitId: strin
 					snapshot.owned.collectionItems.map((row) => collectionItemRowSchema.parse(row)),
 				);
 	}
-	if (snapshot.kind === "book")
-		await restoreSoftRows(tx, unitId, "contentNode", snapshot.owned.contentNodes);
+	await restoreSoftRows(tx, unitId, "contentStructureNode", snapshot.owned.contentStructureNodes);
 	if (snapshot.kind === "poll")
 		await restoreSoftRows(tx, unitId, "pollOption", snapshot.owned.pollOptions);
 	if (snapshot.kind === "realm") {
 		await tx.delete(realmPin).where(eq(realmPin.realmId, unitId));
+		await tx.delete(realmDock).where(eq(realmDock.realmId, unitId));
 		if (snapshot.owned.realmPins.length)
 			await tx
 				.insert(realmPin)
 				.values(snapshot.owned.realmPins.map((row) => realmPinRowSchema.parse(row)));
+		if (snapshot.owned.realmDocks.length)
+			await tx
+				.insert(realmDock)
+				.values(snapshot.owned.realmDocks.map((row) => realmDockRowSchema.parse(row)));
 		await restoreRealmRules(tx, unitId, snapshot.owned.realmRules);
 	}
 }
@@ -639,6 +763,7 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 				version: 1,
 				aliases: snapshot.owned.aliases,
 				credits: snapshot.owned.credits,
+				subjectAttributions: snapshot.owned.subjectAttributions,
 				links: snapshot.owned.links,
 				tags: snapshot.owned.tags,
 				variants: snapshot.owned.variants,
@@ -649,12 +774,14 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 			payload: {
 				version: 1,
 				seriesReleases: snapshot.owned.seriesReleases,
-				gameRequirements: snapshot.owned.gameRequirements,
+				softwareRequirements: snapshot.owned.softwareRequirements,
 				zonePages: snapshot.owned.zonePages,
+				zoneMenus: snapshot.owned.zoneMenus,
 				collectionItems: snapshot.owned.collectionItems,
-				contentNodes: snapshot.owned.contentNodes,
+				contentStructureNodes: snapshot.owned.contentStructureNodes,
 				pollOptions: snapshot.owned.pollOptions,
 				realmPins: snapshot.owned.realmPins,
+				realmDocks: snapshot.owned.realmDocks,
 			},
 		},
 	};
@@ -688,17 +815,20 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 		owned: {
 			aliases: relations.aliases,
 			credits: relations.credits,
+			subjectAttributions: relations.subjectAttributions ?? [],
 			links: relations.links,
 			tags: relations.tags,
 			variants: relations.variants,
 			seriesReleases: structure.seriesReleases,
-			gameRequirements: structure.gameRequirements,
+			softwareRequirements: structure.softwareRequirements,
 			zonePages: structure.zonePages,
+			zoneMenus: structure.zoneMenus ?? [],
 			collectionItems: structure.collectionItems,
-			contentNodes: structure.contentNodes,
+			contentStructureNodes: structure.contentStructureNodes,
 			pollOptions: structure.pollOptions,
 			realmPins: structure.realmPins,
-			realmContent: [],
+			realmDocks: structure.realmDocks ?? [],
+			realmUnit: [],
 			realmRules: rules
 				? {
 						requireOnJoin: rules.requireOnJoin,
@@ -924,7 +1054,7 @@ const StableArrayKeys = [
 	["creditedEntityId", "role"],
 	["sourceEntityId", "role", "position"],
 	["seriesId", "releaseUnitId"],
-	["gameId", "kind"],
+	["softwareId", "kind"],
 	["zoneId", "unitId"],
 	["collectionId", "unitId"],
 	["position"],

@@ -295,6 +295,22 @@ import type {
 	DeleteApiZonesByZoneIdPagesByPageIdStatus404,
 	DeleteApiZonesByZoneIdPagesByPageIdStatus422,
 	DeleteApiZonesByZoneIdPagesByPageIdStatus500,
+	GetApiZonesByZoneIdMenusOptions,
+	GetApiZonesByZoneIdMenusStatus200,
+	GetApiZonesByZoneIdMenusStatus404,
+	GetApiZonesByZoneIdMenusStatus422,
+	GetApiZonesByZoneIdMenusStatus500,
+	PutApiZonesByZoneIdMenusBySlotOptions,
+	PutApiZonesByZoneIdMenusBySlotStatus200,
+	PutApiZonesByZoneIdMenusBySlotStatus403,
+	PutApiZonesByZoneIdMenusBySlotStatus404,
+	PutApiZonesByZoneIdMenusBySlotStatus422,
+	PutApiZonesByZoneIdMenusBySlotStatus500,
+	DeleteApiZonesByZoneIdMenusBySlotOptions,
+	DeleteApiZonesByZoneIdMenusBySlotStatus204,
+	DeleteApiZonesByZoneIdMenusBySlotStatus403,
+	DeleteApiZonesByZoneIdMenusBySlotStatus422,
+	DeleteApiZonesByZoneIdMenusBySlotStatus500,
 	PutApiZonesByZoneIdFollowOptions,
 	PutApiZonesByZoneIdFollowStatus200,
 	PutApiZonesByZoneIdFollowStatus404,
@@ -304,31 +320,31 @@ import type {
 	DeleteApiZonesByZoneIdFollowStatus200,
 	DeleteApiZonesByZoneIdFollowStatus422,
 	DeleteApiZonesByZoneIdFollowStatus500,
-	GetApiGamesByGameIdSystemRequirementsOptions,
-	GetApiGamesByGameIdSystemRequirementsStatus200,
-	GetApiGamesByGameIdSystemRequirementsStatus404,
-	GetApiGamesByGameIdSystemRequirementsStatus422,
-	GetApiGamesByGameIdSystemRequirementsStatus500,
-	PostApiGamesByGameIdSystemRequirementsOptions,
-	PostApiGamesByGameIdSystemRequirementsStatus200,
-	PostApiGamesByGameIdSystemRequirementsStatus400,
-	PostApiGamesByGameIdSystemRequirementsStatus403,
-	PostApiGamesByGameIdSystemRequirementsStatus404,
-	PostApiGamesByGameIdSystemRequirementsStatus422,
-	PostApiGamesByGameIdSystemRequirementsStatus500,
-	PutApiGamesByGameIdSystemRequirementsByRequirementIdOptions,
-	PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus200,
-	PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus400,
-	PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus403,
-	PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus404,
-	PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus422,
-	PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus500,
-	DeleteApiGamesByGameIdSystemRequirementsByRequirementIdOptions,
-	DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus204,
-	DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus403,
-	DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus404,
-	DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus422,
-	DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus500,
+	GetApiSoftwareBySoftwareIdSystemRequirementsOptions,
+	GetApiSoftwareBySoftwareIdSystemRequirementsStatus200,
+	GetApiSoftwareBySoftwareIdSystemRequirementsStatus404,
+	GetApiSoftwareBySoftwareIdSystemRequirementsStatus422,
+	GetApiSoftwareBySoftwareIdSystemRequirementsStatus500,
+	PostApiSoftwareBySoftwareIdSystemRequirementsOptions,
+	PostApiSoftwareBySoftwareIdSystemRequirementsStatus200,
+	PostApiSoftwareBySoftwareIdSystemRequirementsStatus400,
+	PostApiSoftwareBySoftwareIdSystemRequirementsStatus403,
+	PostApiSoftwareBySoftwareIdSystemRequirementsStatus404,
+	PostApiSoftwareBySoftwareIdSystemRequirementsStatus422,
+	PostApiSoftwareBySoftwareIdSystemRequirementsStatus500,
+	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
+	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus200,
+	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400,
+	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403,
+	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404,
+	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422,
+	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500,
+	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
+	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204,
+	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403,
+	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404,
+	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422,
+	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500,
 	GetApiUsersMeStatus200,
 	GetApiUsersMeStatus404,
 	GetApiUsersMeStatus500,
@@ -552,23 +568,23 @@ import type {
 	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404,
 	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422,
 	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500,
-	GetApiUnitsBookByUnitIdContentNodesOptions,
-	GetApiUnitsBookByUnitIdContentNodesStatus200,
-	GetApiUnitsBookByUnitIdContentNodesStatus404,
-	GetApiUnitsBookByUnitIdContentNodesStatus422,
-	GetApiUnitsBookByUnitIdContentNodesStatus500,
-	PostApiUnitsBookByUnitIdContentNodesOptions,
-	PostApiUnitsBookByUnitIdContentNodesStatus200,
-	PostApiUnitsBookByUnitIdContentNodesStatus403,
-	PostApiUnitsBookByUnitIdContentNodesStatus404,
-	PostApiUnitsBookByUnitIdContentNodesStatus422,
-	PostApiUnitsBookByUnitIdContentNodesStatus500,
-	PatchApiUnitsBookByUnitIdContentNodesByNodeIdOptions,
-	PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus200,
-	PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus403,
-	PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus404,
-	PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus422,
-	PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus500,
+	GetApiUnitsBookByUnitIdContentStructureNodesOptions,
+	GetApiUnitsBookByUnitIdContentStructureNodesStatus200,
+	GetApiUnitsBookByUnitIdContentStructureNodesStatus404,
+	GetApiUnitsBookByUnitIdContentStructureNodesStatus422,
+	GetApiUnitsBookByUnitIdContentStructureNodesStatus500,
+	PostApiUnitsBookByUnitIdContentStructureNodesOptions,
+	PostApiUnitsBookByUnitIdContentStructureNodesStatus200,
+	PostApiUnitsBookByUnitIdContentStructureNodesStatus403,
+	PostApiUnitsBookByUnitIdContentStructureNodesStatus404,
+	PostApiUnitsBookByUnitIdContentStructureNodesStatus422,
+	PostApiUnitsBookByUnitIdContentStructureNodesStatus500,
+	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
+	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200,
+	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403,
+	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404,
+	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422,
+	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500,
 	GetApiChaptersByChapterIdOptions,
 	GetApiChaptersByChapterIdStatus200,
 	GetApiChaptersByChapterIdStatus404,
@@ -890,12 +906,27 @@ import type {
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus403,
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus422,
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus500,
-	PatchApiRealmsByRealmIdContentByUnitIdOptions,
-	PatchApiRealmsByRealmIdContentByUnitIdStatus200,
-	PatchApiRealmsByRealmIdContentByUnitIdStatus403,
-	PatchApiRealmsByRealmIdContentByUnitIdStatus404,
-	PatchApiRealmsByRealmIdContentByUnitIdStatus422,
-	PatchApiRealmsByRealmIdContentByUnitIdStatus500,
+	GetApiRealmsByRealmIdDocksOptions,
+	GetApiRealmsByRealmIdDocksStatus200,
+	GetApiRealmsByRealmIdDocksStatus404,
+	GetApiRealmsByRealmIdDocksStatus422,
+	GetApiRealmsByRealmIdDocksStatus500,
+	PutApiRealmsByRealmIdDocksBySlotOptions,
+	PutApiRealmsByRealmIdDocksBySlotStatus200,
+	PutApiRealmsByRealmIdDocksBySlotStatus403,
+	PutApiRealmsByRealmIdDocksBySlotStatus422,
+	PutApiRealmsByRealmIdDocksBySlotStatus500,
+	DeleteApiRealmsByRealmIdDocksBySlotOptions,
+	DeleteApiRealmsByRealmIdDocksBySlotStatus204,
+	DeleteApiRealmsByRealmIdDocksBySlotStatus403,
+	DeleteApiRealmsByRealmIdDocksBySlotStatus422,
+	DeleteApiRealmsByRealmIdDocksBySlotStatus500,
+	PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
+	PatchApiRealmsByRealmIdUnitsByUnitIdStatus200,
+	PatchApiRealmsByRealmIdUnitsByUnitIdStatus403,
+	PatchApiRealmsByRealmIdUnitsByUnitIdStatus404,
+	PatchApiRealmsByRealmIdUnitsByUnitIdStatus422,
+	PatchApiRealmsByRealmIdUnitsByUnitIdStatus500,
 	PostApiSearchOptions,
 	PostApiSearchStatus200,
 	PostApiSearchStatus422,
@@ -987,12 +1018,15 @@ import {
 	postApiZonesByZoneIdPages,
 	putApiZonesByZoneIdPagesByPageId,
 	deleteApiZonesByZoneIdPagesByPageId,
+	getApiZonesByZoneIdMenus,
+	putApiZonesByZoneIdMenusBySlot,
+	deleteApiZonesByZoneIdMenusBySlot,
 	putApiZonesByZoneIdFollow,
 	deleteApiZonesByZoneIdFollow,
-	getApiGamesByGameIdSystemRequirements,
-	postApiGamesByGameIdSystemRequirements,
-	putApiGamesByGameIdSystemRequirementsByRequirementId,
-	deleteApiGamesByGameIdSystemRequirementsByRequirementId,
+	getApiSoftwareBySoftwareIdSystemRequirements,
+	postApiSoftwareBySoftwareIdSystemRequirements,
+	putApiSoftwareBySoftwareIdSystemRequirementsByRequirementId,
+	deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementId,
 	getApiUsersMe,
 	patchApiUsersMe,
 	getApiUsersMePreferences,
@@ -1035,9 +1069,9 @@ import {
 	putApiUnitsByTypeByUnitIdTagsByTagIdVote,
 	deleteApiUnitsByTypeByUnitIdTagsByTagIdVote,
 	putApiUnitsByTypeByUnitIdVersionOfByCanonicalId,
-	getApiUnitsBookByUnitIdContentNodes,
-	postApiUnitsBookByUnitIdContentNodes,
-	patchApiUnitsBookByUnitIdContentNodesByNodeId,
+	getApiUnitsBookByUnitIdContentStructureNodes,
+	postApiUnitsBookByUnitIdContentStructureNodes,
+	patchApiUnitsBookByUnitIdContentStructureNodesByNodeId,
 	getApiChaptersByChapterId,
 	putApiChaptersByChapterIdLocalizationsByLanguageContent,
 	getApiProgress,
@@ -1098,7 +1132,10 @@ import {
 	getApiRealmsByRealmIdPins,
 	putApiRealmsByRealmIdPinsByUnitId,
 	deleteApiRealmsByRealmIdPinsByUnitId,
-	patchApiRealmsByRealmIdContentByUnitId,
+	getApiRealmsByRealmIdDocks,
+	putApiRealmsByRealmIdDocksBySlot,
+	deleteApiRealmsByRealmIdDocksBySlot,
+	patchApiRealmsByRealmIdUnitsByUnitId,
 	postApiSearch,
 	postApiSearchByIndex,
 	postApiUploads,
@@ -5982,6 +6019,291 @@ export function useDeleteApiZonesByZoneIdPagesByPageId<TContext>(
 	>;
 }
 
+export const getApiZonesByZoneIdMenusQueryKey = ({
+	path,
+}: Omit<GetApiZonesByZoneIdMenusOptions, "headers">) =>
+	[{ url: "/api/zones/:zoneId/menus", params: path }] as const;
+
+type GetApiZonesByZoneIdMenusQueryKey = ReturnType<typeof getApiZonesByZoneIdMenusQueryKey>;
+
+export function getApiZonesByZoneIdMenusQueryOptions(
+	{ path }: GetApiZonesByZoneIdMenusOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiZonesByZoneIdMenusQueryKey({ path });
+	return queryOptions<
+		GetApiZonesByZoneIdMenusStatus200,
+		ResponseErrorConfig<
+			| GetApiZonesByZoneIdMenusStatus404
+			| GetApiZonesByZoneIdMenusStatus422
+			| GetApiZonesByZoneIdMenusStatus500
+		>,
+		GetApiZonesByZoneIdMenusStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiZonesByZoneIdMenus({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List Zone menus
+ * {@link /api/zones/:zoneId/menus}
+ */
+export function useGetApiZonesByZoneIdMenus<
+	TData = GetApiZonesByZoneIdMenusStatus200,
+	TQueryData = GetApiZonesByZoneIdMenusStatus200,
+	TQueryKey extends QueryKey = GetApiZonesByZoneIdMenusQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiZonesByZoneIdMenusOptions["path"]
+			| (() => GetApiZonesByZoneIdMenusOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiZonesByZoneIdMenusStatus200,
+				ResponseErrorConfig<
+					| GetApiZonesByZoneIdMenusStatus404
+					| GetApiZonesByZoneIdMenusStatus422
+					| GetApiZonesByZoneIdMenusStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey = resolvedOptions?.queryKey ?? getApiZonesByZoneIdMenusQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiZonesByZoneIdMenusQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiZonesByZoneIdMenusStatus404
+			| GetApiZonesByZoneIdMenusStatus422
+			| GetApiZonesByZoneIdMenusStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiZonesByZoneIdMenusBySlotMutationKey = () =>
+	[{ url: "/api/zones/:zoneId/menus/:slot" }] as const;
+
+export function putApiZonesByZoneIdMenusBySlotMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiZonesByZoneIdMenusBySlotMutationKey();
+	return mutationOptions<
+		PutApiZonesByZoneIdMenusBySlotStatus200,
+		ResponseErrorConfig<
+			| PutApiZonesByZoneIdMenusBySlotStatus403
+			| PutApiZonesByZoneIdMenusBySlotStatus404
+			| PutApiZonesByZoneIdMenusBySlotStatus422
+			| PutApiZonesByZoneIdMenusBySlotStatus500
+		>,
+		PutApiZonesByZoneIdMenusBySlotOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiZonesByZoneIdMenusBySlot({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create or replace Zone menu
+ * {@link /api/zones/:zoneId/menus/:slot}
+ */
+export function usePutApiZonesByZoneIdMenusBySlot<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiZonesByZoneIdMenusBySlotStatus200,
+			ResponseErrorConfig<
+				| PutApiZonesByZoneIdMenusBySlotStatus403
+				| PutApiZonesByZoneIdMenusBySlotStatus404
+				| PutApiZonesByZoneIdMenusBySlotStatus422
+				| PutApiZonesByZoneIdMenusBySlotStatus500
+			>,
+			PutApiZonesByZoneIdMenusBySlotOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? putApiZonesByZoneIdMenusBySlotMutationKey();
+
+	const baseOptions = putApiZonesByZoneIdMenusBySlotMutationOptions(config) as UseMutationOptions<
+		PutApiZonesByZoneIdMenusBySlotStatus200,
+		ResponseErrorConfig<
+			| PutApiZonesByZoneIdMenusBySlotStatus403
+			| PutApiZonesByZoneIdMenusBySlotStatus404
+			| PutApiZonesByZoneIdMenusBySlotStatus422
+			| PutApiZonesByZoneIdMenusBySlotStatus500
+		>,
+		PutApiZonesByZoneIdMenusBySlotOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiZonesByZoneIdMenusBySlotStatus200,
+		ResponseErrorConfig<
+			| PutApiZonesByZoneIdMenusBySlotStatus403
+			| PutApiZonesByZoneIdMenusBySlotStatus404
+			| PutApiZonesByZoneIdMenusBySlotStatus422
+			| PutApiZonesByZoneIdMenusBySlotStatus500
+		>,
+		PutApiZonesByZoneIdMenusBySlotOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiZonesByZoneIdMenusBySlotStatus200,
+		ResponseErrorConfig<
+			| PutApiZonesByZoneIdMenusBySlotStatus403
+			| PutApiZonesByZoneIdMenusBySlotStatus404
+			| PutApiZonesByZoneIdMenusBySlotStatus422
+			| PutApiZonesByZoneIdMenusBySlotStatus500
+		>,
+		PutApiZonesByZoneIdMenusBySlotOptions,
+		TContext
+	>;
+}
+
+export const deleteApiZonesByZoneIdMenusBySlotMutationKey = () =>
+	[{ url: "/api/zones/:zoneId/menus/:slot" }] as const;
+
+export function deleteApiZonesByZoneIdMenusBySlotMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = deleteApiZonesByZoneIdMenusBySlotMutationKey();
+	return mutationOptions<
+		DeleteApiZonesByZoneIdMenusBySlotStatus204,
+		ResponseErrorConfig<
+			| DeleteApiZonesByZoneIdMenusBySlotStatus403
+			| DeleteApiZonesByZoneIdMenusBySlotStatus422
+			| DeleteApiZonesByZoneIdMenusBySlotStatus500
+		>,
+		DeleteApiZonesByZoneIdMenusBySlotOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiZonesByZoneIdMenusBySlot({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Delete Zone menu
+ * {@link /api/zones/:zoneId/menus/:slot}
+ */
+export function useDeleteApiZonesByZoneIdMenusBySlot<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiZonesByZoneIdMenusBySlotStatus204,
+			ResponseErrorConfig<
+				| DeleteApiZonesByZoneIdMenusBySlotStatus403
+				| DeleteApiZonesByZoneIdMenusBySlotStatus422
+				| DeleteApiZonesByZoneIdMenusBySlotStatus500
+			>,
+			DeleteApiZonesByZoneIdMenusBySlotOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? deleteApiZonesByZoneIdMenusBySlotMutationKey();
+
+	const baseOptions = deleteApiZonesByZoneIdMenusBySlotMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiZonesByZoneIdMenusBySlotStatus204,
+		ResponseErrorConfig<
+			| DeleteApiZonesByZoneIdMenusBySlotStatus403
+			| DeleteApiZonesByZoneIdMenusBySlotStatus422
+			| DeleteApiZonesByZoneIdMenusBySlotStatus500
+		>,
+		DeleteApiZonesByZoneIdMenusBySlotOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiZonesByZoneIdMenusBySlotStatus204,
+		ResponseErrorConfig<
+			| DeleteApiZonesByZoneIdMenusBySlotStatus403
+			| DeleteApiZonesByZoneIdMenusBySlotStatus422
+			| DeleteApiZonesByZoneIdMenusBySlotStatus500
+		>,
+		DeleteApiZonesByZoneIdMenusBySlotOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiZonesByZoneIdMenusBySlotStatus204,
+		ResponseErrorConfig<
+			| DeleteApiZonesByZoneIdMenusBySlotStatus403
+			| DeleteApiZonesByZoneIdMenusBySlotStatus422
+			| DeleteApiZonesByZoneIdMenusBySlotStatus500
+		>,
+		DeleteApiZonesByZoneIdMenusBySlotOptions,
+		TContext
+	>;
+}
+
 export const putApiZonesByZoneIdFollowMutationKey = () =>
 	[{ url: "/api/zones/:zoneId/follow" }] as const;
 
@@ -6154,33 +6476,33 @@ export function useDeleteApiZonesByZoneIdFollow<TContext>(
 	>;
 }
 
-export const getApiGamesByGameIdSystemRequirementsQueryKey = ({
+export const getApiSoftwareBySoftwareIdSystemRequirementsQueryKey = ({
 	path,
-}: Omit<GetApiGamesByGameIdSystemRequirementsOptions, "headers">) =>
-	[{ url: "/api/games/:gameId/system-requirements", params: path }] as const;
+}: Omit<GetApiSoftwareBySoftwareIdSystemRequirementsOptions, "headers">) =>
+	[{ url: "/api/software/:softwareId/system-requirements", params: path }] as const;
 
-type GetApiGamesByGameIdSystemRequirementsQueryKey = ReturnType<
-	typeof getApiGamesByGameIdSystemRequirementsQueryKey
+type GetApiSoftwareBySoftwareIdSystemRequirementsQueryKey = ReturnType<
+	typeof getApiSoftwareBySoftwareIdSystemRequirementsQueryKey
 >;
 
-export function getApiGamesByGameIdSystemRequirementsQueryOptions(
-	{ path }: GetApiGamesByGameIdSystemRequirementsOptions,
+export function getApiSoftwareBySoftwareIdSystemRequirementsQueryOptions(
+	{ path }: GetApiSoftwareBySoftwareIdSystemRequirementsOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiGamesByGameIdSystemRequirementsQueryKey({ path });
+	const queryKey = getApiSoftwareBySoftwareIdSystemRequirementsQueryKey({ path });
 	return queryOptions<
-		GetApiGamesByGameIdSystemRequirementsStatus200,
+		GetApiSoftwareBySoftwareIdSystemRequirementsStatus200,
 		ResponseErrorConfig<
-			| GetApiGamesByGameIdSystemRequirementsStatus404
-			| GetApiGamesByGameIdSystemRequirementsStatus422
-			| GetApiGamesByGameIdSystemRequirementsStatus500
+			| GetApiSoftwareBySoftwareIdSystemRequirementsStatus404
+			| GetApiSoftwareBySoftwareIdSystemRequirementsStatus422
+			| GetApiSoftwareBySoftwareIdSystemRequirementsStatus500
 		>,
-		GetApiGamesByGameIdSystemRequirementsStatus200,
+		GetApiSoftwareBySoftwareIdSystemRequirementsStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiGamesByGameIdSystemRequirements({
+			const { data } = await getApiSoftwareBySoftwareIdSystemRequirements({
 				...config,
 				path,
 				signal: config.signal ?? signal,
@@ -6192,29 +6514,29 @@ export function getApiGamesByGameIdSystemRequirementsQueryOptions(
 }
 
 /**
- * @summary List Game system requirements
- * {@link /api/games/:gameId/system-requirements}
+ * @summary List Software system requirements
+ * {@link /api/software/:softwareId/system-requirements}
  */
-export function useGetApiGamesByGameIdSystemRequirements<
-	TData = GetApiGamesByGameIdSystemRequirementsStatus200,
-	TQueryData = GetApiGamesByGameIdSystemRequirementsStatus200,
-	TQueryKey extends QueryKey = GetApiGamesByGameIdSystemRequirementsQueryKey,
+export function useGetApiSoftwareBySoftwareIdSystemRequirements<
+	TData = GetApiSoftwareBySoftwareIdSystemRequirementsStatus200,
+	TQueryData = GetApiSoftwareBySoftwareIdSystemRequirementsStatus200,
+	TQueryKey extends QueryKey = GetApiSoftwareBySoftwareIdSystemRequirementsQueryKey,
 >(
 	{
 		path,
 	}: {
 		path:
-			| GetApiGamesByGameIdSystemRequirementsOptions["path"]
-			| (() => GetApiGamesByGameIdSystemRequirementsOptions["path"]);
+			| GetApiSoftwareBySoftwareIdSystemRequirementsOptions["path"]
+			| (() => GetApiSoftwareBySoftwareIdSystemRequirementsOptions["path"]);
 	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiGamesByGameIdSystemRequirementsStatus200,
+				GetApiSoftwareBySoftwareIdSystemRequirementsStatus200,
 				ResponseErrorConfig<
-					| GetApiGamesByGameIdSystemRequirementsStatus404
-					| GetApiGamesByGameIdSystemRequirementsStatus422
-					| GetApiGamesByGameIdSystemRequirementsStatus500
+					| GetApiSoftwareBySoftwareIdSystemRequirementsStatus404
+					| GetApiSoftwareBySoftwareIdSystemRequirementsStatus422
+					| GetApiSoftwareBySoftwareIdSystemRequirementsStatus500
 				>,
 				TData,
 				TQueryData,
@@ -6228,11 +6550,12 @@ export function useGetApiGamesByGameIdSystemRequirements<
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { path: typeof path === "function" ? path() : path };
 	const queryKey =
-		resolvedOptions?.queryKey ?? getApiGamesByGameIdSystemRequirementsQueryKey(resolvedParams);
+		resolvedOptions?.queryKey ??
+		getApiSoftwareBySoftwareIdSystemRequirementsQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiGamesByGameIdSystemRequirementsQueryOptions(resolvedParams, config),
+			...getApiSoftwareBySoftwareIdSystemRequirementsQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -6240,9 +6563,9 @@ export function useGetApiGamesByGameIdSystemRequirements<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiGamesByGameIdSystemRequirementsStatus404
-			| GetApiGamesByGameIdSystemRequirementsStatus422
-			| GetApiGamesByGameIdSystemRequirementsStatus500
+			| GetApiSoftwareBySoftwareIdSystemRequirementsStatus404
+			| GetApiSoftwareBySoftwareIdSystemRequirementsStatus422
+			| GetApiSoftwareBySoftwareIdSystemRequirementsStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -6251,28 +6574,28 @@ export function useGetApiGamesByGameIdSystemRequirements<
 	return queryResult;
 }
 
-export const postApiGamesByGameIdSystemRequirementsMutationKey = () =>
-	[{ url: "/api/games/:gameId/system-requirements" }] as const;
+export const postApiSoftwareBySoftwareIdSystemRequirementsMutationKey = () =>
+	[{ url: "/api/software/:softwareId/system-requirements" }] as const;
 
-export function postApiGamesByGameIdSystemRequirementsMutationOptions<TContext = unknown>(
+export function postApiSoftwareBySoftwareIdSystemRequirementsMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = postApiGamesByGameIdSystemRequirementsMutationKey();
+	const mutationKey = postApiSoftwareBySoftwareIdSystemRequirementsMutationKey();
 	return mutationOptions<
-		PostApiGamesByGameIdSystemRequirementsStatus200,
+		PostApiSoftwareBySoftwareIdSystemRequirementsStatus200,
 		ResponseErrorConfig<
-			| PostApiGamesByGameIdSystemRequirementsStatus400
-			| PostApiGamesByGameIdSystemRequirementsStatus403
-			| PostApiGamesByGameIdSystemRequirementsStatus404
-			| PostApiGamesByGameIdSystemRequirementsStatus422
-			| PostApiGamesByGameIdSystemRequirementsStatus500
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus400
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus403
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus404
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus422
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus500
 		>,
-		PostApiGamesByGameIdSystemRequirementsOptions,
+		PostApiSoftwareBySoftwareIdSystemRequirementsOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiGamesByGameIdSystemRequirements({
+			const { data } = await postApiSoftwareBySoftwareIdSystemRequirements({
 				...config,
 				path,
 				body,
@@ -6284,21 +6607,21 @@ export function postApiGamesByGameIdSystemRequirementsMutationOptions<TContext =
 }
 
 /**
- * @summary Create Game system requirement
- * {@link /api/games/:gameId/system-requirements}
+ * @summary Create Software system requirement
+ * {@link /api/software/:softwareId/system-requirements}
  */
-export function usePostApiGamesByGameIdSystemRequirements<TContext>(
+export function usePostApiSoftwareBySoftwareIdSystemRequirements<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PostApiGamesByGameIdSystemRequirementsStatus200,
+			PostApiSoftwareBySoftwareIdSystemRequirementsStatus200,
 			ResponseErrorConfig<
-				| PostApiGamesByGameIdSystemRequirementsStatus400
-				| PostApiGamesByGameIdSystemRequirementsStatus403
-				| PostApiGamesByGameIdSystemRequirementsStatus404
-				| PostApiGamesByGameIdSystemRequirementsStatus422
-				| PostApiGamesByGameIdSystemRequirementsStatus500
+				| PostApiSoftwareBySoftwareIdSystemRequirementsStatus400
+				| PostApiSoftwareBySoftwareIdSystemRequirementsStatus403
+				| PostApiSoftwareBySoftwareIdSystemRequirementsStatus404
+				| PostApiSoftwareBySoftwareIdSystemRequirementsStatus422
+				| PostApiSoftwareBySoftwareIdSystemRequirementsStatus500
 			>,
-			PostApiGamesByGameIdSystemRequirementsOptions,
+			PostApiSoftwareBySoftwareIdSystemRequirementsOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -6307,33 +6630,33 @@ export function usePostApiGamesByGameIdSystemRequirements<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ?? postApiGamesByGameIdSystemRequirementsMutationKey();
+		mutationOptions.mutationKey ?? postApiSoftwareBySoftwareIdSystemRequirementsMutationKey();
 
-	const baseOptions = postApiGamesByGameIdSystemRequirementsMutationOptions(
+	const baseOptions = postApiSoftwareBySoftwareIdSystemRequirementsMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PostApiGamesByGameIdSystemRequirementsStatus200,
+		PostApiSoftwareBySoftwareIdSystemRequirementsStatus200,
 		ResponseErrorConfig<
-			| PostApiGamesByGameIdSystemRequirementsStatus400
-			| PostApiGamesByGameIdSystemRequirementsStatus403
-			| PostApiGamesByGameIdSystemRequirementsStatus404
-			| PostApiGamesByGameIdSystemRequirementsStatus422
-			| PostApiGamesByGameIdSystemRequirementsStatus500
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus400
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus403
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus404
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus422
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus500
 		>,
-		PostApiGamesByGameIdSystemRequirementsOptions,
+		PostApiSoftwareBySoftwareIdSystemRequirementsOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PostApiGamesByGameIdSystemRequirementsStatus200,
+		PostApiSoftwareBySoftwareIdSystemRequirementsStatus200,
 		ResponseErrorConfig<
-			| PostApiGamesByGameIdSystemRequirementsStatus400
-			| PostApiGamesByGameIdSystemRequirementsStatus403
-			| PostApiGamesByGameIdSystemRequirementsStatus404
-			| PostApiGamesByGameIdSystemRequirementsStatus422
-			| PostApiGamesByGameIdSystemRequirementsStatus500
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus400
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus403
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus404
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus422
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus500
 		>,
-		PostApiGamesByGameIdSystemRequirementsOptions,
+		PostApiSoftwareBySoftwareIdSystemRequirementsOptions,
 		TContext
 	>(
 		{
@@ -6343,41 +6666,41 @@ export function usePostApiGamesByGameIdSystemRequirements<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PostApiGamesByGameIdSystemRequirementsStatus200,
+		PostApiSoftwareBySoftwareIdSystemRequirementsStatus200,
 		ResponseErrorConfig<
-			| PostApiGamesByGameIdSystemRequirementsStatus400
-			| PostApiGamesByGameIdSystemRequirementsStatus403
-			| PostApiGamesByGameIdSystemRequirementsStatus404
-			| PostApiGamesByGameIdSystemRequirementsStatus422
-			| PostApiGamesByGameIdSystemRequirementsStatus500
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus400
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus403
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus404
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus422
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus500
 		>,
-		PostApiGamesByGameIdSystemRequirementsOptions,
+		PostApiSoftwareBySoftwareIdSystemRequirementsOptions,
 		TContext
 	>;
 }
 
-export const putApiGamesByGameIdSystemRequirementsByRequirementIdMutationKey = () =>
-	[{ url: "/api/games/:gameId/system-requirements/:requirementId" }] as const;
+export const putApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMutationKey = () =>
+	[{ url: "/api/software/:softwareId/system-requirements/:requirementId" }] as const;
 
-export function putApiGamesByGameIdSystemRequirementsByRequirementIdMutationOptions<
+export function putApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMutationOptions<
 	TContext = unknown,
 >(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = putApiGamesByGameIdSystemRequirementsByRequirementIdMutationKey();
+	const mutationKey = putApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMutationKey();
 	return mutationOptions<
-		PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus200,
+		PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus200,
 		ResponseErrorConfig<
-			| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus400
-			| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus403
-			| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus404
-			| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus422
-			| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus500
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
 		>,
-		PutApiGamesByGameIdSystemRequirementsByRequirementIdOptions,
+		PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiGamesByGameIdSystemRequirementsByRequirementId({
+			const { data } = await putApiSoftwareBySoftwareIdSystemRequirementsByRequirementId({
 				...config,
 				path,
 				body,
@@ -6389,21 +6712,21 @@ export function putApiGamesByGameIdSystemRequirementsByRequirementIdMutationOpti
 }
 
 /**
- * @summary Replace Game system requirement
- * {@link /api/games/:gameId/system-requirements/:requirementId}
+ * @summary Replace Software system requirement
+ * {@link /api/software/:softwareId/system-requirements/:requirementId}
  */
-export function usePutApiGamesByGameIdSystemRequirementsByRequirementId<TContext>(
+export function usePutApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus200,
+			PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus200,
 			ResponseErrorConfig<
-				| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus400
-				| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus403
-				| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus404
-				| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus422
-				| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus500
+				| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400
+				| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
+				| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
+				| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+				| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
 			>,
-			PutApiGamesByGameIdSystemRequirementsByRequirementIdOptions,
+			PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -6413,33 +6736,33 @@ export function usePutApiGamesByGameIdSystemRequirementsByRequirementId<TContext
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
 		mutationOptions.mutationKey ??
-		putApiGamesByGameIdSystemRequirementsByRequirementIdMutationKey();
+		putApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMutationKey();
 
-	const baseOptions = putApiGamesByGameIdSystemRequirementsByRequirementIdMutationOptions(
+	const baseOptions = putApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus200,
+		PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus200,
 		ResponseErrorConfig<
-			| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus400
-			| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus403
-			| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus404
-			| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus422
-			| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus500
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
 		>,
-		PutApiGamesByGameIdSystemRequirementsByRequirementIdOptions,
+		PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus200,
+		PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus200,
 		ResponseErrorConfig<
-			| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus400
-			| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus403
-			| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus404
-			| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus422
-			| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus500
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
 		>,
-		PutApiGamesByGameIdSystemRequirementsByRequirementIdOptions,
+		PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
 		TContext
 	>(
 		{
@@ -6449,40 +6772,40 @@ export function usePutApiGamesByGameIdSystemRequirementsByRequirementId<TContext
 		},
 		queryClient,
 	) as UseMutationResult<
-		PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus200,
+		PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus200,
 		ResponseErrorConfig<
-			| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus400
-			| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus403
-			| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus404
-			| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus422
-			| PutApiGamesByGameIdSystemRequirementsByRequirementIdStatus500
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus400
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
 		>,
-		PutApiGamesByGameIdSystemRequirementsByRequirementIdOptions,
+		PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
 		TContext
 	>;
 }
 
-export const deleteApiGamesByGameIdSystemRequirementsByRequirementIdMutationKey = () =>
-	[{ url: "/api/games/:gameId/system-requirements/:requirementId" }] as const;
+export const deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMutationKey = () =>
+	[{ url: "/api/software/:softwareId/system-requirements/:requirementId" }] as const;
 
-export function deleteApiGamesByGameIdSystemRequirementsByRequirementIdMutationOptions<
+export function deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMutationOptions<
 	TContext = unknown,
 >(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey = deleteApiGamesByGameIdSystemRequirementsByRequirementIdMutationKey();
+	const mutationKey = deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMutationKey();
 	return mutationOptions<
-		DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus204,
+		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204,
 		ResponseErrorConfig<
-			| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus403
-			| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus404
-			| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus422
-			| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus500
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
 		>,
-		DeleteApiGamesByGameIdSystemRequirementsByRequirementIdOptions,
+		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiGamesByGameIdSystemRequirementsByRequirementId({
+			const { data } = await deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementId({
 				...config,
 				path,
 				throwOnError: true,
@@ -6493,20 +6816,20 @@ export function deleteApiGamesByGameIdSystemRequirementsByRequirementIdMutationO
 }
 
 /**
- * @summary Delete Game system requirement
- * {@link /api/games/:gameId/system-requirements/:requirementId}
+ * @summary Delete Software system requirement
+ * {@link /api/software/:softwareId/system-requirements/:requirementId}
  */
-export function useDeleteApiGamesByGameIdSystemRequirementsByRequirementId<TContext>(
+export function useDeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus204,
+			DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204,
 			ResponseErrorConfig<
-				| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus403
-				| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus404
-				| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus422
-				| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus500
+				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
+				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
+				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
 			>,
-			DeleteApiGamesByGameIdSystemRequirementsByRequirementIdOptions,
+			DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -6516,31 +6839,32 @@ export function useDeleteApiGamesByGameIdSystemRequirementsByRequirementId<TCont
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
 		mutationOptions.mutationKey ??
-		deleteApiGamesByGameIdSystemRequirementsByRequirementIdMutationKey();
+		deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMutationKey();
 
-	const baseOptions = deleteApiGamesByGameIdSystemRequirementsByRequirementIdMutationOptions(
-		config,
-	) as UseMutationOptions<
-		DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus204,
-		ResponseErrorConfig<
-			| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus403
-			| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus404
-			| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus422
-			| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus500
-		>,
-		DeleteApiGamesByGameIdSystemRequirementsByRequirementIdOptions,
-		TContext
-	>;
+	const baseOptions =
+		deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMutationOptions(
+			config,
+		) as UseMutationOptions<
+			DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204,
+			ResponseErrorConfig<
+				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
+				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
+				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
+			>,
+			DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
+			TContext
+		>;
 
 	return useMutation<
-		DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus204,
+		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204,
 		ResponseErrorConfig<
-			| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus403
-			| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus404
-			| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus422
-			| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus500
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
 		>,
-		DeleteApiGamesByGameIdSystemRequirementsByRequirementIdOptions,
+		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
 		TContext
 	>(
 		{
@@ -6550,14 +6874,14 @@ export function useDeleteApiGamesByGameIdSystemRequirementsByRequirementId<TCont
 		},
 		queryClient,
 	) as UseMutationResult<
-		DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus204,
+		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204,
 		ResponseErrorConfig<
-			| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus403
-			| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus404
-			| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus422
-			| DeleteApiGamesByGameIdSystemRequirementsByRequirementIdStatus500
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
 		>,
-		DeleteApiGamesByGameIdSystemRequirementsByRequirementIdOptions,
+		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
 		TContext
 	>;
 }
@@ -10428,33 +10752,33 @@ export function usePutApiUnitsByTypeByUnitIdVersionOfByCanonicalId<TContext>(
 	>;
 }
 
-export const getApiUnitsBookByUnitIdContentNodesQueryKey = ({
+export const getApiUnitsBookByUnitIdContentStructureNodesQueryKey = ({
 	path,
-}: Omit<GetApiUnitsBookByUnitIdContentNodesOptions, "headers">) =>
-	[{ url: "/api/units/book/:unitId/content-nodes", params: path }] as const;
+}: Omit<GetApiUnitsBookByUnitIdContentStructureNodesOptions, "headers">) =>
+	[{ url: "/api/units/book/:unitId/content-structure/nodes", params: path }] as const;
 
-type GetApiUnitsBookByUnitIdContentNodesQueryKey = ReturnType<
-	typeof getApiUnitsBookByUnitIdContentNodesQueryKey
+type GetApiUnitsBookByUnitIdContentStructureNodesQueryKey = ReturnType<
+	typeof getApiUnitsBookByUnitIdContentStructureNodesQueryKey
 >;
 
-export function getApiUnitsBookByUnitIdContentNodesQueryOptions(
-	{ path }: GetApiUnitsBookByUnitIdContentNodesOptions,
+export function getApiUnitsBookByUnitIdContentStructureNodesQueryOptions(
+	{ path }: GetApiUnitsBookByUnitIdContentStructureNodesOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiUnitsBookByUnitIdContentNodesQueryKey({ path });
+	const queryKey = getApiUnitsBookByUnitIdContentStructureNodesQueryKey({ path });
 	return queryOptions<
-		GetApiUnitsBookByUnitIdContentNodesStatus200,
+		GetApiUnitsBookByUnitIdContentStructureNodesStatus200,
 		ResponseErrorConfig<
-			| GetApiUnitsBookByUnitIdContentNodesStatus404
-			| GetApiUnitsBookByUnitIdContentNodesStatus422
-			| GetApiUnitsBookByUnitIdContentNodesStatus500
+			| GetApiUnitsBookByUnitIdContentStructureNodesStatus404
+			| GetApiUnitsBookByUnitIdContentStructureNodesStatus422
+			| GetApiUnitsBookByUnitIdContentStructureNodesStatus500
 		>,
-		GetApiUnitsBookByUnitIdContentNodesStatus200,
+		GetApiUnitsBookByUnitIdContentStructureNodesStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiUnitsBookByUnitIdContentNodes({
+			const { data } = await getApiUnitsBookByUnitIdContentStructureNodes({
 				...config,
 				path,
 				signal: config.signal ?? signal,
@@ -10466,29 +10790,29 @@ export function getApiUnitsBookByUnitIdContentNodesQueryOptions(
 }
 
 /**
- * @summary List book content tree
- * {@link /api/units/book/:unitId/content-nodes}
+ * @summary List book Content Structure nodes
+ * {@link /api/units/book/:unitId/content-structure/nodes}
  */
-export function useGetApiUnitsBookByUnitIdContentNodes<
-	TData = GetApiUnitsBookByUnitIdContentNodesStatus200,
-	TQueryData = GetApiUnitsBookByUnitIdContentNodesStatus200,
-	TQueryKey extends QueryKey = GetApiUnitsBookByUnitIdContentNodesQueryKey,
+export function useGetApiUnitsBookByUnitIdContentStructureNodes<
+	TData = GetApiUnitsBookByUnitIdContentStructureNodesStatus200,
+	TQueryData = GetApiUnitsBookByUnitIdContentStructureNodesStatus200,
+	TQueryKey extends QueryKey = GetApiUnitsBookByUnitIdContentStructureNodesQueryKey,
 >(
 	{
 		path,
 	}: {
 		path:
-			| GetApiUnitsBookByUnitIdContentNodesOptions["path"]
-			| (() => GetApiUnitsBookByUnitIdContentNodesOptions["path"]);
+			| GetApiUnitsBookByUnitIdContentStructureNodesOptions["path"]
+			| (() => GetApiUnitsBookByUnitIdContentStructureNodesOptions["path"]);
 	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiUnitsBookByUnitIdContentNodesStatus200,
+				GetApiUnitsBookByUnitIdContentStructureNodesStatus200,
 				ResponseErrorConfig<
-					| GetApiUnitsBookByUnitIdContentNodesStatus404
-					| GetApiUnitsBookByUnitIdContentNodesStatus422
-					| GetApiUnitsBookByUnitIdContentNodesStatus500
+					| GetApiUnitsBookByUnitIdContentStructureNodesStatus404
+					| GetApiUnitsBookByUnitIdContentStructureNodesStatus422
+					| GetApiUnitsBookByUnitIdContentStructureNodesStatus500
 				>,
 				TData,
 				TQueryData,
@@ -10502,11 +10826,12 @@ export function useGetApiUnitsBookByUnitIdContentNodes<
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { path: typeof path === "function" ? path() : path };
 	const queryKey =
-		resolvedOptions?.queryKey ?? getApiUnitsBookByUnitIdContentNodesQueryKey(resolvedParams);
+		resolvedOptions?.queryKey ??
+		getApiUnitsBookByUnitIdContentStructureNodesQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiUnitsBookByUnitIdContentNodesQueryOptions(resolvedParams, config),
+			...getApiUnitsBookByUnitIdContentStructureNodesQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -10514,9 +10839,9 @@ export function useGetApiUnitsBookByUnitIdContentNodes<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiUnitsBookByUnitIdContentNodesStatus404
-			| GetApiUnitsBookByUnitIdContentNodesStatus422
-			| GetApiUnitsBookByUnitIdContentNodesStatus500
+			| GetApiUnitsBookByUnitIdContentStructureNodesStatus404
+			| GetApiUnitsBookByUnitIdContentStructureNodesStatus422
+			| GetApiUnitsBookByUnitIdContentStructureNodesStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -10525,27 +10850,27 @@ export function useGetApiUnitsBookByUnitIdContentNodes<
 	return queryResult;
 }
 
-export const postApiUnitsBookByUnitIdContentNodesMutationKey = () =>
-	[{ url: "/api/units/book/:unitId/content-nodes" }] as const;
+export const postApiUnitsBookByUnitIdContentStructureNodesMutationKey = () =>
+	[{ url: "/api/units/book/:unitId/content-structure/nodes" }] as const;
 
-export function postApiUnitsBookByUnitIdContentNodesMutationOptions<TContext = unknown>(
+export function postApiUnitsBookByUnitIdContentStructureNodesMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = postApiUnitsBookByUnitIdContentNodesMutationKey();
+	const mutationKey = postApiUnitsBookByUnitIdContentStructureNodesMutationKey();
 	return mutationOptions<
-		PostApiUnitsBookByUnitIdContentNodesStatus200,
+		PostApiUnitsBookByUnitIdContentStructureNodesStatus200,
 		ResponseErrorConfig<
-			| PostApiUnitsBookByUnitIdContentNodesStatus403
-			| PostApiUnitsBookByUnitIdContentNodesStatus404
-			| PostApiUnitsBookByUnitIdContentNodesStatus422
-			| PostApiUnitsBookByUnitIdContentNodesStatus500
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus500
 		>,
-		PostApiUnitsBookByUnitIdContentNodesOptions,
+		PostApiUnitsBookByUnitIdContentStructureNodesOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await postApiUnitsBookByUnitIdContentNodes({
+			const { data } = await postApiUnitsBookByUnitIdContentStructureNodes({
 				...config,
 				path,
 				body,
@@ -10558,19 +10883,19 @@ export function postApiUnitsBookByUnitIdContentNodesMutationOptions<TContext = u
 
 /**
  * @summary Create book group or chapter
- * {@link /api/units/book/:unitId/content-nodes}
+ * {@link /api/units/book/:unitId/content-structure/nodes}
  */
-export function usePostApiUnitsBookByUnitIdContentNodes<TContext>(
+export function usePostApiUnitsBookByUnitIdContentStructureNodes<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PostApiUnitsBookByUnitIdContentNodesStatus200,
+			PostApiUnitsBookByUnitIdContentStructureNodesStatus200,
 			ResponseErrorConfig<
-				| PostApiUnitsBookByUnitIdContentNodesStatus403
-				| PostApiUnitsBookByUnitIdContentNodesStatus404
-				| PostApiUnitsBookByUnitIdContentNodesStatus422
-				| PostApiUnitsBookByUnitIdContentNodesStatus500
+				| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
+				| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
+				| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
+				| PostApiUnitsBookByUnitIdContentStructureNodesStatus500
 			>,
-			PostApiUnitsBookByUnitIdContentNodesOptions,
+			PostApiUnitsBookByUnitIdContentStructureNodesOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -10579,31 +10904,31 @@ export function usePostApiUnitsBookByUnitIdContentNodes<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ?? postApiUnitsBookByUnitIdContentNodesMutationKey();
+		mutationOptions.mutationKey ?? postApiUnitsBookByUnitIdContentStructureNodesMutationKey();
 
-	const baseOptions = postApiUnitsBookByUnitIdContentNodesMutationOptions(
+	const baseOptions = postApiUnitsBookByUnitIdContentStructureNodesMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PostApiUnitsBookByUnitIdContentNodesStatus200,
+		PostApiUnitsBookByUnitIdContentStructureNodesStatus200,
 		ResponseErrorConfig<
-			| PostApiUnitsBookByUnitIdContentNodesStatus403
-			| PostApiUnitsBookByUnitIdContentNodesStatus404
-			| PostApiUnitsBookByUnitIdContentNodesStatus422
-			| PostApiUnitsBookByUnitIdContentNodesStatus500
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus500
 		>,
-		PostApiUnitsBookByUnitIdContentNodesOptions,
+		PostApiUnitsBookByUnitIdContentStructureNodesOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PostApiUnitsBookByUnitIdContentNodesStatus200,
+		PostApiUnitsBookByUnitIdContentStructureNodesStatus200,
 		ResponseErrorConfig<
-			| PostApiUnitsBookByUnitIdContentNodesStatus403
-			| PostApiUnitsBookByUnitIdContentNodesStatus404
-			| PostApiUnitsBookByUnitIdContentNodesStatus422
-			| PostApiUnitsBookByUnitIdContentNodesStatus500
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus500
 		>,
-		PostApiUnitsBookByUnitIdContentNodesOptions,
+		PostApiUnitsBookByUnitIdContentStructureNodesOptions,
 		TContext
 	>(
 		{
@@ -10613,39 +10938,39 @@ export function usePostApiUnitsBookByUnitIdContentNodes<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PostApiUnitsBookByUnitIdContentNodesStatus200,
+		PostApiUnitsBookByUnitIdContentStructureNodesStatus200,
 		ResponseErrorConfig<
-			| PostApiUnitsBookByUnitIdContentNodesStatus403
-			| PostApiUnitsBookByUnitIdContentNodesStatus404
-			| PostApiUnitsBookByUnitIdContentNodesStatus422
-			| PostApiUnitsBookByUnitIdContentNodesStatus500
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus500
 		>,
-		PostApiUnitsBookByUnitIdContentNodesOptions,
+		PostApiUnitsBookByUnitIdContentStructureNodesOptions,
 		TContext
 	>;
 }
 
-export const patchApiUnitsBookByUnitIdContentNodesByNodeIdMutationKey = () =>
-	[{ url: "/api/units/book/:unitId/content-nodes/:nodeId" }] as const;
+export const patchApiUnitsBookByUnitIdContentStructureNodesByNodeIdMutationKey = () =>
+	[{ url: "/api/units/book/:unitId/content-structure/nodes/:nodeId" }] as const;
 
-export function patchApiUnitsBookByUnitIdContentNodesByNodeIdMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = patchApiUnitsBookByUnitIdContentNodesByNodeIdMutationKey();
+export function patchApiUnitsBookByUnitIdContentStructureNodesByNodeIdMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = patchApiUnitsBookByUnitIdContentStructureNodesByNodeIdMutationKey();
 	return mutationOptions<
-		PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus200,
+		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200,
 		ResponseErrorConfig<
-			| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus403
-			| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus404
-			| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus422
-			| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus500
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500
 		>,
-		PatchApiUnitsBookByUnitIdContentNodesByNodeIdOptions,
+		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiUnitsBookByUnitIdContentNodesByNodeId({
+			const { data } = await patchApiUnitsBookByUnitIdContentStructureNodesByNodeId({
 				...config,
 				path,
 				body,
@@ -10657,20 +10982,20 @@ export function patchApiUnitsBookByUnitIdContentNodesByNodeIdMutationOptions<TCo
 }
 
 /**
- * @summary Move or rename content node
- * {@link /api/units/book/:unitId/content-nodes/:nodeId}
+ * @summary Move or rename Content Structure node
+ * {@link /api/units/book/:unitId/content-structure/nodes/:nodeId}
  */
-export function usePatchApiUnitsBookByUnitIdContentNodesByNodeId<TContext>(
+export function usePatchApiUnitsBookByUnitIdContentStructureNodesByNodeId<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus200,
+			PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200,
 			ResponseErrorConfig<
-				| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus403
-				| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus404
-				| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus422
-				| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus500
+				| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403
+				| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
+				| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422
+				| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500
 			>,
-			PatchApiUnitsBookByUnitIdContentNodesByNodeIdOptions,
+			PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -10679,31 +11004,32 @@ export function usePatchApiUnitsBookByUnitIdContentNodesByNodeId<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ?? patchApiUnitsBookByUnitIdContentNodesByNodeIdMutationKey();
+		mutationOptions.mutationKey ??
+		patchApiUnitsBookByUnitIdContentStructureNodesByNodeIdMutationKey();
 
-	const baseOptions = patchApiUnitsBookByUnitIdContentNodesByNodeIdMutationOptions(
+	const baseOptions = patchApiUnitsBookByUnitIdContentStructureNodesByNodeIdMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus200,
+		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200,
 		ResponseErrorConfig<
-			| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus403
-			| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus404
-			| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus422
-			| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus500
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500
 		>,
-		PatchApiUnitsBookByUnitIdContentNodesByNodeIdOptions,
+		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus200,
+		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200,
 		ResponseErrorConfig<
-			| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus403
-			| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus404
-			| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus422
-			| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus500
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500
 		>,
-		PatchApiUnitsBookByUnitIdContentNodesByNodeIdOptions,
+		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
 		TContext
 	>(
 		{
@@ -10713,14 +11039,14 @@ export function usePatchApiUnitsBookByUnitIdContentNodesByNodeId<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus200,
+		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200,
 		ResponseErrorConfig<
-			| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus403
-			| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus404
-			| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus422
-			| PatchApiUnitsBookByUnitIdContentNodesByNodeIdStatus500
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus403
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500
 		>,
-		PatchApiUnitsBookByUnitIdContentNodesByNodeIdOptions,
+		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
 		TContext
 	>;
 }
@@ -11299,7 +11625,7 @@ export function putApiProgressByUnitIdNodesByNodeIdMutationOptions<TContext = un
 }
 
 /**
- * @summary Complete content node
+ * @summary Complete Content Structure node
  * {@link /api/progress/:unitId/nodes/:nodeId}
  */
 export function usePutApiProgressByUnitIdNodesByNodeId<TContext>(
@@ -11392,7 +11718,7 @@ export function deleteApiProgressByUnitIdNodesByNodeIdMutationOptions<TContext =
 }
 
 /**
- * @summary Uncomplete content node
+ * @summary Uncomplete Content Structure node
  * {@link /api/progress/:unitId/nodes/:nodeId}
  */
 export function useDeleteApiProgressByUnitIdNodesByNodeId<TContext>(
@@ -16305,27 +16631,121 @@ export function useDeleteApiRealmsByRealmIdPinsByUnitId<TContext>(
 	>;
 }
 
-export const patchApiRealmsByRealmIdContentByUnitIdMutationKey = () =>
-	[{ url: "/api/realms/:realmId/content/:unitId" }] as const;
+export const getApiRealmsByRealmIdDocksQueryKey = ({
+	path,
+}: Omit<GetApiRealmsByRealmIdDocksOptions, "headers">) =>
+	[{ url: "/api/realms/:realmId/docks", params: path }] as const;
 
-export function patchApiRealmsByRealmIdContentByUnitIdMutationOptions<TContext = unknown>(
+type GetApiRealmsByRealmIdDocksQueryKey = ReturnType<typeof getApiRealmsByRealmIdDocksQueryKey>;
+
+export function getApiRealmsByRealmIdDocksQueryOptions(
+	{ path }: GetApiRealmsByRealmIdDocksOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = patchApiRealmsByRealmIdContentByUnitIdMutationKey();
-	return mutationOptions<
-		PatchApiRealmsByRealmIdContentByUnitIdStatus200,
+	const queryKey = getApiRealmsByRealmIdDocksQueryKey({ path });
+	return queryOptions<
+		GetApiRealmsByRealmIdDocksStatus200,
 		ResponseErrorConfig<
-			| PatchApiRealmsByRealmIdContentByUnitIdStatus403
-			| PatchApiRealmsByRealmIdContentByUnitIdStatus404
-			| PatchApiRealmsByRealmIdContentByUnitIdStatus422
-			| PatchApiRealmsByRealmIdContentByUnitIdStatus500
+			| GetApiRealmsByRealmIdDocksStatus404
+			| GetApiRealmsByRealmIdDocksStatus422
+			| GetApiRealmsByRealmIdDocksStatus500
 		>,
-		PatchApiRealmsByRealmIdContentByUnitIdOptions,
+		GetApiRealmsByRealmIdDocksStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiRealmsByRealmIdDocks({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List Realm docks
+ * {@link /api/realms/:realmId/docks}
+ */
+export function useGetApiRealmsByRealmIdDocks<
+	TData = GetApiRealmsByRealmIdDocksStatus200,
+	TQueryData = GetApiRealmsByRealmIdDocksStatus200,
+	TQueryKey extends QueryKey = GetApiRealmsByRealmIdDocksQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiRealmsByRealmIdDocksOptions["path"]
+			| (() => GetApiRealmsByRealmIdDocksOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiRealmsByRealmIdDocksStatus200,
+				ResponseErrorConfig<
+					| GetApiRealmsByRealmIdDocksStatus404
+					| GetApiRealmsByRealmIdDocksStatus422
+					| GetApiRealmsByRealmIdDocksStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdDocksQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiRealmsByRealmIdDocksQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdDocksStatus404
+			| GetApiRealmsByRealmIdDocksStatus422
+			| GetApiRealmsByRealmIdDocksStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiRealmsByRealmIdDocksBySlotMutationKey = () =>
+	[{ url: "/api/realms/:realmId/docks/:slot" }] as const;
+
+export function putApiRealmsByRealmIdDocksBySlotMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiRealmsByRealmIdDocksBySlotMutationKey();
+	return mutationOptions<
+		PutApiRealmsByRealmIdDocksBySlotStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdDocksBySlotStatus403
+			| PutApiRealmsByRealmIdDocksBySlotStatus422
+			| PutApiRealmsByRealmIdDocksBySlotStatus500
+		>,
+		PutApiRealmsByRealmIdDocksBySlotOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await patchApiRealmsByRealmIdContentByUnitId({
+			const { data } = await putApiRealmsByRealmIdDocksBySlot({
 				...config,
 				path,
 				body,
@@ -16337,20 +16757,19 @@ export function patchApiRealmsByRealmIdContentByUnitIdMutationOptions<TContext =
 }
 
 /**
- * @summary Moderate Realm content
- * {@link /api/realms/:realmId/content/:unitId}
+ * @summary Create or replace Realm dock
+ * {@link /api/realms/:realmId/docks/:slot}
  */
-export function usePatchApiRealmsByRealmIdContentByUnitId<TContext>(
+export function usePutApiRealmsByRealmIdDocksBySlot<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PatchApiRealmsByRealmIdContentByUnitIdStatus200,
+			PutApiRealmsByRealmIdDocksBySlotStatus200,
 			ResponseErrorConfig<
-				| PatchApiRealmsByRealmIdContentByUnitIdStatus403
-				| PatchApiRealmsByRealmIdContentByUnitIdStatus404
-				| PatchApiRealmsByRealmIdContentByUnitIdStatus422
-				| PatchApiRealmsByRealmIdContentByUnitIdStatus500
+				| PutApiRealmsByRealmIdDocksBySlotStatus403
+				| PutApiRealmsByRealmIdDocksBySlotStatus422
+				| PutApiRealmsByRealmIdDocksBySlotStatus500
 			>,
-			PatchApiRealmsByRealmIdContentByUnitIdOptions,
+			PutApiRealmsByRealmIdDocksBySlotOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -16359,31 +16778,29 @@ export function usePatchApiRealmsByRealmIdContentByUnitId<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ?? patchApiRealmsByRealmIdContentByUnitIdMutationKey();
+		mutationOptions.mutationKey ?? putApiRealmsByRealmIdDocksBySlotMutationKey();
 
-	const baseOptions = patchApiRealmsByRealmIdContentByUnitIdMutationOptions(
+	const baseOptions = putApiRealmsByRealmIdDocksBySlotMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PatchApiRealmsByRealmIdContentByUnitIdStatus200,
+		PutApiRealmsByRealmIdDocksBySlotStatus200,
 		ResponseErrorConfig<
-			| PatchApiRealmsByRealmIdContentByUnitIdStatus403
-			| PatchApiRealmsByRealmIdContentByUnitIdStatus404
-			| PatchApiRealmsByRealmIdContentByUnitIdStatus422
-			| PatchApiRealmsByRealmIdContentByUnitIdStatus500
+			| PutApiRealmsByRealmIdDocksBySlotStatus403
+			| PutApiRealmsByRealmIdDocksBySlotStatus422
+			| PutApiRealmsByRealmIdDocksBySlotStatus500
 		>,
-		PatchApiRealmsByRealmIdContentByUnitIdOptions,
+		PutApiRealmsByRealmIdDocksBySlotOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PatchApiRealmsByRealmIdContentByUnitIdStatus200,
+		PutApiRealmsByRealmIdDocksBySlotStatus200,
 		ResponseErrorConfig<
-			| PatchApiRealmsByRealmIdContentByUnitIdStatus403
-			| PatchApiRealmsByRealmIdContentByUnitIdStatus404
-			| PatchApiRealmsByRealmIdContentByUnitIdStatus422
-			| PatchApiRealmsByRealmIdContentByUnitIdStatus500
+			| PutApiRealmsByRealmIdDocksBySlotStatus403
+			| PutApiRealmsByRealmIdDocksBySlotStatus422
+			| PutApiRealmsByRealmIdDocksBySlotStatus500
 		>,
-		PatchApiRealmsByRealmIdContentByUnitIdOptions,
+		PutApiRealmsByRealmIdDocksBySlotOptions,
 		TContext
 	>(
 		{
@@ -16393,14 +16810,207 @@ export function usePatchApiRealmsByRealmIdContentByUnitId<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PatchApiRealmsByRealmIdContentByUnitIdStatus200,
+		PutApiRealmsByRealmIdDocksBySlotStatus200,
 		ResponseErrorConfig<
-			| PatchApiRealmsByRealmIdContentByUnitIdStatus403
-			| PatchApiRealmsByRealmIdContentByUnitIdStatus404
-			| PatchApiRealmsByRealmIdContentByUnitIdStatus422
-			| PatchApiRealmsByRealmIdContentByUnitIdStatus500
+			| PutApiRealmsByRealmIdDocksBySlotStatus403
+			| PutApiRealmsByRealmIdDocksBySlotStatus422
+			| PutApiRealmsByRealmIdDocksBySlotStatus500
 		>,
-		PatchApiRealmsByRealmIdContentByUnitIdOptions,
+		PutApiRealmsByRealmIdDocksBySlotOptions,
+		TContext
+	>;
+}
+
+export const deleteApiRealmsByRealmIdDocksBySlotMutationKey = () =>
+	[{ url: "/api/realms/:realmId/docks/:slot" }] as const;
+
+export function deleteApiRealmsByRealmIdDocksBySlotMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = deleteApiRealmsByRealmIdDocksBySlotMutationKey();
+	return mutationOptions<
+		DeleteApiRealmsByRealmIdDocksBySlotStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdDocksBySlotStatus403
+			| DeleteApiRealmsByRealmIdDocksBySlotStatus422
+			| DeleteApiRealmsByRealmIdDocksBySlotStatus500
+		>,
+		DeleteApiRealmsByRealmIdDocksBySlotOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiRealmsByRealmIdDocksBySlot({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Delete Realm dock
+ * {@link /api/realms/:realmId/docks/:slot}
+ */
+export function useDeleteApiRealmsByRealmIdDocksBySlot<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiRealmsByRealmIdDocksBySlotStatus204,
+			ResponseErrorConfig<
+				| DeleteApiRealmsByRealmIdDocksBySlotStatus403
+				| DeleteApiRealmsByRealmIdDocksBySlotStatus422
+				| DeleteApiRealmsByRealmIdDocksBySlotStatus500
+			>,
+			DeleteApiRealmsByRealmIdDocksBySlotOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? deleteApiRealmsByRealmIdDocksBySlotMutationKey();
+
+	const baseOptions = deleteApiRealmsByRealmIdDocksBySlotMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiRealmsByRealmIdDocksBySlotStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdDocksBySlotStatus403
+			| DeleteApiRealmsByRealmIdDocksBySlotStatus422
+			| DeleteApiRealmsByRealmIdDocksBySlotStatus500
+		>,
+		DeleteApiRealmsByRealmIdDocksBySlotOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiRealmsByRealmIdDocksBySlotStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdDocksBySlotStatus403
+			| DeleteApiRealmsByRealmIdDocksBySlotStatus422
+			| DeleteApiRealmsByRealmIdDocksBySlotStatus500
+		>,
+		DeleteApiRealmsByRealmIdDocksBySlotOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiRealmsByRealmIdDocksBySlotStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdDocksBySlotStatus403
+			| DeleteApiRealmsByRealmIdDocksBySlotStatus422
+			| DeleteApiRealmsByRealmIdDocksBySlotStatus500
+		>,
+		DeleteApiRealmsByRealmIdDocksBySlotOptions,
+		TContext
+	>;
+}
+
+export const patchApiRealmsByRealmIdUnitsByUnitIdMutationKey = () =>
+	[{ url: "/api/realms/:realmId/units/:unitId" }] as const;
+
+export function patchApiRealmsByRealmIdUnitsByUnitIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = patchApiRealmsByRealmIdUnitsByUnitIdMutationKey();
+	return mutationOptions<
+		PatchApiRealmsByRealmIdUnitsByUnitIdStatus200,
+		ResponseErrorConfig<
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus403
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus404
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus422
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus500
+		>,
+		PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await patchApiRealmsByRealmIdUnitsByUnitId({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Update Realm Unit status
+ * {@link /api/realms/:realmId/units/:unitId}
+ */
+export function usePatchApiRealmsByRealmIdUnitsByUnitId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PatchApiRealmsByRealmIdUnitsByUnitIdStatus200,
+			ResponseErrorConfig<
+				| PatchApiRealmsByRealmIdUnitsByUnitIdStatus403
+				| PatchApiRealmsByRealmIdUnitsByUnitIdStatus404
+				| PatchApiRealmsByRealmIdUnitsByUnitIdStatus422
+				| PatchApiRealmsByRealmIdUnitsByUnitIdStatus500
+			>,
+			PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? patchApiRealmsByRealmIdUnitsByUnitIdMutationKey();
+
+	const baseOptions = patchApiRealmsByRealmIdUnitsByUnitIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PatchApiRealmsByRealmIdUnitsByUnitIdStatus200,
+		ResponseErrorConfig<
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus403
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus404
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus422
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus500
+		>,
+		PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PatchApiRealmsByRealmIdUnitsByUnitIdStatus200,
+		ResponseErrorConfig<
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus403
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus404
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus422
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus500
+		>,
+		PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PatchApiRealmsByRealmIdUnitsByUnitIdStatus200,
+		ResponseErrorConfig<
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus403
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus404
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus422
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus500
+		>,
+		PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
 		TContext
 	>;
 }

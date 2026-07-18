@@ -21,16 +21,11 @@ function resolveLocalizedEntry(pathname: string, locale: AboutLocale): string | 
 	const detail = normalized.match(/^\/(?:product|products)\/([^/]+)$/);
 	if (!detail?.[1]) return undefined;
 
-	return getProductPath(locale, detail[1] === "entity-source" ? "entity-attribution" : detail[1]);
+	return getProductPath(locale, detail[1]);
 }
 
 function resolveLocalizedLegacyPath(pathname: string): string | undefined {
 	const normalized = normalizePathname(pathname);
-
-	const renamedProduct = normalized.match(/^\/([^/]+)\/products\/entity-source$/);
-	if (renamedProduct?.[1] && isAboutLocale(renamedProduct[1])) {
-		return getProductPath(renamedProduct[1], "entity-attribution");
-	}
 
 	const legacyDirectory = normalized.match(/^\/([^/]+)\/product$/);
 	if (legacyDirectory?.[1] && isAboutLocale(legacyDirectory[1])) {
@@ -39,10 +34,7 @@ function resolveLocalizedLegacyPath(pathname: string): string | undefined {
 
 	const legacyDetail = normalized.match(/^\/([^/]+)\/product\/([^/]+)$/);
 	if (legacyDetail?.[1] && legacyDetail[2] && isAboutLocale(legacyDetail[1])) {
-		return getProductPath(
-			legacyDetail[1],
-			legacyDetail[2] === "entity-source" ? "entity-attribution" : legacyDetail[2],
-		);
+		return getProductPath(legacyDetail[1], legacyDetail[2]);
 	}
 
 	return undefined;

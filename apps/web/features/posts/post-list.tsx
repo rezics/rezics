@@ -47,6 +47,7 @@ import { useRecommendationTracking } from "@/features/recommendations/tracking";
 import { recommendationReasonLabel } from "@/features/recommendations/reason";
 import { invalidateRecommendationQueries } from "@/features/recommendations/query";
 import { useTranslation } from "@/i18n/client";
+import { readPortableText } from "@/lib/content-structure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 type FeedSort = "best" | "hot" | "new" | "top" | "rising";
@@ -371,7 +372,10 @@ export function PostListItem({
 									: (post.title ?? t.posts.untitled)}
 							</h2>
 							<div className="prose prose-sm text-muted-foreground mt-2 max-w-none leading-6">
-								<PortableTextContent value={post.body} variant="preview" />
+								<PortableTextContent
+									value={readPortableText(post.body)}
+									variant="preview"
+								/>
 							</div>
 						</Link>
 						{post.subjectId && (

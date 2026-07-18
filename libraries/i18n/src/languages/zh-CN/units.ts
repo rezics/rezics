@@ -1,5 +1,5 @@
 export default {
-	types: { book: "书籍", game: "游戏", media: "媒体" },
+	types: { book: "书籍", software: "软件", media: "媒体" },
 	detail: {
 		information: "条目信息",
 		localizations: "本地化内容",

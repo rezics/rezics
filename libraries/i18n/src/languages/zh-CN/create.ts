@@ -3,7 +3,7 @@ export default {
 	description: "选择要创建的内容类型。",
 	items: {
 		book: "书籍",
-		game: "游戏",
+		software: "软件",
 		media: "媒体",
 		entity: "目录条目",
 		tag: "标签",

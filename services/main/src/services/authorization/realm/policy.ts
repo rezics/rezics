@@ -43,7 +43,7 @@ const realmRoleCapabilities: Record<RealmRole, readonly RealmCapability[]> = {
 		"realm.members.read",
 		"realm.members.manage",
 		"realm.pins.manage",
-		"realm.content.moderate",
+		"realm.units.moderate",
 	],
 	admin: [
 		"realm.contribute",
@@ -52,7 +52,7 @@ const realmRoleCapabilities: Record<RealmRole, readonly RealmCapability[]> = {
 		"realm.members.manage",
 		"realm.rules.publish",
 		"realm.pins.manage",
-		"realm.content.moderate",
+		"realm.units.moderate",
 	],
 	owner: RealmCapabilityValues,
 };

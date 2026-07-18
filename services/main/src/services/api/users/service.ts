@@ -1,4 +1,5 @@
 import { eq, sql } from "drizzle-orm";
+import { PortableTextDocument, parseNullableDocument } from "@rezics/content-structure";
 
 import { database } from "../../database";
 import { profile as profileTable, unit } from "../../database/schema";
@@ -34,13 +35,19 @@ export async function getProfile(unitId: string) {
 }
 
 export async function presentProfile<
-	T extends { avatar: string | null; status: string; visibility: string },
+	T extends {
+		avatar: string | null;
+		status: string;
+		visibility: string;
+		description: unknown;
+	},
 >(profile: T, includeKey = false) {
 	const avatarKey = profile.avatar && isManagedUploadKey(profile.avatar) ? profile.avatar : null;
 	return {
 		...profile,
 		status: profile.status.toLowerCase(),
 		visibility: profile.visibility.toLowerCase(),
+		description: parseNullableDocument(PortableTextDocument, profile.description),
 		avatar: avatarKey ? await storage.presignGet({ Key: avatarKey }) : profile.avatar,
 		...(includeKey ? { avatarKey } : {}),
 	};

@@ -11,7 +11,6 @@ import {
 	uniqueIndex,
 	uuid,
 } from "drizzle-orm/pg-core";
-import type { PortableText } from "@rezics/portable-text";
 
 import { pgTable } from "./base";
 import {
@@ -29,7 +28,6 @@ import {
 } from "./contract-values";
 import {
 	createCreatedAtColumn,
-	createJsonArrayConstraint,
 	createJsonDocumentColumn,
 	createJsonObjectColumn,
 	createJsonObjectConstraint,
@@ -110,8 +108,8 @@ export const unitLocalization = pgTable(
 		isDefault: boolean().default(false).notNull(),
 		title: text(),
 		summary: text(),
-		description: createJsonDocumentColumn<PortableText>(),
-		content: createJsonDocumentColumn<PortableText>(),
+		description: createJsonDocumentColumn(),
+		content: createJsonDocumentColumn(),
 		contentStatus: contentStatus(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -145,11 +143,6 @@ export const unitLocalization = pgTable(
 			"unit_localization_content_state_check",
 			sql`(${table.content} is null) = (${table.contentStatus} is null)`,
 		),
-		createJsonArrayConstraint(
-			"unit_localization_description_json_array_check",
-			table.description,
-		),
-		createJsonArrayConstraint("unit_localization_content_json_array_check", table.content),
 	],
 );
 
@@ -165,7 +158,7 @@ export const profile = pgTable(
 		name: text(),
 		avatar: text(),
 		summary: text(),
-		description: createJsonDocumentColumn<PortableText>(),
+		description: createJsonDocumentColumn(),
 		joinedAt: createTimestampMsColumn().defaultNow().notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -179,7 +172,6 @@ export const profile = pgTable(
 			table.description.op("pgroonga_jsonb_full_text_search_ops_v2"),
 		),
 		check("profile_name_not_blank", sql`${table.name} is null or btrim(${table.name}) <> ''`),
-		createJsonArrayConstraint("profile_description_json_array_check", table.description),
 	],
 );
 

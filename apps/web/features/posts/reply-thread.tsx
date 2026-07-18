@@ -7,7 +7,7 @@ import {
 	usePatchApiPostsByPostIdRepliesByReplyPostId,
 	usePostApiPostsByPostIdReplies,
 } from "@rezics/openapi-tanstack-query";
-import { normalizePortableText, type PortableTextValue } from "@rezics/portable-text";
+import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
@@ -33,6 +33,7 @@ import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { readPortableText, writePortableText } from "@/lib/content-structure";
 import { buildReplyPostTree, findReplyPost, type ReplyPostTreeNode } from "./reply-tree";
 import { invalidatePostQueries } from "./query";
 
@@ -133,7 +134,7 @@ function ReplyPostNode({
 			{
 				path: { postId: rootPostId, replyPostId: reply.id },
 				body: {
-					body: normalizePortableText(body),
+					body: writePortableText(body, reply.body),
 					baseRevisionId: reply.latestRevisionId,
 				},
 			},
@@ -192,7 +193,10 @@ function ReplyPostNode({
 					</form>
 				) : (
 					<div className="prose prose-sm max-w-none">
-						<PortableTextContent value={reply.body} variant="compact" />
+						<PortableTextContent
+							value={readPortableText(reply.body)}
+							variant="compact"
+						/>
 					</div>
 				)}
 				{reply.status !== "deleted" && (
@@ -214,7 +218,7 @@ function ReplyPostNode({
 									size="xs"
 									variant="ghost"
 									onClick={() => {
-										setBody(normalizePortableText(reply.body));
+										setBody(readPortableText(reply.body));
 										setEditing(true);
 									}}
 								>
@@ -324,7 +328,7 @@ function ReplyPostComposer({
 				body: {
 					...(parentPostId ? { parentPostId } : {}),
 					language: locale.target,
-					body: normalizePortableText(body),
+					body: writePortableText(body),
 				},
 			},
 			{

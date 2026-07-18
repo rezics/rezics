@@ -1,5 +1,5 @@
 import { type Static, t } from "elysia";
-import { PortableText } from "@rezics/portable-text";
+import { PortableTextDocument } from "@rezics/content-structure";
 
 import { LanguageTag, Uuid } from "../schema";
 
@@ -16,7 +16,7 @@ export const CreateReviewBody = t.Object({
 	language: LanguageTag,
 	title: t.String({ minLength: 1, maxLength: 500 }),
 	summary: t.Optional(t.String({ maxLength: 2_000 })),
-	body: PortableText,
+	body: PortableTextDocument,
 	score: t.Optional(t.Integer({ minimum: 1, maximum: 10 })),
 });
 export type CreateReviewBody = Static<typeof CreateReviewBody>;
@@ -28,7 +28,7 @@ export const UpdateReviewBody = t.Object({
 	language: LanguageTag,
 	title: t.String({ minLength: 1, maxLength: 500 }),
 	summary: t.Optional(t.String({ maxLength: 2_000 })),
-	body: PortableText,
+	body: PortableTextDocument,
 });
 export type UpdateReviewBody = Static<typeof UpdateReviewBody>;
 

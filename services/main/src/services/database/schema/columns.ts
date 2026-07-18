@@ -17,7 +17,11 @@ export const createUpdatedAtColumn = () =>
 		.$onUpdate(() => new Date())
 		.notNull();
 
-export const createJsonDocumentColumn = <T = unknown>() => jsonb().$type<T>();
+/**
+ * Persistence deliberately does not know the domain document shape.
+ * Callers must validate unknown values with the owning product schema.
+ */
+export const createJsonDocumentColumn = () => jsonb().$type<unknown>();
 
 export const createJsonObjectColumn = <
 	T extends Record<string, unknown> = Record<string, unknown>,
@@ -25,6 +29,3 @@ export const createJsonObjectColumn = <
 
 export const createJsonObjectConstraint = (name: string, column: AnyPgColumn) =>
 	check(name, sql`${column} is null or jsonb_typeof(${column}) = 'object'`);
-
-export const createJsonArrayConstraint = (name: string, column: AnyPgColumn) =>
-	check(name, sql`${column} is null or jsonb_typeof(${column}) = 'array'`);

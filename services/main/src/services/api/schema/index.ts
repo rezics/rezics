@@ -1,6 +1,6 @@
 import { type Static, t } from "elysia";
 import { FormatRegistry } from "@sinclair/typebox";
-import { PortableText } from "@rezics/portable-text";
+import { PortableTextDocument } from "@rezics/content-structure";
 import tags from "language-tags";
 
 import {
@@ -32,7 +32,7 @@ export const LocalizationInput = t.Object(
 		language: LanguageTag,
 		title: t.String({ minLength: 1, maxLength: 500 }),
 		summary: t.Optional(t.String({ maxLength: 2_000 })),
-		description: t.Optional(PortableText),
+		description: t.Optional(PortableTextDocument),
 	},
 	{ additionalProperties: false },
 );

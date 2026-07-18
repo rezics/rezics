@@ -30,10 +30,10 @@ export class RealmMemberNotFound extends Data.TaggedError("RealmMemberNotFound")
 	}
 }
 
-export class RealmContentNotFound extends Data.TaggedError("RealmContentNotFound") {
+export class RealmUnitNotFound extends Data.TaggedError("RealmUnitNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = RealmContentNotFound.status;
-	readonly message = "Realm content not found";
+	readonly status = RealmUnitNotFound.status;
+	readonly message = "Realm Unit not found";
 }
 
 export const RealmErrors = [
@@ -41,5 +41,5 @@ export const RealmErrors = [
 	RealmMembershipNotFound,
 	RealmOwnerLeaveForbidden,
 	RealmMemberNotFound,
-	RealmContentNotFound,
+	RealmUnitNotFound,
 ] as const;

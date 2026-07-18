@@ -1,5 +1,16 @@
 import { createHash } from "node:crypto";
 
+import {
+	createCollectionPresentationDocument,
+	createDockDocument,
+	createManualCollectionDefinitionDocument,
+	createPortableTextDocument,
+	createSystemCollectionDefinitionDocument,
+	createZoneBoundaryDocument,
+	createZoneMenuDocument,
+	createZonePageDocument,
+	createZoneThemeDocument,
+} from "@rezics/content-structure";
 import { hashPassword } from "better-auth/crypto";
 import { and, eq } from "drizzle-orm";
 
@@ -14,15 +25,15 @@ import {
 	capabilityGrant,
 	collection,
 	collectionItem,
-	contentNode,
-	contentNodeProgress,
+	contentStructureNode,
+	contentStructureNodeProgress,
 	conversation,
 	conversationRead,
 	entity,
 	EnforcementKindValues,
 	feedback,
-	game,
-	gameRequirement,
+	software,
+	softwareRequirement,
 	media,
 	message,
 	moderationAction,
@@ -39,7 +50,8 @@ import {
 	profileFollow,
 	profilePreference,
 	realm,
-	realmContent,
+	realmDock,
+	realmUnit,
 	realmMember,
 	realmPin,
 	realmRule,
@@ -51,11 +63,12 @@ import {
 	score,
 	series,
 	seriesRelease,
+	tag,
 	unit,
 	unitAlias,
 	unitAliasVote,
 	unitCollaborator,
-	unitCredit,
+	creditAttribution,
 	unitFieldLock,
 	unitLink,
 	unitLocalization,
@@ -67,6 +80,7 @@ import {
 	unitVariant,
 	users,
 	zone,
+	zoneMenu,
 	zonePage,
 	zoneSubscription,
 } from "../src/services/database/schema";
@@ -132,8 +146,8 @@ interface CreatedLink {
 
 interface CreatedNode {
 	id: string;
-	bookId: string;
-	chapterId: string | null;
+	ownerUnitId: string;
+	contentUnitId: string | null;
 	createdAt: Date;
 }
 
@@ -250,7 +264,7 @@ function localizationRows(data: SeedData, value: CreatedUnit) {
 			case "reply":
 				return {
 					...base,
-					content: data.portableText(language, 1),
+					content: createPortableTextDocument(data.portableText(language, 1)),
 					contentStatus,
 				};
 			case "post":
@@ -258,7 +272,7 @@ function localizationRows(data: SeedData, value: CreatedUnit) {
 					...base,
 					title: data.title(language),
 					summary: data.summary(language),
-					content: data.portableText(language, 2),
+					content: createPortableTextDocument(data.portableText(language, 2)),
 					contentStatus,
 				};
 			case "poll":
@@ -268,7 +282,7 @@ function localizationRows(data: SeedData, value: CreatedUnit) {
 					...base,
 					title: data.title(language),
 					summary: data.summary(language),
-					description: data.portableText(language, 2),
+					description: createPortableTextDocument(data.portableText(language, 2)),
 				};
 		}
 	});
@@ -354,7 +368,7 @@ async function seedProfiles(
 				name: value.name,
 				avatar: itemAt(userInputs, index).image,
 				summary: data.summary(language),
-				description: data.portableText(language, 2),
+				description: createPortableTextDocument(data.portableText(language, 2)),
 				joinedAt: value.createdAt,
 				createdAt: value.createdAt,
 				updatedAt: value.createdAt,
@@ -415,7 +429,7 @@ interface SeedCatalog {
 	entities: CreatedUnit[];
 	tags: CreatedUnit[];
 	books: CreatedUnit[];
-	games: CreatedUnit[];
+	softwareUnits: CreatedUnit[];
 	media: CreatedUnit[];
 	works: CreatedUnit[];
 	series: CreatedUnit[];
@@ -437,7 +451,7 @@ interface SeedContent {
 
 interface SeedStructure {
 	readonly realmMembers: readonly { realmId: string; profileId: string }[];
-	readonly realmContents: readonly { realmId: string; unitId: string }[];
+	readonly realmUnits: readonly { realmId: string; unitId: string }[];
 }
 
 async function seedCatalog(
@@ -470,7 +484,10 @@ async function seedCatalog(
 	const entities = await insertUnits(tx, descriptors("entity", SeedPlan.entities, "entity"));
 	const tags = await insertUnits(tx, descriptors("tag", SeedPlan.tags, "tag"));
 	const books = await insertUnits(tx, descriptors("book", SeedPlan.books, "book"));
-	const games = await insertUnits(tx, descriptors("game", SeedPlan.games, "game"));
+	const softwareUnits = await insertUnits(
+		tx,
+		descriptors("software", SeedPlan.software, "software"),
+	);
 	const mediaItems = await insertUnits(tx, descriptors("media", SeedPlan.media, "media"));
 	const seriesItems = await insertUnits(tx, descriptors("series", SeedPlan.series, "series"));
 	const realms = await insertUnits(tx, descriptors("realm", SeedPlan.realms, "realm"));
@@ -511,7 +528,7 @@ async function seedCatalog(
 		...entities,
 		...tags,
 		...books,
-		...games,
+		...softwareUnits,
 		...mediaItems,
 		...seriesItems,
 		...realms,
@@ -533,6 +550,14 @@ async function seedCatalog(
 		(batch) => tx.insert(entity).values(batch),
 	);
 	await writeBatches(
+		tags.map((value) => ({
+			id: value.id,
+			createdAt: value.createdAt,
+			updatedAt: value.updatedAt,
+		})),
+		(batch) => tx.insert(tag).values(batch),
+	);
+	await writeBatches(
 		books.map((value, index) => ({
 			id: value.id,
 			isbn13: data.fakerByLanguage.en.string.numeric(13),
@@ -546,7 +571,7 @@ async function seedCatalog(
 		(batch) => tx.insert(book).values(batch),
 	);
 	await writeBatches(
-		games.map((value, index) => ({
+		softwareUnits.map((value, index) => ({
 			id: value.id,
 			releaseDate: dateOnly(data.pastDate(5_000)),
 			versionLabel: `${1 + (index % 5)}.${index % 10}`,
@@ -554,7 +579,7 @@ async function seedCatalog(
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
-		(batch) => tx.insert(game).values(batch),
+		(batch) => tx.insert(software).values(batch),
 	);
 	await writeBatches(
 		mediaItems.map((value, index) => ({
@@ -573,7 +598,7 @@ async function seedCatalog(
 	await writeBatches(
 		seriesItems.map((value, index) => ({
 			id: value.id,
-			kind: itemAt(["franchise", "book_series", "game_series", "media_series"], index),
+			kind: itemAt(["franchise", "book_series", "software_series", "media_series"], index),
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
@@ -591,10 +616,14 @@ async function seedCatalog(
 	await writeBatches(
 		zones.map((value, index) => ({
 			id: value.id,
-			ownerRealmId: itemAt(realms, index).id,
-			boundary: { kind: "catalog", index },
-			nav: { layout: index % 2 === 0 ? "tabs" : "sidebar" },
-			theme: { accent: itemAt(["amber", "blue", "violet"], index) },
+			managingRealmId: itemAt(realms, index).id,
+			boundaryDocument: createZoneBoundaryDocument({
+				kind: "catalog",
+				index,
+			}),
+			themeDocument: createZoneThemeDocument({
+				accent: itemAt(["amber", "blue", "violet"], index),
+			}),
 			startsAt: index % 3 === 0 ? data.pastDate(180) : null,
 			endsAt: index % 3 === 0 ? data.futureDate(180) : null,
 			createdAt: value.createdAt,
@@ -603,13 +632,32 @@ async function seedCatalog(
 		(batch) => tx.insert(zone).values(batch),
 	);
 	await writeBatches(
-		collections.map((value, index) => ({
-			id: value.id,
-			ownerProfileId: value.ownerProfileId,
-			kind: index < SeedPlan.users ? ("favorites" as const) : ("custom" as const),
+		zones.map((value, index) => ({
+			zoneId: value.id,
+			slot: "primary",
+			document: createZoneMenuDocument(),
+			position: position(index),
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
+		(batch) => tx.insert(zoneMenu).values(batch),
+	);
+	await writeBatches(
+		collections.map((value, index) => {
+			const favorites = index < SeedPlan.users;
+			return {
+				id: value.id,
+				ownerProfileId: value.ownerProfileId,
+				source: favorites ? ("system" as const) : ("manual" as const),
+				systemKey: favorites ? ("favorites" as const) : null,
+				definitionDocument: favorites
+					? createSystemCollectionDefinitionDocument("favorites")
+					: createManualCollectionDefinitionDocument(),
+				presentationDocument: createCollectionPresentationDocument(),
+				createdAt: value.createdAt,
+				updatedAt: value.updatedAt,
+			};
+		}),
 		(batch) => tx.insert(collection).values(batch),
 	);
 	await writeBatches(
@@ -630,7 +678,7 @@ async function seedCatalog(
 		(batch) => tx.insert(poll).values(batch),
 	);
 
-	const works = [...books, ...games, ...mediaItems];
+	const works = [...books, ...softwareUnits, ...mediaItems];
 	const aliases = Array.from({ length: SeedPlan.aliases }, (_, index) => {
 		const target = itemAt(
 			[...entities, ...tags, ...works, ...seriesItems, ...realms, ...zones],
@@ -681,7 +729,7 @@ async function seedCatalog(
 			role: itemAt(["author", "developer", "director", "publisher"], index),
 			position: position(index),
 		})),
-		(batch) => tx.insert(unitCredit).values(batch),
+		(batch) => tx.insert(creditAttribution).values(batch),
 	);
 	const linkInputs = Array.from({ length: SeedPlan.links }, (_, index) => {
 		const target = itemAt(works, index);
@@ -744,14 +792,14 @@ async function seedCatalog(
 	);
 	const linkByUnitId = new Map(links.map((value) => [value.unitId, value]));
 	await writeBatches(
-		Array.from({ length: SeedPlan.gameRequirements }, (_, index) => {
-			const gameUnit = itemAt(games, Math.floor(index / 2));
+		Array.from({ length: SeedPlan.softwareRequirements }, (_, index) => {
+			const softwareUnit = itemAt(softwareUnits, Math.floor(index / 2));
 			return {
-				gameId: gameUnit.id,
+				softwareId: softwareUnit.id,
 				platformEntityId: itemAt(entities.slice(65), index).id,
 				tier: index % 2 === 0 ? "minimum" : "recommended",
 				language: itemAt(data.languages(index), 0),
-				sourceLinkId: linkByUnitId.get(gameUnit.id)?.id,
+				sourceLinkId: linkByUnitId.get(softwareUnit.id)?.id,
 				hardware: {
 					memoryGb: index % 2 === 0 ? 8 : 16,
 					storageGb: 40 + (index % 8) * 10,
@@ -759,13 +807,13 @@ async function seedCatalog(
 				rawText: data.summary("en"),
 			};
 		}),
-		(batch) => tx.insert(gameRequirement).values(batch),
+		(batch) => tx.insert(softwareRequirement).values(batch),
 	);
 	await writeBatches(
 		Array.from({ length: SeedPlan.zonePages }, (_, index) => ({
 			zoneId: itemAt(zones, Math.floor(index / 4)).id,
 			slug: itemAt(["home", "catalog", "community", "about"], index),
-			config: { display: itemAt(["grid", "list", "tiles"], index) },
+			document: createZonePageDocument(),
 			position: position(index % 4),
 			home: index % 4 === 0,
 		})),
@@ -789,7 +837,7 @@ async function seedCatalog(
 		entities,
 		tags,
 		books,
-		games,
+		softwareUnits,
 		media: mediaItems,
 		works,
 		series: seriesItems,
@@ -933,9 +981,9 @@ async function seedContent(
 	);
 
 	const rootNodeInputs = catalog.books.map((bookUnit, index) => ({
-		bookId: bookUnit.id,
+		ownerUnitId: bookUnit.id,
 		parentId: null,
-		chapterId: null,
+		contentUnitId: null,
 		title: data.title(itemAt(data.languages(index), 0)),
 		position: position(0),
 		contentRating: index % 8 === 0 ? ("r15" as const) : ("general" as const),
@@ -945,25 +993,25 @@ async function seedContent(
 	const rootNodes: CreatedNode[] = [];
 	for (const batch of chunks(rootNodeInputs)) {
 		rootNodes.push(
-			...(await tx.insert(contentNode).values(batch).returning({
-				id: contentNode.id,
-				bookId: contentNode.bookId,
-				chapterId: contentNode.chapterId,
-				createdAt: contentNode.createdAt,
+			...(await tx.insert(contentStructureNode).values(batch).returning({
+				id: contentStructureNode.id,
+				ownerUnitId: contentStructureNode.ownerUnitId,
+				contentUnitId: contentStructureNode.contentUnitId,
+				createdAt: contentStructureNode.createdAt,
 			})),
 		);
 	}
-	const rootByBook = new Map(rootNodes.map((value) => [value.bookId, value]));
+	const rootByBook = new Map(rootNodes.map((value) => [value.ownerUnitId, value]));
 	const childInputs = Array.from(
-		{ length: SeedPlan.contentNodes - rootNodes.length },
+		{ length: SeedPlan.contentStructureNodes - rootNodes.length },
 		(_, index) => {
 			const bookUnit = itemAt(catalog.books, index);
 			const parent = rootByBook.get(bookUnit.id);
 			if (!parent) throw new Error(`Missing seed root node for book ${bookUnit.id}`);
 			return {
-				bookId: bookUnit.id,
+				ownerUnitId: bookUnit.id,
 				parentId: parent.id,
-				chapterId: index < chapters.length ? itemAt(chapters, index).id : null,
+				contentUnitId: index < chapters.length ? itemAt(chapters, index).id : null,
 				title: data.title(itemAt(data.languages(index + rootNodes.length), 0)),
 				position: position(1 + Math.floor(index / catalog.books.length)),
 				contentRating: index % 11 === 0 ? ("r15" as const) : ("general" as const),
@@ -975,11 +1023,11 @@ async function seedContent(
 	const childNodes: CreatedNode[] = [];
 	for (const batch of chunks(childInputs)) {
 		childNodes.push(
-			...(await tx.insert(contentNode).values(batch).returning({
-				id: contentNode.id,
-				bookId: contentNode.bookId,
-				chapterId: contentNode.chapterId,
-				createdAt: contentNode.createdAt,
+			...(await tx.insert(contentStructureNode).values(batch).returning({
+				id: contentStructureNode.id,
+				ownerUnitId: contentStructureNode.ownerUnitId,
+				contentUnitId: contentStructureNode.contentUnitId,
+				createdAt: contentStructureNode.createdAt,
 			})),
 		);
 	}
@@ -1125,7 +1173,7 @@ async function seedStructure(
 					position: position(index),
 					language,
 					title: data.title(language),
-					content: data.portableText(language, 1),
+					content: createPortableTextDocument(data.portableText(language, 1)),
 					createdAt: revision.publishedAt,
 				};
 			}),
@@ -1145,6 +1193,16 @@ async function seedStructure(
 			),
 		),
 		(batch) => tx.insert(realmRuleAcceptance).values(batch),
+	);
+	await writeBatches(
+		catalog.realms.map((realmUnit) => ({
+			realmId: realmUnit.id,
+			slot: "primary",
+			document: createDockDocument(),
+			createdAt: realmUnit.createdAt,
+			updatedAt: realmUnit.updatedAt,
+		})),
+		(batch) => tx.insert(realmDock).values(batch),
 	);
 
 	const realmTargets = [
@@ -1169,16 +1227,16 @@ async function seedStructure(
 		),
 		(batch) => tx.insert(realmPin).values(batch),
 	);
-	const realmContentRows = catalog.realms.flatMap((realmUnit, realmIndex) =>
-		Array.from({ length: SeedPlan.realmContents / catalog.realms.length }, (_, index) => {
+	const realmUnitRows = catalog.realms.flatMap((realmUnit, realmIndex) =>
+		Array.from({ length: SeedPlan.realmUnits / catalog.realms.length }, (_, index) => {
 			const target = itemAt(realmTargets, realmIndex * 53 + index);
 			const createdAt = latestDate(realmUnit.createdAt, target.createdAt);
 			return {
 				realmId: realmUnit.id,
 				unitId: target.id,
 				locked: index % 19 === 0,
-				moderationStatus: itemAt(
-					["approved", "approved", "approved", "approved", "pending"] as const,
+				status: itemAt(
+					["visible", "visible", "visible", "visible", "pending"] as const,
 					index,
 				),
 				createdAt,
@@ -1186,7 +1244,7 @@ async function seedStructure(
 			};
 		}),
 	);
-	await writeBatches(realmContentRows, (batch) => tx.insert(realmContent).values(batch));
+	await writeBatches(realmUnitRows, (batch) => tx.insert(realmUnit).values(batch));
 
 	const capabilities = [
 		"realm.contribute",
@@ -1194,7 +1252,7 @@ async function seedStructure(
 		"realm.members.manage",
 		"realm.rules.publish",
 		"realm.pins.manage",
-		"realm.content.moderate",
+		"realm.units.moderate",
 	] as const;
 	await writeBatches(
 		Array.from({ length: SeedPlan.capabilityGrants }, (_, index) => {
@@ -1231,7 +1289,7 @@ async function seedStructure(
 		(batch) => tx.insert(zoneSubscription).values(batch),
 	);
 
-	return { realmMembers: memberRows, realmContents: realmContentRows };
+	return { realmMembers: memberRows, realmUnits: realmUnitRows };
 }
 
 async function seedInteractions(
@@ -1276,7 +1334,7 @@ async function seedInteractions(
 
 	const firstNodeByBook = new Map<string, CreatedNode>();
 	for (const node of content.nodes) {
-		if (!firstNodeByBook.has(node.bookId)) firstNodeByBook.set(node.bookId, node);
+		if (!firstNodeByBook.has(node.ownerUnitId)) firstNodeByBook.set(node.ownerUnitId, node);
 	}
 	await writeBatches(
 		profiles.flatMap((seedProfile, profileIndex) =>
@@ -1301,7 +1359,7 @@ async function seedInteractions(
 					totalTimeMs: BigInt((index + 1) * 900_000),
 					firstSeenAt: createdAt,
 					lastSeenAt,
-					lastReadNodeId:
+					lastContentStructureNodeId:
 						target.kind === "book"
 							? (firstNodeByBook.get(target.id)?.id ?? null)
 							: null,
@@ -1314,20 +1372,23 @@ async function seedInteractions(
 	);
 	await writeBatches(
 		profiles.flatMap((seedProfile, profileIndex) =>
-			Array.from({ length: SeedPlan.contentNodeProgress / profiles.length }, (_, index) => {
-				const node = itemAt(content.nodes, profileIndex * 13 + index);
-				return {
-					profileId: seedProfile.id,
-					nodeId: node.id,
-					completedAt: latestDate(
-						data.pastDate(180),
-						seedProfile.createdAt,
-						node.createdAt,
-					),
-				};
-			}),
+			Array.from(
+				{ length: SeedPlan.contentStructureNodeProgress / profiles.length },
+				(_, index) => {
+					const node = itemAt(content.nodes, profileIndex * 13 + index);
+					return {
+						profileId: seedProfile.id,
+						nodeId: node.id,
+						completedAt: latestDate(
+							data.pastDate(180),
+							seedProfile.createdAt,
+							node.createdAt,
+						),
+					};
+				},
+			),
 		),
-		(batch) => tx.insert(contentNodeProgress).values(batch),
+		(batch) => tx.insert(contentStructureNodeProgress).values(batch),
 	);
 
 	const interactionTargets = [
@@ -1615,7 +1676,7 @@ async function seedGovernance(
 		"unit",
 		"unit_field",
 		"profile",
-		"realm_content",
+		"realm_unit",
 		"realm_member",
 		"feedback",
 	] as const;
@@ -1624,10 +1685,10 @@ async function seedGovernance(
 		Array.from({ length: SeedPlan.moderationCases - 10 }, (_, index) => {
 			const targetKind = itemAt(targetKinds, index);
 			const realmTarget =
-				targetKind === "realm_member" || targetKind === "realm_content"
+				targetKind === "realm_member" || targetKind === "realm_unit"
 					? selectSeedRealmModerationTarget(targetKind, index, {
 							members: structure.realmMembers,
-							contents: structure.realmContents,
+							units: structure.realmUnits,
 						})
 					: null;
 			const targetId = realmTarget
@@ -1838,7 +1899,7 @@ async function seedRecommendations(
 	const surfaces = [
 		"home_feed",
 		"home_book",
-		"home_game",
+		"home_software",
 		"home_media",
 		"unit_related",
 		"post_related",

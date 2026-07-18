@@ -1,4 +1,5 @@
 import type { GetApiPostsByPostIdRepliesStatus200 } from "@rezics/openapi-tanstack-query";
+import { createPortableTextDocument } from "@rezics/content-structure";
 import { describe, expect, it } from "vitest";
 
 import { buildReplyPostTree } from "./reply-tree";
@@ -15,7 +16,7 @@ function createReplyPost(id: string, parentPostId: string | null = null): ApiRep
 		parentPostId,
 		contextRealmId: null,
 		depth: parentPostId ? 1 : 0,
-		body: [],
+		body: createPortableTextDocument([], "000000000000"),
 		status: "approved",
 		latestRevisionId: "019b1234-1234-7000-8000-000000000000",
 		createdAt: "2026-01-01T00:00:00.000Z",

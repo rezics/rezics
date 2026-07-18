@@ -16,7 +16,7 @@ export const SeedPlan = {
 	entities: 75,
 	tags: 60,
 	books: 80,
-	games: 60,
+	software: 60,
 	media: 60,
 	series: 20,
 	realms: 12,
@@ -35,15 +35,15 @@ export const SeedPlan = {
 	tagVotes: 2_000,
 	variants: 40,
 	seriesReleases: 120,
-	gameRequirements: 120,
-	contentNodes: 300,
+	softwareRequirements: 120,
+	contentStructureNodes: 300,
 	pollOptions: 120,
 	fieldLocks: 40,
 	profileFollows: 300,
 	profileBlocks: 50,
 	collectionItems: 1_500,
 	unitProgress: 1_000,
-	contentNodeProgress: 500,
+	contentStructureNodeProgress: 500,
 	unitReactions: 3_000,
 	unitShares: 1_000,
 	scores: 1_500,
@@ -54,7 +54,7 @@ export const SeedPlan = {
 	realmRules: 36,
 	realmRuleAcceptances: 180,
 	realmPins: 72,
-	realmContents: 600,
+	realmUnits: 600,
 	capabilityGrants: 80,
 	zonePages: 24,
 	zoneSubscriptions: 150,
@@ -271,7 +271,7 @@ interface SeedRealmMemberTarget {
 	readonly profileId: string;
 }
 
-interface SeedRealmContentTarget {
+interface SeedRealmUnitTarget {
 	readonly realmId: string;
 	readonly unitId: string;
 }
@@ -286,7 +286,7 @@ export type SeedRealmModerationTarget =
 	| {
 			authority: "realm";
 			realmId: string;
-			targetKind: "realm_content";
+			targetKind: "realm_unit";
 			targetId: string;
 	  };
 
@@ -295,7 +295,7 @@ export function selectSeedRealmModerationTarget(
 	index: number,
 	targets: {
 		readonly members: readonly SeedRealmMemberTarget[];
-		readonly contents: readonly SeedRealmContentTarget[];
+		readonly units: readonly SeedRealmUnitTarget[];
 	},
 ): SeedRealmModerationTarget {
 	if (targetKind === "realm_member") {
@@ -307,7 +307,7 @@ export function selectSeedRealmModerationTarget(
 			targetId: target.profileId,
 		};
 	}
-	const target = cycleValue(targets.contents, index);
+	const target = cycleValue(targets.units, index);
 	return {
 		authority: "realm",
 		realmId: target.realmId,

@@ -1,5 +1,5 @@
 import { type Static, t } from "elysia";
-import { PortableText } from "@rezics/portable-text";
+import { PortableTextDocument } from "@rezics/content-structure";
 
 import { ContentRatingValues } from "../../database/schema/contract-values";
 import { LanguageTag, Uuid } from "../schema";
@@ -17,7 +17,7 @@ export const UpdateProfileBody = t.Object(
 		name: t.Optional(t.String({ minLength: 1, maxLength: 120 })),
 		avatar: t.Optional(t.String({ maxLength: 1_000 })),
 		summary: t.Optional(t.String({ maxLength: 500 })),
-		description: t.Optional(PortableText),
+		description: t.Optional(PortableTextDocument),
 	},
 	{ additionalProperties: false },
 );

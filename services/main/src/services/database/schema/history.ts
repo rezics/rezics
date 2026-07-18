@@ -1,5 +1,4 @@
 import { sql } from "drizzle-orm";
-import type { JsonValue } from "@rezics/portable-text";
 import {
 	boolean,
 	check,
@@ -35,7 +34,7 @@ export const revisionContent = pgTable(
 		model: text().notNull(),
 		sha256: text().notNull(),
 		byteSize: integer().notNull(),
-		payload: jsonb().$type<JsonValue>().notNull(),
+		payload: jsonb().$type<unknown>().notNull(),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [

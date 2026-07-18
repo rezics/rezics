@@ -12,7 +12,7 @@ import {
 describe("realm policy", () => {
 	it.each([
 		["member", "realm.contribute", true],
-		["member", "realm.content.moderate", false],
+		["member", "realm.units.moderate", false],
 		["moderator", "realm.pins.manage", true],
 		["admin", "realm.rules.publish", true],
 		["unknown", "realm.contribute", false],

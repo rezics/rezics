@@ -9,6 +9,7 @@
 		"@elysiajs/cors": "^1.4.2",
 		"@elysiajs/openapi": "^1.4.15",
 		"@nmnmcc/intee": "^3.2.0",
+		"@rezics/content-structure": "workspace:*",
 		"@rezics/i18n": "workspace:*",
 		"@rezics/portable-text": "workspace:*",
 		"@sinclair/typebox": "^0.34.41",

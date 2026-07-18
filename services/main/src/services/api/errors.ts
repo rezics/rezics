@@ -9,7 +9,7 @@ import { SearchErrors } from "../search/errors";
 import { UnitErrors } from "../units/errors";
 import { CatalogErrors } from "./catalog/errors";
 import { CollectionErrors } from "./collections/errors";
-import { ContentErrors } from "./content/errors";
+import { ContentStructureErrors } from "./content-structure/errors";
 import { DomainExtensionErrors } from "./domain-extensions/errors";
 import { FeedbackErrors } from "./feedback/errors";
 import { FeedErrors } from "./feed/errors";
@@ -60,7 +60,7 @@ export const ApiErrors = [
 	...DomainExtensionErrors,
 	...PollErrors,
 	...ProgressErrors,
-	...ContentErrors,
+	...ContentStructureErrors,
 	...ReviewErrors,
 	...GovernanceErrors,
 	...FeedbackErrors,

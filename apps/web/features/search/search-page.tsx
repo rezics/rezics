@@ -81,7 +81,7 @@ function searchHitHref(index: string, hit: SearchHit) {
 		case "polls":
 			return `/polls/${hit.id}`;
 		case "units":
-			return hit.type === "book" || hit.type === "game" || hit.type === "media"
+			return hit.type === "book" || hit.type === "software" || hit.type === "media"
 				? `/units/${hit.type}/${hit.id}`
 				: undefined;
 		default:

@@ -8,7 +8,7 @@ const content = {
 	blockSchema: "Block Schema",
 	headerBlock: "Header 區塊",
 	feedBlock: "Feed 區塊 · query: recent",
-	shelfBlock: "Shelf 區塊 · 引用",
+	collectionBlock: "Collection 區塊 · 引用",
 	feedResult: "Feed 結果",
 	postCard: "Post 卡片",
 	catalogResult: "Catalog 結果",

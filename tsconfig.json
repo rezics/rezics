@@ -23,6 +23,9 @@
 			"path": "./libraries/portable-text"
 		},
 		{
+			"path": "./libraries/content-structure"
+		},
+		{
 			"path": "./libraries/ui"
 		}
 	]

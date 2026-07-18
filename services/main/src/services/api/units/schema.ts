@@ -3,7 +3,7 @@ import { JsonValue } from "@rezics/portable-text";
 
 import { LanguageTag, LifecycleInput, LocalizationInput, Uuid } from "../schema";
 
-export const UnitType = t.Union([t.Literal("book"), t.Literal("game"), t.Literal("media")]);
+export const UnitType = t.Union([t.Literal("book"), t.Literal("software"), t.Literal("media")]);
 export type UnitType = Static<typeof UnitType>;
 
 export const UnitTypeParams = t.Object({ type: UnitType });

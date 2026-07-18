@@ -8,7 +8,7 @@ const content = {
 	blockSchema: "ブロックスキーマ",
 	headerBlock: "ヘッダーブロック",
 	feedBlock: "Feed ブロック · query: recent",
-	shelfBlock: "Shelf ブロック · 参照",
+	collectionBlock: "Collection ブロック · 参照",
 	feedResult: "Feed の結果",
 	postCard: "Post カード",
 	catalogResult: "Catalog の結果",

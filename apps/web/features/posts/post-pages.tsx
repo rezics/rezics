@@ -10,7 +10,7 @@ import {
 	usePostApiPosts,
 	type GetApiPostsByPostIdStatus200,
 } from "@rezics/openapi-tanstack-query";
-import { normalizePortableText, type PortableTextValue } from "@rezics/portable-text";
+import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -38,6 +38,7 @@ import { RequireSession } from "@/features/auth/require-session";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { readPortableText, writePortableText } from "@/lib/content-structure";
 import { selectLocalization } from "@/lib/localization";
 import { ReplyPostThread } from "./reply-thread";
 import { PostList, RelatedPostRecommendations } from "./post-list";
@@ -98,7 +99,7 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 				body: {
 					title,
 					language: locale.target,
-					body: normalizePortableText(body),
+					body: writePortableText(body),
 					...(realm ? { realmId: realm.id } : {}),
 					...(subject ? { subjectId: subject.id } : {}),
 				},
@@ -219,7 +220,10 @@ export function PostDetailPage({ id }: { id: string }) {
 				</CardHeader>
 				<CardContent>
 					<article className="prose max-w-none">
-						<PortableTextContent value={post.body} variant="article" />
+						<PortableTextContent
+							value={readPortableText(post.body)}
+							variant="article"
+						/>
 					</article>
 				</CardContent>
 			</Card>
@@ -264,7 +268,7 @@ function PostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const update = usePatchApiPostsByPostId();
-	const [body, setBody] = useState(() => normalizePortableText(post.body));
+	const [body, setBody] = useState(() => readPortableText(post.body));
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -275,7 +279,7 @@ function PostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
 				path: { postId: post.id },
 				body: {
 					title,
-					body: normalizePortableText(body),
+					body: writePortableText(body, post.body),
 					baseRevisionId: post.latestRevisionId,
 				},
 			},
@@ -320,7 +324,7 @@ function ReplyPostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const update = usePatchApiPostsByPostIdRepliesByReplyPostId();
-	const [body, setBody] = useState(() => normalizePortableText(post.body));
+	const [body, setBody] = useState(() => readPortableText(post.body));
 	const rootPostId = post.rootPostId;
 
 	function submit(event: FormEvent<HTMLFormElement>) {
@@ -330,7 +334,7 @@ function ReplyPostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
 			{
 				path: { postId: rootPostId, replyPostId: post.id },
 				body: {
-					body: normalizePortableText(body),
+					body: writePortableText(body, post.body),
 					baseRevisionId: post.latestRevisionId,
 				},
 			},

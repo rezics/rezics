@@ -10,7 +10,7 @@ import {
 	postReply,
 	profile as profileTable,
 	profileFollow,
-	realmContent,
+	realmUnit,
 	realmSubscription,
 	recommendationProfileInterest,
 	recommendationUnitEdge,
@@ -128,10 +128,10 @@ export function getFeedEligibilityCondition(
 		))`,
 		query.realmId
 			? sql`exists (
-				select 1 from realm_content scoped_content
+				select 1 from realm_unit scoped_content
 				where scoped_content.unit_id = ${post.id}
 					and scoped_content.realm_id = ${query.realmId}::uuid
-					and scoped_content.moderation_status = 'approved'
+					and scoped_content.status = 'visible'
 			)`
 			: undefined,
 		query.subjectId ? eq(post.subjectUnitId, query.subjectId) : undefined,
@@ -263,17 +263,14 @@ async function getCandidateSources(input: {
 					.from(post)
 					.innerJoin(unit, eq(unit.id, post.id))
 					.innerJoin(
-						realmContent,
-						and(
-							eq(realmContent.unitId, post.id),
-							eq(realmContent.moderationStatus, "approved"),
-						),
+						realmUnit,
+						and(eq(realmUnit.unitId, post.id), eq(realmUnit.status, "visible")),
 					)
 					.innerJoin(
 						realmSubscription,
 						and(
 							eq(realmSubscription.profileId, input.viewer.profileId),
-							eq(realmSubscription.realmId, realmContent.realmId),
+							eq(realmSubscription.realmId, realmUnit.realmId),
 						),
 					)
 					.where(condition)
@@ -362,9 +359,9 @@ export async function getFeedRankingCandidates(input: {
 	const selectedRealmId = input.query.realmId
 		? sql<string>`${input.query.realmId}::uuid`
 		: sql<string | null>`(
-			select candidate_realm.realm_id from realm_content candidate_realm
+			select candidate_realm.realm_id from realm_unit candidate_realm
 			where candidate_realm.unit_id = ${post.id}
-				and candidate_realm.moderation_status = 'approved'
+				and candidate_realm.status = 'visible'
 			order by
 				${
 					input.viewer.personalized && input.viewer.profileId
@@ -675,7 +672,7 @@ export async function hydrateFeedItems(
 				subjectId: row.subjectId,
 				rootPostId: row.rootPostId,
 				parentPostId: row.parentPostId,
-				body: toPortableTextResponse(row.body ?? []),
+				body: toPortableTextResponse(row.body),
 				replyCount:
 					row.postKind === "reply"
 						? (childCount.get(row.id) ?? 0)

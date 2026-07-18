@@ -1,8 +1,7 @@
 import { type Static, t } from "elysia";
-import { PortableText } from "@rezics/portable-text";
+import { DockDocument, PortableTextDocument } from "@rezics/content-structure";
 
 import {
-	ModerationStatusValues,
 	RealmJoinPolicyValues,
 	RealmMemberRoleValues,
 	RealmMemberStateValues,
@@ -10,7 +9,7 @@ import {
 	UnitStatusValues,
 	UnitVisibilityValues,
 } from "../../database/schema/contract-values";
-import { LanguageTag, LocalizationInput, Uuid } from "../schema";
+import { DateTime, LanguageTag, LocalizationInput, Uuid } from "../schema";
 
 const RealmVisibility = t.Union(UnitVisibilityValues.map((value) => t.Literal(value)));
 
@@ -22,11 +21,12 @@ const RealmMemberRole = t.Union(RealmMemberRoleValues.map((value) => t.Literal(v
 
 const RealmMemberState = t.Union(RealmMemberStateValues.map((value) => t.Literal(value)));
 
-const RealmModerationStatus = t.Union(
-	[ModerationStatusValues[1], ModerationStatusValues[0], ModerationStatusValues[2]].map((value) =>
-		t.Literal(value),
-	),
-);
+const RealmUnitStatus = t.Union([
+	t.Literal("pending"),
+	t.Literal("visible"),
+	t.Literal("hidden"),
+	t.Literal("removed"),
+]);
 
 export const ListRealmsQuery = t.Object({
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
@@ -81,7 +81,7 @@ export const PublishRealmRulesBody = t.Object({
 		t.Object({
 			language: LanguageTag,
 			title: t.String({ minLength: 1, maxLength: 500 }),
-			content: PortableText,
+			content: PortableTextDocument,
 		}),
 		{ minItems: 1, maxItems: 100 },
 	),
@@ -104,14 +104,47 @@ export const RemoveRealmPinQuery = t.Object({
 });
 export type RemoveRealmPinQuery = Static<typeof RemoveRealmPinQuery>;
 
-export const RealmContentParams = t.Object({ realmId: Uuid, unitId: Uuid });
-export type RealmContentParams = Static<typeof RealmContentParams>;
+export const RealmDockParams = t.Object({
+	realmId: Uuid,
+	slot: t.String({ minLength: 1, maxLength: 128 }),
+});
+export type RealmDockParams = Static<typeof RealmDockParams>;
 
-export const ModerateRealmContentBody = t.Object(
-	{
-		status: t.Optional(RealmModerationStatus),
-		locked: t.Optional(t.Boolean()),
-	},
-	{ minProperties: 1, additionalProperties: false },
+export const UpsertRealmDockBody = t.Object(
+	{ document: DockDocument },
+	{ additionalProperties: false },
 );
-export type ModerateRealmContentBody = Static<typeof ModerateRealmContentBody>;
+export type UpsertRealmDockBody = Static<typeof UpsertRealmDockBody>;
+
+export const RealmDockResponse = t.Object({
+	realmId: Uuid,
+	slot: t.String(),
+	document: DockDocument,
+	createdAt: DateTime,
+	updatedAt: DateTime,
+});
+
+export const RealmDockListResponse = t.Object({
+	items: t.Array(RealmDockResponse),
+});
+
+export const RealmUnitParams = t.Object({ realmId: Uuid, unitId: Uuid });
+export type RealmUnitParams = Static<typeof RealmUnitParams>;
+
+export const ModerateRealmUnitBody = t.Union([
+	t.Object(
+		{
+			status: RealmUnitStatus,
+			locked: t.Optional(t.Boolean()),
+			annotationDocument: t.Optional(PortableTextDocument),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			locked: t.Boolean(),
+		},
+		{ additionalProperties: false },
+	),
+]);
+export type ModerateRealmUnitBody = Static<typeof ModerateRealmUnitBody>;

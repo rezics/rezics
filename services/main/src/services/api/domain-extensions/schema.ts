@@ -1,4 +1,10 @@
 import { JsonValue } from "@rezics/portable-text";
+import {
+	ZoneBoundaryDocument,
+	ZoneMenuDocument,
+	ZonePageDocument,
+	ZoneThemeDocument,
+} from "@rezics/content-structure";
 import { t } from "elysia";
 
 import { DateTime, LanguageTag, LocalizationInput, Uuid } from "../schema";
@@ -24,8 +30,11 @@ export const UpsertSeriesReleaseBody = t.Object(
 	{ additionalProperties: false },
 );
 
-export const GameParams = t.Object({ gameId: Uuid });
-export const GameRequirementParams = t.Object({ gameId: Uuid, requirementId: Uuid });
+export const SoftwareParams = t.Object({ softwareId: Uuid });
+export const SoftwareRequirementParams = t.Object({
+	softwareId: Uuid,
+	requirementId: Uuid,
+});
 export const SystemRequirementBody = t.Object(
 	{
 		platformEntityId: t.Optional(t.Nullable(Uuid)),
@@ -40,14 +49,14 @@ export const SystemRequirementBody = t.Object(
 
 export const CreateZoneBody = t.Object(
 	{
-		ownerRealmId: Uuid,
+		managingRealmId: t.Optional(t.Nullable(Uuid)),
 		slug: t.Optional(
 			t.String({ minLength: 3, maxLength: 72, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
 		),
 		localization: LocalizationInput,
-		boundary: t.Record(t.String(), JsonValue),
-		nav: t.Record(t.String(), JsonValue),
-		theme: t.Record(t.String(), JsonValue),
+		boundaryDocument: ZoneBoundaryDocument,
+		themeDocument: ZoneThemeDocument,
+		menuDocument: t.Optional(ZoneMenuDocument),
 		startsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 		endsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 	},
@@ -58,7 +67,7 @@ export const ZonePageParams = t.Object({ zoneId: Uuid, pageId: Uuid });
 export const ZonePageBody = t.Object(
 	{
 		slug: t.String({ minLength: 1, maxLength: 120, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
-		config: t.Record(t.String(), JsonValue),
+		document: ZonePageDocument,
 		position: t.Optional(t.String({ minLength: 1, maxLength: 64 })),
 		home: t.Optional(t.Boolean()),
 	},
@@ -78,7 +87,7 @@ export const SeriesReleaseListResponse = t.Object({ items: t.Array(SeriesRelease
 
 export const SystemRequirementResponse = t.Object({
 	id: Uuid,
-	gameId: Uuid,
+	softwareId: Uuid,
 	platformEntityId: t.Nullable(Uuid),
 	tier: t.String(),
 	language: t.Nullable(t.String()),
@@ -96,10 +105,38 @@ export const ZonePageResponse = t.Object({
 	id: Uuid,
 	zoneId: Uuid,
 	slug: t.String(),
-	config: t.Unknown(),
+	document: ZonePageDocument,
 	position: t.String(),
 	home: t.Boolean(),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
 export const ZonePageListResponse = t.Object({ items: t.Array(ZonePageResponse) });
+
+export const ZoneMenuParams = t.Object({
+	zoneId: Uuid,
+	slot: t.String({
+		minLength: 1,
+		maxLength: 64,
+		pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+	}),
+});
+export const ZoneMenuBody = t.Object(
+	{
+		document: ZoneMenuDocument,
+		position: t.Optional(t.String({ minLength: 1, maxLength: 64 })),
+	},
+	{ additionalProperties: false },
+);
+export const ZoneMenuResponse = t.Object({
+	id: Uuid,
+	zoneId: Uuid,
+	slot: t.String(),
+	document: ZoneMenuDocument,
+	position: t.String(),
+	createdAt: DateTime,
+	updatedAt: DateTime,
+});
+export const ZoneMenuListResponse = t.Object({
+	items: t.Array(ZoneMenuResponse),
+});

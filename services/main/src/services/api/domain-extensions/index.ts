@@ -1,14 +1,19 @@
 import { StatusCodes } from "http-status-codes";
 import { and, eq, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
-import type { PortableText } from "@rezics/portable-text";
+import {
+	ZoneMenuDocument,
+	ZonePageDocument,
+	assertDocument,
+	type PortableTextDocument,
+} from "@rezics/content-structure";
 
 import session, { resolveIdentity } from "../../auth/session";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
 import { database } from "../../database";
 import {
-	game,
-	gameRequirement,
+	software,
+	softwareRequirement,
 	series,
 	seriesRelease,
 	unit,
@@ -16,6 +21,7 @@ import {
 	unitLink,
 	unitLocalization,
 	zone,
+	zoneMenu,
 	zonePage,
 	zoneSubscription,
 } from "../../database/schema";
@@ -27,8 +33,8 @@ import { toApiErrorResponse } from "../schema/response";
 import {
 	CreateSeriesBody,
 	CreateZoneBody,
-	GameParams,
-	GameRequirementParams,
+	SoftwareParams,
+	SoftwareRequirementParams,
 	SeriesParams,
 	SeriesReleaseListResponse,
 	SeriesReleaseParams,
@@ -41,19 +47,35 @@ import {
 	ZonePageListResponse,
 	ZonePageParams,
 	ZonePageResponse,
+	ZoneMenuBody,
+	ZoneMenuListResponse,
+	ZoneMenuParams,
+	ZoneMenuResponse,
 	ZoneParams,
 } from "./schema";
 import {
-	GameNotFound,
-	GameSystemRequirementSourceInvalid,
+	SoftwareNotFound,
+	SoftwareSystemRequirementSourceInvalid,
 	SeriesReleaseNotFound,
-	SeriesReleaseRangeInvalid,
 	SystemRequirementNotFound,
 	ZonePageNotFound,
+	ZoneTimeRangeInvalid,
 } from "./errors";
 
 const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitEditForbidden", "UnitFieldLocked"]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
+
+function toZonePageResponse(row: typeof zonePage.$inferSelect) {
+	const document = row.document;
+	assertDocument(ZonePageDocument, document);
+	return { ...row, document };
+}
+
+function toZoneMenuResponse(row: typeof zoneMenu.$inferSelect) {
+	const document = row.document;
+	assertDocument(ZoneMenuDocument, document);
+	return { ...row, document };
+}
 
 async function ensureUnitMutationAuthorized(
 	authorization: UnitAuthorization<string>,
@@ -73,7 +95,7 @@ async function createBaseUnit(
 			language: string;
 			title: string;
 			summary?: string;
-			description?: PortableText;
+			description?: PortableTextDocument;
 		};
 		ownerId: string;
 	},
@@ -108,14 +130,14 @@ async function createBaseUnit(
 	return created.id;
 }
 
-async function ensureRequirementSource(gameId: string, sourceExternalLinkId?: string | null) {
+async function ensureRequirementSource(softwareId: string, sourceExternalLinkId?: string | null) {
 	if (!sourceExternalLinkId) return;
 	const [source] = await database
 		.select({ id: unitLink.id })
 		.from(unitLink)
-		.where(and(eq(unitLink.id, sourceExternalLinkId), eq(unitLink.unitId, gameId)))
+		.where(and(eq(unitLink.id, sourceExternalLinkId), eq(unitLink.unitId, softwareId)))
 		.limit(1);
-	if (!source) throw new GameSystemRequirementSourceInvalid();
+	if (!source) throw new SoftwareSystemRequirementSourceInvalid();
 }
 
 export default new Elysia()
@@ -272,14 +294,14 @@ export default new Elysia()
 			.post(
 				"",
 				async ({ profile, authorization, body }) => {
-					await authorization.realm.ensureCapability(
-						body.ownerRealmId,
-						"realm.settings.update",
-					);
+					if (body.managingRealmId)
+						await authorization.realm.ensureCapability(
+							body.managingRealmId,
+							"realm.settings.update",
+						);
 					const startsAt = body.startsAt ? new Date(body.startsAt) : null;
 					const endsAt = body.endsAt ? new Date(body.endsAt) : null;
-					if (startsAt && endsAt && endsAt <= startsAt)
-						throw new SeriesReleaseRangeInvalid();
+					if (startsAt && endsAt && endsAt <= startsAt) throw new ZoneTimeRangeInvalid();
 					const id = await database.transaction(async (tx) => {
 						const unitId = await createBaseUnit(tx, {
 							kind: "zone",
@@ -289,13 +311,18 @@ export default new Elysia()
 						});
 						await tx.insert(zone).values({
 							id: unitId,
-							ownerRealmId: body.ownerRealmId,
-							boundary: body.boundary,
-							nav: body.nav,
-							theme: body.theme,
+							managingRealmId: body.managingRealmId,
+							boundaryDocument: body.boundaryDocument,
+							themeDocument: body.themeDocument,
 							startsAt,
 							endsAt,
 						});
+						if (body.menuDocument)
+							await tx.insert(zoneMenu).values({
+								zoneId: unitId,
+								slot: "primary",
+								document: body.menuDocument,
+							});
 						await recordUnitRevision(tx, {
 							unitId,
 							actorProfileId: profile.unitId,
@@ -310,9 +337,7 @@ export default new Elysia()
 					body: CreateZoneBody,
 					response: {
 						[StatusCodes.OK]: IdResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"SeriesReleaseRangeInvalid",
-						]),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ZoneTimeRangeInvalid"]),
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
 					},
 					detail: { summary: "Create Zone", tags: ["Zones"] },
@@ -326,13 +351,12 @@ export default new Elysia()
 						params.zoneId,
 						() => new UnitNotFound("Zone"),
 					);
-					return {
-						items: await database
-							.select()
-							.from(zonePage)
-							.where(eq(zonePage.zoneId, params.zoneId))
-							.orderBy(zonePage.position, zonePage.id),
-					};
+					const items = await database
+						.select()
+						.from(zonePage)
+						.where(eq(zonePage.zoneId, params.zoneId))
+						.orderBy(zonePage.position, zonePage.id);
+					return { items: items.map(toZonePageResponse) };
 				},
 				{
 					params: ZoneParams,
@@ -368,7 +392,7 @@ export default new Elysia()
 						return rows;
 					});
 					if (!created) throw new Error("Zone page insertion did not return a row");
-					return created;
+					return toZonePageResponse(created);
 				},
 				{
 					contribute: true,
@@ -417,7 +441,7 @@ export default new Elysia()
 							actorProfileId: profile.unitId,
 							event: "update",
 						});
-						return updated;
+						return toZonePageResponse(updated);
 					});
 				},
 				{
@@ -476,6 +500,108 @@ export default new Elysia()
 					},
 				},
 			)
+			.get(
+				"/:zoneId/menus",
+				async ({ params, request }) => {
+					const authorization = (await resolveIdentity(request.headers)).authorization;
+					await authorization.unit.ensureCanRead(
+						params.zoneId,
+						() => new UnitNotFound("Zone"),
+					);
+					const items = await database
+						.select()
+						.from(zoneMenu)
+						.where(eq(zoneMenu.zoneId, params.zoneId))
+						.orderBy(zoneMenu.position, zoneMenu.id);
+					return { items: items.map(toZoneMenuResponse) };
+				},
+				{
+					params: ZoneParams,
+					response: {
+						[StatusCodes.OK]: ZoneMenuListResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+					},
+					detail: { summary: "List Zone menus", tags: ["Zones"] },
+				},
+			)
+			.put(
+				"/:zoneId/menus/:slot",
+				async ({ params, profile, authorization, body }) => {
+					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, "/menus");
+					const [saved] = await database.transaction(async (tx) => {
+						const rows = await tx
+							.insert(zoneMenu)
+							.values({
+								zoneId: params.zoneId,
+								slot: params.slot,
+								document: body.document,
+								position: body.position,
+							})
+							.onConflictDoUpdate({
+								target: [zoneMenu.zoneId, zoneMenu.slot],
+								set: {
+									document: body.document,
+									position: body.position,
+								},
+							})
+							.returning();
+						await recordUnitRevision(tx, {
+							unitId: params.zoneId,
+							actorProfileId: profile.unitId,
+							event: "update",
+						});
+						return rows;
+					});
+					if (!saved) throw new Error("Zone menu upsert did not return a row");
+					return toZoneMenuResponse(saved);
+				},
+				{
+					contribute: true,
+					params: ZoneMenuParams,
+					body: ZoneMenuBody,
+					response: {
+						[StatusCodes.OK]: ZoneMenuResponse,
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+					},
+					detail: { summary: "Create or replace Zone menu", tags: ["Zones"] },
+				},
+			)
+			.delete(
+				"/:zoneId/menus/:slot",
+				async ({ params, profile, authorization }) => {
+					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, "/menus");
+					await database.transaction(async (tx) => {
+						await tx
+							.delete(zoneMenu)
+							.where(
+								and(
+									eq(zoneMenu.zoneId, params.zoneId),
+									eq(zoneMenu.slot, params.slot),
+								),
+							);
+						await recordUnitRevision(tx, {
+							unitId: params.zoneId,
+							actorProfileId: profile.unitId,
+							event: "update",
+						});
+					});
+					return new Response(null, { status: StatusCodes.NO_CONTENT });
+				},
+				{
+					write: true,
+					params: ZoneMenuParams,
+					response: {
+						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+					},
+					detail: {
+						summary: "Delete Zone menu",
+						tags: ["Zones"],
+						responses: NoContentResponse,
+					},
+				},
+			)
 			.put(
 				"/:zoneId/follow",
 				async ({ params, profile, authorization }) => {
@@ -520,58 +646,58 @@ export default new Elysia()
 				},
 			),
 	)
-	.group("/games", (app) =>
+	.group("/software", (app) =>
 		app
 			.get(
-				"/:gameId/system-requirements",
+				"/:softwareId/system-requirements",
 				async ({ params, request }) => {
 					const authorization = (await resolveIdentity(request.headers)).authorization;
 					await authorization.unit.ensureCanRead(
-						params.gameId,
-						() => new UnitNotFound("Game"),
+						params.softwareId,
+						() => new UnitNotFound("Software"),
 					);
 					return {
 						items: await database
 							.select()
-							.from(gameRequirement)
-							.where(eq(gameRequirement.gameId, params.gameId))
+							.from(softwareRequirement)
+							.where(eq(softwareRequirement.softwareId, params.softwareId))
 							.orderBy(
-								gameRequirement.platformEntityId,
-								gameRequirement.tier,
-								gameRequirement.language,
-								gameRequirement.id,
+								softwareRequirement.platformEntityId,
+								softwareRequirement.tier,
+								softwareRequirement.language,
+								softwareRequirement.id,
 							),
 					};
 				},
 				{
-					params: GameParams,
+					params: SoftwareParams,
 					response: {
 						[StatusCodes.OK]: SystemRequirementListResponse,
 						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 					},
-					detail: { summary: "List Game system requirements", tags: ["Games"] },
+					detail: { summary: "List Software system requirements", tags: ["Software"] },
 				},
 			)
 			.post(
-				"/:gameId/system-requirements",
+				"/:softwareId/system-requirements",
 				async ({ params, profile, authorization, body }) => {
 					await ensureUnitMutationAuthorized(
 						authorization.unit,
-						params.gameId,
+						params.softwareId,
 						"/systemRequirements",
 					);
-					await ensureRequirementSource(params.gameId, body.sourceLinkId);
-					const [gameRecord] = await database
-						.select({ id: game.id })
-						.from(game)
-						.where(eq(game.id, params.gameId))
+					await ensureRequirementSource(params.softwareId, body.sourceLinkId);
+					const [softwareRecord] = await database
+						.select({ id: software.id })
+						.from(software)
+						.where(eq(software.id, params.softwareId))
 						.limit(1);
-					if (!gameRecord) throw new GameNotFound();
+					if (!softwareRecord) throw new SoftwareNotFound();
 					const [created] = await database.transaction(async (tx) => {
 						const rows = await tx
-							.insert(gameRequirement)
+							.insert(softwareRequirement)
 							.values({
-								gameId: params.gameId,
+								softwareId: params.softwareId,
 								platformEntityId: body.platformEntityId,
 								tier: body.tier,
 								language: body.language,
@@ -581,7 +707,7 @@ export default new Elysia()
 							})
 							.returning();
 						await recordUnitRevision(tx, {
-							unitId: params.gameId,
+							unitId: params.softwareId,
 							actorProfileId: profile.unitId,
 							event: "update",
 						});
@@ -593,34 +719,34 @@ export default new Elysia()
 				},
 				{
 					contribute: true,
-					params: GameParams,
+					params: SoftwareParams,
 					body: SystemRequirementBody,
 					response: {
 						[StatusCodes.OK]: SystemRequirementResponse,
 						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"GameSystemRequirementSourceInvalid",
+							"SoftwareSystemRequirementSourceInvalid",
 						]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
-							"GameNotFound",
+							"SoftwareNotFound",
 						]),
 					},
-					detail: { summary: "Create Game system requirement", tags: ["Games"] },
+					detail: { summary: "Create Software system requirement", tags: ["Software"] },
 				},
 			)
 			.put(
-				"/:gameId/system-requirements/:requirementId",
+				"/:softwareId/system-requirements/:requirementId",
 				async ({ params, profile, authorization, body }) => {
 					await ensureUnitMutationAuthorized(
 						authorization.unit,
-						params.gameId,
+						params.softwareId,
 						"/systemRequirements",
 					);
-					await ensureRequirementSource(params.gameId, body.sourceLinkId);
+					await ensureRequirementSource(params.softwareId, body.sourceLinkId);
 					return database.transaction(async (tx) => {
 						const rows = await tx
-							.update(gameRequirement)
+							.update(softwareRequirement)
 							.set({
 								platformEntityId: body.platformEntityId,
 								tier: body.tier,
@@ -631,15 +757,15 @@ export default new Elysia()
 							})
 							.where(
 								and(
-									eq(gameRequirement.id, params.requirementId),
-									eq(gameRequirement.gameId, params.gameId),
+									eq(softwareRequirement.id, params.requirementId),
+									eq(softwareRequirement.softwareId, params.softwareId),
 								),
 							)
 							.returning();
 						const [updated] = rows;
 						if (!updated) throw new SystemRequirementNotFound();
 						await recordUnitRevision(tx, {
-							unitId: params.gameId,
+							unitId: params.softwareId,
 							actorProfileId: profile.unitId,
 							event: "update",
 						});
@@ -648,12 +774,12 @@ export default new Elysia()
 				},
 				{
 					contribute: true,
-					params: GameRequirementParams,
+					params: SoftwareRequirementParams,
 					body: SystemRequirementBody,
 					response: {
 						[StatusCodes.OK]: SystemRequirementResponse,
 						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"GameSystemRequirementSourceInvalid",
+							"SoftwareSystemRequirementSourceInvalid",
 						]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
@@ -661,30 +787,30 @@ export default new Elysia()
 							"SystemRequirementNotFound",
 						]),
 					},
-					detail: { summary: "Replace Game system requirement", tags: ["Games"] },
+					detail: { summary: "Replace Software system requirement", tags: ["Software"] },
 				},
 			)
 			.delete(
-				"/:gameId/system-requirements/:requirementId",
+				"/:softwareId/system-requirements/:requirementId",
 				async ({ params, profile, authorization }) => {
 					await ensureUnitMutationAuthorized(
 						authorization.unit,
-						params.gameId,
+						params.softwareId,
 						"/systemRequirements",
 					);
 					await database.transaction(async (tx) => {
 						const deleted = await tx
-							.delete(gameRequirement)
+							.delete(softwareRequirement)
 							.where(
 								and(
-									eq(gameRequirement.id, params.requirementId),
-									eq(gameRequirement.gameId, params.gameId),
+									eq(softwareRequirement.id, params.requirementId),
+									eq(softwareRequirement.softwareId, params.softwareId),
 								),
 							)
-							.returning({ id: gameRequirement.id });
+							.returning({ id: softwareRequirement.id });
 						if (!deleted.length) throw new SystemRequirementNotFound();
 						await recordUnitRevision(tx, {
-							unitId: params.gameId,
+							unitId: params.softwareId,
 							actorProfileId: profile.unitId,
 							event: "update",
 						});
@@ -693,7 +819,7 @@ export default new Elysia()
 				},
 				{
 					write: true,
-					params: GameRequirementParams,
+					params: SoftwareRequirementParams,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
@@ -703,8 +829,8 @@ export default new Elysia()
 						]),
 					},
 					detail: {
-						summary: "Delete Game system requirement",
-						tags: ["Games"],
+						summary: "Delete Software system requirement",
+						tags: ["Software"],
 						responses: NoContentResponse,
 					},
 				},

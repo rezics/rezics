@@ -21,7 +21,7 @@ import {
 import { recommendationObjectiveExpression } from "./sql-ranking";
 import { createRecommendationTracking } from "./tracking";
 
-export type RecommendedUnitKind = "book" | "game" | "media";
+export type RecommendedUnitKind = "book" | "software" | "media";
 
 interface CatalogCandidate extends RecommendationCandidate {
 	kind: RecommendedUnitKind;
@@ -35,7 +35,7 @@ function eligibleCatalogUnit(input: {
 	afterId?: string;
 }) {
 	return and(
-		inArray(unit.kind, input.type ? [input.type] : ["book", "game", "media"]),
+		inArray(unit.kind, input.type ? [input.type] : ["book", "software", "media"]),
 		eq(unit.status, "published"),
 		eq(unit.visibility, "public"),
 		eq(unit.moderationStatus, "approved"),
@@ -62,7 +62,7 @@ function number(value: number | null) {
 function surface(kind: RecommendedUnitKind, related: boolean): RecommendationSurface {
 	if (related) return "unit_related";
 	if (kind === "book") return "home_book";
-	if (kind === "game") return "home_game";
+	if (kind === "software") return "home_software";
 	return "home_media";
 }
 
@@ -221,7 +221,7 @@ export async function recommendUnits(input: {
 		.leftJoin(recommendationUnitStat, statJoin)
 		.where(and(inArray(unit.id, ids), condition));
 	const candidates = rows.flatMap((row): CatalogCandidate[] => {
-		if (row.kind !== "book" && row.kind !== "game" && row.kind !== "media") return [];
+		if (row.kind !== "book" && row.kind !== "software" && row.kind !== "media") return [];
 		const stats: RecommendationStats = {
 			...EmptyRecommendationStats,
 			impressions: number(row.impressions),
@@ -294,7 +294,7 @@ export async function recommendUnits(input: {
 			const detail = detailById.get(ranked.id);
 			if (
 				!detail ||
-				(detail.kind !== "book" && detail.kind !== "game" && detail.kind !== "media")
+				(detail.kind !== "book" && detail.kind !== "software" && detail.kind !== "media")
 			)
 				return [];
 			const kind = detail.kind;

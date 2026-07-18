@@ -24,7 +24,7 @@ import {
 } from "./contract-values";
 import { createCreatedAtColumn, createTimestampMsColumn, createUuidv7PrimaryKey } from "./columns";
 import { profile, unit } from "./core";
-import { realm } from "./catalog";
+import { realm } from "./realm";
 
 export const recommendationSurface = pgEnum(
 	"recommendation_surface",

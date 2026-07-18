@@ -37,14 +37,18 @@ import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 type RecommendedUnit = GetApiRecommendationsUnitsStatus200["items"][number];
 
-const UnitIcons = { book: BookOpenIcon, game: Gamepad2Icon, media: PlaySquareIcon };
+const UnitIcons = {
+	book: BookOpenIcon,
+	software: Gamepad2Icon,
+	media: PlaySquareIcon,
+};
 
 export function UnitShelf({
 	type,
 	personalized,
 	seedUnitId,
 }: {
-	type: "book" | "game" | "media";
+	type: "book" | "software" | "media";
 	personalized?: boolean;
 	seedUnitId?: string;
 }) {

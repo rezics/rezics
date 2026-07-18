@@ -11,6 +11,7 @@ import { PortableTextContent } from "@rezics/ui";
 import { DataList, DataListItem, DataListItemLabel, DataListItemValue } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
+import { readPortableText } from "@/lib/content-structure";
 import { selectLocalization } from "@/lib/localization";
 import { FavoriteToggle } from "@/features/collections/collections";
 import { ProgressRecordForm } from "@/features/progress/progress";
@@ -18,7 +19,7 @@ import { UnitShelf } from "@/features/explore/unit-shelf";
 import { BookChapters } from "./reader";
 import type { UnitType } from "./unit-types";
 
-const Icons = { book: BookOpen, game: Gamepad2, media: PlaySquare };
+const Icons = { book: BookOpen, software: Gamepad2, media: PlaySquare };
 
 function formatDate(value: string | null, language: string) {
 	if (!value) return undefined;
@@ -138,7 +139,9 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 								</Button>
 								{type === "book" && (
 									<Button variant="outline" asChild>
-										<Link href={`/units/book/${item.id}/edit/content`}>
+										<Link
+											href={`/units/book/${item.id}/edit/content-structure`}
+										>
 											{t.units.content.edit}
 										</Link>
 									</Button>
@@ -181,7 +184,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 								{localization?.description ? (
 									<div className="prose max-w-none">
 										<PortableTextContent
-											value={localization.description}
+											value={readPortableText(localization.description)}
 											variant="article"
 										/>
 									</div>

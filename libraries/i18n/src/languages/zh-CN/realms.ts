@@ -52,7 +52,8 @@ export default {
 	moderation: "内容治理",
 	moderationStates: {
 		pending: "待处理",
-		approved: "通过",
+		visible: "可见",
+		hidden: "隐藏",
 		removed: "移除",
 	},
 	lock: "锁定",

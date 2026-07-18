@@ -11,7 +11,7 @@ export default defineConfig({
 		path: "./src/generated",
 		clean: true,
 		barrel: false,
-		format: "prettier",
+		format: false,
 		lint: false,
 	},
 	plugins: [

@@ -52,7 +52,8 @@ export default {
 	moderation: "Content moderation",
 	moderationStates: {
 		pending: "Pending",
-		approved: "Approve",
+		visible: "Visible",
+		hidden: "Hidden",
 		removed: "Remove",
 	},
 	lock: "Lock",

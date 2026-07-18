@@ -81,7 +81,7 @@ describe("domain search SQL", () => {
 		});
 		const postsQuery = lastQuery();
 		expect(postsQuery).toContain('"post"."author_profile_id"');
-		expect(postsQuery).toContain('FROM "realm_content"');
+		expect(postsQuery).toContain('FROM "realm_unit"');
 		expect(postsQuery).toContain('"post_reply"."root_post_id"');
 		expect(postsQuery).toContain('"post_reply"."parent_post_id"');
 		expect(postsQuery).toContain('"post_reply"."parent_post_id" = "unit"."id"');

@@ -1,5 +1,5 @@
 import { type Static, t } from "elysia";
-import { PortableText } from "@rezics/portable-text";
+import { PortableTextDocument } from "@rezics/content-structure";
 
 import { LanguageTag, Uuid } from "../schema";
 
@@ -12,7 +12,7 @@ export type ListPostsQuery = Static<typeof ListPostsQuery>;
 
 export const CreatePostBody = t.Object({
 	title: t.String({ minLength: 1, maxLength: 500 }),
-	body: PortableText,
+	body: PortableTextDocument,
 	language: LanguageTag,
 	realmId: t.Optional(Uuid),
 	subjectId: t.Optional(Uuid),
@@ -24,7 +24,7 @@ export type PostParams = Static<typeof PostParams>;
 
 export const UpdatePostBody = t.Object({
 	title: t.String({ minLength: 1, maxLength: 500 }),
-	body: PortableText,
+	body: PortableTextDocument,
 	baseRevisionId: Uuid,
 	editSummary: t.Optional(t.String({ maxLength: 500 })),
 	minor: t.Optional(t.Boolean()),
@@ -51,7 +51,7 @@ export const CreateReplyBody = t.Object({
 	parentPostId: t.Optional(Uuid),
 	realmId: t.Optional(Uuid),
 	language: LanguageTag,
-	body: PortableText,
+	body: PortableTextDocument,
 });
 export type CreateReplyBody = Static<typeof CreateReplyBody>;
 
@@ -62,7 +62,7 @@ export const RootPostParams = t.Object({ postId: Uuid });
 export type RootPostParams = Static<typeof RootPostParams>;
 
 export const UpdateReplyBody = t.Object({
-	body: PortableText,
+	body: PortableTextDocument,
 	baseRevisionId: Uuid,
 	editSummary: t.Optional(t.String({ maxLength: 500 })),
 	minor: t.Optional(t.Boolean()),

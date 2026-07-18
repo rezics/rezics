@@ -3,11 +3,11 @@
 import {
 	type GetApiChaptersByChapterIdStatus200,
 	useGetApiChaptersByChapterId,
-	useGetApiUnitsBookByUnitIdContentNodes,
+	useGetApiUnitsBookByUnitIdContentStructureNodes,
 	useGetApiUnitsByTypeByUnitId,
 	usePutApiChaptersByChapterIdLocalizationsByLanguageContent,
 } from "@rezics/openapi-tanstack-query";
-import { normalizePortableText, type PortableTextValue } from "@rezics/portable-text";
+import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeftIcon, ListTreeIcon, MinusIcon, PlusIcon } from "lucide-react";
 import Link from "next/link";
@@ -42,12 +42,15 @@ import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { hasErrorCode } from "@/i18n/errors";
-import { buildContentTree, type ContentTreeNode } from "./content-tree";
+import { readPortableText, writePortableText } from "@/lib/content-structure";
+import { buildContentStructureTree, type ContentStructureTreeNode } from "./content-structure-tree";
 import { invalidateChapterContent } from "./unit-cache";
 
 export function BookChapters({ bookId }: { bookId: string }) {
 	const { t } = useTranslation({ suspense: true });
-	const query = useGetApiUnitsBookByUnitIdContentNodes({ path: { unitId: bookId } });
+	const query = useGetApiUnitsBookByUnitIdContentStructureNodes({
+		path: { unitId: bookId },
+	});
 	if (query.isPending)
 		return (
 			<section className="flex flex-col gap-4">
@@ -77,7 +80,7 @@ export function BookChapters({ bookId }: { bookId: string }) {
 			<ContentReadTree
 				bookId={bookId}
 				label={t.units.content.title}
-				nodes={buildContentTree(query.data.items)}
+				nodes={buildContentStructureTree(query.data.items)}
 			/>
 		</section>
 	);
@@ -97,7 +100,7 @@ function ContentReadTree({
 }: {
 	bookId: string;
 	label: string;
-	nodes: readonly ContentTreeNode[];
+	nodes: readonly ContentStructureTreeNode[];
 	currentChapterId?: string;
 	className?: string;
 }) {
@@ -181,7 +184,7 @@ function ContentReadTreeNode({
 	);
 }
 
-function toReadTreeNodes(nodes: readonly ContentTreeNode[]): ReadTreeNode[] {
+function toReadTreeNodes(nodes: readonly ContentStructureTreeNode[]): ReadTreeNode[] {
 	return nodes.map(({ node, children }) => ({
 		...(children.length ? { children: toReadTreeNodes(children) } : {}),
 		contentUnitId: node.contentUnitId,
@@ -203,12 +206,14 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 		path: { chapterId },
 		query: { language: locale.target },
 	});
-	const outline = useGetApiUnitsBookByUnitIdContentNodes({ path: { unitId: bookId } });
+	const outline = useGetApiUnitsBookByUnitIdContentStructureNodes({
+		path: { unitId: bookId },
+	});
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data) return <QueryPending />;
-	const tree = outline.data?.items.length ? buildContentTree(outline.data.items) : [];
+	const tree = outline.data?.items.length ? buildContentStructureTree(outline.data.items) : [];
 	const fontSizeClass = ["text-base sm:text-[1.05rem]", "text-lg", "text-xl"][fontSize];
 	return (
 		<main
@@ -304,7 +309,10 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 						<article
 							className={cn("flex-1 py-8 leading-8 sm:leading-9", fontSizeClass)}
 						>
-							<PortableTextContent value={query.data.content} variant="article" />
+							<PortableTextContent
+								value={readPortableText(query.data.content)}
+								variant="article"
+							/>
 						</article>
 						<footer className="flex flex-wrap items-center justify-between gap-3 border-t pt-6">
 							{query.data.previousChapterId ? (
@@ -347,8 +355,8 @@ function ReaderOutline({
 	bookId: string;
 	className?: string;
 	currentChapterId: string;
-	outline: ReturnType<typeof useGetApiUnitsBookByUnitIdContentNodes>;
-	tree: readonly ContentTreeNode[];
+	outline: ReturnType<typeof useGetApiUnitsBookByUnitIdContentStructureNodes>;
+	tree: readonly ContentStructureTreeNode[];
 }) {
 	const { t } = useTranslation({ suspense: true });
 	if (outline.isPending) return <Skeleton className="h-60" />;
@@ -472,7 +480,7 @@ function ChapterLocalizationForm({
 	const { t } = useTranslation({ suspense: true });
 	const queryClient = useQueryClient();
 	const [content, setContent] = useState<PortableTextValue>(() =>
-		normalizePortableText(chapter?.content),
+		readPortableText(chapter?.content),
 	);
 	const update = usePutApiChaptersByChapterIdLocalizationsByLanguageContent({
 		mutation: {
@@ -487,7 +495,7 @@ function ChapterLocalizationForm({
 				path: { chapterId, language },
 				body: {
 					title: String(form.get("title") ?? "").trim(),
-					content: normalizePortableText(content),
+					content: writePortableText(content, chapter?.content),
 					status:
 						form.get("status") === "published"
 							? "published"

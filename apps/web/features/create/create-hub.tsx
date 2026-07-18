@@ -18,7 +18,7 @@ import { useTranslation } from "@/i18n/client";
 
 const Destinations = [
 	{ href: "/units/book/new", key: "book", icon: BookOpen },
-	{ href: "/units/game/new", key: "game", icon: BookOpen },
+	{ href: "/units/software/new", key: "software", icon: BookOpen },
 	{ href: "/units/media/new", key: "media", icon: BookOpen },
 	{ href: "/entities/new", key: "entity", icon: Landmark },
 	{ href: "/tags/new", key: "tag", icon: Tags },

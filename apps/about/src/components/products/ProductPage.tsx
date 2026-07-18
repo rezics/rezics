@@ -106,7 +106,7 @@ export function ProductPage({
 							<div style={{ display: "grid", gap: "2rem", marginTop: "2rem" }}>
 								<ProductDemo
 									kind="attribution"
-									productName="Book · Entity & Attribution"
+									productName="Book · Entity"
 									locale={locale}
 									label={common.labels.conceptPreview}
 									caption={common.labels.conceptCaption}

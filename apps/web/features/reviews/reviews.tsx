@@ -17,7 +17,7 @@ import {
 	usePutApiReactionsUnitsByUnitId,
 	usePutApiScoresByTargetId,
 } from "@rezics/openapi-tanstack-query";
-import { normalizePortableText, type PortableTextValue } from "@rezics/portable-text";
+import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -48,6 +48,7 @@ import { RequireSession } from "@/features/auth/require-session";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { readPortableText, writePortableText } from "@/lib/content-structure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 
 async function invalidateReviews(
@@ -137,7 +138,7 @@ export function ReviewCreate() {
 					...(String(form.get("summary") ?? "").trim()
 						? { summary: String(form.get("summary") ?? "").trim() }
 						: {}),
-					body: normalizePortableText(body),
+					body: writePortableText(body),
 					...(scoreValue ? { score: Number(scoreValue) } : {}),
 				},
 			});
@@ -262,7 +263,10 @@ export function ReviewDetail({ id }: { id: string }) {
 			{review.body && (
 				<Card>
 					<CardContent className="prose max-w-none py-2">
-						<PortableTextContent value={review.body} variant="article" />
+						<PortableTextContent
+							value={readPortableText(review.body)}
+							variant="article"
+						/>
 					</CardContent>
 				</Card>
 			)}
@@ -300,7 +304,7 @@ function ReviewEditForm({
 	const queryClient = useQueryClient();
 	const router = useRouter();
 	const { locale, t } = useTranslation({ suspense: true });
-	const [body, setBody] = useState<PortableTextValue>(() => normalizePortableText(review.body));
+	const [body, setBody] = useState<PortableTextValue>(() => readPortableText(review.body));
 	const [invalid, setInvalid] = useState(false);
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -319,7 +323,7 @@ function ReviewEditForm({
 					...(String(form.get("summary") ?? "").trim()
 						? { summary: String(form.get("summary") ?? "").trim() }
 						: {}),
-					body: normalizePortableText(body),
+					body: writePortableText(body, review.body),
 				},
 			});
 			await invalidateReviews(queryClient, reviewId);

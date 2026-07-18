@@ -8,7 +8,7 @@ import {
 	post,
 	postReply,
 	profile as profileTable,
-	realmContent,
+	realmUnit,
 	unit,
 	unitCollaborator,
 	unitLocalization,
@@ -53,8 +53,9 @@ const UnitMutationForbiddenResponse = toApiErrorResponse(["UnitEditForbidden", "
 const ordinaryPostKind = sql<"post" | "reply">`${post.kind}::text`;
 
 const primaryRealmId = sql<string | null>`(
-	select rc.realm_id from realm_content rc
+	select rc.realm_id from realm_unit rc
 	where rc.unit_id = ${post.id}
+		and rc.status = 'visible'
 	order by rc.created_at, rc.realm_id limit 1
 )`;
 const replyCount = sql<number>`(
@@ -85,6 +86,7 @@ function toReplyResponse<
 		updatedAt: Date;
 	},
 >(row: T) {
+	const body = toPortableTextResponse(row.body);
 	return {
 		id: row.id,
 		postKind: "reply" as const,
@@ -94,7 +96,7 @@ function toReplyResponse<
 		parentPostId: row.parentPostId,
 		contextRealmId: row.contextRealmId,
 		depth: row.depth,
-		body: toPortableTextResponse(row.deletedAt ? [] : row.body),
+		body: row.deletedAt ? { ...body, content: [] } : body,
 		status: row.deletedAt ? "deleted" : row.moderationStatus,
 		latestRevisionId: row.latestRevisionId,
 		createdAt: row.createdAt,
@@ -162,7 +164,7 @@ export default new Elysia()
 									eq(unit.visibility, "public"),
 									isNull(unit.deletedAt),
 									query.realmId
-										? sql`exists(select 1 from realm_content rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId})`
+										? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible')`
 										: undefined,
 									query.subjectId
 										? eq(post.subjectUnitId, query.subjectId)
@@ -171,7 +173,7 @@ export default new Elysia()
 							)
 							.orderBy(desc(unit.createdAt), desc(unit.id))
 							.limit(query.limit ?? 20)
-					).map((item) => ({ ...item, body: toPortableTextResponse(item.body ?? []) })),
+					).map((item) => ({ ...item, body: toPortableTextResponse(item.body) })),
 				}),
 				{
 					query: ListPostsQuery,
@@ -218,7 +220,7 @@ export default new Elysia()
 						});
 						if (body.realmId)
 							await tx
-								.insert(realmContent)
+								.insert(realmUnit)
 								.values({ realmId: body.realmId, unitId: created.id });
 						await recordUnitRevision(tx, {
 							unitId: created.id,
@@ -288,7 +290,7 @@ export default new Elysia()
 					if (!row) throw new PostNotFound();
 					return {
 						...row,
-						body: toPortableTextResponse(row.body ?? []),
+						body: toPortableTextResponse(row.body),
 						capabilities: { canEdit: await authorization.unit.canEdit(row.id) },
 					};
 				},
@@ -559,15 +561,15 @@ export default new Elysia()
 					);
 					await ensureRootPost(params.postId);
 					const [realm] = await database
-						.select({ id: realmContent.realmId })
-						.from(realmContent)
+						.select({ id: realmUnit.realmId })
+						.from(realmUnit)
 						.where(
 							and(
-								eq(realmContent.unitId, params.postId),
-								body.realmId ? eq(realmContent.realmId, body.realmId) : undefined,
+								eq(realmUnit.unitId, params.postId),
+								body.realmId ? eq(realmUnit.realmId, body.realmId) : undefined,
 							),
 						)
-						.orderBy(realmContent.realmId)
+						.orderBy(realmUnit.realmId)
 						.limit(1);
 					if (body.realmId && !realm) throw new UnitNotFound("Realm");
 					await authorization.realm.ensureParticipation(realm?.id, "post");
@@ -642,7 +644,7 @@ export default new Elysia()
 							addedByProfileId: profile.unitId,
 						});
 						if (realm)
-							await tx.insert(realmContent).values({
+							await tx.insert(realmUnit).values({
 								realmId: realm.id,
 								unitId: created.id,
 							});
@@ -693,7 +695,7 @@ export default new Elysia()
 						if (row.contextRealmId)
 							await authorization.realm.ensureCapability(
 								row.contextRealmId,
-								"realm.content.moderate",
+								"realm.units.moderate",
 							);
 						else await authorization.unit.ensureCanEdit(params.replyPostId);
 					}
@@ -749,7 +751,7 @@ export default new Elysia()
 						if (row.contextRealmId)
 							await authorization.realm.ensureCapability(
 								row.contextRealmId,
-								"realm.content.moderate",
+								"realm.units.moderate",
 							);
 						else await authorization.unit.ensureCanEdit(params.replyPostId);
 					}

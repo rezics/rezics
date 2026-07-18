@@ -41,7 +41,7 @@ import {
 const UnitRecommendationCursor = t.Object(
 	{
 		v: t.Literal(1),
-		type: t.Nullable(t.Union([t.Literal("book"), t.Literal("game"), t.Literal("media")])),
+		type: t.Nullable(t.Union([t.Literal("book"), t.Literal("software"), t.Literal("media")])),
 		seedUnitId: t.Nullable(t.String({ format: "uuid" })),
 		personalized: t.Boolean(),
 		snapshotId: t.Nullable(t.String({ format: "uuid" })),

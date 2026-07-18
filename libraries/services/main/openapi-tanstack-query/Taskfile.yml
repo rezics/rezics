@@ -5,6 +5,7 @@ tasks:
         desc: Generate the TanStack Query SDK from the OpenAPI document.
         cmds:
             - KUBB_DISABLE_TELEMETRY=1 yarn exec kubb generate --config ./kubb.config.ts
+            - yarn exec prettier --ignore-unknown --write ./src/generated
 
     typecheck:
         desc: Type-check the TanStack Query SDK.

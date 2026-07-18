@@ -44,7 +44,7 @@ type ProgressStatus = (typeof ProgressStatuses)[number];
 
 function getProgressHref(type: string, unitId: string) {
 	const normalized = type.toLowerCase();
-	return ["book", "game", "media"].includes(normalized)
+	return ["book", "software", "media"].includes(normalized)
 		? `/units/${normalized}/${unitId}`
 		: undefined;
 }
