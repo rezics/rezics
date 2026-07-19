@@ -43,13 +43,13 @@ jobs:
               run: yarn install --immutable
 
             - name: Test
-              run: yarn task about:test
+              run: yarn task apps-about:test
 
             - name: Build
-              run: yarn task about:build
+              run: yarn task apps-about:build
 
             - name: Verify prerender output
-              run: yarn task about:test:dist
+              run: yarn task apps-about:test:dist
 
             - name: Deploy to Cloudflare Pages
               uses: cloudflare/wrangler-action@v3

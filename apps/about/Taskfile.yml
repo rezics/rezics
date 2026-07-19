@@ -10,12 +10,13 @@ tasks:
     build:
         desc: Build the prerendered Vike site.
         cmds:
-            - yarn run build
+            - yarn exec vike build
+            - yarn exec tsx scripts/write-static-files.ts
 
     preview:
         desc: Preview the built Vike site.
         cmds:
-            - yarn exec vike preview --host 0.0.0.0 --port 4174
+            - yarn exec vite preview --outDir dist/client --host 0.0.0.0 --port 4174
 
     check:
         desc: Run TypeScript checks.

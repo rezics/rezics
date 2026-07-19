@@ -58,6 +58,7 @@ yarn task typecheck
 yarn task test
 yarn task apps-web:build
 yarn task apps-about:build
+yarn task apps-about:test:dist
 ```
 
 OpenAPI documents and generated clients are updated through

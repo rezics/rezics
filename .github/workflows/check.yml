@@ -34,5 +34,6 @@ jobs:
             - run: devenv shell yarn task openapi:check
             - run: devenv shell yarn task typecheck
             - run: devenv shell yarn task test
-            - run: devenv shell yarn task web:build
-            - run: devenv shell yarn task about:build
+            - run: devenv shell yarn task apps-web:build
+            - run: devenv shell yarn task apps-about:build
+            - run: devenv shell yarn task apps-about:test:dist
