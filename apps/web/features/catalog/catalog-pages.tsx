@@ -2,12 +2,15 @@
 
 import {
 	getApiEntitiesQueryKey,
+	getApiEntitiesByUnitIdQueryKey,
 	getApiTagsQueryKey,
+	type GetApiEntitiesByUnitIdStatus200,
 	useGetApiEntities,
 	useGetApiEntitiesByUnitId,
 	useGetApiTags,
 	usePostApiEntities,
 	usePostApiTags,
+	usePutApiEntitiesByUnitIdLocalizationsByLanguage,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -17,6 +20,7 @@ import { type FormEvent, useState } from "react";
 import { PageHeading } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { UnitList } from "@rezics/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
@@ -24,6 +28,12 @@ import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
+import {
+	LocalizationImageUploadField,
+	type LocalizationImageAssetOption,
+	type LocalizationImageAssetValue,
+} from "@/features/units/localization-image-upload-field";
+import { RequestFailure } from "@/i18n/request-failure";
 import { useTranslation } from "@/i18n/client";
 import { selectLocalization } from "@/lib/localization";
 
@@ -55,8 +65,8 @@ function CatalogFrame({
 }
 
 export function EntitiesPage() {
-	const { t } = useTranslation({ suspense: true });
-	const query = useGetApiEntities({ query: { limit: 50 } });
+	const { t, locale } = useTranslation({ suspense: true });
+	const query = useGetApiEntities({ query: { language: locale.target, limit: 50 } });
 	return (
 		<CatalogFrame title={t.catalog.entities} createHref="/entities/new">
 			<UnitList
@@ -81,15 +91,33 @@ export function TagsPage() {
 
 export function EntityDetailPage({ id }: { id: string }) {
 	const { t, locale } = useTranslation({ suspense: true });
-	const query = useGetApiEntitiesByUnitId({ path: { unitId: id } });
+	const query = useGetApiEntitiesByUnitId({
+		path: { unitId: id },
+		query: { language: locale.target },
+	});
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	const localization = selectLocalization(query.data.localizations, locale.target);
+	const avatar = localization?.avatar ?? query.data.avatar;
+	const banner = localization?.banner ?? query.data.banner;
 	return (
 		<CatalogFrame title={localization?.title ?? query.data.slug ?? t.ui.unnamed}>
+			{banner ? (
+				<div className="aspect-[3/1] overflow-hidden rounded-2xl bg-muted">
+					<img alt="" className="size-full object-cover" src={banner.url} />
+				</div>
+			) : null}
 			<Card>
 				<CardContent className="grid gap-3 p-5 text-sm">
+					<Avatar className="size-20">
+						{avatar ? <AvatarImage alt="" src={avatar.url} /> : null}
+						<AvatarFallback>
+							{(localization?.title ?? query.data.slug ?? t.ui.unnamed)
+								.slice(0, 1)
+								.toUpperCase()}
+						</AvatarFallback>
+					</Avatar>
 					<p>
 						<span className="text-muted-foreground">{t.catalog.kind}</span>{" "}
 						{query.data.kind}
@@ -99,9 +127,151 @@ export function EntityDetailPage({ id }: { id: string }) {
 						{query.data.verified ? t.catalog.verified : t.catalog.unverified}
 					</p>
 					{localization?.summary && <p>{localization.summary}</p>}
+					{query.data.capabilities.canEdit ? (
+						<Button asChild className="w-fit">
+							<Link href={`/entities/${query.data.id}/edit`}>{t.ui.edit}</Link>
+						</Button>
+					) : null}
 				</CardContent>
 			</Card>
 		</CatalogFrame>
+	);
+}
+
+export function EntityEditPage({ id }: { id: string }) {
+	return (
+		<RequireSession>
+			<EntityEditContent id={id} />
+		</RequireSession>
+	);
+}
+
+function EntityEditContent({ id }: { id: string }) {
+	const { t, locale } = useTranslation({ suspense: true });
+	const query = useGetApiEntitiesByUnitId({
+		path: { unitId: id },
+		query: { language: locale.target },
+	});
+	if (query.isPending) return <QueryPending />;
+	if (query.isError || !query.data)
+		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (!query.data.capabilities.canEdit)
+		return (
+			<main className="mx-auto grid min-h-64 w-full max-w-2xl place-items-center px-4 py-10">
+				<p className="text-destructive text-sm">{t.errors.forbidden}</p>
+			</main>
+		);
+	return (
+		<EntityLocalizationForm
+			key={`${query.data.id}:${locale.target}:${query.data.updatedAt}`}
+			entity={query.data}
+		/>
+	);
+}
+
+function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStatus200 }) {
+	const { t, locale } = useTranslation({ suspense: true });
+	const router = useRouter();
+	const queryClient = useQueryClient();
+	const localization = entity.localizations.find((entry) => entry.language === locale.target);
+	const fallbackLocalization = selectLocalization(
+		entity.localizations,
+		locale.target,
+		entity.localizations[0]?.language,
+	);
+	const mediaOptions = (role: "avatar" | "banner"): LocalizationImageAssetOption[] =>
+		entity.localizations.flatMap((entry) =>
+			entry.language !== locale.target && entry[role]
+				? [{ ...entry[role], label: entry.language }]
+				: [],
+		);
+	const avatarOptions = mediaOptions("avatar");
+	const bannerOptions = mediaOptions("banner");
+	const [avatar, setAvatar] = useState<LocalizationImageAssetValue | null>(
+		localization?.avatar ?? null,
+	);
+	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(
+		localization?.banner ?? null,
+	);
+	const update = usePutApiEntitiesByUnitIdLocalizationsByLanguage();
+
+	async function submit(event: FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		const form = new FormData(event.currentTarget);
+		try {
+			await update.mutateAsync({
+				path: { unitId: entity.id, language: locale.target },
+				body: {
+					title: String(form.get("title") ?? "").trim(),
+					summary: String(form.get("summary") ?? "").trim(),
+					avatarAssetId: avatar?.id ?? null,
+					bannerAssetId: banner?.id ?? null,
+				},
+			});
+			await queryClient.invalidateQueries({
+				queryKey: getApiEntitiesByUnitIdQueryKey({
+					path: { unitId: entity.id },
+					query: { language: locale.target },
+				}),
+			});
+			router.push(`/entities/${entity.id}`);
+		} catch {
+			// The typed mutation state supplies the visible API error.
+		}
+	}
+
+	return (
+		<CreateFrame title={t.catalog.entities}>
+			<form onSubmit={submit}>
+				<FieldGroup>
+					<Field required>
+						<FieldLabel>{t.ui.title}</FieldLabel>
+						<Input
+							defaultValue={localization?.title ?? fallbackLocalization?.title ?? ""}
+							maxLength={500}
+							name="title"
+							required
+						/>
+					</Field>
+					<Field>
+						<FieldLabel>{t.ui.summary}</FieldLabel>
+						<Textarea
+							defaultValue={
+								localization?.summary ?? fallbackLocalization?.summary ?? ""
+							}
+							maxLength={2000}
+							name="summary"
+						/>
+					</Field>
+					<Field>
+						<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
+						<LocalizationImageUploadField
+							fallback={avatarOptions[0] ?? null}
+							onChange={setAvatar}
+							options={avatarOptions}
+							role="avatar"
+							shape="avatar"
+							value={avatar}
+						/>
+					</Field>
+					<Field>
+						<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
+						<LocalizationImageUploadField
+							fallback={bannerOptions[0] ?? null}
+							onChange={setBanner}
+							options={bannerOptions}
+							role="banner"
+							shape="banner"
+							value={banner}
+						/>
+					</Field>
+					<RequestFailure error={update.error} />
+					<Button className="w-fit" isLoading={update.isPending} type="submit">
+						{t.ui.save}
+					</Button>
+				</FieldGroup>
+			</form>
+		</CreateFrame>
 	);
 }
 
@@ -121,6 +291,8 @@ export function EntityCreatePage() {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const [error, setError] = useState(false);
+	const [avatar, setAvatar] = useState<LocalizationImageAssetValue | null>(null);
+	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(null);
 	const create = usePostApiEntities({
 		mutation: {
 			onSuccess: async (result) => {
@@ -140,6 +312,8 @@ export function EntityCreatePage() {
 					localization: {
 						language: locale.target,
 						title: String(form.get("title") ?? "").trim(),
+						avatarAssetId: avatar?.id ?? null,
+						bannerAssetId: banner?.id ?? null,
 						...(String(form.get("summary") ?? "").trim()
 							? { summary: String(form.get("summary")).trim() }
 							: {}),
@@ -180,6 +354,24 @@ export function EntityCreatePage() {
 					<Field>
 						<FieldLabel>{t.ui.summary}</FieldLabel>
 						<Textarea name="summary" maxLength={2000} />
+					</Field>
+					<Field>
+						<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
+						<LocalizationImageUploadField
+							onChange={setAvatar}
+							role="avatar"
+							shape="avatar"
+							value={avatar}
+						/>
+					</Field>
+					<Field>
+						<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
+						<LocalizationImageUploadField
+							onChange={setBanner}
+							role="banner"
+							shape="banner"
+							value={banner}
+						/>
 					</Field>
 					{error && <p className="text-destructive text-sm">{t.ui.retryLater}</p>}
 					<Button type="submit" isLoading={create.isPending}>

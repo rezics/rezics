@@ -211,6 +211,8 @@ import type {
 	PostApiEntitiesResponses,
 	GetApiEntitiesByUnitIdOptions,
 	GetApiEntitiesByUnitIdResponses,
+	PutApiEntitiesByUnitIdLocalizationsByLanguageOptions,
+	PutApiEntitiesByUnitIdLocalizationsByLanguageResponses,
 	GetApiEntitiesByUnitIdAssociationPolicyOptions,
 	GetApiEntitiesByUnitIdAssociationPolicyResponses,
 	PatchApiEntitiesByUnitIdAssociationPolicyOptions,
@@ -2080,6 +2082,24 @@ export function getApiEntitiesByUnitId<ThrowOnError extends boolean = true>(
 
 	return request({ method: "GET", url: "/api/entities/{unitId}", ...config }) as Promise<
 		RequestResult<GetApiEntitiesByUnitIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Create or replace entity localization
+ * {@link /api/entities/:unitId/localizations/:language}
+ */
+export function putApiEntitiesByUnitIdLocalizationsByLanguage<ThrowOnError extends boolean = true>(
+	options: Options<PutApiEntitiesByUnitIdLocalizationsByLanguageOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiEntitiesByUnitIdLocalizationsByLanguageResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/entities/{unitId}/localizations/{language}",
+		...config,
+	}) as Promise<
+		RequestResult<PutApiEntitiesByUnitIdLocalizationsByLanguageResponses, ThrowOnError>
 	>;
 }
 

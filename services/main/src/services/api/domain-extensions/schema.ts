@@ -8,7 +8,8 @@ import {
 import { type Static, Type } from "@sinclair/typebox";
 import { t } from "elysia";
 
-import { DateTime, FractionalPosition, LocalizationInput, Uuid } from "../schema";
+import { DateTime, FractionalPosition, LanguageTag, LocalizationInput, Uuid } from "../schema";
+import { ImageAssetResponse } from "../schema/response";
 
 // Exact models are registered by the Zone route plugin. References keep one
 // OpenAPI component and prevent recursive Block static types from expanding
@@ -82,6 +83,7 @@ export const CreateZoneBody = t.Object(
 	{ additionalProperties: false },
 );
 export const ZoneParams = t.Object({ zoneId: Uuid });
+export const ZoneDetailQuery = t.Object({ language: t.Optional(LanguageTag) });
 export const ZonePageParams = t.Object({
 	zoneId: Uuid,
 	slug: t.String({ minLength: 1, maxLength: 100, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
@@ -92,6 +94,7 @@ export const ZoneNavigationParams = t.Object({
 });
 export const UpdateZoneBody = t.Object(
 	{
+		localization: t.Optional(LocalizationInput),
 		boundaryDocument: t.Optional(ZoneBoundaryInputDocument),
 		themeDocument: t.Optional(ZoneThemeInputDocument),
 		dockDocument: t.Optional(UnitReferencedBlockInputDocument),
@@ -143,6 +146,20 @@ export const SystemRequirementListResponse = t.Object({
 
 export const ZoneResponse = t.Object({
 	id: Uuid,
+	language: t.Nullable(t.String()),
+	avatar: ImageAssetResponse,
+	banner: ImageAssetResponse,
+	cover: ImageAssetResponse,
+	localizations: t.Array(
+		t.Object({
+			language: t.String(),
+			title: t.Nullable(t.String()),
+			summary: t.Nullable(t.String()),
+			avatar: ImageAssetResponse,
+			banner: ImageAssetResponse,
+			cover: ImageAssetResponse,
+		}),
+	),
 	boundaryDocument: ZoneBoundaryResponseDocument,
 	themeDocument: ZoneThemeResponseDocument,
 	dockDocument: UnitReferencedBlockResponseDocument,

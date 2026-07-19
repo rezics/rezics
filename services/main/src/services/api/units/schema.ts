@@ -15,13 +15,7 @@ export const SlugLabelInput = t.String({
 	pattern: "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
 });
 
-const UnitLocalizationInput = t.Object(
-	{
-		...LocalizationInput.properties,
-		coverAssetId: t.Optional(t.Nullable(Uuid)),
-	},
-	{ additionalProperties: false },
-);
+const UnitLocalizationInput = LocalizationInput;
 
 export const CreateUnitBody = t.Object(
 	{

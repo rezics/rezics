@@ -1,15 +1,18 @@
 import { StatusCodes } from "http-status-codes";
 import { createHash } from "node:crypto";
 
-import { and, desc, eq, isNull, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
-import session from "../../auth/session";
+import session, { resolveIdentity } from "../../auth/session";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
 import { getEntityAssociationPolicy } from "../../authorization/entity/authorization";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
-import { isPrimaryUnitLocalization } from "../../units/localization";
+import {
+	isPrimaryUnitLocalization,
+	resolvedUnitLocalizationImageAssetId,
+} from "../../units/localization";
 import { fractionalPositionBetween } from "../../ordering/position";
 import {
 	auditEvent,
@@ -36,6 +39,8 @@ import {
 	AddUnitSubjectAssociationBody,
 	AddUnitLinkBody,
 	CreateCatalogUnitBody,
+	EntityDetailQuery,
+	EntityLocalizationParams,
 	ListEntityEntriesQuery,
 	ListTagsQuery,
 	TagUnitBody,
@@ -49,6 +54,8 @@ import {
 	VoteBody,
 } from "./schema";
 import { checkUnitType, createCatalogUnit } from "./service";
+import { upsertLocalization } from "../../units/service";
+import { UnitLocalizationBody } from "../units/schema";
 import { recordUnitRevision } from "../../units/history";
 import { presentImageAsset } from "../../units/service";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
@@ -78,6 +85,11 @@ import {
 import { resolveEntityAssociationPolicy } from "../../authorization/entity/policy";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
+const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
+const CatalogUnitMutationNotFoundResponse = toApiErrorResponse([
+	"UnitNotFound",
+	"ImageAssetNotFound",
+]);
 const UnitMutationForbiddenResponse = toApiErrorResponse([
 	"UnitPermissionForbidden",
 	"UnitProtected",
@@ -144,7 +156,21 @@ export default new Elysia()
 							slug: unit.slug,
 							kind: entity.kind,
 							verified: entity.verified,
-							avatarAssetId: entity.avatarAssetId,
+							avatarAssetId: resolvedUnitLocalizationImageAssetId(
+								unit.id,
+								"avatar",
+								query.language,
+							),
+							bannerAssetId: resolvedUnitLocalizationImageAssetId(
+								unit.id,
+								"banner",
+								query.language,
+							),
+							coverAssetId: resolvedUnitLocalizationImageAssetId(
+								unit.id,
+								"cover",
+								query.language,
+							),
 							title: unitLocalization.title,
 							summary: unitLocalization.summary,
 						})
@@ -166,11 +192,15 @@ export default new Elysia()
 						.orderBy(desc(unit.createdAt))
 						.limit(query.limit ?? 20);
 					return {
-						items: items.map(({ avatarAssetId, ...item }) => ({
-							...item,
-							kind: item.kind ?? "unknown",
-							avatar: presentImageAsset(avatarAssetId)?.url ?? null,
-						})),
+						items: items.map(
+							({ avatarAssetId, bannerAssetId, coverAssetId, ...item }) => ({
+								...item,
+								kind: item.kind ?? "unknown",
+								avatar: presentImageAsset(avatarAssetId),
+								banner: presentImageAsset(bannerAssetId),
+								cover: presentImageAsset(coverAssetId),
+							}),
+						),
 					};
 				},
 				{
@@ -187,20 +217,38 @@ export default new Elysia()
 				{
 					access: "contribute:unit:create",
 					body: CreateCatalogUnitBody,
-					response: { [StatusCodes.OK]: IdResponse },
+					response: {
+						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
+					},
 					detail: { summary: "Create entity entry", tags: ["Entity"] },
 				},
 			)
 			.get(
 				"/:unitId",
-				async ({ params }) => {
+				async ({ params, query, request }) => {
+					const identity = await resolveIdentity(request.headers, "unit:read");
 					const [entry] = await database
 						.select({
 							id: unit.id,
 							slug: unit.slug,
 							kind: entity.kind,
 							verified: entity.verified,
-							avatarAssetId: entity.avatarAssetId,
+							avatarAssetId: resolvedUnitLocalizationImageAssetId(
+								unit.id,
+								"avatar",
+								query.language,
+							),
+							bannerAssetId: resolvedUnitLocalizationImageAssetId(
+								unit.id,
+								"banner",
+								query.language,
+							),
+							coverAssetId: resolvedUnitLocalizationImageAssetId(
+								unit.id,
+								"cover",
+								query.language,
+							),
 							createdAt: unit.createdAt,
 							updatedAt: unit.updatedAt,
 						})
@@ -214,6 +262,7 @@ export default new Elysia()
 							.select()
 							.from(unitLocalization)
 							.where(eq(unitLocalization.unitId, params.unitId))
+							.orderBy(asc(unitLocalization.position), asc(unitLocalization.language))
 					).map((row) => ({
 						unitId: row.unitId,
 						language: row.language,
@@ -224,6 +273,8 @@ export default new Elysia()
 							row.description === null
 								? null
 								: toPortableTextResponse(row.description),
+						avatar: presentImageAsset(row.avatarAssetId),
+						banner: presentImageAsset(row.bannerAssetId),
 						cover: presentImageAsset(row.coverAssetId),
 						createdAt: row.createdAt,
 						updatedAt: row.updatedAt,
@@ -272,25 +323,55 @@ export default new Elysia()
 							),
 						)
 						.limit(1);
-					const { avatarAssetId, ...entityEntry } = entry;
+					const { avatarAssetId, bannerAssetId, coverAssetId, ...entityEntry } = entry;
 					return {
 						...entityEntry,
 						kind: entry.kind ?? "unknown",
-						avatar: presentImageAsset(avatarAssetId)?.url ?? null,
+						avatar: presentImageAsset(avatarAssetId),
+						banner: presentImageAsset(bannerAssetId),
+						cover: presentImageAsset(coverAssetId),
 						localizations,
 						associationPolicy: await getEntityAssociationPolicy(params.unitId),
 						ownerProfileId: owner?.profileId ?? null,
+						capabilities: {
+							canEdit: await identity.authorization.unit.canUpdate(params.unitId, [
+								"localizations",
+							]),
+						},
 						creditAttributions,
 						subjectAssociations,
 					};
 				},
 				{
 					params: UnitIdParams,
+					query: EntityDetailQuery,
 					response: {
 						[StatusCodes.OK]: EntityDetailResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["EntityEntryNotFound"]),
 					},
 					detail: { summary: "Get entity entry", tags: ["Entity"] },
+				},
+			)
+			.put(
+				"/:unitId/localizations/:language",
+				async ({ params, authorization, body }) => {
+					await checkUnitType(params.unitId, "entity");
+					await upsertLocalization(params.unitId, authorization, {
+						...body,
+						language: params.language,
+					});
+					return { id: params.unitId };
+				},
+				{
+					access: "contribute:unit:update",
+					params: EntityLocalizationParams,
+					body: UnitLocalizationBody,
+					response: {
+						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: CatalogUnitMutationNotFoundResponse,
+					},
+					detail: { summary: "Create or replace entity localization", tags: ["Entity"] },
 				},
 			)
 			.get(

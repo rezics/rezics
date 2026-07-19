@@ -22,9 +22,16 @@ export type CreateCatalogUnitBody = Static<typeof CreateCatalogUnitBody>;
 
 export const ListEntityEntriesQuery = t.Object({
 	kind: t.Optional(t.String({ maxLength: 64 })),
+	language: t.Optional(LanguageTag),
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 });
 export type ListEntityEntriesQuery = Static<typeof ListEntityEntriesQuery>;
+
+export const EntityDetailQuery = t.Object({ language: t.Optional(LanguageTag) });
+export type EntityDetailQuery = Static<typeof EntityDetailQuery>;
+
+export const EntityLocalizationParams = t.Object({ unitId: Uuid, language: LanguageTag });
+export type EntityLocalizationParams = Static<typeof EntityLocalizationParams>;
 
 export const ListTagsQuery = t.Object({
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),

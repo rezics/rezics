@@ -61,6 +61,7 @@ export default defineConfig({
 		strictPort: true,
 		proxy: {
 			"/api": "http://localhost:3001",
+			"/image-assets": "http://localhost:3001",
 		},
 	},
 	resolve: {

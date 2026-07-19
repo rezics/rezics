@@ -16,6 +16,8 @@ import {
 	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
 	primaryUnitTitle,
+	resolvedUnitLocalizationImageAssetId,
+	unitLocalizationImageAssetIds,
 } from "../../units/localization";
 import {
 	auditEvent,
@@ -42,6 +44,8 @@ import { recordUnitRevision } from "../../units/history";
 import { insertAddressedUnit } from "../../units/slug-address";
 import { TopLevelSlugNamespaceUnitIds } from "../../units/slug-system";
 import { generateSlugLabel } from "../../units/slug";
+import { ensureImageAssetsAttachable } from "../image-assets/service";
+import { presentImageAsset } from "../../units/service";
 import {
 	FollowResponse,
 	IdResponse,
@@ -75,6 +79,7 @@ import {
 	RealmUnitModerationHistoryResponse,
 	RealmMemberParams,
 	RealmParams,
+	RealmDetailQuery,
 	RealmPinParams,
 	RemoveRealmPinQuery,
 	UpdateRealmBody,
@@ -98,6 +103,8 @@ import {
 } from "./errors";
 
 const RealmNotFoundResponse = toApiErrorResponse(["RealmNotFound"]);
+const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
+const RealmMutationNotFoundResponse = toApiErrorResponse(["RealmNotFound", "ImageAssetNotFound"]);
 const RealmMutationForbiddenResponse = toApiErrorResponse([
 	"RealmCapabilityRequired",
 	"UnitProtected",
@@ -170,6 +177,21 @@ export default new Elysia({ prefix: "/realms" })
 					joinPolicy: realm.joinPolicy,
 					title: unitLocalization.title,
 					summary: unitLocalization.summary,
+					avatarAssetId: resolvedUnitLocalizationImageAssetId(
+						unit.id,
+						"avatar",
+						query.language,
+					),
+					bannerAssetId: resolvedUnitLocalizationImageAssetId(
+						unit.id,
+						"banner",
+						query.language,
+					),
+					coverAssetId: resolvedUnitLocalizationImageAssetId(
+						unit.id,
+						"cover",
+						query.language,
+					),
 					createdAt: unit.createdAt,
 					updatedAt: unit.updatedAt,
 				})
@@ -184,7 +206,15 @@ export default new Elysia({ prefix: "/realms" })
 				)
 				.where(and(eq(unit.status, "published"), eq(unit.visibility, "public")))
 				.orderBy(desc(unit.createdAt), desc(unit.id))
-				.limit(query.limit ?? 20),
+				.limit(query.limit ?? 20)
+				.then((items) =>
+					items.map(({ avatarAssetId, bannerAssetId, coverAssetId, ...item }) => ({
+						...item,
+						avatar: presentImageAsset(avatarAssetId),
+						banner: presentImageAsset(bannerAssetId),
+						cover: presentImageAsset(coverAssetId),
+					})),
+				),
 		}),
 		{
 			query: ListRealmsQuery,
@@ -196,6 +226,11 @@ export default new Elysia({ prefix: "/realms" })
 		"",
 		async ({ profile, body }) => {
 			const id = await database.transaction(async (tx) => {
+				await ensureImageAssetsAttachable(
+					tx,
+					profile.unitId,
+					unitLocalizationImageAssetIds(body.localization),
+				);
 				const created = await insertAddressedUnit(tx, {
 					kind: "realm",
 					slugScopeId: TopLevelSlugNamespaceUnitIds.realms,
@@ -238,13 +273,16 @@ export default new Elysia({ prefix: "/realms" })
 		{
 			access: "contribute:unit:create",
 			body: CreateRealmBody,
-			response: { [StatusCodes.OK]: IdResponse },
+			response: {
+				[StatusCodes.OK]: IdResponse,
+				[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
+			},
 			detail: { summary: "Create Realm", tags: ["Realms"] },
 		},
 	)
 	.get(
 		"/:realmId",
-		async ({ params, request }) => {
+		async ({ params, query, request }) => {
 			const viewer = await ensureRealmVisible(params.realmId, request.headers);
 			const [record] = await database
 				.select({
@@ -253,6 +291,21 @@ export default new Elysia({ prefix: "/realms" })
 					status: unit.status,
 					visibility: unit.visibility,
 					joinPolicy: realm.joinPolicy,
+					avatarAssetId: resolvedUnitLocalizationImageAssetId(
+						unit.id,
+						"avatar",
+						query.language,
+					),
+					bannerAssetId: resolvedUnitLocalizationImageAssetId(
+						unit.id,
+						"banner",
+						query.language,
+					),
+					coverAssetId: resolvedUnitLocalizationImageAssetId(
+						unit.id,
+						"cover",
+						query.language,
+					),
 					createdAt: unit.createdAt,
 					updatedAt: unit.updatedAt,
 				})
@@ -266,6 +319,9 @@ export default new Elysia({ prefix: "/realms" })
 					language: unitLocalization.language,
 					title: unitLocalization.title,
 					summary: unitLocalization.summary,
+					avatarAssetId: unitLocalization.avatarAssetId,
+					bannerAssetId: unitLocalization.bannerAssetId,
+					coverAssetId: unitLocalization.coverAssetId,
 				})
 				.from(unitLocalization)
 				.where(eq(unitLocalization.unitId, params.realmId))
@@ -284,10 +340,21 @@ export default new Elysia({ prefix: "/realms" })
 							),
 					])
 				: [undefined, []];
+			const { avatarAssetId, bannerAssetId, coverAssetId, ...realmRecord } = record;
 			return {
-				...record,
+				...realmRecord,
 				language: localizations[0]?.language ?? null,
-				localizations,
+				avatar: presentImageAsset(avatarAssetId),
+				banner: presentImageAsset(bannerAssetId),
+				cover: presentImageAsset(coverAssetId),
+				localizations: localizations.map(
+					({ avatarAssetId, bannerAssetId, coverAssetId, ...localization }) => ({
+						...localization,
+						avatar: presentImageAsset(avatarAssetId),
+						banner: presentImageAsset(bannerAssetId),
+						cover: presentImageAsset(coverAssetId),
+					}),
+				),
 				viewerMembership: viewerMembership
 					? { role: viewerMembership.role, state: viewerMembership.state }
 					: undefined,
@@ -296,6 +363,7 @@ export default new Elysia({ prefix: "/realms" })
 		},
 		{
 			params: RealmParams,
+			query: RealmDetailQuery,
 			response: {
 				[StatusCodes.OK]: RealmDetailResponse,
 				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
@@ -310,6 +378,12 @@ export default new Elysia({ prefix: "/realms" })
 			for (const scope of [["unit"], ["realm"], ["localizations"]] as const)
 				await authorization.unit.ensureOperationAllowed(params.realmId, scope);
 			await database.transaction(async (tx) => {
+				if (body.localization)
+					await ensureImageAssetsAttachable(
+						tx,
+						profile.unitId,
+						unitLocalizationImageAssetIds(body.localization),
+					);
 				const updated = await tx
 					.update(unit)
 					.set({
@@ -355,7 +429,7 @@ export default new Elysia({ prefix: "/realms" })
 			response: {
 				[StatusCodes.OK]: IdResponse,
 				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
+				[StatusCodes.NOT_FOUND]: RealmMutationNotFoundResponse,
 			},
 			detail: { summary: "Update Realm", tags: ["Realms"] },
 		},

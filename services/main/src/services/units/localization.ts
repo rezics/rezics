@@ -1,8 +1,56 @@
 import { and, eq, sql, type SQL, type SQLWrapper } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 
 import type { DatabaseTransaction } from "../database";
 import { unitLocalization } from "../database/schema";
 import { fractionalPositionBetween } from "../ordering/position";
+
+export const UnitLocalizationImageRoles = ["avatar", "banner", "cover"] as const;
+export type UnitLocalizationImageRole = (typeof UnitLocalizationImageRoles)[number];
+export interface UnitLocalizationImageAssetInput {
+	avatarAssetId?: string | null;
+	bannerAssetId?: string | null;
+	coverAssetId?: string | null;
+}
+
+export function unitLocalizationImageAssetIds(
+	input: UnitLocalizationImageAssetInput,
+): readonly (string | null | undefined)[] {
+	return [input.avatarAssetId, input.bannerAssetId, input.coverAssetId];
+}
+
+const mediaLocalization = alias(unitLocalization, "media_localization");
+const mediaAssetColumns = {
+	avatar: mediaLocalization.avatarAssetId,
+	banner: mediaLocalization.bannerAssetId,
+	cover: mediaLocalization.coverAssetId,
+} as const satisfies Record<UnitLocalizationImageRole, SQLWrapper>;
+
+const mediaAssetKeys = {
+	avatar: "avatarAssetId",
+	banner: "bannerAssetId",
+	cover: "coverAssetId",
+} as const satisfies Record<UnitLocalizationImageRole, keyof UnitLocalizationImageAssetInput>;
+
+/** Resolve from rows already ordered by position and language. */
+export function resolveUnitLocalizationImageAssetIdFromOrdered(
+	localizations: readonly (UnitLocalizationImageAssetInput & { language: string })[],
+	role: UnitLocalizationImageRole,
+	preferredLanguage?: string | null,
+): string | null {
+	const assetKey = mediaAssetKeys[role];
+	const preferred = preferredLanguage
+		? localizations.find(
+				(localization) =>
+					localization.language === preferredLanguage && Boolean(localization[assetKey]),
+			)
+		: undefined;
+	return (
+		preferred?.[assetKey] ??
+		localizations.find((localization) => localization[assetKey])?.[assetKey] ??
+		null
+	);
+}
 
 /** Return the first position in the Unit's ordered localization sequence. */
 function primaryUnitLocalizationPosition(unitId: SQLWrapper): SQL<string | null> {
@@ -19,16 +67,30 @@ export function isPrimaryUnitLocalization(unitId: SQLWrapper): SQL {
 	return eq(unitLocalization.position, primaryUnitLocalizationPosition(unitId));
 }
 
-/** Resolve the first localization-specific cover, preserving localization order. */
-export function firstUnitLocalizationCoverAssetId(unitId: SQLWrapper): SQL<string | null> {
+/** Resolve a locale override, then the first available image in localization order. */
+export function resolvedUnitLocalizationImageAssetId(
+	unitId: SQLWrapper,
+	role: UnitLocalizationImageRole,
+	preferredLanguage?: string | null,
+): SQL<string | null> {
+	const assetColumn = mediaAssetColumns[role];
 	return sql<string | null>`(
-		select "cover_localization"."cover_asset_id"
-		from "unit_localization" as "cover_localization"
-		where "cover_localization"."unit_id" = ${unitId}
-			and "cover_localization"."cover_asset_id" is not null
-		order by "cover_localization"."position", "cover_localization"."language"
+		select ${assetColumn}
+		from ${unitLocalization} as ${mediaLocalization}
+		where ${mediaLocalization.unitId} = ${unitId}
+			and ${assetColumn} is not null
+		order by
+			case when ${preferredLanguage ?? null}::text is not null
+				and ${mediaLocalization.language} = ${preferredLanguage ?? null}::text
+				then 0 else 1 end,
+			${mediaLocalization.position},
+			${mediaLocalization.language}
 		limit 1
 	)`;
+}
+
+export function firstUnitLocalizationCoverAssetId(unitId: SQLWrapper): SQL<string | null> {
+	return resolvedUnitLocalizationImageAssetId(unitId, "cover");
 }
 
 /**

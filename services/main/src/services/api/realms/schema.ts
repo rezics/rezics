@@ -29,6 +29,7 @@ const RealmUnitStatus = t.UnionEnum(RealmUnitStatusValues, { default: undefined 
 const GovernanceReasonCode = t.UnionEnum(GovernanceReasonCodeValues);
 
 export const ListRealmsQuery = t.Object({
+	language: t.Optional(LanguageTag),
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 });
 export type ListRealmsQuery = Static<typeof ListRealmsQuery>;
@@ -43,6 +44,9 @@ export type CreateRealmBody = Static<typeof CreateRealmBody>;
 
 export const RealmParams = t.Object({ realmId: Uuid });
 export type RealmParams = Static<typeof RealmParams>;
+
+export const RealmDetailQuery = t.Object({ language: t.Optional(LanguageTag) });
+export type RealmDetailQuery = Static<typeof RealmDetailQuery>;
 
 export const UpdateRealmBody = t.Object({
 	joinPolicy: t.Optional(RealmJoinPolicy),

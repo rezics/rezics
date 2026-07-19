@@ -14365,6 +14365,34 @@ export type PostApiSeriesStatus200 = {
 /**
  * @type object
  */
+export type PostApiSeriesStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ImageAssetNotFound'
+		 * @type string
+		 */
+		code: "ImageAssetNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiSeriesStatus422 = ValidationError;
 
 /**
@@ -14539,6 +14567,9 @@ export type PostApiSeriesBody = {
 				  }
 			)[];
 		};
+		avatarAssetId?: (string | null) | null;
+		bannerAssetId?: (string | null) | null;
+		coverAssetId?: (string | null) | null;
 	};
 };
 
@@ -14557,6 +14588,7 @@ export type PostApiSeriesOptions = {
  */
 export type PostApiSeriesResponses = {
 	"200": PostApiSeriesStatus200;
+	"404": PostApiSeriesStatus404;
 	"422": PostApiSeriesStatus422;
 	"500": PostApiSeriesStatus500;
 };
@@ -14565,7 +14597,10 @@ export type PostApiSeriesResponses = {
  * @description Union of all possible responses
  */
 export type PostApiSeriesResponse =
-	PostApiSeriesStatus200 | PostApiSeriesStatus422 | PostApiSeriesStatus500;
+	| PostApiSeriesStatus200
+	| PostApiSeriesStatus404
+	| PostApiSeriesStatus422
+	| PostApiSeriesStatus500;
 
 /**
  * @type object
@@ -14705,6 +14740,20 @@ export type GetApiZonesByZoneIdPath = {
 /**
  * @type object
  */
+export type GetApiZonesByZoneIdQuery = {
+	/**
+	 * @description
+	 * Format: `bcp-47`
+	 * @minLength 2
+	 * @maxLength 35
+	 * @type string | undefined
+	 */
+	language?: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiZonesByZoneIdStatus200 = {
 	/**
 	 * @description
@@ -14712,6 +14761,102 @@ export type GetApiZonesByZoneIdStatus200 = {
 	 * @type string
 	 */
 	id: string;
+	language: (string | null) | null;
+	avatar:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	banner:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	cover:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	/**
+	 * @type array
+	 */
+	localizations: {
+		/**
+		 * @type string
+		 */
+		language: string;
+		title: (string | null) | null;
+		summary: (string | null) | null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		banner:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+	}[];
 	/**
 	 * @type unknown
 	 */
@@ -14784,7 +14929,7 @@ export type GetApiZonesByZoneIdStatus500 = InternalError;
 export type GetApiZonesByZoneIdOptions = {
 	body?: never;
 	path: GetApiZonesByZoneIdPath;
-	query?: never;
+	query?: GetApiZonesByZoneIdQuery;
 	headers?: never;
 };
 
@@ -14829,6 +14974,102 @@ export type PatchApiZonesByZoneIdStatus200 = {
 	 * @type string
 	 */
 	id: string;
+	language: (string | null) | null;
+	avatar:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	banner:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	cover:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	/**
+	 * @type array
+	 */
+	localizations: {
+		/**
+		 * @type string
+		 */
+		language: string;
+		title: (string | null) | null;
+		summary: (string | null) | null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		banner:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+	}[];
 	/**
 	 * @type unknown
 	 */
@@ -14929,6 +15170,14 @@ export type PatchApiZonesByZoneIdStatus403 = {
 	requestId: string;
 };
 
+export const PatchApiZonesByZoneIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ImageAssetNotFound: "ImageAssetNotFound",
+} as const;
+
+export type PatchApiZonesByZoneIdStatus404ErrorCodeEnum =
+	(typeof PatchApiZonesByZoneIdStatus404ErrorCodeEnum)[keyof typeof PatchApiZonesByZoneIdStatus404ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -14941,7 +15190,7 @@ export type PatchApiZonesByZoneIdStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: "UnitNotFound";
+		code: PatchApiZonesByZoneIdStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -14971,6 +15220,160 @@ export type PatchApiZonesByZoneIdStatus500 = InternalError;
  * @type object
  */
 export type PatchApiZonesByZoneIdBody = {
+	/**
+	 * @type object | undefined
+	 */
+	localization?: {
+		/**
+		 * @description
+		 * Format: `bcp-47`
+		 * @minLength 2
+		 * @maxLength 35
+		 * @type string
+		 */
+		language: string;
+		/**
+		 * @minLength 1
+		 * @maxLength 500
+		 * @type string
+		 */
+		title: string;
+		/**
+		 * @maxLength 2000
+		 * @type string | undefined
+		 */
+		summary?: string;
+		/**
+		 * @type object | undefined
+		 */
+		description?: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "image";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						assetId: string;
+						/**
+						 * @type string | undefined
+						 */
+						alt?: string;
+						/**
+						 * @type string | undefined
+						 */
+						caption?: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!(?:block|image)$).+
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+				  }
+			)[];
+		};
+		avatarAssetId?: (string | null) | null;
+		bannerAssetId?: (string | null) | null;
+		coverAssetId?: (string | null) | null;
+	};
 	/**
 	 * @type unknown | undefined
 	 */
@@ -16734,6 +17137,34 @@ export type PostApiZonesStatus400 = {
 /**
  * @type object
  */
+export type PostApiZonesStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ImageAssetNotFound'
+		 * @type string
+		 */
+		code: "ImageAssetNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiZonesStatus422 = ValidationError;
 
 /**
@@ -16902,6 +17333,9 @@ export type PostApiZonesBody = {
 				  }
 			)[];
 		};
+		avatarAssetId?: (string | null) | null;
+		bannerAssetId?: (string | null) | null;
+		coverAssetId?: (string | null) | null;
 	};
 	/**
 	 * @type unknown
@@ -16935,6 +17369,7 @@ export type PostApiZonesOptions = {
 export type PostApiZonesResponses = {
 	"200": PostApiZonesStatus200;
 	"400": PostApiZonesStatus400;
+	"404": PostApiZonesStatus404;
 	"422": PostApiZonesStatus422;
 	"500": PostApiZonesStatus500;
 };
@@ -16943,7 +17378,11 @@ export type PostApiZonesResponses = {
  * @description Union of all possible responses
  */
 export type PostApiZonesResponse =
-	PostApiZonesStatus200 | PostApiZonesStatus400 | PostApiZonesStatus422 | PostApiZonesStatus500;
+	| PostApiZonesStatus200
+	| PostApiZonesStatus400
+	| PostApiZonesStatus404
+	| PostApiZonesStatus422
+	| PostApiZonesStatus500;
 
 /**
  * @type object
@@ -17826,8 +18265,34 @@ export type GetApiUsersMeStatus200 = {
 	visibility: string;
 	language: (string | null) | null;
 	name: (string | null) | null;
-	avatar: (string | null) | null;
-	avatarAssetId?: (string | null) | null;
+	avatar:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	banner:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
 	summary: (string | null) | null;
 	description:
 		| ({
@@ -18065,8 +18530,34 @@ export type PatchApiUsersMeStatus200 = {
 	visibility: string;
 	language: (string | null) | null;
 	name: (string | null) | null;
-	avatar: (string | null) | null;
-	avatarAssetId?: (string | null) | null;
+	avatar:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	banner:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
 	summary: (string | null) | null;
 	description:
 		| ({
@@ -18331,6 +18822,7 @@ export type PatchApiUsersMeBody = {
 	 */
 	name?: string;
 	avatarAssetId?: (string | null) | null;
+	bannerAssetId?: (string | null) | null;
 	/**
 	 * @maxLength 500
 	 * @type string | undefined
@@ -18796,8 +19288,34 @@ export type GetApiUsersByIdStatus200 = {
 	visibility: string;
 	language: (string | null) | null;
 	name: (string | null) | null;
-	avatar: (string | null) | null;
-	avatarAssetId?: (string | null) | null;
+	avatar:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	banner:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
 	summary: (string | null) | null;
 	description:
 		| ({
@@ -20409,6 +20927,34 @@ export type GetApiUnitsByTypeStatus200 = {
 		updatedAt: string;
 		title: (string | null) | null;
 		summary: (string | null) | null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		banner:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
 		cover:
 			| ({
 					/**
@@ -20561,6 +21107,34 @@ export type PostApiUnitsByTypeStatus200 = {
 	updatedAt: string;
 	primaryLanguage: (string | null) | null;
 	releasedOn: (string | null) | null;
+	avatar:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	banner:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
 	cover:
 		| ({
 				/**
@@ -20723,6 +21297,34 @@ export type PostApiUnitsByTypeStatus200 = {
 								[key: string]: unknown;
 						  }
 					)[];
+			  } | null)
+			| null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		banner:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
 			  } | null)
 			| null;
 		cover:
@@ -21210,6 +21812,8 @@ export type PostApiUnitsByTypeBody = {
 				  }
 			)[];
 		};
+		avatarAssetId?: (string | null) | null;
+		bannerAssetId?: (string | null) | null;
 		coverAssetId?: (string | null) | null;
 	};
 	/**
@@ -21340,6 +21944,34 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 	updatedAt: string;
 	primaryLanguage: (string | null) | null;
 	releasedOn: (string | null) | null;
+	avatar:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	banner:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
 	cover:
 		| ({
 				/**
@@ -21502,6 +22134,34 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 								[key: string]: unknown;
 						  }
 					)[];
+			  } | null)
+			| null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		banner:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
 			  } | null)
 			| null;
 		cover:
@@ -21834,6 +22494,34 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 	updatedAt: string;
 	primaryLanguage: (string | null) | null;
 	releasedOn: (string | null) | null;
+	avatar:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	banner:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
 	cover:
 		| ({
 				/**
@@ -21996,6 +22684,34 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 								[key: string]: unknown;
 						  }
 					)[];
+			  } | null)
+			| null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		banner:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
 			  } | null)
 			| null;
 		cover:
@@ -22747,6 +23463,34 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 	updatedAt: string;
 	primaryLanguage: (string | null) | null;
 	releasedOn: (string | null) | null;
+	avatar:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	banner:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
 	cover:
 		| ({
 				/**
@@ -22909,6 +23653,34 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 								[key: string]: unknown;
 						  }
 					)[];
+			  } | null)
+			| null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		banner:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
 			  } | null)
 			| null;
 		cover:
@@ -23356,6 +24128,8 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageBody = {
 			  }
 		)[];
 	};
+	avatarAssetId?: (string | null) | null;
+	bannerAssetId?: (string | null) | null;
 	coverAssetId?: (string | null) | null;
 };
 
@@ -24884,6 +25658,14 @@ export type GetApiEntitiesQuery = {
 	 */
 	kind?: string;
 	/**
+	 * @description
+	 * Format: `bcp-47`
+	 * @minLength 2
+	 * @maxLength 35
+	 * @type string | undefined
+	 */
+	language?: string;
+	/**
 	 * @default 20
 	 */
 	limit?: string | number;
@@ -24912,7 +25694,48 @@ export type GetApiEntitiesStatus200 = {
 		 * @type boolean
 		 */
 		verified: boolean;
-		avatar: (string | null) | null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		banner:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
 		title: (string | null) | null;
 		summary: (string | null) | null;
 	}[];
@@ -24963,6 +25786,34 @@ export type PostApiEntitiesStatus200 = {
 	 * @type string
 	 */
 	id: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiEntitiesStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ImageAssetNotFound'
+		 * @type string
+		 */
+		code: "ImageAssetNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
 };
 
 /**
@@ -25142,6 +25993,9 @@ export type PostApiEntitiesBody = {
 				  }
 			)[];
 		};
+		avatarAssetId?: (string | null) | null;
+		bannerAssetId?: (string | null) | null;
+		coverAssetId?: (string | null) | null;
 	};
 };
 
@@ -25160,6 +26014,7 @@ export type PostApiEntitiesOptions = {
  */
 export type PostApiEntitiesResponses = {
 	"200": PostApiEntitiesStatus200;
+	"404": PostApiEntitiesStatus404;
 	"422": PostApiEntitiesStatus422;
 	"500": PostApiEntitiesStatus500;
 };
@@ -25168,7 +26023,10 @@ export type PostApiEntitiesResponses = {
  * @description Union of all possible responses
  */
 export type PostApiEntitiesResponse =
-	PostApiEntitiesStatus200 | PostApiEntitiesStatus422 | PostApiEntitiesStatus500;
+	| PostApiEntitiesStatus200
+	| PostApiEntitiesStatus404
+	| PostApiEntitiesStatus422
+	| PostApiEntitiesStatus500;
 
 /**
  * @type object
@@ -25180,6 +26038,20 @@ export type GetApiEntitiesByUnitIdPath = {
 	 * @type string
 	 */
 	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiEntitiesByUnitIdQuery = {
+	/**
+	 * @description
+	 * Format: `bcp-47`
+	 * @minLength 2
+	 * @maxLength 35
+	 * @type string | undefined
+	 */
+	language?: string;
 };
 
 export const GetApiEntitiesByUnitIdStatus200AssociationPolicyCreditAttributionEnum = {
@@ -25219,7 +26091,48 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 	 * @type boolean
 	 */
 	verified: boolean;
-	avatar: (string | null) | null;
+	avatar:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	banner:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	cover:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -25382,6 +26295,34 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 					)[];
 			  } | null)
 			| null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		banner:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
 		cover:
 			| ({
 					/**
@@ -25425,6 +26366,15 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 		subjectAssociation: GetApiEntitiesByUnitIdStatus200AssociationPolicySubjectAssociationEnum;
 	};
 	ownerProfileId: (string | null) | null;
+	/**
+	 * @type object
+	 */
+	capabilities: {
+		/**
+		 * @type boolean
+		 */
+		canEdit: boolean;
+	};
 	/**
 	 * @type array
 	 */
@@ -25513,7 +26463,7 @@ export type GetApiEntitiesByUnitIdStatus500 = InternalError;
 export type GetApiEntitiesByUnitIdOptions = {
 	body?: never;
 	path: GetApiEntitiesByUnitIdPath;
-	query?: never;
+	query?: GetApiEntitiesByUnitIdQuery;
 	headers?: never;
 };
 
@@ -25535,6 +26485,298 @@ export type GetApiEntitiesByUnitIdResponse =
 	| GetApiEntitiesByUnitIdStatus404
 	| GetApiEntitiesByUnitIdStatus422
 	| GetApiEntitiesByUnitIdStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiEntitiesByUnitIdLocalizationsByLanguagePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `bcp-47`
+	 * @minLength 2
+	 * @maxLength 35
+	 * @type string
+	 */
+	language: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+};
+
+export const PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum =
+	(typeof PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum)[keyof typeof PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ImageAssetNotFound: "ImageAssetNotFound",
+} as const;
+
+export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404ErrorCodeEnum =
+	(typeof PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404ErrorCodeEnum)[keyof typeof PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiEntitiesByUnitIdLocalizationsByLanguageBody = {
+	/**
+	 * @minLength 1
+	 * @maxLength 500
+	 * @type string
+	 */
+	title: string;
+	/**
+	 * @maxLength 2000
+	 * @type string | undefined
+	 */
+	summary?: string;
+	/**
+	 * @type object | undefined
+	 */
+	description?: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type string
+					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!span$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type string
+					 */
+					_type: "image";
+					/**
+					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+					 * @type string
+					 */
+					assetId: string;
+					/**
+					 * @type string | undefined
+					 */
+					alt?: string;
+					/**
+					 * @type string | undefined
+					 */
+					caption?: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!(?:block|image)$).+
+					 * @type string
+					 */
+					_type: string;
+					[key: string]: unknown;
+			  }
+		)[];
+	};
+	avatarAssetId?: (string | null) | null;
+	bannerAssetId?: (string | null) | null;
+	coverAssetId?: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type PutApiEntitiesByUnitIdLocalizationsByLanguageOptions = {
+	body: PutApiEntitiesByUnitIdLocalizationsByLanguageBody;
+	path: PutApiEntitiesByUnitIdLocalizationsByLanguagePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiEntitiesByUnitIdLocalizationsByLanguageResponses = {
+	"200": PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200;
+	"403": PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403;
+	"404": PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404;
+	"422": PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422;
+	"500": PutApiEntitiesByUnitIdLocalizationsByLanguageStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiEntitiesByUnitIdLocalizationsByLanguageResponse =
+	| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200
+	| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403
+	| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404
+	| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422
+	| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus500;
 
 /**
  * @type object
@@ -26087,6 +27329,9 @@ export type PostApiTagsBody = {
 				  }
 			)[];
 		};
+		avatarAssetId?: (string | null) | null;
+		bannerAssetId?: (string | null) | null;
+		coverAssetId?: (string | null) | null;
 	};
 };
 
@@ -30969,6 +32214,48 @@ export type PostApiCollectionsStatus200 = {
 		language: string;
 		title: (string | null) | null;
 		summary: (string | null) | null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		banner:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
 	}[];
 	/**
 	 * @type array
@@ -31002,6 +32289,14 @@ export type PostApiCollectionsStatus200 = {
 	}[];
 };
 
+export const PostApiCollectionsStatus404ErrorCodeEnum = {
+	CollectionNotFound: "CollectionNotFound",
+	ImageAssetNotFound: "ImageAssetNotFound",
+} as const;
+
+export type PostApiCollectionsStatus404ErrorCodeEnum =
+	(typeof PostApiCollectionsStatus404ErrorCodeEnum)[keyof typeof PostApiCollectionsStatus404ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -31014,7 +32309,7 @@ export type PostApiCollectionsStatus404 = {
 		 * @default 'CollectionNotFound'
 		 * @type string
 		 */
-		code: "CollectionNotFound";
+		code: PostApiCollectionsStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -31228,6 +32523,9 @@ export type PostApiCollectionsBody = {
 				  }
 			)[];
 		};
+		avatarAssetId?: (string | null) | null;
+		bannerAssetId?: (string | null) | null;
+		coverAssetId?: (string | null) | null;
 	};
 	/**
 	 * @type string | undefined
@@ -31913,6 +33211,48 @@ export type GetApiCollectionsFavoritesStatus200 = {
 		language: string;
 		title: (string | null) | null;
 		summary: (string | null) | null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		banner:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
 	}[];
 	/**
 	 * @type array
@@ -32383,6 +33723,48 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 		language: string;
 		title: (string | null) | null;
 		summary: (string | null) | null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		banner:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
 	}[];
 	/**
 	 * @type array
@@ -32860,6 +34242,48 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 		language: string;
 		title: (string | null) | null;
 		summary: (string | null) | null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		banner:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
 	}[];
 	/**
 	 * @type array
@@ -32921,6 +34345,14 @@ export type PatchApiCollectionsByCollectionIdStatus403 = {
 	requestId: string;
 };
 
+export const PatchApiCollectionsByCollectionIdStatus404ErrorCodeEnum = {
+	CollectionNotFound: "CollectionNotFound",
+	ImageAssetNotFound: "ImageAssetNotFound",
+} as const;
+
+export type PatchApiCollectionsByCollectionIdStatus404ErrorCodeEnum =
+	(typeof PatchApiCollectionsByCollectionIdStatus404ErrorCodeEnum)[keyof typeof PatchApiCollectionsByCollectionIdStatus404ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -32933,7 +34365,7 @@ export type PatchApiCollectionsByCollectionIdStatus404 = {
 		 * @default 'CollectionNotFound'
 		 * @type string
 		 */
-		code: "CollectionNotFound";
+		code: PatchApiCollectionsByCollectionIdStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -33185,6 +34617,9 @@ export type PatchApiCollectionsByCollectionIdBody = {
 				  }
 			)[];
 		};
+		avatarAssetId?: (string | null) | null;
+		bannerAssetId?: (string | null) | null;
+		coverAssetId?: (string | null) | null;
 	};
 	definitionDocument?:
 		| {
@@ -39014,6 +40449,14 @@ export type DeleteApiPostsByPostIdRepliesByReplyPostIdResponse =
  */
 export type GetApiRealmsQuery = {
 	/**
+	 * @description
+	 * Format: `bcp-47`
+	 * @minLength 2
+	 * @maxLength 35
+	 * @type string | undefined
+	 */
+	language?: string;
+	/**
 	 * @default 20
 	 */
 	limit?: string | number;
@@ -39040,6 +40483,48 @@ export type GetApiRealmsStatus200 = {
 		joinPolicy: string;
 		title: (string | null) | null;
 		summary: (string | null) | null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		banner:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -39100,6 +40585,34 @@ export type PostApiRealmsStatus200 = {
 	 * @type string
 	 */
 	id: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiRealmsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ImageAssetNotFound'
+		 * @type string
+		 */
+		code: "ImageAssetNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
 };
 
 /**
@@ -39290,6 +40803,9 @@ export type PostApiRealmsBody = {
 				  }
 			)[];
 		};
+		avatarAssetId?: (string | null) | null;
+		bannerAssetId?: (string | null) | null;
+		coverAssetId?: (string | null) | null;
 	};
 	/**
 	 * @type string
@@ -39316,6 +40832,7 @@ export type PostApiRealmsOptions = {
  */
 export type PostApiRealmsResponses = {
 	"200": PostApiRealmsStatus200;
+	"404": PostApiRealmsStatus404;
 	"422": PostApiRealmsStatus422;
 	"500": PostApiRealmsStatus500;
 };
@@ -39324,7 +40841,10 @@ export type PostApiRealmsResponses = {
  * @description Union of all possible responses
  */
 export type PostApiRealmsResponse =
-	PostApiRealmsStatus200 | PostApiRealmsStatus422 | PostApiRealmsStatus500;
+	| PostApiRealmsStatus200
+	| PostApiRealmsStatus404
+	| PostApiRealmsStatus422
+	| PostApiRealmsStatus500;
 
 /**
  * @type object
@@ -39336,6 +40856,20 @@ export type GetApiRealmsByRealmIdPath = {
 	 * @type string
 	 */
 	realmId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdQuery = {
+	/**
+	 * @description
+	 * Format: `bcp-47`
+	 * @minLength 2
+	 * @maxLength 35
+	 * @type string | undefined
+	 */
+	language?: string;
 };
 
 /**
@@ -39374,6 +40908,48 @@ export type GetApiRealmsByRealmIdStatus200 = {
 	 * @type string
 	 */
 	updatedAt: string;
+	avatar:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	banner:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	cover:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
 	/**
 	 * @type array
 	 */
@@ -39384,6 +40960,48 @@ export type GetApiRealmsByRealmIdStatus200 = {
 		language: string;
 		title: (string | null) | null;
 		summary: (string | null) | null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		banner:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
 	}[];
 	/**
 	 * @type boolean
@@ -39448,7 +41066,7 @@ export type GetApiRealmsByRealmIdStatus500 = InternalError;
 export type GetApiRealmsByRealmIdOptions = {
 	body?: never;
 	path: GetApiRealmsByRealmIdPath;
-	query?: never;
+	query?: GetApiRealmsByRealmIdQuery;
 	headers?: never;
 };
 
@@ -39531,6 +41149,14 @@ export type PatchApiRealmsByRealmIdStatus403 = {
 	requestId: string;
 };
 
+export const PatchApiRealmsByRealmIdStatus404ErrorCodeEnum = {
+	RealmNotFound: "RealmNotFound",
+	ImageAssetNotFound: "ImageAssetNotFound",
+} as const;
+
+export type PatchApiRealmsByRealmIdStatus404ErrorCodeEnum =
+	(typeof PatchApiRealmsByRealmIdStatus404ErrorCodeEnum)[keyof typeof PatchApiRealmsByRealmIdStatus404ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -39543,7 +41169,7 @@ export type PatchApiRealmsByRealmIdStatus404 = {
 		 * @default 'RealmNotFound'
 		 * @type string
 		 */
-		code: "RealmNotFound";
+		code: PatchApiRealmsByRealmIdStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -39761,6 +41387,9 @@ export type PatchApiRealmsByRealmIdBody = {
 				  }
 			)[];
 		};
+		avatarAssetId?: (string | null) | null;
+		bannerAssetId?: (string | null) | null;
+		coverAssetId?: (string | null) | null;
 	};
 };
 

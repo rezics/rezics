@@ -33,6 +33,11 @@ import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Skeleton } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
+import {
+	LocalizationImageUploadField,
+	type LocalizationImageAssetOption,
+	type LocalizationImageAssetValue,
+} from "@/features/units/localization-image-upload-field";
 import { RequireSession } from "@/features/auth/require-session";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
@@ -65,8 +70,11 @@ export function RealmSettingsPage({ id }: { id: string }) {
 }
 
 function RealmSettingsContent({ id }: { id: string }) {
-	const { t } = useTranslation({ suspense: true });
-	const realm = useGetApiRealmsByRealmId({ path: { realmId: id } });
+	const { t, locale } = useTranslation({ suspense: true });
+	const realm = useGetApiRealmsByRealmId({
+		path: { realmId: id },
+		query: { language: locale.target },
+	});
 	const mayManage = canManageRealm(realm.data?.viewerMembership);
 	const members = useGetApiRealmsByRealmIdMembers(
 		{ path: { realmId: id }, query: { limit: 100 } },
@@ -103,7 +111,10 @@ function RealmSettingsContent({ id }: { id: string }) {
 					</Button>
 				}
 			/>
-			<RealmProfileSettings realm={realm.data} />
+			<RealmProfileSettings
+				key={`${realm.data.id}:${locale.target}:${realm.data.updatedAt}`}
+				realm={realm.data}
+			/>
 			<RealmMembers
 				realmId={realm.data.id}
 				members={members.data?.items}
@@ -131,7 +142,26 @@ function RealmProfileSettings({ realm }: { realm: GetApiRealmsByRealmIdStatus200
 	const { t, locale } = useTranslation({ suspense: true });
 	const queryClient = useQueryClient();
 	const update = usePatchApiRealmsByRealmId();
-	const localization = selectLocalization(realm.localizations, locale.target, realm.language);
+	const localization = realm.localizations.find((entry) => entry.language === locale.target);
+	const fallbackLocalization = selectLocalization(
+		realm.localizations,
+		locale.target,
+		realm.language,
+	);
+	const mediaOptions = (role: "avatar" | "banner"): LocalizationImageAssetOption[] =>
+		realm.localizations.flatMap((entry) =>
+			entry.language !== locale.target && entry[role]
+				? [{ ...entry[role], label: entry.language }]
+				: [],
+		);
+	const avatarOptions = mediaOptions("avatar");
+	const bannerOptions = mediaOptions("banner");
+	const [avatar, setAvatar] = useState<LocalizationImageAssetValue | null>(
+		localization?.avatar ?? null,
+	);
+	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(
+		localization?.banner ?? null,
+	);
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -157,9 +187,11 @@ function RealmProfileSettings({ realm }: { realm: GetApiRealmsByRealmIdStatus200
 					visibility,
 					joinPolicy: data.get("joinPolicy") === "approval" ? "approval" : "open",
 					localization: {
-						language: localization?.language ?? locale.target,
+						language: locale.target,
 						title,
 						...(summary ? { summary } : {}),
+						avatarAssetId: avatar?.id ?? null,
+						bannerAssetId: banner?.id ?? null,
 					},
 				},
 			},
@@ -182,7 +214,9 @@ function RealmProfileSettings({ realm }: { realm: GetApiRealmsByRealmIdStatus200
 									name="title"
 									required
 									maxLength={500}
-									defaultValue={localization?.title ?? ""}
+									defaultValue={
+										localization?.title ?? fallbackLocalization?.title ?? ""
+									}
 								/>
 							</Field>
 							<Field>
@@ -190,7 +224,31 @@ function RealmProfileSettings({ realm }: { realm: GetApiRealmsByRealmIdStatus200
 								<Textarea
 									name="summary"
 									maxLength={2000}
-									defaultValue={localization?.summary ?? ""}
+									defaultValue={
+										localization?.summary ?? fallbackLocalization?.summary ?? ""
+									}
+								/>
+							</Field>
+							<Field>
+								<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
+								<LocalizationImageUploadField
+									fallback={avatarOptions[0] ?? null}
+									onChange={setAvatar}
+									options={avatarOptions}
+									role="avatar"
+									shape="avatar"
+									value={avatar}
+								/>
+							</Field>
+							<Field>
+								<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
+								<LocalizationImageUploadField
+									fallback={bannerOptions[0] ?? null}
+									onChange={setBanner}
+									options={bannerOptions}
+									role="banner"
+									shape="banner"
+									value={banner}
 								/>
 							</Field>
 							<div className="grid gap-4 sm:grid-cols-3">

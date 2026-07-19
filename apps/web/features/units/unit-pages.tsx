@@ -21,7 +21,10 @@ import { RequireSession } from "@/features/auth/require-session";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import type { UnitType } from "./unit-types";
-import { CoverUploadField, type CoverAssetValue } from "./cover-upload-field";
+import {
+	LocalizationImageUploadField,
+	type LocalizationImageAssetValue,
+} from "./localization-image-upload-field";
 
 export function UnitBrowsePage({ type }: { type: UnitType }) {
 	const { t } = useTranslation({ suspense: true });
@@ -78,7 +81,7 @@ export function UnitCreatePage({ type }: { type: UnitType }) {
 	const { t, locale } = useTranslation({ suspense: true });
 	const router = useRouter();
 	const queryClient = useQueryClient();
-	const [cover, setCover] = useState<CoverAssetValue | null>(null);
+	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
 	const create = usePostApiUnitsByType({
 		mutation: {
 			onSuccess: async (unit) => {
@@ -155,11 +158,12 @@ export function UnitCreatePage({ type }: { type: UnitType }) {
 							<Textarea maxLength={2000} name="summary" />
 						</Field>
 						<Field>
-							<FieldLabel>{t.cover.title}</FieldLabel>
-							<CoverUploadField
+							<FieldLabel>{t.media.roles.cover.title}</FieldLabel>
+							<LocalizationImageUploadField
 								value={cover}
 								onChange={setCover}
-								landscape={type !== "book"}
+								role="cover"
+								shape={type === "book" ? "portrait" : "landscape"}
 							/>
 						</Field>
 						<Field>

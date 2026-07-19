@@ -44,6 +44,13 @@ import { recordUnitRevision } from "../../units/history";
 import { insertAddressedUnit } from "../../units/slug-address";
 import { TopLevelSlugNamespaceUnitIds } from "../../units/slug-system";
 import { generateSlugLabel } from "../../units/slug";
+import {
+	makePrimaryUnitLocalization,
+	resolveUnitLocalizationImageAssetIdFromOrdered,
+	unitLocalizationImageAssetIds,
+} from "../../units/localization";
+import { ensureImageAssetsAttachable } from "../image-assets/service";
+import { presentImageAsset } from "../../units/service";
 import { FollowResponse, IdResponse, NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
 import {
@@ -64,6 +71,7 @@ import {
 	ZoneNavigationListResponse,
 	ZoneNavigationParams,
 	ZoneNavigationResponse,
+	ZoneDetailQuery,
 	ZonePageBody,
 	ZonePageListResponse,
 	ZonePageParams,
@@ -89,6 +97,8 @@ const UnitMutationForbiddenResponse = toApiErrorResponse([
 	"UnitProtected",
 ]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
+const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
+const UnitMutationNotFoundResponse = toApiErrorResponse(["UnitNotFound", "ImageAssetNotFound"]);
 
 async function ensureUnitMutationAuthorized(
 	authorization: UnitAuthorization<string>,
@@ -108,10 +118,18 @@ async function createBaseUnit(
 			title: string;
 			summary?: string;
 			description?: PortableTextDocument;
+			avatarAssetId?: string | null;
+			bannerAssetId?: string | null;
+			coverAssetId?: string | null;
 		};
 		ownerId: string;
 	},
 ) {
+	await ensureImageAssetsAttachable(
+		tx,
+		input.ownerId,
+		unitLocalizationImageAssetIds(input.localization),
+	);
 	const created = await insertAddressedUnit(tx, {
 		kind: input.kind,
 		slugScopeId: input.kind === "zone" ? TopLevelSlugNamespaceUnitIds.zones : input.ownerId,
@@ -148,9 +166,51 @@ async function getZone(zoneId: string) {
 	return record;
 }
 
-function toZoneResponse(record: Awaited<ReturnType<typeof getZone>>) {
+async function toZoneResponse(
+	record: Awaited<ReturnType<typeof getZone>>,
+	preferredLanguage?: string | null,
+) {
+	const localizations = await database
+		.select({
+			language: unitLocalization.language,
+			title: unitLocalization.title,
+			summary: unitLocalization.summary,
+			avatarAssetId: unitLocalization.avatarAssetId,
+			bannerAssetId: unitLocalization.bannerAssetId,
+			coverAssetId: unitLocalization.coverAssetId,
+		})
+		.from(unitLocalization)
+		.where(eq(unitLocalization.unitId, record.id))
+		.orderBy(unitLocalization.position, unitLocalization.language);
+	const avatarAssetId = resolveUnitLocalizationImageAssetIdFromOrdered(
+		localizations,
+		"avatar",
+		preferredLanguage,
+	);
+	const bannerAssetId = resolveUnitLocalizationImageAssetIdFromOrdered(
+		localizations,
+		"banner",
+		preferredLanguage,
+	);
+	const coverAssetId = resolveUnitLocalizationImageAssetIdFromOrdered(
+		localizations,
+		"cover",
+		preferredLanguage,
+	);
 	return {
 		...record,
+		language: localizations[0]?.language ?? null,
+		avatar: presentImageAsset(avatarAssetId),
+		banner: presentImageAsset(bannerAssetId),
+		cover: presentImageAsset(coverAssetId),
+		localizations: localizations.map(
+			({ avatarAssetId, bannerAssetId, coverAssetId, ...localization }) => ({
+				...localization,
+				avatar: presentImageAsset(avatarAssetId),
+				banner: presentImageAsset(bannerAssetId),
+				cover: presentImageAsset(coverAssetId),
+			}),
+		),
 		boundaryDocument: parseDocument(ZoneBoundaryDocument, record.boundaryDocument),
 		themeDocument: parseDocument(ZoneThemeDocument, record.themeDocument),
 		dockDocument: parseDocument(UnitReferencedBlockDocument, record.dockDocument),
@@ -319,7 +379,10 @@ export default new Elysia()
 				{
 					access: "contribute:unit:create",
 					body: CreateSeriesBody,
-					response: { [StatusCodes.OK]: IdResponse },
+					response: {
+						[StatusCodes.OK]: IdResponse,
+						[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
+					},
 					detail: { summary: "Create Series", tags: ["Series"] },
 				},
 			)
@@ -354,17 +417,18 @@ export default new Elysia()
 		app
 			.get(
 				"/:zoneId",
-				async ({ params, request }) => {
+				async ({ params, query, request }) => {
 					const authorization = (await resolveIdentity(request.headers, "unit:read"))
 						.authorization;
 					await authorization.unit.ensureCanRead(
 						params.zoneId,
 						() => new UnitNotFound("Zone"),
 					);
-					return toZoneResponse(await getZone(params.zoneId));
+					return toZoneResponse(await getZone(params.zoneId), query.language);
 				},
 				{
 					params: ZoneParams,
+					query: ZoneDetailQuery,
 					response: {
 						[StatusCodes.OK]: ZoneResponse,
 						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
@@ -376,6 +440,8 @@ export default new Elysia()
 				"/:zoneId",
 				async ({ params, profile, authorization, body }) => {
 					const scopes: string[][] = [];
+					if (body.localization)
+						scopes.push(["localizations", body.localization.language]);
 					if (body.boundaryDocument) scopes.push(["zone", "boundary"]);
 					if (body.themeDocument) scopes.push(["zone", "theme"]);
 					if (body.dockDocument) scopes.push(["zone", "dock"]);
@@ -402,7 +468,7 @@ export default new Elysia()
 								? null
 								: new Date(body.endsAt);
 					if (startsAt && endsAt && endsAt <= startsAt) throw new ZoneTimeRangeInvalid();
-					return database.transaction(async (tx) => {
+					await database.transaction(async (tx) => {
 						await tx.execute(
 							sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${params.zoneId}`}::text, 0))`,
 						);
@@ -411,29 +477,58 @@ export default new Elysia()
 								zoneId: params.zoneId,
 								profileId: profile.unitId,
 							});
-						const [updated] = await tx
-							.update(zone)
-							.set({
-								...(body.boundaryDocument
-									? { boundaryDocument: body.boundaryDocument }
-									: {}),
-								...(body.themeDocument
-									? { themeDocument: body.themeDocument }
-									: {}),
-								...(body.dockDocument ? { dockDocument: body.dockDocument } : {}),
-								...(body.startsAt !== undefined ? { startsAt } : {}),
-								...(body.endsAt !== undefined ? { endsAt } : {}),
-							})
-							.where(eq(zone.id, params.zoneId))
-							.returning();
-						if (!updated) throw new UnitNotFound("Zone");
+						if (body.localization) {
+							await ensureImageAssetsAttachable(
+								tx,
+								profile.unitId,
+								unitLocalizationImageAssetIds(body.localization),
+							);
+							await tx
+								.insert(unitLocalization)
+								.values({ unitId: params.zoneId, ...body.localization })
+								.onConflictDoUpdate({
+									target: [unitLocalization.unitId, unitLocalization.language],
+									set: { ...body.localization },
+								});
+							await makePrimaryUnitLocalization(
+								tx,
+								params.zoneId,
+								body.localization.language,
+							);
+						}
+						if (
+							body.boundaryDocument ||
+							body.themeDocument ||
+							body.dockDocument ||
+							body.startsAt !== undefined ||
+							body.endsAt !== undefined
+						)
+							await tx
+								.update(zone)
+								.set({
+									...(body.boundaryDocument
+										? { boundaryDocument: body.boundaryDocument }
+										: {}),
+									...(body.themeDocument
+										? { themeDocument: body.themeDocument }
+										: {}),
+									...(body.dockDocument
+										? { dockDocument: body.dockDocument }
+										: {}),
+									...(body.startsAt !== undefined ? { startsAt } : {}),
+									...(body.endsAt !== undefined ? { endsAt } : {}),
+								})
+								.where(eq(zone.id, params.zoneId));
 						await recordUnitRevision(tx, {
 							unitId: params.zoneId,
 							actorProfileId: profile.unitId,
 							event: "update",
 						});
-						return toZoneResponse(updated);
 					});
+					return toZoneResponse(
+						await getZone(params.zoneId),
+						body.localization?.language,
+					);
 				},
 				{
 					access: "contribute:unit:update",
@@ -446,7 +541,7 @@ export default new Elysia()
 							"ZoneDocumentInvalid",
 						]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 					},
 					detail: { summary: "Update Zone configuration", tags: ["Zones"] },
 				},
@@ -974,6 +1069,7 @@ export default new Elysia()
 							"ZoneTimeRangeInvalid",
 							"ZoneDocumentInvalid",
 						]),
+						[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
 					},
 					detail: { summary: "Create Zone", tags: ["Zones"] },
 				},

@@ -15,6 +15,8 @@ import {
 	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
 	firstUnitLocalizationCoverAssetId,
+	resolvedUnitLocalizationImageAssetId,
+	unitLocalizationImageAssetIds,
 } from "./localization";
 import {
 	book,
@@ -30,7 +32,7 @@ import {
 	unitTagVoteStat,
 	unitVariant,
 } from "../database/schema";
-import { ensureImageAssetAttachable, imageAssetContentUrl } from "../api/image-assets/service";
+import { ensureImageAssetsAttachable, imageAssetContentUrl } from "../api/image-assets/service";
 import { UnitDetailResponse } from "../api/schema/response";
 import { UnitChanged, UnitNotFound, UnitPrimaryLanguageMissing } from "./errors";
 import { recordUnitRevision } from "./history";
@@ -46,6 +48,8 @@ export interface CreateUnitInput {
 		title: string;
 		summary?: string;
 		description?: PortableTextDocumentValue;
+		avatarAssetId?: string | null;
+		bannerAssetId?: string | null;
 		coverAssetId?: string | null;
 	};
 	slug?: string;
@@ -91,7 +95,11 @@ export async function createUnit(
 ): Promise<UnitDetail> {
 	const ownerId = authorization.profileId;
 	const unitId = await database.transaction(async (tx) => {
-		await ensureImageAssetAttachable(tx, ownerId, input.localization.coverAssetId);
+		await ensureImageAssetsAttachable(
+			tx,
+			ownerId,
+			unitLocalizationImageAssetIds(input.localization),
+		);
 		const created = await insertAddressedUnit(tx, {
 			kind,
 			slugScopeId: ownerId,
@@ -262,13 +270,29 @@ export async function getUnit(
 		updatedAt: base.updatedAt,
 		primaryLanguage,
 		releasedOn: await getReleaseDate(kind, base.id),
+		avatar: presentImageAsset(
+			localizations.find(({ avatarAssetId }) => avatarAssetId)?.avatarAssetId ?? null,
+		),
+		banner: presentImageAsset(
+			localizations.find(({ bannerAssetId }) => bannerAssetId)?.bannerAssetId ?? null,
+		),
 		cover: presentImageAsset(
 			localizations.find(({ coverAssetId }) => coverAssetId)?.coverAssetId ?? null,
 		),
 		localizations: localizations.map(
-			({ content: _content, contentStatus: _status, description, coverAssetId, ...row }) => ({
+			({
+				content: _content,
+				contentStatus: _status,
+				description,
+				avatarAssetId,
+				bannerAssetId,
+				coverAssetId,
+				...row
+			}) => ({
 				...row,
 				description: parseNullableDocument(PortableTextDocument, description),
+				avatar: presentImageAsset(avatarAssetId),
+				banner: presentImageAsset(bannerAssetId),
 				cover: presentImageAsset(coverAssetId),
 			}),
 		),
@@ -312,6 +336,8 @@ export async function listUnits(kind: UnitKind, cursor?: [string, string], limit
 			updatedAt: unit.updatedAt,
 			title: unitLocalization.title,
 			summary: unitLocalization.summary,
+			avatarAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "avatar"),
+			bannerAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "banner"),
 			coverAssetId: firstUnitLocalizationCoverAssetId(unit.id),
 		})
 		.from(unit)
@@ -336,8 +362,10 @@ export async function listUnits(kind: UnitKind, cursor?: [string, string], limit
 		.orderBy(desc(unit.createdAt), desc(unit.id))
 		.limit(limit + 1);
 	return Promise.all(
-		rows.map(async ({ coverAssetId, ...row }) => ({
+		rows.map(async ({ avatarAssetId, bannerAssetId, coverAssetId, ...row }) => ({
 			...row,
+			avatar: presentImageAsset(avatarAssetId),
+			banner: presentImageAsset(bannerAssetId),
 			cover: presentImageAsset(coverAssetId),
 		})),
 	);
@@ -474,12 +502,18 @@ export async function upsertLocalization(
 		title: string;
 		summary?: string;
 		description?: PortableTextDocumentValue;
+		avatarAssetId?: string | null;
+		bannerAssetId?: string | null;
 		coverAssetId?: string | null;
 	},
 ): Promise<void> {
 	await authorization.unit.ensureCanUpdate(unitId, [["localizations", input.language]]);
 	await database.transaction(async (tx) => {
-		await ensureImageAssetAttachable(tx, authorization.profileId, input.coverAssetId);
+		await ensureImageAssetsAttachable(
+			tx,
+			authorization.profileId,
+			unitLocalizationImageAssetIds(input),
+		);
 		await tx
 			.insert(unitLocalization)
 			.values({ unitId, ...input })
@@ -489,6 +523,12 @@ export async function upsertLocalization(
 					title: input.title,
 					summary: input.summary,
 					description: input.description,
+					...(Object.hasOwn(input, "avatarAssetId")
+						? { avatarAssetId: input.avatarAssetId }
+						: {}),
+					...(Object.hasOwn(input, "bannerAssetId")
+						? { bannerAssetId: input.bannerAssetId }
+						: {}),
 					...(Object.hasOwn(input, "coverAssetId")
 						? { coverAssetId: input.coverAssetId }
 						: {}),

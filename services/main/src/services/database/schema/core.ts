@@ -131,7 +131,15 @@ export const unitLocalization = pgTable(
 		position: fractionalIndexPosition()
 			.default(sql`('a0' || replace(uuidv7()::text, '-', '') || 'V')`)
 			.notNull(),
-		/** Cover is fixed product terminology across every Unit kind. */
+		/** Compact identity artwork; fixed product terminology across every Unit kind. */
+		avatarAssetId: uuid().references((): AnyPgColumn => imageAsset.id, {
+			onDelete: "set null",
+		}),
+		/** Wide header artwork; fixed product terminology across every Unit kind. */
+		bannerAssetId: uuid().references((): AnyPgColumn => imageAsset.id, {
+			onDelete: "set null",
+		}),
+		/** Primary editorial artwork; fixed product terminology across every Unit kind. */
 		coverAssetId: uuid().references((): AnyPgColumn => imageAsset.id, {
 			onDelete: "set null",
 		}),
@@ -169,7 +177,7 @@ export const unitLocalization = pgTable(
 		),
 		check(
 			"unit_localization_value_check",
-			sql`${table.title} is not null or ${table.summary} is not null or ${table.description} is not null or ${table.content} is not null`,
+			sql`${table.avatarAssetId} is not null or ${table.bannerAssetId} is not null or ${table.coverAssetId} is not null or ${table.title} is not null or ${table.summary} is not null or ${table.description} is not null or ${table.content} is not null`,
 		),
 		check(
 			"unit_localization_content_state_check",
@@ -187,9 +195,6 @@ export const profile = pgTable(
 		authUserId: uuid()
 			.notNull()
 			.references(() => users.id, { onDelete: "restrict" }),
-		avatarAssetId: uuid().references((): AnyPgColumn => imageAsset.id, {
-			onDelete: "set null",
-		}),
 		joinedAt: createTimestampMsColumn().defaultNow().notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),

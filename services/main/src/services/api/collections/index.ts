@@ -9,7 +9,11 @@ import Elysia, { t } from "elysia";
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
 import { fractionalPositionBetween } from "../../ordering/position";
-import { isPrimaryUnitLocalization, makePrimaryUnitLocalization } from "../../units/localization";
+import {
+	isPrimaryUnitLocalization,
+	makePrimaryUnitLocalization,
+	unitLocalizationImageAssetIds,
+} from "../../units/localization";
 import {
 	collection,
 	collectionItem,
@@ -36,8 +40,13 @@ import {
 	CollectionListResponse,
 } from "../schema/response";
 import { FavoritesDeleteForbidden, FavoritesEditForbidden } from "./errors";
+import { ensureImageAssetsAttachable } from "../image-assets/service";
 
 const CollectionNotFoundResponse = toApiErrorResponse(["CollectionNotFound"]);
+const CollectionMutationNotFoundResponse = toApiErrorResponse([
+	"CollectionNotFound",
+	"ImageAssetNotFound",
+]);
 const CollectionOwnershipResponse = toApiErrorResponse(["CollectionOwnershipRequired"]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 const FavoritesEditResponse = toApiErrorResponse(["FavoritesEditForbidden"]);
@@ -88,6 +97,11 @@ export default new Elysia({ prefix: "/collections" })
 		"",
 		async ({ profile, body }) => {
 			const id = await database.transaction(async (tx) => {
+				await ensureImageAssetsAttachable(
+					tx,
+					profile.unitId,
+					unitLocalizationImageAssetIds(body.localization),
+				);
 				const definitionDocument =
 					body.definitionDocument ?? createManualCollectionDefinitionDocument();
 				const created = await insertAddressedUnit(tx, {
@@ -129,7 +143,7 @@ export default new Elysia({ prefix: "/collections" })
 			body: CreateCollectionBody,
 			response: {
 				[StatusCodes.OK]: CollectionDetailResponse,
-				[StatusCodes.NOT_FOUND]: CollectionNotFoundResponse,
+				[StatusCodes.NOT_FOUND]: CollectionMutationNotFoundResponse,
 			},
 			detail: { summary: "Create collection", tags: ["Collections"] },
 		},
@@ -176,6 +190,12 @@ export default new Elysia({ prefix: "/collections" })
 				.limit(1);
 			if (current?.systemKey === "favorites") throw new FavoritesEditForbidden();
 			await database.transaction(async (tx) => {
+				if (body.localization)
+					await ensureImageAssetsAttachable(
+						tx,
+						profile.unitId,
+						unitLocalizationImageAssetIds(body.localization),
+					);
 				await tx
 					.update(unit)
 					.set({
@@ -226,7 +246,7 @@ export default new Elysia({ prefix: "/collections" })
 			response: {
 				[StatusCodes.OK]: CollectionDetailResponse,
 				[StatusCodes.FORBIDDEN]: CollectionOwnershipResponse,
-				[StatusCodes.NOT_FOUND]: CollectionNotFoundResponse,
+				[StatusCodes.NOT_FOUND]: CollectionMutationNotFoundResponse,
 				[StatusCodes.CONFLICT]: FavoritesEditResponse,
 			},
 			detail: { summary: "Update collection", tags: ["Collections"] },

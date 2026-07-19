@@ -604,7 +604,6 @@ async function seedCatalog(
 			id: value.id,
 			kind: index < 45 ? "person" : index < 65 ? "organization" : "platform",
 			verified: false,
-			avatar: data.fakerByLanguage[itemAt(data.languages(index), 0)].image.avatar(),
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),

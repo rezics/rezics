@@ -1,4 +1,4 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import { fileTypeFromBuffer } from "file-type";
 
 import type { DatabaseTransaction } from "../../database";
@@ -216,25 +216,28 @@ export async function getOwnedImageAsset(profileId: string, assetId: string) {
 	return presentImageAsset(asset);
 }
 
-export async function ensureImageAssetAttachable(
+/** Validate a set of localization image overrides with one ownership query. */
+export async function ensureImageAssetsAttachable(
 	tx: DatabaseTransaction,
 	profileId: string,
-	assetId: string | null | undefined,
+	assetIds: readonly (string | null | undefined)[],
 ): Promise<void> {
-	if (!assetId) return;
-	const [asset] = await tx
+	const requestedIds = [
+		...new Set(assetIds.filter((assetId): assetId is string => Boolean(assetId))),
+	];
+	if (!requestedIds.length) return;
+	const assets = await tx
 		.select({ id: imageAsset.id })
 		.from(imageAsset)
 		.where(
 			and(
-				eq(imageAsset.id, assetId),
+				inArray(imageAsset.id, requestedIds),
 				eq(imageAsset.ownerProfileId, profileId),
 				eq(imageAsset.status, "ready"),
 				isNull(imageAsset.deletedAt),
 			),
-		)
-		.limit(1);
-	if (!asset) throw new ImageAssetNotFound();
+		);
+	if (assets.length !== requestedIds.length) throw new ImageAssetNotFound();
 }
 
 export async function deletePendingImageAsset(profileId: string, assetId: string) {

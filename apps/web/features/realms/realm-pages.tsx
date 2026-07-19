@@ -16,7 +16,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { PinIcon, ShieldCheckIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 
 import { PageHeading } from "@rezics/ui";
 import { PortableTextContent } from "@rezics/ui";
@@ -24,6 +24,7 @@ import { QueryFailure, QueryPending } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Badge } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
@@ -31,6 +32,10 @@ import { Skeleton } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
+import {
+	LocalizationImageUploadField,
+	type LocalizationImageAssetValue,
+} from "@/features/units/localization-image-upload-field";
 import { PostList } from "@/features/posts/post-list";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { selectLocalization } from "@/lib/localization";
@@ -41,8 +46,8 @@ import { canManageRealm, isRealmOwner } from "./realm-permissions";
 import { invalidateRealmDetails } from "./query";
 
 export function RealmsPage() {
-	const { t } = useTranslation({ suspense: true });
-	const query = useGetApiRealms({ query: { limit: 20 } });
+	const { t, locale } = useTranslation({ suspense: true });
+	const query = useGetApiRealms({ query: { language: locale.target, limit: 20 } });
 	return (
 		<main className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6">
 			<PageHeading
@@ -71,21 +76,33 @@ export function RealmsPage() {
 					{query.data.items.map((realm) => (
 						<Link key={realm.id} href={`/realms/${realm.id}`}>
 							<Card className="transition-colors hover:bg-surface-hover">
-								<CardContent className="grid gap-2 p-5">
-									<h2 className="font-semibold">
-										{realm.title ?? realm.slug ?? t.realms.untitled}
-									</h2>
-									{realm.summary && (
-										<p className="text-muted-foreground line-clamp-2 text-sm">
-											{realm.summary}
+								<CardContent className="grid grid-cols-[auto_minmax(0,1fr)] gap-4 p-5">
+									<Avatar className="size-12">
+										{realm.avatar ? (
+											<AvatarImage alt="" src={realm.avatar.url} />
+										) : null}
+										<AvatarFallback>
+											{(realm.title ?? realm.slug ?? t.realms.untitled)
+												.slice(0, 1)
+												.toUpperCase()}
+										</AvatarFallback>
+									</Avatar>
+									<div className="grid min-w-0 gap-2">
+										<h2 className="font-semibold">
+											{realm.title ?? realm.slug ?? t.realms.untitled}
+										</h2>
+										{realm.summary && (
+											<p className="text-muted-foreground line-clamp-2 text-sm">
+												{realm.summary}
+											</p>
+										)}
+										<p className="text-muted-foreground text-sm">
+											{t.realms.joinPolicy}:{" "}
+											{realm.joinPolicy === "approval"
+												? t.realms.approval
+												: t.realms.open}
 										</p>
-									)}
-									<p className="text-muted-foreground text-sm">
-										{t.realms.joinPolicy}:{" "}
-										{realm.joinPolicy === "approval"
-											? t.realms.approval
-											: t.realms.open}
-									</p>
+									</div>
 								</CardContent>
 							</Card>
 						</Link>
@@ -102,6 +119,8 @@ export function RealmCreatePage() {
 	const { t, locale } = useTranslation({ suspense: true });
 	const router = useRouter();
 	const queryClient = useQueryClient();
+	const [avatar, setAvatar] = useState<LocalizationImageAssetValue | null>(null);
+	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(null);
 	const create = usePostApiRealms();
 
 	function submit(event: FormEvent<HTMLFormElement>) {
@@ -118,6 +137,8 @@ export function RealmCreatePage() {
 					localization: {
 						language: locale.target,
 						title,
+						avatarAssetId: avatar?.id ?? null,
+						bannerAssetId: banner?.id ?? null,
 						...(summary ? { summary } : {}),
 					},
 					visibility: "public",
@@ -158,6 +179,24 @@ export function RealmCreatePage() {
 							<Textarea name="summary" maxLength={2000} />
 						</Field>
 						<Field>
+							<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
+							<LocalizationImageUploadField
+								onChange={setAvatar}
+								role="avatar"
+								shape="avatar"
+								value={avatar}
+							/>
+						</Field>
+						<Field>
+							<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
+							<LocalizationImageUploadField
+								onChange={setBanner}
+								role="banner"
+								shape="banner"
+								value={banner}
+							/>
+						</Field>
+						<Field>
 							<FieldLabel>{t.realms.joinPolicy}</FieldLabel>
 							<NativeSelect name="joinPolicy" defaultValue="open">
 								<NativeSelectOption value="open">
@@ -181,7 +220,10 @@ export function RealmCreatePage() {
 
 export function RealmDetailPage({ id }: { id: string }) {
 	const { t, locale } = useTranslation({ suspense: true });
-	const query = useGetApiRealmsByRealmId({ path: { realmId: id } });
+	const query = useGetApiRealmsByRealmId({
+		path: { realmId: id },
+		query: { language: locale.target },
+	});
 	const rules = useGetApiRealmsByRealmIdRules(
 		{ path: { realmId: id } },
 		{
@@ -204,15 +246,32 @@ export function RealmDetailPage({ id }: { id: string }) {
 	return (
 		<main className="mx-auto flex w-full max-w-[76rem] flex-col gap-7 px-4 py-6 sm:px-6 sm:py-9">
 			<header className="grid gap-6 border-b pb-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+				{realm.banner ? (
+					<div className="col-span-full aspect-[3/1] overflow-hidden rounded-2xl bg-muted">
+						<img alt="" className="size-full object-cover" src={realm.banner.url} />
+					</div>
+				) : null}
 				<div className="min-w-0">
-					<div className="mb-3 flex flex-wrap items-center gap-2">
-						<Badge variant="secondary">Realm</Badge>
-						<Badge variant="outline">
-							{realm.joinPolicy === "approval" ? t.realms.approval : t.realms.open}
-						</Badge>
-						{realm.viewerMembership?.state === "pending" ? (
-							<Badge variant="outline">{t.realms.membershipPending}</Badge>
-						) : null}
+					<div className="mb-4 flex items-center gap-4">
+						<Avatar className="size-16 ring-4 ring-background sm:size-20">
+							{realm.avatar ? <AvatarImage alt="" src={realm.avatar.url} /> : null}
+							<AvatarFallback>
+								{(localization?.title ?? realm.slug ?? t.realms.untitled)
+									.slice(0, 1)
+									.toUpperCase()}
+							</AvatarFallback>
+						</Avatar>
+						<div className="flex flex-wrap items-center gap-2">
+							<Badge variant="secondary">Realm</Badge>
+							<Badge variant="outline">
+								{realm.joinPolicy === "approval"
+									? t.realms.approval
+									: t.realms.open}
+							</Badge>
+							{realm.viewerMembership?.state === "pending" ? (
+								<Badge variant="outline">{t.realms.membershipPending}</Badge>
+							) : null}
+						</div>
 					</div>
 					<h1 className="break-words font-serif font-semibold text-3xl tracking-tight sm:text-5xl">
 						{localization?.title ?? realm.slug ?? t.realms.untitled}

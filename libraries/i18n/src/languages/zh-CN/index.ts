@@ -4,6 +4,7 @@ import actions from "./actions";
 import home from "./home";
 import feed from "./feed";
 import cover from "./cover";
+import media from "./media";
 import search from "./search";
 import posts from "./posts";
 import realms from "./realms";
@@ -32,6 +33,7 @@ export default {
 	home,
 	feed,
 	cover,
+	media,
 	search,
 	posts,
 	realms,

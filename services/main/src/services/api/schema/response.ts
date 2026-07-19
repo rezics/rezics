@@ -39,6 +39,13 @@ export const ReadinessResponse = t.Object({
 	}),
 });
 
+export const ImageAssetResponse = t.Nullable(t.Object({ id: Uuid, url: t.String() }));
+const LocalizationImageResponse = {
+	avatar: ImageAssetResponse,
+	banner: ImageAssetResponse,
+	cover: ImageAssetResponse,
+};
+
 const LocalizationResponse = t.Object({
 	unitId: Uuid,
 	language: t.String(),
@@ -46,11 +53,10 @@ const LocalizationResponse = t.Object({
 	title: NullableText,
 	summary: NullableText,
 	description: t.Nullable(PortableTextDocument),
-	cover: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
+	...LocalizationImageResponse,
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
-const CoverAssetResponse = t.Nullable(t.Object({ id: Uuid, url: t.String() }));
 
 export const UnitListResponse = t.Object({
 	items: t.Array(
@@ -64,7 +70,9 @@ export const UnitListResponse = t.Object({
 			updatedAt: DateTime,
 			title: NullableText,
 			summary: NullableText,
-			cover: CoverAssetResponse,
+			avatar: ImageAssetResponse,
+			banner: ImageAssetResponse,
+			cover: ImageAssetResponse,
 		}),
 	),
 	nextCursor: NullableText,
@@ -84,7 +92,9 @@ export const UnitDetailResponse = t.Object({
 	updatedAt: DateTime,
 	primaryLanguage: NullableText,
 	releasedOn: t.Nullable(t.String()),
-	cover: CoverAssetResponse,
+	avatar: ImageAssetResponse,
+	banner: ImageAssetResponse,
+	cover: ImageAssetResponse,
 	localizations: t.Array(LocalizationResponse),
 	credits: t.Array(
 		t.Object({
@@ -189,7 +199,9 @@ export const EntityListResponse = t.Object({
 			slug: NullableText,
 			kind: t.String(),
 			verified: t.Boolean(),
-			avatar: NullableText,
+			avatar: ImageAssetResponse,
+			banner: ImageAssetResponse,
+			cover: ImageAssetResponse,
 			title: NullableText,
 			summary: NullableText,
 		}),
@@ -221,6 +233,9 @@ export const RealmListResponse = t.Object({
 			joinPolicy: t.String(),
 			title: NullableText,
 			summary: NullableText,
+			avatar: ImageAssetResponse,
+			banner: ImageAssetResponse,
+			cover: ImageAssetResponse,
 			createdAt: DateTime,
 			updatedAt: DateTime,
 		}),
@@ -276,7 +291,7 @@ export const FeedResponse = t.Object({
 					type: t.String(),
 					slug: NullableText,
 					title: NullableText,
-					cover: CoverAssetResponse,
+					cover: ImageAssetResponse,
 				}),
 			),
 			createdAt: DateTime,
@@ -312,8 +327,8 @@ export const PublicProfileResponse = t.Object({
 	visibility: t.String(),
 	language: NullableText,
 	name: NullableText,
-	avatar: NullableText,
-	avatarAssetId: t.Optional(t.Nullable(Uuid)),
+	avatar: ImageAssetResponse,
+	banner: ImageAssetResponse,
 	summary: NullableText,
 	description: t.Nullable(PortableTextDocument),
 	createdAt: DateTime,
@@ -389,18 +404,22 @@ const LocalizationSummary = t.Object({
 	language: t.String(),
 	title: NullableText,
 	summary: NullableText,
+	...LocalizationImageResponse,
 });
 export const EntityDetailResponse = t.Object({
 	id: Uuid,
 	slug: NullableText,
 	kind: t.String(),
 	verified: t.Boolean(),
-	avatar: NullableText,
+	avatar: ImageAssetResponse,
+	banner: ImageAssetResponse,
+	cover: ImageAssetResponse,
 	createdAt: DateTime,
 	updatedAt: DateTime,
 	localizations: t.Array(LocalizationResponse),
 	associationPolicy: EntityAssociationPolicyResponse,
 	ownerProfileId: t.Nullable(Uuid),
+	capabilities: t.Object({ canEdit: t.Boolean() }),
 	creditAttributions: t.Array(t.Object({ id: Uuid, unitId: Uuid, role: t.String() })),
 	subjectAssociations: t.Array(t.Object({ id: Uuid, unitId: Uuid, role: t.String() })),
 });
@@ -440,6 +459,9 @@ export const RealmDetailResponse = t.Object({
 	joinPolicy: t.String(),
 	createdAt: DateTime,
 	updatedAt: DateTime,
+	avatar: ImageAssetResponse,
+	banner: ImageAssetResponse,
+	cover: ImageAssetResponse,
 	localizations: t.Array(LocalizationSummary),
 	viewerFollowing: t.Boolean(),
 	viewerMembership: t.Optional(t.Object({ role: t.String(), state: t.String() })),

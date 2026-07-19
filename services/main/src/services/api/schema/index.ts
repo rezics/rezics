@@ -26,6 +26,13 @@ export const DateTime = t
 export const Uuid = t.String({ format: "uuid" });
 export type Uuid = Static<typeof Uuid>;
 
+/** Optional per-language presentation overrides. Null removes an override and inherits. */
+export const LocalizationImageInput = {
+	avatarAssetId: t.Optional(t.Nullable(Uuid)),
+	bannerAssetId: t.Optional(t.Nullable(Uuid)),
+	coverAssetId: t.Optional(t.Nullable(Uuid)),
+};
+
 /** A case-sensitive fractional index used by mutable ordered sequences. */
 export const FractionalPosition = t.String({
 	format: "fractional-position",
@@ -48,6 +55,7 @@ export const LocalizationInput = t.Object(
 		title: t.String({ minLength: 1, maxLength: 500 }),
 		summary: t.Optional(t.String({ maxLength: 2_000 })),
 		description: t.Optional(PortableTextDocument),
+		...LocalizationImageInput,
 	},
 	{ additionalProperties: false },
 );

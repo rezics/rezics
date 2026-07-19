@@ -46,6 +46,11 @@ export function ProfilePage({ id }: { id: string }) {
 	const canFollow = Boolean(session && me.data && me.data.id !== user.id);
 	return (
 		<main className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6">
+			{user.banner ? (
+				<div className="aspect-[3/1] overflow-hidden rounded-2xl bg-muted">
+					<img alt="" className="size-full object-cover" src={user.banner.url} />
+				</div>
+			) : null}
 			<PageHeading
 				title={user.name ?? user.slug ?? t.ui.unnamed}
 				description={user.summary ?? undefined}
@@ -67,7 +72,7 @@ export function ProfilePage({ id }: { id: string }) {
 			<Card>
 				<CardContent className="flex flex-col gap-3 p-5 text-sm">
 					<Avatar className="size-20">
-						{user.avatar && <AvatarImage alt="" src={user.avatar} />}
+						{user.avatar ? <AvatarImage alt="" src={user.avatar.url} /> : null}
 						<AvatarFallback>
 							{(user.name ?? user.slug ?? t.ui.unnamed).slice(0, 1).toUpperCase()}
 						</AvatarFallback>

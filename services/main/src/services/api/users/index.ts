@@ -4,7 +4,7 @@ import Elysia from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
-import { isPrimaryUnitLocalization } from "../../units/localization";
+import { isPrimaryUnitLocalization, unitLocalizationImageAssetIds } from "../../units/localization";
 import {
 	unit,
 	profile as profileTable,
@@ -14,7 +14,7 @@ import {
 	unitLocalization,
 } from "../../database/schema";
 import { createNotification, deliverNotificationEmail } from "../../notifications/service";
-import { ensureImageAssetAttachable } from "../image-assets/service";
+import { ensureImageAssetsAttachable } from "../image-assets/service";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import { BlockResponse, FollowResponse, UserBlockListResponse } from "../schema/action-response";
@@ -75,7 +75,11 @@ export default new Elysia({ prefix: "/users" })
 		async ({ profile, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(profile.unitId, [["profile"]]);
 			await database.transaction(async (tx) => {
-				await ensureImageAssetAttachable(tx, profile.unitId, body.avatarAssetId);
+				await ensureImageAssetsAttachable(
+					tx,
+					profile.unitId,
+					unitLocalizationImageAssetIds(body),
+				);
 				const [current] = await tx
 					.select({ id: profileTable.id })
 					.from(profileTable)
@@ -103,17 +107,17 @@ export default new Elysia({ prefix: "/users" })
 					throw new ProfileChanged(latest.updatedAt);
 				}
 				await tx
-					.update(profileTable)
-					.set({
-						avatarAssetId: body.avatarAssetId,
-					})
-					.where(eq(profileTable.id, profile.unitId));
-				await tx
 					.update(unitLocalization)
 					.set({
 						title: body.name,
 						summary: body.summary,
 						description: body.description,
+						...(Object.hasOwn(body, "avatarAssetId")
+							? { avatarAssetId: body.avatarAssetId }
+							: {}),
+						...(Object.hasOwn(body, "bannerAssetId")
+							? { bannerAssetId: body.bannerAssetId }
+							: {}),
 					})
 					.where(
 						and(

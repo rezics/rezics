@@ -25,31 +25,37 @@ import {
 } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
 
-export interface CoverAssetValue {
+export type LocalizationImageRole = "avatar" | "banner" | "cover";
+export type LocalizationImageShape = "avatar" | "banner" | "landscape" | "portrait";
+
+export interface LocalizationImageAssetValue {
 	id: string;
 	url: string;
 }
 
-export interface CoverAssetOption extends CoverAssetValue {
+export interface LocalizationImageAssetOption extends LocalizationImageAssetValue {
 	label: string;
 }
 
 const AcceptedTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 
-export function CoverUploadField({
+export function LocalizationImageUploadField({
 	value,
 	onChange,
 	fallback = null,
 	options = [],
-	landscape = false,
+	role,
+	shape,
 }: {
-	value: CoverAssetValue | null;
-	onChange: (value: CoverAssetValue | null) => void;
-	fallback?: CoverAssetValue | null;
-	options?: readonly CoverAssetOption[];
-	landscape?: boolean;
+	value: LocalizationImageAssetValue | null;
+	onChange: (value: LocalizationImageAssetValue | null) => void;
+	fallback?: LocalizationImageAssetValue | null;
+	options?: readonly LocalizationImageAssetOption[];
+	role: LocalizationImageRole;
+	shape: LocalizationImageShape;
 }) {
 	const { t } = useTranslation({ suspense: true });
+	const copy = t.media.roles[role];
 	const requestUpload = usePostApiImageAssets();
 	const completeUpload = usePostApiImageAssetsByIdComplete();
 	const deleteUpload = useDeleteApiImageAssetsById();
@@ -72,7 +78,7 @@ export function CoverUploadField({
 		if (!file) return;
 		setError(undefined);
 		if (!AcceptedTypes.includes(file.type) || file.size > 10_485_760) {
-			setError(t.cover.invalid);
+			setError(t.media.invalid);
 			return;
 		}
 		if (preview) URL.revokeObjectURL(preview);
@@ -89,7 +95,7 @@ export function CoverUploadField({
 		} catch {
 			if (assetId)
 				await deleteUpload.mutateAsync({ path: { id: assetId } }).catch(() => undefined);
-			setError(t.cover.failed);
+			setError(copy.failed);
 			setProgress(0);
 		} finally {
 			setFiles([]);
@@ -108,6 +114,7 @@ export function CoverUploadField({
 
 	const busy =
 		requestUpload.isPending || completeUpload.isPending || (progress > 0 && progress < 100);
+	const valueIsReusableOption = options.some((option) => option.id === value?.id);
 	return (
 		<FileUpload
 			accept={AcceptedTypes.join(",")}
@@ -118,7 +125,7 @@ export function CoverUploadField({
 			maxFiles={1}
 			onFileAccept={({ files }) => void choose(files[0])}
 			onFileChange={({ acceptedFiles }) => setFiles(acceptedFiles)}
-			onFileReject={() => setError(t.cover.invalid)}
+			onFileReject={() => setError(t.media.invalid)}
 		>
 			{options.length > 0 && (
 				<NativeSelect
@@ -129,7 +136,10 @@ export function CoverUploadField({
 						setPreview(undefined);
 					}}
 				>
-					<NativeSelectOption value="">{t.cover.inherit}</NativeSelectOption>
+					<NativeSelectOption value="">{copy.inherit}</NativeSelectOption>
+					{value && !valueIsReusableOption ? (
+						<NativeSelectOption value={value.id}>{t.media.current}</NativeSelectOption>
+					) : null}
 					{options.map((option) => (
 						<NativeSelectOption key={`${option.label}:${option.id}`} value={option.id}>
 							{option.label}
@@ -140,7 +150,13 @@ export function CoverUploadField({
 			<FileUploadDropzone
 				className={cn(
 					"group bg-muted/45 relative grid max-w-md place-items-center overflow-hidden border-dashed p-0 transition-colors",
-					landscape ? "aspect-video" : "aspect-[2/3] max-h-96",
+					shape === "avatar"
+						? "aspect-square max-w-48 rounded-full"
+						: shape === "banner"
+							? "aspect-[3/1] max-w-2xl"
+							: shape === "landscape"
+								? "aspect-video"
+								: "aspect-[2/3] max-h-96",
 				)}
 				disableClick={Boolean(displayed)}
 				onPaste={(event) => {
@@ -157,8 +173,8 @@ export function CoverUploadField({
 						<FileUploadDropzoneIcon>
 							<ImagePlus aria-hidden className="size-5" />
 						</FileUploadDropzoneIcon>
-						<FileUploadTitle>{t.cover.choose}</FileUploadTitle>
-						<FileUploadHelper>{t.cover.hint}</FileUploadHelper>
+						<FileUploadTitle>{t.media.choose}</FileUploadTitle>
+						<FileUploadHelper>{t.media.hint}</FileUploadHelper>
 					</>
 				)}
 				{busy && (
@@ -177,7 +193,7 @@ export function CoverUploadField({
 						) : (
 							<UploadCloud aria-hidden className="size-3.5" />
 						)}
-						{displayed ? t.cover.replace : t.cover.upload}
+						{displayed ? t.media.replace : copy.upload}
 					</Button>
 				</FileUploadTrigger>
 				{busy && (
@@ -188,13 +204,13 @@ export function CoverUploadField({
 						variant="ghost"
 					>
 						<X aria-hidden className="size-3.5" />
-						{t.cover.cancel}
+						{t.media.cancel}
 					</Button>
 				)}
 				{value && (
 					<Button onClick={remove} size="sm" type="button" variant="ghost">
 						<Trash2 aria-hidden className="size-3.5" />
-						{t.cover.remove}
+						{t.media.remove}
 					</Button>
 				)}
 			</div>

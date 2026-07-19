@@ -12,6 +12,7 @@ export interface UnitListItem {
 	title: string | null;
 	summary?: string | null;
 	href?: string;
+	avatar?: { id: string; url: string } | null;
 	cover?: { id: string; url: string } | null;
 }
 
@@ -47,6 +48,8 @@ export function UnitList({
 		<ItemGroup className="gap-0 overflow-hidden rounded-2xl bg-background">
 			{items.map((item) => {
 				const target = href?.(item) ?? item.href;
+				const image = item.avatar ?? item.cover;
+				const usesAvatar = Boolean(item.avatar);
 				return (
 					<LinkBox key={item.id}>
 						<Item
@@ -54,14 +57,18 @@ export function UnitList({
 							role="listitem"
 						>
 							<ItemMedia
-								className="bg-accent text-accent-foreground size-auto aspect-[2/3] w-14 self-stretch overflow-hidden rounded-md text-lg font-black"
+								className={
+									usesAvatar
+										? "bg-accent text-accent-foreground size-14 overflow-hidden rounded-full text-lg font-black"
+										: "bg-accent text-accent-foreground size-auto aspect-[2/3] w-14 self-stretch overflow-hidden rounded-md text-lg font-black"
+								}
 								variant="image"
 							>
-								{item.cover ? (
+								{image ? (
 									<img
 										alt=""
 										className="size-full object-cover"
-										src={item.cover.url}
+										src={image.url}
 									/>
 								) : (
 									(item.title ?? item.slug ?? "R").slice(0, 1)

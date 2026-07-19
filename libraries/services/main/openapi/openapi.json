@@ -21902,6 +21902,27 @@
 														}
 													}
 												}
+											},
+											"avatarAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											},
+											"bannerAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											},
+											"coverAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
 											}
 										}
 									}
@@ -21920,6 +21941,33 @@
 									"type": "object",
 									"required": ["id"],
 									"properties": { "id": { "format": "uuid", "type": "string" } }
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ImageAssetNotFound",
+													"type": "string",
+													"enum": ["ImageAssetNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
 								}
 							}
 						}
@@ -22072,6 +22120,17 @@
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "language",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"format": "bcp-47",
+							"minLength": 2,
+							"maxLength": 35,
+							"type": "string"
+						}
 					}
 				],
 				"responses": {
@@ -22083,6 +22142,11 @@
 									"type": "object",
 									"required": [
 										"id",
+										"language",
+										"avatar",
+										"banner",
+										"cover",
+										"localizations",
 										"boundaryDocument",
 										"themeDocument",
 										"dockDocument",
@@ -22093,6 +22157,143 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
+										"language": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"avatar": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"banner": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"cover": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"localizations": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"language",
+													"title",
+													"summary",
+													"avatar",
+													"banner",
+													"cover"
+												],
+												"properties": {
+													"language": { "type": "string" },
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"banner": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													}
+												}
+											}
+										},
 										"boundaryDocument": { "$ref": "ZoneBoundaryDocument" },
 										"themeDocument": { "$ref": "ZoneThemeDocument" },
 										"dockDocument": { "$ref": "UnitReferencedBlockDocument" },
@@ -22182,6 +22383,319 @@
 								"additionalProperties": false,
 								"type": "object",
 								"properties": {
+									"localization": {
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["language", "title"],
+										"properties": {
+											"language": {
+												"format": "bcp-47",
+												"minLength": 2,
+												"maxLength": 35,
+												"type": "string"
+											},
+											"title": {
+												"minLength": 1,
+												"maxLength": 500,
+												"type": "string"
+											},
+											"summary": { "maxLength": 2000, "type": "string" },
+											"description": {
+												"additionalProperties": false,
+												"$id": "PortableTextDocument",
+												"type": "object",
+												"required": ["_type", "_key", "content"],
+												"properties": {
+													"_type": {
+														"const": "portable-text",
+														"type": "string"
+													},
+													"_key": {
+														"pattern": "^[0-9a-f]{12}$",
+														"$id": "BlockKey",
+														"type": "string"
+													},
+													"content": {
+														"$id": "PortableText",
+														"type": "array",
+														"items": {
+															"$id": "PortableTextBlock",
+															"anyOf": [
+																{
+																	"additionalProperties": {
+																		"$id": "#/components/schemas/JsonValue",
+																		"anyOf": [
+																			{ "type": "null" },
+																			{ "type": "boolean" },
+																			{ "type": "number" },
+																			{ "type": "string" },
+																			{
+																				"type": "array",
+																				"items": {
+																					"$ref": "#/components/schemas/JsonValue"
+																				}
+																			},
+																			{
+																				"type": "object",
+																				"patternProperties": {
+																					"^(.*)$": {
+																						"$ref": "#/components/schemas/JsonValue"
+																					}
+																				}
+																			}
+																		]
+																	},
+																	"$id": "PortableTextTextBlock",
+																	"type": "object",
+																	"required": [
+																		"_key",
+																		"_type",
+																		"children"
+																	],
+																	"properties": {
+																		"_key": {
+																			"type": "string"
+																		},
+																		"_type": {
+																			"const": "block",
+																			"type": "string"
+																		},
+																		"children": {
+																			"type": "array",
+																			"items": {
+																				"$id": "PortableTextChild",
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"$id": "PortableTextSpan",
+																						"type": "object",
+																						"required": [
+																							"_key",
+																							"_type",
+																							"text"
+																						],
+																						"properties": {
+																							"_key": {
+																								"type": "string"
+																							},
+																							"_type": {
+																								"const": "span",
+																								"type": "string"
+																							},
+																							"text": {
+																								"type": "string"
+																							},
+																							"marks": {
+																								"type": "array",
+																								"items": {
+																									"type": "string"
+																								}
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": {
+																							"$id": "#/components/schemas/JsonValue",
+																							"anyOf": [
+																								{
+																									"type": "null"
+																								},
+																								{
+																									"type": "boolean"
+																								},
+																								{
+																									"type": "number"
+																								},
+																								{
+																									"type": "string"
+																								},
+																								{
+																									"type": "array",
+																									"items": {
+																										"$ref": "#/components/schemas/JsonValue"
+																									}
+																								},
+																								{
+																									"type": "object",
+																									"patternProperties": {
+																										"^(.*)$": {
+																											"$ref": "#/components/schemas/JsonValue"
+																										}
+																									}
+																								}
+																							]
+																						},
+																						"type": "object",
+																						"required": [
+																							"_key",
+																							"_type"
+																						],
+																						"properties": {
+																							"_key": {
+																								"type": "string"
+																							},
+																							"_type": {
+																								"pattern": "^(?!span$).+",
+																								"type": "string"
+																							}
+																						}
+																					}
+																				]
+																			}
+																		},
+																		"markDefs": {
+																			"type": "array",
+																			"items": {
+																				"additionalProperties": {
+																					"$id": "#/components/schemas/JsonValue",
+																					"anyOf": [
+																						{
+																							"type": "null"
+																						},
+																						{
+																							"type": "boolean"
+																						},
+																						{
+																							"type": "number"
+																						},
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "array",
+																							"items": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						},
+																						{
+																							"type": "object",
+																							"patternProperties": {
+																								"^(.*)$": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"$id": "PortableTextObject",
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		"listItem": {
+																			"type": "string"
+																		},
+																		"style": {
+																			"type": "string"
+																		},
+																		"level": {
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"$id": "PortableTextImage",
+																	"type": "object",
+																	"required": [
+																		"_key",
+																		"_type",
+																		"assetId"
+																	],
+																	"properties": {
+																		"_key": {
+																			"type": "string"
+																		},
+																		"_type": {
+																			"const": "image",
+																			"type": "string"
+																		},
+																		"assetId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"alt": { "type": "string" },
+																		"caption": {
+																			"type": "string"
+																		}
+																	}
+																},
+																{
+																	"additionalProperties": {
+																		"$id": "#/components/schemas/JsonValue",
+																		"anyOf": [
+																			{ "type": "null" },
+																			{ "type": "boolean" },
+																			{ "type": "number" },
+																			{ "type": "string" },
+																			{
+																				"type": "array",
+																				"items": {
+																					"$ref": "#/components/schemas/JsonValue"
+																				}
+																			},
+																			{
+																				"type": "object",
+																				"patternProperties": {
+																					"^(.*)$": {
+																						"$ref": "#/components/schemas/JsonValue"
+																					}
+																				}
+																			}
+																		]
+																	},
+																	"type": "object",
+																	"required": ["_key", "_type"],
+																	"properties": {
+																		"_key": {
+																			"type": "string"
+																		},
+																		"_type": {
+																			"pattern": "^(?!(?:block|image)$).+",
+																			"type": "string"
+																		}
+																	}
+																}
+															]
+														}
+													}
+												}
+											},
+											"avatarAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											},
+											"bannerAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											},
+											"coverAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											}
+										}
+									},
 									"boundaryDocument": { "$ref": "ZoneBoundaryDocument" },
 									"themeDocument": { "$ref": "ZoneThemeDocument" },
 									"dockDocument": { "$ref": "UnitReferencedBlockDocument" },
@@ -22214,6 +22728,11 @@
 									"type": "object",
 									"required": [
 										"id",
+										"language",
+										"avatar",
+										"banner",
+										"cover",
+										"localizations",
 										"boundaryDocument",
 										"themeDocument",
 										"dockDocument",
@@ -22224,6 +22743,143 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
+										"language": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"avatar": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"banner": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"cover": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"localizations": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"language",
+													"title",
+													"summary",
+													"avatar",
+													"banner",
+													"cover"
+												],
+												"properties": {
+													"language": { "type": "string" },
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"banner": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													}
+												}
+											}
+										},
 										"boundaryDocument": { "$ref": "ZoneBoundaryDocument" },
 										"themeDocument": { "$ref": "ZoneThemeDocument" },
 										"dockDocument": { "$ref": "UnitReferencedBlockDocument" },
@@ -22323,7 +22979,7 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": ["UnitNotFound"]
+													"enum": ["UnitNotFound", "ImageAssetNotFound"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -24000,6 +24656,27 @@
 														}
 													}
 												}
+											},
+											"avatarAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											},
+											"bannerAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											},
+											"coverAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
 											}
 										}
 									},
@@ -24058,6 +24735,33 @@
 														"ZoneTimeRangeInvalid",
 														"ZoneDocumentInvalid"
 													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ImageAssetNotFound",
+													"type": "string",
+													"enum": ["ImageAssetNotFound"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -24890,6 +25594,7 @@
 												"language",
 												"name",
 												"avatar",
+												"banner",
 												"summary",
 												"description",
 												"createdAt",
@@ -24923,14 +25628,34 @@
 												"avatar": {
 													"nullable": true,
 													"anyOf": [
-														{ "type": "string" },
+														{
+															"type": "object",
+															"required": ["id", "url"],
+															"properties": {
+																"id": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"url": { "type": "string" }
+															}
+														},
 														{ "type": "null" }
 													]
 												},
-												"avatarAssetId": {
+												"banner": {
 													"nullable": true,
 													"anyOf": [
-														{ "format": "uuid", "type": "string" },
+														{
+															"type": "object",
+															"required": ["id", "url"],
+															"properties": {
+																"id": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"url": { "type": "string" }
+															}
+														},
 														{ "type": "null" }
 													]
 												},
@@ -25328,6 +26053,13 @@
 											{ "type": "null" }
 										]
 									},
+									"bannerAssetId": {
+										"nullable": true,
+										"anyOf": [
+											{ "format": "uuid", "type": "string" },
+											{ "type": "null" }
+										]
+									},
 									"summary": { "maxLength": 500, "type": "string" },
 									"description": {
 										"additionalProperties": false,
@@ -25606,6 +26338,7 @@
 										"language",
 										"name",
 										"avatar",
+										"banner",
 										"summary",
 										"description",
 										"createdAt",
@@ -25629,12 +26362,35 @@
 										},
 										"avatar": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
 										},
-										"avatarAssetId": {
+										"banner": {
 											"nullable": true,
 											"anyOf": [
-												{ "format": "uuid", "type": "string" },
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
 												{ "type": "null" }
 											]
 										},
@@ -26351,6 +27107,7 @@
 										"language",
 										"name",
 										"avatar",
+										"banner",
 										"summary",
 										"description",
 										"createdAt",
@@ -26374,12 +27131,35 @@
 										},
 										"avatar": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
 										},
-										"avatarAssetId": {
+										"banner": {
 											"nullable": true,
 											"anyOf": [
-												{ "format": "uuid", "type": "string" },
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
 												{ "type": "null" }
 											]
 										},
@@ -27927,6 +28707,8 @@
 													"updatedAt",
 													"title",
 													"summary",
+													"avatar",
+													"banner",
 													"cover"
 												],
 												"properties": {
@@ -27975,6 +28757,40 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"banner": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
 															{ "type": "null" }
 														]
 													},
@@ -28362,6 +29178,20 @@
 													}
 												}
 											},
+											"avatarAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											},
+											"bannerAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											},
 											"coverAssetId": {
 												"nullable": true,
 												"anyOf": [
@@ -28430,6 +29260,8 @@
 										"updatedAt",
 										"primaryLanguage",
 										"releasedOn",
+										"avatar",
+										"banner",
 										"cover",
 										"localizations",
 										"credits",
@@ -28475,6 +29307,40 @@
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
+										"avatar": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"banner": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
+										},
 										"cover": {
 											"nullable": true,
 											"anyOf": [
@@ -28503,6 +29369,8 @@
 													"title",
 													"summary",
 													"description",
+													"avatar",
+													"banner",
 													"cover",
 													"createdAt",
 													"updatedAt"
@@ -28832,6 +29700,40 @@
 																			]
 																		}
 																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"banner": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
 																}
 															},
 															{ "type": "null" }
@@ -29251,6 +30153,8 @@
 										"updatedAt",
 										"primaryLanguage",
 										"releasedOn",
+										"avatar",
+										"banner",
 										"cover",
 										"localizations",
 										"credits",
@@ -29296,6 +30200,40 @@
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
+										"avatar": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"banner": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
+										},
 										"cover": {
 											"nullable": true,
 											"anyOf": [
@@ -29324,6 +30262,8 @@
 													"title",
 													"summary",
 													"description",
+													"avatar",
+													"banner",
 													"cover",
 													"createdAt",
 													"updatedAt"
@@ -29653,6 +30593,40 @@
 																			]
 																		}
 																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"banner": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
 																}
 															},
 															{ "type": "null" }
@@ -30173,6 +31147,8 @@
 										"updatedAt",
 										"primaryLanguage",
 										"releasedOn",
+										"avatar",
+										"banner",
 										"cover",
 										"localizations",
 										"credits",
@@ -30218,6 +31194,40 @@
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
+										"avatar": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"banner": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
+										},
 										"cover": {
 											"nullable": true,
 											"anyOf": [
@@ -30246,6 +31256,8 @@
 													"title",
 													"summary",
 													"description",
+													"avatar",
+													"banner",
 													"cover",
 													"createdAt",
 													"updatedAt"
@@ -30575,6 +31587,40 @@
 																			]
 																		}
 																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"banner": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
 																}
 															},
 															{ "type": "null" }
@@ -31433,6 +32479,20 @@
 											}
 										}
 									},
+									"avatarAssetId": {
+										"nullable": true,
+										"anyOf": [
+											{ "format": "uuid", "type": "string" },
+											{ "type": "null" }
+										]
+									},
+									"bannerAssetId": {
+										"nullable": true,
+										"anyOf": [
+											{ "format": "uuid", "type": "string" },
+											{ "type": "null" }
+										]
+									},
 									"coverAssetId": {
 										"nullable": true,
 										"anyOf": [
@@ -31468,6 +32528,8 @@
 										"updatedAt",
 										"primaryLanguage",
 										"releasedOn",
+										"avatar",
+										"banner",
 										"cover",
 										"localizations",
 										"credits",
@@ -31513,6 +32575,40 @@
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
+										"avatar": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"banner": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
+										},
 										"cover": {
 											"nullable": true,
 											"anyOf": [
@@ -31541,6 +32637,8 @@
 													"title",
 													"summary",
 													"description",
+													"avatar",
+													"banner",
 													"cover",
 													"createdAt",
 													"updatedAt"
@@ -31870,6 +32968,40 @@
 																			]
 																		}
 																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"banner": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
 																}
 															},
 															{ "type": "null" }
@@ -33750,6 +34882,17 @@
 						"schema": { "maxLength": 64, "type": "string" }
 					},
 					{
+						"name": "language",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"format": "bcp-47",
+							"minLength": 2,
+							"maxLength": 35,
+							"type": "string"
+						}
+					},
+					{
 						"name": "limit",
 						"in": "query",
 						"required": false,
@@ -33783,6 +34926,8 @@
 													"kind",
 													"verified",
 													"avatar",
+													"banner",
+													"cover",
 													"title",
 													"summary"
 												],
@@ -33800,7 +34945,51 @@
 													"avatar": {
 														"nullable": true,
 														"anyOf": [
-															{ "type": "string" },
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"banner": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
 															{ "type": "null" }
 														]
 													},
@@ -34152,6 +35341,27 @@
 														}
 													}
 												}
+											},
+											"avatarAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											},
+											"bannerAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											},
+											"coverAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
 											}
 										}
 									}
@@ -34170,6 +35380,33 @@
 									"type": "object",
 									"required": ["id"],
 									"properties": { "id": { "format": "uuid", "type": "string" } }
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ImageAssetNotFound",
+													"type": "string",
+													"enum": ["ImageAssetNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
 								}
 							}
 						}
@@ -34204,6 +35441,17 @@
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "language",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"format": "bcp-47",
+							"minLength": 2,
+							"maxLength": 35,
+							"type": "string"
+						}
 					}
 				],
 				"responses": {
@@ -34219,11 +35467,14 @@
 										"kind",
 										"verified",
 										"avatar",
+										"banner",
+										"cover",
 										"createdAt",
 										"updatedAt",
 										"localizations",
 										"associationPolicy",
 										"ownerProfileId",
+										"capabilities",
 										"creditAttributions",
 										"subjectAssociations"
 									],
@@ -34237,7 +35488,54 @@
 										"verified": { "type": "boolean" },
 										"avatar": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"banner": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"cover": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
@@ -34252,6 +35550,8 @@
 													"title",
 													"summary",
 													"description",
+													"avatar",
+													"banner",
 													"cover",
 													"createdAt",
 													"updatedAt"
@@ -34586,6 +35886,40 @@
 															{ "type": "null" }
 														]
 													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"banner": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
 													"cover": {
 														"nullable": true,
 														"anyOf": [
@@ -34636,6 +35970,11 @@
 												{ "format": "uuid", "type": "string" },
 												{ "type": "null" }
 											]
+										},
+										"capabilities": {
+											"type": "object",
+											"required": ["canEdit"],
+											"properties": { "canEdit": { "type": "boolean" } }
 										},
 										"creditAttributions": {
 											"type": "array",
@@ -34717,6 +36056,412 @@
 					}
 				},
 				"operationId": "getApiEntitiesByUnitId"
+			}
+		},
+		"/api/entities/{unitId}/localizations/{language}": {
+			"put": {
+				"summary": "Create or replace entity localization",
+				"tags": ["Entity"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "language",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"format": "bcp-47",
+							"minLength": 2,
+							"maxLength": 35,
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["title"],
+								"properties": {
+									"title": { "minLength": 1, "maxLength": 500, "type": "string" },
+									"summary": { "maxLength": 2000, "type": "string" },
+									"description": {
+										"additionalProperties": false,
+										"$id": "PortableTextDocument",
+										"type": "object",
+										"required": ["_type", "_key", "content"],
+										"properties": {
+											"_type": { "const": "portable-text", "type": "string" },
+											"_key": {
+												"pattern": "^[0-9a-f]{12}$",
+												"$id": "BlockKey",
+												"type": "string"
+											},
+											"content": {
+												"$id": "PortableText",
+												"type": "array",
+												"items": {
+													"$id": "PortableTextBlock",
+													"anyOf": [
+														{
+															"additionalProperties": {
+																"$id": "#/components/schemas/JsonValue",
+																"anyOf": [
+																	{ "type": "null" },
+																	{ "type": "boolean" },
+																	{ "type": "number" },
+																	{ "type": "string" },
+																	{
+																		"type": "array",
+																		"items": {
+																			"$ref": "#/components/schemas/JsonValue"
+																		}
+																	},
+																	{
+																		"type": "object",
+																		"patternProperties": {
+																			"^(.*)$": {
+																				"$ref": "#/components/schemas/JsonValue"
+																			}
+																		}
+																	}
+																]
+															},
+															"$id": "PortableTextTextBlock",
+															"type": "object",
+															"required": [
+																"_key",
+																"_type",
+																"children"
+															],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"const": "block",
+																	"type": "string"
+																},
+																"children": {
+																	"type": "array",
+																	"items": {
+																		"$id": "PortableTextChild",
+																		"anyOf": [
+																			{
+																				"additionalProperties": false,
+																				"$id": "PortableTextSpan",
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type",
+																					"text"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"const": "span",
+																						"type": "string"
+																					},
+																					"text": {
+																						"type": "string"
+																					},
+																					"marks": {
+																						"type": "array",
+																						"items": {
+																							"type": "string"
+																						}
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": {
+																					"$id": "#/components/schemas/JsonValue",
+																					"anyOf": [
+																						{
+																							"type": "null"
+																						},
+																						{
+																							"type": "boolean"
+																						},
+																						{
+																							"type": "number"
+																						},
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "array",
+																							"items": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						},
+																						{
+																							"type": "object",
+																							"patternProperties": {
+																								"^(.*)$": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"pattern": "^(?!span$).+",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		]
+																	}
+																},
+																"markDefs": {
+																	"type": "array",
+																	"items": {
+																		"additionalProperties": {
+																			"$id": "#/components/schemas/JsonValue",
+																			"anyOf": [
+																				{ "type": "null" },
+																				{
+																					"type": "boolean"
+																				},
+																				{
+																					"type": "number"
+																				},
+																				{
+																					"type": "string"
+																				},
+																				{
+																					"type": "array",
+																					"items": {
+																						"$ref": "#/components/schemas/JsonValue"
+																					}
+																				},
+																				{
+																					"type": "object",
+																					"patternProperties": {
+																						"^(.*)$": {
+																							"$ref": "#/components/schemas/JsonValue"
+																						}
+																					}
+																				}
+																			]
+																		},
+																		"$id": "PortableTextObject",
+																		"type": "object",
+																		"required": [
+																			"_key",
+																			"_type"
+																		],
+																		"properties": {
+																			"_key": {
+																				"type": "string"
+																			},
+																			"_type": {
+																				"type": "string"
+																			}
+																		}
+																	}
+																},
+																"listItem": { "type": "string" },
+																"style": { "type": "string" },
+																"level": {
+																	"minimum": 1,
+																	"type": "integer"
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"$id": "PortableTextImage",
+															"type": "object",
+															"required": [
+																"_key",
+																"_type",
+																"assetId"
+															],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"const": "image",
+																	"type": "string"
+																},
+																"assetId": {
+																	"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																	"type": "string"
+																},
+																"alt": { "type": "string" },
+																"caption": { "type": "string" }
+															}
+														},
+														{
+															"additionalProperties": {
+																"$id": "#/components/schemas/JsonValue",
+																"anyOf": [
+																	{ "type": "null" },
+																	{ "type": "boolean" },
+																	{ "type": "number" },
+																	{ "type": "string" },
+																	{
+																		"type": "array",
+																		"items": {
+																			"$ref": "#/components/schemas/JsonValue"
+																		}
+																	},
+																	{
+																		"type": "object",
+																		"patternProperties": {
+																			"^(.*)$": {
+																				"$ref": "#/components/schemas/JsonValue"
+																			}
+																		}
+																	}
+																]
+															},
+															"type": "object",
+															"required": ["_key", "_type"],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"pattern": "^(?!(?:block|image)$).+",
+																	"type": "string"
+																}
+															}
+														}
+													]
+												}
+											}
+										}
+									},
+									"avatarAssetId": {
+										"nullable": true,
+										"anyOf": [
+											{ "format": "uuid", "type": "string" },
+											{ "type": "null" }
+										]
+									},
+									"bannerAssetId": {
+										"nullable": true,
+										"anyOf": [
+											{ "format": "uuid", "type": "string" },
+											{ "type": "null" }
+										]
+									},
+									"coverAssetId": {
+										"nullable": true,
+										"anyOf": [
+											{ "format": "uuid", "type": "string" },
+											{ "type": "null" }
+										]
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["id"],
+									"properties": { "id": { "format": "uuid", "type": "string" } }
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitProtected"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound", "ImageAssetNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiEntitiesByUnitIdLocalizationsByLanguage"
 			}
 		},
 		"/api/entities/{unitId}/association-policy": {
@@ -35328,6 +37073,27 @@
 														}
 													}
 												}
+											},
+											"avatarAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											},
+											"bannerAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											},
+											"coverAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
 											}
 										}
 									}
@@ -39997,6 +41763,27 @@
 														}
 													}
 												}
+											},
+											"avatarAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											},
+											"bannerAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											},
+											"coverAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
 											}
 										}
 									},
@@ -41982,7 +43769,14 @@
 											"type": "array",
 											"items": {
 												"type": "object",
-												"required": ["language", "title", "summary"],
+												"required": [
+													"language",
+													"title",
+													"summary",
+													"avatar",
+													"banner",
+													"cover"
+												],
 												"properties": {
 													"language": { "type": "string" },
 													"title": {
@@ -41996,6 +43790,57 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"banner": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
 															{ "type": "null" }
 														]
 													}
@@ -42072,7 +43917,10 @@
 												"code": {
 													"default": "CollectionNotFound",
 													"type": "string",
-													"enum": ["CollectionNotFound"]
+													"enum": [
+														"CollectionNotFound",
+														"ImageAssetNotFound"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -43126,7 +44974,14 @@
 											"type": "array",
 											"items": {
 												"type": "object",
-												"required": ["language", "title", "summary"],
+												"required": [
+													"language",
+													"title",
+													"summary",
+													"avatar",
+													"banner",
+													"cover"
+												],
 												"properties": {
 													"language": { "type": "string" },
 													"title": {
@@ -43140,6 +44995,57 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"banner": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
 															{ "type": "null" }
 														]
 													}
@@ -44270,7 +46176,14 @@
 											"type": "array",
 											"items": {
 												"type": "object",
-												"required": ["language", "title", "summary"],
+												"required": [
+													"language",
+													"title",
+													"summary",
+													"avatar",
+													"banner",
+													"cover"
+												],
 												"properties": {
 													"language": { "type": "string" },
 													"title": {
@@ -44284,6 +46197,57 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"banner": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
 															{ "type": "null" }
 														]
 													}
@@ -44705,6 +46669,27 @@
 														}
 													}
 												}
+											},
+											"avatarAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											},
+											"bannerAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											},
+											"coverAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
 											}
 										}
 									},
@@ -46686,7 +48671,14 @@
 											"type": "array",
 											"items": {
 												"type": "object",
-												"required": ["language", "title", "summary"],
+												"required": [
+													"language",
+													"title",
+													"summary",
+													"avatar",
+													"banner",
+													"cover"
+												],
 												"properties": {
 													"language": { "type": "string" },
 													"title": {
@@ -46700,6 +48692,57 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"banner": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
 															{ "type": "null" }
 														]
 													}
@@ -46803,7 +48846,10 @@
 												"code": {
 													"default": "CollectionNotFound",
 													"type": "string",
-													"enum": ["CollectionNotFound"]
+													"enum": [
+														"CollectionNotFound",
+														"ImageAssetNotFound"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -53236,6 +55282,17 @@
 				"tags": ["Realms"],
 				"parameters": [
 					{
+						"name": "language",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"format": "bcp-47",
+							"minLength": 2,
+							"maxLength": 35,
+							"type": "string"
+						}
+					},
+					{
 						"name": "limit",
 						"in": "query",
 						"required": false,
@@ -53269,6 +55326,9 @@
 													"joinPolicy",
 													"title",
 													"summary",
+													"avatar",
+													"banner",
+													"cover",
 													"createdAt",
 													"updatedAt"
 												],
@@ -53293,6 +55353,57 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"banner": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
 															{ "type": "null" }
 														]
 													},
@@ -53636,6 +55747,27 @@
 														}
 													}
 												}
+											},
+											"avatarAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											},
+											"bannerAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											},
+											"coverAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
 											}
 										}
 									},
@@ -53659,6 +55791,33 @@
 									"type": "object",
 									"required": ["id"],
 									"properties": { "id": { "format": "uuid", "type": "string" } }
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ImageAssetNotFound",
+													"type": "string",
+													"enum": ["ImageAssetNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
 								}
 							}
 						}
@@ -53693,6 +55852,17 @@
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "language",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"format": "bcp-47",
+							"minLength": 2,
+							"maxLength": 35,
+							"type": "string"
+						}
 					}
 				],
 				"responses": {
@@ -53711,6 +55881,9 @@
 										"joinPolicy",
 										"createdAt",
 										"updatedAt",
+										"avatar",
+										"banner",
+										"cover",
 										"localizations",
 										"viewerFollowing"
 									],
@@ -53729,11 +55902,69 @@
 										"joinPolicy": { "type": "string" },
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
+										"avatar": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"banner": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"cover": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"type": "object",
+													"required": ["id", "url"],
+													"properties": {
+														"id": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"url": { "type": "string" }
+													}
+												},
+												{ "type": "null" }
+											]
+										},
 										"localizations": {
 											"type": "array",
 											"items": {
 												"type": "object",
-												"required": ["language", "title", "summary"],
+												"required": [
+													"language",
+													"title",
+													"summary",
+													"avatar",
+													"banner",
+													"cover"
+												],
 												"properties": {
 													"language": { "type": "string" },
 													"title": {
@@ -53747,6 +55978,57 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"banner": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
 															{ "type": "null" }
 														]
 													}
@@ -54131,6 +56413,27 @@
 														}
 													}
 												}
+											},
+											"avatarAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											},
+											"bannerAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
+											},
+											"coverAssetId": {
+												"nullable": true,
+												"anyOf": [
+													{ "format": "uuid", "type": "string" },
+													{ "type": "null" }
+												]
 											}
 										}
 									}
@@ -54198,7 +56501,7 @@
 												"code": {
 													"default": "RealmNotFound",
 													"type": "string",
-													"enum": ["RealmNotFound"]
+													"enum": ["RealmNotFound", "ImageAssetNotFound"]
 												},
 												"message": { "type": "string" },
 												"details": {}

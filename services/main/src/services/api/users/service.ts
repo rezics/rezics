@@ -2,9 +2,12 @@ import { and, eq } from "drizzle-orm";
 import { PortableTextDocument, parseNullableDocument } from "@rezics/block";
 
 import { database } from "../../database";
-import { isPrimaryUnitLocalization } from "../../units/localization";
+import {
+	isPrimaryUnitLocalization,
+	resolvedUnitLocalizationImageAssetId,
+} from "../../units/localization";
 import { profile as profileTable, unit, unitLocalization } from "../../database/schema";
-import { imageAssetContentUrl } from "../image-assets/service";
+import { presentImageAsset } from "../../units/service";
 import { ProfileNotFound } from "./errors";
 
 export const PublicProfileSelection = {
@@ -14,7 +17,8 @@ export const PublicProfileSelection = {
 	visibility: unit.visibility,
 	language: unitLocalization.language,
 	name: unitLocalization.title,
-	avatarAssetId: profileTable.avatarAssetId,
+	avatarAssetId: resolvedUnitLocalizationImageAssetId(profileTable.id, "avatar"),
+	bannerAssetId: resolvedUnitLocalizationImageAssetId(profileTable.id, "banner"),
 	summary: unitLocalization.summary,
 	description: unitLocalization.description,
 	createdAt: unit.createdAt,
@@ -38,23 +42,25 @@ export async function getProfile(unitId: string) {
 			.limit(1)
 	)[0];
 	if (!profile) throw new ProfileNotFound();
-	return presentProfile(profile, true);
+	return presentProfile(profile);
 }
 
 export async function presentProfile<
 	T extends {
 		avatarAssetId: string | null;
+		bannerAssetId: string | null;
 		status: string;
 		visibility: string;
 		description: unknown;
 	},
->(profile: T, includeKey = false) {
+>(profile: T) {
+	const { avatarAssetId, bannerAssetId, ...publicProfile } = profile;
 	return {
-		...profile,
+		...publicProfile,
 		status: profile.status.toLowerCase(),
 		visibility: profile.visibility.toLowerCase(),
 		description: parseNullableDocument(PortableTextDocument, profile.description),
-		avatar: profile.avatarAssetId ? imageAssetContentUrl(profile.avatarAssetId) : null,
-		...(includeKey ? { avatarAssetId: profile.avatarAssetId } : {}),
+		avatar: presentImageAsset(avatarAssetId),
+		banner: presentImageAsset(bannerAssetId),
 	};
 }

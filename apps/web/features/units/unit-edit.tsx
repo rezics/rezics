@@ -32,10 +32,10 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
 import { invalidateUnitDetail } from "./unit-cache";
 import {
-	CoverUploadField,
-	type CoverAssetOption,
-	type CoverAssetValue,
-} from "./cover-upload-field";
+	LocalizationImageUploadField,
+	type LocalizationImageAssetOption,
+	type LocalizationImageAssetValue,
+} from "./localization-image-upload-field";
 import type { UnitType } from "./unit-types";
 
 type Unit = GetApiUnitsByTypeByUnitIdStatus200;
@@ -315,9 +315,13 @@ function UnitLocalizationForm({
 	const [description, setDescription] = useState<PortableTextValue>(() =>
 		readPortableText(localization?.description),
 	);
-	const [cover, setCover] = useState<CoverAssetValue | null>(localization?.cover ?? null);
-	const coverOptions: CoverAssetOption[] = unit.localizations.flatMap((entry) =>
-		entry.cover ? [{ ...entry.cover, label: entry.language }] : [],
+	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(
+		localization?.cover ?? null,
+	);
+	const coverOptions: LocalizationImageAssetOption[] = unit.localizations.flatMap((entry) =>
+		entry.language !== language && entry.cover
+			? [{ ...entry.cover, label: entry.language }]
+			: [],
 	);
 	const fallbackCover = coverOptions[0] ?? null;
 	const update = usePutApiUnitsByTypeByUnitIdLocalizationsByLanguage({
@@ -369,11 +373,12 @@ function UnitLocalizationForm({
 				/>
 				<Field>
 					<FieldLabel>{t.cover.title}</FieldLabel>
-					<CoverUploadField
+					<LocalizationImageUploadField
 						fallback={fallbackCover}
-						landscape={type !== "book"}
 						onChange={setCover}
 						options={coverOptions}
+						role="cover"
+						shape={type === "book" ? "portrait" : "landscape"}
 						value={cover}
 					/>
 				</Field>

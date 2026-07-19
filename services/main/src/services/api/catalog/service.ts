@@ -8,6 +8,8 @@ import { createSystemOwnedCatalogAccess } from "../../authorization/unit/ownersh
 import { insertAddressedUnit } from "../../units/slug-address";
 import { TopLevelSlugNamespaceUnitIds } from "../../units/slug-system";
 import { generateSlugLabel } from "../../units/slug";
+import { unitLocalizationImageAssetIds } from "../../units/localization";
+import { ensureImageAssetsAttachable } from "../image-assets/service";
 import type { CreateCatalogUnitBody } from "./schema";
 
 export async function createCatalogUnit(
@@ -16,6 +18,11 @@ export async function createCatalogUnit(
 	body: CreateCatalogUnitBody,
 ) {
 	return database.transaction(async (tx) => {
+		await ensureImageAssetsAttachable(
+			tx,
+			ownerId,
+			unitLocalizationImageAssetIds(body.localization),
+		);
 		const created = await insertAddressedUnit(tx, {
 			kind: type,
 			slugScopeId:

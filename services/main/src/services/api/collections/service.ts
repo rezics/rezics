@@ -23,6 +23,7 @@ import { insertAddressedUnit } from "../../units/slug-address";
 import { DefaultLanguage } from "../../database/schema/contract-values";
 import { CollectionNotFound } from "./errors";
 import { CollectionDetailResponse } from "../schema/response";
+import { presentImageAsset } from "../../units/service";
 
 export async function ensureFavorites(ownerId: string) {
 	const find = () =>
@@ -135,9 +136,13 @@ export async function getCollection(
 			language: unitLocalization.language,
 			title: unitLocalization.title,
 			summary: unitLocalization.summary,
+			avatarAssetId: unitLocalization.avatarAssetId,
+			bannerAssetId: unitLocalization.bannerAssetId,
+			coverAssetId: unitLocalization.coverAssetId,
 		})
 		.from(unitLocalization)
-		.where(eq(unitLocalization.unitId, collectionId));
+		.where(eq(unitLocalization.unitId, collectionId))
+		.orderBy(unitLocalization.position, unitLocalization.language);
 	const items = await database
 		.select({
 			targetId: collectionItem.unitId,
@@ -162,7 +167,14 @@ export async function getCollection(
 		...record,
 		definitionDocument,
 		presentationDocument,
-		localizations,
+		localizations: localizations.map(
+			({ avatarAssetId, bannerAssetId, coverAssetId, ...localization }) => ({
+				...localization,
+				avatar: presentImageAsset(avatarAssetId),
+				banner: presentImageAsset(bannerAssetId),
+				cover: presentImageAsset(coverAssetId),
+			}),
+		),
 		items: items.map((item) => ({ ...item, parentTargetId: null })),
 	};
 }

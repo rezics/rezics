@@ -8,7 +8,7 @@ import {
 	createUuidv7PrimaryKey,
 	fractionalIndexPosition,
 } from "./columns";
-import { imageAsset, profile, unit } from "./core";
+import { profile, unit } from "./core";
 import {
 	EntityAssociationKindValues,
 	EntityAssociationPolicyModeValues,
@@ -32,7 +32,6 @@ export const entity = pgTable(
 			.references(() => unit.id, { onDelete: "cascade" }),
 		kind: text().notNull(),
 		verified: boolean().default(false).notNull(),
-		avatarAssetId: uuid().references(() => imageAsset.id, { onDelete: "set null" }),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},

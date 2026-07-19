@@ -288,6 +288,7 @@ import type {
 	DeleteApiGovernanceGrantsByGrantIdStatus500,
 	PostApiSeriesOptions,
 	PostApiSeriesStatus200,
+	PostApiSeriesStatus404,
 	PostApiSeriesStatus422,
 	PostApiSeriesStatus500,
 	GetApiSeriesBySeriesIdReleasesOptions,
@@ -370,6 +371,7 @@ import type {
 	PostApiZonesOptions,
 	PostApiZonesStatus200,
 	PostApiZonesStatus400,
+	PostApiZonesStatus404,
 	PostApiZonesStatus422,
 	PostApiZonesStatus500,
 	PutApiZonesByZoneIdFollowOptions,
@@ -576,6 +578,7 @@ import type {
 	GetApiEntitiesStatus500,
 	PostApiEntitiesOptions,
 	PostApiEntitiesStatus200,
+	PostApiEntitiesStatus404,
 	PostApiEntitiesStatus422,
 	PostApiEntitiesStatus500,
 	GetApiEntitiesByUnitIdOptions,
@@ -583,6 +586,12 @@ import type {
 	GetApiEntitiesByUnitIdStatus404,
 	GetApiEntitiesByUnitIdStatus422,
 	GetApiEntitiesByUnitIdStatus500,
+	PutApiEntitiesByUnitIdLocalizationsByLanguageOptions,
+	PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200,
+	PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403,
+	PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404,
+	PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422,
+	PutApiEntitiesByUnitIdLocalizationsByLanguageStatus500,
 	GetApiEntitiesByUnitIdAssociationPolicyOptions,
 	GetApiEntitiesByUnitIdAssociationPolicyStatus200,
 	GetApiEntitiesByUnitIdAssociationPolicyStatus404,
@@ -947,6 +956,7 @@ import type {
 	GetApiRealmsStatus500,
 	PostApiRealmsOptions,
 	PostApiRealmsStatus200,
+	PostApiRealmsStatus404,
 	PostApiRealmsStatus422,
 	PostApiRealmsStatus500,
 	GetApiRealmsByRealmIdOptions,
@@ -1207,6 +1217,7 @@ import {
 	getApiEntities,
 	postApiEntities,
 	getApiEntitiesByUnitId,
+	putApiEntitiesByUnitIdLocalizationsByLanguage,
 	getApiEntitiesByUnitIdAssociationPolicy,
 	patchApiEntitiesByUnitIdAssociationPolicy,
 	getApiTags,
@@ -6091,7 +6102,9 @@ export function postApiSeriesMutationOptions<TContext = unknown>(
 	const mutationKey = postApiSeriesMutationKey();
 	return mutationOptions<
 		PostApiSeriesStatus200,
-		ResponseErrorConfig<PostApiSeriesStatus422 | PostApiSeriesStatus500>,
+		ResponseErrorConfig<
+			PostApiSeriesStatus404 | PostApiSeriesStatus422 | PostApiSeriesStatus500
+		>,
 		PostApiSeriesOptions,
 		TContext
 	>({
@@ -6111,7 +6124,9 @@ export function usePostApiSeries<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
 			PostApiSeriesStatus200,
-			ResponseErrorConfig<PostApiSeriesStatus422 | PostApiSeriesStatus500>,
+			ResponseErrorConfig<
+				PostApiSeriesStatus404 | PostApiSeriesStatus422 | PostApiSeriesStatus500
+			>,
 			PostApiSeriesOptions,
 			TContext
 		> & { client?: QueryClient };
@@ -6124,14 +6139,18 @@ export function usePostApiSeries<TContext>(
 
 	const baseOptions = postApiSeriesMutationOptions(config) as UseMutationOptions<
 		PostApiSeriesStatus200,
-		ResponseErrorConfig<PostApiSeriesStatus422 | PostApiSeriesStatus500>,
+		ResponseErrorConfig<
+			PostApiSeriesStatus404 | PostApiSeriesStatus422 | PostApiSeriesStatus500
+		>,
 		PostApiSeriesOptions,
 		TContext
 	>;
 
 	return useMutation<
 		PostApiSeriesStatus200,
-		ResponseErrorConfig<PostApiSeriesStatus422 | PostApiSeriesStatus500>,
+		ResponseErrorConfig<
+			PostApiSeriesStatus404 | PostApiSeriesStatus422 | PostApiSeriesStatus500
+		>,
 		PostApiSeriesOptions,
 		TContext
 	>(
@@ -6143,7 +6162,9 @@ export function usePostApiSeries<TContext>(
 		queryClient,
 	) as UseMutationResult<
 		PostApiSeriesStatus200,
-		ResponseErrorConfig<PostApiSeriesStatus422 | PostApiSeriesStatus500>,
+		ResponseErrorConfig<
+			PostApiSeriesStatus404 | PostApiSeriesStatus422 | PostApiSeriesStatus500
+		>,
 		PostApiSeriesOptions,
 		TContext
 	>;
@@ -6248,16 +6269,17 @@ export function useGetApiSeriesBySeriesIdReleases<
 
 export const getApiZonesByZoneIdQueryKey = ({
 	path,
+	query,
 }: Omit<GetApiZonesByZoneIdOptions, "headers">) =>
-	[{ url: "/api/zones/:zoneId", params: path }] as const;
+	[{ url: "/api/zones/:zoneId", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiZonesByZoneIdQueryKey = ReturnType<typeof getApiZonesByZoneIdQueryKey>;
 
 export function getApiZonesByZoneIdQueryOptions(
-	{ path }: GetApiZonesByZoneIdOptions,
+	{ path, query }: GetApiZonesByZoneIdOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiZonesByZoneIdQueryKey({ path });
+	const queryKey = getApiZonesByZoneIdQueryKey({ path, query });
 	return queryOptions<
 		GetApiZonesByZoneIdStatus200,
 		ResponseErrorConfig<
@@ -6273,6 +6295,7 @@ export function getApiZonesByZoneIdQueryOptions(
 			const { data } = await getApiZonesByZoneId({
 				...config,
 				path,
+				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -6292,7 +6315,11 @@ export function useGetApiZonesByZoneId<
 >(
 	{
 		path,
-	}: { path: GetApiZonesByZoneIdOptions["path"] | (() => GetApiZonesByZoneIdOptions["path"]) },
+		query,
+	}: {
+		path: GetApiZonesByZoneIdOptions["path"] | (() => GetApiZonesByZoneIdOptions["path"]);
+		query?: GetApiZonesByZoneIdOptions["query"] | (() => GetApiZonesByZoneIdOptions["query"]);
+	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
@@ -6312,7 +6339,10 @@ export function useGetApiZonesByZoneId<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
 	const queryKey = resolvedOptions?.queryKey ?? getApiZonesByZoneIdQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
@@ -7444,7 +7474,12 @@ export function postApiZonesMutationOptions<TContext = unknown>(
 	const mutationKey = postApiZonesMutationKey();
 	return mutationOptions<
 		PostApiZonesStatus200,
-		ResponseErrorConfig<PostApiZonesStatus400 | PostApiZonesStatus422 | PostApiZonesStatus500>,
+		ResponseErrorConfig<
+			| PostApiZonesStatus400
+			| PostApiZonesStatus404
+			| PostApiZonesStatus422
+			| PostApiZonesStatus500
+		>,
 		PostApiZonesOptions,
 		TContext
 	>({
@@ -7465,7 +7500,10 @@ export function usePostApiZones<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiZonesStatus200,
 			ResponseErrorConfig<
-				PostApiZonesStatus400 | PostApiZonesStatus422 | PostApiZonesStatus500
+				| PostApiZonesStatus400
+				| PostApiZonesStatus404
+				| PostApiZonesStatus422
+				| PostApiZonesStatus500
 			>,
 			PostApiZonesOptions,
 			TContext
@@ -7479,14 +7517,24 @@ export function usePostApiZones<TContext>(
 
 	const baseOptions = postApiZonesMutationOptions(config) as UseMutationOptions<
 		PostApiZonesStatus200,
-		ResponseErrorConfig<PostApiZonesStatus400 | PostApiZonesStatus422 | PostApiZonesStatus500>,
+		ResponseErrorConfig<
+			| PostApiZonesStatus400
+			| PostApiZonesStatus404
+			| PostApiZonesStatus422
+			| PostApiZonesStatus500
+		>,
 		PostApiZonesOptions,
 		TContext
 	>;
 
 	return useMutation<
 		PostApiZonesStatus200,
-		ResponseErrorConfig<PostApiZonesStatus400 | PostApiZonesStatus422 | PostApiZonesStatus500>,
+		ResponseErrorConfig<
+			| PostApiZonesStatus400
+			| PostApiZonesStatus404
+			| PostApiZonesStatus422
+			| PostApiZonesStatus500
+		>,
 		PostApiZonesOptions,
 		TContext
 	>(
@@ -7498,7 +7546,12 @@ export function usePostApiZones<TContext>(
 		queryClient,
 	) as UseMutationResult<
 		PostApiZonesStatus200,
-		ResponseErrorConfig<PostApiZonesStatus400 | PostApiZonesStatus422 | PostApiZonesStatus500>,
+		ResponseErrorConfig<
+			| PostApiZonesStatus400
+			| PostApiZonesStatus404
+			| PostApiZonesStatus422
+			| PostApiZonesStatus500
+		>,
 		PostApiZonesOptions,
 		TContext
 	>;
@@ -10903,7 +10956,9 @@ export function postApiEntitiesMutationOptions<TContext = unknown>(
 	const mutationKey = postApiEntitiesMutationKey();
 	return mutationOptions<
 		PostApiEntitiesStatus200,
-		ResponseErrorConfig<PostApiEntitiesStatus422 | PostApiEntitiesStatus500>,
+		ResponseErrorConfig<
+			PostApiEntitiesStatus404 | PostApiEntitiesStatus422 | PostApiEntitiesStatus500
+		>,
 		PostApiEntitiesOptions,
 		TContext
 	>({
@@ -10923,7 +10978,9 @@ export function usePostApiEntities<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
 			PostApiEntitiesStatus200,
-			ResponseErrorConfig<PostApiEntitiesStatus422 | PostApiEntitiesStatus500>,
+			ResponseErrorConfig<
+				PostApiEntitiesStatus404 | PostApiEntitiesStatus422 | PostApiEntitiesStatus500
+			>,
 			PostApiEntitiesOptions,
 			TContext
 		> & { client?: QueryClient };
@@ -10936,14 +10993,18 @@ export function usePostApiEntities<TContext>(
 
 	const baseOptions = postApiEntitiesMutationOptions(config) as UseMutationOptions<
 		PostApiEntitiesStatus200,
-		ResponseErrorConfig<PostApiEntitiesStatus422 | PostApiEntitiesStatus500>,
+		ResponseErrorConfig<
+			PostApiEntitiesStatus404 | PostApiEntitiesStatus422 | PostApiEntitiesStatus500
+		>,
 		PostApiEntitiesOptions,
 		TContext
 	>;
 
 	return useMutation<
 		PostApiEntitiesStatus200,
-		ResponseErrorConfig<PostApiEntitiesStatus422 | PostApiEntitiesStatus500>,
+		ResponseErrorConfig<
+			PostApiEntitiesStatus404 | PostApiEntitiesStatus422 | PostApiEntitiesStatus500
+		>,
 		PostApiEntitiesOptions,
 		TContext
 	>(
@@ -10955,7 +11016,9 @@ export function usePostApiEntities<TContext>(
 		queryClient,
 	) as UseMutationResult<
 		PostApiEntitiesStatus200,
-		ResponseErrorConfig<PostApiEntitiesStatus422 | PostApiEntitiesStatus500>,
+		ResponseErrorConfig<
+			PostApiEntitiesStatus404 | PostApiEntitiesStatus422 | PostApiEntitiesStatus500
+		>,
 		PostApiEntitiesOptions,
 		TContext
 	>;
@@ -10963,16 +11026,17 @@ export function usePostApiEntities<TContext>(
 
 export const getApiEntitiesByUnitIdQueryKey = ({
 	path,
+	query,
 }: Omit<GetApiEntitiesByUnitIdOptions, "headers">) =>
-	[{ url: "/api/entities/:unitId", params: path }] as const;
+	[{ url: "/api/entities/:unitId", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiEntitiesByUnitIdQueryKey = ReturnType<typeof getApiEntitiesByUnitIdQueryKey>;
 
 export function getApiEntitiesByUnitIdQueryOptions(
-	{ path }: GetApiEntitiesByUnitIdOptions,
+	{ path, query }: GetApiEntitiesByUnitIdOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiEntitiesByUnitIdQueryKey({ path });
+	const queryKey = getApiEntitiesByUnitIdQueryKey({ path, query });
 	return queryOptions<
 		GetApiEntitiesByUnitIdStatus200,
 		ResponseErrorConfig<
@@ -10988,6 +11052,7 @@ export function getApiEntitiesByUnitIdQueryOptions(
 			const { data } = await getApiEntitiesByUnitId({
 				...config,
 				path,
+				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -11007,8 +11072,11 @@ export function useGetApiEntitiesByUnitId<
 >(
 	{
 		path,
+		query,
 	}: {
 		path: GetApiEntitiesByUnitIdOptions["path"] | (() => GetApiEntitiesByUnitIdOptions["path"]);
+		query?:
+			GetApiEntitiesByUnitIdOptions["query"] | (() => GetApiEntitiesByUnitIdOptions["query"]);
 	},
 	options: {
 		query?: Partial<
@@ -11029,7 +11097,10 @@ export function useGetApiEntitiesByUnitId<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
 	const queryKey = resolvedOptions?.queryKey ?? getApiEntitiesByUnitIdQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
@@ -11051,6 +11122,106 @@ export function useGetApiEntitiesByUnitId<
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
+}
+
+export const putApiEntitiesByUnitIdLocalizationsByLanguageMutationKey = () =>
+	[{ url: "/api/entities/:unitId/localizations/:language" }] as const;
+
+export function putApiEntitiesByUnitIdLocalizationsByLanguageMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiEntitiesByUnitIdLocalizationsByLanguageMutationKey();
+	return mutationOptions<
+		PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200,
+		ResponseErrorConfig<
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus500
+		>,
+		PutApiEntitiesByUnitIdLocalizationsByLanguageOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiEntitiesByUnitIdLocalizationsByLanguage({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create or replace entity localization
+ * {@link /api/entities/:unitId/localizations/:language}
+ */
+export function usePutApiEntitiesByUnitIdLocalizationsByLanguage<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200,
+			ResponseErrorConfig<
+				| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403
+				| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404
+				| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422
+				| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus500
+			>,
+			PutApiEntitiesByUnitIdLocalizationsByLanguageOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiEntitiesByUnitIdLocalizationsByLanguageMutationKey();
+
+	const baseOptions = putApiEntitiesByUnitIdLocalizationsByLanguageMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200,
+		ResponseErrorConfig<
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus500
+		>,
+		PutApiEntitiesByUnitIdLocalizationsByLanguageOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200,
+		ResponseErrorConfig<
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus500
+		>,
+		PutApiEntitiesByUnitIdLocalizationsByLanguageOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiEntitiesByUnitIdLocalizationsByLanguageStatus200,
+		ResponseErrorConfig<
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus500
+		>,
+		PutApiEntitiesByUnitIdLocalizationsByLanguageOptions,
+		TContext
+	>;
 }
 
 export const getApiEntitiesByUnitIdAssociationPolicyQueryKey = ({
@@ -17326,7 +17497,9 @@ export function postApiRealmsMutationOptions<TContext = unknown>(
 	const mutationKey = postApiRealmsMutationKey();
 	return mutationOptions<
 		PostApiRealmsStatus200,
-		ResponseErrorConfig<PostApiRealmsStatus422 | PostApiRealmsStatus500>,
+		ResponseErrorConfig<
+			PostApiRealmsStatus404 | PostApiRealmsStatus422 | PostApiRealmsStatus500
+		>,
 		PostApiRealmsOptions,
 		TContext
 	>({
@@ -17346,7 +17519,9 @@ export function usePostApiRealms<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
 			PostApiRealmsStatus200,
-			ResponseErrorConfig<PostApiRealmsStatus422 | PostApiRealmsStatus500>,
+			ResponseErrorConfig<
+				PostApiRealmsStatus404 | PostApiRealmsStatus422 | PostApiRealmsStatus500
+			>,
 			PostApiRealmsOptions,
 			TContext
 		> & { client?: QueryClient };
@@ -17359,14 +17534,18 @@ export function usePostApiRealms<TContext>(
 
 	const baseOptions = postApiRealmsMutationOptions(config) as UseMutationOptions<
 		PostApiRealmsStatus200,
-		ResponseErrorConfig<PostApiRealmsStatus422 | PostApiRealmsStatus500>,
+		ResponseErrorConfig<
+			PostApiRealmsStatus404 | PostApiRealmsStatus422 | PostApiRealmsStatus500
+		>,
 		PostApiRealmsOptions,
 		TContext
 	>;
 
 	return useMutation<
 		PostApiRealmsStatus200,
-		ResponseErrorConfig<PostApiRealmsStatus422 | PostApiRealmsStatus500>,
+		ResponseErrorConfig<
+			PostApiRealmsStatus404 | PostApiRealmsStatus422 | PostApiRealmsStatus500
+		>,
 		PostApiRealmsOptions,
 		TContext
 	>(
@@ -17378,7 +17557,9 @@ export function usePostApiRealms<TContext>(
 		queryClient,
 	) as UseMutationResult<
 		PostApiRealmsStatus200,
-		ResponseErrorConfig<PostApiRealmsStatus422 | PostApiRealmsStatus500>,
+		ResponseErrorConfig<
+			PostApiRealmsStatus404 | PostApiRealmsStatus422 | PostApiRealmsStatus500
+		>,
 		PostApiRealmsOptions,
 		TContext
 	>;
@@ -17386,16 +17567,17 @@ export function usePostApiRealms<TContext>(
 
 export const getApiRealmsByRealmIdQueryKey = ({
 	path,
+	query,
 }: Omit<GetApiRealmsByRealmIdOptions, "headers">) =>
-	[{ url: "/api/realms/:realmId", params: path }] as const;
+	[{ url: "/api/realms/:realmId", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiRealmsByRealmIdQueryKey = ReturnType<typeof getApiRealmsByRealmIdQueryKey>;
 
 export function getApiRealmsByRealmIdQueryOptions(
-	{ path }: GetApiRealmsByRealmIdOptions,
+	{ path, query }: GetApiRealmsByRealmIdOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiRealmsByRealmIdQueryKey({ path });
+	const queryKey = getApiRealmsByRealmIdQueryKey({ path, query });
 	return queryOptions<
 		GetApiRealmsByRealmIdStatus200,
 		ResponseErrorConfig<
@@ -17411,6 +17593,7 @@ export function getApiRealmsByRealmIdQueryOptions(
 			const { data } = await getApiRealmsByRealmId({
 				...config,
 				path,
+				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -17430,8 +17613,11 @@ export function useGetApiRealmsByRealmId<
 >(
 	{
 		path,
+		query,
 	}: {
 		path: GetApiRealmsByRealmIdOptions["path"] | (() => GetApiRealmsByRealmIdOptions["path"]);
+		query?:
+			GetApiRealmsByRealmIdOptions["query"] | (() => GetApiRealmsByRealmIdOptions["query"]);
 	},
 	options: {
 		query?: Partial<
@@ -17452,7 +17638,10 @@ export function useGetApiRealmsByRealmId<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
 	const queryKey = resolvedOptions?.queryKey ?? getApiRealmsByRealmIdQueryKey(resolvedParams);
 
 	const queryResult = useQuery(

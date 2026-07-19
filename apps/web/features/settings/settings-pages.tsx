@@ -4,13 +4,11 @@ import {
 	getApiUsersByIdQueryKey,
 	getApiUsersMePreferencesQueryKey,
 	getApiUsersMeQueryKey,
-	useDeleteApiImageAssetsById,
 	useGetApiUsersMe,
 	useGetApiUsersMePreferences,
 	usePatchApiUsersMe,
-	usePostApiImageAssets,
-	usePostApiImageAssetsByIdComplete,
 	usePutApiUsersMePreferences,
+	type GetApiUsersMeStatus200,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -18,17 +16,19 @@ import { useState, type FormEvent } from "react";
 
 import { PageHeading } from "@rezics/ui";
 import { Alert, AlertDescription } from "@rezics/ui";
-import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
 import { Checkbox, CheckboxGroup } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@rezics/ui";
-import { FileUpload, FileUploadTrigger } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
+import {
+	LocalizationImageUploadField,
+	type LocalizationImageAssetValue,
+} from "@/features/units/localization-image-upload-field";
 import { useSetLocale, useTranslation } from "@/i18n/client";
 import { authClient } from "@/lib/auth-client";
 
@@ -51,9 +51,16 @@ function isContentRating(value: FormDataEntryValue): value is ContentRating {
 }
 
 export function ProfileSettings() {
+	const profile = useGetApiUsersMe();
+	if (profile.isPending) return <QueryPending />;
+	if (profile.isError || !profile.data)
+		return <QueryFailure error={profile.error} retry={() => void profile.refetch()} />;
+	return <ProfileSettingsForm key={profile.data.updatedAt} current={profile.data} />;
+}
+
+function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 	const { t } = useTranslation({ suspense: true });
 	const queryClient = useQueryClient();
-	const profile = useGetApiUsersMe();
 	const update = usePatchApiUsersMe({
 		mutation: {
 			onSuccess: (profile) =>
@@ -65,42 +72,9 @@ export function ProfileSettings() {
 				]),
 		},
 	});
-	const requestUpload = usePostApiImageAssets();
-	const completeUpload = usePostApiImageAssetsByIdComplete();
-	const deleteUpload = useDeleteApiImageAssetsById();
 	const [saved, setSaved] = useState(false);
-	const [avatarFiles, setAvatarFiles] = useState<File[]>([]);
-	const [uploadError, setUploadError] = useState(false);
-	if (profile.isPending) return <QueryPending />;
-	if (profile.isError || !profile.data)
-		return <QueryFailure error={profile.error} retry={() => void profile.refetch()} />;
-	const current = profile.data;
-	async function uploadAvatar(file: File) {
-		let assetId: string | undefined;
-		setUploadError(false);
-		try {
-			const asset = await requestUpload.mutateAsync({
-				body: { contentType: file.type, size: file.size, access: "public" },
-			});
-			assetId = asset.id;
-			const response = await fetch(asset.upload.url, {
-				method: "PUT",
-				headers: asset.upload.headers,
-				body: file,
-			});
-			if (!response.ok) throw new Error("Upload failed");
-			await completeUpload.mutateAsync({ path: { id: asset.id } });
-			await update.mutateAsync({
-				body: { updatedAt: current.updatedAt, avatarAssetId: asset.id },
-			});
-		} catch {
-			if (assetId)
-				await deleteUpload.mutateAsync({ path: { id: assetId } }).catch(() => undefined);
-			setUploadError(true);
-		} finally {
-			setAvatarFiles([]);
-		}
-	}
+	const [avatar, setAvatar] = useState<LocalizationImageAssetValue | null>(current.avatar);
+	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(current.banner);
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setSaved(false);
@@ -114,6 +88,8 @@ export function ProfileSettings() {
 					...(name ? { name } : {}),
 					...(slug ? { slug } : {}),
 					summary: String(data.get("summary") ?? "").trim(),
+					avatarAssetId: avatar?.id ?? null,
+					bannerAssetId: banner?.id ?? null,
 				},
 			});
 			setSaved(true);
@@ -126,38 +102,22 @@ export function ProfileSettings() {
 			<form onSubmit={submit}>
 				<FieldGroup>
 					<Field>
-						<FieldLabel>{t.ui.avatar}</FieldLabel>
-						<FileUpload
-							accept="image/jpeg,image/png,image/webp,image/gif"
-							acceptedFiles={avatarFiles}
-							disabled={requestUpload.isPending || completeUpload.isPending}
-							maxFiles={1}
-							onFileAccept={({ files }) => {
-								const file = files[0];
-								if (file) void uploadAvatar(file);
-							}}
-							onFileChange={({ acceptedFiles }) => setAvatarFiles(acceptedFiles)}
-							onFileReject={() => setUploadError(true)}
-						>
-							<div className="flex flex-wrap items-center gap-4">
-								<Avatar className="size-16">
-									{current.avatar && <AvatarImage alt="" src={current.avatar} />}
-									<AvatarFallback>
-										{(current.name ?? current.slug ?? t.ui.avatar)
-											.slice(0, 1)
-											.toUpperCase()}
-									</AvatarFallback>
-								</Avatar>
-								<FileUploadTrigger asChild>
-									<Button type="button" variant="outline">
-										{t.cover.choose}
-									</Button>
-								</FileUploadTrigger>
-							</div>
-						</FileUpload>
-						{uploadError && (
-							<p className="text-destructive text-sm">{t.ui.retryLater}</p>
-						)}
+						<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
+						<LocalizationImageUploadField
+							onChange={setAvatar}
+							role="avatar"
+							shape="avatar"
+							value={avatar}
+						/>
+					</Field>
+					<Field>
+						<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
+						<LocalizationImageUploadField
+							onChange={setBanner}
+							role="banner"
+							shape="banner"
+							value={banner}
+						/>
 					</Field>
 					<Field>
 						<FieldLabel>{t.ui.displayName}</FieldLabel>
