@@ -2,7 +2,13 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 
 import type { Authorization } from "../authorization";
 import { database, type DatabaseTransaction } from "../database";
-import { auditEvent, unit, unitRedirect, type UnitKindValues } from "../database/schema";
+import {
+	auditEvent,
+	unit,
+	unitRedirect,
+	type GovernanceReasonCodeValues,
+	type UnitKindValues,
+} from "../database/schema";
 import {
 	SlugDepthExceeded,
 	SlugRedirectLoop,
@@ -19,6 +25,7 @@ import { RootSlugNamespaceUnitId } from "./slug-system";
 import { parseSlugLabel, SlugAddressMaximumDepth, type SlugLabel } from "./slug";
 
 type UnitKind = (typeof UnitKindValues)[number];
+type GovernanceReasonCode = (typeof GovernanceReasonCodeValues)[number];
 type CanonicalUnitKind = Exclude<UnitKind, "redirect">;
 type UnitInsert = typeof unit.$inferInsert;
 
@@ -49,12 +56,6 @@ export interface UnitAddressMutationResult {
 
 const SlugTreeMutationLock = "rezics-unit-slug-tree";
 const RedirectMaximumHops = 8;
-
-function ensureReason(reason: string): string {
-	const value = reason.trim();
-	if (!value) throw new UnitAddressMutationForbidden();
-	return value;
-}
 
 function objectField(value: unknown, key: string): unknown {
 	return typeof value === "object" && value !== null && key in value
@@ -306,11 +307,14 @@ export async function resolveUnitPath(segments: readonly string[]): Promise<Reso
 
 export async function createSlugNamespace(
 	authorization: Authorization<string>,
-	input: { readonly scopeUnitId: string; readonly slug: string; readonly reason: string },
+	input: {
+		readonly scopeUnitId: string;
+		readonly slug: string;
+		readonly reasonCode: GovernanceReasonCode;
+	},
 ): Promise<{ readonly id: string; readonly canonicalPath: readonly SlugLabel[] }> {
 	await authorization.platform.ensureCapability("unit.slug.namespace.manage");
 	const slug = parseSlugLabel(input.slug);
-	const reason = ensureReason(input.reason);
 	const id = await database.transaction(async (tx) => {
 		await lockSlugTreeScopeRead(tx);
 		await ensureCanonicalScope(tx, input.scopeUnitId, { allowRoot: true });
@@ -330,8 +334,7 @@ export async function createSlugNamespace(
 			await tx.insert(auditEvent).values({
 				actorProfileId: authorization.profileId,
 				action: "unit.slug_namespace.create",
-				decisionCode: "allowed",
-				reason,
+				decisionCode: input.reasonCode,
 				subjectKind: "unit",
 				subjectId: created.id,
 				metadata: { after: { scopeUnitId: input.scopeUnitId, slug } },
@@ -350,11 +353,10 @@ export async function updateUnitSlugAddress(
 		readonly unitId: string;
 		readonly scopeUnitId: string;
 		readonly slug: string;
-		readonly reason: string;
+		readonly reasonCode: GovernanceReasonCode;
 	},
 ): Promise<UnitAddressMutationResult> {
 	const slug = parseSlugLabel(input.slug);
-	const reason = ensureReason(input.reason);
 	const result = await database.transaction(async (tx) => {
 		await lockSlugTree(tx);
 		const [current] = await tx
@@ -432,8 +434,7 @@ export async function updateUnitSlugAddress(
 			actorProfileId: authorization.profileId,
 			action:
 				current.slugScopeId === input.scopeUnitId ? "unit.slug.rename" : "unit.slug.move",
-			decisionCode: "allowed",
-			reason,
+			decisionCode: input.reasonCode,
 			subjectKind: "unit",
 			subjectId: current.id,
 			metadata: {
@@ -450,10 +451,12 @@ export async function updateUnitSlugAddress(
 
 export async function releaseSlugRedirect(
 	authorization: Authorization<string>,
-	input: { readonly redirectUnitId: string; readonly reason: string },
+	input: {
+		readonly redirectUnitId: string;
+		readonly reasonCode: GovernanceReasonCode;
+	},
 ): Promise<void> {
 	await authorization.platform.ensureCapability("unit.slug.redirect.release");
-	const reason = ensureReason(input.reason);
 	await database.transaction(async (tx) => {
 		const [redirect] = await tx
 			.select({
@@ -473,8 +476,7 @@ export async function releaseSlugRedirect(
 		await tx.insert(auditEvent).values({
 			actorProfileId: authorization.profileId,
 			action: "unit.slug_redirect.release",
-			decisionCode: "allowed",
-			reason,
+			decisionCode: input.reasonCode,
 			subjectKind: "unit",
 			subjectId: redirect.targetUnitId,
 			metadata: {

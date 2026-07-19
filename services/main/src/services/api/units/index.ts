@@ -160,7 +160,7 @@ export default new Elysia({ prefix: "/units" })
 		async ({ params, authorization, body, status }) => {
 			await releaseSlugRedirect(authorization, {
 				redirectUnitId: params.redirectUnitId,
-				reason: body.reason,
+				reasonCode: body.reasonCode,
 			});
 			return status(StatusCodes.NO_CONTENT, undefined);
 		},

@@ -17,6 +17,7 @@ import { and, eq, notInArray } from "drizzle-orm";
 import { env } from "../src/services/config";
 import { ApiPermissionValues, toApiKeyPermissions } from "../src/services/auth/api-permissions";
 import { database, type DatabaseTransaction } from "../src/services/database";
+import { createGovernanceNotePost } from "../src/services/governance/note-service";
 import { isPrimaryUnitLocalization } from "../src/services/units/localization";
 import {
 	accountEnforcement,
@@ -1191,7 +1192,7 @@ async function seedStructure(
 			scope: ["localizations", itemAt(data.languages(index), 0), "title"],
 			mode: "frozen" as const,
 			createdByProfileId: itemAt(profiles, index * 11).id,
-			reason: "Seeded moderation lock",
+			reasonCode: "administrative" as const,
 			createdAt: data.pastDate(180),
 			updatedAt: data.pastDate(30),
 		})),
@@ -1714,6 +1715,7 @@ async function seedCommunications(
 		(batch) => tx.insert(notificationPreference).values(batch),
 	);
 	const notificationSubjects = [...content.rootPosts, ...content.reviews, ...content.replies];
+	const seededNotificationKinds = ["reply", "follow", "direct_message"] as const;
 	await writeBatches(
 		profiles.flatMap((recipient, profileIndex) =>
 			Array.from({ length: SeedPlan.notifications / profiles.length }, (_, index) => {
@@ -1726,12 +1728,22 @@ async function seedCommunications(
 					["not_requested", "pending", "sent", "failed"] as const,
 					profileIndex + index,
 				);
+				const kind = itemAt(seededNotificationKinds, profileIndex + index);
+				const conversationId = itemAt(conversations, profileIndex * 7 + index).id;
 				return {
 					recipientProfileId: recipient.id,
 					actorProfileId: actor.id,
-					kind: itemAt(notificationKinds, profileIndex + index),
-					subjectUnitId: itemAt(notificationSubjects, profileIndex * 13 + index).id,
-					payload: { seed: true, index },
+					kind,
+					subjectUnitId:
+						kind === "reply"
+							? itemAt(notificationSubjects, profileIndex * 13 + index).id
+							: kind === "follow"
+								? actor.id
+								: null,
+					payload:
+						kind === "direct_message"
+							? { type: "direct_message", conversationId }
+							: null,
 					dedupeKey: `seed:${profileIndex}:${index}`,
 					inAppVisible: index % 9 !== 0,
 					readAt: index % 3 === 0 ? new Date(createdAt.getTime() + 60_000) : null,
@@ -1764,25 +1776,52 @@ async function seedGovernance(
 		...content.reviews,
 	];
 	const feedbackRows: (typeof feedback.$inferSelect)[] = [];
-	for (const batch of chunks(
-		Array.from({ length: SeedPlan.feedback }, (_, index) => {
-			const createdAt = data.pastDate(365, 1);
-			const resolved = index % 3 === 0;
-			return {
-				profileId: itemAt(profiles, index * 7).id,
+	for (let index = 0; index < SeedPlan.feedback; index += 1) {
+		const createdAt = data.pastDate(365, 1);
+		const resolved = index % 3 === 0;
+		const reporter = itemAt(profiles, index * 7);
+		const resolver = resolved ? itemAt(profiles, index * 13 + 1) : undefined;
+		const subjectUnitId = itemAt(governanceTargets, index * 11).id;
+		const [row] = await tx
+			.insert(feedback)
+			.values({
+				profileId: reporter.id,
 				kind: itemAt(["report", "bug", "feature", "other"] as const, index),
-				content: data.fakerByLanguage.en.lorem.paragraph(),
 				url: index % 4 === 0 ? `https://example.test/feedback/${position(index)}` : null,
-				subjectUnitId: itemAt(governanceTargets, index * 11).id,
-				resolution: resolved ? "Resolved in the seed dataset" : null,
-				resolvedByProfileId: resolved ? itemAt(profiles, index * 13 + 1).id : null,
+				subjectUnitId,
+				resolutionCode: resolved ? "administrative" : null,
+				resolvedByProfileId: resolver?.id ?? null,
 				resolvedAt: resolved ? new Date(createdAt.getTime() + 3_600_000) : null,
 				createdAt,
 				updatedAt: createdAt,
-			};
-		}),
-	)) {
-		feedbackRows.push(...(await tx.insert(feedback).values(batch).returning()));
+			})
+			.returning();
+		if (!row) throw new Error("Seed feedback insertion did not return a row");
+		feedbackRows.push(row);
+		await createGovernanceNotePost(tx, {
+			actorProfileId: reporter.id,
+			subjectKind: "feedback",
+			subjectId: row.id,
+			subjectUnitId,
+			note: {
+				role: "evidence",
+				language: "en",
+				content: createPortableTextDocument(data.portableText("en", 2)),
+			},
+		});
+		if (resolver)
+			await createGovernanceNotePost(tx, {
+				actorProfileId: resolver.id,
+				subjectKind: "feedback",
+				subjectId: row.id,
+				subjectUnitId,
+				publicRecipientProfileIds: [reporter.id],
+				note: {
+					role: "public_notice",
+					language: "en",
+					content: createPortableTextDocument(data.portableText("en", 1)),
+				},
+			});
 	}
 
 	const targetKinds = [
@@ -1832,8 +1871,6 @@ async function seedGovernance(
 				targetPath: targetKind === "unit_field" ? "/localizations/en/title" : null,
 				reporterProfileId: itemAt(profiles, index * 17).id,
 				assignedProfileId: index % 4 === 0 ? null : itemAt(profiles, index * 19 + 1).id,
-				reason: "Seeded moderation report",
-				safeSummary: data.summary("en"),
 				createdAt,
 				updatedAt: createdAt,
 			};
@@ -1856,8 +1893,6 @@ async function seedGovernance(
 					reporterProfileId: itemAt(profiles, index * 7 + 2).id,
 					assignedProfileId: original.assignedProfileId,
 					duplicateOfCaseId: original.id,
-					reason: "Duplicate seed report",
-					safeSummary: original.safeSummary,
 					createdAt: data.pastDate(90),
 					updatedAt: data.pastDate(30),
 				};
@@ -1896,9 +1931,7 @@ async function seedGovernance(
 					kind,
 					resultingStatus: kind === "remove" ? ("removed" as const) : null,
 					resultingLocked: kind === "lock" ? true : null,
-					reasonCode: "administrative",
-					reason: "Seeded moderation decision",
-					publicMessage: index % 3 === 0 ? "A moderation decision was recorded." : null,
+					reasonCode: "administrative" as const,
 					requestId: `seed-request-${position(index)}`,
 					idempotencyKey: `seed-action-${position(index)}`,
 					createdAt: latestDate(data.pastDate(120), caseRow.createdAt, actor.createdAt),
@@ -1918,8 +1951,7 @@ async function seedGovernance(
 					caseId: reversed.caseId,
 					actorProfileId: actor.id,
 					kind: "reverse" as const,
-					reasonCode: "administrative",
-					reason: "Seeded reversal",
+					reasonCode: "administrative" as const,
 					reversesActionId: reversed.id,
 					requestId: `seed-reverse-request-${position(index)}`,
 					idempotencyKey: `seed-reverse-${position(index)}`,
@@ -1983,7 +2015,6 @@ async function seedGovernance(
 			),
 			decisionCode: index % 13 === 0 ? "denied" : "allowed",
 			requestId: `seed-audit-${position(index)}`,
-			reason: "Seeded audit event",
 			subjectKind: "unit",
 			subjectId: itemAt(governanceTargets, index * 17).id,
 			subjectPath: index % 5 === 0 ? "/localizations/en/title" : null,

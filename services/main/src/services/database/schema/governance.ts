@@ -16,6 +16,7 @@ import { realm, realmUnitStatus } from "./realm";
 import {
 	EnforcementKindValues,
 	FeedbackKindValues,
+	GovernanceReasonCodeValues,
 	GovernanceNoteRoleValues,
 	GovernanceNoteSubjectKindValues,
 	ModerationActionKindValues,
@@ -36,6 +37,10 @@ import { unitRevision } from "./history";
 import { post } from "./post";
 
 export const feedbackKind = pgEnum("feedback_kind", toEnumValues(FeedbackKindValues));
+export const governanceReasonCode = pgEnum(
+	"governance_reason_code",
+	toEnumValues(GovernanceReasonCodeValues),
+);
 export const moderationAuthority = pgEnum("moderation_authority", ["platform", "realm"]);
 export const moderationCaseState = pgEnum(
 	"moderation_case_state",
@@ -67,12 +72,9 @@ export const feedback = pgTable(
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
 		kind: feedbackKind().default("report").notNull(),
-		/** @UNIT_LOCALIZATION_EXEMPT Original user-authored feedback record. */
-		content: text().notNull(),
 		url: text(),
 		subjectUnitId: uuid().references(() => unit.id, { onDelete: "set null" }),
-		/** @UNIT_LOCALIZATION_EXEMPT Point-in-time staff resolution record. */
-		resolution: text(),
+		resolutionCode: governanceReasonCode(),
 		resolvedByProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
 		resolvedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
@@ -89,10 +91,9 @@ export const feedback = pgTable(
 			.where(sql`${table.resolvedAt} is null`),
 		index("feedback_subject_unit_idx").on(table.subjectUnitId),
 		index("feedback_resolved_by_idx").on(table.resolvedByProfileId),
-		check("feedback_content_not_blank", sql`btrim(${table.content}) <> ''`),
 		check(
 			"feedback_resolution_check",
-			sql`(${table.resolvedAt} is null and ${table.resolvedByProfileId} is null and ${table.resolution} is null) or (${table.resolvedAt} is not null and ${table.resolvedByProfileId} is not null and nullif(btrim(${table.resolution}), '') is not null)`,
+			sql`(${table.resolvedAt} is null and ${table.resolvedByProfileId} is null and ${table.resolutionCode} is null) or (${table.resolvedAt} is not null and ${table.resolvedByProfileId} is not null and ${table.resolutionCode} is not null)`,
 		),
 	],
 );
@@ -110,10 +111,6 @@ export const moderationCase = pgTable(
 		reporterProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
 		assignedProfileId: uuid().references(() => profile.id, { onDelete: "set null" }),
 		duplicateOfCaseId: uuid(),
-		/** @UNIT_LOCALIZATION_EXEMPT Point-in-time moderation evidence. */
-		reason: text(),
-		/** @UNIT_LOCALIZATION_EXEMPT Point-in-time moderation summary. */
-		safeSummary: text(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
@@ -176,11 +173,7 @@ export const moderationAction = pgTable(
 		kind: moderationActionKind().notNull(),
 		resultingStatus: moderationStatus(),
 		resultingLocked: boolean(),
-		reasonCode: text().notNull(),
-		/** @UNIT_LOCALIZATION_EXEMPT Immutable moderation decision rationale. */
-		reason: text(),
-		/** @UNIT_LOCALIZATION_EXEMPT Public copy recorded with one moderation decision. */
-		publicMessage: text(),
+		reasonCode: governanceReasonCode().notNull(),
 		reversesActionId: uuid(),
 		previousState: text(),
 		resultingState: text(),
@@ -206,7 +199,6 @@ export const moderationAction = pgTable(
 			table.id.desc(),
 		),
 		index("moderation_action_reverses_idx").on(table.reversesActionId),
-		check("moderation_action_reason_code_check", sql`btrim(${table.reasonCode}) <> ''`),
 		check(
 			"moderation_action_state_outcome_check",
 			sql`(${table.previousState} is null) = (${table.resultingState} is null)`,
@@ -291,12 +283,12 @@ export const governancePostBinding = pgTable(
 			foreignColumns: [unitRevision.id, unitRevision.unitId],
 			name: "governance_post_binding_revision_post_fkey",
 		}).onDelete("restrict"),
-		unique("governance_post_binding_subject_role_key").on(
+		index("governance_post_binding_subject_idx").on(table.subjectKind, table.subjectId),
+		index("governance_post_binding_subject_role_idx").on(
 			table.subjectKind,
 			table.subjectId,
 			table.role,
 		),
-		index("governance_post_binding_subject_idx").on(table.subjectKind, table.subjectId),
 	],
 );
 
@@ -346,8 +338,6 @@ export const auditEvent = pgTable(
 		action: text().notNull(),
 		decisionCode: text().notNull(),
 		requestId: text(),
-		/** @UNIT_LOCALIZATION_EXEMPT Immutable audit explanation. */
-		reason: text().notNull(),
 		subjectKind: text(),
 		subjectId: uuid(),
 		subjectPath: text(),
@@ -369,7 +359,7 @@ export const auditEvent = pgTable(
 		index("audit_event_request_idx").on(table.requestId),
 		check(
 			"audit_event_action_check",
-			sql`btrim(${table.action}) <> '' and btrim(${table.decisionCode}) <> '' and btrim(${table.reason}) <> ''`,
+			sql`btrim(${table.action}) <> '' and btrim(${table.decisionCode}) <> ''`,
 		),
 		check(
 			"audit_event_subject_check",

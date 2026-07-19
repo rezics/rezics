@@ -1,6 +1,10 @@
 import { type Static, t } from "elysia";
 
-import { NotificationKindValues } from "../../database/schema/contract-values";
+import {
+	GovernanceReasonCodeValues,
+	ModerationActionKindValues,
+	NotificationKindValues,
+} from "../../database/schema/contract-values";
 import { DateTime, Uuid } from "../schema";
 
 export const NotificationCursorQuery = t.Object({
@@ -32,18 +36,82 @@ export const ReplaceNotificationPreferencesBody = t.Object({
 	),
 });
 
-const NotificationItemResponse = t.Object({
+const NotificationItemBase = {
 	id: Uuid,
-	kind: t.String(),
 	title: t.String(),
 	body: t.String(),
 	actorProfileId: t.Nullable(Uuid),
 	actorName: t.Nullable(t.String()),
 	subjectUnitId: t.Nullable(Uuid),
-	payload: t.Nullable(t.Unknown()),
 	readAt: t.Nullable(DateTime),
 	createdAt: DateTime,
-});
+};
+
+export const ModerationNotificationPayload = t.Union([
+	t.Object(
+		{
+			type: t.Literal("moderation_action"),
+			actionId: Uuid,
+			actionKind: t.UnionEnum(ModerationActionKindValues, { default: undefined }),
+			reasonCode: t.UnionEnum(GovernanceReasonCodeValues, { default: undefined }),
+			publicNoticePostId: t.Optional(Uuid),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			type: t.Literal("feedback_resolution"),
+			feedbackId: Uuid,
+			resolutionCode: t.UnionEnum(GovernanceReasonCodeValues, { default: undefined }),
+			publicNoticePostId: t.Optional(Uuid),
+		},
+		{ additionalProperties: false },
+	),
+]);
+
+export const DirectMessageNotificationPayload = t.Object(
+	{ type: t.Literal("direct_message"), conversationId: Uuid },
+	{ additionalProperties: false },
+);
+
+export const RealmNotificationPayload = t.Object(
+	{ type: t.Literal("realm_event"), event: t.Literal("membership_updated") },
+	{ additionalProperties: false },
+);
+
+export const SystemNotificationPayload = t.Object(
+	{
+		type: t.Literal("system_event"),
+		event: t.String({ minLength: 1 }),
+		references: t.Optional(t.Record(t.String(), t.String())),
+	},
+	{ additionalProperties: false },
+);
+
+export const NotificationItemResponse = t.Union([
+	t.Object({ ...NotificationItemBase, kind: t.Literal("reply"), payload: t.Null() }),
+	t.Object({ ...NotificationItemBase, kind: t.Literal("follow"), payload: t.Null() }),
+	t.Object({
+		...NotificationItemBase,
+		kind: t.Literal("direct_message"),
+		payload: DirectMessageNotificationPayload,
+	}),
+	t.Object({
+		...NotificationItemBase,
+		kind: t.Literal("moderation"),
+		payload: ModerationNotificationPayload,
+	}),
+	t.Object({
+		...NotificationItemBase,
+		kind: t.Literal("realm"),
+		payload: RealmNotificationPayload,
+	}),
+	t.Object({
+		...NotificationItemBase,
+		kind: t.Literal("system"),
+		payload: SystemNotificationPayload,
+	}),
+]);
 
 export const NotificationListResponse = t.Object({
 	items: t.Array(NotificationItemResponse),

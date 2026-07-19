@@ -16,11 +16,12 @@ import {
 	realmMember,
 	RealmCapabilityValues,
 } from "../../database/schema";
+import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/note-service";
 import { createNotification, deliverNotificationEmail } from "../../notifications/service";
 import type { DatabaseTransaction } from "../../database";
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
-import { FeedbackNotFound } from "../feedback/errors";
+import { FeedbackAlreadyResolved, FeedbackNotFound } from "../feedback/errors";
 import { RealmMemberNotFound } from "../realms/errors";
 import { ProfileNotFound } from "../users/errors";
 import {
@@ -51,6 +52,7 @@ import {
 	EnforcementExpiryInvalid,
 	EnforcementNotFound,
 	ModerationCaseNotFound,
+	ModerationNoteRoleDuplicate,
 	PlatformGrantRealmForbidden,
 	RealmGrantCapabilityInvalid,
 	RealmGrantRealmRequired,
@@ -77,8 +79,6 @@ const caseSelection = {
 	reporterProfileId: moderationCase.reporterProfileId,
 	assignedProfileId: moderationCase.assignedProfileId,
 	duplicateOfCaseId: moderationCase.duplicateOfCaseId,
-	reason: moderationCase.reason,
-	safeSummary: moderationCase.safeSummary,
 	createdAt: moderationCase.createdAt,
 	updatedAt: moderationCase.updatedAt,
 };
@@ -110,6 +110,38 @@ const grantSelection = {
 };
 
 type CaseRecord = typeof moderationCase.$inferSelect;
+type PresentableCase = Pick<CaseRecord, "id" | "targetKind" | "targetId">;
+
+async function presentModerationCases<T extends PresentableCase>(
+	tx: DatabaseTransaction,
+	rows: readonly T[],
+) {
+	const caseNotes = await listGovernanceNotes(tx, {
+		subjectKind: "moderation_case",
+		subjectIds: rows.map((row) => row.id),
+		roles: ["internal_note"],
+	});
+	const feedbackIds = rows
+		.filter((row) => row.targetKind === "feedback")
+		.map((row) => row.targetId);
+	const feedbackNotes = await listGovernanceNotes(tx, {
+		subjectKind: "feedback",
+		subjectIds: feedbackIds,
+		roles: ["evidence", "public_notice"],
+	});
+	return rows.map((row) => ({
+		...row,
+		notes: [...caseNotes, ...feedbackNotes]
+			.filter(
+				(note) =>
+					(note.subjectId === row.id && note.role === "internal_note") ||
+					(row.targetKind === "feedback" && note.subjectId === row.targetId),
+			)
+			.sort((left, right) => left.createdAt.getTime() - right.createdAt.getTime())
+			.map(({ subjectId: _subjectId, ...note }) => note),
+	}));
+}
+
 async function ensureCaseAccess(
 	authorization: Authorization<string>,
 	row: Pick<CaseRecord, "authority" | "realmId">,
@@ -127,7 +159,6 @@ async function recordAuditEvent(
 		actorProfileId: string;
 		action: string;
 		decisionCode: string;
-		reason: string;
 		subjectKind?: string;
 		subjectId?: string;
 		subjectPath?: string | null;
@@ -147,19 +178,21 @@ export default new Elysia({ prefix: "/governance" })
 				authority: query.realmId ? "realm" : "platform",
 				realmId: query.realmId ?? null,
 			});
-			return {
-				items: await database
+			return database.transaction(async (tx) => {
+				const rows = await tx
 					.select(caseSelection)
 					.from(moderationCase)
 					.where(
 						and(
+							eq(moderationCase.authority, query.realmId ? "realm" : "platform"),
 							query.realmId ? eq(moderationCase.realmId, query.realmId) : undefined,
 							query.state ? eq(moderationCase.state, query.state) : undefined,
 						),
 					)
 					.orderBy(desc(moderationCase.createdAt), desc(moderationCase.id))
-					.limit(query.limit ?? 50),
-			};
+					.limit(query.limit ?? 50);
+				return { items: await presentModerationCases(tx, rows) };
+			});
 		},
 		{
 			access: "session-only",
@@ -174,14 +207,18 @@ export default new Elysia({ prefix: "/governance" })
 	.get(
 		"/moderation/cases/:caseId",
 		async ({ authorization, params }) => {
-			const [row] = await database
-				.select(caseSelection)
-				.from(moderationCase)
-				.where(eq(moderationCase.id, params.caseId))
-				.limit(1);
-			if (!row) throw new ModerationCaseNotFound();
-			await ensureCaseAccess(authorization, row);
-			return row;
+			return database.transaction(async (tx) => {
+				const [row] = await tx
+					.select(caseSelection)
+					.from(moderationCase)
+					.where(eq(moderationCase.id, params.caseId))
+					.limit(1);
+				if (!row) throw new ModerationCaseNotFound();
+				await ensureCaseAccess(authorization, row);
+				const [presented] = await presentModerationCases(tx, [row]);
+				if (!presented) throw new ModerationCaseNotFound();
+				return presented;
+			});
 		},
 		{
 			access: "session-only",
@@ -205,29 +242,36 @@ export default new Elysia({ prefix: "/governance" })
 			if (!current) throw new ModerationCaseNotFound();
 			await ensureCaseAccess(authorization, current);
 			return database.transaction(async (tx) => {
+				const { internalNote, ...changes } = body;
 				const rows = await tx
 					.update(moderationCase)
-					.set({
-						state: body.state,
-						assignedProfileId: body.assignedProfileId,
-						duplicateOfCaseId: body.duplicateOfCaseId,
-						safeSummary: body.safeSummary,
-						reason: body.reason,
-					})
+					.set({ ...changes, updatedAt: new Date() })
 					.where(eq(moderationCase.id, params.caseId))
 					.returning(caseSelection);
 				const [updated] = rows;
 				if (!updated) throw new ModerationCaseNotFound();
+				const note = internalNote
+					? await createGovernanceNotePost(tx, {
+							actorProfileId: profile.unitId,
+							subjectKind: "moderation_case",
+							subjectId: current.id,
+							subjectUnitId:
+								current.targetKind === "feedback" ? undefined : current.targetId,
+							realmId: current.realmId,
+							note: { role: "internal_note", ...internalNote },
+						})
+					: undefined;
 				await recordAuditEvent(tx, {
 					actorProfileId: profile.unitId,
 					action: "moderation.case.update",
 					decisionCode: "allowed",
-					reason: "Moderation case updated",
 					subjectKind: "moderation_case",
 					subjectId: params.caseId,
-					metadata: { changes: body },
+					metadata: { changes, internalNotePostId: note?.postId },
 				});
-				return updated;
+				const [presented] = await presentModerationCases(tx, [updated]);
+				if (!presented) throw new ModerationCaseNotFound();
+				return presented;
 			});
 		},
 		{
@@ -303,16 +347,40 @@ export default new Elysia({ prefix: "/governance" })
 				caseRow ?? { authority: "platform", realmId: null },
 			);
 			const result = await database.transaction(async (tx) => {
+				const [current] = await tx
+					.select({
+						id: feedback.id,
+						profileId: feedback.profileId,
+						subjectUnitId: feedback.subjectUnitId,
+						resolvedAt: feedback.resolvedAt,
+					})
+					.from(feedback)
+					.where(eq(feedback.id, params.feedbackId))
+					.for("update")
+					.limit(1);
+				if (!current) throw new FeedbackNotFound();
+				if (current.resolvedAt) throw new FeedbackAlreadyResolved();
 				const [updated] = await tx
 					.update(feedback)
 					.set({
-						resolution: body.resolution,
+						resolutionCode: body.resolutionCode,
 						resolvedByProfileId: profile.unitId,
 						resolvedAt: new Date(),
 					})
-					.where(eq(feedback.id, params.feedbackId))
+					.where(and(eq(feedback.id, params.feedbackId), isNull(feedback.resolvedAt)))
 					.returning({ id: feedback.id, profileId: feedback.profileId });
-				if (!updated) throw new FeedbackNotFound();
+				if (!updated) throw new FeedbackAlreadyResolved();
+				const publicNotice = body.publicNotice
+					? await createGovernanceNotePost(tx, {
+							actorProfileId: profile.unitId,
+							subjectKind: "feedback",
+							subjectId: updated.id,
+							subjectUnitId: current.subjectUnitId ?? undefined,
+							realmId: caseRow?.realmId,
+							publicRecipientProfileIds: [updated.profileId],
+							note: { role: "public_notice", ...body.publicNotice },
+						})
+					: undefined;
 				if (caseRow)
 					await tx
 						.update(moderationCase)
@@ -321,16 +389,21 @@ export default new Elysia({ prefix: "/governance" })
 				await recordAuditEvent(tx, {
 					actorProfileId: profile.unitId,
 					action: "feedback.resolve",
-					decisionCode: "allowed",
-					reason: body.resolution,
+					decisionCode: body.resolutionCode,
 					subjectKind: "feedback",
 					subjectId: updated.id,
+					metadata: { publicNoticePostId: publicNotice?.postId },
 				});
 				const notificationId = await createNotification(tx, {
 					recipientProfileId: updated.profileId,
 					actorProfileId: profile.unitId,
 					kind: "moderation",
-					payload: { feedbackId: updated.id, resolution: body.resolution },
+					payload: {
+						type: "feedback_resolution",
+						feedbackId: updated.id,
+						resolutionCode: body.resolutionCode,
+						publicNoticePostId: publicNotice?.postId,
+					},
 				});
 				return notificationId;
 			});
@@ -345,6 +418,7 @@ export default new Elysia({ prefix: "/governance" })
 				[StatusCodes.NO_CONTENT]: t.Void(),
 				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["FeedbackNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["FeedbackAlreadyResolved"]),
 			},
 			detail: {
 				summary: "Resolve feedback",
@@ -357,6 +431,8 @@ export default new Elysia({ prefix: "/governance" })
 		"/moderation/enforcements",
 		async ({ authorization, profile, body }) => {
 			await authorization.platform.ensureCapability("platform.moderate");
+			if (new Set(body.notes?.map((note) => note.role)).size !== (body.notes?.length ?? 0))
+				throw new ModerationNoteRoleDuplicate();
 			const expiresAt = body.expiresAt ? new Date(body.expiresAt) : undefined;
 			if (expiresAt && expiresAt <= new Date()) throw new EnforcementExpiryInvalid();
 			const result = await database.transaction(async (tx) => {
@@ -371,7 +447,6 @@ export default new Elysia({ prefix: "/governance" })
 					.values({
 						targetKind: "profile",
 						targetId: target.id,
-						reason: body.reason,
 					})
 					.returning({ id: moderationCase.id });
 				if (!caseRow) throw new Error("Moderation case insertion did not return a row");
@@ -381,12 +456,24 @@ export default new Elysia({ prefix: "/governance" })
 						caseId: caseRow.id,
 						actorProfileId: profile.unitId,
 						kind: body.kind,
-						reasonCode: body.decisionCode,
-						reason: body.reason,
-						publicMessage: body.publicMessage,
+						reasonCode: body.reasonCode,
 					})
 					.returning({ id: moderationAction.id });
 				if (!action) throw new Error("Moderation action insertion did not return a row");
+				const notePostIds: string[] = [];
+				let publicNoticePostId: string | undefined;
+				for (const note of body.notes ?? []) {
+					const createdNote = await createGovernanceNotePost(tx, {
+						actorProfileId: profile.unitId,
+						subjectKind: "moderation_action",
+						subjectId: action.id,
+						subjectUnitId: target.id,
+						publicRecipientProfileIds: [target.id],
+						note,
+					});
+					notePostIds.push(createdNote.postId);
+					if (note.role === "public_notice") publicNoticePostId = createdNote.postId;
+				}
 				const [created] = await tx
 					.insert(accountEnforcement)
 					.values({
@@ -406,16 +493,21 @@ export default new Elysia({ prefix: "/governance" })
 					actorProfileId: profile.unitId,
 					kind: "moderation",
 					subjectUnitId: target.id,
-					payload: { kind: body.kind, message: body.publicMessage },
+					payload: {
+						type: "moderation_action",
+						actionId: action.id,
+						actionKind: body.kind,
+						reasonCode: body.reasonCode,
+						publicNoticePostId,
+					},
 				});
 				await recordAuditEvent(tx, {
 					actorProfileId: profile.unitId,
 					action: "account.enforcement.create",
-					decisionCode: body.decisionCode,
-					reason: body.reason,
+					decisionCode: body.reasonCode,
 					subjectKind: "profile",
 					subjectId: target.id,
-					metadata: { enforcementId: created.id, kind: body.kind },
+					metadata: { enforcementId: created.id, kind: body.kind, notePostIds },
 				});
 				return { created, notificationId };
 			});
@@ -427,7 +519,10 @@ export default new Elysia({ prefix: "/governance" })
 			body: CreateAccountEnforcementBody,
 			response: {
 				[StatusCodes.OK]: EnforcementResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["EnforcementExpiryInvalid"]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"EnforcementExpiryInvalid",
+					"ModerationNoteRoleDuplicate",
+				]),
 				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["ProfileNotFound"]),
 			},
@@ -438,7 +533,9 @@ export default new Elysia({ prefix: "/governance" })
 		"/moderation/enforcements/:enforcementId/revoke",
 		async ({ authorization, profile, params, body }) => {
 			await authorization.platform.ensureCapability("platform.moderate");
-			return database.transaction(async (tx) => {
+			if (new Set(body.notes?.map((note) => note.role)).size !== (body.notes?.length ?? 0))
+				throw new ModerationNoteRoleDuplicate();
+			const result = await database.transaction(async (tx) => {
 				const [current] = await tx
 					.select({
 						id: accountEnforcement.id,
@@ -462,12 +559,25 @@ export default new Elysia({ prefix: "/governance" })
 						caseId: current.caseId,
 						actorProfileId: profile.unitId,
 						kind: "revoke_enforcement",
-						reasonCode: "revoked",
-						reason: body.reason,
+						reasonCode: body.reasonCode,
 						reversesActionId: current.decisionActionId,
 					})
 					.returning({ id: moderationAction.id });
 				if (!action) throw new Error("Moderation action insertion did not return a row");
+				const notePostIds: string[] = [];
+				let publicNoticePostId: string | undefined;
+				for (const note of body.notes ?? []) {
+					const createdNote = await createGovernanceNotePost(tx, {
+						actorProfileId: profile.unitId,
+						subjectKind: "moderation_action",
+						subjectId: action.id,
+						subjectUnitId: current.profileId,
+						publicRecipientProfileIds: [current.profileId],
+						note,
+					});
+					notePostIds.push(createdNote.postId);
+					if (note.role === "public_notice") publicNoticePostId = createdNote.postId;
+				}
 				const [updated] = await tx
 					.update(accountEnforcement)
 					.set({ revocationActionId: action.id })
@@ -482,14 +592,28 @@ export default new Elysia({ prefix: "/governance" })
 				await recordAuditEvent(tx, {
 					actorProfileId: profile.unitId,
 					action: "account.enforcement.revoke",
-					decisionCode: "revoked",
-					reason: body.reason,
+					decisionCode: body.reasonCode,
 					subjectKind: "profile",
 					subjectId: current.profileId,
-					metadata: { enforcementId: current.id },
+					metadata: { enforcementId: current.id, notePostIds },
 				});
-				return updated;
+				const notificationId = await createNotification(tx, {
+					recipientProfileId: current.profileId,
+					actorProfileId: profile.unitId,
+					kind: "moderation",
+					subjectUnitId: current.profileId,
+					payload: {
+						type: "moderation_action",
+						actionId: action.id,
+						actionKind: "revoke_enforcement",
+						reasonCode: body.reasonCode,
+						publicNoticePostId,
+					},
+				});
+				return { updated, notificationId };
 			});
+			await deliverNotificationEmail(result.notificationId);
+			return result.updated;
 		},
 		{
 			access: "session-only",
@@ -497,6 +621,7 @@ export default new Elysia({ prefix: "/governance" })
 			body: RevokeAccountEnforcementBody,
 			response: {
 				[StatusCodes.OK]: EnforcementResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ModerationNoteRoleDuplicate"]),
 				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["EnforcementNotFound"]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse([
@@ -605,7 +730,6 @@ export default new Elysia({ prefix: "/governance" })
 					actorProfileId: profile.unitId,
 					action: "capability_grant.upsert",
 					decisionCode: "allowed",
-					reason: `Granted ${body.capability}`,
 					subjectKind: "profile",
 					subjectId: body.profileId,
 					metadata: {
@@ -666,7 +790,6 @@ export default new Elysia({ prefix: "/governance" })
 					actorProfileId: profile.unitId,
 					action: "capability_grant.revoke",
 					decisionCode: "allowed",
-					reason: `Revoked ${updated.capability}`,
 					subjectKind: "profile",
 					subjectId: updated.profileId,
 					metadata: { grantId: current.id },

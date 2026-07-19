@@ -943,7 +943,6 @@ export async function recordUnitRevision(
 			actorProfileId: input.actorProfileId,
 			action: "unit.delete",
 			decisionCode: "allowed",
-			reason: input.message ?? "Unit deleted",
 			subjectKind: "unit",
 			subjectId: input.unitId,
 		});

@@ -26,6 +26,7 @@ import {
 	createUuidv7PrimaryKey,
 } from "./columns";
 import { profile, unit } from "./core";
+import { governanceReasonCode } from "./governance";
 import { realm } from "./realm";
 
 export const unitAccessSubjectKind = pgEnum(
@@ -145,7 +146,7 @@ export const unitAccessRestriction = pgTable(
 			.array()
 			.default(sql`array[]::text[]`)
 			.notNull(),
-		reason: text().notNull(),
+		reasonCode: governanceReasonCode().notNull(),
 		createdByProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
@@ -178,7 +179,6 @@ export const unitAccessRestriction = pgTable(
 			)`,
 		),
 		check("unit_access_restriction_scope_check", scopeCheck(table.scope)),
-		check("unit_access_restriction_reason_check", sql`btrim(${table.reason}) <> ''`),
 		check(
 			"unit_access_restriction_expiry_check",
 			sql`${table.expiresAt} is null or ${table.expiresAt} > ${table.createdAt}`,
@@ -203,7 +203,7 @@ export const unitProtection = pgTable(
 			.default(sql`array[]::text[]`)
 			.notNull(),
 		mode: unitProtectionMode().notNull(),
-		reason: text().notNull(),
+		reasonCode: governanceReasonCode().notNull(),
 		createdByProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
@@ -219,7 +219,6 @@ export const unitProtection = pgTable(
 			.where(sql`${table.revokedAt} is null`),
 		index("unit_protection_created_by_idx").on(table.createdByProfileId),
 		check("unit_protection_scope_check", scopeCheck(table.scope)),
-		check("unit_protection_reason_check", sql`btrim(${table.reason}) <> ''`),
 		check(
 			"unit_protection_expiry_check",
 			sql`${table.expiresAt} is null or ${table.expiresAt} > ${table.createdAt}`,

@@ -19,7 +19,6 @@ import {
 } from "../../units/localization";
 import {
 	auditEvent,
-	governancePostBinding,
 	moderationAction,
 	moderationCase,
 	profile as profileTable,
@@ -30,13 +29,12 @@ import {
 	realmRule,
 	realmRuleAcceptance,
 	realmRuleRevision,
-	revisionContent,
 	unitFollow,
 	unit,
 	unitAccessBinding,
 	unitLocalization,
-	unitRevisionSlot,
 } from "../../database/schema";
+import { listGovernanceNotes } from "../../governance/note-service";
 import { createNotification, deliverNotificationEmail } from "../../notifications/service";
 import { findRealmMembership, getCurrentRealmRules } from "../../realms/service";
 import type { DatabaseTransaction } from "../../database";
@@ -105,22 +103,6 @@ const RealmMutationForbiddenResponse = toApiErrorResponse([
 	"UnitProtected",
 ]);
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-	return value !== null && typeof value === "object" && !Array.isArray(value);
-}
-
-function presentGovernanceNoteLocalization(payload: unknown) {
-	if (!isRecord(payload) || payload.version !== 1 || !Array.isArray(payload.items))
-		throw new Error("Governance note revision has an invalid localization snapshot");
-	const [localization] = payload.items;
-	if (!isRecord(localization) || typeof localization.language !== "string")
-		throw new Error("Governance note revision is missing its localization");
-	return {
-		language: localization.language,
-		content: toPortableTextResponse(localization.content),
-	};
-}
-
 function presentRealmUnitStatus(value: string | null) {
 	if (value === null) return null;
 	const status = RealmUnitStatusValues.find((candidate) => candidate === value);
@@ -164,14 +146,12 @@ async function recordAuditEvent(
 	actorProfileId: string,
 	action: string,
 	subjectId: string,
-	reason: string,
 	metadata?: Record<string, unknown>,
 ) {
 	await tx.insert(auditEvent).values({
 		actorProfileId,
 		action,
 		decisionCode: "allowed",
-		reason,
 		subjectKind: "unit",
 		subjectId,
 		metadata,
@@ -364,13 +344,7 @@ export default new Elysia({ prefix: "/realms" })
 					actorProfileId: profile.unitId,
 					event: "update",
 				});
-				await recordAuditEvent(
-					tx,
-					profile.unitId,
-					"realm.settings.update",
-					params.realmId,
-					"Realm settings updated",
-				);
+				await recordAuditEvent(tx, profile.unitId, "realm.settings.update", params.realmId);
 			});
 			return { id: params.realmId };
 		},
@@ -624,18 +598,11 @@ export default new Elysia({ prefix: "/realms" })
 					actorProfileId: profile.unitId,
 					kind: "realm",
 					subjectUnitId: params.realmId,
-					payload: { event: "membership_updated" },
+					payload: { type: "realm_event", event: "membership_updated" },
 				});
-				await recordAuditEvent(
-					tx,
-					profile.unitId,
-					"realm.members.update",
-					params.realmId,
-					"Realm member updated",
-					{
-						profileId: params.profileId,
-					},
-				);
+				await recordAuditEvent(tx, profile.unitId, "realm.members.update", params.realmId, {
+					profileId: params.profileId,
+				});
 				return { row, notificationId };
 			});
 			await deliverNotificationEmail(result.notificationId);
@@ -721,13 +688,7 @@ export default new Elysia({ prefix: "/realms" })
 					actorProfileId: profile.unitId,
 					event: "update",
 				});
-				await recordAuditEvent(
-					tx,
-					profile.unitId,
-					"realm.rules.publish",
-					params.realmId,
-					"Realm rules published",
-				);
+				await recordAuditEvent(tx, profile.unitId, "realm.rules.publish", params.realmId);
 				return created;
 			});
 			return { id: revision.id, version: revision.version };
@@ -864,16 +825,9 @@ export default new Elysia({ prefix: "/realms" })
 					actorProfileId: profile.unitId,
 					event: "update",
 				});
-				await recordAuditEvent(
-					tx,
-					profile.unitId,
-					"realm.pins.upsert",
-					params.unitId,
-					"Realm pin updated",
-					{
-						realmId: params.realmId,
-					},
-				);
+				await recordAuditEvent(tx, profile.unitId, "realm.pins.upsert", params.unitId, {
+					realmId: params.realmId,
+				});
 				return entry;
 			});
 		},
@@ -912,16 +866,9 @@ export default new Elysia({ prefix: "/realms" })
 					actorProfileId: profile.unitId,
 					event: "update",
 				});
-				await recordAuditEvent(
-					tx,
-					profile.unitId,
-					"realm.pins.delete",
-					params.unitId,
-					"Realm pin removed",
-					{
-						realmId: params.realmId,
-					},
-				);
+				await recordAuditEvent(tx, profile.unitId, "realm.pins.delete", params.unitId, {
+					realmId: params.realmId,
+				});
 			});
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
@@ -1026,38 +973,13 @@ export default new Elysia({ prefix: "/realms" })
 				.limit(query.limit ?? 50);
 			const actionIds = actions.map((action) => action.id);
 			const notes = actionIds.length
-				? await database
-						.select({
-							postId: governancePostBinding.postId,
-							revisionId: governancePostBinding.revisionId,
-							actionId: governancePostBinding.subjectId,
-							role: governancePostBinding.role,
-							payload: revisionContent.payload,
-							createdAt: governancePostBinding.createdAt,
-						})
-						.from(governancePostBinding)
-						.innerJoin(
-							unitRevisionSlot,
-							and(
-								eq(unitRevisionSlot.revisionId, governancePostBinding.revisionId),
-								eq(unitRevisionSlot.unitId, governancePostBinding.postId),
-								eq(unitRevisionSlot.role, "localizations"),
-							),
-						)
-						.innerJoin(
-							revisionContent,
-							eq(revisionContent.id, unitRevisionSlot.contentId),
-						)
-						.where(
-							and(
-								eq(governancePostBinding.subjectKind, "moderation_action"),
-								inArray(governancePostBinding.subjectId, actionIds),
-								inArray(governancePostBinding.role, [
-									"internal_note",
-									"public_notice",
-								]),
-							),
-						)
+				? await database.transaction((tx) =>
+						listGovernanceNotes(tx, {
+							subjectKind: "moderation_action",
+							subjectIds: actionIds,
+							roles: ["internal_note", "public_notice"],
+						}),
+					)
 				: [];
 			const notesByAction = new Map<
 				string,
@@ -1072,16 +994,16 @@ export default new Elysia({ prefix: "/realms" })
 			>();
 			for (const note of notes) {
 				if (note.role === "evidence") continue;
-				const localization = presentGovernanceNoteLocalization(note.payload);
-				const items = notesByAction.get(note.actionId) ?? [];
+				const items = notesByAction.get(note.subjectId) ?? [];
 				items.push({
 					postId: note.postId,
 					revisionId: note.revisionId,
 					role: note.role,
-					...localization,
+					language: note.language,
+					content: toPortableTextResponse(note.content),
 					createdAt: note.createdAt,
 				});
-				notesByAction.set(note.actionId, items);
+				notesByAction.set(note.subjectId, items);
 			}
 			return {
 				items: actions.map((action) => ({

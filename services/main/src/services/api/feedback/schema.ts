@@ -1,14 +1,19 @@
+import { PortableTextDocument } from "@rezics/block";
 import { type Static, t } from "elysia";
 
-import { FeedbackKindValues } from "../../database/schema/contract-values";
-import { DateTime, Uuid } from "../schema";
+import {
+	FeedbackKindValues,
+	GovernanceReasonCodeValues,
+} from "../../database/schema/contract-values";
+import { DateTime, LanguageTag, Uuid } from "../schema";
 
 const FeedbackType = t.Union(FeedbackKindValues.map((value) => t.Literal(value)));
 
 export const CreateFeedbackBody = t.Object(
 	{
 		type: FeedbackType,
-		content: t.String({ minLength: 1, maxLength: 10_000 }),
+		language: LanguageTag,
+		content: PortableTextDocument,
 		url: t.Optional(t.String({ format: "uri", maxLength: 2_000 })),
 		subjectUnitId: t.Optional(Uuid),
 		realmId: t.Optional(Uuid),
@@ -22,14 +27,22 @@ export const ListFeedbackQuery = t.Object({
 });
 export type ListFeedbackQuery = Static<typeof ListFeedbackQuery>;
 
+const FeedbackNoteResponse = t.Object({
+	postId: Uuid,
+	revisionId: Uuid,
+	language: LanguageTag,
+	content: PortableTextDocument,
+});
+
 export const FeedbackResponse = t.Object({
 	id: Uuid,
 	type: t.String(),
-	content: t.String(),
+	evidence: FeedbackNoteResponse,
 	url: t.Nullable(t.String()),
 	subjectUnitId: t.Nullable(Uuid),
 	status: t.String(),
-	resolution: t.Nullable(t.String()),
+	resolutionCode: t.Nullable(t.UnionEnum(GovernanceReasonCodeValues, { default: undefined })),
+	publicNotice: t.Nullable(FeedbackNoteResponse),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });

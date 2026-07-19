@@ -64,6 +64,7 @@ export default {
 		"This retry key was already used for a different moderation request.",
 	ModerationNoteRoleDuplicate: "Add at most one internal note and one public notice.",
 	FeedbackNotFound: "This feedback could not be found.",
+	FeedbackAlreadyResolved: "This feedback has already been resolved.",
 	EnforcementExpiryInvalid: "The enforcement expiry must be in the future.",
 	EnforcementNotFound: "This enforcement could not be found.",
 	EnforcementAlreadyRevoked: "This enforcement has already been revoked.",

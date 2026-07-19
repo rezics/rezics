@@ -6,7 +6,6 @@ import type { DatabaseTransaction } from "../../database";
 import {
 	auditEvent,
 	feedback,
-	governancePostBinding,
 	moderationAction,
 	moderationCase,
 	post,
@@ -16,13 +15,10 @@ import {
 	realmUnitStatusEvent,
 	unit,
 	unitAccessBinding,
-	unitLocalization,
 	unitProtection,
 } from "../../database/schema";
+import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/note-service";
 import { createNotification } from "../../notifications/service";
-import { recordUnitRevision } from "../../units/history";
-import { insertAddressedUnit } from "../../units/slug-address";
-import { generateSlugLabel } from "../../units/slug";
 import {
 	ModerationActionIncompatible,
 	ModerationActionNoEffect,
@@ -529,7 +525,7 @@ async function executeActionPlan(
 	input: {
 		actorProfileId: string;
 		actionId: string;
-		reasonCode: string;
+		reasonCode: CreateModerationActionBody["reasonCode"];
 	},
 ): Promise<void> {
 	if (plan.type === "unit_state") {
@@ -622,7 +618,7 @@ async function executeActionPlan(
 			scope: plan.scope,
 			mode: plan.mode,
 			createdByProfileId: input.actorProfileId,
-			reason: input.reasonCode,
+			reasonCode: input.reasonCode,
 		});
 		return;
 	}
@@ -640,84 +636,6 @@ async function executeActionPlan(
 			.returning({ id: unitProtection.id });
 		if (!rows.length) throw new ModerationActionNoEffect();
 	}
-}
-
-async function createGovernanceNote(
-	tx: DatabaseTransaction,
-	input: {
-		actorProfileId: string;
-		caseRow: ModerationCaseRecord;
-		actionId: string;
-		target: ModerationTargetContext;
-		note: NonNullable<CreateModerationActionBody["notes"]>[number];
-	},
-): Promise<string> {
-	const created = await insertAddressedUnit(tx, {
-		kind: "post",
-		slugScopeId: input.actorProfileId,
-		slug: generateSlugLabel(
-			`governance-note-${input.actionId}-${input.note.role}`,
-			"governance-note",
-		),
-		status: "published",
-		visibility: "private",
-		publishedAt: new Date(),
-	});
-	await tx.insert(post).values({
-		id: created.id,
-		authorProfileId: input.actorProfileId,
-		subjectUnitId: input.target.subjectUnitId,
-		kind: "governance_note",
-		locked: true,
-	});
-	await tx.insert(unitLocalization).values({
-		unitId: created.id,
-		language: input.note.language,
-		content: input.note.content,
-		contentStatus: "published",
-	});
-	await tx.insert(unitAccessBinding).values({
-		unitId: created.id,
-		subjectKind: "profile",
-		profileId: input.actorProfileId,
-		role: "owner",
-		scope: [],
-		grantedByProfileId: input.actorProfileId,
-	});
-	if (input.note.role === "public_notice")
-		for (const recipientProfileId of input.target.recipientProfileIds)
-			if (recipientProfileId !== input.actorProfileId)
-				await tx.insert(unitAccessBinding).values({
-					unitId: created.id,
-					subjectKind: "profile",
-					profileId: recipientProfileId,
-					role: "viewer",
-					scope: [],
-					grantedByProfileId: input.actorProfileId,
-				});
-	if (input.caseRow.realmId)
-		await tx.insert(unitAccessBinding).values({
-			unitId: created.id,
-			subjectKind: "realm",
-			realmId: input.caseRow.realmId,
-			realmRelation: "governor",
-			role: "viewer",
-			scope: [],
-			grantedByProfileId: input.actorProfileId,
-		});
-	const revision = await recordUnitRevision(tx, {
-		unitId: created.id,
-		actorProfileId: input.actorProfileId,
-		event: "create",
-	});
-	await tx.insert(governancePostBinding).values({
-		postId: created.id,
-		revisionId: revision.revisionId,
-		subjectKind: "moderation_action",
-		subjectId: input.actionId,
-		role: input.note.role,
-	});
-	return created.id;
 }
 
 export async function executeAuthorizedModerationAction(
@@ -748,7 +666,13 @@ export async function executeAuthorizedModerationAction(
 			if (existing.requestFingerprint !== fingerprint)
 				throw new ModerationIdempotencyConflict();
 			const { requestFingerprint: _requestFingerprint, ...created } = existing;
-			return { created, notificationIds: [], replayed: true };
+			const notes = (
+				await listGovernanceNotes(tx, {
+					subjectKind: "moderation_action",
+					subjectIds: [created.id],
+				})
+			).map(({ postId, revisionId, role }) => ({ postId, revisionId, role }));
+			return { created: { ...created, notes }, notificationIds: [], replayed: true };
 		}
 	}
 
@@ -796,26 +720,33 @@ export async function executeAuthorizedModerationAction(
 		actionId: created.id,
 		reasonCode: input.body.reasonCode,
 	});
-	const notePostIds: string[] = [];
-	for (const note of input.body.notes ?? [])
-		notePostIds.push(
-			await createGovernanceNote(tx, {
-				actorProfileId: input.actorProfileId,
-				caseRow: input.caseRow,
-				actionId: created.id,
-				target,
-				note,
-			}),
-		);
+	const noteBindings: Array<{
+		postId: string;
+		revisionId: string;
+		role: "internal_note" | "public_notice";
+	}> = [];
+	for (const note of input.body.notes ?? []) {
+		const binding = await createGovernanceNotePost(tx, {
+			actorProfileId: input.actorProfileId,
+			subjectKind: "moderation_action",
+			subjectId: created.id,
+			subjectUnitId: target.subjectUnitId,
+			realmId: input.caseRow.realmId,
+			publicRecipientProfileIds: target.recipientProfileIds,
+			note,
+		});
+		noteBindings.push({ ...binding, role: note.role });
+	}
+	const notePostIds = noteBindings.map((binding) => binding.postId);
 	const nextCaseState = resolveModerationCaseState(input.caseRow.state, input.body.kind);
 	if (nextCaseState !== input.caseRow.state)
 		await tx
 			.update(moderationCase)
 			.set({ state: nextCaseState })
 			.where(eq(moderationCase.id, input.caseRow.id));
-	const publicNoticePostId = input.body.notes
-		?.map((note, index) => ({ note, postId: notePostIds[index] }))
-		.find((item) => item.note.role === "public_notice")?.postId;
+	const publicNoticePostId = noteBindings.find(
+		(binding) => binding.role === "public_notice",
+	)?.postId;
 	const notificationIds: string[] = [];
 	if (input.body.kind !== "note" || publicNoticePostId)
 		for (const recipientProfileId of target.recipientProfileIds) {
@@ -825,6 +756,7 @@ export async function executeAuthorizedModerationAction(
 				kind: "moderation",
 				subjectUnitId: target.subjectUnitId,
 				payload: {
+					type: "moderation_action",
 					actionId: created.id,
 					actionKind: input.body.kind,
 					reasonCode: input.body.reasonCode,
@@ -837,7 +769,6 @@ export async function executeAuthorizedModerationAction(
 		actorProfileId: input.actorProfileId,
 		action: `moderation.${input.body.kind}`,
 		decisionCode: input.body.reasonCode,
-		reason: input.body.reasonCode,
 		subjectKind: input.caseRow.targetKind,
 		subjectId: input.caseRow.targetId,
 		subjectPath: input.caseRow.targetPath,
@@ -848,5 +779,5 @@ export async function executeAuthorizedModerationAction(
 			notePostIds,
 		},
 	});
-	return { created, notificationIds, replayed: false };
+	return { created: { ...created, notes: noteBindings }, notificationIds, replayed: false };
 }

@@ -2262,6 +2262,7 @@ export const ApiErrorCode = {
 	UnitOwnerRestrictionForbidden: "UnitOwnerRestrictionForbidden",
 	FeedbackRealmMismatch: "FeedbackRealmMismatch",
 	FeedbackNotFound: "FeedbackNotFound",
+	FeedbackAlreadyResolved: "FeedbackAlreadyResolved",
 	PostNotFound: "PostNotFound",
 	PostLocalizationNotFound: "PostLocalizationNotFound",
 	PostLocked: "PostLocked",
@@ -2636,6 +2637,70 @@ export type GetApiNotificationsQuery = {
 	limit?: string | number;
 };
 
+export const GetApiNotificationsStatus200ItemsPayloadActionKindEnum = {
+	approve: "approve",
+	hide: "hide",
+	remove: "remove",
+	restore: "restore",
+	lock: "lock",
+	unlock: "unlock",
+	protect: "protect",
+	unprotect: "unprotect",
+	warning: "warning",
+	silence: "silence",
+	suspension: "suspension",
+	ban: "ban",
+	rate_limit: "rate_limit",
+	trust_restriction: "trust_restriction",
+	revoke_enforcement: "revoke_enforcement",
+	mute_member: "mute_member",
+	remove_member: "remove_member",
+	ban_member: "ban_member",
+	restore_member: "restore_member",
+	escalate: "escalate",
+	reverse: "reverse",
+	note: "note",
+} as const;
+
+export type GetApiNotificationsStatus200ItemsPayloadActionKindEnum =
+	(typeof GetApiNotificationsStatus200ItemsPayloadActionKindEnum)[keyof typeof GetApiNotificationsStatus200ItemsPayloadActionKindEnum];
+
+export const GetApiNotificationsStatus200ItemsPayloadReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type GetApiNotificationsStatus200ItemsPayloadReasonCodeEnum =
+	(typeof GetApiNotificationsStatus200ItemsPayloadReasonCodeEnum)[keyof typeof GetApiNotificationsStatus200ItemsPayloadReasonCodeEnum];
+
+export const GetApiNotificationsStatus200ItemsPayloadResolutionCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type GetApiNotificationsStatus200ItemsPayloadResolutionCodeEnum =
+	(typeof GetApiNotificationsStatus200ItemsPayloadResolutionCodeEnum)[keyof typeof GetApiNotificationsStatus200ItemsPayloadResolutionCodeEnum];
+
 /**
  * @type object
  */
@@ -2643,37 +2708,293 @@ export type GetApiNotificationsStatus200 = {
 	/**
 	 * @type array
 	 */
-	items: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		id: string;
-		/**
-		 * @type string
-		 */
-		kind: string;
-		/**
-		 * @type string
-		 */
-		title: string;
-		/**
-		 * @type string
-		 */
-		body: string;
-		actorProfileId: (string | null) | null;
-		actorName: (string | null) | null;
-		subjectUnitId: (string | null) | null;
-		payload: (void | null) | null;
-		readAt: (string | null) | null;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		createdAt: string;
-	}[];
+	items: (
+		| {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				title: string;
+				/**
+				 * @type string
+				 */
+				body: string;
+				actorProfileId: (string | null) | null;
+				actorName: (string | null) | null;
+				subjectUnitId: (string | null) | null;
+				readAt: (string | null) | null;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+				/**
+				 * @type string
+				 */
+				kind: "reply";
+				/**
+				 * @type null
+				 */
+				payload: null;
+		  }
+		| {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				title: string;
+				/**
+				 * @type string
+				 */
+				body: string;
+				actorProfileId: (string | null) | null;
+				actorName: (string | null) | null;
+				subjectUnitId: (string | null) | null;
+				readAt: (string | null) | null;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+				/**
+				 * @type string
+				 */
+				kind: "follow";
+				/**
+				 * @type null
+				 */
+				payload: null;
+		  }
+		| {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				title: string;
+				/**
+				 * @type string
+				 */
+				body: string;
+				actorProfileId: (string | null) | null;
+				actorName: (string | null) | null;
+				subjectUnitId: (string | null) | null;
+				readAt: (string | null) | null;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+				/**
+				 * @type string
+				 */
+				kind: "direct_message";
+				/**
+				 * @type object
+				 */
+				payload: {
+					/**
+					 * @type string
+					 */
+					type: "direct_message";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					conversationId: string;
+				};
+		  }
+		| {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				title: string;
+				/**
+				 * @type string
+				 */
+				body: string;
+				actorProfileId: (string | null) | null;
+				actorName: (string | null) | null;
+				subjectUnitId: (string | null) | null;
+				readAt: (string | null) | null;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+				/**
+				 * @type string
+				 */
+				kind: "moderation";
+				payload:
+					| {
+							/**
+							 * @type string
+							 */
+							type: "moderation_action";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							actionId: string;
+							/**
+							 * @type string
+							 */
+							actionKind: GetApiNotificationsStatus200ItemsPayloadActionKindEnum;
+							/**
+							 * @type string
+							 */
+							reasonCode: GetApiNotificationsStatus200ItemsPayloadReasonCodeEnum;
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string | undefined
+							 */
+							publicNoticePostId?: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							type: "feedback_resolution";
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							feedbackId: string;
+							/**
+							 * @type string
+							 */
+							resolutionCode: GetApiNotificationsStatus200ItemsPayloadResolutionCodeEnum;
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string | undefined
+							 */
+							publicNoticePostId?: string;
+					  };
+		  }
+		| {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				title: string;
+				/**
+				 * @type string
+				 */
+				body: string;
+				actorProfileId: (string | null) | null;
+				actorName: (string | null) | null;
+				subjectUnitId: (string | null) | null;
+				readAt: (string | null) | null;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+				/**
+				 * @type string
+				 */
+				kind: "realm";
+				/**
+				 * @type object
+				 */
+				payload: {
+					/**
+					 * @type string
+					 */
+					type: "realm_event";
+					/**
+					 * @type string
+					 */
+					event: "membership_updated";
+				};
+		  }
+		| {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				title: string;
+				/**
+				 * @type string
+				 */
+				body: string;
+				actorProfileId: (string | null) | null;
+				actorName: (string | null) | null;
+				subjectUnitId: (string | null) | null;
+				readAt: (string | null) | null;
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				createdAt: string;
+				/**
+				 * @type string
+				 */
+				kind: "system";
+				/**
+				 * @type object
+				 */
+				payload: {
+					/**
+					 * @type string
+					 */
+					type: "system_event";
+					/**
+					 * @minLength 1
+					 * @type string
+					 */
+					event: string;
+					/**
+					 * @type object | undefined
+					 */
+					references?: {
+						[key: string]: string;
+					};
+				};
+		  }
+	)[];
 	nextCursor: (string | null) | null;
 	pollCursor: (string | null) | null;
 	unreadCount: string | number;
@@ -6424,6 +6745,24 @@ export type GetApiFeedbackMeQuery = {
 	limit?: string | number;
 };
 
+export const GetApiFeedbackMeStatus200ItemsResolutionCode = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type GetApiFeedbackMeStatus200ItemsResolutionCode =
+	(typeof GetApiFeedbackMeStatus200ItemsResolutionCode)[keyof typeof GetApiFeedbackMeStatus200ItemsResolutionCode];
+
 /**
  * @type object
  */
@@ -6443,16 +6782,315 @@ export type GetApiFeedbackMeStatus200 = {
 		 */
 		type: string;
 		/**
-		 * @type string
+		 * @type object
 		 */
-		content: string;
+		evidence: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			postId: string;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			revisionId: string;
+			/**
+			 * @description
+			 * Format: `bcp-47`
+			 * @minLength 2
+			 * @maxLength 35
+			 * @type string
+			 */
+			language: string;
+			/**
+			 * @type object
+			 */
+			content: {
+				/**
+				 * @type string
+				 */
+				_type: "portable-text";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type array
+				 */
+				content: (
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "block";
+							/**
+							 * @type array
+							 */
+							children: (
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "span";
+										/**
+										 * @type string
+										 */
+										text: string;
+										/**
+										 * @type array | undefined
+										 */
+										marks?: string[];
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @pattern ^(?!span$).+
+										 * @type string
+										 */
+										_type: string;
+										[key: string]: unknown;
+								  }
+							)[];
+							/**
+							 * @type array | undefined
+							 */
+							markDefs?: {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+							}[];
+							/**
+							 * @type string | undefined
+							 */
+							listItem?: string;
+							/**
+							 * @type string | undefined
+							 */
+							style?: string;
+							/**
+							 * @minLength 1
+							 * @type integer | undefined
+							 */
+							level?: number;
+							[key: string]: unknown;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "image";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							assetId: string;
+							/**
+							 * @type string | undefined
+							 */
+							alt?: string;
+							/**
+							 * @type string | undefined
+							 */
+							caption?: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @pattern ^(?!(?:block|image)$).+
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+					  }
+				)[];
+			};
+		};
 		url: (string | null) | null;
 		subjectUnitId: (string | null) | null;
 		/**
 		 * @type string
 		 */
 		status: string;
-		resolution: (string | null) | null;
+		resolutionCode: (GetApiFeedbackMeStatus200ItemsResolutionCode | null) | null;
+		publicNotice:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					postId: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					revisionId: string;
+					/**
+					 * @description
+					 * Format: `bcp-47`
+					 * @minLength 2
+					 * @maxLength 35
+					 * @type string
+					 */
+					language: string;
+					/**
+					 * @type object
+					 */
+					content: {
+						/**
+						 * @type string
+						 */
+						_type: "portable-text";
+						/**
+						 * @pattern ^[0-9a-f]{12}$
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type array
+						 */
+						content: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "block";
+									/**
+									 * @type array
+									 */
+									children: (
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @type string
+												 */
+												_type: "span";
+												/**
+												 * @type string
+												 */
+												text: string;
+												/**
+												 * @type array | undefined
+												 */
+												marks?: string[];
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												_key: string;
+												/**
+												 * @pattern ^(?!span$).+
+												 * @type string
+												 */
+												_type: string;
+												[key: string]: unknown;
+										  }
+									)[];
+									/**
+									 * @type array | undefined
+									 */
+									markDefs?: {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: string;
+										[key: string]: unknown;
+									}[];
+									/**
+									 * @type string | undefined
+									 */
+									listItem?: string;
+									/**
+									 * @type string | undefined
+									 */
+									style?: string;
+									/**
+									 * @minLength 1
+									 * @type integer | undefined
+									 */
+									level?: number;
+									[key: string]: unknown;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "image";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									assetId: string;
+									/**
+									 * @type string | undefined
+									 */
+									alt?: string;
+									/**
+									 * @type string | undefined
+									 */
+									caption?: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!(?:block|image)$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+					};
+			  } | null)
+			| null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -6503,6 +7141,24 @@ export type GetApiFeedbackMeResponses = {
 export type GetApiFeedbackMeResponse =
 	GetApiFeedbackMeStatus200 | GetApiFeedbackMeStatus422 | GetApiFeedbackMeStatus500;
 
+export const PostApiFeedbackStatus200ResolutionCode = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PostApiFeedbackStatus200ResolutionCode =
+	(typeof PostApiFeedbackStatus200ResolutionCode)[keyof typeof PostApiFeedbackStatus200ResolutionCode];
+
 /**
  * @type object
  */
@@ -6518,16 +7174,315 @@ export type PostApiFeedbackStatus200 = {
 	 */
 	type: string;
 	/**
-	 * @type string
+	 * @type object
 	 */
-	content: string;
+	evidence: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		postId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @description
+		 * Format: `bcp-47`
+		 * @minLength 2
+		 * @maxLength 35
+		 * @type string
+		 */
+		language: string;
+		/**
+		 * @type object
+		 */
+		content: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "image";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						assetId: string;
+						/**
+						 * @type string | undefined
+						 */
+						alt?: string;
+						/**
+						 * @type string | undefined
+						 */
+						caption?: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!(?:block|image)$).+
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+				  }
+			)[];
+		};
+	};
 	url: (string | null) | null;
 	subjectUnitId: (string | null) | null;
 	/**
 	 * @type string
 	 */
 	status: string;
-	resolution: (string | null) | null;
+	resolutionCode: (PostApiFeedbackStatus200ResolutionCode | null) | null;
+	publicNotice:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				postId: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				revisionId: string;
+				/**
+				 * @description
+				 * Format: `bcp-47`
+				 * @minLength 2
+				 * @maxLength 35
+				 * @type string
+				 */
+				language: string;
+				/**
+				 * @type object
+				 */
+				content: {
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "image";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								assetId: string;
+								/**
+								 * @type string | undefined
+								 */
+								alt?: string;
+								/**
+								 * @type string | undefined
+								 */
+								caption?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!(?:block|image)$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+				};
+		  } | null)
+		| null;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -6627,11 +7582,140 @@ export type PostApiFeedbackBody = {
 	 */
 	type: PostApiFeedbackRequestTypeEnum;
 	/**
-	 * @minLength 1
-	 * @maxLength 10000
+	 * @description
+	 * Format: `bcp-47`
+	 * @minLength 2
+	 * @maxLength 35
 	 * @type string
 	 */
-	content: string;
+	language: string;
+	/**
+	 * @type object
+	 */
+	content: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type string
+					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!span$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type string
+					 */
+					_type: "image";
+					/**
+					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+					 * @type string
+					 */
+					assetId: string;
+					/**
+					 * @type string | undefined
+					 */
+					alt?: string;
+					/**
+					 * @type string | undefined
+					 */
+					caption?: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!(?:block|image)$).+
+					 * @type string
+					 */
+					_type: string;
+					[key: string]: unknown;
+			  }
+		)[];
+	};
 	/**
 	 * @description
 	 * Format: `uri`
@@ -7573,6 +8657,24 @@ export type GetApiGovernanceUnitByUnitIdAccessRestrictionsPath = {
 	unitId: string;
 };
 
+export const GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus200ItemsReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus200ItemsReasonCodeEnum =
+	(typeof GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus200ItemsReasonCodeEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus200ItemsReasonCodeEnum];
+
 /**
  * @type object
  */
@@ -7629,7 +8731,8 @@ export type GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus200 = {
 		/**
 		 * @type string
 		 */
-		reason: string;
+		reasonCode: GetApiGovernanceUnitByUnitIdAccessRestrictionsStatus200ItemsReasonCodeEnum;
+		internalNotePostId: (string | null) | null;
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -7771,6 +8874,24 @@ export type PostApiGovernanceUnitByUnitIdAccessRestrictionsPath = {
 	unitId: string;
 };
 
+export const PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus200ReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus200ReasonCodeEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus200ReasonCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus200ReasonCodeEnum];
+
 /**
  * @type object
  */
@@ -7823,7 +8944,8 @@ export type PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus200 = {
 	/**
 	 * @type string
 	 */
-	reason: string;
+	reasonCode: PostApiGovernanceUnitByUnitIdAccessRestrictionsStatus200ReasonCodeEnum;
+	internalNotePostId: (string | null) | null;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -8007,6 +9129,24 @@ export const PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestPermissionEnu
 export type PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestPermissionEnum =
 	(typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestPermissionEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestPermissionEnum];
 
+export const PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestReasonCodeEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestReasonCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestReasonCodeEnum];
+
 /**
  * @type object
  */
@@ -8046,11 +9186,149 @@ export type PostApiGovernanceUnitByUnitIdAccessRestrictionsBody = {
 	 */
 	scope: string[];
 	/**
-	 * @minLength 1
-	 * @maxLength 2000
 	 * @type string
 	 */
-	reason: string;
+	reasonCode: PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestReasonCodeEnum;
+	/**
+	 * @type object | undefined
+	 */
+	internalNote?: {
+		/**
+		 * @description
+		 * Format: `bcp-47`
+		 * @minLength 2
+		 * @maxLength 35
+		 * @type string
+		 */
+		language: string;
+		/**
+		 * @type object
+		 */
+		content: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "image";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						assetId: string;
+						/**
+						 * @type string | undefined
+						 */
+						alt?: string;
+						/**
+						 * @type string | undefined
+						 */
+						caption?: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!(?:block|image)$).+
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+				  }
+			)[];
+		};
+	};
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -8247,6 +9525,24 @@ export type GetApiGovernanceUnitByUnitIdProtectionsPath = {
 	unitId: string;
 };
 
+export const GetApiGovernanceUnitByUnitIdProtectionsStatus200ItemsReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdProtectionsStatus200ItemsReasonCodeEnum =
+	(typeof GetApiGovernanceUnitByUnitIdProtectionsStatus200ItemsReasonCodeEnum)[keyof typeof GetApiGovernanceUnitByUnitIdProtectionsStatus200ItemsReasonCodeEnum];
+
 /**
  * @type object
  */
@@ -8278,7 +9574,8 @@ export type GetApiGovernanceUnitByUnitIdProtectionsStatus200 = {
 		/**
 		 * @type string
 		 */
-		reason: string;
+		reasonCode: GetApiGovernanceUnitByUnitIdProtectionsStatus200ItemsReasonCodeEnum;
+		internalNotePostId: (string | null) | null;
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -8420,6 +9717,24 @@ export type PostApiGovernanceUnitByUnitIdProtectionsPath = {
 	unitId: string;
 };
 
+export const PostApiGovernanceUnitByUnitIdProtectionsStatus200ReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdProtectionsStatus200ReasonCodeEnum =
+	(typeof PostApiGovernanceUnitByUnitIdProtectionsStatus200ReasonCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdProtectionsStatus200ReasonCodeEnum];
+
 /**
  * @type object
  */
@@ -8447,7 +9762,8 @@ export type PostApiGovernanceUnitByUnitIdProtectionsStatus200 = {
 	/**
 	 * @type string
 	 */
-	reason: string;
+	reasonCode: PostApiGovernanceUnitByUnitIdProtectionsStatus200ReasonCodeEnum;
+	internalNotePostId: (string | null) | null;
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -8581,6 +9897,24 @@ export const PostApiGovernanceUnitByUnitIdProtectionsRequestModeEnum = {
 export type PostApiGovernanceUnitByUnitIdProtectionsRequestModeEnum =
 	(typeof PostApiGovernanceUnitByUnitIdProtectionsRequestModeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdProtectionsRequestModeEnum];
 
+export const PostApiGovernanceUnitByUnitIdProtectionsRequestReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdProtectionsRequestReasonCodeEnum =
+	(typeof PostApiGovernanceUnitByUnitIdProtectionsRequestReasonCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdProtectionsRequestReasonCodeEnum];
+
 /**
  * @type object
  */
@@ -8595,11 +9929,149 @@ export type PostApiGovernanceUnitByUnitIdProtectionsBody = {
 	 */
 	mode: PostApiGovernanceUnitByUnitIdProtectionsRequestModeEnum;
 	/**
-	 * @minLength 1
-	 * @maxLength 2000
 	 * @type string
 	 */
-	reason: string;
+	reasonCode: PostApiGovernanceUnitByUnitIdProtectionsRequestReasonCodeEnum;
+	/**
+	 * @type object | undefined
+	 */
+	internalNote?: {
+		/**
+		 * @description
+		 * Format: `bcp-47`
+		 * @minLength 2
+		 * @maxLength 35
+		 * @type string
+		 */
+		language: string;
+		/**
+		 * @type object
+		 */
+		content: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "image";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						assetId: string;
+						/**
+						 * @type string | undefined
+						 */
+						alt?: string;
+						/**
+						 * @type string | undefined
+						 */
+						caption?: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!(?:block|image)$).+
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+				  }
+			)[];
+		};
+	};
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -8813,6 +10285,15 @@ export type GetApiGovernanceModerationCasesQuery = {
 	limit?: string | number;
 };
 
+export const GetApiGovernanceModerationCasesStatus200ItemsNotesRoleEnum = {
+	evidence: "evidence",
+	internal_note: "internal_note",
+	public_notice: "public_notice",
+} as const;
+
+export type GetApiGovernanceModerationCasesStatus200ItemsNotesRoleEnum =
+	(typeof GetApiGovernanceModerationCasesStatus200ItemsNotesRoleEnum)[keyof typeof GetApiGovernanceModerationCasesStatus200ItemsNotesRoleEnum];
+
 /**
  * @type object
  */
@@ -8850,8 +10331,168 @@ export type GetApiGovernanceModerationCasesStatus200 = {
 		reporterProfileId: (string | null) | null;
 		assignedProfileId: (string | null) | null;
 		duplicateOfCaseId: (string | null) | null;
-		reason: (string | null) | null;
-		safeSummary: (string | null) | null;
+		/**
+		 * @type array
+		 */
+		notes: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			postId: string;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			revisionId: string;
+			/**
+			 * @type string
+			 */
+			role: GetApiGovernanceModerationCasesStatus200ItemsNotesRoleEnum;
+			/**
+			 * @description
+			 * Format: `bcp-47`
+			 * @minLength 2
+			 * @maxLength 35
+			 * @type string
+			 */
+			language: string;
+			/**
+			 * @type object
+			 */
+			content: {
+				/**
+				 * @type string
+				 */
+				_type: "portable-text";
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @type array
+				 */
+				content: (
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "block";
+							/**
+							 * @type array
+							 */
+							children: (
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @type string
+										 */
+										_type: "span";
+										/**
+										 * @type string
+										 */
+										text: string;
+										/**
+										 * @type array | undefined
+										 */
+										marks?: string[];
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										_key: string;
+										/**
+										 * @pattern ^(?!span$).+
+										 * @type string
+										 */
+										_type: string;
+										[key: string]: unknown;
+								  }
+							)[];
+							/**
+							 * @type array | undefined
+							 */
+							markDefs?: {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+							}[];
+							/**
+							 * @type string | undefined
+							 */
+							listItem?: string;
+							/**
+							 * @type string | undefined
+							 */
+							style?: string;
+							/**
+							 * @minLength 1
+							 * @type integer | undefined
+							 */
+							level?: number;
+							[key: string]: unknown;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: "image";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							assetId: string;
+							/**
+							 * @type string | undefined
+							 */
+							alt?: string;
+							/**
+							 * @type string | undefined
+							 */
+							caption?: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @pattern ^(?!(?:block|image)$).+
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+					  }
+				)[];
+			};
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+		}[];
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -8954,6 +10595,15 @@ export type GetApiGovernanceModerationCasesByCaseIdPath = {
 	caseId: string;
 };
 
+export const GetApiGovernanceModerationCasesByCaseIdStatus200NotesRoleEnum = {
+	evidence: "evidence",
+	internal_note: "internal_note",
+	public_notice: "public_notice",
+} as const;
+
+export type GetApiGovernanceModerationCasesByCaseIdStatus200NotesRoleEnum =
+	(typeof GetApiGovernanceModerationCasesByCaseIdStatus200NotesRoleEnum)[keyof typeof GetApiGovernanceModerationCasesByCaseIdStatus200NotesRoleEnum];
+
 /**
  * @type object
  */
@@ -8987,8 +10637,168 @@ export type GetApiGovernanceModerationCasesByCaseIdStatus200 = {
 	reporterProfileId: (string | null) | null;
 	assignedProfileId: (string | null) | null;
 	duplicateOfCaseId: (string | null) | null;
-	reason: (string | null) | null;
-	safeSummary: (string | null) | null;
+	/**
+	 * @type array
+	 */
+	notes: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		postId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @type string
+		 */
+		role: GetApiGovernanceModerationCasesByCaseIdStatus200NotesRoleEnum;
+		/**
+		 * @description
+		 * Format: `bcp-47`
+		 * @minLength 2
+		 * @maxLength 35
+		 * @type string
+		 */
+		language: string;
+		/**
+		 * @type object
+		 */
+		content: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "image";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						assetId: string;
+						/**
+						 * @type string | undefined
+						 */
+						alt?: string;
+						/**
+						 * @type string | undefined
+						 */
+						caption?: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!(?:block|image)$).+
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+				  }
+			)[];
+		};
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -9120,6 +10930,15 @@ export type PatchApiGovernanceModerationCasesByCaseIdPath = {
 	caseId: string;
 };
 
+export const PatchApiGovernanceModerationCasesByCaseIdStatus200NotesRoleEnum = {
+	evidence: "evidence",
+	internal_note: "internal_note",
+	public_notice: "public_notice",
+} as const;
+
+export type PatchApiGovernanceModerationCasesByCaseIdStatus200NotesRoleEnum =
+	(typeof PatchApiGovernanceModerationCasesByCaseIdStatus200NotesRoleEnum)[keyof typeof PatchApiGovernanceModerationCasesByCaseIdStatus200NotesRoleEnum];
+
 /**
  * @type object
  */
@@ -9153,8 +10972,168 @@ export type PatchApiGovernanceModerationCasesByCaseIdStatus200 = {
 	reporterProfileId: (string | null) | null;
 	assignedProfileId: (string | null) | null;
 	duplicateOfCaseId: (string | null) | null;
-	reason: (string | null) | null;
-	safeSummary: (string | null) | null;
+	/**
+	 * @type array
+	 */
+	notes: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		postId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @type string
+		 */
+		role: PatchApiGovernanceModerationCasesByCaseIdStatus200NotesRoleEnum;
+		/**
+		 * @description
+		 * Format: `bcp-47`
+		 * @minLength 2
+		 * @maxLength 35
+		 * @type string
+		 */
+		language: string;
+		/**
+		 * @type object
+		 */
+		content: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "image";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						assetId: string;
+						/**
+						 * @type string | undefined
+						 */
+						alt?: string;
+						/**
+						 * @type string | undefined
+						 */
+						caption?: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!(?:block|image)$).+
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+				  }
+			)[];
+		};
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -9268,8 +11247,146 @@ export type PatchApiGovernanceModerationCasesByCaseIdBody = {
 	state?: PatchApiGovernanceModerationCasesByCaseIdRequestStateEnum;
 	assignedProfileId?: (string | null) | null;
 	duplicateOfCaseId?: (string | null) | null;
-	safeSummary?: (string | null) | null;
-	reason?: (string | null) | null;
+	/**
+	 * @type object | undefined
+	 */
+	internalNote?: {
+		/**
+		 * @description
+		 * Format: `bcp-47`
+		 * @minLength 2
+		 * @maxLength 35
+		 * @type string
+		 */
+		language: string;
+		/**
+		 * @type object
+		 */
+		content: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "image";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						assetId: string;
+						/**
+						 * @type string | undefined
+						 */
+						alt?: string;
+						/**
+						 * @type string | undefined
+						 */
+						caption?: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!(?:block|image)$).+
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+				  }
+			)[];
+		};
+	};
 };
 
 /**
@@ -9302,6 +11419,15 @@ export type PatchApiGovernanceModerationCasesByCaseIdResponse =
 	| PatchApiGovernanceModerationCasesByCaseIdStatus404
 	| PatchApiGovernanceModerationCasesByCaseIdStatus422
 	| PatchApiGovernanceModerationCasesByCaseIdStatus500;
+
+export const PostApiGovernanceModerationActionsStatus200NotesRoleEnum = {
+	evidence: "evidence",
+	internal_note: "internal_note",
+	public_notice: "public_notice",
+} as const;
+
+export type PostApiGovernanceModerationActionsStatus200NotesRoleEnum =
+	(typeof PostApiGovernanceModerationActionsStatus200NotesRoleEnum)[keyof typeof PostApiGovernanceModerationActionsStatus200NotesRoleEnum];
 
 /**
  * @type object
@@ -9339,6 +11465,27 @@ export type PostApiGovernanceModerationActionsStatus200 = {
 	 */
 	reasonCode: string;
 	reversesActionId: (string | null) | null;
+	/**
+	 * @type array
+	 */
+	notes: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		postId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @type string
+		 */
+		role: PostApiGovernanceModerationActionsStatus200NotesRoleEnum;
+	}[];
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -9540,7 +11687,6 @@ export type PostApiGovernanceModerationActionsBody =
 			 */
 			caseId: string;
 			/**
-			 * @default 'content_policy'
 			 * @type string
 			 */
 			reasonCode: PostApiGovernanceModerationActionsRequestReasonCodeEnum;
@@ -9712,7 +11858,6 @@ export type PostApiGovernanceModerationActionsBody =
 			 */
 			caseId: string;
 			/**
-			 * @default 'content_policy'
 			 * @type string
 			 */
 			reasonCode: PostApiGovernanceModerationActionsRequestReasonCodeEnum;
@@ -9885,7 +12030,6 @@ export type PostApiGovernanceModerationActionsBody =
 			 */
 			caseId: string;
 			/**
-			 * @default 'content_policy'
 			 * @type string
 			 */
 			reasonCode: PostApiGovernanceModerationActionsRequestReasonCodeEnum;
@@ -10053,7 +12197,6 @@ export type PostApiGovernanceModerationActionsBody =
 			 */
 			caseId: string;
 			/**
-			 * @default 'content_policy'
 			 * @type string
 			 */
 			reasonCode: PostApiGovernanceModerationActionsRequestReasonCodeEnum;
@@ -10223,7 +12366,6 @@ export type PostApiGovernanceModerationActionsBody =
 			 */
 			caseId: string;
 			/**
-			 * @default 'content_policy'
 			 * @type string
 			 */
 			reasonCode: PostApiGovernanceModerationActionsRequestReasonCodeEnum;
@@ -10499,6 +12641,34 @@ export type PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404 = {
 /**
  * @type object
  */
+export type PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'FeedbackAlreadyResolved'
+		 * @type string
+		 */
+		code: "FeedbackAlreadyResolved";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PatchApiGovernanceFeedbackByFeedbackIdResolveStatus422 = ValidationError;
 
 /**
@@ -10506,16 +12676,172 @@ export type PatchApiGovernanceFeedbackByFeedbackIdResolveStatus422 = ValidationE
  */
 export type PatchApiGovernanceFeedbackByFeedbackIdResolveStatus500 = InternalError;
 
+export const PatchApiGovernanceFeedbackByFeedbackIdResolveRequestResolutionCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PatchApiGovernanceFeedbackByFeedbackIdResolveRequestResolutionCodeEnum =
+	(typeof PatchApiGovernanceFeedbackByFeedbackIdResolveRequestResolutionCodeEnum)[keyof typeof PatchApiGovernanceFeedbackByFeedbackIdResolveRequestResolutionCodeEnum];
+
 /**
  * @type object
  */
 export type PatchApiGovernanceFeedbackByFeedbackIdResolveBody = {
 	/**
-	 * @minLength 1
-	 * @maxLength 10000
 	 * @type string
 	 */
-	resolution: string;
+	resolutionCode: PatchApiGovernanceFeedbackByFeedbackIdResolveRequestResolutionCodeEnum;
+	/**
+	 * @type object | undefined
+	 */
+	publicNotice?: {
+		/**
+		 * @description
+		 * Format: `bcp-47`
+		 * @minLength 2
+		 * @maxLength 35
+		 * @type string
+		 */
+		language: string;
+		/**
+		 * @type object
+		 */
+		content: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "image";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						assetId: string;
+						/**
+						 * @type string | undefined
+						 */
+						alt?: string;
+						/**
+						 * @type string | undefined
+						 */
+						caption?: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!(?:block|image)$).+
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+				  }
+			)[];
+		};
+	};
 };
 
 /**
@@ -10535,6 +12861,7 @@ export type PatchApiGovernanceFeedbackByFeedbackIdResolveResponses = {
 	"204": PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204;
 	"403": PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403;
 	"404": PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404;
+	"409": PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409;
 	"422": PatchApiGovernanceFeedbackByFeedbackIdResolveStatus422;
 	"500": PatchApiGovernanceFeedbackByFeedbackIdResolveStatus500;
 };
@@ -10546,6 +12873,7 @@ export type PatchApiGovernanceFeedbackByFeedbackIdResolveResponse =
 	| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204
 	| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403
 	| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404
+	| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409
 	| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus422
 	| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus500;
 
@@ -10601,6 +12929,14 @@ export type PostApiGovernanceModerationEnforcementsStatus200 = {
 	updatedAt: string;
 };
 
+export const PostApiGovernanceModerationEnforcementsStatus400ErrorCodeEnum = {
+	EnforcementExpiryInvalid: "EnforcementExpiryInvalid",
+	ModerationNoteRoleDuplicate: "ModerationNoteRoleDuplicate",
+} as const;
+
+export type PostApiGovernanceModerationEnforcementsStatus400ErrorCodeEnum =
+	(typeof PostApiGovernanceModerationEnforcementsStatus400ErrorCodeEnum)[keyof typeof PostApiGovernanceModerationEnforcementsStatus400ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -10613,7 +12949,7 @@ export type PostApiGovernanceModerationEnforcementsStatus400 = {
 		 * @default 'EnforcementExpiryInvalid'
 		 * @type string
 		 */
-		code: "EnforcementExpiryInvalid";
+		code: PostApiGovernanceModerationEnforcementsStatus400ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -10715,6 +13051,32 @@ export const PostApiGovernanceModerationEnforcementsRequestKindEnum = {
 export type PostApiGovernanceModerationEnforcementsRequestKindEnum =
 	(typeof PostApiGovernanceModerationEnforcementsRequestKindEnum)[keyof typeof PostApiGovernanceModerationEnforcementsRequestKindEnum];
 
+export const PostApiGovernanceModerationEnforcementsRequestReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PostApiGovernanceModerationEnforcementsRequestReasonCodeEnum =
+	(typeof PostApiGovernanceModerationEnforcementsRequestReasonCodeEnum)[keyof typeof PostApiGovernanceModerationEnforcementsRequestReasonCodeEnum];
+
+export const PostApiGovernanceModerationEnforcementsRequestNotesRoleEnum = {
+	internal_note: "internal_note",
+	public_notice: "public_notice",
+} as const;
+
+export type PostApiGovernanceModerationEnforcementsRequestNotesRoleEnum =
+	(typeof PostApiGovernanceModerationEnforcementsRequestNotesRoleEnum)[keyof typeof PostApiGovernanceModerationEnforcementsRequestNotesRoleEnum];
+
 /**
  * @type object
  */
@@ -10730,22 +13092,153 @@ export type PostApiGovernanceModerationEnforcementsBody = {
 	 */
 	kind: PostApiGovernanceModerationEnforcementsRequestKindEnum;
 	/**
-	 * @minLength 1
-	 * @maxLength 10000
 	 * @type string
 	 */
-	reason: string;
+	reasonCode: PostApiGovernanceModerationEnforcementsRequestReasonCodeEnum;
 	/**
-	 * @maxLength 2000
-	 * @type string | undefined
+	 * @type array | undefined
 	 */
-	publicMessage?: string;
-	/**
-	 * @minLength 1
-	 * @maxLength 64
-	 * @type string
-	 */
-	decisionCode: string;
+	notes?: {
+		/**
+		 * @type string
+		 */
+		role: PostApiGovernanceModerationEnforcementsRequestNotesRoleEnum;
+		/**
+		 * @description
+		 * Format: `bcp-47`
+		 * @minLength 2
+		 * @maxLength 35
+		 * @type string
+		 */
+		language: string;
+		/**
+		 * @type object
+		 */
+		content: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "image";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						assetId: string;
+						/**
+						 * @type string | undefined
+						 */
+						alt?: string;
+						/**
+						 * @type string | undefined
+						 */
+						caption?: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!(?:block|image)$).+
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+				  }
+			)[];
+		};
+	}[];
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -10849,6 +13342,34 @@ export type PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus20
 	 * @type string
 	 */
 	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ModerationNoteRoleDuplicate'
+		 * @type string
+		 */
+		code: "ModerationNoteRoleDuplicate";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
 };
 
 export const PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus403ErrorCodeEnum = {
@@ -10961,16 +13482,184 @@ export type PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus42
  */
 export type PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus500 = InternalError;
 
+export const PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeRequestReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeRequestReasonCodeEnum =
+	(typeof PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeRequestReasonCodeEnum)[keyof typeof PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeRequestReasonCodeEnum];
+
+export const PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeRequestNotesRoleEnum = {
+	internal_note: "internal_note",
+	public_notice: "public_notice",
+} as const;
+
+export type PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeRequestNotesRoleEnum =
+	(typeof PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeRequestNotesRoleEnum)[keyof typeof PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeRequestNotesRoleEnum];
+
 /**
  * @type object
  */
 export type PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeBody = {
 	/**
-	 * @minLength 1
-	 * @maxLength 10000
 	 * @type string
 	 */
-	reason: string;
+	reasonCode: PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeRequestReasonCodeEnum;
+	/**
+	 * @type array | undefined
+	 */
+	notes?: {
+		/**
+		 * @type string
+		 */
+		role: PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeRequestNotesRoleEnum;
+		/**
+		 * @description
+		 * Format: `bcp-47`
+		 * @minLength 2
+		 * @maxLength 35
+		 * @type string
+		 */
+		language: string;
+		/**
+		 * @type object
+		 */
+		content: {
+			/**
+			 * @type string
+			 */
+			_type: "portable-text";
+			/**
+			 * @pattern ^[0-9a-f]{12}$
+			 * @type string
+			 */
+			_key: string;
+			/**
+			 * @type array
+			 */
+			content: (
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "block";
+						/**
+						 * @type array
+						 */
+						children: (
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: "span";
+									/**
+									 * @type string
+									 */
+									text: string;
+									/**
+									 * @type array | undefined
+									 */
+									marks?: string[];
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @pattern ^(?!span$).+
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+							  }
+						)[];
+						/**
+						 * @type array | undefined
+						 */
+						markDefs?: {
+							/**
+							 * @type string
+							 */
+							_key: string;
+							/**
+							 * @type string
+							 */
+							_type: string;
+							[key: string]: unknown;
+						}[];
+						/**
+						 * @type string | undefined
+						 */
+						listItem?: string;
+						/**
+						 * @type string | undefined
+						 */
+						style?: string;
+						/**
+						 * @minLength 1
+						 * @type integer | undefined
+						 */
+						level?: number;
+						[key: string]: unknown;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: "image";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						assetId: string;
+						/**
+						 * @type string | undefined
+						 */
+						alt?: string;
+						/**
+						 * @type string | undefined
+						 */
+						caption?: string;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @pattern ^(?!(?:block|image)$).+
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+				  }
+			)[];
+		};
+	}[];
 };
 
 /**
@@ -10988,6 +13677,7 @@ export type PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeOptions 
  */
 export type PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeResponses = {
 	"200": PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus200;
+	"400": PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus400;
 	"403": PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus403;
 	"404": PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus404;
 	"409": PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus409;
@@ -11000,6 +13690,7 @@ export type PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeResponse
  */
 export type PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeResponse =
 	| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus200
+	| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus400
 	| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus403
 	| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus404
 	| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus409
@@ -17045,6 +19736,24 @@ export type PostApiUnitsSlugNamespacesStatus422 =
  */
 export type PostApiUnitsSlugNamespacesStatus500 = InternalError;
 
+export const PostApiUnitsSlugNamespacesRequestReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PostApiUnitsSlugNamespacesRequestReasonCodeEnum =
+	(typeof PostApiUnitsSlugNamespacesRequestReasonCodeEnum)[keyof typeof PostApiUnitsSlugNamespacesRequestReasonCodeEnum];
+
 /**
  * @type object
  */
@@ -17063,11 +19772,9 @@ export type PostApiUnitsSlugNamespacesBody = {
 	 */
 	slug: string;
 	/**
-	 * @minLength 1
-	 * @maxLength 1000
 	 * @type string
 	 */
-	reason: string;
+	reasonCode: PostApiUnitsSlugNamespacesRequestReasonCodeEnum;
 };
 
 /**
@@ -17318,6 +20025,24 @@ export type PutApiUnitsSlugAddressesByUnitIdStatus422 =
  */
 export type PutApiUnitsSlugAddressesByUnitIdStatus500 = InternalError;
 
+export const PutApiUnitsSlugAddressesByUnitIdRequestReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PutApiUnitsSlugAddressesByUnitIdRequestReasonCodeEnum =
+	(typeof PutApiUnitsSlugAddressesByUnitIdRequestReasonCodeEnum)[keyof typeof PutApiUnitsSlugAddressesByUnitIdRequestReasonCodeEnum];
+
 /**
  * @type object
  */
@@ -17336,11 +20061,9 @@ export type PutApiUnitsSlugAddressesByUnitIdBody = {
 	 */
 	slug: string;
 	/**
-	 * @minLength 1
-	 * @maxLength 1000
 	 * @type string
 	 */
-	reason: string;
+	reasonCode: PutApiUnitsSlugAddressesByUnitIdRequestReasonCodeEnum;
 };
 
 /**
@@ -17469,16 +20192,32 @@ export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus422 = ValidationErr
  */
 export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus500 = InternalError;
 
+export const DeleteApiUnitsSlugRedirectsByRedirectUnitIdRequestReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdRequestReasonCodeEnum =
+	(typeof DeleteApiUnitsSlugRedirectsByRedirectUnitIdRequestReasonCodeEnum)[keyof typeof DeleteApiUnitsSlugRedirectsByRedirectUnitIdRequestReasonCodeEnum];
+
 /**
  * @type object
  */
 export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdBody = {
 	/**
-	 * @minLength 1
-	 * @maxLength 1000
 	 * @type string
 	 */
-	reason: string;
+	reasonCode: DeleteApiUnitsSlugRedirectsByRedirectUnitIdRequestReasonCodeEnum;
 };
 
 /**
@@ -21446,6 +24185,24 @@ export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus422 = Valida
  */
 export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus500 = InternalError;
 
+export const PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestReasonCodeEnum =
+	(typeof PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestReasonCodeEnum)[keyof typeof PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestReasonCodeEnum];
+
 /**
  * @type object
  */
@@ -21467,11 +24224,9 @@ export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityBody = {
 	 */
 	suppressed: boolean;
 	/**
-	 * @minLength 1
-	 * @maxLength 1000
 	 * @type string
 	 */
-	reason: string;
+	reasonCode: PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestReasonCodeEnum;
 };
 
 /**
@@ -38213,6 +40968,15 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdPath = {
 	unitId: string;
 };
 
+export const PatchApiRealmsByRealmIdUnitsByUnitIdStatus200NotesRoleEnum = {
+	evidence: "evidence",
+	internal_note: "internal_note",
+	public_notice: "public_notice",
+} as const;
+
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200NotesRoleEnum =
+	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200NotesRoleEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200NotesRoleEnum];
+
 /**
  * @type object
  */
@@ -38249,6 +41013,27 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200 = {
 	 */
 	reasonCode: string;
 	reversesActionId: (string | null) | null;
+	/**
+	 * @type array
+	 */
+	notes: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		postId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		revisionId: string;
+		/**
+		 * @type string
+		 */
+		role: PatchApiRealmsByRealmIdUnitsByUnitIdStatus200NotesRoleEnum;
+	}[];
 	/**
 	 * @description
 	 * Format: `date-time`

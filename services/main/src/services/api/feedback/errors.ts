@@ -13,4 +13,14 @@ export class FeedbackNotFound extends Data.TaggedError("FeedbackNotFound") {
 	readonly message = "Feedback not found";
 }
 
-export const FeedbackErrors = [FeedbackRealmMismatch, FeedbackNotFound] as const;
+export class FeedbackAlreadyResolved extends Data.TaggedError("FeedbackAlreadyResolved") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = FeedbackAlreadyResolved.status;
+	readonly message = "Feedback is already resolved";
+}
+
+export const FeedbackErrors = [
+	FeedbackRealmMismatch,
+	FeedbackNotFound,
+	FeedbackAlreadyResolved,
+] as const;

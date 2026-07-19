@@ -412,8 +412,7 @@ export default new Elysia({ prefix: "/history" })
 				await tx.insert(auditEvent).values({
 					actorProfileId: profile.unitId,
 					action: "revision.visibility.update",
-					decisionCode: "allowed",
-					reason: body.reason,
+					decisionCode: body.reasonCode,
 					subjectKind: "unit_revision",
 					subjectId: params.revisionId,
 					metadata: {

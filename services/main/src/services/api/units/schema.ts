@@ -1,5 +1,6 @@
 import { type Static, t } from "elysia";
 
+import { GovernanceReasonCodeValues } from "../../database/schema/contract-values";
 import { LanguageTag, LifecycleInput, LocalizationInput, Uuid } from "../schema";
 
 export const UnitType = t.Union([t.Literal("book"), t.Literal("software"), t.Literal("media")]);
@@ -116,7 +117,7 @@ export const ResolvedUnitPathResponse = t.Object({
 const StaffSlugMutationInput = {
 	scopeUnitId: Uuid,
 	slug: SlugLabelInput,
-	reason: t.String({ minLength: 1, maxLength: 1000 }),
+	reasonCode: t.UnionEnum(GovernanceReasonCodeValues, { default: undefined }),
 };
 
 export const CreateSlugNamespaceBody = t.Object(StaffSlugMutationInput, {
@@ -147,7 +148,9 @@ export const SlugRedirectParams = t.Object({ redirectUnitId: Uuid });
 export type SlugRedirectParams = Static<typeof SlugRedirectParams>;
 
 export const ReleaseSlugRedirectBody = t.Object(
-	{ reason: t.String({ minLength: 1, maxLength: 1000 }) },
+	{
+		reasonCode: t.UnionEnum(GovernanceReasonCodeValues, { default: undefined }),
+	},
 	{ additionalProperties: false },
 );
 export type ReleaseSlugRedirectBody = Static<typeof ReleaseSlugRedirectBody>;

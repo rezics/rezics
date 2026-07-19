@@ -1,4 +1,5 @@
 import { type Static, t } from "elysia";
+import { GovernanceReasonCodeValues } from "../../database/schema/contract-values";
 import { UnitRevisionChangeTags } from "../../units/history";
 import { DateTime, Uuid } from "../schema";
 
@@ -37,7 +38,7 @@ export const RevisionVisibilityBody = t.Object(
 		summaryHidden: t.Boolean(),
 		actorHidden: t.Boolean(),
 		suppressed: t.Boolean(),
-		reason: t.String({ minLength: 1, maxLength: 1_000 }),
+		reasonCode: t.UnionEnum(GovernanceReasonCodeValues, { default: undefined }),
 	},
 	{ additionalProperties: false },
 );

@@ -243,6 +243,7 @@ import type {
 	PatchApiGovernanceFeedbackByFeedbackIdResolveStatus204,
 	PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403,
 	PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404,
+	PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409,
 	PatchApiGovernanceFeedbackByFeedbackIdResolveStatus422,
 	PatchApiGovernanceFeedbackByFeedbackIdResolveStatus500,
 	PostApiGovernanceModerationEnforcementsOptions,
@@ -254,6 +255,7 @@ import type {
 	PostApiGovernanceModerationEnforcementsStatus500,
 	PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeOptions,
 	PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus200,
+	PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus400,
 	PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus403,
 	PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus404,
 	PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus409,
@@ -5340,6 +5342,7 @@ export function patchApiGovernanceFeedbackByFeedbackIdResolveMutationOptions<TCo
 		ResponseErrorConfig<
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404
+			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus422
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus500
 		>,
@@ -5370,6 +5373,7 @@ export function usePatchApiGovernanceFeedbackByFeedbackIdResolve<TContext>(
 			ResponseErrorConfig<
 				| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403
 				| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404
+				| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409
 				| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus422
 				| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus500
 			>,
@@ -5391,6 +5395,7 @@ export function usePatchApiGovernanceFeedbackByFeedbackIdResolve<TContext>(
 		ResponseErrorConfig<
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404
+			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus422
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus500
 		>,
@@ -5403,6 +5408,7 @@ export function usePatchApiGovernanceFeedbackByFeedbackIdResolve<TContext>(
 		ResponseErrorConfig<
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404
+			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus422
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus500
 		>,
@@ -5420,6 +5426,7 @@ export function usePatchApiGovernanceFeedbackByFeedbackIdResolve<TContext>(
 		ResponseErrorConfig<
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus403
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus404
+			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus409
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus422
 			| PatchApiGovernanceFeedbackByFeedbackIdResolveStatus500
 		>,
@@ -5542,6 +5549,7 @@ export function postApiGovernanceModerationEnforcementsByEnforcementIdRevokeMuta
 	return mutationOptions<
 		PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus200,
 		ResponseErrorConfig<
+			| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus400
 			| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus403
 			| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus404
 			| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus409
@@ -5573,6 +5581,7 @@ export function usePostApiGovernanceModerationEnforcementsByEnforcementIdRevoke<
 		mutation?: UseMutationOptions<
 			PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus200,
 			ResponseErrorConfig<
+				| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus400
 				| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus403
 				| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus404
 				| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus409
@@ -5596,6 +5605,7 @@ export function usePostApiGovernanceModerationEnforcementsByEnforcementIdRevoke<
 	) as UseMutationOptions<
 		PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus200,
 		ResponseErrorConfig<
+			| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus400
 			| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus403
 			| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus404
 			| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus409
@@ -5609,6 +5619,7 @@ export function usePostApiGovernanceModerationEnforcementsByEnforcementIdRevoke<
 	return useMutation<
 		PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus200,
 		ResponseErrorConfig<
+			| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus400
 			| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus403
 			| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus404
 			| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus409
@@ -5627,6 +5638,7 @@ export function usePostApiGovernanceModerationEnforcementsByEnforcementIdRevoke<
 	) as UseMutationResult<
 		PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus200,
 		ResponseErrorConfig<
+			| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus400
 			| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus403
 			| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus404
 			| PostApiGovernanceModerationEnforcementsByEnforcementIdRevokeStatus409

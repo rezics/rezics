@@ -1,4 +1,5 @@
 import { StatusCodes } from "http-status-codes";
+import { Check } from "@sinclair/typebox/value";
 import { and, asc, count, desc, eq, gt, isNull, lt, or } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
@@ -17,12 +18,16 @@ import { parseJsonCursor } from "../../pagination";
 import { toApiErrorResponse } from "../schema/response";
 import { InvalidNotificationCursor, NotificationNotFound } from "./errors";
 import {
+	DirectMessageNotificationPayload,
+	ModerationNotificationPayload,
 	NotificationCursorQuery,
 	NotificationListResponse,
 	NotificationParams,
 	NotificationPreferencesResponse,
 	ReadNotificationsBody,
+	RealmNotificationPayload,
 	ReplaceNotificationPreferencesBody,
+	SystemNotificationPayload,
 	UnreadCountResponse,
 } from "./schema";
 
@@ -66,6 +71,34 @@ function decodeCursor(value: string | undefined, unreadOnly: boolean) {
 		};
 	} catch {
 		throw new InvalidNotificationCursor();
+	}
+}
+
+function presentNotificationPayload(
+	kind: (typeof notification.$inferSelect)["kind"],
+	payload: (typeof notification.$inferSelect)["payload"],
+) {
+	switch (kind) {
+		case "reply":
+		case "follow":
+			if (payload !== null) throw new Error(`${kind} notification has an invalid payload`);
+			return { kind, payload };
+		case "direct_message":
+			if (!Check(DirectMessageNotificationPayload, payload))
+				throw new Error("Direct-message notification has an invalid payload");
+			return { kind, payload };
+		case "moderation":
+			if (!Check(ModerationNotificationPayload, payload))
+				throw new Error("Moderation notification has an invalid payload");
+			return { kind, payload };
+		case "realm":
+			if (!Check(RealmNotificationPayload, payload))
+				throw new Error("Realm notification has an invalid payload");
+			return { kind, payload };
+		case "system":
+			if (!Check(SystemNotificationPayload, payload))
+				throw new Error("System notification has an invalid payload");
+			return { kind, payload };
 	}
 }
 
@@ -136,6 +169,7 @@ export default new Elysia({ prefix: "/notifications" })
 				.limit(limit + 1);
 			const items = candidates.slice(0, limit).map((item) => ({
 				...item,
+				...presentNotificationPayload(item.kind, item.payload),
 				...translation.notifications[item.kind],
 			}));
 			const [unread] = await database

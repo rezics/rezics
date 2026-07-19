@@ -382,7 +382,10 @@ export default new Elysia({ prefix: "/messages" })
 					recipientProfileId: recipientProfileId,
 					actorProfileId: profile.unitId,
 					kind: "direct_message",
-					payload: { conversationId: params.conversationId },
+					payload: {
+						type: "direct_message",
+						conversationId: params.conversationId,
+					},
 				});
 				return { created, notificationId };
 			});

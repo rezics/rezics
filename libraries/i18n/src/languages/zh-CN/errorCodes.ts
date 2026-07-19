@@ -62,6 +62,7 @@ export default {
 	ModerationIdempotencyConflict: "该重试键已用于另一项管理请求。",
 	ModerationNoteRoleDuplicate: "内部批注和公开通知均最多添加一条。",
 	FeedbackNotFound: "没有找到这条反馈。",
+	FeedbackAlreadyResolved: "这条反馈已经处理完成。",
 	EnforcementExpiryInvalid: "管理措施的过期时间必须晚于当前时间。",
 	EnforcementNotFound: "没有找到这项管理措施。",
 	EnforcementAlreadyRevoked: "这项管理措施已被撤销。",

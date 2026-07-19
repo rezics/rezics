@@ -14,6 +14,7 @@ import {
 	unitAccessRestriction,
 	unitProtection,
 } from "../../database/schema";
+import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/note-service";
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
 import { RealmNotFound } from "../realms/errors";
@@ -69,7 +70,10 @@ function parseExpiry(value: string | undefined): Date | null {
 	return expiresAt;
 }
 
-function toUnitAccessRestrictionResponse(record: typeof unitAccessRestriction.$inferSelect) {
+function toUnitAccessRestrictionResponse(
+	record: typeof unitAccessRestriction.$inferSelect,
+	internalNotePostId: string | null,
+) {
 	const subject =
 		record.subjectKind === "profile" && record.profileId && record.realmId === null
 			? { kind: "profile" as const, profileId: record.profileId }
@@ -83,13 +87,36 @@ function toUnitAccessRestrictionResponse(record: typeof unitAccessRestriction.$i
 		subject,
 		permission: record.permission,
 		scope: record.scope,
-		reason: record.reason,
+		reasonCode: record.reasonCode,
+		internalNotePostId,
 		createdByProfileId: record.createdByProfileId,
 		expiresAt: record.expiresAt,
 		revokedAt: record.revokedAt,
 		createdAt: record.createdAt,
 		updatedAt: record.updatedAt,
 	};
+}
+
+function toUnitProtectionResponse(
+	record: typeof unitProtection.$inferSelect,
+	internalNotePostId: string | null,
+) {
+	return { ...record, internalNotePostId };
+}
+
+async function activeOwnerProfileIds(tx: DatabaseTransaction, unitId: string): Promise<string[]> {
+	const owners = await tx
+		.select({ profileId: unitAccessBinding.profileId })
+		.from(unitAccessBinding)
+		.where(
+			and(
+				eq(unitAccessBinding.unitId, unitId),
+				eq(unitAccessBinding.subjectKind, "profile"),
+				eq(unitAccessBinding.role, "owner"),
+				active(unitAccessBinding.revokedAt, unitAccessBinding.expiresAt),
+			),
+		);
+	return owners.flatMap((owner) => (owner.profileId ? [owner.profileId] : []));
 }
 
 async function ensureOwnerOrPlatform(
@@ -132,15 +159,14 @@ async function recordAccessAudit(
 		actorProfileId: string;
 		action: string;
 		unitId: string;
-		reason: string;
+		decisionCode?: string;
 		metadata?: Record<string, unknown>;
 	},
 ) {
 	await tx.insert(auditEvent).values({
 		actorProfileId: input.actorProfileId,
 		action: input.action,
-		decisionCode: "allowed",
-		reason: input.reason,
+		decisionCode: input.decisionCode ?? "allowed",
 		subjectKind: "unit",
 		subjectId: input.unitId,
 		metadata: input.metadata,
@@ -274,8 +300,12 @@ export default new Elysia({ prefix: "/unit" })
 					actorProfileId: profile.unitId,
 					action: "unit.access_binding.create",
 					unitId: params.unitId,
-					reason: `Granted ${body.role} at ${body.scope.join("/") || "root"}`,
-					metadata: { bindingId: created.id, subjectKind: body.subject.kind },
+					metadata: {
+						bindingId: created.id,
+						subjectKind: body.subject.kind,
+						role: body.role,
+						scope: body.scope,
+					},
 				});
 				return created;
 			});
@@ -351,7 +381,6 @@ export default new Elysia({ prefix: "/unit" })
 					actorProfileId: profile.unitId,
 					action: "unit.access_binding.revoke",
 					unitId: params.unitId,
-					reason: "Unit access binding revoked",
 					metadata: { bindingId: target.id },
 				});
 			});
@@ -380,25 +409,36 @@ export default new Elysia({ prefix: "/unit" })
 		"/:unitId/access-restrictions",
 		async ({ authorization, params }) => {
 			await authorization.unit.ensure(params.unitId, "unit.access.manage");
-			return {
-				items: (
-					await database
-						.select()
-						.from(unitAccessRestriction)
-						.where(
-							and(
-								eq(unitAccessRestriction.unitId, params.unitId),
-								isNull(unitAccessRestriction.revokedAt),
-							),
-						)
-						.orderBy(
-							unitAccessRestriction.scope,
-							unitAccessRestriction.permission,
-							unitAccessRestriction.subjectKind,
-							unitAccessRestriction.id,
-						)
-				).map(toUnitAccessRestrictionResponse),
-			};
+			return database.transaction(async (tx) => {
+				const rows = await tx
+					.select()
+					.from(unitAccessRestriction)
+					.where(
+						and(
+							eq(unitAccessRestriction.unitId, params.unitId),
+							isNull(unitAccessRestriction.revokedAt),
+						),
+					)
+					.orderBy(
+						unitAccessRestriction.scope,
+						unitAccessRestriction.permission,
+						unitAccessRestriction.subjectKind,
+						unitAccessRestriction.id,
+					);
+				const notes = await listGovernanceNotes(tx, {
+					subjectKind: "unit_access_restriction",
+					subjectIds: rows.map((row) => row.id),
+					roles: ["internal_note"],
+				});
+				return {
+					items: rows.map((row) =>
+						toUnitAccessRestrictionResponse(
+							row,
+							notes.find((note) => note.subjectId === row.id)?.postId ?? null,
+						),
+					),
+				};
+			});
 		},
 		{
 			access: "session-only",
@@ -478,22 +518,38 @@ export default new Elysia({ prefix: "/unit" })
 						...subjectColumns,
 						permission: body.permission,
 						scope: body.scope,
-						reason: body.reason,
+						reasonCode: body.reasonCode,
 						expiresAt,
 						createdByProfileId: profile.unitId,
 					})
 					.returning();
 				if (!row) throw new Error("Unit access restriction insertion returned no row");
+				const internalNote = body.internalNote
+					? await createGovernanceNotePost(tx, {
+							actorProfileId: profile.unitId,
+							subjectKind: "unit_access_restriction",
+							subjectId: row.id,
+							subjectUnitId: params.unitId,
+							viewerProfileIds: await activeOwnerProfileIds(tx, params.unitId),
+							note: { role: "internal_note", ...body.internalNote },
+						})
+					: undefined;
 				await recordAccessAudit(tx, {
 					actorProfileId: profile.unitId,
 					action: "unit.access_restriction.create",
 					unitId: params.unitId,
-					reason: body.reason,
-					metadata: { restrictionId: row.id, subject: body.subject },
+					decisionCode: body.reasonCode,
+					metadata: {
+						restrictionId: row.id,
+						subject: body.subject,
+						permission: body.permission,
+						scope: body.scope,
+						internalNotePostId: internalNote?.postId,
+					},
 				});
-				return row;
+				return { row, internalNotePostId: internalNote?.postId ?? null };
 			});
-			return toUnitAccessRestrictionResponse(created);
+			return toUnitAccessRestrictionResponse(created.row, created.internalNotePostId);
 		},
 		{
 			access: "session-only",
@@ -544,7 +600,7 @@ export default new Elysia({ prefix: "/unit" })
 					actorProfileId: profile.unitId,
 					action: "unit.access_restriction.revoke",
 					unitId: params.unitId,
-					reason: "Unit access restriction revoked",
+					decisionCode: "administrative",
 					metadata: { restrictionId: target.id },
 				});
 			});
@@ -572,8 +628,8 @@ export default new Elysia({ prefix: "/unit" })
 		"/:unitId/protections",
 		async ({ authorization, params }) => {
 			await authorization.unit.ensure(params.unitId, "unit.protection.manage");
-			return {
-				items: await database
+			return database.transaction(async (tx) => {
+				const rows = await tx
 					.select()
 					.from(unitProtection)
 					.where(
@@ -582,8 +638,21 @@ export default new Elysia({ prefix: "/unit" })
 							isNull(unitProtection.revokedAt),
 						),
 					)
-					.orderBy(unitProtection.scope, unitProtection.id),
-			};
+					.orderBy(unitProtection.scope, unitProtection.id);
+				const notes = await listGovernanceNotes(tx, {
+					subjectKind: "unit_protection",
+					subjectIds: rows.map((row) => row.id),
+					roles: ["internal_note"],
+				});
+				return {
+					items: rows.map((row) =>
+						toUnitProtectionResponse(
+							row,
+							notes.find((note) => note.subjectId === row.id)?.postId ?? null,
+						),
+					),
+				};
+			});
 		},
 		{
 			access: "session-only",
@@ -621,20 +690,35 @@ export default new Elysia({ prefix: "/unit" })
 						unitId: params.unitId,
 						scope: body.scope,
 						mode: body.mode,
-						reason: body.reason,
+						reasonCode: body.reasonCode,
 						expiresAt,
 						createdByProfileId: profile.unitId,
 					})
 					.returning();
 				if (!created) throw new Error("Unit protection insertion returned no row");
+				const internalNote = body.internalNote
+					? await createGovernanceNotePost(tx, {
+							actorProfileId: profile.unitId,
+							subjectKind: "unit_protection",
+							subjectId: created.id,
+							subjectUnitId: params.unitId,
+							viewerProfileIds: await activeOwnerProfileIds(tx, params.unitId),
+							note: { role: "internal_note", ...body.internalNote },
+						})
+					: undefined;
 				await recordAccessAudit(tx, {
 					actorProfileId: profile.unitId,
 					action: "unit.protection.create",
 					unitId: params.unitId,
-					reason: body.reason,
-					metadata: { protectionId: created.id, mode: body.mode, scope: body.scope },
+					decisionCode: body.reasonCode,
+					metadata: {
+						protectionId: created.id,
+						mode: body.mode,
+						scope: body.scope,
+						internalNotePostId: internalNote?.postId,
+					},
 				});
-				return created;
+				return toUnitProtectionResponse(created, internalNote?.postId ?? null);
 			});
 		},
 		{
@@ -682,7 +766,7 @@ export default new Elysia({ prefix: "/unit" })
 					actorProfileId: profile.unitId,
 					action: "unit.protection.revoke",
 					unitId: params.unitId,
-					reason: "Unit protection revoked",
+					decisionCode: "administrative",
 					metadata: { protectionId: target.id },
 				});
 			});

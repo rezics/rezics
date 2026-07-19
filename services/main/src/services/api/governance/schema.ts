@@ -19,8 +19,15 @@ const NullableUuid = t.Nullable(Uuid);
 
 const ModerationCaseState = t.Union(ModerationCaseStateValues.map((value) => t.Literal(value)));
 
-const GovernanceReasonCode = t.UnionEnum(GovernanceReasonCodeValues);
-const GovernanceActionNote = t.Object(
+const GovernanceReasonCode = t.UnionEnum(GovernanceReasonCodeValues, { default: undefined });
+export const GovernanceInternalNote = t.Object(
+	{
+		language: LanguageTag,
+		content: PortableTextDocument,
+	},
+	{ additionalProperties: false },
+);
+export const GovernanceActionNote = t.Object(
 	{
 		role: t.Union([t.Literal("internal_note"), t.Literal("public_notice")]),
 		language: LanguageTag,
@@ -29,6 +36,19 @@ const GovernanceActionNote = t.Object(
 	{ additionalProperties: false },
 );
 const GovernanceActionNotes = t.Array(GovernanceActionNote, { maxItems: 2 });
+export const GovernanceNoteResponse = t.Object({
+	postId: Uuid,
+	revisionId: Uuid,
+	role: t.Union([t.Literal("evidence"), t.Literal("internal_note"), t.Literal("public_notice")]),
+	language: LanguageTag,
+	content: PortableTextDocument,
+	createdAt: DateTime,
+});
+const GovernanceNoteBindingResponse = t.Pick(GovernanceNoteResponse, [
+	"postId",
+	"revisionId",
+	"role",
+]);
 const ModerationActionCommon = {
 	caseId: Uuid,
 	reasonCode: GovernanceReasonCode,
@@ -47,8 +67,7 @@ export const UpdateModerationCaseBody = t.Object(
 		state: t.Optional(ModerationCaseState),
 		assignedProfileId: t.Optional(NullableUuid),
 		duplicateOfCaseId: t.Optional(NullableUuid),
-		safeSummary: t.Optional(t.Nullable(t.String({ maxLength: 2_000 }))),
-		reason: t.Optional(t.Nullable(t.String({ maxLength: 10_000 }))),
+		internalNote: t.Optional(GovernanceInternalNote),
 	},
 	{ minProperties: 1, additionalProperties: false },
 );
@@ -116,7 +135,18 @@ export type CreateModerationActionBody = Static<typeof CreateModerationActionBod
 
 export const FeedbackParams = t.Object({ feedbackId: Uuid });
 export const ResolveFeedbackBody = t.Object(
-	{ resolution: t.String({ minLength: 1, maxLength: 10_000 }) },
+	{
+		resolutionCode: GovernanceReasonCode,
+		publicNotice: t.Optional(
+			t.Object(
+				{
+					language: LanguageTag,
+					content: PortableTextDocument,
+				},
+				{ additionalProperties: false },
+			),
+		),
+	},
 	{ additionalProperties: false },
 );
 
@@ -125,16 +155,18 @@ export const CreateAccountEnforcementBody = t.Object(
 	{
 		profileId: Uuid,
 		kind: AccountEnforcementKind,
-		reason: t.String({ minLength: 1, maxLength: 10_000 }),
-		publicMessage: t.Optional(t.String({ maxLength: 2_000 })),
-		decisionCode: t.String({ minLength: 1, maxLength: 64 }),
+		reasonCode: GovernanceReasonCode,
+		notes: t.Optional(GovernanceActionNotes),
 		expiresAt: t.Optional(t.String({ format: "date-time" })),
 	},
 	{ additionalProperties: false },
 );
 export const AccountEnforcementParams = t.Object({ enforcementId: Uuid });
 export const RevokeAccountEnforcementBody = t.Object(
-	{ reason: t.String({ minLength: 1, maxLength: 10_000 }) },
+	{
+		reasonCode: GovernanceReasonCode,
+		notes: t.Optional(GovernanceActionNotes),
+	},
 	{ additionalProperties: false },
 );
 
@@ -193,7 +225,8 @@ export const CreateUnitAccessRestrictionBody = t.Object(
 		subject: UnitAccessRestrictionSubject,
 		permission: t.UnionEnum(UnitPermissionValues),
 		scope: UnitScope,
-		reason: t.String({ minLength: 1, maxLength: 2_000 }),
+		reasonCode: GovernanceReasonCode,
+		internalNote: t.Optional(GovernanceInternalNote),
 		expiresAt: t.Optional(t.String({ format: "date-time" })),
 	},
 	{ additionalProperties: false },
@@ -203,7 +236,8 @@ export const CreateUnitProtectionBody = t.Object(
 	{
 		scope: UnitScope,
 		mode: t.UnionEnum(UnitProtectionModeValues),
-		reason: t.String({ minLength: 1, maxLength: 2_000 }),
+		reasonCode: GovernanceReasonCode,
+		internalNote: t.Optional(GovernanceInternalNote),
 		expiresAt: t.Optional(t.String({ format: "date-time" })),
 	},
 	{ additionalProperties: false },
@@ -220,8 +254,7 @@ export const ModerationCaseResponse = t.Object({
 	reporterProfileId: t.Nullable(Uuid),
 	assignedProfileId: t.Nullable(Uuid),
 	duplicateOfCaseId: t.Nullable(Uuid),
-	reason: t.Nullable(t.String()),
-	safeSummary: t.Nullable(t.String()),
+	notes: t.Array(GovernanceNoteResponse),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
@@ -239,6 +272,7 @@ export const ModerationActionResponse = t.Object({
 	resultingLocked: t.Nullable(t.Boolean()),
 	reasonCode: t.String(),
 	reversesActionId: t.Nullable(Uuid),
+	notes: t.Array(GovernanceNoteBindingResponse),
 	createdAt: DateTime,
 });
 
@@ -293,7 +327,8 @@ export const UnitAccessRestrictionResponse = t.Object({
 	subject: UnitAccessRestrictionSubject,
 	permission: t.String(),
 	scope: UnitScope,
-	reason: t.String(),
+	reasonCode: GovernanceReasonCode,
+	internalNotePostId: t.Nullable(Uuid),
 	createdByProfileId: Uuid,
 	expiresAt: t.Nullable(DateTime),
 	revokedAt: t.Nullable(DateTime),
@@ -308,7 +343,8 @@ export const UnitProtectionResponse = t.Object({
 	unitId: Uuid,
 	scope: UnitScope,
 	mode: t.String(),
-	reason: t.String(),
+	reasonCode: GovernanceReasonCode,
+	internalNotePostId: t.Nullable(Uuid),
 	createdByProfileId: Uuid,
 	expiresAt: t.Nullable(DateTime),
 	revokedAt: t.Nullable(DateTime),

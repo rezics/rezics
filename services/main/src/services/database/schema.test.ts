@@ -3,6 +3,8 @@ import { getTableConfig, PgDialect } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 
 import {
+	auditEvent,
+	feedback,
 	unit,
 	conversationParticipantStat,
 	realmTagVoteStat,
@@ -10,9 +12,11 @@ import {
 	recommendationSignalKind,
 	recommendationUnitStat,
 	governancePostBinding,
+	governanceReasonCode,
 	GovernanceNoteRoleValues,
 	GovernanceReasonCodeValues,
 	moderationAction,
+	moderationCase,
 	ModerationActionKindValues,
 	PostKindValues,
 	realmUnitStatus,
@@ -21,6 +25,7 @@ import {
 	scoreStat,
 	unitAccessBinding,
 	unitAccessRestriction,
+	unitProtection,
 	unitAlias,
 	unitAliasVoteStat,
 	unitReactionStat,
@@ -114,8 +119,11 @@ describe("database schema contracts", () => {
 		expect(binding.foreignKeys.map((key) => key.getName())).toContain(
 			"governance_post_binding_revision_post_fkey",
 		);
-		expect(binding.uniqueConstraints.map((constraint) => constraint.name)).toContain(
+		expect(binding.uniqueConstraints.map((constraint) => constraint.name)).not.toContain(
 			"governance_post_binding_subject_role_key",
+		);
+		expect(binding.indexes.map((index) => index.config.name)).toContain(
+			"governance_post_binding_subject_role_idx",
 		);
 
 		const event = getTableConfig(realmUnitStatusEvent);
@@ -128,6 +136,11 @@ describe("database schema contracts", () => {
 		expect(event.columns.map((column) => column.name)).not.toContain("annotation_document");
 
 		const action = getTableConfig(moderationAction);
+		expect(governanceReasonCode.enumValues).toEqual(GovernanceReasonCodeValues);
+		expect(moderationAction.reasonCode.enumValues).toEqual(GovernanceReasonCodeValues);
+		expect(feedback.resolutionCode.enumValues).toEqual(GovernanceReasonCodeValues);
+		expect(unitAccessRestriction.reasonCode.enumValues).toEqual(GovernanceReasonCodeValues);
+		expect(unitProtection.reasonCode.enumValues).toEqual(GovernanceReasonCodeValues);
 		expect(action.indexes.map((index) => index.config.name)).toContain(
 			"moderation_action_actor_case_idempotency_key",
 		);
@@ -138,6 +151,18 @@ describe("database schema contracts", () => {
 				"moderation_action_single_outcome_check",
 				"moderation_action_request_fingerprint_check",
 			]),
+		);
+		expect(getTableConfig(feedback).columns.map((column) => column.name)).not.toEqual(
+			expect.arrayContaining(["content", "resolution"]),
+		);
+		expect(getTableConfig(moderationCase).columns.map((column) => column.name)).not.toEqual(
+			expect.arrayContaining(["reason", "safe_summary"]),
+		);
+		expect(action.columns.map((column) => column.name)).not.toEqual(
+			expect.arrayContaining(["reason", "public_message"]),
+		);
+		expect(getTableConfig(auditEvent).columns.map((column) => column.name)).not.toContain(
+			"reason",
 		);
 	});
 

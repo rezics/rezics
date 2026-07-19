@@ -8,23 +8,61 @@ import {
 	profilePreference,
 	users,
 } from "../database/schema";
+import type { GovernanceReasonCodeValues, ModerationActionKindValues } from "../database/schema";
 import { getTranslation } from "../i18n";
 import { sendMail } from "../mailer";
 import type { DatabaseTransaction } from "../database";
 
-type NotificationKind = NonNullable<typeof notification.$inferInsert.kind>;
+type GovernanceReasonCode = (typeof GovernanceReasonCodeValues)[number];
+type ModerationActionKind = (typeof ModerationActionKindValues)[number];
 
-export async function createNotification(
-	tx: DatabaseTransaction,
-	input: {
-		recipientProfileId: string;
-		actorProfileId?: string | null;
-		kind: NotificationKind;
-		subjectUnitId?: string | null;
-		payload?: Record<string, unknown> | null;
-		dedupeKey?: string | null;
-	},
-) {
+type NotificationBase = {
+	recipientProfileId: string;
+	actorProfileId?: string | null;
+	subjectUnitId?: string | null;
+	dedupeKey?: string | null;
+};
+
+export type NotificationInput = NotificationBase &
+	(
+		| { kind: "reply"; payload?: never }
+		| { kind: "follow"; payload?: never }
+		| {
+				kind: "direct_message";
+				payload: { type: "direct_message"; conversationId: string };
+		  }
+		| {
+				kind: "moderation";
+				payload:
+					| {
+							type: "moderation_action";
+							actionId: string;
+							actionKind: ModerationActionKind;
+							reasonCode: GovernanceReasonCode;
+							publicNoticePostId?: string;
+					  }
+					| {
+							type: "feedback_resolution";
+							feedbackId: string;
+							resolutionCode: GovernanceReasonCode;
+							publicNoticePostId?: string;
+					  };
+		  }
+		| {
+				kind: "realm";
+				payload: { type: "realm_event"; event: "membership_updated" };
+		  }
+		| {
+				kind: "system";
+				payload: {
+					type: "system_event";
+					event: string;
+					references?: Record<string, string>;
+				};
+		  }
+	);
+
+export async function createNotification(tx: DatabaseTransaction, input: NotificationInput) {
 	if (input.actorProfileId && input.actorProfileId === input.recipientProfileId) return undefined;
 	const [preferences] = await tx
 		.select({
