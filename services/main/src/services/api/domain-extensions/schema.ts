@@ -1,7 +1,7 @@
 import { JsonValue } from "@rezics/portable-text";
 import {
-	BlockDocument,
 	NavigationDocument,
+	UnitReferencedBlockDocument,
 	ZoneBoundaryDocument,
 	ZoneThemeDocument,
 } from "@rezics/block";
@@ -15,7 +15,9 @@ import { DateTime, FractionalPosition, LocalizationInput, Uuid } from "../schema
 // through the entire Elysia route chain.
 const ZoneBoundaryResponseDocument = Type.Unsafe<unknown>(Type.Ref("ZoneBoundaryDocument"));
 const ZoneThemeResponseDocument = Type.Unsafe<unknown>(Type.Ref("ZoneThemeDocument"));
-const BlockResponseDocument = Type.Unsafe<unknown>(Type.Ref("BlockDocument"));
+const UnitReferencedBlockResponseDocument = Type.Unsafe<unknown>(
+	Type.Ref("UnitReferencedBlockDocument"),
+);
 const NavigationResponseDocument = Type.Unsafe<unknown>(Type.Ref("NavigationDocument"));
 const ZoneBoundaryInputDocument = Type.Unsafe<Static<typeof ZoneBoundaryDocument>>(
 	Type.Ref("ZoneBoundaryDocument"),
@@ -23,7 +25,9 @@ const ZoneBoundaryInputDocument = Type.Unsafe<Static<typeof ZoneBoundaryDocument
 const ZoneThemeInputDocument = Type.Unsafe<Static<typeof ZoneThemeDocument>>(
 	Type.Ref("ZoneThemeDocument"),
 );
-const BlockInputDocument = Type.Unsafe<Static<typeof BlockDocument>>(Type.Ref("BlockDocument"));
+const UnitReferencedBlockInputDocument = Type.Unsafe<Static<typeof UnitReferencedBlockDocument>>(
+	Type.Ref("UnitReferencedBlockDocument"),
+);
 const NavigationInputDocument = Type.Unsafe<Static<typeof NavigationDocument>>(
 	Type.Ref("NavigationDocument"),
 );
@@ -71,7 +75,7 @@ export const CreateZoneBody = t.Object(
 		localization: LocalizationInput,
 		boundaryDocument: ZoneBoundaryInputDocument,
 		themeDocument: ZoneThemeInputDocument,
-		dockDocument: BlockInputDocument,
+		dockDocument: UnitReferencedBlockInputDocument,
 		startsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 		endsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 	},
@@ -90,7 +94,7 @@ export const UpdateZoneBody = t.Object(
 	{
 		boundaryDocument: t.Optional(ZoneBoundaryInputDocument),
 		themeDocument: t.Optional(ZoneThemeInputDocument),
-		dockDocument: t.Optional(BlockInputDocument),
+		dockDocument: t.Optional(UnitReferencedBlockInputDocument),
 		startsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 		endsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 	},
@@ -99,7 +103,7 @@ export const UpdateZoneBody = t.Object(
 export const ZonePageBody = t.Object(
 	{
 		titleUnitId: Uuid,
-		document: BlockInputDocument,
+		document: UnitReferencedBlockInputDocument,
 		position: FractionalPosition,
 		home: t.Boolean(),
 	},
@@ -141,7 +145,7 @@ export const ZoneResponse = t.Object({
 	id: Uuid,
 	boundaryDocument: ZoneBoundaryResponseDocument,
 	themeDocument: ZoneThemeResponseDocument,
-	dockDocument: BlockResponseDocument,
+	dockDocument: UnitReferencedBlockResponseDocument,
 	startsAt: t.Nullable(DateTime),
 	endsAt: t.Nullable(DateTime),
 	createdAt: DateTime,
@@ -152,7 +156,7 @@ export const ZonePageResponse = t.Object({
 	zoneId: Uuid,
 	slug: t.String(),
 	titleUnitId: Uuid,
-	document: BlockResponseDocument,
+	document: UnitReferencedBlockResponseDocument,
 	position: FractionalPosition,
 	home: t.Boolean(),
 	createdAt: DateTime,

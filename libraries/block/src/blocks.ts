@@ -1,6 +1,6 @@
 import { type PortableText as PortableTextValue, PortableText } from "@rezics/portable-text";
 import { SearchConfiguration } from "@rezics/search";
-import { type Static, Type } from "@sinclair/typebox";
+import { type Static, type TSchema, Type } from "@sinclair/typebox";
 
 import { BlockKey, createBlockKey } from "./identity";
 
@@ -158,67 +158,84 @@ export const DividerBlock = Type.Object(
 );
 export type DividerBlock = Static<typeof DividerBlock>;
 
+const ReferencedAtomicBlocks = [
+	UnitRefBlock,
+	UnitListBlock,
+	SearchBlock,
+	MenuBlock,
+	MediaBlock,
+	DividerBlock,
+] as const;
+
+function createContainerBlocks<ThisSchema extends TSchema>(This: ThisSchema) {
+	return [
+		Type.Object(
+			{
+				_type: Type.Literal("group"),
+				_key: BlockKey,
+				layout: Type.Union([
+					Type.Literal("stack"),
+					Type.Literal("row"),
+					Type.Literal("grid"),
+				]),
+				blocks: Type.Array(This, { minItems: 1, maxItems: 50 }),
+			},
+			{ additionalProperties: false },
+		),
+		Type.Object(
+			{
+				_type: Type.Literal("callout"),
+				_key: BlockKey,
+				tone: Type.Union([
+					Type.Literal("neutral"),
+					Type.Literal("info"),
+					Type.Literal("success"),
+					Type.Literal("warning"),
+					Type.Literal("danger"),
+				]),
+				labelUnitId: Type.Optional(Uuid),
+				blocks: Type.Array(This, { minItems: 1, maxItems: 20 }),
+			},
+			{ additionalProperties: false },
+		),
+		Type.Object(
+			{
+				_type: Type.Literal("tabs"),
+				_key: BlockKey,
+				tabs: Type.Array(
+					Type.Object(
+						{
+							_key: BlockKey,
+							labelUnitId: Uuid,
+							blocks: Type.Array(This, { minItems: 1, maxItems: 50 }),
+						},
+						{ additionalProperties: false },
+					),
+					{ minItems: 2, maxItems: 12 },
+				),
+			},
+			{ additionalProperties: false },
+		),
+	] as const;
+}
+
 export const Block = Type.Recursive(
 	(This) =>
 		Type.Union([
 			PortableTextDocument,
-			UnitRefBlock,
-			UnitListBlock,
-			SearchBlock,
-			MenuBlock,
-			MediaBlock,
-			DividerBlock,
-			Type.Object(
-				{
-					_type: Type.Literal("group"),
-					_key: BlockKey,
-					layout: Type.Union([
-						Type.Literal("stack"),
-						Type.Literal("row"),
-						Type.Literal("grid"),
-					]),
-					blocks: Type.Array(This, { minItems: 1, maxItems: 50 }),
-				},
-				{ additionalProperties: false },
-			),
-			Type.Object(
-				{
-					_type: Type.Literal("callout"),
-					_key: BlockKey,
-					tone: Type.Union([
-						Type.Literal("neutral"),
-						Type.Literal("info"),
-						Type.Literal("success"),
-						Type.Literal("warning"),
-						Type.Literal("danger"),
-					]),
-					labelUnitId: Type.Optional(Uuid),
-					blocks: Type.Array(This, { minItems: 1, maxItems: 20 }),
-				},
-				{ additionalProperties: false },
-			),
-			Type.Object(
-				{
-					_type: Type.Literal("tabs"),
-					_key: BlockKey,
-					tabs: Type.Array(
-						Type.Object(
-							{
-								_key: BlockKey,
-								labelUnitId: Uuid,
-								blocks: Type.Array(This, { minItems: 1, maxItems: 50 }),
-							},
-							{ additionalProperties: false },
-						),
-						{ minItems: 2, maxItems: 12 },
-					),
-				},
-				{ additionalProperties: false },
-			),
+			...ReferencedAtomicBlocks,
+			...createContainerBlocks(This),
 		]),
 	{ $id: "Block" },
 );
 export type Block = Static<typeof Block>;
+
+/** Composition-only Block variant whose display copy must be referenced through Units. */
+export const UnitReferencedBlock = Type.Recursive(
+	(This) => Type.Union([...ReferencedAtomicBlocks, ...createContainerBlocks(This)]),
+	{ $id: "UnitReferencedBlock" },
+);
+export type UnitReferencedBlock = Static<typeof UnitReferencedBlock>;
 
 export const BlockDocument = Type.Object(
 	{
@@ -230,10 +247,27 @@ export const BlockDocument = Type.Object(
 );
 export type BlockDocument = Static<typeof BlockDocument>;
 
+export const UnitReferencedBlockDocument = Type.Object(
+	{
+		_type: Type.Literal("block-document"),
+		_key: BlockKey,
+		blocks: Type.Array(UnitReferencedBlock, { maxItems: 100 }),
+	},
+	{ additionalProperties: false, $id: "UnitReferencedBlockDocument" },
+);
+export type UnitReferencedBlockDocument = Static<typeof UnitReferencedBlockDocument>;
+
 export function createBlockDocument(
 	blocks: Block[] = [],
 	key: BlockKey = createBlockKey(),
 ): BlockDocument {
+	return { _type: "block-document", _key: key, blocks };
+}
+
+export function createUnitReferencedBlockDocument(
+	blocks: UnitReferencedBlock[] = [],
+	key: BlockKey = createBlockKey(),
+): UnitReferencedBlockDocument {
 	return { _type: "block-document", _key: key, blocks };
 }
 

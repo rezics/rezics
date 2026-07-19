@@ -32,7 +32,7 @@ export const unitAlias = pgTable(
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
-		/** @UNIT_LOCALIZATION_EXEMPT Many-per-language search synonym, never canonical Unit content. */
+		/** @UNIT_LOCALIZATION_EXEMPT Search synonym: language-tagged lookup term, never canonical Unit display copy. */
 		term: text().notNull(),
 		normalizedTerm: text().notNull(),
 		language: text(),

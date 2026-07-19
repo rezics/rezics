@@ -24,9 +24,9 @@ export const collection = pgTable(
 			.references(() => profile.id, { onDelete: "restrict" }),
 		source: collectionSource().default("manual").notNull(),
 		systemKey: collectionSystemKey(),
-		/** @UNIT_LOCALIZATION_EXEMPT Executable collection membership rules, not display copy. */
+		/** @UNIT_LOCALIZATION_EXEMPT Structured contract: executable membership rules contain no display copy. */
 		definitionDocument: createJsonDocumentColumn().notNull(),
-		/** @UNIT_LOCALIZATION_EXEMPT Collection layout configuration, not display copy. */
+		/** @UNIT_LOCALIZATION_EXEMPT Structured contract: layout and order codes contain no display copy. */
 		presentationDocument: createJsonDocumentColumn().notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),

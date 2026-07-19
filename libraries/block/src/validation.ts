@@ -9,6 +9,8 @@ import {
 	type BlockType,
 	PortableTextDocument,
 	type PortableTextDocument as PortableTextDocumentValue,
+	UnitReferencedBlockDocument,
+	type UnitReferencedBlockDocument as UnitReferencedBlockDocumentValue,
 } from "./blocks";
 import {
 	NavigationDocument,
@@ -87,6 +89,38 @@ export const ZoneDockBlockHostPolicy: BlockHostPolicy = {
 	},
 	maxDepth: 2,
 	maxBlocks: 40,
+	allowExternalNavigation: false,
+};
+
+export const ZonePageBlockHostPolicy: BlockHostPolicy = {
+	allowedRootTypes: [
+		"unit-ref",
+		"unit-list",
+		"search",
+		"menu",
+		"media",
+		"divider",
+		"group",
+		"callout",
+		"tabs",
+	],
+	allowedChildTypes: {
+		group: [
+			"unit-ref",
+			"unit-list",
+			"search",
+			"menu",
+			"media",
+			"divider",
+			"group",
+			"callout",
+			"tabs",
+		],
+		callout: ["unit-ref", "unit-list", "media", "divider", "group"],
+		tabs: ["unit-ref", "unit-list", "search", "menu", "media", "divider", "group", "callout"],
+	},
+	maxDepth: 4,
+	maxBlocks: 250,
 	allowExternalNavigation: false,
 };
 
@@ -181,6 +215,14 @@ export function assertBlockDocument(
 	};
 
 	for (const block of value.blocks) visit(block, 1);
+}
+
+export function assertUnitReferencedBlockDocument(
+	value: unknown,
+	policy: BlockHostPolicy,
+): asserts value is UnitReferencedBlockDocumentValue {
+	assertDocument(UnitReferencedBlockDocument, value);
+	assertBlockDocument(value, policy);
 }
 
 export interface BlockReferences {

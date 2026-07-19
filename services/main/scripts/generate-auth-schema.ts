@@ -46,7 +46,7 @@ let code = generated.code
 	)
 	.replace(
 		'name: text("name").notNull(),',
-		'/** @UNIT_LOCALIZATION_EXEMPT Identity-provider source name, not the public Profile title. */\nname: text("name").notNull(),',
+		'/** @UNIT_LOCALIZATION_EXEMPT Identity source: provider-owned sign-in name; public Profile titles remain Unit localizations. */\nname: text("name").notNull(),',
 	)
 	.replace(
 		'(table) => [index("accounts_user_id_idx").on(table.userId)],',

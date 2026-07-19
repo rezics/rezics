@@ -7,12 +7,14 @@ import {
 	NavigationDocument,
 	PollContentDocument,
 	PortableTextDocument,
+	UnitReferencedBlockDocument,
 	ZoneDockBlockHostPolicy,
 	assertBlockDocument,
 	assertDocument,
 	assertNavigationDocument,
 	assertResolvedBlockReferences,
 	assertResolvedNavigationReferences,
+	assertUnitReferencedBlockDocument,
 	collectBlockReferences,
 	collectNavigationReferences,
 	createBlockKey,
@@ -89,6 +91,46 @@ describe("Block document contracts", () => {
 		expect(updated).not.toBe(original);
 		expect(updated._key).toBe(original._key);
 		expect(updated.content).toBe(nextContent);
+	});
+
+	test("requires Zone composition copy to be referenced through localized Units", () => {
+		const inlineCopy = {
+			_type: "block-document",
+			_key: "000000000040",
+			blocks: [createPortableTextDocument([], "000000000041")],
+		};
+		const referencedCopy = {
+			_type: "block-document",
+			_key: "000000000042",
+			blocks: [
+				{
+					_type: "unit-ref",
+					_key: "000000000043",
+					unitId: "019b0000-0000-7000-8000-000000000001",
+					appearance: "card",
+				},
+			],
+		};
+		const nestedInlineCopy = {
+			_type: "block-document",
+			_key: "000000000044",
+			blocks: [
+				{
+					_type: "group",
+					_key: "000000000045",
+					layout: "stack",
+					blocks: [createPortableTextDocument([], "000000000046")],
+				},
+			],
+		};
+
+		expect(isDocument(BlockDocument, inlineCopy)).toBe(true);
+		expect(isDocument(UnitReferencedBlockDocument, inlineCopy)).toBe(false);
+		expect(isDocument(UnitReferencedBlockDocument, nestedInlineCopy)).toBe(false);
+		expect(isDocument(UnitReferencedBlockDocument, referencedCopy)).toBe(true);
+		expect(() =>
+			assertUnitReferencedBlockDocument(referencedCopy, ZoneDockBlockHostPolicy),
+		).not.toThrow();
 	});
 
 	test("keeps Collection source variants mutually exclusive", () => {

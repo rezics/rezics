@@ -2,13 +2,13 @@ import { StatusCodes } from "http-status-codes";
 import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import {
-	BlockDocument,
-	DefaultBlockHostPolicy,
 	NavigationDocument,
+	UnitReferencedBlockDocument,
 	ZoneBoundaryDocument,
 	ZoneDockBlockHostPolicy,
+	ZonePageBlockHostPolicy,
 	ZoneThemeDocument,
-	assertBlockDocument,
+	assertUnitReferencedBlockDocument,
 	assertNavigationDocument,
 	assertResolvedBlockReferences,
 	assertResolvedNavigationReferences,
@@ -153,14 +153,14 @@ function toZoneResponse(record: Awaited<ReturnType<typeof getZone>>) {
 		...record,
 		boundaryDocument: parseDocument(ZoneBoundaryDocument, record.boundaryDocument),
 		themeDocument: parseDocument(ZoneThemeDocument, record.themeDocument),
-		dockDocument: parseDocument(BlockDocument, record.dockDocument),
+		dockDocument: parseDocument(UnitReferencedBlockDocument, record.dockDocument),
 	} satisfies typeof ZoneResponse.static;
 }
 
 function toZonePageResponse(record: typeof zonePage.$inferSelect) {
 	return {
 		...record,
-		document: parseDocument(BlockDocument, record.document),
+		document: parseDocument(UnitReferencedBlockDocument, record.document),
 	} satisfies typeof ZonePageResponse.static;
 }
 
@@ -173,7 +173,10 @@ function toZoneNavigationResponse(record: typeof zoneNavigation.$inferSelect) {
 
 function ensureZoneBlockDocument(value: unknown, dock = false): void {
 	try {
-		assertBlockDocument(value, dock ? ZoneDockBlockHostPolicy : DefaultBlockHostPolicy);
+		assertUnitReferencedBlockDocument(
+			value,
+			dock ? ZoneDockBlockHostPolicy : ZonePageBlockHostPolicy,
+		);
 	} catch {
 		throw new ZoneDocumentInvalid();
 	}
@@ -260,7 +263,7 @@ async function ensureZoneBlockReferences(
 ): Promise<void> {
 	try {
 		await assertResolvedBlockReferences(
-			parseDocument(BlockDocument, document),
+			parseDocument(UnitReferencedBlockDocument, document),
 			createZoneReferenceResolver(tx, input),
 		);
 	} catch {
@@ -284,7 +287,12 @@ async function ensureZoneNavigationReferences(
 }
 
 export default new Elysia()
-	.model({ BlockDocument, NavigationDocument, ZoneBoundaryDocument, ZoneThemeDocument })
+	.model({
+		NavigationDocument,
+		UnitReferencedBlockDocument,
+		ZoneBoundaryDocument,
+		ZoneThemeDocument,
+	})
 	.use(session)
 	.group("/series", (app) =>
 		app
@@ -606,7 +614,7 @@ export default new Elysia()
 								.map((page) => page.document),
 						].some((document) =>
 							collectBlockReferences(
-								parseDocument(BlockDocument, document),
+								parseDocument(UnitReferencedBlockDocument, document),
 							).zonePageSlugs.has(params.slug),
 						);
 						const referencedByNavigation = navigations.some((navigation) =>
@@ -795,7 +803,7 @@ export default new Elysia()
 						if (
 							documents.some((document) =>
 								collectBlockReferences(
-									parseDocument(BlockDocument, document),
+									parseDocument(UnitReferencedBlockDocument, document),
 								).navigationIds.has(target.id),
 							)
 						)

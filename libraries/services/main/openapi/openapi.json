@@ -19,9 +19,120 @@
 					}
 				]
 			},
-			"BlockDocument": {
+			"NavigationDocument": {
 				"additionalProperties": false,
-				"$id": "BlockDocument",
+				"$id": "NavigationDocument",
+				"type": "object",
+				"required": ["_type", "_key", "items"],
+				"properties": {
+					"_type": { "const": "navigation-document", "type": "string" },
+					"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
+					"items": {
+						"minItems": 1,
+						"maxItems": 100,
+						"type": "array",
+						"items": {
+							"$id": "NavigationItem",
+							"anyOf": [
+								{
+									"additionalProperties": false,
+									"type": "object",
+									"required": ["_key", "labelUnitId", "target"],
+									"properties": {
+										"_key": {
+											"pattern": "^[0-9a-f]{12}$",
+											"$id": "BlockKey",
+											"type": "string"
+										},
+										"labelUnitId": {
+											"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+											"type": "string"
+										},
+										"target": {
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "unitId"],
+													"properties": {
+														"kind": {
+															"const": "unit",
+															"type": "string"
+														},
+														"unitId": {
+															"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+															"type": "string"
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "slug"],
+													"properties": {
+														"kind": {
+															"const": "zone-page",
+															"type": "string"
+														},
+														"slug": {
+															"minLength": 1,
+															"maxLength": 100,
+															"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+															"type": "string"
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["kind", "url"],
+													"properties": {
+														"kind": {
+															"const": "external",
+															"type": "string"
+														},
+														"url": {
+															"minLength": 1,
+															"maxLength": 2000,
+															"pattern": "^https://",
+															"type": "string"
+														}
+													}
+												}
+											]
+										}
+									}
+								},
+								{
+									"additionalProperties": false,
+									"type": "object",
+									"required": ["_key", "labelUnitId", "children"],
+									"properties": {
+										"_key": {
+											"pattern": "^[0-9a-f]{12}$",
+											"$id": "BlockKey",
+											"type": "string"
+										},
+										"labelUnitId": {
+											"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+											"type": "string"
+										},
+										"children": {
+											"minItems": 1,
+											"maxItems": 20,
+											"type": "array",
+											"items": { "$ref": "NavigationItem" }
+										}
+									}
+								}
+							]
+						}
+					}
+				}
+			},
+			"UnitReferencedBlockDocument": {
+				"additionalProperties": false,
+				"$id": "UnitReferencedBlockDocument",
 				"type": "object",
 				"required": ["_type", "_key", "blocks"],
 				"properties": {
@@ -31,247 +142,8 @@
 						"maxItems": 100,
 						"type": "array",
 						"items": {
-							"$id": "Block",
+							"$id": "UnitReferencedBlock",
 							"anyOf": [
-								{
-									"additionalProperties": false,
-									"$id": "PortableTextDocument",
-									"type": "object",
-									"required": ["_type", "_key", "content"],
-									"properties": {
-										"_type": { "const": "portable-text", "type": "string" },
-										"_key": {
-											"pattern": "^[0-9a-f]{12}$",
-											"$id": "BlockKey",
-											"type": "string"
-										},
-										"content": {
-											"$id": "PortableText",
-											"type": "array",
-											"items": {
-												"$id": "PortableTextBlock",
-												"anyOf": [
-													{
-														"additionalProperties": {
-															"$id": "#/components/schemas/JsonValue",
-															"anyOf": [
-																{ "type": "null" },
-																{ "type": "boolean" },
-																{ "type": "number" },
-																{ "type": "string" },
-																{
-																	"type": "array",
-																	"items": {
-																		"$ref": "#/components/schemas/JsonValue"
-																	}
-																},
-																{
-																	"type": "object",
-																	"patternProperties": {
-																		"^(.*)$": {
-																			"$ref": "#/components/schemas/JsonValue"
-																		}
-																	}
-																}
-															]
-														},
-														"$id": "PortableTextTextBlock",
-														"type": "object",
-														"required": ["_key", "_type", "children"],
-														"properties": {
-															"_key": { "type": "string" },
-															"_type": {
-																"const": "block",
-																"type": "string"
-															},
-															"children": {
-																"type": "array",
-																"items": {
-																	"$id": "PortableTextChild",
-																	"anyOf": [
-																		{
-																			"additionalProperties": false,
-																			"$id": "PortableTextSpan",
-																			"type": "object",
-																			"required": [
-																				"_key",
-																				"_type",
-																				"text"
-																			],
-																			"properties": {
-																				"_key": {
-																					"type": "string"
-																				},
-																				"_type": {
-																					"const": "span",
-																					"type": "string"
-																				},
-																				"text": {
-																					"type": "string"
-																				},
-																				"marks": {
-																					"type": "array",
-																					"items": {
-																						"type": "string"
-																					}
-																				}
-																			}
-																		},
-																		{
-																			"additionalProperties": {
-																				"$id": "#/components/schemas/JsonValue",
-																				"anyOf": [
-																					{
-																						"type": "null"
-																					},
-																					{
-																						"type": "boolean"
-																					},
-																					{
-																						"type": "number"
-																					},
-																					{
-																						"type": "string"
-																					},
-																					{
-																						"type": "array",
-																						"items": {
-																							"$ref": "#/components/schemas/JsonValue"
-																						}
-																					},
-																					{
-																						"type": "object",
-																						"patternProperties": {
-																							"^(.*)$": {
-																								"$ref": "#/components/schemas/JsonValue"
-																							}
-																						}
-																					}
-																				]
-																			},
-																			"type": "object",
-																			"required": [
-																				"_key",
-																				"_type"
-																			],
-																			"properties": {
-																				"_key": {
-																					"type": "string"
-																				},
-																				"_type": {
-																					"pattern": "^(?!span$).+",
-																					"type": "string"
-																				}
-																			}
-																		}
-																	]
-																}
-															},
-															"markDefs": {
-																"type": "array",
-																"items": {
-																	"additionalProperties": {
-																		"$id": "#/components/schemas/JsonValue",
-																		"anyOf": [
-																			{ "type": "null" },
-																			{ "type": "boolean" },
-																			{ "type": "number" },
-																			{ "type": "string" },
-																			{
-																				"type": "array",
-																				"items": {
-																					"$ref": "#/components/schemas/JsonValue"
-																				}
-																			},
-																			{
-																				"type": "object",
-																				"patternProperties": {
-																					"^(.*)$": {
-																						"$ref": "#/components/schemas/JsonValue"
-																					}
-																				}
-																			}
-																		]
-																	},
-																	"$id": "PortableTextObject",
-																	"type": "object",
-																	"required": ["_key", "_type"],
-																	"properties": {
-																		"_key": {
-																			"type": "string"
-																		},
-																		"_type": {
-																			"type": "string"
-																		}
-																	}
-																}
-															},
-															"listItem": { "type": "string" },
-															"style": { "type": "string" },
-															"level": {
-																"minimum": 1,
-																"type": "integer"
-															}
-														}
-													},
-													{
-														"additionalProperties": false,
-														"$id": "PortableTextImage",
-														"type": "object",
-														"required": ["_key", "_type", "assetId"],
-														"properties": {
-															"_key": { "type": "string" },
-															"_type": {
-																"const": "image",
-																"type": "string"
-															},
-															"assetId": {
-																"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
-																"type": "string"
-															},
-															"alt": { "type": "string" },
-															"caption": { "type": "string" }
-														}
-													},
-													{
-														"additionalProperties": {
-															"$id": "#/components/schemas/JsonValue",
-															"anyOf": [
-																{ "type": "null" },
-																{ "type": "boolean" },
-																{ "type": "number" },
-																{ "type": "string" },
-																{
-																	"type": "array",
-																	"items": {
-																		"$ref": "#/components/schemas/JsonValue"
-																	}
-																},
-																{
-																	"type": "object",
-																	"patternProperties": {
-																		"^(.*)$": {
-																			"$ref": "#/components/schemas/JsonValue"
-																		}
-																	}
-																}
-															]
-														},
-														"type": "object",
-														"required": ["_key", "_type"],
-														"properties": {
-															"_key": { "type": "string" },
-															"_type": {
-																"pattern": "^(?!(?:block|image)$).+",
-																"type": "string"
-															}
-														}
-													}
-												]
-											}
-										}
-									}
-								},
 								{
 									"additionalProperties": false,
 									"$id": "UnitRefBlock",
@@ -5349,7 +5221,7 @@
 											"minItems": 1,
 											"maxItems": 50,
 											"type": "array",
-											"items": { "$ref": "Block" }
+											"items": { "$ref": "UnitReferencedBlock" }
 										}
 									}
 								},
@@ -5381,7 +5253,7 @@
 											"minItems": 1,
 											"maxItems": 20,
 											"type": "array",
-											"items": { "$ref": "Block" }
+											"items": { "$ref": "UnitReferencedBlock" }
 										}
 									}
 								},
@@ -5418,121 +5290,10 @@
 														"minItems": 1,
 														"maxItems": 50,
 														"type": "array",
-														"items": { "$ref": "Block" }
+														"items": { "$ref": "UnitReferencedBlock" }
 													}
 												}
 											}
-										}
-									}
-								}
-							]
-						}
-					}
-				}
-			},
-			"NavigationDocument": {
-				"additionalProperties": false,
-				"$id": "NavigationDocument",
-				"type": "object",
-				"required": ["_type", "_key", "items"],
-				"properties": {
-					"_type": { "const": "navigation-document", "type": "string" },
-					"_key": { "pattern": "^[0-9a-f]{12}$", "$id": "BlockKey", "type": "string" },
-					"items": {
-						"minItems": 1,
-						"maxItems": 100,
-						"type": "array",
-						"items": {
-							"$id": "NavigationItem",
-							"anyOf": [
-								{
-									"additionalProperties": false,
-									"type": "object",
-									"required": ["_key", "labelUnitId", "target"],
-									"properties": {
-										"_key": {
-											"pattern": "^[0-9a-f]{12}$",
-											"$id": "BlockKey",
-											"type": "string"
-										},
-										"labelUnitId": {
-											"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
-											"type": "string"
-										},
-										"target": {
-											"anyOf": [
-												{
-													"additionalProperties": false,
-													"type": "object",
-													"required": ["kind", "unitId"],
-													"properties": {
-														"kind": {
-															"const": "unit",
-															"type": "string"
-														},
-														"unitId": {
-															"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
-															"type": "string"
-														}
-													}
-												},
-												{
-													"additionalProperties": false,
-													"type": "object",
-													"required": ["kind", "slug"],
-													"properties": {
-														"kind": {
-															"const": "zone-page",
-															"type": "string"
-														},
-														"slug": {
-															"minLength": 1,
-															"maxLength": 100,
-															"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-															"type": "string"
-														}
-													}
-												},
-												{
-													"additionalProperties": false,
-													"type": "object",
-													"required": ["kind", "url"],
-													"properties": {
-														"kind": {
-															"const": "external",
-															"type": "string"
-														},
-														"url": {
-															"minLength": 1,
-															"maxLength": 2000,
-															"pattern": "^https://",
-															"type": "string"
-														}
-													}
-												}
-											]
-										}
-									}
-								},
-								{
-									"additionalProperties": false,
-									"type": "object",
-									"required": ["_key", "labelUnitId", "children"],
-									"properties": {
-										"_key": {
-											"pattern": "^[0-9a-f]{12}$",
-											"$id": "BlockKey",
-											"type": "string"
-										},
-										"labelUnitId": {
-											"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
-											"type": "string"
-										},
-										"children": {
-											"minItems": 1,
-											"maxItems": 20,
-											"type": "array",
-											"items": { "$ref": "NavigationItem" }
 										}
 									}
 								}
@@ -22121,7 +21882,7 @@
 										"id": { "format": "uuid", "type": "string" },
 										"boundaryDocument": { "$ref": "ZoneBoundaryDocument" },
 										"themeDocument": { "$ref": "ZoneThemeDocument" },
-										"dockDocument": { "$ref": "BlockDocument" },
+										"dockDocument": { "$ref": "UnitReferencedBlockDocument" },
 										"startsAt": {
 											"nullable": true,
 											"anyOf": [
@@ -22210,7 +21971,7 @@
 								"properties": {
 									"boundaryDocument": { "$ref": "ZoneBoundaryDocument" },
 									"themeDocument": { "$ref": "ZoneThemeDocument" },
-									"dockDocument": { "$ref": "BlockDocument" },
+									"dockDocument": { "$ref": "UnitReferencedBlockDocument" },
 									"startsAt": {
 										"nullable": true,
 										"anyOf": [
@@ -22252,7 +22013,7 @@
 										"id": { "format": "uuid", "type": "string" },
 										"boundaryDocument": { "$ref": "ZoneBoundaryDocument" },
 										"themeDocument": { "$ref": "ZoneThemeDocument" },
-										"dockDocument": { "$ref": "BlockDocument" },
+										"dockDocument": { "$ref": "UnitReferencedBlockDocument" },
 										"startsAt": {
 											"nullable": true,
 											"anyOf": [
@@ -22428,7 +22189,9 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"document": { "$ref": "BlockDocument" },
+													"document": {
+														"$ref": "UnitReferencedBlockDocument"
+													},
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -22545,7 +22308,7 @@
 										"zoneId": { "format": "uuid", "type": "string" },
 										"slug": { "type": "string" },
 										"titleUnitId": { "format": "uuid", "type": "string" },
-										"document": { "$ref": "BlockDocument" },
+										"document": { "$ref": "UnitReferencedBlockDocument" },
 										"position": {
 											"format": "fractional-position",
 											"minLength": 2,
@@ -22637,7 +22400,7 @@
 								"required": ["titleUnitId", "document", "position", "home"],
 								"properties": {
 									"titleUnitId": { "format": "uuid", "type": "string" },
-									"document": { "$ref": "BlockDocument" },
+									"document": { "$ref": "UnitReferencedBlockDocument" },
 									"position": {
 										"format": "fractional-position",
 										"minLength": 2,
@@ -22674,7 +22437,7 @@
 										"zoneId": { "format": "uuid", "type": "string" },
 										"slug": { "type": "string" },
 										"titleUnitId": { "format": "uuid", "type": "string" },
-										"document": { "$ref": "BlockDocument" },
+										"document": { "$ref": "UnitReferencedBlockDocument" },
 										"position": {
 											"format": "fractional-position",
 											"minLength": 2,
@@ -24029,7 +23792,7 @@
 									},
 									"boundaryDocument": { "$ref": "ZoneBoundaryDocument" },
 									"themeDocument": { "$ref": "ZoneThemeDocument" },
-									"dockDocument": { "$ref": "BlockDocument" },
+									"dockDocument": { "$ref": "UnitReferencedBlockDocument" },
 									"startsAt": {
 										"nullable": true,
 										"anyOf": [

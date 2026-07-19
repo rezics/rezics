@@ -4,11 +4,11 @@ import { and, desc, eq, max, sql } from "drizzle-orm";
 import { createSchemaFactory } from "drizzle-orm/zod";
 import { z } from "zod";
 import {
-	BlockDocument,
 	CollectionDefinitionDocument,
 	CollectionPresentationDocument,
 	NavigationDocument,
 	PollContentDocument,
+	UnitReferencedBlockDocument,
 	ZoneBoundaryDocument,
 	ZoneThemeDocument,
 	isDocument,
@@ -85,7 +85,7 @@ const CollectionDefinitionDocumentSchema = createDocumentSchema(CollectionDefini
 const CollectionPresentationDocumentSchema = createDocumentSchema(CollectionPresentationDocument);
 const ZoneBoundaryDocumentSchema = createDocumentSchema(ZoneBoundaryDocument);
 const ZoneThemeDocumentSchema = createDocumentSchema(ZoneThemeDocument);
-const BlockDocumentSchema = createDocumentSchema(BlockDocument);
+const UnitReferencedBlockDocumentSchema = createDocumentSchema(UnitReferencedBlockDocument);
 const NavigationDocumentSchema = createDocumentSchema(NavigationDocument);
 const FractionalPositionSchema = z.string().refine(isFractionalPosition);
 const RuleSnapshotSchema = z.object({
@@ -182,7 +182,7 @@ const zoneStateSchema = schemaFactory
 	.createSelectSchema(zone, {
 		boundaryDocument: ZoneBoundaryDocumentSchema,
 		themeDocument: ZoneThemeDocumentSchema,
-		dockDocument: BlockDocumentSchema,
+		dockDocument: UnitReferencedBlockDocumentSchema,
 	})
 	.omit({ id: true, createdAt: true, updatedAt: true });
 const collectionStateSchema = schemaFactory
@@ -227,7 +227,7 @@ const realmPinRowSchema = schemaFactory.createSelectSchema(realmPin, {
 	position: FractionalPositionSchema,
 });
 const zonePageRowSchema = schemaFactory.createSelectSchema(zonePage, {
-	document: BlockDocumentSchema,
+	document: UnitReferencedBlockDocumentSchema,
 	position: FractionalPositionSchema,
 });
 const zoneNavigationRowSchema = schemaFactory.createSelectSchema(zoneNavigation, {

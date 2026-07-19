@@ -58,7 +58,7 @@ export const unitRevision = pgTable(
 			.references(() => unit.id, { onDelete: "restrict" }),
 		parentRevisionId: uuid(),
 		actorProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
-		/** @UNIT_LOCALIZATION_EXEMPT Point-in-time revision message. */
+		/** @UNIT_LOCALIZATION_EXEMPT Authored snapshot: original point-in-time edit summary, never interface copy. */
 		editSummary: text(),
 		minor: boolean().default(false).notNull(),
 		byteSize: integer().notNull(),

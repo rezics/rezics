@@ -16,7 +16,93 @@ export type JsonValue =
 /**
  * @type object
  */
-export type BlockDocument = {
+export type NavigationDocument = {
+	/**
+	 * @type string
+	 */
+	_type: "navigation-document";
+	/**
+	 * @pattern ^[0-9a-f]{12}$
+	 * @type string
+	 */
+	_key: string;
+	/**
+	 * @type array
+	 */
+	items: (
+		| {
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+				 * @type string
+				 */
+				labelUnitId: string;
+				target:
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "unit";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							unitId: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "zone-page";
+							/**
+							 * @minLength 1
+							 * @maxLength 100
+							 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+							 * @type string
+							 */
+							slug: string;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							kind: "external";
+							/**
+							 * @minLength 1
+							 * @maxLength 2000
+							 * @pattern ^https://
+							 * @type string
+							 */
+							url: string;
+					  };
+		  }
+		| {
+				/**
+				 * @pattern ^[0-9a-f]{12}$
+				 * @type string
+				 */
+				_key: string;
+				/**
+				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+				 * @type string
+				 */
+				labelUnitId: string;
+				/**
+				 * @type array
+				 */
+				children: unknown[];
+		  }
+	)[];
+};
+
+/**
+ * @type object
+ */
+export type UnitReferencedBlockDocument = {
 	/**
 	 * @type string
 	 */
@@ -30,130 +116,6 @@ export type BlockDocument = {
 	 * @type array
 	 */
 	blocks: (
-		| {
-				/**
-				 * @type string
-				 */
-				_type: "portable-text";
-				/**
-				 * @pattern ^[0-9a-f]{12}$
-				 * @type string
-				 */
-				_key: string;
-				/**
-				 * @type array
-				 */
-				content: (
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: "block";
-							/**
-							 * @type array
-							 */
-							children: (
-								| {
-										/**
-										 * @type string
-										 */
-										_key: string;
-										/**
-										 * @type string
-										 */
-										_type: "span";
-										/**
-										 * @type string
-										 */
-										text: string;
-										/**
-										 * @type array | undefined
-										 */
-										marks?: string[];
-								  }
-								| {
-										/**
-										 * @type string
-										 */
-										_key: string;
-										/**
-										 * @pattern ^(?!span$).+
-										 * @type string
-										 */
-										_type: string;
-										[key: string]: unknown;
-								  }
-							)[];
-							/**
-							 * @type array | undefined
-							 */
-							markDefs?: {
-								/**
-								 * @type string
-								 */
-								_key: string;
-								/**
-								 * @type string
-								 */
-								_type: string;
-								[key: string]: unknown;
-							}[];
-							/**
-							 * @type string | undefined
-							 */
-							listItem?: string;
-							/**
-							 * @type string | undefined
-							 */
-							style?: string;
-							/**
-							 * @minLength 1
-							 * @type integer | undefined
-							 */
-							level?: number;
-							[key: string]: unknown;
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: "image";
-							/**
-							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-							 * @type string
-							 */
-							assetId: string;
-							/**
-							 * @type string | undefined
-							 */
-							alt?: string;
-							/**
-							 * @type string | undefined
-							 */
-							caption?: string;
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @pattern ^(?!(?:block|image)$).+
-							 * @type string
-							 */
-							_type: string;
-							[key: string]: unknown;
-					  }
-				)[];
-		  }
 		| {
 				/**
 				 * @type string
@@ -1790,92 +1752,6 @@ export type BlockDocument = {
 					 */
 					blocks: unknown[];
 				}[];
-		  }
-	)[];
-};
-
-/**
- * @type object
- */
-export type NavigationDocument = {
-	/**
-	 * @type string
-	 */
-	_type: "navigation-document";
-	/**
-	 * @pattern ^[0-9a-f]{12}$
-	 * @type string
-	 */
-	_key: string;
-	/**
-	 * @type array
-	 */
-	items: (
-		| {
-				/**
-				 * @pattern ^[0-9a-f]{12}$
-				 * @type string
-				 */
-				_key: string;
-				/**
-				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-				 * @type string
-				 */
-				labelUnitId: string;
-				target:
-					| {
-							/**
-							 * @type string
-							 */
-							kind: "unit";
-							/**
-							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-							 * @type string
-							 */
-							unitId: string;
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							kind: "zone-page";
-							/**
-							 * @minLength 1
-							 * @maxLength 100
-							 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-							 * @type string
-							 */
-							slug: string;
-					  }
-					| {
-							/**
-							 * @type string
-							 */
-							kind: "external";
-							/**
-							 * @minLength 1
-							 * @maxLength 2000
-							 * @pattern ^https://
-							 * @type string
-							 */
-							url: string;
-					  };
-		  }
-		| {
-				/**
-				 * @pattern ^[0-9a-f]{12}$
-				 * @type string
-				 */
-				_key: string;
-				/**
-				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-				 * @type string
-				 */
-				labelUnitId: string;
-				/**
-				 * @type array
-				 */
-				children: unknown[];
 		  }
 	)[];
 };

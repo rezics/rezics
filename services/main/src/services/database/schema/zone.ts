@@ -18,11 +18,11 @@ export const zone = pgTable(
 		id: uuid()
 			.primaryKey()
 			.references(() => unit.id, { onDelete: "cascade" }),
-		/** @UNIT_LOCALIZATION_EXEMPT Machine-readable Zone membership boundary. */
+		/** @UNIT_LOCALIZATION_EXEMPT Structured contract: search boundary contains only categories and filters. */
 		boundaryDocument: createJsonDocumentColumn().notNull(),
-		/** @UNIT_LOCALIZATION_EXEMPT Visual theme configuration without localized copy. */
+		/** @UNIT_LOCALIZATION_EXEMPT Structured contract: theme contains only color and density tokens. */
 		themeDocument: createJsonDocumentColumn().notNull(),
-		/** @UNIT_LOCALIZATION_EXEMPT Renderable dock; localized copy is referenced through Units. */
+		/** @UNIT_LOCALIZATION_EXEMPT Structured contract: dock display copy is referenced through localized Units. */
 		dockDocument: createJsonDocumentColumn().notNull(),
 		startsAt: createTimestampMsColumn(),
 		endsAt: createTimestampMsColumn(),
