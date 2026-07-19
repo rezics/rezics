@@ -33185,7 +33185,12 @@ export type GetApiPostsByPostIdRepliesQuery = {
 	 */
 	parentPostId?: string;
 	/**
-	 * @default 100
+	 * @maxLength 512
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 25
 	 */
 	limit?: string | number;
 };
@@ -33357,6 +33362,11 @@ export type GetApiPostsByPostIdRepliesStatus200 = {
 		status: string;
 		latestRevisionId: (string | null) | null;
 		/**
+		 * @type boolean
+		 */
+		hasMoreChildren: boolean;
+		childEndCursor: (string | null) | null;
+		/**
 		 * @description
 		 * Format: `date-time`
 		 * @type string
@@ -33369,6 +33379,35 @@ export type GetApiPostsByPostIdRepliesStatus200 = {
 		 */
 		updatedAt: string;
 	}[];
+	nextCursor: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type GetApiPostsByPostIdRepliesStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InvalidPaginationCursor'
+		 * @type string
+		 */
+		code: "InvalidPaginationCursor";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
 };
 
 export const GetApiPostsByPostIdRepliesStatus404ErrorCodeEnum = {
@@ -33432,6 +33471,7 @@ export type GetApiPostsByPostIdRepliesOptions = {
  */
 export type GetApiPostsByPostIdRepliesResponses = {
 	"200": GetApiPostsByPostIdRepliesStatus200;
+	"400": GetApiPostsByPostIdRepliesStatus400;
 	"404": GetApiPostsByPostIdRepliesStatus404;
 	"422": GetApiPostsByPostIdRepliesStatus422;
 	"500": GetApiPostsByPostIdRepliesStatus500;
@@ -33442,6 +33482,7 @@ export type GetApiPostsByPostIdRepliesResponses = {
  */
 export type GetApiPostsByPostIdRepliesResponse =
 	| GetApiPostsByPostIdRepliesStatus200
+	| GetApiPostsByPostIdRepliesStatus400
 	| GetApiPostsByPostIdRepliesStatus404
 	| GetApiPostsByPostIdRepliesStatus422
 	| GetApiPostsByPostIdRepliesStatus500;
@@ -33767,318 +33808,6 @@ export type PostApiPostsByPostIdRepliesResponse =
 	| PostApiPostsByPostIdRepliesStatus409
 	| PostApiPostsByPostIdRepliesStatus422
 	| PostApiPostsByPostIdRepliesStatus500;
-
-/**
- * @type object
- */
-export type GetApiPostsByPostIdRepliesThreadPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	postId: string;
-};
-
-export const GetApiPostsByPostIdRepliesThreadSort = {
-	best: "best",
-	new: "new",
-	top: "top",
-} as const;
-
-export type GetApiPostsByPostIdRepliesThreadSort =
-	(typeof GetApiPostsByPostIdRepliesThreadSort)[keyof typeof GetApiPostsByPostIdRepliesThreadSort];
-
-/**
- * @type object
- */
-export type GetApiPostsByPostIdRepliesThreadQuery = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string | undefined
-	 */
-	parentPostId?: string;
-	/**
-	 * @type string | undefined
-	 */
-	sort?: GetApiPostsByPostIdRepliesThreadSort;
-	/**
-	 * @maxLength 256
-	 * @type string | undefined
-	 */
-	cursor?: string;
-	/**
-	 * @default 20
-	 */
-	limit?: string | number;
-};
-
-/**
- * @type object
- */
-export type GetApiPostsByPostIdRepliesThreadStatus200 = {
-	/**
-	 * @type array
-	 */
-	items: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		id: string;
-		/**
-		 * @type string
-		 */
-		postKind: "reply";
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		authorId: string;
-		authorName: (string | null) | null;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		rootPostId: string;
-		parentPostId: (string | null) | null;
-		contextRealmId: (string | null) | null;
-		depth: string | number;
-		/**
-		 * @type object
-		 */
-		body: {
-			/**
-			 * @type string
-			 */
-			_type: "portable-text";
-			/**
-			 * @pattern ^[0-9a-f]{12}$
-			 * @type string
-			 */
-			_key: string;
-			/**
-			 * @type array
-			 */
-			content: (
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type string
-						 */
-						_type: "block";
-						/**
-						 * @type array
-						 */
-						children: (
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @type string
-									 */
-									_type: "span";
-									/**
-									 * @type string
-									 */
-									text: string;
-									/**
-									 * @type array | undefined
-									 */
-									marks?: string[];
-							  }
-							| {
-									/**
-									 * @type string
-									 */
-									_key: string;
-									/**
-									 * @pattern ^(?!span$).+
-									 * @type string
-									 */
-									_type: string;
-									[key: string]: unknown;
-							  }
-						)[];
-						/**
-						 * @type array | undefined
-						 */
-						markDefs?: {
-							/**
-							 * @type string
-							 */
-							_key: string;
-							/**
-							 * @type string
-							 */
-							_type: string;
-							[key: string]: unknown;
-						}[];
-						/**
-						 * @type string | undefined
-						 */
-						listItem?: string;
-						/**
-						 * @type string | undefined
-						 */
-						style?: string;
-						/**
-						 * @minLength 1
-						 * @type integer | undefined
-						 */
-						level?: number;
-						[key: string]: unknown;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @type string
-						 */
-						_type: "image";
-						/**
-						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-						 * @type string
-						 */
-						assetId: string;
-						/**
-						 * @type string | undefined
-						 */
-						alt?: string;
-						/**
-						 * @type string | undefined
-						 */
-						caption?: string;
-				  }
-				| {
-						/**
-						 * @type string
-						 */
-						_key: string;
-						/**
-						 * @pattern ^(?!(?:block|image)$).+
-						 * @type string
-						 */
-						_type: string;
-						[key: string]: unknown;
-				  }
-			)[];
-		};
-		/**
-		 * @type string
-		 */
-		status: string;
-		latestRevisionId: (string | null) | null;
-		childCount: string | number;
-		/**
-		 * @type object
-		 */
-		reactions: {
-			upvote: string | number;
-			downvote: string | number;
-		};
-		viewerReaction: (string | null) | null;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		createdAt: string;
-		/**
-		 * @description
-		 * Format: `date-time`
-		 * @type string
-		 */
-		updatedAt: string;
-	}[];
-	nextCursor: (string | null) | null;
-};
-
-export const GetApiPostsByPostIdRepliesThreadStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	PostNotFound: "PostNotFound",
-} as const;
-
-export type GetApiPostsByPostIdRepliesThreadStatus404ErrorCodeEnum =
-	(typeof GetApiPostsByPostIdRepliesThreadStatus404ErrorCodeEnum)[keyof typeof GetApiPostsByPostIdRepliesThreadStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type GetApiPostsByPostIdRepliesThreadStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: GetApiPostsByPostIdRepliesThreadStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiPostsByPostIdRepliesThreadStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type GetApiPostsByPostIdRepliesThreadStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type GetApiPostsByPostIdRepliesThreadOptions = {
-	body?: never;
-	path: GetApiPostsByPostIdRepliesThreadPath;
-	query?: GetApiPostsByPostIdRepliesThreadQuery;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type GetApiPostsByPostIdRepliesThreadResponses = {
-	"200": GetApiPostsByPostIdRepliesThreadStatus200;
-	"404": GetApiPostsByPostIdRepliesThreadStatus404;
-	"422": GetApiPostsByPostIdRepliesThreadStatus422;
-	"500": GetApiPostsByPostIdRepliesThreadStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type GetApiPostsByPostIdRepliesThreadResponse =
-	| GetApiPostsByPostIdRepliesThreadStatus200
-	| GetApiPostsByPostIdRepliesThreadStatus404
-	| GetApiPostsByPostIdRepliesThreadStatus422
-	| GetApiPostsByPostIdRepliesThreadStatus500;
 
 /**
  * @type object

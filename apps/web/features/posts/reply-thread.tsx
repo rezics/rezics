@@ -1,16 +1,17 @@
 "use client";
 
 import {
+	getApiPostsByPostIdReplies,
+	getApiPostsByPostIdRepliesQueryKey,
 	useDeleteApiPostsByPostIdRepliesByReplyPostId,
-	useGetApiPostsByPostIdReplies,
 	useGetApiUsersMe,
 	usePatchApiPostsByPostIdRepliesByReplyPostId,
 	usePostApiPostsByPostIdReplies,
 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
-import { useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 
 import {
 	AlertDialog,
@@ -34,7 +35,7 @@ import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
-import { buildReplyPostTree, findReplyPost, type ReplyPostTreeNode } from "./reply-tree";
+import { buildReplyPostTree, type ReplyPostTreeNode } from "./reply-tree";
 import { invalidatePostQueries } from "./query";
 
 export function ReplyPostThread({
@@ -45,14 +46,35 @@ export function ReplyPostThread({
 	parentPostId?: string;
 }) {
 	const { t } = useTranslation({ suspense: true });
-	const replies = useGetApiPostsByPostIdReplies({
-		path: { postId: rootPostId },
-		query: { limit: 200 },
+	const baseQuery = {
+		limit: 25,
+		...(parentPostId ? { parentPostId } : {}),
+	};
+	const replies = useInfiniteQuery({
+		queryKey: [
+			...getApiPostsByPostIdRepliesQueryKey({
+				path: { postId: rootPostId },
+				query: baseQuery,
+			}),
+			"infinite",
+		] as const,
+		queryFn: async ({ pageParam, signal }) => {
+			const { data } = await getApiPostsByPostIdReplies({
+				path: { postId: rootPostId },
+				query: { ...baseQuery, ...(pageParam ? { cursor: pageParam } : {}) },
+				signal,
+			});
+			return data;
+		},
+		initialPageParam: "",
+		getNextPageParam: (page) => page.nextCursor ?? undefined,
 	});
 	const { data: session } = useHydratedSession();
 	const viewer = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
-	const tree = buildReplyPostTree(replies.data?.items ?? []);
-	const visibleTree = parentPostId ? (findReplyPost(tree, parentPostId)?.children ?? []) : tree;
+	const visibleTree = useMemo(
+		() => buildReplyPostTree(replies.data?.pages.flatMap((page) => page.items) ?? []),
+		[replies.data?.pages],
+	);
 
 	return (
 		<section className="flex flex-col gap-4" id="replies">
@@ -78,7 +100,7 @@ export function ReplyPostThread({
 						<Skeleton key={index} className="h-32 rounded-xl" />
 					))}
 				</div>
-			) : replies.isError ? (
+			) : replies.isError && !replies.data ? (
 				<div className="flex flex-col items-start gap-3">
 					<RequestFailure error={replies.error} />
 					<Button variant="outline" size="sm" onClick={() => void replies.refetch()}>
@@ -96,6 +118,28 @@ export function ReplyPostThread({
 							canReply={Boolean(session)}
 						/>
 					))}
+					{replies.isFetchNextPageError ? (
+						<div className="flex flex-col items-center gap-2">
+							<RequestFailure error={replies.error} />
+							<Button
+								onClick={() => void replies.fetchNextPage()}
+								size="sm"
+								variant="outline"
+							>
+								{t.actions.retry}
+							</Button>
+						</div>
+					) : replies.hasNextPage ? (
+						<Button
+							className="self-center"
+							disabled={replies.isFetchingNextPage}
+							onClick={() => void replies.fetchNextPage()}
+							variant="outline"
+						>
+							{replies.isFetchingNextPage && <Spinner data-icon="inline-start" />}
+							{t.actions.loadMore}
+						</Button>
+					) : null}
 				</div>
 			) : (
 				<p className="text-muted-foreground text-sm">{t.posts.noReplies}</p>
@@ -298,6 +342,11 @@ function ReplyPostNode({
 						/>
 					))}
 				</div>
+			)}
+			{reply.hasMoreChildren && (
+				<Button className="mb-3 ms-3 w-fit sm:ms-5" size="xs" variant="ghost" asChild>
+					<Link href={`/posts/${reply.id}#replies`}>{t.actions.loadMore}</Link>
+				</Button>
 			)}
 		</div>
 	);

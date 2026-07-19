@@ -327,8 +327,6 @@ import type {
 	GetApiPostsByPostIdRepliesResponses,
 	PostApiPostsByPostIdRepliesOptions,
 	PostApiPostsByPostIdRepliesResponses,
-	GetApiPostsByPostIdRepliesThreadOptions,
-	GetApiPostsByPostIdRepliesThreadResponses,
 	PatchApiPostsByPostIdRepliesByReplyPostIdOptions,
 	PatchApiPostsByPostIdRepliesByReplyPostIdResponses,
 	DeleteApiPostsByPostIdRepliesByReplyPostIdOptions,
@@ -2947,7 +2945,7 @@ export function deleteApiPostsByPostId<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary List reply posts
+ * @summary List a bounded reply-post tree
  * {@link /api/posts/:postId/replies}
  */
 export function getApiPostsByPostIdReplies<ThrowOnError extends boolean = true>(
@@ -2972,22 +2970,6 @@ export function postApiPostsByPostIdReplies<ThrowOnError extends boolean = true>
 	return request({ method: "POST", url: "/api/posts/{postId}/replies", ...config }) as Promise<
 		RequestResult<PostApiPostsByPostIdRepliesResponses, ThrowOnError>
 	>;
-}
-
-/**
- * @summary List one reply-post branch
- * {@link /api/posts/:postId/replies/thread}
- */
-export function getApiPostsByPostIdRepliesThread<ThrowOnError extends boolean = true>(
-	options: Options<GetApiPostsByPostIdRepliesThreadOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiPostsByPostIdRepliesThreadResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "GET",
-		url: "/api/posts/{postId}/replies/thread",
-		...config,
-	}) as Promise<RequestResult<GetApiPostsByPostIdRepliesThreadResponses, ThrowOnError>>;
 }
 
 /**

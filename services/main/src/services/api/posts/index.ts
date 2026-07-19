@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -16,7 +16,6 @@ import {
 	unitRevisionHead,
 } from "../../database/schema";
 import { createNotification, deliverNotificationEmail } from "../../notifications/service";
-import { parseJsonCursor } from "../../pagination";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import { insertAddressedUnit } from "../../units/slug-address";
@@ -24,7 +23,6 @@ import { generateSlugLabel } from "../../units/slug";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
 import {
 	ReplyListResponse,
-	ReplyThreadResponse,
 	toPortableTextResponse,
 	PostDetailResponse,
 	PostListResponse,
@@ -37,7 +35,6 @@ import {
 	ListPostsQuery,
 	PostParams,
 	ReplyParams,
-	ReplyThreadQuery,
 	RootPostParams,
 	UpdatePostBody,
 	UpdateReplyBody,
@@ -50,6 +47,7 @@ import {
 	ReplyDepthExceeded,
 	ReplyPostNotFound,
 } from "./errors";
+import { selectReplyTree } from "./reply-tree-query";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 const UnitMutationForbiddenResponse = toApiErrorResponse([
@@ -415,6 +413,14 @@ export default new Elysia()
 						() => new UnitNotFound("Post"),
 					);
 					await ensureRootPost(params.postId);
+					const selection = await selectReplyTree({
+						rootPostId: params.postId,
+						...(query.parentPostId ? { parentPostId: query.parentPostId } : {}),
+						...(query.cursor ? { cursor: query.cursor } : {}),
+						...(query.limit ? { limit: query.limit } : {}),
+					});
+					if (!selection.items.length)
+						return { items: [], nextCursor: selection.nextCursor };
 					const rows = await database
 						.select(replySelection)
 						.from(postReply)
@@ -430,130 +436,40 @@ export default new Elysia()
 						)
 						.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, postReply.postId))
 						.where(
-							and(
-								eq(postReply.rootPostId, params.postId),
-								query.parentPostId
-									? eq(postReply.parentPostId, query.parentPostId)
-									: undefined,
+							inArray(
+								postReply.postId,
+								selection.items.map(({ postId }) => postId),
 							),
-						)
-						.orderBy(postReply.createdAt, postReply.postId)
-						.limit(query.limit ?? 100);
-					return { items: rows.map(toReplyResponse) };
+						);
+					const rowById = new Map(rows.map((row) => [row.id, row]));
+					return {
+						items: selection.items.map((selected) => {
+							const row = rowById.get(selected.postId);
+							if (!row)
+								throw new Error(
+									`Selected reply ${selected.postId} was not hydrated`,
+								);
+							return {
+								...toReplyResponse(row),
+								hasMoreChildren: selected.hasMoreChildren,
+								childEndCursor: selected.childEndCursor,
+							};
+						}),
+						nextCursor: selection.nextCursor,
+					};
 				},
 				{
 					params: RootPostParams,
 					query: ListRepliesQuery,
 					response: {
 						[StatusCodes.OK]: ReplyListResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"UnitNotFound",
 							"PostNotFound",
 						]),
 					},
-					detail: { summary: "List reply posts", tags: ["Posts"] },
-				},
-			)
-			.get(
-				"/thread",
-				async ({ params, query, request }) => {
-					const identity = await resolveIdentity(request.headers, "unit:read");
-					await identity.authorization.unit.ensureCanRead(
-						params.postId,
-						() => new UnitNotFound("Post"),
-					);
-					await ensureRootPost(params.postId);
-					const viewerId = identity.profile?.unitId;
-					const rows = await database
-						.select({
-							...replySelection,
-							childCount: sql<number>`(
-								select count(*)::int from post_reply child
-								join unit child_unit on child_unit.id = child.post_id
-								where child.parent_post_id = ${postReply.postId} and child_unit.deleted_at is null
-							)`,
-							upvote: sql<number>`(
-								select count(*)::int from unit_reaction r
-								where r.unit_id = ${postReply.postId} and r.reaction = 'upvote'
-									and r.realm_id is not distinct from ${postReply.contextRealmId}
-							)`,
-							downvote: sql<number>`(
-								select count(*)::int from unit_reaction r
-								where r.unit_id = ${postReply.postId} and r.reaction = 'downvote'
-									and r.realm_id is not distinct from ${postReply.contextRealmId}
-							)`,
-							viewerReaction: viewerId
-								? sql<
-										string | null
-									>`(select r.reaction::text from unit_reaction r where r.unit_id = ${postReply.postId} and r.profile_id = ${viewerId} and r.realm_id is not distinct from ${postReply.contextRealmId} limit 1)`
-								: sql<string | null>`null`,
-						})
-						.from(postReply)
-						.innerJoin(post, eq(post.id, postReply.postId))
-						.innerJoin(unit, eq(unit.id, postReply.postId))
-						.innerJoin(profileTable, eq(profileTable.id, post.authorProfileId))
-						.leftJoin(
-							unitLocalization,
-							and(
-								eq(unitLocalization.unitId, postReply.postId),
-								isPrimaryUnitLocalization(unitLocalization.unitId),
-							),
-						)
-						.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, postReply.postId))
-						.where(
-							and(
-								eq(postReply.rootPostId, params.postId),
-								query.parentPostId
-									? eq(postReply.parentPostId, query.parentPostId)
-									: isNull(postReply.parentPostId),
-							),
-						);
-					const ranked = rows
-						.map((row) => ({
-							...toReplyResponse(row),
-							childCount: row.childCount,
-							reactions: { upvote: row.upvote, downvote: row.downvote },
-							viewerReaction: row.viewerReaction,
-						}))
-						.sort((left, right) => {
-							if (query.sort === "new")
-								return right.createdAt.getTime() - left.createdAt.getTime();
-							const leftScore =
-								left.reactions.upvote -
-								left.reactions.downvote +
-								(query.sort === "top" ? 0 : Math.min(left.childCount, 10) * 0.15);
-							const rightScore =
-								right.reactions.upvote -
-								right.reactions.downvote +
-								(query.sort === "top" ? 0 : Math.min(right.childCount, 10) * 0.15);
-							return (
-								rightScore - leftScore ||
-								right.createdAt.getTime() - left.createdAt.getTime()
-							);
-						});
-					const offset = decodeReplyOffset(query.cursor);
-					const limit = query.limit ?? 20;
-					return {
-						items: ranked.slice(offset, offset + limit),
-						nextCursor:
-							offset + limit < ranked.length
-								? Buffer.from(
-										JSON.stringify({ v: 1, offset: offset + limit }),
-									).toString("base64url")
-								: null,
-					};
-				},
-				{
-					params: RootPostParams,
-					query: ReplyThreadQuery,
-					response: {
-						[StatusCodes.OK]: ReplyThreadResponse,
-						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-							"UnitNotFound",
-							"PostNotFound",
-						]),
-					},
-					detail: { summary: "List one reply-post branch", tags: ["Posts"] },
+					detail: { summary: "List a bounded reply-post tree", tags: ["Posts"] },
 				},
 			)
 			.post(
@@ -836,18 +752,4 @@ async function ensureOrdinaryPost(postId: string) {
 		)
 		.limit(1);
 	if (!row) throw new PostNotFound();
-}
-
-const ReplyOffsetCursor = t.Object(
-	{ v: t.Literal(1), offset: t.Integer({ minimum: 0 }) },
-	{ additionalProperties: false },
-);
-
-function decodeReplyOffset(cursor?: string) {
-	if (!cursor) return 0;
-	try {
-		return parseJsonCursor(cursor, ReplyOffsetCursor).offset;
-	} catch {
-		return 0;
-	}
 }

@@ -33,19 +33,10 @@ export type UpdatePostBody = Static<typeof UpdatePostBody>;
 
 export const ListRepliesQuery = t.Object({
 	parentPostId: t.Optional(Uuid),
-	limit: t.Optional(t.Integer({ minimum: 1, maximum: 200, default: 100 })),
+	cursor: t.Optional(t.String({ maxLength: 512 })),
+	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 25 })),
 });
 export type ListRepliesQuery = Static<typeof ListRepliesQuery>;
-
-export const ReplyThreadQuery = t.Object({
-	parentPostId: t.Optional(Uuid),
-	sort: t.Optional(
-		t.Union([t.Literal("best"), t.Literal("new"), t.Literal("top")], { default: "best" }),
-	),
-	cursor: t.Optional(t.String({ maxLength: 256 })),
-	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
-});
-export type ReplyThreadQuery = Static<typeof ReplyThreadQuery>;
 
 export const CreateReplyBody = t.Object({
 	parentPostId: t.Optional(Uuid),

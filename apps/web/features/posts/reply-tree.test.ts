@@ -19,6 +19,8 @@ function createReplyPost(id: string, parentPostId: string | null = null): ApiRep
 		body: createPortableTextDocument([], "000000000000"),
 		status: "approved",
 		latestRevisionId: "019b1234-1234-7000-8000-000000000000",
+		hasMoreChildren: false,
+		childEndCursor: null,
 		createdAt: "2026-01-01T00:00:00.000Z",
 		updatedAt: "2026-01-01T00:00:00.000Z",
 	};

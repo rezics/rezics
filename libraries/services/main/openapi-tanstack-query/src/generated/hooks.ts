@@ -879,6 +879,7 @@ import type {
 	DeleteApiPostsByPostIdStatus500,
 	GetApiPostsByPostIdRepliesOptions,
 	GetApiPostsByPostIdRepliesStatus200,
+	GetApiPostsByPostIdRepliesStatus400,
 	GetApiPostsByPostIdRepliesStatus404,
 	GetApiPostsByPostIdRepliesStatus422,
 	GetApiPostsByPostIdRepliesStatus500,
@@ -889,11 +890,6 @@ import type {
 	PostApiPostsByPostIdRepliesStatus409,
 	PostApiPostsByPostIdRepliesStatus422,
 	PostApiPostsByPostIdRepliesStatus500,
-	GetApiPostsByPostIdRepliesThreadOptions,
-	GetApiPostsByPostIdRepliesThreadStatus200,
-	GetApiPostsByPostIdRepliesThreadStatus404,
-	GetApiPostsByPostIdRepliesThreadStatus422,
-	GetApiPostsByPostIdRepliesThreadStatus500,
 	PatchApiPostsByPostIdRepliesByReplyPostIdOptions,
 	PatchApiPostsByPostIdRepliesByReplyPostIdStatus200,
 	PatchApiPostsByPostIdRepliesByReplyPostIdStatus403,
@@ -1218,7 +1214,6 @@ import {
 	deleteApiPostsByPostId,
 	getApiPostsByPostIdReplies,
 	postApiPostsByPostIdReplies,
-	getApiPostsByPostIdRepliesThread,
 	patchApiPostsByPostIdRepliesByReplyPostId,
 	deleteApiPostsByPostIdRepliesByReplyPostId,
 	getApiRealms,
@@ -16178,6 +16173,7 @@ export function getApiPostsByPostIdRepliesQueryOptions(
 	return queryOptions<
 		GetApiPostsByPostIdRepliesStatus200,
 		ResponseErrorConfig<
+			| GetApiPostsByPostIdRepliesStatus400
 			| GetApiPostsByPostIdRepliesStatus404
 			| GetApiPostsByPostIdRepliesStatus422
 			| GetApiPostsByPostIdRepliesStatus500
@@ -16200,7 +16196,7 @@ export function getApiPostsByPostIdRepliesQueryOptions(
 }
 
 /**
- * @summary List reply posts
+ * @summary List a bounded reply-post tree
  * {@link /api/posts/:postId/replies}
  */
 export function useGetApiPostsByPostIdReplies<
@@ -16224,6 +16220,7 @@ export function useGetApiPostsByPostIdReplies<
 			QueryObserverOptions<
 				GetApiPostsByPostIdRepliesStatus200,
 				ResponseErrorConfig<
+					| GetApiPostsByPostIdRepliesStatus400
 					| GetApiPostsByPostIdRepliesStatus404
 					| GetApiPostsByPostIdRepliesStatus422
 					| GetApiPostsByPostIdRepliesStatus500
@@ -16255,6 +16252,7 @@ export function useGetApiPostsByPostIdReplies<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
+			| GetApiPostsByPostIdRepliesStatus400
 			| GetApiPostsByPostIdRepliesStatus404
 			| GetApiPostsByPostIdRepliesStatus422
 			| GetApiPostsByPostIdRepliesStatus500
@@ -16366,115 +16364,6 @@ export function usePostApiPostsByPostIdReplies<TContext>(
 		PostApiPostsByPostIdRepliesOptions,
 		TContext
 	>;
-}
-
-export const getApiPostsByPostIdRepliesThreadQueryKey = ({
-	path,
-	query,
-}: Omit<GetApiPostsByPostIdRepliesThreadOptions, "headers">) =>
-	[
-		{ url: "/api/posts/:postId/replies/thread", params: path },
-		...(query ? [query] : []),
-	] as const;
-
-type GetApiPostsByPostIdRepliesThreadQueryKey = ReturnType<
-	typeof getApiPostsByPostIdRepliesThreadQueryKey
->;
-
-export function getApiPostsByPostIdRepliesThreadQueryOptions(
-	{ path, query }: GetApiPostsByPostIdRepliesThreadOptions,
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const queryKey = getApiPostsByPostIdRepliesThreadQueryKey({ path, query });
-	return queryOptions<
-		GetApiPostsByPostIdRepliesThreadStatus200,
-		ResponseErrorConfig<
-			| GetApiPostsByPostIdRepliesThreadStatus404
-			| GetApiPostsByPostIdRepliesThreadStatus422
-			| GetApiPostsByPostIdRepliesThreadStatus500
-		>,
-		GetApiPostsByPostIdRepliesThreadStatus200,
-		typeof queryKey
-	>({
-		queryKey,
-		queryFn: async ({ signal }) => {
-			const { data } = await getApiPostsByPostIdRepliesThread({
-				...config,
-				path,
-				query,
-				signal: config.signal ?? signal,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary List one reply-post branch
- * {@link /api/posts/:postId/replies/thread}
- */
-export function useGetApiPostsByPostIdRepliesThread<
-	TData = GetApiPostsByPostIdRepliesThreadStatus200,
-	TQueryData = GetApiPostsByPostIdRepliesThreadStatus200,
-	TQueryKey extends QueryKey = GetApiPostsByPostIdRepliesThreadQueryKey,
->(
-	{
-		path,
-		query,
-	}: {
-		path:
-			| GetApiPostsByPostIdRepliesThreadOptions["path"]
-			| (() => GetApiPostsByPostIdRepliesThreadOptions["path"]);
-		query?:
-			| GetApiPostsByPostIdRepliesThreadOptions["query"]
-			| (() => GetApiPostsByPostIdRepliesThreadOptions["query"]);
-	},
-	options: {
-		query?: Partial<
-			QueryObserverOptions<
-				GetApiPostsByPostIdRepliesThreadStatus200,
-				ResponseErrorConfig<
-					| GetApiPostsByPostIdRepliesThreadStatus404
-					| GetApiPostsByPostIdRepliesThreadStatus422
-					| GetApiPostsByPostIdRepliesThreadStatus500
-				>,
-				TData,
-				TQueryData,
-				TQueryKey
-			>
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { query: queryConfig = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = {
-		path: typeof path === "function" ? path() : path,
-		query: typeof query === "function" ? query() : query,
-	};
-	const queryKey =
-		resolvedOptions?.queryKey ?? getApiPostsByPostIdRepliesThreadQueryKey(resolvedParams);
-
-	const queryResult = useQuery(
-		{
-			...getApiPostsByPostIdRepliesThreadQueryOptions(resolvedParams, config),
-			...resolvedOptions,
-			queryKey,
-		} as unknown as QueryObserverOptions,
-		queryClient,
-	) as UseQueryResult<
-		TData,
-		ResponseErrorConfig<
-			| GetApiPostsByPostIdRepliesThreadStatus404
-			| GetApiPostsByPostIdRepliesThreadStatus422
-			| GetApiPostsByPostIdRepliesThreadStatus500
-		>
-	> & { queryKey: TQueryKey };
-
-	queryResult.queryKey = queryKey as TQueryKey;
-
-	return queryResult;
 }
 
 export const patchApiPostsByPostIdRepliesByReplyPostIdMutationKey = () =>

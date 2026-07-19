@@ -2,7 +2,6 @@ import {
 	getApiFeedQueryKey,
 	getApiPostsByPostIdQueryKey,
 	getApiPostsByPostIdRepliesQueryKey,
-	getApiPostsByPostIdRepliesThreadQueryKey,
 	getApiPostsQueryKey,
 } from "@rezics/openapi-tanstack-query";
 import type { QueryClient } from "@tanstack/react-query";
@@ -22,11 +21,6 @@ export async function invalidatePostQueries(
 					}),
 					queryClient.invalidateQueries({
 						queryKey: getApiPostsByPostIdRepliesQueryKey({
-							path: { postId: rootPostId },
-						}),
-					}),
-					queryClient.invalidateQueries({
-						queryKey: getApiPostsByPostIdRepliesThreadQueryKey({
 							path: { postId: rootPostId },
 						}),
 					}),
