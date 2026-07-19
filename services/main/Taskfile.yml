@@ -5,16 +5,19 @@ tasks:
         desc: Start RustFS and create the development bucket.
         dir: ../..
         cmds:
-            - docker compose up -d rustfs rustfs-setup
+            - docker compose up -d --wait rustfs
+            - docker compose run --rm rustfs-setup
 
     storage:down:
         desc: Stop the development RustFS service.
         dir: ../..
         cmds:
-            - docker compose down
+            - docker compose stop --timeout 30 rustfs
 
     dev:
         desc: Start the backend API and recommendation worker.
+        env:
+            DATABASE_ADMIN_URL: ""
         deps:
             - dev:api
             - dev:worker
@@ -66,30 +69,30 @@ tasks:
         cmds:
             - yarn exec tsx scripts/generate-auth-schema.ts
 
-    db:dev:up:
+    db:replay:up:
         internal: true
         dir: ../..
         cmds:
             - docker compose --profile migration-test up -d --wait postgres-migration-test
 
-    db:dev:down:
+    db:replay:down:
         internal: true
         dir: ../..
         cmds:
             - docker compose --profile migration-test rm --stop --force postgres-migration-test
 
-    db:dev:reset:
+    db:replay:reset:
         internal: true
         cmds:
-            - task: db:dev:down
-            - task: db:dev:up
+            - task: db:replay:down
+            - task: db:replay:up
 
     db:generate:
         desc: Generate an Atlas migration from the Drizzle schema.
         cmds:
             - test -n "{{.CLI_ARGS}}"
-            - defer: { task: db:dev:down }
-            - task: db:dev:up
+            - defer: { task: db:replay:down }
+            - task: db:replay:up
             - yarn exec atlas migrate diff --env main {{.CLI_ARGS}}
 
     db:hash:
@@ -98,19 +101,18 @@ tasks:
             - yarn exec atlas migrate hash --env main
 
     db:validate:
-        desc: Validate Atlas migration directory integrity.
+        desc: Validate the Atlas migration checksum without replaying the database.
         cmds:
-            - defer: { task: db:dev:down }
-            - task: db:dev:up
-            - yarn exec atlas migrate validate --env main
+            - yarn exec atlas migrate validate --dir file://src/services/database/migrations
 
     db:check:
         desc: Replay migrations and verify that they match the Drizzle schema.
         cmds:
-            - defer: { task: db:dev:down }
-            - task: db:dev:up
+            - task: db:validate
+            - defer: { task: db:replay:down }
+            - task: db:replay:up
             - yarn exec atlas migrate validate --env main
-            - task: db:dev:reset
+            - task: db:replay:reset
             - yarn exec atlas migrate diff --env main ci_schema_sync
             - test -z "$(find src/services/database/migrations -maxdepth 1 -type f -name '*_ci_schema_sync.sql' -print -quit)"
 
@@ -128,9 +130,20 @@ tasks:
             - yarn exec tsx scripts/ensure-database-privileges.ts
 
     db:bootstrap:
-        desc: Provision required slug namespaces and official Rezics Units.
+        desc: Fill missing bootstrap records without changing existing credentials.
         cmds:
             - yarn exec tsx scripts/bootstrap.ts
+
+    db:bootstrap:check:
+        desc: Verify that the database has all required bootstrap records.
+        cmds:
+            - yarn exec tsx scripts/check-bootstrap.ts
+
+    db:bootstrap:credentials:overwrite:
+        desc: Replace every official Profile password and print the new credentials.
+        prompt: This replaces all official Profile passwords. Continue?
+        cmds:
+            - yarn exec tsx scripts/bootstrap.ts --overwrite-credentials --yes
 
     db:prepare:
         desc: Migrate and bootstrap a database for application traffic.

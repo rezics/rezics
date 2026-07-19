@@ -18,7 +18,7 @@ import {
 import { InitialFractionalPosition } from "../ordering/position";
 import { recordUnitRevision } from "../units/history";
 import { insertAddressedUnit } from "../units/slug-address";
-import { generateBootstrapPassword } from "./credentials";
+import { type BootstrapCredentialMode, generateBootstrapPassword } from "./credentials";
 import {
 	assertBootstrapManifest,
 	BootstrapAccountIds,
@@ -36,21 +36,27 @@ import {
 
 const BootstrapLockName = "rezics-bootstrap";
 
-export interface CreatedBootstrapCredential {
+export interface IssuedBootstrapCredential {
+	readonly action: "created" | "overwritten";
 	readonly name: string;
 	readonly email: string;
 	readonly password: string;
 }
 
 export interface BootstrapResult {
-	readonly createdCredentials: readonly CreatedBootstrapCredential[];
+	readonly issuedCredentials: readonly IssuedBootstrapCredential[];
+}
+
+export interface BootstrapOptions {
+	readonly credentialMode: BootstrapCredentialMode;
 }
 
 interface PreparedCredential {
-	readonly profile: (typeof OfficialProfileManifest)[number];
 	readonly password: string;
 	readonly passwordHash: string;
 }
+
+const FillBootstrapOptions: BootstrapOptions = { credentialMode: "fill" };
 
 function bootstrapEpoch(): Date {
 	return new Date(BootstrapEpochIso);
@@ -192,12 +198,11 @@ async function ensureLocalization(
 
 async function ensureOfficialProfiles(
 	tx: DatabaseTransaction,
-	credentials: readonly PreparedCredential[],
-): Promise<CreatedBootstrapCredential[]> {
+	credentialMode: BootstrapCredentialMode,
+): Promise<IssuedBootstrapCredential[]> {
 	const createdAt = bootstrapEpoch();
-	const createdCredentials: CreatedBootstrapCredential[] = [];
-	for (const prepared of credentials) {
-		const value = prepared.profile;
+	const issuedCredentials: IssuedBootstrapCredential[] = [];
+	for (const value of OfficialProfileManifest) {
 		await tx
 			.insert(users)
 			.values({
@@ -248,17 +253,34 @@ async function ensureOfficialProfiles(
 				providerId: "credential",
 				userId: value.authUserId,
 			});
-		} else {
-			await tx.insert(accounts).values({
-				id: value.accountId,
-				accountId: value.authUserId,
-				providerId: "credential",
-				userId: value.authUserId,
-				password: prepared.passwordHash,
-				createdAt,
-				updatedAt: createdAt,
-			});
-			createdCredentials.push({
+		}
+
+		if (!storedAccount || credentialMode === "overwrite") {
+			const prepared = await prepareCredential();
+			const action = storedAccount ? "overwritten" : "created";
+			if (storedAccount) {
+				const updated = await tx
+					.update(accounts)
+					.set({ password: prepared.passwordHash, updatedAt: new Date() })
+					.where(eq(accounts.id, storedAccount.id))
+					.returning({ id: accounts.id });
+				if (updated.length !== 1 || updated[0]?.id !== storedAccount.id)
+					throw new Error(
+						`Bootstrap credential account ${value.key} was not overwritten`,
+					);
+			} else {
+				await tx.insert(accounts).values({
+					id: value.accountId,
+					accountId: value.authUserId,
+					providerId: "credential",
+					userId: value.authUserId,
+					password: prepared.passwordHash,
+					createdAt,
+					updatedAt: createdAt,
+				});
+			}
+			issuedCredentials.push({
+				action,
 				name: value.name,
 				email: value.email,
 				password: prepared.password,
@@ -311,7 +333,12 @@ async function ensureOfficialProfiles(
 				message: "Bootstrap official Profile",
 			});
 	}
-	return createdCredentials;
+	return issuedCredentials;
+}
+
+async function prepareCredential(): Promise<PreparedCredential> {
+	const password = generateBootstrapPassword();
+	return { password, passwordHash: await hashPassword(password) };
 }
 
 async function ensureOwnerBinding(
@@ -507,27 +534,19 @@ export async function isBootstrapReady(): Promise<boolean> {
 	);
 }
 
-export async function bootstrapDatabase(): Promise<BootstrapResult> {
+export async function bootstrapDatabase(
+	options: BootstrapOptions = FillBootstrapOptions,
+): Promise<BootstrapResult> {
 	assertBootstrapManifest();
-	const prepared = await Promise.all(
-		OfficialProfileManifest.map(async (profileValue): Promise<PreparedCredential> => {
-			const password = generateBootstrapPassword();
-			return {
-				profile: profileValue,
-				password,
-				passwordHash: await hashPassword(password),
-			};
-		}),
-	);
-	const createdCredentials = await database.transaction(async (tx) => {
+	const issuedCredentials = await database.transaction(async (tx) => {
 		await tx.execute(
 			sql`select pg_advisory_xact_lock(hashtextextended(${BootstrapLockName}, 0))`,
 		);
 		await ensureSlugNamespaces(tx);
-		const credentials = await ensureOfficialProfiles(tx, prepared);
+		const credentials = await ensureOfficialProfiles(tx, options.credentialMode);
 		await ensureOfficialRealm(tx);
 		await ensureOfficialZone(tx);
 		return credentials;
 	});
-	return { createdCredentials };
+	return { issuedCredentials };
 }

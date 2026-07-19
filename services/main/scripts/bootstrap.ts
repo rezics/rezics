@@ -1,17 +1,19 @@
+import { parseBootstrapCredentialMode } from "../src/services/bootstrap/credentials";
 import { bootstrapDatabase } from "../src/services/bootstrap/service";
 import { database } from "../src/services/database";
 
 try {
-	const result = await bootstrapDatabase();
-	if (result.createdCredentials.length === 0) {
-		console.info("Bootstrap is already complete; no credentials were created.");
+	const credentialMode = parseBootstrapCredentialMode(process.argv.slice(2));
+	const result = await bootstrapDatabase({ credentialMode });
+	if (result.issuedCredentials.length === 0) {
+		console.info("Bootstrap is already complete; no credentials were changed.");
 	} else {
 		console.info(
-			"Official Profile credentials were created. Store these passwords now; they will not be shown again.",
+			"Official Profile credentials were issued. Store these passwords now; they will not be shown again.",
 		);
-		for (const credential of result.createdCredentials) {
+		for (const credential of result.issuedCredentials) {
 			console.info(
-				`\n${credential.name}\nEmail: ${credential.email}\nPassword: ${credential.password}`,
+				`\n${credential.name} (${credential.action})\nEmail: ${credential.email}\nPassword: ${credential.password}`,
 			);
 		}
 	}

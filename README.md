@@ -45,9 +45,20 @@ environment or provide compatible tools locally.
 
 ```sh
 yarn install --immutable
-yarn task services:up
+yarn task local:setup
 yarn task dev
 ```
+
+`local:setup` owns local infrastructure and one-off database preparation. It is
+safe to rerun after pulling migrations or bootstrap-manifest changes: pending
+migrations are applied and bootstrap only fills missing records. On a fresh
+database it prints newly created official Profile credentials once, so store
+them before starting the long-running development processes.
+
+`dev` only verifies bootstrap readiness and supervises the API, recommendation
+worker, and web development server. It does not start, migrate, bootstrap, or
+stop persistent infrastructure. Use `yarn task services:stop` when the local
+PostgreSQL and RustFS services are no longer needed.
 
 The main checks are:
 
@@ -89,6 +100,12 @@ yarn task db:check
 yarn task services-main:db:migrate:dry-run
 yarn task services-main:db:migrate
 yarn task services-main:db:status
+
+# Fill missing required records without changing existing credentials.
+yarn task services-main:db:bootstrap
+
+# Explicitly replace all official Profile passwords and print the replacements.
+yarn task services-main:db:bootstrap:credentials:overwrite
 ```
 
 Functions, triggers, extensions, and data backfills remain explicit SQL
@@ -97,10 +114,18 @@ Drizzle diff ownership so it does not delete those manually managed objects.
 The isolated dev database installs PGroonga as an infrastructure prerequisite.
 Every manual migration edit must be followed by `db:hash`.
 
-`yarn task dev` starts PostgreSQL, replays and validates the full migration
-history in an isolated PostgreSQL 18 + PGroonga database, applies pending
-migrations to the local database, reconciles application-role privileges, and
-only then starts applications.
+`yarn task db:check` owns the correctness workflow: it validates the migration
+checksum, replays the full history in an isolated PostgreSQL 18 + PGroonga
+database, and verifies that the result matches the Drizzle schema. CI runs this
+check for every pull request and main-branch push. It is intentionally separate
+from `dev` and from the target-database `db:migrate` operation.
+
+`db:prepare` is the reusable one-off administration workflow for a target
+database. It applies pending migrations, reconciles application-role
+privileges, and fills missing bootstrap records. Normal bootstrap never changes
+an existing official Profile password. Credential replacement is available
+only through the separately confirmed
+`db:bootstrap:credentials:overwrite` task.
 
 Existing databases created by the previous Drizzle migrator need a one-time
 baseline before their first Atlas-managed deployment. After taking a backup,

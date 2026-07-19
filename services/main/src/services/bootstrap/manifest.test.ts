@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { generateBootstrapPassword } from "./credentials";
+import { generateBootstrapPassword, parseBootstrapCredentialMode } from "./credentials";
 import {
 	assertBootstrapManifest,
 	BootstrapEpochUnixMilliseconds,
@@ -60,5 +60,20 @@ describe("database bootstrap manifest", () => {
 			expect(password).toMatch(/[0-9]/);
 			expect(password).toMatch(/[_-]/);
 		}
+	});
+
+	it("keeps credential overwrite separate from the fill-only default", () => {
+		expect(parseBootstrapCredentialMode([])).toBe("fill");
+		expect(parseBootstrapCredentialMode(["--overwrite-credentials", "--yes"])).toBe(
+			"overwrite",
+		);
+		expect(parseBootstrapCredentialMode(["--yes", "--overwrite-credentials"])).toBe(
+			"overwrite",
+		);
+		expect(() => parseBootstrapCredentialMode(["--overwrite-credentials"])).toThrow(
+			/without --yes/,
+		);
+		expect(() => parseBootstrapCredentialMode(["--yes"])).toThrow(/Usage:/);
+		expect(() => parseBootstrapCredentialMode(["--unknown"])).toThrow(/Usage:/);
 	});
 });

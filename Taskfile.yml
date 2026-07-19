@@ -78,10 +78,10 @@ tasks:
             - test -z "$(git ls-files --others --exclude-standard -- libraries/services/main/openapi/openapi.json libraries/services/main/openapi-fetch/src/generated libraries/services/main/openapi-tanstack-query/src/generated)"
 
     services:up:
-        desc: Start the base development services.
+        desc: Start persistent local infrastructure and initialize object storage.
         cmds:
             - docker compose up -d --wait postgres rustfs
-            - docker compose up rustfs-setup
+            - docker compose run --rm rustfs-setup
 
     services:down:
         desc: Remove every development container and network without deleting data.
@@ -89,17 +89,22 @@ tasks:
             - docker compose down --timeout 30 --remove-orphans
 
     services:stop:
-        desc: Gracefully stop every development service.
+        desc: Gracefully stop persistent local infrastructure.
         cmds:
-            - docker compose stop --timeout 30
+            - docker compose stop --timeout 30 postgres rustfs
+
+    local:setup:
+        desc: Start infrastructure and prepare the local database for development.
+        cmds:
+            - task: services:up
+            - task: services-main:db:prepare
 
     dev:
-        desc: Enter full-stack development with initialized services, API, and web app.
+        desc: Start the API, recommendation worker, and web development server.
+        env:
+            DATABASE_ADMIN_URL: ""
         cmds:
-            - defer: { task: services:stop }
-            - task: services:up
-            - task: services-main:db:validate
-            - task: services-main:db:prepare
+            - task: services-main:db:bootstrap:check
             - task: dev:apps
 
     dev:apps:
