@@ -2,7 +2,6 @@ import { sql } from "drizzle-orm";
 import {
 	boolean,
 	check,
-	foreignKey,
 	index,
 	integer,
 	pgEnum,
@@ -19,11 +18,11 @@ import {
 	RealmMemberRoleValues,
 	RealmMemberStateValues,
 	RealmPinKindValues,
+	RealmUnitStatusValues,
 	toEnumValues,
 } from "./contract-values";
 import {
 	createCreatedAtColumn,
-	createJsonDocumentColumn,
 	fractionalIndexPosition,
 	ordinalPosition,
 	createTimestampMsColumn,
@@ -36,12 +35,7 @@ export const realmJoinPolicy = pgEnum("realm_join_policy", toEnumValues(RealmJoi
 export const realmMemberRole = pgEnum("realm_member_role", toEnumValues(RealmMemberRoleValues));
 export const realmMemberState = pgEnum("realm_member_state", toEnumValues(RealmMemberStateValues));
 export const realmPinKind = pgEnum("realm_pin_kind", toEnumValues(RealmPinKindValues));
-export const realmUnitStatus = pgEnum("realm_unit_status", [
-	"pending",
-	"visible",
-	"hidden",
-	"removed",
-]);
+export const realmUnitStatus = pgEnum("realm_unit_status", toEnumValues(RealmUnitStatusValues));
 export const capabilityAuthority = pgEnum(
 	"capability_authority",
 	toEnumValues(CapabilityAuthorityValues),
@@ -189,41 +183,6 @@ export const realmUnit = pgTable(
 		),
 		index("realm_unit_unit_idx").on(table.unitId),
 		check("realm_unit_not_self_check", sql`${table.realmId} <> ${table.unitId}`),
-	],
-);
-
-export const realmUnitStatusEvent = pgTable(
-	"realm_unit_status_event",
-	{
-		id: createUuidv7PrimaryKey(),
-		realmId: uuid().notNull(),
-		unitId: uuid().notNull(),
-		fromStatus: realmUnitStatus(),
-		toStatus: realmUnitStatus().notNull(),
-		changedByProfileId: uuid().references(() => profile.id, {
-			onDelete: "set null",
-		}),
-		/** @UNIT_LOCALIZATION_EXEMPT Immutable point-in-time moderation annotation. */
-		annotationDocument: createJsonDocumentColumn(),
-		createdAt: createCreatedAtColumn(),
-	},
-	(table) => [
-		foreignKey({
-			columns: [table.realmId, table.unitId],
-			foreignColumns: [realmUnit.realmId, realmUnit.unitId],
-			name: "realm_unit_status_event_realm_unit_fkey",
-		}).onDelete("cascade"),
-		index("realm_unit_status_event_history_idx").on(
-			table.realmId,
-			table.unitId,
-			table.createdAt.desc(),
-			table.id.desc(),
-		),
-		index("realm_unit_status_event_actor_idx").on(table.changedByProfileId),
-		check(
-			"realm_unit_status_event_transition_check",
-			sql`${table.fromStatus} is null or ${table.fromStatus} <> ${table.toStatus}`,
-		),
 	],
 );
 

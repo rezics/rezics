@@ -12,15 +12,20 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { realm } from "./realm";
+import { realm, realmUnitStatus } from "./realm";
 import {
 	EnforcementKindValues,
 	FeedbackKindValues,
+	GovernanceNoteRoleValues,
+	GovernanceNoteSubjectKindValues,
+	ModerationActionKindValues,
 	ModerationCaseStateValues,
+	ModerationTargetKindValues,
 	toEnumValues,
 } from "./contract-values";
 import {
 	createCreatedAtColumn,
+	createJsonDocumentColumn,
 	createJsonObjectColumn,
 	createJsonObjectConstraint,
 	createTimestampMsColumn,
@@ -28,6 +33,8 @@ import {
 	createUuidv7PrimaryKey,
 } from "./columns";
 import { moderationStatus, profile, unit } from "./core";
+import { unitRevision } from "./history";
+import { post } from "./post";
 
 export const feedbackKind = pgEnum("feedback_kind", toEnumValues(FeedbackKindValues));
 export const moderationAuthority = pgEnum("moderation_authority", ["platform", "realm"]);
@@ -35,38 +42,23 @@ export const moderationCaseState = pgEnum(
 	"moderation_case_state",
 	toEnumValues(ModerationCaseStateValues),
 );
-export const moderationTargetKind = pgEnum("moderation_target_kind", [
-	"unit",
-	"unit_field",
-	"profile",
-	"realm_unit",
-	"realm_member",
-	"feedback",
-]);
-export const moderationActionKind = pgEnum("moderation_action_kind", [
-	"approve",
-	"remove",
-	"restore",
-	"lock",
-	"unlock",
-	"protect",
-	"unprotect",
-	"warning",
-	"silence",
-	"suspension",
-	"ban",
-	"rate_limit",
-	"trust_restriction",
-	"revoke_enforcement",
-	"mute_member",
-	"remove_member",
-	"ban_member",
-	"restore_member",
-	"escalate",
-	"reverse",
-	"note",
-]);
+export const moderationTargetKind = pgEnum(
+	"moderation_target_kind",
+	toEnumValues(ModerationTargetKindValues),
+);
+export const moderationActionKind = pgEnum(
+	"moderation_action_kind",
+	toEnumValues(ModerationActionKindValues),
+);
 export const enforcementKind = pgEnum("enforcement_kind", toEnumValues(EnforcementKindValues));
+export const governanceNoteRole = pgEnum(
+	"governance_note_role",
+	toEnumValues(GovernanceNoteRoleValues),
+);
+export const governanceNoteSubjectKind = pgEnum(
+	"governance_note_subject_kind",
+	toEnumValues(GovernanceNoteSubjectKindValues),
+);
 
 export const feedback = pgTable(
 	"feedback",
@@ -220,6 +212,73 @@ export const moderationAction = pgTable(
 			"moderation_action_reversal_check",
 			sql`(${table.kind} in ('reverse', 'revoke_enforcement')) = (${table.reversesActionId} is not null)`,
 		),
+	],
+);
+
+export const realmUnitStatusEvent = pgTable(
+	"realm_unit_status_event",
+	{
+		id: createUuidv7PrimaryKey(),
+		realmId: uuid()
+			.notNull()
+			.references(() => realm.id, { onDelete: "restrict" }),
+		unitId: uuid()
+			.notNull()
+			.references(() => unit.id, { onDelete: "restrict" }),
+		fromStatus: realmUnitStatus(),
+		toStatus: realmUnitStatus().notNull(),
+		changedByProfileId: uuid().references(() => profile.id, {
+			onDelete: "set null",
+		}),
+		annotationDocument: createJsonDocumentColumn(),
+		moderationActionId: uuid(),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.moderationActionId],
+			foreignColumns: [moderationAction.id],
+			name: "realm_unit_status_event_moderation_action_fkey",
+		}).onDelete("restrict"),
+		unique("realm_unit_status_event_action_key").on(table.moderationActionId),
+		index("realm_unit_status_event_history_idx").on(
+			table.realmId,
+			table.unitId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		index("realm_unit_status_event_actor_idx").on(table.changedByProfileId),
+		check(
+			"realm_unit_status_event_transition_check",
+			sql`${table.fromStatus} is null or ${table.fromStatus} <> ${table.toStatus}`,
+		),
+	],
+);
+
+export const governancePostBinding = pgTable(
+	"governance_post_binding",
+	{
+		postId: uuid()
+			.primaryKey()
+			.references(() => post.id, { onDelete: "restrict" }),
+		revisionId: uuid().notNull(),
+		subjectKind: governanceNoteSubjectKind().notNull(),
+		subjectId: uuid().notNull(),
+		role: governanceNoteRole().notNull(),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.revisionId, table.postId],
+			foreignColumns: [unitRevision.id, unitRevision.unitId],
+			name: "governance_post_binding_revision_post_fkey",
+		}).onDelete("restrict"),
+		unique("governance_post_binding_subject_role_key").on(
+			table.subjectKind,
+			table.subjectId,
+			table.role,
+		),
+		index("governance_post_binding_subject_idx").on(table.subjectKind, table.subjectId),
 	],
 );
 

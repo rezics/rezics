@@ -43,6 +43,7 @@ export const PostKindValues = [
 	"chapter_group",
 	"wiki",
 	"picture",
+	"governance_note",
 ] as const;
 export const ProgressStatusValues = [
 	"backlog",
@@ -93,6 +94,66 @@ export const RealmJoinPolicyValues = ["open", "approval"] as const;
 export const RealmMemberRoleValues = ["owner", "admin", "moderator", "member"] as const;
 export const RealmMemberStateValues = ["active", "pending", "muted", "removed", "banned"] as const;
 export const RealmPinKindValues = ["pinned", "highlight"] as const;
+export const RealmUnitStatusValues = ["pending", "visible", "hidden", "removed"] as const;
+export const RealmModerationCommandValues = [
+	"approve",
+	"hide",
+	"remove",
+	"restore",
+	"lock",
+	"unlock",
+	"note",
+] as const;
+export const GovernanceReasonCodeValues = [
+	"content_policy",
+	"realm_rules",
+	"spam",
+	"harassment",
+	"unsafe_content",
+	"off_topic",
+	"duplicate",
+	"account_security",
+	"user_request",
+	"appeal",
+	"administrative",
+	"other",
+] as const;
+export const GovernanceNoteRoleValues = ["evidence", "internal_note", "public_notice"] as const;
+export const GovernanceNoteSubjectKindValues = [
+	"feedback",
+	"moderation_case",
+	"moderation_action",
+	"unit_access_restriction",
+	"unit_protection",
+	"realm_unit_status_event",
+] as const;
+export const ModerationTargetKindValues = [
+	"unit",
+	"unit_field",
+	"profile",
+	"realm_unit",
+	"realm_member",
+	"feedback",
+] as const;
+export const ModerationActionKindValues = [
+	"approve",
+	"hide",
+	"remove",
+	"restore",
+	"lock",
+	"unlock",
+	"protect",
+	"unprotect",
+	...EnforcementKindValues,
+	"revoke_enforcement",
+	"mute_member",
+	"remove_member",
+	"ban_member",
+	"restore_member",
+	"escalate",
+	"reverse",
+	"note",
+] as const;
 export const AliasKindValues = [
 	"common",
 	"abbreviation",

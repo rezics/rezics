@@ -9,6 +9,13 @@ import {
 	recommendationMetricDaily,
 	recommendationSignalKind,
 	recommendationUnitStat,
+	governancePostBinding,
+	GovernanceNoteRoleValues,
+	GovernanceReasonCodeValues,
+	ModerationActionKindValues,
+	PostKindValues,
+	realmUnitStatus,
+	realmUnitStatusEvent,
 	scoreStat,
 	unitAccessBinding,
 	unitAccessRestriction,
@@ -80,6 +87,34 @@ describe("database schema contracts", () => {
 			]),
 		);
 		expect(unitAccessRestriction.subjectKind.enumValues).toEqual(["profile", "realm"]);
+	});
+
+	it("centralizes governance contracts and immutable note bindings", () => {
+		expect(realmUnitStatus.enumValues).toEqual(["pending", "visible", "hidden", "removed"]);
+		expect(PostKindValues).toContain("governance_note");
+		expect(ModerationActionKindValues).toEqual(
+			expect.arrayContaining(["hide", "note", "warning", "revoke_enforcement"]),
+		);
+		expect(GovernanceReasonCodeValues).toEqual(
+			expect.arrayContaining(["content_policy", "realm_rules", "administrative"]),
+		);
+		expect(GovernanceNoteRoleValues).toEqual(["evidence", "internal_note", "public_notice"]);
+
+		const binding = getTableConfig(governancePostBinding);
+		expect(binding.foreignKeys.map((key) => key.getName())).toContain(
+			"governance_post_binding_revision_post_fkey",
+		);
+		expect(binding.uniqueConstraints.map((constraint) => constraint.name)).toContain(
+			"governance_post_binding_subject_role_key",
+		);
+
+		const event = getTableConfig(realmUnitStatusEvent);
+		expect(event.foreignKeys.map((key) => key.getName())).not.toContain(
+			"realm_unit_status_event_realm_unit_fkey",
+		);
+		expect(event.uniqueConstraints.map((constraint) => constraint.name)).toContain(
+			"realm_unit_status_event_action_key",
+		);
 	});
 
 	it("models Unit slugs as one scoped address tree", () => {
