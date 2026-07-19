@@ -2,7 +2,7 @@ const content = {
 	implemented: "実装済み",
 	modes: "帰属モード",
 	credit: "CreditAttribution",
-	subject: "SubjectAttribution",
+	subject: "SubjectAssociation",
 	bookCredits: "Book のクレジット",
 	relationship: "関係タイプ",
 	entity: "Entity",

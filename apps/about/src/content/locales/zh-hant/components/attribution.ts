@@ -2,7 +2,7 @@ const content = {
 	implemented: "已實作",
 	modes: "歸屬模式",
 	credit: "CreditAttribution",
-	subject: "SubjectAttribution",
+	subject: "SubjectAssociation",
 	bookCredits: "Book 貢獻歸屬",
 	relationship: "關係類型",
 	entity: "Entity",

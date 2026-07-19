@@ -27,8 +27,14 @@ export const post = pgTable(
 		authorProfileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "restrict" }),
+		/**
+		 * Generic typed target. Public posts and reviews that target an Entity pass the
+		 * Entity subject-association policy; structural and governance posts use this
+		 * column for containment or administrative context instead.
+		 */
 		subjectUnitId: uuid().references(() => unit.id, { onDelete: "restrict" }),
 		kind: postKind().default("post").notNull(),
+		/** Prevents new replies to this post; this is not a Unit field-edit lock. */
 		locked: boolean().default(false).notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),

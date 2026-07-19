@@ -420,14 +420,14 @@ export const PRODUCT_DEFINITIONS = [
 		name: "Entity",
 		pageClass: "surface",
 		navGroup: "products",
-		capabilityModes: ["Entity", "CreditAttribution", "SubjectAttribution"],
+		capabilityModes: ["Entity", "CreditAttribution", "SubjectAssociation"],
 		consumesCapabilities: ["history", "api-oauth"],
 		relatedProductIds: ["book", "post", "media", "software"],
 		implementationStatus: "implemented",
 		sourceDocuments: [
 			"Outline · Entity",
 			"Schema · CreditAttribution",
-			"Schema · SubjectAttribution",
+			"Schema · SubjectAssociation",
 			"User-confirmed product model",
 		],
 		mediaIds: ["entity-stage"],
@@ -572,11 +572,11 @@ export const PRODUCT_CLAIMS = [
 		status: "confirmed",
 	},
 	{
-		id: "subject-attribution",
+		id: "subject-association",
 		productId: "entity",
 		sourceType: "user-confirmed",
 		sourceReference:
-			"SubjectAttribution expresses character, protagonist and derivative relationships",
+			"SubjectAssociation expresses character, protagonist and derivative relationships",
 		status: "confirmed",
 	},
 ] as const satisfies readonly ProductClaim[];

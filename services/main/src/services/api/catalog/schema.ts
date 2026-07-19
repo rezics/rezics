@@ -1,6 +1,10 @@
 import { type Static, t } from "elysia";
 
-import { AliasKindValues, UnitKindValues } from "../../database/schema/contract-values";
+import {
+	AliasKindValues,
+	EntityAssociationPolicyModeValues,
+	UnitKindValues,
+} from "../../database/schema/contract-values";
 import { FractionalPosition, LanguageTag, LocalizationInput, Uuid } from "../schema";
 import { UnitType } from "../units/schema";
 
@@ -34,6 +38,26 @@ export const AddUnitCreditBody = t.Object({
 });
 export type AddUnitCreditBody = Static<typeof AddUnitCreditBody>;
 
+export const AddUnitSubjectAssociationBody = t.Object(
+	{
+		entityId: Uuid,
+		role: t.String({ minLength: 1, maxLength: 64 }),
+		position: t.Optional(FractionalPosition),
+	},
+	{ additionalProperties: false },
+);
+export type AddUnitSubjectAssociationBody = Static<typeof AddUnitSubjectAssociationBody>;
+
+const EntityAssociationPolicyMode = t.UnionEnum(EntityAssociationPolicyModeValues);
+export const UpdateEntityAssociationPolicyBody = t.Object(
+	{
+		creditAttribution: t.Optional(EntityAssociationPolicyMode),
+		subjectAssociation: t.Optional(EntityAssociationPolicyMode),
+	},
+	{ additionalProperties: false, minProperties: 1 },
+);
+export type UpdateEntityAssociationPolicyBody = Static<typeof UpdateEntityAssociationPolicyBody>;
+
 export const AddUnitLinkBody = t.Object({
 	url: t.String({ format: "uri" }),
 	sourceEntityUnitId: Uuid,
@@ -44,6 +68,13 @@ export type AddUnitLinkBody = Static<typeof AddUnitLinkBody>;
 
 export const UnitUnitParams = t.Object({ type: UnitType, unitId: Uuid });
 export type UnitUnitParams = Static<typeof UnitUnitParams>;
+
+export const UnitAssociationParams = t.Object({
+	type: UnitType,
+	unitId: Uuid,
+	associationId: Uuid,
+});
+export type UnitAssociationParams = Static<typeof UnitAssociationParams>;
 
 export const UnitTagParams = t.Object({ type: UnitType, unitId: Uuid, tagId: Uuid });
 export type UnitTagParams = Static<typeof UnitTagParams>;

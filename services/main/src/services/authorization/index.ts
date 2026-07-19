@@ -1,5 +1,6 @@
 import { AccountAuthorization } from "./account/authorization";
 import { CollectionAuthorization } from "./collection/authorization";
+import { EntityAuthorization } from "./entity/authorization";
 import { PlatformAuthorization } from "./platform/authorization";
 import { RealmAuthorization } from "./realm/authorization";
 import { UnitAuthorization } from "./unit/authorization";
@@ -8,6 +9,7 @@ import { UnitAuthorization } from "./unit/authorization";
 export class Authorization<ProfileId extends string | undefined = string | undefined> {
 	readonly account: AccountAuthorization<ProfileId>;
 	readonly collection: CollectionAuthorization<ProfileId>;
+	readonly entity: EntityAuthorization<ProfileId>;
 	readonly platform: PlatformAuthorization<ProfileId>;
 	readonly realm: RealmAuthorization<ProfileId>;
 	readonly unit: UnitAuthorization<ProfileId>;
@@ -16,6 +18,7 @@ export class Authorization<ProfileId extends string | undefined = string | undef
 		this.account = new AccountAuthorization(profileId);
 		this.collection = new CollectionAuthorization(profileId);
 		this.platform = new PlatformAuthorization(profileId);
+		this.entity = new EntityAuthorization(profileId, this.platform);
 		this.realm = new RealmAuthorization(profileId, this.platform);
 		this.unit = new UnitAuthorization(profileId, this.platform);
 	}

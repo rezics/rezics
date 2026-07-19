@@ -328,6 +328,7 @@ export default new Elysia({ prefix: "/history" })
 					actorProfileId: profile.unitId,
 					message: body.editSummary,
 					minor: body.minor,
+					entityAuthorization: authorization.entity,
 				}),
 			);
 			return { unitId: params.unitId, ...result };
@@ -339,10 +340,14 @@ export default new Elysia({ prefix: "/history" })
 			response: {
 				[StatusCodes.OK]: RevisionActionResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"UnitPermissionForbidden",
+					"EntityAssociationRestricted",
+				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
 					"UnitRevisionNotFound",
+					"EntityEntryNotFound",
 				]),
 			},
 			detail: { summary: "Restore Unit revision", tags: ["History"] },
@@ -370,6 +375,7 @@ export default new Elysia({ prefix: "/history" })
 					actorProfileId: profile.unitId,
 					message: body.editSummary,
 					minor: body.minor,
+					entityAuthorization: authorization.entity,
 				}),
 			);
 			return { unitId: params.unitId, ...result };
@@ -381,10 +387,14 @@ export default new Elysia({ prefix: "/history" })
 			response: {
 				[StatusCodes.OK]: RevisionActionResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
-				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"UnitPermissionForbidden",
+					"EntityAssociationRestricted",
+				]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
 					"UnitRevisionNotFound",
+					"EntityEntryNotFound",
 				]),
 			},
 			detail: { summary: "Undo Unit revision", tags: ["History"] },

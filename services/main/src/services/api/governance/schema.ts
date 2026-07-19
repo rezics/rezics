@@ -9,6 +9,7 @@ import {
 	PlatformCapabilityValues,
 	UnitAccessRealmRelationValues,
 	UnitAccessRoleValues,
+	UnitDelegableAccessRoleValues,
 	UnitAccessSubjectKindValues,
 	UnitPermissionValues,
 	UnitProtectionModeValues,
@@ -209,13 +210,25 @@ const UnitAccessSubject = t.Union([
 export const CreateUnitAccessBindingBody = t.Object(
 	{
 		subject: UnitAccessSubject,
-		role: t.UnionEnum(UnitAccessRoleValues),
+		role: t.UnionEnum(UnitDelegableAccessRoleValues),
 		scope: UnitScope,
 		expiresAt: t.Optional(t.String({ format: "date-time" })),
 	},
 	{ additionalProperties: false },
 );
 export const UnitAccessRestrictionParams = t.Object({ unitId: Uuid, restrictionId: Uuid });
+export const TransferUnitOwnershipBody = t.Object(
+	{
+		owner: t.Union([
+			t.Object(
+				{ kind: t.Literal("profile"), profileId: Uuid },
+				{ additionalProperties: false },
+			),
+			t.Object({ kind: t.Literal("system") }, { additionalProperties: false }),
+		]),
+	},
+	{ additionalProperties: false },
+);
 export const UnitAccessRestrictionSubject = t.Union([
 	t.Object({ kind: t.Literal("profile"), profileId: Uuid }, { additionalProperties: false }),
 	t.Object({ kind: t.Literal("realm"), realmId: Uuid }, { additionalProperties: false }),

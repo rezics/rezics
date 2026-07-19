@@ -1,9 +1,10 @@
 import { eq } from "drizzle-orm";
 
 import { database } from "../../database";
-import { entity, unit, unitAccessBinding, unitLocalization } from "../../database/schema";
+import { entity, entityAssociationPolicy, unit, unitLocalization } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
+import { createSystemOwnedCatalogAccess } from "../../authorization/unit/ownership";
 import { insertAddressedUnit } from "../../units/slug-address";
 import { TopLevelSlugNamespaceUnitIds } from "../../units/slug-system";
 import { generateSlugLabel } from "../../units/slug";
@@ -26,17 +27,25 @@ export async function createCatalogUnit(
 			visibility: "public",
 			publishedAt: new Date(),
 		});
-		if (type === "entity")
+		if (type === "entity") {
 			await tx.insert(entity).values({ id: created.id, kind: body.kind ?? "person" });
+			await tx.insert(entityAssociationPolicy).values([
+				{
+					entityId: created.id,
+					kind: "credit",
+					mode: "open",
+					updatedByProfileId: ownerId,
+				},
+				{
+					entityId: created.id,
+					kind: "subject",
+					mode: "open",
+					updatedByProfileId: ownerId,
+				},
+			]);
+		}
 		await tx.insert(unitLocalization).values({ unitId: created.id, ...body.localization });
-		await tx.insert(unitAccessBinding).values({
-			unitId: created.id,
-			subjectKind: "profile",
-			profileId: ownerId,
-			role: "owner",
-			scope: [],
-			grantedByProfileId: ownerId,
-		});
+		await createSystemOwnedCatalogAccess(tx, created.id, ownerId);
 		await recordUnitRevision(tx, {
 			unitId: created.id,
 			actorProfileId: ownerId,

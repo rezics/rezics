@@ -18,6 +18,14 @@ export const UnitKindValues = [
 	"realm",
 	"realm_rule",
 ] as const;
+export const CommunityCatalogUnitKindValues = [
+	"book",
+	"software",
+	"media",
+	"series",
+	"entity",
+	"tag",
+] as const;
 
 export type UnitKind = (typeof UnitKindValues)[number];
 
@@ -70,7 +78,7 @@ export const EnforcementKindValues = [
 	"trust_restriction",
 ] as const;
 export const CapabilityAuthorityValues = ["platform", "realm"] as const;
-export const UnitAccessSubjectKindValues = ["profile", "realm", "authenticated"] as const;
+export const UnitAccessSubjectKindValues = ["profile", "realm", "authenticated", "system"] as const;
 export const UnitAccessRestrictionSubjectKindValues = ["profile", "realm"] as const;
 export const UnitAccessRealmRelationValues = ["member", "content_editor", "governor"] as const;
 export const UnitAccessRoleValues = [
@@ -79,6 +87,12 @@ export const UnitAccessRoleValues = [
 	"publisher",
 	"maintainer",
 	"owner",
+] as const;
+export const UnitDelegableAccessRoleValues = [
+	"viewer",
+	"editor",
+	"publisher",
+	"maintainer",
 ] as const;
 export const UnitPermissionValues = [
 	"unit.read",
@@ -211,8 +225,13 @@ export const RealmCapabilityValues = [
 	"realm.pins.manage",
 	"realm.units.moderate",
 ] as const;
+export const EntityAssociationKindValues = ["credit", "subject"] as const;
+export const EntityAssociationPolicyModeValues = ["open", "owner_only", "closed"] as const;
 export const PlatformCapabilityValues = [
+	"entity.association-policy.manage",
+	"entity.associations.override",
 	"unit.edit",
+	"unit.ownership.transfer",
 	"unit.slug.manage",
 	"unit.slug.namespace.manage",
 	"unit.slug.redirect.release",

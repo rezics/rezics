@@ -126,6 +126,10 @@ export default new Elysia()
 						scoreInput = { realmId: body.realmId, score: body.score };
 					}
 					const id = await database.transaction(async (tx) => {
+						await authorization.entity.ensureSubjectAssociationAllowedIfEntity(
+							tx,
+							body.targetId,
+						);
 						if (scoreInput) {
 							await upsertScore(
 								tx,
@@ -184,8 +188,14 @@ export default new Elysia()
 					response: {
 						[StatusCodes.OK]: IdResponse,
 						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ReviewRealmRequired"]),
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
-						[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+							"RealmCapabilityRequired",
+							"EntityAssociationRestricted",
+						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"EntityEntryNotFound",
+						]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"RealmRulesAcceptanceRequired",
 						]),

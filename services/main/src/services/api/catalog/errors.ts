@@ -1,12 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import * as Data from "effect/Data";
 
-export class EntityEntryNotFound extends Data.TaggedError("EntityEntryNotFound") {
-	static readonly status = StatusCodes.NOT_FOUND as const;
-	readonly status = EntityEntryNotFound.status;
-	readonly message = "Entity entry not found";
-}
-
 export class AliasNotFound extends Data.TaggedError("AliasNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
 	readonly status = AliasNotFound.status;
@@ -32,9 +26,4 @@ export class UnitVersionNotFound extends Data.TaggedError("UnitVersionNotFound")
 	readonly message = "Unit version not found";
 }
 
-export const CatalogErrors = [
-	EntityEntryNotFound,
-	AliasNotFound,
-	TagApplicationNotFound,
-	UnitVersionNotFound,
-] as const;
+export const CatalogErrors = [AliasNotFound, TagApplicationNotFound, UnitVersionNotFound] as const;

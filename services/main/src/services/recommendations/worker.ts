@@ -96,9 +96,22 @@ async function buildUnitEdges(tx: DatabaseTransaction, snapshotId: string) {
 			JOIN credit_degree d
 				ON d.entity_id = a.entity_id AND d.degree <= ${RecommendationPolicy.maxStructuralDegree}
 			GROUP BY a.unit_id, b.unit_id
+		), subject_degree AS (
+			SELECT entity_id, count(*)::double precision AS degree
+			FROM subject_association
+			GROUP BY entity_id
+		), subject_pair AS (
+			SELECT a.unit_id AS left_id, b.unit_id AS right_id,
+				sum(1 / ln(1 + d.degree)) AS score
+			FROM subject_association a
+			JOIN subject_association b ON b.entity_id = a.entity_id AND a.unit_id < b.unit_id
+			JOIN subject_degree d
+				ON d.entity_id = a.entity_id AND d.degree <= ${RecommendationPolicy.maxStructuralDegree}
+			GROUP BY a.unit_id, b.unit_id
 		), structural_direct AS (
 			SELECT left_id, right_id, score FROM tag_pair
 			UNION ALL SELECT left_id, right_id, score FROM credit_pair
+			UNION ALL SELECT left_id, right_id, score FROM subject_pair
 			UNION ALL
 			SELECT a.release_unit_id, b.release_unit_id, 2::double precision
 			FROM series_release a

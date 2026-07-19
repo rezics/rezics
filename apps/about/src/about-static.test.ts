@@ -124,7 +124,7 @@ describe("product fact registry", () => {
 		expect(entity.capabilityModes).toEqual([
 			"Entity",
 			"CreditAttribution",
-			"SubjectAttribution",
+			"SubjectAssociation",
 		]);
 	});
 
@@ -166,13 +166,13 @@ describe("confirmed product claims", () => {
 
 		expect(claimStatus["entity-implemented"]).toBe("confirmed");
 		expect(claimStatus["credit-attribution"]).toBe("confirmed");
-		expect(claimStatus["subject-attribution"]).toBe("confirmed");
+		expect(claimStatus["subject-association"]).toBe("confirmed");
 
 		const publicText = await readProductMarkdown("zh-hant", "entity");
 		for (const fact of [
 			"Entity",
 			"CreditAttribution",
-			"SubjectAttribution",
+			"SubjectAssociation",
 			"作者",
 			"譯者",
 			"出版商",

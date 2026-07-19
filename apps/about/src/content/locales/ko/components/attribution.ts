@@ -2,7 +2,7 @@ const content = {
 	implemented: "구현됨",
 	modes: "귀속 모드",
 	credit: "CreditAttribution",
-	subject: "SubjectAttribution",
+	subject: "SubjectAssociation",
 	bookCredits: "Book 크레딧",
 	relationship: "관계 유형",
 	entity: "Entity",

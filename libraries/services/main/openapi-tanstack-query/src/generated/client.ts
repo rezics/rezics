@@ -65,6 +65,8 @@ import type {
 	PostApiFeedbackResponses,
 	GetApiGovernanceUnitByUnitIdAccessEffectiveOptions,
 	GetApiGovernanceUnitByUnitIdAccessEffectiveResponses,
+	PutApiGovernanceUnitByUnitIdOwnershipOptions,
+	PutApiGovernanceUnitByUnitIdOwnershipResponses,
 	GetApiGovernanceUnitByUnitIdAccessBindingsOptions,
 	GetApiGovernanceUnitByUnitIdAccessBindingsResponses,
 	PostApiGovernanceUnitByUnitIdAccessBindingsOptions,
@@ -209,6 +211,10 @@ import type {
 	PostApiEntitiesResponses,
 	GetApiEntitiesByUnitIdOptions,
 	GetApiEntitiesByUnitIdResponses,
+	GetApiEntitiesByUnitIdAssociationPolicyOptions,
+	GetApiEntitiesByUnitIdAssociationPolicyResponses,
+	PatchApiEntitiesByUnitIdAssociationPolicyOptions,
+	PatchApiEntitiesByUnitIdAssociationPolicyResponses,
 	GetApiTagsOptions,
 	GetApiTagsResponses,
 	PostApiTagsOptions,
@@ -223,8 +229,14 @@ import type {
 	PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses,
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions,
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses,
-	PostApiUnitsByTypeByUnitIdCreditsOptions,
-	PostApiUnitsByTypeByUnitIdCreditsResponses,
+	PostApiUnitsByTypeByUnitIdCreditAttributionsOptions,
+	PostApiUnitsByTypeByUnitIdCreditAttributionsResponses,
+	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdOptions,
+	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdResponses,
+	PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
+	PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses,
+	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdOptions,
+	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdResponses,
 	PostApiUnitsByTypeByUnitIdLinksOptions,
 	PostApiUnitsByTypeByUnitIdLinksResponses,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdOptions,
@@ -846,6 +858,22 @@ export function getApiGovernanceUnitByUnitIdAccessEffective<ThrowOnError extends
 	}) as Promise<
 		RequestResult<GetApiGovernanceUnitByUnitIdAccessEffectiveResponses, ThrowOnError>
 	>;
+}
+
+/**
+ * @summary Transfer Unit ownership
+ * {@link /api/governance/unit/:unitId/ownership}
+ */
+export function putApiGovernanceUnitByUnitIdOwnership<ThrowOnError extends boolean = true>(
+	options: Options<PutApiGovernanceUnitByUnitIdOwnershipOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiGovernanceUnitByUnitIdOwnershipResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/governance/unit/{unitId}/ownership",
+		...config,
+	}) as Promise<RequestResult<PutApiGovernanceUnitByUnitIdOwnershipResponses, ThrowOnError>>;
 }
 
 /**
@@ -2056,6 +2084,38 @@ export function getApiEntitiesByUnitId<ThrowOnError extends boolean = true>(
 }
 
 /**
+ * @summary Get Entity association policy
+ * {@link /api/entities/:unitId/association-policy}
+ */
+export function getApiEntitiesByUnitIdAssociationPolicy<ThrowOnError extends boolean = true>(
+	options: Options<GetApiEntitiesByUnitIdAssociationPolicyOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiEntitiesByUnitIdAssociationPolicyResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/entities/{unitId}/association-policy",
+		...config,
+	}) as Promise<RequestResult<GetApiEntitiesByUnitIdAssociationPolicyResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Update Entity association policy
+ * {@link /api/entities/:unitId/association-policy}
+ */
+export function patchApiEntitiesByUnitIdAssociationPolicy<ThrowOnError extends boolean = true>(
+	options: Options<PatchApiEntitiesByUnitIdAssociationPolicyOptions, ThrowOnError>,
+): Promise<RequestResult<PatchApiEntitiesByUnitIdAssociationPolicyResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PATCH",
+		url: "/api/entities/{unitId}/association-policy",
+		...config,
+	}) as Promise<RequestResult<PatchApiEntitiesByUnitIdAssociationPolicyResponses, ThrowOnError>>;
+}
+
+/**
  * @summary List tags
  * {@link /api/tags}
  */
@@ -2172,19 +2232,101 @@ export function deleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote<
 }
 
 /**
- * @summary Add unit credit
- * {@link /api/units/:type/:unitId/credits}
+ * @summary Add Unit credit attribution
+ * {@link /api/units/:type/:unitId/credit-attributions}
  */
-export function postApiUnitsByTypeByUnitIdCredits<ThrowOnError extends boolean = true>(
-	options: Options<PostApiUnitsByTypeByUnitIdCreditsOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiUnitsByTypeByUnitIdCreditsResponses, ThrowOnError>> {
+export function postApiUnitsByTypeByUnitIdCreditAttributions<ThrowOnError extends boolean = true>(
+	options: Options<PostApiUnitsByTypeByUnitIdCreditAttributionsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiUnitsByTypeByUnitIdCreditAttributionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/units/{type}/{unitId}/credits",
+		url: "/api/units/{type}/{unitId}/credit-attributions",
 		...config,
-	}) as Promise<RequestResult<PostApiUnitsByTypeByUnitIdCreditsResponses, ThrowOnError>>;
+	}) as Promise<
+		RequestResult<PostApiUnitsByTypeByUnitIdCreditAttributionsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Remove Unit credit attribution
+ * {@link /api/units/:type/:unitId/credit-attributions/:associationId}
+ */
+export function deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/units/{type}/{unitId}/credit-attributions/{associationId}",
+		...config,
+	}) as Promise<
+		RequestResult<
+			DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Add Unit subject association
+ * {@link /api/units/:type/:unitId/subject-associations}
+ */
+export function postApiUnitsByTypeByUnitIdSubjectAssociations<ThrowOnError extends boolean = true>(
+	options: Options<PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/units/{type}/{unitId}/subject-associations",
+		...config,
+	}) as Promise<
+		RequestResult<PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Remove Unit subject association
+ * {@link /api/units/:type/:unitId/subject-associations/:associationId}
+ */
+export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/units/{type}/{unitId}/subject-associations/{associationId}",
+		...config,
+	}) as Promise<
+		RequestResult<
+			DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdResponses,
+			ThrowOnError
+		>
+	>;
 }
 
 /**

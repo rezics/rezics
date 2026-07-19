@@ -4,8 +4,9 @@ import {
 	type GetApiUnitsByTypeByUnitIdStatus200,
 	useGetApiUnitsByTypeByUnitId,
 	usePatchApiUnitsByTypeByUnitId,
-	usePostApiUnitsByTypeByUnitIdCredits,
+	usePostApiUnitsByTypeByUnitIdCreditAttributions,
 	usePostApiUnitsByTypeByUnitIdLinks,
+	usePostApiUnitsByTypeByUnitIdSubjectAssociations,
 	usePutApiUnitsByTypeByUnitIdLocalizationsByLanguage,
 	usePutApiUnitsByTypeByUnitIdTagsByTagId,
 	usePutApiUnitsByTypeByUnitIdVersionOfByCanonicalId,
@@ -389,13 +390,19 @@ function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }) {
 	const { t } = useTranslation({ suspense: true });
 	const queryClient = useQueryClient();
 	const invalidate = () => invalidateUnitDetail(queryClient, type, unit.id);
-	const credit = usePostApiUnitsByTypeByUnitIdCredits({ mutation: { onSuccess: invalidate } });
+	const credit = usePostApiUnitsByTypeByUnitIdCreditAttributions({
+		mutation: { onSuccess: invalidate },
+	});
+	const subject = usePostApiUnitsByTypeByUnitIdSubjectAssociations({
+		mutation: { onSuccess: invalidate },
+	});
 	const link = usePostApiUnitsByTypeByUnitIdLinks({ mutation: { onSuccess: invalidate } });
 	const tag = usePutApiUnitsByTypeByUnitIdTagsByTagId({ mutation: { onSuccess: invalidate } });
 	const version = usePutApiUnitsByTypeByUnitIdVersionOfByCanonicalId({
 		mutation: { onSuccess: invalidate },
 	});
 	const [creditEntity, setCreditEntity] = useState<SelectedEntity>();
+	const [subjectEntity, setSubjectEntity] = useState<SelectedEntity>();
 	const [linkSource, setLinkSource] = useState<SelectedEntity>();
 	const [selectedTag, setSelectedTag] = useState<SelectedEntity>();
 	const [canonicalUnit, setCanonicalUnit] = useState<SelectedEntity>();
@@ -439,6 +446,47 @@ function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }) {
 						{t.units.editor.credit}
 					</Button>
 					<RequestFailure error={credit.error} fallback={t.ui.retryLater} />
+				</form>
+
+				<form
+					className="grid gap-4"
+					onSubmit={async (event) => {
+						event.preventDefault();
+						if (!subjectEntity) return;
+						const form = new FormData(event.currentTarget);
+						try {
+							await subject.mutateAsync({
+								path: { type, unitId: unit.id },
+								body: {
+									entityId: subjectEntity.id,
+									role: String(form.get("role") ?? "").trim(),
+								},
+							});
+							setSubjectEntity(undefined);
+							event.currentTarget.reset();
+						} catch {
+							// The typed mutation state supplies the visible API error.
+						}
+					}}
+				>
+					<EntityPicker
+						index="entity"
+						onChange={setSubjectEntity}
+						value={subjectEntity}
+					/>
+					<Field required>
+						<FieldLabel>{t.units.editor.subjectRole}</FieldLabel>
+						<Input maxLength={64} name="role" required />
+					</Field>
+					<Button
+						disabled={!subjectEntity}
+						isLoading={subject.isPending}
+						type="submit"
+						variant="outline"
+					>
+						{t.units.editor.subjectAssociation}
+					</Button>
+					<RequestFailure error={subject.error} fallback={t.ui.retryLater} />
 				</form>
 
 				<form

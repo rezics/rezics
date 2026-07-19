@@ -19,6 +19,7 @@ import type { JsonValue } from "@rezics/portable-text";
 import type { Static, TSchema } from "@sinclair/typebox";
 
 import type { DatabaseTransaction } from "../database";
+import type { EntityAuthorization } from "../authorization/entity/authorization";
 import { isPrimaryUnitLocalization } from "./localization";
 import {
 	auditEvent,
@@ -42,7 +43,7 @@ import {
 	revisionContent,
 	series,
 	seriesRelease,
-	subjectAttribution,
+	subjectAssociation,
 	unit,
 	UnitKindValues,
 	unitAlias,
@@ -102,7 +103,7 @@ const RuleSnapshotSchema = z.object({
 	),
 });
 const UnitSnapshotSchema = z.object({
-	version: z.literal(1),
+	version: z.literal(2),
 	kind: z.enum(UnitKindValues),
 	unit: SnapshotRowSchema,
 	localizations: z.array(SnapshotRowSchema),
@@ -111,7 +112,7 @@ const UnitSnapshotSchema = z.object({
 	owned: z.object({
 		aliases: z.array(SnapshotRowSchema),
 		credits: z.array(SnapshotRowSchema),
-		subjectAttributions: z.array(SnapshotRowSchema).default([]),
+		subjectAssociations: z.array(SnapshotRowSchema),
 		links: z.array(SnapshotRowSchema),
 		tags: z.array(SnapshotRowSchema),
 		variants: z.array(SnapshotRowSchema),
@@ -198,7 +199,7 @@ const unitAliasRowSchema = schemaFactory.createSelectSchema(unitAlias);
 const creditAttributionRowSchema = schemaFactory.createSelectSchema(creditAttribution, {
 	position: FractionalPositionSchema,
 });
-const subjectAttributionRowSchema = schemaFactory.createSelectSchema(subjectAttribution, {
+const subjectAssociationRowSchema = schemaFactory.createSelectSchema(subjectAssociation, {
 	position: FractionalPositionSchema,
 });
 const unitLinkRowSchema = schemaFactory.createSelectSchema(unitLink, {
@@ -371,11 +372,11 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		.from(creditAttribution)
 		.where(eq(creditAttribution.unitId, unitId))
 		.orderBy(creditAttribution.id);
-	const subjectAttributions = await tx
+	const subjectAssociations = await tx
 		.select()
-		.from(subjectAttribution)
-		.where(eq(subjectAttribution.unitId, unitId))
-		.orderBy(subjectAttribution.id);
+		.from(subjectAssociation)
+		.where(eq(subjectAssociation.unitId, unitId))
+		.orderBy(subjectAssociation.id);
 	const links = await tx
 		.select()
 		.from(unitLink)
@@ -396,7 +397,7 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 	const owned: UnitSnapshot["owned"] = {
 		aliases,
 		credits,
-		subjectAttributions,
+		subjectAssociations,
 		links,
 		tags,
 		variants,
@@ -465,7 +466,7 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		realmRules: record.kind === "realm" ? await snapshotRealmRules(tx, unitId) : null,
 	};
 	return {
-		version: 1,
+		version: 2,
 		kind: record.kind,
 		unit: unitStateSchema.parse(record),
 		localizations: localizations.map((localization) =>
@@ -632,10 +633,39 @@ async function restoreRealmRules(
 	}
 }
 
-export async function restoreUnitSnapshot(tx: DatabaseTransaction, unitId: string, value: unknown) {
+export async function restoreUnitSnapshot(
+	tx: DatabaseTransaction,
+	unitId: string,
+	value: unknown,
+	entityAuthorization: EntityAuthorization<string>,
+) {
 	const result = UnitSnapshotSchema.safeParse(value);
 	if (!result.success) throw new Error("Unsupported Unit snapshot", { cause: result.error });
 	const snapshot = result.data;
+	const credits = snapshot.owned.credits.map((row) => creditAttributionRowSchema.parse(row));
+	const subjectAssociations = snapshot.owned.subjectAssociations.map((row) =>
+		subjectAssociationRowSchema.parse(row),
+	);
+	const associationTargets = [
+		...credits.map((row) => ({ entityId: row.entityId, kind: "credit" as const })),
+		...subjectAssociations.map((row) => ({
+			entityId: row.entityId,
+			kind: "subject" as const,
+		})),
+	].sort(
+		(left, right) =>
+			left.entityId.localeCompare(right.entityId) || left.kind.localeCompare(right.kind),
+	);
+	for (const target of associationTargets)
+		await entityAuthorization.ensureAssociationAllowed(tx, target.entityId, target.kind);
+	if (snapshot.kind === "post" && snapshot.extension) {
+		const postState = postStateSchema.parse(snapshot.extension);
+		if (postState.subjectUnitId)
+			await entityAuthorization.ensureSubjectAssociationAllowedIfEntity(
+				tx,
+				postState.subjectUnitId,
+			);
+	}
 	await lockUnitHistory(tx, unitId);
 	const [current] = await tx
 		.select({ kind: unit.kind })
@@ -658,22 +688,12 @@ export async function restoreUnitSnapshot(tx: DatabaseTransaction, unitId: strin
 	if (snapshot.kind === "software")
 		await tx.delete(softwareRequirement).where(eq(softwareRequirement.softwareId, unitId));
 	await tx.delete(creditAttribution).where(eq(creditAttribution.unitId, unitId));
-	await tx.delete(subjectAttribution).where(eq(subjectAttribution.unitId, unitId));
+	await tx.delete(subjectAssociation).where(eq(subjectAssociation.unitId, unitId));
 	await tx.delete(unitLink).where(eq(unitLink.unitId, unitId));
 	await tx.delete(unitTag).where(eq(unitTag.unitId, unitId));
 	await tx.delete(unitVariant).where(eq(unitVariant.unitId, unitId));
-	if (snapshot.owned.credits.length)
-		await tx
-			.insert(creditAttribution)
-			.values(snapshot.owned.credits.map((row) => creditAttributionRowSchema.parse(row)));
-	if (snapshot.owned.subjectAttributions.length)
-		await tx
-			.insert(subjectAttribution)
-			.values(
-				snapshot.owned.subjectAttributions.map((row) =>
-					subjectAttributionRowSchema.parse(row),
-				),
-			);
+	if (snapshot.owned.credits.length) await tx.insert(creditAttribution).values(credits);
+	if (subjectAssociations.length) await tx.insert(subjectAssociation).values(subjectAssociations);
 	if (snapshot.owned.links.length)
 		await tx
 			.insert(unitLink)
@@ -755,7 +775,7 @@ export type UnitRevisionCommitResult = {
 const SlotModels = {
 	main: "rezics.unit.main.v1",
 	localizations: "rezics.unit.localizations.v1",
-	relations: "rezics.unit.relations.v1",
+	relations: "rezics.unit.relations.v2",
 	structure: "rezics.unit.structure.v1",
 	rules: "rezics.unit.rules.v1",
 } as const satisfies Record<SlotRole, string>;
@@ -791,10 +811,10 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 		relations: {
 			model: SlotModels.relations,
 			payload: {
-				version: 1,
+				version: 2,
 				aliases: snapshot.owned.aliases,
 				credits: snapshot.owned.credits,
-				subjectAttributions: snapshot.owned.subjectAttributions,
+				subjectAssociations: snapshot.owned.subjectAssociations,
 				links: snapshot.owned.links,
 				tags: snapshot.owned.tags,
 				variants: snapshot.owned.variants,
@@ -836,7 +856,7 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 	const structure = asRecord(documents.structure?.payload, "structure");
 	const rules = documents.rules ? asRecord(documents.rules.payload, "rules") : null;
 	return UnitSnapshotSchema.parse({
-		version: 1,
+		version: 2,
 		kind: main.kind,
 		unit: main.unit,
 		localizations: localizations.items,
@@ -845,7 +865,7 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 		owned: {
 			aliases: relations.aliases,
 			credits: relations.credits,
-			subjectAttributions: relations.subjectAttributions ?? [],
+			subjectAssociations: relations.subjectAssociations,
 			links: relations.links,
 			tags: relations.tags,
 			variants: relations.variants,
@@ -1046,11 +1066,17 @@ export async function restoreUnitRevision(
 		actorProfileId: string;
 		message?: string;
 		minor?: boolean;
+		entityAuthorization: EntityAuthorization<string>;
 	},
 ) {
 	const documents = await getUnitRevisionDocuments(tx, input.sourceRevisionId);
 	if (!documents.main) throw new Error("Unit revision not found");
-	await restoreUnitSnapshot(tx, input.unitId, documentsToSnapshot(documents));
+	await restoreUnitSnapshot(
+		tx,
+		input.unitId,
+		documentsToSnapshot(documents),
+		input.entityAuthorization,
+	);
 	return recordUnitRevision(tx, {
 		unitId: input.unitId,
 		actorProfileId: input.actorProfileId,
@@ -1079,7 +1105,7 @@ const StableArrayKeys = [
 	["language"],
 	["tagId"],
 	["unitId", "role"],
-	["creditedEntityId", "role"],
+	["entityId", "role"],
 	["sourceEntityId", "role", "position"],
 	["seriesId", "releaseUnitId"],
 	["softwareId", "kind"],
@@ -1234,6 +1260,7 @@ export async function undoUnitRevision(
 		actorProfileId: string;
 		message?: string;
 		minor?: boolean;
+		entityAuthorization: EntityAuthorization<string>;
 	},
 ) {
 	await lockUnitHistory(tx, input.unitId);
@@ -1257,7 +1284,12 @@ export async function undoUnitRevision(
 	const result = undoRevisionDocuments(before, after, current);
 	if (result.conflictPaths.length)
 		throw new UnitRevisionConflict(head.revisionId, result.conflictPaths);
-	await restoreUnitSnapshot(tx, input.unitId, documentsToSnapshot(result.documents));
+	await restoreUnitSnapshot(
+		tx,
+		input.unitId,
+		documentsToSnapshot(result.documents),
+		input.entityAuthorization,
+	);
 	return recordUnitRevision(tx, {
 		unitId: input.unitId,
 		actorProfileId: input.actorProfileId,

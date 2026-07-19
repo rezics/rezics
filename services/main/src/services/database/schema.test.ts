@@ -1,9 +1,11 @@
-import { type SQL } from "drizzle-orm";
+import { getTableName, type SQL } from "drizzle-orm";
 import { getTableConfig, PgDialect } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 
 import {
 	auditEvent,
+	entityAssociationPolicy,
+	subjectAssociation,
 	feedback,
 	unit,
 	conversationParticipantStat,
@@ -15,6 +17,9 @@ import {
 	governanceReasonCode,
 	GovernanceNoteRoleValues,
 	GovernanceReasonCodeValues,
+	CommunityCatalogUnitKindValues,
+	EntityAssociationKindValues,
+	EntityAssociationPolicyModeValues,
 	moderationAction,
 	moderationCase,
 	ModerationActionKindValues,
@@ -94,6 +99,38 @@ describe("database schema contracts", () => {
 			]),
 		);
 		expect(unitAccessRestriction.subjectKind.enumValues).toEqual(["profile", "realm"]);
+		expect(unitAccessBinding.subjectKind.enumValues).toEqual([
+			"profile",
+			"realm",
+			"authenticated",
+			"system",
+		]);
+		expect(binding.indexes.map((index) => index.config.name)).toEqual(
+			expect.arrayContaining([
+				"unit_access_binding_active_system_scope_key",
+				"unit_access_binding_active_owner_key",
+			]),
+		);
+		expect(binding.checks.map((constraint) => constraint.name)).toContain(
+			"unit_access_binding_owner_scope_check",
+		);
+	});
+
+	it("separates Entity credit consent from subject association consent", () => {
+		expect(entityAssociationPolicy.kind.enumValues).toEqual(EntityAssociationKindValues);
+		expect(entityAssociationPolicy.mode.enumValues).toEqual(EntityAssociationPolicyModeValues);
+		const policy = getTableConfig(entityAssociationPolicy);
+		expect(policy.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
+			"entity_id",
+			"kind",
+		]);
+		expect(getTableName(subjectAssociation)).toBe("subject_association");
+		expect(getTableConfig(subjectAssociation).columns.map((column) => column.name)).toEqual(
+			expect.arrayContaining(["unit_id", "entity_id", "role"]),
+		);
+		expect(
+			getTableConfig(subjectAssociation).columns.map((column) => column.name),
+		).not.toContain("subject_entity_id");
 	});
 
 	it("centralizes governance contracts and immutable note bindings", () => {
@@ -190,11 +227,22 @@ describe("database schema contracts", () => {
 
 	it("keeps structural, Redirect, and staff capability meanings explicit", () => {
 		expect(UnitKindValues).toEqual(expect.arrayContaining(["slug_namespace", "redirect"]));
+		expect(CommunityCatalogUnitKindValues).toEqual([
+			"book",
+			"software",
+			"media",
+			"series",
+			"entity",
+			"tag",
+		]);
 		expect(PlatformCapabilityValues).toEqual(
 			expect.arrayContaining([
 				"unit.slug.manage",
 				"unit.slug.namespace.manage",
 				"unit.slug.redirect.release",
+				"entity.association-policy.manage",
+				"entity.associations.override",
+				"unit.ownership.transfer",
 			]),
 		);
 		const redirect = getTableConfig(unitRedirect);

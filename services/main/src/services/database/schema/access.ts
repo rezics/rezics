@@ -55,7 +55,8 @@ const scopeCheck = (scope: AnyPgColumn) =>
 	)`;
 
 /**
- * Grant to a Profile, a Realm relationship, or every authenticated Profile.
+ * Grant to a Profile, a Realm relationship, every authenticated Profile, or the
+ * non-login Rezics system authority. System ownership is used for community catalog Units.
  * Empty scope is the Unit root; a grant covers that scope and descendants.
  */
 export const unitAccessBinding = pgTable(
@@ -93,6 +94,12 @@ export const unitAccessBinding = pgTable(
 		uniqueIndex("unit_access_binding_active_authenticated_scope_key")
 			.on(table.unitId, table.scope)
 			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'authenticated'`),
+		uniqueIndex("unit_access_binding_active_system_scope_key")
+			.on(table.unitId, table.scope)
+			.where(sql`${table.revokedAt} is null and ${table.subjectKind} = 'system'`),
+		uniqueIndex("unit_access_binding_active_owner_key")
+			.on(table.unitId)
+			.where(sql`${table.revokedAt} is null and ${table.role} = 'owner'`),
 		index("unit_access_binding_profile_active_idx")
 			.on(table.profileId, table.unitId, table.role)
 			.where(sql`${table.revokedAt} is null`),
@@ -108,15 +115,23 @@ export const unitAccessBinding = pgTable(
 				${table.subjectKind} = 'realm' and ${table.profileId} is null and ${table.realmId} is not null and ${table.realmRelation} is not null
 			) or (
 				${table.subjectKind} = 'authenticated' and ${table.profileId} is null and ${table.realmId} is null and ${table.realmRelation} is null
+			) or (
+				${table.subjectKind} = 'system' and ${table.profileId} is null and ${table.realmId} is null and ${table.realmRelation} is null
 			)`,
 		),
 		check(
 			"unit_access_binding_subject_role_check",
 			sql`(
-				${table.subjectKind} = 'profile' or ${table.role} <> 'owner'
+				${table.subjectKind} in ('profile', 'system') or ${table.role} <> 'owner'
 			) and (
 				${table.subjectKind} <> 'authenticated' or ${table.role} in ('viewer', 'editor')
+			) and (
+				${table.subjectKind} <> 'system' or ${table.role} = 'owner'
 			)`,
+		),
+		check(
+			"unit_access_binding_owner_scope_check",
+			sql`${table.role} <> 'owner' or cardinality(${table.scope}) = 0`,
 		),
 		check("unit_access_binding_scope_check", scopeCheck(table.scope)),
 		check(

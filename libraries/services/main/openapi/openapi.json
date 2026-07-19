@@ -5720,6 +5720,11 @@
 					"UnitAddressMutationForbidden",
 					"SlugRedirectNotFound",
 					"SlugRedirectLoop",
+					"EntityEntryNotFound",
+					"EntityAssociationRestricted",
+					"EntityOwnershipRequired",
+					"CreditAttributionNotFound",
+					"SubjectAssociationNotFound",
 					"ImageAssetNotFound",
 					"ImageAssetUploadNotFound",
 					"ImageAssetUnsupportedType",
@@ -5802,7 +5807,6 @@
 					"ReplyDepthExceeded",
 					"InvalidNotificationCursor",
 					"NotificationNotFound",
-					"EntityEntryNotFound",
 					"AliasNotFound",
 					"TagApplicationNotFound",
 					"UnitVersionNotFound",
@@ -13030,6 +13034,217 @@
 				"operationId": "getApiGovernanceUnitByUnitIdAccessEffective"
 			}
 		},
+		"/api/governance/unit/{unitId}/ownership": {
+			"put": {
+				"summary": "Transfer Unit ownership",
+				"tags": ["Governance"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["owner"],
+								"properties": {
+									"owner": {
+										"anyOf": [
+											{
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["kind", "profileId"],
+												"properties": {
+													"kind": {
+														"const": "profile",
+														"type": "string"
+													},
+													"profileId": {
+														"format": "uuid",
+														"type": "string"
+													}
+												}
+											},
+											{
+												"additionalProperties": false,
+												"type": "object",
+												"required": ["kind"],
+												"properties": {
+													"kind": { "const": "system", "type": "string" }
+												}
+											}
+										]
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"unitId",
+										"subjectKind",
+										"profileId",
+										"realmId",
+										"realmRelation",
+										"role",
+										"scope",
+										"grantedByProfileId",
+										"expiresAt",
+										"revokedAt",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"unitId": { "format": "uuid", "type": "string" },
+										"subjectKind": {
+											"default": "profile",
+											"type": "string",
+											"enum": ["profile", "realm", "authenticated", "system"]
+										},
+										"profileId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"realmId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"realmRelation": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"role": { "type": "string" },
+										"scope": {
+											"maxItems": 8,
+											"type": "array",
+											"items": {
+												"minLength": 1,
+												"maxLength": 64,
+												"pattern": "^[a-z0-9][a-z0-9-]*$",
+												"type": "string"
+											}
+										},
+										"grantedByProfileId": {
+											"format": "uuid",
+											"type": "string"
+										},
+										"expiresAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"revokedAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound", "ProfileNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiGovernanceUnitByUnitIdOwnership"
+			}
+		},
 		"/api/governance/unit/{unitId}/access-bindings": {
 			"get": {
 				"summary": "List Unit access bindings",
@@ -13082,7 +13297,8 @@
 														"enum": [
 															"profile",
 															"realm",
-															"authenticated"
+															"authenticated",
+															"system"
 														]
 													},
 													"profileId": {
@@ -13307,13 +13523,7 @@
 									"role": {
 										"default": "viewer",
 										"type": "string",
-										"enum": [
-											"viewer",
-											"editor",
-											"publisher",
-											"maintainer",
-											"owner"
-										]
+										"enum": ["viewer", "editor", "publisher", "maintainer"]
 									},
 									"scope": {
 										"maxItems": 8,
@@ -13360,7 +13570,7 @@
 										"subjectKind": {
 											"default": "profile",
 											"type": "string",
-											"enum": ["profile", "realm", "authenticated"]
+											"enum": ["profile", "realm", "authenticated", "system"]
 										},
 										"profileId": {
 											"nullable": true,
@@ -21099,7 +21309,10 @@
 									"capability": {
 										"type": "string",
 										"enum": [
+											"entity.association-policy.manage",
+											"entity.associations.override",
 											"unit.edit",
+											"unit.ownership.transfer",
 											"unit.slug.manage",
 											"unit.slug.namespace.manage",
 											"unit.slug.redirect.release",
@@ -28220,6 +28433,7 @@
 										"cover",
 										"localizations",
 										"credits",
+										"subjectAssociations",
 										"links",
 										"tags",
 										"versions",
@@ -28690,6 +28904,40 @@
 															{ "type": "string" },
 															{ "type": "null" }
 														]
+													},
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													}
+												}
+											}
+										},
+										"subjectAssociations": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"id",
+													"entityEntryId",
+													"role",
+													"position",
+													"title"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"entityEntryId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"role": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
 													},
 													"title": {
 														"nullable": true,
@@ -29006,6 +29254,7 @@
 										"cover",
 										"localizations",
 										"credits",
+										"subjectAssociations",
 										"links",
 										"tags",
 										"versions",
@@ -29476,6 +29725,40 @@
 															{ "type": "string" },
 															{ "type": "null" }
 														]
+													},
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													}
+												}
+											}
+										},
+										"subjectAssociations": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"id",
+													"entityEntryId",
+													"role",
+													"position",
+													"title"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"entityEntryId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"role": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
 													},
 													"title": {
 														"nullable": true,
@@ -29893,6 +30176,7 @@
 										"cover",
 										"localizations",
 										"credits",
+										"subjectAssociations",
 										"links",
 										"tags",
 										"versions",
@@ -30363,6 +30647,40 @@
 															{ "type": "string" },
 															{ "type": "null" }
 														]
+													},
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													}
+												}
+											}
+										},
+										"subjectAssociations": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"id",
+													"entityEntryId",
+													"role",
+													"position",
+													"title"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"entityEntryId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"role": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
 													},
 													"title": {
 														"nullable": true,
@@ -31153,6 +31471,7 @@
 										"cover",
 										"localizations",
 										"credits",
+										"subjectAssociations",
 										"links",
 										"tags",
 										"versions",
@@ -31623,6 +31942,40 @@
 															{ "type": "string" },
 															{ "type": "null" }
 														]
+													},
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													}
+												}
+											}
+										},
+										"subjectAssociations": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"id",
+													"entityEntryId",
+													"role",
+													"position",
+													"title"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"entityEntryId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"role": { "type": "string" },
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
 													},
 													"title": {
 														"nullable": true,
@@ -32509,7 +32862,10 @@
 												"code": {
 													"default": "UnitPermissionForbidden",
 													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
+													"enum": [
+														"UnitPermissionForbidden",
+														"EntityAssociationRestricted"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -32536,7 +32892,11 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": ["UnitNotFound", "UnitRevisionNotFound"]
+													"enum": [
+														"UnitNotFound",
+														"UnitRevisionNotFound",
+														"EntityEntryNotFound"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -32662,7 +33022,10 @@
 												"code": {
 													"default": "UnitPermissionForbidden",
 													"type": "string",
-													"enum": ["UnitPermissionForbidden"]
+													"enum": [
+														"UnitPermissionForbidden",
+														"EntityAssociationRestricted"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -32689,7 +33052,11 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": ["UnitNotFound", "UnitRevisionNotFound"]
+													"enum": [
+														"UnitNotFound",
+														"UnitRevisionNotFound",
+														"EntityEntryNotFound"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -33855,7 +34222,10 @@
 										"createdAt",
 										"updatedAt",
 										"localizations",
-										"credits"
+										"associationPolicy",
+										"ownerProfileId",
+										"creditAttributions",
+										"subjectAssociations"
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
@@ -34244,12 +34614,51 @@
 												}
 											}
 										},
-										"credits": {
+										"associationPolicy": {
+											"type": "object",
+											"required": ["creditAttribution", "subjectAssociation"],
+											"properties": {
+												"creditAttribution": {
+													"default": "open",
+													"type": "string",
+													"enum": ["open", "owner_only", "closed"]
+												},
+												"subjectAssociation": {
+													"default": "open",
+													"type": "string",
+													"enum": ["open", "owner_only", "closed"]
+												}
+											}
+										},
+										"ownerProfileId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"creditAttributions": {
 											"type": "array",
 											"items": {
 												"type": "object",
-												"required": ["unitId", "role"],
+												"required": ["id", "unitId", "role"],
 												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"unitId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"role": { "type": "string" }
+												}
+											}
+										},
+										"subjectAssociations": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": ["id", "unitId", "role"],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
 													"unitId": {
 														"format": "uuid",
 														"type": "string"
@@ -34308,6 +34717,224 @@
 					}
 				},
 				"operationId": "getApiEntitiesByUnitId"
+			}
+		},
+		"/api/entities/{unitId}/association-policy": {
+			"get": {
+				"summary": "Get Entity association policy",
+				"tags": ["Entity"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["creditAttribution", "subjectAssociation"],
+									"properties": {
+										"creditAttribution": {
+											"default": "open",
+											"type": "string",
+											"enum": ["open", "owner_only", "closed"]
+										},
+										"subjectAssociation": {
+											"default": "open",
+											"type": "string",
+											"enum": ["open", "owner_only", "closed"]
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "EntityEntryNotFound",
+													"type": "string",
+													"enum": ["EntityEntryNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiEntitiesByUnitIdAssociation-policy"
+			},
+			"patch": {
+				"summary": "Update Entity association policy",
+				"tags": ["Entity"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"minProperties": 1,
+								"type": "object",
+								"properties": {
+									"creditAttribution": {
+										"default": "open",
+										"type": "string",
+										"enum": ["open", "owner_only", "closed"]
+									},
+									"subjectAssociation": {
+										"default": "open",
+										"type": "string",
+										"enum": ["open", "owner_only", "closed"]
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["creditAttribution", "subjectAssociation"],
+									"properties": {
+										"creditAttribution": {
+											"default": "open",
+											"type": "string",
+											"enum": ["open", "owner_only", "closed"]
+										},
+										"subjectAssociation": {
+											"default": "open",
+											"type": "string",
+											"enum": ["open", "owner_only", "closed"]
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "EntityOwnershipRequired",
+													"type": "string",
+													"enum": [
+														"EntityOwnershipRequired",
+														"PlatformCapabilityRequired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "EntityEntryNotFound",
+													"type": "string",
+													"enum": ["EntityEntryNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "patchApiEntitiesByUnitIdAssociation-policy"
 			}
 		},
 		"/api/tags": {
@@ -35519,9 +36146,9 @@
 				"operationId": "deleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote"
 			}
 		},
-		"/api/units/{type}/{unitId}/credits": {
+		"/api/units/{type}/{unitId}/credit-attributions": {
 			"post": {
-				"summary": "Add unit credit",
+				"summary": "Add Unit credit attribution",
 				"tags": ["Units"],
 				"parameters": [
 					{
@@ -35565,8 +36192,17 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["unitId", "entityId", "role", "position"],
+									"required": [
+										"id",
+										"unitId",
+										"entityId",
+										"role",
+										"position",
+										"createdAt",
+										"updatedAt"
+									],
 									"properties": {
+										"id": { "format": "uuid", "type": "string" },
 										"unitId": { "format": "uuid", "type": "string" },
 										"entityId": { "format": "uuid", "type": "string" },
 										"role": { "type": "string" },
@@ -35575,11 +36211,100 @@
 											"minLength": 2,
 											"maxLength": 512,
 											"type": "string"
-										}
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
 									}
 								}
 							}
 						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitProtected",
+														"EntityAssociationRestricted"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound", "EntityEntryNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiUnitsByTypeByUnitIdCredit-attributions"
+			}
+		},
+		"/api/units/{type}/{unitId}/credit-attributions/{associationId}": {
+			"delete": {
+				"summary": "Remove Unit credit attribution",
+				"tags": ["Units"],
+				"responses": {
+					"204": {
+						"description": "Response for status 204",
+						"content": { "type": "void" }
 					},
 					"403": {
 						"description": "Response for status 403",
@@ -35626,7 +36351,10 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": ["UnitNotFound"]
+													"enum": [
+														"UnitNotFound",
+														"CreditAttributionNotFound"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -35655,7 +36383,288 @@
 						}
 					}
 				},
-				"operationId": "postApiUnitsByTypeByUnitIdCredits"
+				"parameters": [
+					{
+						"name": "type",
+						"in": "path",
+						"required": true,
+						"schema": { "type": "string", "enum": ["book", "software", "media"] }
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "associationId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"operationId": "deleteApiUnitsByTypeByUnitIdCredit-attributionsByAssociationId"
+			}
+		},
+		"/api/units/{type}/{unitId}/subject-associations": {
+			"post": {
+				"summary": "Add Unit subject association",
+				"tags": ["Units"],
+				"parameters": [
+					{
+						"name": "type",
+						"in": "path",
+						"required": true,
+						"schema": { "type": "string", "enum": ["book", "software", "media"] }
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["entityId", "role"],
+								"properties": {
+									"entityId": { "format": "uuid", "type": "string" },
+									"role": { "minLength": 1, "maxLength": 64, "type": "string" },
+									"position": {
+										"format": "fractional-position",
+										"minLength": 2,
+										"maxLength": 512,
+										"type": "string"
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"unitId",
+										"entityId",
+										"role",
+										"position",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"unitId": { "format": "uuid", "type": "string" },
+										"entityId": { "format": "uuid", "type": "string" },
+										"role": { "type": "string" },
+										"position": {
+											"format": "fractional-position",
+											"minLength": 2,
+											"maxLength": 512,
+											"type": "string"
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitProtected",
+														"EntityAssociationRestricted"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound", "EntityEntryNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiUnitsByTypeByUnitIdSubject-associations"
+			}
+		},
+		"/api/units/{type}/{unitId}/subject-associations/{associationId}": {
+			"delete": {
+				"summary": "Remove Unit subject association",
+				"tags": ["Units"],
+				"responses": {
+					"204": {
+						"description": "Response for status 204",
+						"content": { "type": "void" }
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitProtected"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"SubjectAssociationNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"parameters": [
+					{
+						"name": "type",
+						"in": "path",
+						"required": true,
+						"schema": { "type": "string", "enum": ["book", "software", "media"] }
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "associationId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"operationId": "deleteApiUnitsByTypeByUnitIdSubject-associationsByAssociationId"
 			}
 		},
 		"/api/units/{type}/{unitId}/links": {
@@ -46745,7 +47754,10 @@
 												"code": {
 													"default": "RealmCapabilityRequired",
 													"type": "string",
-													"enum": ["RealmCapabilityRequired"]
+													"enum": [
+														"RealmCapabilityRequired",
+														"EntityAssociationRestricted"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -46772,7 +47784,7 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": ["UnitNotFound"]
+													"enum": ["UnitNotFound", "EntityEntryNotFound"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -49794,7 +50806,10 @@
 												"code": {
 													"default": "RealmCapabilityRequired",
 													"type": "string",
-													"enum": ["RealmCapabilityRequired"]
+													"enum": [
+														"RealmCapabilityRequired",
+														"EntityAssociationRestricted"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -49821,7 +50836,7 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": ["UnitNotFound"]
+													"enum": ["UnitNotFound", "EntityEntryNotFound"]
 												},
 												"message": { "type": "string" },
 												"details": {}

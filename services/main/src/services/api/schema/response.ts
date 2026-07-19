@@ -7,6 +7,7 @@ import {
 	type PortableTextDocument as PortableTextDocumentValue,
 } from "@rezics/block";
 import { DateTime, FractionalPosition, OrdinalPosition, Uuid } from ".";
+import { EntityAssociationPolicyModeValues } from "../../database/schema/contract-values";
 import {
 	RecommendationReasonSchema,
 	RecommendationTrackingSchema,
@@ -15,6 +16,11 @@ export { toApiErrorResponse } from "./error-response";
 
 const NullableText = t.Nullable(t.String());
 const OrdinaryPostKindResponse = t.Union([t.Literal("post"), t.Literal("reply")]);
+const EntityAssociationPolicyModeResponse = t.UnionEnum(EntityAssociationPolicyModeValues);
+export const EntityAssociationPolicyResponse = t.Object({
+	creditAttribution: EntityAssociationPolicyModeResponse,
+	subjectAssociation: EntityAssociationPolicyModeResponse,
+});
 
 export function toPortableTextResponse(value: unknown): PortableTextDocumentValue {
 	return parseDocument(PortableTextDocument, value);
@@ -88,6 +94,15 @@ export const UnitDetailResponse = t.Object({
 			position: FractionalPosition,
 			evidenceUrl: NullableText,
 			note: NullableText,
+			title: NullableText,
+		}),
+	),
+	subjectAssociations: t.Array(
+		t.Object({
+			id: Uuid,
+			entityEntryId: Uuid,
+			role: t.String(),
+			position: FractionalPosition,
 			title: NullableText,
 		}),
 	),
@@ -384,7 +399,10 @@ export const EntityDetailResponse = t.Object({
 	createdAt: DateTime,
 	updatedAt: DateTime,
 	localizations: t.Array(LocalizationResponse),
-	credits: t.Array(t.Object({ unitId: Uuid, role: t.String() })),
+	associationPolicy: EntityAssociationPolicyResponse,
+	ownerProfileId: t.Nullable(Uuid),
+	creditAttributions: t.Array(t.Object({ id: Uuid, unitId: Uuid, role: t.String() })),
+	subjectAssociations: t.Array(t.Object({ id: Uuid, unitId: Uuid, role: t.String() })),
 });
 export const CollectionDetailResponse = t.Object({
 	id: Uuid,
@@ -517,10 +535,22 @@ export const ReplyListResponse = t.Object({
 });
 
 export const CreditAttributionResponse = t.Object({
+	id: Uuid,
 	unitId: Uuid,
 	entityId: Uuid,
 	role: t.String(),
 	position: FractionalPosition,
+	createdAt: DateTime,
+	updatedAt: DateTime,
+});
+export const SubjectAssociationResponse = t.Object({
+	id: Uuid,
+	unitId: Uuid,
+	entityId: Uuid,
+	role: t.String(),
+	position: FractionalPosition,
+	createdAt: DateTime,
+	updatedAt: DateTime,
 });
 export const ExternalLinkResponse = t.Object({
 	id: Uuid,

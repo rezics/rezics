@@ -24,7 +24,7 @@ export function HomeExperience({ locale }: { locale: AboutLocale }) {
 		["Book", "ContentStructure", home.labels.formulaResults.chapters],
 		["Book", "GameContentStructure", "GameBook"],
 		["Unit", "CreditAttribution", home.labels.formulaResults.credits],
-		["Unit", "SubjectAttribution", home.labels.formulaResults.subjects],
+		["Unit", "SubjectAssociation", home.labels.formulaResults.subjects],
 	];
 
 	return (

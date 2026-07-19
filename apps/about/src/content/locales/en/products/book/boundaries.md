@@ -2,4 +2,4 @@ Book only presents capabilities supported by confirmed user facts, current Outli
 
 - GameBook is a Book manifestation using GameContentStructure.
 - Chapter is a protocol concept, not an independent public product.
-- CreditAttribution and SubjectAttribution serve contribution and subject relations respectively.
+- CreditAttribution and SubjectAssociation serve contribution and subject relations respectively.

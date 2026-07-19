@@ -168,6 +168,7 @@ export const realmUnit = pgTable(
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
+		/** Realm-local moderation state; this is not a Unit field-edit lock. */
 		locked: boolean().default(false).notNull(),
 		status: realmUnitStatus().default("visible").notNull(),
 		createdAt: createCreatedAtColumn(),

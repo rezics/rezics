@@ -7,6 +7,7 @@ import { AuthorizationErrors } from "../authorization/errors";
 import { PaginationErrors } from "../pagination/errors";
 import { SearchErrors } from "../search/errors";
 import { UnitErrors } from "../units/errors";
+import { EntityErrors } from "../entities/errors";
 import { CatalogErrors } from "./catalog/errors";
 import { CollectionErrors } from "./collections/errors";
 import { ContentStructureErrors } from "./content-structure/errors";
@@ -52,6 +53,7 @@ export const ApiErrors = [
 	...AuthErrors,
 	...AuthorizationErrors,
 	...UnitErrors,
+	...EntityErrors,
 	...ImageAssetErrors,
 	...TokenErrors,
 	...SearchErrors,

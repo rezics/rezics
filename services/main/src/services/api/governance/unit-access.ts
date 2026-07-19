@@ -4,12 +4,15 @@ import Elysia, { t } from "elysia";
 
 import session from "../../auth/session";
 import type { Authorization } from "../../authorization";
+import { lockEntityAssociationState } from "../../authorization/entity/authorization";
 import { database } from "../../database";
 import type { DatabaseTransaction } from "../../database";
 import {
 	auditEvent,
+	entity,
 	profile as profileTable,
 	realm,
+	unit,
 	unitAccessBinding,
 	unitAccessRestriction,
 	unitProtection,
@@ -23,6 +26,7 @@ import {
 	CreateUnitAccessBindingBody,
 	CreateUnitAccessRestrictionBody,
 	CreateUnitProtectionBody,
+	TransferUnitOwnershipBody,
 	UnitEffectiveAccessQuery,
 	UnitEffectiveAccessResponse,
 	UnitAccessBindingListResponse,
@@ -48,6 +52,7 @@ import {
 	UnitProtectionNotFound,
 } from "./errors";
 import { UnitPermissionValues } from "../../database/schema/contract-values";
+import { UnitNotFound } from "../../units/errors";
 
 const UnitGovernanceForbiddenResponse = toApiErrorResponse([
 	"UnitPermissionForbidden",
@@ -201,6 +206,113 @@ export default new Elysia({ prefix: "/unit" })
 			},
 		},
 	)
+	.put(
+		"/:unitId/ownership",
+		async ({ authorization, profile, params, body }) => {
+			await authorization.platform.ensureCapability("unit.ownership.transfer");
+			return database.transaction(async (tx) => {
+				const [targetUnit] = await tx
+					.select({ kind: unit.kind })
+					.from(unit)
+					.where(and(eq(unit.id, params.unitId), isNull(unit.deletedAt)))
+					.limit(1);
+				if (!targetUnit) throw new UnitNotFound();
+				if (body.owner.kind === "profile") {
+					const [targetProfile] = await tx
+						.select({ id: profileTable.id })
+						.from(profileTable)
+						.where(eq(profileTable.id, body.owner.profileId))
+						.limit(1);
+					if (!targetProfile) throw new ProfileNotFound();
+				}
+				if (targetUnit.kind === "entity")
+					await lockEntityAssociationState(tx, params.unitId);
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${`unit-access:${params.unitId}`}::text, 0))`,
+				);
+				const superseded = await tx
+					.select({ id: unitAccessBinding.id })
+					.from(unitAccessBinding)
+					.where(
+						and(
+							eq(unitAccessBinding.unitId, params.unitId),
+							isNull(unitAccessBinding.revokedAt),
+							or(
+								eq(unitAccessBinding.role, "owner"),
+								body.owner.kind === "profile"
+									? and(
+											eq(unitAccessBinding.subjectKind, "profile"),
+											eq(unitAccessBinding.profileId, body.owner.profileId),
+											eq(unitAccessBinding.scope, []),
+										)
+									: undefined,
+							),
+						),
+					);
+				if (superseded.length)
+					await tx
+						.update(unitAccessBinding)
+						.set({ revokedAt: new Date(), revokedByProfileId: profile.unitId })
+						.where(
+							and(
+								eq(unitAccessBinding.unitId, params.unitId),
+								isNull(unitAccessBinding.revokedAt),
+								or(
+									eq(unitAccessBinding.role, "owner"),
+									body.owner.kind === "profile"
+										? and(
+												eq(unitAccessBinding.subjectKind, "profile"),
+												eq(
+													unitAccessBinding.profileId,
+													body.owner.profileId,
+												),
+												eq(unitAccessBinding.scope, []),
+											)
+										: undefined,
+								),
+							),
+						);
+				const [created] = await tx
+					.insert(unitAccessBinding)
+					.values({
+						unitId: params.unitId,
+						subjectKind: body.owner.kind,
+						profileId: body.owner.kind === "profile" ? body.owner.profileId : null,
+						role: "owner",
+						scope: [],
+						grantedByProfileId: profile.unitId,
+					})
+					.returning();
+				if (!created) throw new Error("Unit owner transfer returned no binding");
+				if (targetUnit.kind === "entity")
+					await tx
+						.update(entity)
+						.set({ verified: body.owner.kind === "profile" })
+						.where(eq(entity.id, params.unitId));
+				await recordAccessAudit(tx, {
+					actorProfileId: profile.unitId,
+					action: "unit.owner.transfer",
+					unitId: params.unitId,
+					metadata: {
+						newOwner: body.owner,
+						supersededBindingIds: superseded.map((binding) => binding.id),
+					},
+				});
+				return created;
+			});
+		},
+		{
+			access: "session-only",
+			params: UnitGovernanceParams,
+			body: TransferUnitOwnershipBody,
+			response: {
+				[StatusCodes.OK]: UnitAccessBindingResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ProfileNotFound"]),
+			},
+			detail: { summary: "Transfer Unit ownership", tags: ["Governance"] },
+		},
+	)
 	.get(
 		"/:unitId/access-bindings",
 		async ({ authorization, params }) => {
@@ -234,13 +346,12 @@ export default new Elysia({ prefix: "/unit" })
 		async ({ authorization, profile, params, body }) => {
 			await authorization.unit.ensure(params.unitId, "unit.access.manage", body.scope);
 			if (
-				(body.subject.kind === "authenticated" &&
-					body.role !== "viewer" &&
-					body.role !== "editor") ||
-				(body.subject.kind === "realm" && body.role === "owner")
+				body.subject.kind === "authenticated" &&
+				body.role !== "viewer" &&
+				body.role !== "editor"
 			)
 				throw new UnitAccessSubjectRoleInvalid();
-			if (body.role === "owner" || body.role === "maintainer")
+			if (body.role === "maintainer")
 				await ensureOwnerOrPlatform(authorization, params.unitId);
 			await ensureSubjectExists(body.subject);
 			const expiresAt = parseExpiry(body.expiresAt);

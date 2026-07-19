@@ -5,9 +5,11 @@ import { describe, expect, it } from "vitest";
 import {
 	CreateAccountEnforcementBody,
 	CreateUnitAccessRestrictionBody,
+	CreateUnitAccessBindingBody,
 	CreateUnitProtectionBody,
 	ResolveFeedbackBody,
 	RevokeAccountEnforcementBody,
+	TransferUnitOwnershipBody,
 	UpdateModerationCaseBody,
 } from "./schema";
 
@@ -57,6 +59,22 @@ describe("adjacent governance API contracts", () => {
 				reason: "copied rationale",
 			}),
 		).toBe(false);
+	});
+
+	it("keeps governance ownership transfer separate from delegable access", () => {
+		expect(
+			Check(CreateUnitAccessBindingBody, {
+				subject: { kind: "profile", profileId },
+				role: "owner",
+				scope: [],
+			}),
+		).toBe(false);
+		expect(
+			Check(TransferUnitOwnershipBody, {
+				owner: { kind: "profile", profileId },
+			}),
+		).toBe(true);
+		expect(Check(TransferUnitOwnershipBody, { owner: { kind: "system" } })).toBe(true);
 	});
 
 	it("removes copied rationale and public messages from enforcement commands", () => {

@@ -1,22 +1,27 @@
 import { StatusCodes } from "http-status-codes";
 import { createHash } from "node:crypto";
 
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, or, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session from "../../auth/session";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
+import { getEntityAssociationPolicy } from "../../authorization/entity/authorization";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import { isPrimaryUnitLocalization } from "../../units/localization";
 import { fractionalPositionBetween } from "../../ordering/position";
 import {
+	auditEvent,
 	creditAttribution,
 	entity,
+	entityAssociationPolicy,
+	subjectAssociation,
 	unit,
 	unitAlias,
 	unitAliasVote,
 	unitAliasVoteStat,
+	unitAccessBinding,
 	unitTagVote,
 	unitLink,
 	unitTag,
@@ -28,16 +33,19 @@ import { AliasSearchScoreThreshold } from "../../database/schema/contract-values
 import {
 	AddUnitAliasBody,
 	AddUnitCreditBody,
+	AddUnitSubjectAssociationBody,
 	AddUnitLinkBody,
 	CreateCatalogUnitBody,
 	ListEntityEntriesQuery,
 	ListTagsQuery,
 	TagUnitBody,
+	UnitAssociationParams,
 	UnitAliasParams,
 	UnitAliasUnitParams,
 	UnitUnitParams,
 	UnitTagParams,
 	UnitVersionParams,
+	UpdateEntityAssociationPolicyBody,
 	VoteBody,
 } from "./schema";
 import { checkUnitType, createCatalogUnit } from "./service";
@@ -50,27 +58,42 @@ import {
 	AliasResponse,
 	AliasListResponse,
 	CreditAttributionResponse,
+	EntityAssociationPolicyResponse,
 	EntityDetailResponse,
 	EntityListResponse,
 	ExternalLinkResponse,
+	SubjectAssociationResponse,
 	TagApplicationResponse,
 	TagListResponse,
 	toPortableTextResponse,
 	UnitVersionResponse,
 	VoteResponse,
 } from "../schema/response";
+import { AliasNotFound, TagApplicationNotFound, UnitVersionNotFound } from "./errors";
 import {
-	AliasNotFound,
+	CreditAttributionNotFound,
 	EntityEntryNotFound,
-	TagApplicationNotFound,
-	UnitVersionNotFound,
-} from "./errors";
+	SubjectAssociationNotFound,
+} from "../../entities/errors";
+import { resolveEntityAssociationPolicy } from "../../authorization/entity/policy";
 
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 const UnitMutationForbiddenResponse = toApiErrorResponse([
 	"UnitPermissionForbidden",
 	"UnitProtected",
 ]);
+const EntityPolicyForbiddenResponse = toApiErrorResponse([
+	"EntityOwnershipRequired",
+	"PlatformCapabilityRequired",
+]);
+
+const publiclyReadableUnitCondition = () =>
+	and(
+		eq(unit.status, "published"),
+		eq(unit.visibility, "public"),
+		eq(unit.moderationStatus, "approved"),
+		isNull(unit.deletedAt),
+	);
 
 async function ensureUnitMutationAuthorized(
 	authorization: UnitAuthorization<string>,
@@ -136,8 +159,7 @@ export default new Elysia()
 						)
 						.where(
 							and(
-								eq(unit.status, "published"),
-								eq(unit.visibility, "public"),
+								publiclyReadableUnitCondition(),
 								query.kind ? eq(entity.kind, query.kind) : undefined,
 							),
 						)
@@ -184,13 +206,7 @@ export default new Elysia()
 						})
 						.from(entity)
 						.innerJoin(unit, eq(unit.id, entity.id))
-						.where(
-							and(
-								eq(entity.id, params.unitId),
-								eq(unit.status, "published"),
-								eq(unit.visibility, "public"),
-							),
-						)
+						.where(and(eq(entity.id, params.unitId), publiclyReadableUnitCondition()))
 						.limit(1);
 					if (!entry) throw new EntityEntryNotFound();
 					const localizations = (
@@ -212,20 +228,60 @@ export default new Elysia()
 						createdAt: row.createdAt,
 						updatedAt: row.updatedAt,
 					}));
-					const credits = await database
+					const creditAttributions = await database
 						.select({
+							id: creditAttribution.id,
 							unitId: creditAttribution.unitId,
 							role: creditAttribution.role,
 						})
 						.from(creditAttribution)
-						.where(eq(creditAttribution.entityId, params.unitId));
+						.innerJoin(unit, eq(unit.id, creditAttribution.unitId))
+						.where(
+							and(
+								eq(creditAttribution.entityId, params.unitId),
+								publiclyReadableUnitCondition(),
+							),
+						);
+					const subjectAssociations = await database
+						.select({
+							id: subjectAssociation.id,
+							unitId: subjectAssociation.unitId,
+							role: subjectAssociation.role,
+						})
+						.from(subjectAssociation)
+						.innerJoin(unit, eq(unit.id, subjectAssociation.unitId))
+						.where(
+							and(
+								eq(subjectAssociation.entityId, params.unitId),
+								publiclyReadableUnitCondition(),
+							),
+						);
+					const [owner] = await database
+						.select({ profileId: unitAccessBinding.profileId })
+						.from(unitAccessBinding)
+						.where(
+							and(
+								eq(unitAccessBinding.unitId, params.unitId),
+								eq(unitAccessBinding.subjectKind, "profile"),
+								eq(unitAccessBinding.role, "owner"),
+								isNull(unitAccessBinding.revokedAt),
+								or(
+									isNull(unitAccessBinding.expiresAt),
+									sql`${unitAccessBinding.expiresAt} > now()`,
+								),
+							),
+						)
+						.limit(1);
 					const { avatarAssetId, ...entityEntry } = entry;
 					return {
 						...entityEntry,
 						kind: entry.kind ?? "unknown",
 						avatar: presentImageAsset(avatarAssetId)?.url ?? null,
 						localizations,
-						credits,
+						associationPolicy: await getEntityAssociationPolicy(params.unitId),
+						ownerProfileId: owner?.profileId ?? null,
+						creditAttributions,
+						subjectAssociations,
 					};
 				},
 				{
@@ -235,6 +291,82 @@ export default new Elysia()
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["EntityEntryNotFound"]),
 					},
 					detail: { summary: "Get entity entry", tags: ["Entity"] },
+				},
+			)
+			.get(
+				"/:unitId/association-policy",
+				async ({ params }) => getEntityAssociationPolicy(params.unitId),
+				{
+					params: UnitIdParams,
+					response: {
+						[StatusCodes.OK]: EntityAssociationPolicyResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["EntityEntryNotFound"]),
+					},
+					detail: { summary: "Get Entity association policy", tags: ["Entity"] },
+				},
+			)
+			.patch(
+				"/:unitId/association-policy",
+				async ({ params, body, profile, authorization }) =>
+					database.transaction(async (tx) => {
+						await authorization.entity.ensureCanManageAssociationPolicy(
+							tx,
+							params.unitId,
+						);
+						const changes = [
+							body.creditAttribution === undefined
+								? undefined
+								: { kind: "credit" as const, mode: body.creditAttribution },
+							body.subjectAssociation === undefined
+								? undefined
+								: { kind: "subject" as const, mode: body.subjectAssociation },
+						].filter((change) => change !== undefined);
+						for (const change of changes)
+							await tx
+								.insert(entityAssociationPolicy)
+								.values({
+									entityId: params.unitId,
+									...change,
+									updatedByProfileId: profile.unitId,
+								})
+								.onConflictDoUpdate({
+									target: [
+										entityAssociationPolicy.entityId,
+										entityAssociationPolicy.kind,
+									],
+									set: {
+										mode: change.mode,
+										updatedByProfileId: profile.unitId,
+									},
+								});
+						await tx.insert(auditEvent).values({
+							actorProfileId: profile.unitId,
+							action: "entity.association_policy.update",
+							decisionCode: "allowed",
+							subjectKind: "entity",
+							subjectId: params.unitId,
+							metadata: { changes },
+						});
+						return resolveEntityAssociationPolicy(
+							await tx
+								.select({
+									kind: entityAssociationPolicy.kind,
+									mode: entityAssociationPolicy.mode,
+								})
+								.from(entityAssociationPolicy)
+								.where(eq(entityAssociationPolicy.entityId, params.unitId)),
+						);
+					}),
+				{
+					access: "session-only",
+					params: UnitIdParams,
+					body: UpdateEntityAssociationPolicyBody,
+					response: {
+						[StatusCodes.OK]: EntityAssociationPolicyResponse,
+						[StatusCodes.FORBIDDEN]: EntityPolicyForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["EntityEntryNotFound"]),
+					},
+					detail: { summary: "Update Entity association policy", tags: ["Entity"] },
 				},
 			),
 	)
@@ -510,13 +642,18 @@ export default new Elysia()
 				},
 			)
 			.post(
-				"/credits",
+				"/credit-attributions",
 				async ({ params, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
 					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
-						"credits",
+						"credit-attributions",
 					]);
 					const credit = await database.transaction(async (tx) => {
+						await authorization.entity.ensureAssociationAllowed(
+							tx,
+							body.entityId,
+							"credit",
+						);
 						await tx.execute(
 							sql`select pg_advisory_xact_lock(hashtextextended(${params.unitId}::text, 0))`,
 						);
@@ -552,10 +689,167 @@ export default new Elysia()
 					body: AddUnitCreditBody,
 					response: {
 						[StatusCodes.OK]: CreditAttributionResponse,
-						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+							"UnitPermissionForbidden",
+							"UnitProtected",
+							"EntityAssociationRestricted",
+						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"EntityEntryNotFound",
+						]),
 					},
-					detail: { summary: "Add unit credit", tags: ["Units"] },
+					detail: { summary: "Add Unit credit attribution", tags: ["Units"] },
+				},
+			)
+			.delete(
+				"/credit-attributions/:associationId",
+				async ({ params, profile, authorization }) => {
+					await checkUnitType(params.unitId, params.type);
+					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
+						"credit-attributions",
+					]);
+					await database.transaction(async (tx) => {
+						const deleted = await tx
+							.delete(creditAttribution)
+							.where(
+								and(
+									eq(creditAttribution.id, params.associationId),
+									eq(creditAttribution.unitId, params.unitId),
+								),
+							)
+							.returning({ id: creditAttribution.id });
+						if (!deleted.length) throw new CreditAttributionNotFound();
+						await recordUnitRevision(tx, {
+							unitId: params.unitId,
+							actorProfileId: profile.unitId,
+							event: "update",
+						});
+					});
+					return new Response(null, { status: StatusCodes.NO_CONTENT });
+				},
+				{
+					access: "write:unit:update",
+					params: UnitAssociationParams,
+					response: {
+						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"CreditAttributionNotFound",
+						]),
+					},
+					detail: {
+						summary: "Remove Unit credit attribution",
+						tags: ["Units"],
+						responses: NoContentResponse,
+					},
+				},
+			)
+			.post(
+				"/subject-associations",
+				async ({ params, authorization, body }) => {
+					await checkUnitType(params.unitId, params.type);
+					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
+						"subject-associations",
+					]);
+					const association = await database.transaction(async (tx) => {
+						await authorization.entity.ensureAssociationAllowed(
+							tx,
+							body.entityId,
+							"subject",
+						);
+						await tx.execute(
+							sql`select pg_advisory_xact_lock(hashtextextended(${params.unitId}::text, 0))`,
+						);
+						const [last] = await tx
+							.select({ position: subjectAssociation.position })
+							.from(subjectAssociation)
+							.where(eq(subjectAssociation.unitId, params.unitId))
+							.orderBy(desc(subjectAssociation.position), desc(subjectAssociation.id))
+							.limit(1);
+						const [created] = await tx
+							.insert(subjectAssociation)
+							.values({
+								unitId: params.unitId,
+								...body,
+								position:
+									body.position ??
+									fractionalPositionBetween(last?.position, null),
+							})
+							.returning();
+						if (!created)
+							throw new Error("Subject association insertion returned no row");
+						await recordUnitRevision(tx, {
+							unitId: params.unitId,
+							actorProfileId: authorization.profileId,
+							event: "update",
+						});
+						return created;
+					});
+					return association;
+				},
+				{
+					access: "contribute:unit:update",
+					params: UnitUnitParams,
+					body: AddUnitSubjectAssociationBody,
+					response: {
+						[StatusCodes.OK]: SubjectAssociationResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+							"UnitPermissionForbidden",
+							"UnitProtected",
+							"EntityAssociationRestricted",
+						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"EntityEntryNotFound",
+						]),
+					},
+					detail: { summary: "Add Unit subject association", tags: ["Units"] },
+				},
+			)
+			.delete(
+				"/subject-associations/:associationId",
+				async ({ params, profile, authorization }) => {
+					await checkUnitType(params.unitId, params.type);
+					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
+						"subject-associations",
+					]);
+					await database.transaction(async (tx) => {
+						const deleted = await tx
+							.delete(subjectAssociation)
+							.where(
+								and(
+									eq(subjectAssociation.id, params.associationId),
+									eq(subjectAssociation.unitId, params.unitId),
+								),
+							)
+							.returning({ id: subjectAssociation.id });
+						if (!deleted.length) throw new SubjectAssociationNotFound();
+						await recordUnitRevision(tx, {
+							unitId: params.unitId,
+							actorProfileId: profile.unitId,
+							event: "update",
+						});
+					});
+					return new Response(null, { status: StatusCodes.NO_CONTENT });
+				},
+				{
+					access: "write:unit:update",
+					params: UnitAssociationParams,
+					response: {
+						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"SubjectAssociationNotFound",
+						]),
+					},
+					detail: {
+						summary: "Remove Unit subject association",
+						tags: ["Units"],
+						responses: NoContentResponse,
+					},
 				},
 			)
 			.post(
@@ -565,6 +859,8 @@ export default new Elysia()
 					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
 						"external-links",
 					]);
+					// A source link records evidence provenance, not credit or “is about” semantics.
+					// It intentionally does not consume either Entity association capability.
 					const normalized = new URL(body.url);
 					normalized.hash = "";
 					normalized.searchParams.sort();

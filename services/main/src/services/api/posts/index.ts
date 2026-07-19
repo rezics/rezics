@@ -51,7 +51,6 @@ import {
 } from "./errors";
 import { selectReplyTree } from "./reply-tree-query";
 
-const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 const UnitMutationForbiddenResponse = toApiErrorResponse([
 	"UnitPermissionForbidden",
 	"UnitProtected",
@@ -193,6 +192,11 @@ export default new Elysia()
 						await authorization.unit.ensureCanRead(body.subjectId);
 					}
 					const id = await database.transaction(async (tx) => {
+						if (body.subjectId)
+							await authorization.entity.ensureSubjectAssociationAllowedIfEntity(
+								tx,
+								body.subjectId,
+							);
 						const created = await insertAddressedUnit(tx, {
 							kind: "post",
 							slugScopeId: profile.unitId,
@@ -239,8 +243,14 @@ export default new Elysia()
 					body: CreatePostBody,
 					response: {
 						[StatusCodes.OK]: IdResponse,
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+							"RealmCapabilityRequired",
+							"EntityAssociationRestricted",
+						]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"EntityEntryNotFound",
+						]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"RealmRulesAcceptanceRequired",
 						]),

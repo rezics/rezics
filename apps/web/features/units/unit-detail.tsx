@@ -254,6 +254,24 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 						</DetailSection>
 					)}
 
+					{item.subjectAssociations.length > 0 && (
+						<DetailSection title={t.units.detail.subjectAssociations}>
+							<Card>
+								<CardContent className="grid gap-2 p-5 text-sm">
+									{item.subjectAssociations.map((association) => (
+										<Link
+											key={association.id}
+											className="min-w-0 break-words text-link hover:text-link-hover hover:underline"
+											href={`/entities/${association.entityEntryId}`}
+										>
+											{association.title ?? t.ui.unnamed} · {association.role}
+										</Link>
+									))}
+								</CardContent>
+							</Card>
+						</DetailSection>
+					)}
+
 					{item.links.length > 0 && (
 						<DetailSection title={t.units.detail.links}>
 							<Card>

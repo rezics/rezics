@@ -2,7 +2,7 @@ const content = {
 	implemented: "Implementiert",
 	modes: "Zuordnungsmodi",
 	credit: "CreditAttribution",
-	subject: "SubjectAttribution",
+	subject: "SubjectAssociation",
 	bookCredits: "Book-Zuordnungen",
 	relationship: "Beziehungstyp",
 	entity: "Entity",

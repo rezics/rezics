@@ -7,6 +7,7 @@ import {
 import type { Static } from "elysia";
 
 import type { Authorization } from "../authorization";
+import { createSystemOwnedCatalogAccess } from "../authorization/unit/ownership";
 import { isPubliclyReadableUnit } from "../authorization/unit/policy";
 import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
@@ -21,8 +22,8 @@ import {
 	software,
 	media,
 	unit,
-	unitAccessBinding,
 	creditAttribution,
+	subjectAssociation,
 	unitLink,
 	unitLocalization,
 	unitTag,
@@ -107,14 +108,7 @@ export async function createUnit(
 			unitId: created.id,
 			...input.localization,
 		});
-		await tx.insert(unitAccessBinding).values({
-			unitId: created.id,
-			subjectKind: "profile",
-			profileId: ownerId,
-			role: "owner",
-			scope: [],
-			grantedByProfileId: ownerId,
-		});
+		await createSystemOwnedCatalogAccess(tx, created.id, ownerId, "publisher");
 		await recordUnitRevision(tx, {
 			unitId: created.id,
 			actorProfileId: ownerId,
@@ -197,6 +191,25 @@ export async function getUnit(
 		)
 		.where(eq(creditAttribution.unitId, base.id))
 		.orderBy(creditAttribution.position, creditAttribution.id);
+	const subjectAssociations = await database
+		.select({
+			id: subjectAssociation.id,
+			entityEntryId: subjectAssociation.entityId,
+			role: subjectAssociation.role,
+			position: subjectAssociation.position,
+			title: unitLocalization.title,
+		})
+		.from(subjectAssociation)
+		.innerJoin(entity, eq(entity.id, subjectAssociation.entityId))
+		.leftJoin(
+			unitLocalization,
+			and(
+				eq(unitLocalization.unitId, entity.id),
+				eq(unitLocalization.language, primaryLanguage ?? ""),
+			),
+		)
+		.where(eq(subjectAssociation.unitId, base.id))
+		.orderBy(subjectAssociation.position, subjectAssociation.id);
 	const links = await database
 		.select()
 		.from(unitLink)
@@ -260,6 +273,7 @@ export async function getUnit(
 			}),
 		),
 		credits: credits.map((credit) => ({ ...credit, evidenceUrl: null, note: null })),
+		subjectAssociations,
 		links: links.map((link) => ({
 			...link,
 			kind: link.role,

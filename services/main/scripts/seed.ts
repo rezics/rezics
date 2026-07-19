@@ -15,6 +15,7 @@ import { hashPassword } from "better-auth/crypto";
 import { and, eq, notInArray } from "drizzle-orm";
 
 import { env } from "../src/services/config";
+import { Authorization } from "../src/services/authorization";
 import { ApiPermissionValues, toApiKeyPermissions } from "../src/services/auth/api-permissions";
 import { database, type DatabaseTransaction } from "../src/services/database";
 import { createGovernanceNotePost } from "../src/services/governance/note-service";
@@ -70,6 +71,7 @@ import {
 	unitAliasVote,
 	unitAccessBinding,
 	creditAttribution,
+	CommunityCatalogUnitKindValues,
 	unitProtection,
 	unitLink,
 	unitLocalization,
@@ -329,19 +331,38 @@ async function insertUnitDetails(
 		values.flatMap((value) => localizationRows(data, value)),
 		(batch) => tx.insert(unitLocalization).values(batch),
 	);
-	await writeBatches(
-		values.map((value) => ({
+	const accessRows: (typeof unitAccessBinding.$inferInsert)[] = [];
+	const communityCatalogKinds: ReadonlySet<string> = new Set(CommunityCatalogUnitKindValues);
+	for (const value of values) {
+		const common = {
 			unitId: value.id,
-			subjectKind: "profile" as const,
-			profileId: value.ownerProfileId,
-			role: "owner" as const,
 			scope: [],
 			grantedByProfileId: value.ownerProfileId,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
-		})),
-		(batch) => tx.insert(unitAccessBinding).values(batch),
-	);
+		};
+		if (communityCatalogKinds.has(value.kind)) {
+			const contributorRole =
+				value.kind === "entity" || value.kind === "tag" ? "editor" : "publisher";
+			accessRows.push(
+				{ ...common, subjectKind: "system", role: "owner" },
+				{
+					...common,
+					subjectKind: "profile",
+					profileId: value.ownerProfileId,
+					role: contributorRole,
+				},
+			);
+		} else {
+			accessRows.push({
+				...common,
+				subjectKind: "profile",
+				profileId: value.ownerProfileId,
+				role: "owner",
+			});
+		}
+	}
+	await writeBatches(accessRows, (batch) => tx.insert(unitAccessBinding).values(batch));
 }
 
 async function seedProfiles(
@@ -582,7 +603,7 @@ async function seedCatalog(
 		entities.map((value, index) => ({
 			id: value.id,
 			kind: index < 45 ? "person" : index < 65 ? "organization" : "platform",
-			verified: index % 4 !== 0,
+			verified: false,
 			avatar: data.fakerByLanguage[itemAt(data.languages(index), 0)].image.avatar(),
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
@@ -2166,6 +2187,7 @@ async function seedHistory(
 			baseRevisionId,
 			actorProfileId: value.ownerProfileId,
 			message: "Seeded revision restore",
+			entityAuthorization: new Authorization(value.ownerProfileId).entity,
 		});
 	}
 }
