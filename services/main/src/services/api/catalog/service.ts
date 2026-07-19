@@ -5,9 +5,7 @@ import { entity, entityAssociationPolicy, unit, unitLocalization } from "../../d
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import { createCommunityCatalogAccess } from "../../authorization/unit/ownership";
-import { insertAddressedUnit } from "../../units/slug-address";
-import { TopLevelSlugNamespaceUnitIds } from "../../units/slug-system";
-import { generateSlugLabel } from "../../units/slug";
+import { insertUnit } from "../../units/create";
 import { unitLocalizationImageAssetIds } from "../../units/localization";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
 import type { CreateCatalogUnitBody } from "./schema";
@@ -23,16 +21,12 @@ export async function createCatalogUnit(
 			ownerId,
 			unitLocalizationImageAssetIds(body.localization),
 		);
-		const created = await insertAddressedUnit(tx, {
+		const created = await insertUnit(tx, {
 			kind: type,
-			slugScopeId:
-				type === "entity"
-					? TopLevelSlugNamespaceUnitIds.entities
-					: TopLevelSlugNamespaceUnitIds.tags,
-			slug: body.slug ?? generateSlugLabel(body.localization.title, "entry"),
 			status: "published",
 			visibility: "public",
 			publishedAt: new Date(),
+			statusActor: { kind: "profile", profileId: ownerId },
 		});
 		if (type === "entity") {
 			await tx.insert(entity).values({ id: created.id, kind: body.kind ?? "person" });

@@ -13,7 +13,7 @@ import {
 import { pgTable } from "./base";
 import { PostKindValues, toEnumValues } from "./contract-values";
 import { createCreatedAtColumn, createUpdatedAtColumn } from "./columns";
-import { profile, unit } from "./core";
+import { unit } from "./core";
 import { realm } from "./realm";
 
 export const postKind = pgEnum("post_kind", toEnumValues(PostKindValues));
@@ -24,9 +24,6 @@ export const post = pgTable(
 		id: uuid()
 			.primaryKey()
 			.references(() => unit.id, { onDelete: "cascade" }),
-		authorProfileId: uuid()
-			.notNull()
-			.references(() => profile.id, { onDelete: "restrict" }),
 		/**
 		 * Generic typed target. Public posts and reviews that target an Entity pass the
 		 * Entity subject-association policy; structural and governance posts use this
@@ -40,11 +37,6 @@ export const post = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		index("post_author_created_at_idx").on(
-			table.authorProfileId,
-			table.createdAt.desc(),
-			table.id.desc(),
-		),
 		index("post_subject_created_at_idx").on(
 			table.subjectUnitId,
 			table.createdAt.desc(),

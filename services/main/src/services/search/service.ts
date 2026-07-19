@@ -21,6 +21,7 @@ import {
 	unitAliasVoteStat,
 	unitLocalization,
 	unitTag,
+	unitStatusEvent,
 } from "../database/schema";
 import { AliasSearchScoreThreshold } from "../database/schema/contract-values";
 import { InvalidSearch } from "./errors";
@@ -36,6 +37,7 @@ const subjectUnit = alias(unit, "subject_unit");
 const facetLocalization = alias(unitLocalization, "facet_unit_localization");
 const facetUnitTag = alias(unitTag, "facet_unit_tag");
 const facetRealmUnit = alias(realmUnit, "facet_realm_unit");
+const facetPublisherEvent = alias(unitStatusEvent, "facet_publisher_event");
 
 const categoryKinds: Record<SearchCategory, readonly string[]> = {
 	units: ["book", "software", "media"],
@@ -95,7 +97,7 @@ function validateRequest(category: SearchCategory, request: DomainSearchRequest)
 		["contentRatings", "contentRating", Boolean(request.contentRatings?.length)],
 		["aiDisclosures", "aiDisclosure", Boolean(request.aiDisclosures?.length)],
 		["licenses", "license", Boolean(request.licenses?.length)],
-		["authorId", "authorId", Boolean(request.authorId)],
+		["publisherId", "publisherId", Boolean(request.publisherId)],
 		["realmId", "realmId", Boolean(request.realmId)],
 		["subjectId", "subjectId", Boolean(request.subjectId)],
 		["targetId", "targetId", Boolean(request.targetId)],
@@ -169,7 +171,7 @@ function compileFilter(category: SearchCategory, filter: SearchFilter): SQL {
 		"ai-disclosure": "aiDisclosure",
 		license: "license",
 		tag: "tagId",
-		author: "authorId",
+		publisher: "publisherId",
 		realm: "realmId",
 		subject: "subjectId",
 		target: "targetId",
@@ -204,6 +206,26 @@ function compileFilter(category: SearchCategory, filter: SearchFilter): SQL {
 					where ${unitLocalization.unitId} = ${unit.id}
 						and ${unitLocalization.language} = any(${toTextArray(values)})
 				)`;
+		return filter.operator === "not-equals" || filter.operator === "none-of"
+			? sql`not (${match})`
+			: match;
+	}
+	if (filter.field === "publisher") {
+		const actors = sql`array(
+			select distinct ${unitStatusEvent.changedByProfileId}
+			from ${unitStatusEvent}
+			where ${unitStatusEvent.unitId} = ${unit.id}
+				and ${unitStatusEvent.toStatus} = 'published'
+				and ${unitStatusEvent.actorKind} = 'profile'
+				and ${unitStatusEvent.actorHidden} = false
+		)`;
+		if (filter.operator === "exists")
+			return filter.value ? sql`cardinality(${actors}) > 0` : sql`cardinality(${actors}) = 0`;
+		const values = scalarStrings(filterValues(filter), filter.field);
+		const match =
+			filter.operator === "all-of"
+				? sql`${actors} @> ${toUuidArray(values)}`
+				: sql`${actors} && ${toUuidArray(values)}`;
 		return filter.operator === "not-equals" || filter.operator === "none-of"
 			? sql`not (${match})`
 			: match;
@@ -258,7 +280,6 @@ function compileFilter(category: SearchCategory, filter: SearchFilter): SQL {
 		"content-rating": sql`${unit.contentRating}`,
 		"ai-disclosure": sql`${unit.aiDisclosure}`,
 		license: sql`${unit.license}`,
-		author: sql`${post.authorProfileId}`,
 		subject: sql`${post.subjectUnitId}`,
 		target: sql`${post.subjectUnitId}`,
 		root: sql`${postReply.rootPostId}`,
@@ -305,11 +326,6 @@ function getUnitCandidateIds(query: string): SQL {
 				FROM ${unitAliasVoteStat}
 				WHERE ${unitAliasVoteStat.aliasId} = ${unitAlias.id}
 			), 0) >= ${AliasSearchScoreThreshold}
-		UNION
-		SELECT ${unit.id}
-		FROM ${unit}
-		WHERE ${unit.deletedAt} IS NULL
-			AND ${unit.slug} &@~ pgroonga_query_escape(${query})
 	)`;
 }
 
@@ -384,8 +400,16 @@ function buildSearchConditions(category: SearchCategory, request: DomainSearchRe
 		addList(conditions, sql`${realm.joinPolicy}`, request.joinPolicies);
 	}
 
+	if (request.publisherId)
+		conditions.push(sql`exists (
+			select 1 from ${unitStatusEvent}
+			where ${unitStatusEvent.unitId} = ${unit.id}
+				and ${unitStatusEvent.toStatus} = 'published'
+				and ${unitStatusEvent.actorKind} = 'profile'
+				and ${unitStatusEvent.actorHidden} = false
+				and ${unitStatusEvent.changedByProfileId} = ${request.publisherId}::uuid
+		)`);
 	const scalarFilters = [
-		[sql`${post.authorProfileId}`, request.authorId],
 		[sql`${post.subjectUnitId}`, request.subjectId],
 		[sql`${post.subjectUnitId}`, request.targetId],
 		[sql`${postReply.rootPostId}`, request.rootId],
@@ -445,7 +469,6 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 			'id', ${unit.id},
 			'kind', ${category}::text,
 			'type', ${hitType},
-			'slug', ${unit.slug},
 			'titles', coalesce((
 				SELECT jsonb_agg(${unitLocalization.title} ORDER BY ${unitLocalization.position}, ${unitLocalization.language})
 					FILTER (WHERE ${unitLocalization.title} IS NOT NULL)
@@ -509,6 +532,14 @@ function facetSpec(
 			value: sql`${facetRealmUnit.realmId}`,
 			join: sql`join ${facetRealmUnit} on ${facetRealmUnit.unitId} = ${unit.id} and ${facetRealmUnit.status} = 'visible'`,
 		};
+	if (field === "publisher")
+		return {
+			value: sql`${facetPublisherEvent.changedByProfileId}`,
+			join: sql`join ${facetPublisherEvent} on ${facetPublisherEvent.unitId} = ${unit.id}
+				and ${facetPublisherEvent.toStatus} = 'published'
+				and ${facetPublisherEvent.actorKind} = 'profile'
+				and ${facetPublisherEvent.actorHidden} = false`,
+		};
 	if (field === "type")
 		return {
 			value:
@@ -525,7 +556,6 @@ function facetSpec(
 		"content-rating": { attribute: "contentRating", value: sql`${unit.contentRating}` },
 		"ai-disclosure": { attribute: "aiDisclosure", value: sql`${unit.aiDisclosure}` },
 		license: { attribute: "license", value: sql`${unit.license}` },
-		author: { attribute: "authorId", value: sql`${post.authorProfileId}` },
 		owner: { attribute: "ownerId", value: sql`${collection.ownerProfileId}` },
 		"join-policy": { attribute: "joinPolicy", value: sql`${realm.joinPolicy}` },
 		multiple: { attribute: "multiple", value: sql`${poll.mode} = 'multiple'` },

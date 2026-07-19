@@ -5,14 +5,9 @@ import Elysia, { t } from "elysia";
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
-import {
-	isPrimaryUnitLocalization,
-	makePrimaryUnitLocalization,
-	primaryUnitTitle,
-} from "../../units/localization";
+import { isPrimaryUnitLocalization, makePrimaryUnitLocalization } from "../../units/localization";
 import {
 	post,
-	profile as profileTable,
 	realmUnit,
 	scoreStat,
 	unit,
@@ -21,8 +16,8 @@ import {
 } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
-import { insertAddressedUnit } from "../../units/slug-address";
-import { generateSlugLabel } from "../../units/slug";
+import { insertUnit } from "../../units/create";
+import { getPublisherSummariesByUnitIds } from "../../units/status";
 import {
 	IdResponse,
 	NoContentResponse,
@@ -70,8 +65,6 @@ export default new Elysia()
 					const items = await database
 						.select({
 							id: post.id,
-							authorId: post.authorProfileId,
-							authorName: primaryUnitTitle(profileTable.id),
 							targetId: post.subjectUnitId,
 							realmId: primaryRealmId,
 							title: unitLocalization.title,
@@ -81,7 +74,6 @@ export default new Elysia()
 						})
 						.from(post)
 						.innerJoin(unit, eq(unit.id, post.id))
-						.innerJoin(profileTable, eq(profileTable.id, post.authorProfileId))
 						.leftJoin(
 							unitLocalization,
 							and(
@@ -103,9 +95,20 @@ export default new Elysia()
 						)
 						.orderBy(desc(unit.createdAt), desc(unit.id))
 						.limit(query.limit ?? 20);
+					const publishers = await getPublisherSummariesByUnitIds(
+						items.map(({ id }) => id),
+					);
 					return {
 						items: items.flatMap((item) =>
-							item.targetId ? [{ ...item, targetId: item.targetId }] : [],
+							item.targetId
+								? [
+										{
+											...item,
+											targetId: item.targetId,
+											publishers: publishers.get(item.id) ?? [],
+										},
+									]
+								: [],
 						),
 					};
 				},
@@ -139,17 +142,15 @@ export default new Elysia()
 								scoreInput.score,
 							);
 						}
-						const created = await insertAddressedUnit(tx, {
+						const created = await insertUnit(tx, {
 							kind: "post",
-							slugScopeId: profile.unitId,
-							slug: generateSlugLabel(body.title, "review"),
 							status: "published",
 							visibility: "public",
 							publishedAt: new Date(),
+							statusActor: { kind: "profile", profileId: profile.unitId },
 						});
 						await tx.insert(post).values({
 							id: created.id,
-							authorProfileId: profile.unitId,
 							subjectUnitId: body.targetId,
 							kind: "review",
 						});
@@ -215,7 +216,6 @@ export default new Elysia()
 					const [review] = await database
 						.select({
 							id: post.id,
-							authorId: post.authorProfileId,
 							targetId: post.subjectUnitId,
 							realmId: primaryRealmId,
 							language: unitLocalization.language,
@@ -237,8 +237,11 @@ export default new Elysia()
 						.where(and(eq(post.id, params.reviewId), eq(post.kind, "review")))
 						.limit(1);
 					if (!review?.targetId) throw new ReviewNotFound();
+					const publishers =
+						(await getPublisherSummariesByUnitIds([review.id])).get(review.id) ?? [];
 					return {
 						...review,
+						publishers,
 						targetId: review.targetId,
 						body: review.body === null ? null : toPortableTextResponse(review.body),
 						capabilities: {

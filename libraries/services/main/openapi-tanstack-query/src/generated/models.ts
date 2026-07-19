@@ -276,7 +276,7 @@ export type UnitReferencedBlockDocument = {
 												| "ai-disclosure"
 												| "license"
 												| "tag"
-												| "author"
+												| "publisher"
 												| "realm"
 												| "zone"
 												| "subject"
@@ -307,7 +307,7 @@ export type UnitReferencedBlockDocument = {
 												| "ai-disclosure"
 												| "license"
 												| "tag"
-												| "author"
+												| "publisher"
 												| "realm"
 												| "zone"
 												| "subject"
@@ -338,7 +338,7 @@ export type UnitReferencedBlockDocument = {
 												| "ai-disclosure"
 												| "license"
 												| "tag"
-												| "author"
+												| "publisher"
 												| "realm"
 												| "zone"
 												| "subject"
@@ -370,7 +370,7 @@ export type UnitReferencedBlockDocument = {
 														| "ai-disclosure"
 														| "license"
 														| "tag"
-														| "author"
+														| "publisher"
 														| "realm"
 														| "zone"
 														| "subject"
@@ -402,7 +402,7 @@ export type UnitReferencedBlockDocument = {
 														| "ai-disclosure"
 														| "license"
 														| "tag"
-														| "author"
+														| "publisher"
 														| "realm"
 														| "zone"
 														| "subject"
@@ -435,7 +435,7 @@ export type UnitReferencedBlockDocument = {
 												| "ai-disclosure"
 												| "license"
 												| "tag"
-												| "author"
+												| "publisher"
 												| "realm"
 												| "zone"
 												| "subject"
@@ -474,7 +474,7 @@ export type UnitReferencedBlockDocument = {
 												| "ai-disclosure"
 												| "license"
 												| "tag"
-												| "author"
+												| "publisher"
 												| "realm"
 												| "zone"
 												| "subject"
@@ -505,7 +505,7 @@ export type UnitReferencedBlockDocument = {
 												| "ai-disclosure"
 												| "license"
 												| "tag"
-												| "author"
+												| "publisher"
 												| "realm"
 												| "zone"
 												| "subject"
@@ -536,7 +536,7 @@ export type UnitReferencedBlockDocument = {
 												| "ai-disclosure"
 												| "license"
 												| "tag"
-												| "author"
+												| "publisher"
 												| "realm"
 												| "zone"
 												| "subject"
@@ -568,7 +568,7 @@ export type UnitReferencedBlockDocument = {
 														| "ai-disclosure"
 														| "license"
 														| "tag"
-														| "author"
+														| "publisher"
 														| "realm"
 														| "zone"
 														| "subject"
@@ -600,7 +600,7 @@ export type UnitReferencedBlockDocument = {
 														| "ai-disclosure"
 														| "license"
 														| "tag"
-														| "author"
+														| "publisher"
 														| "realm"
 														| "zone"
 														| "subject"
@@ -633,7 +633,7 @@ export type UnitReferencedBlockDocument = {
 												| "ai-disclosure"
 												| "license"
 												| "tag"
-												| "author"
+												| "publisher"
 												| "realm"
 												| "zone"
 												| "subject"
@@ -678,7 +678,7 @@ export type UnitReferencedBlockDocument = {
 										| "ai-disclosure"
 										| "license"
 										| "tag"
-										| "author"
+										| "publisher"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -848,7 +848,7 @@ export type UnitReferencedBlockDocument = {
 										| "ai-disclosure"
 										| "license"
 										| "tag"
-										| "author"
+										| "publisher"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -992,7 +992,7 @@ export type UnitReferencedBlockDocument = {
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -1023,7 +1023,7 @@ export type UnitReferencedBlockDocument = {
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -1054,7 +1054,7 @@ export type UnitReferencedBlockDocument = {
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -1086,7 +1086,7 @@ export type UnitReferencedBlockDocument = {
 											| "ai-disclosure"
 											| "license"
 											| "tag"
-											| "author"
+											| "publisher"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -1118,7 +1118,7 @@ export type UnitReferencedBlockDocument = {
 											| "ai-disclosure"
 											| "license"
 											| "tag"
-											| "author"
+											| "publisher"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -1151,7 +1151,7 @@ export type UnitReferencedBlockDocument = {
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -1190,7 +1190,7 @@ export type UnitReferencedBlockDocument = {
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -1221,7 +1221,7 @@ export type UnitReferencedBlockDocument = {
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -1252,7 +1252,7 @@ export type UnitReferencedBlockDocument = {
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -1284,7 +1284,7 @@ export type UnitReferencedBlockDocument = {
 											| "ai-disclosure"
 											| "license"
 											| "tag"
-											| "author"
+											| "publisher"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -1316,7 +1316,7 @@ export type UnitReferencedBlockDocument = {
 											| "ai-disclosure"
 											| "license"
 											| "tag"
-											| "author"
+											| "publisher"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -1349,7 +1349,7 @@ export type UnitReferencedBlockDocument = {
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -1394,7 +1394,7 @@ export type UnitReferencedBlockDocument = {
 							| "ai-disclosure"
 							| "license"
 							| "tag"
-							| "author"
+							| "publisher"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -1560,7 +1560,7 @@ export type UnitReferencedBlockDocument = {
 							| "ai-disclosure"
 							| "license"
 							| "tag"
-							| "author"
+							| "publisher"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -1801,7 +1801,7 @@ export type ZoneBoundaryDocument = {
 					| "ai-disclosure"
 					| "license"
 					| "tag"
-					| "author"
+					| "publisher"
 					| "realm"
 					| "zone"
 					| "subject"
@@ -1832,7 +1832,7 @@ export type ZoneBoundaryDocument = {
 					| "ai-disclosure"
 					| "license"
 					| "tag"
-					| "author"
+					| "publisher"
 					| "realm"
 					| "zone"
 					| "subject"
@@ -1863,7 +1863,7 @@ export type ZoneBoundaryDocument = {
 					| "ai-disclosure"
 					| "license"
 					| "tag"
-					| "author"
+					| "publisher"
 					| "realm"
 					| "zone"
 					| "subject"
@@ -1895,7 +1895,7 @@ export type ZoneBoundaryDocument = {
 							| "ai-disclosure"
 							| "license"
 							| "tag"
-							| "author"
+							| "publisher"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -1927,7 +1927,7 @@ export type ZoneBoundaryDocument = {
 							| "ai-disclosure"
 							| "license"
 							| "tag"
-							| "author"
+							| "publisher"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -1960,7 +1960,7 @@ export type ZoneBoundaryDocument = {
 					| "ai-disclosure"
 					| "license"
 					| "tag"
-					| "author"
+					| "publisher"
 					| "realm"
 					| "zone"
 					| "subject"
@@ -2061,10 +2061,9 @@ export const ApiErrorCode = {
 	SlugScopeUnavailable: "SlugScopeUnavailable",
 	SlugScopeCycle: "SlugScopeCycle",
 	SlugDepthExceeded: "SlugDepthExceeded",
-	UnitAddressUnchanged: "UnitAddressUnchanged",
 	UnitAddressMutationForbidden: "UnitAddressMutationForbidden",
 	SlugRedirectNotFound: "SlugRedirectNotFound",
-	SlugRedirectLoop: "SlugRedirectLoop",
+	UnitSlugAddressNotFound: "UnitSlugAddressNotFound",
 	EntityEntryNotFound: "EntityEntryNotFound",
 	EntityAssociationRestricted: "EntityAssociationRestricted",
 	EntityOwnershipRequired: "EntityOwnershipRequired",
@@ -3386,7 +3385,7 @@ export type GetApiRecommendationsUnitsStatus200ItemsTypeEnum =
 	(typeof GetApiRecommendationsUnitsStatus200ItemsTypeEnum)[keyof typeof GetApiRecommendationsUnitsStatus200ItemsTypeEnum];
 
 export const GetApiRecommendationsUnitsStatus200ItemsRecommendationReason = {
-	followed_author: "followed_author",
+	followed_publisher: "followed_publisher",
 	followed_realm: "followed_realm",
 	based_on_activity: "based_on_activity",
 	related_subject: "related_subject",
@@ -3427,7 +3426,6 @@ export type GetApiRecommendationsUnitsStatus200 = {
 		 * @type string
 		 */
 		type: GetApiRecommendationsUnitsStatus200ItemsTypeEnum;
-		slug: (string | null) | null;
 		language: (string | null) | null;
 		/**
 		 * @type string
@@ -3636,7 +3634,7 @@ export type GetApiRecommendationsPostsByPostIdStatus200ItemsPostKindEnum =
 	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsPostKindEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsPostKindEnum];
 
 export const GetApiRecommendationsPostsByPostIdStatus200ItemsRecommendationReason = {
-	followed_author: "followed_author",
+	followed_publisher: "followed_publisher",
 	followed_realm: "followed_realm",
 	based_on_activity: "based_on_activity",
 	related_subject: "related_subject",
@@ -3678,12 +3676,30 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 		 */
 		postKind: GetApiRecommendationsPostsByPostIdStatus200ItemsPostKindEnum;
 		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
+		 * @type array
 		 */
-		authorId: string;
-		authorName: (string | null) | null;
+		publishers: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			profileId: string;
+			name: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			firstPublishedAt: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			lastPublishedAt: string;
+			publicationCount: string | number;
+		}[];
 		realmId: (string | null) | null;
 		subjectId: (string | null) | null;
 		rootPostId: (string | null) | null;
@@ -3828,12 +3844,30 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 					rootPostId: string;
 					title: (string | null) | null;
 					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
+					 * @type array
 					 */
-					authorId: string;
-					authorName: (string | null) | null;
+					publishers: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						profileId: string;
+						name: (string | null) | null;
+						/**
+						 * @description
+						 * Format: `date-time`
+						 * @type string
+						 */
+						firstPublishedAt: string;
+						/**
+						 * @description
+						 * Format: `date-time`
+						 * @type string
+						 */
+						lastPublishedAt: string;
+						publicationCount: string | number;
+					}[];
 					subjectId: (string | null) | null;
 			  } | null)
 			| null;
@@ -3849,7 +3883,6 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 					 * @type string
 					 */
 					type: string;
-					slug: (string | null) | null;
 					title: (string | null) | null;
 					cover:
 						| ({
@@ -6265,7 +6298,7 @@ export type GetApiFeedStatus200ItemsPostKindEnum =
 	(typeof GetApiFeedStatus200ItemsPostKindEnum)[keyof typeof GetApiFeedStatus200ItemsPostKindEnum];
 
 export const GetApiFeedStatus200ItemsRecommendationReason = {
-	followed_author: "followed_author",
+	followed_publisher: "followed_publisher",
 	followed_realm: "followed_realm",
 	based_on_activity: "based_on_activity",
 	related_subject: "related_subject",
@@ -6307,12 +6340,30 @@ export type GetApiFeedStatus200 = {
 		 */
 		postKind: GetApiFeedStatus200ItemsPostKindEnum;
 		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
+		 * @type array
 		 */
-		authorId: string;
-		authorName: (string | null) | null;
+		publishers: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			profileId: string;
+			name: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			firstPublishedAt: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			lastPublishedAt: string;
+			publicationCount: string | number;
+		}[];
 		realmId: (string | null) | null;
 		subjectId: (string | null) | null;
 		rootPostId: (string | null) | null;
@@ -6457,12 +6508,30 @@ export type GetApiFeedStatus200 = {
 					rootPostId: string;
 					title: (string | null) | null;
 					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
+					 * @type array
 					 */
-					authorId: string;
-					authorName: (string | null) | null;
+					publishers: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						profileId: string;
+						name: (string | null) | null;
+						/**
+						 * @description
+						 * Format: `date-time`
+						 * @type string
+						 */
+						firstPublishedAt: string;
+						/**
+						 * @description
+						 * Format: `date-time`
+						 * @type string
+						 */
+						lastPublishedAt: string;
+						publicationCount: string | number;
+					}[];
 					subjectId: (string | null) | null;
 			  } | null)
 			| null;
@@ -6478,7 +6547,6 @@ export type GetApiFeedStatus200 = {
 					 * @type string
 					 */
 					type: string;
-					slug: (string | null) | null;
 					title: (string | null) | null;
 					cover:
 						| ({
@@ -7687,7 +7755,7 @@ export type GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsPermiss
 export const GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsDecisionRoleEnum = {
 	viewer: "viewer",
 	editor: "editor",
-	publisher: "publisher",
+	publishing_editor: "publishing_editor",
 	maintainer: "maintainer",
 	owner: "owner",
 } as const;
@@ -8697,7 +8765,7 @@ export type PostApiGovernanceUnitByUnitIdAccessBindingsRequestSubjectRelationEnu
 export const PostApiGovernanceUnitByUnitIdAccessBindingsRequestRoleEnum = {
 	viewer: "viewer",
 	editor: "editor",
-	publisher: "publisher",
+	publishing_editor: "publishing_editor",
 	maintainer: "maintainer",
 } as const;
 
@@ -14642,13 +14710,6 @@ export type PostApiSeriesBody = {
 	 */
 	kind: string;
 	/**
-	 * @minLength 3
-	 * @maxLength 63
-	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-	 * @type string | undefined
-	 */
-	slug?: string;
-	/**
 	 * @type object
 	 */
 	localization: {
@@ -17408,13 +17469,6 @@ export type PostApiZonesStatus500 = InternalError;
  */
 export type PostApiZonesBody = {
 	/**
-	 * @minLength 3
-	 * @maxLength 63
-	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-	 * @type string | undefined
-	 */
-	slug?: string;
-	/**
 	 * @type object
 	 */
 	localization: {
@@ -18485,7 +18539,6 @@ export type GetApiUsersMeStatus200 = {
 	 * @type string
 	 */
 	id: string;
-	slug: (string | null) | null;
 	/**
 	 * @type string
 	 */
@@ -18750,7 +18803,6 @@ export type PatchApiUsersMeStatus200 = {
 	 * @type string
 	 */
 	id: string;
-	slug: (string | null) | null;
 	/**
 	 * @type string
 	 */
@@ -19508,7 +19560,6 @@ export type GetApiUsersByIdStatus200 = {
 	 * @type string
 	 */
 	id: string;
-	slug: (string | null) | null;
 	/**
 	 * @type string
 	 */
@@ -20187,7 +20238,7 @@ export type DeleteApiUsersByIdBlockResponse =
 /**
  * @type object
  */
-export type PostApiUnitsResolveStatus200 = {
+export type ResolveUnitSlugAddressStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -20215,7 +20266,7 @@ export type PostApiUnitsResolveStatus200 = {
 /**
  * @type object
  */
-export type PostApiUnitsResolveStatus400 = {
+export type ResolveUnitSlugAddressStatus400 = {
 	/**
 	 * @type object
 	 */
@@ -20240,18 +20291,10 @@ export type PostApiUnitsResolveStatus400 = {
 	requestId: string;
 };
 
-export const PostApiUnitsResolveStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	SlugRedirectNotFound: "SlugRedirectNotFound",
-} as const;
-
-export type PostApiUnitsResolveStatus404ErrorCodeEnum =
-	(typeof PostApiUnitsResolveStatus404ErrorCodeEnum)[keyof typeof PostApiUnitsResolveStatus404ErrorCodeEnum];
-
 /**
  * @type object
  */
-export type PostApiUnitsResolveStatus404 = {
+export type ResolveUnitSlugAddressStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -20260,7 +20303,7 @@ export type PostApiUnitsResolveStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: PostApiUnitsResolveStatus404ErrorCodeEnum;
+		code: "UnitNotFound";
 		/**
 		 * @type string
 		 */
@@ -20276,19 +20319,10 @@ export type PostApiUnitsResolveStatus404 = {
 	requestId: string;
 };
 
-export const PostApiUnitsResolveStatus409ErrorCodeEnum = {
-	SlugScopeCycle: "SlugScopeCycle",
-	SlugScopeUnavailable: "SlugScopeUnavailable",
-	SlugRedirectLoop: "SlugRedirectLoop",
-} as const;
-
-export type PostApiUnitsResolveStatus409ErrorCodeEnum =
-	(typeof PostApiUnitsResolveStatus409ErrorCodeEnum)[keyof typeof PostApiUnitsResolveStatus409ErrorCodeEnum];
-
 /**
  * @type object
  */
-export type PostApiUnitsResolveStatus409 = {
+export type ResolveUnitSlugAddressStatus409 = {
 	/**
 	 * @type object
 	 */
@@ -20297,7 +20331,7 @@ export type PostApiUnitsResolveStatus409 = {
 		 * @default 'SlugScopeCycle'
 		 * @type string
 		 */
-		code: PostApiUnitsResolveStatus409ErrorCodeEnum;
+		code: "SlugScopeCycle";
 		/**
 		 * @type string
 		 */
@@ -20313,7 +20347,7 @@ export type PostApiUnitsResolveStatus409 = {
 	requestId: string;
 };
 
-export type PostApiUnitsResolveStatus422 =
+export type ResolveUnitSlugAddressStatus422 =
 	| {
 			/**
 			 * @type object
@@ -20343,12 +20377,12 @@ export type PostApiUnitsResolveStatus422 =
 /**
  * @type object
  */
-export type PostApiUnitsResolveStatus500 = InternalError;
+export type ResolveUnitSlugAddressStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PostApiUnitsResolveBody = {
+export type ResolveUnitSlugAddressBody = {
 	/**
 	 * @type array
 	 */
@@ -20358,8 +20392,8 @@ export type PostApiUnitsResolveBody = {
 /**
  * @type object
  */
-export type PostApiUnitsResolveOptions = {
-	body: PostApiUnitsResolveBody;
+export type ResolveUnitSlugAddressOptions = {
+	body: ResolveUnitSlugAddressBody;
 	path?: never;
 	query?: never;
 	headers?: never;
@@ -20368,36 +20402,51 @@ export type PostApiUnitsResolveOptions = {
 /**
  * @type object
  */
-export type PostApiUnitsResolveResponses = {
-	"200": PostApiUnitsResolveStatus200;
-	"400": PostApiUnitsResolveStatus400;
-	"404": PostApiUnitsResolveStatus404;
-	"409": PostApiUnitsResolveStatus409;
-	"422": PostApiUnitsResolveStatus422;
-	"500": PostApiUnitsResolveStatus500;
+export type ResolveUnitSlugAddressResponses = {
+	"200": ResolveUnitSlugAddressStatus200;
+	"400": ResolveUnitSlugAddressStatus400;
+	"404": ResolveUnitSlugAddressStatus404;
+	"409": ResolveUnitSlugAddressStatus409;
+	"422": ResolveUnitSlugAddressStatus422;
+	"500": ResolveUnitSlugAddressStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PostApiUnitsResolveResponse =
-	| PostApiUnitsResolveStatus200
-	| PostApiUnitsResolveStatus400
-	| PostApiUnitsResolveStatus404
-	| PostApiUnitsResolveStatus409
-	| PostApiUnitsResolveStatus422
-	| PostApiUnitsResolveStatus500;
+export type ResolveUnitSlugAddressResponse =
+	| ResolveUnitSlugAddressStatus200
+	| ResolveUnitSlugAddressStatus400
+	| ResolveUnitSlugAddressStatus404
+	| ResolveUnitSlugAddressStatus409
+	| ResolveUnitSlugAddressStatus422
+	| ResolveUnitSlugAddressStatus500;
 
 /**
  * @type object
  */
-export type PostApiUnitsSlugNamespacesStatus200 = {
+export type ReplaceOwnProfileSlugAddressStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
-	id: string;
+	addressId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	scopeUnitId: (string | null) | null;
+	/**
+	 * @minLength 1
+	 * @maxLength 63
+	 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+	 * @type string
+	 */
+	slug: string;
+	redirectAddressId: (string | null) | null;
 	/**
 	 * @type array
 	 */
@@ -20407,7 +20456,7 @@ export type PostApiUnitsSlugNamespacesStatus200 = {
 /**
  * @type object
  */
-export type PostApiUnitsSlugNamespacesStatus400 = {
+export type ReplaceOwnProfileSlugAddressStatus400 = {
 	/**
 	 * @type object
 	 */
@@ -20432,27 +20481,19 @@ export type PostApiUnitsSlugNamespacesStatus400 = {
 	requestId: string;
 };
 
-export const PostApiUnitsSlugNamespacesStatus403ErrorCodeEnum = {
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-	UnitAddressMutationForbidden: "UnitAddressMutationForbidden",
-} as const;
-
-export type PostApiUnitsSlugNamespacesStatus403ErrorCodeEnum =
-	(typeof PostApiUnitsSlugNamespacesStatus403ErrorCodeEnum)[keyof typeof PostApiUnitsSlugNamespacesStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
-export type PostApiUnitsSlugNamespacesStatus403 = {
+export type ReplaceOwnProfileSlugAddressStatus401 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'PlatformCapabilityRequired'
+		 * @default 'AuthenticationRequired'
 		 * @type string
 		 */
-		code: PostApiUnitsSlugNamespacesStatus403ErrorCodeEnum;
+		code: "AuthenticationRequired";
 		/**
 		 * @type string
 		 */
@@ -20468,19 +20509,48 @@ export type PostApiUnitsSlugNamespacesStatus403 = {
 	requestId: string;
 };
 
-export const PostApiUnitsSlugNamespacesStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	SlugScopeNotFound: "SlugScopeNotFound",
-	SlugRedirectNotFound: "SlugRedirectNotFound",
+export const ReplaceOwnProfileSlugAddressStatus403ErrorCodeEnum = {
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountRestricted: "AccountRestricted",
+	UnitAddressMutationForbidden: "UnitAddressMutationForbidden",
 } as const;
 
-export type PostApiUnitsSlugNamespacesStatus404ErrorCodeEnum =
-	(typeof PostApiUnitsSlugNamespacesStatus404ErrorCodeEnum)[keyof typeof PostApiUnitsSlugNamespacesStatus404ErrorCodeEnum];
+export type ReplaceOwnProfileSlugAddressStatus403ErrorCodeEnum =
+	(typeof ReplaceOwnProfileSlugAddressStatus403ErrorCodeEnum)[keyof typeof ReplaceOwnProfileSlugAddressStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PostApiUnitsSlugNamespacesStatus404 = {
+export type ReplaceOwnProfileSlugAddressStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenPermissionRequired'
+		 * @type string
+		 */
+		code: ReplaceOwnProfileSlugAddressStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ReplaceOwnProfileSlugAddressStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -20489,7 +20559,7 @@ export type PostApiUnitsSlugNamespacesStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: PostApiUnitsSlugNamespacesStatus404ErrorCodeEnum;
+		code: "UnitNotFound";
 		/**
 		 * @type string
 		 */
@@ -20505,20 +20575,19 @@ export type PostApiUnitsSlugNamespacesStatus404 = {
 	requestId: string;
 };
 
-export const PostApiUnitsSlugNamespacesStatus409ErrorCodeEnum = {
+export const ReplaceOwnProfileSlugAddressStatus409ErrorCodeEnum = {
 	SlugTaken: "SlugTaken",
 	SlugScopeUnavailable: "SlugScopeUnavailable",
 	SlugScopeCycle: "SlugScopeCycle",
-	SlugRedirectLoop: "SlugRedirectLoop",
 } as const;
 
-export type PostApiUnitsSlugNamespacesStatus409ErrorCodeEnum =
-	(typeof PostApiUnitsSlugNamespacesStatus409ErrorCodeEnum)[keyof typeof PostApiUnitsSlugNamespacesStatus409ErrorCodeEnum];
+export type ReplaceOwnProfileSlugAddressStatus409ErrorCodeEnum =
+	(typeof ReplaceOwnProfileSlugAddressStatus409ErrorCodeEnum)[keyof typeof ReplaceOwnProfileSlugAddressStatus409ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PostApiUnitsSlugNamespacesStatus409 = {
+export type ReplaceOwnProfileSlugAddressStatus409 = {
 	/**
 	 * @type object
 	 */
@@ -20527,7 +20596,7 @@ export type PostApiUnitsSlugNamespacesStatus409 = {
 		 * @default 'SlugTaken'
 		 * @type string
 		 */
-		code: PostApiUnitsSlugNamespacesStatus409ErrorCodeEnum;
+		code: ReplaceOwnProfileSlugAddressStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -20543,7 +20612,7 @@ export type PostApiUnitsSlugNamespacesStatus409 = {
 	requestId: string;
 };
 
-export type PostApiUnitsSlugNamespacesStatus422 =
+export type ReplaceOwnProfileSlugAddressStatus422 =
 	| {
 			/**
 			 * @type object
@@ -20573,36 +20642,12 @@ export type PostApiUnitsSlugNamespacesStatus422 =
 /**
  * @type object
  */
-export type PostApiUnitsSlugNamespacesStatus500 = InternalError;
-
-export const PostApiUnitsSlugNamespacesRequestReasonCodeEnum = {
-	content_policy: "content_policy",
-	realm_rules: "realm_rules",
-	spam: "spam",
-	harassment: "harassment",
-	unsafe_content: "unsafe_content",
-	off_topic: "off_topic",
-	duplicate: "duplicate",
-	account_security: "account_security",
-	user_request: "user_request",
-	appeal: "appeal",
-	administrative: "administrative",
-	other: "other",
-} as const;
-
-export type PostApiUnitsSlugNamespacesRequestReasonCodeEnum =
-	(typeof PostApiUnitsSlugNamespacesRequestReasonCodeEnum)[keyof typeof PostApiUnitsSlugNamespacesRequestReasonCodeEnum];
+export type ReplaceOwnProfileSlugAddressStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PostApiUnitsSlugNamespacesBody = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	scopeUnitId: string;
+export type ReplaceOwnProfileSlugAddressBody = {
 	/**
 	 * @minLength 1
 	 * @maxLength 63
@@ -20610,17 +20655,13 @@ export type PostApiUnitsSlugNamespacesBody = {
 	 * @type string
 	 */
 	slug: string;
-	/**
-	 * @type string
-	 */
-	reasonCode: PostApiUnitsSlugNamespacesRequestReasonCodeEnum;
 };
 
 /**
  * @type object
  */
-export type PostApiUnitsSlugNamespacesOptions = {
-	body: PostApiUnitsSlugNamespacesBody;
+export type ReplaceOwnProfileSlugAddressOptions = {
+	body: ReplaceOwnProfileSlugAddressBody;
 	path?: never;
 	query?: never;
 	headers?: never;
@@ -20629,32 +20670,34 @@ export type PostApiUnitsSlugNamespacesOptions = {
 /**
  * @type object
  */
-export type PostApiUnitsSlugNamespacesResponses = {
-	"200": PostApiUnitsSlugNamespacesStatus200;
-	"400": PostApiUnitsSlugNamespacesStatus400;
-	"403": PostApiUnitsSlugNamespacesStatus403;
-	"404": PostApiUnitsSlugNamespacesStatus404;
-	"409": PostApiUnitsSlugNamespacesStatus409;
-	"422": PostApiUnitsSlugNamespacesStatus422;
-	"500": PostApiUnitsSlugNamespacesStatus500;
+export type ReplaceOwnProfileSlugAddressResponses = {
+	"200": ReplaceOwnProfileSlugAddressStatus200;
+	"400": ReplaceOwnProfileSlugAddressStatus400;
+	"401": ReplaceOwnProfileSlugAddressStatus401;
+	"403": ReplaceOwnProfileSlugAddressStatus403;
+	"404": ReplaceOwnProfileSlugAddressStatus404;
+	"409": ReplaceOwnProfileSlugAddressStatus409;
+	"422": ReplaceOwnProfileSlugAddressStatus422;
+	"500": ReplaceOwnProfileSlugAddressStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PostApiUnitsSlugNamespacesResponse =
-	| PostApiUnitsSlugNamespacesStatus200
-	| PostApiUnitsSlugNamespacesStatus400
-	| PostApiUnitsSlugNamespacesStatus403
-	| PostApiUnitsSlugNamespacesStatus404
-	| PostApiUnitsSlugNamespacesStatus409
-	| PostApiUnitsSlugNamespacesStatus422
-	| PostApiUnitsSlugNamespacesStatus500;
+export type ReplaceOwnProfileSlugAddressResponse =
+	| ReplaceOwnProfileSlugAddressStatus200
+	| ReplaceOwnProfileSlugAddressStatus400
+	| ReplaceOwnProfileSlugAddressStatus401
+	| ReplaceOwnProfileSlugAddressStatus403
+	| ReplaceOwnProfileSlugAddressStatus404
+	| ReplaceOwnProfileSlugAddressStatus409
+	| ReplaceOwnProfileSlugAddressStatus422
+	| ReplaceOwnProfileSlugAddressStatus500;
 
 /**
  * @type object
  */
-export type PutApiUnitsSlugAddressesByUnitIdPath = {
+export type GetUnitSlugAddressAsStaffPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -20666,46 +20709,42 @@ export type PutApiUnitsSlugAddressesByUnitIdPath = {
 /**
  * @type object
  */
-export type PutApiUnitsSlugAddressesByUnitIdStatus200 = {
+export type GetUnitSlugAddressAsStaffStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	addressId: string;
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
 	unitId: string;
+	scopeUnitId: (string | null) | null;
 	/**
-	 * @description
-	 * Format: `uuid`
+	 * @minLength 1
+	 * @maxLength 63
+	 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
 	 * @type string
 	 */
-	redirectUnitId: string;
-	/**
-	 * @type array
-	 */
-	canonicalPath: string[];
+	slug: string;
 };
-
-export const PutApiUnitsSlugAddressesByUnitIdStatus400ErrorCodeEnum = {
-	InvalidSlug: "InvalidSlug",
-	UnitAddressUnchanged: "UnitAddressUnchanged",
-} as const;
-
-export type PutApiUnitsSlugAddressesByUnitIdStatus400ErrorCodeEnum =
-	(typeof PutApiUnitsSlugAddressesByUnitIdStatus400ErrorCodeEnum)[keyof typeof PutApiUnitsSlugAddressesByUnitIdStatus400ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PutApiUnitsSlugAddressesByUnitIdStatus400 = {
+export type GetUnitSlugAddressAsStaffStatus401 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'InvalidSlug'
+		 * @default 'AuthenticationRequired'
 		 * @type string
 		 */
-		code: PutApiUnitsSlugAddressesByUnitIdStatus400ErrorCodeEnum;
+		code: "AuthenticationRequired";
 		/**
 		 * @type string
 		 */
@@ -20721,18 +20760,10 @@ export type PutApiUnitsSlugAddressesByUnitIdStatus400 = {
 	requestId: string;
 };
 
-export const PutApiUnitsSlugAddressesByUnitIdStatus403ErrorCodeEnum = {
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-	UnitAddressMutationForbidden: "UnitAddressMutationForbidden",
-} as const;
-
-export type PutApiUnitsSlugAddressesByUnitIdStatus403ErrorCodeEnum =
-	(typeof PutApiUnitsSlugAddressesByUnitIdStatus403ErrorCodeEnum)[keyof typeof PutApiUnitsSlugAddressesByUnitIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
-export type PutApiUnitsSlugAddressesByUnitIdStatus403 = {
+export type GetUnitSlugAddressAsStaffStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -20741,7 +20772,7 @@ export type PutApiUnitsSlugAddressesByUnitIdStatus403 = {
 		 * @default 'PlatformCapabilityRequired'
 		 * @type string
 		 */
-		code: PutApiUnitsSlugAddressesByUnitIdStatus403ErrorCodeEnum;
+		code: "PlatformCapabilityRequired";
 		/**
 		 * @type string
 		 */
@@ -20757,19 +20788,18 @@ export type PutApiUnitsSlugAddressesByUnitIdStatus403 = {
 	requestId: string;
 };
 
-export const PutApiUnitsSlugAddressesByUnitIdStatus404ErrorCodeEnum = {
+export const GetUnitSlugAddressAsStaffStatus404ErrorCodeEnum = {
 	UnitNotFound: "UnitNotFound",
-	SlugScopeNotFound: "SlugScopeNotFound",
-	SlugRedirectNotFound: "SlugRedirectNotFound",
+	UnitSlugAddressNotFound: "UnitSlugAddressNotFound",
 } as const;
 
-export type PutApiUnitsSlugAddressesByUnitIdStatus404ErrorCodeEnum =
-	(typeof PutApiUnitsSlugAddressesByUnitIdStatus404ErrorCodeEnum)[keyof typeof PutApiUnitsSlugAddressesByUnitIdStatus404ErrorCodeEnum];
+export type GetUnitSlugAddressAsStaffStatus404ErrorCodeEnum =
+	(typeof GetUnitSlugAddressAsStaffStatus404ErrorCodeEnum)[keyof typeof GetUnitSlugAddressAsStaffStatus404ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type PutApiUnitsSlugAddressesByUnitIdStatus404 = {
+export type GetUnitSlugAddressAsStaffStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -20778,7 +20808,7 @@ export type PutApiUnitsSlugAddressesByUnitIdStatus404 = {
 		 * @default 'UnitNotFound'
 		 * @type string
 		 */
-		code: PutApiUnitsSlugAddressesByUnitIdStatus404ErrorCodeEnum;
+		code: GetUnitSlugAddressAsStaffStatus404ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -20794,20 +20824,233 @@ export type PutApiUnitsSlugAddressesByUnitIdStatus404 = {
 	requestId: string;
 };
 
-export const PutApiUnitsSlugAddressesByUnitIdStatus409ErrorCodeEnum = {
-	SlugTaken: "SlugTaken",
-	SlugScopeUnavailable: "SlugScopeUnavailable",
-	SlugScopeCycle: "SlugScopeCycle",
-	SlugRedirectLoop: "SlugRedirectLoop",
-} as const;
-
-export type PutApiUnitsSlugAddressesByUnitIdStatus409ErrorCodeEnum =
-	(typeof PutApiUnitsSlugAddressesByUnitIdStatus409ErrorCodeEnum)[keyof typeof PutApiUnitsSlugAddressesByUnitIdStatus409ErrorCodeEnum];
+/**
+ * @type object
+ */
+export type GetUnitSlugAddressAsStaffStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type PutApiUnitsSlugAddressesByUnitIdStatus409 = {
+export type GetUnitSlugAddressAsStaffStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetUnitSlugAddressAsStaffOptions = {
+	body?: never;
+	path: GetUnitSlugAddressAsStaffPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetUnitSlugAddressAsStaffResponses = {
+	"200": GetUnitSlugAddressAsStaffStatus200;
+	"401": GetUnitSlugAddressAsStaffStatus401;
+	"403": GetUnitSlugAddressAsStaffStatus403;
+	"404": GetUnitSlugAddressAsStaffStatus404;
+	"422": GetUnitSlugAddressAsStaffStatus422;
+	"500": GetUnitSlugAddressAsStaffStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetUnitSlugAddressAsStaffResponse =
+	| GetUnitSlugAddressAsStaffStatus200
+	| GetUnitSlugAddressAsStaffStatus401
+	| GetUnitSlugAddressAsStaffStatus403
+	| GetUnitSlugAddressAsStaffStatus404
+	| GetUnitSlugAddressAsStaffStatus422
+	| GetUnitSlugAddressAsStaffStatus500;
+
+/**
+ * @type object
+ */
+export type ReplaceUnitSlugAddressAsStaffPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type ReplaceUnitSlugAddressAsStaffStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	addressId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	scopeUnitId: (string | null) | null;
+	/**
+	 * @minLength 1
+	 * @maxLength 63
+	 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+	 * @type string
+	 */
+	slug: string;
+	redirectAddressId: (string | null) | null;
+	/**
+	 * @type array
+	 */
+	canonicalPath: string[];
+};
+
+/**
+ * @type object
+ */
+export type ReplaceUnitSlugAddressAsStaffStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InvalidSlug'
+		 * @type string
+		 */
+		code: "InvalidSlug";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ReplaceUnitSlugAddressAsStaffStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: "AuthenticationRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const ReplaceUnitSlugAddressAsStaffStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	UnitAddressMutationForbidden: "UnitAddressMutationForbidden",
+} as const;
+
+export type ReplaceUnitSlugAddressAsStaffStatus403ErrorCodeEnum =
+	(typeof ReplaceUnitSlugAddressAsStaffStatus403ErrorCodeEnum)[keyof typeof ReplaceUnitSlugAddressAsStaffStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type ReplaceUnitSlugAddressAsStaffStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: ReplaceUnitSlugAddressAsStaffStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const ReplaceUnitSlugAddressAsStaffStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	SlugScopeNotFound: "SlugScopeNotFound",
+} as const;
+
+export type ReplaceUnitSlugAddressAsStaffStatus404ErrorCodeEnum =
+	(typeof ReplaceUnitSlugAddressAsStaffStatus404ErrorCodeEnum)[keyof typeof ReplaceUnitSlugAddressAsStaffStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type ReplaceUnitSlugAddressAsStaffStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: ReplaceUnitSlugAddressAsStaffStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const ReplaceUnitSlugAddressAsStaffStatus409ErrorCodeEnum = {
+	SlugTaken: "SlugTaken",
+	SlugScopeUnavailable: "SlugScopeUnavailable",
+	SlugScopeCycle: "SlugScopeCycle",
+} as const;
+
+export type ReplaceUnitSlugAddressAsStaffStatus409ErrorCodeEnum =
+	(typeof ReplaceUnitSlugAddressAsStaffStatus409ErrorCodeEnum)[keyof typeof ReplaceUnitSlugAddressAsStaffStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type ReplaceUnitSlugAddressAsStaffStatus409 = {
 	/**
 	 * @type object
 	 */
@@ -20816,7 +21059,7 @@ export type PutApiUnitsSlugAddressesByUnitIdStatus409 = {
 		 * @default 'SlugTaken'
 		 * @type string
 		 */
-		code: PutApiUnitsSlugAddressesByUnitIdStatus409ErrorCodeEnum;
+		code: ReplaceUnitSlugAddressAsStaffStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -20832,7 +21075,7 @@ export type PutApiUnitsSlugAddressesByUnitIdStatus409 = {
 	requestId: string;
 };
 
-export type PutApiUnitsSlugAddressesByUnitIdStatus422 =
+export type ReplaceUnitSlugAddressAsStaffStatus422 =
 	| {
 			/**
 			 * @type object
@@ -20862,9 +21105,9 @@ export type PutApiUnitsSlugAddressesByUnitIdStatus422 =
 /**
  * @type object
  */
-export type PutApiUnitsSlugAddressesByUnitIdStatus500 = InternalError;
+export type ReplaceUnitSlugAddressAsStaffStatus500 = InternalError;
 
-export const PutApiUnitsSlugAddressesByUnitIdRequestReasonCodeEnum = {
+export const ReplaceUnitSlugAddressAsStaffRequestReasonCodeEnum = {
 	content_policy: "content_policy",
 	realm_rules: "realm_rules",
 	spam: "spam",
@@ -20879,19 +21122,14 @@ export const PutApiUnitsSlugAddressesByUnitIdRequestReasonCodeEnum = {
 	other: "other",
 } as const;
 
-export type PutApiUnitsSlugAddressesByUnitIdRequestReasonCodeEnum =
-	(typeof PutApiUnitsSlugAddressesByUnitIdRequestReasonCodeEnum)[keyof typeof PutApiUnitsSlugAddressesByUnitIdRequestReasonCodeEnum];
+export type ReplaceUnitSlugAddressAsStaffRequestReasonCodeEnum =
+	(typeof ReplaceUnitSlugAddressAsStaffRequestReasonCodeEnum)[keyof typeof ReplaceUnitSlugAddressAsStaffRequestReasonCodeEnum];
 
 /**
  * @type object
  */
-export type PutApiUnitsSlugAddressesByUnitIdBody = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	scopeUnitId: string;
+export type ReplaceUnitSlugAddressAsStaffBody = {
+	scopeUnitId: (string | null) | null;
 	/**
 	 * @minLength 1
 	 * @maxLength 63
@@ -20902,15 +21140,15 @@ export type PutApiUnitsSlugAddressesByUnitIdBody = {
 	/**
 	 * @type string
 	 */
-	reasonCode: PutApiUnitsSlugAddressesByUnitIdRequestReasonCodeEnum;
+	reasonCode: ReplaceUnitSlugAddressAsStaffRequestReasonCodeEnum;
 };
 
 /**
  * @type object
  */
-export type PutApiUnitsSlugAddressesByUnitIdOptions = {
-	body: PutApiUnitsSlugAddressesByUnitIdBody;
-	path: PutApiUnitsSlugAddressesByUnitIdPath;
+export type ReplaceUnitSlugAddressAsStaffOptions = {
+	body: ReplaceUnitSlugAddressAsStaffBody;
+	path: ReplaceUnitSlugAddressAsStaffPath;
 	query?: never;
 	headers?: never;
 };
@@ -20918,66 +21156,74 @@ export type PutApiUnitsSlugAddressesByUnitIdOptions = {
 /**
  * @type object
  */
-export type PutApiUnitsSlugAddressesByUnitIdResponses = {
-	"200": PutApiUnitsSlugAddressesByUnitIdStatus200;
-	"400": PutApiUnitsSlugAddressesByUnitIdStatus400;
-	"403": PutApiUnitsSlugAddressesByUnitIdStatus403;
-	"404": PutApiUnitsSlugAddressesByUnitIdStatus404;
-	"409": PutApiUnitsSlugAddressesByUnitIdStatus409;
-	"422": PutApiUnitsSlugAddressesByUnitIdStatus422;
-	"500": PutApiUnitsSlugAddressesByUnitIdStatus500;
+export type ReplaceUnitSlugAddressAsStaffResponses = {
+	"200": ReplaceUnitSlugAddressAsStaffStatus200;
+	"400": ReplaceUnitSlugAddressAsStaffStatus400;
+	"401": ReplaceUnitSlugAddressAsStaffStatus401;
+	"403": ReplaceUnitSlugAddressAsStaffStatus403;
+	"404": ReplaceUnitSlugAddressAsStaffStatus404;
+	"409": ReplaceUnitSlugAddressAsStaffStatus409;
+	"422": ReplaceUnitSlugAddressAsStaffStatus422;
+	"500": ReplaceUnitSlugAddressAsStaffStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PutApiUnitsSlugAddressesByUnitIdResponse =
-	| PutApiUnitsSlugAddressesByUnitIdStatus200
-	| PutApiUnitsSlugAddressesByUnitIdStatus400
-	| PutApiUnitsSlugAddressesByUnitIdStatus403
-	| PutApiUnitsSlugAddressesByUnitIdStatus404
-	| PutApiUnitsSlugAddressesByUnitIdStatus409
-	| PutApiUnitsSlugAddressesByUnitIdStatus422
-	| PutApiUnitsSlugAddressesByUnitIdStatus500;
+export type ReplaceUnitSlugAddressAsStaffResponse =
+	| ReplaceUnitSlugAddressAsStaffStatus200
+	| ReplaceUnitSlugAddressAsStaffStatus400
+	| ReplaceUnitSlugAddressAsStaffStatus401
+	| ReplaceUnitSlugAddressAsStaffStatus403
+	| ReplaceUnitSlugAddressAsStaffStatus404
+	| ReplaceUnitSlugAddressAsStaffStatus409
+	| ReplaceUnitSlugAddressAsStaffStatus422
+	| ReplaceUnitSlugAddressAsStaffStatus500;
 
 /**
  * @type object
  */
-export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdPath = {
+export type CreateSlugNamespaceAsStaffStatus201 = {
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
-	redirectUnitId: string;
+	addressId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	scopeUnitId: (string | null) | null;
+	/**
+	 * @minLength 1
+	 * @maxLength 63
+	 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+	 * @type string
+	 */
+	slug: string;
+	redirectAddressId: (string | null) | null;
+	/**
+	 * @type array
+	 */
+	canonicalPath: string[];
 };
-
-/**
- * @type void
- */
-export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus204 = void;
-
-export const DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403ErrorCodeEnum = {
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
-	UnitAddressMutationForbidden: "UnitAddressMutationForbidden",
-} as const;
-
-export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403ErrorCodeEnum];
 
 /**
  * @type object
  */
-export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403 = {
+export type CreateSlugNamespaceAsStaffStatus400 = {
 	/**
 	 * @type object
 	 */
 	error: {
 		/**
-		 * @default 'PlatformCapabilityRequired'
+		 * @default 'InvalidSlug'
 		 * @type string
 		 */
-		code: DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403ErrorCodeEnum;
+		code: "InvalidSlug";
 		/**
 		 * @type string
 		 */
@@ -20996,7 +21242,330 @@ export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403 = {
 /**
  * @type object
  */
-export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus404 = {
+export type CreateSlugNamespaceAsStaffStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: "AuthenticationRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const CreateSlugNamespaceAsStaffStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	UnitAddressMutationForbidden: "UnitAddressMutationForbidden",
+} as const;
+
+export type CreateSlugNamespaceAsStaffStatus403ErrorCodeEnum =
+	(typeof CreateSlugNamespaceAsStaffStatus403ErrorCodeEnum)[keyof typeof CreateSlugNamespaceAsStaffStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type CreateSlugNamespaceAsStaffStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: CreateSlugNamespaceAsStaffStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const CreateSlugNamespaceAsStaffStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	SlugScopeNotFound: "SlugScopeNotFound",
+} as const;
+
+export type CreateSlugNamespaceAsStaffStatus404ErrorCodeEnum =
+	(typeof CreateSlugNamespaceAsStaffStatus404ErrorCodeEnum)[keyof typeof CreateSlugNamespaceAsStaffStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type CreateSlugNamespaceAsStaffStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: CreateSlugNamespaceAsStaffStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const CreateSlugNamespaceAsStaffStatus409ErrorCodeEnum = {
+	SlugTaken: "SlugTaken",
+	SlugScopeUnavailable: "SlugScopeUnavailable",
+	SlugScopeCycle: "SlugScopeCycle",
+} as const;
+
+export type CreateSlugNamespaceAsStaffStatus409ErrorCodeEnum =
+	(typeof CreateSlugNamespaceAsStaffStatus409ErrorCodeEnum)[keyof typeof CreateSlugNamespaceAsStaffStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type CreateSlugNamespaceAsStaffStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'SlugTaken'
+		 * @type string
+		 */
+		code: CreateSlugNamespaceAsStaffStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type CreateSlugNamespaceAsStaffStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'SlugDepthExceeded'
+				 * @type string
+				 */
+				code: "SlugDepthExceeded";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type CreateSlugNamespaceAsStaffStatus500 = InternalError;
+
+export const CreateSlugNamespaceAsStaffRequestReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type CreateSlugNamespaceAsStaffRequestReasonCodeEnum =
+	(typeof CreateSlugNamespaceAsStaffRequestReasonCodeEnum)[keyof typeof CreateSlugNamespaceAsStaffRequestReasonCodeEnum];
+
+/**
+ * @type object
+ */
+export type CreateSlugNamespaceAsStaffBody = {
+	scopeUnitId: (string | null) | null;
+	/**
+	 * @minLength 1
+	 * @maxLength 63
+	 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+	 * @type string
+	 */
+	slug: string;
+	/**
+	 * @type string
+	 */
+	reasonCode: CreateSlugNamespaceAsStaffRequestReasonCodeEnum;
+};
+
+/**
+ * @type object
+ */
+export type CreateSlugNamespaceAsStaffOptions = {
+	body: CreateSlugNamespaceAsStaffBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type CreateSlugNamespaceAsStaffResponses = {
+	"201": CreateSlugNamespaceAsStaffStatus201;
+	"400": CreateSlugNamespaceAsStaffStatus400;
+	"401": CreateSlugNamespaceAsStaffStatus401;
+	"403": CreateSlugNamespaceAsStaffStatus403;
+	"404": CreateSlugNamespaceAsStaffStatus404;
+	"409": CreateSlugNamespaceAsStaffStatus409;
+	"422": CreateSlugNamespaceAsStaffStatus422;
+	"500": CreateSlugNamespaceAsStaffStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type CreateSlugNamespaceAsStaffResponse =
+	| CreateSlugNamespaceAsStaffStatus201
+	| CreateSlugNamespaceAsStaffStatus400
+	| CreateSlugNamespaceAsStaffStatus401
+	| CreateSlugNamespaceAsStaffStatus403
+	| CreateSlugNamespaceAsStaffStatus404
+	| CreateSlugNamespaceAsStaffStatus409
+	| CreateSlugNamespaceAsStaffStatus422
+	| CreateSlugNamespaceAsStaffStatus500;
+
+/**
+ * @type object
+ */
+export type ReleaseSlugRedirectAsStaffPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	redirectAddressId: string;
+};
+
+/**
+ * @type void
+ */
+export type ReleaseSlugRedirectAsStaffStatus204 = void;
+
+/**
+ * @type object
+ */
+export type ReleaseSlugRedirectAsStaffStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: "AuthenticationRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const ReleaseSlugRedirectAsStaffStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	UnitAddressMutationForbidden: "UnitAddressMutationForbidden",
+} as const;
+
+export type ReleaseSlugRedirectAsStaffStatus403ErrorCodeEnum =
+	(typeof ReleaseSlugRedirectAsStaffStatus403ErrorCodeEnum)[keyof typeof ReleaseSlugRedirectAsStaffStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type ReleaseSlugRedirectAsStaffStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: ReleaseSlugRedirectAsStaffStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ReleaseSlugRedirectAsStaffStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -21024,14 +21593,14 @@ export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus404 = {
 /**
  * @type object
  */
-export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus422 = ValidationError;
+export type ReleaseSlugRedirectAsStaffStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus500 = InternalError;
+export type ReleaseSlugRedirectAsStaffStatus500 = InternalError;
 
-export const DeleteApiUnitsSlugRedirectsByRedirectUnitIdRequestReasonCodeEnum = {
+export const ReleaseSlugRedirectAsStaffRequestReasonCodeEnum = {
 	content_policy: "content_policy",
 	realm_rules: "realm_rules",
 	spam: "spam",
@@ -21046,25 +21615,25 @@ export const DeleteApiUnitsSlugRedirectsByRedirectUnitIdRequestReasonCodeEnum = 
 	other: "other",
 } as const;
 
-export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdRequestReasonCodeEnum =
-	(typeof DeleteApiUnitsSlugRedirectsByRedirectUnitIdRequestReasonCodeEnum)[keyof typeof DeleteApiUnitsSlugRedirectsByRedirectUnitIdRequestReasonCodeEnum];
+export type ReleaseSlugRedirectAsStaffRequestReasonCodeEnum =
+	(typeof ReleaseSlugRedirectAsStaffRequestReasonCodeEnum)[keyof typeof ReleaseSlugRedirectAsStaffRequestReasonCodeEnum];
 
 /**
  * @type object
  */
-export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdBody = {
+export type ReleaseSlugRedirectAsStaffBody = {
 	/**
 	 * @type string
 	 */
-	reasonCode: DeleteApiUnitsSlugRedirectsByRedirectUnitIdRequestReasonCodeEnum;
+	reasonCode: ReleaseSlugRedirectAsStaffRequestReasonCodeEnum;
 };
 
 /**
  * @type object
  */
-export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdOptions = {
-	body: DeleteApiUnitsSlugRedirectsByRedirectUnitIdBody;
-	path: DeleteApiUnitsSlugRedirectsByRedirectUnitIdPath;
+export type ReleaseSlugRedirectAsStaffOptions = {
+	body: ReleaseSlugRedirectAsStaffBody;
+	path: ReleaseSlugRedirectAsStaffPath;
 	query?: never;
 	headers?: never;
 };
@@ -21072,23 +21641,235 @@ export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdOptions = {
 /**
  * @type object
  */
-export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdResponses = {
-	"204": DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus204;
-	"403": DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403;
-	"404": DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus404;
-	"422": DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus422;
-	"500": DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus500;
+export type ReleaseSlugRedirectAsStaffResponses = {
+	"204": ReleaseSlugRedirectAsStaffStatus204;
+	"401": ReleaseSlugRedirectAsStaffStatus401;
+	"403": ReleaseSlugRedirectAsStaffStatus403;
+	"404": ReleaseSlugRedirectAsStaffStatus404;
+	"422": ReleaseSlugRedirectAsStaffStatus422;
+	"500": ReleaseSlugRedirectAsStaffStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdResponse =
-	| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus204
-	| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403
-	| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus404
-	| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus422
-	| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus500;
+export type ReleaseSlugRedirectAsStaffResponse =
+	| ReleaseSlugRedirectAsStaffStatus204
+	| ReleaseSlugRedirectAsStaffStatus401
+	| ReleaseSlugRedirectAsStaffStatus403
+	| ReleaseSlugRedirectAsStaffStatus404
+	| ReleaseSlugRedirectAsStaffStatus422
+	| ReleaseSlugRedirectAsStaffStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdStatusEventsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdStatusEventsQuery = {
+	/**
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 50
+	 */
+	limit?: string | number;
+};
+
+export const GetApiUnitsByIdByUnitIdStatusEventsStatus200ItemsFromStatus = {
+	draft: "draft",
+	published: "published",
+	archived: "archived",
+} as const;
+
+export type GetApiUnitsByIdByUnitIdStatusEventsStatus200ItemsFromStatus =
+	(typeof GetApiUnitsByIdByUnitIdStatusEventsStatus200ItemsFromStatus)[keyof typeof GetApiUnitsByIdByUnitIdStatusEventsStatus200ItemsFromStatus];
+
+export const GetApiUnitsByIdByUnitIdStatusEventsStatus200ItemsToStatusEnum = {
+	draft: "draft",
+	published: "published",
+	archived: "archived",
+} as const;
+
+export type GetApiUnitsByIdByUnitIdStatusEventsStatus200ItemsToStatusEnum =
+	(typeof GetApiUnitsByIdByUnitIdStatusEventsStatus200ItemsToStatusEnum)[keyof typeof GetApiUnitsByIdByUnitIdStatusEventsStatus200ItemsToStatusEnum];
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdStatusEventsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		fromStatus: (GetApiUnitsByIdByUnitIdStatusEventsStatus200ItemsFromStatus | null) | null;
+		/**
+		 * @default 'draft'
+		 * @type string
+		 */
+		toStatus: GetApiUnitsByIdByUnitIdStatusEventsStatus200ItemsToStatusEnum;
+		actor:
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "profile";
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					profileId: string;
+					name: (string | null) | null;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "system";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "import";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					kind: "hidden";
+			  };
+		revisionId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
+	nextCursor: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdStatusEventsStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InvalidPaginationCursor'
+		 * @type string
+		 */
+		code: "InvalidPaginationCursor";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdStatusEventsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdStatusEventsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdStatusEventsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdStatusEventsOptions = {
+	body?: never;
+	path: GetApiUnitsByIdByUnitIdStatusEventsPath;
+	query?: GetApiUnitsByIdByUnitIdStatusEventsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdStatusEventsResponses = {
+	"200": GetApiUnitsByIdByUnitIdStatusEventsStatus200;
+	"400": GetApiUnitsByIdByUnitIdStatusEventsStatus400;
+	"404": GetApiUnitsByIdByUnitIdStatusEventsStatus404;
+	"422": GetApiUnitsByIdByUnitIdStatusEventsStatus422;
+	"500": GetApiUnitsByIdByUnitIdStatusEventsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiUnitsByIdByUnitIdStatusEventsResponse =
+	| GetApiUnitsByIdByUnitIdStatusEventsStatus200
+	| GetApiUnitsByIdByUnitIdStatusEventsStatus400
+	| GetApiUnitsByIdByUnitIdStatusEventsStatus404
+	| GetApiUnitsByIdByUnitIdStatusEventsStatus422
+	| GetApiUnitsByIdByUnitIdStatusEventsStatus500;
 
 export const GetApiUnitsByTypeType = {
 	book: "book",
@@ -21137,7 +21918,6 @@ export type GetApiUnitsByTypeStatus200 = {
 		 * @type string
 		 */
 		id: string;
-		slug: (string | null) | null;
 		language: (string | null) | null;
 		/**
 		 * @type string
@@ -21158,6 +21938,31 @@ export type GetApiUnitsByTypeStatus200 = {
 		updatedAt: string;
 		title: (string | null) | null;
 		summary: (string | null) | null;
+		/**
+		 * @type array
+		 */
+		publishers: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			profileId: string;
+			name: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			firstPublishedAt: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			lastPublishedAt: string;
+			publicationCount: string | number;
+		}[];
 		avatar:
 			| ({
 					/**
@@ -21304,7 +22109,6 @@ export type PostApiUnitsByTypeStatus200 = {
 	 * @type string
 	 */
 	type: string;
-	slug: (string | null) | null;
 	/**
 	 * @type string
 	 */
@@ -21324,6 +22128,31 @@ export type PostApiUnitsByTypeStatus200 = {
 	aiDisclosure: string;
 	license: (string | null) | null;
 	publishedAt: (string | null) | null;
+	/**
+	 * @type array
+	 */
+	publishers: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		name: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		firstPublishedAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		lastPublishedAt: string;
+		publicationCount: string | number;
+	}[];
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -22048,13 +22877,6 @@ export type PostApiUnitsByTypeBody = {
 		coverAssetId?: (string | null) | null;
 	};
 	/**
-	 * @minLength 3
-	 * @maxLength 63
-	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-	 * @type string | undefined
-	 */
-	slug?: string;
-	/**
 	 * @type string | undefined
 	 */
 	visibility?: PostApiUnitsByTypeRequestVisibilityEnum;
@@ -22141,7 +22963,6 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 	 * @type string
 	 */
 	type: string;
-	slug: (string | null) | null;
 	/**
 	 * @type string
 	 */
@@ -22161,6 +22982,31 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 	aiDisclosure: string;
 	license: (string | null) | null;
 	publishedAt: (string | null) | null;
+	/**
+	 * @type array
+	 */
+	publishers: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		name: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		firstPublishedAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		lastPublishedAt: string;
+		publicationCount: string | number;
+	}[];
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -22691,7 +23537,6 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 	 * @type string
 	 */
 	type: string;
-	slug: (string | null) | null;
 	/**
 	 * @type string
 	 */
@@ -22711,6 +23556,31 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 	aiDisclosure: string;
 	license: (string | null) | null;
 	publishedAt: (string | null) | null;
+	/**
+	 * @type array
+	 */
+	publishers: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		name: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		firstPublishedAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		lastPublishedAt: string;
+		publicationCount: string | number;
+	}[];
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -23660,7 +24530,6 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 	 * @type string
 	 */
 	type: string;
-	slug: (string | null) | null;
 	/**
 	 * @type string
 	 */
@@ -23680,6 +24549,31 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 	aiDisclosure: string;
 	license: (string | null) | null;
 	publishedAt: (string | null) | null;
+	/**
+	 * @type array
+	 */
+	publishers: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		name: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		firstPublishedAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		lastPublishedAt: string;
+		publicationCount: string | number;
+	}[];
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -25916,7 +26810,6 @@ export type GetApiEntitiesStatus200 = {
 		 * @type string
 		 */
 		id: string;
-		slug: (string | null) | null;
 		/**
 		 * @type string
 		 */
@@ -26067,13 +26960,6 @@ export type PostApiEntitiesBody = {
 	 * @type string | undefined
 	 */
 	kind?: string;
-	/**
-	 * @minLength 3
-	 * @maxLength 63
-	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-	 * @type string | undefined
-	 */
-	slug?: string;
 	/**
 	 * @type object
 	 */
@@ -26313,7 +27199,6 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 	 * @type string
 	 */
 	id: string;
-	slug: (string | null) | null;
 	/**
 	 * @type string
 	 */
@@ -27331,7 +28216,6 @@ export type GetApiTagsStatus200 = {
 		 * @type string
 		 */
 		id: string;
-		slug: (string | null) | null;
 		title: (string | null) | null;
 		summary: (string | null) | null;
 	}[];
@@ -27403,13 +28287,6 @@ export type PostApiTagsBody = {
 	 * @type string | undefined
 	 */
 	kind?: string;
-	/**
-	 * @minLength 3
-	 * @maxLength 63
-	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-	 * @type string | undefined
-	 */
-	slug?: string;
 	/**
 	 * @type object
 	 */
@@ -27593,7 +28470,6 @@ export type PostApiTagsResponse =
 
 export const GetApiUnitsByTypeByUnitIdAliasesType = {
 	slug_namespace: "slug_namespace",
-	redirect: "redirect",
 	profile: "profile",
 	book: "book",
 	software: "software",
@@ -27723,7 +28599,6 @@ export type GetApiUnitsByTypeByUnitIdAliasesResponse =
 
 export const PostApiUnitsByTypeByUnitIdAliasesType = {
 	slug_namespace: "slug_namespace",
-	redirect: "redirect",
 	profile: "profile",
 	book: "book",
 	software: "software",
@@ -27953,7 +28828,6 @@ export type PostApiUnitsByTypeByUnitIdAliasesResponse =
 
 export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdType = {
 	slug_namespace: "slug_namespace",
-	redirect: "redirect",
 	profile: "profile",
 	book: "book",
 	software: "software",
@@ -28115,7 +28989,6 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponse =
 
 export const PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteType = {
 	slug_namespace: "slug_namespace",
-	redirect: "redirect",
 	profile: "profile",
 	book: "book",
 	software: "software",
@@ -28261,7 +29134,6 @@ export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponse =
 
 export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteType = {
 	slug_namespace: "slug_namespace",
-	redirect: "redirect",
 	profile: "profile",
 	book: "book",
 	software: "software",
@@ -31422,7 +32294,6 @@ export type GetApiProgressStatus200 = {
 		 * @type string
 		 */
 		type: string;
-		slug: (string | null) | null;
 		title: (string | null) | null;
 	}[];
 };
@@ -32033,7 +32904,6 @@ export type GetApiCollectionsStatus200 = {
 		 */
 		ownerId: string;
 		itemCount: string | number;
-		slug: (string | null) | null;
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		/**
@@ -32117,7 +32987,6 @@ export type PostApiCollectionsStatus200 = {
 	 * @type string
 	 */
 	id: string;
-	slug: (string | null) | null;
 	/**
 	 * @type string
 	 */
@@ -32189,7 +33058,7 @@ export type PostApiCollectionsStatus200 = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -32220,7 +33089,7 @@ export type PostApiCollectionsStatus200 = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -32251,7 +33120,7 @@ export type PostApiCollectionsStatus200 = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -32283,7 +33152,7 @@ export type PostApiCollectionsStatus200 = {
 										| "ai-disclosure"
 										| "license"
 										| "tag"
-										| "author"
+										| "publisher"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -32315,7 +33184,7 @@ export type PostApiCollectionsStatus200 = {
 										| "ai-disclosure"
 										| "license"
 										| "tag"
-										| "author"
+										| "publisher"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -32348,7 +33217,7 @@ export type PostApiCollectionsStatus200 = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -32515,7 +33384,6 @@ export type PostApiCollectionsStatus200 = {
 		 * @type string
 		 */
 		type: string;
-		slug: (string | null) | null;
 		title: (string | null) | null;
 	}[];
 };
@@ -32597,13 +33465,6 @@ export type PostApiCollectionsRequestPresentationDocumentOrderEnum =
  * @type object
  */
 export type PostApiCollectionsBody = {
-	/**
-	 * @minLength 3
-	 * @maxLength 63
-	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-	 * @type string
-	 */
-	slug: string;
 	/**
 	 * @type object
 	 */
@@ -32819,7 +33680,7 @@ export type PostApiCollectionsBody = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -32850,7 +33711,7 @@ export type PostApiCollectionsBody = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -32881,7 +33742,7 @@ export type PostApiCollectionsBody = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -32913,7 +33774,7 @@ export type PostApiCollectionsBody = {
 										| "ai-disclosure"
 										| "license"
 										| "tag"
-										| "author"
+										| "publisher"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -32945,7 +33806,7 @@ export type PostApiCollectionsBody = {
 										| "ai-disclosure"
 										| "license"
 										| "tag"
-										| "author"
+										| "publisher"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -32978,7 +33839,7 @@ export type PostApiCollectionsBody = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -33114,7 +33975,6 @@ export type GetApiCollectionsFavoritesStatus200 = {
 	 * @type string
 	 */
 	id: string;
-	slug: (string | null) | null;
 	/**
 	 * @type string
 	 */
@@ -33186,7 +34046,7 @@ export type GetApiCollectionsFavoritesStatus200 = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -33217,7 +34077,7 @@ export type GetApiCollectionsFavoritesStatus200 = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -33248,7 +34108,7 @@ export type GetApiCollectionsFavoritesStatus200 = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -33280,7 +34140,7 @@ export type GetApiCollectionsFavoritesStatus200 = {
 										| "ai-disclosure"
 										| "license"
 										| "tag"
-										| "author"
+										| "publisher"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -33312,7 +34172,7 @@ export type GetApiCollectionsFavoritesStatus200 = {
 										| "ai-disclosure"
 										| "license"
 										| "tag"
-										| "author"
+										| "publisher"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -33345,7 +34205,7 @@ export type GetApiCollectionsFavoritesStatus200 = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -33512,7 +34372,6 @@ export type GetApiCollectionsFavoritesStatus200 = {
 		 * @type string
 		 */
 		type: string;
-		slug: (string | null) | null;
 		title: (string | null) | null;
 	}[];
 };
@@ -33626,7 +34485,6 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 	 * @type string
 	 */
 	id: string;
-	slug: (string | null) | null;
 	/**
 	 * @type string
 	 */
@@ -33698,7 +34556,7 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -33729,7 +34587,7 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -33760,7 +34618,7 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -33792,7 +34650,7 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 										| "ai-disclosure"
 										| "license"
 										| "tag"
-										| "author"
+										| "publisher"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -33824,7 +34682,7 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 										| "ai-disclosure"
 										| "license"
 										| "tag"
-										| "author"
+										| "publisher"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -33857,7 +34715,7 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -34024,7 +34882,6 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 		 * @type string
 		 */
 		type: string;
-		slug: (string | null) | null;
 		title: (string | null) | null;
 	}[];
 };
@@ -34145,7 +35002,6 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 	 * @type string
 	 */
 	id: string;
-	slug: (string | null) | null;
 	/**
 	 * @type string
 	 */
@@ -34217,7 +35073,7 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -34248,7 +35104,7 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -34279,7 +35135,7 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -34311,7 +35167,7 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 										| "ai-disclosure"
 										| "license"
 										| "tag"
-										| "author"
+										| "publisher"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -34343,7 +35199,7 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 										| "ai-disclosure"
 										| "license"
 										| "tag"
-										| "author"
+										| "publisher"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -34376,7 +35232,7 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -34543,7 +35399,6 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 		 * @type string
 		 */
 		type: string;
-		slug: (string | null) | null;
 		title: (string | null) | null;
 	}[];
 };
@@ -34909,7 +35764,7 @@ export type PatchApiCollectionsByCollectionIdBody = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -34940,7 +35795,7 @@ export type PatchApiCollectionsByCollectionIdBody = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -34971,7 +35826,7 @@ export type PatchApiCollectionsByCollectionIdBody = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -35003,7 +35858,7 @@ export type PatchApiCollectionsByCollectionIdBody = {
 										| "ai-disclosure"
 										| "license"
 										| "tag"
-										| "author"
+										| "publisher"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -35035,7 +35890,7 @@ export type PatchApiCollectionsByCollectionIdBody = {
 										| "ai-disclosure"
 										| "license"
 										| "tag"
-										| "author"
+										| "publisher"
 										| "realm"
 										| "zone"
 										| "subject"
@@ -35068,7 +35923,7 @@ export type PatchApiCollectionsByCollectionIdBody = {
 								| "ai-disclosure"
 								| "license"
 								| "tag"
-								| "author"
+								| "publisher"
 								| "realm"
 								| "zone"
 								| "subject"
@@ -35727,12 +36582,30 @@ export type GetApiReviewsStatus200 = {
 		 */
 		id: string;
 		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
+		 * @type array
 		 */
-		authorId: string;
-		authorName: (string | null) | null;
+		publishers: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			profileId: string;
+			name: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			firstPublishedAt: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			lastPublishedAt: string;
+			publicationCount: string | number;
+		}[];
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -36165,11 +37038,30 @@ export type GetApiReviewsByReviewIdStatus200 = {
 	 */
 	id: string;
 	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
+	 * @type array
 	 */
-	authorId: string;
+	publishers: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		name: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		firstPublishedAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		lastPublishedAt: string;
+		publicationCount: string | number;
+	}[];
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -38350,12 +39242,30 @@ export type GetApiPostsStatus200 = {
 		 */
 		postKind: GetApiPostsStatus200ItemsPostKindEnum;
 		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
+		 * @type array
 		 */
-		authorId: string;
-		authorName: (string | null) | null;
+		publishers: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			profileId: string;
+			name: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			firstPublishedAt: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			lastPublishedAt: string;
+			publicationCount: string | number;
+		}[];
 		realmId: (string | null) | null;
 		subjectId: (string | null) | null;
 		rootPostId: (string | null) | null;
@@ -38889,11 +39799,30 @@ export type GetApiPostsByPostIdStatus200 = {
 	 */
 	postKind: GetApiPostsByPostIdStatus200PostKindEnum;
 	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
+	 * @type array
 	 */
-	authorId: string;
+	publishers: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		name: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		firstPublishedAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		lastPublishedAt: string;
+		publicationCount: string | number;
+	}[];
 	realmId: (string | null) | null;
 	subjectId: (string | null) | null;
 	rootPostId: (string | null) | null;
@@ -39622,12 +40551,30 @@ export type GetApiPostsByPostIdRepliesStatus200 = {
 		 */
 		postKind: "reply";
 		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
+		 * @type array
 		 */
-		authorId: string;
-		authorName: (string | null) | null;
+		publishers: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			profileId: string;
+			name: (string | null) | null;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			firstPublishedAt: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			lastPublishedAt: string;
+			publicationCount: string | number;
+		}[];
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -39786,6 +40733,15 @@ export type GetApiPostsByPostIdRepliesStatus200 = {
 		 * @type string
 		 */
 		updatedAt: string;
+		/**
+		 * @type object
+		 */
+		capabilities: {
+			/**
+			 * @type boolean
+			 */
+			canEdit: boolean;
+		};
 	}[];
 	nextCursor: (string | null) | null;
 };
@@ -40707,7 +41663,6 @@ export type GetApiRealmsStatus200 = {
 		 * @type string
 		 */
 		id: string;
-		slug: (string | null) | null;
 		/**
 		 * @type string
 		 */
@@ -40877,13 +41832,6 @@ export type PostApiRealmsRequestJoinPolicyEnum =
  * @type object
  */
 export type PostApiRealmsBody = {
-	/**
-	 * @minLength 3
-	 * @maxLength 63
-	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-	 * @type string
-	 */
-	slug: string;
 	/**
 	 * @type object
 	 */
@@ -41113,7 +42061,6 @@ export type GetApiRealmsByRealmIdStatus200 = {
 	 * @type string
 	 */
 	id: string;
-	slug: (string | null) | null;
 	/**
 	 * @type string
 	 */
@@ -44617,7 +45564,7 @@ export const GetApiSearchConfigurationStatus200ControlsFieldEnum = {
 	"ai-disclosure": "ai-disclosure",
 	license: "license",
 	tag: "tag",
-	author: "author",
+	publisher: "publisher",
 	realm: "realm",
 	zone: "zone",
 	subject: "subject",
@@ -44716,7 +45663,7 @@ export const GetApiSearchConfigurationStatus200ResultsFacetsEnum = {
 	"ai-disclosure": "ai-disclosure",
 	license: "license",
 	tag: "tag",
-	author: "author",
+	publisher: "publisher",
 	realm: "realm",
 	zone: "zone",
 	subject: "subject",
@@ -44836,7 +45783,7 @@ export type GetApiSearchConfigurationStatus200 = {
 					| "ai-disclosure"
 					| "license"
 					| "tag"
-					| "author"
+					| "publisher"
 					| "realm"
 					| "zone"
 					| "subject"
@@ -44867,7 +45814,7 @@ export type GetApiSearchConfigurationStatus200 = {
 					| "ai-disclosure"
 					| "license"
 					| "tag"
-					| "author"
+					| "publisher"
 					| "realm"
 					| "zone"
 					| "subject"
@@ -44898,7 +45845,7 @@ export type GetApiSearchConfigurationStatus200 = {
 					| "ai-disclosure"
 					| "license"
 					| "tag"
-					| "author"
+					| "publisher"
 					| "realm"
 					| "zone"
 					| "subject"
@@ -44930,7 +45877,7 @@ export type GetApiSearchConfigurationStatus200 = {
 							| "ai-disclosure"
 							| "license"
 							| "tag"
-							| "author"
+							| "publisher"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -44962,7 +45909,7 @@ export type GetApiSearchConfigurationStatus200 = {
 							| "ai-disclosure"
 							| "license"
 							| "tag"
-							| "author"
+							| "publisher"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -44995,7 +45942,7 @@ export type GetApiSearchConfigurationStatus200 = {
 					| "ai-disclosure"
 					| "license"
 					| "tag"
-					| "author"
+					| "publisher"
 					| "realm"
 					| "zone"
 					| "subject"
@@ -45034,7 +45981,7 @@ export type GetApiSearchConfigurationStatus200 = {
 					| "ai-disclosure"
 					| "license"
 					| "tag"
-					| "author"
+					| "publisher"
 					| "realm"
 					| "zone"
 					| "subject"
@@ -45065,7 +46012,7 @@ export type GetApiSearchConfigurationStatus200 = {
 					| "ai-disclosure"
 					| "license"
 					| "tag"
-					| "author"
+					| "publisher"
 					| "realm"
 					| "zone"
 					| "subject"
@@ -45096,7 +46043,7 @@ export type GetApiSearchConfigurationStatus200 = {
 					| "ai-disclosure"
 					| "license"
 					| "tag"
-					| "author"
+					| "publisher"
 					| "realm"
 					| "zone"
 					| "subject"
@@ -45128,7 +46075,7 @@ export type GetApiSearchConfigurationStatus200 = {
 							| "ai-disclosure"
 							| "license"
 							| "tag"
-							| "author"
+							| "publisher"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -45160,7 +46107,7 @@ export type GetApiSearchConfigurationStatus200 = {
 							| "ai-disclosure"
 							| "license"
 							| "tag"
-							| "author"
+							| "publisher"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -45193,7 +46140,7 @@ export type GetApiSearchConfigurationStatus200 = {
 					| "ai-disclosure"
 					| "license"
 					| "tag"
-					| "author"
+					| "publisher"
 					| "realm"
 					| "zone"
 					| "subject"
@@ -45437,7 +46384,6 @@ export type PostApiSearchExecuteStatus200 = {
 			 * @type string
 			 */
 			type: string;
-			slug?: (string | null) | null;
 			/**
 			 * @type array
 			 */
@@ -45569,7 +46515,7 @@ export type PostApiSearchExecuteBody =
 							| "ai-disclosure"
 							| "license"
 							| "tag"
-							| "author"
+							| "publisher"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -45600,7 +46546,7 @@ export type PostApiSearchExecuteBody =
 							| "ai-disclosure"
 							| "license"
 							| "tag"
-							| "author"
+							| "publisher"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -45631,7 +46577,7 @@ export type PostApiSearchExecuteBody =
 							| "ai-disclosure"
 							| "license"
 							| "tag"
-							| "author"
+							| "publisher"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -45663,7 +46609,7 @@ export type PostApiSearchExecuteBody =
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -45695,7 +46641,7 @@ export type PostApiSearchExecuteBody =
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -45728,7 +46674,7 @@ export type PostApiSearchExecuteBody =
 							| "ai-disclosure"
 							| "license"
 							| "tag"
-							| "author"
+							| "publisher"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -45802,7 +46748,7 @@ export type PostApiSearchExecuteBody =
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -45833,7 +46779,7 @@ export type PostApiSearchExecuteBody =
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -45864,7 +46810,7 @@ export type PostApiSearchExecuteBody =
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -45896,7 +46842,7 @@ export type PostApiSearchExecuteBody =
 											| "ai-disclosure"
 											| "license"
 											| "tag"
-											| "author"
+											| "publisher"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -45928,7 +46874,7 @@ export type PostApiSearchExecuteBody =
 											| "ai-disclosure"
 											| "license"
 											| "tag"
-											| "author"
+											| "publisher"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -45961,7 +46907,7 @@ export type PostApiSearchExecuteBody =
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -46110,7 +47056,6 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200 = {
 			 * @type string
 			 */
 			type: string;
-			slug?: (string | null) | null;
 			/**
 			 * @type array
 			 */
@@ -46270,7 +47215,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 							| "ai-disclosure"
 							| "license"
 							| "tag"
-							| "author"
+							| "publisher"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -46301,7 +47246,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 							| "ai-disclosure"
 							| "license"
 							| "tag"
-							| "author"
+							| "publisher"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -46332,7 +47277,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 							| "ai-disclosure"
 							| "license"
 							| "tag"
-							| "author"
+							| "publisher"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -46364,7 +47309,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -46396,7 +47341,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -46429,7 +47374,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 							| "ai-disclosure"
 							| "license"
 							| "tag"
-							| "author"
+							| "publisher"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -46503,7 +47448,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -46534,7 +47479,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -46565,7 +47510,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -46597,7 +47542,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 											| "ai-disclosure"
 											| "license"
 											| "tag"
-											| "author"
+											| "publisher"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -46629,7 +47574,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 											| "ai-disclosure"
 											| "license"
 											| "tag"
-											| "author"
+											| "publisher"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -46662,7 +47607,7 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -46820,7 +47765,6 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus20
 			 * @type string
 			 */
 			type: string;
-			slug?: (string | null) | null;
 			/**
 			 * @type array
 			 */
@@ -46988,7 +47932,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 							| "ai-disclosure"
 							| "license"
 							| "tag"
-							| "author"
+							| "publisher"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -47019,7 +47963,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 							| "ai-disclosure"
 							| "license"
 							| "tag"
-							| "author"
+							| "publisher"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -47050,7 +47994,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 							| "ai-disclosure"
 							| "license"
 							| "tag"
-							| "author"
+							| "publisher"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -47082,7 +48026,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -47114,7 +48058,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -47147,7 +48091,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 							| "ai-disclosure"
 							| "license"
 							| "tag"
-							| "author"
+							| "publisher"
 							| "realm"
 							| "zone"
 							| "subject"
@@ -47221,7 +48165,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -47252,7 +48196,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -47283,7 +48227,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -47315,7 +48259,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 											| "ai-disclosure"
 											| "license"
 											| "tag"
-											| "author"
+											| "publisher"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -47347,7 +48291,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 											| "ai-disclosure"
 											| "license"
 											| "tag"
-											| "author"
+											| "publisher"
 											| "realm"
 											| "zone"
 											| "subject"
@@ -47380,7 +48324,7 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 									| "ai-disclosure"
 									| "license"
 									| "tag"
-									| "author"
+									| "publisher"
 									| "realm"
 									| "zone"
 									| "subject"
@@ -47514,7 +48458,6 @@ export type PostApiSearchStatus200 = {
 			 * @type string
 			 */
 			type: string;
-			slug?: (string | null) | null;
 			/**
 			 * @type array
 			 */
@@ -47711,7 +48654,6 @@ export type PostApiSearchByIndexStatus200 = {
 		 * @type string
 		 */
 		type: string;
-		slug?: (string | null) | null;
 		/**
 		 * @type array
 		 */
@@ -47853,7 +48795,7 @@ export type PostApiSearchByIndexBody = {
 	 * @minLength 1
 	 * @type string | undefined
 	 */
-	authorId?: string;
+	publisherId?: string;
 	/**
 	 * @minLength 1
 	 * @type string | undefined

@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, ne, or, sql } from "drizzle-orm";
+import { and, desc, eq, exists, inArray, ne, or, sql } from "drizzle-orm";
 
 import {
 	getFeedEligibilityCondition,
@@ -12,6 +12,7 @@ import {
 	recommendationProfileInterest,
 	recommendationUnitEdge,
 	unit,
+	unitStatusEvent,
 } from "../database/schema";
 import type { RecommendationReason } from "../api/recommendations/schema";
 import type { RecommendationSnapshotContext, RecommendationViewer } from "./context";
@@ -21,7 +22,7 @@ import { rankRecommendations } from "./ranking";
 export async function recommendRelatedPosts(input: {
 	viewer: RecommendationViewer;
 	snapshot: RecommendationSnapshotContext | null;
-	seed: { id: string; subjectId: string | null; authorId: string };
+	seed: { id: string; subjectId: string | null; publisherIds: readonly string[] };
 	asOf: Date;
 	pageSize: number;
 	afterId?: string;
@@ -92,7 +93,23 @@ export async function recommendRelatedPosts(input: {
 				eligible,
 				or(
 					input.seed.subjectId ? eq(post.subjectUnitId, input.seed.subjectId) : undefined,
-					eq(post.authorProfileId, input.seed.authorId),
+					input.seed.publisherIds.length
+						? exists(
+								database
+									.select({ id: unitStatusEvent.id })
+									.from(unitStatusEvent)
+									.where(
+										and(
+											eq(unitStatusEvent.unitId, post.id),
+											eq(unitStatusEvent.toStatus, "published"),
+											eq(unitStatusEvent.actorKind, "profile"),
+											inArray(unitStatusEvent.changedByProfileId, [
+												...input.seed.publisherIds,
+											]),
+										),
+									),
+							)
+						: undefined,
 				),
 			),
 		)

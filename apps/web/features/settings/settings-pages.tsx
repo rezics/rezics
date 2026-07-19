@@ -80,13 +80,11 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 		setSaved(false);
 		const data = new FormData(event.currentTarget);
 		const name = String(data.get("name") ?? "").trim();
-		const slug = String(data.get("slug") ?? "").trim();
 		try {
 			await update.mutateAsync({
 				body: {
 					updatedAt: current.updatedAt,
 					...(name ? { name } : {}),
-					...(slug ? { slug } : {}),
 					summary: String(data.get("summary") ?? "").trim(),
 					avatarAssetId: avatar?.id ?? null,
 					bannerAssetId: banner?.id ?? null,
@@ -122,10 +120,6 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 					<Field>
 						<FieldLabel>{t.ui.displayName}</FieldLabel>
 						<Input name="name" defaultValue={current.name ?? ""} />
-					</Field>
-					<Field>
-						<FieldLabel>{t.ui.slug}</FieldLabel>
-						<Input name="slug" defaultValue={current.slug ?? ""} />
 					</Field>
 					<Field>
 						<FieldLabel>{t.ui.introduction}</FieldLabel>

@@ -7,7 +7,6 @@ import { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import {
-	primaryUnitTitle,
 	isPrimaryUnitLocalization,
 	firstUnitLocalizationCoverAssetId,
 } from "../../units/localization";
@@ -15,7 +14,6 @@ import {
 	post,
 	postReply,
 	postReplyStat,
-	profile as profileTable,
 	unitFollow,
 	realmUnit,
 	recommendationProfileInterest,
@@ -26,6 +24,7 @@ import {
 	unitReaction,
 	unitReactionGlobalStat,
 	unitRevisionHead,
+	unitStatusEvent,
 } from "../../database/schema";
 import { parseJsonCursor } from "../../pagination";
 import {
@@ -44,6 +43,7 @@ import {
 import { recommendationObjectiveExpression } from "../../recommendations/sql-ranking";
 import { createRecommendationTracking } from "../../recommendations/tracking";
 import { presentImageAsset } from "../../units/service";
+import { getPublisherSummariesByUnitIds } from "../../units/status";
 import {
 	RecommendationPolicyVersionSchema,
 	type RecommendationReason,
@@ -117,12 +117,16 @@ export function getFeedEligibilityCondition(
 		isNull(unit.deletedAt),
 		lte(unit.createdAt, asOf),
 		sql`exists (
-			select 1 from unit author_unit
-			where author_unit.id = ${post.authorProfileId}
-				and author_unit.status = 'published'
-				and author_unit.visibility = 'public'
-				and author_unit.moderation_status = 'approved'
-				and author_unit.deleted_at is null
+			select 1 from unit_status_event publisher_event
+			join unit publisher_unit on publisher_unit.id = publisher_event.changed_by_profile_id
+			where publisher_event.unit_id = ${post.id}
+				and publisher_event.to_status = 'published'
+				and publisher_event.actor_kind = 'profile'
+				and publisher_event.actor_hidden = false
+				and publisher_unit.status = 'published'
+				and publisher_unit.visibility = 'public'
+				and publisher_unit.moderation_status = 'approved'
+				and publisher_unit.deleted_at is null
 		)`,
 		sql`(${post.kind} <> 'reply'::post_kind or exists (
 			select 1 from post_reply readable_reply
@@ -147,9 +151,14 @@ export function getFeedEligibilityCondition(
 			: undefined,
 		viewer.profileId
 			? sql`not exists (
-				select 1 from profile_block blocked
-				where (blocked.blocker_profile_id = ${viewer.profileId}::uuid and blocked.blocked_profile_id = ${post.authorProfileId})
-					or (blocked.blocker_profile_id = ${post.authorProfileId} and blocked.blocked_profile_id = ${viewer.profileId}::uuid)
+				select 1 from unit_status_event publisher_event
+				join profile_block blocked on
+					(blocked.blocker_profile_id = ${viewer.profileId}::uuid and blocked.blocked_profile_id = publisher_event.changed_by_profile_id)
+					or (blocked.blocker_profile_id = publisher_event.changed_by_profile_id and blocked.blocked_profile_id = ${viewer.profileId}::uuid)
+				where publisher_event.unit_id = ${post.id}
+					and publisher_event.to_status = 'published'
+					and publisher_event.actor_kind = 'profile'
+					and publisher_event.actor_hidden = false
 			)`
 			: undefined,
 		viewer.profileId
@@ -253,10 +262,19 @@ async function getCandidateSources(input: {
 					.from(post)
 					.innerJoin(unit, eq(unit.id, post.id))
 					.innerJoin(
+						unitStatusEvent,
+						and(
+							eq(unitStatusEvent.unitId, post.id),
+							eq(unitStatusEvent.toStatus, "published"),
+							eq(unitStatusEvent.actorKind, "profile"),
+							eq(unitStatusEvent.actorHidden, false),
+						),
+					)
+					.innerJoin(
 						unitFollow,
 						and(
 							eq(unitFollow.followerProfileId, input.viewer.profileId),
-							eq(unitFollow.unitId, post.authorProfileId),
+							eq(unitFollow.unitId, unitStatusEvent.changedByProfileId),
 						),
 					)
 					.where(condition)
@@ -297,14 +315,14 @@ async function getCandidateSources(input: {
 	const addRanked = (
 		rows: readonly { id: string }[],
 		weight: number,
-		nextReason: "followed_author" | "followed_realm" | "based_on_activity",
+		nextReason: "followed_publisher" | "followed_realm" | "based_on_activity",
 	) => {
 		rows.forEach(({ id }, index) => {
 			relevance.set(id, (relevance.get(id) ?? 0) + weight / (60 + index + 1));
 			if (!reason.has(id)) reason.set(id, nextReason);
 		});
 	};
-	addRanked(followedRows, 4, "followed_author");
+	addRanked(followedRows, 4, "followed_publisher");
 	addRanked(realmRows, 4, "followed_realm");
 	addRanked(graphRows, 4, "based_on_activity");
 	for (const row of objectiveRows) {
@@ -342,7 +360,7 @@ async function getCandidateSources(input: {
 
 export interface FeedRankingCandidate extends RecommendationCandidate {
 	postKind: "post" | "reply";
-	authorId: string;
+	publisherIds: readonly string[];
 	realmId: string | null;
 	subjectId: string | null;
 	rootPostId: string | null;
@@ -404,7 +422,15 @@ export async function getFeedRankingCandidates(input: {
 		.select({
 			id: post.id,
 			postKind: post.kind,
-			authorId: post.authorProfileId,
+			publisherIds: sql<string[]>`array(
+				select distinct publisher_event.changed_by_profile_id::text
+				from unit_status_event publisher_event
+				where publisher_event.unit_id = ${post.id}
+					and publisher_event.to_status = 'published'
+					and publisher_event.actor_kind = 'profile'
+					and publisher_event.actor_hidden = false
+				order by publisher_event.changed_by_profile_id::text
+			)`,
 			realmId: selectedRealmId,
 			subjectId: post.subjectUnitId,
 			rootPostId: postReply.rootPostId,
@@ -461,7 +487,7 @@ export async function getFeedRankingCandidates(input: {
 			{
 				id: row.id,
 				postKind: row.postKind,
-				authorId: row.authorId,
+				publisherIds: row.publisherIds,
 				realmId: row.realmId,
 				subjectId: row.subjectId,
 				rootPostId: row.rootPostId,
@@ -495,8 +521,6 @@ export async function hydrateFeedItems(
 		.select({
 			id: post.id,
 			postKind: post.kind,
-			authorId: post.authorProfileId,
-			authorName: primaryUnitTitle(profileTable.id),
 			subjectId: post.subjectUnitId,
 			rootPostId: postReply.rootPostId,
 			parentPostId: postReply.parentPostId,
@@ -508,7 +532,6 @@ export async function hydrateFeedItems(
 		})
 		.from(post)
 		.innerJoin(unit, eq(unit.id, post.id))
-		.innerJoin(profileTable, eq(profileTable.id, post.authorProfileId))
 		.leftJoin(postReply, eq(postReply.postId, post.id))
 		.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, post.id))
 		.leftJoin(
@@ -577,7 +600,6 @@ export async function hydrateFeedItems(
 						.select({
 							id: unit.id,
 							type: unit.kind,
-							slug: unit.slug,
 							title: unitLocalization.title,
 							coverAssetId: firstUnitLocalizationCoverAssetId(unit.id),
 						})
@@ -604,13 +626,10 @@ export async function hydrateFeedItems(
 						.select({
 							rootPostId: post.id,
 							title: unitLocalization.title,
-							authorId: post.authorProfileId,
-							authorName: primaryUnitTitle(profileTable.id),
 							subjectId: post.subjectUnitId,
 						})
 						.from(post)
 						.innerJoin(unit, eq(unit.id, post.id))
-						.innerJoin(profileTable, eq(profileTable.id, post.authorProfileId))
 						.leftJoin(
 							unitLocalization,
 							and(
@@ -626,6 +645,10 @@ export async function hydrateFeedItems(
 						)
 				: [],
 		]);
+	const [publishers, rootPublishers] = await Promise.all([
+		getPublisherSummariesByUnitIds(validIds),
+		getPublisherSummariesByUnitIds(rootIds),
+	]);
 	const subjects = new Map(
 		await Promise.all(
 			subjectRows.map(
@@ -642,7 +665,12 @@ export async function hydrateFeedItems(
 	);
 	const rowMap = new Map(rows.map((row) => [row.id, row]));
 	const pageMap = new Map(page.map((item) => [item.id, item]));
-	const rootContext = new Map(rootRows.map((row) => [row.rootPostId, row]));
+	const rootContext = new Map(
+		rootRows.map((row) => [
+			row.rootPostId,
+			{ ...row, publishers: rootPublishers.get(row.rootPostId) ?? [] },
+		]),
+	);
 	const rootCount = new Map(
 		rootReplyCounts.map((row) => [row.id, toSafeInteger(row.count, "reply count")]),
 	);
@@ -666,8 +694,7 @@ export async function hydrateFeedItems(
 			{
 				id: row.id,
 				postKind: row.postKind,
-				authorId: row.authorId,
-				authorName: row.authorName,
+				publishers: publishers.get(row.id) ?? [],
 				realmId: ranked.realmId,
 				subjectId: row.subjectId,
 				rootPostId: row.rootPostId,

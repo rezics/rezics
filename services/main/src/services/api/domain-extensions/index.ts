@@ -41,9 +41,7 @@ import {
 import { UnitNotFound } from "../../units/errors";
 import type { DatabaseTransaction } from "../../database";
 import { recordUnitRevision } from "../../units/history";
-import { insertAddressedUnit } from "../../units/slug-address";
-import { TopLevelSlugNamespaceUnitIds } from "../../units/slug-system";
-import { generateSlugLabel } from "../../units/slug";
+import { insertUnit } from "../../units/create";
 import {
 	makePrimaryUnitLocalization,
 	resolveUnitLocalizationImageAssetIdFromOrdered,
@@ -112,7 +110,6 @@ async function createBaseUnit(
 	tx: DatabaseTransaction,
 	input: {
 		kind: "series" | "zone";
-		slug?: string;
 		localization: {
 			language: string;
 			title: string;
@@ -130,13 +127,12 @@ async function createBaseUnit(
 		input.ownerId,
 		unitLocalizationImageAssetIds(input.localization),
 	);
-	const created = await insertAddressedUnit(tx, {
+	const created = await insertUnit(tx, {
 		kind: input.kind,
-		slugScopeId: input.kind === "zone" ? TopLevelSlugNamespaceUnitIds.zones : input.ownerId,
-		slug: input.slug ?? generateSlugLabel(input.localization.title),
 		status: "published",
 		visibility: "public",
 		publishedAt: new Date(),
+		statusActor: { kind: "profile", profileId: input.ownerId },
 	});
 	await tx.insert(unitLocalization).values({ unitId: created.id, ...input.localization });
 	await tx.insert(unitAccessBinding).values({
@@ -362,7 +358,6 @@ export default new Elysia()
 					const id = await database.transaction(async (tx) => {
 						const unitId = await createBaseUnit(tx, {
 							kind: "series",
-							slug: body.slug,
 							localization: body.localization,
 							ownerId: profile.unitId,
 						});
@@ -1035,7 +1030,6 @@ export default new Elysia()
 					const id = await database.transaction(async (tx) => {
 						const unitId = await createBaseUnit(tx, {
 							kind: "zone",
-							slug: body.slug,
 							localization: body.localization,
 							ownerId: profile.unitId,
 						});

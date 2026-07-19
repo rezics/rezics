@@ -4,15 +4,14 @@ import {
 	createZoneThemeDocument,
 } from "@rezics/block";
 
-import { RootSlugNamespaceUnitId, TopLevelSlugNamespaceUnitIds } from "../units/slug-system";
+import { TopLevelSlugNamespaceUnitIds } from "../units/slug-system";
 
-export { RootSlugNamespaceUnitId, TopLevelSlugNamespaceUnitIds };
+export { TopLevelSlugNamespaceUnitIds };
 
 export const BootstrapEpochIso = "2026-01-01T00:00:00.000Z";
 export const BootstrapEpochUnixMilliseconds = 1_767_225_600_000;
 
 export const SlugNamespaceManifest = [
-	{ id: RootSlugNamespaceUnitId, slug: null },
 	...Object.entries(TopLevelSlugNamespaceUnitIds).map(([slug, id]) => ({ id, slug })),
 ] as const;
 

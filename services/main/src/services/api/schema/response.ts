@@ -58,11 +58,18 @@ const LocalizationResponse = t.Object({
 	updatedAt: DateTime,
 });
 
+export const UnitPublisherSummaryResponse = t.Object({
+	profileId: Uuid,
+	name: NullableText,
+	firstPublishedAt: DateTime,
+	lastPublishedAt: DateTime,
+	publicationCount: t.Integer({ minimum: 1 }),
+});
+
 export const UnitListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			id: Uuid,
-			slug: NullableText,
 			language: NullableText,
 			contentRating: t.String(),
 			publishedAt: t.Nullable(DateTime),
@@ -70,6 +77,7 @@ export const UnitListResponse = t.Object({
 			updatedAt: DateTime,
 			title: NullableText,
 			summary: NullableText,
+			publishers: t.Array(UnitPublisherSummaryResponse),
 			avatar: ImageAssetResponse,
 			banner: ImageAssetResponse,
 			cover: ImageAssetResponse,
@@ -80,7 +88,6 @@ export const UnitListResponse = t.Object({
 export const UnitDetailResponse = t.Object({
 	id: Uuid,
 	type: t.String(),
-	slug: NullableText,
 	status: t.String(),
 	visibility: t.String(),
 	language: NullableText,
@@ -88,6 +95,7 @@ export const UnitDetailResponse = t.Object({
 	aiDisclosure: t.String(),
 	license: NullableText,
 	publishedAt: t.Nullable(DateTime),
+	publishers: t.Array(UnitPublisherSummaryResponse),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 	primaryLanguage: NullableText,
@@ -156,7 +164,6 @@ const SearchHit = t.Object({
 	id: Uuid,
 	kind: t.String(),
 	type: t.String(),
-	slug: t.Optional(NullableText),
 	titles: t.Array(t.String()),
 	summaries: t.Array(t.String()),
 	name: t.Optional(NullableText),
@@ -196,7 +203,6 @@ export const EntityListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			id: Uuid,
-			slug: NullableText,
 			kind: t.String(),
 			verified: t.Boolean(),
 			avatar: ImageAssetResponse,
@@ -208,9 +214,7 @@ export const EntityListResponse = t.Object({
 	),
 });
 export const TagListResponse = t.Object({
-	items: t.Array(
-		t.Object({ id: Uuid, slug: NullableText, title: NullableText, summary: NullableText }),
-	),
+	items: t.Array(t.Object({ id: Uuid, title: NullableText, summary: NullableText })),
 });
 export const CollectionListResponse = t.Object({
 	items: t.Array(
@@ -218,7 +222,6 @@ export const CollectionListResponse = t.Object({
 			id: Uuid,
 			ownerId: Uuid,
 			itemCount: t.Integer(),
-			slug: NullableText,
 			title: NullableText,
 			summary: NullableText,
 			updatedAt: DateTime,
@@ -229,7 +232,6 @@ export const RealmListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			id: Uuid,
-			slug: NullableText,
 			joinPolicy: t.String(),
 			title: NullableText,
 			summary: NullableText,
@@ -246,8 +248,7 @@ export const PostListResponse = t.Object({
 		t.Object({
 			id: Uuid,
 			postKind: OrdinaryPostKindResponse,
-			authorId: Uuid,
-			authorName: NullableText,
+			publishers: t.Array(UnitPublisherSummaryResponse),
 			realmId: t.Nullable(Uuid),
 			subjectId: t.Nullable(Uuid),
 			rootPostId: t.Nullable(Uuid),
@@ -266,8 +267,7 @@ export const FeedResponse = t.Object({
 		t.Object({
 			id: Uuid,
 			postKind: OrdinaryPostKindResponse,
-			authorId: Uuid,
-			authorName: NullableText,
+			publishers: t.Array(UnitPublisherSummaryResponse),
 			realmId: t.Nullable(Uuid),
 			subjectId: t.Nullable(Uuid),
 			rootPostId: t.Nullable(Uuid),
@@ -280,8 +280,7 @@ export const FeedResponse = t.Object({
 				t.Object({
 					rootPostId: Uuid,
 					title: NullableText,
-					authorId: Uuid,
-					authorName: NullableText,
+					publishers: t.Array(UnitPublisherSummaryResponse),
 					subjectId: t.Nullable(Uuid),
 				}),
 			),
@@ -289,7 +288,6 @@ export const FeedResponse = t.Object({
 				t.Object({
 					id: Uuid,
 					type: t.String(),
-					slug: NullableText,
 					title: NullableText,
 					cover: ImageAssetResponse,
 				}),
@@ -308,8 +306,7 @@ export const ReviewListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			id: Uuid,
-			authorId: Uuid,
-			authorName: NullableText,
+			publishers: t.Array(UnitPublisherSummaryResponse),
 			targetId: Uuid,
 			realmId: t.Nullable(Uuid),
 			title: NullableText,
@@ -322,7 +319,6 @@ export const ReviewListResponse = t.Object({
 
 export const PublicProfileResponse = t.Object({
 	id: Uuid,
-	slug: NullableText,
 	status: t.String(),
 	visibility: t.String(),
 	language: NullableText,
@@ -361,7 +357,6 @@ export const ProgressListResponse = t.Object({
 			lastContentStructureNodeId: t.Nullable(Uuid),
 			lastReadAnchor: t.Nullable(t.Unknown()),
 			type: t.String(),
-			slug: NullableText,
 			title: NullableText,
 		}),
 	),
@@ -408,7 +403,6 @@ const LocalizationSummary = t.Object({
 });
 export const EntityDetailResponse = t.Object({
 	id: Uuid,
-	slug: NullableText,
 	kind: t.String(),
 	verified: t.Boolean(),
 	avatar: ImageAssetResponse,
@@ -425,7 +419,6 @@ export const EntityDetailResponse = t.Object({
 });
 export const CollectionDetailResponse = t.Object({
 	id: Uuid,
-	slug: NullableText,
 	status: t.String(),
 	visibility: t.String(),
 	language: NullableText,
@@ -445,14 +438,12 @@ export const CollectionDetailResponse = t.Object({
 			parentTargetId: t.Nullable(Uuid),
 			position: FractionalPosition,
 			type: t.String(),
-			slug: NullableText,
 			title: NullableText,
 		}),
 	),
 });
 export const RealmDetailResponse = t.Object({
 	id: Uuid,
-	slug: NullableText,
 	status: t.String(),
 	visibility: t.String(),
 	language: NullableText,
@@ -469,7 +460,7 @@ export const RealmDetailResponse = t.Object({
 export const PostDetailResponse = t.Object({
 	id: Uuid,
 	postKind: OrdinaryPostKindResponse,
-	authorId: Uuid,
+	publishers: t.Array(UnitPublisherSummaryResponse),
 	realmId: t.Nullable(Uuid),
 	subjectId: t.Nullable(Uuid),
 	rootPostId: t.Nullable(Uuid),
@@ -484,7 +475,7 @@ export const PostDetailResponse = t.Object({
 });
 export const ReviewDetailResponse = t.Object({
 	id: Uuid,
-	authorId: Uuid,
+	publishers: t.Array(UnitPublisherSummaryResponse),
 	targetId: Uuid,
 	realmId: t.Nullable(Uuid),
 	title: NullableText,
@@ -538,8 +529,7 @@ export const ReplyListResponse = t.Object({
 		t.Object({
 			id: Uuid,
 			postKind: t.Literal("reply"),
-			authorId: Uuid,
-			authorName: NullableText,
+			publishers: t.Array(UnitPublisherSummaryResponse),
 			rootPostId: Uuid,
 			parentPostId: t.Nullable(Uuid),
 			contextRealmId: t.Nullable(Uuid),
@@ -551,6 +541,7 @@ export const ReplyListResponse = t.Object({
 			childEndCursor: NullableText,
 			createdAt: DateTime,
 			updatedAt: DateTime,
+			capabilities: t.Object({ canEdit: t.Boolean() }),
 		}),
 	),
 	nextCursor: NullableText,

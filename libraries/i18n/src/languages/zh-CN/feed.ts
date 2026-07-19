@@ -8,7 +8,7 @@ export default {
 	emptyTitle: "广场还很安静",
 	emptyBody: "成为第一个分享作品与见解的人。",
 	reason: {
-		followedAuthor: "因为你关注了作者",
+		followedPublisher: "因为你关注了发布者",
 		followedRealm: "因为你关注了社区",
 		basedOnActivity: "根据你的近期活动",
 		relatedSubject: "与正在浏览的内容相关",

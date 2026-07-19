@@ -49,6 +49,7 @@ import { invalidateRecommendationQueries } from "@/features/recommendations/quer
 import { useTranslation } from "@/i18n/client";
 import { readPortableText } from "@/lib/block";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
+import { firstPublisher, PublisherLinks } from "./publisher-list";
 
 type FeedSort = "best" | "hot" | "new" | "top" | "rising";
 export type FeedPost = GetApiFeedStatus200["items"][number];
@@ -266,7 +267,8 @@ export function PostListItem({
 	onHiddenChange?: (hidden: boolean) => void;
 }) {
 	const { t } = useTranslation({ suspense: true });
-	const initial = (post.authorName ?? "R").slice(0, 1).toUpperCase();
+	const primaryPublisher = firstPublisher(post.publishers);
+	const initial = (primaryPublisher?.name ?? "R").slice(0, 1).toUpperCase();
 	const { elementRef, trackOpen } = useRecommendationTracking(post.id, post.tracking);
 	const queryClient = useQueryClient();
 	const exclude = usePutApiRecommendationsExclusionsByUnitId({
@@ -298,27 +300,34 @@ export function PostListItem({
 		>
 			<article ref={elementRef}>
 				<CardContent className="flex gap-3">
-					<Link
-						className="grid size-11 shrink-0 place-items-center sm:size-9"
-						href={`/users/${post.authorId}`}
-					>
-						<Avatar className="size-9">
-							<AvatarFallback className="bg-accent text-accent-foreground">
-								{initial}
-							</AvatarFallback>
-						</Avatar>
-					</Link>
+					{primaryPublisher ? (
+						<Link
+							className="grid size-11 shrink-0 place-items-center sm:size-9"
+							href={`/users/${primaryPublisher.profileId}`}
+						>
+							<Avatar className="size-9">
+								<AvatarFallback className="bg-accent text-accent-foreground">
+									{initial}
+								</AvatarFallback>
+							</Avatar>
+						</Link>
+					) : (
+						<div className="grid size-11 shrink-0 place-items-center sm:size-9">
+							<Avatar className="size-9">
+								<AvatarFallback>{initial}</AvatarFallback>
+							</Avatar>
+						</div>
+					)}
 					<div className="min-w-0 flex-1">
 						<div className="text-muted-foreground flex flex-wrap items-center gap-x-1.5 text-xs">
 							{post.postKind === "reply" && (
 								<Badge variant="secondary">{t.posts.replyPost}</Badge>
 							)}
-							<Link
+							<PublisherLinks
 								className="inline-flex min-h-6 items-center text-foreground font-semibold hover:underline"
-								href={`/users/${post.authorId}`}
-							>
-								{post.authorName ?? t.posts.unknownAuthor}
-							</Link>
+								emptyLabel={t.posts.unknownPublisher}
+								publishers={post.publishers}
+							/>
 							<span>·</span>
 							<span>{formatRelativeTime(post.createdAt)}</span>
 							{post.realmId && (

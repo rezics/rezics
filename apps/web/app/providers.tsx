@@ -27,7 +27,7 @@ const searchEntities: EntitySearch = async (index, query, signal) => {
 	});
 	return data.hits.map((hit) => ({
 		id: hit.id,
-		label: hit.titles[0] ?? hit.name ?? hit.slug ?? hit.id,
+		label: hit.titles[0] ?? hit.name ?? hit.id,
 	}));
 };
 

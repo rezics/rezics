@@ -16,8 +16,7 @@ import {
 } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
-import { insertAddressedUnit } from "../../units/slug-address";
-import { generateSlugLabel } from "../../units/slug";
+import { insertUnit } from "../../units/create";
 import { CreatePollBody, PollParams, VotePollBody } from "./schema";
 import { toApiErrorResponse, PollDetailResponse } from "../schema/response";
 import { IdResponse, PollVoteResponse } from "../schema/action-response";
@@ -41,13 +40,12 @@ export default new Elysia({ prefix: "/polls" })
 			)
 				throw new PollOptionsDuplicated();
 			const id = await database.transaction(async (tx) => {
-				const pollUnit = await insertAddressedUnit(tx, {
+				const pollUnit = await insertUnit(tx, {
 					kind: "poll",
-					slugScopeId: profile.unitId,
-					slug: generateSlugLabel(body.question, "poll"),
 					status: "published",
 					visibility: "public",
 					publishedAt: new Date(),
+					statusActor: { kind: "profile", profileId: profile.unitId },
 				});
 				await tx.insert(poll).values({
 					id: pollUnit.id,

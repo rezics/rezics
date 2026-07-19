@@ -19,7 +19,7 @@ import {
 	unitLocalization,
 } from "../../database/schema";
 import { recordUnitRevision } from "../../units/history";
-import { insertAddressedUnit } from "../../units/slug-address";
+import { insertUnit } from "../../units/create";
 import { DefaultLanguage } from "../../database/schema/contract-values";
 import { CollectionNotFound } from "./errors";
 import { CollectionDetailResponse } from "../schema/response";
@@ -42,13 +42,12 @@ export async function ensureFavorites(ownerId: string) {
 
 	try {
 		return await database.transaction(async (tx) => {
-			const created = await insertAddressedUnit(tx, {
+			const created = await insertUnit(tx, {
 				kind: "collection",
-				slugScopeId: ownerId,
-				slug: "favorites",
 				status: "published",
 				visibility: "private",
 				publishedAt: new Date(),
+				statusActor: { kind: "profile", profileId: ownerId },
 			});
 			await tx.insert(collectionTable).values({
 				id: created.id,
@@ -92,7 +91,6 @@ export async function getCollection(
 	const [record] = await database
 		.select({
 			id: unit.id,
-			slug: unit.slug,
 			status: unit.status,
 			visibility: unit.visibility,
 			language: unitLocalization.language,
@@ -149,7 +147,6 @@ export async function getCollection(
 			kind: collectionItem.role,
 			position: collectionItem.position,
 			type: unit.kind,
-			slug: unit.slug,
 			title: unitLocalization.title,
 		})
 		.from(collectionItem)

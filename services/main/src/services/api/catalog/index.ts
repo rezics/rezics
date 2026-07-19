@@ -153,7 +153,6 @@ export default new Elysia()
 					const items = await database
 						.select({
 							id: unit.id,
-							slug: unit.slug,
 							kind: entity.kind,
 							verified: entity.verified,
 							avatarAssetId: resolvedUnitLocalizationImageAssetId(
@@ -231,7 +230,6 @@ export default new Elysia()
 					const [entry] = await database
 						.select({
 							id: unit.id,
-							slug: unit.slug,
 							kind: entity.kind,
 							verified: entity.verified,
 							avatarAssetId: resolvedUnitLocalizationImageAssetId(
@@ -459,7 +457,6 @@ export default new Elysia()
 					items: await database
 						.select({
 							id: unit.id,
-							slug: unit.slug,
 							title: unitLocalization.title,
 							summary: unitLocalization.summary,
 						})

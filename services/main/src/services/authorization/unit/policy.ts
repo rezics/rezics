@@ -19,7 +19,7 @@ export type UnitAccessOverride =
 const RolePermissions = {
 	viewer: ["unit.read"],
 	editor: ["unit.read", "unit.update"],
-	publisher: ["unit.read", "unit.update", "unit.publish"],
+	publishing_editor: ["unit.read", "unit.update", "unit.publish"],
 	maintainer: [
 		"unit.read",
 		"unit.update",

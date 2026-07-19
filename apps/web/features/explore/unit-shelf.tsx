@@ -170,7 +170,7 @@ function UnitRecommendationCard({
 					</Menu>
 				)}
 				<Link
-					aria-label={item.title ?? item.slug ?? t.ui.unnamed}
+					aria-label={item.title ?? t.ui.unnamed}
 					href={`/units/${item.type}/${item.id}`}
 					onClick={trackOpen}
 				>
@@ -212,7 +212,7 @@ function UnitRecommendationCard({
 							featuredMobile && "text-base sm:text-sm",
 						)}
 					>
-						{item.title ?? item.slug ?? t.ui.unnamed}
+						{item.title ?? t.ui.unnamed}
 					</h3>
 					{reason && (
 						<p className="line-clamp-1 text-muted-foreground text-xs">{reason}</p>

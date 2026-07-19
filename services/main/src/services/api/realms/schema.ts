@@ -35,7 +35,6 @@ export const ListRealmsQuery = t.Object({
 export type ListRealmsQuery = Static<typeof ListRealmsQuery>;
 
 export const CreateRealmBody = t.Object({
-	slug: t.String({ minLength: 3, maxLength: 63, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
 	localization: LocalizationInput,
 	visibility: RealmVisibility,
 	joinPolicy: RealmJoinPolicy,

@@ -131,11 +131,10 @@ export default {
 	InvalidSlug: "Slug 必须是 1 至 63 个字符的小写 ASCII 短横线标签。",
 	SlugTaken: "这个 Unit 命名空间中的 Slug 已被使用。",
 	SlugScopeNotFound: "没有找到 Slug 所属的 Unit 命名空间。",
-	SlugScopeUnavailable: "重定向或已删除的 Unit 不能作为规范 Slug 命名空间。",
+	SlugScopeUnavailable: "没有地址或已删除的 Unit 不能作为规范 Slug 命名空间。",
 	SlugScopeCycle: "这次移动会形成 Slug 命名空间循环。",
 	SlugDepthExceeded: "Unit 的 Slug 路径超过了最大深度。",
-	UnitAddressUnchanged: "Unit 的 Slug 地址没有变化。",
 	UnitAddressMutationForbidden: "这个 Unit 的 Slug 地址不能执行这项操作。",
 	SlugRedirectNotFound: "没有找到 Slug 重定向。",
-	SlugRedirectLoop: "检测到 Slug 重定向循环。",
+	UnitSlugAddressNotFound: "这个 Unit 没有规范 Slug 地址。",
 };

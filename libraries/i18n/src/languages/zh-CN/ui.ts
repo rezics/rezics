@@ -7,7 +7,6 @@ export default {
 	edit: "编辑",
 	search: "搜索",
 	title: "标题",
-	slug: "短链接",
 	summary: "摘要",
 	body: "正文",
 	status: "状态",

@@ -6,7 +6,6 @@ import {
 	BootstrapEpochUnixMilliseconds,
 	OfficialProfileManifest,
 	ReservedBootstrapUuidv7s,
-	RootSlugNamespaceUnitId,
 	SlugNamespaceManifest,
 	uuidv7UnixMilliseconds,
 } from "./manifest";
@@ -22,12 +21,8 @@ describe("database bootstrap manifest", () => {
 		}
 	});
 
-	it("orders the root before its top-level slug namespaces", () => {
-		expect(SlugNamespaceManifest[0]).toEqual({
-			id: RootSlugNamespaceUnitId,
-			slug: null,
-		});
-		expect(SlugNamespaceManifest.slice(1).map((value) => value.slug)).toEqual([
+	it("models top-level namespaces directly under the virtual null root", () => {
+		expect(SlugNamespaceManifest.map((value) => value.slug)).toEqual([
 			"users",
 			"realms",
 			"tags",

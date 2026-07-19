@@ -5,7 +5,7 @@ export function recommendationReasonLabel(
 	reason: GetApiFeedStatus200ItemsRecommendationReason | null | undefined,
 	feed: Translation["feed"],
 ) {
-	if (reason === "followed_author") return feed.reason.followedAuthor;
+	if (reason === "followed_publisher") return feed.reason.followedPublisher;
 	if (reason === "followed_realm") return feed.reason.followedRealm;
 	if (reason === "based_on_activity") return feed.reason.basedOnActivity;
 	if (reason === "related_subject") return feed.reason.relatedSubject;

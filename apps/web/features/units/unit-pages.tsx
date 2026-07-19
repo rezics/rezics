@@ -95,7 +95,6 @@ export function UnitCreatePage({ type }: { type: UnitType }) {
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		const form = new FormData(event.currentTarget);
-		const slug = String(form.get("slug") ?? "").trim();
 		const summary = String(form.get("summary") ?? "").trim();
 		try {
 			await create.mutateAsync({
@@ -107,7 +106,6 @@ export function UnitCreatePage({ type }: { type: UnitType }) {
 						...(summary ? { summary } : {}),
 						coverAssetId: cover?.id ?? null,
 					},
-					...(slug ? { slug } : {}),
 					visibility:
 						form.get("visibility") === "private"
 							? "private"
@@ -148,10 +146,6 @@ export function UnitCreatePage({ type }: { type: UnitType }) {
 						<Field required>
 							<FieldLabel>{t.ui.title}</FieldLabel>
 							<Input maxLength={500} name="title" required />
-						</Field>
-						<Field>
-							<FieldLabel>{t.ui.slug}</FieldLabel>
-							<Input name="slug" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" />
 						</Field>
 						<Field>
 							<FieldLabel>{t.ui.summary}</FieldLabel>

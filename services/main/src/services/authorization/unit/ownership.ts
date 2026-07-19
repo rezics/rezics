@@ -10,7 +10,7 @@ export async function createCommunityCatalogAccess(
 	tx: DatabaseTransaction,
 	unitId: string,
 	contributorProfileId: string,
-	contributorRole: "editor" | "publisher" = "editor",
+	contributorRole: "editor" | "publishing_editor" = "editor",
 ): Promise<void> {
 	await tx.insert(unitAccessBinding).values([
 		{

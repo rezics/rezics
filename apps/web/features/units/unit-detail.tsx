@@ -116,7 +116,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 						<Badge variant="outline">{rating}</Badge>
 					</div>
 					<h1 className="font-heading text-2xl font-black tracking-tight sm:text-4xl">
-						{localization?.title ?? item.slug ?? t.ui.unnamed}
+						{localization?.title ?? t.ui.unnamed}
 					</h1>
 					{localization?.summary && (
 						<p className="max-w-3xl text-lg leading-8 text-muted-foreground">

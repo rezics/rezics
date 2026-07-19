@@ -82,14 +82,14 @@ export function RealmsPage() {
 											<AvatarImage alt="" src={realm.avatar.url} />
 										) : null}
 										<AvatarFallback>
-											{(realm.title ?? realm.slug ?? t.realms.untitled)
+											{(realm.title ?? t.realms.untitled)
 												.slice(0, 1)
 												.toUpperCase()}
 										</AvatarFallback>
 									</Avatar>
 									<div className="grid min-w-0 gap-2">
 										<h2 className="font-semibold">
-											{realm.title ?? realm.slug ?? t.realms.untitled}
+											{realm.title ?? t.realms.untitled}
 										</h2>
 										{realm.summary && (
 											<p className="text-muted-foreground line-clamp-2 text-sm">
@@ -127,13 +127,11 @@ export function RealmCreatePage() {
 		event.preventDefault();
 		const data = new FormData(event.currentTarget);
 		const title = String(data.get("title") ?? "").trim();
-		const slug = String(data.get("slug") ?? "").trim();
 		const summary = String(data.get("summary") ?? "").trim();
-		if (!title || !slug) return;
+		if (!title) return;
 		create.mutate(
 			{
 				body: {
-					slug,
 					localization: {
 						language: locale.target,
 						title,
@@ -163,16 +161,6 @@ export function RealmCreatePage() {
 						<Field required>
 							<FieldLabel>{t.ui.title}</FieldLabel>
 							<Input name="title" required maxLength={500} />
-						</Field>
-						<Field required>
-							<FieldLabel>{t.ui.slug}</FieldLabel>
-							<Input
-								name="slug"
-								required
-								minLength={3}
-								maxLength={72}
-								pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-							/>
 						</Field>
 						<Field>
 							<FieldLabel>{t.ui.summary}</FieldLabel>
@@ -256,7 +244,7 @@ export function RealmDetailPage({ id }: { id: string }) {
 						<Avatar className="size-16 ring-4 ring-background sm:size-20">
 							{realm.avatar ? <AvatarImage alt="" src={realm.avatar.url} /> : null}
 							<AvatarFallback>
-								{(localization?.title ?? realm.slug ?? t.realms.untitled)
+								{(localization?.title ?? t.realms.untitled)
 									.slice(0, 1)
 									.toUpperCase()}
 							</AvatarFallback>
@@ -274,7 +262,7 @@ export function RealmDetailPage({ id }: { id: string }) {
 						</div>
 					</div>
 					<h1 className="break-words font-serif font-semibold text-3xl tracking-tight sm:text-5xl">
-						{localization?.title ?? realm.slug ?? t.realms.untitled}
+						{localization?.title ?? t.realms.untitled}
 					</h1>
 					{localization?.summary ? (
 						<p className="mt-3 max-w-3xl text-base text-muted-foreground leading-7 sm:text-lg">

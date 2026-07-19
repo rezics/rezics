@@ -103,7 +103,6 @@ export const UnitRecommendationResponse = t.Object({
 		t.Object({
 			id: Uuid,
 			type: UnitType,
-			slug: t.Nullable(t.String()),
 			language: t.Nullable(t.String()),
 			contentRating: t.String(),
 			publishedAt: t.Nullable(DateTime),

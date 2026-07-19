@@ -50,6 +50,7 @@ import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
+import { PublisherLinks } from "@/features/posts/publisher-list";
 
 async function invalidateReviews(
 	queryClient: ReturnType<typeof useQueryClient>,
@@ -93,7 +94,10 @@ export function ReviewsPage() {
 									title={review.title ?? t.ui.unnamed}
 								/>
 								<CardContent className="text-muted-foreground text-sm">
-									{review.authorName ?? t.engagement.unknownAuthor}
+									<PublisherLinks
+										emptyLabel={t.posts.unknownPublisher}
+										publishers={review.publishers}
+									/>
 								</CardContent>
 							</Card>
 						</Link>

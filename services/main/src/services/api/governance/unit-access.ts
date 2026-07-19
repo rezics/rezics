@@ -353,7 +353,7 @@ export default new Elysia({ prefix: "/unit" })
 							eq(unitAccessBinding.unitId, params.unitId),
 							eq(unitAccessBinding.subjectKind, "profile"),
 							eq(unitAccessBinding.profileId, profile.unitId),
-							inArray(unitAccessBinding.role, ["editor", "publisher"]),
+							inArray(unitAccessBinding.role, ["editor", "publishing_editor"]),
 							eq(unitAccessBinding.scope, []),
 							active(unitAccessBinding.revokedAt, unitAccessBinding.expiresAt),
 						),
@@ -461,7 +461,7 @@ export default new Elysia({ prefix: "/unit" })
 				await ensureOwnerOrPlatform(authorization, params.unitId);
 			await ensureSubjectExists(body.subject);
 			const expiresAt = parseExpiry(body.expiresAt);
-			return database.transaction(async (tx) => {
+			const created = await database.transaction(async (tx) => {
 				await tx.execute(
 					sql`select pg_advisory_xact_lock(hashtextextended(${`unit-access:${params.unitId}`}::text, 0))`,
 				);
@@ -526,6 +526,8 @@ export default new Elysia({ prefix: "/unit" })
 				});
 				return created;
 			});
+			/** TODO: Deliver a best-effort access-granted notification after this commit boundary. */
+			return created;
 		},
 		{
 			access: "session-only",

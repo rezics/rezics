@@ -43,6 +43,7 @@ import { selectLocalization } from "@/lib/localization";
 import { ReplyPostThread } from "./reply-thread";
 import { PostList, RelatedPostRecommendations } from "./post-list";
 import { invalidatePostQueries } from "./query";
+import { PublisherLinks } from "./publisher-list";
 
 type PickedEntity = { id: string; label: string };
 
@@ -85,7 +86,7 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 		);
 		setRealm({
 			id: defaultRealm.data.id,
-			label: localization?.title ?? defaultRealm.data.slug ?? defaultRealm.data.id,
+			label: localization?.title ?? defaultRealm.data.id,
 		});
 	}, [defaultRealm.data, locale.target, realm]);
 
@@ -197,12 +198,14 @@ export function PostDetailPage({ id }: { id: string }) {
 			<Card>
 				<CardHeader>
 					<CardDescription className="flex flex-wrap gap-x-4 gap-y-2">
-						<Link
-							className="text-link hover:text-link-hover"
-							href={`/users/${post.authorId}`}
-						>
-							{t.posts.author}
-						</Link>
+						<span className="inline-flex gap-1">
+							<span>{t.posts.publishers}:</span>
+							<PublisherLinks
+								className="text-link hover:text-link-hover"
+								emptyLabel={t.posts.unknownPublisher}
+								publishers={post.publishers}
+							/>
+						</span>
 						{post.realmId && (
 							<Link
 								className="text-link hover:text-link-hover"

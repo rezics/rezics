@@ -9,7 +9,6 @@ import {
 	primaryKey,
 	text,
 	unique,
-	uniqueIndex,
 	uuid,
 } from "drizzle-orm/pg-core";
 
@@ -54,10 +53,6 @@ export const unit = pgTable(
 	{
 		id: createUuidv7PrimaryKey(),
 		kind: text().$type<UnitKind>().notNull(),
-		slugScopeId: uuid("slug_scope_id").references((): AnyPgColumn => unit.id, {
-			onDelete: "restrict",
-		}),
-		slug: text(),
 		status: unitStatus().default("draft").notNull(),
 		visibility: unitVisibility().default("public").notNull(),
 		contentRating: contentRating().default("general").notNull(),
@@ -70,12 +65,6 @@ export const unit = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		uniqueIndex("unit_slug_scope_slug_key")
-			.on(table.slugScopeId, table.slug)
-			.where(sql`${table.slugScopeId} is not null`),
-		uniqueIndex("unit_slug_root_key")
-			.on(sql`(true)`)
-			.where(sql`${table.slugScopeId} is null`),
 		index("unit_kind_status_created_at_idx")
 			.on(table.kind, table.status, table.createdAt.desc(), table.id.desc())
 			.where(sql`${table.deletedAt} is null`),
@@ -83,29 +72,7 @@ export const unit = pgTable(
 			.on(table.status, table.visibility, table.createdAt.desc(), table.id.desc())
 			.where(sql`${table.deletedAt} is null`),
 		index("unit_moderation_status_idx").on(table.moderationStatus),
-		index("unit_slug_search_idx")
-			.using("pgroonga", table.slug)
-			.where(sql`${table.deletedAt} is null`),
 		check("unit_kind_check", inArray(table.kind, UnitKindValues)),
-		check(
-			"unit_slug_address_shape_check",
-			sql`(
-				${table.slugScopeId} is null
-				and ${table.slug} is null
-				and ${table.kind} = 'slug_namespace'
-			) or (
-				${table.slugScopeId} is not null
-				and ${table.slug} is not null
-			)`,
-		),
-		check(
-			"unit_slug_label_check",
-			sql`${table.slug} is null or ${table.slug} ~ '^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$'`,
-		),
-		check(
-			"unit_slug_scope_not_self_check",
-			sql`${table.slugScopeId} is null or ${table.slugScopeId} <> ${table.id}`,
-		),
 		check(
 			"unit_publication_check",
 			sql`${table.status} <> 'published'::unit_status or ${table.publishedAt} is not null`,

@@ -36,8 +36,8 @@ import { ensureImageAssetsAttachable, imageAssetContentUrl } from "../api/image-
 import { UnitDetailResponse } from "../api/schema/response";
 import { UnitChanged, UnitNotFound, UnitPrimaryLanguageMissing } from "./errors";
 import { recordUnitRevision } from "./history";
-import { insertAddressedUnit } from "./slug-address";
-import { generateSlugLabel } from "./slug";
+import { insertUnit } from "./create";
+import { getPublisherSummariesByUnitIds, transitionUnitStatus } from "./status";
 
 export type UnitKind = "book" | "software" | "media";
 export type UnitDetail = Static<typeof UnitDetailResponse>;
@@ -52,7 +52,6 @@ export interface CreateUnitInput {
 		bannerAssetId?: string | null;
 		coverAssetId?: string | null;
 	};
-	slug?: string;
 	visibility?: "public" | "unlisted" | "private";
 	contentRating?: "general" | "r15" | "r18" | "r18g";
 	aiDisclosure?: "unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
@@ -100,14 +99,13 @@ export async function createUnit(
 			ownerId,
 			unitLocalizationImageAssetIds(input.localization),
 		);
-		const created = await insertAddressedUnit(tx, {
+		const created = await insertUnit(tx, {
 			kind,
-			slugScopeId: ownerId,
-			slug: input.slug ?? generateSlugLabel(input.localization.title),
 			visibility: input.visibility ?? "public",
 			contentRating: input.contentRating ?? "general",
 			aiDisclosure: input.aiDisclosure ?? "unknown",
 			license: input.license,
+			statusActor: { kind: "profile", profileId: ownerId },
 		});
 		if (kind === "book") await tx.insert(book).values({ id: created.id });
 		if (kind === "software") await tx.insert(software).values({ id: created.id });
@@ -116,7 +114,7 @@ export async function createUnit(
 			unitId: created.id,
 			...input.localization,
 		});
-		await createCommunityCatalogAccess(tx, created.id, ownerId, "publisher");
+		await createCommunityCatalogAccess(tx, created.id, ownerId, "publishing_editor");
 		await recordUnitRevision(tx, {
 			unitId: created.id,
 			actorProfileId: ownerId,
@@ -255,10 +253,10 @@ export async function getUnit(
 		.where(or(eq(unitVariant.unitId, base.id), eq(unitVariant.canonicalUnitId, base.id)))
 		.orderBy(unitVariant.createdAt);
 	const canEdit = await authorization.unit.canUpdate(base.id);
+	const publishers = (await getPublisherSummariesByUnitIds([base.id])).get(base.id) ?? [];
 	return {
 		id: base.id,
 		type: base.kind,
-		slug: base.slug,
 		status: base.status,
 		visibility: base.visibility,
 		language: primaryLanguage,
@@ -266,6 +264,7 @@ export async function getUnit(
 		aiDisclosure: base.aiDisclosure,
 		license: base.license,
 		publishedAt: base.publishedAt,
+		publishers,
 		createdAt: base.createdAt,
 		updatedAt: base.updatedAt,
 		primaryLanguage,
@@ -328,7 +327,6 @@ export async function listUnits(kind: UnitKind, cursor?: [string, string], limit
 	const rows = await database
 		.select({
 			id: unit.id,
-			slug: unit.slug,
 			language: unitLocalization.language,
 			contentRating: unit.contentRating,
 			publishedAt: unit.publishedAt,
@@ -361,9 +359,11 @@ export async function listUnits(kind: UnitKind, cursor?: [string, string], limit
 		)
 		.orderBy(desc(unit.createdAt), desc(unit.id))
 		.limit(limit + 1);
+	const publishers = await getPublisherSummariesByUnitIds(rows.map(({ id }) => id));
 	return Promise.all(
 		rows.map(async ({ avatarAssetId, bannerAssetId, coverAssetId, ...row }) => ({
 			...row,
+			publishers: publishers.get(row.id) ?? [],
 			avatar: presentImageAsset(avatarAssetId),
 			banner: presentImageAsset(bannerAssetId),
 			cover: presentImageAsset(coverAssetId),
@@ -378,16 +378,17 @@ export async function updateUnit(
 	body: UpdateUnitInput,
 ): Promise<UnitDetail> {
 	await authorization.unit.ensureCanUpdate(unitId, [["unit"], [kind]]);
+	const publishDecision = body.status
+		? await authorization.unit.decide(unitId, "unit.publish", ["unit"])
+		: undefined;
 	await database.transaction(async (tx) => {
 		const [updated] = await tx
 			.update(unit)
 			.set({
-				status: body.status,
 				visibility: body.visibility,
 				contentRating: body.contentRating,
 				aiDisclosure: body.aiDisclosure,
 				...(Object.hasOwn(body, "license") ? { license: body.license } : {}),
-				...(body.status === "published" ? { publishedAt: new Date() } : {}),
 			})
 			.where(
 				and(
@@ -396,7 +397,7 @@ export async function updateUnit(
 					eq(unit.updatedAt, new Date(body.updatedAt)),
 				),
 			)
-			.returning({ id: unit.id });
+			.returning({ id: unit.id, status: unit.status });
 		if (!updated) {
 			const [current] = await tx
 				.select({ updatedAt: unit.updatedAt })
@@ -464,11 +465,23 @@ export async function updateUnit(
 					licensed: details.licensed,
 				})
 				.where(eq(media.id, unitId));
-		await recordUnitRevision(tx, {
+		const revision = await recordUnitRevision(tx, {
 			unitId,
 			actorProfileId: authorization.profileId,
 			event: "update",
 		});
+		if (body.status) {
+			await transitionUnitStatus(tx, {
+				unitId,
+				toStatus: body.status,
+				actor: { kind: "profile", profileId: authorization.profileId },
+				authorization: {
+					kind: "interactive",
+					publishAllowed: publishDecision?.allowed ?? false,
+				},
+				revisionId: revision.revisionId,
+			});
+		}
 	});
 	return getUnit(kind, unitId, authorization);
 }

@@ -277,7 +277,6 @@ export async function recommendUnits(input: {
 			.select({
 				id: unit.id,
 				kind: unit.kind,
-				slug: unit.slug,
 				contentRating: unit.contentRating,
 				publishedAt: unit.publishedAt,
 				createdAt: unit.createdAt,
@@ -317,7 +316,6 @@ export async function recommendUnits(input: {
 				(async () => ({
 					id: detail.id,
 					type: kind,
-					slug: detail.slug,
 					language: localization?.language ?? null,
 					contentRating: detail.contentRating,
 					publishedAt: detail.publishedAt,

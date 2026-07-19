@@ -97,7 +97,6 @@ async function invalidateCollections(queryClient: ReturnType<typeof useQueryClie
 
 function CollectionFields({
 	initial,
-	includeSlug,
 	includeStatus,
 }: {
 	initial?: {
@@ -106,18 +105,11 @@ function CollectionFields({
 		visibility?: string;
 		status?: string;
 	};
-	includeSlug?: boolean;
 	includeStatus?: boolean;
 }) {
 	const { t } = useTranslation({ suspense: true });
 	return (
 		<FieldGroup>
-			{includeSlug && (
-				<Field required>
-					<FieldLabel>{t.ui.slug}</FieldLabel>
-					<Input name="slug" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" required />
-				</Field>
-			)}
 			<Field required>
 				<FieldLabel>{t.ui.title}</FieldLabel>
 				<Input defaultValue={initial?.title ?? ""} maxLength={500} name="title" required />
@@ -170,7 +162,7 @@ export function CollectionsPage() {
 						<Link key={collection.id} href={`/collections/${collection.id}`}>
 							<Card className="transition-colors hover:bg-surface-hover">
 								<CardHeader
-									title={collection.title ?? collection.slug ?? t.ui.unnamed}
+									title={collection.title ?? t.ui.unnamed}
 									description={collection.summary ?? undefined}
 								/>
 								<CardContent className="text-muted-foreground text-sm">
@@ -198,7 +190,6 @@ export function CollectionCreate() {
 		try {
 			const result = await create.mutateAsync({
 				body: {
-					slug: String(form.get("slug") ?? "").trim(),
 					localization: {
 						language: locale.target,
 						title: String(form.get("title") ?? "").trim(),
@@ -220,7 +211,7 @@ export function CollectionCreate() {
 			<main className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-10 sm:px-6">
 				<PageHeading title={t.engagement.newCollection} />
 				<form className="flex flex-col gap-6" onSubmit={(event) => void submit(event)}>
-					<CollectionFields includeSlug />
+					<CollectionFields />
 					<RequestFailure error={create.error} fallback={t.ui.retryLater} />
 					<Button isLoading={create.isPending} type="submit">
 						{t.ui.create}
@@ -287,7 +278,7 @@ export function CollectionDetail({ id }: { id: string }) {
 	return (
 		<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6">
 			<PageHeading
-				title={localization?.title ?? collection.slug ?? t.ui.unnamed}
+				title={localization?.title ?? t.ui.unnamed}
 				description={localization?.summary ?? undefined}
 				action={
 					canManage ? (
@@ -362,7 +353,7 @@ export function CollectionDetail({ id }: { id: string }) {
 							<Card key={item.targetId}>
 								<CardHeader
 									description={item.type}
-									title={item.title ?? item.slug ?? t.ui.unnamed}
+									title={item.title ?? t.ui.unnamed}
 								>
 									<CardAction>
 										<div className="flex gap-2">
@@ -500,7 +491,7 @@ function FavoritesList() {
 							<Card key={item.targetId}>
 								<CardHeader
 									description={item.type}
-									title={item.title ?? item.slug ?? t.ui.unnamed}
+									title={item.title ?? t.ui.unnamed}
 								>
 									<CardAction>
 										<div className="flex gap-2">

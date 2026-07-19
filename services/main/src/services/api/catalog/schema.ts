@@ -11,9 +11,6 @@ import { UnitType } from "../units/schema";
 export const CreateCatalogUnitBody = t.Object(
 	{
 		kind: t.Optional(t.String({ minLength: 1, maxLength: 64 })),
-		slug: t.Optional(
-			t.String({ minLength: 3, maxLength: 63, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
-		),
 		localization: LocalizationInput,
 	},
 	{ additionalProperties: false },

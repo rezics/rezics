@@ -12,7 +12,6 @@ import { ProfileNotFound } from "./errors";
 
 export const PublicProfileSelection = {
 	id: unit.id,
-	slug: unit.slug,
 	status: unit.status,
 	visibility: unit.visibility,
 	language: unitLocalization.language,

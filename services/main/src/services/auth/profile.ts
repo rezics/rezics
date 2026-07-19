@@ -6,13 +6,10 @@ import { isPrimaryUnitLocalization } from "../units/localization";
 import { profile, profilePreference, unit, unitLocalization, users } from "../database/schema";
 import { DefaultLanguage } from "../database/schema/contract-values";
 import { recordUnitRevision } from "../units/history";
-import { insertAddressedUnit } from "../units/slug-address";
-import { TopLevelSlugNamespaceUnitIds } from "../units/slug-system";
-import { generateSlugLabel } from "../units/slug";
+import { insertUnit } from "../units/create";
 
 export interface SessionProfile {
 	unitId: string;
-	slug: string;
 	name: string | null;
 	email: string | null;
 }
@@ -21,7 +18,6 @@ async function findProfile(authUserId: string): Promise<SessionProfile | undefin
 	const [record] = await database
 		.select({
 			unitId: profile.id,
-			slug: unit.slug,
 			name: unitLocalization.title,
 			email: users.email,
 		})
@@ -37,7 +33,7 @@ async function findProfile(authUserId: string): Promise<SessionProfile | undefin
 		)
 		.where(eq(profile.authUserId, authUserId))
 		.limit(1);
-	return record?.slug ? { ...record, slug: record.slug } : undefined;
+	return record;
 }
 
 export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name" | "image">) {
@@ -46,13 +42,12 @@ export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name"
 
 	try {
 		return await database.transaction(async (tx) => {
-			const profileUnit = await insertAddressedUnit(tx, {
+			const profileUnit = await insertUnit(tx, {
 				kind: "profile",
-				slugScopeId: TopLevelSlugNamespaceUnitIds.users,
-				slug: generateSlugLabel(authUser.name, "user"),
 				status: "published",
 				visibility: "public",
 				publishedAt: new Date(),
+				statusActor: { kind: "system" },
 			});
 			await tx.insert(profile).values({
 				id: profileUnit.id,
@@ -71,7 +66,6 @@ export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name"
 			});
 			return {
 				unitId: profileUnit.id,
-				slug: profileUnit.slug,
 				name: authUser.name,
 				email: authUser.email,
 			};

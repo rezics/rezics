@@ -15,7 +15,6 @@ export interface SearchHit {
 	id: string;
 	kind: string;
 	type: string;
-	slug?: string | null;
 	titles: string[];
 	summaries: string[];
 }
@@ -31,7 +30,7 @@ export interface DomainSearchRequest {
 	contentRatings?: string[];
 	aiDisclosures?: string[];
 	licenses?: string[];
-	authorId?: string;
+	publisherId?: string;
 	realmId?: string;
 	subjectId?: string;
 	targetId?: string;
@@ -77,7 +76,7 @@ export const SearchCategoryRules = {
 	},
 	posts: {
 		filterableAttributes: [
-			"authorId",
+			"publisherId",
 			...CommonFilterableAttributes,
 			"subjectId",
 			"rootId",
@@ -94,7 +93,7 @@ export const SearchCategoryRules = {
 		sortableAttributes: CommonSortableAttributes,
 	},
 	reviews: {
-		filterableAttributes: [...CommonFilterableAttributes, "authorId", "targetId", "type"],
+		filterableAttributes: [...CommonFilterableAttributes, "publisherId", "targetId", "type"],
 		sortableAttributes: CommonSortableAttributes,
 	},
 	polls: {

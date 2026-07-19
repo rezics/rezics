@@ -5,7 +5,7 @@ export default {
 	editTitle: "编辑帖子",
 	publish: "发布",
 	untitled: "未命名帖子",
-	unknownAuthor: "未知作者",
+	unknownPublisher: "系统发布",
 	replies: "回复帖",
 	replyPost: "回复帖",
 	signInToReply: "登录后回复",
@@ -39,6 +39,6 @@ export default {
 	subject: "讨论对象",
 	clearRealm: "移除社区",
 	clearSubject: "移除对象",
-	author: "查看作者",
+	publishers: "发布者",
 	viewRealm: "查看社区",
 };

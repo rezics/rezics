@@ -12,12 +12,13 @@ import {
 	unit,
 	unitAccessBinding,
 	unitLocalization,
+	unitSlugAddress,
 	users,
 	zone,
 } from "../database/schema";
 import { InitialFractionalPosition } from "../ordering/position";
+import { insertUnit, insertUnitIfMissing } from "../units/create";
 import { recordUnitRevision } from "../units/history";
-import { insertAddressedUnit } from "../units/slug-address";
 import { type BootstrapCredentialMode, generateBootstrapPassword } from "./credentials";
 import {
 	assertBootstrapManifest,
@@ -29,7 +30,6 @@ import {
 	OfficialProfileManifest,
 	OfficialRealmManifest,
 	OfficialZoneManifest,
-	RootSlugNamespaceUnitId,
 	SlugNamespaceManifest,
 	TopLevelSlugNamespaceUnitIds,
 } from "./manifest";
@@ -85,27 +85,20 @@ function assertFields(
 async function ensureSlugNamespaces(tx: DatabaseTransaction): Promise<void> {
 	const createdAt = bootstrapEpoch();
 	for (const namespace of SlugNamespaceManifest) {
-		const slugScopeId = namespace.slug === null ? null : RootSlugNamespaceUnitId;
-		await tx
-			.insert(unit)
-			.values({
-				id: namespace.id,
-				kind: "slug_namespace",
-				slugScopeId,
-				slug: namespace.slug,
-				status: "published",
-				visibility: "public",
-				publishedAt: createdAt,
-				createdAt,
-				updatedAt: createdAt,
-			})
-			.onConflictDoNothing();
+		const created = await insertUnitIfMissing(tx, {
+			id: namespace.id,
+			kind: "slug_namespace",
+			status: "published",
+			visibility: "public",
+			publishedAt: createdAt,
+			createdAt,
+			updatedAt: createdAt,
+			statusActor: { kind: "system" },
+		});
 		const [stored] = await tx
 			.select({
 				id: unit.id,
 				kind: unit.kind,
-				slugScopeId: unit.slugScopeId,
-				slug: unit.slug,
 				status: unit.status,
 				visibility: unit.visibility,
 				deletedAt: unit.deletedAt,
@@ -113,24 +106,61 @@ async function ensureSlugNamespaces(tx: DatabaseTransaction): Promise<void> {
 			.from(unit)
 			.where(eq(unit.id, namespace.id))
 			.limit(1);
-		assertFields(`slug namespace ${namespace.slug ?? "<root>"}`, stored, {
+		assertFields(`slug namespace ${namespace.slug}`, stored, {
 			id: namespace.id,
 			kind: "slug_namespace",
-			slugScopeId,
-			slug: namespace.slug,
 			status: "published",
 			visibility: "public",
 			deletedAt: null,
 		});
+		await tx
+			.insert(unitSlugAddress)
+			.values({
+				kind: "canonical",
+				scopeUnitId: null,
+				slug: namespace.slug,
+				targetUnitId: namespace.id,
+				createdAt,
+				updatedAt: createdAt,
+			})
+			.onConflictDoNothing();
+		const [storedAddress] = await tx
+			.select({
+				kind: unitSlugAddress.kind,
+				scopeUnitId: unitSlugAddress.scopeUnitId,
+				slug: unitSlugAddress.slug,
+				targetUnitId: unitSlugAddress.targetUnitId,
+			})
+			.from(unitSlugAddress)
+			.where(
+				and(
+					eq(unitSlugAddress.kind, "canonical"),
+					eq(unitSlugAddress.targetUnitId, namespace.id),
+				),
+			)
+			.limit(1);
+		assertFields(`slug namespace address ${namespace.slug}`, storedAddress, {
+			kind: "canonical",
+			scopeUnitId: null,
+			slug: namespace.slug,
+			targetUnitId: namespace.id,
+		});
+		if (created)
+			await recordUnitRevision(tx, {
+				unitId: namespace.id,
+				actorProfileId: null,
+				event: "create",
+			});
 	}
 }
 
-async function ensureAddressedUnit(
+/** Installs an explicit reserved address; this never derives a slug from content. */
+async function ensureBootstrapAddressedUnit(
 	tx: DatabaseTransaction,
 	input: {
 		readonly id: string;
 		readonly kind: "profile" | "realm" | "zone";
-		readonly slugScopeId: string;
+		readonly scopeUnitId: string;
 		readonly slug: string;
 	},
 ): Promise<boolean> {
@@ -138,8 +168,6 @@ async function ensureAddressedUnit(
 		.select({
 			id: unit.id,
 			kind: unit.kind,
-			slugScopeId: unit.slugScopeId,
-			slug: unit.slug,
 			status: unit.status,
 			visibility: unit.visibility,
 			deletedAt: unit.deletedAt,
@@ -151,28 +179,56 @@ async function ensureAddressedUnit(
 		assertFields(`${input.kind} Unit ${input.slug}`, existing, {
 			id: input.id,
 			kind: input.kind,
-			slugScopeId: input.slugScopeId,
-			slug: input.slug,
 			status: "published",
 			visibility: "public",
 			deletedAt: null,
 		});
-		return false;
+	} else {
+		const createdAt = bootstrapEpoch();
+		await insertUnit(tx, {
+			id: input.id,
+			kind: input.kind,
+			status: "published",
+			visibility: "public",
+			publishedAt: createdAt,
+			createdAt,
+			updatedAt: createdAt,
+			statusActor: { kind: "system" },
+		});
 	}
 
 	const createdAt = bootstrapEpoch();
-	await insertAddressedUnit(tx, {
-		id: input.id,
-		kind: input.kind,
-		slugScopeId: input.slugScopeId,
+	const insertedAddress = await tx
+		.insert(unitSlugAddress)
+		.values({
+			kind: "canonical",
+			scopeUnitId: input.scopeUnitId,
+			slug: input.slug,
+			targetUnitId: input.id,
+			createdAt,
+			updatedAt: createdAt,
+		})
+		.onConflictDoNothing()
+		.returning({ id: unitSlugAddress.id });
+	const [address] = await tx
+		.select({
+			kind: unitSlugAddress.kind,
+			scopeUnitId: unitSlugAddress.scopeUnitId,
+			slug: unitSlugAddress.slug,
+			targetUnitId: unitSlugAddress.targetUnitId,
+		})
+		.from(unitSlugAddress)
+		.where(
+			and(eq(unitSlugAddress.kind, "canonical"), eq(unitSlugAddress.targetUnitId, input.id)),
+		)
+		.limit(1);
+	assertFields(`${input.kind} address ${input.slug}`, address, {
+		kind: "canonical",
+		scopeUnitId: input.scopeUnitId,
 		slug: input.slug,
-		status: "published",
-		visibility: "public",
-		publishedAt: createdAt,
-		createdAt,
-		updatedAt: createdAt,
+		targetUnitId: input.id,
 	});
-	return true;
+	return !existing || insertedAddress.length > 0;
 }
 
 async function ensureLocalization(
@@ -287,10 +343,10 @@ async function ensureOfficialProfiles(
 			});
 		}
 
-		let changed = await ensureAddressedUnit(tx, {
+		let changed = await ensureBootstrapAddressedUnit(tx, {
 			id: value.profileId,
 			kind: "profile",
-			slugScopeId: TopLevelSlugNamespaceUnitIds.users,
+			scopeUnitId: TopLevelSlugNamespaceUnitIds.users,
 			slug: value.slug,
 		});
 		const insertedProfile = await tx
@@ -390,10 +446,10 @@ async function ensureOwnerBinding(
 async function ensureOfficialRealm(tx: DatabaseTransaction): Promise<void> {
 	const value = OfficialRealmManifest;
 	const createdAt = bootstrapEpoch();
-	let changed = await ensureAddressedUnit(tx, {
+	let changed = await ensureBootstrapAddressedUnit(tx, {
 		id: value.id,
 		kind: "realm",
-		slugScopeId: TopLevelSlugNamespaceUnitIds.realms,
+		scopeUnitId: TopLevelSlugNamespaceUnitIds.realms,
 		slug: value.slug,
 	});
 	const insertedRealm = await tx
@@ -447,10 +503,10 @@ async function ensureOfficialRealm(tx: DatabaseTransaction): Promise<void> {
 async function ensureOfficialZone(tx: DatabaseTransaction): Promise<void> {
 	const value = OfficialZoneManifest;
 	const createdAt = bootstrapEpoch();
-	let changed = await ensureAddressedUnit(tx, {
+	let changed = await ensureBootstrapAddressedUnit(tx, {
 		id: value.id,
 		kind: "zone",
-		slugScopeId: TopLevelSlugNamespaceUnitIds.zones,
+		scopeUnitId: TopLevelSlugNamespaceUnitIds.zones,
 		slug: value.slug,
 	});
 	const insertedZone = await tx
@@ -496,37 +552,54 @@ async function ensureOfficialZone(tx: DatabaseTransaction): Promise<void> {
 }
 
 export async function isBootstrapReady(): Promise<boolean> {
-	const [unitCount, userCount, accountCount, profileCount, officialRealm, officialZone] =
-		await Promise.all([
-			database
-				.select({ value: count() })
-				.from(unit)
-				.where(inArray(unit.id, [...BootstrapUnitIds])),
-			database
-				.select({ value: count() })
-				.from(users)
-				.where(inArray(users.id, BootstrapAuthUserIds)),
-			database
-				.select({ value: count() })
-				.from(accounts)
-				.where(inArray(accounts.id, BootstrapAccountIds)),
-			database
-				.select({ value: count() })
-				.from(profile)
-				.where(inArray(profile.id, OfficialProfileIdValues)),
-			database
-				.select({ id: realm.id })
-				.from(realm)
-				.where(eq(realm.id, OfficialRealmManifest.id))
-				.limit(1),
-			database
-				.select({ id: zone.id })
-				.from(zone)
-				.where(eq(zone.id, OfficialZoneManifest.id))
-				.limit(1),
-		]);
+	const [
+		unitCount,
+		addressCount,
+		userCount,
+		accountCount,
+		profileCount,
+		officialRealm,
+		officialZone,
+	] = await Promise.all([
+		database
+			.select({ value: count() })
+			.from(unit)
+			.where(inArray(unit.id, [...BootstrapUnitIds])),
+		database
+			.select({ value: count() })
+			.from(unitSlugAddress)
+			.where(
+				and(
+					eq(unitSlugAddress.kind, "canonical"),
+					inArray(unitSlugAddress.targetUnitId, [...BootstrapUnitIds]),
+				),
+			),
+		database
+			.select({ value: count() })
+			.from(users)
+			.where(inArray(users.id, BootstrapAuthUserIds)),
+		database
+			.select({ value: count() })
+			.from(accounts)
+			.where(inArray(accounts.id, BootstrapAccountIds)),
+		database
+			.select({ value: count() })
+			.from(profile)
+			.where(inArray(profile.id, OfficialProfileIdValues)),
+		database
+			.select({ id: realm.id })
+			.from(realm)
+			.where(eq(realm.id, OfficialRealmManifest.id))
+			.limit(1),
+		database
+			.select({ id: zone.id })
+			.from(zone)
+			.where(eq(zone.id, OfficialZoneManifest.id))
+			.limit(1),
+	]);
 	return (
 		unitCount[0]?.value === BootstrapUnitIds.length &&
+		addressCount[0]?.value === BootstrapUnitIds.length &&
 		userCount[0]?.value === BootstrapAuthUserIds.length &&
 		accountCount[0]?.value === BootstrapAccountIds.length &&
 		profileCount[0]?.value === OfficialProfileIdValues.length &&

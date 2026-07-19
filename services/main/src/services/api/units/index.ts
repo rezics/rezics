@@ -3,6 +3,7 @@ import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { decodeCursor, encodeCursor } from "../../pagination";
+import { listUnitStatusEvents } from "../../units/status";
 import {
 	createUnit,
 	deleteUnit,
@@ -12,32 +13,20 @@ import {
 	upsertLocalization,
 } from "../../units/service";
 import {
-	createSlugNamespace,
-	releaseSlugRedirect,
-	resolveUnitPath,
-	updateUnitSlugAddress,
-} from "../../units/slug-address";
-import {
 	CreateUnitBody,
-	CreateSlugNamespaceBody,
 	ListUnitsQuery,
-	ReleaseSlugRedirectBody,
-	ResolveUnitPathBody,
-	ResolvedUnitPathResponse,
-	SlugNamespaceCreatedResponse,
-	SlugRedirectParams,
 	UpdateUnitBody,
-	UpdateUnitAddressBody,
-	UpdateUnitAddressParams,
-	UnitAddressMutationResponse,
 	UnitLocalizationBody,
 	UnitLocalizationParams,
 	UnitLookupParams,
 	UnitUnitIdParams,
 	UnitTypeParams,
+	UnitStatusEventListQuery,
+	UnitStatusEventListResponse,
+	UnitStatusEventParams,
 } from "./schema";
-import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse, UnitDetailResponse, UnitListResponse } from "../schema/response";
+import { NoContentResponse } from "../schema/action-response";
 
 const AuthenticationRequiredResponse = toApiErrorResponse(["AuthenticationRequired"]);
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
@@ -63,121 +52,37 @@ const UnitAuthorizationForbiddenResponse = toApiErrorResponse([
 	"UnitProtected",
 ]);
 const UnitChangedResponse = toApiErrorResponse(["UnitChanged"]);
-const SlugMutationBadRequestResponse = toApiErrorResponse(["InvalidSlug", "UnitAddressUnchanged"]);
-const SlugMutationForbiddenResponse = toApiErrorResponse([
-	"PlatformCapabilityRequired",
-	"UnitAddressMutationForbidden",
-]);
-const SlugMutationConflictResponse = toApiErrorResponse([
-	"SlugTaken",
-	"SlugScopeUnavailable",
-	"SlugScopeCycle",
-	"SlugRedirectLoop",
-]);
-const SlugMutationNotFoundResponse = toApiErrorResponse([
-	"UnitNotFound",
-	"SlugScopeNotFound",
-	"SlugRedirectNotFound",
-]);
-
 export default new Elysia({ prefix: "/units" })
 	.use(session)
-	.post(
-		"/resolve",
-		async ({ body }) => {
-			const result = await resolveUnitPath(body.path);
+	.get(
+		"/by-id/:unitId/status-events",
+		async ({ params, query, request }) => {
+			const authorization = (await resolveIdentity(request.headers, "unit:read"))
+				.authorization;
+			await authorization.unit.ensureCanRead(params.unitId);
+			const limit = query.limit ?? 50;
+			const rows = await listUnitStatusEvents({
+				unitId: params.unitId,
+				cursor: decodeCursor(query.cursor),
+				limit: limit + 1,
+			});
+			const hasMore = rows.length > limit;
+			const items = hasMore ? rows.slice(0, limit) : rows;
+			const last = items.at(-1);
 			return {
-				...result,
-				path: [...result.path],
-				canonicalPath: [...result.canonicalPath],
+				items,
+				nextCursor: hasMore && last ? encodeCursor(last.createdAt, last.id) : null,
 			};
 		},
 		{
-			body: ResolveUnitPathBody,
+			params: UnitStatusEventParams,
+			query: UnitStatusEventListQuery,
 			response: {
-				[StatusCodes.OK]: ResolvedUnitPathResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidSlug"]),
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
-					"UnitNotFound",
-					"SlugRedirectNotFound",
-				]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse([
-					"SlugScopeCycle",
-					"SlugScopeUnavailable",
-					"SlugRedirectLoop",
-				]),
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["SlugDepthExceeded"]),
+				[StatusCodes.OK]: UnitStatusEventListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
 			},
-			detail: { summary: "Resolve a canonical Unit slug path", tags: ["Units"] },
-		},
-	)
-	.post(
-		"/slug-namespaces",
-		async ({ authorization, body }) => {
-			const result = await createSlugNamespace(authorization, body);
-			return { ...result, canonicalPath: [...result.canonicalPath] };
-		},
-		{
-			access: "session-only",
-			body: CreateSlugNamespaceBody,
-			response: {
-				[StatusCodes.OK]: SlugNamespaceCreatedResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidSlug"]),
-				[StatusCodes.FORBIDDEN]: SlugMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: SlugMutationNotFoundResponse,
-				[StatusCodes.CONFLICT]: SlugMutationConflictResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["SlugDepthExceeded"]),
-			},
-			detail: { summary: "Create a staff-managed slug namespace", tags: ["Units"] },
-		},
-	)
-	.put(
-		"/slug-addresses/:unitId",
-		async ({ params, authorization, body }) => {
-			const result = await updateUnitSlugAddress(authorization, {
-				unitId: params.unitId,
-				...body,
-			});
-			return { ...result, canonicalPath: [...result.canonicalPath] };
-		},
-		{
-			access: "session-only",
-			params: UpdateUnitAddressParams,
-			body: UpdateUnitAddressBody,
-			response: {
-				[StatusCodes.OK]: UnitAddressMutationResponse,
-				[StatusCodes.BAD_REQUEST]: SlugMutationBadRequestResponse,
-				[StatusCodes.FORBIDDEN]: SlugMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: SlugMutationNotFoundResponse,
-				[StatusCodes.CONFLICT]: SlugMutationConflictResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["SlugDepthExceeded"]),
-			},
-			detail: { summary: "Change a Unit slug address as staff", tags: ["Units"] },
-		},
-	)
-	.delete(
-		"/slug-redirects/:redirectUnitId",
-		async ({ params, authorization, body, status }) => {
-			await releaseSlugRedirect(authorization, {
-				redirectUnitId: params.redirectUnitId,
-				reasonCode: body.reasonCode,
-			});
-			return status(StatusCodes.NO_CONTENT, undefined);
-		},
-		{
-			access: "session-only",
-			params: SlugRedirectParams,
-			body: ReleaseSlugRedirectBody,
-			response: {
-				[StatusCodes.NO_CONTENT]: t.Void(),
-				[StatusCodes.FORBIDDEN]: SlugMutationForbiddenResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["SlugRedirectNotFound"]),
-			},
-			detail: {
-				summary: "Release a slug Redirect as staff",
-				tags: ["Units"],
-				responses: NoContentResponse,
-			},
+			detail: { summary: "List Unit status events", tags: ["Units"] },
 		},
 	)
 	.get(

@@ -2,7 +2,6 @@ export const DefaultLanguage = "zh-hant";
 
 export const UnitKindValues = [
 	"slug_namespace",
-	"redirect",
 	"profile",
 	"book",
 	"software",
@@ -29,7 +28,11 @@ export const CommunityCatalogUnitKindValues = [
 
 export type UnitKind = (typeof UnitKindValues)[number];
 
+export const SlugAddressKindValues = ["canonical", "redirect"] as const;
+export type SlugAddressKind = (typeof SlugAddressKindValues)[number];
+
 export const UnitStatusValues = ["draft", "published", "archived"] as const;
+export const UnitStatusActorKindValues = ["profile", "system", "import"] as const;
 export const UnitVisibilityValues = ["public", "unlisted", "private"] as const;
 export const ContentRatingValues = ["general", "r15", "r18", "r18g"] as const;
 export const AiDisclosureValues = [
@@ -84,14 +87,14 @@ export const UnitAccessRealmRelationValues = ["member", "content_editor", "gover
 export const UnitAccessRoleValues = [
 	"viewer",
 	"editor",
-	"publisher",
+	"publishing_editor",
 	"maintainer",
 	"owner",
 ] as const;
 export const UnitDelegableAccessRoleValues = [
 	"viewer",
 	"editor",
-	"publisher",
+	"publishing_editor",
 	"maintainer",
 ] as const;
 export const UnitPermissionValues = [
@@ -196,7 +199,7 @@ export const RecommendationEventTypeValues = [
 	"not_interested",
 ] as const;
 export const RecommendationReasonValues = [
-	"followed_author",
+	"followed_publisher",
 	"followed_realm",
 	"based_on_activity",
 	"related_subject",

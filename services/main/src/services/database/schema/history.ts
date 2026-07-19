@@ -15,7 +15,8 @@ import {
 
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUuidv7PrimaryKey } from "./columns";
-import { profile, unit } from "./core";
+import { UnitStatusActorKindValues, toEnumValues } from "./contract-values";
+import { profile, unit, unitStatus } from "./core";
 
 export const UnitRevisionSlotRoleValues = [
 	"main",
@@ -26,6 +27,10 @@ export const UnitRevisionSlotRoleValues = [
 ] as const;
 
 export const unitRevisionSlotRole = pgEnum("unit_revision_slot_role", UnitRevisionSlotRoleValues);
+export const unitStatusActorKind = pgEnum(
+	"unit_status_actor_kind",
+	toEnumValues(UnitStatusActorKindValues),
+);
 
 export const revisionContent = pgTable(
 	"revision_content",
@@ -90,6 +95,61 @@ export const unitRevision = pgTable(
 		check(
 			"unit_revision_suppressed_check",
 			sql`not ${table.suppressed} or ${table.contentHidden} or ${table.summaryHidden} or ${table.actorHidden}`,
+		),
+	],
+);
+
+/** Immutable provenance for every real Unit lifecycle transition. */
+export const unitStatusEvent = pgTable(
+	"unit_status_event",
+	{
+		id: createUuidv7PrimaryKey(),
+		unitId: uuid()
+			.notNull()
+			.references(() => unit.id, { onDelete: "restrict" }),
+		fromStatus: unitStatus(),
+		toStatus: unitStatus().notNull(),
+		actorKind: unitStatusActorKind().notNull(),
+		changedByProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
+		revisionId: uuid(),
+		actorHidden: boolean().default(false).notNull(),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.revisionId, table.unitId],
+			foreignColumns: [unitRevision.id, unitRevision.unitId],
+			name: "unit_status_event_revision_unit_fkey",
+		}).onDelete("restrict"),
+		index("unit_status_event_unit_created_at_idx").on(
+			table.unitId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		index("unit_status_event_publication_idx").on(
+			table.unitId,
+			table.toStatus,
+			table.createdAt,
+			table.id,
+		),
+		index("unit_status_event_actor_created_at_idx").on(
+			table.changedByProfileId,
+			table.createdAt.desc(),
+			table.id.desc(),
+		),
+		check(
+			"unit_status_event_transition_check",
+			sql`${table.fromStatus} is null or ${table.fromStatus} <> ${table.toStatus}`,
+		),
+		check(
+			"unit_status_event_actor_shape_check",
+			sql`(
+				${table.actorKind} = 'profile'::unit_status_actor_kind
+				and ${table.changedByProfileId} is not null
+			) or (
+				${table.actorKind} in ('system'::unit_status_actor_kind, 'import'::unit_status_actor_kind)
+				and ${table.changedByProfileId} is null
+			)`,
 		),
 	],
 );

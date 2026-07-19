@@ -41,9 +41,8 @@ import { createNotification, deliverNotificationEmail } from "../../notification
 import { findRealmMembership, getCurrentRealmRules } from "../../realms/service";
 import type { DatabaseTransaction } from "../../database";
 import { recordUnitRevision } from "../../units/history";
-import { insertAddressedUnit } from "../../units/slug-address";
-import { TopLevelSlugNamespaceUnitIds } from "../../units/slug-system";
-import { generateSlugLabel } from "../../units/slug";
+import { insertUnit } from "../../units/create";
+import { transitionUnitStatus } from "../../units/status";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
 import { presentImageAsset } from "../../units/service";
 import {
@@ -173,7 +172,6 @@ export default new Elysia({ prefix: "/realms" })
 			items: await database
 				.select({
 					id: realm.id,
-					slug: unit.slug,
 					joinPolicy: realm.joinPolicy,
 					title: unitLocalization.title,
 					summary: unitLocalization.summary,
@@ -231,13 +229,12 @@ export default new Elysia({ prefix: "/realms" })
 					profile.unitId,
 					unitLocalizationImageAssetIds(body.localization),
 				);
-				const created = await insertAddressedUnit(tx, {
+				const created = await insertUnit(tx, {
 					kind: "realm",
-					slugScopeId: TopLevelSlugNamespaceUnitIds.realms,
-					slug: body.slug,
 					status: "published",
 					visibility: body.visibility,
 					publishedAt: new Date(),
+					statusActor: { kind: "profile", profileId: profile.unitId },
 				});
 				await tx.insert(realm).values({ id: created.id, joinPolicy: body.joinPolicy });
 				await tx.insert(unitLocalization).values({
@@ -287,7 +284,6 @@ export default new Elysia({ prefix: "/realms" })
 			const [record] = await database
 				.select({
 					id: realm.id,
-					slug: unit.slug,
 					status: unit.status,
 					visibility: unit.visibility,
 					joinPolicy: realm.joinPolicy,
@@ -377,6 +373,15 @@ export default new Elysia({ prefix: "/realms" })
 			await authorization.realm.ensureCapability(params.realmId, "realm.settings.update");
 			for (const scope of [["unit"], ["realm"], ["localizations"]] as const)
 				await authorization.unit.ensureOperationAllowed(params.realmId, scope);
+			const publishDecision = body.status
+				? await authorization.unit.decide(params.realmId, "unit.publish", ["unit"])
+				: undefined;
+			const [current] = await database
+				.select({ id: unit.id })
+				.from(unit)
+				.where(and(eq(unit.id, params.realmId), eq(unit.kind, "realm")))
+				.limit(1);
+			if (!current) throw new RealmNotFound();
 			await database.transaction(async (tx) => {
 				if (body.localization)
 					await ensureImageAssetsAttachable(
@@ -387,9 +392,7 @@ export default new Elysia({ prefix: "/realms" })
 				const updated = await tx
 					.update(unit)
 					.set({
-						status: body.status,
 						visibility: body.visibility,
-						publishedAt: body.status === "published" ? new Date() : undefined,
 					})
 					.where(and(eq(unit.id, params.realmId), eq(unit.kind, "realm")))
 					.returning({ id: unit.id });
@@ -413,11 +416,22 @@ export default new Elysia({ prefix: "/realms" })
 						body.localization.language,
 					);
 				}
-				await recordUnitRevision(tx, {
+				const revision = await recordUnitRevision(tx, {
 					unitId: params.realmId,
 					actorProfileId: profile.unitId,
 					event: "update",
 				});
+				if (body.status)
+					await transitionUnitStatus(tx, {
+						unitId: params.realmId,
+						toStatus: body.status,
+						actor: { kind: "profile", profileId: profile.unitId },
+						authorization: {
+							kind: "interactive",
+							publishAllowed: publishDecision?.allowed ?? false,
+						},
+						revisionId: revision.revisionId,
+					});
 				await recordAuditEvent(tx, profile.unitId, "realm.settings.update", params.realmId);
 			});
 			return { id: params.realmId };
@@ -728,13 +742,12 @@ export default new Elysia({ prefix: "/realms" })
 					.returning();
 				if (!created) throw new Error("Realm rule revision insertion did not return a row");
 				for (const [index, rule] of body.rules.entries()) {
-					const ruleUnit = await insertAddressedUnit(tx, {
+					const ruleUnit = await insertUnit(tx, {
 						kind: "realm_rule",
-						slugScopeId: params.realmId,
-						slug: generateSlugLabel(rule.title, "rule"),
 						status: "published",
 						visibility: "unlisted",
 						publishedAt: new Date(),
+						statusActor: { kind: "profile", profileId: profile.unitId },
 					});
 					await tx.insert(unitLocalization).values({
 						unitId: ruleUnit.id,

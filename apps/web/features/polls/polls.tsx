@@ -64,7 +64,7 @@ export function PollsPage() {
 							<Card className="transition-colors hover:bg-surface-hover">
 								<CardHeader
 									description={poll.summaries[0] ?? undefined}
-									title={poll.titles[0] ?? poll.slug ?? t.ui.unnamed}
+									title={poll.titles[0] ?? t.ui.unnamed}
 								/>
 							</Card>
 						</Link>

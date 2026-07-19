@@ -8,7 +8,6 @@ import { Skeleton } from "../ui/skeleton";
 
 export interface UnitListItem {
 	id: string;
-	slug?: string | null;
 	title: string | null;
 	summary?: string | null;
 	href?: string;
@@ -71,17 +70,17 @@ export function UnitList({
 										src={image.url}
 									/>
 								) : (
-									(item.title ?? item.slug ?? "R").slice(0, 1)
+									(item.title ?? "R").slice(0, 1)
 								)}
 							</ItemMedia>
 							<ItemContent className="min-w-0 justify-center">
 								<ItemTitle>
 									{target ? (
 										<LinkOverlay href={target}>
-											{item.title ?? item.slug ?? messages.unnamed}
+											{item.title ?? messages.unnamed}
 										</LinkOverlay>
 									) : (
-										(item.title ?? item.slug ?? messages.unnamed)
+										(item.title ?? messages.unnamed)
 									)}
 								</ItemTitle>
 								{item.summary && <ItemDescription>{item.summary}</ItemDescription>}

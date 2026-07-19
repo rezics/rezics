@@ -23,6 +23,7 @@ import { RecommendationPolicyVersion } from "../../recommendations/policy";
 import { recommendRelatedPosts } from "../../recommendations/related-posts";
 import { verifyRecommendationTracking } from "../../recommendations/tracking";
 import { UnitNotFound } from "../../units/errors";
+import { getPublisherSummariesByUnitIds } from "../../units/status";
 import { ValidationError } from "../errors";
 import { FeedResponse, toApiErrorResponse } from "../schema/response";
 import {
@@ -229,11 +230,10 @@ export default new Elysia({ prefix: "/recommendations" })
 					Number.isNaN(Date.parse(cursor.asOf)))
 			)
 				throw new InvalidPaginationCursor();
-			const [seed] = await database
+			const [seedBase] = await database
 				.select({
 					id: post.id,
 					subjectId: post.subjectUnitId,
-					authorId: post.authorProfileId,
 				})
 				.from(post)
 				.innerJoin(unit, eq(unit.id, post.id))
@@ -245,7 +245,14 @@ export default new Elysia({ prefix: "/recommendations" })
 					),
 				)
 				.limit(1);
-			if (!seed) throw new UnitNotFound();
+			if (!seedBase) throw new UnitNotFound();
+			const publisherMap = await getPublisherSummariesByUnitIds([seedBase.id]);
+			const seed = {
+				...seedBase,
+				publisherIds: (publisherMap.get(seedBase.id) ?? []).map(
+					({ profileId }) => profileId,
+				),
+			};
 			const snapshot = await resolvePageSnapshot(cursor);
 			const policyVersion = snapshot?.policyVersion ?? RecommendationPolicyVersion;
 			if (cursor?.policyVersion !== undefined && cursor.policyVersion !== policyVersion)

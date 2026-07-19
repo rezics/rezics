@@ -87,9 +87,9 @@ export class SlugTaken extends Data.TaggedError("SlugTaken") {
 	static readonly status = StatusCodes.CONFLICT as const;
 	readonly status = SlugTaken.status;
 	readonly message = "Slug is already used in this Unit scope";
-	readonly details: { readonly scopeUnitId: string; readonly slug: string };
+	readonly details: { readonly scopeUnitId: string | null; readonly slug: string };
 
-	constructor(scopeUnitId: string, slug: string) {
+	constructor(scopeUnitId: string | null, slug: string) {
 		super();
 		this.details = { scopeUnitId, slug };
 	}
@@ -104,7 +104,7 @@ export class SlugScopeNotFound extends Data.TaggedError("SlugScopeNotFound") {
 export class SlugScopeUnavailable extends Data.TaggedError("SlugScopeUnavailable") {
 	static readonly status = StatusCodes.CONFLICT as const;
 	readonly status = SlugScopeUnavailable.status;
-	readonly message = "Redirect and deleted Units cannot be canonical slug scopes";
+	readonly message = "Unaddressed and deleted Units cannot be canonical slug scopes";
 }
 
 export class SlugScopeCycle extends Data.TaggedError("SlugScopeCycle") {
@@ -119,12 +119,6 @@ export class SlugDepthExceeded extends Data.TaggedError("SlugDepthExceeded") {
 	readonly message = "Unit slug path exceeds the maximum depth";
 }
 
-export class UnitAddressUnchanged extends Data.TaggedError("UnitAddressUnchanged") {
-	static readonly status = StatusCodes.BAD_REQUEST as const;
-	readonly status = UnitAddressUnchanged.status;
-	readonly message = "Unit slug address is unchanged";
-}
-
 export class UnitAddressMutationForbidden extends Data.TaggedError("UnitAddressMutationForbidden") {
 	static readonly status = StatusCodes.FORBIDDEN as const;
 	readonly status = UnitAddressMutationForbidden.status;
@@ -137,10 +131,10 @@ export class SlugRedirectNotFound extends Data.TaggedError("SlugRedirectNotFound
 	readonly message = "Slug Redirect not found";
 }
 
-export class SlugRedirectLoop extends Data.TaggedError("SlugRedirectLoop") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = SlugRedirectLoop.status;
-	readonly message = "Slug Redirect loop detected";
+export class UnitSlugAddressNotFound extends Data.TaggedError("UnitSlugAddressNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = UnitSlugAddressNotFound.status;
+	readonly message = "Unit has no canonical slug address";
 }
 
 export const UnitErrors = [
@@ -157,8 +151,7 @@ export const UnitErrors = [
 	SlugScopeUnavailable,
 	SlugScopeCycle,
 	SlugDepthExceeded,
-	UnitAddressUnchanged,
 	UnitAddressMutationForbidden,
 	SlugRedirectNotFound,
-	SlugRedirectLoop,
+	UnitSlugAddressNotFound,
 ] as const;

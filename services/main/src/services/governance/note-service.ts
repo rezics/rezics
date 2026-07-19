@@ -17,8 +17,7 @@ import {
 	type GovernanceNoteSubjectKindValues,
 } from "../database/schema";
 import { recordUnitRevision } from "../units/history";
-import { insertAddressedUnit } from "../units/slug-address";
-import { generateSlugLabel } from "../units/slug";
+import { insertUnit } from "../units/create";
 
 export type GovernanceNoteRole = (typeof GovernanceNoteRoleValues)[number];
 export type GovernanceNoteSubjectKind = (typeof GovernanceNoteSubjectKindValues)[number];
@@ -65,20 +64,15 @@ export async function createGovernanceNotePost(
 		note: GovernanceNote;
 	},
 ): Promise<{ postId: string; revisionId: string }> {
-	const created = await insertAddressedUnit(tx, {
+	const created = await insertUnit(tx, {
 		kind: "post",
-		slugScopeId: input.actorProfileId,
-		slug: generateSlugLabel(
-			`governance-note-${input.subjectKind}-${input.subjectId}-${input.note.role}-${crypto.randomUUID()}`,
-			"governance-note",
-		),
 		status: "published",
 		visibility: "private",
 		publishedAt: new Date(),
+		statusActor: { kind: "profile", profileId: input.actorProfileId },
 	});
 	await tx.insert(post).values({
 		id: created.id,
-		authorProfileId: input.actorProfileId,
 		subjectUnitId: input.subjectUnitId,
 		kind: "governance_note",
 		locked: true,

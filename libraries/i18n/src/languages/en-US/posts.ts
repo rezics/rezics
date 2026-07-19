@@ -5,7 +5,7 @@ export default {
 	editTitle: "Edit post",
 	publish: "Publish",
 	untitled: "Untitled post",
-	unknownAuthor: "Unknown author",
+	unknownPublisher: "Published by system",
 	replies: "Reply posts",
 	replyPost: "Reply post",
 	signInToReply: "Sign in to reply",
@@ -39,6 +39,6 @@ export default {
 	subject: "Subject",
 	clearRealm: "Remove realm",
 	clearSubject: "Remove subject",
-	author: "View author",
+	publishers: "Publishers",
 	viewRealm: "View realm",
 } satisfies typeof import("../zh-CN/posts").default;

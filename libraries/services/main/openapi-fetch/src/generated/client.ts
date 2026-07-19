@@ -5,6 +5,8 @@
 
 import type { Options, RequestResult } from "./.kubb/client";
 import type {
+	CreateSlugNamespaceAsStaffOptions,
+	CreateSlugNamespaceAsStaffResponses,
 	DeleteApiApiTokensByTokenIdOptions,
 	DeleteApiApiTokensByTokenIdResponses,
 	DeleteApiMessagesByMessageIdOptions,
@@ -169,14 +171,18 @@ import type {
 	PutApiUsersByIdBlockResponses,
 	DeleteApiUsersByIdBlockOptions,
 	DeleteApiUsersByIdBlockResponses,
-	PostApiUnitsResolveOptions,
-	PostApiUnitsResolveResponses,
-	PostApiUnitsSlugNamespacesOptions,
-	PostApiUnitsSlugNamespacesResponses,
-	PutApiUnitsSlugAddressesByUnitIdOptions,
-	PutApiUnitsSlugAddressesByUnitIdResponses,
-	DeleteApiUnitsSlugRedirectsByRedirectUnitIdOptions,
-	DeleteApiUnitsSlugRedirectsByRedirectUnitIdResponses,
+	ResolveUnitSlugAddressOptions,
+	ResolveUnitSlugAddressResponses,
+	ReplaceOwnProfileSlugAddressOptions,
+	ReplaceOwnProfileSlugAddressResponses,
+	GetUnitSlugAddressAsStaffOptions,
+	GetUnitSlugAddressAsStaffResponses,
+	ReplaceUnitSlugAddressAsStaffOptions,
+	ReplaceUnitSlugAddressAsStaffResponses,
+	ReleaseSlugRedirectAsStaffOptions,
+	ReleaseSlugRedirectAsStaffResponses,
+	GetApiUnitsByIdByUnitIdStatusEventsOptions,
+	GetApiUnitsByIdByUnitIdStatusEventsResponses,
 	GetApiUnitsByTypeOptions,
 	GetApiUnitsByTypeResponses,
 	PostApiUnitsByTypeOptions,
@@ -1751,65 +1757,115 @@ export function deleteApiUsersByIdBlock<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary Resolve a canonical Unit slug path
- * {@link /api/units/resolve}
+ * @description Resolves one to three slug labels to a public Unit ID and reports its canonical path. This isolated backend lookup does not alter the ID-based Unit API or enable frontend slug routing.
+ * @summary Resolve a backend Unit slug address
+ * {@link /api/slug-addresses/resolve}
  */
-export function postApiUnitsResolve<ThrowOnError extends boolean = true>(
-	options: Options<PostApiUnitsResolveOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiUnitsResolveResponses, ThrowOnError>> {
+export function resolveUnitSlugAddress<ThrowOnError extends boolean = true>(
+	options: Options<ResolveUnitSlugAddressOptions, ThrowOnError>,
+): Promise<RequestResult<ResolveUnitSlugAddressResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/units/resolve", ...config }) as Promise<
-		RequestResult<PostApiUnitsResolveResponses, ThrowOnError>
+	return request({ method: "POST", url: "/api/slug-addresses/resolve", ...config }) as Promise<
+		RequestResult<ResolveUnitSlugAddressResponses, ThrowOnError>
 	>;
 }
 
 /**
- * @summary Create a staff-managed slug namespace
- * {@link /api/units/slug-namespaces}
+ * @description Sets or replaces the authenticated Profile's optional slug label. The server always uses the permanent users namespace; callers cannot choose a scope. Repeating the same replacement is idempotent.
+ * @summary Replace the current Profile slug address
+ * {@link /api/slug-addresses/profile}
  */
-export function postApiUnitsSlugNamespaces<ThrowOnError extends boolean = true>(
-	options: Options<PostApiUnitsSlugNamespacesOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiUnitsSlugNamespacesResponses, ThrowOnError>> {
+export function replaceOwnProfileSlugAddress<ThrowOnError extends boolean = true>(
+	options: Options<ReplaceOwnProfileSlugAddressOptions, ThrowOnError>,
+): Promise<RequestResult<ReplaceOwnProfileSlugAddressResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/units/slug-namespaces", ...config }) as Promise<
-		RequestResult<PostApiUnitsSlugNamespacesResponses, ThrowOnError>
+	return request({ method: "PUT", url: "/api/slug-addresses/profile", ...config }) as Promise<
+		RequestResult<ReplaceOwnProfileSlugAddressResponses, ThrowOnError>
 	>;
 }
 
 /**
- * @summary Change a Unit slug address as staff
- * {@link /api/units/slug-addresses/:unitId}
+ * @description Returns the optional canonical slug address stored independently from the Unit. This administrative read is intentionally absent from core Unit responses.
+ * @summary Get a Unit canonical slug address as staff
+ * {@link /api/slug-addresses/units/:unitId}
  */
-export function putApiUnitsSlugAddressesByUnitId<ThrowOnError extends boolean = true>(
-	options: Options<PutApiUnitsSlugAddressesByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiUnitsSlugAddressesByUnitIdResponses, ThrowOnError>> {
+export function getUnitSlugAddressAsStaff<ThrowOnError extends boolean = true>(
+	options: Options<GetUnitSlugAddressAsStaffOptions, ThrowOnError>,
+): Promise<RequestResult<GetUnitSlugAddressAsStaffResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/slug-addresses/units/{unitId}",
+		...config,
+	}) as Promise<RequestResult<GetUnitSlugAddressAsStaffResponses, ThrowOnError>>;
+}
+
+/**
+ * @description Assigns or replaces a canonical address independently of Unit creation and update. It retains the former address as a redirect and succeeds idempotently when the requested address is already canonical.
+ * @summary Replace any Unit slug address as staff
+ * {@link /api/slug-addresses/units/:unitId}
+ */
+export function replaceUnitSlugAddressAsStaff<ThrowOnError extends boolean = true>(
+	options: Options<ReplaceUnitSlugAddressAsStaffOptions, ThrowOnError>,
+): Promise<RequestResult<ReplaceUnitSlugAddressAsStaffResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/units/slug-addresses/{unitId}",
+		url: "/api/slug-addresses/units/{unitId}",
 		...config,
-	}) as Promise<RequestResult<PutApiUnitsSlugAddressesByUnitIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<ReplaceUnitSlugAddressAsStaffResponses, ThrowOnError>>;
 }
 
 /**
- * @summary Release a slug Redirect as staff
- * {@link /api/units/slug-redirects/:redirectUnitId}
+ * @description Creates a namespace Unit and its canonical address atomically. A null scope creates a top-level namespace under the virtual root; a Unit ID creates a nested namespace.
+ * @summary Create an explicitly addressed namespace as staff
+ * {@link /api/slug-addresses/namespaces}
  */
-export function deleteApiUnitsSlugRedirectsByRedirectUnitId<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiUnitsSlugRedirectsByRedirectUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiUnitsSlugRedirectsByRedirectUnitIdResponses, ThrowOnError>> {
+export function createSlugNamespaceAsStaff<ThrowOnError extends boolean = true>(
+	options: Options<CreateSlugNamespaceAsStaffOptions, ThrowOnError>,
+): Promise<RequestResult<CreateSlugNamespaceAsStaffResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "POST", url: "/api/slug-addresses/namespaces", ...config }) as Promise<
+		RequestResult<CreateSlugNamespaceAsStaffResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @description Deletes one redirect address so the scope and label may be reused. This is explicit because retained redirects protect existing backend links.
+ * @summary Release a retained slug redirect as staff
+ * {@link /api/slug-addresses/redirects/:redirectAddressId}
+ */
+export function releaseSlugRedirectAsStaff<ThrowOnError extends boolean = true>(
+	options: Options<ReleaseSlugRedirectAsStaffOptions, ThrowOnError>,
+): Promise<RequestResult<ReleaseSlugRedirectAsStaffResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "DELETE",
-		url: "/api/units/slug-redirects/{redirectUnitId}",
+		url: "/api/slug-addresses/redirects/{redirectAddressId}",
 		...config,
-	}) as Promise<
-		RequestResult<DeleteApiUnitsSlugRedirectsByRedirectUnitIdResponses, ThrowOnError>
-	>;
+	}) as Promise<RequestResult<ReleaseSlugRedirectAsStaffResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List Unit status events
+ * {@link /api/units/by-id/:unitId/status-events}
+ */
+export function getApiUnitsByIdByUnitIdStatusEvents<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitsByIdByUnitIdStatusEventsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitsByIdByUnitIdStatusEventsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/units/by-id/{unitId}/status-events",
+		...config,
+	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdStatusEventsResponses, ThrowOnError>>;
 }
 
 /**

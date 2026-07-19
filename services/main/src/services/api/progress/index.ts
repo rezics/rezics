@@ -61,7 +61,6 @@ export default new Elysia({ prefix: "/progress" })
 					lastContentStructureNodeId: unitProgress.lastContentStructureNodeId,
 					deletedAt: unitProgress.deletedAt,
 					type: unit.kind,
-					slug: unit.slug,
 					title: unitLocalization.title,
 				})
 				.from(unitProgress)

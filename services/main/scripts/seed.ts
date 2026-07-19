@@ -84,6 +84,7 @@ import {
 	unitProgress,
 	unitReaction,
 	unitShare,
+	unitStatusEvent,
 	unitTag,
 	unitTagVote,
 	unitVariant,
@@ -93,7 +94,6 @@ import {
 import { RecommendationPolicyVersion } from "../src/services/recommendations/policy";
 import { fractionalPositionAt } from "../src/services/ordering/position";
 import { recordUnitRevision, restoreUnitRevision } from "../src/services/units/history";
-import { TopLevelSlugNamespaceUnitIds } from "../src/services/units/slug-system";
 import {
 	assertLocalDatabaseUrl,
 	chunks,
@@ -118,8 +118,7 @@ type LocalizationKind = "description" | "post" | "reply" | "poll" | "title";
 
 interface UnitDescriptor {
 	kind: UnitKind;
-	slugScopeId: string;
-	slug: string;
+	seedKey: string;
 	ownerProfileId: string;
 	localizationKind: LocalizationKind;
 	status: UnitStatus;
@@ -137,7 +136,6 @@ interface CreatedUnit extends UnitDescriptor {
 interface CreatedProfile {
 	id: string;
 	authUserId: string;
-	slug: string;
 	name: string;
 	email: string;
 	createdAt: Date;
@@ -184,32 +182,11 @@ function createdAtFor(data: SeedData, maximumAgeDays = 730): Date {
 	return data.pastDate(maximumAgeDays);
 }
 
-function seedSlugScopeId(kind: UnitKind, ownerProfileId: string): string {
-	switch (kind) {
-		case "profile":
-			return TopLevelSlugNamespaceUnitIds.users;
-		case "realm":
-			return TopLevelSlugNamespaceUnitIds.realms;
-		case "tag":
-			return TopLevelSlugNamespaceUnitIds.tags;
-		case "zone":
-			return TopLevelSlugNamespaceUnitIds.zones;
-		case "entity":
-			return TopLevelSlugNamespaceUnitIds.entities;
-		case "slug_namespace":
-		case "redirect":
-			throw new Error(`Seed content cannot create ${kind} Units`);
-		default:
-			if (!ownerProfileId) throw new Error(`Seed ${kind} Unit requires an address owner`);
-			return ownerProfileId;
-	}
-}
-
 function createDescriptor(
 	data: SeedData,
 	input: {
 		kind: UnitKind;
-		slug: string;
+		seedKey: string;
 		ownerProfileId: string;
 		localizationKind?: LocalizationKind;
 		stateIndex: number;
@@ -225,8 +202,7 @@ function createDescriptor(
 	const state = data.unitState(input.stateIndex, input.forcePublished);
 	return {
 		kind: input.kind,
-		slugScopeId: seedSlugScopeId(input.kind, input.ownerProfileId),
-		slug: input.slug,
+		seedKey: input.seedKey,
 		ownerProfileId: input.ownerProfileId,
 		localizationKind: input.localizationKind ?? "description",
 		status: state.status,
@@ -242,46 +218,36 @@ async function insertUnits(
 	tx: DatabaseTransaction,
 	descriptors: readonly UnitDescriptor[],
 ): Promise<CreatedUnit[]> {
-	const returned: { id: string; slugScopeId: string | null; slug: string | null }[] = [];
-	for (const batch of chunks(descriptors)) {
-		returned.push(
-			...(await tx
-				.insert(unit)
-				.values(
-					batch.map((descriptor) => ({
-						kind: descriptor.kind,
-						slugScopeId: descriptor.slugScopeId,
-						slug: descriptor.slug,
-						status: descriptor.status,
-						visibility: descriptor.visibility,
-						moderationStatus: descriptor.moderationStatus,
-						publishedAt: descriptor.publishedAt,
-						createdAt: descriptor.createdAt,
-						updatedAt: descriptor.updatedAt,
-					})),
-				)
-				.returning({ id: unit.id, slugScopeId: unit.slugScopeId, slug: unit.slug })),
-		);
+	const created: CreatedUnit[] = [];
+	for (const descriptor of descriptors) {
+		const [row] = await tx
+			.insert(unit)
+			.values({
+				kind: descriptor.kind,
+				status: descriptor.status,
+				visibility: descriptor.visibility,
+				moderationStatus: descriptor.moderationStatus,
+				publishedAt: descriptor.publishedAt,
+				createdAt: descriptor.createdAt,
+				updatedAt: descriptor.updatedAt,
+			})
+			.returning({ id: unit.id });
+		if (!row) throw new Error(`Seed Unit insertion did not return ${descriptor.seedKey}`);
+		await tx.insert(unitStatusEvent).values({
+			unitId: row.id,
+			fromStatus: null,
+			toStatus: descriptor.status,
+			actorKind: "system",
+			changedByProfileId: null,
+			createdAt: descriptor.createdAt,
+		});
+		created.push({ ...descriptor, id: row.id });
 	}
-	const idByAddress = new Map(
-		returned.map((row) => {
-			if (!row.slugScopeId || !row.slug)
-				throw new Error("Seed Unit insertion returned an incomplete address");
-			return [`${row.slugScopeId}:${row.slug}`, row.id];
-		}),
-	);
-	return descriptors.map((descriptor) => {
-		const id = idByAddress.get(`${descriptor.slugScopeId}:${descriptor.slug}`);
-		if (!id)
-			throw new Error(
-				`Seed Unit insertion did not return ${descriptor.slugScopeId}/${descriptor.slug}`,
-			);
-		return { ...descriptor, id };
-	});
+	return created;
 }
 
 function localizationRows(data: SeedData, value: CreatedUnit) {
-	return data.languages(Number(value.slug.match(/\d+$/)?.[0] ?? 0)).map((language, index) => {
+	return data.languages(Number(value.seedKey.match(/\d+$/)?.[0] ?? 0)).map((language, index) => {
 		const contentStatus =
 			value.status === "published"
 				? ("published" as const)
@@ -346,7 +312,7 @@ async function insertUnitDetails(
 		};
 		if (communityCatalogKinds.has(value.kind)) {
 			const contributorRole =
-				value.kind === "entity" || value.kind === "tag" ? "editor" : "publisher";
+				value.kind === "entity" || value.kind === "tag" ? "editor" : "publishing_editor";
 			accessRows.push(
 				{
 					...common,
@@ -401,8 +367,7 @@ async function seedProfiles(
 	const userByEmail = new Map(returnedUsers.map((value) => [value.email, value]));
 	const profileDescriptors = userInputs.map((input, index) => ({
 		kind: "profile" as const,
-		slugScopeId: TopLevelSlugNamespaceUnitIds.users,
-		slug: index === 0 ? "demo" : `seed-profile-${position(index)}`,
+		seedKey: index === 0 ? "demo" : `seed-profile-${position(index)}`,
 		ownerProfileId: "",
 		localizationKind: "description" as const,
 		status: "published" as const,
@@ -420,7 +385,6 @@ async function seedProfiles(
 		return {
 			id: profileUnit.id,
 			authUserId: authUser.id,
-			slug: profileUnit.slug,
 			name: input.name,
 			email: input.email,
 			createdAt: input.createdAt,
@@ -542,7 +506,7 @@ async function seedCatalog(
 			const owner = itemAt(profiles, index);
 			return createDescriptor(data, {
 				kind,
-				slug: index === 0 ? `demo-${prefix}` : `seed-${prefix}-${position(index)}`,
+				seedKey: index === 0 ? `demo-${prefix}` : `seed-${prefix}-${position(index)}`,
 				ownerProfileId: owner.id,
 				localizationKind,
 				stateIndex: stateIndex++,
@@ -571,8 +535,7 @@ async function seedCatalog(
 		if (index < SeedPlan.users) {
 			return {
 				kind: "collection" as const,
-				slugScopeId: owner.id,
-				slug: "favorites",
+				seedKey: `favorites-${position(index)}`,
 				ownerProfileId: owner.id,
 				localizationKind: "description" as const,
 				status: "published" as const,
@@ -585,7 +548,7 @@ async function seedCatalog(
 		}
 		return createDescriptor(data, {
 			kind: "collection",
-			slug: `seed-collection-${position(index - SeedPlan.users)}`,
+			seedKey: `seed-collection-${position(index - SeedPlan.users)}`,
 			ownerProfileId: owner.id,
 			stateIndex: stateIndex++,
 			maximumAgeDays: 730,
@@ -742,7 +705,7 @@ async function seedCatalog(
 			index,
 		);
 		const ordinal = Math.floor(index / (entities.length + tags.length + works.length));
-		const value = `${target.slug.replaceAll("-", " ")} ${ordinal + 1}`;
+		const value = `${target.seedKey.replaceAll("-", " ")} ${ordinal + 1}`;
 		return {
 			unitId: target.id,
 			term: value,
@@ -788,7 +751,7 @@ async function seedCatalog(
 	);
 	const linkInputs = Array.from({ length: SeedPlan.links }, (_, index) => {
 		const target = itemAt(works, index);
-		const url = `https://example.test/catalog/${target.slug}`;
+		const url = `https://example.test/catalog/${target.id}`;
 		return {
 			unitId: target.id,
 			sourceEntityId: itemAt(entities, index).id,
@@ -884,7 +847,7 @@ async function seedCatalog(
 		const options = createdPollOptions
 			.filter((option) => option.pollId === pollUnit.id)
 			.sort((left, right) => left.position - right.position);
-		for (const language of data.languages(Number(pollUnit.slug.match(/\d+$/)?.[0] ?? 0))) {
+		for (const language of data.languages(Number(pollUnit.seedKey.match(/\d+$/)?.[0] ?? 0))) {
 			await tx
 				.update(unitLocalization)
 				.set({
@@ -937,7 +900,7 @@ async function seedContent(
 		const owner = itemAt(profiles, index * 7);
 		return createDescriptor(data, {
 			kind: "post",
-			slug: index === 0 ? `demo-${prefix}` : `seed-${prefix}-${position(index)}`,
+			seedKey: index === 0 ? `demo-${prefix}` : `seed-${prefix}-${position(index)}`,
 			ownerProfileId: owner.id,
 			localizationKind,
 			stateIndex: stateIndex++,
@@ -969,42 +932,14 @@ async function seedContent(
 	);
 
 	const rootPosts = await insertUnits(tx, rootDescriptors);
-	const createdFirstLevelReplies = await insertUnits(
-		tx,
-		firstLevelReplyDescriptors.map((value, index) => ({
-			...value,
-			slugScopeId: itemAt(rootPosts, index).id,
-		})),
-	);
-	const createdNestedReplies = await insertUnits(
-		tx,
-		nestedReplyDescriptors.map((value, index) => ({
-			...value,
-			slugScopeId: itemAt(rootPosts, index * 7).id,
-		})),
-	);
+	const createdFirstLevelReplies = await insertUnits(tx, firstLevelReplyDescriptors);
+	const createdNestedReplies = await insertUnits(tx, nestedReplyDescriptors);
 	const replies = [...createdFirstLevelReplies, ...createdNestedReplies];
 	const reviews = await insertUnits(tx, descriptors(SeedPlan.reviews, "review", "post"));
-	const chapters = await insertUnits(
-		tx,
-		descriptors(SeedPlan.chapters, "chapter", "post").map((value, index) => ({
-			...value,
-			slugScopeId: itemAt(catalog.books, index).id,
-		})),
-	);
+	const chapters = await insertUnits(tx, descriptors(SeedPlan.chapters, "chapter", "post"));
 	const chapterGroups = await insertUnits(
 		tx,
-		descriptors(
-			SeedPlan.contentStructureNodes - SeedPlan.chapters,
-			"chapter-group",
-			"title",
-		).map((value, index) => ({
-			...value,
-			slugScopeId:
-				index < catalog.books.length
-					? itemAt(catalog.books, index).id
-					: itemAt(catalog.books, SeedPlan.chapters + index - catalog.books.length).id,
-		})),
+		descriptors(SeedPlan.contentStructureNodes - SeedPlan.chapters, "chapter-group", "title"),
 	);
 	const allPosts = [...rootPosts, ...replies, ...reviews, ...chapters, ...chapterGroups];
 	await insertUnitDetails(tx, data, allPosts);
@@ -1012,7 +947,6 @@ async function seedContent(
 	await writeBatches(
 		rootPosts.map((value, index) => ({
 			id: value.id,
-			authorProfileId: value.ownerProfileId,
 			subjectUnitId: index % 4 === 0 ? null : itemAt(catalog.works, index * 11).id,
 			kind: "post" as const,
 			locked: index % 29 === 0,
@@ -1024,7 +958,6 @@ async function seedContent(
 	await writeBatches(
 		reviews.map((value, index) => ({
 			id: value.id,
-			authorProfileId: value.ownerProfileId,
 			subjectUnitId: itemAt(catalog.works, index * 13).id,
 			kind: "review" as const,
 			locked: index % 37 === 0,
@@ -1036,7 +969,6 @@ async function seedContent(
 	await writeBatches(
 		chapters.map((value, index) => ({
 			id: value.id,
-			authorProfileId: value.ownerProfileId,
 			subjectUnitId: itemAt(catalog.books, index).id,
 			kind: "chapter" as const,
 			locked: false,
@@ -1048,7 +980,6 @@ async function seedContent(
 	await writeBatches(
 		chapterGroups.map((value, index) => ({
 			id: value.id,
-			authorProfileId: value.ownerProfileId,
 			subjectUnitId: itemAt(catalog.books, index).id,
 			kind: "chapter_group" as const,
 			locked: false,
@@ -1060,7 +991,6 @@ async function seedContent(
 	await writeBatches(
 		replies.map((value) => ({
 			id: value.id,
-			authorProfileId: value.ownerProfileId,
 			subjectUnitId: null,
 			kind: "reply" as const,
 			locked: false,
@@ -1294,14 +1224,13 @@ async function seedStructure(
 			descriptor: {
 				...createDescriptor(data, {
 					kind: "realm_rule",
-					slug: `seed-realm-rule-${position(revisionIndex)}-${position(index)}`,
+					seedKey: `seed-realm-rule-${position(revisionIndex)}-${position(index)}`,
 					ownerProfileId,
 					localizationKind: "post",
 					stateIndex: revisionIndex * 100 + index,
 					forcePublished: true,
 					notBefore: [revision.publishedAt],
 				}),
-				slugScopeId: revision.realmId,
 			},
 		}));
 	});

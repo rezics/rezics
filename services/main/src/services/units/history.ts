@@ -62,8 +62,8 @@ import {
 } from "../database/schema";
 import { isFractionalPosition } from "../ordering/position";
 import { UnitRevisionConflict } from "./errors";
-import { insertAddressedUnit } from "./slug-address";
-import { generateSlugLabel } from "./slug";
+import { insertUnit } from "./create";
+import { finalizeInitialUnitStatusRevision } from "./status";
 
 export type UnitRevisionEvent = "create" | "update" | "delete" | "restore";
 
@@ -135,8 +135,6 @@ const schemaFactory = createSchemaFactory({ coerce: { date: true } });
 const unitStateSchema = schemaFactory.createSelectSchema(unit).omit({
 	id: true,
 	kind: true,
-	slugScopeId: true,
-	slug: true,
 	status: true,
 	visibility: true,
 	moderationStatus: true,
@@ -316,7 +314,6 @@ async function snapshotExtension(
 		case "tag":
 		case "realm_rule":
 		case "slug_namespace":
-		case "redirect":
 			return null;
 	}
 }
@@ -484,8 +481,7 @@ async function restoreExtension(
 	kind: UnitSnapshot["kind"],
 	value: SnapshotRow | null,
 ) {
-	if (kind === "tag" || kind === "realm_rule" || kind === "slug_namespace" || kind === "redirect")
-		return;
+	if (kind === "tag" || kind === "realm_rule" || kind === "slug_namespace") return;
 	if (!value) throw new Error(`Missing ${kind} extension in Unit snapshot`);
 	switch (kind) {
 		case "profile":
@@ -593,6 +589,7 @@ async function restoreRealmRules(
 	tx: DatabaseTransaction,
 	realmId: string,
 	value: RuleSnapshot | null,
+	actorProfileId: string,
 ) {
 	const [latest] = await tx
 		.select({ value: max(realmRuleRevision.version) })
@@ -610,13 +607,12 @@ async function restoreRealmRules(
 		.returning({ id: realmRuleRevision.id });
 	if (!revision) throw new Error("Realm rule restore did not return a revision");
 	for (const rule of value?.rules ?? []) {
-		const ruleUnit = await insertAddressedUnit(tx, {
+		const ruleUnit = await insertUnit(tx, {
 			kind: "realm_rule",
-			slugScopeId: realmId,
-			slug: generateSlugLabel(rule.title, "rule"),
 			status: "published",
 			visibility: "unlisted",
 			publishedAt: new Date(),
+			statusActor: { kind: "profile", profileId: actorProfileId },
 		});
 		await tx.insert(unitLocalization).values({
 			unitId: ruleUnit.id,
@@ -742,7 +738,12 @@ export async function restoreUnitSnapshot(
 			await tx
 				.insert(realmPin)
 				.values(snapshot.owned.realmPins.map((row) => realmPinRowSchema.parse(row)));
-		await restoreRealmRules(tx, unitId, snapshot.owned.realmRules);
+		await restoreRealmRules(
+			tx,
+			unitId,
+			snapshot.owned.realmRules,
+			entityAuthorization.profileId,
+		);
 	}
 	if (snapshot.kind === "zone") {
 		await tx.delete(zonePage).where(eq(zonePage.zoneId, unitId));
@@ -1041,6 +1042,11 @@ export async function recordUnitRevision(
 		.onConflictDoUpdate({
 			target: unitRevisionHead.unitId,
 			set: { revisionId: revision.id },
+		});
+	if (!head)
+		await finalizeInitialUnitStatusRevision(tx, {
+			unitId: input.unitId,
+			revisionId: revision.id,
 		});
 	const tags = new Set(input.tags ?? []);
 	if (input.event === "restore") tags.add("mw-manual-revert");

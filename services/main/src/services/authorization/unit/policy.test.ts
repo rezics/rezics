@@ -18,7 +18,7 @@ describe("unit access policy", () => {
 	it("maps roles to permissions without route-specific role checks", () => {
 		expect(roleAllows("viewer", "unit.read")).toBe(true);
 		expect(roleAllows("viewer", "unit.update")).toBe(false);
-		expect(roleAllows("publisher", "unit.publish")).toBe(true);
+		expect(roleAllows("publishing_editor", "unit.publish")).toBe(true);
 		expect(roleAllows("maintainer", "unit.access.manage")).toBe(true);
 		expect(roleAllows("owner", "unit.delete")).toBe(true);
 	});

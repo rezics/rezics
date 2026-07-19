@@ -468,7 +468,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "author",
+																								"const": "publisher",
 																								"type": "string"
 																							},
 																							{
@@ -594,7 +594,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "author",
+																								"const": "publisher",
 																								"type": "string"
 																							},
 																							{
@@ -720,7 +720,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "author",
+																								"const": "publisher",
 																								"type": "string"
 																							},
 																							{
@@ -865,7 +865,7 @@
 																										"type": "string"
 																									},
 																									{
-																										"const": "author",
+																										"const": "publisher",
 																										"type": "string"
 																									},
 																									{
@@ -1006,7 +1006,7 @@
 																										"type": "string"
 																									},
 																									{
-																										"const": "author",
+																										"const": "publisher",
 																										"type": "string"
 																									},
 																									{
@@ -1149,7 +1149,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "author",
+																								"const": "publisher",
 																								"type": "string"
 																							},
 																							{
@@ -1272,7 +1272,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "author",
+																								"const": "publisher",
 																								"type": "string"
 																							},
 																							{
@@ -1398,7 +1398,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "author",
+																								"const": "publisher",
 																								"type": "string"
 																							},
 																							{
@@ -1524,7 +1524,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "author",
+																								"const": "publisher",
 																								"type": "string"
 																							},
 																							{
@@ -1669,7 +1669,7 @@
 																										"type": "string"
 																									},
 																									{
-																										"const": "author",
+																										"const": "publisher",
 																										"type": "string"
 																									},
 																									{
@@ -1810,7 +1810,7 @@
 																										"type": "string"
 																									},
 																									{
-																										"const": "author",
+																										"const": "publisher",
 																										"type": "string"
 																									},
 																									{
@@ -1953,7 +1953,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "author",
+																								"const": "publisher",
 																								"type": "string"
 																							},
 																							{
@@ -2082,7 +2082,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -2571,7 +2571,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -2877,7 +2877,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -2999,7 +2999,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -3121,7 +3121,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -3266,7 +3266,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -3407,7 +3407,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -3550,7 +3550,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -3671,7 +3671,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -3793,7 +3793,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -3915,7 +3915,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -4060,7 +4060,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -4201,7 +4201,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -4344,7 +4344,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -4471,7 +4471,7 @@
 																		"type": "string"
 																	},
 																	{
-																		"const": "author",
+																		"const": "publisher",
 																		"type": "string"
 																	},
 																	{
@@ -4953,7 +4953,7 @@
 																		"type": "string"
 																	},
 																	{
-																		"const": "author",
+																		"const": "publisher",
 																		"type": "string"
 																	},
 																	{
@@ -5349,7 +5349,7 @@
 												{ "const": "ai-disclosure", "type": "string" },
 												{ "const": "license", "type": "string" },
 												{ "const": "tag", "type": "string" },
-												{ "const": "author", "type": "string" },
+												{ "const": "publisher", "type": "string" },
 												{ "const": "realm", "type": "string" },
 												{ "const": "zone", "type": "string" },
 												{ "const": "subject", "type": "string" },
@@ -5395,7 +5395,7 @@
 												{ "const": "ai-disclosure", "type": "string" },
 												{ "const": "license", "type": "string" },
 												{ "const": "tag", "type": "string" },
-												{ "const": "author", "type": "string" },
+												{ "const": "publisher", "type": "string" },
 												{ "const": "realm", "type": "string" },
 												{ "const": "zone", "type": "string" },
 												{ "const": "subject", "type": "string" },
@@ -5441,7 +5441,7 @@
 												{ "const": "ai-disclosure", "type": "string" },
 												{ "const": "license", "type": "string" },
 												{ "const": "tag", "type": "string" },
-												{ "const": "author", "type": "string" },
+												{ "const": "publisher", "type": "string" },
 												{ "const": "realm", "type": "string" },
 												{ "const": "zone", "type": "string" },
 												{ "const": "subject", "type": "string" },
@@ -5506,7 +5506,7 @@
 														},
 														{ "const": "license", "type": "string" },
 														{ "const": "tag", "type": "string" },
-														{ "const": "author", "type": "string" },
+														{ "const": "publisher", "type": "string" },
 														{ "const": "realm", "type": "string" },
 														{ "const": "zone", "type": "string" },
 														{ "const": "subject", "type": "string" },
@@ -5578,7 +5578,7 @@
 														},
 														{ "const": "license", "type": "string" },
 														{ "const": "tag", "type": "string" },
-														{ "const": "author", "type": "string" },
+														{ "const": "publisher", "type": "string" },
 														{ "const": "realm", "type": "string" },
 														{ "const": "zone", "type": "string" },
 														{ "const": "subject", "type": "string" },
@@ -5646,7 +5646,7 @@
 												{ "const": "ai-disclosure", "type": "string" },
 												{ "const": "license", "type": "string" },
 												{ "const": "tag", "type": "string" },
-												{ "const": "author", "type": "string" },
+												{ "const": "publisher", "type": "string" },
 												{ "const": "realm", "type": "string" },
 												{ "const": "zone", "type": "string" },
 												{ "const": "subject", "type": "string" },
@@ -5716,10 +5716,9 @@
 					"SlugScopeUnavailable",
 					"SlugScopeCycle",
 					"SlugDepthExceeded",
-					"UnitAddressUnchanged",
 					"UnitAddressMutationForbidden",
 					"SlugRedirectNotFound",
-					"SlugRedirectLoop",
+					"UnitSlugAddressNotFound",
 					"EntityEntryNotFound",
 					"EntityAssociationRestricted",
 					"EntityOwnershipRequired",
@@ -7158,7 +7157,6 @@
 												"required": [
 													"id",
 													"type",
-													"slug",
 													"language",
 													"contentRating",
 													"publishedAt",
@@ -7175,13 +7173,6 @@
 													"type": {
 														"type": "string",
 														"enum": ["book", "software", "media"]
-													},
-													"slug": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
 													},
 													"language": {
 														"nullable": true,
@@ -7244,10 +7235,10 @@
 														"nullable": true,
 														"anyOf": [
 															{
-																"default": "followed_author",
+																"default": "followed_publisher",
 																"type": "string",
 																"enum": [
-																	"followed_author",
+																	"followed_publisher",
 																	"followed_realm",
 																	"based_on_activity",
 																	"related_subject",
@@ -7455,8 +7446,7 @@
 												"required": [
 													"id",
 													"postKind",
-													"authorId",
-													"authorName",
+													"publishers",
 													"realmId",
 													"subjectId",
 													"rootPostId",
@@ -7480,16 +7470,53 @@
 														"type": "string",
 														"enum": ["post", "reply"]
 													},
-													"authorId": {
-														"format": "uuid",
-														"type": "string"
-													},
-													"authorName": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
+													"publishers": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"required": [
+																"profileId",
+																"name",
+																"firstPublishedAt",
+																"lastPublishedAt",
+																"publicationCount"
+															],
+															"properties": {
+																"profileId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"name": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"firstPublishedAt": {
+																	"format": "date-time",
+																	"type": "string"
+																},
+																"lastPublishedAt": {
+																	"format": "date-time",
+																	"type": "string"
+																},
+																"publicationCount": {
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																}
+															}
+														}
 													},
 													"realmId": {
 														"nullable": true,
@@ -7845,8 +7872,7 @@
 																"required": [
 																	"rootPostId",
 																	"title",
-																	"authorId",
-																	"authorName",
+																	"publishers",
 																	"subjectId"
 																],
 																"properties": {
@@ -7861,16 +7887,57 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"authorId": {
-																		"format": "uuid",
-																		"type": "string"
-																	},
-																	"authorName": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "type": "string" },
-																			{ "type": "null" }
-																		]
+																	"publishers": {
+																		"type": "array",
+																		"items": {
+																			"type": "object",
+																			"required": [
+																				"profileId",
+																				"name",
+																				"firstPublishedAt",
+																				"lastPublishedAt",
+																				"publicationCount"
+																			],
+																			"properties": {
+																				"profileId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"name": {
+																					"nullable": true,
+																					"anyOf": [
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "null"
+																						}
+																					]
+																				},
+																				"firstPublishedAt": {
+																					"format": "date-time",
+																					"type": "string"
+																				},
+																				"lastPublishedAt": {
+																					"format": "date-time",
+																					"type": "string"
+																				},
+																				"publicationCount": {
+																					"minimum": 1,
+																					"anyOf": [
+																						{
+																							"format": "integer",
+																							"default": 0,
+																							"type": "string"
+																						},
+																						{
+																							"minimum": 1,
+																							"type": "integer"
+																						}
+																					]
+																				}
+																			}
+																		}
 																	},
 																	"subjectId": {
 																		"nullable": true,
@@ -7895,7 +7962,6 @@
 																"required": [
 																	"id",
 																	"type",
-																	"slug",
 																	"title",
 																	"cover"
 																],
@@ -7905,13 +7971,6 @@
 																		"type": "string"
 																	},
 																	"type": { "type": "string" },
-																	"slug": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "type": "string" },
-																			{ "type": "null" }
-																		]
-																	},
 																	"title": {
 																		"nullable": true,
 																		"anyOf": [
@@ -7991,10 +8050,10 @@
 														"nullable": true,
 														"anyOf": [
 															{
-																"default": "followed_author",
+																"default": "followed_publisher",
 																"type": "string",
 																"enum": [
-																	"followed_author",
+																	"followed_publisher",
 																	"followed_realm",
 																	"based_on_activity",
 																	"related_subject",
@@ -10269,8 +10328,7 @@
 												"required": [
 													"id",
 													"postKind",
-													"authorId",
-													"authorName",
+													"publishers",
 													"realmId",
 													"subjectId",
 													"rootPostId",
@@ -10294,16 +10352,53 @@
 														"type": "string",
 														"enum": ["post", "reply"]
 													},
-													"authorId": {
-														"format": "uuid",
-														"type": "string"
-													},
-													"authorName": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
+													"publishers": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"required": [
+																"profileId",
+																"name",
+																"firstPublishedAt",
+																"lastPublishedAt",
+																"publicationCount"
+															],
+															"properties": {
+																"profileId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"name": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"firstPublishedAt": {
+																	"format": "date-time",
+																	"type": "string"
+																},
+																"lastPublishedAt": {
+																	"format": "date-time",
+																	"type": "string"
+																},
+																"publicationCount": {
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																}
+															}
+														}
 													},
 													"realmId": {
 														"nullable": true,
@@ -10659,8 +10754,7 @@
 																"required": [
 																	"rootPostId",
 																	"title",
-																	"authorId",
-																	"authorName",
+																	"publishers",
 																	"subjectId"
 																],
 																"properties": {
@@ -10675,16 +10769,57 @@
 																			{ "type": "null" }
 																		]
 																	},
-																	"authorId": {
-																		"format": "uuid",
-																		"type": "string"
-																	},
-																	"authorName": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "type": "string" },
-																			{ "type": "null" }
-																		]
+																	"publishers": {
+																		"type": "array",
+																		"items": {
+																			"type": "object",
+																			"required": [
+																				"profileId",
+																				"name",
+																				"firstPublishedAt",
+																				"lastPublishedAt",
+																				"publicationCount"
+																			],
+																			"properties": {
+																				"profileId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"name": {
+																					"nullable": true,
+																					"anyOf": [
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "null"
+																						}
+																					]
+																				},
+																				"firstPublishedAt": {
+																					"format": "date-time",
+																					"type": "string"
+																				},
+																				"lastPublishedAt": {
+																					"format": "date-time",
+																					"type": "string"
+																				},
+																				"publicationCount": {
+																					"minimum": 1,
+																					"anyOf": [
+																						{
+																							"format": "integer",
+																							"default": 0,
+																							"type": "string"
+																						},
+																						{
+																							"minimum": 1,
+																							"type": "integer"
+																						}
+																					]
+																				}
+																			}
+																		}
 																	},
 																	"subjectId": {
 																		"nullable": true,
@@ -10709,7 +10844,6 @@
 																"required": [
 																	"id",
 																	"type",
-																	"slug",
 																	"title",
 																	"cover"
 																],
@@ -10719,13 +10853,6 @@
 																		"type": "string"
 																	},
 																	"type": { "type": "string" },
-																	"slug": {
-																		"nullable": true,
-																		"anyOf": [
-																			{ "type": "string" },
-																			{ "type": "null" }
-																		]
-																	},
 																	"title": {
 																		"nullable": true,
 																		"anyOf": [
@@ -10805,10 +10932,10 @@
 														"nullable": true,
 														"anyOf": [
 															{
-																"default": "followed_author",
+																"default": "followed_publisher",
 																"type": "string",
 																"enum": [
-																	"followed_author",
+																	"followed_publisher",
 																	"followed_realm",
 																	"based_on_activity",
 																	"related_subject",
@@ -12899,7 +13026,7 @@
 																				"enum": [
 																					"viewer",
 																					"editor",
-																					"publisher",
+																					"publishing_editor",
 																					"maintainer",
 																					"owner"
 																				]
@@ -13741,7 +13868,12 @@
 									"role": {
 										"default": "viewer",
 										"type": "string",
-										"enum": ["viewer", "editor", "publisher", "maintainer"]
+										"enum": [
+											"viewer",
+											"editor",
+											"publishing_editor",
+											"maintainer"
+										]
 									},
 									"scope": {
 										"maxItems": 8,
@@ -21825,12 +21957,6 @@
 								"required": ["kind", "localization"],
 								"properties": {
 									"kind": { "minLength": 1, "maxLength": 64, "type": "string" },
-									"slug": {
-										"minLength": 3,
-										"maxLength": 63,
-										"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-										"type": "string"
-									},
 									"localization": {
 										"additionalProperties": false,
 										"type": "object",
@@ -24579,12 +24705,6 @@
 									"dockDocument"
 								],
 								"properties": {
-									"slug": {
-										"minLength": 3,
-										"maxLength": 63,
-										"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-										"type": "string"
-									},
 									"localization": {
 										"additionalProperties": false,
 										"type": "object",
@@ -25806,7 +25926,6 @@
 											"type": "object",
 											"required": [
 												"id",
-												"slug",
 												"status",
 												"visibility",
 												"language",
@@ -25820,13 +25939,6 @@
 											],
 											"properties": {
 												"id": { "format": "uuid", "type": "string" },
-												"slug": {
-													"nullable": true,
-													"anyOf": [
-														{ "type": "string" },
-														{ "type": "null" }
-													]
-												},
 												"status": { "type": "string" },
 												"visibility": { "type": "string" },
 												"language": {
@@ -26550,7 +26662,6 @@
 									"type": "object",
 									"required": [
 										"id",
-										"slug",
 										"status",
 										"visibility",
 										"language",
@@ -26564,10 +26675,6 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
-										"slug": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
 										"language": {
@@ -27319,7 +27426,6 @@
 									"type": "object",
 									"required": [
 										"id",
-										"slug",
 										"status",
 										"visibility",
 										"language",
@@ -27333,10 +27439,6 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
-										"slug": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
 										"language": {
@@ -28077,10 +28179,12 @@
 				"operationId": "deleteApiUsersByIdBlock"
 			}
 		},
-		"/api/units/resolve": {
+		"/api/slug-addresses/resolve": {
 			"post": {
-				"summary": "Resolve a canonical Unit slug path",
-				"tags": ["Units"],
+				"operationId": "resolveUnitSlugAddress",
+				"summary": "Resolve a backend Unit slug address",
+				"description": "Resolves one to three slug labels to a public Unit ID and reports its canonical path. This isolated backend lookup does not alter the ID-based Unit API or enable frontend slug routing.",
+				"tags": ["Slug Addresses"],
 				"requestBody": {
 					"content": {
 						"application/json": {
@@ -28091,7 +28195,7 @@
 								"properties": {
 									"path": {
 										"minItems": 1,
-										"maxItems": 16,
+										"maxItems": 3,
 										"type": "array",
 										"items": {
 											"minLength": 1,
@@ -28124,6 +28228,8 @@
 										"id": { "format": "uuid", "type": "string" },
 										"kind": { "type": "string" },
 										"path": {
+											"minItems": 1,
+											"maxItems": 3,
 											"type": "array",
 											"items": {
 												"minLength": 1,
@@ -28133,6 +28239,8 @@
 											}
 										},
 										"canonicalPath": {
+											"minItems": 1,
+											"maxItems": 3,
 											"type": "array",
 											"items": {
 												"minLength": 1,
@@ -28189,7 +28297,7 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": ["UnitNotFound", "SlugRedirectNotFound"]
+													"enum": ["UnitNotFound"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -28216,11 +28324,7 @@
 												"code": {
 													"default": "SlugScopeCycle",
 													"type": "string",
-													"enum": [
-														"SlugScopeCycle",
-														"SlugScopeUnavailable",
-														"SlugRedirectLoop"
-													]
+													"enum": ["SlugScopeCycle"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -28272,45 +28376,28 @@
 							}
 						}
 					}
-				},
-				"operationId": "postApiUnitsResolve"
+				}
 			}
 		},
-		"/api/units/slug-namespaces": {
-			"post": {
-				"summary": "Create a staff-managed slug namespace",
-				"tags": ["Units"],
+		"/api/slug-addresses/profile": {
+			"put": {
+				"operationId": "replaceOwnProfileSlugAddress",
+				"summary": "Replace the current Profile slug address",
+				"description": "Sets or replaces the authenticated Profile's optional slug label. The server always uses the permanent users namespace; callers cannot choose a scope. Repeating the same replacement is idempotent.",
+				"tags": ["Slug Addresses"],
 				"requestBody": {
 					"content": {
 						"application/json": {
 							"schema": {
 								"additionalProperties": false,
 								"type": "object",
-								"required": ["scopeUnitId", "slug", "reasonCode"],
+								"required": ["slug"],
 								"properties": {
-									"scopeUnitId": { "format": "uuid", "type": "string" },
 									"slug": {
 										"minLength": 1,
 										"maxLength": 63,
 										"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
 										"type": "string"
-									},
-									"reasonCode": {
-										"type": "string",
-										"enum": [
-											"content_policy",
-											"realm_rules",
-											"spam",
-											"harassment",
-											"unsafe_content",
-											"off_topic",
-											"duplicate",
-											"account_security",
-											"user_request",
-											"appeal",
-											"administrative",
-											"other"
-										]
 									}
 								}
 							}
@@ -28325,10 +28412,40 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["id", "canonicalPath"],
+									"required": [
+										"addressId",
+										"unitId",
+										"scopeUnitId",
+										"slug",
+										"redirectAddressId",
+										"canonicalPath"
+									],
 									"properties": {
-										"id": { "format": "uuid", "type": "string" },
+										"addressId": { "format": "uuid", "type": "string" },
+										"unitId": { "format": "uuid", "type": "string" },
+										"scopeUnitId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"slug": {
+											"minLength": 1,
+											"maxLength": 63,
+											"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+											"type": "string"
+										},
+										"redirectAddressId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
 										"canonicalPath": {
+											"minItems": 1,
+											"maxItems": 3,
 											"type": "array",
 											"items": {
 												"minLength": 1,
@@ -28369,6 +28486,33 @@
 							}
 						}
 					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": ["AuthenticationRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
 					"403": {
 						"description": "Response for status 403",
 						"content": {
@@ -28382,10 +28526,12 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "PlatformCapabilityRequired",
+													"default": "ApiTokenPermissionRequired",
 													"type": "string",
 													"enum": [
-														"PlatformCapabilityRequired",
+														"ApiTokenPermissionRequired",
+														"EmailVerificationRequired",
+														"AccountRestricted",
 														"UnitAddressMutationForbidden"
 													]
 												},
@@ -28414,11 +28560,7 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": [
-														"UnitNotFound",
-														"SlugScopeNotFound",
-														"SlugRedirectNotFound"
-													]
+													"enum": ["UnitNotFound"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -28448,8 +28590,7 @@
 													"enum": [
 														"SlugTaken",
 														"SlugScopeUnavailable",
-														"SlugScopeCycle",
-														"SlugRedirectLoop"
+														"SlugScopeCycle"
 													]
 												},
 												"message": { "type": "string" },
@@ -28502,14 +28643,159 @@
 							}
 						}
 					}
-				},
-				"operationId": "postApiUnitsSlug-namespaces"
+				}
 			}
 		},
-		"/api/units/slug-addresses/{unitId}": {
+		"/api/slug-addresses/units/{unitId}": {
+			"get": {
+				"operationId": "getUnitSlugAddressAsStaff",
+				"summary": "Get a Unit canonical slug address as staff",
+				"description": "Returns the optional canonical slug address stored independently from the Unit. This administrative read is intentionally absent from core Unit responses.",
+				"tags": ["Slug Addresses"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["addressId", "unitId", "scopeUnitId", "slug"],
+									"properties": {
+										"addressId": { "format": "uuid", "type": "string" },
+										"unitId": { "format": "uuid", "type": "string" },
+										"scopeUnitId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"slug": {
+											"minLength": 1,
+											"maxLength": 63,
+											"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": ["AuthenticationRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"UnitSlugAddressNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				}
+			},
 			"put": {
-				"summary": "Change a Unit slug address as staff",
-				"tags": ["Units"],
+				"operationId": "replaceUnitSlugAddressAsStaff",
+				"summary": "Replace any Unit slug address as staff",
+				"description": "Assigns or replaces a canonical address independently of Unit creation and update. It retains the former address as a redirect and succeeds idempotently when the requested address is already canonical.",
+				"tags": ["Slug Addresses"],
 				"parameters": [
 					{
 						"name": "unitId",
@@ -28526,7 +28812,13 @@
 								"type": "object",
 								"required": ["scopeUnitId", "slug", "reasonCode"],
 								"properties": {
-									"scopeUnitId": { "format": "uuid", "type": "string" },
+									"scopeUnitId": {
+										"nullable": true,
+										"anyOf": [
+											{ "format": "uuid", "type": "string" },
+											{ "type": "null" }
+										]
+									},
 									"slug": {
 										"minLength": 1,
 										"maxLength": 63,
@@ -28563,11 +28855,40 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["unitId", "redirectUnitId", "canonicalPath"],
+									"required": [
+										"addressId",
+										"unitId",
+										"scopeUnitId",
+										"slug",
+										"redirectAddressId",
+										"canonicalPath"
+									],
 									"properties": {
+										"addressId": { "format": "uuid", "type": "string" },
 										"unitId": { "format": "uuid", "type": "string" },
-										"redirectUnitId": { "format": "uuid", "type": "string" },
+										"scopeUnitId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"slug": {
+											"minLength": 1,
+											"maxLength": 63,
+											"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+											"type": "string"
+										},
+										"redirectAddressId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
 										"canonicalPath": {
+											"minItems": 1,
+											"maxItems": 3,
 											"type": "array",
 											"items": {
 												"minLength": 1,
@@ -28596,7 +28917,34 @@
 												"code": {
 													"default": "InvalidSlug",
 													"type": "string",
-													"enum": ["InvalidSlug", "UnitAddressUnchanged"]
+													"enum": ["InvalidSlug"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": ["AuthenticationRequired"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -28653,11 +29001,7 @@
 												"code": {
 													"default": "UnitNotFound",
 													"type": "string",
-													"enum": [
-														"UnitNotFound",
-														"SlugScopeNotFound",
-														"SlugRedirectNotFound"
-													]
+													"enum": ["UnitNotFound", "SlugScopeNotFound"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -28687,8 +29031,7 @@
 													"enum": [
 														"SlugTaken",
 														"SlugScopeUnavailable",
-														"SlugScopeCycle",
-														"SlugRedirectLoop"
+														"SlugScopeCycle"
 													]
 												},
 												"message": { "type": "string" },
@@ -28741,18 +29084,335 @@
 							}
 						}
 					}
-				},
-				"operationId": "putApiUnitsSlug-addressesByUnitId"
+				}
 			}
 		},
-		"/api/units/slug-redirects/{redirectUnitId}": {
+		"/api/slug-addresses/namespaces": {
+			"post": {
+				"operationId": "createSlugNamespaceAsStaff",
+				"summary": "Create an explicitly addressed namespace as staff",
+				"description": "Creates a namespace Unit and its canonical address atomically. A null scope creates a top-level namespace under the virtual root; a Unit ID creates a nested namespace.",
+				"tags": ["Slug Addresses"],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["scopeUnitId", "slug", "reasonCode"],
+								"properties": {
+									"scopeUnitId": {
+										"nullable": true,
+										"anyOf": [
+											{ "format": "uuid", "type": "string" },
+											{ "type": "null" }
+										]
+									},
+									"slug": {
+										"minLength": 1,
+										"maxLength": 63,
+										"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+										"type": "string"
+									},
+									"reasonCode": {
+										"type": "string",
+										"enum": [
+											"content_policy",
+											"realm_rules",
+											"spam",
+											"harassment",
+											"unsafe_content",
+											"off_topic",
+											"duplicate",
+											"account_security",
+											"user_request",
+											"appeal",
+											"administrative",
+											"other"
+										]
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"201": {
+						"description": "Response for status 201",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"addressId",
+										"unitId",
+										"scopeUnitId",
+										"slug",
+										"redirectAddressId",
+										"canonicalPath"
+									],
+									"properties": {
+										"addressId": { "format": "uuid", "type": "string" },
+										"unitId": { "format": "uuid", "type": "string" },
+										"scopeUnitId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"slug": {
+											"minLength": 1,
+											"maxLength": 63,
+											"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+											"type": "string"
+										},
+										"redirectAddressId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"canonicalPath": {
+											"minItems": 1,
+											"maxItems": 3,
+											"type": "array",
+											"items": {
+												"minLength": 1,
+												"maxLength": 63,
+												"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "InvalidSlug",
+													"type": "string",
+													"enum": ["InvalidSlug"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": ["AuthenticationRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"PlatformCapabilityRequired",
+														"UnitAddressMutationForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound", "SlugScopeNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "SlugTaken",
+													"type": "string",
+													"enum": [
+														"SlugTaken",
+														"SlugScopeUnavailable",
+														"SlugScopeCycle"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "SlugDepthExceeded",
+															"type": "string",
+															"enum": ["SlugDepthExceeded"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/slug-addresses/redirects/{redirectAddressId}": {
 			"delete": {
-				"summary": "Release a slug Redirect as staff",
-				"tags": ["Units"],
+				"operationId": "releaseSlugRedirectAsStaff",
+				"summary": "Release a retained slug redirect as staff",
+				"description": "Deletes one redirect address so the scope and label may be reused. This is explicit because retained redirects protect existing backend links.",
+				"tags": ["Slug Addresses"],
 				"responses": {
 					"204": {
 						"description": "Response for status 204",
 						"content": { "type": "void" }
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "AuthenticationRequired",
+													"type": "string",
+													"enum": ["AuthenticationRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
 					},
 					"403": {
 						"description": "Response for status 403",
@@ -28830,7 +29490,7 @@
 				},
 				"parameters": [
 					{
-						"name": "redirectUnitId",
+						"name": "redirectAddressId",
 						"in": "path",
 						"required": true,
 						"schema": { "format": "uuid", "type": "string" }
@@ -28866,8 +29526,243 @@
 						}
 					},
 					"required": true
+				}
+			}
+		},
+		"/api/units/by-id/{unitId}/status-events": {
+			"get": {
+				"summary": "List Unit status events",
+				"tags": ["Units"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "cursor",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "string" }
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 100,
+							"default": 50,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 100, "default": 50, "type": "integer" }
+							]
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items", "nextCursor"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"id",
+													"unitId",
+													"fromStatus",
+													"toStatus",
+													"actor",
+													"revisionId",
+													"createdAt"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"unitId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"fromStatus": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"default": "draft",
+																"type": "string",
+																"enum": [
+																	"draft",
+																	"published",
+																	"archived"
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"toStatus": {
+														"default": "draft",
+														"type": "string",
+														"enum": ["draft", "published", "archived"]
+													},
+													"actor": {
+														"anyOf": [
+															{
+																"type": "object",
+																"required": [
+																	"kind",
+																	"profileId",
+																	"name"
+																],
+																"properties": {
+																	"kind": {
+																		"const": "profile",
+																		"type": "string"
+																	},
+																	"profileId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"name": {
+																		"nullable": true,
+																		"anyOf": [
+																			{ "type": "string" },
+																			{ "type": "null" }
+																		]
+																	}
+																}
+															},
+															{
+																"type": "object",
+																"required": ["kind"],
+																"properties": {
+																	"kind": {
+																		"const": "system",
+																		"type": "string"
+																	}
+																}
+															},
+															{
+																"type": "object",
+																"required": ["kind"],
+																"properties": {
+																	"kind": {
+																		"const": "import",
+																		"type": "string"
+																	}
+																}
+															},
+															{
+																"type": "object",
+																"required": ["kind"],
+																"properties": {
+																	"kind": {
+																		"const": "hidden",
+																		"type": "string"
+																	}
+																}
+															}
+														]
+													},
+													"revisionId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										},
+										"nextCursor": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "InvalidPaginationCursor",
+													"type": "string",
+													"enum": ["InvalidPaginationCursor"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
 				},
-				"operationId": "deleteApiUnitsSlug-redirectsByRedirectUnitId"
+				"operationId": "getApiUnitsBy-idByUnitIdStatus-events"
 			}
 		},
 		"/api/units/{type}": {
@@ -28917,7 +29812,6 @@
 												"type": "object",
 												"required": [
 													"id",
-													"slug",
 													"language",
 													"contentRating",
 													"publishedAt",
@@ -28925,19 +29819,13 @@
 													"updatedAt",
 													"title",
 													"summary",
+													"publishers",
 													"avatar",
 													"banner",
 													"cover"
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
-													"slug": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
 													"language": {
 														"nullable": true,
 														"anyOf": [
@@ -28977,6 +29865,54 @@
 															{ "type": "string" },
 															{ "type": "null" }
 														]
+													},
+													"publishers": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"required": [
+																"profileId",
+																"name",
+																"firstPublishedAt",
+																"lastPublishedAt",
+																"publicationCount"
+															],
+															"properties": {
+																"profileId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"name": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"firstPublishedAt": {
+																	"format": "date-time",
+																	"type": "string"
+																},
+																"lastPublishedAt": {
+																	"format": "date-time",
+																	"type": "string"
+																},
+																"publicationCount": {
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																}
+															}
+														}
 													},
 													"avatar": {
 														"nullable": true,
@@ -29419,12 +30355,6 @@
 											}
 										}
 									},
-									"slug": {
-										"minLength": 3,
-										"maxLength": 63,
-										"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-										"type": "string"
-									},
 									"visibility": {
 										"type": "string",
 										"enum": ["public", "unlisted", "private"]
@@ -29466,7 +30396,6 @@
 									"required": [
 										"id",
 										"type",
-										"slug",
 										"status",
 										"visibility",
 										"language",
@@ -29474,6 +30403,7 @@
 										"aiDisclosure",
 										"license",
 										"publishedAt",
+										"publishers",
 										"createdAt",
 										"updatedAt",
 										"primaryLanguage",
@@ -29492,10 +30422,6 @@
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
 										"type": { "type": "string" },
-										"slug": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
 										"language": {
@@ -29514,6 +30440,51 @@
 												{ "format": "date-time", "type": "string" },
 												{ "type": "null" }
 											]
+										},
+										"publishers": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"profileId",
+													"name",
+													"firstPublishedAt",
+													"lastPublishedAt",
+													"publicationCount"
+												],
+												"properties": {
+													"profileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"name": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"firstPublishedAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"lastPublishedAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"publicationCount": {
+														"minimum": 1,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 1, "type": "integer" }
+														]
+													}
+												}
+											}
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
@@ -30359,7 +31330,6 @@
 									"required": [
 										"id",
 										"type",
-										"slug",
 										"status",
 										"visibility",
 										"language",
@@ -30367,6 +31337,7 @@
 										"aiDisclosure",
 										"license",
 										"publishedAt",
+										"publishers",
 										"createdAt",
 										"updatedAt",
 										"primaryLanguage",
@@ -30385,10 +31356,6 @@
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
 										"type": { "type": "string" },
-										"slug": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
 										"language": {
@@ -30407,6 +31374,51 @@
 												{ "format": "date-time", "type": "string" },
 												{ "type": "null" }
 											]
+										},
+										"publishers": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"profileId",
+													"name",
+													"firstPublishedAt",
+													"lastPublishedAt",
+													"publicationCount"
+												],
+												"properties": {
+													"profileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"name": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"firstPublishedAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"lastPublishedAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"publicationCount": {
+														"minimum": 1,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 1, "type": "integer" }
+														]
+													}
+												}
+											}
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
@@ -31353,7 +32365,6 @@
 									"required": [
 										"id",
 										"type",
-										"slug",
 										"status",
 										"visibility",
 										"language",
@@ -31361,6 +32372,7 @@
 										"aiDisclosure",
 										"license",
 										"publishedAt",
+										"publishers",
 										"createdAt",
 										"updatedAt",
 										"primaryLanguage",
@@ -31379,10 +32391,6 @@
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
 										"type": { "type": "string" },
-										"slug": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
 										"language": {
@@ -31401,6 +32409,51 @@
 												{ "format": "date-time", "type": "string" },
 												{ "type": "null" }
 											]
+										},
+										"publishers": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"profileId",
+													"name",
+													"firstPublishedAt",
+													"lastPublishedAt",
+													"publicationCount"
+												],
+												"properties": {
+													"profileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"name": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"firstPublishedAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"lastPublishedAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"publicationCount": {
+														"minimum": 1,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 1, "type": "integer" }
+														]
+													}
+												}
+											}
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
@@ -32734,7 +33787,6 @@
 									"required": [
 										"id",
 										"type",
-										"slug",
 										"status",
 										"visibility",
 										"language",
@@ -32742,6 +33794,7 @@
 										"aiDisclosure",
 										"license",
 										"publishedAt",
+										"publishers",
 										"createdAt",
 										"updatedAt",
 										"primaryLanguage",
@@ -32760,10 +33813,6 @@
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
 										"type": { "type": "string" },
-										"slug": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
 										"language": {
@@ -32782,6 +33831,51 @@
 												{ "format": "date-time", "type": "string" },
 												{ "type": "null" }
 											]
+										},
+										"publishers": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"profileId",
+													"name",
+													"firstPublishedAt",
+													"lastPublishedAt",
+													"publicationCount"
+												],
+												"properties": {
+													"profileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"name": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"firstPublishedAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"lastPublishedAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"publicationCount": {
+														"minimum": 1,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 1, "type": "integer" }
+														]
+													}
+												}
+											}
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" },
@@ -35140,7 +36234,6 @@
 												"type": "object",
 												"required": [
 													"id",
-													"slug",
 													"kind",
 													"verified",
 													"avatar",
@@ -35151,13 +36244,6 @@
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
-													"slug": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
 													"kind": { "type": "string" },
 													"verified": { "type": "boolean" },
 													"avatar": {
@@ -35264,12 +36350,6 @@
 								"required": ["localization"],
 								"properties": {
 									"kind": { "minLength": 1, "maxLength": 64, "type": "string" },
-									"slug": {
-										"minLength": 3,
-										"maxLength": 63,
-										"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-										"type": "string"
-									},
 									"localization": {
 										"additionalProperties": false,
 										"type": "object",
@@ -35681,7 +36761,6 @@
 									"type": "object",
 									"required": [
 										"id",
-										"slug",
 										"kind",
 										"verified",
 										"avatar",
@@ -35698,10 +36777,6 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
-										"slug": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
 										"kind": { "type": "string" },
 										"verified": { "type": "boolean" },
 										"avatar": {
@@ -36933,16 +38008,9 @@
 											"type": "array",
 											"items": {
 												"type": "object",
-												"required": ["id", "slug", "title", "summary"],
+												"required": ["id", "title", "summary"],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
-													"slug": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -36996,12 +38064,6 @@
 								"required": ["localization"],
 								"properties": {
 									"kind": { "minLength": 1, "maxLength": 64, "type": "string" },
-									"slug": {
-										"minLength": 3,
-										"maxLength": 63,
-										"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-										"type": "string"
-									},
 									"localization": {
 										"additionalProperties": false,
 										"type": "object",
@@ -37367,7 +38429,6 @@
 							"type": "string",
 							"enum": [
 								"slug_namespace",
-								"redirect",
 								"profile",
 								"book",
 								"software",
@@ -37510,7 +38571,6 @@
 							"type": "string",
 							"enum": [
 								"slug_namespace",
-								"redirect",
 								"profile",
 								"book",
 								"software",
@@ -37803,7 +38863,6 @@
 							"type": "string",
 							"enum": [
 								"slug_namespace",
-								"redirect",
 								"profile",
 								"book",
 								"software",
@@ -37850,7 +38909,6 @@
 							"type": "string",
 							"enum": [
 								"slug_namespace",
-								"redirect",
 								"profile",
 								"book",
 								"software",
@@ -38002,7 +39060,6 @@
 							"type": "string",
 							"enum": [
 								"slug_namespace",
-								"redirect",
 								"profile",
 								"book",
 								"software",
@@ -41008,7 +42065,6 @@
 													"lastContentStructureNodeId",
 													"lastReadAnchor",
 													"type",
-													"slug",
 													"title"
 												],
 												"properties": {
@@ -41058,13 +42114,6 @@
 														"anyOf": [{}, { "type": "null" }]
 													},
 													"type": { "type": "string" },
-													"slug": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -41603,7 +42652,6 @@
 													"id",
 													"ownerId",
 													"itemCount",
-													"slug",
 													"title",
 													"summary",
 													"updatedAt"
@@ -41622,13 +42670,6 @@
 																"type": "string"
 															},
 															{ "type": "integer" }
-														]
-													},
-													"slug": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
 														]
 													},
 													"title": {
@@ -41684,14 +42725,8 @@
 						"application/json": {
 							"schema": {
 								"type": "object",
-								"required": ["slug", "localization"],
+								"required": ["localization"],
 								"properties": {
-									"slug": {
-										"minLength": 3,
-										"maxLength": 63,
-										"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-										"type": "string"
-									},
 									"localization": {
 										"additionalProperties": false,
 										"type": "object",
@@ -42147,7 +43182,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "author",
+																					"const": "publisher",
 																					"type": "string"
 																				},
 																				{
@@ -42273,7 +43308,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "author",
+																					"const": "publisher",
 																					"type": "string"
 																				},
 																				{
@@ -42399,7 +43434,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "author",
+																					"const": "publisher",
 																					"type": "string"
 																				},
 																				{
@@ -42544,7 +43579,7 @@
 																							"type": "string"
 																						},
 																						{
-																							"const": "author",
+																							"const": "publisher",
 																							"type": "string"
 																						},
 																						{
@@ -42685,7 +43720,7 @@
 																							"type": "string"
 																						},
 																						{
-																							"const": "author",
+																							"const": "publisher",
 																							"type": "string"
 																						},
 																						{
@@ -42828,7 +43863,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "author",
+																					"const": "publisher",
 																					"type": "string"
 																				},
 																				{
@@ -42978,7 +44013,6 @@
 									"type": "object",
 									"required": [
 										"id",
-										"slug",
 										"status",
 										"visibility",
 										"language",
@@ -42995,10 +44029,6 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
-										"slug": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
 										"language": {
@@ -43154,7 +44184,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -43280,7 +44310,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -43406,7 +44436,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -43551,7 +44581,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "author",
+																								"const": "publisher",
 																								"type": "string"
 																							},
 																							{
@@ -43692,7 +44722,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "author",
+																								"const": "publisher",
 																								"type": "string"
 																							},
 																							{
@@ -43835,7 +44865,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -44075,7 +45105,6 @@
 													"parentTargetId",
 													"position",
 													"type",
-													"slug",
 													"title"
 												],
 												"properties": {
@@ -44098,13 +45127,6 @@
 														"type": "string"
 													},
 													"type": { "type": "string" },
-													"slug": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -44183,7 +45205,6 @@
 									"type": "object",
 									"required": [
 										"id",
-										"slug",
 										"status",
 										"visibility",
 										"language",
@@ -44200,10 +45221,6 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
-										"slug": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
 										"language": {
@@ -44359,7 +45376,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -44485,7 +45502,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -44611,7 +45628,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -44756,7 +45773,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "author",
+																								"const": "publisher",
 																								"type": "string"
 																							},
 																							{
@@ -44897,7 +45914,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "author",
+																								"const": "publisher",
 																								"type": "string"
 																							},
 																							{
@@ -45040,7 +46057,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -45280,7 +46297,6 @@
 													"parentTargetId",
 													"position",
 													"type",
-													"slug",
 													"title"
 												],
 												"properties": {
@@ -45303,13 +46319,6 @@
 														"type": "string"
 													},
 													"type": { "type": "string" },
-													"slug": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -45385,7 +46394,6 @@
 									"type": "object",
 									"required": [
 										"id",
-										"slug",
 										"status",
 										"visibility",
 										"language",
@@ -45402,10 +46410,6 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
-										"slug": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
 										"language": {
@@ -45561,7 +46565,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -45687,7 +46691,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -45813,7 +46817,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -45958,7 +46962,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "author",
+																								"const": "publisher",
 																								"type": "string"
 																							},
 																							{
@@ -46099,7 +47103,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "author",
+																								"const": "publisher",
 																								"type": "string"
 																							},
 																							{
@@ -46242,7 +47246,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -46482,7 +47486,6 @@
 													"parentTargetId",
 													"position",
 													"type",
-													"slug",
 													"title"
 												],
 												"properties": {
@@ -46505,13 +47508,6 @@
 														"type": "string"
 													},
 													"type": { "type": "string" },
-													"slug": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -47049,7 +48045,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "author",
+																					"const": "publisher",
 																					"type": "string"
 																				},
 																				{
@@ -47175,7 +48171,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "author",
+																					"const": "publisher",
 																					"type": "string"
 																				},
 																				{
@@ -47301,7 +48297,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "author",
+																					"const": "publisher",
 																					"type": "string"
 																				},
 																				{
@@ -47446,7 +48442,7 @@
 																							"type": "string"
 																						},
 																						{
-																							"const": "author",
+																							"const": "publisher",
 																							"type": "string"
 																						},
 																						{
@@ -47587,7 +48583,7 @@
 																							"type": "string"
 																						},
 																						{
-																							"const": "author",
+																							"const": "publisher",
 																							"type": "string"
 																						},
 																						{
@@ -47730,7 +48726,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "author",
+																					"const": "publisher",
 																					"type": "string"
 																				},
 																				{
@@ -47880,7 +48876,6 @@
 									"type": "object",
 									"required": [
 										"id",
-										"slug",
 										"status",
 										"visibility",
 										"language",
@@ -47897,10 +48892,6 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
-										"slug": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
 										"language": {
@@ -48056,7 +49047,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -48182,7 +49173,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -48308,7 +49299,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -48453,7 +49444,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "author",
+																								"const": "publisher",
 																								"type": "string"
 																							},
 																							{
@@ -48594,7 +49585,7 @@
 																								"type": "string"
 																							},
 																							{
-																								"const": "author",
+																								"const": "publisher",
 																								"type": "string"
 																							},
 																							{
@@ -48737,7 +49728,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -48977,7 +49968,6 @@
 													"parentTargetId",
 													"position",
 													"type",
-													"slug",
 													"title"
 												],
 												"properties": {
@@ -49000,13 +49990,6 @@
 														"type": "string"
 													},
 													"type": { "type": "string" },
-													"slug": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -49591,8 +50574,7 @@
 												"type": "object",
 												"required": [
 													"id",
-													"authorId",
-													"authorName",
+													"publishers",
 													"targetId",
 													"realmId",
 													"title",
@@ -49602,16 +50584,53 @@
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
-													"authorId": {
-														"format": "uuid",
-														"type": "string"
-													},
-													"authorName": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
+													"publishers": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"required": [
+																"profileId",
+																"name",
+																"firstPublishedAt",
+																"lastPublishedAt",
+																"publicationCount"
+															],
+															"properties": {
+																"profileId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"name": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"firstPublishedAt": {
+																	"format": "date-time",
+																	"type": "string"
+																},
+																"lastPublishedAt": {
+																	"format": "date-time",
+																	"type": "string"
+																},
+																"publicationCount": {
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																}
+															}
+														}
 													},
 													"targetId": {
 														"format": "uuid",
@@ -50128,7 +51147,7 @@
 									"type": "object",
 									"required": [
 										"id",
-										"authorId",
+										"publishers",
 										"targetId",
 										"realmId",
 										"title",
@@ -50141,7 +51160,51 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
-										"authorId": { "format": "uuid", "type": "string" },
+										"publishers": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"profileId",
+													"name",
+													"firstPublishedAt",
+													"lastPublishedAt",
+													"publicationCount"
+												],
+												"properties": {
+													"profileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"name": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"firstPublishedAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"lastPublishedAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"publicationCount": {
+														"minimum": 1,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 1, "type": "integer" }
+														]
+													}
+												}
+											}
+										},
 										"targetId": { "format": "uuid", "type": "string" },
 										"realmId": {
 											"nullable": true,
@@ -52350,8 +53413,7 @@
 												"required": [
 													"id",
 													"postKind",
-													"authorId",
-													"authorName",
+													"publishers",
 													"realmId",
 													"subjectId",
 													"rootPostId",
@@ -52369,16 +53431,53 @@
 														"type": "string",
 														"enum": ["post", "reply"]
 													},
-													"authorId": {
-														"format": "uuid",
-														"type": "string"
-													},
-													"authorName": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
+													"publishers": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"required": [
+																"profileId",
+																"name",
+																"firstPublishedAt",
+																"lastPublishedAt",
+																"publicationCount"
+															],
+															"properties": {
+																"profileId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"name": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"firstPublishedAt": {
+																	"format": "date-time",
+																	"type": "string"
+																},
+																"lastPublishedAt": {
+																	"format": "date-time",
+																	"type": "string"
+																},
+																"publicationCount": {
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																}
+															}
+														}
 													},
 													"realmId": {
 														"nullable": true,
@@ -53181,7 +54280,7 @@
 									"required": [
 										"id",
 										"postKind",
-										"authorId",
+										"publishers",
 										"realmId",
 										"subjectId",
 										"rootPostId",
@@ -53197,7 +54296,51 @@
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
 										"postKind": { "type": "string", "enum": ["post", "reply"] },
-										"authorId": { "format": "uuid", "type": "string" },
+										"publishers": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"profileId",
+													"name",
+													"firstPublishedAt",
+													"lastPublishedAt",
+													"publicationCount"
+												],
+												"properties": {
+													"profileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"name": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"firstPublishedAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"lastPublishedAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"publicationCount": {
+														"minimum": 1,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{ "minimum": 1, "type": "integer" }
+														]
+													}
+												}
+											}
+										},
 										"realmId": {
 											"nullable": true,
 											"anyOf": [
@@ -54116,8 +55259,7 @@
 												"required": [
 													"id",
 													"postKind",
-													"authorId",
-													"authorName",
+													"publishers",
 													"rootPostId",
 													"parentPostId",
 													"contextRealmId",
@@ -54128,7 +55270,8 @@
 													"hasMoreChildren",
 													"childEndCursor",
 													"createdAt",
-													"updatedAt"
+													"updatedAt",
+													"capabilities"
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
@@ -54136,16 +55279,53 @@
 														"const": "reply",
 														"type": "string"
 													},
-													"authorId": {
-														"format": "uuid",
-														"type": "string"
-													},
-													"authorName": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
+													"publishers": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"required": [
+																"profileId",
+																"name",
+																"firstPublishedAt",
+																"lastPublishedAt",
+																"publicationCount"
+															],
+															"properties": {
+																"profileId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"name": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"firstPublishedAt": {
+																	"format": "date-time",
+																	"type": "string"
+																},
+																"lastPublishedAt": {
+																	"format": "date-time",
+																	"type": "string"
+																},
+																"publicationCount": {
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																}
+															}
+														}
 													},
 													"rootPostId": {
 														"format": "uuid",
@@ -54492,6 +55672,13 @@
 													"updatedAt": {
 														"format": "date-time",
 														"type": "string"
+													},
+													"capabilities": {
+														"type": "object",
+														"required": ["canEdit"],
+														"properties": {
+															"canEdit": { "type": "boolean" }
+														}
 													}
 												}
 											}
@@ -55540,7 +56727,6 @@
 												"type": "object",
 												"required": [
 													"id",
-													"slug",
 													"joinPolicy",
 													"title",
 													"summary",
@@ -55552,13 +56738,6 @@
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
-													"slug": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
 													"joinPolicy": { "type": "string" },
 													"title": {
 														"nullable": true,
@@ -55668,14 +56847,8 @@
 						"application/json": {
 							"schema": {
 								"type": "object",
-								"required": ["slug", "localization", "visibility", "joinPolicy"],
+								"required": ["localization", "visibility", "joinPolicy"],
 								"properties": {
-									"slug": {
-										"minLength": 3,
-										"maxLength": 63,
-										"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-										"type": "string"
-									},
 									"localization": {
 										"additionalProperties": false,
 										"type": "object",
@@ -56092,7 +57265,6 @@
 									"type": "object",
 									"required": [
 										"id",
-										"slug",
 										"status",
 										"visibility",
 										"language",
@@ -56107,10 +57279,6 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
-										"slug": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
-										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
 										"language": {
@@ -60472,7 +61640,7 @@
 																		"type": "string"
 																	},
 																	{
-																		"const": "author",
+																		"const": "publisher",
 																		"type": "string"
 																	},
 																	{
@@ -60590,7 +61758,7 @@
 																		"type": "string"
 																	},
 																	{
-																		"const": "author",
+																		"const": "publisher",
 																		"type": "string"
 																	},
 																	{
@@ -60708,7 +61876,7 @@
 																		"type": "string"
 																	},
 																	{
-																		"const": "author",
+																		"const": "publisher",
 																		"type": "string"
 																	},
 																	{
@@ -60849,7 +62017,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -60982,7 +62150,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -61113,7 +62281,7 @@
 																		"type": "string"
 																	},
 																	{
-																		"const": "author",
+																		"const": "publisher",
 																		"type": "string"
 																	},
 																	{
@@ -61230,7 +62398,7 @@
 																		"type": "string"
 																	},
 																	{
-																		"const": "author",
+																		"const": "publisher",
 																		"type": "string"
 																	},
 																	{
@@ -61348,7 +62516,7 @@
 																		"type": "string"
 																	},
 																	{
-																		"const": "author",
+																		"const": "publisher",
 																		"type": "string"
 																	},
 																	{
@@ -61466,7 +62634,7 @@
 																		"type": "string"
 																	},
 																	{
-																		"const": "author",
+																		"const": "publisher",
 																		"type": "string"
 																	},
 																	{
@@ -61607,7 +62775,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -61740,7 +62908,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -61871,7 +63039,7 @@
 																		"type": "string"
 																	},
 																	{
-																		"const": "author",
+																		"const": "publisher",
 																		"type": "string"
 																	},
 																	{
@@ -61977,7 +63145,7 @@
 															"ai-disclosure",
 															"license",
 															"tag",
-															"author",
+															"publisher",
 															"realm",
 															"zone",
 															"subject",
@@ -62262,7 +63430,7 @@
 															"ai-disclosure",
 															"license",
 															"tag",
-															"author",
+															"publisher",
 															"realm",
 															"zone",
 															"subject",
@@ -62405,7 +63573,7 @@
 																			"type": "string"
 																		},
 																		{
-																			"const": "author",
+																			"const": "publisher",
 																			"type": "string"
 																		},
 																		{
@@ -62527,7 +63695,7 @@
 																			"type": "string"
 																		},
 																		{
-																			"const": "author",
+																			"const": "publisher",
 																			"type": "string"
 																		},
 																		{
@@ -62649,7 +63817,7 @@
 																			"type": "string"
 																		},
 																		{
-																			"const": "author",
+																			"const": "publisher",
 																			"type": "string"
 																		},
 																		{
@@ -62790,7 +63958,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "author",
+																					"const": "publisher",
 																					"type": "string"
 																				},
 																				{
@@ -62931,7 +64099,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "author",
+																					"const": "publisher",
 																					"type": "string"
 																				},
 																				{
@@ -63074,7 +64242,7 @@
 																			"type": "string"
 																		},
 																		{
-																			"const": "author",
+																			"const": "publisher",
 																			"type": "string"
 																		},
 																		{
@@ -63246,7 +64414,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -63368,7 +64536,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -63490,7 +64658,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -63635,7 +64803,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -63776,7 +64944,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -63919,7 +65087,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -64118,13 +65286,6 @@
 																},
 																"kind": { "type": "string" },
 																"type": { "type": "string" },
-																"slug": {
-																	"nullable": true,
-																	"anyOf": [
-																		{ "type": "string" },
-																		{ "type": "null" }
-																	]
-																},
 																"titles": {
 																	"type": "array",
 																	"items": { "type": "string" }
@@ -64383,7 +65544,7 @@
 																			"type": "string"
 																		},
 																		{
-																			"const": "author",
+																			"const": "publisher",
 																			"type": "string"
 																		},
 																		{
@@ -64505,7 +65666,7 @@
 																			"type": "string"
 																		},
 																		{
-																			"const": "author",
+																			"const": "publisher",
 																			"type": "string"
 																		},
 																		{
@@ -64627,7 +65788,7 @@
 																			"type": "string"
 																		},
 																		{
-																			"const": "author",
+																			"const": "publisher",
 																			"type": "string"
 																		},
 																		{
@@ -64768,7 +65929,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "author",
+																					"const": "publisher",
 																					"type": "string"
 																				},
 																				{
@@ -64909,7 +66070,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "author",
+																					"const": "publisher",
 																					"type": "string"
 																				},
 																				{
@@ -65052,7 +66213,7 @@
 																			"type": "string"
 																		},
 																		{
-																			"const": "author",
+																			"const": "publisher",
 																			"type": "string"
 																		},
 																		{
@@ -65224,7 +66385,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -65346,7 +66507,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -65468,7 +66629,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -65613,7 +66774,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -65754,7 +66915,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -65897,7 +67058,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -66096,13 +67257,6 @@
 																},
 																"kind": { "type": "string" },
 																"type": { "type": "string" },
-																"slug": {
-																	"nullable": true,
-																	"anyOf": [
-																		{ "type": "string" },
-																		{ "type": "null" }
-																	]
-																},
 																"titles": {
 																	"type": "array",
 																	"items": { "type": "string" }
@@ -66399,7 +67553,7 @@
 																			"type": "string"
 																		},
 																		{
-																			"const": "author",
+																			"const": "publisher",
 																			"type": "string"
 																		},
 																		{
@@ -66521,7 +67675,7 @@
 																			"type": "string"
 																		},
 																		{
-																			"const": "author",
+																			"const": "publisher",
 																			"type": "string"
 																		},
 																		{
@@ -66643,7 +67797,7 @@
 																			"type": "string"
 																		},
 																		{
-																			"const": "author",
+																			"const": "publisher",
 																			"type": "string"
 																		},
 																		{
@@ -66784,7 +67938,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "author",
+																					"const": "publisher",
 																					"type": "string"
 																				},
 																				{
@@ -66925,7 +68079,7 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "author",
+																					"const": "publisher",
 																					"type": "string"
 																				},
 																				{
@@ -67068,7 +68222,7 @@
 																			"type": "string"
 																		},
 																		{
-																			"const": "author",
+																			"const": "publisher",
 																			"type": "string"
 																		},
 																		{
@@ -67240,7 +68394,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -67362,7 +68516,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -67484,7 +68638,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -67629,7 +68783,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -67770,7 +68924,7 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "author",
+																						"const": "publisher",
 																						"type": "string"
 																					},
 																					{
@@ -67913,7 +69067,7 @@
 																				"type": "string"
 																			},
 																			{
-																				"const": "author",
+																				"const": "publisher",
 																				"type": "string"
 																			},
 																			{
@@ -68112,13 +69266,6 @@
 																},
 																"kind": { "type": "string" },
 																"type": { "type": "string" },
-																"slug": {
-																	"nullable": true,
-																	"anyOf": [
-																		{ "type": "string" },
-																		{ "type": "null" }
-																	]
-																},
 																"titles": {
 																	"type": "array",
 																	"items": { "type": "string" }
@@ -68418,13 +69565,6 @@
 																},
 																"kind": { "type": "string" },
 																"type": { "type": "string" },
-																"slug": {
-																	"nullable": true,
-																	"anyOf": [
-																		{ "type": "string" },
-																		{ "type": "null" }
-																	]
-																},
 																"titles": {
 																	"type": "array",
 																	"items": { "type": "string" }
@@ -68645,7 +69785,7 @@
 										"type": "array",
 										"items": { "minLength": 1, "type": "string" }
 									},
-									"authorId": { "minLength": 1, "type": "string" },
+									"publisherId": { "minLength": 1, "type": "string" },
 									"realmId": { "minLength": 1, "type": "string" },
 									"subjectId": { "minLength": 1, "type": "string" },
 									"targetId": { "minLength": 1, "type": "string" },
@@ -68718,13 +69858,6 @@
 													"id": { "format": "uuid", "type": "string" },
 													"kind": { "type": "string" },
 													"type": { "type": "string" },
-													"slug": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
 													"titles": {
 														"type": "array",
 														"items": { "type": "string" }

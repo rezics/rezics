@@ -4,58 +4,75 @@ import type { Authorization } from "../authorization";
 import { database, type DatabaseTransaction } from "../database";
 import {
 	auditEvent,
+	profile,
 	unit,
-	unitRedirect,
+	unitSlugAddress,
 	type GovernanceReasonCodeValues,
-	type UnitKindValues,
+	type UnitKind,
 } from "../database/schema";
 import {
+	InvalidSlug,
 	SlugDepthExceeded,
-	SlugRedirectLoop,
 	SlugRedirectNotFound,
 	SlugScopeCycle,
 	SlugScopeNotFound,
 	SlugScopeUnavailable,
 	SlugTaken,
 	UnitAddressMutationForbidden,
-	UnitAddressUnchanged,
 	UnitNotFound,
+	UnitSlugAddressNotFound,
 } from "./errors";
-import { RootSlugNamespaceUnitId } from "./slug-system";
+import { insertUnit } from "./create";
+import { recordUnitRevision } from "./history";
+import {
+	SystemSlugNamespaceUnitIds,
+	TopLevelSlugNamespaceSlugByUnitId,
+	TopLevelSlugNamespaceUnitIdBySlug,
+	TopLevelSlugNamespaceUnitIds,
+} from "./slug-system";
 import { parseSlugLabel, SlugAddressMaximumDepth, type SlugLabel } from "./slug";
 
-type UnitKind = (typeof UnitKindValues)[number];
 type GovernanceReasonCode = (typeof GovernanceReasonCodeValues)[number];
-type CanonicalUnitKind = Exclude<UnitKind, "redirect">;
-type UnitInsert = typeof unit.$inferInsert;
 
-export interface UnitSlugAddress {
-	readonly scopeUnitId: string;
+export interface UnitSlugAddressValue {
+	readonly scopeUnitId: string | null;
 	readonly slug: SlugLabel;
 }
 
-export interface AddressedUnitInsert extends Omit<UnitInsert, "kind" | "slug" | "slugScopeId"> {
-	readonly kind: CanonicalUnitKind;
-	readonly slugScopeId: string;
-	readonly slug: string;
+export interface CanonicalUnitSlugAddress extends UnitSlugAddressValue {
+	readonly addressId: string;
+	readonly unitId: string;
 }
 
 export interface ResolvedUnitPath {
 	readonly id: string;
-	readonly kind: CanonicalUnitKind;
+	readonly kind: UnitKind;
 	readonly path: readonly SlugLabel[];
 	readonly canonicalPath: readonly SlugLabel[];
 	readonly redirected: boolean;
 }
 
-export interface UnitAddressMutationResult {
-	readonly unitId: string;
-	readonly redirectUnitId: string;
+export interface UnitAddressMutationResult extends CanonicalUnitSlugAddress {
+	readonly redirectAddressId: string | null;
 	readonly canonicalPath: readonly SlugLabel[];
 }
 
-const SlugTreeMutationLock = "rezics-unit-slug-tree";
-const RedirectMaximumHops = 8;
+interface StoredCanonicalAddress {
+	readonly id: string;
+	readonly scopeUnitId: string | null;
+	readonly slug: string;
+}
+
+interface CanonicalAddressMutation {
+	readonly addressId: string;
+	readonly redirectAddressId: string | null;
+	readonly before: UnitSlugAddressValue | null;
+	readonly after: UnitSlugAddressValue;
+	readonly changed: boolean;
+}
+
+const SlugTreeMutationLock = "rezics-unit-slug-addresses";
+const SystemSlugNamespaceUnitIdSet: ReadonlySet<string> = new Set(SystemSlugNamespaceUnitIds);
 
 function objectField(value: unknown, key: string): unknown {
 	return typeof value === "object" && value !== null && key in value
@@ -72,8 +89,11 @@ function hasDatabaseConstraint(error: unknown, constraint: string): boolean {
 	return false;
 }
 
-function mapSlugCollision(error: unknown, address: UnitSlugAddress): never {
-	if (hasDatabaseConstraint(error, "unit_slug_scope_slug_key"))
+function mapSlugCollision(
+	error: unknown,
+	address: { readonly scopeUnitId: string | null; readonly slug: string },
+): never {
+	if (hasDatabaseConstraint(error, "unit_slug_address_scope_slug_key"))
 		throw new SlugTaken(address.scopeUnitId, address.slug);
 	throw error;
 }
@@ -84,81 +104,182 @@ async function lockSlugTree(tx: DatabaseTransaction): Promise<void> {
 	);
 }
 
-async function lockSlugTreeScopeRead(tx: DatabaseTransaction): Promise<void> {
-	await tx.execute(
-		sql`select pg_advisory_xact_lock_shared(hashtextextended(${SlugTreeMutationLock}, 0))`,
-	);
+function scopeMatches(scopeUnitId: string | null) {
+	return scopeUnitId === null
+		? isNull(unitSlugAddress.scopeUnitId)
+		: eq(unitSlugAddress.scopeUnitId, scopeUnitId);
+}
+
+async function loadCanonicalAddress(
+	tx: DatabaseTransaction,
+	unitId: string,
+): Promise<StoredCanonicalAddress | undefined> {
+	return (
+		await tx
+			.select({
+				id: unitSlugAddress.id,
+				scopeUnitId: unitSlugAddress.scopeUnitId,
+				slug: unitSlugAddress.slug,
+			})
+			.from(unitSlugAddress)
+			.where(
+				and(
+					eq(unitSlugAddress.kind, "canonical"),
+					eq(unitSlugAddress.targetUnitId, unitId),
+				),
+			)
+			.limit(1)
+	)[0];
 }
 
 async function loadScopeDepth(
 	tx: DatabaseTransaction,
-	scopeUnitId: string,
-	movingUnitId?: string,
+	scopeUnitId: string | null,
+	movingUnitId: string,
 ): Promise<number> {
+	if (scopeUnitId === null) return 0;
 	let currentId = scopeUnitId;
 	let depth = 0;
 	const visited = new Set<string>();
 
-	while (currentId !== RootSlugNamespaceUnitId) {
-		if (currentId === movingUnitId) throw new SlugScopeCycle();
-		if (visited.has(currentId)) throw new SlugScopeCycle();
+	while (true) {
+		if (currentId === movingUnitId || visited.has(currentId)) throw new SlugScopeCycle();
 		visited.add(currentId);
+
+		if (TopLevelSlugNamespaceSlugByUnitId.has(currentId)) return depth + 1;
 
 		const [current] = await tx
 			.select({
-				id: unit.id,
-				kind: unit.kind,
-				slugScopeId: unit.slugScopeId,
+				scopeUnitId: unitSlugAddress.scopeUnitId,
 				deletedAt: unit.deletedAt,
 			})
-			.from(unit)
-			.where(eq(unit.id, currentId))
+			.from(unitSlugAddress)
+			.innerJoin(unit, eq(unit.id, unitSlugAddress.targetUnitId))
+			.where(
+				and(
+					eq(unitSlugAddress.kind, "canonical"),
+					eq(unitSlugAddress.targetUnitId, currentId),
+				),
+			)
 			.limit(1);
 		if (!current) throw new SlugScopeNotFound();
-		if (current.deletedAt || current.kind === "redirect" || !current.slugScopeId)
-			throw new SlugScopeUnavailable();
+		if (current.deletedAt) throw new SlugScopeUnavailable();
 
 		depth += 1;
-		if (depth + 1 > SlugAddressMaximumDepth) throw new SlugDepthExceeded();
-		currentId = current.slugScopeId;
+		if (current.scopeUnitId === null) return depth;
+		currentId = current.scopeUnitId;
 	}
+}
 
-	const [root] = await tx
+async function replaceCanonicalAddress(
+	tx: DatabaseTransaction,
+	input: {
+		readonly unitId: string;
+		readonly scopeUnitId: string | null;
+		readonly slug: SlugLabel;
+	},
+): Promise<CanonicalAddressMutation> {
+	await lockSlugTree(tx);
+	const [target] = await tx
 		.select({ id: unit.id, kind: unit.kind, deletedAt: unit.deletedAt })
 		.from(unit)
-		.where(eq(unit.id, RootSlugNamespaceUnitId))
+		.where(eq(unit.id, input.unitId))
 		.limit(1);
-	if (!root) throw new SlugScopeNotFound();
-	if (root.deletedAt || root.kind !== "slug_namespace") throw new SlugScopeUnavailable();
-	return depth;
-}
+	if (!target || target.deletedAt) throw new UnitNotFound();
 
-async function ensureCanonicalScope(
-	tx: DatabaseTransaction,
-	scopeUnitId: string,
-	options: { readonly allowRoot: boolean; readonly movingUnitId?: string },
-): Promise<void> {
-	if (scopeUnitId === RootSlugNamespaceUnitId && !options.allowRoot)
+	const current = await loadCanonicalAddress(tx, target.id);
+	if (SystemSlugNamespaceUnitIdSet.has(target.id)) {
+		const declaredSlug = TopLevelSlugNamespaceSlugByUnitId.get(target.id);
+		if (
+			!current ||
+			input.scopeUnitId !== null ||
+			input.slug !== declaredSlug ||
+			current.scopeUnitId !== null ||
+			current.slug !== declaredSlug
+		)
+			throw new UnitAddressMutationForbidden();
+	}
+	if (input.scopeUnitId === null && target.kind !== "slug_namespace")
 		throw new UnitAddressMutationForbidden();
-	await loadScopeDepth(tx, scopeUnitId, options.movingUnitId);
-}
 
-export async function insertAddressedUnit(
-	tx: DatabaseTransaction,
-	input: AddressedUnitInsert,
-): Promise<{ readonly id: string; readonly slug: SlugLabel }> {
-	const slug = parseSlugLabel(input.slug);
-	await lockSlugTreeScopeRead(tx);
-	await ensureCanonicalScope(tx, input.slugScopeId, { allowRoot: false });
+	const scopeDepth = await loadScopeDepth(tx, input.scopeUnitId, target.id);
+	if (scopeDepth + 1 > SlugAddressMaximumDepth) throw new SlugDepthExceeded();
+
+	const after: UnitSlugAddressValue = {
+		scopeUnitId: input.scopeUnitId,
+		slug: input.slug,
+	};
+	if (current && current.scopeUnitId === input.scopeUnitId && current.slug === input.slug)
+		return {
+			addressId: current.id,
+			redirectAddressId: null,
+			before: after,
+			after,
+			changed: false,
+		};
+
+	const [occupant] = await tx
+		.select({
+			id: unitSlugAddress.id,
+			kind: unitSlugAddress.kind,
+			targetUnitId: unitSlugAddress.targetUnitId,
+		})
+		.from(unitSlugAddress)
+		.where(and(scopeMatches(input.scopeUnitId), eq(unitSlugAddress.slug, input.slug)))
+		.limit(1);
+	if (occupant) {
+		if (occupant.kind === "redirect" && occupant.targetUnitId === target.id)
+			await tx.delete(unitSlugAddress).where(eq(unitSlugAddress.id, occupant.id));
+		else throw new SlugTaken(input.scopeUnitId, input.slug);
+	}
+
 	try {
-		const [created] = await tx
-			.insert(unit)
-			.values({ ...input, slug })
-			.returning({ id: unit.id, slug: unit.slug });
-		if (!created?.slug) throw new Error("Addressed Unit insertion did not return an address");
-		return { id: created.id, slug: parseSlugLabel(created.slug) };
+		if (!current) {
+			const [created] = await tx
+				.insert(unitSlugAddress)
+				.values({
+					kind: "canonical",
+					scopeUnitId: input.scopeUnitId,
+					slug: input.slug,
+					targetUnitId: target.id,
+				})
+				.returning({ id: unitSlugAddress.id });
+			if (!created) throw new Error("Canonical slug address insertion did not return an id");
+			return {
+				addressId: created.id,
+				redirectAddressId: null,
+				before: null,
+				after,
+				changed: true,
+			};
+		}
+
+		await tx
+			.update(unitSlugAddress)
+			.set({ scopeUnitId: input.scopeUnitId, slug: input.slug, updatedAt: new Date() })
+			.where(eq(unitSlugAddress.id, current.id));
+		const [redirect] = await tx
+			.insert(unitSlugAddress)
+			.values({
+				kind: "redirect",
+				scopeUnitId: current.scopeUnitId,
+				slug: current.slug,
+				targetUnitId: target.id,
+			})
+			.returning({ id: unitSlugAddress.id });
+		if (!redirect) throw new Error("Slug Redirect insertion did not return an id");
+		return {
+			addressId: current.id,
+			redirectAddressId: redirect.id,
+			before: {
+				scopeUnitId: current.scopeUnitId,
+				slug: parseSlugLabel(current.slug),
+			},
+			after,
+			changed: true,
+		};
 	} catch (error) {
-		mapSlugCollision(error, { scopeUnitId: input.slugScopeId, slug });
+		mapSlugCollision(error, input);
 	}
 }
 
@@ -176,39 +297,6 @@ function isPublicAddressNode(value: {
 	);
 }
 
-async function followRedirect(redirectUnitId: string): Promise<{
-	readonly id: string;
-	readonly kind: CanonicalUnitKind;
-	readonly status: string;
-	readonly visibility: string;
-	readonly moderationStatus: string;
-	readonly deletedAt: Date | null;
-}> {
-	let currentId = redirectUnitId;
-	const visited = new Set<string>();
-	for (let hops = 0; hops < RedirectMaximumHops; hops += 1) {
-		if (visited.has(currentId)) throw new SlugRedirectLoop();
-		visited.add(currentId);
-		const [target] = await database
-			.select({
-				id: unit.id,
-				kind: unit.kind,
-				status: unit.status,
-				visibility: unit.visibility,
-				moderationStatus: unit.moderationStatus,
-				deletedAt: unit.deletedAt,
-			})
-			.from(unitRedirect)
-			.innerJoin(unit, eq(unit.id, unitRedirect.targetUnitId))
-			.where(eq(unitRedirect.id, currentId))
-			.limit(1);
-		if (!target) throw new SlugRedirectNotFound();
-		if (target.kind !== "redirect") return { ...target, kind: target.kind };
-		currentId = target.id;
-	}
-	throw new SlugRedirectLoop();
-}
-
 async function loadCanonicalUnitPath(
 	unitId: string,
 	requirePublicAncestors: boolean,
@@ -217,47 +305,97 @@ async function loadCanonicalUnitPath(
 	const path: SlugLabel[] = [];
 	const visited = new Set<string>();
 
-	for (let depth = 0; depth <= SlugAddressMaximumDepth; depth += 1) {
+	for (let depth = 0; depth < SlugAddressMaximumDepth; depth += 1) {
 		if (visited.has(currentId)) throw new SlugScopeCycle();
 		visited.add(currentId);
+
+		const cachedNamespaceSlug = TopLevelSlugNamespaceSlugByUnitId.get(currentId);
+		if (cachedNamespaceSlug) {
+			path.push(parseSlugLabel(cachedNamespaceSlug));
+			return path.reverse();
+		}
+
 		const [current] = await database
 			.select({
-				id: unit.id,
-				kind: unit.kind,
-				slugScopeId: unit.slugScopeId,
-				slug: unit.slug,
+				scopeUnitId: unitSlugAddress.scopeUnitId,
+				slug: unitSlugAddress.slug,
 				status: unit.status,
 				visibility: unit.visibility,
 				moderationStatus: unit.moderationStatus,
 				deletedAt: unit.deletedAt,
 			})
-			.from(unit)
-			.where(eq(unit.id, currentId))
+			.from(unitSlugAddress)
+			.innerJoin(unit, eq(unit.id, unitSlugAddress.targetUnitId))
+			.where(
+				and(
+					eq(unitSlugAddress.kind, "canonical"),
+					eq(unitSlugAddress.targetUnitId, currentId),
+				),
+			)
 			.limit(1);
-		if (!current || current.deletedAt) throw new UnitNotFound();
-		if (current.kind === "redirect") throw new SlugScopeUnavailable();
+		if (!current) throw new UnitSlugAddressNotFound();
 		if (requirePublicAncestors && !isPublicAddressNode(current)) throw new UnitNotFound();
-		if (current.id === RootSlugNamespaceUnitId) return path.reverse();
-		if (!current.slugScopeId || !current.slug) throw new SlugScopeUnavailable();
 		path.push(parseSlugLabel(current.slug));
-		currentId = current.slugScopeId;
+		if (current.scopeUnitId === null) return path.reverse();
+		currentId = current.scopeUnitId;
 	}
 	throw new SlugDepthExceeded();
 }
 
-export async function getCanonicalUnitPath(unitId: string): Promise<readonly SlugLabel[]> {
-	return loadCanonicalUnitPath(unitId, false);
+/**
+ * Returns a Unit's optional canonical address as a proved address value.
+ *
+ * @remarks
+ * Core Unit reads deliberately do not call this function or expose slug data.
+ */
+export async function getCanonicalUnitSlugAddressAsStaff(
+	authorization: Authorization<string>,
+	unitId: string,
+): Promise<CanonicalUnitSlugAddress> {
+	await authorization.platform.ensureCapability("unit.slug.manage");
+	const [record] = await database
+		.select({
+			unitId: unit.id,
+			addressId: unitSlugAddress.id,
+			scopeUnitId: unitSlugAddress.scopeUnitId,
+			slug: unitSlugAddress.slug,
+		})
+		.from(unit)
+		.leftJoin(
+			unitSlugAddress,
+			and(eq(unitSlugAddress.kind, "canonical"), eq(unitSlugAddress.targetUnitId, unit.id)),
+		)
+		.where(and(eq(unit.id, unitId), isNull(unit.deletedAt)))
+		.limit(1);
+	if (!record) throw new UnitNotFound();
+	if (!record.addressId || record.slug === null) throw new UnitSlugAddressNotFound();
+	return {
+		addressId: record.addressId,
+		unitId: record.unitId,
+		scopeUnitId: record.scopeUnitId,
+		slug: parseSlugLabel(record.slug),
+	};
 }
 
+/**
+ * Resolves a backend slug path without changing the ID-based Unit contract.
+ *
+ * @remarks
+ * Permanent platform namespaces use immutable process-local routing data. The
+ * frontend intentionally does not consume this resolver yet.
+ *
+ * @todo
+ * Define frontend routing, cache observability, and canonical redirect behavior
+ * before enabling public slug routes.
+ */
 export async function resolveUnitPath(segments: readonly string[]): Promise<ResolvedUnitPath> {
 	if (!segments.length || segments.length > SlugAddressMaximumDepth)
 		throw new SlugDepthExceeded();
 	const path = segments.map(parseSlugLabel);
-	let scopeUnitId = RootSlugNamespaceUnitId;
 	let resolved:
 		| {
 				readonly id: string;
-				readonly kind: CanonicalUnitKind;
+				readonly kind: UnitKind;
 				readonly status: string;
 				readonly visibility: string;
 				readonly moderationStatus: string;
@@ -265,10 +403,29 @@ export async function resolveUnitPath(segments: readonly string[]): Promise<Reso
 		  }
 		| undefined;
 	let followedRedirect = false;
+	let scopeUnitId: string | null = null;
+	let startIndex = 0;
 
-	for (const slug of path) {
-		const [child] = await database
+	const cachedNamespaceId = TopLevelSlugNamespaceUnitIdBySlug.get(path[0] ?? "");
+	if (cachedNamespaceId) {
+		resolved = {
+			id: cachedNamespaceId,
+			kind: "slug_namespace",
+			status: "published",
+			visibility: "public",
+			moderationStatus: "approved",
+			deletedAt: null,
+		};
+		scopeUnitId = cachedNamespaceId;
+		startIndex = 1;
+	}
+
+	for (let index = startIndex; index < path.length; index += 1) {
+		const slug = path[index];
+		if (!slug) throw new InvalidSlug();
+		const [address] = await database
 			.select({
+				addressKind: unitSlugAddress.kind,
 				id: unit.id,
 				kind: unit.kind,
 				status: unit.status,
@@ -276,19 +433,14 @@ export async function resolveUnitPath(segments: readonly string[]): Promise<Reso
 				moderationStatus: unit.moderationStatus,
 				deletedAt: unit.deletedAt,
 			})
-			.from(unit)
-			.where(
-				and(eq(unit.slugScopeId, scopeUnitId), eq(unit.slug, slug), isNull(unit.deletedAt)),
-			)
+			.from(unitSlugAddress)
+			.innerJoin(unit, eq(unit.id, unitSlugAddress.targetUnitId))
+			.where(and(scopeMatches(scopeUnitId), eq(unitSlugAddress.slug, slug)))
 			.limit(1);
-		if (!child) throw new UnitNotFound();
-		resolved =
-			child.kind === "redirect"
-				? await followRedirect(child.id)
-				: { ...child, kind: child.kind };
-		if (child.kind === "redirect") followedRedirect = true;
-		if (!isPublicAddressNode(resolved)) throw new UnitNotFound();
-		scopeUnitId = resolved.id;
+		if (!address || !isPublicAddressNode(address)) throw new UnitNotFound();
+		resolved = address;
+		followedRedirect ||= address.addressKind === "redirect";
+		scopeUnitId = address.id;
 	}
 
 	if (!resolved) throw new UnitNotFound();
@@ -305,174 +457,201 @@ export async function resolveUnitPath(segments: readonly string[]): Promise<Reso
 	};
 }
 
-export async function createSlugNamespace(
+/**
+ * Replaces the current Profile's canonical slug address.
+ *
+ * @remarks
+ * This is the only non-staff slug mutation. The caller supplies only the label;
+ * the backend proves Profile ownership from the session and fixes the scope to
+ * the permanent `users` namespace. Repeating the same replacement is idempotent.
+ *
+ * @todo
+ * Complete abuse controls and the public Profile slug lifecycle before frontend
+ * integration.
+ */
+export async function replaceOwnProfileSlugAddress(
 	authorization: Authorization<string>,
-	input: {
-		readonly scopeUnitId: string;
-		readonly slug: string;
-		readonly reasonCode: GovernanceReasonCode;
-	},
-): Promise<{ readonly id: string; readonly canonicalPath: readonly SlugLabel[] }> {
-	await authorization.platform.ensureCapability("unit.slug.namespace.manage");
+	input: { readonly slug: string },
+): Promise<UnitAddressMutationResult> {
 	const slug = parseSlugLabel(input.slug);
-	const id = await database.transaction(async (tx) => {
-		await lockSlugTreeScopeRead(tx);
-		await ensureCanonicalScope(tx, input.scopeUnitId, { allowRoot: true });
-		try {
-			const [created] = await tx
-				.insert(unit)
-				.values({
-					kind: "slug_namespace",
-					slugScopeId: input.scopeUnitId,
-					slug,
-					status: "published",
-					visibility: "public",
-					publishedAt: new Date(),
-				})
-				.returning({ id: unit.id });
-			if (!created) throw new Error("Slug Namespace insertion did not return an id");
+	const mutation = await database.transaction(async (tx) => {
+		const [ownedProfile] = await tx
+			.select({ id: profile.id })
+			.from(profile)
+			.where(eq(profile.id, authorization.profileId))
+			.limit(1);
+		if (!ownedProfile) throw new UnitNotFound();
+		const result = await replaceCanonicalAddress(tx, {
+			unitId: ownedProfile.id,
+			scopeUnitId: TopLevelSlugNamespaceUnitIds.users,
+			slug,
+		});
+		if (result.changed)
 			await tx.insert(auditEvent).values({
 				actorProfileId: authorization.profileId,
-				action: "unit.slug_namespace.create",
-				decisionCode: input.reasonCode,
+				action: result.before ? "unit.slug.rename" : "unit.slug.assign",
+				decisionCode: "allowed",
 				subjectKind: "unit",
-				subjectId: created.id,
-				metadata: { after: { scopeUnitId: input.scopeUnitId, slug } },
+				subjectId: ownedProfile.id,
+				metadata: {
+					before: result.before,
+					after: result.after,
+					redirectAddressId: result.redirectAddressId,
+				},
 			});
-			return created.id;
-		} catch (error) {
-			mapSlugCollision(error, { scopeUnitId: input.scopeUnitId, slug });
-		}
+		return result;
 	});
-	return { id, canonicalPath: await getCanonicalUnitPath(id) };
+	return {
+		addressId: mutation.addressId,
+		unitId: authorization.profileId,
+		scopeUnitId: mutation.after.scopeUnitId,
+		slug: mutation.after.slug,
+		redirectAddressId: mutation.redirectAddressId,
+		canonicalPath: await loadCanonicalUnitPath(authorization.profileId, false),
+	};
 }
 
-export async function updateUnitSlugAddress(
+/**
+ * Replaces any Unit's canonical slug address through the staff-only contract.
+ *
+ * @remarks
+ * Non-Profile public slug mutation is intentionally unavailable. Permanent
+ * platform namespace addresses are immutable because the resolver caches them.
+ *
+ * @todo
+ * Design per-kind public policies before exposing any narrower non-staff API.
+ * In particular, define ownership validation and rendering semantics for posts
+ * whose explicit staff-selected scope differs from their author Profile ID.
+ */
+export async function replaceUnitSlugAddressAsStaff(
 	authorization: Authorization<string>,
 	input: {
 		readonly unitId: string;
-		readonly scopeUnitId: string;
+		readonly scopeUnitId: string | null;
 		readonly slug: string;
 		readonly reasonCode: GovernanceReasonCode;
 	},
 ): Promise<UnitAddressMutationResult> {
+	await authorization.platform.ensureCapability("unit.slug.manage");
 	const slug = parseSlugLabel(input.slug);
-	const result = await database.transaction(async (tx) => {
-		await lockSlugTree(tx);
-		const [current] = await tx
-			.select({
-				id: unit.id,
-				kind: unit.kind,
-				slugScopeId: unit.slugScopeId,
-				slug: unit.slug,
-				deletedAt: unit.deletedAt,
-			})
+	const mutation = await database.transaction(async (tx) => {
+		const [target] = await tx
+			.select({ kind: unit.kind })
 			.from(unit)
 			.where(eq(unit.id, input.unitId))
 			.limit(1);
-		if (!current || current.deletedAt) throw new UnitNotFound();
-		if (
-			current.id === RootSlugNamespaceUnitId ||
-			current.kind === "redirect" ||
-			!current.slugScopeId ||
-			!current.slug
-		)
-			throw new UnitAddressMutationForbidden();
-
-		const namespaceMutation =
-			current.kind === "slug_namespace" ||
-			current.slugScopeId === RootSlugNamespaceUnitId ||
-			input.scopeUnitId === RootSlugNamespaceUnitId;
-		await authorization.platform.ensureCapability(
-			namespaceMutation ? "unit.slug.namespace.manage" : "unit.slug.manage",
-		);
-		if (input.scopeUnitId === RootSlugNamespaceUnitId && current.kind !== "slug_namespace")
-			throw new UnitAddressMutationForbidden();
-		if (current.slugScopeId === input.scopeUnitId && current.slug === slug)
-			throw new UnitAddressUnchanged();
-
-		await ensureCanonicalScope(tx, input.scopeUnitId, {
-			allowRoot: current.kind === "slug_namespace",
-			movingUnitId: current.id,
-		});
-		try {
-			await tx
-				.update(unit)
-				.set({ slugScopeId: input.scopeUnitId, slug })
-				.where(eq(unit.id, current.id));
-		} catch (error) {
-			mapSlugCollision(error, { scopeUnitId: input.scopeUnitId, slug });
-		}
-
-		let redirectUnitId: string;
-		try {
-			const [redirect] = await tx
-				.insert(unit)
-				.values({
-					kind: "redirect",
-					slugScopeId: current.slugScopeId,
-					slug: current.slug,
-					status: "published",
-					visibility: "public",
-					publishedAt: new Date(),
-				})
-				.returning({ id: unit.id });
-			if (!redirect) throw new Error("Slug Redirect insertion did not return an id");
-			redirectUnitId = redirect.id;
-			await tx.insert(unitRedirect).values({
-				id: redirect.id,
-				targetUnitId: current.id,
+		if (!target) throw new UnitNotFound();
+		if (target.kind === "slug_namespace" || input.scopeUnitId === null)
+			await authorization.platform.ensureCapability("unit.slug.namespace.manage");
+		const result = await replaceCanonicalAddress(tx, { ...input, slug });
+		if (result.changed)
+			await tx.insert(auditEvent).values({
+				actorProfileId: authorization.profileId,
+				action: !result.before
+					? "unit.slug.assign"
+					: result.before.scopeUnitId === result.after.scopeUnitId
+						? "unit.slug.rename"
+						: "unit.slug.move",
+				decisionCode: input.reasonCode,
+				subjectKind: "unit",
+				subjectId: input.unitId,
+				metadata: {
+					before: result.before,
+					after: result.after,
+					redirectAddressId: result.redirectAddressId,
+				},
 			});
-		} catch (error) {
-			mapSlugCollision(error, {
-				scopeUnitId: current.slugScopeId,
-				slug: parseSlugLabel(current.slug),
-			});
-		}
-
-		await tx.insert(auditEvent).values({
-			actorProfileId: authorization.profileId,
-			action:
-				current.slugScopeId === input.scopeUnitId ? "unit.slug.rename" : "unit.slug.move",
-			decisionCode: input.reasonCode,
-			subjectKind: "unit",
-			subjectId: current.id,
-			metadata: {
-				before: { scopeUnitId: current.slugScopeId, slug: current.slug },
-				after: { scopeUnitId: input.scopeUnitId, slug },
-				redirectUnitId,
-			},
-		});
-		return { unitId: current.id, redirectUnitId };
+		return result;
 	});
-
-	return { ...result, canonicalPath: await getCanonicalUnitPath(result.unitId) };
+	return {
+		addressId: mutation.addressId,
+		unitId: input.unitId,
+		scopeUnitId: mutation.after.scopeUnitId,
+		slug: mutation.after.slug,
+		redirectAddressId: mutation.redirectAddressId,
+		canonicalPath: await loadCanonicalUnitPath(input.unitId, false),
+	};
 }
 
+/** Creates an explicitly addressed namespace through the staff-only slug API. */
+export async function createSlugNamespace(
+	authorization: Authorization<string>,
+	input: {
+		readonly scopeUnitId: string | null;
+		readonly slug: string;
+		readonly reasonCode: GovernanceReasonCode;
+	},
+): Promise<UnitAddressMutationResult> {
+	await authorization.platform.ensureCapability("unit.slug.namespace.manage");
+	const slug = parseSlugLabel(input.slug);
+	const result = await database.transaction(async (tx) => {
+		const created = await insertUnit(tx, {
+			kind: "slug_namespace",
+			status: "published",
+			visibility: "public",
+			publishedAt: new Date(),
+			statusActor: { kind: "profile", profileId: authorization.profileId },
+		});
+		const mutation = await replaceCanonicalAddress(tx, {
+			unitId: created.id,
+			scopeUnitId: input.scopeUnitId,
+			slug,
+		});
+		await tx.insert(auditEvent).values({
+			actorProfileId: authorization.profileId,
+			action: "unit.slug_namespace.create",
+			decisionCode: input.reasonCode,
+			subjectKind: "unit",
+			subjectId: created.id,
+			metadata: { after: mutation.after, addressId: mutation.addressId },
+		});
+		await recordUnitRevision(tx, {
+			unitId: created.id,
+			actorProfileId: authorization.profileId,
+			event: "create",
+		});
+		return { unitId: created.id, mutation };
+	});
+	return {
+		addressId: result.mutation.addressId,
+		unitId: result.unitId,
+		scopeUnitId: result.mutation.after.scopeUnitId,
+		slug: result.mutation.after.slug,
+		redirectAddressId: null,
+		canonicalPath: await loadCanonicalUnitPath(result.unitId, false),
+	};
+}
+
+/** Releases one retained Redirect address through the staff-only slug API. */
 export async function releaseSlugRedirect(
 	authorization: Authorization<string>,
 	input: {
-		readonly redirectUnitId: string;
+		readonly redirectAddressId: string;
 		readonly reasonCode: GovernanceReasonCode;
 	},
 ): Promise<void> {
 	await authorization.platform.ensureCapability("unit.slug.redirect.release");
 	await database.transaction(async (tx) => {
+		await lockSlugTree(tx);
 		const [redirect] = await tx
 			.select({
-				id: unit.id,
-				slugScopeId: unit.slugScopeId,
-				slug: unit.slug,
-				targetUnitId: unitRedirect.targetUnitId,
+				id: unitSlugAddress.id,
+				scopeUnitId: unitSlugAddress.scopeUnitId,
+				slug: unitSlugAddress.slug,
+				targetUnitId: unitSlugAddress.targetUnitId,
 			})
-			.from(unitRedirect)
-			.innerJoin(unit, eq(unit.id, unitRedirect.id))
-			.where(and(eq(unitRedirect.id, input.redirectUnitId), isNull(unit.deletedAt)))
+			.from(unitSlugAddress)
+			.where(
+				and(
+					eq(unitSlugAddress.id, input.redirectAddressId),
+					eq(unitSlugAddress.kind, "redirect"),
+				),
+			)
 			.limit(1);
-		if (!redirect || !redirect.slugScopeId || !redirect.slug) throw new SlugRedirectNotFound();
-		if (redirect.slugScopeId === RootSlugNamespaceUnitId)
+		if (!redirect) throw new SlugRedirectNotFound();
+		if (redirect.scopeUnitId === null)
 			await authorization.platform.ensureCapability("unit.slug.namespace.manage");
-		await tx.delete(unit).where(eq(unit.id, redirect.id));
+		await tx.delete(unitSlugAddress).where(eq(unitSlugAddress.id, redirect.id));
 		await tx.insert(auditEvent).values({
 			actorProfileId: authorization.profileId,
 			action: "unit.slug_redirect.release",
@@ -480,8 +659,8 @@ export async function releaseSlugRedirect(
 			subjectKind: "unit",
 			subjectId: redirect.targetUnitId,
 			metadata: {
-				redirectUnitId: redirect.id,
-				before: { scopeUnitId: redirect.slugScopeId, slug: redirect.slug },
+				redirectAddressId: redirect.id,
+				before: { scopeUnitId: redirect.scopeUnitId, slug: redirect.slug },
 				after: null,
 			},
 		});

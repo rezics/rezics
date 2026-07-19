@@ -97,7 +97,7 @@ function ProgressList() {
 							<Card key={item.unitId}>
 								<CardHeader
 									description={`${Math.round(item.progress * 100)}%`}
-									title={item.title ?? item.slug ?? t.ui.unnamed}
+									title={item.title ?? t.ui.unnamed}
 								>
 									<CardAction>
 										<div className="flex gap-2">

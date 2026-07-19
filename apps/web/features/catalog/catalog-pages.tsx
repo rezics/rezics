@@ -102,7 +102,7 @@ export function EntityDetailPage({ id }: { id: string }) {
 	const avatar = localization?.avatar ?? query.data.avatar;
 	const banner = localization?.banner ?? query.data.banner;
 	return (
-		<CatalogFrame title={localization?.title ?? query.data.slug ?? t.ui.unnamed}>
+		<CatalogFrame title={localization?.title ?? t.ui.unnamed}>
 			{banner ? (
 				<div className="aspect-[3/1] overflow-hidden rounded-2xl bg-muted">
 					<img alt="" className="size-full object-cover" src={banner.url} />
@@ -113,9 +113,7 @@ export function EntityDetailPage({ id }: { id: string }) {
 					<Avatar className="size-20">
 						{avatar ? <AvatarImage alt="" src={avatar.url} /> : null}
 						<AvatarFallback>
-							{(localization?.title ?? query.data.slug ?? t.ui.unnamed)
-								.slice(0, 1)
-								.toUpperCase()}
+							{(localization?.title ?? t.ui.unnamed).slice(0, 1).toUpperCase()}
 						</AvatarFallback>
 					</Avatar>
 					<p>
@@ -318,9 +316,6 @@ export function EntityCreatePage() {
 							? { summary: String(form.get("summary")).trim() }
 							: {}),
 					},
-					...(String(form.get("slug") ?? "").trim()
-						? { slug: String(form.get("slug")).trim() }
-						: {}),
 				},
 			});
 		} catch {
@@ -346,10 +341,6 @@ export function EntityCreatePage() {
 								{t.ui.character}
 							</NativeSelectOption>
 						</NativeSelect>
-					</Field>
-					<Field>
-						<FieldLabel>{t.ui.slug}</FieldLabel>
-						<Input name="slug" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" />
 					</Field>
 					<Field>
 						<FieldLabel>{t.ui.summary}</FieldLabel>
@@ -410,9 +401,6 @@ export function TagCreatePage() {
 							? { summary: String(form.get("summary")).trim() }
 							: {}),
 					},
-					...(String(form.get("slug") ?? "").trim()
-						? { slug: String(form.get("slug")).trim() }
-						: {}),
 				},
 			});
 		} catch {
@@ -426,10 +414,6 @@ export function TagCreatePage() {
 					<Field required>
 						<FieldLabel>{t.ui.title}</FieldLabel>
 						<Input name="title" required maxLength={500} />
-					</Field>
-					<Field>
-						<FieldLabel>{t.ui.slug}</FieldLabel>
-						<Input name="slug" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" />
 					</Field>
 					<Field>
 						<FieldLabel>{t.ui.summary}</FieldLabel>

@@ -22,7 +22,8 @@ import {
 	unitLocalization,
 } from "../../database/schema";
 import { recordUnitRevision } from "../../units/history";
-import { insertAddressedUnit } from "../../units/slug-address";
+import { insertUnit } from "../../units/create";
+import { transitionUnitStatus } from "../../units/status";
 import {
 	CollectionItemParams,
 	CollectionParams,
@@ -62,7 +63,6 @@ export default new Elysia({ prefix: "/collections" })
 					id: collection.id,
 					ownerId: collection.ownerProfileId,
 					itemCount: sql<number>`(select count(*) from ${collectionItem} where ${collectionItem.collectionId} = ${collection.id})::int`,
-					slug: unit.slug,
 					title: unitLocalization.title,
 					summary: unitLocalization.summary,
 					updatedAt: unit.updatedAt,
@@ -104,11 +104,10 @@ export default new Elysia({ prefix: "/collections" })
 				);
 				const definitionDocument =
 					body.definitionDocument ?? createManualCollectionDefinitionDocument();
-				const created = await insertAddressedUnit(tx, {
+				const created = await insertUnit(tx, {
 					kind: "collection",
-					slugScopeId: profile.unitId,
-					slug: body.slug,
 					visibility: body.visibility ?? "private",
+					statusActor: { kind: "profile", profileId: profile.unitId },
 				});
 				await tx.insert(collection).values({
 					id: created.id,
@@ -183,9 +182,13 @@ export default new Elysia({ prefix: "/collections" })
 		"/:collectionId",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.collection.ensureOwner(params.collectionId);
+			const publishDecision = body.status
+				? await authorization.unit.decide(params.collectionId, "unit.publish", ["unit"])
+				: undefined;
 			const [current] = await database
 				.select({ systemKey: collection.systemKey })
 				.from(collection)
+				.innerJoin(unit, eq(unit.id, collection.id))
 				.where(eq(collection.id, params.collectionId))
 				.limit(1);
 			if (current?.systemKey === "favorites") throw new FavoritesEditForbidden();
@@ -199,9 +202,7 @@ export default new Elysia({ prefix: "/collections" })
 				await tx
 					.update(unit)
 					.set({
-						status: body.status,
 						visibility: body.visibility,
-						...(body.status === "published" ? { publishedAt: new Date() } : {}),
 					})
 					.where(eq(unit.id, params.collectionId));
 				if (body.definitionDocument || body.presentationDocument) {
@@ -231,11 +232,22 @@ export default new Elysia({ prefix: "/collections" })
 						body.localization.language,
 					);
 				}
-				await recordUnitRevision(tx, {
+				const revision = await recordUnitRevision(tx, {
 					unitId: params.collectionId,
 					actorProfileId: profile.unitId,
 					event: "update",
 				});
+				if (body.status)
+					await transitionUnitStatus(tx, {
+						unitId: params.collectionId,
+						toStatus: body.status,
+						actor: { kind: "profile", profileId: profile.unitId },
+						authorization: {
+							kind: "interactive",
+							publishAllowed: publishDecision?.allowed ?? false,
+						},
+						revisionId: revision.revisionId,
+					});
 			});
 			return getCollection(params.collectionId, profile.unitId);
 		},

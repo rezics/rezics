@@ -137,11 +137,10 @@ export default {
 	InvalidSlug: "A slug must be a 1-63 character lowercase ASCII hyphenated label.",
 	SlugTaken: "That slug is already used in this Unit namespace.",
 	SlugScopeNotFound: "The Unit namespace for this slug could not be found.",
-	SlugScopeUnavailable: "Redirect and deleted Units cannot be canonical slug namespaces.",
+	SlugScopeUnavailable: "Unaddressed and deleted Units cannot be canonical slug namespaces.",
 	SlugScopeCycle: "This move would create a slug namespace cycle.",
 	SlugDepthExceeded: "The Unit slug path exceeds the maximum depth.",
-	UnitAddressUnchanged: "The Unit slug address is unchanged.",
 	UnitAddressMutationForbidden: "This Unit slug address cannot perform that operation.",
 	SlugRedirectNotFound: "The slug Redirect could not be found.",
-	SlugRedirectLoop: "A slug Redirect loop was detected.",
+	UnitSlugAddressNotFound: "The Unit has no canonical slug address.",
 } satisfies typeof import("../zh-CN/errorCodes").default;

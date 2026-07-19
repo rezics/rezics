@@ -5,23 +5,23 @@ import Elysia, { t } from "elysia";
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
-import { isPrimaryUnitLocalization, primaryUnitTitle } from "../../units/localization";
+import { isPrimaryUnitLocalization } from "../../units/localization";
 import {
 	post,
 	postReply,
 	postReplyStat,
-	profile as profileTable,
 	realmUnit,
 	unit,
 	unitAccessBinding,
 	unitLocalization,
 	unitRevisionHead,
+	unitStatusEvent,
 } from "../../database/schema";
 import { createNotification, deliverNotificationEmail } from "../../notifications/service";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
-import { insertAddressedUnit } from "../../units/slug-address";
-import { generateSlugLabel } from "../../units/slug";
+import { insertUnit } from "../../units/create";
+import { getPublisherSummariesByUnitIds, type UnitPublisherSummary } from "../../units/status";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
 import {
 	ReplyListResponse,
@@ -70,8 +70,6 @@ const replyCount = sql<unknown>`coalesce(case when ${post.kind} = 'post'::post_k
 function toReplyResponse<
 	T extends {
 		id: string;
-		authorId: string;
-		authorName: string | null;
 		rootPostId: string;
 		parentPostId: string | null;
 		contextRealmId: string | null;
@@ -83,13 +81,12 @@ function toReplyResponse<
 		createdAt: Date;
 		updatedAt: Date;
 	},
->(row: T) {
+>(row: T, publishers: readonly UnitPublisherSummary[]) {
 	const body = toPortableTextResponse(row.body);
 	return {
 		id: row.id,
 		postKind: "reply" as const,
-		authorId: row.authorId,
-		authorName: row.authorName,
+		publishers: [...publishers],
 		rootPostId: row.rootPostId,
 		parentPostId: row.parentPostId,
 		contextRealmId: row.contextRealmId,
@@ -104,8 +101,6 @@ function toReplyResponse<
 
 const replySelection = {
 	id: postReply.postId,
-	authorId: post.authorProfileId,
-	authorName: primaryUnitTitle(profileTable.id),
 	rootPostId: postReply.rootPostId,
 	parentPostId: postReply.parentPostId,
 	contextRealmId: postReply.contextRealmId,
@@ -124,60 +119,62 @@ export default new Elysia()
 		app
 			.get(
 				"",
-				async ({ query }) => ({
-					items: (
-						await database
-							.select({
-								id: post.id,
-								postKind: ordinaryPostKind,
-								authorId: post.authorProfileId,
-								authorName: primaryUnitTitle(profileTable.id),
-								realmId: primaryRealmId,
-								subjectId: post.subjectUnitId,
-								rootPostId: postReply.rootPostId,
-								parentPostId: postReply.parentPostId,
-								body: unitLocalization.content,
-								replyCount,
-								title: unitLocalization.title,
-								latestRevisionId: unitRevisionHead.revisionId,
-								createdAt: unit.createdAt,
-								updatedAt: unit.updatedAt,
-							})
-							.from(post)
-							.innerJoin(unit, eq(unit.id, post.id))
-							.innerJoin(profileTable, eq(profileTable.id, post.authorProfileId))
-							.leftJoin(postReply, eq(postReply.postId, post.id))
-							.leftJoin(postReplyStat, eq(postReplyStat.postId, post.id))
-							.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, post.id))
-							.leftJoin(
-								unitLocalization,
-								and(
-									eq(unitLocalization.unitId, post.id),
-									isPrimaryUnitLocalization(unitLocalization.unitId),
-								),
-							)
-							.where(
-								and(
-									sql`${post.kind} in ('post'::post_kind, 'reply'::post_kind)`,
-									eq(unit.status, "published"),
-									eq(unit.visibility, "public"),
-									isNull(unit.deletedAt),
-									query.realmId
-										? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible')`
-										: undefined,
-									query.subjectId
-										? eq(post.subjectUnitId, query.subjectId)
-										: undefined,
-								),
-							)
-							.orderBy(desc(unit.createdAt), desc(unit.id))
-							.limit(query.limit ?? 20)
-					).map((item) => ({
-						...item,
-						replyCount: toSafeInteger(item.replyCount, "reply count"),
-						body: toPortableTextResponse(item.body),
-					})),
-				}),
+				async ({ query }) => {
+					const rows = await database
+						.select({
+							id: post.id,
+							postKind: ordinaryPostKind,
+							realmId: primaryRealmId,
+							subjectId: post.subjectUnitId,
+							rootPostId: postReply.rootPostId,
+							parentPostId: postReply.parentPostId,
+							body: unitLocalization.content,
+							replyCount,
+							title: unitLocalization.title,
+							latestRevisionId: unitRevisionHead.revisionId,
+							createdAt: unit.createdAt,
+							updatedAt: unit.updatedAt,
+						})
+						.from(post)
+						.innerJoin(unit, eq(unit.id, post.id))
+						.leftJoin(postReply, eq(postReply.postId, post.id))
+						.leftJoin(postReplyStat, eq(postReplyStat.postId, post.id))
+						.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, post.id))
+						.leftJoin(
+							unitLocalization,
+							and(
+								eq(unitLocalization.unitId, post.id),
+								isPrimaryUnitLocalization(unitLocalization.unitId),
+							),
+						)
+						.where(
+							and(
+								sql`${post.kind} in ('post'::post_kind, 'reply'::post_kind)`,
+								eq(unit.status, "published"),
+								eq(unit.visibility, "public"),
+								isNull(unit.deletedAt),
+								query.realmId
+									? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible')`
+									: undefined,
+								query.subjectId
+									? eq(post.subjectUnitId, query.subjectId)
+									: undefined,
+							),
+						)
+						.orderBy(desc(unit.createdAt), desc(unit.id))
+						.limit(query.limit ?? 20);
+					const publishers = await getPublisherSummariesByUnitIds(
+						rows.map(({ id }) => id),
+					);
+					return {
+						items: rows.map((item) => ({
+							...item,
+							publishers: publishers.get(item.id) ?? [],
+							replyCount: toSafeInteger(item.replyCount, "reply count"),
+							body: toPortableTextResponse(item.body),
+						})),
+					};
+				},
 				{
 					query: ListPostsQuery,
 					response: { [StatusCodes.OK]: PostListResponse },
@@ -197,17 +194,15 @@ export default new Elysia()
 								tx,
 								body.subjectId,
 							);
-						const created = await insertAddressedUnit(tx, {
+						const created = await insertUnit(tx, {
 							kind: "post",
-							slugScopeId: profile.unitId,
-							slug: generateSlugLabel(body.title, "post"),
 							status: "published",
 							visibility: "public",
 							publishedAt: new Date(),
+							statusActor: { kind: "profile", profileId: profile.unitId },
 						});
 						await tx.insert(post).values({
 							id: created.id,
-							authorProfileId: profile.unitId,
 							subjectUnitId: body.subjectId,
 						});
 						await tx.insert(unitLocalization).values({
@@ -271,7 +266,6 @@ export default new Elysia()
 						.select({
 							id: post.id,
 							postKind: ordinaryPostKind,
-							authorId: post.authorProfileId,
 							realmId: primaryRealmId,
 							subjectId: post.subjectUnitId,
 							rootPostId: postReply.rootPostId,
@@ -303,8 +297,11 @@ export default new Elysia()
 						)
 						.limit(1);
 					if (!row) throw new PostNotFound();
+					const publishers =
+						(await getPublisherSummariesByUnitIds([row.id])).get(row.id) ?? [];
 					return {
 						...row,
+						publishers,
 						replyCount: toSafeInteger(row.replyCount, "reply count"),
 						body: toPortableTextResponse(row.body),
 						capabilities: { canEdit: await authorization.unit.canUpdate(row.id) },
@@ -438,7 +435,6 @@ export default new Elysia()
 						.from(postReply)
 						.innerJoin(post, eq(post.id, postReply.postId))
 						.innerJoin(unit, eq(unit.id, postReply.postId))
-						.innerJoin(profileTable, eq(profileTable.id, post.authorProfileId))
 						.leftJoin(
 							unitLocalization,
 							and(
@@ -453,20 +449,28 @@ export default new Elysia()
 								selection.items.map(({ postId }) => postId),
 							),
 						);
+					const publishers = await getPublisherSummariesByUnitIds(
+						rows.map(({ id }) => id),
+					);
 					const rowById = new Map(rows.map((row) => [row.id, row]));
 					return {
-						items: selection.items.map((selected) => {
-							const row = rowById.get(selected.postId);
-							if (!row)
-								throw new Error(
-									`Selected reply ${selected.postId} was not hydrated`,
-								);
-							return {
-								...toReplyResponse(row),
-								hasMoreChildren: selected.hasMoreChildren,
-								childEndCursor: selected.childEndCursor,
-							};
-						}),
+						items: await Promise.all(
+							selection.items.map(async (selected) => {
+								const row = rowById.get(selected.postId);
+								if (!row)
+									throw new Error(
+										`Selected reply ${selected.postId} was not hydrated`,
+									);
+								return {
+									...toReplyResponse(row, publishers.get(row.id) ?? []),
+									hasMoreChildren: selected.hasMoreChildren,
+									childEndCursor: selected.childEndCursor,
+									capabilities: {
+										canEdit: await authorization.unit.canUpdate(row.id),
+									},
+								};
+							}),
+						),
 						nextCursor: selection.nextCursor,
 					};
 				},
@@ -507,20 +511,19 @@ export default new Elysia()
 					await authorization.realm.ensureParticipation(realm?.id, "post");
 					const createdReply = await database.transaction(async (tx) => {
 						const [root] = await tx
-							.select({ authorId: post.authorProfileId, locked: post.locked })
+							.select({ locked: post.locked })
 							.from(post)
 							.where(and(eq(post.id, params.postId), eq(post.kind, "post")))
 							.limit(1);
 						if (!root) throw new PostNotFound();
 						if (root.locked) throw new PostLocked();
 						let depth = 0;
-						let recipientId = root.authorId;
+						let recipientUnitId = params.postId;
 						if (body.parentPostId) {
 							const [parent] = await tx
 								.select({
 									rootPostId: postReply.rootPostId,
 									depth: postReply.depth,
-									authorId: post.authorProfileId,
 									locked: post.locked,
 								})
 								.from(postReply)
@@ -538,19 +541,17 @@ export default new Elysia()
 							if (parent.locked) throw new PostLocked();
 							if (parent.depth >= 64) throw new ReplyDepthExceeded();
 							depth = parent.depth + 1;
-							recipientId = parent.authorId;
+							recipientUnitId = body.parentPostId;
 						}
-						const created = await insertAddressedUnit(tx, {
+						const created = await insertUnit(tx, {
 							kind: "post",
-							slugScopeId: params.postId,
-							slug: generateSlugLabel("reply", "reply"),
 							status: "published",
 							visibility: "public",
 							publishedAt: new Date(),
+							statusActor: { kind: "profile", profileId: profile.unitId },
 						});
 						await tx.insert(post).values({
 							id: created.id,
-							authorProfileId: profile.unitId,
 							kind: "reply",
 						});
 						await tx.insert(postReply).values({
@@ -584,15 +585,32 @@ export default new Elysia()
 							actorProfileId: profile.unitId,
 							event: "create",
 						});
-						const notificationId = await createNotification(tx, {
-							recipientProfileId: recipientId,
-							actorProfileId: profile.unitId,
-							kind: "reply",
-							subjectUnitId: created.id,
-						});
-						return { id: created.id, notificationId };
+						const recipients = await tx
+							.selectDistinct({ profileId: unitStatusEvent.changedByProfileId })
+							.from(unitStatusEvent)
+							.where(
+								and(
+									eq(unitStatusEvent.unitId, recipientUnitId),
+									eq(unitStatusEvent.toStatus, "published"),
+									eq(unitStatusEvent.actorKind, "profile"),
+									eq(unitStatusEvent.actorHidden, false),
+								),
+							);
+						const notificationIds: string[] = [];
+						for (const recipient of recipients) {
+							if (!recipient.profileId || recipient.profileId === profile.unitId)
+								continue;
+							const notificationId = await createNotification(tx, {
+								recipientProfileId: recipient.profileId,
+								actorProfileId: profile.unitId,
+								kind: "reply",
+								subjectUnitId: created.id,
+							});
+							if (notificationId) notificationIds.push(notificationId);
+						}
+						return { id: created.id, notificationIds };
 					});
-					await deliverNotificationEmail(createdReply.notificationId);
+					await Promise.all(createdReply.notificationIds.map(deliverNotificationEmail));
 					return { id: createdReply.id };
 				},
 				{

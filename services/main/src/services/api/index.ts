@@ -23,6 +23,7 @@ import progress from "./progress";
 import reactions from "./reactions";
 import reviews from "./reviews";
 import search from "./search";
+import slugAddresses from "./slug-addresses";
 import tokens from "./tokens";
 import users from "./users";
 import units from "./units";
@@ -82,6 +83,7 @@ export default new Elysia()
 				.use(governance)
 				.use(domainExtensions)
 				.use(users)
+				.use(slugAddresses)
 				.use(units)
 				.use(history)
 				.use(catalog)

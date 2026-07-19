@@ -36,7 +36,9 @@ import {
 	unitReactionStat,
 	unitTagVoteStat,
 	unitLocalization,
-	unitRedirect,
+	unitSlugAddress,
+	unitStatusEvent,
+	UnitStatusActorKindValues,
 	PlatformCapabilityValues,
 	UnitKindValues,
 } from "./schema";
@@ -60,7 +62,6 @@ describe("database schema contracts", () => {
 				"unit_localization_description_search_idx",
 				"unit_localization_summary_search_idx",
 				"unit_localization_title_search_idx",
-				"unit_slug_search_idx",
 			].sort(),
 		);
 		for (const name of [
@@ -73,9 +74,6 @@ describe("database schema contracts", () => {
 				column && "indexConfig" in column ? column.indexConfig?.opClass : undefined,
 			).toBe("pgroonga_jsonb_full_text_search_ops_v2");
 		}
-		expect(
-			indexes.find((index) => index.config.name === "unit_slug_search_idx")?.config.where,
-		).toBeDefined();
 		expect(
 			indexes.find((index) => index.config.name === "unit_alias_term_search_idx")?.config
 				.where,
@@ -109,6 +107,27 @@ describe("database schema contracts", () => {
 		);
 		expect(binding.checks.map((constraint) => constraint.name)).toContain(
 			"unit_access_binding_owner_scope_check",
+		);
+	});
+
+	it("records typed generic Unit status provenance", () => {
+		expect(unitStatusEvent.actorKind.enumValues).toEqual(UnitStatusActorKindValues);
+		const event = getTableConfig(unitStatusEvent);
+		expect(event.foreignKeys.map((key) => key.getName())).toContain(
+			"unit_status_event_revision_unit_fkey",
+		);
+		expect(event.checks.map((constraint) => constraint.name)).toEqual(
+			expect.arrayContaining([
+				"unit_status_event_transition_check",
+				"unit_status_event_actor_shape_check",
+			]),
+		);
+		expect(event.indexes.map((index) => index.config.name)).toEqual(
+			expect.arrayContaining([
+				"unit_status_event_unit_created_at_idx",
+				"unit_status_event_publication_idx",
+				"unit_status_event_actor_created_at_idx",
+			]),
 		);
 	});
 
@@ -199,30 +218,40 @@ describe("database schema contracts", () => {
 		);
 	});
 
-	it("models Unit slugs as one scoped address tree", () => {
-		const address = getTableConfig(unit);
+	it("separates optional Unit slug addresses from ID-addressed Units", () => {
+		const coreUnit = getTableConfig(unit);
+		const address = getTableConfig(unitSlugAddress);
 		expect(unit.kind.getSQLType()).toBe("text");
-		expect(address.indexes.map((index) => index.config.name)).toEqual(
-			expect.arrayContaining(["unit_slug_scope_slug_key", "unit_slug_root_key"]),
+		expect(coreUnit.columns.map((column) => column.name)).not.toEqual(
+			expect.arrayContaining(["slug", "slug_scope_id"]),
 		);
-		expect(address.indexes.map((index) => index.config.name)).not.toContain(
-			"unit_kind_slug_key",
+		expect(address.uniqueConstraints.map((constraint) => constraint.name)).toContain(
+			"unit_slug_address_scope_slug_key",
+		);
+		expect(address.indexes.map((index) => index.config.name)).toEqual(
+			expect.arrayContaining([
+				"unit_slug_address_target_canonical_key",
+				"unit_slug_address_target_unit_idx",
+			]),
 		);
 		expect(address.checks.map((constraint) => constraint.name)).toEqual(
 			expect.arrayContaining([
-				"unit_kind_check",
-				"unit_slug_address_shape_check",
-				"unit_slug_label_check",
-				"unit_slug_scope_not_self_check",
+				"unit_slug_address_kind_check",
+				"unit_slug_address_label_check",
+				"unit_slug_address_scope_not_target_check",
 			]),
 		);
-		expect(address.foreignKeys.map((key) => key.getName())).toContain(
-			"unit_slug_scope_id_unit_id_fk",
+		expect(address.foreignKeys.map((key) => key.getName())).toEqual(
+			expect.arrayContaining([
+				"unit_slug_address_scope_unit_id_unit_id_fk",
+				"unit_slug_address_target_unit_id_unit_id_fk",
+			]),
 		);
 	});
 
 	it("keeps structural, Redirect, and staff capability meanings explicit", () => {
-		expect(UnitKindValues).toEqual(expect.arrayContaining(["slug_namespace", "redirect"]));
+		expect(UnitKindValues).toContain("slug_namespace");
+		expect(UnitKindValues).not.toContain("redirect");
 		expect(CommunityCatalogUnitKindValues).toEqual([
 			"book",
 			"software",
@@ -241,13 +270,7 @@ describe("database schema contracts", () => {
 				"unit.ownership.transfer",
 			]),
 		);
-		const redirect = getTableConfig(unitRedirect);
-		expect(redirect.checks.map((constraint) => constraint.name)).toContain(
-			"unit_redirect_not_self_check",
-		);
-		expect(redirect.indexes.map((index) => index.config.name)).toContain(
-			"unit_redirect_target_unit_idx",
-		);
+		expect(unitSlugAddress.kind.getSQLType()).toBe("text");
 	});
 
 	it("models global and Realm aggregate meanings separately", () => {

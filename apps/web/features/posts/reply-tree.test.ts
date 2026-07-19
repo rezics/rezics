@@ -10,8 +10,15 @@ function createReplyPost(id: string, parentPostId: string | null = null): ApiRep
 	return {
 		id,
 		postKind: "reply",
-		authorId: "author",
-		authorName: "Author",
+		publishers: [
+			{
+				profileId: "019b1234-1234-7000-8000-000000000001",
+				name: "Publisher",
+				firstPublishedAt: "2026-01-01T00:00:00.000Z",
+				lastPublishedAt: "2026-01-01T00:00:00.000Z",
+				publicationCount: 1,
+			},
+		],
 		rootPostId: "post",
 		parentPostId,
 		contextRealmId: null,
@@ -23,6 +30,7 @@ function createReplyPost(id: string, parentPostId: string | null = null): ApiRep
 		childEndCursor: null,
 		createdAt: "2026-01-01T00:00:00.000Z",
 		updatedAt: "2026-01-01T00:00:00.000Z",
+		capabilities: { canEdit: true },
 	};
 }
 

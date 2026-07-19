@@ -8,7 +8,7 @@ export default {
 	emptyTitle: "It is quiet here",
 	emptyBody: "Be the first to share a work or an idea.",
 	reason: {
-		followedAuthor: "Because you follow the author",
+		followedPublisher: "Because you follow a publisher",
 		followedRealm: "Because you follow the realm",
 		basedOnActivity: "Based on your recent activity",
 		relatedSubject: "Related to what you are viewing",

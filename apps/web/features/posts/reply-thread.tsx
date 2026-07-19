@@ -4,7 +4,6 @@ import {
 	getApiPostsByPostIdReplies,
 	getApiPostsByPostIdRepliesQueryKey,
 	useDeleteApiPostsByPostIdRepliesByReplyPostId,
-	useGetApiUsersMe,
 	usePatchApiPostsByPostIdRepliesByReplyPostId,
 	usePostApiPostsByPostIdReplies,
 } from "@rezics/openapi-tanstack-query";
@@ -37,6 +36,7 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
 import { buildReplyPostTree, type ReplyPostTreeNode } from "./reply-tree";
 import { invalidatePostQueries } from "./query";
+import { PublisherLinks } from "./publisher-list";
 
 export function ReplyPostThread({
 	rootPostId,
@@ -70,7 +70,6 @@ export function ReplyPostThread({
 		getNextPageParam: (page) => page.nextCursor ?? undefined,
 	});
 	const { data: session } = useHydratedSession();
-	const viewer = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
 	const visibleTree = useMemo(
 		() => buildReplyPostTree(replies.data?.pages.flatMap((page) => page.items) ?? []),
 		[replies.data?.pages],
@@ -114,7 +113,6 @@ export function ReplyPostThread({
 							key={reply.id}
 							reply={reply}
 							rootPostId={rootPostId}
-							viewerId={viewer.data?.id}
 							canReply={Boolean(session)}
 						/>
 					))}
@@ -151,12 +149,10 @@ export function ReplyPostThread({
 function ReplyPostNode({
 	reply,
 	rootPostId,
-	viewerId,
 	canReply,
 }: {
 	reply: ReplyPostTreeNode;
 	rootPostId: string;
-	viewerId?: string;
 	canReply: boolean;
 }) {
 	const { t } = useTranslation({ suspense: true });
@@ -167,9 +163,7 @@ function ReplyPostNode({
 	const [replying, setReplying] = useState(false);
 	const [body, setBody] = useState<PortableTextValue>([]);
 	const canEdit =
-		viewerId === reply.authorId &&
-		reply.status !== "deleted" &&
-		Boolean(reply.latestRevisionId);
+		reply.capabilities.canEdit && reply.status !== "deleted" && Boolean(reply.latestRevisionId);
 
 	function save(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -197,9 +191,11 @@ function ReplyPostNode({
 		>
 			<div className="flex flex-col gap-3 py-4">
 				<div className="flex flex-wrap items-center gap-3 text-sm">
-					<Link className="font-medium" href={`/users/${reply.authorId}`}>
-						{reply.authorName ?? t.posts.unknownAuthor}
-					</Link>
+					<PublisherLinks
+						className="font-medium hover:underline"
+						emptyLabel={t.posts.unknownPublisher}
+						publishers={reply.publishers}
+					/>
 					<Link className="text-muted-foreground text-xs" href={`/posts/${reply.id}`}>
 						{new Date(reply.createdAt).toLocaleString()}
 					</Link>
@@ -337,7 +333,6 @@ function ReplyPostNode({
 							key={child.id}
 							reply={child}
 							rootPostId={rootPostId}
-							viewerId={viewerId}
 							canReply={canReply}
 						/>
 					))}

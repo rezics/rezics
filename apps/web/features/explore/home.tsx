@@ -181,7 +181,7 @@ function ContinueReading() {
 							>
 								<div className="flex items-center justify-between gap-3 text-sm">
 									<span className="line-clamp-1 font-medium group-hover:underline">
-										{item.title ?? item.slug ?? t.ui.unnamed}
+										{item.title ?? t.ui.unnamed}
 									</span>
 									<span className="shrink-0 text-muted-foreground text-xs">
 										{Math.round(item.progress * 100)}%
@@ -221,7 +221,7 @@ function ActiveRealms() {
 								</span>
 								<span className="min-w-0">
 									<span className="block truncate font-medium text-sm group-hover:underline">
-										{realm.title ?? realm.slug ?? t.realms.untitled}
+										{realm.title ?? t.realms.untitled}
 									</span>
 									{realm.summary ? (
 										<span className="block truncate text-muted-foreground text-xs">

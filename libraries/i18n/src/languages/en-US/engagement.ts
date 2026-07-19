@@ -62,6 +62,6 @@ export default {
 	cancel: "Cancel",
 	delete: "Delete",
 	select: "Select",
-	unknownAuthor: "Unknown author",
+	unknownPublisher: "Unknown publisher",
 	items: "items",
 } satisfies typeof import("../zh-CN/engagement").default;

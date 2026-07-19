@@ -52,7 +52,7 @@ export function ProfilePage({ id }: { id: string }) {
 				</div>
 			) : null}
 			<PageHeading
-				title={user.name ?? user.slug ?? t.ui.unnamed}
+				title={user.name ?? t.ui.unnamed}
 				description={user.summary ?? undefined}
 				action={
 					canFollow ? (
@@ -74,7 +74,7 @@ export function ProfilePage({ id }: { id: string }) {
 					<Avatar className="size-20">
 						{user.avatar ? <AvatarImage alt="" src={user.avatar.url} /> : null}
 						<AvatarFallback>
-							{(user.name ?? user.slug ?? t.ui.unnamed).slice(0, 1).toUpperCase()}
+							{(user.name ?? t.ui.unnamed).slice(0, 1).toUpperCase()}
 						</AvatarFallback>
 					</Avatar>
 					<p className="text-muted-foreground">

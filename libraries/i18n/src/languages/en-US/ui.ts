@@ -7,7 +7,6 @@ export default {
 	edit: "Edit",
 	search: "Search",
 	title: "Title",
-	slug: "Slug",
 	summary: "Summary",
 	body: "Body",
 	status: "Status",

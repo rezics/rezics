@@ -21,7 +21,7 @@ export interface RecommendationStats {
 export interface RecommendationCandidate {
 	id: string;
 	createdAt: Date;
-	authorId?: string | null;
+	publisherIds?: readonly string[];
 	realmId?: string | null;
 	subjectId?: string | null;
 	personalizedRelevance: number;
@@ -126,7 +126,7 @@ function freshness(candidate: RecommendationCandidate, asOf: Date) {
 function similarity(left: RecommendationCandidate, right: RecommendationCandidate) {
 	if (left.id === right.id) return 1;
 	if (left.subjectId && left.subjectId === right.subjectId) return 0.7;
-	if (left.authorId && left.authorId === right.authorId) return 0.5;
+	if (left.publisherIds?.some((profileId) => right.publisherIds?.includes(profileId))) return 0.5;
 	if (left.realmId && left.realmId === right.realmId) return 0.3;
 	return 0;
 }
@@ -137,11 +137,15 @@ function exceedsDiversityCap(
 	scopedRealmId?: string,
 ) {
 	const cap = RecommendationPolicy.pageDiversityCap;
-	const matches = (key: "authorId" | "realmId" | "subjectId") => {
+	const matches = (key: "realmId" | "subjectId") => {
 		const value = candidate[key];
 		return value ? selected.filter((item) => item[key] === value).length >= cap : false;
 	};
-	return matches("authorId") || (!scopedRealmId && matches("realmId")) || matches("subjectId");
+	const publisherCapped = candidate.publisherIds?.some(
+		(profileId) =>
+			selected.filter((item) => item.publisherIds?.includes(profileId)).length >= cap,
+	);
+	return publisherCapped || (!scopedRealmId && matches("realmId")) || matches("subjectId");
 }
 
 function applyExploration<T extends RecommendationCandidate>(
