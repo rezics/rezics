@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
-	associationPolicyAllows,
 	DefaultEntityAssociationPolicy,
 	resolveEntityAssociationPolicy,
+	resolveEntityAssociationAdmission,
 } from "./policy";
 
 describe("Entity association policy", () => {
@@ -15,13 +15,38 @@ describe("Entity association policy", () => {
 		});
 	});
 
-	it.each([
-		["open", "community", true],
-		["owner_only", "community", false],
-		["owner_only", "owner", true],
-		["closed", "owner", false],
-		["closed", "platform", true],
-	] as const)("resolves %s for %s as %s", (mode, actor, expected) => {
-		expect(associationPolicyAllows(mode, actor)).toBe(expected);
+	it("distinguishes direct admission from two-sided proposal workflows", () => {
+		expect(
+			resolveEntityAssociationAdmission({
+				mode: "open",
+				command: "direct",
+				targetManager: false,
+				platformOverride: false,
+			}),
+		).toEqual({ kind: "materialize" });
+		expect(
+			resolveEntityAssociationAdmission({
+				mode: "approval",
+				command: "request",
+				targetManager: false,
+				platformOverride: false,
+			}),
+		).toEqual({ kind: "proposal", awaiting: "target" });
+		expect(
+			resolveEntityAssociationAdmission({
+				mode: "invite_only",
+				command: "invitation",
+				targetManager: true,
+				platformOverride: false,
+			}),
+		).toEqual({ kind: "proposal", awaiting: "source" });
+		expect(
+			resolveEntityAssociationAdmission({
+				mode: "closed",
+				command: "invitation",
+				targetManager: true,
+				platformOverride: false,
+			}),
+		).toEqual({ kind: "forbidden" });
 	});
 });

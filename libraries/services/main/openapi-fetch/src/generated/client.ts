@@ -13,10 +13,22 @@ import type {
 	DeleteApiMessagesByMessageIdResponses,
 	DeleteApiRecommendationsExclusionsByUnitIdOptions,
 	DeleteApiRecommendationsExclusionsByUnitIdResponses,
-	GetApiHealthOptions,
-	GetApiHealthResponses,
+	DeleteApiUnitByUnitIdAssociationProposalsByProposalIdOptions,
+	DeleteApiUnitByUnitIdAssociationProposalsByProposalIdResponses,
+	GetApiUnitByUnitIdAssociationProposalsOptions,
+	GetApiUnitByUnitIdAssociationProposalsResponses,
 	GetImageAssetsByIdContentOptions,
 	GetImageAssetsByIdContentResponses,
+	PostApiUnitByUnitIdAssociationProposalsRequestsOptions,
+	PostApiUnitByUnitIdAssociationProposalsRequestsResponses,
+	PostApiUnitByUnitIdAssociationProposalsInvitationsOptions,
+	PostApiUnitByUnitIdAssociationProposalsInvitationsResponses,
+	PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptOptions,
+	PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptResponses,
+	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineOptions,
+	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineResponses,
+	GetApiHealthOptions,
+	GetApiHealthResponses,
 	HeadApiHealthOptions,
 	HeadApiHealthResponses,
 	GetApiReadyOptions,
@@ -89,6 +101,18 @@ import type {
 	PostApiGovernanceUnitByUnitIdProtectionsResponses,
 	DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdOptions,
 	DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdResponses,
+	GetApiGovernanceUnitAccessInvitationsOptions,
+	GetApiGovernanceUnitAccessInvitationsResponses,
+	GetApiGovernanceUnitByUnitIdAccessInvitationsOptions,
+	GetApiGovernanceUnitByUnitIdAccessInvitationsResponses,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsOptions,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsResponses,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptOptions,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptResponses,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineOptions,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineResponses,
+	DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdOptions,
+	DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdResponses,
 	GetApiGovernanceModerationCasesOptions,
 	GetApiGovernanceModerationCasesResponses,
 	GetApiGovernanceModerationCasesByCaseIdOptions,
@@ -423,6 +447,142 @@ export function getImageAssetsByIdContent<ThrowOnError extends boolean = true>(
 
 	return request({ method: "GET", url: "/image-assets/{id}/content", ...config }) as Promise<
 		RequestResult<GetImageAssetsByIdContentResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary List Unit association proposals
+ * {@link /api/unit/:unitId/association-proposals}
+ */
+export function getApiUnitByUnitIdAssociationProposals<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitByUnitIdAssociationProposalsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitByUnitIdAssociationProposalsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/unit/{unitId}/association-proposals",
+		...config,
+	}) as Promise<RequestResult<GetApiUnitByUnitIdAssociationProposalsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Request Entity association
+ * {@link /api/unit/:unitId/association-proposals/requests}
+ */
+export function postApiUnitByUnitIdAssociationProposalsRequests<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PostApiUnitByUnitIdAssociationProposalsRequestsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiUnitByUnitIdAssociationProposalsRequestsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/unit/{unitId}/association-proposals/requests",
+		...config,
+	}) as Promise<
+		RequestResult<PostApiUnitByUnitIdAssociationProposalsRequestsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Invite Unit to Entity association
+ * {@link /api/unit/:unitId/association-proposals/invitations}
+ */
+export function postApiUnitByUnitIdAssociationProposalsInvitations<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PostApiUnitByUnitIdAssociationProposalsInvitationsOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PostApiUnitByUnitIdAssociationProposalsInvitationsResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/unit/{unitId}/association-proposals/invitations",
+		...config,
+	}) as Promise<
+		RequestResult<PostApiUnitByUnitIdAssociationProposalsInvitationsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Accept Entity association proposal
+ * {@link /api/unit/:unitId/association-proposals/:proposalId/accept}
+ */
+export function postApiUnitByUnitIdAssociationProposalsByProposalIdAccept<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/unit/{unitId}/association-proposals/{proposalId}/accept",
+		...config,
+	}) as Promise<
+		RequestResult<
+			PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Decline Entity association proposal
+ * {@link /api/unit/:unitId/association-proposals/:proposalId/decline}
+ */
+export function postApiUnitByUnitIdAssociationProposalsByProposalIdDecline<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/unit/{unitId}/association-proposals/{proposalId}/decline",
+		...config,
+	}) as Promise<
+		RequestResult<
+			PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Cancel Entity association proposal
+ * {@link /api/unit/:unitId/association-proposals/:proposalId}
+ */
+export function deleteApiUnitByUnitIdAssociationProposalsByProposalId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<DeleteApiUnitByUnitIdAssociationProposalsByProposalIdOptions, ThrowOnError>,
+): Promise<
+	RequestResult<DeleteApiUnitByUnitIdAssociationProposalsByProposalIdResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/unit/{unitId}/association-proposals/{proposalId}",
+		...config,
+	}) as Promise<
+		RequestResult<DeleteApiUnitByUnitIdAssociationProposalsByProposalIdResponses, ThrowOnError>
 	>;
 }
 
@@ -1084,6 +1244,151 @@ export function deleteApiGovernanceUnitByUnitIdProtectionsByProtectionId<
 	}) as Promise<
 		RequestResult<
 			DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary List received Unit access invitations
+ * {@link /api/governance/unit/access-invitations}
+ */
+export function getApiGovernanceUnitAccessInvitations<ThrowOnError extends boolean = true>(
+	options: Options<GetApiGovernanceUnitAccessInvitationsOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiGovernanceUnitAccessInvitationsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/governance/unit/access-invitations",
+		...config,
+	}) as Promise<RequestResult<GetApiGovernanceUnitAccessInvitationsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List managed Unit access invitations
+ * {@link /api/governance/unit/:unitId/access-invitations}
+ */
+export function getApiGovernanceUnitByUnitIdAccessInvitations<ThrowOnError extends boolean = true>(
+	options: Options<GetApiGovernanceUnitByUnitIdAccessInvitationsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessInvitationsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/governance/unit/{unitId}/access-invitations",
+		...config,
+	}) as Promise<
+		RequestResult<GetApiGovernanceUnitByUnitIdAccessInvitationsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Create Unit access invitation
+ * {@link /api/governance/unit/:unitId/access-invitations}
+ */
+export function postApiGovernanceUnitByUnitIdAccessInvitations<ThrowOnError extends boolean = true>(
+	options: Options<PostApiGovernanceUnitByUnitIdAccessInvitationsOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiGovernanceUnitByUnitIdAccessInvitationsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/governance/unit/{unitId}/access-invitations",
+		...config,
+	}) as Promise<
+		RequestResult<PostApiGovernanceUnitByUnitIdAccessInvitationsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Accept Unit access invitation
+ * {@link /api/governance/unit/:unitId/access-invitations/:invitationId/accept}
+ */
+export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAccept<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/governance/unit/{unitId}/access-invitations/{invitationId}/accept",
+		...config,
+	}) as Promise<
+		RequestResult<
+			PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Decline Unit access invitation
+ * {@link /api/governance/unit/:unitId/access-invitations/:invitationId/decline}
+ */
+export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/governance/unit/{unitId}/access-invitations/{invitationId}/decline",
+		...config,
+	}) as Promise<
+		RequestResult<
+			PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Cancel Unit access invitation
+ * {@link /api/governance/unit/:unitId/access-invitations/:invitationId}
+ */
+export function deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/governance/unit/{unitId}/access-invitations/{invitationId}",
+		...config,
+	}) as Promise<
+		RequestResult<
+			DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdResponses,
 			ThrowOnError
 		>
 	>;

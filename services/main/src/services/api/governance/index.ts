@@ -58,6 +58,7 @@ import {
 	RealmGrantRealmRequired,
 } from "./errors";
 import unitAccessRoutes from "./unit-access";
+import unitAccessInvitationRoutes from "./unit-access-invitations";
 import {
 	executeAuthorizedModerationAction,
 	loadModerationCaseForAction,
@@ -171,6 +172,7 @@ async function recordAuditEvent(
 export default new Elysia({ prefix: "/governance" })
 	.use(session)
 	.use(unitAccessRoutes)
+	.use(unitAccessInvitationRoutes)
 	.get(
 		"/moderation/cases",
 		async ({ authorization, query }) => {

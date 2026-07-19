@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	auditEvent,
+	entityAssociationProposal,
 	entityAssociationPolicy,
 	subjectAssociation,
 	feedback,
@@ -29,6 +30,7 @@ import {
 	RealmUnitMutationCommandValues,
 	scoreStat,
 	unitAccessBinding,
+	unitAccessInvitation,
 	unitAccessRestriction,
 	unitProtection,
 	unitAlias,
@@ -41,6 +43,7 @@ import {
 	UnitStatusActorKindValues,
 	PlatformCapabilityValues,
 	UnitKindValues,
+	UnitPermissionValues,
 } from "./schema";
 
 const dialect = new PgDialect();
@@ -110,6 +113,24 @@ describe("database schema contracts", () => {
 		);
 	});
 
+	it("keeps pending Unit access invitations out of effective access bindings", () => {
+		const invitation = getTableConfig(unitAccessInvitation);
+		expect(getTableName(unitAccessInvitation)).toBe("unit_access_invitation");
+		expect(invitation.checks.map((constraint) => constraint.name)).toEqual(
+			expect.arrayContaining([
+				"unit_access_invitation_role_check",
+				"unit_access_invitation_resolution_shape_check",
+			]),
+		);
+		expect(invitation.indexes.map((index) => index.config.name)).toEqual(
+			expect.arrayContaining([
+				"unit_access_invitation_unit_unresolved_idx",
+				"unit_access_invitation_profile_unresolved_idx",
+			]),
+		);
+		expect(UnitPermissionValues).toContain("unit.association.manage");
+	});
+
 	it("records typed generic Unit status provenance", () => {
 		expect(unitStatusEvent.actorKind.enumValues).toEqual(UnitStatusActorKindValues);
 		const event = getTableConfig(unitStatusEvent);
@@ -146,6 +167,19 @@ describe("database schema contracts", () => {
 		expect(
 			getTableConfig(subjectAssociation).columns.map((column) => column.name),
 		).not.toContain("subject_entity_id");
+		const proposal = getTableConfig(entityAssociationProposal);
+		expect(proposal.checks.map((constraint) => constraint.name)).toEqual(
+			expect.arrayContaining([
+				"entity_association_proposal_not_self_check",
+				"entity_association_proposal_resolution_shape_check",
+			]),
+		);
+		expect(proposal.indexes.map((index) => index.config.name)).toEqual(
+			expect.arrayContaining([
+				"entity_association_proposal_source_unresolved_idx",
+				"entity_association_proposal_target_unresolved_idx",
+			]),
+		);
 	});
 
 	it("centralizes governance contracts and immutable note bindings", () => {
@@ -265,7 +299,6 @@ describe("database schema contracts", () => {
 				"unit.slug.manage",
 				"unit.slug.namespace.manage",
 				"unit.slug.redirect.release",
-				"entity.association-policy.manage",
 				"entity.associations.override",
 				"unit.ownership.transfer",
 			]),

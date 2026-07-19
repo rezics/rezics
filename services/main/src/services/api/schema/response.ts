@@ -157,7 +157,11 @@ export const UnitDetailResponse = t.Object({
 			canonicalUnitId: t.Nullable(Uuid),
 		}),
 	),
-	capabilities: t.Object({ canEdit: t.Boolean() }),
+	capabilities: t.Object({
+		canEdit: t.Boolean(),
+		canManageAccess: t.Boolean(),
+		canManageAssociations: t.Boolean(),
+	}),
 });
 
 const SearchHit = t.Object({
@@ -413,7 +417,12 @@ export const EntityDetailResponse = t.Object({
 	localizations: t.Array(LocalizationResponse),
 	associationPolicy: EntityAssociationPolicyResponse,
 	ownerProfileId: t.Nullable(Uuid),
-	capabilities: t.Object({ canEdit: t.Boolean() }),
+	capabilities: t.Object({
+		canEdit: t.Boolean(),
+		canManageAccess: t.Boolean(),
+		canManageCreditAssociations: t.Boolean(),
+		canManageSubjectAssociations: t.Boolean(),
+	}),
 	creditAttributions: t.Array(t.Object({ id: Uuid, unitId: Uuid, role: t.String() })),
 	subjectAssociations: t.Array(t.Object({ id: Uuid, unitId: Uuid, role: t.String() })),
 });

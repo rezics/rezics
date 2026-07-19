@@ -20,6 +20,8 @@ describe("unit access policy", () => {
 		expect(roleAllows("viewer", "unit.update")).toBe(false);
 		expect(roleAllows("publishing_editor", "unit.publish")).toBe(true);
 		expect(roleAllows("maintainer", "unit.access.manage")).toBe(true);
+		expect(roleAllows("maintainer", "unit.association.manage")).toBe(true);
+		expect(roleAllows("editor", "unit.association.manage")).toBe(false);
 		expect(roleAllows("owner", "unit.delete")).toBe(true);
 	});
 

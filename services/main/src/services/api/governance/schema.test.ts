@@ -6,6 +6,7 @@ import {
 	ClaimUnitOwnershipBody,
 	CreateAccountEnforcementBody,
 	CreateUnitAccessRestrictionBody,
+	CreateUnitAccessInvitationBody,
 	CreateUnitAccessBindingBody,
 	CreateUnitProtectionBody,
 	ResolveFeedbackBody,
@@ -80,6 +81,25 @@ describe("adjacent governance API contracts", () => {
 		expect(Check(ClaimUnitOwnershipBody, { owner: { kind: "profile", profileId } })).toBe(
 			false,
 		);
+	});
+
+	it("keeps pending access invitations separate from active bindings", () => {
+		expect(
+			Check(CreateUnitAccessInvitationBody, {
+				invitedProfileId: profileId,
+				role: "publishing_editor",
+				scope: [],
+				invitationExpiresAt: "2026-08-01T00:00:00.000Z",
+			}),
+		).toBe(true);
+		expect(
+			Check(CreateUnitAccessInvitationBody, {
+				invitedProfileId: profileId,
+				role: "owner",
+				scope: [],
+				invitationExpiresAt: "2026-08-01T00:00:00.000Z",
+			}),
+		).toBe(false);
 	});
 
 	it("removes copied rationale and public messages from enforcement commands", () => {

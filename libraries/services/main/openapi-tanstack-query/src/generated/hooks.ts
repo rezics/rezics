@@ -32,13 +32,56 @@ import type {
 	DeleteApiRecommendationsExclusionsByUnitIdStatus403,
 	DeleteApiRecommendationsExclusionsByUnitIdStatus422,
 	DeleteApiRecommendationsExclusionsByUnitIdStatus500,
-	GetApiHealthStatus200,
-	GetApiHealthStatus500,
+	DeleteApiUnitByUnitIdAssociationProposalsByProposalIdOptions,
+	DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus204,
+	DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus403,
+	DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus404,
+	DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus409,
+	DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus422,
+	DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus500,
+	GetApiUnitByUnitIdAssociationProposalsOptions,
+	GetApiUnitByUnitIdAssociationProposalsStatus200,
+	GetApiUnitByUnitIdAssociationProposalsStatus403,
+	GetApiUnitByUnitIdAssociationProposalsStatus404,
+	GetApiUnitByUnitIdAssociationProposalsStatus422,
+	GetApiUnitByUnitIdAssociationProposalsStatus500,
 	GetImageAssetsByIdContentOptions,
 	GetImageAssetsByIdContentResponse,
 	GetImageAssetsByIdContentStatus404,
 	GetImageAssetsByIdContentStatus422,
 	GetImageAssetsByIdContentStatus500,
+	PostApiUnitByUnitIdAssociationProposalsRequestsOptions,
+	PostApiUnitByUnitIdAssociationProposalsRequestsStatus200,
+	PostApiUnitByUnitIdAssociationProposalsRequestsStatus400,
+	PostApiUnitByUnitIdAssociationProposalsRequestsStatus403,
+	PostApiUnitByUnitIdAssociationProposalsRequestsStatus404,
+	PostApiUnitByUnitIdAssociationProposalsRequestsStatus409,
+	PostApiUnitByUnitIdAssociationProposalsRequestsStatus422,
+	PostApiUnitByUnitIdAssociationProposalsRequestsStatus500,
+	PostApiUnitByUnitIdAssociationProposalsInvitationsOptions,
+	PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200,
+	PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400,
+	PostApiUnitByUnitIdAssociationProposalsInvitationsStatus403,
+	PostApiUnitByUnitIdAssociationProposalsInvitationsStatus404,
+	PostApiUnitByUnitIdAssociationProposalsInvitationsStatus409,
+	PostApiUnitByUnitIdAssociationProposalsInvitationsStatus422,
+	PostApiUnitByUnitIdAssociationProposalsInvitationsStatus500,
+	PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptOptions,
+	PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200,
+	PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403,
+	PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404,
+	PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409,
+	PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus422,
+	PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus500,
+	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineOptions,
+	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200,
+	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403,
+	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404,
+	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409,
+	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus422,
+	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus500,
+	GetApiHealthStatus200,
+	GetApiHealthStatus500,
 	HeadApiHealthStatus204,
 	HeadApiHealthStatus422,
 	HeadApiHealthStatus500,
@@ -237,6 +280,43 @@ import type {
 	DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus404,
 	DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus422,
 	DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus500,
+	GetApiGovernanceUnitAccessInvitationsOptions,
+	GetApiGovernanceUnitAccessInvitationsStatus200,
+	GetApiGovernanceUnitAccessInvitationsStatus422,
+	GetApiGovernanceUnitAccessInvitationsStatus500,
+	GetApiGovernanceUnitByUnitIdAccessInvitationsOptions,
+	GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200,
+	GetApiGovernanceUnitByUnitIdAccessInvitationsStatus403,
+	GetApiGovernanceUnitByUnitIdAccessInvitationsStatus404,
+	GetApiGovernanceUnitByUnitIdAccessInvitationsStatus422,
+	GetApiGovernanceUnitByUnitIdAccessInvitationsStatus500,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsOptions,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsStatus403,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsStatus404,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsStatus409,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsStatus422,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsStatus500,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptOptions,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus404,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus422,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus500,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineOptions,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus404,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus422,
+	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus500,
+	DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdOptions,
+	DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus204,
+	DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus403,
+	DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus404,
+	DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus409,
+	DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus422,
+	DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus500,
 	GetApiGovernanceModerationCasesOptions,
 	GetApiGovernanceModerationCasesStatus200,
 	GetApiGovernanceModerationCasesStatus403,
@@ -1151,8 +1231,14 @@ import {
 	deleteApiApiTokensByTokenId,
 	deleteApiMessagesByMessageId,
 	deleteApiRecommendationsExclusionsByUnitId,
-	getApiHealth,
+	deleteApiUnitByUnitIdAssociationProposalsByProposalId,
+	getApiUnitByUnitIdAssociationProposals,
 	getImageAssetsByIdContent,
+	postApiUnitByUnitIdAssociationProposalsRequests,
+	postApiUnitByUnitIdAssociationProposalsInvitations,
+	postApiUnitByUnitIdAssociationProposalsByProposalIdAccept,
+	postApiUnitByUnitIdAssociationProposalsByProposalIdDecline,
+	getApiHealth,
 	headApiHealth,
 	getApiReady,
 	getApiNotifications,
@@ -1189,6 +1275,12 @@ import {
 	getApiGovernanceUnitByUnitIdProtections,
 	postApiGovernanceUnitByUnitIdProtections,
 	deleteApiGovernanceUnitByUnitIdProtectionsByProtectionId,
+	getApiGovernanceUnitAccessInvitations,
+	getApiGovernanceUnitByUnitIdAccessInvitations,
+	postApiGovernanceUnitByUnitIdAccessInvitations,
+	postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAccept,
+	postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline,
+	deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId,
 	getApiGovernanceModerationCases,
 	getApiGovernanceModerationCasesByCaseId,
 	patchApiGovernanceModerationCasesByCaseId,
@@ -1444,6 +1536,656 @@ export function useGetImageAssetsByIdContent<
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
+}
+
+export const getApiUnitByUnitIdAssociationProposalsQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiUnitByUnitIdAssociationProposalsOptions, "headers">) =>
+	[
+		{ url: "/api/unit/:unitId/association-proposals", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetApiUnitByUnitIdAssociationProposalsQueryKey = ReturnType<
+	typeof getApiUnitByUnitIdAssociationProposalsQueryKey
+>;
+
+export function getApiUnitByUnitIdAssociationProposalsQueryOptions(
+	{ path, query }: GetApiUnitByUnitIdAssociationProposalsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiUnitByUnitIdAssociationProposalsQueryKey({ path, query });
+	return queryOptions<
+		GetApiUnitByUnitIdAssociationProposalsStatus200,
+		ResponseErrorConfig<
+			| GetApiUnitByUnitIdAssociationProposalsStatus403
+			| GetApiUnitByUnitIdAssociationProposalsStatus404
+			| GetApiUnitByUnitIdAssociationProposalsStatus422
+			| GetApiUnitByUnitIdAssociationProposalsStatus500
+		>,
+		GetApiUnitByUnitIdAssociationProposalsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiUnitByUnitIdAssociationProposals({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List Unit association proposals
+ * {@link /api/unit/:unitId/association-proposals}
+ */
+export function useGetApiUnitByUnitIdAssociationProposals<
+	TData = GetApiUnitByUnitIdAssociationProposalsStatus200,
+	TQueryData = GetApiUnitByUnitIdAssociationProposalsStatus200,
+	TQueryKey extends QueryKey = GetApiUnitByUnitIdAssociationProposalsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiUnitByUnitIdAssociationProposalsOptions["path"]
+			| (() => GetApiUnitByUnitIdAssociationProposalsOptions["path"]);
+		query:
+			| GetApiUnitByUnitIdAssociationProposalsOptions["query"]
+			| (() => GetApiUnitByUnitIdAssociationProposalsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiUnitByUnitIdAssociationProposalsStatus200,
+				ResponseErrorConfig<
+					| GetApiUnitByUnitIdAssociationProposalsStatus403
+					| GetApiUnitByUnitIdAssociationProposalsStatus404
+					| GetApiUnitByUnitIdAssociationProposalsStatus422
+					| GetApiUnitByUnitIdAssociationProposalsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiUnitByUnitIdAssociationProposalsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiUnitByUnitIdAssociationProposalsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiUnitByUnitIdAssociationProposalsStatus403
+			| GetApiUnitByUnitIdAssociationProposalsStatus404
+			| GetApiUnitByUnitIdAssociationProposalsStatus422
+			| GetApiUnitByUnitIdAssociationProposalsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const postApiUnitByUnitIdAssociationProposalsRequestsMutationKey = () =>
+	[{ url: "/api/unit/:unitId/association-proposals/requests" }] as const;
+
+export function postApiUnitByUnitIdAssociationProposalsRequestsMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiUnitByUnitIdAssociationProposalsRequestsMutationKey();
+	return mutationOptions<
+		PostApiUnitByUnitIdAssociationProposalsRequestsStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus400
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus403
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus404
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus409
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus422
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus500
+		>,
+		PostApiUnitByUnitIdAssociationProposalsRequestsOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiUnitByUnitIdAssociationProposalsRequests({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Request Entity association
+ * {@link /api/unit/:unitId/association-proposals/requests}
+ */
+export function usePostApiUnitByUnitIdAssociationProposalsRequests<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiUnitByUnitIdAssociationProposalsRequestsStatus200,
+			ResponseErrorConfig<
+				| PostApiUnitByUnitIdAssociationProposalsRequestsStatus400
+				| PostApiUnitByUnitIdAssociationProposalsRequestsStatus403
+				| PostApiUnitByUnitIdAssociationProposalsRequestsStatus404
+				| PostApiUnitByUnitIdAssociationProposalsRequestsStatus409
+				| PostApiUnitByUnitIdAssociationProposalsRequestsStatus422
+				| PostApiUnitByUnitIdAssociationProposalsRequestsStatus500
+			>,
+			PostApiUnitByUnitIdAssociationProposalsRequestsOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiUnitByUnitIdAssociationProposalsRequestsMutationKey();
+
+	const baseOptions = postApiUnitByUnitIdAssociationProposalsRequestsMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiUnitByUnitIdAssociationProposalsRequestsStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus400
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus403
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus404
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus409
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus422
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus500
+		>,
+		PostApiUnitByUnitIdAssociationProposalsRequestsOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiUnitByUnitIdAssociationProposalsRequestsStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus400
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus403
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus404
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus409
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus422
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus500
+		>,
+		PostApiUnitByUnitIdAssociationProposalsRequestsOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiUnitByUnitIdAssociationProposalsRequestsStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus400
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus403
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus404
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus409
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus422
+			| PostApiUnitByUnitIdAssociationProposalsRequestsStatus500
+		>,
+		PostApiUnitByUnitIdAssociationProposalsRequestsOptions,
+		TContext
+	>;
+}
+
+export const postApiUnitByUnitIdAssociationProposalsInvitationsMutationKey = () =>
+	[{ url: "/api/unit/:unitId/association-proposals/invitations" }] as const;
+
+export function postApiUnitByUnitIdAssociationProposalsInvitationsMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = postApiUnitByUnitIdAssociationProposalsInvitationsMutationKey();
+	return mutationOptions<
+		PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus403
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus404
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus409
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus422
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus500
+		>,
+		PostApiUnitByUnitIdAssociationProposalsInvitationsOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiUnitByUnitIdAssociationProposalsInvitations({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Invite Unit to Entity association
+ * {@link /api/unit/:unitId/association-proposals/invitations}
+ */
+export function usePostApiUnitByUnitIdAssociationProposalsInvitations<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200,
+			ResponseErrorConfig<
+				| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400
+				| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus403
+				| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus404
+				| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus409
+				| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus422
+				| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus500
+			>,
+			PostApiUnitByUnitIdAssociationProposalsInvitationsOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		postApiUnitByUnitIdAssociationProposalsInvitationsMutationKey();
+
+	const baseOptions = postApiUnitByUnitIdAssociationProposalsInvitationsMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus403
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus404
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus409
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus422
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus500
+		>,
+		PostApiUnitByUnitIdAssociationProposalsInvitationsOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus403
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus404
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus409
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus422
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus500
+		>,
+		PostApiUnitByUnitIdAssociationProposalsInvitationsOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus403
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus404
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus409
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus422
+			| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus500
+		>,
+		PostApiUnitByUnitIdAssociationProposalsInvitationsOptions,
+		TContext
+	>;
+}
+
+export const postApiUnitByUnitIdAssociationProposalsByProposalIdAcceptMutationKey = () =>
+	[{ url: "/api/unit/:unitId/association-proposals/:proposalId/accept" }] as const;
+
+export function postApiUnitByUnitIdAssociationProposalsByProposalIdAcceptMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = postApiUnitByUnitIdAssociationProposalsByProposalIdAcceptMutationKey();
+	return mutationOptions<
+		PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus422
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus500
+		>,
+		PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiUnitByUnitIdAssociationProposalsByProposalIdAccept({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Accept Entity association proposal
+ * {@link /api/unit/:unitId/association-proposals/:proposalId/accept}
+ */
+export function usePostApiUnitByUnitIdAssociationProposalsByProposalIdAccept<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200,
+			ResponseErrorConfig<
+				| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403
+				| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404
+				| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409
+				| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus422
+				| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus500
+			>,
+			PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		postApiUnitByUnitIdAssociationProposalsByProposalIdAcceptMutationKey();
+
+	const baseOptions = postApiUnitByUnitIdAssociationProposalsByProposalIdAcceptMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus422
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus500
+		>,
+		PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus422
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus500
+		>,
+		PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus422
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus500
+		>,
+		PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptOptions,
+		TContext
+	>;
+}
+
+export const postApiUnitByUnitIdAssociationProposalsByProposalIdDeclineMutationKey = () =>
+	[{ url: "/api/unit/:unitId/association-proposals/:proposalId/decline" }] as const;
+
+export function postApiUnitByUnitIdAssociationProposalsByProposalIdDeclineMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = postApiUnitByUnitIdAssociationProposalsByProposalIdDeclineMutationKey();
+	return mutationOptions<
+		PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus422
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus500
+		>,
+		PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiUnitByUnitIdAssociationProposalsByProposalIdDecline({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Decline Entity association proposal
+ * {@link /api/unit/:unitId/association-proposals/:proposalId/decline}
+ */
+export function usePostApiUnitByUnitIdAssociationProposalsByProposalIdDecline<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200,
+			ResponseErrorConfig<
+				| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403
+				| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404
+				| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409
+				| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus422
+				| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus500
+			>,
+			PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		postApiUnitByUnitIdAssociationProposalsByProposalIdDeclineMutationKey();
+
+	const baseOptions = postApiUnitByUnitIdAssociationProposalsByProposalIdDeclineMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus422
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus500
+		>,
+		PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus422
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus500
+		>,
+		PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus422
+			| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus500
+		>,
+		PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineOptions,
+		TContext
+	>;
+}
+
+export const deleteApiUnitByUnitIdAssociationProposalsByProposalIdMutationKey = () =>
+	[{ url: "/api/unit/:unitId/association-proposals/:proposalId" }] as const;
+
+export function deleteApiUnitByUnitIdAssociationProposalsByProposalIdMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = deleteApiUnitByUnitIdAssociationProposalsByProposalIdMutationKey();
+	return mutationOptions<
+		DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus403
+			| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus404
+			| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus409
+			| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus422
+			| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus500
+		>,
+		DeleteApiUnitByUnitIdAssociationProposalsByProposalIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiUnitByUnitIdAssociationProposalsByProposalId({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Cancel Entity association proposal
+ * {@link /api/unit/:unitId/association-proposals/:proposalId}
+ */
+export function useDeleteApiUnitByUnitIdAssociationProposalsByProposalId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus204,
+			ResponseErrorConfig<
+				| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus403
+				| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus404
+				| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus409
+				| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus422
+				| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus500
+			>,
+			DeleteApiUnitByUnitIdAssociationProposalsByProposalIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		deleteApiUnitByUnitIdAssociationProposalsByProposalIdMutationKey();
+
+	const baseOptions = deleteApiUnitByUnitIdAssociationProposalsByProposalIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus403
+			| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus404
+			| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus409
+			| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus422
+			| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus500
+		>,
+		DeleteApiUnitByUnitIdAssociationProposalsByProposalIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus403
+			| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus404
+			| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus409
+			| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus422
+			| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus500
+		>,
+		DeleteApiUnitByUnitIdAssociationProposalsByProposalIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus403
+			| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus404
+			| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus409
+			| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus422
+			| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus500
+		>,
+		DeleteApiUnitByUnitIdAssociationProposalsByProposalIdOptions,
+		TContext
+	>;
 }
 
 export const getApiHealthQueryKey = () => [{ url: "/api/health" }] as const;
@@ -5218,6 +5960,637 @@ export function useDeleteApiGovernanceUnitByUnitIdProtectionsByProtectionId<TCon
 			| DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus500
 		>,
 		DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdOptions,
+		TContext
+	>;
+}
+
+export const getApiGovernanceUnitAccessInvitationsQueryKey = ({
+	query,
+}: Omit<GetApiGovernanceUnitAccessInvitationsOptions, "headers"> = {}) =>
+	[{ url: "/api/governance/unit/access-invitations" }, ...(query ? [query] : [])] as const;
+
+type GetApiGovernanceUnitAccessInvitationsQueryKey = ReturnType<
+	typeof getApiGovernanceUnitAccessInvitationsQueryKey
+>;
+
+export function getApiGovernanceUnitAccessInvitationsQueryOptions(
+	{ query }: GetApiGovernanceUnitAccessInvitationsOptions = {},
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiGovernanceUnitAccessInvitationsQueryKey({ query });
+	return queryOptions<
+		GetApiGovernanceUnitAccessInvitationsStatus200,
+		ResponseErrorConfig<
+			| GetApiGovernanceUnitAccessInvitationsStatus422
+			| GetApiGovernanceUnitAccessInvitationsStatus500
+		>,
+		GetApiGovernanceUnitAccessInvitationsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiGovernanceUnitAccessInvitations({
+				...config,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List received Unit access invitations
+ * {@link /api/governance/unit/access-invitations}
+ */
+export function useGetApiGovernanceUnitAccessInvitations<
+	TData = GetApiGovernanceUnitAccessInvitationsStatus200,
+	TQueryData = GetApiGovernanceUnitAccessInvitationsStatus200,
+	TQueryKey extends QueryKey = GetApiGovernanceUnitAccessInvitationsQueryKey,
+>(
+	{
+		query,
+	}: {
+		query?:
+			| GetApiGovernanceUnitAccessInvitationsOptions["query"]
+			| (() => GetApiGovernanceUnitAccessInvitationsOptions["query"]);
+	} = {},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiGovernanceUnitAccessInvitationsStatus200,
+				ResponseErrorConfig<
+					| GetApiGovernanceUnitAccessInvitationsStatus422
+					| GetApiGovernanceUnitAccessInvitationsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiGovernanceUnitAccessInvitationsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiGovernanceUnitAccessInvitationsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiGovernanceUnitAccessInvitationsStatus422
+			| GetApiGovernanceUnitAccessInvitationsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getApiGovernanceUnitByUnitIdAccessInvitationsQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiGovernanceUnitByUnitIdAccessInvitationsOptions, "headers">) =>
+	[
+		{ url: "/api/governance/unit/:unitId/access-invitations", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetApiGovernanceUnitByUnitIdAccessInvitationsQueryKey = ReturnType<
+	typeof getApiGovernanceUnitByUnitIdAccessInvitationsQueryKey
+>;
+
+export function getApiGovernanceUnitByUnitIdAccessInvitationsQueryOptions(
+	{ path, query }: GetApiGovernanceUnitByUnitIdAccessInvitationsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiGovernanceUnitByUnitIdAccessInvitationsQueryKey({ path, query });
+	return queryOptions<
+		GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200,
+		ResponseErrorConfig<
+			| GetApiGovernanceUnitByUnitIdAccessInvitationsStatus403
+			| GetApiGovernanceUnitByUnitIdAccessInvitationsStatus404
+			| GetApiGovernanceUnitByUnitIdAccessInvitationsStatus422
+			| GetApiGovernanceUnitByUnitIdAccessInvitationsStatus500
+		>,
+		GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiGovernanceUnitByUnitIdAccessInvitations({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List managed Unit access invitations
+ * {@link /api/governance/unit/:unitId/access-invitations}
+ */
+export function useGetApiGovernanceUnitByUnitIdAccessInvitations<
+	TData = GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200,
+	TQueryData = GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200,
+	TQueryKey extends QueryKey = GetApiGovernanceUnitByUnitIdAccessInvitationsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiGovernanceUnitByUnitIdAccessInvitationsOptions["path"]
+			| (() => GetApiGovernanceUnitByUnitIdAccessInvitationsOptions["path"]);
+		query?:
+			| GetApiGovernanceUnitByUnitIdAccessInvitationsOptions["query"]
+			| (() => GetApiGovernanceUnitByUnitIdAccessInvitationsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200,
+				ResponseErrorConfig<
+					| GetApiGovernanceUnitByUnitIdAccessInvitationsStatus403
+					| GetApiGovernanceUnitByUnitIdAccessInvitationsStatus404
+					| GetApiGovernanceUnitByUnitIdAccessInvitationsStatus422
+					| GetApiGovernanceUnitByUnitIdAccessInvitationsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiGovernanceUnitByUnitIdAccessInvitationsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiGovernanceUnitByUnitIdAccessInvitationsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiGovernanceUnitByUnitIdAccessInvitationsStatus403
+			| GetApiGovernanceUnitByUnitIdAccessInvitationsStatus404
+			| GetApiGovernanceUnitByUnitIdAccessInvitationsStatus422
+			| GetApiGovernanceUnitByUnitIdAccessInvitationsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const postApiGovernanceUnitByUnitIdAccessInvitationsMutationKey = () =>
+	[{ url: "/api/governance/unit/:unitId/access-invitations" }] as const;
+
+export function postApiGovernanceUnitByUnitIdAccessInvitationsMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiGovernanceUnitByUnitIdAccessInvitationsMutationKey();
+	return mutationOptions<
+		PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus403
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus404
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus409
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus422
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus500
+		>,
+		PostApiGovernanceUnitByUnitIdAccessInvitationsOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiGovernanceUnitByUnitIdAccessInvitations({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create Unit access invitation
+ * {@link /api/governance/unit/:unitId/access-invitations}
+ */
+export function usePostApiGovernanceUnitByUnitIdAccessInvitations<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200,
+			ResponseErrorConfig<
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus403
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus404
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus409
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus422
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus500
+			>,
+			PostApiGovernanceUnitByUnitIdAccessInvitationsOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiGovernanceUnitByUnitIdAccessInvitationsMutationKey();
+
+	const baseOptions = postApiGovernanceUnitByUnitIdAccessInvitationsMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus403
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus404
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus409
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus422
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus500
+		>,
+		PostApiGovernanceUnitByUnitIdAccessInvitationsOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus403
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus404
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus409
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus422
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus500
+		>,
+		PostApiGovernanceUnitByUnitIdAccessInvitationsOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus403
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus404
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus409
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus422
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus500
+		>,
+		PostApiGovernanceUnitByUnitIdAccessInvitationsOptions,
+		TContext
+	>;
+}
+
+export const postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptMutationKey = () =>
+	[{ url: "/api/governance/unit/:unitId/access-invitations/:invitationId/accept" }] as const;
+
+export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey =
+		postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptMutationKey();
+	return mutationOptions<
+		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus404
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus422
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus500
+		>,
+		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } =
+				await postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAccept({
+					...config,
+					path,
+					body,
+					throwOnError: true,
+				});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Accept Unit access invitation
+ * {@link /api/governance/unit/:unitId/access-invitations/:invitationId/accept}
+ */
+export function usePostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAccept<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200,
+			ResponseErrorConfig<
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus404
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus422
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus500
+			>,
+			PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptMutationKey();
+
+	const baseOptions =
+		postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptMutationOptions(
+			config,
+		) as UseMutationOptions<
+			PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200,
+			ResponseErrorConfig<
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus404
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus422
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus500
+			>,
+			PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptOptions,
+			TContext
+		>;
+
+	return useMutation<
+		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus404
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus422
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus500
+		>,
+		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus404
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus422
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus500
+		>,
+		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptOptions,
+		TContext
+	>;
+}
+
+export const postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineMutationKey = () =>
+	[{ url: "/api/governance/unit/:unitId/access-invitations/:invitationId/decline" }] as const;
+
+export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey =
+		postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineMutationKey();
+	return mutationOptions<
+		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus404
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus422
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus500
+		>,
+		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } =
+				await postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline({
+					...config,
+					path,
+					body,
+					throwOnError: true,
+				});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Decline Unit access invitation
+ * {@link /api/governance/unit/:unitId/access-invitations/:invitationId/decline}
+ */
+export function usePostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200,
+			ResponseErrorConfig<
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus404
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus422
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus500
+			>,
+			PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineMutationKey();
+
+	const baseOptions =
+		postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineMutationOptions(
+			config,
+		) as UseMutationOptions<
+			PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200,
+			ResponseErrorConfig<
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus404
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus422
+				| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus500
+			>,
+			PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineOptions,
+			TContext
+		>;
+
+	return useMutation<
+		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus404
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus422
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus500
+		>,
+		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus404
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus422
+			| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus500
+		>,
+		PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineOptions,
+		TContext
+	>;
+}
+
+export const deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdMutationKey = () =>
+	[{ url: "/api/governance/unit/:unitId/access-invitations/:invitationId" }] as const;
+
+export function deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdMutationOptions<
+	TContext = unknown,
+>(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
+	const mutationKey = deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdMutationKey();
+	return mutationOptions<
+		DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus403
+			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus404
+			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus409
+			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus422
+			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus500
+		>,
+		DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Cancel Unit access invitation
+ * {@link /api/governance/unit/:unitId/access-invitations/:invitationId}
+ */
+export function useDeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus204,
+			ResponseErrorConfig<
+				| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus403
+				| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus404
+				| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus409
+				| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus422
+				| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus500
+			>,
+			DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdMutationKey();
+
+	const baseOptions =
+		deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdMutationOptions(
+			config,
+		) as UseMutationOptions<
+			DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus204,
+			ResponseErrorConfig<
+				| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus403
+				| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus404
+				| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus409
+				| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus422
+				| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus500
+			>,
+			DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdOptions,
+			TContext
+		>;
+
+	return useMutation<
+		DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus403
+			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus404
+			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus409
+			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus422
+			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus500
+		>,
+		DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus403
+			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus404
+			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus409
+			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus422
+			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus500
+		>,
+		DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdOptions,
 		TContext
 	>;
 }

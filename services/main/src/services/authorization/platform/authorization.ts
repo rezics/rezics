@@ -1,13 +1,17 @@
 import { and, eq, isNull, or, sql } from "drizzle-orm";
 
-import { database } from "../../database";
+import { database, type DatabaseExecutor } from "../../database";
 import { capabilityGrant, PlatformCapabilityValues } from "../../database/schema";
 import { PlatformCapabilityRequired } from "../errors";
 
 export type PlatformCapability = (typeof PlatformCapabilityValues)[number];
 
-async function hasActivePlatformGrant(profileId: string, capability: PlatformCapability) {
-	const [grant] = await database
+async function hasActivePlatformGrant(
+	executor: DatabaseExecutor,
+	profileId: string,
+	capability: PlatformCapability,
+) {
+	const [grant] = await executor
 		.select({ id: capabilityGrant.id })
 		.from(capabilityGrant)
 		.where(
@@ -27,9 +31,12 @@ async function hasActivePlatformGrant(profileId: string, capability: PlatformCap
 export class PlatformAuthorization<ProfileId extends string | undefined> {
 	constructor(readonly profileId: ProfileId) {}
 
-	hasCapability(capability: PlatformCapability): Promise<boolean> {
+	hasCapability(
+		capability: PlatformCapability,
+		executor: DatabaseExecutor = database,
+	): Promise<boolean> {
 		return this.profileId
-			? hasActivePlatformGrant(this.profileId, capability)
+			? hasActivePlatformGrant(executor, this.profileId, capability)
 			: Promise.resolve(false);
 	}
 

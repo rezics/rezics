@@ -1,19 +1,20 @@
-import { and, eq, isNull, or, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 
 import { database, type DatabaseTransaction } from "../../database";
-import { entity, entityAssociationPolicy, unit, unitAccessBinding } from "../../database/schema";
-import {
-	EntityAssociationRestricted,
-	EntityEntryNotFound,
-	EntityOwnershipRequired,
-} from "../../entities/errors";
+import { entity, entityAssociationPolicy, unit } from "../../database/schema";
+import { EntityAssociationRestricted, EntityEntryNotFound } from "../../entities/errors";
 import type { PlatformAuthorization } from "../platform/authorization";
+import type { UnitAuthorization } from "../unit/authorization";
 import {
-	associationPolicyAllows,
 	resolveEntityAssociationPolicy,
-	type EntityAssociationActorKind,
+	resolveEntityAssociationAdmission,
+	type EntityAssociationCommand,
 	type EntityAssociationKind,
+	type EntityAssociationPolicyMode,
 } from "./policy";
+
+export const entityAssociationScope = (kind: EntityAssociationKind) =>
+	["associations", kind] as const;
 
 export async function lockEntityAssociationState(
 	tx: DatabaseTransaction,
@@ -50,35 +51,11 @@ async function entityExists(
 	return Boolean(record);
 }
 
-async function hasActiveOwner(
-	executor: typeof database | DatabaseTransaction,
-	entityId: string,
-	profileId: string,
-): Promise<boolean> {
-	const [record] = await executor
-		.select({ id: unitAccessBinding.id })
-		.from(unitAccessBinding)
-		.where(
-			and(
-				eq(unitAccessBinding.unitId, entityId),
-				eq(unitAccessBinding.subjectKind, "profile"),
-				eq(unitAccessBinding.profileId, profileId),
-				eq(unitAccessBinding.role, "owner"),
-				isNull(unitAccessBinding.revokedAt),
-				or(
-					isNull(unitAccessBinding.expiresAt),
-					sql`${unitAccessBinding.expiresAt} > now()`,
-				),
-			),
-		)
-		.limit(1);
-	return Boolean(record);
-}
-
 export class EntityAuthorization<ProfileId extends string | undefined> {
 	constructor(
 		readonly profileId: ProfileId,
 		private readonly platform: PlatformAuthorization<ProfileId>,
+		private readonly unitAuthorization: UnitAuthorization<ProfileId>,
 	) {}
 
 	async getAssociationPolicy(entityId: string) {
@@ -89,20 +66,24 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 		this: EntityAuthorization<string>,
 		tx: DatabaseTransaction,
 		entityId: string,
+		kinds: readonly EntityAssociationKind[],
 	): Promise<void> {
 		await lockEntityAssociationState(tx, entityId);
 		if (!(await entityExists(tx, entityId))) throw new EntityEntryNotFound();
-		if (await this.platform.hasCapability("entity.association-policy.manage")) return;
-		if (await hasActiveOwner(tx, entityId, this.profileId)) return;
-		throw new EntityOwnershipRequired();
+		for (const kind of kinds)
+			await this.unitAuthorization.ensureInTransaction(
+				tx,
+				entityId,
+				"unit.association.manage",
+				entityAssociationScope(kind),
+			);
 	}
 
-	private async ensureAssociationAllowedForExistingEntity(
-		this: EntityAuthorization<string>,
+	private async associationMode(
 		tx: DatabaseTransaction,
 		entityId: string,
 		kind: EntityAssociationKind,
-	): Promise<void> {
+	): Promise<EntityAssociationPolicyMode> {
 		const [row] = await tx
 			.select({ mode: entityAssociationPolicy.mode })
 			.from(entityAssociationPolicy)
@@ -113,14 +94,34 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 				),
 			)
 			.limit(1);
-		const mode = row?.mode ?? "open";
-		let actor: EntityAssociationActorKind = "community";
-		if (await this.platform.hasCapability("entity.associations.override")) {
-			actor = "platform";
-		} else if (await hasActiveOwner(tx, entityId, this.profileId)) {
-			actor = "owner";
-		}
-		if (!associationPolicyAllows(mode, actor))
+		return row?.mode ?? "open";
+	}
+
+	private async ensureAssociationCommandAllowedForExistingEntity(
+		this: EntityAuthorization<string>,
+		tx: DatabaseTransaction,
+		entityId: string,
+		kind: EntityAssociationKind,
+		command: EntityAssociationCommand,
+	): Promise<void> {
+		const [mode, platformOverride, targetDecision] = await Promise.all([
+			this.associationMode(tx, entityId, kind),
+			this.platform.hasCapability("entity.associations.override", tx),
+			this.unitAuthorization.decideInTransaction(
+				tx,
+				entityId,
+				"unit.association.manage",
+				entityAssociationScope(kind),
+			),
+		]);
+		if (
+			resolveEntityAssociationAdmission({
+				mode,
+				command,
+				targetManager: targetDecision.allowed,
+				platformOverride,
+			}).kind === "forbidden"
+		)
 			throw new EntityAssociationRestricted(kind, mode);
 	}
 
@@ -132,7 +133,45 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 	): Promise<void> {
 		await lockEntityAssociationState(tx, entityId);
 		if (!(await entityExists(tx, entityId))) throw new EntityEntryNotFound();
-		await this.ensureAssociationAllowedForExistingEntity(tx, entityId, kind);
+		await this.ensureAssociationCommandAllowedForExistingEntity(tx, entityId, kind, "direct");
+	}
+
+	async ensureAssociationRequestAllowed(
+		this: EntityAuthorization<string>,
+		tx: DatabaseTransaction,
+		entityId: string,
+		kind: EntityAssociationKind,
+	): Promise<void> {
+		await lockEntityAssociationState(tx, entityId);
+		if (!(await entityExists(tx, entityId))) throw new EntityEntryNotFound();
+		await this.ensureAssociationCommandAllowedForExistingEntity(tx, entityId, kind, "request");
+	}
+
+	async ensureAssociationInvitationAllowed(
+		this: EntityAuthorization<string>,
+		tx: DatabaseTransaction,
+		entityId: string,
+		kind: EntityAssociationKind,
+	): Promise<void> {
+		await lockEntityAssociationState(tx, entityId);
+		if (!(await entityExists(tx, entityId))) throw new EntityEntryNotFound();
+		const platformOverride = await this.platform.hasCapability(
+			"entity.associations.override",
+			tx,
+		);
+		if (!platformOverride)
+			await this.unitAuthorization.ensureInTransaction(
+				tx,
+				entityId,
+				"unit.association.manage",
+				entityAssociationScope(kind),
+			);
+		await this.ensureAssociationCommandAllowedForExistingEntity(
+			tx,
+			entityId,
+			kind,
+			"invitation",
+		);
 	}
 
 	async ensureSubjectAssociationAllowedIfEntity(
@@ -149,6 +188,11 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 			.limit(1);
 		if (!record) return;
 		if (record.deletedAt) throw new EntityEntryNotFound();
-		await this.ensureAssociationAllowedForExistingEntity(tx, targetUnitId, "subject");
+		await this.ensureAssociationCommandAllowedForExistingEntity(
+			tx,
+			targetUnitId,
+			"subject",
+			"direct",
+		);
 	}
 }

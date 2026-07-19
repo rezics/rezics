@@ -26,6 +26,7 @@ const RolePermissions = {
 		"unit.publish",
 		"unit.history.restore",
 		"unit.access.manage",
+		"unit.association.manage",
 		"unit.protection.manage",
 	],
 	owner: UnitPermissionValues,

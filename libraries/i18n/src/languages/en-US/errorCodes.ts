@@ -83,6 +83,11 @@ export default {
 	UnitProtectionNotFound: "This Unit protection could not be found.",
 	UnitAccessExpiryInvalid: "The Unit access expiry must be in the future.",
 	UnitAccessBindingConflict: "An active Unit access binding already exists.",
+	UnitAccessInvitationNotFound: "This Unit access invitation could not be found.",
+	UnitAccessInvitationConflict: "This Unit access invitation is no longer actionable.",
+	UnitAccessInvitationExpired: "This Unit access invitation has expired.",
+	UnitAccessInvitationSelfForbidden: "You cannot invite yourself to a Unit.",
+	UnitAccessRoleDelegationForbidden: "You cannot delegate this Unit access role.",
 	UnitAccessSubjectRoleInvalid:
 		"Authenticated access can only receive the viewer or editor role.",
 	UnitAccessRestrictionConflict:
@@ -103,7 +108,11 @@ export default {
 	NotificationNotFound: "This notification could not be found.",
 	EntityEntryNotFound: "This entity entry could not be found.",
 	EntityAssociationRestricted: "This entity does not accept that kind of association.",
-	EntityOwnershipRequired: "The Entity owner must perform this action.",
+	EntityAssociationProposalNotFound: "This association proposal could not be found.",
+	EntityAssociationProposalConflict: "This association proposal is no longer actionable.",
+	EntityAssociationProposalExpired: "This association proposal has expired.",
+	EntityAssociationProposalExpiryInvalid:
+		"The association proposal expiry must be in the future.",
 	CreditAttributionNotFound: "This credit attribution could not be found.",
 	SubjectAssociationNotFound: "This subject association could not be found.",
 	AliasNotFound: "This alias could not be found.",

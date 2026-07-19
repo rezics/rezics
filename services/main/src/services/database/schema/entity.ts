@@ -4,6 +4,7 @@ import { boolean, check, index, pgEnum, primaryKey, text, unique, uuid } from "d
 import { pgTable } from "./base";
 import {
 	createCreatedAtColumn,
+	createTimestampMsColumn,
 	createUpdatedAtColumn,
 	createUuidv7PrimaryKey,
 	fractionalIndexPosition,
@@ -12,6 +13,8 @@ import { profile, unit } from "./core";
 import {
 	EntityAssociationKindValues,
 	EntityAssociationPolicyModeValues,
+	EntityAssociationProposalDirectionValues,
+	EntityAssociationProposalResolutionValues,
 	toEnumValues,
 } from "./contract-values";
 
@@ -22,6 +25,14 @@ export const entityAssociationKind = pgEnum(
 export const entityAssociationPolicyMode = pgEnum(
 	"entity_association_policy_mode",
 	toEnumValues(EntityAssociationPolicyModeValues),
+);
+export const entityAssociationProposalDirection = pgEnum(
+	"entity_association_proposal_direction",
+	toEnumValues(EntityAssociationProposalDirectionValues),
+);
+export const entityAssociationProposalResolution = pgEnum(
+	"entity_association_proposal_resolution",
+	toEnumValues(EntityAssociationProposalResolutionValues),
 );
 
 export const entity = pgTable(
@@ -62,6 +73,59 @@ export const entityAssociationPolicy = pgTable(
 	(table) => [
 		primaryKey({ columns: [table.entityId, table.kind] }),
 		index("entity_association_policy_updated_by_idx").on(table.updatedByProfileId),
+	],
+);
+
+/** Two-sided consent workflow for a relationship stored on a source Unit. */
+export const entityAssociationProposal = pgTable(
+	"entity_association_proposal",
+	{
+		id: createUuidv7PrimaryKey(),
+		sourceUnitId: uuid()
+			.notNull()
+			.references(() => unit.id, { onDelete: "cascade" }),
+		targetEntityId: uuid()
+			.notNull()
+			.references(() => entity.id, { onDelete: "cascade" }),
+		kind: entityAssociationKind().notNull(),
+		role: text().notNull(),
+		direction: entityAssociationProposalDirection().notNull(),
+		createdByProfileId: uuid()
+			.notNull()
+			.references(() => profile.id, { onDelete: "restrict" }),
+		expiresAt: createTimestampMsColumn().notNull(),
+		resolution: entityAssociationProposalResolution(),
+		resolvedAt: createTimestampMsColumn(),
+		resolvedByProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		index("entity_association_proposal_source_unresolved_idx")
+			.on(table.sourceUnitId, table.createdAt.desc(), table.id.desc())
+			.where(sql`${table.resolution} is null`),
+		index("entity_association_proposal_target_unresolved_idx")
+			.on(table.targetEntityId, table.createdAt.desc(), table.id.desc())
+			.where(sql`${table.resolution} is null`),
+		index("entity_association_proposal_created_by_idx").on(table.createdByProfileId),
+		index("entity_association_proposal_resolved_by_idx").on(table.resolvedByProfileId),
+		check("entity_association_proposal_role_not_blank", sql`btrim(${table.role}) <> ''`),
+		check(
+			"entity_association_proposal_not_self_check",
+			sql`${table.sourceUnitId} <> ${table.targetEntityId}`,
+		),
+		check(
+			"entity_association_proposal_expiry_check",
+			sql`${table.expiresAt} > ${table.createdAt}`,
+		),
+		check(
+			"entity_association_proposal_resolution_shape_check",
+			sql`(
+				${table.resolution} is null and ${table.resolvedAt} is null and ${table.resolvedByProfileId} is null
+			) or (
+				${table.resolution} is not null and ${table.resolvedAt} is not null and ${table.resolvedByProfileId} is not null
+			)`,
+		),
 	],
 );
 

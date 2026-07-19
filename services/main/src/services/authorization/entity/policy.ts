@@ -5,7 +5,7 @@ import {
 
 export type EntityAssociationKind = (typeof EntityAssociationKindValues)[number];
 export type EntityAssociationPolicyMode = (typeof EntityAssociationPolicyModeValues)[number];
-export type EntityAssociationActorKind = "community" | "owner" | "platform";
+export type EntityAssociationCommand = "direct" | "request" | "invitation";
 
 export const DefaultEntityAssociationPolicy = {
 	creditAttribution: "open",
@@ -35,11 +35,31 @@ export function resolveEntityAssociationPolicy(
 	return policy;
 }
 
-export function associationPolicyAllows(
-	mode: EntityAssociationPolicyMode,
-	actor: EntityAssociationActorKind,
-): boolean {
-	if (actor === "platform") return true;
-	if (mode === "open") return true;
-	return mode === "owner_only" && actor === "owner";
+export type EntityAssociationAdmission =
+	| { readonly kind: "materialize" }
+	| { readonly kind: "proposal"; readonly awaiting: "source" | "target" }
+	| { readonly kind: "forbidden" };
+
+export function resolveEntityAssociationAdmission(input: {
+	readonly mode: EntityAssociationPolicyMode;
+	readonly command: EntityAssociationCommand;
+	readonly targetManager: boolean;
+	readonly platformOverride: boolean;
+}): EntityAssociationAdmission {
+	if (input.command === "direct") {
+		if (
+			input.platformOverride ||
+			input.mode === "open" ||
+			(input.targetManager && input.mode !== "closed")
+		)
+			return { kind: "materialize" };
+		return { kind: "forbidden" };
+	}
+	if (input.command === "request")
+		return input.mode === "approval"
+			? { kind: "proposal", awaiting: "target" }
+			: { kind: "forbidden" };
+	if ((input.targetManager || input.platformOverride) && input.mode !== "closed")
+		return { kind: "proposal", awaiting: "source" };
+	return { kind: "forbidden" };
 }

@@ -3,6 +3,7 @@ import { JsonValue } from "@rezics/portable-text";
 import Elysia from "elysia";
 
 import catalog from "./catalog";
+import associationProposals from "./association-proposals";
 import collections from "./collections";
 import realms from "./realms";
 import contentStructure from "./content-structure";
@@ -73,6 +74,7 @@ export default new Elysia()
 	.group("/api", (api) =>
 		api.guard({ parse: "json" }, (api) =>
 			api
+				.use(associationProposals)
 				.use(health)
 				.use(notifications)
 				.use(recommendations)

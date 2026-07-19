@@ -11,6 +11,7 @@ import {
 
 import { pgTable } from "./base";
 import {
+	UnitAccessInvitationResolutionValues,
 	UnitAccessRealmRelationValues,
 	UnitAccessRestrictionSubjectKindValues,
 	UnitAccessRoleValues,
@@ -36,6 +37,10 @@ export const unitAccessSubjectKind = pgEnum(
 export const unitAccessRealmRelation = pgEnum(
 	"unit_access_realm_relation",
 	toEnumValues(UnitAccessRealmRelationValues),
+);
+export const unitAccessInvitationResolution = pgEnum(
+	"unit_access_invitation_resolution",
+	toEnumValues(UnitAccessInvitationResolutionValues),
 );
 export const unitAccessRestrictionSubjectKind = pgEnum(
 	"unit_access_restriction_subject_kind",
@@ -133,6 +138,69 @@ export const unitAccessBinding = pgTable(
 		check(
 			"unit_access_binding_revocation_shape_check",
 			sql`(${table.revokedAt} is null) = (${table.revokedByProfileId} is null)`,
+		),
+	],
+);
+
+/** A Profile-mediated offer that has no access effect until the invitee accepts it. */
+export const unitAccessInvitation = pgTable(
+	"unit_access_invitation",
+	{
+		id: createUuidv7PrimaryKey(),
+		unitId: uuid()
+			.notNull()
+			.references(() => unit.id, { onDelete: "cascade" }),
+		invitedProfileId: uuid()
+			.notNull()
+			.references(() => profile.id, { onDelete: "cascade" }),
+		role: unitAccessRole().notNull(),
+		scope: text()
+			.array()
+			.default(sql`array[]::text[]`)
+			.notNull(),
+		invitedByProfileId: uuid()
+			.notNull()
+			.references(() => profile.id, { onDelete: "restrict" }),
+		expiresAt: createTimestampMsColumn().notNull(),
+		accessExpiresAt: createTimestampMsColumn(),
+		resolution: unitAccessInvitationResolution(),
+		resolvedAt: createTimestampMsColumn(),
+		resolvedByProfileId: uuid().references(() => profile.id, { onDelete: "restrict" }),
+		acceptedBindingId: uuid().references(() => unitAccessBinding.id, { onDelete: "restrict" }),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		index("unit_access_invitation_unit_unresolved_idx")
+			.on(table.unitId, table.createdAt.desc(), table.id.desc())
+			.where(sql`${table.resolution} is null`),
+		index("unit_access_invitation_profile_unresolved_idx")
+			.on(table.invitedProfileId, table.createdAt.desc(), table.id.desc())
+			.where(sql`${table.resolution} is null`),
+		uniqueIndex("unit_access_invitation_accepted_binding_key")
+			.on(table.acceptedBindingId)
+			.where(sql`${table.acceptedBindingId} is not null`),
+		index("unit_access_invitation_invited_by_idx").on(table.invitedByProfileId),
+		index("unit_access_invitation_resolved_by_idx").on(table.resolvedByProfileId),
+		check("unit_access_invitation_scope_check", scopeCheck(table.scope)),
+		check(
+			"unit_access_invitation_profiles_differ_check",
+			sql`${table.invitedProfileId} <> ${table.invitedByProfileId}`,
+		),
+		check("unit_access_invitation_role_check", sql`${table.role} <> 'owner'::unit_access_role`),
+		check(
+			"unit_access_invitation_expiry_check",
+			sql`${table.expiresAt} > ${table.createdAt} and (${table.accessExpiresAt} is null or ${table.accessExpiresAt} > ${table.createdAt})`,
+		),
+		check(
+			"unit_access_invitation_resolution_shape_check",
+			sql`(
+				${table.resolution} is null and ${table.resolvedAt} is null and ${table.resolvedByProfileId} is null and ${table.acceptedBindingId} is null
+			) or (
+				${table.resolution} = 'accepted'::unit_access_invitation_resolution and ${table.resolvedAt} is not null and ${table.resolvedByProfileId} is not null and ${table.acceptedBindingId} is not null
+			) or (
+				${table.resolution} in ('declined'::unit_access_invitation_resolution, 'cancelled'::unit_access_invitation_resolution) and ${table.resolvedAt} is not null and ${table.resolvedByProfileId} is not null and ${table.acceptedBindingId} is null
+			)`,
 		),
 	],
 );

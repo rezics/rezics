@@ -10,7 +10,12 @@ describe("Entity association API contracts", () => {
 		);
 		expect(
 			Check(UpdateEntityAssociationPolicyBody, {
-				creditAttribution: "owner_only",
+				creditAttribution: "approval",
+			}),
+		).toBe(true);
+		expect(
+			Check(UpdateEntityAssociationPolicyBody, {
+				creditAttribution: "invite_only",
 			}),
 		).toBe(true);
 		expect(Check(UpdateEntityAssociationPolicyBody, {})).toBe(false);

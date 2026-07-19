@@ -25,6 +25,7 @@ import editor from "./editor";
 import units from "./units";
 import notifications from "./notifications";
 import emails from "./emails";
+import governance from "./governance";
 
 export default {
 	brand,
@@ -54,4 +55,5 @@ export default {
 	units,
 	notifications,
 	emails,
+	governance,
 } satisfies typeof import("../zh-CN").default;

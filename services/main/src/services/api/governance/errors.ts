@@ -181,6 +181,40 @@ export class UnitAccessBindingConflict extends Data.TaggedError("UnitAccessBindi
 	readonly message = "An active binding already exists for this subject and scope";
 }
 
+export class UnitAccessInvitationNotFound extends Data.TaggedError("UnitAccessInvitationNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = UnitAccessInvitationNotFound.status;
+	readonly message = "Unit access invitation not found";
+}
+
+export class UnitAccessInvitationConflict extends Data.TaggedError("UnitAccessInvitationConflict") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitAccessInvitationConflict.status;
+	readonly message = "A matching active Unit access invitation already exists";
+}
+
+export class UnitAccessInvitationExpired extends Data.TaggedError("UnitAccessInvitationExpired") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitAccessInvitationExpired.status;
+	readonly message = "Unit access invitation has expired";
+}
+
+export class UnitAccessInvitationSelfForbidden extends Data.TaggedError(
+	"UnitAccessInvitationSelfForbidden",
+) {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = UnitAccessInvitationSelfForbidden.status;
+	readonly message = "A Profile cannot invite itself to Unit access";
+}
+
+export class UnitAccessRoleDelegationForbidden extends Data.TaggedError(
+	"UnitAccessRoleDelegationForbidden",
+) {
+	static readonly status = StatusCodes.FORBIDDEN as const;
+	readonly status = UnitAccessRoleDelegationForbidden.status;
+	readonly message = "The current Unit access role cannot delegate the requested role";
+}
+
 export class UnitAccessSubjectRoleInvalid extends Data.TaggedError("UnitAccessSubjectRoleInvalid") {
 	static readonly status = StatusCodes.BAD_REQUEST as const;
 	readonly status = UnitAccessSubjectRoleInvalid.status;
@@ -234,6 +268,11 @@ export const GovernanceErrors = [
 	UnitProtectionNotFound,
 	UnitAccessExpiryInvalid,
 	UnitAccessBindingConflict,
+	UnitAccessInvitationNotFound,
+	UnitAccessInvitationConflict,
+	UnitAccessInvitationExpired,
+	UnitAccessInvitationSelfForbidden,
+	UnitAccessRoleDelegationForbidden,
 	UnitAccessSubjectRoleInvalid,
 	UnitAccessRestrictionConflict,
 	UnitOwnerRestrictionForbidden,

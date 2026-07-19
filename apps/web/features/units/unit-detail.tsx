@@ -141,6 +141,14 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 								)}
 							</>
 						)}
+						{item.capabilities.canManageAccess ||
+						item.capabilities.canManageAssociations ? (
+							<Button variant="outline" asChild>
+								<Link href={`/units/${type}/${item.id}/governance`}>
+									{t.governance.open}
+								</Link>
+							</Button>
+						) : null}
 					</div>
 				</div>
 			</section>

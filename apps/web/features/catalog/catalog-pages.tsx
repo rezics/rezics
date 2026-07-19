@@ -130,6 +130,15 @@ export function EntityDetailPage({ id }: { id: string }) {
 							<Link href={`/entities/${query.data.id}/edit`}>{t.ui.edit}</Link>
 						</Button>
 					) : null}
+					{query.data.capabilities.canManageAccess ||
+					query.data.capabilities.canManageCreditAssociations ||
+					query.data.capabilities.canManageSubjectAssociations ? (
+						<Button asChild className="w-fit" variant="outline">
+							<Link href={`/entities/${query.data.id}/governance`}>
+								{t.governance.open}
+							</Link>
+						</Button>
+					) : null}
 				</CardContent>
 			</Card>
 		</CatalogFrame>

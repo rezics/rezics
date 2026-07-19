@@ -1,6 +1,6 @@
 import { and, eq, exists, isNull, or, sql } from "drizzle-orm";
 
-import { database } from "../../database";
+import { database, type DatabaseExecutor, type DatabaseTransaction } from "../../database";
 import {
 	capabilityGrant,
 	realmMember,
@@ -60,11 +60,12 @@ async function canReadUnit(unitId: string, profileId?: string) {
 }
 
 async function hasRealmCapability(
+	executor: DatabaseExecutor,
 	realmId: string,
 	profileId: string,
 	capability: RealmCapability,
 ): Promise<boolean> {
-	const [membership] = await database
+	const [membership] = await executor
 		.select({ role: realmMember.role })
 		.from(realmMember)
 		.where(
@@ -77,7 +78,7 @@ async function hasRealmCapability(
 		.limit(1);
 	if (!membership) return false;
 	if (canRealmRolePerform(membership.role, capability)) return true;
-	const [grant] = await database
+	const [grant] = await executor
 		.select({ id: capabilityGrant.id })
 		.from(capabilityGrant)
 		.where(
@@ -95,6 +96,7 @@ async function hasRealmCapability(
 }
 
 async function realmBindingMatches(
+	executor: DatabaseExecutor,
 	binding: {
 		realmId: string | null;
 		realmRelation: "member" | "content_editor" | "governor" | null;
@@ -108,8 +110,8 @@ async function realmBindingMatches(
 			: binding.realmRelation === "content_editor"
 				? "realm.contribute"
 				: undefined;
-	if (capability) return hasRealmCapability(binding.realmId, profileId, capability);
-	const [membership] = await database
+	if (capability) return hasRealmCapability(executor, binding.realmId, profileId, capability);
+	const [membership] = await executor
 		.select({ profileId: realmMember.profileId })
 		.from(realmMember)
 		.where(
@@ -127,6 +129,7 @@ const MutatingPermissions: readonly UnitPermission[] = [
 	"unit.update",
 	"unit.publish",
 	"unit.history.restore",
+	"unit.association.manage",
 	"unit.delete",
 ];
 
@@ -142,17 +145,18 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		const key = `unit:${unitId}:${permission}:${scopeKey(scope)}`;
 		const current = this.#decisions.get(key);
 		if (current) return current;
-		const decision = this.#decide(unitId, permission, scope);
+		const decision = this.#decide(database, unitId, permission, scope);
 		this.#decisions.set(key, decision);
 		return decision;
 	}
 
 	async #decide(
+		executor: DatabaseExecutor,
 		unitId: string,
 		permission: UnitPermission,
 		scope: UnitScope,
 	): Promise<UnitAccessDecision> {
-		const [record] = await database
+		const [record] = await executor
 			.select({
 				status: unit.status,
 				visibility: unit.visibility,
@@ -166,8 +170,8 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 
 		if (this.profileId) {
 			const [platformOverride, restrictions, directOwnerBindings] = await Promise.all([
-				this.platform.hasCapability("unit.edit"),
-				database
+				this.platform.hasCapability("unit.edit", executor),
+				executor
 					.select({
 						id: unitAccessRestriction.id,
 						subjectKind: unitAccessRestriction.subjectKind,
@@ -186,7 +190,7 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 								and(
 									eq(unitAccessRestriction.subjectKind, "realm"),
 									exists(
-										database
+										executor
 											.select({ profileId: realmMember.profileId })
 											.from(realmMember)
 											.where(
@@ -209,7 +213,7 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 							),
 						),
 					),
-				database
+				executor
 					.select({ scope: unitAccessBinding.scope })
 					.from(unitAccessBinding)
 					.where(
@@ -259,7 +263,7 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 			return { allowed: true, source: "public" };
 		if (!this.profileId) return { allowed: false, reason: "anonymous" };
 
-		const bindings = await database
+		const bindings = await executor
 			.select({
 				id: unitAccessBinding.id,
 				subjectKind: unitAccessBinding.subjectKind,
@@ -291,7 +295,7 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 				binding.subjectKind === "authenticated" ||
 				(binding.subjectKind === "profile" && binding.profileId === this.profileId) ||
 				(binding.subjectKind === "realm" &&
-					(await realmBindingMatches(binding, this.profileId)));
+					(await realmBindingMatches(executor, binding, this.profileId)));
 			if (!subjectMatches) continue;
 			if (!matched || binding.scope.length > matched.scope.length)
 				matched = { id: binding.id, role: binding.role, scope: binding.scope };
@@ -299,7 +303,7 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		if (!matched) return { allowed: false, reason: "ungranted" };
 
 		if (MutatingPermissions.includes(permission)) {
-			const protections = await database
+			const protections = await executor
 				.select({ scope: unitProtection.scope, mode: unitProtection.mode })
 				.from(unitProtection)
 				.where(
@@ -331,6 +335,29 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 
 	async ensure(unitId: string, permission: UnitPermission, scope: UnitScope = []): Promise<void> {
 		const decision = await this.decide(unitId, permission, scope);
+		if (decision.allowed) return;
+		if (decision.reason === "missing") throw new UnitNotFound();
+		if (decision.reason === "restricted") throw new UnitAccessRestricted();
+		if (decision.reason === "protected") throw new UnitProtected(scope, decision.mode);
+		throw new UnitPermissionForbidden(permission, scope);
+	}
+
+	decideInTransaction(
+		tx: DatabaseTransaction,
+		unitId: string,
+		permission: UnitPermission,
+		scope: UnitScope = [],
+	): Promise<UnitAccessDecision> {
+		return this.#decide(tx, unitId, permission, scope);
+	}
+
+	async ensureInTransaction(
+		tx: DatabaseTransaction,
+		unitId: string,
+		permission: UnitPermission,
+		scope: UnitScope = [],
+	): Promise<void> {
+		const decision = await this.decideInTransaction(tx, unitId, permission, scope);
 		if (decision.allowed) return;
 		if (decision.reason === "missing") throw new UnitNotFound();
 		if (decision.reason === "restricted") throw new UnitAccessRestricted();

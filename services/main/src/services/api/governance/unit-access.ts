@@ -4,6 +4,7 @@ import Elysia, { t } from "elysia";
 
 import session from "../../auth/session";
 import type { Authorization } from "../../authorization";
+import { cancelPendingUnitAccessInvitations } from "../../authorization/unit/invitations";
 import { lockEntityAssociationState } from "../../authorization/entity/authorization";
 import { database } from "../../database";
 import type { DatabaseTransaction } from "../../database";
@@ -238,6 +239,11 @@ export default new Elysia({ prefix: "/unit" })
 				await tx.execute(
 					sql`select pg_advisory_xact_lock(hashtextextended(${`unit-access:${params.unitId}`}::text, 0))`,
 				);
+				const cancelledInvitationIds = await cancelPendingUnitAccessInvitations(
+					tx,
+					params.unitId,
+					profile.unitId,
+				);
 				const superseded = await tx
 					.select({ id: unitAccessBinding.id })
 					.from(unitAccessBinding)
@@ -297,6 +303,7 @@ export default new Elysia({ prefix: "/unit" })
 					metadata: {
 						newOwner: body.owner,
 						supersededBindingIds: superseded.map((binding) => binding.id),
+						cancelledInvitationIds,
 					},
 				});
 				return created;
@@ -330,6 +337,11 @@ export default new Elysia({ prefix: "/unit" })
 					await lockEntityAssociationState(tx, params.unitId);
 				await tx.execute(
 					sql`select pg_advisory_xact_lock(hashtextextended(${`unit-access:${params.unitId}`}::text, 0))`,
+				);
+				const cancelledInvitationIds = await cancelPendingUnitAccessInvitations(
+					tx,
+					params.unitId,
+					profile.unitId,
 				);
 
 				const [currentOwner] = await tx
@@ -401,6 +413,7 @@ export default new Elysia({ prefix: "/unit" })
 					metadata: {
 						previousOwnerProfileId: currentOwner.profileId,
 						supersededBindingIds,
+						cancelledInvitationIds,
 					},
 				});
 				return created;

@@ -5721,9 +5721,12 @@
 					"UnitSlugAddressNotFound",
 					"EntityEntryNotFound",
 					"EntityAssociationRestricted",
-					"EntityOwnershipRequired",
 					"CreditAttributionNotFound",
 					"SubjectAssociationNotFound",
+					"EntityAssociationProposalNotFound",
+					"EntityAssociationProposalConflict",
+					"EntityAssociationProposalExpired",
+					"EntityAssociationProposalExpiryInvalid",
 					"ImageAssetNotFound",
 					"ImageAssetUploadNotFound",
 					"ImageAssetUnsupportedType",
@@ -5793,6 +5796,11 @@
 					"UnitProtectionNotFound",
 					"UnitAccessExpiryInvalid",
 					"UnitAccessBindingConflict",
+					"UnitAccessInvitationNotFound",
+					"UnitAccessInvitationConflict",
+					"UnitAccessInvitationExpired",
+					"UnitAccessInvitationSelfForbidden",
+					"UnitAccessRoleDelegationForbidden",
 					"UnitAccessSubjectRoleInvalid",
 					"UnitAccessRestrictionConflict",
 					"UnitOwnerRestrictionForbidden",
@@ -5925,6 +5933,1363 @@
 					}
 				},
 				"operationId": "getImage-assetsByIdContent"
+			}
+		},
+		"/api/unit/{unitId}/association-proposals": {
+			"get": {
+				"summary": "List Unit association proposals",
+				"tags": ["Entity"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "side",
+						"in": "query",
+						"required": true,
+						"schema": { "type": "string", "enum": ["source", "target"] }
+					},
+					{
+						"name": "kind",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"default": "credit",
+							"type": "string",
+							"enum": ["credit", "subject"]
+						}
+					},
+					{
+						"name": "includeResolved",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "boolean" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"id",
+													"sourceUnitId",
+													"targetEntityId",
+													"kind",
+													"role",
+													"direction",
+													"createdByProfileId",
+													"expiresAt",
+													"state",
+													"resolution",
+													"resolvedAt",
+													"resolvedByProfileId",
+													"createdAt",
+													"updatedAt"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"sourceUnitId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"targetEntityId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"kind": {
+														"default": "credit",
+														"type": "string",
+														"enum": ["credit", "subject"]
+													},
+													"role": { "type": "string" },
+													"direction": {
+														"type": "string",
+														"enum": ["request", "invitation"]
+													},
+													"createdByProfileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"expiresAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"state": {
+														"type": "string",
+														"enum": [
+															"pending",
+															"expired",
+															"accepted",
+															"declined",
+															"cancelled"
+														]
+													},
+													"resolution": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": "accepted",
+																		"type": "string"
+																	},
+																	{
+																		"const": "declined",
+																		"type": "string"
+																	},
+																	{
+																		"const": "cancelled",
+																		"type": "string"
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"resolvedAt": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "date-time",
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													},
+													"resolvedByProfileId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted",
+														"UnitProtected",
+														"EntityAssociationRestricted"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"EntityEntryNotFound",
+														"EntityAssociationProposalNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiUnitByUnitIdAssociation-proposals"
+			}
+		},
+		"/api/unit/{unitId}/association-proposals/requests": {
+			"post": {
+				"summary": "Request Entity association",
+				"tags": ["Entity"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["targetEntityId", "kind", "role", "expiresAt"],
+								"properties": {
+									"targetEntityId": { "format": "uuid", "type": "string" },
+									"kind": {
+										"default": "credit",
+										"type": "string",
+										"enum": ["credit", "subject"]
+									},
+									"role": { "minLength": 1, "maxLength": 64, "type": "string" },
+									"expiresAt": { "format": "date-time", "type": "string" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"sourceUnitId",
+										"targetEntityId",
+										"kind",
+										"role",
+										"direction",
+										"createdByProfileId",
+										"expiresAt",
+										"state",
+										"resolution",
+										"resolvedAt",
+										"resolvedByProfileId",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"sourceUnitId": { "format": "uuid", "type": "string" },
+										"targetEntityId": { "format": "uuid", "type": "string" },
+										"kind": {
+											"default": "credit",
+											"type": "string",
+											"enum": ["credit", "subject"]
+										},
+										"role": { "type": "string" },
+										"direction": {
+											"type": "string",
+											"enum": ["request", "invitation"]
+										},
+										"createdByProfileId": {
+											"format": "uuid",
+											"type": "string"
+										},
+										"expiresAt": { "format": "date-time", "type": "string" },
+										"state": {
+											"type": "string",
+											"enum": [
+												"pending",
+												"expired",
+												"accepted",
+												"declined",
+												"cancelled"
+											]
+										},
+										"resolution": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "accepted", "type": "string" },
+														{ "const": "declined", "type": "string" },
+														{ "const": "cancelled", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"resolvedAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"resolvedByProfileId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "EntityAssociationProposalExpiryInvalid",
+													"type": "string",
+													"enum": [
+														"EntityAssociationProposalExpiryInvalid"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted",
+														"UnitProtected",
+														"EntityAssociationRestricted"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"EntityEntryNotFound",
+														"EntityAssociationProposalNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "EntityAssociationProposalConflict",
+													"type": "string",
+													"enum": [
+														"EntityAssociationProposalConflict",
+														"EntityAssociationProposalExpired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiUnitByUnitIdAssociation-proposalsRequests"
+			}
+		},
+		"/api/unit/{unitId}/association-proposals/invitations": {
+			"post": {
+				"summary": "Invite Unit to Entity association",
+				"tags": ["Entity"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["sourceUnitId", "kind", "role", "expiresAt"],
+								"properties": {
+									"sourceUnitId": { "format": "uuid", "type": "string" },
+									"kind": {
+										"default": "credit",
+										"type": "string",
+										"enum": ["credit", "subject"]
+									},
+									"role": { "minLength": 1, "maxLength": 64, "type": "string" },
+									"expiresAt": { "format": "date-time", "type": "string" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"sourceUnitId",
+										"targetEntityId",
+										"kind",
+										"role",
+										"direction",
+										"createdByProfileId",
+										"expiresAt",
+										"state",
+										"resolution",
+										"resolvedAt",
+										"resolvedByProfileId",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"sourceUnitId": { "format": "uuid", "type": "string" },
+										"targetEntityId": { "format": "uuid", "type": "string" },
+										"kind": {
+											"default": "credit",
+											"type": "string",
+											"enum": ["credit", "subject"]
+										},
+										"role": { "type": "string" },
+										"direction": {
+											"type": "string",
+											"enum": ["request", "invitation"]
+										},
+										"createdByProfileId": {
+											"format": "uuid",
+											"type": "string"
+										},
+										"expiresAt": { "format": "date-time", "type": "string" },
+										"state": {
+											"type": "string",
+											"enum": [
+												"pending",
+												"expired",
+												"accepted",
+												"declined",
+												"cancelled"
+											]
+										},
+										"resolution": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "accepted", "type": "string" },
+														{ "const": "declined", "type": "string" },
+														{ "const": "cancelled", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"resolvedAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"resolvedByProfileId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "EntityAssociationProposalExpiryInvalid",
+													"type": "string",
+													"enum": [
+														"EntityAssociationProposalExpiryInvalid"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted",
+														"UnitProtected",
+														"EntityAssociationRestricted"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"EntityEntryNotFound",
+														"EntityAssociationProposalNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "EntityAssociationProposalConflict",
+													"type": "string",
+													"enum": [
+														"EntityAssociationProposalConflict",
+														"EntityAssociationProposalExpired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiUnitByUnitIdAssociation-proposalsInvitations"
+			}
+		},
+		"/api/unit/{unitId}/association-proposals/{proposalId}/accept": {
+			"post": {
+				"summary": "Accept Entity association proposal",
+				"tags": ["Entity"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "proposalId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"properties": {}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"sourceUnitId",
+										"targetEntityId",
+										"kind",
+										"role",
+										"direction",
+										"createdByProfileId",
+										"expiresAt",
+										"state",
+										"resolution",
+										"resolvedAt",
+										"resolvedByProfileId",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"sourceUnitId": { "format": "uuid", "type": "string" },
+										"targetEntityId": { "format": "uuid", "type": "string" },
+										"kind": {
+											"default": "credit",
+											"type": "string",
+											"enum": ["credit", "subject"]
+										},
+										"role": { "type": "string" },
+										"direction": {
+											"type": "string",
+											"enum": ["request", "invitation"]
+										},
+										"createdByProfileId": {
+											"format": "uuid",
+											"type": "string"
+										},
+										"expiresAt": { "format": "date-time", "type": "string" },
+										"state": {
+											"type": "string",
+											"enum": [
+												"pending",
+												"expired",
+												"accepted",
+												"declined",
+												"cancelled"
+											]
+										},
+										"resolution": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "accepted", "type": "string" },
+														{ "const": "declined", "type": "string" },
+														{ "const": "cancelled", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"resolvedAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"resolvedByProfileId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted",
+														"UnitProtected",
+														"EntityAssociationRestricted"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"EntityEntryNotFound",
+														"EntityAssociationProposalNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "EntityAssociationProposalConflict",
+													"type": "string",
+													"enum": [
+														"EntityAssociationProposalConflict",
+														"EntityAssociationProposalExpired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiUnitByUnitIdAssociation-proposalsByProposalIdAccept"
+			}
+		},
+		"/api/unit/{unitId}/association-proposals/{proposalId}/decline": {
+			"post": {
+				"summary": "Decline Entity association proposal",
+				"tags": ["Entity"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "proposalId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"properties": {}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"sourceUnitId",
+										"targetEntityId",
+										"kind",
+										"role",
+										"direction",
+										"createdByProfileId",
+										"expiresAt",
+										"state",
+										"resolution",
+										"resolvedAt",
+										"resolvedByProfileId",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"sourceUnitId": { "format": "uuid", "type": "string" },
+										"targetEntityId": { "format": "uuid", "type": "string" },
+										"kind": {
+											"default": "credit",
+											"type": "string",
+											"enum": ["credit", "subject"]
+										},
+										"role": { "type": "string" },
+										"direction": {
+											"type": "string",
+											"enum": ["request", "invitation"]
+										},
+										"createdByProfileId": {
+											"format": "uuid",
+											"type": "string"
+										},
+										"expiresAt": { "format": "date-time", "type": "string" },
+										"state": {
+											"type": "string",
+											"enum": [
+												"pending",
+												"expired",
+												"accepted",
+												"declined",
+												"cancelled"
+											]
+										},
+										"resolution": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "accepted", "type": "string" },
+														{ "const": "declined", "type": "string" },
+														{ "const": "cancelled", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"resolvedAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"resolvedByProfileId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted",
+														"UnitProtected",
+														"EntityAssociationRestricted"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"EntityEntryNotFound",
+														"EntityAssociationProposalNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "EntityAssociationProposalConflict",
+													"type": "string",
+													"enum": [
+														"EntityAssociationProposalConflict",
+														"EntityAssociationProposalExpired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiUnitByUnitIdAssociation-proposalsByProposalIdDecline"
+			}
+		},
+		"/api/unit/{unitId}/association-proposals/{proposalId}": {
+			"delete": {
+				"summary": "Cancel Entity association proposal",
+				"tags": ["Entity"],
+				"responses": {
+					"204": {
+						"description": "Response for status 204",
+						"content": { "type": "void" }
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted",
+														"UnitProtected",
+														"EntityAssociationRestricted"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"EntityEntryNotFound",
+														"EntityAssociationProposalNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "EntityAssociationProposalConflict",
+													"type": "string",
+													"enum": [
+														"EntityAssociationProposalConflict",
+														"EntityAssociationProposalExpired"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "proposalId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"operationId": "deleteApiUnitByUnitIdAssociation-proposalsByProposalId"
 			}
 		},
 		"/api/health": {
@@ -12964,6 +14329,7 @@
 															"unit.publish",
 															"unit.history.restore",
 															"unit.access.manage",
+															"unit.association.manage",
 															"unit.protection.manage",
 															"unit.delete"
 														]
@@ -14536,6 +15902,7 @@
 											"unit.publish",
 											"unit.history.restore",
 											"unit.access.manage",
+											"unit.association.manage",
 											"unit.protection.manage",
 											"unit.delete"
 										]
@@ -16051,6 +17418,1315 @@
 					}
 				],
 				"operationId": "deleteApiGovernanceUnitByUnitIdProtectionsByProtectionId"
+			}
+		},
+		"/api/governance/unit/access-invitations": {
+			"get": {
+				"summary": "List received Unit access invitations",
+				"tags": ["Governance"],
+				"parameters": [
+					{
+						"name": "includeResolved",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "boolean" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"id",
+													"unitId",
+													"invitedProfileId",
+													"role",
+													"scope",
+													"invitedByProfileId",
+													"expiresAt",
+													"accessExpiresAt",
+													"state",
+													"resolution",
+													"resolvedAt",
+													"resolvedByProfileId",
+													"acceptedBindingId",
+													"createdAt",
+													"updatedAt"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"unitId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"invitedProfileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"role": {
+														"default": "viewer",
+														"type": "string",
+														"enum": [
+															"viewer",
+															"editor",
+															"publishing_editor",
+															"maintainer"
+														]
+													},
+													"scope": {
+														"maxItems": 8,
+														"type": "array",
+														"items": {
+															"minLength": 1,
+															"maxLength": 64,
+															"pattern": "^[a-z0-9][a-z0-9-]*$",
+															"type": "string"
+														}
+													},
+													"invitedByProfileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"expiresAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"accessExpiresAt": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "date-time",
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													},
+													"state": {
+														"type": "string",
+														"enum": [
+															"pending",
+															"expired",
+															"accepted",
+															"declined",
+															"cancelled"
+														]
+													},
+													"resolution": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": "accepted",
+																		"type": "string"
+																	},
+																	{
+																		"const": "declined",
+																		"type": "string"
+																	},
+																	{
+																		"const": "cancelled",
+																		"type": "string"
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"resolvedAt": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "date-time",
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													},
+													"resolvedByProfileId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"acceptedBindingId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiGovernanceUnitAccess-invitations"
+			}
+		},
+		"/api/governance/unit/{unitId}/access-invitations": {
+			"get": {
+				"summary": "List managed Unit access invitations",
+				"tags": ["Governance"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "includeResolved",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "boolean" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"id",
+													"unitId",
+													"invitedProfileId",
+													"role",
+													"scope",
+													"invitedByProfileId",
+													"expiresAt",
+													"accessExpiresAt",
+													"state",
+													"resolution",
+													"resolvedAt",
+													"resolvedByProfileId",
+													"acceptedBindingId",
+													"createdAt",
+													"updatedAt"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"unitId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"invitedProfileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"role": {
+														"default": "viewer",
+														"type": "string",
+														"enum": [
+															"viewer",
+															"editor",
+															"publishing_editor",
+															"maintainer"
+														]
+													},
+													"scope": {
+														"maxItems": 8,
+														"type": "array",
+														"items": {
+															"minLength": 1,
+															"maxLength": 64,
+															"pattern": "^[a-z0-9][a-z0-9-]*$",
+															"type": "string"
+														}
+													},
+													"invitedByProfileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"expiresAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"accessExpiresAt": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "date-time",
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													},
+													"state": {
+														"type": "string",
+														"enum": [
+															"pending",
+															"expired",
+															"accepted",
+															"declined",
+															"cancelled"
+														]
+													},
+													"resolution": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": "accepted",
+																		"type": "string"
+																	},
+																	{
+																		"const": "declined",
+																		"type": "string"
+																	},
+																	{
+																		"const": "cancelled",
+																		"type": "string"
+																	}
+																]
+															},
+															{ "type": "null" }
+														]
+													},
+													"resolvedAt": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"format": "date-time",
+																"type": "string"
+															},
+															{ "type": "null" }
+														]
+													},
+													"resolvedByProfileId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"acceptedBindingId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted",
+														"UnitProtected",
+														"UnitAccessRoleDelegationForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiGovernanceUnitByUnitIdAccess-invitations"
+			},
+			"post": {
+				"summary": "Create Unit access invitation",
+				"tags": ["Governance"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": [
+									"invitedProfileId",
+									"role",
+									"scope",
+									"invitationExpiresAt"
+								],
+								"properties": {
+									"invitedProfileId": { "format": "uuid", "type": "string" },
+									"role": {
+										"default": "viewer",
+										"type": "string",
+										"enum": [
+											"viewer",
+											"editor",
+											"publishing_editor",
+											"maintainer"
+										]
+									},
+									"scope": {
+										"maxItems": 8,
+										"type": "array",
+										"items": {
+											"minLength": 1,
+											"maxLength": 64,
+											"pattern": "^[a-z0-9][a-z0-9-]*$",
+											"type": "string"
+										}
+									},
+									"invitationExpiresAt": {
+										"format": "date-time",
+										"type": "string"
+									},
+									"accessExpiresAt": { "format": "date-time", "type": "string" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"unitId",
+										"invitedProfileId",
+										"role",
+										"scope",
+										"invitedByProfileId",
+										"expiresAt",
+										"accessExpiresAt",
+										"state",
+										"resolution",
+										"resolvedAt",
+										"resolvedByProfileId",
+										"acceptedBindingId",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"unitId": { "format": "uuid", "type": "string" },
+										"invitedProfileId": { "format": "uuid", "type": "string" },
+										"role": {
+											"default": "viewer",
+											"type": "string",
+											"enum": [
+												"viewer",
+												"editor",
+												"publishing_editor",
+												"maintainer"
+											]
+										},
+										"scope": {
+											"maxItems": 8,
+											"type": "array",
+											"items": {
+												"minLength": 1,
+												"maxLength": 64,
+												"pattern": "^[a-z0-9][a-z0-9-]*$",
+												"type": "string"
+											}
+										},
+										"invitedByProfileId": {
+											"format": "uuid",
+											"type": "string"
+										},
+										"expiresAt": { "format": "date-time", "type": "string" },
+										"accessExpiresAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"state": {
+											"type": "string",
+											"enum": [
+												"pending",
+												"expired",
+												"accepted",
+												"declined",
+												"cancelled"
+											]
+										},
+										"resolution": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "accepted", "type": "string" },
+														{ "const": "declined", "type": "string" },
+														{ "const": "cancelled", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"resolvedAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"resolvedByProfileId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"acceptedBindingId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitAccessExpiryInvalid",
+													"type": "string",
+													"enum": [
+														"UnitAccessExpiryInvalid",
+														"UnitAccessInvitationSelfForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted",
+														"UnitProtected",
+														"UnitAccessRoleDelegationForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound", "ProfileNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitAccessInvitationConflict",
+													"type": "string",
+													"enum": [
+														"UnitAccessInvitationConflict",
+														"UnitAccessInvitationExpired",
+														"UnitAccessBindingConflict"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiGovernanceUnitByUnitIdAccess-invitations"
+			}
+		},
+		"/api/governance/unit/{unitId}/access-invitations/{invitationId}/accept": {
+			"post": {
+				"summary": "Accept Unit access invitation",
+				"tags": ["Governance"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "invitationId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"properties": {}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"unitId",
+										"invitedProfileId",
+										"role",
+										"scope",
+										"invitedByProfileId",
+										"expiresAt",
+										"accessExpiresAt",
+										"state",
+										"resolution",
+										"resolvedAt",
+										"resolvedByProfileId",
+										"acceptedBindingId",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"unitId": { "format": "uuid", "type": "string" },
+										"invitedProfileId": { "format": "uuid", "type": "string" },
+										"role": {
+											"default": "viewer",
+											"type": "string",
+											"enum": [
+												"viewer",
+												"editor",
+												"publishing_editor",
+												"maintainer"
+											]
+										},
+										"scope": {
+											"maxItems": 8,
+											"type": "array",
+											"items": {
+												"minLength": 1,
+												"maxLength": 64,
+												"pattern": "^[a-z0-9][a-z0-9-]*$",
+												"type": "string"
+											}
+										},
+										"invitedByProfileId": {
+											"format": "uuid",
+											"type": "string"
+										},
+										"expiresAt": { "format": "date-time", "type": "string" },
+										"accessExpiresAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"state": {
+											"type": "string",
+											"enum": [
+												"pending",
+												"expired",
+												"accepted",
+												"declined",
+												"cancelled"
+											]
+										},
+										"resolution": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "accepted", "type": "string" },
+														{ "const": "declined", "type": "string" },
+														{ "const": "cancelled", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"resolvedAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"resolvedByProfileId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"acceptedBindingId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitAccessInvitationNotFound",
+													"type": "string",
+													"enum": ["UnitAccessInvitationNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitAccessInvitationConflict",
+													"type": "string",
+													"enum": [
+														"UnitAccessInvitationConflict",
+														"UnitAccessInvitationExpired",
+														"UnitAccessBindingConflict"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiGovernanceUnitByUnitIdAccess-invitationsByInvitationIdAccept"
+			}
+		},
+		"/api/governance/unit/{unitId}/access-invitations/{invitationId}/decline": {
+			"post": {
+				"summary": "Decline Unit access invitation",
+				"tags": ["Governance"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "invitationId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"properties": {}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"unitId",
+										"invitedProfileId",
+										"role",
+										"scope",
+										"invitedByProfileId",
+										"expiresAt",
+										"accessExpiresAt",
+										"state",
+										"resolution",
+										"resolvedAt",
+										"resolvedByProfileId",
+										"acceptedBindingId",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"unitId": { "format": "uuid", "type": "string" },
+										"invitedProfileId": { "format": "uuid", "type": "string" },
+										"role": {
+											"default": "viewer",
+											"type": "string",
+											"enum": [
+												"viewer",
+												"editor",
+												"publishing_editor",
+												"maintainer"
+											]
+										},
+										"scope": {
+											"maxItems": 8,
+											"type": "array",
+											"items": {
+												"minLength": 1,
+												"maxLength": 64,
+												"pattern": "^[a-z0-9][a-z0-9-]*$",
+												"type": "string"
+											}
+										},
+										"invitedByProfileId": {
+											"format": "uuid",
+											"type": "string"
+										},
+										"expiresAt": { "format": "date-time", "type": "string" },
+										"accessExpiresAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"state": {
+											"type": "string",
+											"enum": [
+												"pending",
+												"expired",
+												"accepted",
+												"declined",
+												"cancelled"
+											]
+										},
+										"resolution": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": "accepted", "type": "string" },
+														{ "const": "declined", "type": "string" },
+														{ "const": "cancelled", "type": "string" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"resolvedAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"resolvedByProfileId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"acceptedBindingId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitAccessInvitationNotFound",
+													"type": "string",
+													"enum": ["UnitAccessInvitationNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitAccessInvitationConflict",
+													"type": "string",
+													"enum": [
+														"UnitAccessInvitationConflict",
+														"UnitAccessInvitationExpired",
+														"UnitAccessBindingConflict"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiGovernanceUnitByUnitIdAccess-invitationsByInvitationIdDecline"
+			}
+		},
+		"/api/governance/unit/{unitId}/access-invitations/{invitationId}": {
+			"delete": {
+				"summary": "Cancel Unit access invitation",
+				"tags": ["Governance"],
+				"responses": {
+					"204": {
+						"description": "Response for status 204",
+						"content": { "type": "void" }
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted",
+														"UnitProtected",
+														"UnitAccessRoleDelegationForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"UnitAccessInvitationNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitAccessInvitationConflict",
+													"type": "string",
+													"enum": [
+														"UnitAccessInvitationConflict",
+														"UnitAccessInvitationExpired",
+														"UnitAccessBindingConflict"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "invitationId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"operationId": "deleteApiGovernanceUnitByUnitIdAccess-invitationsByInvitationId"
 			}
 		},
 		"/api/governance/moderation/cases": {
@@ -21659,7 +24335,6 @@
 									"capability": {
 										"type": "string",
 										"enum": [
-											"entity.association-policy.manage",
 											"entity.associations.override",
 											"unit.edit",
 											"unit.ownership.transfer",
@@ -31189,8 +33864,16 @@
 										},
 										"capabilities": {
 											"type": "object",
-											"required": ["canEdit"],
-											"properties": { "canEdit": { "type": "boolean" } }
+											"required": [
+												"canEdit",
+												"canManageAccess",
+												"canManageAssociations"
+											],
+											"properties": {
+												"canEdit": { "type": "boolean" },
+												"canManageAccess": { "type": "boolean" },
+												"canManageAssociations": { "type": "boolean" }
+											}
 										}
 									}
 								}
@@ -32123,8 +34806,16 @@
 										},
 										"capabilities": {
 											"type": "object",
-											"required": ["canEdit"],
-											"properties": { "canEdit": { "type": "boolean" } }
+											"required": [
+												"canEdit",
+												"canManageAccess",
+												"canManageAssociations"
+											],
+											"properties": {
+												"canEdit": { "type": "boolean" },
+												"canManageAccess": { "type": "boolean" },
+												"canManageAssociations": { "type": "boolean" }
+											}
 										}
 									}
 								}
@@ -33158,8 +35849,16 @@
 										},
 										"capabilities": {
 											"type": "object",
-											"required": ["canEdit"],
-											"properties": { "canEdit": { "type": "boolean" } }
+											"required": [
+												"canEdit",
+												"canManageAccess",
+												"canManageAssociations"
+											],
+											"properties": {
+												"canEdit": { "type": "boolean" },
+												"canManageAccess": { "type": "boolean" },
+												"canManageAssociations": { "type": "boolean" }
+											}
 										}
 									}
 								}
@@ -34580,8 +37279,16 @@
 										},
 										"capabilities": {
 											"type": "object",
-											"required": ["canEdit"],
-											"properties": { "canEdit": { "type": "boolean" } }
+											"required": [
+												"canEdit",
+												"canManageAccess",
+												"canManageAssociations"
+											],
+											"properties": {
+												"canEdit": { "type": "boolean" },
+												"canManageAccess": { "type": "boolean" },
+												"canManageAssociations": { "type": "boolean" }
+											}
 										}
 									}
 								}
@@ -37248,12 +39955,22 @@
 												"creditAttribution": {
 													"default": "open",
 													"type": "string",
-													"enum": ["open", "owner_only", "closed"]
+													"enum": [
+														"open",
+														"approval",
+														"invite_only",
+														"closed"
+													]
 												},
 												"subjectAssociation": {
 													"default": "open",
 													"type": "string",
-													"enum": ["open", "owner_only", "closed"]
+													"enum": [
+														"open",
+														"approval",
+														"invite_only",
+														"closed"
+													]
 												}
 											}
 										},
@@ -37266,8 +39983,22 @@
 										},
 										"capabilities": {
 											"type": "object",
-											"required": ["canEdit"],
-											"properties": { "canEdit": { "type": "boolean" } }
+											"required": [
+												"canEdit",
+												"canManageAccess",
+												"canManageCreditAssociations",
+												"canManageSubjectAssociations"
+											],
+											"properties": {
+												"canEdit": { "type": "boolean" },
+												"canManageAccess": { "type": "boolean" },
+												"canManageCreditAssociations": {
+													"type": "boolean"
+												},
+												"canManageSubjectAssociations": {
+													"type": "boolean"
+												}
+											}
 										},
 										"creditAttributions": {
 											"type": "array",
@@ -37781,12 +40512,12 @@
 										"creditAttribution": {
 											"default": "open",
 											"type": "string",
-											"enum": ["open", "owner_only", "closed"]
+											"enum": ["open", "approval", "invite_only", "closed"]
 										},
 										"subjectAssociation": {
 											"default": "open",
 											"type": "string",
-											"enum": ["open", "owner_only", "closed"]
+											"enum": ["open", "approval", "invite_only", "closed"]
 										}
 									}
 								}
@@ -37861,12 +40592,12 @@
 									"creditAttribution": {
 										"default": "open",
 										"type": "string",
-										"enum": ["open", "owner_only", "closed"]
+										"enum": ["open", "approval", "invite_only", "closed"]
 									},
 									"subjectAssociation": {
 										"default": "open",
 										"type": "string",
-										"enum": ["open", "owner_only", "closed"]
+										"enum": ["open", "approval", "invite_only", "closed"]
 									}
 								}
 							}
@@ -37886,12 +40617,12 @@
 										"creditAttribution": {
 											"default": "open",
 											"type": "string",
-											"enum": ["open", "owner_only", "closed"]
+											"enum": ["open", "approval", "invite_only", "closed"]
 										},
 										"subjectAssociation": {
 											"default": "open",
 											"type": "string",
-											"enum": ["open", "owner_only", "closed"]
+											"enum": ["open", "approval", "invite_only", "closed"]
 										}
 									}
 								}
@@ -37911,11 +40642,12 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "EntityOwnershipRequired",
+													"default": "UnitPermissionForbidden",
 													"type": "string",
 													"enum": [
-														"EntityOwnershipRequired",
-														"PlatformCapabilityRequired"
+														"UnitPermissionForbidden",
+														"UnitAccessRestricted",
+														"UnitProtected"
 													]
 												},
 												"message": { "type": "string" },

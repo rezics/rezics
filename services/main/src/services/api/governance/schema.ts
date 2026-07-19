@@ -192,6 +192,11 @@ export const GrantParams = t.Object({ grantId: Uuid });
 export const UnitGovernanceParams = t.Object({ unitId: Uuid });
 export const ClaimUnitOwnershipBody = t.Object({}, { additionalProperties: false });
 export const UnitAccessBindingParams = t.Object({ unitId: Uuid, bindingId: Uuid });
+export const UnitAccessInvitationParams = t.Object({ unitId: Uuid, invitationId: Uuid });
+export const ListUnitAccessInvitationsQuery = t.Object(
+	{ includeResolved: t.Optional(t.Boolean()) },
+	{ additionalProperties: false },
+);
 export const UnitEffectiveAccessQuery = t.Object(
 	{ scope: t.Optional(UnitScope) },
 	{ additionalProperties: false },
@@ -214,6 +219,16 @@ export const CreateUnitAccessBindingBody = t.Object(
 		role: t.UnionEnum(UnitDelegableAccessRoleValues),
 		scope: UnitScope,
 		expiresAt: t.Optional(t.String({ format: "date-time" })),
+	},
+	{ additionalProperties: false },
+);
+export const CreateUnitAccessInvitationBody = t.Object(
+	{
+		invitedProfileId: Uuid,
+		role: t.UnionEnum(UnitDelegableAccessRoleValues),
+		scope: UnitScope,
+		invitationExpiresAt: t.String({ format: "date-time" }),
+		accessExpiresAt: t.Optional(t.String({ format: "date-time" })),
 	},
 	{ additionalProperties: false },
 );
@@ -331,6 +346,34 @@ export const UnitAccessBindingResponse = t.Object({
 });
 export const UnitAccessBindingListResponse = t.Object({
 	items: t.Array(UnitAccessBindingResponse),
+});
+export const UnitAccessInvitationResponse = t.Object({
+	id: Uuid,
+	unitId: Uuid,
+	invitedProfileId: Uuid,
+	role: t.UnionEnum(UnitDelegableAccessRoleValues),
+	scope: UnitScope,
+	invitedByProfileId: Uuid,
+	expiresAt: DateTime,
+	accessExpiresAt: t.Nullable(DateTime),
+	state: t.Union([
+		t.Literal("pending"),
+		t.Literal("expired"),
+		t.Literal("accepted"),
+		t.Literal("declined"),
+		t.Literal("cancelled"),
+	]),
+	resolution: t.Nullable(
+		t.Union([t.Literal("accepted"), t.Literal("declined"), t.Literal("cancelled")]),
+	),
+	resolvedAt: t.Nullable(DateTime),
+	resolvedByProfileId: t.Nullable(Uuid),
+	acceptedBindingId: t.Nullable(Uuid),
+	createdAt: DateTime,
+	updatedAt: DateTime,
+});
+export const UnitAccessInvitationListResponse = t.Object({
+	items: t.Array(UnitAccessInvitationResponse),
 });
 export const UnitAccessRestrictionResponse = t.Object({
 	id: Uuid,

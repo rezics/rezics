@@ -84,6 +84,7 @@ export const CapabilityAuthorityValues = ["platform", "realm"] as const;
 export const UnitAccessSubjectKindValues = ["profile", "realm", "authenticated"] as const;
 export const UnitAccessRestrictionSubjectKindValues = ["profile", "realm"] as const;
 export const UnitAccessRealmRelationValues = ["member", "content_editor", "governor"] as const;
+export const UnitAccessInvitationResolutionValues = ["accepted", "declined", "cancelled"] as const;
 export const UnitAccessRoleValues = [
 	"viewer",
 	"editor",
@@ -103,6 +104,7 @@ export const UnitPermissionValues = [
 	"unit.publish",
 	"unit.history.restore",
 	"unit.access.manage",
+	"unit.association.manage",
 	"unit.protection.manage",
 	"unit.delete",
 ] as const;
@@ -229,9 +231,19 @@ export const RealmCapabilityValues = [
 	"realm.units.moderate",
 ] as const;
 export const EntityAssociationKindValues = ["credit", "subject"] as const;
-export const EntityAssociationPolicyModeValues = ["open", "owner_only", "closed"] as const;
+export const EntityAssociationPolicyModeValues = [
+	"open",
+	"approval",
+	"invite_only",
+	"closed",
+] as const;
+export const EntityAssociationProposalDirectionValues = ["request", "invitation"] as const;
+export const EntityAssociationProposalResolutionValues = [
+	"accepted",
+	"declined",
+	"cancelled",
+] as const;
 export const PlatformCapabilityValues = [
-	"entity.association-policy.manage",
 	"entity.associations.override",
 	"unit.edit",
 	"unit.ownership.transfer",

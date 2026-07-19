@@ -25,12 +25,6 @@ export class EntityAssociationRestricted extends Data.TaggedError("EntityAssocia
 	}
 }
 
-export class EntityOwnershipRequired extends Data.TaggedError("EntityOwnershipRequired") {
-	static readonly status = StatusCodes.FORBIDDEN as const;
-	readonly status = EntityOwnershipRequired.status;
-	readonly message = "Entity ownership is required";
-}
-
 export class CreditAttributionNotFound extends Data.TaggedError("CreditAttributionNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
 	readonly status = CreditAttributionNotFound.status;
@@ -43,10 +37,45 @@ export class SubjectAssociationNotFound extends Data.TaggedError("SubjectAssocia
 	readonly message = "Subject association not found";
 }
 
+export class EntityAssociationProposalNotFound extends Data.TaggedError(
+	"EntityAssociationProposalNotFound",
+) {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = EntityAssociationProposalNotFound.status;
+	readonly message = "Entity association proposal not found";
+}
+
+export class EntityAssociationProposalConflict extends Data.TaggedError(
+	"EntityAssociationProposalConflict",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = EntityAssociationProposalConflict.status;
+	readonly message = "Entity association proposal conflicts with the current relationship state";
+}
+
+export class EntityAssociationProposalExpired extends Data.TaggedError(
+	"EntityAssociationProposalExpired",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = EntityAssociationProposalExpired.status;
+	readonly message = "Entity association proposal has expired";
+}
+
+export class EntityAssociationProposalExpiryInvalid extends Data.TaggedError(
+	"EntityAssociationProposalExpiryInvalid",
+) {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = EntityAssociationProposalExpiryInvalid.status;
+	readonly message = "Entity association proposal expiry must be in the future";
+}
+
 export const EntityErrors = [
 	EntityEntryNotFound,
 	EntityAssociationRestricted,
-	EntityOwnershipRequired,
 	CreditAttributionNotFound,
 	SubjectAssociationNotFound,
+	EntityAssociationProposalNotFound,
+	EntityAssociationProposalConflict,
+	EntityAssociationProposalExpired,
+	EntityAssociationProposalExpiryInvalid,
 ] as const;

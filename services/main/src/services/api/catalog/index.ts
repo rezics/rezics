@@ -95,8 +95,9 @@ const UnitMutationForbiddenResponse = toApiErrorResponse([
 	"UnitProtected",
 ]);
 const EntityPolicyForbiddenResponse = toApiErrorResponse([
-	"EntityOwnershipRequired",
-	"PlatformCapabilityRequired",
+	"UnitPermissionForbidden",
+	"UnitAccessRestricted",
+	"UnitProtected",
 ]);
 
 const publiclyReadableUnitCondition = () =>
@@ -322,6 +323,21 @@ export default new Elysia()
 						)
 						.limit(1);
 					const { avatarAssetId, bannerAssetId, coverAssetId, ...entityEntry } = entry;
+					const [canEdit, accessDecision, creditDecision, subjectDecision] =
+						await Promise.all([
+							identity.authorization.unit.canUpdate(params.unitId, ["localizations"]),
+							identity.authorization.unit.decide(params.unitId, "unit.access.manage"),
+							identity.authorization.unit.decide(
+								params.unitId,
+								"unit.association.manage",
+								["associations", "credit"],
+							),
+							identity.authorization.unit.decide(
+								params.unitId,
+								"unit.association.manage",
+								["associations", "subject"],
+							),
+						]);
 					return {
 						...entityEntry,
 						kind: entry.kind ?? "unknown",
@@ -332,9 +348,10 @@ export default new Elysia()
 						associationPolicy: await getEntityAssociationPolicy(params.unitId),
 						ownerProfileId: owner?.profileId ?? null,
 						capabilities: {
-							canEdit: await identity.authorization.unit.canUpdate(params.unitId, [
-								"localizations",
-							]),
+							canEdit,
+							canManageAccess: accessDecision.allowed,
+							canManageCreditAssociations: creditDecision.allowed,
+							canManageSubjectAssociations: subjectDecision.allowed,
 						},
 						creditAttributions,
 						subjectAssociations,
@@ -386,20 +403,21 @@ export default new Elysia()
 			)
 			.patch(
 				"/:unitId/association-policy",
-				async ({ params, body, profile, authorization }) =>
-					database.transaction(async (tx) => {
+				async ({ params, body, profile, authorization }) => {
+					const changes = [
+						body.creditAttribution === undefined
+							? undefined
+							: { kind: "credit" as const, mode: body.creditAttribution },
+						body.subjectAssociation === undefined
+							? undefined
+							: { kind: "subject" as const, mode: body.subjectAssociation },
+					].filter((change) => change !== undefined);
+					return database.transaction(async (tx) => {
 						await authorization.entity.ensureCanManageAssociationPolicy(
 							tx,
 							params.unitId,
+							changes.map((change) => change.kind),
 						);
-						const changes = [
-							body.creditAttribution === undefined
-								? undefined
-								: { kind: "credit" as const, mode: body.creditAttribution },
-							body.subjectAssociation === undefined
-								? undefined
-								: { kind: "subject" as const, mode: body.subjectAssociation },
-						].filter((change) => change !== undefined);
 						for (const change of changes)
 							await tx
 								.insert(entityAssociationPolicy)
@@ -435,7 +453,8 @@ export default new Elysia()
 								.from(entityAssociationPolicy)
 								.where(eq(entityAssociationPolicy.entityId, params.unitId)),
 						);
-					}),
+					});
+				},
 				{
 					access: "session-only",
 					params: UnitIdParams,

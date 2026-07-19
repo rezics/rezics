@@ -2066,9 +2066,12 @@ export const ApiErrorCode = {
 	UnitSlugAddressNotFound: "UnitSlugAddressNotFound",
 	EntityEntryNotFound: "EntityEntryNotFound",
 	EntityAssociationRestricted: "EntityAssociationRestricted",
-	EntityOwnershipRequired: "EntityOwnershipRequired",
 	CreditAttributionNotFound: "CreditAttributionNotFound",
 	SubjectAssociationNotFound: "SubjectAssociationNotFound",
+	EntityAssociationProposalNotFound: "EntityAssociationProposalNotFound",
+	EntityAssociationProposalConflict: "EntityAssociationProposalConflict",
+	EntityAssociationProposalExpired: "EntityAssociationProposalExpired",
+	EntityAssociationProposalExpiryInvalid: "EntityAssociationProposalExpiryInvalid",
 	ImageAssetNotFound: "ImageAssetNotFound",
 	ImageAssetUploadNotFound: "ImageAssetUploadNotFound",
 	ImageAssetUnsupportedType: "ImageAssetUnsupportedType",
@@ -2138,6 +2141,11 @@ export const ApiErrorCode = {
 	UnitProtectionNotFound: "UnitProtectionNotFound",
 	UnitAccessExpiryInvalid: "UnitAccessExpiryInvalid",
 	UnitAccessBindingConflict: "UnitAccessBindingConflict",
+	UnitAccessInvitationNotFound: "UnitAccessInvitationNotFound",
+	UnitAccessInvitationConflict: "UnitAccessInvitationConflict",
+	UnitAccessInvitationExpired: "UnitAccessInvitationExpired",
+	UnitAccessInvitationSelfForbidden: "UnitAccessInvitationSelfForbidden",
+	UnitAccessRoleDelegationForbidden: "UnitAccessRoleDelegationForbidden",
 	UnitAccessSubjectRoleInvalid: "UnitAccessSubjectRoleInvalid",
 	UnitAccessRestrictionConflict: "UnitAccessRestrictionConflict",
 	UnitOwnerRestrictionForbidden: "UnitOwnerRestrictionForbidden",
@@ -2306,6 +2314,1646 @@ export type GetImageAssetsByIdContentResponse =
 	| GetImageAssetsByIdContentStatus404
 	| GetImageAssetsByIdContentStatus422
 	| GetImageAssetsByIdContentStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiUnitByUnitIdAssociationProposalsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const GetApiUnitByUnitIdAssociationProposalsSide = {
+	source: "source",
+	target: "target",
+} as const;
+
+export type GetApiUnitByUnitIdAssociationProposalsSide =
+	(typeof GetApiUnitByUnitIdAssociationProposalsSide)[keyof typeof GetApiUnitByUnitIdAssociationProposalsSide];
+
+export const GetApiUnitByUnitIdAssociationProposalsKind = {
+	credit: "credit",
+	subject: "subject",
+} as const;
+
+export type GetApiUnitByUnitIdAssociationProposalsKind =
+	(typeof GetApiUnitByUnitIdAssociationProposalsKind)[keyof typeof GetApiUnitByUnitIdAssociationProposalsKind];
+
+/**
+ * @type object
+ */
+export type GetApiUnitByUnitIdAssociationProposalsQuery = {
+	/**
+	 * @type string
+	 */
+	side: GetApiUnitByUnitIdAssociationProposalsSide;
+	/**
+	 * @default 'credit'
+	 * @type string
+	 */
+	kind: GetApiUnitByUnitIdAssociationProposalsKind;
+	/**
+	 * @type boolean | undefined
+	 */
+	includeResolved?: boolean;
+};
+
+export const GetApiUnitByUnitIdAssociationProposalsStatus200ItemsKindEnum = {
+	credit: "credit",
+	subject: "subject",
+} as const;
+
+export type GetApiUnitByUnitIdAssociationProposalsStatus200ItemsKindEnum =
+	(typeof GetApiUnitByUnitIdAssociationProposalsStatus200ItemsKindEnum)[keyof typeof GetApiUnitByUnitIdAssociationProposalsStatus200ItemsKindEnum];
+
+export const GetApiUnitByUnitIdAssociationProposalsStatus200ItemsDirectionEnum = {
+	request: "request",
+	invitation: "invitation",
+} as const;
+
+export type GetApiUnitByUnitIdAssociationProposalsStatus200ItemsDirectionEnum =
+	(typeof GetApiUnitByUnitIdAssociationProposalsStatus200ItemsDirectionEnum)[keyof typeof GetApiUnitByUnitIdAssociationProposalsStatus200ItemsDirectionEnum];
+
+export const GetApiUnitByUnitIdAssociationProposalsStatus200ItemsStateEnum = {
+	pending: "pending",
+	expired: "expired",
+	accepted: "accepted",
+	declined: "declined",
+	cancelled: "cancelled",
+} as const;
+
+export type GetApiUnitByUnitIdAssociationProposalsStatus200ItemsStateEnum =
+	(typeof GetApiUnitByUnitIdAssociationProposalsStatus200ItemsStateEnum)[keyof typeof GetApiUnitByUnitIdAssociationProposalsStatus200ItemsStateEnum];
+
+/**
+ * @type object
+ */
+export type GetApiUnitByUnitIdAssociationProposalsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		sourceUnitId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		targetEntityId: string;
+		/**
+		 * @default 'credit'
+		 * @type string
+		 */
+		kind: GetApiUnitByUnitIdAssociationProposalsStatus200ItemsKindEnum;
+		/**
+		 * @type string
+		 */
+		role: string;
+		/**
+		 * @type string
+		 */
+		direction: GetApiUnitByUnitIdAssociationProposalsStatus200ItemsDirectionEnum;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		createdByProfileId: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		expiresAt: string;
+		/**
+		 * @type string
+		 */
+		state: GetApiUnitByUnitIdAssociationProposalsStatus200ItemsStateEnum;
+		resolution: (("accepted" | "declined" | "cancelled") | null) | null;
+		resolvedAt: (string | null) | null;
+		resolvedByProfileId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+};
+
+export const GetApiUnitByUnitIdAssociationProposalsStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitProtected: "UnitProtected",
+	EntityAssociationRestricted: "EntityAssociationRestricted",
+} as const;
+
+export type GetApiUnitByUnitIdAssociationProposalsStatus403ErrorCodeEnum =
+	(typeof GetApiUnitByUnitIdAssociationProposalsStatus403ErrorCodeEnum)[keyof typeof GetApiUnitByUnitIdAssociationProposalsStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiUnitByUnitIdAssociationProposalsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: GetApiUnitByUnitIdAssociationProposalsStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const GetApiUnitByUnitIdAssociationProposalsStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	EntityEntryNotFound: "EntityEntryNotFound",
+	EntityAssociationProposalNotFound: "EntityAssociationProposalNotFound",
+} as const;
+
+export type GetApiUnitByUnitIdAssociationProposalsStatus404ErrorCodeEnum =
+	(typeof GetApiUnitByUnitIdAssociationProposalsStatus404ErrorCodeEnum)[keyof typeof GetApiUnitByUnitIdAssociationProposalsStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiUnitByUnitIdAssociationProposalsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: GetApiUnitByUnitIdAssociationProposalsStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitByUnitIdAssociationProposalsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiUnitByUnitIdAssociationProposalsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiUnitByUnitIdAssociationProposalsOptions = {
+	body?: never;
+	path: GetApiUnitByUnitIdAssociationProposalsPath;
+	query: GetApiUnitByUnitIdAssociationProposalsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitByUnitIdAssociationProposalsResponses = {
+	"200": GetApiUnitByUnitIdAssociationProposalsStatus200;
+	"403": GetApiUnitByUnitIdAssociationProposalsStatus403;
+	"404": GetApiUnitByUnitIdAssociationProposalsStatus404;
+	"422": GetApiUnitByUnitIdAssociationProposalsStatus422;
+	"500": GetApiUnitByUnitIdAssociationProposalsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiUnitByUnitIdAssociationProposalsResponse =
+	| GetApiUnitByUnitIdAssociationProposalsStatus200
+	| GetApiUnitByUnitIdAssociationProposalsStatus403
+	| GetApiUnitByUnitIdAssociationProposalsStatus404
+	| GetApiUnitByUnitIdAssociationProposalsStatus422
+	| GetApiUnitByUnitIdAssociationProposalsStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsRequestsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const PostApiUnitByUnitIdAssociationProposalsRequestsStatus200KindEnum = {
+	credit: "credit",
+	subject: "subject",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus200KindEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus200KindEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus200KindEnum];
+
+export const PostApiUnitByUnitIdAssociationProposalsRequestsStatus200DirectionEnum = {
+	request: "request",
+	invitation: "invitation",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus200DirectionEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus200DirectionEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus200DirectionEnum];
+
+export const PostApiUnitByUnitIdAssociationProposalsRequestsStatus200StateEnum = {
+	pending: "pending",
+	expired: "expired",
+	accepted: "accepted",
+	declined: "declined",
+	cancelled: "cancelled",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus200StateEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus200StateEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus200StateEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	sourceUnitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	targetEntityId: string;
+	/**
+	 * @default 'credit'
+	 * @type string
+	 */
+	kind: PostApiUnitByUnitIdAssociationProposalsRequestsStatus200KindEnum;
+	/**
+	 * @type string
+	 */
+	role: string;
+	/**
+	 * @type string
+	 */
+	direction: PostApiUnitByUnitIdAssociationProposalsRequestsStatus200DirectionEnum;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	createdByProfileId: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+	/**
+	 * @type string
+	 */
+	state: PostApiUnitByUnitIdAssociationProposalsRequestsStatus200StateEnum;
+	resolution: (("accepted" | "declined" | "cancelled") | null) | null;
+	resolvedAt: (string | null) | null;
+	resolvedByProfileId: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'EntityAssociationProposalExpiryInvalid'
+		 * @type string
+		 */
+		code: "EntityAssociationProposalExpiryInvalid";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitByUnitIdAssociationProposalsRequestsStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitProtected: "UnitProtected",
+	EntityAssociationRestricted: "EntityAssociationRestricted",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus403ErrorCodeEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus403ErrorCodeEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PostApiUnitByUnitIdAssociationProposalsRequestsStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitByUnitIdAssociationProposalsRequestsStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	EntityEntryNotFound: "EntityEntryNotFound",
+	EntityAssociationProposalNotFound: "EntityAssociationProposalNotFound",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus404ErrorCodeEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus404ErrorCodeEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiUnitByUnitIdAssociationProposalsRequestsStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitByUnitIdAssociationProposalsRequestsStatus409ErrorCodeEnum = {
+	EntityAssociationProposalConflict: "EntityAssociationProposalConflict",
+	EntityAssociationProposalExpired: "EntityAssociationProposalExpired",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus409ErrorCodeEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus409ErrorCodeEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'EntityAssociationProposalConflict'
+		 * @type string
+		 */
+		code: PostApiUnitByUnitIdAssociationProposalsRequestsStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus500 = InternalError;
+
+export const PostApiUnitByUnitIdAssociationProposalsRequestsRequestKindEnum = {
+	credit: "credit",
+	subject: "subject",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsRequestsRequestKindEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsRequestsRequestKindEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsRequestsRequestKindEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsRequestsBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	targetEntityId: string;
+	/**
+	 * @default 'credit'
+	 * @type string
+	 */
+	kind: PostApiUnitByUnitIdAssociationProposalsRequestsRequestKindEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 64
+	 * @type string
+	 */
+	role: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsRequestsOptions = {
+	body: PostApiUnitByUnitIdAssociationProposalsRequestsBody;
+	path: PostApiUnitByUnitIdAssociationProposalsRequestsPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsRequestsResponses = {
+	"200": PostApiUnitByUnitIdAssociationProposalsRequestsStatus200;
+	"400": PostApiUnitByUnitIdAssociationProposalsRequestsStatus400;
+	"403": PostApiUnitByUnitIdAssociationProposalsRequestsStatus403;
+	"404": PostApiUnitByUnitIdAssociationProposalsRequestsStatus404;
+	"409": PostApiUnitByUnitIdAssociationProposalsRequestsStatus409;
+	"422": PostApiUnitByUnitIdAssociationProposalsRequestsStatus422;
+	"500": PostApiUnitByUnitIdAssociationProposalsRequestsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiUnitByUnitIdAssociationProposalsRequestsResponse =
+	| PostApiUnitByUnitIdAssociationProposalsRequestsStatus200
+	| PostApiUnitByUnitIdAssociationProposalsRequestsStatus400
+	| PostApiUnitByUnitIdAssociationProposalsRequestsStatus403
+	| PostApiUnitByUnitIdAssociationProposalsRequestsStatus404
+	| PostApiUnitByUnitIdAssociationProposalsRequestsStatus409
+	| PostApiUnitByUnitIdAssociationProposalsRequestsStatus422
+	| PostApiUnitByUnitIdAssociationProposalsRequestsStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200KindEnum = {
+	credit: "credit",
+	subject: "subject",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200KindEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200KindEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200KindEnum];
+
+export const PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200DirectionEnum = {
+	request: "request",
+	invitation: "invitation",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200DirectionEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200DirectionEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200DirectionEnum];
+
+export const PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200StateEnum = {
+	pending: "pending",
+	expired: "expired",
+	accepted: "accepted",
+	declined: "declined",
+	cancelled: "cancelled",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200StateEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200StateEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200StateEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	sourceUnitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	targetEntityId: string;
+	/**
+	 * @default 'credit'
+	 * @type string
+	 */
+	kind: PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200KindEnum;
+	/**
+	 * @type string
+	 */
+	role: string;
+	/**
+	 * @type string
+	 */
+	direction: PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200DirectionEnum;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	createdByProfileId: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+	/**
+	 * @type string
+	 */
+	state: PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200StateEnum;
+	resolution: (("accepted" | "declined" | "cancelled") | null) | null;
+	resolvedAt: (string | null) | null;
+	resolvedByProfileId: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'EntityAssociationProposalExpiryInvalid'
+		 * @type string
+		 */
+		code: "EntityAssociationProposalExpiryInvalid";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitByUnitIdAssociationProposalsInvitationsStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitProtected: "UnitProtected",
+	EntityAssociationRestricted: "EntityAssociationRestricted",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus403ErrorCodeEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus403ErrorCodeEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PostApiUnitByUnitIdAssociationProposalsInvitationsStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitByUnitIdAssociationProposalsInvitationsStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	EntityEntryNotFound: "EntityEntryNotFound",
+	EntityAssociationProposalNotFound: "EntityAssociationProposalNotFound",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus404ErrorCodeEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus404ErrorCodeEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiUnitByUnitIdAssociationProposalsInvitationsStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitByUnitIdAssociationProposalsInvitationsStatus409ErrorCodeEnum = {
+	EntityAssociationProposalConflict: "EntityAssociationProposalConflict",
+	EntityAssociationProposalExpired: "EntityAssociationProposalExpired",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus409ErrorCodeEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus409ErrorCodeEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'EntityAssociationProposalConflict'
+		 * @type string
+		 */
+		code: PostApiUnitByUnitIdAssociationProposalsInvitationsStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus500 = InternalError;
+
+export const PostApiUnitByUnitIdAssociationProposalsInvitationsRequestKindEnum = {
+	credit: "credit",
+	subject: "subject",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsRequestKindEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsInvitationsRequestKindEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsInvitationsRequestKindEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	sourceUnitId: string;
+	/**
+	 * @default 'credit'
+	 * @type string
+	 */
+	kind: PostApiUnitByUnitIdAssociationProposalsInvitationsRequestKindEnum;
+	/**
+	 * @minLength 1
+	 * @maxLength 64
+	 * @type string
+	 */
+	role: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsOptions = {
+	body: PostApiUnitByUnitIdAssociationProposalsInvitationsBody;
+	path: PostApiUnitByUnitIdAssociationProposalsInvitationsPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsResponses = {
+	"200": PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200;
+	"400": PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400;
+	"403": PostApiUnitByUnitIdAssociationProposalsInvitationsStatus403;
+	"404": PostApiUnitByUnitIdAssociationProposalsInvitationsStatus404;
+	"409": PostApiUnitByUnitIdAssociationProposalsInvitationsStatus409;
+	"422": PostApiUnitByUnitIdAssociationProposalsInvitationsStatus422;
+	"500": PostApiUnitByUnitIdAssociationProposalsInvitationsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsResponse =
+	| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200
+	| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400
+	| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus403
+	| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus404
+	| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus409
+	| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus422
+	| PostApiUnitByUnitIdAssociationProposalsInvitationsStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	proposalId: string;
+};
+
+export const PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200KindEnum = {
+	credit: "credit",
+	subject: "subject",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200KindEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200KindEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200KindEnum];
+
+export const PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200DirectionEnum = {
+	request: "request",
+	invitation: "invitation",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200DirectionEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200DirectionEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200DirectionEnum];
+
+export const PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200StateEnum = {
+	pending: "pending",
+	expired: "expired",
+	accepted: "accepted",
+	declined: "declined",
+	cancelled: "cancelled",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200StateEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200StateEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200StateEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	sourceUnitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	targetEntityId: string;
+	/**
+	 * @default 'credit'
+	 * @type string
+	 */
+	kind: PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200KindEnum;
+	/**
+	 * @type string
+	 */
+	role: string;
+	/**
+	 * @type string
+	 */
+	direction: PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200DirectionEnum;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	createdByProfileId: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+	/**
+	 * @type string
+	 */
+	state: PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200StateEnum;
+	resolution: (("accepted" | "declined" | "cancelled") | null) | null;
+	resolvedAt: (string | null) | null;
+	resolvedByProfileId: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export const PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitProtected: "UnitProtected",
+	EntityAssociationRestricted: "EntityAssociationRestricted",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403ErrorCodeEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403ErrorCodeEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	EntityEntryNotFound: "EntityEntryNotFound",
+	EntityAssociationProposalNotFound: "EntityAssociationProposalNotFound",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404ErrorCodeEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404ErrorCodeEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409ErrorCodeEnum = {
+	EntityAssociationProposalConflict: "EntityAssociationProposalConflict",
+	EntityAssociationProposalExpired: "EntityAssociationProposalExpired",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409ErrorCodeEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409ErrorCodeEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'EntityAssociationProposalConflict'
+		 * @type string
+		 */
+		code: PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptBody = object;
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptOptions = {
+	body: PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptBody;
+	path: PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptResponses = {
+	"200": PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200;
+	"403": PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403;
+	"404": PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404;
+	"409": PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409;
+	"422": PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus422;
+	"500": PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptResponse =
+	| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200
+	| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403
+	| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus404
+	| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus409
+	| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus422
+	| PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclinePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	proposalId: string;
+};
+
+export const PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200KindEnum = {
+	credit: "credit",
+	subject: "subject",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200KindEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200KindEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200KindEnum];
+
+export const PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200DirectionEnum = {
+	request: "request",
+	invitation: "invitation",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200DirectionEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200DirectionEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200DirectionEnum];
+
+export const PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200StateEnum = {
+	pending: "pending",
+	expired: "expired",
+	accepted: "accepted",
+	declined: "declined",
+	cancelled: "cancelled",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200StateEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200StateEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200StateEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	sourceUnitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	targetEntityId: string;
+	/**
+	 * @default 'credit'
+	 * @type string
+	 */
+	kind: PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200KindEnum;
+	/**
+	 * @type string
+	 */
+	role: string;
+	/**
+	 * @type string
+	 */
+	direction: PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200DirectionEnum;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	createdByProfileId: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+	/**
+	 * @type string
+	 */
+	state: PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200StateEnum;
+	resolution: (("accepted" | "declined" | "cancelled") | null) | null;
+	resolvedAt: (string | null) | null;
+	resolvedByProfileId: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export const PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitProtected: "UnitProtected",
+	EntityAssociationRestricted: "EntityAssociationRestricted",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403ErrorCodeEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403ErrorCodeEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	EntityEntryNotFound: "EntityEntryNotFound",
+	EntityAssociationProposalNotFound: "EntityAssociationProposalNotFound",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404ErrorCodeEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404ErrorCodeEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409ErrorCodeEnum = {
+	EntityAssociationProposalConflict: "EntityAssociationProposalConflict",
+	EntityAssociationProposalExpired: "EntityAssociationProposalExpired",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409ErrorCodeEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409ErrorCodeEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'EntityAssociationProposalConflict'
+		 * @type string
+		 */
+		code: PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineBody = object;
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineOptions = {
+	body: PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineBody;
+	path: PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclinePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineResponses = {
+	"200": PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200;
+	"403": PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403;
+	"404": PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404;
+	"409": PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409;
+	"422": PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus422;
+	"500": PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineResponse =
+	| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200
+	| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403
+	| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus404
+	| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409
+	| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus422
+	| PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitByUnitIdAssociationProposalsByProposalIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	proposalId: string;
+};
+
+/**
+ * @type void
+ */
+export type DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus204 = void;
+
+export const DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitProtected: "UnitProtected",
+	EntityAssociationRestricted: "EntityAssociationRestricted",
+} as const;
+
+export type DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	EntityEntryNotFound: "EntityEntryNotFound",
+	EntityAssociationProposalNotFound: "EntityAssociationProposalNotFound",
+} as const;
+
+export type DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus404ErrorCodeEnum =
+	(typeof DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus409ErrorCodeEnum = {
+	EntityAssociationProposalConflict: "EntityAssociationProposalConflict",
+	EntityAssociationProposalExpired: "EntityAssociationProposalExpired",
+} as const;
+
+export type DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus409ErrorCodeEnum =
+	(typeof DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus409ErrorCodeEnum)[keyof typeof DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'EntityAssociationProposalConflict'
+		 * @type string
+		 */
+		code: DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitByUnitIdAssociationProposalsByProposalIdOptions = {
+	body?: never;
+	path: DeleteApiUnitByUnitIdAssociationProposalsByProposalIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitByUnitIdAssociationProposalsByProposalIdResponses = {
+	"204": DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus204;
+	"403": DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus403;
+	"404": DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus404;
+	"409": DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus409;
+	"422": DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus422;
+	"500": DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiUnitByUnitIdAssociationProposalsByProposalIdResponse =
+	| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus204
+	| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus403
+	| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus404
+	| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus409
+	| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus422
+	| DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus500;
 
 /**
  * @type object
@@ -7745,6 +9393,7 @@ export const GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200DecisionsPermis
 	"unit.publish": "unit.publish",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
+	"unit.association.manage": "unit.association.manage",
 	"unit.protection.manage": "unit.protection.manage",
 	"unit.delete": "unit.delete",
 } as const;
@@ -9508,6 +11157,7 @@ export const PostApiGovernanceUnitByUnitIdAccessRestrictionsRequestPermissionEnu
 	"unit.publish": "unit.publish",
 	"unit.history.restore": "unit.history.restore",
 	"unit.access.manage": "unit.access.manage",
+	"unit.association.manage": "unit.association.manage",
 	"unit.protection.manage": "unit.protection.manage",
 	"unit.delete": "unit.delete",
 } as const;
@@ -10635,6 +12285,1322 @@ export type DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdResponse =
 	| DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus404
 	| DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus422
 	| DeleteApiGovernanceUnitByUnitIdProtectionsByProtectionIdStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitAccessInvitationsQuery = {
+	/**
+	 * @type boolean | undefined
+	 */
+	includeResolved?: boolean;
+};
+
+export const GetApiGovernanceUnitAccessInvitationsStatus200ItemsRoleEnum = {
+	viewer: "viewer",
+	editor: "editor",
+	publishing_editor: "publishing_editor",
+	maintainer: "maintainer",
+} as const;
+
+export type GetApiGovernanceUnitAccessInvitationsStatus200ItemsRoleEnum =
+	(typeof GetApiGovernanceUnitAccessInvitationsStatus200ItemsRoleEnum)[keyof typeof GetApiGovernanceUnitAccessInvitationsStatus200ItemsRoleEnum];
+
+export const GetApiGovernanceUnitAccessInvitationsStatus200ItemsStateEnum = {
+	pending: "pending",
+	expired: "expired",
+	accepted: "accepted",
+	declined: "declined",
+	cancelled: "cancelled",
+} as const;
+
+export type GetApiGovernanceUnitAccessInvitationsStatus200ItemsStateEnum =
+	(typeof GetApiGovernanceUnitAccessInvitationsStatus200ItemsStateEnum)[keyof typeof GetApiGovernanceUnitAccessInvitationsStatus200ItemsStateEnum];
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitAccessInvitationsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		invitedProfileId: string;
+		/**
+		 * @default 'viewer'
+		 * @type string
+		 */
+		role: GetApiGovernanceUnitAccessInvitationsStatus200ItemsRoleEnum;
+		/**
+		 * @type array
+		 */
+		scope: string[];
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		invitedByProfileId: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		expiresAt: string;
+		accessExpiresAt: (string | null) | null;
+		/**
+		 * @type string
+		 */
+		state: GetApiGovernanceUnitAccessInvitationsStatus200ItemsStateEnum;
+		resolution: (("accepted" | "declined" | "cancelled") | null) | null;
+		resolvedAt: (string | null) | null;
+		resolvedByProfileId: (string | null) | null;
+		acceptedBindingId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitAccessInvitationsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitAccessInvitationsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitAccessInvitationsOptions = {
+	body?: never;
+	path?: never;
+	query?: GetApiGovernanceUnitAccessInvitationsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitAccessInvitationsResponses = {
+	"200": GetApiGovernanceUnitAccessInvitationsStatus200;
+	"422": GetApiGovernanceUnitAccessInvitationsStatus422;
+	"500": GetApiGovernanceUnitAccessInvitationsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiGovernanceUnitAccessInvitationsResponse =
+	| GetApiGovernanceUnitAccessInvitationsStatus200
+	| GetApiGovernanceUnitAccessInvitationsStatus422
+	| GetApiGovernanceUnitAccessInvitationsStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessInvitationsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessInvitationsQuery = {
+	/**
+	 * @type boolean | undefined
+	 */
+	includeResolved?: boolean;
+};
+
+export const GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsRoleEnum = {
+	viewer: "viewer",
+	editor: "editor",
+	publishing_editor: "publishing_editor",
+	maintainer: "maintainer",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsRoleEnum =
+	(typeof GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsRoleEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsRoleEnum];
+
+export const GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsStateEnum = {
+	pending: "pending",
+	expired: "expired",
+	accepted: "accepted",
+	declined: "declined",
+	cancelled: "cancelled",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsStateEnum =
+	(typeof GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsStateEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsStateEnum];
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		invitedProfileId: string;
+		/**
+		 * @default 'viewer'
+		 * @type string
+		 */
+		role: GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsRoleEnum;
+		/**
+		 * @type array
+		 */
+		scope: string[];
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		invitedByProfileId: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		expiresAt: string;
+		accessExpiresAt: (string | null) | null;
+		/**
+		 * @type string
+		 */
+		state: GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200ItemsStateEnum;
+		resolution: (("accepted" | "declined" | "cancelled") | null) | null;
+		resolvedAt: (string | null) | null;
+		resolvedByProfileId: (string | null) | null;
+		acceptedBindingId: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+};
+
+export const GetApiGovernanceUnitByUnitIdAccessInvitationsStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitProtected: "UnitProtected",
+	UnitAccessRoleDelegationForbidden: "UnitAccessRoleDelegationForbidden",
+} as const;
+
+export type GetApiGovernanceUnitByUnitIdAccessInvitationsStatus403ErrorCodeEnum =
+	(typeof GetApiGovernanceUnitByUnitIdAccessInvitationsStatus403ErrorCodeEnum)[keyof typeof GetApiGovernanceUnitByUnitIdAccessInvitationsStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessInvitationsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: GetApiGovernanceUnitByUnitIdAccessInvitationsStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessInvitationsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessInvitationsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessInvitationsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessInvitationsOptions = {
+	body?: never;
+	path: GetApiGovernanceUnitByUnitIdAccessInvitationsPath;
+	query?: GetApiGovernanceUnitByUnitIdAccessInvitationsQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceUnitByUnitIdAccessInvitationsResponses = {
+	"200": GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200;
+	"403": GetApiGovernanceUnitByUnitIdAccessInvitationsStatus403;
+	"404": GetApiGovernanceUnitByUnitIdAccessInvitationsStatus404;
+	"422": GetApiGovernanceUnitByUnitIdAccessInvitationsStatus422;
+	"500": GetApiGovernanceUnitByUnitIdAccessInvitationsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiGovernanceUnitByUnitIdAccessInvitationsResponse =
+	| GetApiGovernanceUnitByUnitIdAccessInvitationsStatus200
+	| GetApiGovernanceUnitByUnitIdAccessInvitationsStatus403
+	| GetApiGovernanceUnitByUnitIdAccessInvitationsStatus404
+	| GetApiGovernanceUnitByUnitIdAccessInvitationsStatus422
+	| GetApiGovernanceUnitByUnitIdAccessInvitationsStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200RoleEnum = {
+	viewer: "viewer",
+	editor: "editor",
+	publishing_editor: "publishing_editor",
+	maintainer: "maintainer",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200RoleEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200RoleEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200RoleEnum];
+
+export const PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200StateEnum = {
+	pending: "pending",
+	expired: "expired",
+	accepted: "accepted",
+	declined: "declined",
+	cancelled: "cancelled",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200StateEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200StateEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200StateEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	invitedProfileId: string;
+	/**
+	 * @default 'viewer'
+	 * @type string
+	 */
+	role: PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200RoleEnum;
+	/**
+	 * @type array
+	 */
+	scope: string[];
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	invitedByProfileId: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+	accessExpiresAt: (string | null) | null;
+	/**
+	 * @type string
+	 */
+	state: PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200StateEnum;
+	resolution: (("accepted" | "declined" | "cancelled") | null) | null;
+	resolvedAt: (string | null) | null;
+	resolvedByProfileId: (string | null) | null;
+	acceptedBindingId: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export const PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400ErrorCodeEnum = {
+	UnitAccessExpiryInvalid: "UnitAccessExpiryInvalid",
+	UnitAccessInvitationSelfForbidden: "UnitAccessInvitationSelfForbidden",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400ErrorCodeEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitAccessExpiryInvalid'
+		 * @type string
+		 */
+		code: PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernanceUnitByUnitIdAccessInvitationsStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitProtected: "UnitProtected",
+	UnitAccessRoleDelegationForbidden: "UnitAccessRoleDelegationForbidden",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus403ErrorCodeEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsStatus403ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PostApiGovernanceUnitByUnitIdAccessInvitationsStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernanceUnitByUnitIdAccessInvitationsStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	ProfileNotFound: "ProfileNotFound",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus404ErrorCodeEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsStatus404ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiGovernanceUnitByUnitIdAccessInvitationsStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernanceUnitByUnitIdAccessInvitationsStatus409ErrorCodeEnum = {
+	UnitAccessInvitationConflict: "UnitAccessInvitationConflict",
+	UnitAccessInvitationExpired: "UnitAccessInvitationExpired",
+	UnitAccessBindingConflict: "UnitAccessBindingConflict",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus409ErrorCodeEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsStatus409ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitAccessInvitationConflict'
+		 * @type string
+		 */
+		code: PostApiGovernanceUnitByUnitIdAccessInvitationsStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsStatus500 = InternalError;
+
+export const PostApiGovernanceUnitByUnitIdAccessInvitationsRequestRoleEnum = {
+	viewer: "viewer",
+	editor: "editor",
+	publishing_editor: "publishing_editor",
+	maintainer: "maintainer",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsRequestRoleEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsRequestRoleEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsRequestRoleEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	invitedProfileId: string;
+	/**
+	 * @default 'viewer'
+	 * @type string
+	 */
+	role: PostApiGovernanceUnitByUnitIdAccessInvitationsRequestRoleEnum;
+	/**
+	 * @type array
+	 */
+	scope: string[];
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	invitationExpiresAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string | undefined
+	 */
+	accessExpiresAt?: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsOptions = {
+	body: PostApiGovernanceUnitByUnitIdAccessInvitationsBody;
+	path: PostApiGovernanceUnitByUnitIdAccessInvitationsPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsResponses = {
+	"200": PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200;
+	"400": PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400;
+	"403": PostApiGovernanceUnitByUnitIdAccessInvitationsStatus403;
+	"404": PostApiGovernanceUnitByUnitIdAccessInvitationsStatus404;
+	"409": PostApiGovernanceUnitByUnitIdAccessInvitationsStatus409;
+	"422": PostApiGovernanceUnitByUnitIdAccessInvitationsStatus422;
+	"500": PostApiGovernanceUnitByUnitIdAccessInvitationsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsResponse =
+	| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus200
+	| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus400
+	| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus403
+	| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus404
+	| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus409
+	| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus422
+	| PostApiGovernanceUnitByUnitIdAccessInvitationsStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	invitationId: string;
+};
+
+export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200RoleEnum = {
+	viewer: "viewer",
+	editor: "editor",
+	publishing_editor: "publishing_editor",
+	maintainer: "maintainer",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200RoleEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200RoleEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200RoleEnum];
+
+export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200StateEnum =
+	{
+		pending: "pending",
+		expired: "expired",
+		accepted: "accepted",
+		declined: "declined",
+		cancelled: "cancelled",
+	} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200StateEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200StateEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200StateEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	invitedProfileId: string;
+	/**
+	 * @default 'viewer'
+	 * @type string
+	 */
+	role: PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200RoleEnum;
+	/**
+	 * @type array
+	 */
+	scope: string[];
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	invitedByProfileId: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+	accessExpiresAt: (string | null) | null;
+	/**
+	 * @type string
+	 */
+	state: PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200StateEnum;
+	resolution: (("accepted" | "declined" | "cancelled") | null) | null;
+	resolvedAt: (string | null) | null;
+	resolvedByProfileId: (string | null) | null;
+	acceptedBindingId: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitAccessInvitationNotFound'
+		 * @type string
+		 */
+		code: "UnitAccessInvitationNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409ErrorCodeEnum =
+	{
+		UnitAccessInvitationConflict: "UnitAccessInvitationConflict",
+		UnitAccessInvitationExpired: "UnitAccessInvitationExpired",
+		UnitAccessBindingConflict: "UnitAccessBindingConflict",
+	} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409ErrorCodeEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitAccessInvitationConflict'
+		 * @type string
+		 */
+		code: PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus422 =
+	ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus500 =
+	InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptBody = object;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptOptions = {
+	body: PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptBody;
+	path: PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptResponses = {
+	"200": PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200;
+	"404": PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus404;
+	"409": PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409;
+	"422": PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus422;
+	"500": PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptResponse =
+	| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus200
+	| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus404
+	| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus409
+	| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus422
+	| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcceptStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclinePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	invitationId: string;
+};
+
+export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200RoleEnum =
+	{
+		viewer: "viewer",
+		editor: "editor",
+		publishing_editor: "publishing_editor",
+		maintainer: "maintainer",
+	} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200RoleEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200RoleEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200RoleEnum];
+
+export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200StateEnum =
+	{
+		pending: "pending",
+		expired: "expired",
+		accepted: "accepted",
+		declined: "declined",
+		cancelled: "cancelled",
+	} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200StateEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200StateEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200StateEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	invitedProfileId: string;
+	/**
+	 * @default 'viewer'
+	 * @type string
+	 */
+	role: PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200RoleEnum;
+	/**
+	 * @type array
+	 */
+	scope: string[];
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	invitedByProfileId: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	expiresAt: string;
+	accessExpiresAt: (string | null) | null;
+	/**
+	 * @type string
+	 */
+	state: PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200StateEnum;
+	resolution: (("accepted" | "declined" | "cancelled") | null) | null;
+	resolvedAt: (string | null) | null;
+	resolvedByProfileId: (string | null) | null;
+	acceptedBindingId: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitAccessInvitationNotFound'
+		 * @type string
+		 */
+		code: "UnitAccessInvitationNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409ErrorCodeEnum =
+	{
+		UnitAccessInvitationConflict: "UnitAccessInvitationConflict",
+		UnitAccessInvitationExpired: "UnitAccessInvitationExpired",
+		UnitAccessBindingConflict: "UnitAccessBindingConflict",
+	} as const;
+
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409ErrorCodeEnum =
+	(typeof PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409ErrorCodeEnum)[keyof typeof PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitAccessInvitationConflict'
+		 * @type string
+		 */
+		code: PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus422 =
+	ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus500 =
+	InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineBody = object;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineOptions = {
+	body: PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineBody;
+	path: PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclinePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineResponses = {
+	"200": PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200;
+	"404": PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus404;
+	"409": PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409;
+	"422": PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus422;
+	"500": PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineResponse =
+	| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus200
+	| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus404
+	| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus409
+	| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus422
+	| PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	invitationId: string;
+};
+
+/**
+ * @type void
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus204 = void;
+
+export const DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus403ErrorCodeEnum =
+	{
+		UnitPermissionForbidden: "UnitPermissionForbidden",
+		UnitAccessRestricted: "UnitAccessRestricted",
+		UnitProtected: "UnitProtected",
+		UnitAccessRoleDelegationForbidden: "UnitAccessRoleDelegationForbidden",
+	} as const;
+
+export type DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus404ErrorCodeEnum =
+	{
+		UnitNotFound: "UnitNotFound",
+		UnitAccessInvitationNotFound: "UnitAccessInvitationNotFound",
+	} as const;
+
+export type DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus404ErrorCodeEnum =
+	(typeof DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus404ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus409ErrorCodeEnum =
+	{
+		UnitAccessInvitationConflict: "UnitAccessInvitationConflict",
+		UnitAccessInvitationExpired: "UnitAccessInvitationExpired",
+		UnitAccessBindingConflict: "UnitAccessBindingConflict",
+	} as const;
+
+export type DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus409ErrorCodeEnum =
+	(typeof DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus409ErrorCodeEnum)[keyof typeof DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitAccessInvitationConflict'
+		 * @type string
+		 */
+		code: DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus422 =
+	ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdOptions = {
+	body?: never;
+	path: DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdResponses = {
+	"204": DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus204;
+	"403": DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus403;
+	"404": DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus404;
+	"409": DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus409;
+	"422": DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus422;
+	"500": DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdResponse =
+	| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus204
+	| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus403
+	| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus404
+	| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus409
+	| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus422
+	| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus500;
 
 export const GetApiGovernanceModerationCasesState = {
 	new: "new",
@@ -14440,7 +17406,6 @@ export type PostApiGovernanceGrantsRequestAuthorityEnum =
 	(typeof PostApiGovernanceGrantsRequestAuthorityEnum)[keyof typeof PostApiGovernanceGrantsRequestAuthorityEnum];
 
 export const PostApiGovernanceGrantsRequestCapabilityEnum = {
-	"entity.association-policy.manage": "entity.association-policy.manage",
 	"entity.associations.override": "entity.associations.override",
 	"unit.edit": "unit.edit",
 	"unit.ownership.transfer": "unit.ownership.transfer",
@@ -22574,6 +25539,14 @@ export type PostApiUnitsByTypeStatus200 = {
 		 * @type boolean
 		 */
 		canEdit: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageAccess: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageAssociations: boolean;
 	};
 };
 
@@ -23428,6 +26401,14 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		 * @type boolean
 		 */
 		canEdit: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageAccess: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageAssociations: boolean;
 	};
 };
 
@@ -24002,6 +26983,14 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		 * @type boolean
 		 */
 		canEdit: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageAccess: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageAssociations: boolean;
 	};
 };
 
@@ -24995,6 +27984,14 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 * @type boolean
 		 */
 		canEdit: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageAccess: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageAssociations: boolean;
 	};
 };
 
@@ -27173,7 +30170,8 @@ export type GetApiEntitiesByUnitIdQuery = {
 
 export const GetApiEntitiesByUnitIdStatus200AssociationPolicyCreditAttributionEnum = {
 	open: "open",
-	owner_only: "owner_only",
+	approval: "approval",
+	invite_only: "invite_only",
 	closed: "closed",
 } as const;
 
@@ -27182,7 +30180,8 @@ export type GetApiEntitiesByUnitIdStatus200AssociationPolicyCreditAttributionEnu
 
 export const GetApiEntitiesByUnitIdStatus200AssociationPolicySubjectAssociationEnum = {
 	open: "open",
-	owner_only: "owner_only",
+	approval: "approval",
+	invite_only: "invite_only",
 	closed: "closed",
 } as const;
 
@@ -27490,6 +30489,18 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 		 * @type boolean
 		 */
 		canEdit: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageAccess: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageCreditAssociations: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageSubjectAssociations: boolean;
 	};
 	/**
 	 * @type array
@@ -27908,7 +30919,8 @@ export type GetApiEntitiesByUnitIdAssociationPolicyPath = {
 
 export const GetApiEntitiesByUnitIdAssociationPolicyStatus200CreditAttributionEnum = {
 	open: "open",
-	owner_only: "owner_only",
+	approval: "approval",
+	invite_only: "invite_only",
 	closed: "closed",
 } as const;
 
@@ -27917,7 +30929,8 @@ export type GetApiEntitiesByUnitIdAssociationPolicyStatus200CreditAttributionEnu
 
 export const GetApiEntitiesByUnitIdAssociationPolicyStatus200SubjectAssociationEnum = {
 	open: "open",
-	owner_only: "owner_only",
+	approval: "approval",
+	invite_only: "invite_only",
 	closed: "closed",
 } as const;
 
@@ -28021,7 +31034,8 @@ export type PatchApiEntitiesByUnitIdAssociationPolicyPath = {
 
 export const PatchApiEntitiesByUnitIdAssociationPolicyStatus200CreditAttributionEnum = {
 	open: "open",
-	owner_only: "owner_only",
+	approval: "approval",
+	invite_only: "invite_only",
 	closed: "closed",
 } as const;
 
@@ -28030,7 +31044,8 @@ export type PatchApiEntitiesByUnitIdAssociationPolicyStatus200CreditAttributionE
 
 export const PatchApiEntitiesByUnitIdAssociationPolicyStatus200SubjectAssociationEnum = {
 	open: "open",
-	owner_only: "owner_only",
+	approval: "approval",
+	invite_only: "invite_only",
 	closed: "closed",
 } as const;
 
@@ -28054,8 +31069,9 @@ export type PatchApiEntitiesByUnitIdAssociationPolicyStatus200 = {
 };
 
 export const PatchApiEntitiesByUnitIdAssociationPolicyStatus403ErrorCodeEnum = {
-	EntityOwnershipRequired: "EntityOwnershipRequired",
-	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitProtected: "UnitProtected",
 } as const;
 
 export type PatchApiEntitiesByUnitIdAssociationPolicyStatus403ErrorCodeEnum =
@@ -28070,7 +31086,7 @@ export type PatchApiEntitiesByUnitIdAssociationPolicyStatus403 = {
 	 */
 	error: {
 		/**
-		 * @default 'EntityOwnershipRequired'
+		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
 		code: PatchApiEntitiesByUnitIdAssociationPolicyStatus403ErrorCodeEnum;
@@ -28129,7 +31145,8 @@ export type PatchApiEntitiesByUnitIdAssociationPolicyStatus500 = InternalError;
 
 export const PatchApiEntitiesByUnitIdAssociationPolicyRequestCreditAttributionEnum = {
 	open: "open",
-	owner_only: "owner_only",
+	approval: "approval",
+	invite_only: "invite_only",
 	closed: "closed",
 } as const;
 
@@ -28138,7 +31155,8 @@ export type PatchApiEntitiesByUnitIdAssociationPolicyRequestCreditAttributionEnu
 
 export const PatchApiEntitiesByUnitIdAssociationPolicyRequestSubjectAssociationEnum = {
 	open: "open",
-	owner_only: "owner_only",
+	approval: "approval",
+	invite_only: "invite_only",
 	closed: "closed",
 } as const;
 

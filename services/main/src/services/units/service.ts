@@ -252,7 +252,11 @@ export async function getUnit(
 		.from(unitVariant)
 		.where(or(eq(unitVariant.unitId, base.id), eq(unitVariant.canonicalUnitId, base.id)))
 		.orderBy(unitVariant.createdAt);
-	const canEdit = await authorization.unit.canUpdate(base.id);
+	const [canEdit, accessDecision, associationDecision] = await Promise.all([
+		authorization.unit.canUpdate(base.id),
+		authorization.unit.decide(base.id, "unit.access.manage"),
+		authorization.unit.decide(base.id, "unit.association.manage"),
+	]);
 	const publishers = (await getPublisherSummariesByUnitIds([base.id])).get(base.id) ?? [];
 	return {
 		id: base.id,
@@ -319,7 +323,11 @@ export async function getUnit(
 				canonicalUnitId,
 			})),
 		],
-		capabilities: { canEdit },
+		capabilities: {
+			canEdit,
+			canManageAccess: accessDecision.allowed,
+			canManageAssociations: associationDecision.allowed,
+		},
 	};
 }
 

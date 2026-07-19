@@ -12,6 +12,7 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
 import { PageHeading } from "@rezics/ui";
@@ -97,6 +98,9 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 	}
 	return (
 		<SettingsFrame title={t.settings.profile}>
+			<Button asChild className="w-fit" variant="outline">
+				<Link href="/settings/invitations">{t.governance.receivedInvitations}</Link>
+			</Button>
 			<form onSubmit={submit}>
 				<FieldGroup>
 					<Field>
