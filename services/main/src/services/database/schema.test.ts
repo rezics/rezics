@@ -4,9 +4,18 @@ import { describe, expect, it } from "vitest";
 
 import {
 	unit,
+	conversationParticipantStat,
+	realmTagVoteStat,
+	recommendationMetricDaily,
+	recommendationSignalKind,
+	recommendationUnitStat,
+	scoreStat,
 	unitAccessBinding,
 	unitAccessRestriction,
 	unitAlias,
+	unitAliasVoteStat,
+	unitReactionStat,
+	unitTagVoteStat,
 	unitLocalization,
 	unitRedirect,
 	PlatformCapabilityValues,
@@ -110,6 +119,43 @@ describe("database schema contracts", () => {
 		);
 		expect(redirect.indexes.map((index) => index.config.name)).toContain(
 			"unit_redirect_target_unit_idx",
+		);
+	});
+
+	it("models global and Realm aggregate meanings separately", () => {
+		const globalTag = getTableConfig(unitTagVoteStat);
+		const realmTag = getTableConfig(realmTagVoteStat);
+		expect(globalTag.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
+			"unit_id",
+			"tag_id",
+		]);
+		expect(realmTag.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
+			"realm_id",
+			"unit_id",
+			"tag_id",
+		]);
+		expect(realmTag.foreignKeys.map((key) => key.getName())).toContain(
+			"realm_tag_vote_stat_context_fkey",
+		);
+	});
+
+	it("keeps aggregate counters and read-model identities constrained", () => {
+		for (const table of [
+			scoreStat,
+			unitAliasVoteStat,
+			unitTagVoteStat,
+			realmTagVoteStat,
+			unitReactionStat,
+			conversationParticipantStat,
+		]) {
+			expect(getTableConfig(table).checks.length).toBeGreaterThan(0);
+		}
+		expect(scoreStat.totalCount.getSQLType()).toBe("bigint");
+		expect(unitAliasVoteStat.voteCount.getSQLType()).toBe("bigint");
+		expect(recommendationUnitStat.impressions.getSQLType()).toBe("bigint");
+		expect(recommendationMetricDaily.impressions.getSQLType()).toBe("bigint");
+		expect(recommendationSignalKind.enumValues).toEqual(
+			expect.arrayContaining(["score_high", "score_medium", "score_low"]),
 		);
 	});
 });

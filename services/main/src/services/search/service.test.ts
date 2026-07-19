@@ -69,7 +69,7 @@ describe("domain search SQL", () => {
 		expect(lastQuery()).toContain('"unit"."published_at" DESC NULLS LAST');
 
 		await searchDomain("users", { sort: "subscriberCount:desc" });
-		expect(lastQuery()).toContain('"unit_follow"."unit_id" = "unit"."id"');
+		expect(lastQuery()).toContain('"unit_follow_stat"."follower_count"');
 
 		await searchDomain("entity", { types: ["person"] });
 		expect(lastQuery()).toContain('("entity"."kind")::text');
@@ -87,14 +87,14 @@ describe("domain search SQL", () => {
 		expect(postsQuery).toContain('FROM "realm_unit"');
 		expect(postsQuery).toContain('"post_reply"."root_post_id"');
 		expect(postsQuery).toContain('"post_reply"."parent_post_id"');
-		expect(postsQuery).toContain('"post_reply"."parent_post_id" = "unit"."id"');
-		expect(postsQuery).toContain("reply_unit.deleted_at IS NULL");
+		expect(postsQuery).toContain('"post_reply_stat"."undeleted_descendant_count"');
+		expect(postsQuery).toContain('"post_reply_stat"."undeleted_direct_count"');
 
 		await searchDomain("realms", {
 			joinPolicies: ["approval"],
 			sort: "subscriberCount:asc",
 		});
-		expect(lastQuery()).toContain('"unit_follow"."unit_id" = "unit"."id"');
+		expect(lastQuery()).toContain('"unit_follow_stat"."follower_count"');
 
 		await searchDomain("collections", {
 			ownerId: "11111111-1111-1111-1111-111111111111",

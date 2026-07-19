@@ -4,10 +4,12 @@ import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
+import { toSafeInteger } from "../../database/integer";
 import { isPrimaryUnitLocalization, primaryUnitTitle } from "../../units/localization";
 import {
 	post,
 	postReply,
+	postReplyStat,
 	profile as profileTable,
 	realmUnit,
 	unit,
@@ -62,16 +64,9 @@ const primaryRealmId = sql<string | null>`(
 		and rc.status = 'visible'
 	order by rc.created_at, rc.realm_id limit 1
 )`;
-const replyCount = sql<number>`(
-	select count(*)::int
-	from post_reply counted_reply
-	join unit counted_unit on counted_unit.id = counted_reply.post_id
-	where counted_unit.deleted_at is null
-		and (
-			(${post.kind} = 'post'::post_kind and counted_reply.root_post_id = ${post.id})
-			or (${post.kind} = 'reply'::post_kind and counted_reply.parent_post_id = ${post.id})
-		)
-)`;
+const replyCount = sql<unknown>`coalesce(case when ${post.kind} = 'post'::post_kind
+	then ${postReplyStat.undeletedDescendantCount}
+	else ${postReplyStat.undeletedDirectCount} end, 0)`;
 
 function toReplyResponse<
 	T extends {
@@ -153,6 +148,7 @@ export default new Elysia()
 							.innerJoin(unit, eq(unit.id, post.id))
 							.innerJoin(profileTable, eq(profileTable.id, post.authorProfileId))
 							.leftJoin(postReply, eq(postReply.postId, post.id))
+							.leftJoin(postReplyStat, eq(postReplyStat.postId, post.id))
 							.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, post.id))
 							.leftJoin(
 								unitLocalization,
@@ -177,7 +173,11 @@ export default new Elysia()
 							)
 							.orderBy(desc(unit.createdAt), desc(unit.id))
 							.limit(query.limit ?? 20)
-					).map((item) => ({ ...item, body: toPortableTextResponse(item.body) })),
+					).map((item) => ({
+						...item,
+						replyCount: toSafeInteger(item.replyCount, "reply count"),
+						body: toPortableTextResponse(item.body),
+					})),
 				}),
 				{
 					query: ListPostsQuery,
@@ -276,6 +276,7 @@ export default new Elysia()
 						.from(post)
 						.innerJoin(unit, eq(unit.id, post.id))
 						.leftJoin(postReply, eq(postReply.postId, post.id))
+						.leftJoin(postReplyStat, eq(postReplyStat.postId, post.id))
 						.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, post.id))
 						.leftJoin(
 							unitLocalization,
@@ -294,6 +295,7 @@ export default new Elysia()
 					if (!row) throw new PostNotFound();
 					return {
 						...row,
+						replyCount: toSafeInteger(row.replyCount, "reply count"),
 						body: toPortableTextResponse(row.body),
 						capabilities: { canEdit: await authorization.unit.canUpdate(row.id) },
 					};

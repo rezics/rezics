@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, lt, or } from "drizzle-orm";
 import {
 	PortableTextDocument,
 	parseNullableDocument,
@@ -9,6 +9,7 @@ import type { Static } from "elysia";
 import type { Authorization } from "../authorization";
 import { isPubliclyReadableUnit } from "../authorization/unit/policy";
 import { database } from "../database";
+import { toSafeInteger } from "../database/integer";
 import {
 	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
@@ -25,7 +26,7 @@ import {
 	unitLink,
 	unitLocalization,
 	unitTag,
-	unitTagVote,
+	unitTagVoteStat,
 	unitVariant,
 } from "../database/schema";
 import { ensureImageAssetAttachable, imageAssetContentUrl } from "../api/image-assets/service";
@@ -204,13 +205,20 @@ export async function getUnit(
 	const tags = await database
 		.select({
 			tagId: unitTag.tagId,
-			score: sql<number>`coalesce((select sum(${unitTagVote.value}) from ${unitTagVote} where ${unitTagVote.unitId} = ${unitTag.unitId} and ${unitTagVote.tagId} = ${unitTag.tagId}), 0)::int`,
-			voteCount: sql<number>`(select count(*) from ${unitTagVote} where ${unitTagVote.unitId} = ${unitTag.unitId} and ${unitTagVote.tagId} = ${unitTag.tagId})::int`,
+			score: unitTagVoteStat.score,
+			voteCount: unitTagVoteStat.voteCount,
 			pinned: unitTag.pinned,
 			position: unitTag.position,
 			title: unitLocalization.title,
 		})
 		.from(unitTag)
+		.leftJoin(
+			unitTagVoteStat,
+			and(
+				eq(unitTagVoteStat.unitId, unitTag.unitId),
+				eq(unitTagVoteStat.tagId, unitTag.tagId),
+			),
+		)
 		.leftJoin(
 			unitLocalization,
 			and(
@@ -257,7 +265,13 @@ export async function getUnit(
 			kind: link.role,
 			sourceEntityEntryId: link.sourceEntityId,
 		})),
-		tags: tags.map((tag) => ({ ...tag, id: tag.tagId, realmId: null })),
+		tags: tags.map((tag) => ({
+			...tag,
+			id: tag.tagId,
+			realmId: null,
+			score: toSafeInteger(tag.score ?? 0n, "tag vote score"),
+			voteCount: toSafeInteger(tag.voteCount ?? 0n, "tag vote count"),
+		})),
 		versions: [
 			...(variants.some(({ unitId: id }) => id === base.id)
 				? []

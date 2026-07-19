@@ -1,4 +1,4 @@
-h1:xsnv9taUA1L1ROOWYYYFRyln3U/Afa07adezraaprrs=
+h1:LRpqn/26XnK4k24hGHh4JILR2oJwro/Nr1+GMieFeqw=
 20260718070359_enable_pgroonga.sql h1:tT2i+ShJU7VwHt0LVUKiIN8ltJzm9z3dOONNMaMGP3g=
 20260718070400_current_baseline.sql h1:8k2fN5VnnH6wRhaCsATcwJYQ2ZaMRQ2vfLB4JLNSgIg=
 20260718070401_history_invariants.sql h1:FueH3mEgeYZvUKGYVLOmnF8MOp0cFLWl2U1i0VmcqSg=
@@ -7,3 +7,6 @@ h1:xsnv9taUA1L1ROOWYYYFRyln3U/Afa07adezraaprrs=
 20260719002043_slug_tree_backfill.sql h1:0Zq2ZKr6isShDJZrzuyoa4flQ80mo7iXF3QoQ+GErmw=
 20260719002335_omniscient_vivisector.sql h1:oZyQfk9eNJRMAHB7ngA5cCaceFET9OLAX1XFxTWg344=
 20260719030000_unit_kind_text.sql h1:E7LQ/dArA1YhgeGfVFJw8/zX8hSzeGFhMk4uTUENlOQ=
+20260719040304_aggregate_stats.sql h1:ew8sR10NzD0IkQvdVUNAj8uGaIxy3Vc5KJ3O3nJvf8Q=
+20260719040305_aggregate_maintenance.sql h1:Y3Hpim32uwRpIqDPwDobC4G0NRNaHbVUFaf3LKG1UdE=
+20260719044620_recommendation_bigint_counts.sql h1:hGqVDOekA9EReUhhtzMqbuMpiDHNRoeSLp8uLyTqkD8=

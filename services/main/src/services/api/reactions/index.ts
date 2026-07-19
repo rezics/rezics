@@ -1,10 +1,11 @@
 import { StatusCodes } from "http-status-codes";
-import { and, count, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import Elysia from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
-import { unitReaction, unitShare } from "../../database/schema";
+import { toSafeInteger } from "../../database/integer";
+import { unitReaction, unitReactionStat, unitShare } from "../../database/schema";
 import { ReactionContextQuery, SetReactionBody, UnitReactionParams } from "./schema";
 import {
 	ReactionResponse,
@@ -33,16 +34,25 @@ export default new Elysia({ prefix: "/reactions" })
 				await authorization.unit.ensureCanRead(query.realmId);
 			}
 			return {
-				items: await database
-					.select({ reaction: unitReaction.reaction, count: count() })
-					.from(unitReaction)
-					.where(
-						and(
-							eq(unitReaction.unitId, params.unitId),
-							getContextCondition(unitReaction, query.realmId),
-						),
-					)
-					.groupBy(unitReaction.reaction),
+				items: (
+					await database
+						.select({
+							reaction: unitReactionStat.reaction,
+							count: unitReactionStat.reactionCount,
+						})
+						.from(unitReactionStat)
+						.where(
+							and(
+								eq(unitReactionStat.unitId, params.unitId),
+								query.realmId
+									? eq(unitReactionStat.realmId, query.realmId)
+									: isNull(unitReactionStat.realmId),
+							),
+						)
+				).map((row) => ({
+					reaction: row.reaction,
+					count: toSafeInteger(row.count, "reaction count"),
+				})),
 			};
 		},
 		{

@@ -1,12 +1,13 @@
 import { StatusCodes } from "http-status-codes";
 import { createHash } from "node:crypto";
 
-import { and, count, desc, eq, isNull, sql, sum } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session from "../../auth/session";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
 import { database } from "../../database";
+import { toSafeInteger } from "../../database/integer";
 import { isPrimaryUnitLocalization } from "../../units/localization";
 import { fractionalPositionBetween } from "../../ordering/position";
 import {
@@ -15,9 +16,11 @@ import {
 	unit,
 	unitAlias,
 	unitAliasVote,
+	unitAliasVoteStat,
 	unitTagVote,
 	unitLink,
 	unitTag,
+	unitTagVoteStat,
 	unitLocalization,
 	unitVariant,
 } from "../../database/schema";
@@ -79,10 +82,14 @@ async function ensureUnitMutationAuthorized(
 
 async function getAliasVoteSummary(aliasId: string, value: number | null) {
 	const [totals] = await database
-		.select({ score: sum(unitAliasVote.value), voteCount: count() })
-		.from(unitAliasVote)
-		.where(eq(unitAliasVote.aliasId, aliasId));
-	return { value, score: Number(totals?.score ?? 0), voteCount: totals?.voteCount ?? 0 };
+		.select({ score: unitAliasVoteStat.score, voteCount: unitAliasVoteStat.voteCount })
+		.from(unitAliasVoteStat)
+		.where(eq(unitAliasVoteStat.aliasId, aliasId));
+	return {
+		value,
+		score: toSafeInteger(totals?.score ?? 0n, "alias vote score"),
+		voteCount: toSafeInteger(totals?.voteCount ?? 0n, "alias vote count"),
+	};
 }
 
 function normalizeAliasTerm(term: string): string {
@@ -91,10 +98,14 @@ function normalizeAliasTerm(term: string): string {
 
 async function getTagVoteSummary(unitId: string, tagId: string, value: number | null) {
 	const [totals] = await database
-		.select({ score: sum(unitTagVote.value), voteCount: count() })
-		.from(unitTagVote)
-		.where(and(eq(unitTagVote.unitId, unitId), eq(unitTagVote.tagId, tagId)));
-	return { value, score: Number(totals?.score ?? 0), voteCount: totals?.voteCount ?? 0 };
+		.select({ score: unitTagVoteStat.score, voteCount: unitTagVoteStat.voteCount })
+		.from(unitTagVoteStat)
+		.where(and(eq(unitTagVoteStat.unitId, unitId), eq(unitTagVoteStat.tagId, tagId)));
+	return {
+		value,
+		score: toSafeInteger(totals?.score ?? 0n, "tag vote score"),
+		voteCount: toSafeInteger(totals?.voteCount ?? 0n, "tag vote count"),
+	};
 }
 
 export default new Elysia()
@@ -283,7 +294,7 @@ export default new Elysia()
 				async ({ params, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await authorization.unit.ensureCanRead(params.unitId);
-					const items = await database
+					const rows = await database
 						.select({
 							id: unitAlias.id,
 							unitId: unitAlias.unitId,
@@ -292,23 +303,28 @@ export default new Elysia()
 							language: unitAlias.language,
 							kind: unitAlias.kind,
 							createdByProfileId: unitAlias.createdByProfileId,
-							score: sql<number>`coalesce((select sum(${unitAliasVote.value}) from ${unitAliasVote} where ${unitAliasVote.aliasId} = ${unitAlias.id}), 0)::int`,
-							voteCount: sql<number>`(select count(*) from ${unitAliasVote} where ${unitAliasVote.aliasId} = ${unitAlias.id})::int`,
-							searchable: sql<boolean>`coalesce((select sum(${unitAliasVote.value}) from ${unitAliasVote} where ${unitAliasVote.aliasId} = ${unitAlias.id}), 0) >= ${AliasSearchScoreThreshold}`,
+							score: unitAliasVoteStat.score,
+							voteCount: unitAliasVoteStat.voteCount,
+							searchable: sql<boolean>`coalesce(${unitAliasVoteStat.score}, 0) >= ${AliasSearchScoreThreshold}`,
 							createdAt: unitAlias.createdAt,
 							updatedAt: unitAlias.updatedAt,
 						})
 						.from(unitAlias)
+						.leftJoin(unitAliasVoteStat, eq(unitAliasVoteStat.aliasId, unitAlias.id))
 						.where(
 							and(eq(unitAlias.unitId, params.unitId), isNull(unitAlias.deletedAt)),
 						)
 						.orderBy(
-							desc(
-								sql`coalesce((select sum(${unitAliasVote.value}) from ${unitAliasVote} where ${unitAliasVote.aliasId} = ${unitAlias.id}), 0)`,
-							),
+							desc(sql`coalesce(${unitAliasVoteStat.score}, 0)`),
 							unitAlias.term,
 						);
-					return { items };
+					return {
+						items: rows.map((row) => ({
+							...row,
+							score: toSafeInteger(row.score ?? 0n, "alias vote score"),
+							voteCount: toSafeInteger(row.voteCount ?? 0n, "alias vote count"),
+						})),
+					};
 				},
 				{
 					access: "unit:read",

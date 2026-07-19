@@ -1,6 +1,7 @@
 import { and, desc, eq, inArray, isNull, lte, ne, sql } from "drizzle-orm";
 
 import { database } from "../database";
+import { toSafeInteger } from "../database/integer";
 import { firstUnitLocalizationCoverAssetId } from "../units/localization";
 import { compareFractionalPositions } from "../ordering/position";
 import {
@@ -230,18 +231,24 @@ export async function recommendUnits(input: {
 		if (row.kind !== "book" && row.kind !== "software" && row.kind !== "media") return [];
 		const stats: RecommendationStats = {
 			...EmptyRecommendationStats,
-			impressions: number(row.impressions),
-			opens: number(row.opens),
-			dwell30s: number(row.dwell30s),
-			upvotes: number(row.upvotes),
-			downvotes: number(row.downvotes),
-			replies: number(row.replies),
-			favorites: number(row.favorites),
-			shares: number(row.shares),
-			highScores: number(row.highScores),
-			activeProgress: number(row.activeProgress),
-			completions: number(row.completions),
-			negativeProgress: number(row.negativeProgress),
+			impressions: toSafeInteger(row.impressions ?? 0n, "recommendation impressions"),
+			opens: toSafeInteger(row.opens ?? 0n, "recommendation opens"),
+			dwell30s: toSafeInteger(row.dwell30s ?? 0n, "recommendation dwell count"),
+			upvotes: toSafeInteger(row.upvotes ?? 0n, "recommendation upvotes"),
+			downvotes: toSafeInteger(row.downvotes ?? 0n, "recommendation downvotes"),
+			replies: toSafeInteger(row.replies ?? 0n, "recommendation replies"),
+			favorites: toSafeInteger(row.favorites ?? 0n, "recommendation favorites"),
+			shares: toSafeInteger(row.shares ?? 0n, "recommendation shares"),
+			highScores: toSafeInteger(row.highScores ?? 0n, "recommendation high scores"),
+			activeProgress: toSafeInteger(
+				row.activeProgress ?? 0n,
+				"recommendation active progress",
+			),
+			completions: toSafeInteger(row.completions ?? 0n, "recommendation completions"),
+			negativeProgress: toSafeInteger(
+				row.negativeProgress ?? 0n,
+				"recommendation negative progress",
+			),
 			engagement6h: number(row.engagement6h),
 			engagement24h: number(row.engagement24h),
 			engagement7d: number(row.engagement7d),

@@ -7,89 +7,20 @@ import { RecommendationPolicy, RecommendationPolicyVersion } from "./policy";
 async function buildUnitStats(tx: DatabaseTransaction, snapshotId: string) {
 	await tx.execute(sql`
 		WITH event_stats AS (
-			SELECT target_unit_id AS unit_id,
-				count(*) FILTER (WHERE type = 'impression')::int AS impressions,
-				count(*) FILTER (WHERE type = 'open')::int AS opens,
-				count(*) FILTER (WHERE type = 'dwell_30s')::int AS dwell30s
-				FROM recommendation_event
-				WHERE occurred_at >= now() - ${RecommendationPolicy.eventRetentionDays} * interval '1 day'
-					AND profile_id IS NOT NULL
-			GROUP BY target_unit_id
-		), reaction_stats AS (
 			SELECT unit_id,
-				count(*) FILTER (WHERE reaction = 'upvote')::int AS upvotes,
-				count(*) FILTER (WHERE reaction = 'downvote')::int AS downvotes
-			FROM unit_reaction
+				sum(signal_count) FILTER (WHERE kind = 'impression') AS impressions,
+				sum(signal_count) FILTER (WHERE kind = 'open') AS opens,
+				sum(signal_count) FILTER (WHERE kind = 'dwell_30s') AS dwell30s
+			FROM recommendation_unit_signal_hourly
+			WHERE bucket_start >= now() - ${RecommendationPolicy.eventRetentionDays} * interval '1 day'
 			GROUP BY unit_id
-		), reply_targets AS (
-			SELECT root_post_id AS unit_id, post_id AS reply_id FROM post_reply
-			UNION ALL
-			SELECT parent_post_id AS unit_id, post_id AS reply_id
-			FROM post_reply WHERE parent_post_id IS NOT NULL
-		), reply_stats AS (
-			SELECT reply_targets.unit_id, count(*)::int AS replies
-			FROM reply_targets
-			JOIN unit reply_unit ON reply_unit.id = reply_targets.reply_id
-			WHERE reply_unit.deleted_at IS NULL
-			GROUP BY reply_targets.unit_id
-		), favorite_stats AS (
-			SELECT ci.unit_id, count(*)::int AS favorites
-			FROM collection_item ci
-			JOIN collection c ON c.id = ci.collection_id
-				AND c.source = 'system' AND c.system_key = 'favorites'
-			GROUP BY ci.unit_id
-		), share_stats AS (
-			SELECT unit_id, count(*)::int AS shares
-			FROM unit_share
-			GROUP BY unit_id
-		), score_stats AS (
-			SELECT unit_id, count(*) FILTER (WHERE value >= 8)::int AS high_scores
-			FROM score
-			GROUP BY unit_id
-		), progress_stats AS (
-			SELECT unit_id,
-				count(*) FILTER (WHERE status = 'active')::int AS active_progress,
-				count(*) FILTER (WHERE status = 'completed')::int AS completions,
-				count(*) FILTER (WHERE status = 'dropped')::int AS negative_progress
-			FROM unit_progress
-			WHERE deleted_at IS NULL
-			GROUP BY unit_id
-		), window_signal AS (
-			SELECT target_unit_id AS unit_id, occurred_at,
-				CASE type WHEN 'open' THEN 1 WHEN 'dwell_30s' THEN 2 ELSE 0 END::double precision AS weight
-				FROM recommendation_event
-				WHERE profile_id IS NOT NULL AND type IN ('open', 'dwell_30s')
-			UNION ALL
-			SELECT unit_id, updated_at,
-				CASE reaction WHEN 'upvote' THEN 3 ELSE 0 END::double precision
-			FROM unit_reaction
-			UNION ALL
-			SELECT root_post_id, created_at, 4::double precision FROM post_reply
-			UNION ALL
-			SELECT parent_post_id, created_at, 4::double precision
-			FROM post_reply WHERE parent_post_id IS NOT NULL
-			UNION ALL
-			SELECT ci.unit_id, ci.created_at, 5::double precision
-			FROM collection_item ci
-			JOIN collection c ON c.id = ci.collection_id
-				AND c.source = 'system' AND c.system_key = 'favorites'
-			UNION ALL
-			SELECT unit_id, created_at, 4::double precision FROM unit_share
-			UNION ALL
-			SELECT unit_id, updated_at,
-				CASE WHEN value >= 8 THEN 5 WHEN value >= 6 THEN 3 ELSE 0 END::double precision
-			FROM score
-			UNION ALL
-			SELECT unit_id, last_seen_at,
-				CASE status WHEN 'completed' THEN 5 WHEN 'active' THEN 3 ELSE 0 END::double precision
-			FROM unit_progress WHERE deleted_at IS NULL
 		), window_stats AS (
 			SELECT unit_id,
-				coalesce(sum(weight) FILTER (WHERE occurred_at >= now() - interval '6 hours'), 0) AS engagement6h,
-				coalesce(sum(weight) FILTER (WHERE occurred_at >= now() - interval '24 hours'), 0) AS engagement24h,
-				coalesce(sum(weight) FILTER (WHERE occurred_at >= now() - interval '7 days'), 0) AS engagement7d
-			FROM window_signal
-			WHERE occurred_at >= now() - interval '7 days' AND weight > 0
+				coalesce(sum(weight) FILTER (WHERE bucket_start >= now() - interval '6 hours'), 0) AS engagement6h,
+				coalesce(sum(weight) FILTER (WHERE bucket_start >= now() - interval '24 hours'), 0) AS engagement24h,
+				coalesce(sum(weight), 0) AS engagement7d
+			FROM recommendation_unit_signal_hourly
+			WHERE bucket_start >= now() - interval '7 days' AND weight > 0
 			GROUP BY unit_id
 		)
 		INSERT INTO recommendation_unit_stat (
@@ -100,19 +31,16 @@ async function buildUnitStats(tx: DatabaseTransaction, snapshotId: string) {
 		)
 		SELECT ${snapshotId}::uuid, u.id, NULL,
 			coalesce(es.impressions, 0), coalesce(es.opens, 0), coalesce(es.dwell30s, 0),
-			coalesce(rs.upvotes, 0), coalesce(rs.downvotes, 0), coalesce(replies.replies, 0),
-			coalesce(fs.favorites, 0), coalesce(shares.shares, 0), coalesce(scores.high_scores, 0),
-			coalesce(progress.active_progress, 0), coalesce(progress.completions, 0),
-			coalesce(progress.negative_progress, 0), coalesce(ws.engagement6h, 0),
+			coalesce(current_stat.upvotes, 0), coalesce(current_stat.downvotes, 0),
+			coalesce(current_stat.replies, 0), coalesce(current_stat.favorites, 0),
+			coalesce(current_stat.shares, 0), coalesce(current_stat.high_scores, 0),
+			coalesce(current_stat.active_progress, 0),
+			coalesce(current_stat.completions, 0),
+			coalesce(current_stat.negative_progress, 0), coalesce(ws.engagement6h, 0),
 			coalesce(ws.engagement24h, 0), coalesce(ws.engagement7d, 0)
 		FROM unit u
 		LEFT JOIN event_stats es ON es.unit_id = u.id
-		LEFT JOIN reaction_stats rs ON rs.unit_id = u.id
-		LEFT JOIN reply_stats replies ON replies.unit_id = u.id
-		LEFT JOIN favorite_stats fs ON fs.unit_id = u.id
-		LEFT JOIN share_stats shares ON shares.unit_id = u.id
-		LEFT JOIN score_stats scores ON scores.unit_id = u.id
-		LEFT JOIN progress_stats progress ON progress.unit_id = u.id
+		LEFT JOIN unit_engagement_stat current_stat ON current_stat.unit_id = u.id
 		LEFT JOIN window_stats ws ON ws.unit_id = u.id
 		WHERE u.status = 'published' AND u.visibility = 'public'
 			AND u.moderation_status = 'approved' AND u.deleted_at IS NULL
@@ -121,41 +49,12 @@ async function buildUnitStats(tx: DatabaseTransaction, snapshotId: string) {
 
 async function buildProfileInterests(tx: DatabaseTransaction, snapshotId: string) {
 	await tx.execute(sql`
-		WITH signal AS (
+		WITH decayed AS (
 			SELECT profile_id, unit_id,
-				CASE reaction WHEN 'upvote' THEN 3 ELSE -4 END::double precision AS weight,
-				updated_at AS occurred_at
-			FROM unit_reaction
-			UNION ALL
-			SELECT ci.added_by_profile_id, ci.unit_id, 5::double precision, ci.created_at
-			FROM collection_item ci
-			JOIN collection c ON c.id = ci.collection_id
-				AND c.source = 'system' AND c.system_key = 'favorites'
-			WHERE ci.added_by_profile_id IS NOT NULL
-			UNION ALL
-			SELECT profile_id, unit_id, 4::double precision, created_at FROM unit_share
-			UNION ALL
-			SELECT profile_id, unit_id,
-				CASE WHEN value >= 8 THEN 5 WHEN value >= 6 THEN 3 WHEN value <= 3 THEN -4 ELSE 0 END::double precision,
-				updated_at
-			FROM score
-			UNION ALL
-			SELECT profile_id, unit_id,
-				CASE status WHEN 'completed' THEN 5 WHEN 'active' THEN 3 WHEN 'dropped' THEN -4 ELSE 0 END::double precision,
-				last_seen_at
-			FROM unit_progress WHERE deleted_at IS NULL
-			UNION ALL
-			SELECT profile_id, target_unit_id,
-				CASE type WHEN 'open' THEN 1 WHEN 'dwell_30s' THEN 2 WHEN 'not_interested' THEN -4 ELSE 0 END::double precision,
-				occurred_at
-			FROM recommendation_event
-			WHERE profile_id IS NOT NULL AND type IN ('open', 'dwell_30s', 'not_interested')
-		), decayed AS (
-			SELECT profile_id, unit_id,
-				sum(weight * exp(-ln(2) * extract(epoch FROM (now() - occurred_at)) / (${RecommendationPolicy.interestHalfLifeDays} * 86400))) AS weight
-			FROM signal
-			WHERE profile_id IS NOT NULL AND weight <> 0
-				AND occurred_at >= now() - ${RecommendationPolicy.interestMaxAgeDays} * interval '1 day'
+				sum(weight * exp(-ln(2) * extract(epoch FROM (now() - bucket_start)) / (${RecommendationPolicy.interestHalfLifeDays} * 86400))) AS weight
+			FROM recommendation_profile_signal_hourly
+			WHERE weight <> 0
+				AND bucket_start >= now() - ${RecommendationPolicy.interestMaxAgeDays} * interval '1 day'
 			GROUP BY profile_id, unit_id
 		), ranked AS (
 			SELECT d.profile_id, d.unit_id, d.weight,
@@ -222,24 +121,12 @@ async function buildUnitEdges(tx: DatabaseTransaction, snapshotId: string) {
 			SELECT left_id AS source_id, right_id AS target_id, score FROM structural_pair
 			UNION ALL SELECT right_id, left_id, score FROM structural_pair
 		), interaction_source AS (
-			SELECT profile_id, unit_id, 3::double precision AS weight, updated_at AS occurred_at
-			FROM unit_reaction WHERE reaction = 'upvote'
-			UNION ALL
-			SELECT ci.added_by_profile_id, ci.unit_id, 5::double precision, ci.created_at
-			FROM collection_item ci JOIN collection c ON c.id = ci.collection_id
-				AND c.source = 'system' AND c.system_key = 'favorites'
-			WHERE ci.added_by_profile_id IS NOT NULL
-			UNION ALL SELECT profile_id, unit_id, 4::double precision, created_at FROM unit_share
-			UNION ALL SELECT profile_id, unit_id,
-				CASE WHEN value >= 8 THEN 5 ELSE 3 END::double precision, updated_at
-			FROM score WHERE value >= 6
-			UNION ALL SELECT profile_id, unit_id,
-				CASE status WHEN 'completed' THEN 5 ELSE 3 END::double precision, last_seen_at
-			FROM unit_progress WHERE deleted_at IS NULL AND status IN ('active', 'completed')
-			UNION ALL SELECT profile_id, target_unit_id,
-				CASE type WHEN 'dwell_30s' THEN 2 ELSE 1 END::double precision, occurred_at
-			FROM recommendation_event
-			WHERE profile_id IS NOT NULL AND type IN ('open', 'dwell_30s')
+			SELECT profile_id, unit_id, weight, bucket_start AS occurred_at
+			FROM recommendation_profile_signal_hourly
+			WHERE kind IN (
+				'upvote', 'favorite', 'share', 'score_high', 'score_medium',
+				'progress_active', 'progress_completed', 'open', 'dwell_30s'
+			) AND weight > 0
 		), interaction AS (
 			SELECT interaction_source.profile_id, interaction_source.unit_id,
 				least(sum(interaction_source.weight), 10) AS weight,
@@ -395,10 +282,10 @@ export async function aggregateRecommendationMetrics() {
 				day, surface, policy_version, impressions, opens, dwell_30s, not_interested
 		)
 		SELECT occurred_at::date, surface, policy_version,
-			count(*) FILTER (WHERE type = 'impression')::int,
-			count(*) FILTER (WHERE type = 'open')::int,
-			count(*) FILTER (WHERE type = 'dwell_30s')::int,
-			count(*) FILTER (WHERE type = 'not_interested')::int
+			count(*) FILTER (WHERE type = 'impression'),
+			count(*) FILTER (WHERE type = 'open'),
+			count(*) FILTER (WHERE type = 'dwell_30s'),
+			count(*) FILTER (WHERE type = 'not_interested')
 		FROM recommendation_event
 		WHERE surface IS NOT NULL AND policy_version IS NOT NULL
 			AND occurred_at >= current_date - interval '2 days'
@@ -418,6 +305,9 @@ export async function purgeRecommendationData(now = new Date()) {
 	const snapshotBoundary = new Date(
 		now.getTime() - RecommendationPolicy.snapshotRetentionHours * 3_600_000,
 	);
+	const signalBoundary = new Date(
+		now.getTime() - RecommendationPolicy.interestMaxAgeDays * 86_400_000,
+	);
 	await database
 		.delete(recommendationSnapshot)
 		.where(
@@ -428,6 +318,12 @@ export async function purgeRecommendationData(now = new Date()) {
 		);
 	await database.execute(
 		sql`delete from recommendation_event where occurred_at < ${eventBoundary}`,
+	);
+	await database.execute(
+		sql`delete from recommendation_unit_signal_hourly where bucket_start < ${signalBoundary}`,
+	);
+	await database.execute(
+		sql`delete from recommendation_profile_signal_hourly where bucket_start < ${signalBoundary}`,
 	);
 }
 

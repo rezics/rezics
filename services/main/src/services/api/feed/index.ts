@@ -1,10 +1,11 @@
 import { StatusCodes } from "http-status-codes";
-import { and, count, desc, eq, inArray, isNull, lte, sql, type SQL } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, lte, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
 
 import { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
+import { toSafeInteger } from "../../database/integer";
 import {
 	primaryUnitTitle,
 	isPrimaryUnitLocalization,
@@ -13,6 +14,7 @@ import {
 import {
 	post,
 	postReply,
+	postReplyStat,
 	profile as profileTable,
 	unitFollow,
 	realmUnit,
@@ -22,6 +24,7 @@ import {
 	unit,
 	unitLocalization,
 	unitReaction,
+	unitReactionGlobalStat,
 	unitRevisionHead,
 } from "../../database/schema";
 import { parseJsonCursor } from "../../pagination";
@@ -350,6 +353,10 @@ function toNumber(value: number | null | undefined) {
 	return Number(value ?? 0);
 }
 
+function toCount(value: bigint | null | undefined, name: string) {
+	return toSafeInteger(value ?? 0n, name);
+}
+
 export async function getFeedRankingCandidates(input: {
 	ids: string[];
 	sources: CandidateSources;
@@ -434,18 +441,18 @@ export async function getFeedRankingCandidates(input: {
 		if (row.postKind !== "post" && row.postKind !== "reply") return [];
 		const stats: RecommendationStats = {
 			...EmptyRecommendationStats,
-			impressions: toNumber(row.impressions),
-			opens: toNumber(row.opens),
-			dwell30s: toNumber(row.dwell30s),
-			upvotes: toNumber(row.upvotes),
-			downvotes: toNumber(row.downvotes),
-			replies: toNumber(row.replies),
-			favorites: toNumber(row.favorites),
-			shares: toNumber(row.shares),
-			highScores: toNumber(row.highScores),
-			activeProgress: toNumber(row.activeProgress),
-			completions: toNumber(row.completions),
-			negativeProgress: toNumber(row.negativeProgress),
+			impressions: toCount(row.impressions, "recommendation impressions"),
+			opens: toCount(row.opens, "recommendation opens"),
+			dwell30s: toCount(row.dwell30s, "recommendation dwell count"),
+			upvotes: toCount(row.upvotes, "recommendation upvotes"),
+			downvotes: toCount(row.downvotes, "recommendation downvotes"),
+			replies: toCount(row.replies, "recommendation replies"),
+			favorites: toCount(row.favorites, "recommendation favorites"),
+			shares: toCount(row.shares, "recommendation shares"),
+			highScores: toCount(row.highScores, "recommendation high scores"),
+			activeProgress: toCount(row.activeProgress, "recommendation active progress"),
+			completions: toCount(row.completions, "recommendation completions"),
+			negativeProgress: toCount(row.negativeProgress, "recommendation negative progress"),
 			engagement6h: toNumber(row.engagement6h),
 			engagement24h: toNumber(row.engagement24h),
 			engagement7d: toNumber(row.engagement7d),
@@ -526,45 +533,30 @@ export async function hydrateFeedItems(
 		await Promise.all([
 			postIds.length
 				? database
-						.select({ id: postReply.rootPostId, count: count() })
-						.from(postReply)
-						.innerJoin(unit, eq(unit.id, postReply.postId))
-						.where(
-							and(
-								inArray(postReply.rootPostId, postIds),
-								eq(unit.status, "published"),
-								eq(unit.visibility, "public"),
-								eq(unit.moderationStatus, "approved"),
-								isNull(unit.deletedAt),
-							),
-						)
-						.groupBy(postReply.rootPostId)
+						.select({
+							id: postReplyStat.postId,
+							count: postReplyStat.visibleDescendantCount,
+						})
+						.from(postReplyStat)
+						.where(inArray(postReplyStat.postId, postIds))
 				: [],
 			replyIds.length
 				? database
-						.select({ id: postReply.parentPostId, count: count() })
-						.from(postReply)
-						.innerJoin(unit, eq(unit.id, postReply.postId))
-						.where(
-							and(
-								inArray(postReply.parentPostId, replyIds),
-								eq(unit.status, "published"),
-								eq(unit.visibility, "public"),
-								eq(unit.moderationStatus, "approved"),
-								isNull(unit.deletedAt),
-							),
-						)
-						.groupBy(postReply.parentPostId)
+						.select({
+							id: postReplyStat.postId,
+							count: postReplyStat.visibleDirectCount,
+						})
+						.from(postReplyStat)
+						.where(inArray(postReplyStat.postId, replyIds))
 				: [],
 			database
 				.select({
-					unitId: unitReaction.unitId,
-					reaction: unitReaction.reaction,
-					count: count(),
+					unitId: unitReactionGlobalStat.unitId,
+					reaction: unitReactionGlobalStat.reaction,
+					count: unitReactionGlobalStat.reactionCount,
 				})
-				.from(unitReaction)
-				.where(inArray(unitReaction.unitId, validIds))
-				.groupBy(unitReaction.unitId, unitReaction.reaction),
+				.from(unitReactionGlobalStat)
+				.where(inArray(unitReactionGlobalStat.unitId, validIds)),
 			viewer.profileId
 				? database
 						.select({
@@ -651,10 +643,17 @@ export async function hydrateFeedItems(
 	const rowMap = new Map(rows.map((row) => [row.id, row]));
 	const pageMap = new Map(page.map((item) => [item.id, item]));
 	const rootContext = new Map(rootRows.map((row) => [row.rootPostId, row]));
-	const rootCount = new Map(rootReplyCounts.map((row) => [row.id, Number(row.count)]));
-	const childCount = new Map(childReplyCounts.map((row) => [row.id, Number(row.count)]));
+	const rootCount = new Map(
+		rootReplyCounts.map((row) => [row.id, toSafeInteger(row.count, "reply count")]),
+	);
+	const childCount = new Map(
+		childReplyCounts.map((row) => [row.id, toSafeInteger(row.count, "reply count")]),
+	);
 	const reactionCount = new Map(
-		reactions.map((row) => [`${row.unitId}:${row.reaction}`, Number(row.count)]),
+		reactions.map((row) => [
+			`${row.unitId}:${row.reaction}`,
+			toSafeInteger(row.count, "reaction count"),
+		]),
 	);
 	const ownReaction = new Map(
 		viewerReactions.map((row) => [`${row.unitId}:${row.realmId ?? ""}`, row.reaction]),

@@ -1,9 +1,10 @@
 import { StatusCodes } from "http-status-codes";
-import { and, count, desc, eq, isNull, sql, sum } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
+import { toSafeInteger } from "../../database/integer";
 import {
 	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
@@ -13,7 +14,7 @@ import {
 	post,
 	profile as profileTable,
 	realmUnit,
-	score,
+	scoreStat,
 	unit,
 	unitAccessBinding,
 	unitLocalization,
@@ -358,25 +359,36 @@ export default new Elysia()
 					const authorization = (await resolveIdentity(request.headers, "unit:read"))
 						.authorization;
 					await authorization.unit.ensureCanRead(params.targetId);
-					const condition = and(
-						eq(score.unitId, params.targetId),
-						eq(score.realmId, query.realmId),
-					);
-					const [[totals], rows] = await Promise.all([
-						database
-							.select({ totalScore: sum(score.value), totalCount: count() })
-							.from(score)
-							.where(condition),
-						database
-							.select({ value: score.value, total: count() })
-							.from(score)
-							.where(condition)
-							.groupBy(score.value),
-					]);
+					await authorization.unit.ensureCanRead(query.realmId);
+					const [stat] = await database
+						.select()
+						.from(scoreStat)
+						.where(
+							and(
+								eq(scoreStat.unitId, params.targetId),
+								eq(scoreStat.realmId, query.realmId),
+							),
+						)
+						.limit(1);
+					const distribution = [
+						stat?.score1Count ?? 0n,
+						stat?.score2Count ?? 0n,
+						stat?.score3Count ?? 0n,
+						stat?.score4Count ?? 0n,
+						stat?.score5Count ?? 0n,
+						stat?.score6Count ?? 0n,
+						stat?.score7Count ?? 0n,
+						stat?.score8Count ?? 0n,
+						stat?.score9Count ?? 0n,
+						stat?.score10Count ?? 0n,
+					].flatMap((value, index) => {
+						const count = toSafeInteger(value, `score ${index + 1} count`);
+						return count === 0 ? [] : ([[index + 1, count]] as const);
+					});
 					return {
-						totalScore: Number(totals?.totalScore ?? 0),
-						totalCount: totals?.totalCount ?? 0,
-						distribution: Object.fromEntries(rows.map((row) => [row.value, row.total])),
+						totalScore: toSafeInteger(stat?.totalScore ?? 0n, "total score"),
+						totalCount: toSafeInteger(stat?.totalCount ?? 0n, "score count"),
+						distribution: Object.fromEntries(distribution),
 					};
 				},
 				{

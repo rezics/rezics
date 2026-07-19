@@ -11,13 +11,14 @@ import {
 	poll,
 	post,
 	postReply,
+	postReplyStat,
 	profile,
-	unitFollow,
+	unitFollowStat,
 	realm,
 	realmUnit,
 	unit,
 	unitAlias,
-	unitAliasVote,
+	unitAliasVoteStat,
 	unitLocalization,
 	unitTag,
 } from "../database/schema";
@@ -299,11 +300,11 @@ function getUnitCandidateIds(query: string): SQL {
 		FROM ${unitAlias}
 		WHERE ${unitAlias.deletedAt} IS NULL
 			AND ${unitAlias.term} &@~ pgroonga_query_escape(${query})
-			AND (
-				SELECT coalesce(sum(${unitAliasVote.value}), 0)
-				FROM ${unitAliasVote}
-				WHERE ${unitAliasVote.aliasId} = ${unitAlias.id}
-			) >= ${AliasSearchScoreThreshold}
+			AND coalesce((
+				SELECT ${unitAliasVoteStat.score}
+				FROM ${unitAliasVoteStat}
+				WHERE ${unitAliasVoteStat.aliasId} = ${unitAlias.id}
+			), 0) >= ${AliasSearchScoreThreshold}
 		UNION
 		SELECT ${unit.id}
 		FROM ${unit}
@@ -321,27 +322,13 @@ function getSort(category: SearchCategory, sort: SearchSort): SQL {
 	if (sort.startsWith("publishedAt:")) return sql`${unit.publishedAt} ${direction} NULLS LAST`;
 	if (sort.startsWith("closesAt:")) return sql`${poll.closesAt} ${direction} NULLS LAST`;
 	if (sort.startsWith("replyCount:"))
-		return sql`(
-			SELECT count(*)
-			FROM ${postReply}
-			JOIN unit reply_unit ON reply_unit.id = ${postReply.postId}
-			WHERE reply_unit.deleted_at IS NULL AND (
-				(${post.kind} = 'post'::post_kind AND ${postReply.rootPostId} = ${unit.id})
-				OR (${post.kind} = 'reply'::post_kind AND ${postReply.parentPostId} = ${unit.id})
-			)
-		) ${direction}`;
+		return sql`coalesce(case when ${post.kind} = 'post'::post_kind
+			then ${postReplyStat.undeletedDescendantCount}
+			else ${postReplyStat.undeletedDirectCount} end, 0) ${direction}`;
 	if (sort.startsWith("subscriberCount:") && category === "users")
-		return sql`(
-			SELECT count(*)
-			FROM ${unitFollow}
-			WHERE ${unitFollow.unitId} = ${unit.id}
-		) ${direction}`;
+		return sql`coalesce(${unitFollowStat.followerCount}, 0) ${direction}`;
 	if (sort.startsWith("subscriberCount:") && category === "realms")
-		return sql`(
-			SELECT count(*)
-			FROM ${unitFollow}
-			WHERE ${unitFollow.unitId} = ${unit.id}
-		) ${direction}`;
+		return sql`coalesce(${unitFollowStat.followerCount}, 0) ${direction}`;
 	throw new InvalidSearch(`${sort} is not supported by the ${category} category`);
 }
 
@@ -475,8 +462,10 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 		FROM ${unit}
 		LEFT JOIN ${profile} ON ${profile.id} = ${unit.id}
 		LEFT JOIN ${entity} ON ${entity.id} = ${unit.id}
-		LEFT JOIN ${post} ON ${post.id} = ${unit.id}
-		LEFT JOIN ${postReply} ON ${postReply.postId} = ${unit.id}
+			LEFT JOIN ${post} ON ${post.id} = ${unit.id}
+			LEFT JOIN ${postReply} ON ${postReply.postId} = ${unit.id}
+			LEFT JOIN ${postReplyStat} ON ${postReplyStat.postId} = ${unit.id}
+			LEFT JOIN ${unitFollowStat} ON ${unitFollowStat.unitId} = ${unit.id}
 		LEFT JOIN ${unit} AS ${subjectUnit} ON ${subjectUnit.id} = ${post.subjectUnitId}
 		LEFT JOIN ${realm} ON ${realm.id} = ${unit.id}
 		LEFT JOIN ${collection} ON ${collection.id} = ${unit.id}

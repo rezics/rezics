@@ -4,9 +4,11 @@ import Elysia, { t } from "elysia";
 
 import session from "../../auth/session";
 import { database } from "../../database";
+import { toSafeInteger } from "../../database/integer";
 import { primaryUnitTitle } from "../../units/localization";
 import {
 	conversation,
+	conversationParticipantStat,
 	conversationRead,
 	message,
 	unit,
@@ -97,8 +99,6 @@ export default new Elysia({ prefix: "/messages" })
 		async ({ profile, query }) => {
 			const cursor = decodeCursor(query.cursor, "conversations");
 			const boundary = cursor;
-			const lastMessageAt = sql<Date | null>`(select max(m.created_at) from message m where m.conversation_id = ${conversation.id})`;
-			const sortAt = sql<Date>`coalesce(${lastMessageAt}, ${conversation.createdAt})`;
 			const limit = query.limit ?? 30;
 			const candidates = await database
 				.select({
@@ -108,42 +108,41 @@ export default new Elysia({ prefix: "/messages" })
 						select p.name from profile p
 						where p.id = case when ${conversation.participantLowProfileId} = ${profile.unitId} then ${conversation.participantHighProfileId} else ${conversation.participantLowProfileId} end
 					)`,
-					lastMessageAt,
+					lastMessageAt: conversationParticipantStat.lastMessageAt,
 					lastMessage: sql<string | null>`(
 						select m.content from message m
-						where m.conversation_id = ${conversation.id}
-						order by m.created_at desc, m.id desc limit 1
+						where m.id = ${conversationParticipantStat.lastMessageId}
 					)`,
-					unreadCount: sql<number>`(
-						select count(*)::int from message m
-						left join conversation_read cr on cr.conversation_id = m.conversation_id and cr.profile_id = ${profile.unitId}
-						where m.conversation_id = ${conversation.id}
-						and m.sender_profile_id <> ${profile.unitId}
-						and m.deleted_at is null
-						and (cr.read_at is null or m.created_at > cr.read_at)
-					)`,
+					unreadCount: conversationParticipantStat.unreadCount,
 					createdAt: conversation.createdAt,
-					updatedAt: sortAt,
-					sortAt,
+					updatedAt: conversationParticipantStat.sortAt,
+					sortAt: conversationParticipantStat.sortAt,
 				})
-				.from(conversation)
+				.from(conversationParticipantStat)
+				.innerJoin(
+					conversation,
+					eq(conversation.id, conversationParticipantStat.conversationId),
+				)
 				.where(
 					and(
-						or(
-							eq(conversation.participantLowProfileId, profile.unitId),
-							eq(conversation.participantHighProfileId, profile.unitId),
-						),
+						eq(conversationParticipantStat.profileId, profile.unitId),
 						boundary
-							? sql`(${sortAt} < ${boundary.date} or (${sortAt} = ${boundary.date} and ${conversation.id} < ${boundary.id}))`
+							? sql`(${conversationParticipantStat.sortAt} < ${boundary.date} or (${conversationParticipantStat.sortAt} = ${boundary.date} and ${conversationParticipantStat.conversationId} < ${boundary.id}))`
 							: undefined,
 					),
 				)
-				.orderBy(desc(sortAt), desc(conversation.id))
+				.orderBy(
+					desc(conversationParticipantStat.sortAt),
+					desc(conversationParticipantStat.conversationId),
+				)
 				.limit(limit + 1);
 			const page = candidates.slice(0, limit);
 			const last = page.at(-1);
 			return {
-				items: page.map(({ sortAt: _, ...item }) => item),
+				items: page.map(({ sortAt: _, ...item }) => ({
+					...item,
+					unreadCount: toSafeInteger(item.unreadCount, "conversation unread count"),
+				})),
 				nextCursor:
 					candidates.length > limit && last
 						? encodeCursor({
@@ -246,26 +245,33 @@ export default new Elysia({ prefix: "/messages" })
 					id: conversation.id,
 					otherProfileId: sql<string>`${otherProfileId}`,
 					otherUserName: primaryUnitTitle(profileTable.id),
-					lastMessageAt: sql<Date | null>`(select max(m.created_at) from message m where m.conversation_id = ${conversation.id})`,
+					lastMessageAt: conversationParticipantStat.lastMessageAt,
 					lastMessage: sql<string | null>`(
-						select m.content from message m where m.conversation_id = ${conversation.id}
-						order by m.created_at desc, m.id desc limit 1
+						select m.content from message m
+						where m.id = ${conversationParticipantStat.lastMessageId}
 					)`,
-					unreadCount: sql<number>`(
-						select count(*)::int from message m
-						left join conversation_read cr on cr.conversation_id = m.conversation_id and cr.profile_id = ${profile.unitId}
-						where m.conversation_id = ${conversation.id} and m.sender_profile_id <> ${profile.unitId}
-						and m.deleted_at is null and (cr.read_at is null or m.created_at > cr.read_at)
-					)`,
+					unreadCount: conversationParticipantStat.unreadCount,
 					createdAt: conversation.createdAt,
-					updatedAt: sql<Date>`coalesce((select max(m.created_at) from message m where m.conversation_id = ${conversation.id}), ${conversation.createdAt})`,
+					updatedAt: conversationParticipantStat.sortAt,
 				})
-				.from(conversation)
+				.from(conversationParticipantStat)
+				.innerJoin(
+					conversation,
+					eq(conversation.id, conversationParticipantStat.conversationId),
+				)
 				.innerJoin(profileTable, eq(profileTable.id, otherProfileId))
-				.where(eq(conversation.id, params.conversationId))
+				.where(
+					and(
+						eq(conversationParticipantStat.conversationId, params.conversationId),
+						eq(conversationParticipantStat.profileId, profile.unitId),
+					),
+				)
 				.limit(1);
 			if (!row) throw new ConversationNotFound();
-			return row;
+			return {
+				...row,
+				unreadCount: toSafeInteger(row.unreadCount, "conversation unread count"),
+			};
 		},
 		{
 			access: "message:read",
@@ -398,31 +404,45 @@ export default new Elysia({ prefix: "/messages" })
 	.put(
 		"/conversations/:conversationId/read",
 		async ({ profile, params, body }) => {
-			await findParticipant(params.conversationId, profile.unitId);
-			const [lastMessage] = await database
-				.select({ id: message.id })
-				.from(message)
-				.where(
-					and(
-						eq(message.id, body.lastReadMessageId),
-						eq(message.conversationId, params.conversationId),
-					),
-				)
-				.limit(1);
-			if (!lastMessage) throw new MessageNotFound(true);
-			const now = new Date();
-			await database
-				.insert(conversationRead)
-				.values({
-					conversationId: params.conversationId,
-					profileId: profile.unitId,
-					lastReadMessageId: body.lastReadMessageId,
-					readAt: now,
-				})
-				.onConflictDoUpdate({
-					target: [conversationRead.conversationId, conversationRead.profileId],
-					set: { lastReadMessageId: body.lastReadMessageId, readAt: now },
-				});
+			const now = await database.transaction(async (tx) => {
+				const [participant] = await tx
+					.select({ conversationId: conversationParticipantStat.conversationId })
+					.from(conversationParticipantStat)
+					.where(
+						and(
+							eq(conversationParticipantStat.conversationId, params.conversationId),
+							eq(conversationParticipantStat.profileId, profile.unitId),
+						),
+					)
+					.for("update")
+					.limit(1);
+				if (!participant) throw new ConversationNotFound();
+				const [lastMessage] = await tx
+					.select({ id: message.id })
+					.from(message)
+					.where(
+						and(
+							eq(message.id, body.lastReadMessageId),
+							eq(message.conversationId, params.conversationId),
+						),
+					)
+					.limit(1);
+				if (!lastMessage) throw new MessageNotFound(true);
+				const readAt = new Date();
+				await tx
+					.insert(conversationRead)
+					.values({
+						conversationId: params.conversationId,
+						profileId: profile.unitId,
+						lastReadMessageId: body.lastReadMessageId,
+						readAt,
+					})
+					.onConflictDoUpdate({
+						target: [conversationRead.conversationId, conversationRead.profileId],
+						set: { lastReadMessageId: body.lastReadMessageId, readAt },
+					});
+				return readAt;
+			});
 			return {
 				conversationId: params.conversationId,
 				lastReadMessageId: body.lastReadMessageId,

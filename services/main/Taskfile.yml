@@ -35,6 +35,11 @@ tasks:
         cmds:
             - yarn exec tsx scripts/refresh-recommendations.ts
 
+    aggregates:reconcile:
+        desc: Verify authoritative aggregate tables against their source facts.
+        cmds:
+            - yarn exec tsx scripts/reconcile-aggregates.ts
+
     build:
         desc: Build the backend.
         cmds:
