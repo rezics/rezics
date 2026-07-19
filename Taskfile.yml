@@ -60,6 +60,11 @@ tasks:
         cmds:
             - yarn exec vitest run --coverage
 
+    db:check:
+        desc: Replay main-service migrations and verify schema synchronization.
+        cmds:
+            - task: services-main:db:check
+
     openapi:generate:
         desc: Generate the OpenAPI document and Fetch SDK.
         cmds:
@@ -93,6 +98,7 @@ tasks:
         cmds:
             - defer: { task: services:stop }
             - task: services:up
+            - task: services-main:db:validate
             - task: services-main:db:migrate
             - task: dev:apps
 

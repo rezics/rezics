@@ -16,6 +16,23 @@ services:
             timeout: 5s
             retries: 15
 
+    postgres-migration-test:
+        profiles: ["migration-test"]
+        image: groonga/pgroonga:4.0.6-debian-18
+        environment:
+            POSTGRES_DB: rezics_atlas
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_USER: postgres
+        ports:
+            - "127.0.0.1:5433:5432"
+        volumes:
+            - ./services/main/docker/postgres/migration-test-init:/docker-entrypoint-initdb.d:ro
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres -d rezics_atlas"]
+            interval: 2s
+            timeout: 5s
+            retries: 15
+
     rustfs:
         image: rustfs/rustfs:latest
         command: /data

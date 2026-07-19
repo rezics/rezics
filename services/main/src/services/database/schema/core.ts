@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import {
 	boolean,
 	bigint,
@@ -22,6 +22,7 @@ import {
 	ImageAssetAccessValues,
 	ImageAssetStatusValues,
 	ModerationStatusValues,
+	type UnitKind,
 	UnitKindValues,
 	UnitStatusValues,
 	UnitVisibilityValues,
@@ -39,7 +40,6 @@ import {
 } from "./columns";
 import { users } from "./auth";
 
-export const unitKind = pgEnum("unit_kind", toEnumValues(UnitKindValues));
 export const unitStatus = pgEnum("unit_status", toEnumValues(UnitStatusValues));
 export const unitVisibility = pgEnum("unit_visibility", toEnumValues(UnitVisibilityValues));
 export const contentRating = pgEnum("content_rating", toEnumValues(ContentRatingValues));
@@ -53,7 +53,7 @@ export const unit = pgTable(
 	"unit",
 	{
 		id: createUuidv7PrimaryKey(),
-		kind: unitKind().notNull(),
+		kind: text().$type<UnitKind>().notNull(),
 		slugScopeId: uuid("slug_scope_id").references((): AnyPgColumn => unit.id, {
 			onDelete: "restrict",
 		}),
@@ -86,12 +86,13 @@ export const unit = pgTable(
 		index("unit_slug_search_idx")
 			.using("pgroonga", table.slug)
 			.where(sql`${table.deletedAt} is null`),
+		check("unit_kind_check", inArray(table.kind, UnitKindValues)),
 		check(
 			"unit_slug_address_shape_check",
 			sql`(
 				${table.slugScopeId} is null
 				and ${table.slug} is null
-				and ${table.kind} = 'slug_namespace'::unit_kind
+				and ${table.kind} = 'slug_namespace'
 			) or (
 				${table.slugScopeId} is not null
 				and ${table.slug} is not null

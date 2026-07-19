@@ -61,16 +61,80 @@ tasks:
         cmds:
             - yarn exec tsx scripts/generate-auth-schema.ts
 
-    db:generate:
-        desc: Generate a Drizzle migration from the schema.
+    db:dev:up:
+        internal: true
+        dir: ../..
         cmds:
-            - yarn exec drizzle-kit generate
+            - docker compose --profile migration-test up -d --wait postgres-migration-test
+
+    db:dev:down:
+        internal: true
+        dir: ../..
+        cmds:
+            - docker compose --profile migration-test rm --stop --force postgres-migration-test
+
+    db:dev:reset:
+        internal: true
+        cmds:
+            - task: db:dev:down
+            - task: db:dev:up
+
+    db:generate:
+        desc: Generate an Atlas migration from the Drizzle schema.
+        cmds:
+            - test -n "{{.CLI_ARGS}}"
+            - defer: { task: db:dev:down }
+            - task: db:dev:up
+            - yarn exec atlas migrate diff --env main {{.CLI_ARGS}}
+
+    db:hash:
+        desc: Recompute the Atlas migration directory checksum.
+        cmds:
+            - yarn exec atlas migrate hash --env main
+
+    db:validate:
+        desc: Validate Atlas migration directory integrity.
+        cmds:
+            - defer: { task: db:dev:down }
+            - task: db:dev:up
+            - yarn exec atlas migrate validate --env main
+
+    db:check:
+        desc: Replay migrations and verify that they match the Drizzle schema.
+        cmds:
+            - defer: { task: db:dev:down }
+            - task: db:dev:up
+            - yarn exec atlas migrate validate --env main
+            - task: db:dev:reset
+            - yarn exec atlas migrate diff --env main ci_schema_sync
+            - test -z "$(find src/services/database/migrations -maxdepth 1 -type f -name '*_ci_schema_sync.sql' -print -quit)"
+
+    db:migrate:dry-run:
+        desc: Print pending Atlas migrations without applying them.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - yarn exec atlas migrate apply --env main --url "${DATABASE_ADMIN_URL}" --dry-run
 
     db:migrate:
-        desc: Apply pending Drizzle migrations.
+        desc: Apply pending Atlas migrations and reconcile application privileges.
         cmds:
-            - test -n "${DATABASE_ADMIN_URL:-${DATABASE_URL:-}}"
-            - yarn exec tsx scripts/migrate.ts
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - yarn exec atlas migrate apply --env main --url "${DATABASE_ADMIN_URL}"
+            - yarn exec tsx scripts/ensure-database-privileges.ts
+
+    db:adopt-atlas:
+        desc: One-time adoption of an existing Drizzle-managed database at the known baseline.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - test "${ATLAS_BASELINE_VERSION:-}" = "20260718154924"
+            - yarn exec atlas migrate apply --env main --url "${DATABASE_ADMIN_URL}" --baseline "${ATLAS_BASELINE_VERSION}"
+            - yarn exec tsx scripts/ensure-database-privileges.ts
+
+    db:status:
+        desc: Show Atlas migration status.
+        cmds:
+            - test -n "${DATABASE_ADMIN_URL:-}"
+            - yarn exec atlas migrate status --env main --url "${DATABASE_ADMIN_URL}"
 
     db:seed:
         desc: Seed an empty local database and build its recommendation snapshot.

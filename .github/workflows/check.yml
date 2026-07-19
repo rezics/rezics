@@ -30,6 +30,7 @@ jobs:
                   restore-keys: yarn-${{ runner.os }}-
             - run: devenv shell yarn install --immutable
             - run: devenv shell yarn task format:check
+            - run: devenv shell yarn task db:check
             - run: devenv shell yarn task openapi:check
             - run: devenv shell yarn task typecheck
             - run: devenv shell yarn task test

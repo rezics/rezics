@@ -38,6 +38,7 @@
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {
+		"@ariga/atlas": "1.2.3",
 		"@faker-js/faker": "^10.5.0",
 		"@types/language-tags": "^1.0.4",
 		"@types/node": "26",

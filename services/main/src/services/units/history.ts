@@ -44,6 +44,7 @@ import {
 	seriesRelease,
 	subjectAttribution,
 	unit,
+	UnitKindValues,
 	unitAlias,
 	creditAttribution,
 	unitLink,
@@ -102,7 +103,7 @@ const RuleSnapshotSchema = z.object({
 });
 const UnitSnapshotSchema = z.object({
 	version: z.literal(1),
-	kind: z.enum(unit.kind.enumValues),
+	kind: z.enum(UnitKindValues),
 	unit: SnapshotRowSchema,
 	localizations: z.array(SnapshotRowSchema),
 	extension: SnapshotRowSchema.nullable(),

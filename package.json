@@ -19,6 +19,11 @@
 		"@kubb/parser-ts": "5.0.0-beta.96",
 		"kubb": "5.0.0-beta.96"
 	},
+	"dependenciesMeta": {
+		"@ariga/atlas": {
+			"built": true
+		}
+	},
 	"devDependencies": {
 		"@nmnmcc/task": "^3.52.0",
 		"@types/node": "26",

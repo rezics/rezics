@@ -28,6 +28,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ariga/atlas@npm:1.2.3":
+  version: 1.2.3
+  resolution: "@ariga/atlas@npm:1.2.3"
+  bin:
+    atlas: atlas
+  checksum: 10c0/9e69cb43c9c46d0f7147102617ac094d52fce3916fda357c040c682a410ef455d32555fb1f2a89dfdee80531758c4153cc81e3fd07d6d12eebc97ea4df9ec10e
+  languageName: node
+  linkType: hard
+
 "@ark-ui/react@npm:^5.37.2":
   version: 5.37.2
   resolution: "@ark-ui/react@npm:5.37.2"
@@ -3383,6 +3392,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@rezics/backend@workspace:services/main"
   dependencies:
+    "@ariga/atlas": "npm:1.2.3"
     "@aws-sdk/client-s3": "npm:^3.1085.0"
     "@aws-sdk/s3-request-presigner": "npm:^3.1085.0"
     "@better-auth/api-key": "npm:1.7.0-rc.1"
@@ -11917,6 +11927,9 @@ __metadata:
     prettier: "npm:3"
     typescript: "npm:7"
     vitest: "npm:4.1.10"
+  dependenciesMeta:
+    "@ariga/atlas":
+      built: true
   languageName: unknown
   linkType: soft
 

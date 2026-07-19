@@ -19,6 +19,8 @@ export const UnitKindValues = [
 	"realm_rule",
 ] as const;
 
+export type UnitKind = (typeof UnitKindValues)[number];
+
 export const UnitStatusValues = ["draft", "published", "archived"] as const;
 export const UnitVisibilityValues = ["public", "unlisted", "private"] as const;
 export const ContentRatingValues = ["general", "r15", "r18", "r18g"] as const;

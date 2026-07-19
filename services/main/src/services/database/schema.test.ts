@@ -75,6 +75,7 @@ describe("database schema contracts", () => {
 
 	it("models Unit slugs as one scoped address tree", () => {
 		const address = getTableConfig(unit);
+		expect(unit.kind.getSQLType()).toBe("text");
 		expect(address.indexes.map((index) => index.config.name)).toEqual(
 			expect.arrayContaining(["unit_slug_scope_slug_key", "unit_slug_root_key"]),
 		);
@@ -83,6 +84,7 @@ describe("database schema contracts", () => {
 		);
 		expect(address.checks.map((constraint) => constraint.name)).toEqual(
 			expect.arrayContaining([
+				"unit_kind_check",
 				"unit_slug_address_shape_check",
 				"unit_slug_label_check",
 				"unit_slug_scope_not_self_check",
