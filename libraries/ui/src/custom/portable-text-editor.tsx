@@ -133,7 +133,7 @@ const renderStyle: RenderStyleFunction = ({ schemaType, children }) =>
 	) : schemaType.value === "h3" ? (
 		<h3 className="mt-6 font-serif font-semibold text-xl leading-tight">{children}</h3>
 	) : schemaType.value === "blockquote" ? (
-		<blockquote className="my-4 border-s-2 border-primary/45 ps-4 text-muted-foreground italic">
+		<blockquote className="my-4 border-s-2 border-brand/45 ps-4 text-muted-foreground italic">
 			{children}
 		</blockquote>
 	) : (

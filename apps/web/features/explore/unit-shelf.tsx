@@ -214,10 +214,12 @@ function UnitRecommendationCard({
 					>
 						{item.title ?? item.slug ?? t.ui.unnamed}
 					</h3>
-					{reason && <p className="text-primary line-clamp-1 text-xs">{reason}</p>}
+					{reason && (
+						<p className="line-clamp-1 text-muted-foreground text-xs">{reason}</p>
+					)}
 					<Link
 						href={`/units/${item.type}/${item.id}`}
-						className="text-primary mt-auto inline-flex items-center gap-1 text-sm"
+						className="mt-auto inline-flex items-center gap-1 text-link text-sm hover:text-link-hover"
 						onClick={trackOpen}
 					>
 						{t.actions.view}{" "}

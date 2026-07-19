@@ -108,7 +108,7 @@ export function PostHistoryPage({ postId }: { postId: string }) {
 												{" · "}
 												{t.posts.revisionBy}{" "}
 												<Link
-													className="text-primary"
+													className="text-link hover:text-link-hover"
 													href={`/users/${revision.actorProfileId}`}
 												>
 													{revision.actorName ??

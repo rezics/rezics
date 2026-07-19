@@ -69,11 +69,11 @@ export function AppShell({
 		<div className="min-h-svh bg-background">
 			<SkipNavLink id="main-content">{skipToContentLabel}</SkipNavLink>
 
-			<header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur-md">
+			<header className="sticky top-0 z-40 border-b border-border-weak bg-background/92 backdrop-blur-xl">
 				<div className="mx-auto flex h-16 w-full max-w-[1440px] items-center gap-3 px-4 sm:px-6">
 					<Link className="flex shrink-0 items-center gap-2" href="/" title="REZICS">
 						<Logo alt="" aria-hidden="true" className="size-8" />
-						<span className="hidden text-base font-bold tracking-[0.14em] min-[360px]:inline">
+						<span className="hidden text-base font-black text-foreground tracking-[0.14em] min-[360px]:inline">
 							REZICS
 						</span>
 					</Link>
@@ -90,7 +90,7 @@ export function AppShell({
 									className={cn(
 										"relative flex min-w-14 items-center justify-center px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
 										active &&
-											"text-primary after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:bg-primary",
+											"text-foreground after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full after:bg-brand",
 									)}
 									href={href}
 									key={href}
@@ -105,7 +105,10 @@ export function AppShell({
 						action={search.href}
 						className="mx-auto hidden min-w-40 max-w-md flex-1 lg:block"
 					>
-						<InputGroup className="h-10 bg-card/70 dark:bg-card/70" size="lg">
+						<InputGroup
+							className="h-10 border-transparent bg-surface-container shadow-none"
+							size="lg"
+						>
 							<InputGroupAddon align="inline-start">
 								<Search aria-hidden />
 							</InputGroupAddon>
@@ -193,7 +196,7 @@ export function AppShell({
 
 			<nav
 				aria-label={navigationLabel}
-				className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t bg-background/95 pb-[env(safe-area-inset-bottom,0px)] shadow-[0_-10px_30px_rgba(0,0,0,0.12)] backdrop-blur-md md:hidden"
+				className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border-weak bg-background/94 pb-[env(safe-area-inset-bottom,0px)] backdrop-blur-xl md:hidden"
 			>
 				{navigation.map(({ href, label, icon: Icon }) => {
 					const active = isCurrentPath(currentPath, href);
@@ -202,7 +205,7 @@ export function AppShell({
 							aria-current={active ? "page" : undefined}
 							className={cn(
 								"flex min-h-16 min-w-0 flex-col items-center justify-center gap-1 px-1 text-[0.6875rem] font-medium text-muted-foreground transition-colors [&_svg]:size-5",
-								active && "text-primary",
+								active && "text-foreground [&_svg]:text-brand",
 							)}
 							href={href}
 							key={href}

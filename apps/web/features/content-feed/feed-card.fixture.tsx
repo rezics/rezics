@@ -111,17 +111,22 @@ const postMedia =
 function FeedFixtureCanvas({
 	children,
 	width = "wide",
+	theme = "light",
 }: {
 	children: ReactNode;
 	width?: "wide" | "mobile";
+	theme?: "light" | "dark";
 }) {
 	return (
-		<main className="min-h-screen bg-muted/40 p-3 sm:p-8">
+		<main
+			className={`${theme === "dark" ? "dark " : ""}min-h-screen overflow-x-hidden bg-background p-3 text-foreground sm:p-8`}
+			data-theme={theme}
+		>
 			<div
 				className={
 					width === "mobile"
-						? "mx-auto w-[390px] max-w-full overflow-hidden rounded-xl bg-card shadow-xs"
-						: "mx-auto max-w-3xl overflow-hidden rounded-xl bg-card shadow-xs"
+						? "mx-auto w-[390px] max-w-full min-w-0 overflow-hidden bg-background"
+						: "mx-auto w-full max-w-3xl min-w-0 overflow-hidden bg-background"
 				}
 			>
 				{children}
@@ -376,6 +381,22 @@ function CompactPostFeedCard() {
 }
 
 const fixtures = {
+	"Theme · light feed": (
+		<FeedFixtureCanvas theme="light">
+			<FeedCardList aria-label="Light theme feed cards">
+				<PostFeedCard />
+				<CompactPostFeedCard />
+			</FeedCardList>
+		</FeedFixtureCanvas>
+	),
+	"Theme · dark feed": (
+		<FeedFixtureCanvas theme="dark">
+			<FeedCardList aria-label="Dark theme feed cards">
+				<PostFeedCard />
+				<CompactPostFeedCard />
+			</FeedCardList>
+		</FeedFixtureCanvas>
+	),
 	"Grouped feed": (
 		<FeedFixtureCanvas>
 			<FeedCardList aria-label="Feed cards">

@@ -168,7 +168,7 @@ export function CollectionsPage() {
 				<div className="grid gap-3">
 					{query.data.items.map((collection) => (
 						<Link key={collection.id} href={`/collections/${collection.id}`}>
-							<Card className="transition-colors hover:border-primary/30">
+							<Card className="transition-colors hover:bg-surface-hover">
 								<CardHeader
 									title={collection.title ?? collection.slug ?? t.ui.unnamed}
 									description={collection.summary ?? undefined}

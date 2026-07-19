@@ -61,7 +61,7 @@ export function PollsPage() {
 				<div className="grid gap-3">
 					{query.data.hits.map((poll) => (
 						<Link key={poll.id} href={`/polls/${poll.id}`}>
-							<Card className="transition-colors hover:border-primary/30">
+							<Card className="transition-colors hover:bg-surface-hover">
 								<CardHeader
 									description={poll.summaries[0] ?? undefined}
 									title={poll.titles[0] ?? poll.slug ?? t.ui.unnamed}

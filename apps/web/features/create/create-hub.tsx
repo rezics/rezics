@@ -38,9 +38,9 @@ export function CreateHub() {
 				<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 					{Destinations.map(({ href, key, icon: Icon }) => (
 						<Link key={href} href={href}>
-							<Card className="h-full transition-colors hover:border-primary/40">
+							<Card className="h-full transition-colors hover:bg-surface-hover">
 								<CardContent className="flex min-h-36 flex-col gap-3 p-5">
-									<Icon className="text-primary size-5" />
+									<Icon className="text-brand size-5" />
 									<h2 className="font-semibold">{t.create.items[key]}</h2>
 								</CardContent>
 							</Card>

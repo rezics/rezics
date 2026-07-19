@@ -35,9 +35,9 @@ export function Home() {
 
 	return (
 		<main className="mx-auto flex w-full max-w-[76rem] flex-col gap-5 px-4 py-5 sm:gap-8 sm:px-6 sm:py-9">
-			<header className="flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-end sm:justify-between sm:gap-5 sm:pb-7">
+			<header className="flex flex-col gap-3 border-b border-border-weak pb-4 sm:flex-row sm:items-end sm:justify-between sm:gap-5 sm:pb-7">
 				<div className="max-w-2xl">
-					<p className="mb-2 hidden font-semibold text-primary text-xs uppercase tracking-[0.18em] sm:block">
+					<p className="mb-2 hidden font-semibold text-muted-foreground text-xs uppercase tracking-[0.18em] sm:block">
 						REZICS
 					</p>
 					<h1 className="font-serif font-semibold text-3xl tracking-tight sm:text-5xl">
@@ -85,19 +85,19 @@ export function Home() {
 			</section>
 
 			<div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
-				<Card className="min-w-0 gap-0 overflow-hidden py-0">
+				<div className="min-w-0 overflow-hidden">
 					<Tabs
 						onValueChange={({ value }) => {
 							if (isFeedSort(value)) void setSort(value);
 						}}
 						value={sort}
 					>
-						<div className="flex flex-col gap-3 border-b px-4 pt-5 sm:flex-row sm:items-end sm:justify-between sm:px-5">
+						<div className="flex flex-col gap-3 border-b border-border-weak px-4 pt-5 sm:flex-row sm:items-end sm:justify-between sm:px-5">
 							<div className="pb-1">
 								<div className="flex items-center gap-2">
 									<MessageSquareTextIcon
 										aria-hidden
-										className="size-5 text-primary"
+										className="size-5 text-brand"
 									/>
 									<h2 className="font-serif font-semibold text-2xl">
 										{t.feed.trending}
@@ -122,7 +122,7 @@ export function Home() {
 							</section>
 						</TabsContent>
 					</Tabs>
-				</Card>
+				</div>
 
 				<HomeRail />
 			</div>
@@ -138,9 +138,9 @@ function HomeRail() {
 		<aside className="grid min-w-0 gap-5 lg:sticky lg:top-20" aria-label={t.feed.trending}>
 			{session ? <ContinueReading /> : null}
 			<ActiveRealms />
-			<Card className="min-w-0 border-primary/25 bg-primary/5">
+			<Card className="min-w-0 border-0 bg-surface-container shadow-none">
 				<CardContent className="grid gap-3 px-5">
-					<UsersIcon aria-hidden className="size-6 text-primary" />
+					<UsersIcon aria-hidden className="size-6 text-brand" />
 					<div>
 						<h2 className="font-serif font-semibold text-lg">{t.feed.myRealms}</h2>
 						<p className="mt-1 text-muted-foreground text-sm leading-6">
@@ -163,11 +163,11 @@ function ContinueReading() {
 
 	if (query.isError || (!query.isPending && items.length === 0)) return null;
 	return (
-		<Card className="min-w-0">
+		<Card className="min-w-0 border-0 bg-surface-container shadow-none">
 			<CardContent className="grid gap-4 px-5">
 				<div className="flex items-center justify-between gap-3">
 					<h2 className="font-serif font-semibold text-lg">{t.feed.continueReading}</h2>
-					<BookOpenIcon aria-hidden className="size-4 text-primary" />
+					<BookOpenIcon aria-hidden className="size-4 text-brand" />
 				</div>
 				{query.isPending
 					? Array.from({ length: 2 }, (_, index) => (
@@ -180,7 +180,7 @@ function ContinueReading() {
 								key={item.unitId}
 							>
 								<div className="flex items-center justify-between gap-3 text-sm">
-									<span className="line-clamp-1 font-medium group-hover:text-primary">
+									<span className="line-clamp-1 font-medium group-hover:underline">
 										{item.title ?? item.slug ?? t.ui.unnamed}
 									</span>
 									<span className="shrink-0 text-muted-foreground text-xs">
@@ -200,7 +200,7 @@ function ActiveRealms() {
 	const query = useGetApiRealms({ query: { limit: 5 } });
 
 	return (
-		<Card className="min-w-0">
+		<Card className="min-w-0 border-0 bg-surface-container shadow-none">
 			<CardContent className="grid gap-4 px-5">
 				<div className="flex items-center justify-between gap-3">
 					<h2 className="font-serif font-semibold text-lg">{t.feed.activeRealms}</h2>
@@ -212,15 +212,15 @@ function ActiveRealms() {
 						))
 					: query.data?.items.slice(0, 5).map((realm, index) => (
 							<Link
-								className="group flex min-w-0 items-center gap-3 border-t pt-3 first:border-t-0 first:pt-0"
+								className="group flex min-w-0 items-center gap-3 border-border-weak border-t pt-3 first:border-t-0 first:pt-0"
 								href={`/realms/${realm.id}`}
 								key={realm.id}
 							>
-								<span className="grid size-8 shrink-0 place-items-center rounded-full bg-accent font-serif font-semibold text-primary text-sm">
+								<span className="grid size-8 shrink-0 place-items-center rounded-full bg-surface-selected font-serif font-semibold text-foreground text-sm">
 									{index + 1}
 								</span>
 								<span className="min-w-0">
-									<span className="block truncate font-medium text-sm group-hover:text-primary">
+									<span className="block truncate font-medium text-sm group-hover:underline">
 										{realm.title ?? realm.slug ?? t.realms.untitled}
 									</span>
 									{realm.summary ? (

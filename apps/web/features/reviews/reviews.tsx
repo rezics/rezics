@@ -87,7 +87,7 @@ export function ReviewsPage() {
 				<div className="grid gap-3">
 					{query.data.items.map((review) => (
 						<Link key={review.id} href={`/reviews/${review.id}`}>
-							<Card className="transition-colors hover:border-primary/30">
+							<Card className="transition-colors hover:bg-surface-hover">
 								<CardHeader
 									description={review.summary ?? undefined}
 									title={review.title ?? t.ui.unnamed}

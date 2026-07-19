@@ -143,7 +143,7 @@ export function PostList({
 		);
 	if (!items?.length)
 		return (
-			<div className="grid min-h-56 place-items-center border-b p-8 text-center">
+			<div className="grid min-h-56 place-items-center border-b border-border-weak p-8 text-center">
 				<div>
 					<p className="font-heading font-bold">{t.feed.emptyTitle}</p>
 					<p className="text-muted-foreground mt-1 text-sm">{t.feed.emptyBody}</p>
@@ -151,7 +151,11 @@ export function PostList({
 			</div>
 		);
 	return (
-		<div className="grid gap-2 p-3 sm:p-4" data-sort={sort} data-personalized={personalized}>
+		<div
+			className="divide-y divide-border-weak py-1 sm:py-2"
+			data-sort={sort}
+			data-personalized={personalized}
+		>
 			{items.map((post) => (
 				<PostListItem
 					key={post.id}
@@ -239,7 +243,7 @@ export function RelatedPostRecommendations({ postId }: { postId: string }) {
 
 function FeedSkeleton() {
 	return (
-		<Card className="[--space:--spacing(4)] sm:[--space:--spacing(5)]">
+		<Card className="rounded-none border-0 bg-background shadow-none [--space:--spacing(4)] sm:rounded-2xl sm:[--space:--spacing(5)]">
 			<CardContent className="flex gap-3">
 				<Skeleton className="size-9 shrink-0 rounded-full" />
 				<div className="grid flex-1 gap-3">
@@ -290,7 +294,7 @@ export function PostListItem({
 	return (
 		<Card
 			asChild
-			className="group w-full min-w-0 [--space:--spacing(4)] transition-colors hover:border-primary/25 sm:[--space:--spacing(5)]"
+			className="group w-full min-w-0 rounded-none border-0 bg-background shadow-none [--space:--spacing(4)] transition-colors hover:bg-surface-hover focus-within:bg-surface-hover sm:rounded-2xl sm:[--space:--spacing(5)]"
 		>
 			<article ref={elementRef}>
 				<CardContent className="flex gap-3">
@@ -321,7 +325,7 @@ export function PostListItem({
 								<>
 									<span>·</span>
 									<Link
-										className="inline-flex min-h-6 items-center text-primary font-medium hover:underline"
+										className="inline-flex min-h-6 items-center text-foreground font-medium hover:underline"
 										href={`/realms/${post.realmId}`}
 									>
 										r/community
@@ -355,7 +359,9 @@ export function PostListItem({
 							)}
 						</div>
 						{reason && (
-							<p className="text-primary mt-1 text-xs font-medium">{reason}</p>
+							<p className="text-muted-foreground mt-1 text-xs font-medium">
+								{reason}
+							</p>
 						)}
 						{post.replyContext && (
 							<Link
@@ -366,7 +372,7 @@ export function PostListItem({
 							</Link>
 						)}
 						<Link href={`/posts/${post.id}`} className="block" onClick={trackOpen}>
-							<h2 className="font-heading mt-2 text-[1.05rem] font-black leading-snug group-hover:text-primary">
+							<h2 className="font-heading mt-2 text-[1.05rem] font-black leading-snug">
 								{post.postKind === "reply"
 									? t.posts.replyPost
 									: (post.title ?? t.posts.untitled)}
@@ -408,7 +414,7 @@ export function PostListItem({
 								</Link>
 							</Item>
 						)}
-						<div className="mt-3 flex items-center justify-between gap-1 border-t pt-2">
+						<div className="mt-3 flex items-center justify-between gap-1 border-t border-border-weak pt-2">
 							<Button
 								className="min-h-11 text-xs sm:min-h-7"
 								pill

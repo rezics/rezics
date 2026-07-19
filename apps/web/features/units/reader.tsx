@@ -168,7 +168,8 @@ function ContentReadTreeNode({
 					<Link
 						aria-current={node.contentUnitId === currentChapterId ? "page" : undefined}
 						className={cn(
-							node.contentUnitId === currentChapterId && "bg-primary/10 text-primary",
+							node.contentUnitId === currentChapterId &&
+								"bg-surface-selected text-foreground",
 						)}
 						href={`/units/book/${bookId}/read/${node.contentUnitId}`}
 					>
@@ -226,7 +227,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 						<ArrowLeftIcon aria-hidden />
 					</Link>
 				</Button>
-				<span className="hidden font-serif font-semibold text-primary sm:block">
+				<span className="hidden font-serif font-semibold text-foreground sm:block">
 					REZICS
 				</span>
 				<span aria-hidden className="hidden h-5 w-px bg-border sm:block" />
@@ -299,7 +300,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 				<div className="min-h-0 overflow-y-auto scroll-smooth">
 					<div className="mx-auto flex min-h-full w-full max-w-[48rem] flex-col px-5 py-8 sm:px-10 sm:py-12">
 						<header className="border-b pb-7">
-							<p className="font-semibold text-primary text-xs uppercase tracking-[0.16em]">
+							<p className="font-semibold text-muted-foreground text-xs uppercase tracking-[0.16em]">
 								{t.units.content.chapter}
 							</p>
 							<h1 className="mt-3 font-serif font-semibold text-3xl tracking-tight sm:text-4xl">

@@ -663,7 +663,12 @@ function AuthModeFooter({
 
 function ModeButton({ children, onClick }: { children: ReactNode; onClick: () => void }) {
 	return (
-		<Button className="h-auto px-0" onClick={onClick} size="sm" variant="link">
+		<Button
+			className="h-auto px-0 text-link hover:text-link-hover"
+			onClick={onClick}
+			size="sm"
+			variant="link"
+		>
 			{children}
 		</Button>
 	);

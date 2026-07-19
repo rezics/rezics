@@ -47,7 +47,7 @@ export function FeedCardList({ children, className, ...props }: ComponentProps<"
 
 	return (
 		<div
-			className={cn("w-full overflow-hidden bg-card", className)}
+			className={cn("w-full overflow-hidden bg-background", className)}
 			data-slot="feed-card-list"
 			role="feed"
 			{...props}
@@ -55,7 +55,7 @@ export function FeedCardList({ children, className, ...props }: ComponentProps<"
 			{cards.map((card, index) => (
 				<Fragment key={index}>
 					{card}
-					{index < cards.length - 1 ? <Separator /> : null}
+					{index < cards.length - 1 ? <Separator className="bg-border-weak" /> : null}
 				</Fragment>
 			))}
 		</div>
@@ -67,8 +67,8 @@ export function FeedCard({ className, ...props }: ComponentProps<"article">) {
 		<Card
 			asChild
 			className={cn(
-				"group/feed-card gap-0 rounded-none border-0 bg-transparent py-0 shadow-none",
-				"transition-colors hover:bg-muted/64 focus-within:bg-muted/48",
+				"group/feed-card gap-0 rounded-none border-0 bg-background py-0 shadow-none sm:rounded-2xl",
+				"transition-colors hover:bg-surface-hover focus-within:bg-surface-hover",
 				className,
 			)}
 		>
@@ -103,7 +103,9 @@ export function FeedCardHeader({
 			<time className="text-muted-foreground text-xs">{timestamp}</time>
 			{menu ? <div className="ms-auto">{menu}</div> : null}
 			{recommendation ? (
-				<div className="basis-full ps-8 text-primary text-xs">{recommendation}</div>
+				<div className="basis-full ps-8 text-muted-foreground text-xs">
+					{recommendation}
+				</div>
 			) : null}
 		</CardHeader>
 	);

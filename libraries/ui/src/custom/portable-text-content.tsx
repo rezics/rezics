@@ -61,11 +61,11 @@ const previewComponents = {
 
 const variantClasses: Record<PortableTextContentVariant, string> = {
 	compact:
-		"grid gap-2 text-sm leading-6 text-foreground/88 [&_blockquote]:border-s-2 [&_blockquote]:border-primary/45 [&_blockquote]:ps-3 [&_blockquote]:italic [&_ol]:list-decimal [&_ol]:ps-5 [&_ul]:list-disc [&_ul]:ps-5",
+		"grid gap-2 text-sm leading-6 text-foreground/88 [&_blockquote]:border-s-2 [&_blockquote]:border-brand/45 [&_blockquote]:ps-3 [&_blockquote]:italic [&_ol]:list-decimal [&_ol]:ps-5 [&_ul]:list-disc [&_ul]:ps-5",
 	preview:
 		"line-clamp-3 text-sm leading-6 text-muted-foreground [&_blockquote]:border-s-2 [&_blockquote]:border-border [&_blockquote]:ps-3 [&_ol]:list-decimal [&_ol]:ps-5 [&_ul]:list-disc [&_ul]:ps-5",
 	article:
-		"prose max-w-none text-foreground prose-headings:font-serif prose-headings:text-foreground prose-p:leading-8 prose-a:text-link prose-a:decoration-link/35 prose-a:underline-offset-4 hover:prose-a:decoration-link prose-blockquote:border-primary/45 prose-blockquote:text-muted-foreground prose-li:my-1",
+		"prose max-w-none text-foreground prose-headings:font-serif prose-headings:text-foreground prose-p:leading-8 prose-a:text-link prose-a:decoration-link/35 prose-a:underline-offset-4 hover:prose-a:decoration-link prose-blockquote:border-brand/45 prose-blockquote:text-muted-foreground prose-li:my-1",
 };
 
 export function PortableTextContent({

@@ -44,13 +44,13 @@ export function UnitList({
 	if (!items?.length) return <p className="text-muted-foreground text-sm">{messages.empty}</p>;
 
 	return (
-		<ItemGroup className="gap-0 overflow-hidden rounded-xl border bg-card">
+		<ItemGroup className="gap-0 overflow-hidden rounded-2xl bg-background">
 			{items.map((item) => {
 				const target = href?.(item) ?? item.href;
 				return (
 					<LinkBox key={item.id}>
 						<Item
-							className="rounded-none border-0 border-b shadow-none last:border-b-0 hover:bg-muted/40"
+							className="rounded-none border-0 border-b border-border-weak shadow-none last:border-b-0 hover:bg-surface-hover focus-within:bg-surface-hover"
 							role="listitem"
 						>
 							<ItemMedia

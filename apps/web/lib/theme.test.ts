@@ -5,8 +5,12 @@ import { describe, expect, it } from "vitest";
 import { appTheme, appThemeCss, type AppThemeColors } from "./theme";
 
 const foregroundPairs = [
+	["brand", "brandForeground"],
 	["background", "foreground"],
 	["card", "cardForeground"],
+	["surfaceHover", "foreground"],
+	["surfaceSelected", "foreground"],
+	["surfaceContainer", "foreground"],
 	["popover", "popoverForeground"],
 	["primary", "primaryForeground"],
 	["secondary", "secondaryForeground"],
@@ -16,7 +20,9 @@ const foregroundPairs = [
 	["info", "infoForeground"],
 	["success", "successForeground"],
 	["warning", "warningForeground"],
-	["background", "primary"],
+	["background", "link"],
+	["background", "linkHover"],
+	["background", "linkVisited"],
 	["sidebarPrimary", "sidebarPrimaryForeground"],
 	["sidebarAccent", "sidebarAccentForeground"],
 ] as const satisfies readonly (readonly [keyof AppThemeColors, keyof AppThemeColors])[];
@@ -41,17 +47,29 @@ function contrastRatio(first: string, second: string) {
 }
 
 describe("app theme", () => {
-	it("uses the approved warm editorial palette", () => {
+	it("uses the approved Rezics brand and neutral surface palette", () => {
 		expect(appTheme.light).toMatchObject({
-			background: "#F7F4EE",
-			primary: "#996314",
-			link: "#147D78",
+			brand: "#D8404C",
+			background: "#FFFFFF",
+			primary: "#D8404C",
+			link: "#115BCA",
+			surfaceHover: "#F6F8F9",
 		});
 		expect(appTheme.dark).toMatchObject({
-			background: "#07131F",
-			primary: "#D8A050",
-			link: "#5BB8B1",
+			brand: "#D8404C",
+			background: "#0E1113",
+			primary: "#D8404C",
+			link: "#648EFC",
+			surfaceHover: "#181C1F",
 		});
+	});
+
+	it("keeps flat cards merged with the page until interaction", () => {
+		for (const colors of Object.values(appTheme)) {
+			expect(colors.card).toBe(colors.background);
+			expect(colors.surfaceHover).not.toBe(colors.background);
+			expect(colors.surfaceSelected).not.toBe(colors.surfaceHover);
+		}
 	});
 
 	it("keeps every solid semantic color pair readable", () => {
@@ -82,6 +100,7 @@ describe("app theme", () => {
 			"utf8",
 		);
 		const offlineColors = [
+			appTheme.light.brand,
 			appTheme.light.background,
 			appTheme.light.foreground,
 			appTheme.light.mutedForeground,

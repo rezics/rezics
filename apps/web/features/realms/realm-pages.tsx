@@ -70,7 +70,7 @@ export function RealmsPage() {
 				<div className="grid gap-3">
 					{query.data.items.map((realm) => (
 						<Link key={realm.id} href={`/realms/${realm.id}`}>
-							<Card className="transition-colors hover:border-primary/30">
+							<Card className="transition-colors hover:bg-surface-hover">
 								<CardContent className="grid gap-2 p-5">
 									<h2 className="font-semibold">
 										{realm.title ?? realm.slug ?? t.realms.untitled}
@@ -258,7 +258,7 @@ export function RealmDetailPage({ id }: { id: string }) {
 									<h2 className="font-serif font-semibold text-lg">
 										{t.realms.rules}
 									</h2>
-									<ShieldCheckIcon aria-hidden className="size-4 text-primary" />
+									<ShieldCheckIcon aria-hidden className="size-4 text-brand" />
 								</div>
 								{rules.data.items.map((rule, index) => (
 									<section
@@ -287,7 +287,7 @@ export function RealmDetailPage({ id }: { id: string }) {
 									<h2 className="font-serif font-semibold text-lg">
 										{t.realms.pins}
 									</h2>
-									<PinIcon aria-hidden className="size-4 text-primary" />
+									<PinIcon aria-hidden className="size-4 text-brand" />
 								</div>
 								{pins.data.items.map((pin) => (
 									<div

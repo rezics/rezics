@@ -10,7 +10,7 @@ export default function NotFound() {
 	return (
 		<main className="grid min-h-[60svh] place-items-center px-4 text-center">
 			<div>
-				<p className="text-primary font-semibold">{StatusCodes.NOT_FOUND}</p>
+				<p className="text-destructive font-semibold">{StatusCodes.NOT_FOUND}</p>
 				<h1 className="mt-2 text-3xl font-bold">{t.routes.notFoundTitle}</h1>
 				<p className="text-muted-foreground mt-3">{t.routes.notFoundDescription}</p>
 				<Button className="mt-6" asChild>

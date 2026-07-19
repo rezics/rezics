@@ -156,7 +156,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 						key={href}
 						className={
 							index === 0
-								? "border-primary text-primary shrink-0 border-b-2 px-3 py-3 text-sm font-semibold"
+								? "shrink-0 border-b-2 border-brand px-3 py-3 text-sm font-semibold text-foreground"
 								: "text-muted-foreground shrink-0 border-b-2 border-transparent px-3 py-3 text-sm font-medium hover:text-foreground"
 						}
 						href={href}
@@ -243,7 +243,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 									{item.credits.map((credit) => (
 										<Link
 											key={credit.id}
-											className="min-w-0 break-words text-primary hover:underline"
+											className="min-w-0 break-words text-link hover:text-link-hover hover:underline"
 											href={`/entities/${credit.entityEntryId}`}
 										>
 											{credit.title ?? t.ui.unnamed} · {credit.role}
@@ -261,7 +261,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 									{item.links.map((link) => (
 										<a
 											key={link.id}
-											className="break-all text-primary hover:underline"
+											className="break-all text-link hover:text-link-hover hover:underline"
 											href={link.url}
 											rel="noreferrer"
 											target="_blank"
@@ -293,7 +293,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 									{item.versions.map((version) => (
 										<Link
 											key={version.id}
-											className="break-all text-primary hover:underline"
+											className="break-all text-link hover:text-link-hover hover:underline"
 											href={`/units/${type}/${version.id}`}
 										>
 											{version.kind === "version"

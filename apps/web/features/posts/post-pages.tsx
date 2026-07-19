@@ -197,11 +197,17 @@ export function PostDetailPage({ id }: { id: string }) {
 			<Card>
 				<CardHeader>
 					<CardDescription className="flex flex-wrap gap-x-4 gap-y-2">
-						<Link className="text-primary" href={`/users/${post.authorId}`}>
+						<Link
+							className="text-link hover:text-link-hover"
+							href={`/users/${post.authorId}`}
+						>
 							{t.posts.author}
 						</Link>
 						{post.realmId && (
-							<Link className="text-primary" href={`/realms/${post.realmId}`}>
+							<Link
+								className="text-link hover:text-link-hover"
+								href={`/realms/${post.realmId}`}
+							>
 								{t.posts.viewRealm}
 							</Link>
 						)}
@@ -210,7 +216,7 @@ export function PostDetailPage({ id }: { id: string }) {
 						</span>
 						{post.rootPostId && (
 							<Link
-								className="text-primary"
+								className="text-link hover:text-link-hover"
 								href={`/posts/${post.rootPostId}#replies`}
 							>
 								{t.posts.viewThread}

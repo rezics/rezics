@@ -21,12 +21,20 @@
 	--color-sidebar-primary: var(--sidebar-primary);
 	--color-sidebar-foreground: var(--sidebar-foreground);
 	--color-sidebar: var(--sidebar);
+	--color-brand-foreground: var(--brand-foreground);
+	--color-brand: var(--brand);
+	--color-surface-hover: var(--surface-hover);
+	--color-surface-selected: var(--surface-selected);
+	--color-surface-container: var(--surface-container);
 	--color-ring: var(--ring);
 	--color-input: var(--input);
+	--color-border-weak: var(--border-weak);
 	--color-border: var(--border);
 	--color-warning-foreground: var(--warning-foreground);
 	--color-warning: var(--warning);
 	--color-link: var(--link);
+	--color-link-hover: var(--link-hover);
+	--color-link-visited: var(--link-visited);
 	--color-success-foreground: var(--success-foreground);
 	--color-success: var(--success);
 	--color-info-foreground: var(--info-foreground);
@@ -138,7 +146,7 @@
 }
 
 :root {
-	--radius: 0.375rem;
+	--radius: 0.625rem;
 	--rezics-font-sans:
 		Inter, "Noto Sans CJK SC", "Source Han Sans SC", "Microsoft YaHei", ui-sans-serif,
 		system-ui, sans-serif;
@@ -298,6 +306,14 @@
 		color: var(--color-link);
 		text-decoration: underline;
 		text-underline-offset: var(--spacing);
+	}
+	.prose a:not(.not-prose a):visited {
+		color: var(--color-link-visited);
+	}
+	.prose a:not(.not-prose a):hover,
+	.prose a:not(.not-prose a):visited:hover {
+		color: var(--color-link-hover);
+		text-decoration-color: currentColor;
 	}
 	.prose blockquote:not(.not-prose blockquote) {
 		padding-left: calc(var(--spacing) * 6);
