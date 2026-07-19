@@ -25,7 +25,6 @@ import {
 } from "./contract-values";
 import {
 	createCreatedAtColumn,
-	createJsonDocumentColumn,
 	createJsonObjectColumn,
 	createJsonObjectConstraint,
 	createTimestampMsColumn,
@@ -250,7 +249,6 @@ export const realmUnitStatusEvent = pgTable(
 		changedByProfileId: uuid().references(() => profile.id, {
 			onDelete: "set null",
 		}),
-		annotationDocument: createJsonDocumentColumn(),
 		moderationActionId: uuid(),
 		createdAt: createCreatedAtColumn(),
 	},

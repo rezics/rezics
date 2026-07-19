@@ -85,16 +85,3 @@ export const RealmPinResponse = t.Object({
 	updatedAt: DateTime,
 });
 export const RealmPinListResponse = t.Object({ items: t.Array(RealmPinResponse) });
-export const RealmUnitResponse = t.Object({
-	realmId: Uuid,
-	unitId: Uuid,
-	status: t.Union([
-		t.Literal("pending"),
-		t.Literal("visible"),
-		t.Literal("hidden"),
-		t.Literal("removed"),
-	]),
-	locked: t.Boolean(),
-	createdAt: DateTime,
-	updatedAt: DateTime,
-});

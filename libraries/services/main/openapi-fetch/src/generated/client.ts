@@ -361,6 +361,10 @@ import type {
 	PutApiRealmsByRealmIdPinsByUnitIdResponses,
 	DeleteApiRealmsByRealmIdPinsByUnitIdOptions,
 	DeleteApiRealmsByRealmIdPinsByUnitIdResponses,
+	GetApiRealmsByRealmIdUnitsOptions,
+	GetApiRealmsByRealmIdUnitsResponses,
+	GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions,
+	GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponses,
 	PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
 	PatchApiRealmsByRealmIdUnitsByUnitIdResponses,
 	GetApiSearchConfigurationOptions,
@@ -3225,7 +3229,37 @@ export function deleteApiRealmsByRealmIdPinsByUnitId<ThrowOnError extends boolea
 }
 
 /**
- * @summary Update Realm Unit status
+ * @summary List Realm Units for moderation
+ * {@link /api/realms/:realmId/units}
+ */
+export function getApiRealmsByRealmIdUnits<ThrowOnError extends boolean = true>(
+	options: Options<GetApiRealmsByRealmIdUnitsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiRealmsByRealmIdUnitsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/realms/{realmId}/units", ...config }) as Promise<
+		RequestResult<GetApiRealmsByRealmIdUnitsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Get Realm Unit moderation history
+ * {@link /api/realms/:realmId/units/:unitId/history}
+ */
+export function getApiRealmsByRealmIdUnitsByUnitIdHistory<ThrowOnError extends boolean = true>(
+	options: Options<GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/realms/{realmId}/units/{unitId}/history",
+		...config,
+	}) as Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Apply Realm Unit moderation command
  * {@link /api/realms/:realmId/units/:unitId}
  */
 export function patchApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolean = true>(

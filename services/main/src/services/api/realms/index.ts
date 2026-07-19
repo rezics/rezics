@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, desc, eq, inArray, max, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, max, notInArray, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -19,19 +19,23 @@ import {
 } from "../../units/localization";
 import {
 	auditEvent,
+	governancePostBinding,
+	moderationAction,
+	moderationCase,
 	profile as profileTable,
 	realm,
 	realmUnit,
-	realmUnitStatusEvent,
 	realmMember,
 	realmPin,
 	realmRule,
 	realmRuleAcceptance,
 	realmRuleRevision,
+	revisionContent,
 	unitFollow,
 	unit,
 	unitAccessBinding,
 	unitLocalization,
+	unitRevisionSlot,
 } from "../../database/schema";
 import { createNotification, deliverNotificationEmail } from "../../notifications/service";
 import { findRealmMembership, getCurrentRealmRules } from "../../realms/service";
@@ -45,7 +49,6 @@ import {
 	IdResponse,
 	MembershipResponse,
 	NoContentResponse,
-	RealmUnitResponse,
 	RealmMemberListResponse,
 	RealmMemberResponse,
 	RealmPinListResponse,
@@ -64,10 +67,14 @@ import {
 	CreateRealmPinBody,
 	JoinRealmBody,
 	ListRealmMembersQuery,
+	ListRealmUnitsQuery,
 	ListRealmsQuery,
 	ModerateRealmUnitBody,
 	PublishRealmRulesBody,
 	RealmUnitParams,
+	RealmUnitListResponse,
+	RealmUnitHistoryQuery,
+	RealmUnitModerationHistoryResponse,
 	RealmMemberParams,
 	RealmParams,
 	RealmPinParams,
@@ -75,6 +82,15 @@ import {
 	UpdateRealmBody,
 	UpdateRealmMemberBody,
 } from "./schema";
+import {
+	executeAuthorizedModerationAction,
+	loadModerationCaseForAction,
+} from "../governance/moderation-service";
+import { type CreateModerationActionBody, ModerationActionResponse } from "../governance/schema";
+import {
+	GovernanceReasonCodeValues,
+	RealmUnitStatusValues,
+} from "../../database/schema/contract-values";
 import {
 	RealmUnitNotFound,
 	RealmMemberNotFound,
@@ -88,6 +104,35 @@ const RealmMutationForbiddenResponse = toApiErrorResponse([
 	"RealmCapabilityRequired",
 	"UnitProtected",
 ]);
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function presentGovernanceNoteLocalization(payload: unknown) {
+	if (!isRecord(payload) || payload.version !== 1 || !Array.isArray(payload.items))
+		throw new Error("Governance note revision has an invalid localization snapshot");
+	const [localization] = payload.items;
+	if (!isRecord(localization) || typeof localization.language !== "string")
+		throw new Error("Governance note revision is missing its localization");
+	return {
+		language: localization.language,
+		content: toPortableTextResponse(localization.content),
+	};
+}
+
+function presentRealmUnitStatus(value: string | null) {
+	if (value === null) return null;
+	const status = RealmUnitStatusValues.find((candidate) => candidate === value);
+	if (!status) throw new Error("Realm moderation action has an invalid state outcome");
+	return status;
+}
+
+function presentGovernanceReasonCode(value: string) {
+	const reasonCode = GovernanceReasonCodeValues.find((candidate) => candidate === value);
+	if (!reasonCode) throw new Error("Realm moderation action has an invalid reason code");
+	return reasonCode;
+}
 
 async function ensureRealmFieldsAuthorized(
 	authorization: Authorization<string>,
@@ -895,15 +940,181 @@ export default new Elysia({ prefix: "/realms" })
 			},
 		},
 	)
+	.get(
+		"/:realmId/units",
+		async ({ params, query, authorization }) => {
+			await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
+			return {
+				items: await database
+					.select({
+						realmId: realmUnit.realmId,
+						unitId: realmUnit.unitId,
+						unitKind: unit.kind,
+						title: primaryUnitTitle(unit.id),
+						status: realmUnit.status,
+						locked: realmUnit.locked,
+						moderationStatus: unit.moderationStatus,
+						createdAt: realmUnit.createdAt,
+						updatedAt: realmUnit.updatedAt,
+					})
+					.from(realmUnit)
+					.innerJoin(unit, eq(unit.id, realmUnit.unitId))
+					.where(
+						and(
+							eq(realmUnit.realmId, params.realmId),
+							query.status ? eq(realmUnit.status, query.status) : undefined,
+						),
+					)
+					.orderBy(
+						sql`case ${realmUnit.status} when 'pending' then 0 when 'hidden' then 1 when 'removed' then 2 else 3 end`,
+						desc(realmUnit.updatedAt),
+						desc(realmUnit.unitId),
+					)
+					.limit(query.limit ?? 50),
+			};
+		},
+		{
+			access: "session-only",
+			params: RealmParams,
+			query: ListRealmUnitsQuery,
+			response: {
+				[StatusCodes.OK]: RealmUnitListResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
+			},
+			detail: { summary: "List Realm Units for moderation", tags: ["Realms"] },
+		},
+	)
+	.get(
+		"/:realmId/units/:unitId/history",
+		async ({ params, query, authorization }) => {
+			await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
+			const [target] = await database
+				.select({ unitId: realmUnit.unitId })
+				.from(realmUnit)
+				.where(
+					and(eq(realmUnit.realmId, params.realmId), eq(realmUnit.unitId, params.unitId)),
+				)
+				.limit(1);
+			if (!target) throw new RealmUnitNotFound();
+			const actions = await database
+				.select({
+					id: moderationAction.id,
+					caseId: moderationAction.caseId,
+					kind: moderationAction.kind,
+					actorProfileId: moderationAction.actorProfileId,
+					actorName: primaryUnitTitle(profileTable.id),
+					previousState: moderationAction.previousState,
+					resultingState: moderationAction.resultingState,
+					previousLocked: moderationAction.previousLocked,
+					resultingLocked: moderationAction.resultingLocked,
+					reasonCode: moderationAction.reasonCode,
+					reversesActionId: moderationAction.reversesActionId,
+					createdAt: moderationAction.createdAt,
+				})
+				.from(moderationAction)
+				.innerJoin(moderationCase, eq(moderationCase.id, moderationAction.caseId))
+				.leftJoin(profileTable, eq(profileTable.id, moderationAction.actorProfileId))
+				.where(
+					and(
+						eq(moderationCase.authority, "realm"),
+						eq(moderationCase.realmId, params.realmId),
+						eq(moderationCase.targetKind, "realm_unit"),
+						eq(moderationCase.targetId, params.unitId),
+					),
+				)
+				.orderBy(desc(moderationAction.createdAt), desc(moderationAction.id))
+				.limit(query.limit ?? 50);
+			const actionIds = actions.map((action) => action.id);
+			const notes = actionIds.length
+				? await database
+						.select({
+							postId: governancePostBinding.postId,
+							revisionId: governancePostBinding.revisionId,
+							actionId: governancePostBinding.subjectId,
+							role: governancePostBinding.role,
+							payload: revisionContent.payload,
+							createdAt: governancePostBinding.createdAt,
+						})
+						.from(governancePostBinding)
+						.innerJoin(
+							unitRevisionSlot,
+							and(
+								eq(unitRevisionSlot.revisionId, governancePostBinding.revisionId),
+								eq(unitRevisionSlot.unitId, governancePostBinding.postId),
+								eq(unitRevisionSlot.role, "localizations"),
+							),
+						)
+						.innerJoin(
+							revisionContent,
+							eq(revisionContent.id, unitRevisionSlot.contentId),
+						)
+						.where(
+							and(
+								eq(governancePostBinding.subjectKind, "moderation_action"),
+								inArray(governancePostBinding.subjectId, actionIds),
+								inArray(governancePostBinding.role, [
+									"internal_note",
+									"public_notice",
+								]),
+							),
+						)
+				: [];
+			const notesByAction = new Map<
+				string,
+				Array<{
+					postId: string;
+					revisionId: string;
+					role: "internal_note" | "public_notice";
+					language: string;
+					content: ReturnType<typeof toPortableTextResponse>;
+					createdAt: Date;
+				}>
+			>();
+			for (const note of notes) {
+				if (note.role === "evidence") continue;
+				const localization = presentGovernanceNoteLocalization(note.payload);
+				const items = notesByAction.get(note.actionId) ?? [];
+				items.push({
+					postId: note.postId,
+					revisionId: note.revisionId,
+					role: note.role,
+					...localization,
+					createdAt: note.createdAt,
+				});
+				notesByAction.set(note.actionId, items);
+			}
+			return {
+				items: actions.map((action) => ({
+					...action,
+					previousState: presentRealmUnitStatus(action.previousState),
+					resultingState: presentRealmUnitStatus(action.resultingState),
+					reasonCode: presentGovernanceReasonCode(action.reasonCode),
+					notes: notesByAction.get(action.id) ?? [],
+				})),
+			};
+		},
+		{
+			access: "session-only",
+			params: RealmUnitParams,
+			query: RealmUnitHistoryQuery,
+			response: {
+				[StatusCodes.OK]: RealmUnitModerationHistoryResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmUnitNotFound"]),
+			},
+			detail: { summary: "Get Realm Unit moderation history", tags: ["Realms"] },
+		},
+	)
 	.patch(
 		"/:realmId/units/:unitId",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.realm.ensureCapability(params.realmId, "realm.units.moderate");
 			const result = await database.transaction(async (tx) => {
-				const [current] = await tx
-					.select({
-						status: realmUnit.status,
-					})
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(concat(${params.realmId}, ':', ${params.unitId}), 0))`,
+				);
+				const [target] = await tx
+					.select({ unitId: realmUnit.unitId })
 					.from(realmUnit)
 					.where(
 						and(
@@ -912,76 +1123,106 @@ export default new Elysia({ prefix: "/realms" })
 						),
 					)
 					.limit(1);
-				if (!current) throw new RealmUnitNotFound();
-				const status = "status" in body ? body.status : undefined;
-				const annotationDocument = "status" in body ? body.annotationDocument : undefined;
-				const [row] = await tx
-					.update(realmUnit)
-					.set({ status, locked: body.locked })
-					.where(
-						and(
-							eq(realmUnit.realmId, params.realmId),
-							eq(realmUnit.unitId, params.unitId),
-						),
-					)
-					.returning();
-				if (!row) throw new RealmUnitNotFound();
-				if (status && status !== current.status)
-					await tx.insert(realmUnitStatusEvent).values({
-						realmId: params.realmId,
-						unitId: params.unitId,
-						fromStatus: current.status,
-						toStatus: status,
-						changedByProfileId: profile.unitId,
-						annotationDocument,
-					});
-				const owners = await tx
-					.select({ profileId: unitAccessBinding.profileId })
-					.from(unitAccessBinding)
-					.where(
-						and(
-							eq(unitAccessBinding.unitId, params.unitId),
-							eq(unitAccessBinding.role, "owner"),
-						),
-					);
-				const notificationIds = await Promise.all(
-					owners
-						.filter((owner): owner is { profileId: string } => owner.profileId !== null)
-						.map(({ profileId }) =>
-							createNotification(tx, {
-								recipientProfileId: profileId,
-								actorProfileId: profile.unitId,
-								kind: "moderation",
-								subjectUnitId: params.unitId,
-								payload: { realmId: params.realmId, status: row.status },
-							}),
-						),
-				);
-				await recordAuditEvent(
-					tx,
-					profile.unitId,
-					"realm.units.moderate",
-					params.unitId,
-					"Realm Unit moderation updated",
-					{
-						realmId: params.realmId,
-						status: row.status,
-					},
-				);
-				return { row, notificationIds };
+				if (!target) throw new RealmUnitNotFound();
+				const [idempotentAction] = body.idempotencyKey
+					? await tx
+							.select({ caseId: moderationAction.caseId })
+							.from(moderationAction)
+							.innerJoin(
+								moderationCase,
+								eq(moderationCase.id, moderationAction.caseId),
+							)
+							.where(
+								and(
+									eq(moderationAction.actorProfileId, profile.unitId),
+									eq(moderationAction.idempotencyKey, body.idempotencyKey),
+									eq(moderationCase.authority, "realm"),
+									eq(moderationCase.realmId, params.realmId),
+									eq(moderationCase.targetKind, "realm_unit"),
+									eq(moderationCase.targetId, params.unitId),
+								),
+							)
+							.orderBy(desc(moderationAction.createdAt), desc(moderationAction.id))
+							.limit(1)
+					: [];
+				let caseRow = idempotentAction
+					? await loadModerationCaseForAction(tx, idempotentAction.caseId)
+					: undefined;
+				if (!caseRow) {
+					const [candidate] = await tx
+						.select({ id: moderationCase.id })
+						.from(moderationCase)
+						.where(
+							and(
+								eq(moderationCase.authority, "realm"),
+								eq(moderationCase.realmId, params.realmId),
+								eq(moderationCase.targetKind, "realm_unit"),
+								eq(moderationCase.targetId, params.unitId),
+								notInArray(moderationCase.state, [
+									"resolved",
+									"duplicate",
+									"rejected",
+								]),
+							),
+						)
+						.orderBy(desc(moderationCase.updatedAt), desc(moderationCase.id))
+						.limit(1);
+					caseRow = candidate
+						? await loadModerationCaseForAction(tx, candidate.id)
+						: undefined;
+				}
+				if (!caseRow) {
+					const [createdCase] = await tx
+						.insert(moderationCase)
+						.values({
+							state: "reviewing",
+							authority: "realm",
+							realmId: params.realmId,
+							targetKind: "realm_unit",
+							targetId: params.unitId,
+						})
+						.returning();
+					if (!createdCase)
+						throw new Error("Realm moderation case insertion did not return a row");
+					caseRow = createdCase;
+				}
+				const common = {
+					caseId: caseRow.id,
+					reasonCode: body.reasonCode,
+					idempotencyKey: body.idempotencyKey,
+				};
+				const actionBody: CreateModerationActionBody =
+					body.command === "note"
+						? { ...common, kind: "note", notes: [body.annotation] }
+						: {
+								...common,
+								kind: body.command,
+								...(body.annotation ? { notes: [body.annotation] } : {}),
+							};
+				return executeAuthorizedModerationAction(tx, {
+					caseRow,
+					actorProfileId: profile.unitId,
+					body: actionBody,
+				});
 			});
 			await Promise.all(result.notificationIds.map(deliverNotificationEmail));
-			return result.row;
+			return result.created;
 		},
 		{
 			access: "contribute:unit:update",
 			params: RealmUnitParams,
 			body: ModerateRealmUnitBody,
 			response: {
-				[StatusCodes.OK]: RealmUnitResponse,
+				[StatusCodes.OK]: ModerationActionResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ModerationActionIncompatible"]),
 				[StatusCodes.FORBIDDEN]: toApiErrorResponse(["RealmCapabilityRequired"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmUnitNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"ModerationTransitionInvalid",
+					"ModerationActionNoEffect",
+					"ModerationIdempotencyConflict",
+				]),
 			},
-			detail: { summary: "Update Realm Unit status", tags: ["Realms"] },
+			detail: { summary: "Apply Realm Unit moderation command", tags: ["Realms"] },
 		},
 	);

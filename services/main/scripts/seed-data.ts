@@ -332,7 +332,7 @@ export function createSeedEnforcementPlan(input: {
 			caseId: input.caseId,
 			actorProfileId: input.actorProfileId,
 			kind: input.kind,
-			reasonCode: `seed_${input.kind}`,
+			reasonCode: "administrative",
 			reason: "Seeded account enforcement",
 			requestId: `seed-enforcement-request-${suffix}`,
 			idempotencyKey: `seed-enforcement-${suffix}`,

@@ -95,15 +95,15 @@ export const RealmMemberRoleValues = ["owner", "admin", "moderator", "member"] a
 export const RealmMemberStateValues = ["active", "pending", "muted", "removed", "banned"] as const;
 export const RealmPinKindValues = ["pinned", "highlight"] as const;
 export const RealmUnitStatusValues = ["pending", "visible", "hidden", "removed"] as const;
-export const RealmModerationCommandValues = [
+export const RealmUnitMutationCommandValues = [
 	"approve",
 	"hide",
 	"remove",
 	"restore",
 	"lock",
 	"unlock",
-	"note",
 ] as const;
+export const RealmModerationCommandValues = [...RealmUnitMutationCommandValues, "note"] as const;
 export const GovernanceReasonCodeValues = [
 	"content_policy",
 	"realm_rules",

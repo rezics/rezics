@@ -47,7 +47,16 @@ import { invalidateRealmDetails } from "./query";
 
 const MemberRoles = ["owner", "admin", "moderator", "member"] as const;
 const MemberStates = ["active", "pending", "muted", "removed", "banned"] as const;
-const RealmUnitStates = ["pending", "visible", "hidden", "removed"] as const;
+const RealmModerationCommands = ["approve", "hide", "remove", "restore"] as const;
+const RealmModerationStateByCommand = {
+	approve: "visible",
+	hide: "hidden",
+	remove: "removed",
+	restore: "visible",
+} as const satisfies Record<
+	(typeof RealmModerationCommands)[number],
+	"visible" | "hidden" | "removed"
+>;
 
 type PickedEntity = { id: string; label: string };
 type RuleDraft = {
@@ -764,16 +773,12 @@ function RealmModerationRow({
 	const { t } = useTranslation({ suspense: true });
 	const queryClient = useQueryClient();
 	const moderate = usePatchApiRealmsByRealmIdUnitsByUnitId();
-	function update(
-		data:
-			| {
-					status: (typeof RealmUnitStates)[number];
-					locked?: boolean;
-			  }
-			| { locked: boolean },
-	) {
+	function update(command: (typeof RealmModerationCommands)[number] | "lock" | "unlock") {
 		moderate.mutate(
-			{ path: { realmId, unitId: post.id }, body: data },
+			{
+				path: { realmId, unitId: post.id },
+				body: { command, reasonCode: "administrative" },
+			},
 			{
 				onSuccess: () => invalidatePostQueries(queryClient, post.id),
 			},
@@ -784,23 +789,23 @@ function RealmModerationRow({
 			<CardContent className="grid gap-3 p-5 sm:grid-cols-[1fr_auto] sm:items-center">
 				<p className="font-medium">{post.title ?? t.posts.untitled}</p>
 				<div className="flex flex-wrap gap-2">
-					{RealmUnitStates.map((status) => (
+					{RealmModerationCommands.map((command) => (
 						<Button
-							key={status}
+							key={command}
 							type="button"
 							size="xs"
 							variant="outline"
 							isLoading={moderate.isPending}
-							onClick={() => update({ status })}
+							onClick={() => update(command)}
 						>
-							{t.realms.moderationStates[status]}
+							{t.realms.moderationStates[RealmModerationStateByCommand[command]]}
 						</Button>
 					))}
 					<Button
 						type="button"
 						size="xs"
 						variant="outline"
-						onClick={() => update({ locked: true })}
+						onClick={() => update("lock")}
 					>
 						{t.realms.lock}
 					</Button>
@@ -808,7 +813,7 @@ function RealmModerationRow({
 						type="button"
 						size="xs"
 						variant="outline"
-						onClick={() => update({ locked: false })}
+						onClick={() => update("unlock")}
 					>
 						{t.realms.unlock}
 					</Button>

@@ -1,4 +1,4 @@
-h1:Csb1m0Yp/XjZEzVh3W+Kc+6jhdwPkoz3/GEPzoGz3PM=
+h1:XOJS71erkMXKCyjwO9D4Am7KovSgvG60Rk4IbTgU6Fw=
 20260718070359_enable_pgroonga.sql h1:tT2i+ShJU7VwHt0LVUKiIN8ltJzm9z3dOONNMaMGP3g=
 20260718070400_current_baseline.sql h1:8k2fN5VnnH6wRhaCsATcwJYQ2ZaMRQ2vfLB4JLNSgIg=
 20260718070401_history_invariants.sql h1:FueH3mEgeYZvUKGYVLOmnF8MOp0cFLWl2U1i0VmcqSg=
@@ -12,3 +12,4 @@ h1:Csb1m0Yp/XjZEzVh3W+Kc+6jhdwPkoz3/GEPzoGz3PM=
 20260719044620_recommendation_bigint_counts.sql h1:hGqVDOekA9EReUhhtzMqbuMpiDHNRoeSLp8uLyTqkD8=
 20260719053104_governance_contract_notes.sql h1:8zwqHPOKCcZN8DFTdOFV/y7z+QZaS6Wyl87+LzGXz6A=
 20260719054718_centralize_moderation_actions.sql h1:NGgG67Bs6H56bz/i891Anui56S9zXSTwzLwUIwI2eds=
+20260719060736_route_realm_moderation_commands.sql h1:iJjljn8PuPOJhIaOez6MY+ZheFRRGKLxCYiXSAe7Gn4=

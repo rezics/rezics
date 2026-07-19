@@ -37619,73 +37619,107 @@ export type DeleteApiRealmsByRealmIdPinsByUnitIdResponse =
 /**
  * @type object
  */
-export type PatchApiRealmsByRealmIdUnitsByUnitIdPath = {
+export type GetApiRealmsByRealmIdUnitsPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
 	 * @type string
 	 */
 	realmId: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	unitId: string;
 };
 
-export const PatchApiRealmsByRealmIdUnitsByUnitIdStatus200StatusEnum = {
+export const GetApiRealmsByRealmIdUnitsStatus = {
 	pending: "pending",
 	visible: "visible",
 	hidden: "hidden",
 	removed: "removed",
 } as const;
 
-export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200StatusEnum =
-	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200StatusEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus200StatusEnum];
+export type GetApiRealmsByRealmIdUnitsStatus =
+	(typeof GetApiRealmsByRealmIdUnitsStatus)[keyof typeof GetApiRealmsByRealmIdUnitsStatus];
 
 /**
  * @type object
  */
-export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200 = {
+export type GetApiRealmsByRealmIdUnitsQuery = {
 	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
+	 * @default 'pending'
+	 * @type string | undefined
 	 */
-	realmId: string;
+	status?: GetApiRealmsByRealmIdUnitsStatus;
 	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
+	 * @default 50
 	 */
-	unitId: string;
+	limit?: string | number;
+};
+
+export const GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum = {
+	pending: "pending",
+	visible: "visible",
+	hidden: "hidden",
+	removed: "removed",
+} as const;
+
+export type GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum =
+	(typeof GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum)[keyof typeof GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum];
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsStatus200 = {
 	/**
-	 * @type string
+	 * @type array
 	 */
-	status: PatchApiRealmsByRealmIdUnitsByUnitIdStatus200StatusEnum;
-	/**
-	 * @type boolean
-	 */
-	locked: boolean;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	createdAt: string;
-	/**
-	 * @description
-	 * Format: `date-time`
-	 * @type string
-	 */
-	updatedAt: string;
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		realmId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @type string
+		 */
+		unitKind: string;
+		title: (string | null) | null;
+		/**
+		 * @default 'pending'
+		 * @type string
+		 */
+		status: GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum;
+		/**
+		 * @type boolean
+		 */
+		locked: boolean;
+		/**
+		 * @type string
+		 */
+		moderationStatus: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
 };
 
 /**
  * @type object
  */
-export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus403 = {
+export type GetApiRealmsByRealmIdUnitsStatus403 = {
 	/**
 	 * @type object
 	 */
@@ -37713,52 +37747,220 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus403 = {
 /**
  * @type object
  */
-export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmUnitNotFound'
-		 * @type string
-		 */
-		code: "RealmUnitNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
+export type GetApiRealmsByRealmIdUnitsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsOptions = {
+	body?: never;
+	path: GetApiRealmsByRealmIdUnitsPath;
+	query?: GetApiRealmsByRealmIdUnitsQuery;
+	headers?: never;
 };
 
 /**
  * @type object
  */
-export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus422 = ValidationError;
+export type GetApiRealmsByRealmIdUnitsResponses = {
+	"200": GetApiRealmsByRealmIdUnitsStatus200;
+	"403": GetApiRealmsByRealmIdUnitsStatus403;
+	"422": GetApiRealmsByRealmIdUnitsStatus422;
+	"500": GetApiRealmsByRealmIdUnitsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiRealmsByRealmIdUnitsResponse =
+	| GetApiRealmsByRealmIdUnitsStatus200
+	| GetApiRealmsByRealmIdUnitsStatus403
+	| GetApiRealmsByRealmIdUnitsStatus422
+	| GetApiRealmsByRealmIdUnitsStatus500;
 
 /**
  * @type object
  */
-export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus500 = InternalError;
+export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
 
-export type PatchApiRealmsByRealmIdUnitsByUnitIdBody =
-	| {
-			status: "pending" | "visible" | "hidden" | "removed";
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryQuery = {
+	/**
+	 * @default 50
+	 */
+	limit?: string | number;
+};
+
+export const GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsKindEnum = {
+	approve: "approve",
+	hide: "hide",
+	remove: "remove",
+	restore: "restore",
+	lock: "lock",
+	unlock: "unlock",
+	protect: "protect",
+	unprotect: "unprotect",
+	warning: "warning",
+	silence: "silence",
+	suspension: "suspension",
+	ban: "ban",
+	rate_limit: "rate_limit",
+	trust_restriction: "trust_restriction",
+	revoke_enforcement: "revoke_enforcement",
+	mute_member: "mute_member",
+	remove_member: "remove_member",
+	ban_member: "ban_member",
+	restore_member: "restore_member",
+	escalate: "escalate",
+	reverse: "reverse",
+	note: "note",
+} as const;
+
+export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsKindEnum =
+	(typeof GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsKindEnum)[keyof typeof GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsKindEnum];
+
+export const GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsPreviousState = {
+	pending: "pending",
+	visible: "visible",
+	hidden: "hidden",
+	removed: "removed",
+} as const;
+
+export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsPreviousState =
+	(typeof GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsPreviousState)[keyof typeof GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsPreviousState];
+
+export const GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsResultingState = {
+	pending: "pending",
+	visible: "visible",
+	hidden: "hidden",
+	removed: "removed",
+} as const;
+
+export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsResultingState =
+	(typeof GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsResultingState)[keyof typeof GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsResultingState];
+
+export const GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsReasonCodeEnum =
+	(typeof GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsReasonCodeEnum)[keyof typeof GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsReasonCodeEnum];
+
+export const GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsNotesRoleEnum = {
+	internal_note: "internal_note",
+	public_notice: "public_notice",
+} as const;
+
+export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsNotesRoleEnum =
+	(typeof GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsNotesRoleEnum)[keyof typeof GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsNotesRoleEnum];
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		caseId: string;
+		/**
+		 * @default 'approve'
+		 * @type string
+		 */
+		kind: GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsKindEnum;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		actorProfileId: string;
+		actorName: (string | null) | null;
+		previousState:
+			(GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsPreviousState | null) | null;
+		resultingState:
+			(GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsResultingState | null) | null;
+		previousLocked: (boolean | null) | null;
+		resultingLocked: (boolean | null) | null;
+		/**
+		 * @default 'content_policy'
+		 * @type string
+		 */
+		reasonCode: GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsReasonCodeEnum;
+		reversesActionId: (string | null) | null;
+		/**
+		 * @type array
+		 */
+		notes: {
 			/**
-			 * @type boolean | undefined
+			 * @description
+			 * Format: `uuid`
+			 * @type string
 			 */
-			locked?: boolean;
+			postId: string;
 			/**
-			 * @type object | undefined
+			 * @description
+			 * Format: `uuid`
+			 * @type string
 			 */
-			annotationDocument?: {
+			revisionId: string;
+			/**
+			 * @type string
+			 */
+			role: GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsNotesRoleEnum;
+			/**
+			 * @description
+			 * Format: `bcp-47`
+			 * @minLength 2
+			 * @maxLength 35
+			 * @type string
+			 */
+			language: string;
+			/**
+			 * @type object
+			 */
+			content: {
 				/**
 				 * @type string
 				 */
@@ -37882,12 +38084,659 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdBody =
 					  }
 				)[];
 			};
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			createdAt: string;
+		}[];
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: "RealmCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmUnitNotFound'
+		 * @type string
+		 */
+		code: "RealmUnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions = {
+	body?: never;
+	path: GetApiRealmsByRealmIdUnitsByUnitIdHistoryPath;
+	query?: GetApiRealmsByRealmIdUnitsByUnitIdHistoryQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponses = {
+	"200": GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200;
+	"403": GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus403;
+	"404": GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus404;
+	"422": GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus422;
+	"500": GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponse =
+	| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200
+	| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus403
+	| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus404
+	| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus422
+	| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus500;
+
+/**
+ * @type object
+ */
+export type PatchApiRealmsByRealmIdUnitsByUnitIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	caseId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	actorProfileId: string;
+	/**
+	 * @type string
+	 */
+	kind: string;
+	previousState: (string | null) | null;
+	resultingState: (string | null) | null;
+	previousLocked: (boolean | null) | null;
+	resultingStatus: (string | null) | null;
+	resultingLocked: (boolean | null) | null;
+	/**
+	 * @type string
+	 */
+	reasonCode: string;
+	reversesActionId: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ModerationActionIncompatible'
+		 * @type string
+		 */
+		code: "ModerationActionIncompatible";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: "RealmCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmUnitNotFound'
+		 * @type string
+		 */
+		code: "RealmUnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PatchApiRealmsByRealmIdUnitsByUnitIdStatus409ErrorCodeEnum = {
+	ModerationTransitionInvalid: "ModerationTransitionInvalid",
+	ModerationActionNoEffect: "ModerationActionNoEffect",
+	ModerationIdempotencyConflict: "ModerationIdempotencyConflict",
+} as const;
+
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus409ErrorCodeEnum =
+	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus409ErrorCodeEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ModerationTransitionInvalid'
+		 * @type string
+		 */
+		code: PatchApiRealmsByRealmIdUnitsByUnitIdStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus500 = InternalError;
+
+export const PatchApiRealmsByRealmIdUnitsByUnitIdRequestReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
+} as const;
+
+export type PatchApiRealmsByRealmIdUnitsByUnitIdRequestReasonCodeEnum =
+	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestReasonCodeEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestReasonCodeEnum];
+
+export const PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum = {
+	approve: "approve",
+	hide: "hide",
+	remove: "remove",
+	restore: "restore",
+	lock: "lock",
+	unlock: "unlock",
+} as const;
+
+export type PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum =
+	(typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum)[keyof typeof PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum];
+
+export type PatchApiRealmsByRealmIdUnitsByUnitIdBody =
+	| {
+			/**
+			 * @default 'content_policy'
+			 * @type string
+			 */
+			reasonCode: PatchApiRealmsByRealmIdUnitsByUnitIdRequestReasonCodeEnum;
+			/**
+			 * @minLength 1
+			 * @maxLength 256
+			 * @type string | undefined
+			 */
+			idempotencyKey?: string;
+			/**
+			 * @default 'approve'
+			 * @type string
+			 */
+			command: PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum;
+			/**
+			 * @type object | undefined
+			 */
+			annotation?: {
+				role: "internal_note" | "public_notice";
+				/**
+				 * @description
+				 * Format: `bcp-47`
+				 * @minLength 2
+				 * @maxLength 35
+				 * @type string
+				 */
+				language: string;
+				/**
+				 * @type object
+				 */
+				content: {
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "image";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								assetId: string;
+								/**
+								 * @type string | undefined
+								 */
+								alt?: string;
+								/**
+								 * @type string | undefined
+								 */
+								caption?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!(?:block|image)$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+				};
+			};
 	  }
 	| {
 			/**
-			 * @type boolean
+			 * @default 'content_policy'
+			 * @type string
 			 */
-			locked: boolean;
+			reasonCode: PatchApiRealmsByRealmIdUnitsByUnitIdRequestReasonCodeEnum;
+			/**
+			 * @minLength 1
+			 * @maxLength 256
+			 * @type string | undefined
+			 */
+			idempotencyKey?: string;
+			/**
+			 * @type string
+			 */
+			command: "note";
+			/**
+			 * @type object
+			 */
+			annotation: {
+				role: "internal_note" | "public_notice";
+				/**
+				 * @description
+				 * Format: `bcp-47`
+				 * @minLength 2
+				 * @maxLength 35
+				 * @type string
+				 */
+				language: string;
+				/**
+				 * @type object
+				 */
+				content: {
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "image";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								assetId: string;
+								/**
+								 * @type string | undefined
+								 */
+								alt?: string;
+								/**
+								 * @type string | undefined
+								 */
+								caption?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!(?:block|image)$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+				};
+			};
 	  };
 
 /**
@@ -37905,8 +38754,10 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdOptions = {
  */
 export type PatchApiRealmsByRealmIdUnitsByUnitIdResponses = {
 	"200": PatchApiRealmsByRealmIdUnitsByUnitIdStatus200;
+	"400": PatchApiRealmsByRealmIdUnitsByUnitIdStatus400;
 	"403": PatchApiRealmsByRealmIdUnitsByUnitIdStatus403;
 	"404": PatchApiRealmsByRealmIdUnitsByUnitIdStatus404;
+	"409": PatchApiRealmsByRealmIdUnitsByUnitIdStatus409;
 	"422": PatchApiRealmsByRealmIdUnitsByUnitIdStatus422;
 	"500": PatchApiRealmsByRealmIdUnitsByUnitIdStatus500;
 };
@@ -37916,8 +38767,10 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdResponses = {
  */
 export type PatchApiRealmsByRealmIdUnitsByUnitIdResponse =
 	| PatchApiRealmsByRealmIdUnitsByUnitIdStatus200
+	| PatchApiRealmsByRealmIdUnitsByUnitIdStatus400
 	| PatchApiRealmsByRealmIdUnitsByUnitIdStatus403
 	| PatchApiRealmsByRealmIdUnitsByUnitIdStatus404
+	| PatchApiRealmsByRealmIdUnitsByUnitIdStatus409
 	| PatchApiRealmsByRealmIdUnitsByUnitIdStatus422
 	| PatchApiRealmsByRealmIdUnitsByUnitIdStatus500;
 

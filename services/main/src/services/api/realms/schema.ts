@@ -2,14 +2,18 @@ import { type Static, t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 
 import {
+	GovernanceReasonCodeValues,
+	ModerationActionKindValues,
 	RealmJoinPolicyValues,
 	RealmMemberRoleValues,
 	RealmMemberStateValues,
 	RealmPinKindValues,
+	RealmUnitStatusValues,
+	RealmUnitMutationCommandValues,
 	UnitStatusValues,
 	UnitVisibilityValues,
 } from "../../database/schema/contract-values";
-import { FractionalPosition, LanguageTag, LocalizationInput, Uuid } from "../schema";
+import { DateTime, FractionalPosition, LanguageTag, LocalizationInput, Uuid } from "../schema";
 
 const RealmVisibility = t.Union(UnitVisibilityValues.map((value) => t.Literal(value)));
 
@@ -21,12 +25,8 @@ const RealmMemberRole = t.Union(RealmMemberRoleValues.map((value) => t.Literal(v
 
 const RealmMemberState = t.Union(RealmMemberStateValues.map((value) => t.Literal(value)));
 
-const RealmUnitStatus = t.Union([
-	t.Literal("pending"),
-	t.Literal("visible"),
-	t.Literal("hidden"),
-	t.Literal("removed"),
-]);
+const RealmUnitStatus = t.UnionEnum(RealmUnitStatusValues);
+const GovernanceReasonCode = t.UnionEnum(GovernanceReasonCodeValues);
 
 export const ListRealmsQuery = t.Object({
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
@@ -107,20 +107,94 @@ export type RemoveRealmPinQuery = Static<typeof RemoveRealmPinQuery>;
 export const RealmUnitParams = t.Object({ realmId: Uuid, unitId: Uuid });
 export type RealmUnitParams = Static<typeof RealmUnitParams>;
 
+export const ListRealmUnitsQuery = t.Object(
+	{
+		status: t.Optional(RealmUnitStatus),
+		limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
+	},
+	{ additionalProperties: false },
+);
+export type ListRealmUnitsQuery = Static<typeof ListRealmUnitsQuery>;
+
+export const RealmUnitHistoryQuery = t.Object(
+	{ limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })) },
+	{ additionalProperties: false },
+);
+export type RealmUnitHistoryQuery = Static<typeof RealmUnitHistoryQuery>;
+
+const RealmModerationAnnotation = t.Object(
+	{
+		role: t.Union([t.Literal("internal_note"), t.Literal("public_notice")]),
+		language: LanguageTag,
+		content: PortableTextDocument,
+	},
+	{ additionalProperties: false },
+);
+const RealmModerationCommon = {
+	reasonCode: GovernanceReasonCode,
+	idempotencyKey: t.Optional(t.String({ minLength: 1, maxLength: 256 })),
+};
 export const ModerateRealmUnitBody = t.Union([
 	t.Object(
 		{
-			status: RealmUnitStatus,
-			locked: t.Optional(t.Boolean()),
-			annotationDocument: t.Optional(PortableTextDocument),
+			...RealmModerationCommon,
+			command: t.UnionEnum(RealmUnitMutationCommandValues),
+			annotation: t.Optional(RealmModerationAnnotation),
 		},
 		{ additionalProperties: false },
 	),
 	t.Object(
 		{
-			locked: t.Boolean(),
+			...RealmModerationCommon,
+			command: t.Literal("note"),
+			annotation: RealmModerationAnnotation,
 		},
 		{ additionalProperties: false },
 	),
 ]);
 export type ModerateRealmUnitBody = Static<typeof ModerateRealmUnitBody>;
+
+export const RealmUnitListResponse = t.Object({
+	items: t.Array(
+		t.Object({
+			realmId: Uuid,
+			unitId: Uuid,
+			unitKind: t.String(),
+			title: t.Nullable(t.String()),
+			status: RealmUnitStatus,
+			locked: t.Boolean(),
+			moderationStatus: t.String(),
+			createdAt: DateTime,
+			updatedAt: DateTime,
+		}),
+	),
+});
+
+const RealmModerationNoteResponse = t.Object({
+	postId: Uuid,
+	revisionId: Uuid,
+	role: t.Union([t.Literal("internal_note"), t.Literal("public_notice")]),
+	language: LanguageTag,
+	content: PortableTextDocument,
+	createdAt: DateTime,
+});
+
+export const RealmUnitModerationHistoryResponse = t.Object({
+	items: t.Array(
+		t.Object({
+			id: Uuid,
+			caseId: Uuid,
+			kind: t.UnionEnum(ModerationActionKindValues),
+			actorProfileId: Uuid,
+			actorName: t.Nullable(t.String()),
+			previousState: t.Nullable(RealmUnitStatus),
+			resultingState: t.Nullable(RealmUnitStatus),
+			previousLocked: t.Nullable(t.Boolean()),
+			resultingLocked: t.Nullable(t.Boolean()),
+			reasonCode: GovernanceReasonCode,
+			reversesActionId: t.Nullable(Uuid),
+			notes: t.Array(RealmModerationNoteResponse),
+			createdAt: DateTime,
+		}),
+	),
+});

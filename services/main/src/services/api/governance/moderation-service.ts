@@ -65,9 +65,13 @@ export const moderationActionSelection = {
 export type ModerationCaseRecord = typeof moderationCase.$inferSelect;
 
 type ModerationTargetContext = {
-	recipientProfileId: string | undefined;
+	recipientProfileIds: readonly string[];
 	subjectUnitId: string | undefined;
 };
+
+function presentProfileIds(rows: readonly { profileId: string | null }[]): string[] {
+	return [...new Set(rows.flatMap((row) => (row.profileId ? [row.profileId] : [])))];
+}
 
 type StateActionPlan =
 	| {
@@ -164,7 +168,7 @@ async function getModerationTargetContext(
 			.where(eq(unit.id, row.targetId))
 			.limit(1);
 		if (!target) throw new ModerationTargetNotFound();
-		const [owner] = await tx
+		const owners = await tx
 			.select({ profileId: unitAccessBinding.profileId })
 			.from(unitAccessBinding)
 			.where(
@@ -173,9 +177,8 @@ async function getModerationTargetContext(
 					eq(unitAccessBinding.role, "owner"),
 					isNull(unitAccessBinding.revokedAt),
 				),
-			)
-			.limit(1);
-		return { recipientProfileId: owner?.profileId ?? undefined, subjectUnitId: target.id };
+			);
+		return { recipientProfileIds: presentProfileIds(owners), subjectUnitId: target.id };
 	}
 	if (row.targetKind === "profile") {
 		const [target] = await tx
@@ -184,7 +187,7 @@ async function getModerationTargetContext(
 			.where(eq(profileTable.id, row.targetId))
 			.limit(1);
 		if (!target) throw new ModerationTargetNotFound();
-		return { recipientProfileId: target.id, subjectUnitId: target.id };
+		return { recipientProfileIds: [target.id], subjectUnitId: target.id };
 	}
 	if (row.targetKind === "realm_unit") {
 		if (!row.realmId) throw new ModerationRealmMissing();
@@ -194,7 +197,7 @@ async function getModerationTargetContext(
 			.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetId)))
 			.limit(1);
 		if (!target) throw new ModerationTargetNotFound();
-		const [owner] = await tx
+		const owners = await tx
 			.select({ profileId: unitAccessBinding.profileId })
 			.from(unitAccessBinding)
 			.where(
@@ -203,10 +206,9 @@ async function getModerationTargetContext(
 					eq(unitAccessBinding.role, "owner"),
 					isNull(unitAccessBinding.revokedAt),
 				),
-			)
-			.limit(1);
+			);
 		return {
-			recipientProfileId: owner?.profileId ?? undefined,
+			recipientProfileIds: presentProfileIds(owners),
 			subjectUnitId: target.unitId,
 		};
 	}
@@ -220,7 +222,7 @@ async function getModerationTargetContext(
 			)
 			.limit(1);
 		if (!target) throw new ModerationTargetNotFound();
-		return { recipientProfileId: target.profileId, subjectUnitId: row.realmId };
+		return { recipientProfileIds: [target.profileId], subjectUnitId: row.realmId };
 	}
 	const [target] = await tx
 		.select({ profileId: feedback.profileId, subjectUnitId: feedback.subjectUnitId })
@@ -229,7 +231,7 @@ async function getModerationTargetContext(
 		.limit(1);
 	if (!target) throw new ModerationTargetNotFound();
 	return {
-		recipientProfileId: target.profileId,
+		recipientProfileIds: [target.profileId],
 		subjectUnitId: target.subjectUnitId ?? undefined,
 	};
 }
@@ -682,19 +684,17 @@ async function createGovernanceNote(
 		scope: [],
 		grantedByProfileId: input.actorProfileId,
 	});
-	if (
-		input.note.role === "public_notice" &&
-		input.target.recipientProfileId &&
-		input.target.recipientProfileId !== input.actorProfileId
-	)
-		await tx.insert(unitAccessBinding).values({
-			unitId: created.id,
-			subjectKind: "profile",
-			profileId: input.target.recipientProfileId,
-			role: "viewer",
-			scope: [],
-			grantedByProfileId: input.actorProfileId,
-		});
+	if (input.note.role === "public_notice")
+		for (const recipientProfileId of input.target.recipientProfileIds)
+			if (recipientProfileId !== input.actorProfileId)
+				await tx.insert(unitAccessBinding).values({
+					unitId: created.id,
+					subjectKind: "profile",
+					profileId: recipientProfileId,
+					role: "viewer",
+					scope: [],
+					grantedByProfileId: input.actorProfileId,
+				});
 	if (input.caseRow.realmId)
 		await tx.insert(unitAccessBinding).values({
 			unitId: created.id,
@@ -748,7 +748,7 @@ export async function executeAuthorizedModerationAction(
 			if (existing.requestFingerprint !== fingerprint)
 				throw new ModerationIdempotencyConflict();
 			const { requestFingerprint: _requestFingerprint, ...created } = existing;
-			return { created, notificationId: undefined, replayed: true };
+			return { created, notificationIds: [], replayed: true };
 		}
 	}
 
@@ -816,21 +816,23 @@ export async function executeAuthorizedModerationAction(
 	const publicNoticePostId = input.body.notes
 		?.map((note, index) => ({ note, postId: notePostIds[index] }))
 		.find((item) => item.note.role === "public_notice")?.postId;
-	const notificationId =
-		target.recipientProfileId && (input.body.kind !== "note" || publicNoticePostId)
-			? await createNotification(tx, {
-					recipientProfileId: target.recipientProfileId,
-					actorProfileId: input.actorProfileId,
-					kind: "moderation",
-					subjectUnitId: target.subjectUnitId,
-					payload: {
-						actionId: created.id,
-						actionKind: input.body.kind,
-						reasonCode: input.body.reasonCode,
-						publicNoticePostId,
-					},
-				})
-			: undefined;
+	const notificationIds: string[] = [];
+	if (input.body.kind !== "note" || publicNoticePostId)
+		for (const recipientProfileId of target.recipientProfileIds) {
+			const notificationId = await createNotification(tx, {
+				recipientProfileId,
+				actorProfileId: input.actorProfileId,
+				kind: "moderation",
+				subjectUnitId: target.subjectUnitId,
+				payload: {
+					actionId: created.id,
+					actionKind: input.body.kind,
+					reasonCode: input.body.reasonCode,
+					publicNoticePostId,
+				},
+			});
+			if (notificationId) notificationIds.push(notificationId);
+		}
 	await tx.insert(auditEvent).values({
 		actorProfileId: input.actorProfileId,
 		action: `moderation.${input.body.kind}`,
@@ -846,5 +848,5 @@ export async function executeAuthorizedModerationAction(
 			notePostIds,
 		},
 	});
-	return { created, notificationId, replayed: false };
+	return { created, notificationIds, replayed: false };
 }

@@ -983,10 +983,23 @@ import type {
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus403,
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus422,
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus500,
+	GetApiRealmsByRealmIdUnitsOptions,
+	GetApiRealmsByRealmIdUnitsStatus200,
+	GetApiRealmsByRealmIdUnitsStatus403,
+	GetApiRealmsByRealmIdUnitsStatus422,
+	GetApiRealmsByRealmIdUnitsStatus500,
+	GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions,
+	GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
+	GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus403,
+	GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus404,
+	GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus422,
+	GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus500,
 	PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus200,
+	PatchApiRealmsByRealmIdUnitsByUnitIdStatus400,
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus403,
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus404,
+	PatchApiRealmsByRealmIdUnitsByUnitIdStatus409,
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus422,
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus500,
 	GetApiSearchConfigurationStatus200,
@@ -1232,6 +1245,8 @@ import {
 	getApiRealmsByRealmIdPins,
 	putApiRealmsByRealmIdPinsByUnitId,
 	deleteApiRealmsByRealmIdPinsByUnitId,
+	getApiRealmsByRealmIdUnits,
+	getApiRealmsByRealmIdUnitsByUnitIdHistory,
 	patchApiRealmsByRealmIdUnitsByUnitId,
 	getApiSearchConfiguration,
 	postApiSearchExecute,
@@ -17964,6 +17979,223 @@ export function useDeleteApiRealmsByRealmIdPinsByUnitId<TContext>(
 	>;
 }
 
+export const getApiRealmsByRealmIdUnitsQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiRealmsByRealmIdUnitsOptions, "headers">) =>
+	[{ url: "/api/realms/:realmId/units", params: path }, ...(query ? [query] : [])] as const;
+
+type GetApiRealmsByRealmIdUnitsQueryKey = ReturnType<typeof getApiRealmsByRealmIdUnitsQueryKey>;
+
+export function getApiRealmsByRealmIdUnitsQueryOptions(
+	{ path, query }: GetApiRealmsByRealmIdUnitsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiRealmsByRealmIdUnitsQueryKey({ path, query });
+	return queryOptions<
+		GetApiRealmsByRealmIdUnitsStatus200,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdUnitsStatus403
+			| GetApiRealmsByRealmIdUnitsStatus422
+			| GetApiRealmsByRealmIdUnitsStatus500
+		>,
+		GetApiRealmsByRealmIdUnitsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiRealmsByRealmIdUnits({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List Realm Units for moderation
+ * {@link /api/realms/:realmId/units}
+ */
+export function useGetApiRealmsByRealmIdUnits<
+	TData = GetApiRealmsByRealmIdUnitsStatus200,
+	TQueryData = GetApiRealmsByRealmIdUnitsStatus200,
+	TQueryKey extends QueryKey = GetApiRealmsByRealmIdUnitsQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiRealmsByRealmIdUnitsOptions["path"]
+			| (() => GetApiRealmsByRealmIdUnitsOptions["path"]);
+		query?:
+			| GetApiRealmsByRealmIdUnitsOptions["query"]
+			| (() => GetApiRealmsByRealmIdUnitsOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiRealmsByRealmIdUnitsStatus200,
+				ResponseErrorConfig<
+					| GetApiRealmsByRealmIdUnitsStatus403
+					| GetApiRealmsByRealmIdUnitsStatus422
+					| GetApiRealmsByRealmIdUnitsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdUnitsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiRealmsByRealmIdUnitsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdUnitsStatus403
+			| GetApiRealmsByRealmIdUnitsStatus422
+			| GetApiRealmsByRealmIdUnitsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey = ({
+	path,
+	query,
+}: Omit<GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions, "headers">) =>
+	[
+		{ url: "/api/realms/:realmId/units/:unitId/history", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type GetApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey = ReturnType<
+	typeof getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey
+>;
+
+export function getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryOptions(
+	{ path, query }: GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey({ path, query });
+	return queryOptions<
+		GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus403
+			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus404
+			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus422
+			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus500
+		>,
+		GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiRealmsByRealmIdUnitsByUnitIdHistory({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get Realm Unit moderation history
+ * {@link /api/realms/:realmId/units/:unitId/history}
+ */
+export function useGetApiRealmsByRealmIdUnitsByUnitIdHistory<
+	TData = GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
+	TQueryData = GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
+	TQueryKey extends QueryKey = GetApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions["path"]
+			| (() => GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions["path"]);
+		query?:
+			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions["query"]
+			| (() => GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200,
+				ResponseErrorConfig<
+					| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus403
+					| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus404
+					| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus422
+					| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus403
+			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus404
+			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus422
+			| GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
 export const patchApiRealmsByRealmIdUnitsByUnitIdMutationKey = () =>
 	[{ url: "/api/realms/:realmId/units/:unitId" }] as const;
 
@@ -17974,8 +18206,10 @@ export function patchApiRealmsByRealmIdUnitsByUnitIdMutationOptions<TContext = u
 	return mutationOptions<
 		PatchApiRealmsByRealmIdUnitsByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus400
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus403
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus404
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus409
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus422
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus500
 		>,
@@ -17996,7 +18230,7 @@ export function patchApiRealmsByRealmIdUnitsByUnitIdMutationOptions<TContext = u
 }
 
 /**
- * @summary Update Realm Unit status
+ * @summary Apply Realm Unit moderation command
  * {@link /api/realms/:realmId/units/:unitId}
  */
 export function usePatchApiRealmsByRealmIdUnitsByUnitId<TContext>(
@@ -18004,8 +18238,10 @@ export function usePatchApiRealmsByRealmIdUnitsByUnitId<TContext>(
 		mutation?: UseMutationOptions<
 			PatchApiRealmsByRealmIdUnitsByUnitIdStatus200,
 			ResponseErrorConfig<
+				| PatchApiRealmsByRealmIdUnitsByUnitIdStatus400
 				| PatchApiRealmsByRealmIdUnitsByUnitIdStatus403
 				| PatchApiRealmsByRealmIdUnitsByUnitIdStatus404
+				| PatchApiRealmsByRealmIdUnitsByUnitIdStatus409
 				| PatchApiRealmsByRealmIdUnitsByUnitIdStatus422
 				| PatchApiRealmsByRealmIdUnitsByUnitIdStatus500
 			>,
@@ -18025,8 +18261,10 @@ export function usePatchApiRealmsByRealmIdUnitsByUnitId<TContext>(
 	) as UseMutationOptions<
 		PatchApiRealmsByRealmIdUnitsByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus400
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus403
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus404
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus409
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus422
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus500
 		>,
@@ -18037,8 +18275,10 @@ export function usePatchApiRealmsByRealmIdUnitsByUnitId<TContext>(
 	return useMutation<
 		PatchApiRealmsByRealmIdUnitsByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus400
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus403
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus404
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus409
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus422
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus500
 		>,
@@ -18054,8 +18294,10 @@ export function usePatchApiRealmsByRealmIdUnitsByUnitId<TContext>(
 	) as UseMutationResult<
 		PatchApiRealmsByRealmIdUnitsByUnitIdStatus200,
 		ResponseErrorConfig<
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus400
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus403
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus404
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus409
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus422
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus500
 		>,

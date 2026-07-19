@@ -17,6 +17,7 @@ import {
 	PostKindValues,
 	realmUnitStatus,
 	realmUnitStatusEvent,
+	RealmUnitMutationCommandValues,
 	scoreStat,
 	unitAccessBinding,
 	unitAccessRestriction,
@@ -92,6 +93,14 @@ describe("database schema contracts", () => {
 
 	it("centralizes governance contracts and immutable note bindings", () => {
 		expect(realmUnitStatus.enumValues).toEqual(["pending", "visible", "hidden", "removed"]);
+		expect(RealmUnitMutationCommandValues).toEqual([
+			"approve",
+			"hide",
+			"remove",
+			"restore",
+			"lock",
+			"unlock",
+		]);
 		expect(PostKindValues).toContain("governance_note");
 		expect(ModerationActionKindValues).toEqual(
 			expect.arrayContaining(["hide", "note", "warning", "revoke_enforcement"]),
@@ -116,6 +125,7 @@ describe("database schema contracts", () => {
 		expect(event.uniqueConstraints.map((constraint) => constraint.name)).toContain(
 			"realm_unit_status_event_action_key",
 		);
+		expect(event.columns.map((column) => column.name)).not.toContain("annotation_document");
 
 		const action = getTableConfig(moderationAction);
 		expect(action.indexes.map((index) => index.config.name)).toContain(

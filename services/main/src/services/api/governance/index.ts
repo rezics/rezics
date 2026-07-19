@@ -255,7 +255,7 @@ export default new Elysia({ prefix: "/governance" })
 					body,
 				});
 			});
-			await deliverNotificationEmail(result.notificationId);
+			await Promise.all(result.notificationIds.map(deliverNotificationEmail));
 			return result.created;
 		},
 		{
