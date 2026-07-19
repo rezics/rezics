@@ -6006,6 +6006,12 @@
 					"ModerationCaseNotFound",
 					"ModerationReversalInvalid",
 					"ModerationReversedActionInvalid",
+					"ModerationActionIncompatible",
+					"ModerationTransitionInvalid",
+					"ModerationActionNoEffect",
+					"ModerationReversalUnavailable",
+					"ModerationIdempotencyConflict",
+					"ModerationNoteRoleDuplicate",
 					"EnforcementExpiryInvalid",
 					"EnforcementNotFound",
 					"EnforcementAlreadyRevoked",
@@ -13516,64 +13522,1858 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"additionalProperties": false,
-								"type": "object",
-								"required": ["caseId", "kind", "reasonCode"],
-								"properties": {
-									"caseId": { "format": "uuid", "type": "string" },
-									"kind": {
-										"type": "string",
-										"enum": [
-											"approve",
-											"remove",
-											"restore",
-											"lock",
-											"unlock",
-											"protect",
-											"unprotect",
-											"mute_member",
-											"remove_member",
-											"ban_member",
-											"restore_member",
-											"escalate",
-											"reverse",
-											"note"
-										]
-									},
-									"resultingStatus": {
-										"type": "string",
-										"enum": ["approved", "pending", "removed"]
-									},
-									"resultingLocked": { "type": "boolean" },
-									"scope": {
-										"maxItems": 8,
-										"type": "array",
-										"items": {
-											"minLength": 1,
-											"maxLength": 64,
-											"pattern": "^[a-z0-9][a-z0-9-]*$",
-											"type": "string"
+								"anyOf": [
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["caseId", "reasonCode", "kind"],
+										"properties": {
+											"caseId": { "format": "uuid", "type": "string" },
+											"reasonCode": {
+												"default": "content_policy",
+												"type": "string",
+												"enum": [
+													"content_policy",
+													"realm_rules",
+													"spam",
+													"harassment",
+													"unsafe_content",
+													"off_topic",
+													"duplicate",
+													"account_security",
+													"user_request",
+													"appeal",
+													"administrative",
+													"other"
+												]
+											},
+											"notes": {
+												"maxItems": 2,
+												"type": "array",
+												"items": {
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["role", "language", "content"],
+													"properties": {
+														"role": {
+															"anyOf": [
+																{
+																	"const": "internal_note",
+																	"type": "string"
+																},
+																{
+																	"const": "public_notice",
+																	"type": "string"
+																}
+															]
+														},
+														"language": {
+															"format": "bcp-47",
+															"minLength": 2,
+															"maxLength": 35,
+															"type": "string"
+														},
+														"content": {
+															"additionalProperties": false,
+															"$id": "PortableTextDocument",
+															"type": "object",
+															"required": [
+																"_type",
+																"_key",
+																"content"
+															],
+															"properties": {
+																"_type": {
+																	"const": "portable-text",
+																	"type": "string"
+																},
+																"_key": {
+																	"pattern": "^[0-9a-f]{12}$",
+																	"$id": "BlockKey",
+																	"type": "string"
+																},
+																"content": {
+																	"$id": "PortableText",
+																	"type": "array",
+																	"items": {
+																		"$id": "PortableTextBlock",
+																		"anyOf": [
+																			{
+																				"additionalProperties": {
+																					"$id": "#/components/schemas/JsonValue",
+																					"anyOf": [
+																						{
+																							"type": "null"
+																						},
+																						{
+																							"type": "boolean"
+																						},
+																						{
+																							"type": "number"
+																						},
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "array",
+																							"items": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						},
+																						{
+																							"type": "object",
+																							"patternProperties": {
+																								"^(.*)$": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"$id": "PortableTextTextBlock",
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type",
+																					"children"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"const": "block",
+																						"type": "string"
+																					},
+																					"children": {
+																						"type": "array",
+																						"items": {
+																							"$id": "PortableTextChild",
+																							"anyOf": [
+																								{
+																									"additionalProperties": false,
+																									"$id": "PortableTextSpan",
+																									"type": "object",
+																									"required": [
+																										"_key",
+																										"_type",
+																										"text"
+																									],
+																									"properties": {
+																										"_key": {
+																											"type": "string"
+																										},
+																										"_type": {
+																											"const": "span",
+																											"type": "string"
+																										},
+																										"text": {
+																											"type": "string"
+																										},
+																										"marks": {
+																											"type": "array",
+																											"items": {
+																												"type": "string"
+																											}
+																										}
+																									}
+																								},
+																								{
+																									"additionalProperties": {
+																										"$id": "#/components/schemas/JsonValue",
+																										"anyOf": [
+																											{
+																												"type": "null"
+																											},
+																											{
+																												"type": "boolean"
+																											},
+																											{
+																												"type": "number"
+																											},
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "array",
+																												"items": {
+																													"$ref": "#/components/schemas/JsonValue"
+																												}
+																											},
+																											{
+																												"type": "object",
+																												"patternProperties": {
+																													"^(.*)$": {
+																														"$ref": "#/components/schemas/JsonValue"
+																													}
+																												}
+																											}
+																										]
+																									},
+																									"type": "object",
+																									"required": [
+																										"_key",
+																										"_type"
+																									],
+																									"properties": {
+																										"_key": {
+																											"type": "string"
+																										},
+																										"_type": {
+																											"pattern": "^(?!span$).+",
+																											"type": "string"
+																										}
+																									}
+																								}
+																							]
+																						}
+																					},
+																					"markDefs": {
+																						"type": "array",
+																						"items": {
+																							"additionalProperties": {
+																								"$id": "#/components/schemas/JsonValue",
+																								"anyOf": [
+																									{
+																										"type": "null"
+																									},
+																									{
+																										"type": "boolean"
+																									},
+																									{
+																										"type": "number"
+																									},
+																									{
+																										"type": "string"
+																									},
+																									{
+																										"type": "array",
+																										"items": {
+																											"$ref": "#/components/schemas/JsonValue"
+																										}
+																									},
+																									{
+																										"type": "object",
+																										"patternProperties": {
+																											"^(.*)$": {
+																												"$ref": "#/components/schemas/JsonValue"
+																											}
+																										}
+																									}
+																								]
+																							},
+																							"$id": "PortableTextObject",
+																							"type": "object",
+																							"required": [
+																								"_key",
+																								"_type"
+																							],
+																							"properties": {
+																								"_key": {
+																									"type": "string"
+																								},
+																								"_type": {
+																									"type": "string"
+																								}
+																							}
+																						}
+																					},
+																					"listItem": {
+																						"type": "string"
+																					},
+																					"style": {
+																						"type": "string"
+																					},
+																					"level": {
+																						"minimum": 1,
+																						"type": "integer"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"$id": "PortableTextImage",
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type",
+																					"assetId"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"const": "image",
+																						"type": "string"
+																					},
+																					"assetId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"alt": {
+																						"type": "string"
+																					},
+																					"caption": {
+																						"type": "string"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": {
+																					"$id": "#/components/schemas/JsonValue",
+																					"anyOf": [
+																						{
+																							"type": "null"
+																						},
+																						{
+																							"type": "boolean"
+																						},
+																						{
+																							"type": "number"
+																						},
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "array",
+																							"items": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						},
+																						{
+																							"type": "object",
+																							"patternProperties": {
+																								"^(.*)$": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"pattern": "^(?!(?:block|image)$).+",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		]
+																	}
+																}
+															}
+														}
+													}
+												}
+											},
+											"idempotencyKey": {
+												"minLength": 1,
+												"maxLength": 256,
+												"type": "string"
+											},
+											"kind": {
+												"anyOf": [
+													{ "const": "approve", "type": "string" },
+													{ "const": "hide", "type": "string" },
+													{ "const": "remove", "type": "string" },
+													{ "const": "restore", "type": "string" },
+													{ "const": "lock", "type": "string" },
+													{ "const": "unlock", "type": "string" },
+													{ "const": "mute_member", "type": "string" },
+													{ "const": "remove_member", "type": "string" },
+													{ "const": "ban_member", "type": "string" },
+													{ "const": "restore_member", "type": "string" },
+													{ "const": "escalate", "type": "string" }
+												]
+											}
 										}
 									},
-									"protectionMode": {
-										"default": "frozen",
-										"type": "string",
-										"enum": ["frozen", "owner_only"]
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": [
+											"caseId",
+											"reasonCode",
+											"kind",
+											"scope",
+											"protectionMode"
+										],
+										"properties": {
+											"caseId": { "format": "uuid", "type": "string" },
+											"reasonCode": {
+												"default": "content_policy",
+												"type": "string",
+												"enum": [
+													"content_policy",
+													"realm_rules",
+													"spam",
+													"harassment",
+													"unsafe_content",
+													"off_topic",
+													"duplicate",
+													"account_security",
+													"user_request",
+													"appeal",
+													"administrative",
+													"other"
+												]
+											},
+											"notes": {
+												"maxItems": 2,
+												"type": "array",
+												"items": {
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["role", "language", "content"],
+													"properties": {
+														"role": {
+															"anyOf": [
+																{
+																	"const": "internal_note",
+																	"type": "string"
+																},
+																{
+																	"const": "public_notice",
+																	"type": "string"
+																}
+															]
+														},
+														"language": {
+															"format": "bcp-47",
+															"minLength": 2,
+															"maxLength": 35,
+															"type": "string"
+														},
+														"content": {
+															"additionalProperties": false,
+															"$id": "PortableTextDocument",
+															"type": "object",
+															"required": [
+																"_type",
+																"_key",
+																"content"
+															],
+															"properties": {
+																"_type": {
+																	"const": "portable-text",
+																	"type": "string"
+																},
+																"_key": {
+																	"pattern": "^[0-9a-f]{12}$",
+																	"$id": "BlockKey",
+																	"type": "string"
+																},
+																"content": {
+																	"$id": "PortableText",
+																	"type": "array",
+																	"items": {
+																		"$id": "PortableTextBlock",
+																		"anyOf": [
+																			{
+																				"additionalProperties": {
+																					"$id": "#/components/schemas/JsonValue",
+																					"anyOf": [
+																						{
+																							"type": "null"
+																						},
+																						{
+																							"type": "boolean"
+																						},
+																						{
+																							"type": "number"
+																						},
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "array",
+																							"items": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						},
+																						{
+																							"type": "object",
+																							"patternProperties": {
+																								"^(.*)$": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"$id": "PortableTextTextBlock",
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type",
+																					"children"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"const": "block",
+																						"type": "string"
+																					},
+																					"children": {
+																						"type": "array",
+																						"items": {
+																							"$id": "PortableTextChild",
+																							"anyOf": [
+																								{
+																									"additionalProperties": false,
+																									"$id": "PortableTextSpan",
+																									"type": "object",
+																									"required": [
+																										"_key",
+																										"_type",
+																										"text"
+																									],
+																									"properties": {
+																										"_key": {
+																											"type": "string"
+																										},
+																										"_type": {
+																											"const": "span",
+																											"type": "string"
+																										},
+																										"text": {
+																											"type": "string"
+																										},
+																										"marks": {
+																											"type": "array",
+																											"items": {
+																												"type": "string"
+																											}
+																										}
+																									}
+																								},
+																								{
+																									"additionalProperties": {
+																										"$id": "#/components/schemas/JsonValue",
+																										"anyOf": [
+																											{
+																												"type": "null"
+																											},
+																											{
+																												"type": "boolean"
+																											},
+																											{
+																												"type": "number"
+																											},
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "array",
+																												"items": {
+																													"$ref": "#/components/schemas/JsonValue"
+																												}
+																											},
+																											{
+																												"type": "object",
+																												"patternProperties": {
+																													"^(.*)$": {
+																														"$ref": "#/components/schemas/JsonValue"
+																													}
+																												}
+																											}
+																										]
+																									},
+																									"type": "object",
+																									"required": [
+																										"_key",
+																										"_type"
+																									],
+																									"properties": {
+																										"_key": {
+																											"type": "string"
+																										},
+																										"_type": {
+																											"pattern": "^(?!span$).+",
+																											"type": "string"
+																										}
+																									}
+																								}
+																							]
+																						}
+																					},
+																					"markDefs": {
+																						"type": "array",
+																						"items": {
+																							"additionalProperties": {
+																								"$id": "#/components/schemas/JsonValue",
+																								"anyOf": [
+																									{
+																										"type": "null"
+																									},
+																									{
+																										"type": "boolean"
+																									},
+																									{
+																										"type": "number"
+																									},
+																									{
+																										"type": "string"
+																									},
+																									{
+																										"type": "array",
+																										"items": {
+																											"$ref": "#/components/schemas/JsonValue"
+																										}
+																									},
+																									{
+																										"type": "object",
+																										"patternProperties": {
+																											"^(.*)$": {
+																												"$ref": "#/components/schemas/JsonValue"
+																											}
+																										}
+																									}
+																								]
+																							},
+																							"$id": "PortableTextObject",
+																							"type": "object",
+																							"required": [
+																								"_key",
+																								"_type"
+																							],
+																							"properties": {
+																								"_key": {
+																									"type": "string"
+																								},
+																								"_type": {
+																									"type": "string"
+																								}
+																							}
+																						}
+																					},
+																					"listItem": {
+																						"type": "string"
+																					},
+																					"style": {
+																						"type": "string"
+																					},
+																					"level": {
+																						"minimum": 1,
+																						"type": "integer"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"$id": "PortableTextImage",
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type",
+																					"assetId"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"const": "image",
+																						"type": "string"
+																					},
+																					"assetId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"alt": {
+																						"type": "string"
+																					},
+																					"caption": {
+																						"type": "string"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": {
+																					"$id": "#/components/schemas/JsonValue",
+																					"anyOf": [
+																						{
+																							"type": "null"
+																						},
+																						{
+																							"type": "boolean"
+																						},
+																						{
+																							"type": "number"
+																						},
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "array",
+																							"items": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						},
+																						{
+																							"type": "object",
+																							"patternProperties": {
+																								"^(.*)$": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"pattern": "^(?!(?:block|image)$).+",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		]
+																	}
+																}
+															}
+														}
+													}
+												}
+											},
+											"idempotencyKey": {
+												"minLength": 1,
+												"maxLength": 256,
+												"type": "string"
+											},
+											"kind": { "const": "protect", "type": "string" },
+											"scope": {
+												"maxItems": 8,
+												"type": "array",
+												"items": {
+													"minLength": 1,
+													"maxLength": 64,
+													"pattern": "^[a-z0-9][a-z0-9-]*$",
+													"type": "string"
+												}
+											},
+											"protectionMode": {
+												"default": "frozen",
+												"type": "string",
+												"enum": ["frozen", "owner_only"]
+											}
+										}
 									},
-									"reasonCode": {
-										"minLength": 1,
-										"maxLength": 64,
-										"type": "string"
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["caseId", "reasonCode", "kind", "scope"],
+										"properties": {
+											"caseId": { "format": "uuid", "type": "string" },
+											"reasonCode": {
+												"default": "content_policy",
+												"type": "string",
+												"enum": [
+													"content_policy",
+													"realm_rules",
+													"spam",
+													"harassment",
+													"unsafe_content",
+													"off_topic",
+													"duplicate",
+													"account_security",
+													"user_request",
+													"appeal",
+													"administrative",
+													"other"
+												]
+											},
+											"notes": {
+												"maxItems": 2,
+												"type": "array",
+												"items": {
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["role", "language", "content"],
+													"properties": {
+														"role": {
+															"anyOf": [
+																{
+																	"const": "internal_note",
+																	"type": "string"
+																},
+																{
+																	"const": "public_notice",
+																	"type": "string"
+																}
+															]
+														},
+														"language": {
+															"format": "bcp-47",
+															"minLength": 2,
+															"maxLength": 35,
+															"type": "string"
+														},
+														"content": {
+															"additionalProperties": false,
+															"$id": "PortableTextDocument",
+															"type": "object",
+															"required": [
+																"_type",
+																"_key",
+																"content"
+															],
+															"properties": {
+																"_type": {
+																	"const": "portable-text",
+																	"type": "string"
+																},
+																"_key": {
+																	"pattern": "^[0-9a-f]{12}$",
+																	"$id": "BlockKey",
+																	"type": "string"
+																},
+																"content": {
+																	"$id": "PortableText",
+																	"type": "array",
+																	"items": {
+																		"$id": "PortableTextBlock",
+																		"anyOf": [
+																			{
+																				"additionalProperties": {
+																					"$id": "#/components/schemas/JsonValue",
+																					"anyOf": [
+																						{
+																							"type": "null"
+																						},
+																						{
+																							"type": "boolean"
+																						},
+																						{
+																							"type": "number"
+																						},
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "array",
+																							"items": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						},
+																						{
+																							"type": "object",
+																							"patternProperties": {
+																								"^(.*)$": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"$id": "PortableTextTextBlock",
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type",
+																					"children"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"const": "block",
+																						"type": "string"
+																					},
+																					"children": {
+																						"type": "array",
+																						"items": {
+																							"$id": "PortableTextChild",
+																							"anyOf": [
+																								{
+																									"additionalProperties": false,
+																									"$id": "PortableTextSpan",
+																									"type": "object",
+																									"required": [
+																										"_key",
+																										"_type",
+																										"text"
+																									],
+																									"properties": {
+																										"_key": {
+																											"type": "string"
+																										},
+																										"_type": {
+																											"const": "span",
+																											"type": "string"
+																										},
+																										"text": {
+																											"type": "string"
+																										},
+																										"marks": {
+																											"type": "array",
+																											"items": {
+																												"type": "string"
+																											}
+																										}
+																									}
+																								},
+																								{
+																									"additionalProperties": {
+																										"$id": "#/components/schemas/JsonValue",
+																										"anyOf": [
+																											{
+																												"type": "null"
+																											},
+																											{
+																												"type": "boolean"
+																											},
+																											{
+																												"type": "number"
+																											},
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "array",
+																												"items": {
+																													"$ref": "#/components/schemas/JsonValue"
+																												}
+																											},
+																											{
+																												"type": "object",
+																												"patternProperties": {
+																													"^(.*)$": {
+																														"$ref": "#/components/schemas/JsonValue"
+																													}
+																												}
+																											}
+																										]
+																									},
+																									"type": "object",
+																									"required": [
+																										"_key",
+																										"_type"
+																									],
+																									"properties": {
+																										"_key": {
+																											"type": "string"
+																										},
+																										"_type": {
+																											"pattern": "^(?!span$).+",
+																											"type": "string"
+																										}
+																									}
+																								}
+																							]
+																						}
+																					},
+																					"markDefs": {
+																						"type": "array",
+																						"items": {
+																							"additionalProperties": {
+																								"$id": "#/components/schemas/JsonValue",
+																								"anyOf": [
+																									{
+																										"type": "null"
+																									},
+																									{
+																										"type": "boolean"
+																									},
+																									{
+																										"type": "number"
+																									},
+																									{
+																										"type": "string"
+																									},
+																									{
+																										"type": "array",
+																										"items": {
+																											"$ref": "#/components/schemas/JsonValue"
+																										}
+																									},
+																									{
+																										"type": "object",
+																										"patternProperties": {
+																											"^(.*)$": {
+																												"$ref": "#/components/schemas/JsonValue"
+																											}
+																										}
+																									}
+																								]
+																							},
+																							"$id": "PortableTextObject",
+																							"type": "object",
+																							"required": [
+																								"_key",
+																								"_type"
+																							],
+																							"properties": {
+																								"_key": {
+																									"type": "string"
+																								},
+																								"_type": {
+																									"type": "string"
+																								}
+																							}
+																						}
+																					},
+																					"listItem": {
+																						"type": "string"
+																					},
+																					"style": {
+																						"type": "string"
+																					},
+																					"level": {
+																						"minimum": 1,
+																						"type": "integer"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"$id": "PortableTextImage",
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type",
+																					"assetId"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"const": "image",
+																						"type": "string"
+																					},
+																					"assetId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"alt": {
+																						"type": "string"
+																					},
+																					"caption": {
+																						"type": "string"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": {
+																					"$id": "#/components/schemas/JsonValue",
+																					"anyOf": [
+																						{
+																							"type": "null"
+																						},
+																						{
+																							"type": "boolean"
+																						},
+																						{
+																							"type": "number"
+																						},
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "array",
+																							"items": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						},
+																						{
+																							"type": "object",
+																							"patternProperties": {
+																								"^(.*)$": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"pattern": "^(?!(?:block|image)$).+",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		]
+																	}
+																}
+															}
+														}
+													}
+												}
+											},
+											"idempotencyKey": {
+												"minLength": 1,
+												"maxLength": 256,
+												"type": "string"
+											},
+											"kind": { "const": "unprotect", "type": "string" },
+											"scope": {
+												"maxItems": 8,
+												"type": "array",
+												"items": {
+													"minLength": 1,
+													"maxLength": 64,
+													"pattern": "^[a-z0-9][a-z0-9-]*$",
+													"type": "string"
+												}
+											}
+										}
 									},
-									"reason": { "maxLength": 10000, "type": "string" },
-									"publicMessage": { "maxLength": 2000, "type": "string" },
-									"reversesActionId": { "format": "uuid", "type": "string" },
-									"idempotencyKey": {
-										"minLength": 1,
-										"maxLength": 256,
-										"type": "string"
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": [
+											"caseId",
+											"reasonCode",
+											"kind",
+											"reversesActionId"
+										],
+										"properties": {
+											"caseId": { "format": "uuid", "type": "string" },
+											"reasonCode": {
+												"default": "content_policy",
+												"type": "string",
+												"enum": [
+													"content_policy",
+													"realm_rules",
+													"spam",
+													"harassment",
+													"unsafe_content",
+													"off_topic",
+													"duplicate",
+													"account_security",
+													"user_request",
+													"appeal",
+													"administrative",
+													"other"
+												]
+											},
+											"notes": {
+												"maxItems": 2,
+												"type": "array",
+												"items": {
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["role", "language", "content"],
+													"properties": {
+														"role": {
+															"anyOf": [
+																{
+																	"const": "internal_note",
+																	"type": "string"
+																},
+																{
+																	"const": "public_notice",
+																	"type": "string"
+																}
+															]
+														},
+														"language": {
+															"format": "bcp-47",
+															"minLength": 2,
+															"maxLength": 35,
+															"type": "string"
+														},
+														"content": {
+															"additionalProperties": false,
+															"$id": "PortableTextDocument",
+															"type": "object",
+															"required": [
+																"_type",
+																"_key",
+																"content"
+															],
+															"properties": {
+																"_type": {
+																	"const": "portable-text",
+																	"type": "string"
+																},
+																"_key": {
+																	"pattern": "^[0-9a-f]{12}$",
+																	"$id": "BlockKey",
+																	"type": "string"
+																},
+																"content": {
+																	"$id": "PortableText",
+																	"type": "array",
+																	"items": {
+																		"$id": "PortableTextBlock",
+																		"anyOf": [
+																			{
+																				"additionalProperties": {
+																					"$id": "#/components/schemas/JsonValue",
+																					"anyOf": [
+																						{
+																							"type": "null"
+																						},
+																						{
+																							"type": "boolean"
+																						},
+																						{
+																							"type": "number"
+																						},
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "array",
+																							"items": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						},
+																						{
+																							"type": "object",
+																							"patternProperties": {
+																								"^(.*)$": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"$id": "PortableTextTextBlock",
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type",
+																					"children"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"const": "block",
+																						"type": "string"
+																					},
+																					"children": {
+																						"type": "array",
+																						"items": {
+																							"$id": "PortableTextChild",
+																							"anyOf": [
+																								{
+																									"additionalProperties": false,
+																									"$id": "PortableTextSpan",
+																									"type": "object",
+																									"required": [
+																										"_key",
+																										"_type",
+																										"text"
+																									],
+																									"properties": {
+																										"_key": {
+																											"type": "string"
+																										},
+																										"_type": {
+																											"const": "span",
+																											"type": "string"
+																										},
+																										"text": {
+																											"type": "string"
+																										},
+																										"marks": {
+																											"type": "array",
+																											"items": {
+																												"type": "string"
+																											}
+																										}
+																									}
+																								},
+																								{
+																									"additionalProperties": {
+																										"$id": "#/components/schemas/JsonValue",
+																										"anyOf": [
+																											{
+																												"type": "null"
+																											},
+																											{
+																												"type": "boolean"
+																											},
+																											{
+																												"type": "number"
+																											},
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "array",
+																												"items": {
+																													"$ref": "#/components/schemas/JsonValue"
+																												}
+																											},
+																											{
+																												"type": "object",
+																												"patternProperties": {
+																													"^(.*)$": {
+																														"$ref": "#/components/schemas/JsonValue"
+																													}
+																												}
+																											}
+																										]
+																									},
+																									"type": "object",
+																									"required": [
+																										"_key",
+																										"_type"
+																									],
+																									"properties": {
+																										"_key": {
+																											"type": "string"
+																										},
+																										"_type": {
+																											"pattern": "^(?!span$).+",
+																											"type": "string"
+																										}
+																									}
+																								}
+																							]
+																						}
+																					},
+																					"markDefs": {
+																						"type": "array",
+																						"items": {
+																							"additionalProperties": {
+																								"$id": "#/components/schemas/JsonValue",
+																								"anyOf": [
+																									{
+																										"type": "null"
+																									},
+																									{
+																										"type": "boolean"
+																									},
+																									{
+																										"type": "number"
+																									},
+																									{
+																										"type": "string"
+																									},
+																									{
+																										"type": "array",
+																										"items": {
+																											"$ref": "#/components/schemas/JsonValue"
+																										}
+																									},
+																									{
+																										"type": "object",
+																										"patternProperties": {
+																											"^(.*)$": {
+																												"$ref": "#/components/schemas/JsonValue"
+																											}
+																										}
+																									}
+																								]
+																							},
+																							"$id": "PortableTextObject",
+																							"type": "object",
+																							"required": [
+																								"_key",
+																								"_type"
+																							],
+																							"properties": {
+																								"_key": {
+																									"type": "string"
+																								},
+																								"_type": {
+																									"type": "string"
+																								}
+																							}
+																						}
+																					},
+																					"listItem": {
+																						"type": "string"
+																					},
+																					"style": {
+																						"type": "string"
+																					},
+																					"level": {
+																						"minimum": 1,
+																						"type": "integer"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"$id": "PortableTextImage",
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type",
+																					"assetId"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"const": "image",
+																						"type": "string"
+																					},
+																					"assetId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"alt": {
+																						"type": "string"
+																					},
+																					"caption": {
+																						"type": "string"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": {
+																					"$id": "#/components/schemas/JsonValue",
+																					"anyOf": [
+																						{
+																							"type": "null"
+																						},
+																						{
+																							"type": "boolean"
+																						},
+																						{
+																							"type": "number"
+																						},
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "array",
+																							"items": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						},
+																						{
+																							"type": "object",
+																							"patternProperties": {
+																								"^(.*)$": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"pattern": "^(?!(?:block|image)$).+",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		]
+																	}
+																}
+															}
+														}
+													}
+												}
+											},
+											"idempotencyKey": {
+												"minLength": 1,
+												"maxLength": 256,
+												"type": "string"
+											},
+											"kind": { "const": "reverse", "type": "string" },
+											"reversesActionId": {
+												"format": "uuid",
+												"type": "string"
+											}
+										}
+									},
+									{
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["caseId", "reasonCode", "notes", "kind"],
+										"properties": {
+											"caseId": { "format": "uuid", "type": "string" },
+											"reasonCode": {
+												"default": "content_policy",
+												"type": "string",
+												"enum": [
+													"content_policy",
+													"realm_rules",
+													"spam",
+													"harassment",
+													"unsafe_content",
+													"off_topic",
+													"duplicate",
+													"account_security",
+													"user_request",
+													"appeal",
+													"administrative",
+													"other"
+												]
+											},
+											"notes": {
+												"minItems": 1,
+												"maxItems": 2,
+												"type": "array",
+												"items": {
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["role", "language", "content"],
+													"properties": {
+														"role": {
+															"anyOf": [
+																{
+																	"const": "internal_note",
+																	"type": "string"
+																},
+																{
+																	"const": "public_notice",
+																	"type": "string"
+																}
+															]
+														},
+														"language": {
+															"format": "bcp-47",
+															"minLength": 2,
+															"maxLength": 35,
+															"type": "string"
+														},
+														"content": {
+															"additionalProperties": false,
+															"$id": "PortableTextDocument",
+															"type": "object",
+															"required": [
+																"_type",
+																"_key",
+																"content"
+															],
+															"properties": {
+																"_type": {
+																	"const": "portable-text",
+																	"type": "string"
+																},
+																"_key": {
+																	"pattern": "^[0-9a-f]{12}$",
+																	"$id": "BlockKey",
+																	"type": "string"
+																},
+																"content": {
+																	"$id": "PortableText",
+																	"type": "array",
+																	"items": {
+																		"$id": "PortableTextBlock",
+																		"anyOf": [
+																			{
+																				"additionalProperties": {
+																					"$id": "#/components/schemas/JsonValue",
+																					"anyOf": [
+																						{
+																							"type": "null"
+																						},
+																						{
+																							"type": "boolean"
+																						},
+																						{
+																							"type": "number"
+																						},
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "array",
+																							"items": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						},
+																						{
+																							"type": "object",
+																							"patternProperties": {
+																								"^(.*)$": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"$id": "PortableTextTextBlock",
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type",
+																					"children"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"const": "block",
+																						"type": "string"
+																					},
+																					"children": {
+																						"type": "array",
+																						"items": {
+																							"$id": "PortableTextChild",
+																							"anyOf": [
+																								{
+																									"additionalProperties": false,
+																									"$id": "PortableTextSpan",
+																									"type": "object",
+																									"required": [
+																										"_key",
+																										"_type",
+																										"text"
+																									],
+																									"properties": {
+																										"_key": {
+																											"type": "string"
+																										},
+																										"_type": {
+																											"const": "span",
+																											"type": "string"
+																										},
+																										"text": {
+																											"type": "string"
+																										},
+																										"marks": {
+																											"type": "array",
+																											"items": {
+																												"type": "string"
+																											}
+																										}
+																									}
+																								},
+																								{
+																									"additionalProperties": {
+																										"$id": "#/components/schemas/JsonValue",
+																										"anyOf": [
+																											{
+																												"type": "null"
+																											},
+																											{
+																												"type": "boolean"
+																											},
+																											{
+																												"type": "number"
+																											},
+																											{
+																												"type": "string"
+																											},
+																											{
+																												"type": "array",
+																												"items": {
+																													"$ref": "#/components/schemas/JsonValue"
+																												}
+																											},
+																											{
+																												"type": "object",
+																												"patternProperties": {
+																													"^(.*)$": {
+																														"$ref": "#/components/schemas/JsonValue"
+																													}
+																												}
+																											}
+																										]
+																									},
+																									"type": "object",
+																									"required": [
+																										"_key",
+																										"_type"
+																									],
+																									"properties": {
+																										"_key": {
+																											"type": "string"
+																										},
+																										"_type": {
+																											"pattern": "^(?!span$).+",
+																											"type": "string"
+																										}
+																									}
+																								}
+																							]
+																						}
+																					},
+																					"markDefs": {
+																						"type": "array",
+																						"items": {
+																							"additionalProperties": {
+																								"$id": "#/components/schemas/JsonValue",
+																								"anyOf": [
+																									{
+																										"type": "null"
+																									},
+																									{
+																										"type": "boolean"
+																									},
+																									{
+																										"type": "number"
+																									},
+																									{
+																										"type": "string"
+																									},
+																									{
+																										"type": "array",
+																										"items": {
+																											"$ref": "#/components/schemas/JsonValue"
+																										}
+																									},
+																									{
+																										"type": "object",
+																										"patternProperties": {
+																											"^(.*)$": {
+																												"$ref": "#/components/schemas/JsonValue"
+																											}
+																										}
+																									}
+																								]
+																							},
+																							"$id": "PortableTextObject",
+																							"type": "object",
+																							"required": [
+																								"_key",
+																								"_type"
+																							],
+																							"properties": {
+																								"_key": {
+																									"type": "string"
+																								},
+																								"_type": {
+																									"type": "string"
+																								}
+																							}
+																						}
+																					},
+																					"listItem": {
+																						"type": "string"
+																					},
+																					"style": {
+																						"type": "string"
+																					},
+																					"level": {
+																						"minimum": 1,
+																						"type": "integer"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"$id": "PortableTextImage",
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type",
+																					"assetId"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"const": "image",
+																						"type": "string"
+																					},
+																					"assetId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"alt": {
+																						"type": "string"
+																					},
+																					"caption": {
+																						"type": "string"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": {
+																					"$id": "#/components/schemas/JsonValue",
+																					"anyOf": [
+																						{
+																							"type": "null"
+																						},
+																						{
+																							"type": "boolean"
+																						},
+																						{
+																							"type": "number"
+																						},
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "array",
+																							"items": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						},
+																						{
+																							"type": "object",
+																							"patternProperties": {
+																								"^(.*)$": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"pattern": "^(?!(?:block|image)$).+",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		]
+																	}
+																}
+															}
+														}
+													}
+												}
+											},
+											"idempotencyKey": {
+												"minLength": 1,
+												"maxLength": 256,
+												"type": "string"
+											},
+											"kind": { "const": "note", "type": "string" }
+										}
 									}
-								}
+								]
 							}
 						}
 					},
@@ -13591,6 +15391,9 @@
 										"caseId",
 										"actorProfileId",
 										"kind",
+										"previousState",
+										"resultingState",
+										"previousLocked",
 										"resultingStatus",
 										"resultingLocked",
 										"reasonCode",
@@ -13602,6 +15405,18 @@
 										"caseId": { "format": "uuid", "type": "string" },
 										"actorProfileId": { "format": "uuid", "type": "string" },
 										"kind": { "type": "string" },
+										"previousState": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"resultingState": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"previousLocked": {
+											"nullable": true,
+											"anyOf": [{ "type": "boolean" }, { "type": "null" }]
+										},
 										"resultingStatus": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
@@ -13637,13 +15452,13 @@
 											"required": ["code", "message"],
 											"properties": {
 												"code": {
-													"default": "ModerationReversalInvalid",
+													"default": "ModerationReversedActionInvalid",
 													"type": "string",
 													"enum": [
-														"ModerationReversalInvalid",
 														"ModerationReversedActionInvalid",
-														"ModerationRealmMissing",
-														"ModerationTargetScopeRequired"
+														"ModerationActionIncompatible",
+														"ModerationNoteRoleDuplicate",
+														"ModerationRealmMissing"
 													]
 												},
 												"message": { "type": "string" },
@@ -13704,6 +15519,38 @@
 													"enum": [
 														"ModerationCaseNotFound",
 														"ModerationTargetNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "ModerationTransitionInvalid",
+													"type": "string",
+													"enum": [
+														"ModerationTransitionInvalid",
+														"ModerationActionNoEffect",
+														"ModerationReversalUnavailable",
+														"ModerationIdempotencyConflict"
 													]
 												},
 												"message": { "type": "string" },

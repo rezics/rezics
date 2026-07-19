@@ -41,6 +41,46 @@ export class ModerationReversedActionInvalid extends Data.TaggedError(
 	readonly message = "The reversed action must belong to this case";
 }
 
+export class ModerationActionIncompatible extends Data.TaggedError("ModerationActionIncompatible") {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = ModerationActionIncompatible.status;
+	readonly message = "The moderation action is not valid for this target";
+}
+
+export class ModerationTransitionInvalid extends Data.TaggedError("ModerationTransitionInvalid") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = ModerationTransitionInvalid.status;
+	readonly message = "The moderation target cannot make that state transition";
+}
+
+export class ModerationActionNoEffect extends Data.TaggedError("ModerationActionNoEffect") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = ModerationActionNoEffect.status;
+	readonly message = "The moderation action would not change the target";
+}
+
+export class ModerationReversalUnavailable extends Data.TaggedError(
+	"ModerationReversalUnavailable",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = ModerationReversalUnavailable.status;
+	readonly message = "The moderation action cannot be reversed from its current state";
+}
+
+export class ModerationIdempotencyConflict extends Data.TaggedError(
+	"ModerationIdempotencyConflict",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = ModerationIdempotencyConflict.status;
+	readonly message = "The idempotency key was already used for a different request";
+}
+
+export class ModerationNoteRoleDuplicate extends Data.TaggedError("ModerationNoteRoleDuplicate") {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = ModerationNoteRoleDuplicate.status;
+	readonly message = "A moderation action can create at most one note for each role";
+}
+
 export class EnforcementExpiryInvalid extends Data.TaggedError("EnforcementExpiryInvalid") {
 	static readonly status = StatusCodes.BAD_REQUEST as const;
 	readonly status = EnforcementExpiryInvalid.status;
@@ -164,6 +204,12 @@ export const GovernanceErrors = [
 	ModerationCaseNotFound,
 	ModerationReversalInvalid,
 	ModerationReversedActionInvalid,
+	ModerationActionIncompatible,
+	ModerationTransitionInvalid,
+	ModerationActionNoEffect,
+	ModerationReversalUnavailable,
+	ModerationIdempotencyConflict,
+	ModerationNoteRoleDuplicate,
 	EnforcementExpiryInvalid,
 	EnforcementNotFound,
 	EnforcementAlreadyRevoked,

@@ -183,8 +183,12 @@ export const moderationAction = pgTable(
 		/** @UNIT_LOCALIZATION_EXEMPT Public copy recorded with one moderation decision. */
 		publicMessage: text(),
 		reversesActionId: uuid(),
+		previousState: text(),
+		resultingState: text(),
+		previousLocked: boolean(),
 		requestId: text(),
 		idempotencyKey: text(),
+		requestFingerprint: text(),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
@@ -193,8 +197,8 @@ export const moderationAction = pgTable(
 			foreignColumns: [table.id],
 			name: "moderation_action_reverses_fkey",
 		}).onDelete("restrict"),
-		uniqueIndex("moderation_action_idempotency_key")
-			.on(table.idempotencyKey)
+		uniqueIndex("moderation_action_actor_case_idempotency_key")
+			.on(table.actorProfileId, table.caseId, table.idempotencyKey)
 			.where(sql`${table.idempotencyKey} is not null`),
 		index("moderation_action_case_created_at_idx").on(table.caseId, table.createdAt, table.id),
 		index("moderation_action_actor_created_at_idx").on(
@@ -204,6 +208,22 @@ export const moderationAction = pgTable(
 		),
 		index("moderation_action_reverses_idx").on(table.reversesActionId),
 		check("moderation_action_reason_code_check", sql`btrim(${table.reasonCode}) <> ''`),
+		check(
+			"moderation_action_state_outcome_check",
+			sql`(${table.previousState} is null) = (${table.resultingState} is null)`,
+		),
+		check(
+			"moderation_action_lock_outcome_check",
+			sql`(${table.previousLocked} is null) = (${table.resultingLocked} is null)`,
+		),
+		check(
+			"moderation_action_single_outcome_check",
+			sql`${table.previousState} is null or ${table.previousLocked} is null`,
+		),
+		check(
+			"moderation_action_request_fingerprint_check",
+			sql`${table.requestFingerprint} is null or ${table.requestFingerprint} ~ '^[0-9a-f]{64}$'`,
+		),
 		check(
 			"moderation_action_not_self_reverse",
 			sql`${table.reversesActionId} is null or ${table.reversesActionId} <> ${table.id}`,

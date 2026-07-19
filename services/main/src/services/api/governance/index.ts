@@ -12,15 +12,9 @@ import {
 	feedback,
 	moderationAction,
 	moderationCase,
-	post,
 	profile as profileTable,
-	realmUnit,
-	realmUnitStatusEvent,
 	realmMember,
 	RealmCapabilityValues,
-	unit,
-	unitAccessBinding,
-	unitProtection,
 } from "../../database/schema";
 import { createNotification, deliverNotificationEmail } from "../../notifications/service";
 import type { DatabaseTransaction } from "../../database";
@@ -57,16 +51,15 @@ import {
 	EnforcementExpiryInvalid,
 	EnforcementNotFound,
 	ModerationCaseNotFound,
-	ModerationRealmMissing,
-	ModerationReversalInvalid,
-	ModerationReversedActionInvalid,
-	ModerationTargetNotFound,
-	ModerationTargetScopeRequired,
 	PlatformGrantRealmForbidden,
 	RealmGrantCapabilityInvalid,
 	RealmGrantRealmRequired,
 } from "./errors";
 import unitAccessRoutes from "./unit-access";
+import {
+	executeAuthorizedModerationAction,
+	loadModerationCaseForAction,
+} from "./moderation-service";
 
 const CapabilityForbiddenResponse = toApiErrorResponse([
 	"RealmCapabilityRequired",
@@ -88,18 +81,6 @@ const caseSelection = {
 	safeSummary: moderationCase.safeSummary,
 	createdAt: moderationCase.createdAt,
 	updatedAt: moderationCase.updatedAt,
-};
-
-const actionSelection = {
-	id: moderationAction.id,
-	caseId: moderationAction.caseId,
-	actorProfileId: moderationAction.actorProfileId,
-	kind: moderationAction.kind,
-	resultingStatus: moderationAction.resultingStatus,
-	resultingLocked: moderationAction.resultingLocked,
-	reasonCode: moderationAction.reasonCode,
-	reversesActionId: moderationAction.reversesActionId,
-	createdAt: moderationAction.createdAt,
 };
 
 const enforcementSelection = {
@@ -129,26 +110,6 @@ const grantSelection = {
 };
 
 type CaseRecord = typeof moderationCase.$inferSelect;
-type ActionBody = typeof CreateModerationActionBody.static;
-
-const ModerationStatusByAction: Partial<Record<ActionBody["kind"], "approved" | "removed">> = {
-	approve: "approved",
-	restore: "approved",
-	remove: "removed",
-};
-const LockStateByAction: Partial<Record<ActionBody["kind"], boolean>> = {
-	lock: true,
-	unlock: false,
-};
-const MemberStateByAction: Partial<
-	Record<ActionBody["kind"], "muted" | "removed" | "banned" | "active">
-> = {
-	mute_member: "muted",
-	remove_member: "removed",
-	ban_member: "banned",
-	restore_member: "active",
-};
-
 async function ensureCaseAccess(
 	authorization: Authorization<string>,
 	row: Pick<CaseRecord, "authority" | "realmId">,
@@ -174,198 +135,6 @@ async function recordAuditEvent(
 	},
 ) {
 	await tx.insert(auditEvent).values(input);
-}
-
-type ModerationTargetContext = {
-	recipientProfileId: string | undefined;
-	subjectUnitId: string | undefined;
-};
-
-async function getModerationTargetContext(
-	tx: DatabaseTransaction,
-	row: CaseRecord,
-): Promise<ModerationTargetContext> {
-	let recipientProfileId: string | undefined;
-	let subjectUnitId: string | undefined;
-
-	if (row.targetKind === "unit" || row.targetKind === "unit_field") {
-		const [target] = await tx
-			.select({ id: unit.id })
-			.from(unit)
-			.where(eq(unit.id, row.targetId))
-			.limit(1);
-		if (!target) throw new ModerationTargetNotFound();
-		subjectUnitId = target.id;
-		const [owner] = await tx
-			.select({ profileId: unitAccessBinding.profileId })
-			.from(unitAccessBinding)
-			.where(
-				and(eq(unitAccessBinding.unitId, target.id), eq(unitAccessBinding.role, "owner")),
-			)
-			.limit(1);
-		recipientProfileId = owner?.profileId ?? undefined;
-	}
-	if (row.targetKind === "profile") {
-		const [target] = await tx
-			.select({ id: profileTable.id })
-			.from(profileTable)
-			.where(eq(profileTable.id, row.targetId))
-			.limit(1);
-		if (!target) throw new ModerationTargetNotFound();
-		recipientProfileId = target.id;
-		subjectUnitId = target.id;
-	}
-	if (row.targetKind === "realm_unit") {
-		if (!row.realmId) throw new ModerationRealmMissing();
-		const [target] = await tx
-			.select({ unitId: realmUnit.unitId })
-			.from(realmUnit)
-			.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetId)))
-			.limit(1);
-		if (!target) throw new ModerationTargetNotFound();
-		subjectUnitId = target.unitId;
-		const [owner] = await tx
-			.select({ profileId: unitAccessBinding.profileId })
-			.from(unitAccessBinding)
-			.where(
-				and(
-					eq(unitAccessBinding.unitId, target.unitId),
-					eq(unitAccessBinding.role, "owner"),
-				),
-			)
-			.limit(1);
-		recipientProfileId = owner?.profileId ?? undefined;
-	}
-	if (row.targetKind === "realm_member") {
-		if (!row.realmId) throw new ModerationRealmMissing();
-		const [target] = await tx
-			.select({ profileId: realmMember.profileId })
-			.from(realmMember)
-			.where(
-				and(eq(realmMember.realmId, row.realmId), eq(realmMember.profileId, row.targetId)),
-			)
-			.limit(1);
-		if (!target) throw new ModerationTargetNotFound();
-		recipientProfileId = target.profileId;
-		subjectUnitId = row.realmId;
-	}
-	if (row.targetKind === "feedback") {
-		const [target] = await tx
-			.select({
-				profileId: feedback.profileId,
-				subjectUnitId: feedback.subjectUnitId,
-			})
-			.from(feedback)
-			.where(eq(feedback.id, row.targetId))
-			.limit(1);
-		if (!target) throw new ModerationTargetNotFound();
-		recipientProfileId = target.profileId;
-		subjectUnitId = target.subjectUnitId ?? undefined;
-	}
-	return { recipientProfileId, subjectUnitId };
-}
-
-async function applyAction(
-	tx: DatabaseTransaction,
-	row: CaseRecord,
-	body: ActionBody,
-	actorProfileId: string,
-): Promise<{
-	status: "approved" | "pending" | "removed" | null;
-	locked: boolean | null;
-}> {
-	const status = body.resultingStatus ?? ModerationStatusByAction[body.kind];
-	const locked = body.resultingLocked ?? LockStateByAction[body.kind];
-	if (row.targetKind === "unit" || row.targetKind === "unit_field") {
-		if (status)
-			await tx
-				.update(unit)
-				.set({ moderationStatus: status })
-				.where(eq(unit.id, row.targetId));
-		if (locked !== undefined)
-			await tx.update(post).set({ locked }).where(eq(post.id, row.targetId));
-		if (body.kind === "protect") {
-			if (!body.scope || !body.protectionMode) throw new ModerationTargetScopeRequired();
-			await tx
-				.update(unitProtection)
-				.set({ revokedAt: new Date(), revokedByProfileId: actorProfileId })
-				.where(
-					and(
-						eq(unitProtection.unitId, row.targetId),
-						eq(unitProtection.scope, body.scope),
-						isNull(unitProtection.revokedAt),
-					),
-				);
-			await tx.insert(unitProtection).values({
-				unitId: row.targetId,
-				scope: body.scope,
-				mode: body.protectionMode,
-				createdByProfileId: actorProfileId,
-				reason: body.reason ?? body.reasonCode,
-			});
-		}
-		if (body.kind === "unprotect") {
-			if (!body.scope) throw new ModerationTargetScopeRequired();
-			await tx
-				.update(unitProtection)
-				.set({ revokedAt: new Date(), revokedByProfileId: actorProfileId })
-				.where(
-					and(
-						eq(unitProtection.unitId, row.targetId),
-						eq(unitProtection.scope, body.scope),
-						isNull(unitProtection.revokedAt),
-					),
-				);
-		}
-	}
-	if (row.targetKind === "realm_unit") {
-		if (!row.realmId) throw new ModerationRealmMissing();
-		const [current] = await tx
-			.select({ status: realmUnit.status })
-			.from(realmUnit)
-			.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetId)))
-			.limit(1);
-		if (!current) throw new ModerationTargetNotFound();
-		const nextStatus = status === "approved" ? "visible" : status;
-		if (nextStatus && locked !== undefined)
-			await tx
-				.update(realmUnit)
-				.set({ status: nextStatus, locked })
-				.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetId)));
-		else if (nextStatus)
-			await tx
-				.update(realmUnit)
-				.set({ status: nextStatus })
-				.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetId)));
-		else if (locked !== undefined)
-			await tx
-				.update(realmUnit)
-				.set({ locked })
-				.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetId)));
-		if (nextStatus && nextStatus !== current.status)
-			await tx.insert(realmUnitStatusEvent).values({
-				realmId: row.realmId,
-				unitId: row.targetId,
-				fromStatus: current.status,
-				toStatus: nextStatus,
-				changedByProfileId: actorProfileId,
-			});
-	}
-	if (row.targetKind === "realm_member") {
-		if (!row.realmId) throw new ModerationRealmMissing();
-		const next = MemberStateByAction[body.kind];
-		if (next)
-			await tx
-				.update(realmMember)
-				.set({ state: next })
-				.where(
-					and(
-						eq(realmMember.realmId, row.realmId),
-						eq(realmMember.profileId, row.targetId),
-					),
-				);
-	}
-	return { status: status ?? null, locked: locked ?? null };
 }
 
 export default new Elysia({ prefix: "/governance" })
@@ -476,79 +245,15 @@ export default new Elysia({ prefix: "/governance" })
 	.post(
 		"/moderation/actions",
 		async ({ authorization, profile, body }) => {
-			if ((body.kind === "reverse") !== Boolean(body.reversesActionId))
-				throw new ModerationReversalInvalid();
-			if (body.idempotencyKey) {
-				const [existing] = await database
-					.select(actionSelection)
-					.from(moderationAction)
-					.where(eq(moderationAction.idempotencyKey, body.idempotencyKey))
-					.limit(1);
-				if (existing) return existing;
-			}
 			const result = await database.transaction(async (tx) => {
-				const [caseRow] = await tx
-					.select()
-					.from(moderationCase)
-					.where(eq(moderationCase.id, body.caseId))
-					.limit(1);
+				const caseRow = await loadModerationCaseForAction(tx, body.caseId);
 				if (!caseRow) throw new ModerationCaseNotFound();
 				await ensureCaseAccess(authorization, caseRow);
-				if (body.reversesActionId) {
-					const [reversed] = await tx
-						.select({ caseId: moderationAction.caseId })
-						.from(moderationAction)
-						.where(eq(moderationAction.id, body.reversesActionId))
-						.limit(1);
-					if (!reversed || reversed.caseId !== caseRow.id)
-						throw new ModerationReversedActionInvalid();
-				}
-				const target = await getModerationTargetContext(tx, caseRow);
-				const outcome = await applyAction(tx, caseRow, body, profile.unitId);
-				const [created] = await tx
-					.insert(moderationAction)
-					.values({
-						caseId: caseRow.id,
-						actorProfileId: profile.unitId,
-						kind: body.kind,
-						resultingStatus: outcome.status,
-						resultingLocked: outcome.locked,
-						reasonCode: body.reasonCode,
-						reason: body.reason,
-						publicMessage: body.publicMessage,
-						reversesActionId: body.reversesActionId,
-						idempotencyKey: body.idempotencyKey,
-					})
-					.returning(actionSelection);
-				if (!created) throw new Error("Moderation action insertion did not return a row");
-				await tx
-					.update(moderationCase)
-					.set({ state: body.kind === "escalate" ? "escalated" : "actioned" })
-					.where(eq(moderationCase.id, caseRow.id));
-				const notificationId = target.recipientProfileId
-					? await createNotification(tx, {
-							recipientProfileId: target.recipientProfileId,
-							actorProfileId: profile.unitId,
-							kind: "moderation",
-							subjectUnitId: target.subjectUnitId,
-							payload: { action: body.kind, message: body.publicMessage },
-						})
-					: undefined;
-				await recordAuditEvent(tx, {
+				return executeAuthorizedModerationAction(tx, {
+					caseRow,
 					actorProfileId: profile.unitId,
-					action: `moderation.${body.kind}`,
-					decisionCode: body.reasonCode,
-					reason: body.reason ?? body.reasonCode,
-					subjectKind: caseRow.targetKind,
-					subjectId: caseRow.targetId,
-					subjectPath: caseRow.targetPath,
-					metadata: {
-						moderationActionId: created.id,
-						caseId: caseRow.id,
-						realmId: caseRow.realmId,
-					},
+					body,
 				});
-				return { created, notificationId };
 			});
 			await deliverNotificationEmail(result.notificationId);
 			return result.created;
@@ -559,15 +264,21 @@ export default new Elysia({ prefix: "/governance" })
 			response: {
 				[StatusCodes.OK]: ModerationActionResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"ModerationReversalInvalid",
 					"ModerationReversedActionInvalid",
+					"ModerationActionIncompatible",
+					"ModerationNoteRoleDuplicate",
 					"ModerationRealmMissing",
-					"ModerationTargetScopeRequired",
 				]),
 				[StatusCodes.FORBIDDEN]: CapabilityForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"ModerationCaseNotFound",
 					"ModerationTargetNotFound",
+				]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"ModerationTransitionInvalid",
+					"ModerationActionNoEffect",
+					"ModerationReversalUnavailable",
+					"ModerationIdempotencyConflict",
 				]),
 			},
 			detail: { summary: "Apply moderation action", tags: ["Governance"] },

@@ -2236,6 +2236,12 @@ export const ApiErrorCode = {
 	ModerationCaseNotFound: "ModerationCaseNotFound",
 	ModerationReversalInvalid: "ModerationReversalInvalid",
 	ModerationReversedActionInvalid: "ModerationReversedActionInvalid",
+	ModerationActionIncompatible: "ModerationActionIncompatible",
+	ModerationTransitionInvalid: "ModerationTransitionInvalid",
+	ModerationActionNoEffect: "ModerationActionNoEffect",
+	ModerationReversalUnavailable: "ModerationReversalUnavailable",
+	ModerationIdempotencyConflict: "ModerationIdempotencyConflict",
+	ModerationNoteRoleDuplicate: "ModerationNoteRoleDuplicate",
 	EnforcementExpiryInvalid: "EnforcementExpiryInvalid",
 	EnforcementNotFound: "EnforcementNotFound",
 	EnforcementAlreadyRevoked: "EnforcementAlreadyRevoked",
@@ -9323,6 +9329,9 @@ export type PostApiGovernanceModerationActionsStatus200 = {
 	 * @type string
 	 */
 	kind: string;
+	previousState: (string | null) | null;
+	resultingState: (string | null) | null;
+	previousLocked: (boolean | null) | null;
 	resultingStatus: (string | null) | null;
 	resultingLocked: (boolean | null) | null;
 	/**
@@ -9339,10 +9348,10 @@ export type PostApiGovernanceModerationActionsStatus200 = {
 };
 
 export const PostApiGovernanceModerationActionsStatus400ErrorCodeEnum = {
-	ModerationReversalInvalid: "ModerationReversalInvalid",
 	ModerationReversedActionInvalid: "ModerationReversedActionInvalid",
+	ModerationActionIncompatible: "ModerationActionIncompatible",
+	ModerationNoteRoleDuplicate: "ModerationNoteRoleDuplicate",
 	ModerationRealmMissing: "ModerationRealmMissing",
-	ModerationTargetScopeRequired: "ModerationTargetScopeRequired",
 } as const;
 
 export type PostApiGovernanceModerationActionsStatus400ErrorCodeEnum =
@@ -9357,7 +9366,7 @@ export type PostApiGovernanceModerationActionsStatus400 = {
 	 */
 	error: {
 		/**
-		 * @default 'ModerationReversalInvalid'
+		 * @default 'ModerationReversedActionInvalid'
 		 * @type string
 		 */
 		code: PostApiGovernanceModerationActionsStatus400ErrorCodeEnum;
@@ -9448,6 +9457,44 @@ export type PostApiGovernanceModerationActionsStatus404 = {
 	requestId: string;
 };
 
+export const PostApiGovernanceModerationActionsStatus409ErrorCodeEnum = {
+	ModerationTransitionInvalid: "ModerationTransitionInvalid",
+	ModerationActionNoEffect: "ModerationActionNoEffect",
+	ModerationReversalUnavailable: "ModerationReversalUnavailable",
+	ModerationIdempotencyConflict: "ModerationIdempotencyConflict",
+} as const;
+
+export type PostApiGovernanceModerationActionsStatus409ErrorCodeEnum =
+	(typeof PostApiGovernanceModerationActionsStatus409ErrorCodeEnum)[keyof typeof PostApiGovernanceModerationActionsStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceModerationActionsStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ModerationTransitionInvalid'
+		 * @type string
+		 */
+		code: PostApiGovernanceModerationActionsStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 /**
  * @type object
  */
@@ -9458,34 +9505,23 @@ export type PostApiGovernanceModerationActionsStatus422 = ValidationError;
  */
 export type PostApiGovernanceModerationActionsStatus500 = InternalError;
 
-export const PostApiGovernanceModerationActionsRequestKindEnum = {
-	approve: "approve",
-	remove: "remove",
-	restore: "restore",
-	lock: "lock",
-	unlock: "unlock",
-	protect: "protect",
-	unprotect: "unprotect",
-	mute_member: "mute_member",
-	remove_member: "remove_member",
-	ban_member: "ban_member",
-	restore_member: "restore_member",
-	escalate: "escalate",
-	reverse: "reverse",
-	note: "note",
+export const PostApiGovernanceModerationActionsRequestReasonCodeEnum = {
+	content_policy: "content_policy",
+	realm_rules: "realm_rules",
+	spam: "spam",
+	harassment: "harassment",
+	unsafe_content: "unsafe_content",
+	off_topic: "off_topic",
+	duplicate: "duplicate",
+	account_security: "account_security",
+	user_request: "user_request",
+	appeal: "appeal",
+	administrative: "administrative",
+	other: "other",
 } as const;
 
-export type PostApiGovernanceModerationActionsRequestKindEnum =
-	(typeof PostApiGovernanceModerationActionsRequestKindEnum)[keyof typeof PostApiGovernanceModerationActionsRequestKindEnum];
-
-export const PostApiGovernanceModerationActionsRequestResultingStatusEnum = {
-	approved: "approved",
-	pending: "pending",
-	removed: "removed",
-} as const;
-
-export type PostApiGovernanceModerationActionsRequestResultingStatusEnum =
-	(typeof PostApiGovernanceModerationActionsRequestResultingStatusEnum)[keyof typeof PostApiGovernanceModerationActionsRequestResultingStatusEnum];
+export type PostApiGovernanceModerationActionsRequestReasonCodeEnum =
+	(typeof PostApiGovernanceModerationActionsRequestReasonCodeEnum)[keyof typeof PostApiGovernanceModerationActionsRequestReasonCodeEnum];
 
 export const PostApiGovernanceModerationActionsRequestProtectionModeEnum = {
 	frozen: "frozen",
@@ -9495,66 +9531,854 @@ export const PostApiGovernanceModerationActionsRequestProtectionModeEnum = {
 export type PostApiGovernanceModerationActionsRequestProtectionModeEnum =
 	(typeof PostApiGovernanceModerationActionsRequestProtectionModeEnum)[keyof typeof PostApiGovernanceModerationActionsRequestProtectionModeEnum];
 
-/**
- * @type object
- */
-export type PostApiGovernanceModerationActionsBody = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	caseId: string;
-	/**
-	 * @type string
-	 */
-	kind: PostApiGovernanceModerationActionsRequestKindEnum;
-	/**
-	 * @type string | undefined
-	 */
-	resultingStatus?: PostApiGovernanceModerationActionsRequestResultingStatusEnum;
-	/**
-	 * @type boolean | undefined
-	 */
-	resultingLocked?: boolean;
-	/**
-	 * @type array | undefined
-	 */
-	scope?: string[];
-	/**
-	 * @default 'frozen'
-	 * @type string | undefined
-	 */
-	protectionMode?: PostApiGovernanceModerationActionsRequestProtectionModeEnum;
-	/**
-	 * @minLength 1
-	 * @maxLength 64
-	 * @type string
-	 */
-	reasonCode: string;
-	/**
-	 * @maxLength 10000
-	 * @type string | undefined
-	 */
-	reason?: string;
-	/**
-	 * @maxLength 2000
-	 * @type string | undefined
-	 */
-	publicMessage?: string;
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string | undefined
-	 */
-	reversesActionId?: string;
-	/**
-	 * @minLength 1
-	 * @maxLength 256
-	 * @type string | undefined
-	 */
-	idempotencyKey?: string;
-};
+export type PostApiGovernanceModerationActionsBody =
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			caseId: string;
+			/**
+			 * @default 'content_policy'
+			 * @type string
+			 */
+			reasonCode: PostApiGovernanceModerationActionsRequestReasonCodeEnum;
+			/**
+			 * @type array | undefined
+			 */
+			notes?: {
+				role: "internal_note" | "public_notice";
+				/**
+				 * @description
+				 * Format: `bcp-47`
+				 * @minLength 2
+				 * @maxLength 35
+				 * @type string
+				 */
+				language: string;
+				/**
+				 * @type object
+				 */
+				content: {
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "image";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								assetId: string;
+								/**
+								 * @type string | undefined
+								 */
+								alt?: string;
+								/**
+								 * @type string | undefined
+								 */
+								caption?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!(?:block|image)$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+				};
+			}[];
+			/**
+			 * @minLength 1
+			 * @maxLength 256
+			 * @type string | undefined
+			 */
+			idempotencyKey?: string;
+			kind:
+				| "approve"
+				| "hide"
+				| "remove"
+				| "restore"
+				| "lock"
+				| "unlock"
+				| "mute_member"
+				| "remove_member"
+				| "ban_member"
+				| "restore_member"
+				| "escalate";
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			caseId: string;
+			/**
+			 * @default 'content_policy'
+			 * @type string
+			 */
+			reasonCode: PostApiGovernanceModerationActionsRequestReasonCodeEnum;
+			/**
+			 * @type array | undefined
+			 */
+			notes?: {
+				role: "internal_note" | "public_notice";
+				/**
+				 * @description
+				 * Format: `bcp-47`
+				 * @minLength 2
+				 * @maxLength 35
+				 * @type string
+				 */
+				language: string;
+				/**
+				 * @type object
+				 */
+				content: {
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "image";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								assetId: string;
+								/**
+								 * @type string | undefined
+								 */
+								alt?: string;
+								/**
+								 * @type string | undefined
+								 */
+								caption?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!(?:block|image)$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+				};
+			}[];
+			/**
+			 * @minLength 1
+			 * @maxLength 256
+			 * @type string | undefined
+			 */
+			idempotencyKey?: string;
+			/**
+			 * @type string
+			 */
+			kind: "protect";
+			/**
+			 * @type array
+			 */
+			scope: string[];
+			/**
+			 * @default 'frozen'
+			 * @type string
+			 */
+			protectionMode: PostApiGovernanceModerationActionsRequestProtectionModeEnum;
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			caseId: string;
+			/**
+			 * @default 'content_policy'
+			 * @type string
+			 */
+			reasonCode: PostApiGovernanceModerationActionsRequestReasonCodeEnum;
+			/**
+			 * @type array | undefined
+			 */
+			notes?: {
+				role: "internal_note" | "public_notice";
+				/**
+				 * @description
+				 * Format: `bcp-47`
+				 * @minLength 2
+				 * @maxLength 35
+				 * @type string
+				 */
+				language: string;
+				/**
+				 * @type object
+				 */
+				content: {
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "image";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								assetId: string;
+								/**
+								 * @type string | undefined
+								 */
+								alt?: string;
+								/**
+								 * @type string | undefined
+								 */
+								caption?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!(?:block|image)$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+				};
+			}[];
+			/**
+			 * @minLength 1
+			 * @maxLength 256
+			 * @type string | undefined
+			 */
+			idempotencyKey?: string;
+			/**
+			 * @type string
+			 */
+			kind: "unprotect";
+			/**
+			 * @type array
+			 */
+			scope: string[];
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			caseId: string;
+			/**
+			 * @default 'content_policy'
+			 * @type string
+			 */
+			reasonCode: PostApiGovernanceModerationActionsRequestReasonCodeEnum;
+			/**
+			 * @type array | undefined
+			 */
+			notes?: {
+				role: "internal_note" | "public_notice";
+				/**
+				 * @description
+				 * Format: `bcp-47`
+				 * @minLength 2
+				 * @maxLength 35
+				 * @type string
+				 */
+				language: string;
+				/**
+				 * @type object
+				 */
+				content: {
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "image";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								assetId: string;
+								/**
+								 * @type string | undefined
+								 */
+								alt?: string;
+								/**
+								 * @type string | undefined
+								 */
+								caption?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!(?:block|image)$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+				};
+			}[];
+			/**
+			 * @minLength 1
+			 * @maxLength 256
+			 * @type string | undefined
+			 */
+			idempotencyKey?: string;
+			/**
+			 * @type string
+			 */
+			kind: "reverse";
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			reversesActionId: string;
+	  }
+	| {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			caseId: string;
+			/**
+			 * @default 'content_policy'
+			 * @type string
+			 */
+			reasonCode: PostApiGovernanceModerationActionsRequestReasonCodeEnum;
+			/**
+			 * @type array
+			 */
+			notes: {
+				role: "internal_note" | "public_notice";
+				/**
+				 * @description
+				 * Format: `bcp-47`
+				 * @minLength 2
+				 * @maxLength 35
+				 * @type string
+				 */
+				language: string;
+				/**
+				 * @type object
+				 */
+				content: {
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "image";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								assetId: string;
+								/**
+								 * @type string | undefined
+								 */
+								alt?: string;
+								/**
+								 * @type string | undefined
+								 */
+								caption?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!(?:block|image)$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+				};
+			}[];
+			/**
+			 * @minLength 1
+			 * @maxLength 256
+			 * @type string | undefined
+			 */
+			idempotencyKey?: string;
+			/**
+			 * @type string
+			 */
+			kind: "note";
+	  };
 
 /**
  * @type object
@@ -9574,6 +10398,7 @@ export type PostApiGovernanceModerationActionsResponses = {
 	"400": PostApiGovernanceModerationActionsStatus400;
 	"403": PostApiGovernanceModerationActionsStatus403;
 	"404": PostApiGovernanceModerationActionsStatus404;
+	"409": PostApiGovernanceModerationActionsStatus409;
 	"422": PostApiGovernanceModerationActionsStatus422;
 	"500": PostApiGovernanceModerationActionsStatus500;
 };
@@ -9586,6 +10411,7 @@ export type PostApiGovernanceModerationActionsResponse =
 	| PostApiGovernanceModerationActionsStatus400
 	| PostApiGovernanceModerationActionsStatus403
 	| PostApiGovernanceModerationActionsStatus404
+	| PostApiGovernanceModerationActionsStatus409
 	| PostApiGovernanceModerationActionsStatus422
 	| PostApiGovernanceModerationActionsStatus500;
 

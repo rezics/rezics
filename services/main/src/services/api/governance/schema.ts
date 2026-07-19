@@ -1,10 +1,11 @@
-import { t } from "elysia";
+import { PortableTextDocument } from "@rezics/block";
+import { type Static, t } from "elysia";
 
 import {
 	CapabilityAuthorityValues,
 	EnforcementKindValues,
+	GovernanceReasonCodeValues,
 	ModerationCaseStateValues,
-	ModerationStatusValues,
 	PlatformCapabilityValues,
 	UnitAccessRealmRelationValues,
 	UnitAccessRoleValues,
@@ -12,28 +13,28 @@ import {
 	UnitPermissionValues,
 	UnitProtectionModeValues,
 } from "../../database/schema/contract-values";
-import { DateTime, Uuid } from "../schema";
+import { DateTime, LanguageTag, Uuid } from "../schema";
 
 const NullableUuid = t.Nullable(Uuid);
 
 const ModerationCaseState = t.Union(ModerationCaseStateValues.map((value) => t.Literal(value)));
 
-const ModerationActionKind = t.Union([
-	t.Literal("approve"),
-	t.Literal("remove"),
-	t.Literal("restore"),
-	t.Literal("lock"),
-	t.Literal("unlock"),
-	t.Literal("protect"),
-	t.Literal("unprotect"),
-	t.Literal("mute_member"),
-	t.Literal("remove_member"),
-	t.Literal("ban_member"),
-	t.Literal("restore_member"),
-	t.Literal("escalate"),
-	t.Literal("reverse"),
-	t.Literal("note"),
-]);
+const GovernanceReasonCode = t.UnionEnum(GovernanceReasonCodeValues);
+const GovernanceActionNote = t.Object(
+	{
+		role: t.Union([t.Literal("internal_note"), t.Literal("public_notice")]),
+		language: LanguageTag,
+		content: PortableTextDocument,
+	},
+	{ additionalProperties: false },
+);
+const GovernanceActionNotes = t.Array(GovernanceActionNote, { maxItems: 2 });
+const ModerationActionCommon = {
+	caseId: Uuid,
+	reasonCode: GovernanceReasonCode,
+	notes: t.Optional(GovernanceActionNotes),
+	idempotencyKey: t.Optional(t.String({ minLength: 1, maxLength: 256 })),
+};
 
 export const ListModerationCasesQuery = t.Object({
 	realmId: t.Optional(Uuid),
@@ -52,28 +53,66 @@ export const UpdateModerationCaseBody = t.Object(
 	{ minProperties: 1, additionalProperties: false },
 );
 
-export const CreateModerationActionBody = t.Object(
-	{
-		caseId: Uuid,
-		kind: ModerationActionKind,
-		resultingStatus: t.Optional(
-			t.Union(ModerationStatusValues.map((value) => t.Literal(value))),
-		),
-		resultingLocked: t.Optional(t.Boolean()),
-		scope: t.Optional(
-			t.Array(t.String({ minLength: 1, maxLength: 64, pattern: "^[a-z0-9][a-z0-9-]*$" }), {
-				maxItems: 8,
-			}),
-		),
-		protectionMode: t.Optional(t.UnionEnum(UnitProtectionModeValues)),
-		reasonCode: t.String({ minLength: 1, maxLength: 64 }),
-		reason: t.Optional(t.String({ maxLength: 10_000 })),
-		publicMessage: t.Optional(t.String({ maxLength: 2_000 })),
-		reversesActionId: t.Optional(Uuid),
-		idempotencyKey: t.Optional(t.String({ minLength: 1, maxLength: 256 })),
-	},
-	{ additionalProperties: false },
+const UnitScope = t.Array(
+	t.String({ minLength: 1, maxLength: 64, pattern: "^[a-z0-9][a-z0-9-]*$" }),
+	{ maxItems: 8 },
 );
+
+export const CreateModerationActionBody = t.Union([
+	t.Object(
+		{
+			...ModerationActionCommon,
+			kind: t.Union([
+				t.Literal("approve"),
+				t.Literal("hide"),
+				t.Literal("remove"),
+				t.Literal("restore"),
+				t.Literal("lock"),
+				t.Literal("unlock"),
+				t.Literal("mute_member"),
+				t.Literal("remove_member"),
+				t.Literal("ban_member"),
+				t.Literal("restore_member"),
+				t.Literal("escalate"),
+			]),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			...ModerationActionCommon,
+			kind: t.Literal("protect"),
+			scope: UnitScope,
+			protectionMode: t.UnionEnum(UnitProtectionModeValues),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			...ModerationActionCommon,
+			kind: t.Literal("unprotect"),
+			scope: UnitScope,
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			...ModerationActionCommon,
+			kind: t.Literal("reverse"),
+			reversesActionId: Uuid,
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			...ModerationActionCommon,
+			kind: t.Literal("note"),
+			notes: t.Array(GovernanceActionNote, { minItems: 1, maxItems: 2 }),
+		},
+		{ additionalProperties: false },
+	),
+]);
+export type CreateModerationActionBody = Static<typeof CreateModerationActionBody>;
 
 export const FeedbackParams = t.Object({ feedbackId: Uuid });
 export const ResolveFeedbackBody = t.Object(
@@ -119,10 +158,6 @@ export const GrantParams = t.Object({ grantId: Uuid });
 
 export const UnitGovernanceParams = t.Object({ unitId: Uuid });
 export const UnitAccessBindingParams = t.Object({ unitId: Uuid, bindingId: Uuid });
-const UnitScope = t.Array(
-	t.String({ minLength: 1, maxLength: 64, pattern: "^[a-z0-9][a-z0-9-]*$" }),
-	{ maxItems: 8 },
-);
 export const UnitEffectiveAccessQuery = t.Object(
 	{ scope: t.Optional(UnitScope) },
 	{ additionalProperties: false },
@@ -197,6 +232,9 @@ export const ModerationActionResponse = t.Object({
 	caseId: Uuid,
 	actorProfileId: Uuid,
 	kind: t.String(),
+	previousState: t.Nullable(t.String()),
+	resultingState: t.Nullable(t.String()),
+	previousLocked: t.Nullable(t.Boolean()),
 	resultingStatus: t.Nullable(t.String()),
 	resultingLocked: t.Nullable(t.Boolean()),
 	reasonCode: t.String(),

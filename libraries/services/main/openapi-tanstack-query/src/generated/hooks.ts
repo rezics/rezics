@@ -236,6 +236,7 @@ import type {
 	PostApiGovernanceModerationActionsStatus400,
 	PostApiGovernanceModerationActionsStatus403,
 	PostApiGovernanceModerationActionsStatus404,
+	PostApiGovernanceModerationActionsStatus409,
 	PostApiGovernanceModerationActionsStatus422,
 	PostApiGovernanceModerationActionsStatus500,
 	PatchApiGovernanceFeedbackByFeedbackIdResolveOptions,
@@ -5216,6 +5217,7 @@ export function postApiGovernanceModerationActionsMutationOptions<TContext = unk
 			| PostApiGovernanceModerationActionsStatus400
 			| PostApiGovernanceModerationActionsStatus403
 			| PostApiGovernanceModerationActionsStatus404
+			| PostApiGovernanceModerationActionsStatus409
 			| PostApiGovernanceModerationActionsStatus422
 			| PostApiGovernanceModerationActionsStatus500
 		>,
@@ -5246,6 +5248,7 @@ export function usePostApiGovernanceModerationActions<TContext>(
 				| PostApiGovernanceModerationActionsStatus400
 				| PostApiGovernanceModerationActionsStatus403
 				| PostApiGovernanceModerationActionsStatus404
+				| PostApiGovernanceModerationActionsStatus409
 				| PostApiGovernanceModerationActionsStatus422
 				| PostApiGovernanceModerationActionsStatus500
 			>,
@@ -5268,6 +5271,7 @@ export function usePostApiGovernanceModerationActions<TContext>(
 			| PostApiGovernanceModerationActionsStatus400
 			| PostApiGovernanceModerationActionsStatus403
 			| PostApiGovernanceModerationActionsStatus404
+			| PostApiGovernanceModerationActionsStatus409
 			| PostApiGovernanceModerationActionsStatus422
 			| PostApiGovernanceModerationActionsStatus500
 		>,
@@ -5281,6 +5285,7 @@ export function usePostApiGovernanceModerationActions<TContext>(
 			| PostApiGovernanceModerationActionsStatus400
 			| PostApiGovernanceModerationActionsStatus403
 			| PostApiGovernanceModerationActionsStatus404
+			| PostApiGovernanceModerationActionsStatus409
 			| PostApiGovernanceModerationActionsStatus422
 			| PostApiGovernanceModerationActionsStatus500
 		>,
@@ -5299,6 +5304,7 @@ export function usePostApiGovernanceModerationActions<TContext>(
 			| PostApiGovernanceModerationActionsStatus400
 			| PostApiGovernanceModerationActionsStatus403
 			| PostApiGovernanceModerationActionsStatus404
+			| PostApiGovernanceModerationActionsStatus409
 			| PostApiGovernanceModerationActionsStatus422
 			| PostApiGovernanceModerationActionsStatus500
 		>,

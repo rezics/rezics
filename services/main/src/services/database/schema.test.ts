@@ -12,6 +12,7 @@ import {
 	governancePostBinding,
 	GovernanceNoteRoleValues,
 	GovernanceReasonCodeValues,
+	moderationAction,
 	ModerationActionKindValues,
 	PostKindValues,
 	realmUnitStatus,
@@ -114,6 +115,19 @@ describe("database schema contracts", () => {
 		);
 		expect(event.uniqueConstraints.map((constraint) => constraint.name)).toContain(
 			"realm_unit_status_event_action_key",
+		);
+
+		const action = getTableConfig(moderationAction);
+		expect(action.indexes.map((index) => index.config.name)).toContain(
+			"moderation_action_actor_case_idempotency_key",
+		);
+		expect(action.checks.map((constraint) => constraint.name)).toEqual(
+			expect.arrayContaining([
+				"moderation_action_state_outcome_check",
+				"moderation_action_lock_outcome_check",
+				"moderation_action_single_outcome_check",
+				"moderation_action_request_fingerprint_check",
+			]),
 		);
 	});
 

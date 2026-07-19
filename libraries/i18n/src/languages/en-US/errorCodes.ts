@@ -56,6 +56,13 @@ export default {
 	ModerationCaseNotFound: "This moderation case could not be found.",
 	ModerationReversalInvalid: "The reversal request is invalid.",
 	ModerationReversedActionInvalid: "The reversed action does not belong to this case.",
+	ModerationActionIncompatible: "This action is not available for the moderation target.",
+	ModerationTransitionInvalid: "The target cannot make that moderation state transition.",
+	ModerationActionNoEffect: "The moderation action would not change the target.",
+	ModerationReversalUnavailable: "This action can no longer be reversed safely.",
+	ModerationIdempotencyConflict:
+		"This retry key was already used for a different moderation request.",
+	ModerationNoteRoleDuplicate: "Add at most one internal note and one public notice.",
 	FeedbackNotFound: "This feedback could not be found.",
 	EnforcementExpiryInvalid: "The enforcement expiry must be in the future.",
 	EnforcementNotFound: "This enforcement could not be found.",
