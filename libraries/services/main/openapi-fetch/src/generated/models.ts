@@ -37643,7 +37643,6 @@ export type GetApiRealmsByRealmIdUnitsStatus =
  */
 export type GetApiRealmsByRealmIdUnitsQuery = {
 	/**
-	 * @default 'pending'
 	 * @type string | undefined
 	 */
 	status?: GetApiRealmsByRealmIdUnitsStatus;
@@ -37689,7 +37688,6 @@ export type GetApiRealmsByRealmIdUnitsStatus200 = {
 		unitKind: string;
 		title: (string | null) | null;
 		/**
-		 * @default 'pending'
 		 * @type string
 		 */
 		status: GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum;

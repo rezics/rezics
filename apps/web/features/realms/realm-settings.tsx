@@ -5,13 +5,11 @@ import {
 	getApiRealmsByRealmIdPinsQueryKey,
 	getApiRealmsByRealmIdRulesQueryKey,
 	useDeleteApiRealmsByRealmIdPinsByUnitId,
-	useGetApiPosts,
 	useGetApiRealmsByRealmId,
 	useGetApiRealmsByRealmIdMembers,
 	useGetApiRealmsByRealmIdPins,
 	useGetApiRealmsByRealmIdRules,
 	usePatchApiRealmsByRealmId,
-	usePatchApiRealmsByRealmIdUnitsByUnitId,
 	usePatchApiRealmsByRealmIdMembersByProfileId,
 	usePutApiRealmsByRealmIdPinsByUnitId,
 	usePutApiRealmsByRealmIdRules,
@@ -37,26 +35,16 @@ import { Skeleton } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
-import { invalidatePostQueries } from "@/features/posts/query";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
 import { canManageRealm } from "./realm-permissions";
+import { RealmModeration } from "./realm-moderation";
 import { invalidateRealmDetails } from "./query";
 
 const MemberRoles = ["owner", "admin", "moderator", "member"] as const;
 const MemberStates = ["active", "pending", "muted", "removed", "banned"] as const;
-const RealmModerationCommands = ["approve", "hide", "remove", "restore"] as const;
-const RealmModerationStateByCommand = {
-	approve: "visible",
-	hide: "hidden",
-	remove: "removed",
-	restore: "visible",
-} as const satisfies Record<
-	(typeof RealmModerationCommands)[number],
-	"visible" | "hidden" | "removed"
->;
 
 type PickedEntity = { id: string; label: string };
 type RuleDraft = {
@@ -92,10 +80,6 @@ function RealmSettingsContent({ id }: { id: string }) {
 	);
 	const pins = useGetApiRealmsByRealmIdPins(
 		{ path: { realmId: id } },
-		{ query: { enabled: mayManage } },
-	);
-	const posts = useGetApiPosts(
-		{ query: { realmId: id, limit: 50 } },
 		{ query: { enabled: mayManage } },
 	);
 
@@ -138,12 +122,7 @@ function RealmSettingsContent({ id }: { id: string }) {
 				pending={pins.isPending}
 				error={pins.error}
 			/>
-			<RealmModeration
-				realmId={realm.data.id}
-				posts={posts.data?.items}
-				pending={posts.isPending}
-				error={posts.error}
-			/>
+			<RealmModeration realmId={realm.data.id} />
 		</main>
 	);
 }
@@ -728,99 +707,6 @@ function RealmPins({
 				</CardContent>
 			</Card>
 		</section>
-	);
-}
-
-function RealmModeration({
-	realmId,
-	posts,
-	pending,
-	error,
-}: {
-	realmId: string;
-	posts: readonly { id: string; title: string | null }[] | undefined;
-	pending: boolean;
-	error: Parameters<typeof RequestFailure>[0]["error"];
-}) {
-	const { t } = useTranslation({ suspense: true });
-	return (
-		<section className="grid gap-3">
-			<h2 className="font-heading text-xl font-bold">{t.realms.moderation}</h2>
-			{pending ? (
-				<Skeleton className="h-48 rounded-xl" />
-			) : error ? (
-				<RequestFailure error={error} />
-			) : posts?.length ? (
-				<div className="grid gap-3">
-					{posts.map((post) => (
-						<RealmModerationRow key={post.id} realmId={realmId} post={post} />
-					))}
-				</div>
-			) : (
-				<p className="text-muted-foreground text-sm">{t.state.empty}</p>
-			)}
-		</section>
-	);
-}
-
-function RealmModerationRow({
-	realmId,
-	post,
-}: {
-	realmId: string;
-	post: { id: string; title: string | null };
-}) {
-	const { t } = useTranslation({ suspense: true });
-	const queryClient = useQueryClient();
-	const moderate = usePatchApiRealmsByRealmIdUnitsByUnitId();
-	function update(command: (typeof RealmModerationCommands)[number] | "lock" | "unlock") {
-		moderate.mutate(
-			{
-				path: { realmId, unitId: post.id },
-				body: { command, reasonCode: "administrative" },
-			},
-			{
-				onSuccess: () => invalidatePostQueries(queryClient, post.id),
-			},
-		);
-	}
-	return (
-		<Card>
-			<CardContent className="grid gap-3 p-5 sm:grid-cols-[1fr_auto] sm:items-center">
-				<p className="font-medium">{post.title ?? t.posts.untitled}</p>
-				<div className="flex flex-wrap gap-2">
-					{RealmModerationCommands.map((command) => (
-						<Button
-							key={command}
-							type="button"
-							size="xs"
-							variant="outline"
-							isLoading={moderate.isPending}
-							onClick={() => update(command)}
-						>
-							{t.realms.moderationStates[RealmModerationStateByCommand[command]]}
-						</Button>
-					))}
-					<Button
-						type="button"
-						size="xs"
-						variant="outline"
-						onClick={() => update("lock")}
-					>
-						{t.realms.lock}
-					</Button>
-					<Button
-						type="button"
-						size="xs"
-						variant="outline"
-						onClick={() => update("unlock")}
-					>
-						{t.realms.unlock}
-					</Button>
-				</div>
-				<RequestFailure error={moderate.error} />
-			</CardContent>
-		</Card>
 	);
 }
 

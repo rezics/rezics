@@ -2,9 +2,14 @@ import { createPortableTextDocument } from "@rezics/block";
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { ModerateRealmUnitBody } from "./schema";
+import { ListRealmUnitsQuery, ModerateRealmUnitBody } from "./schema";
 
 describe("Realm moderation API contract", () => {
+	it("treats an omitted status filter as all Realm Unit states", () => {
+		expect(ListRealmUnitsQuery.properties.status.default).toBeUndefined();
+		expect(Check(ListRealmUnitsQuery, {})).toBe(true);
+	});
+
 	it("accepts commands and rejects client-authored resulting state", () => {
 		expect(
 			Check(ModerateRealmUnitBody, {

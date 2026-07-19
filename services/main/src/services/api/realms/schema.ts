@@ -25,7 +25,7 @@ const RealmMemberRole = t.Union(RealmMemberRoleValues.map((value) => t.Literal(v
 
 const RealmMemberState = t.Union(RealmMemberStateValues.map((value) => t.Literal(value)));
 
-const RealmUnitStatus = t.UnionEnum(RealmUnitStatusValues);
+const RealmUnitStatus = t.UnionEnum(RealmUnitStatusValues, { default: undefined });
 const GovernanceReasonCode = t.UnionEnum(GovernanceReasonCodeValues);
 
 export const ListRealmsQuery = t.Object({

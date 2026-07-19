@@ -50182,7 +50182,6 @@
 						"in": "query",
 						"required": false,
 						"schema": {
-							"default": "pending",
 							"type": "string",
 							"enum": ["pending", "visible", "hidden", "removed"]
 						}
@@ -50244,7 +50243,6 @@
 														]
 													},
 													"status": {
-														"default": "pending",
 														"type": "string",
 														"enum": [
 															"pending",
@@ -50427,7 +50425,6 @@
 														"nullable": true,
 														"anyOf": [
 															{
-																"default": "pending",
 																"type": "string",
 																"enum": [
 																	"pending",
@@ -50443,7 +50440,6 @@
 														"nullable": true,
 														"anyOf": [
 															{
-																"default": "pending",
 																"type": "string",
 																"enum": [
 																	"pending",
