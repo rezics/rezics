@@ -40,10 +40,12 @@ import {
 	unitLocalization,
 	unitSlugAddress,
 	unitStatusEvent,
+	unitVariant,
 	UnitStatusActorKindValues,
 	PlatformCapabilityValues,
 	UnitKindValues,
 	UnitPermissionValues,
+	VariantCapableUnitKindValues,
 } from "./schema";
 
 const dialect = new PgDialect();
@@ -281,6 +283,34 @@ describe("database schema contracts", () => {
 				"unit_slug_address_target_unit_id_unit_id_fk",
 			]),
 		);
+	});
+
+	it("enforces same-kind star-shaped Main-Variant edges", () => {
+		const coreUnit = getTableConfig(unit);
+		const variant = getTableConfig(unitVariant);
+		expect(coreUnit.uniqueConstraints.map((constraint) => constraint.name)).toContain(
+			"unit_id_kind_key",
+		);
+		expect(variant.columns.map((column) => column.name)).toEqual([
+			"variant_unit_id",
+			"main_unit_id",
+			"unit_kind",
+			"created_at",
+			"updated_at",
+		]);
+		expect(variant.foreignKeys.map((key) => key.getName())).toEqual(
+			expect.arrayContaining([
+				"unit_variant_variant_kind_fkey",
+				"unit_variant_main_kind_fkey",
+			]),
+		);
+		expect(variant.checks.map((constraint) => constraint.name)).toEqual(
+			expect.arrayContaining(["unit_variant_kind_check", "unit_variant_not_self_check"]),
+		);
+		expect(variant.indexes.map((index) => index.config.name)).toContain(
+			"unit_variant_main_created_at_idx",
+		);
+		expect(VariantCapableUnitKindValues).toEqual(["book", "software", "media"]);
 	});
 
 	it("keeps structural, Redirect, and staff capability meanings explicit", () => {

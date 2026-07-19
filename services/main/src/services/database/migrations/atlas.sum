@@ -1,4 +1,4 @@
-h1:n4Exg7W/4Tv/mefJS71UAllezUOFxXQGMh2Ohe0CqD4=
+h1:H+sRWq2jqXC1mYS2eQRYCFbg4jPKOsDMp7+/my3yEZ0=
 20260718070359_enable_pgroonga.sql h1:tT2i+ShJU7VwHt0LVUKiIN8ltJzm9z3dOONNMaMGP3g=
 20260718070400_current_baseline.sql h1:8k2fN5VnnH6wRhaCsATcwJYQ2ZaMRQ2vfLB4JLNSgIg=
 20260718070401_history_invariants.sql h1:FueH3mEgeYZvUKGYVLOmnF8MOp0cFLWl2U1i0VmcqSg=
@@ -21,3 +21,4 @@ h1:n4Exg7W/4Tv/mefJS71UAllezUOFxXQGMh2Ohe0CqD4=
 20260719211501_unit_publication_provenance.sql h1:N1BJsfuaLcT8vWbcIq1X4lcDd9R3pA3vGf/rQEpPIMU=
 20260719231431_entity_association_policy_workflows.sql h1:D/bcurRSUC1OqjszsvkuVh2ITEQvUOQpRRg2sFrrbYU=
 20260719231432_unit_access_invitation_and_entity_association_proposal.sql h1:Yzrsg/HmVAYoxSbF/8CHlnFKTa8sYCQxb1EoRT9Ft8c=
+20260719231433_main_variants_integrity.sql h1:54c7vblVYJmtjj3wWq9MLYSb0iqQ7i9UkL22HuGiVfg=

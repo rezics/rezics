@@ -12,6 +12,7 @@ import {
 } from "../database/schema";
 import { primaryUnitTitle } from "./localization";
 import { UnitChanged, UnitNotFound, UnitPermissionForbidden } from "./errors";
+import { ensureUnitVariantLifecycle } from "./variant-policy";
 
 export type UnitStatus = (typeof UnitStatusValues)[number];
 export type UnitStatusActorKind = (typeof UnitStatusActorKindValues)[number];
@@ -205,6 +206,7 @@ export async function transitionUnitStatus(
 			...(input.toStatus === "published" ? { publishedAt: occurredAt } : {}),
 		})
 		.where(eq(unit.id, input.unitId));
+	await ensureUnitVariantLifecycle(tx, input.unitId);
 	const [event] = await tx
 		.insert(unitStatusEvent)
 		.values({

@@ -1,0 +1,43 @@
+import { describe, expect, it } from "vitest";
+
+import { isDiscoverableVariantUnit } from "./variant-policy";
+import { isVariantCapableUnitKind, toUnitVariantConstraintError } from "./variants";
+
+describe("Main-Variant rules", () => {
+	it.each(["book", "software", "media"])("accepts the %s Unit kind", (kind) => {
+		expect(isVariantCapableUnitKind(kind)).toBe(true);
+	});
+
+	it.each(["series", "profile", "post"])("rejects the %s Unit kind", (kind) => {
+		expect(isVariantCapableUnitKind(kind)).toBe(false);
+	});
+
+	it("defines public discovery availability as one complete lifecycle state", () => {
+		const discoverable = {
+			status: "published",
+			visibility: "public",
+			moderationStatus: "approved",
+			deletedAt: null,
+		};
+		expect(isDiscoverableVariantUnit(discoverable)).toBe(true);
+		for (const state of [
+			{ ...discoverable, status: "draft" },
+			{ ...discoverable, visibility: "unlisted" },
+			{ ...discoverable, moderationStatus: "pending" },
+			{ ...discoverable, deletedAt: new Date() },
+		])
+			expect(isDiscoverableVariantUnit(state)).toBe(false);
+	});
+
+	it("maps database race failures back to stable semantic errors", () => {
+		expect(
+			toUnitVariantConstraintError({
+				cause: { constraint: "unit_variant_target_is_variant" },
+			}),
+		).toMatchObject({ _tag: "UnitVariantTargetIsVariant", status: 409 });
+		expect(
+			toUnitVariantConstraintError({ constraint: "unit_variant_main_kind_fkey" }),
+		).toMatchObject({ _tag: "UnitVariantKindMismatch", status: 409 });
+		expect(toUnitVariantConstraintError(new Error("unrelated"))).toBeUndefined();
+	});
+});

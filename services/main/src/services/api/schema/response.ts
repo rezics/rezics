@@ -12,6 +12,7 @@ import {
 	RecommendationReasonSchema,
 	RecommendationTrackingSchema,
 } from "../recommendations/schema";
+import { CollectionConfigV1 } from "../users/schema";
 export { toApiErrorResponse } from "./error-response";
 
 const NullableText = t.Nullable(t.String());
@@ -85,6 +86,42 @@ export const UnitListResponse = t.Object({
 	),
 	nextCursor: NullableText,
 });
+
+export const UnitVariantSummaryResponse = t.Object(
+	{
+		id: Uuid,
+		type: t.UnionEnum(["book", "software", "media"]),
+		title: NullableText,
+		cover: ImageAssetResponse,
+	},
+	{ additionalProperties: false },
+);
+
+export const UnitVariantContextResponse = t.Union([
+	t.Object({ role: t.Literal("standalone") }, { additionalProperties: false }),
+	t.Object(
+		{
+			role: t.Literal("main"),
+			variants: t.Array(UnitVariantSummaryResponse),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			role: t.Literal("variant"),
+			relationUpdatedAt: DateTime,
+			main: t.Union([
+				t.Object(
+					{ state: t.Literal("available"), unit: UnitVariantSummaryResponse },
+					{ additionalProperties: false },
+				),
+				t.Object({ state: t.Literal("unavailable") }, { additionalProperties: false }),
+			]),
+		},
+		{ additionalProperties: false },
+	),
+]);
+
 export const UnitDetailResponse = t.Object({
 	id: Uuid,
 	type: t.String(),
@@ -157,6 +194,7 @@ export const UnitDetailResponse = t.Object({
 			canonicalUnitId: t.Nullable(Uuid),
 		}),
 	),
+	variantContext: UnitVariantContextResponse,
 	capabilities: t.Object({
 		canEdit: t.Boolean(),
 		canManageAccess: t.Boolean(),
@@ -170,6 +208,16 @@ const SearchHit = t.Object({
 	type: t.String(),
 	titles: t.Array(t.String()),
 	summaries: t.Array(t.String()),
+	variantRole: t.Optional(t.UnionEnum(["standalone", "main", "variant"])),
+	variantMain: t.Optional(
+		t.Union([
+			t.Object({ state: t.Literal("unavailable") }),
+			t.Object({
+				state: t.Literal("available"),
+				unit: UnitVariantSummaryResponse,
+			}),
+		]),
+	),
 	name: t.Optional(NullableText),
 	summary: t.Optional(NullableText),
 });
@@ -343,7 +391,7 @@ export const PreferencesResponse = t.Object({
 	profileId: Uuid,
 	defaultLicense: NullableText,
 	defaultRealmManageMode: t.Boolean(),
-	collectionConfig: t.Nullable(t.Record(t.String(), t.Unknown())),
+	collectionConfig: t.Nullable(CollectionConfigV1),
 	personalizedFeed: t.Boolean(),
 	contentRatings: t.Array(t.String()),
 	preferredLanguages: t.Array(t.String()),

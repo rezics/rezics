@@ -426,7 +426,11 @@ async function seedProfiles(
 			contentRatings:
 				index % 7 === 0 ? ["general" as const, "r15" as const] : ["general" as const],
 			preferredLanguages: [...data.languages(index)],
-			collectionConfig: { view: index % 2 === 0 ? "grid" : "list" },
+			collectionConfig: {
+				version: 1,
+				view: index % 2 === 0 ? "grid" : "list",
+				addMainWithVariantByDefault: index % 3 !== 0,
+			},
 			createdAt: value.createdAt,
 			updatedAt: value.createdAt,
 		})),
@@ -791,10 +795,20 @@ async function seedCatalog(
 		(batch) => tx.insert(unitTagVote).values(batch),
 	);
 	await writeBatches(
-		Array.from({ length: SeedPlan.variants }, (_, index) => ({
-			unitId: itemAt(works, works.length - 1 - index).id,
-			canonicalUnitId: itemAt(works, index).id,
-		})),
+		Array.from({ length: SeedPlan.variants }, (_, index) => {
+			const groups = [
+				{ kind: "book" as const, units: books },
+				{ kind: "software" as const, units: softwareUnits },
+				{ kind: "media" as const, units: mediaItems },
+			];
+			const group = itemAt(groups, index);
+			const ordinal = Math.floor(index / groups.length);
+			return {
+				variantUnitId: itemAt(group.units, group.units.length - 1 - ordinal).id,
+				mainUnitId: itemAt(group.units, ordinal).id,
+				unitKind: group.kind,
+			};
+		}),
 		(batch) => tx.insert(unitVariant).values(batch),
 	);
 	await writeBatches(

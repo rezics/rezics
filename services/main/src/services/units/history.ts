@@ -46,6 +46,7 @@ import {
 	subjectAssociation,
 	unit,
 	UnitKindValues,
+	VariantCapableUnitKindValues,
 	unitAlias,
 	creditAttribution,
 	unitLink,
@@ -64,6 +65,7 @@ import { isFractionalPosition } from "../ordering/position";
 import { UnitRevisionConflict } from "./errors";
 import { insertUnit } from "./create";
 import { finalizeInitialUnitStatusRevision } from "./status";
+import { ensureUnitVariantLifecycle } from "./variant-policy";
 
 export type UnitRevisionEvent = "create" | "update" | "delete" | "restore";
 
@@ -206,7 +208,9 @@ const unitLinkRowSchema = schemaFactory.createSelectSchema(unitLink, {
 const unitTagRowSchema = schemaFactory.createSelectSchema(unitTag, {
 	position: FractionalPositionSchema.nullable(),
 });
-const unitVariantRowSchema = schemaFactory.createSelectSchema(unitVariant);
+const unitVariantRowSchema = schemaFactory.createSelectSchema(unitVariant, {
+	unitKind: z.enum(VariantCapableUnitKindValues),
+});
 const seriesReleaseRowSchema = schemaFactory.createSelectSchema(seriesRelease, {
 	position: FractionalPositionSchema,
 });
@@ -387,8 +391,8 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 	const variants = await tx
 		.select()
 		.from(unitVariant)
-		.where(eq(unitVariant.unitId, unitId))
-		.orderBy(unitVariant.unitId);
+		.where(eq(unitVariant.variantUnitId, unitId))
+		.orderBy(unitVariant.variantUnitId);
 
 	const empty: SnapshotRow[] = [];
 	const owned: UnitSnapshot["owned"] = {
@@ -687,7 +691,7 @@ export async function restoreUnitSnapshot(
 	await tx.delete(subjectAssociation).where(eq(subjectAssociation.unitId, unitId));
 	await tx.delete(unitLink).where(eq(unitLink.unitId, unitId));
 	await tx.delete(unitTag).where(eq(unitTag.unitId, unitId));
-	await tx.delete(unitVariant).where(eq(unitVariant.unitId, unitId));
+	await tx.delete(unitVariant).where(eq(unitVariant.variantUnitId, unitId));
 	if (snapshot.owned.credits.length) await tx.insert(creditAttribution).values(credits);
 	if (subjectAssociations.length) await tx.insert(subjectAssociation).values(subjectAssociations);
 	if (snapshot.owned.links.length)
@@ -759,6 +763,7 @@ export async function restoreUnitSnapshot(
 					snapshot.owned.zoneNavigations.map((row) => zoneNavigationRowSchema.parse(row)),
 				);
 	}
+	await ensureUnitVariantLifecycle(tx, unitId);
 }
 
 export const UnitRevisionChangeTags = ["mw-undo", "mw-manual-revert"] as const;

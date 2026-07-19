@@ -1,4 +1,4 @@
-import { and, eq, exists, inArray, isNull, not, or, sql } from "drizzle-orm";
+import { and, eq, exists, inArray, isNull, not, or, sql, type SQLWrapper } from "drizzle-orm";
 
 import { database } from "../../database";
 import {
@@ -8,6 +8,14 @@ import {
 	unitAccessBinding,
 	unitAccessRestriction,
 } from "../../database/schema";
+
+type UnitReadTarget = {
+	readonly id: SQLWrapper;
+	readonly status: SQLWrapper;
+	readonly visibility: SQLWrapper;
+	readonly moderationStatus: SQLWrapper;
+	readonly deletedAt: SQLWrapper;
+};
 
 function activeBinding() {
 	return and(
@@ -19,14 +27,15 @@ function activeBinding() {
 export function getUnitReadCondition(
 	profileId?: string,
 	options: { readonly discoverableOnly?: boolean } = {},
+	target: UnitReadTarget = unit,
 ) {
 	const visible = and(
-		eq(unit.status, "published"),
+		eq(target.status, "published"),
 		options.discoverableOnly
-			? eq(unit.visibility, "public")
-			: inArray(unit.visibility, ["public", "unlisted"]),
-		eq(unit.moderationStatus, "approved"),
-		isNull(unit.deletedAt),
+			? eq(target.visibility, "public")
+			: inArray(target.visibility, ["public", "unlisted"]),
+		eq(target.moderationStatus, "approved"),
+		isNull(target.deletedAt),
 	);
 	if (!profileId) return visible;
 
@@ -36,7 +45,7 @@ export function getUnitReadCondition(
 			.from(unitAccessBinding)
 			.where(
 				and(
-					eq(unitAccessBinding.unitId, unit.id),
+					eq(unitAccessBinding.unitId, target.id),
 					eq(unitAccessBinding.subjectKind, "profile"),
 					eq(unitAccessBinding.profileId, profileId),
 					eq(unitAccessBinding.role, "owner"),
@@ -51,7 +60,7 @@ export function getUnitReadCondition(
 				.from(unitAccessRestriction)
 				.where(
 					and(
-						eq(unitAccessRestriction.unitId, unit.id),
+						eq(unitAccessRestriction.unitId, target.id),
 						eq(unitAccessRestriction.permission, "unit.read"),
 						sql`cardinality(${unitAccessRestriction.scope}) = 0`,
 						isNull(unitAccessRestriction.revokedAt),
@@ -111,7 +120,7 @@ export function getUnitReadCondition(
 			.from(unitAccessBinding)
 			.where(
 				and(
-					eq(unitAccessBinding.unitId, unit.id),
+					eq(unitAccessBinding.unitId, target.id),
 					activeBinding(),
 					or(
 						and(
@@ -137,7 +146,7 @@ export function getUnitReadCondition(
 			)
 			.where(
 				and(
-					eq(unitAccessBinding.unitId, unit.id),
+					eq(unitAccessBinding.unitId, target.id),
 					eq(unitAccessBinding.subjectKind, "realm"),
 					activeBinding(),
 					or(
@@ -177,7 +186,7 @@ export function getUnitReadCondition(
 			),
 	);
 	return and(
-		isNull(unit.deletedAt),
+		isNull(target.deletedAt),
 		or(
 			platformSubject,
 			and(notReadRestricted, or(visible, directOrAuthenticated, realmSubject)),

@@ -3,7 +3,7 @@ import {
 	createCollectionPresentationDocument,
 	createManualCollectionDefinitionDocument,
 } from "@rezics/block";
-import { and, desc, eq, ne, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -24,7 +24,10 @@ import {
 import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
 import { transitionUnitStatus } from "../../units/status";
+import { UnitNotFound } from "../../units/errors";
 import {
+	AddCollectionItemsBatchBody,
+	AddCollectionItemsBatchResponse,
 	CollectionItemParams,
 	CollectionParams,
 	CreateCollectionBody,
@@ -42,6 +45,7 @@ import {
 } from "../schema/response";
 import { FavoritesDeleteForbidden, FavoritesEditForbidden } from "./errors";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
+import { ValidationError } from "../errors";
 
 const CollectionNotFoundResponse = toApiErrorResponse(["CollectionNotFound"]);
 const CollectionMutationNotFoundResponse = toApiErrorResponse([
@@ -300,6 +304,94 @@ export default new Elysia({ prefix: "/collections" })
 				tags: ["Collections"],
 				responses: NoContentResponse,
 			},
+		},
+	)
+	.post(
+		"/:collectionId/items/batch",
+		async ({ params, profile, authorization, body }) => {
+			await authorization.collection.ensureOwner(params.collectionId);
+			if (new Set(body.items.map(({ targetId }) => targetId)).size !== body.items.length)
+				throw new ValidationError({ items: "targetId values must be unique" });
+			if (body.items.some(({ targetId }) => targetId === params.collectionId))
+				throw new ValidationError({ items: "a Collection cannot contain itself" });
+			return database.transaction(async (tx) => {
+				await tx.execute(
+					sql`select pg_advisory_xact_lock(hashtextextended(${params.collectionId}::text, 0))`,
+				);
+				const [targetCollection] = await tx
+					.select({ systemKey: collection.systemKey })
+					.from(collection)
+					.where(eq(collection.id, params.collectionId))
+					.limit(1);
+				if (targetCollection?.systemKey === "favorites") throw new FavoritesEditForbidden();
+				for (const item of body.items) {
+					const decision = await authorization.unit.decideInTransaction(
+						tx,
+						item.targetId,
+						"unit.read",
+					);
+					if (!decision.allowed) throw new UnitNotFound();
+				}
+				const targetIds = body.items.map(({ targetId }) => targetId);
+				const existing = await tx
+					.select({ unitId: collectionItem.unitId })
+					.from(collectionItem)
+					.where(
+						and(
+							eq(collectionItem.collectionId, params.collectionId),
+							inArray(collectionItem.unitId, targetIds),
+						),
+					);
+				const existingIds = new Set(existing.map(({ unitId }) => unitId));
+				const pending = body.items.filter(({ targetId }) => !existingIds.has(targetId));
+				const [last] = await tx
+					.select({ position: collectionItem.position })
+					.from(collectionItem)
+					.where(eq(collectionItem.collectionId, params.collectionId))
+					.orderBy(desc(collectionItem.position), desc(collectionItem.unitId))
+					.limit(1);
+				let lastPosition = last?.position;
+				const values = pending.map((item) => {
+					const position = fractionalPositionBetween(lastPosition, null);
+					lastPosition = position;
+					return {
+						collectionId: params.collectionId,
+						unitId: item.targetId,
+						role: item.kind ?? "item",
+						position,
+						addedByProfileId: profile.unitId,
+					};
+				});
+				if (values.length) {
+					await tx.insert(collectionItem).values(values).onConflictDoNothing();
+					await recordUnitRevision(tx, {
+						unitId: params.collectionId,
+						actorProfileId: profile.unitId,
+						event: "update",
+					});
+				}
+				return {
+					items: body.items.map(({ targetId }) => ({
+						targetId,
+						state: existingIds.has(targetId)
+							? ("existing" as const)
+							: ("created" as const),
+					})),
+				};
+			});
+		},
+		{
+			access: "write:unit:update",
+			params: CollectionParams,
+			body: AddCollectionItemsBatchBody,
+			response: {
+				[StatusCodes.OK]: AddCollectionItemsBatchResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
+				[StatusCodes.FORBIDDEN]: CollectionOwnershipResponse,
+				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+				[StatusCodes.CONFLICT]: FavoritesEditResponse,
+			},
+			detail: { summary: "Add collection items atomically", tags: ["Collections"] },
 		},
 	)
 	.put(

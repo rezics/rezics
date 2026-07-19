@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull, lt, or } from "drizzle-orm";
+import { and, desc, eq, exists, isNull, lt, not, or } from "drizzle-orm";
 import {
 	PortableTextDocument,
 	parseNullableDocument,
@@ -8,7 +8,6 @@ import type { Static } from "elysia";
 
 import type { Authorization } from "../authorization";
 import { createCommunityCatalogAccess } from "../authorization/unit/ownership";
-import { isPubliclyReadableUnit } from "../authorization/unit/policy";
 import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
 import {
@@ -38,6 +37,8 @@ import { UnitChanged, UnitNotFound, UnitPrimaryLanguageMissing } from "./errors"
 import { recordUnitRevision } from "./history";
 import { insertUnit } from "./create";
 import { getPublisherSummariesByUnitIds, transitionUnitStatus } from "./status";
+import { getUnitVariantContext } from "./variants";
+import { ensureUnitVariantLifecycle } from "./variant-policy";
 
 export type UnitKind = "book" | "software" | "media";
 export type UnitDetail = Static<typeof UnitDetailResponse>;
@@ -168,9 +169,7 @@ export async function getUnit(
 		.where(and(eq(unit.id, unitId), eq(unit.kind, kind), isNull(unit.deletedAt)))
 		.limit(1);
 	if (!base) throw new UnitNotFound(kind);
-	if (!isPubliclyReadableUnit(base.status, base.visibility)) {
-		await authorization.unit.ensureCanRead(base.id, () => new UnitNotFound(kind));
-	}
+	await authorization.unit.ensureCanRead(base.id, () => new UnitNotFound(kind));
 
 	const localizations = await database
 		.select()
@@ -247,11 +246,7 @@ export async function getUnit(
 		)
 		.where(eq(unitTag.unitId, base.id))
 		.orderBy(desc(unitTag.pinned), unitTag.position, unitTag.tagId);
-	const variants = await database
-		.select()
-		.from(unitVariant)
-		.where(or(eq(unitVariant.unitId, base.id), eq(unitVariant.canonicalUnitId, base.id)))
-		.orderBy(unitVariant.createdAt);
+	const variantContext = await getUnitVariantContext(base.id, authorization.profileId);
 	const [canEdit, accessDecision, associationDecision] = await Promise.all([
 		authorization.unit.canUpdate(base.id),
 		authorization.unit.decide(base.id, "unit.access.manage"),
@@ -313,16 +308,28 @@ export async function getUnit(
 			score: toSafeInteger(tag.score ?? 0n, "tag vote score"),
 			voteCount: toSafeInteger(tag.voteCount ?? 0n, "tag vote count"),
 		})),
-		versions: [
-			...(variants.some(({ unitId: id }) => id === base.id)
-				? []
-				: [{ id: base.id, kind: "primary", canonicalUnitId: null }]),
-			...variants.map(({ unitId: id, canonicalUnitId }) => ({
-				id,
-				kind: "version",
-				canonicalUnitId,
-			})),
-		],
+		versions:
+			variantContext.role === "standalone"
+				? [{ id: base.id, kind: "primary", canonicalUnitId: null }]
+				: variantContext.role === "main"
+					? [
+							{ id: base.id, kind: "primary", canonicalUnitId: null },
+							...variantContext.variants.map(({ id }) => ({
+								id,
+								kind: "version",
+								canonicalUnitId: base.id,
+							})),
+						]
+					: variantContext.main.state === "available"
+						? [
+								{
+									id: base.id,
+									kind: "version",
+									canonicalUnitId: variantContext.main.unit.id,
+								},
+							]
+						: [],
+		variantContext,
 		capabilities: {
 			canEdit,
 			canManageAccess: accessDecision.allowed,
@@ -356,7 +363,16 @@ export async function listUnits(kind: UnitKind, cursor?: [string, string], limit
 				eq(unit.kind, kind),
 				eq(unit.status, "published"),
 				eq(unit.visibility, "public"),
+				eq(unit.moderationStatus, "approved"),
 				isNull(unit.deletedAt),
+				not(
+					exists(
+						database
+							.select({ id: unitVariant.variantUnitId })
+							.from(unitVariant)
+							.where(eq(unitVariant.variantUnitId, unit.id)),
+					),
+				),
 				cursor
 					? or(
 							lt(unit.createdAt, new Date(cursor[0])),
@@ -490,6 +506,7 @@ export async function updateUnit(
 				revisionId: revision.revisionId,
 			});
 		}
+		await ensureUnitVariantLifecycle(tx, unitId);
 	});
 	return getUnit(kind, unitId, authorization);
 }
@@ -507,6 +524,7 @@ export async function deleteUnit(
 			.where(and(eq(unit.id, unitId), eq(unit.kind, kind)))
 			.returning({ id: unit.id });
 		if (!deleted) throw new UnitNotFound(kind);
+		await ensureUnitVariantLifecycle(tx, unitId);
 		await recordUnitRevision(tx, {
 			unitId,
 			actorProfileId: authorization.profileId,

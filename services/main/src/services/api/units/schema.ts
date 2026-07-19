@@ -1,6 +1,13 @@
 import { type Static, t } from "elysia";
 
-import { DateTime, LanguageTag, LifecycleInput, LocalizationInput, Uuid } from "../schema";
+import {
+	DateTime,
+	FractionalPosition,
+	LanguageTag,
+	LifecycleInput,
+	LocalizationInput,
+	Uuid,
+} from "../schema";
 
 export const UnitType = t.Union([t.Literal("book"), t.Literal("software"), t.Literal("media")]);
 export type UnitType = Static<typeof UnitType>;
@@ -32,6 +39,22 @@ export const UnitStatusEventListResponse = t.Object({
 		}),
 	),
 	nextCursor: t.Nullable(t.String()),
+});
+
+export const UnitSeriesMembershipListResponse = t.Object({
+	items: t.Array(
+		t.Object({
+			series: t.Object({
+				id: Uuid,
+				title: t.Nullable(t.String()),
+				cover: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
+			}),
+			releaseUnitId: Uuid,
+			position: FractionalPosition,
+			releasedOn: t.Nullable(t.String({ format: "date" })),
+			source: t.UnionEnum(["direct", "main"]),
+		}),
+	),
 });
 
 const UnitLocalizationInput = LocalizationInput;
@@ -97,6 +120,21 @@ export type UnitLookupParams = Static<typeof UnitLookupParams>;
 
 export const UnitUnitIdParams = t.Object({ type: UnitType, unitId: Uuid });
 export type UnitUnitIdParams = Static<typeof UnitUnitIdParams>;
+
+export const UpdateUnitVariantContextBody = t.Object(
+	{
+		mainUnitId: t.Nullable(Uuid),
+		expectedMainUnitId: t.Nullable(Uuid),
+	},
+	{ additionalProperties: false },
+);
+export type UpdateUnitVariantContextBody = Static<typeof UpdateUnitVariantContextBody>;
+
+export const PromoteUnitVariantBody = t.Object(
+	{ expectedMainUnitId: Uuid },
+	{ additionalProperties: false },
+);
+export type PromoteUnitVariantBody = Static<typeof PromoteUnitVariantBody>;
 
 export const UnitLocalizationParams = t.Object({
 	type: UnitType,

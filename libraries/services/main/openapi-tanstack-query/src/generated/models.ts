@@ -2055,6 +2055,11 @@ export const ApiErrorCode = {
 	UnitChanged: "UnitChanged",
 	UnitRevisionConflict: "UnitRevisionConflict",
 	UnitPrimaryLanguageMissing: "UnitPrimaryLanguageMissing",
+	UnitVariantKindMismatch: "UnitVariantKindMismatch",
+	UnitVariantTargetIsVariant: "UnitVariantTargetIsVariant",
+	UnitVariantSourceHasVariants: "UnitVariantSourceHasVariants",
+	UnitVariantChanged: "UnitVariantChanged",
+	UnitVariantMainUnavailable: "UnitVariantMainUnavailable",
 	InvalidSlug: "InvalidSlug",
 	SlugTaken: "SlugTaken",
 	SlugScopeNotFound: "SlugScopeNotFound",
@@ -5044,6 +5049,14 @@ export const GetApiRecommendationsUnitsStatus200ItemsRecommendationReason = {
 export type GetApiRecommendationsUnitsStatus200ItemsRecommendationReason =
 	(typeof GetApiRecommendationsUnitsStatus200ItemsRecommendationReason)[keyof typeof GetApiRecommendationsUnitsStatus200ItemsRecommendationReason];
 
+export const GetApiRecommendationsUnitsStatus200ItemsSource = {
+	direct: "direct",
+	main: "main",
+} as const;
+
+export type GetApiRecommendationsUnitsStatus200ItemsSource =
+	(typeof GetApiRecommendationsUnitsStatus200ItemsSource)[keyof typeof GetApiRecommendationsUnitsStatus200ItemsSource];
+
 export const GetApiRecommendationsUnitsStatus200ItemsTrackingSurfaceEnum = {
 	home_feed: "home_feed",
 	home_book: "home_book",
@@ -5110,6 +5123,7 @@ export type GetApiRecommendationsUnitsStatus200 = {
 			| null;
 		recommendationReason:
 			(GetApiRecommendationsUnitsStatus200ItemsRecommendationReason | null) | null;
+		source: (GetApiRecommendationsUnitsStatus200ItemsSource | null) | null;
 		/**
 		 * @type object
 		 */
@@ -22238,6 +22252,14 @@ export type PatchApiUsersMeResponse =
 	| PatchApiUsersMeStatus422
 	| PatchApiUsersMeStatus500;
 
+export const GetApiUsersMePreferencesStatus200CollectionConfigViewEnum = {
+	grid: "grid",
+	list: "list",
+} as const;
+
+export type GetApiUsersMePreferencesStatus200CollectionConfigViewEnum =
+	(typeof GetApiUsersMePreferencesStatus200CollectionConfigViewEnum)[keyof typeof GetApiUsersMePreferencesStatus200CollectionConfigViewEnum];
+
 /**
  * @type object
  */
@@ -22255,7 +22277,19 @@ export type GetApiUsersMePreferencesStatus200 = {
 	defaultRealmManageMode: boolean;
 	collectionConfig:
 		| ({
-				[key: string]: unknown;
+				/**
+				 * @type number
+				 */
+				version: 1;
+				/**
+				 * @default 'grid'
+				 * @type string | undefined
+				 */
+				view?: GetApiUsersMePreferencesStatus200CollectionConfigViewEnum;
+				/**
+				 * @type boolean | undefined
+				 */
+				addMainWithVariantByDefault?: boolean;
 		  } | null)
 		| null;
 	/**
@@ -22332,6 +22366,14 @@ export type GetApiUsersMePreferencesResponse =
 	| GetApiUsersMePreferencesStatus404
 	| GetApiUsersMePreferencesStatus500;
 
+export const PutApiUsersMePreferencesStatus200CollectionConfigViewEnum = {
+	grid: "grid",
+	list: "list",
+} as const;
+
+export type PutApiUsersMePreferencesStatus200CollectionConfigViewEnum =
+	(typeof PutApiUsersMePreferencesStatus200CollectionConfigViewEnum)[keyof typeof PutApiUsersMePreferencesStatus200CollectionConfigViewEnum];
+
 /**
  * @type object
  */
@@ -22349,7 +22391,19 @@ export type PutApiUsersMePreferencesStatus200 = {
 	defaultRealmManageMode: boolean;
 	collectionConfig:
 		| ({
-				[key: string]: unknown;
+				/**
+				 * @type number
+				 */
+				version: 1;
+				/**
+				 * @default 'grid'
+				 * @type string | undefined
+				 */
+				view?: PutApiUsersMePreferencesStatus200CollectionConfigViewEnum;
+				/**
+				 * @type boolean | undefined
+				 */
+				addMainWithVariantByDefault?: boolean;
 		  } | null)
 		| null;
 	/**
@@ -22432,6 +22486,14 @@ export type PutApiUsersMePreferencesStatus422 = ValidationError;
  */
 export type PutApiUsersMePreferencesStatus500 = InternalError;
 
+export const PutApiUsersMePreferencesRequestCollectionConfigViewEnum = {
+	grid: "grid",
+	list: "list",
+} as const;
+
+export type PutApiUsersMePreferencesRequestCollectionConfigViewEnum =
+	(typeof PutApiUsersMePreferencesRequestCollectionConfigViewEnum)[keyof typeof PutApiUsersMePreferencesRequestCollectionConfigViewEnum];
+
 export const PutApiUsersMePreferencesRequestContentRatingsEnum = {
 	general: "general",
 	r15: "r15",
@@ -22454,7 +22516,19 @@ export type PutApiUsersMePreferencesBody = {
 	defaultRealmManageMode: boolean;
 	collectionConfig:
 		| ({
-				[key: string]: unknown;
+				/**
+				 * @type number
+				 */
+				version: 1;
+				/**
+				 * @default 'grid'
+				 * @type string | undefined
+				 */
+				view?: PutApiUsersMePreferencesRequestCollectionConfigViewEnum;
+				/**
+				 * @type boolean | undefined
+				 */
+				addMainWithVariantByDefault?: boolean;
 		  } | null)
 		| null;
 	/**
@@ -24629,6 +24703,150 @@ export type ReleaseSlugRedirectAsStaffResponse =
 /**
  * @type object
  */
+export type GetApiUnitsByIdByUnitIdSeriesMembershipsPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const GetApiUnitsByIdByUnitIdSeriesMembershipsStatus200ItemsSourceEnum = {
+	direct: "direct",
+	main: "main",
+} as const;
+
+export type GetApiUnitsByIdByUnitIdSeriesMembershipsStatus200ItemsSourceEnum =
+	(typeof GetApiUnitsByIdByUnitIdSeriesMembershipsStatus200ItemsSourceEnum)[keyof typeof GetApiUnitsByIdByUnitIdSeriesMembershipsStatus200ItemsSourceEnum];
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdSeriesMembershipsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @type object
+		 */
+		series: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			title: (string | null) | null;
+			cover:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						url: string;
+				  } | null)
+				| null;
+		};
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		releaseUnitId: string;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		releasedOn: (string | null) | null;
+		/**
+		 * @default 'direct'
+		 * @type string
+		 */
+		source: GetApiUnitsByIdByUnitIdSeriesMembershipsStatus200ItemsSourceEnum;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdSeriesMembershipsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdSeriesMembershipsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdSeriesMembershipsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdSeriesMembershipsOptions = {
+	body?: never;
+	path: GetApiUnitsByIdByUnitIdSeriesMembershipsPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUnitsByIdByUnitIdSeriesMembershipsResponses = {
+	"200": GetApiUnitsByIdByUnitIdSeriesMembershipsStatus200;
+	"404": GetApiUnitsByIdByUnitIdSeriesMembershipsStatus404;
+	"422": GetApiUnitsByIdByUnitIdSeriesMembershipsStatus422;
+	"500": GetApiUnitsByIdByUnitIdSeriesMembershipsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiUnitsByIdByUnitIdSeriesMembershipsResponse =
+	| GetApiUnitsByIdByUnitIdSeriesMembershipsStatus200
+	| GetApiUnitsByIdByUnitIdSeriesMembershipsStatus404
+	| GetApiUnitsByIdByUnitIdSeriesMembershipsStatus422
+	| GetApiUnitsByIdByUnitIdSeriesMembershipsStatus500;
+
+/**
+ * @type object
+ */
 export type GetApiUnitsByIdByUnitIdStatusEventsPath = {
 	/**
 	 * @description
@@ -25059,6 +25277,24 @@ export type PostApiUnitsByTypePath = {
 	 */
 	type: PostApiUnitsByTypeType;
 };
+
+export const PostApiUnitsByTypeStatus200VariantContextVariantsTypeEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+} as const;
+
+export type PostApiUnitsByTypeStatus200VariantContextVariantsTypeEnum =
+	(typeof PostApiUnitsByTypeStatus200VariantContextVariantsTypeEnum)[keyof typeof PostApiUnitsByTypeStatus200VariantContextVariantsTypeEnum];
+
+export const PostApiUnitsByTypeStatus200VariantContextMainUnitTypeEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+} as const;
+
+export type PostApiUnitsByTypeStatus200VariantContextMainUnitTypeEnum =
+	(typeof PostApiUnitsByTypeStatus200VariantContextMainUnitTypeEnum)[keyof typeof PostApiUnitsByTypeStatus200VariantContextMainUnitTypeEnum];
 
 /**
  * @type object
@@ -25531,6 +25767,106 @@ export type PostApiUnitsByTypeStatus200 = {
 		kind: string;
 		canonicalUnitId: (string | null) | null;
 	}[];
+	variantContext:
+		| {
+				/**
+				 * @type string
+				 */
+				role: "standalone";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				role: "main";
+				/**
+				 * @type array
+				 */
+				variants: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @default 'book'
+					 * @type string
+					 */
+					type: PostApiUnitsByTypeStatus200VariantContextVariantsTypeEnum;
+					title: (string | null) | null;
+					cover:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @type string
+								 */
+								url: string;
+						  } | null)
+						| null;
+				}[];
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				role: "variant";
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				relationUpdatedAt: string;
+				main:
+					| {
+							/**
+							 * @type string
+							 */
+							state: "available";
+							/**
+							 * @type object
+							 */
+							unit: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @default 'book'
+								 * @type string
+								 */
+								type: PostApiUnitsByTypeStatus200VariantContextMainUnitTypeEnum;
+								title: (string | null) | null;
+								cover:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+									  } | null)
+									| null;
+							};
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							state: "unavailable";
+					  };
+		  };
 	/**
 	 * @type object
 	 */
@@ -25921,6 +26257,24 @@ export type GetApiUnitsByTypeByUnitIdPath = {
 	 */
 	unitId: string;
 };
+
+export const GetApiUnitsByTypeByUnitIdStatus200VariantContextVariantsTypeEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200VariantContextVariantsTypeEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200VariantContextVariantsTypeEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200VariantContextVariantsTypeEnum];
+
+export const GetApiUnitsByTypeByUnitIdStatus200VariantContextMainUnitTypeEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200VariantContextMainUnitTypeEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200VariantContextMainUnitTypeEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200VariantContextMainUnitTypeEnum];
 
 /**
  * @type object
@@ -26393,6 +26747,106 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		kind: string;
 		canonicalUnitId: (string | null) | null;
 	}[];
+	variantContext:
+		| {
+				/**
+				 * @type string
+				 */
+				role: "standalone";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				role: "main";
+				/**
+				 * @type array
+				 */
+				variants: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @default 'book'
+					 * @type string
+					 */
+					type: GetApiUnitsByTypeByUnitIdStatus200VariantContextVariantsTypeEnum;
+					title: (string | null) | null;
+					cover:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @type string
+								 */
+								url: string;
+						  } | null)
+						| null;
+				}[];
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				role: "variant";
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				relationUpdatedAt: string;
+				main:
+					| {
+							/**
+							 * @type string
+							 */
+							state: "available";
+							/**
+							 * @type object
+							 */
+							unit: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @default 'book'
+								 * @type string
+								 */
+								type: GetApiUnitsByTypeByUnitIdStatus200VariantContextMainUnitTypeEnum;
+								title: (string | null) | null;
+								cover:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+									  } | null)
+									| null;
+							};
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							state: "unavailable";
+					  };
+		  };
 	/**
 	 * @type object
 	 */
@@ -26503,6 +26957,24 @@ export type PatchApiUnitsByTypeByUnitIdPath = {
 	 */
 	unitId: string;
 };
+
+export const PatchApiUnitsByTypeByUnitIdStatus200VariantContextVariantsTypeEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200VariantContextVariantsTypeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200VariantContextVariantsTypeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200VariantContextVariantsTypeEnum];
+
+export const PatchApiUnitsByTypeByUnitIdStatus200VariantContextMainUnitTypeEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200VariantContextMainUnitTypeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200VariantContextMainUnitTypeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200VariantContextMainUnitTypeEnum];
 
 /**
  * @type object
@@ -26975,6 +27447,106 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		kind: string;
 		canonicalUnitId: (string | null) | null;
 	}[];
+	variantContext:
+		| {
+				/**
+				 * @type string
+				 */
+				role: "standalone";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				role: "main";
+				/**
+				 * @type array
+				 */
+				variants: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @default 'book'
+					 * @type string
+					 */
+					type: PatchApiUnitsByTypeByUnitIdStatus200VariantContextVariantsTypeEnum;
+					title: (string | null) | null;
+					cover:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @type string
+								 */
+								url: string;
+						  } | null)
+						| null;
+				}[];
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				role: "variant";
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				relationUpdatedAt: string;
+				main:
+					| {
+							/**
+							 * @type string
+							 */
+							state: "available";
+							/**
+							 * @type object
+							 */
+							unit: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @default 'book'
+								 * @type string
+								 */
+								type: PatchApiUnitsByTypeByUnitIdStatus200VariantContextMainUnitTypeEnum;
+								title: (string | null) | null;
+								cover:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+									  } | null)
+									| null;
+							};
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							state: "unavailable";
+					  };
+		  };
 	/**
 	 * @type object
 	 */
@@ -27472,6 +28044,1652 @@ export type DeleteApiUnitsByTypeByUnitIdResponse =
 	| DeleteApiUnitsByTypeByUnitIdStatus422
 	| DeleteApiUnitsByTypeByUnitIdStatus500;
 
+export const PatchApiUnitsByTypeByUnitIdVariantContextType = {
+	book: "book",
+	software: "software",
+	media: "media",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextType =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextType)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextType];
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdVariantContextPath = {
+	/**
+	 * @type string
+	 */
+	type: PatchApiUnitsByTypeByUnitIdVariantContextType;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200VariantContextVariantsTypeEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200VariantContextVariantsTypeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200VariantContextVariantsTypeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200VariantContextVariantsTypeEnum];
+
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200VariantContextMainUnitTypeEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200VariantContextMainUnitTypeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200VariantContextMainUnitTypeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200VariantContextMainUnitTypeEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type string
+	 */
+	type: string;
+	/**
+	 * @type string
+	 */
+	status: string;
+	/**
+	 * @type string
+	 */
+	visibility: string;
+	language: (string | null) | null;
+	/**
+	 * @type string
+	 */
+	contentRating: string;
+	/**
+	 * @type string
+	 */
+	aiDisclosure: string;
+	license: (string | null) | null;
+	publishedAt: (string | null) | null;
+	/**
+	 * @type array
+	 */
+	publishers: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		name: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		firstPublishedAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		lastPublishedAt: string;
+		publicationCount: string | number;
+	}[];
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+	primaryLanguage: (string | null) | null;
+	releasedOn: (string | null) | null;
+	avatar:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	banner:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	cover:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	/**
+	 * @type array
+	 */
+	localizations: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @type string
+		 */
+		language: string;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		title: (string | null) | null;
+		summary: (string | null) | null;
+		description:
+			| ({
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "image";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								assetId: string;
+								/**
+								 * @type string | undefined
+								 */
+								alt?: string;
+								/**
+								 * @type string | undefined
+								 */
+								caption?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!(?:block|image)$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+			  } | null)
+			| null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		banner:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+	/**
+	 * @type array
+	 */
+	credits: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		entityEntryId: string;
+		/**
+		 * @type string
+		 */
+		role: string;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		evidenceUrl: (string | null) | null;
+		note: (string | null) | null;
+		title: (string | null) | null;
+	}[];
+	/**
+	 * @type array
+	 */
+	subjectAssociations: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		entityEntryId: string;
+		/**
+		 * @type string
+		 */
+		role: string;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		title: (string | null) | null;
+	}[];
+	/**
+	 * @type array
+	 */
+	links: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @type string
+		 */
+		kind: string;
+		/**
+		 * @type string
+		 */
+		url: string;
+		sourceEntityEntryId: (string | null) | null;
+		normalizedUrl: (string | null) | null;
+		normalizedUrlHash: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+	/**
+	 * @type array
+	 */
+	tags: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		tagId: string;
+		realmId: (string | null) | null;
+		score: string | number;
+		voteCount: string | number;
+		/**
+		 * @type boolean
+		 */
+		pinned: boolean;
+		position: (string | null) | null;
+		title: (string | null) | null;
+	}[];
+	/**
+	 * @type array
+	 */
+	versions: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @type string
+		 */
+		kind: string;
+		canonicalUnitId: (string | null) | null;
+	}[];
+	variantContext:
+		| {
+				/**
+				 * @type string
+				 */
+				role: "standalone";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				role: "main";
+				/**
+				 * @type array
+				 */
+				variants: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @default 'book'
+					 * @type string
+					 */
+					type: PatchApiUnitsByTypeByUnitIdVariantContextStatus200VariantContextVariantsTypeEnum;
+					title: (string | null) | null;
+					cover:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @type string
+								 */
+								url: string;
+						  } | null)
+						| null;
+				}[];
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				role: "variant";
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				relationUpdatedAt: string;
+				main:
+					| {
+							/**
+							 * @type string
+							 */
+							state: "available";
+							/**
+							 * @type object
+							 */
+							unit: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @default 'book'
+								 * @type string
+								 */
+								type: PatchApiUnitsByTypeByUnitIdVariantContextStatus200VariantContextMainUnitTypeEnum;
+								title: (string | null) | null;
+								cover:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+									  } | null)
+									| null;
+							};
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							state: "unavailable";
+					  };
+		  };
+	/**
+	 * @type object
+	 */
+	capabilities: {
+		/**
+		 * @type boolean
+		 */
+		canEdit: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageAccess: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageAssociations: boolean;
+	};
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: "AuthenticationRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus403ErrorCodeEnum = {
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountRestricted: "AccountRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus403ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus403ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenPermissionRequired'
+		 * @type string
+		 */
+		code: PatchApiUnitsByTypeByUnitIdVariantContextStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus409ErrorCodeEnum = {
+	UnitVariantKindMismatch: "UnitVariantKindMismatch",
+	UnitVariantTargetIsVariant: "UnitVariantTargetIsVariant",
+	UnitVariantSourceHasVariants: "UnitVariantSourceHasVariants",
+	UnitVariantChanged: "UnitVariantChanged",
+	UnitVariantMainUnavailable: "UnitVariantMainUnavailable",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus409ErrorCodeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus409ErrorCodeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitVariantKindMismatch'
+		 * @type string
+		 */
+		code: PatchApiUnitsByTypeByUnitIdVariantContextStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdVariantContextBody = {
+	mainUnitId: (string | null) | null;
+	expectedMainUnitId: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdVariantContextOptions = {
+	body: PatchApiUnitsByTypeByUnitIdVariantContextBody;
+	path: PatchApiUnitsByTypeByUnitIdVariantContextPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUnitsByTypeByUnitIdVariantContextResponses = {
+	"200": PatchApiUnitsByTypeByUnitIdVariantContextStatus200;
+	"401": PatchApiUnitsByTypeByUnitIdVariantContextStatus401;
+	"403": PatchApiUnitsByTypeByUnitIdVariantContextStatus403;
+	"404": PatchApiUnitsByTypeByUnitIdVariantContextStatus404;
+	"409": PatchApiUnitsByTypeByUnitIdVariantContextStatus409;
+	"422": PatchApiUnitsByTypeByUnitIdVariantContextStatus422;
+	"500": PatchApiUnitsByTypeByUnitIdVariantContextStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PatchApiUnitsByTypeByUnitIdVariantContextResponse =
+	| PatchApiUnitsByTypeByUnitIdVariantContextStatus200
+	| PatchApiUnitsByTypeByUnitIdVariantContextStatus401
+	| PatchApiUnitsByTypeByUnitIdVariantContextStatus403
+	| PatchApiUnitsByTypeByUnitIdVariantContextStatus404
+	| PatchApiUnitsByTypeByUnitIdVariantContextStatus409
+	| PatchApiUnitsByTypeByUnitIdVariantContextStatus422
+	| PatchApiUnitsByTypeByUnitIdVariantContextStatus500;
+
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteType = {
+	book: "book",
+	software: "software",
+	media: "media",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteType =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteType)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteType];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdVariantContextPromotePath = {
+	/**
+	 * @type string
+	 */
+	type: PostApiUnitsByTypeByUnitIdVariantContextPromoteType;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200VariantContextVariantsTypeEnum =
+	{
+		book: "book",
+		software: "software",
+		media: "media",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200VariantContextVariantsTypeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200VariantContextVariantsTypeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200VariantContextVariantsTypeEnum];
+
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200VariantContextMainUnitTypeEnum =
+	{
+		book: "book",
+		software: "software",
+		media: "media",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200VariantContextMainUnitTypeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200VariantContextMainUnitTypeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200VariantContextMainUnitTypeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type string
+	 */
+	type: string;
+	/**
+	 * @type string
+	 */
+	status: string;
+	/**
+	 * @type string
+	 */
+	visibility: string;
+	language: (string | null) | null;
+	/**
+	 * @type string
+	 */
+	contentRating: string;
+	/**
+	 * @type string
+	 */
+	aiDisclosure: string;
+	license: (string | null) | null;
+	publishedAt: (string | null) | null;
+	/**
+	 * @type array
+	 */
+	publishers: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		name: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		firstPublishedAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		lastPublishedAt: string;
+		publicationCount: string | number;
+	}[];
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+	primaryLanguage: (string | null) | null;
+	releasedOn: (string | null) | null;
+	avatar:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	banner:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	cover:
+		| ({
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				url: string;
+		  } | null)
+		| null;
+	/**
+	 * @type array
+	 */
+	localizations: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @type string
+		 */
+		language: string;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		title: (string | null) | null;
+		summary: (string | null) | null;
+		description:
+			| ({
+					/**
+					 * @type string
+					 */
+					_type: "portable-text";
+					/**
+					 * @pattern ^[0-9a-f]{12}$
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type array
+					 */
+					content: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "block";
+								/**
+								 * @type array
+								 */
+								children: (
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @type string
+											 */
+											_type: "span";
+											/**
+											 * @type string
+											 */
+											text: string;
+											/**
+											 * @type array | undefined
+											 */
+											marks?: string[];
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											_key: string;
+											/**
+											 * @pattern ^(?!span$).+
+											 * @type string
+											 */
+											_type: string;
+											[key: string]: unknown;
+									  }
+								)[];
+								/**
+								 * @type array | undefined
+								 */
+								markDefs?: {
+									/**
+									 * @type string
+									 */
+									_key: string;
+									/**
+									 * @type string
+									 */
+									_type: string;
+									[key: string]: unknown;
+								}[];
+								/**
+								 * @type string | undefined
+								 */
+								listItem?: string;
+								/**
+								 * @type string | undefined
+								 */
+								style?: string;
+								/**
+								 * @minLength 1
+								 * @type integer | undefined
+								 */
+								level?: number;
+								[key: string]: unknown;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "image";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								assetId: string;
+								/**
+								 * @type string | undefined
+								 */
+								alt?: string;
+								/**
+								 * @type string | undefined
+								 */
+								caption?: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!(?:block|image)$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+			  } | null)
+			| null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		banner:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+	/**
+	 * @type array
+	 */
+	credits: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		entityEntryId: string;
+		/**
+		 * @type string
+		 */
+		role: string;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		evidenceUrl: (string | null) | null;
+		note: (string | null) | null;
+		title: (string | null) | null;
+	}[];
+	/**
+	 * @type array
+	 */
+	subjectAssociations: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		entityEntryId: string;
+		/**
+		 * @type string
+		 */
+		role: string;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		title: (string | null) | null;
+	}[];
+	/**
+	 * @type array
+	 */
+	links: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @type string
+		 */
+		kind: string;
+		/**
+		 * @type string
+		 */
+		url: string;
+		sourceEntityEntryId: (string | null) | null;
+		normalizedUrl: (string | null) | null;
+		normalizedUrlHash: (string | null) | null;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+	/**
+	 * @type array
+	 */
+	tags: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		tagId: string;
+		realmId: (string | null) | null;
+		score: string | number;
+		voteCount: string | number;
+		/**
+		 * @type boolean
+		 */
+		pinned: boolean;
+		position: (string | null) | null;
+		title: (string | null) | null;
+	}[];
+	/**
+	 * @type array
+	 */
+	versions: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @type string
+		 */
+		kind: string;
+		canonicalUnitId: (string | null) | null;
+	}[];
+	variantContext:
+		| {
+				/**
+				 * @type string
+				 */
+				role: "standalone";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				role: "main";
+				/**
+				 * @type array
+				 */
+				variants: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @default 'book'
+					 * @type string
+					 */
+					type: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200VariantContextVariantsTypeEnum;
+					title: (string | null) | null;
+					cover:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @type string
+								 */
+								url: string;
+						  } | null)
+						| null;
+				}[];
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				role: "variant";
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				relationUpdatedAt: string;
+				main:
+					| {
+							/**
+							 * @type string
+							 */
+							state: "available";
+							/**
+							 * @type object
+							 */
+							unit: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @default 'book'
+								 * @type string
+								 */
+								type: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200VariantContextMainUnitTypeEnum;
+								title: (string | null) | null;
+								cover:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+									  } | null)
+									| null;
+							};
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							state: "unavailable";
+					  };
+		  };
+	/**
+	 * @type object
+	 */
+	capabilities: {
+		/**
+		 * @type boolean
+		 */
+		canEdit: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageAccess: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageAssociations: boolean;
+	};
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: "AuthenticationRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus403ErrorCodeEnum = {
+	ApiTokenPermissionRequired: "ApiTokenPermissionRequired",
+	EmailVerificationRequired: "EmailVerificationRequired",
+	AccountRestricted: "AccountRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus403ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus403ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenPermissionRequired'
+		 * @type string
+		 */
+		code: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus409ErrorCodeEnum = {
+	UnitVariantKindMismatch: "UnitVariantKindMismatch",
+	UnitVariantTargetIsVariant: "UnitVariantTargetIsVariant",
+	UnitVariantSourceHasVariants: "UnitVariantSourceHasVariants",
+	UnitVariantChanged: "UnitVariantChanged",
+	UnitVariantMainUnavailable: "UnitVariantMainUnavailable",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus409ErrorCodeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus409ErrorCodeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitVariantKindMismatch'
+		 * @type string
+		 */
+		code: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	expectedMainUnitId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteOptions = {
+	body: PostApiUnitsByTypeByUnitIdVariantContextPromoteBody;
+	path: PostApiUnitsByTypeByUnitIdVariantContextPromotePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteResponses = {
+	"200": PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200;
+	"401": PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus401;
+	"403": PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus403;
+	"404": PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus404;
+	"409": PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus409;
+	"422": PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus422;
+	"500": PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteResponse =
+	| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200
+	| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus401
+	| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus403
+	| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus404
+	| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus409
+	| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus422
+	| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus500;
+
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageType = {
 	book: "book",
 	software: "software",
@@ -27504,6 +29722,26 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguagePath = {
 	 */
 	language: string;
 };
+
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200VariantContextVariantsTypeEnum =
+	{
+		book: "book",
+		software: "software",
+		media: "media",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200VariantContextVariantsTypeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200VariantContextVariantsTypeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200VariantContextVariantsTypeEnum];
+
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200VariantContextMainUnitTypeEnum =
+	{
+		book: "book",
+		software: "software",
+		media: "media",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200VariantContextMainUnitTypeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200VariantContextMainUnitTypeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200VariantContextMainUnitTypeEnum];
 
 /**
  * @type object
@@ -27976,6 +30214,106 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		kind: string;
 		canonicalUnitId: (string | null) | null;
 	}[];
+	variantContext:
+		| {
+				/**
+				 * @type string
+				 */
+				role: "standalone";
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				role: "main";
+				/**
+				 * @type array
+				 */
+				variants: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @default 'book'
+					 * @type string
+					 */
+					type: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200VariantContextVariantsTypeEnum;
+					title: (string | null) | null;
+					cover:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @type string
+								 */
+								url: string;
+						  } | null)
+						| null;
+				}[];
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				role: "variant";
+				/**
+				 * @description
+				 * Format: `date-time`
+				 * @type string
+				 */
+				relationUpdatedAt: string;
+				main:
+					| {
+							/**
+							 * @type string
+							 */
+							state: "available";
+							/**
+							 * @type object
+							 */
+							unit: {
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @default 'book'
+								 * @type string
+								 */
+								type: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200VariantContextMainUnitTypeEnum;
+								title: (string | null) | null;
+								cover:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+									  } | null)
+									| null;
+							};
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							state: "unavailable";
+					  };
+		  };
 	/**
 	 * @type object
 	 */
@@ -33935,6 +36273,45 @@ export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404 = {
 	requestId: string;
 };
 
+export const PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409ErrorCodeEnum = {
+	UnitVariantKindMismatch: "UnitVariantKindMismatch",
+	UnitVariantTargetIsVariant: "UnitVariantTargetIsVariant",
+	UnitVariantSourceHasVariants: "UnitVariantSourceHasVariants",
+	UnitVariantChanged: "UnitVariantChanged",
+	UnitVariantMainUnavailable: "UnitVariantMainUnavailable",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409ErrorCodeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409ErrorCodeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitVariantKindMismatch'
+		 * @type string
+		 */
+		code: PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 /**
  * @type object
  */
@@ -33946,6 +36323,7 @@ export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422 = Validatio
 export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500 = InternalError;
 
 /**
+ * @deprecated
  * @type object
  */
 export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdOptions = {
@@ -33962,6 +36340,7 @@ export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdResponses = {
 	"200": PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus200;
 	"403": PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403;
 	"404": PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404;
+	"409": PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409;
 	"422": PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422;
 	"500": PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500;
 };
@@ -33973,6 +36352,7 @@ export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdResponse =
 	| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus200
 	| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus403
 	| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404
+	| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409
 	| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422
 	| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500;
 
@@ -39157,6 +41537,220 @@ export type DeleteApiCollectionsByCollectionIdResponse =
 	| DeleteApiCollectionsByCollectionIdStatus409
 	| DeleteApiCollectionsByCollectionIdStatus422
 	| DeleteApiCollectionsByCollectionIdStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	collectionId: string;
+};
+
+export const PostApiCollectionsByCollectionIdItemsBatchStatus200ItemsStateEnum = {
+	created: "created",
+	existing: "existing",
+} as const;
+
+export type PostApiCollectionsByCollectionIdItemsBatchStatus200ItemsStateEnum =
+	(typeof PostApiCollectionsByCollectionIdItemsBatchStatus200ItemsStateEnum)[keyof typeof PostApiCollectionsByCollectionIdItemsBatchStatus200ItemsStateEnum];
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		targetId: string;
+		/**
+		 * @default 'created'
+		 * @type string
+		 */
+		state: PostApiCollectionsByCollectionIdItemsBatchStatus200ItemsStateEnum;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'CollectionOwnershipRequired'
+		 * @type string
+		 */
+		code: "CollectionOwnershipRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'FavoritesEditForbidden'
+		 * @type string
+		 */
+		code: "FavoritesEditForbidden";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiCollectionsByCollectionIdItemsBatchStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ValidationError'
+				 * @type string
+				 */
+				code: "ValidationError";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchBody = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		targetId: string;
+		/**
+		 * @minLength 1
+		 * @maxLength 32
+		 * @type string | undefined
+		 */
+		kind?: string;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchOptions = {
+	body: PostApiCollectionsByCollectionIdItemsBatchBody;
+	path: PostApiCollectionsByCollectionIdItemsBatchPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchResponses = {
+	"200": PostApiCollectionsByCollectionIdItemsBatchStatus200;
+	"403": PostApiCollectionsByCollectionIdItemsBatchStatus403;
+	"404": PostApiCollectionsByCollectionIdItemsBatchStatus404;
+	"409": PostApiCollectionsByCollectionIdItemsBatchStatus409;
+	"422": PostApiCollectionsByCollectionIdItemsBatchStatus422;
+	"500": PostApiCollectionsByCollectionIdItemsBatchStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiCollectionsByCollectionIdItemsBatchResponse =
+	| PostApiCollectionsByCollectionIdItemsBatchStatus200
+	| PostApiCollectionsByCollectionIdItemsBatchStatus403
+	| PostApiCollectionsByCollectionIdItemsBatchStatus404
+	| PostApiCollectionsByCollectionIdItemsBatchStatus409
+	| PostApiCollectionsByCollectionIdItemsBatchStatus422
+	| PostApiCollectionsByCollectionIdItemsBatchStatus500;
 
 /**
  * @type object
@@ -49344,6 +51938,24 @@ export type GetApiSearchConfigurationResponses = {
 export type GetApiSearchConfigurationResponse =
 	GetApiSearchConfigurationStatus200 | GetApiSearchConfigurationStatus500;
 
+export const PostApiSearchExecuteStatus200GroupsHitsVariantRoleEnum = {
+	standalone: "standalone",
+	main: "main",
+	variant: "variant",
+} as const;
+
+export type PostApiSearchExecuteStatus200GroupsHitsVariantRoleEnum =
+	(typeof PostApiSearchExecuteStatus200GroupsHitsVariantRoleEnum)[keyof typeof PostApiSearchExecuteStatus200GroupsHitsVariantRoleEnum];
+
+export const PostApiSearchExecuteStatus200GroupsHitsVariantMainUnitTypeEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+} as const;
+
+export type PostApiSearchExecuteStatus200GroupsHitsVariantMainUnitTypeEnum =
+	(typeof PostApiSearchExecuteStatus200GroupsHitsVariantMainUnitTypeEnum)[keyof typeof PostApiSearchExecuteStatus200GroupsHitsVariantMainUnitTypeEnum];
+
 /**
  * @type object
  */
@@ -49410,6 +52022,55 @@ export type PostApiSearchExecuteStatus200 = {
 			 * @type array
 			 */
 			summaries: string[];
+			/**
+			 * @default 'standalone'
+			 * @type string | undefined
+			 */
+			variantRole?: PostApiSearchExecuteStatus200GroupsHitsVariantRoleEnum;
+			variantMain?:
+				| {
+						/**
+						 * @type string
+						 */
+						state: "unavailable";
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						state: "available";
+						/**
+						 * @type object
+						 */
+						unit: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @default 'book'
+							 * @type string
+							 */
+							type: PostApiSearchExecuteStatus200GroupsHitsVariantMainUnitTypeEnum;
+							title: (string | null) | null;
+							cover:
+								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+								  } | null)
+								| null;
+						};
+				  };
 			name?: (string | null) | null;
 			summary?: (string | null) | null;
 		}[];
@@ -50016,6 +52677,26 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecutePath = {
 	blockKey: string;
 };
 
+export const PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum =
+	{
+		standalone: "standalone",
+		main: "main",
+		variant: "variant",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum];
+
+export const PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum =
+	{
+		book: "book",
+		software: "software",
+		media: "media",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum =
+	(typeof PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum)[keyof typeof PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum];
+
 /**
  * @type object
  */
@@ -50082,6 +52763,55 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200 = {
 			 * @type array
 			 */
 			summaries: string[];
+			/**
+			 * @default 'standalone'
+			 * @type string | undefined
+			 */
+			variantRole?: PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum;
+			variantMain?:
+				| {
+						/**
+						 * @type string
+						 */
+						state: "unavailable";
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						state: "available";
+						/**
+						 * @type object
+						 */
+						unit: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @default 'book'
+							 * @type string
+							 */
+							type: PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum;
+							title: (string | null) | null;
+							cover:
+								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+								  } | null)
+								| null;
+						};
+				  };
 			name?: (string | null) | null;
 			summary?: (string | null) | null;
 		}[];
@@ -50725,6 +53455,26 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecutePath = {
 	blockKey: string;
 };
 
+export const PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum =
+	{
+		standalone: "standalone",
+		main: "main",
+		variant: "variant",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum];
+
+export const PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum =
+	{
+		book: "book",
+		software: "software",
+		media: "media",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum];
+
 /**
  * @type object
  */
@@ -50791,6 +53541,55 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus20
 			 * @type array
 			 */
 			summaries: string[];
+			/**
+			 * @default 'standalone'
+			 * @type string | undefined
+			 */
+			variantRole?: PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum;
+			variantMain?:
+				| {
+						/**
+						 * @type string
+						 */
+						state: "unavailable";
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						state: "available";
+						/**
+						 * @type object
+						 */
+						unit: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @default 'book'
+							 * @type string
+							 */
+							type: PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum;
+							title: (string | null) | null;
+							cover:
+								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+								  } | null)
+								| null;
+						};
+				  };
 			name?: (string | null) | null;
 			summary?: (string | null) | null;
 		}[];
@@ -51418,6 +54217,24 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteResponse
 	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus500
 	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus503;
 
+export const PostApiSearchStatus200GroupsHitsVariantRoleEnum = {
+	standalone: "standalone",
+	main: "main",
+	variant: "variant",
+} as const;
+
+export type PostApiSearchStatus200GroupsHitsVariantRoleEnum =
+	(typeof PostApiSearchStatus200GroupsHitsVariantRoleEnum)[keyof typeof PostApiSearchStatus200GroupsHitsVariantRoleEnum];
+
+export const PostApiSearchStatus200GroupsHitsVariantMainUnitTypeEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+} as const;
+
+export type PostApiSearchStatus200GroupsHitsVariantMainUnitTypeEnum =
+	(typeof PostApiSearchStatus200GroupsHitsVariantMainUnitTypeEnum)[keyof typeof PostApiSearchStatus200GroupsHitsVariantMainUnitTypeEnum];
+
 /**
  * @type object
  */
@@ -51484,6 +54301,55 @@ export type PostApiSearchStatus200 = {
 			 * @type array
 			 */
 			summaries: string[];
+			/**
+			 * @default 'standalone'
+			 * @type string | undefined
+			 */
+			variantRole?: PostApiSearchStatus200GroupsHitsVariantRoleEnum;
+			variantMain?:
+				| {
+						/**
+						 * @type string
+						 */
+						state: "unavailable";
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						state: "available";
+						/**
+						 * @type object
+						 */
+						unit: {
+							/**
+							 * @description
+							 * Format: `uuid`
+							 * @type string
+							 */
+							id: string;
+							/**
+							 * @default 'book'
+							 * @type string
+							 */
+							type: PostApiSearchStatus200GroupsHitsVariantMainUnitTypeEnum;
+							title: (string | null) | null;
+							cover:
+								| ({
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+								  } | null)
+								| null;
+						};
+				  };
 			name?: (string | null) | null;
 			summary?: (string | null) | null;
 		}[];
@@ -51650,6 +54516,24 @@ export type PostApiSearchByIndexPath = {
 	index: PostApiSearchByIndexIndex;
 };
 
+export const PostApiSearchByIndexStatus200HitsVariantRoleEnum = {
+	standalone: "standalone",
+	main: "main",
+	variant: "variant",
+} as const;
+
+export type PostApiSearchByIndexStatus200HitsVariantRoleEnum =
+	(typeof PostApiSearchByIndexStatus200HitsVariantRoleEnum)[keyof typeof PostApiSearchByIndexStatus200HitsVariantRoleEnum];
+
+export const PostApiSearchByIndexStatus200HitsVariantMainUnitTypeEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+} as const;
+
+export type PostApiSearchByIndexStatus200HitsVariantMainUnitTypeEnum =
+	(typeof PostApiSearchByIndexStatus200HitsVariantMainUnitTypeEnum)[keyof typeof PostApiSearchByIndexStatus200HitsVariantMainUnitTypeEnum];
+
 /**
  * @type object
  */
@@ -51680,6 +54564,55 @@ export type PostApiSearchByIndexStatus200 = {
 		 * @type array
 		 */
 		summaries: string[];
+		/**
+		 * @default 'standalone'
+		 * @type string | undefined
+		 */
+		variantRole?: PostApiSearchByIndexStatus200HitsVariantRoleEnum;
+		variantMain?:
+			| {
+					/**
+					 * @type string
+					 */
+					state: "unavailable";
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					state: "available";
+					/**
+					 * @type object
+					 */
+					unit: {
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @default 'book'
+						 * @type string
+						 */
+						type: PostApiSearchByIndexStatus200HitsVariantMainUnitTypeEnum;
+						title: (string | null) | null;
+						cover:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+							  } | null)
+							| null;
+					};
+			  };
 		name?: (string | null) | null;
 		summary?: (string | null) | null;
 	}[];

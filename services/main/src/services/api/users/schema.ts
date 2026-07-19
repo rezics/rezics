@@ -1,8 +1,24 @@
 import { type Static, t } from "elysia";
+import { Value } from "@sinclair/typebox/value";
 import { PortableTextDocument } from "@rezics/block";
 
 import { ContentRatingValues } from "../../database/schema/contract-values";
 import { LanguageTag, Uuid } from "../schema";
+
+export const CollectionConfigV1 = t.Object(
+	{
+		version: t.Literal(1),
+		view: t.Optional(t.UnionEnum(["grid", "list"])),
+		addMainWithVariantByDefault: t.Optional(t.Boolean()),
+	},
+	{ additionalProperties: false },
+);
+export type CollectionConfigV1 = Static<typeof CollectionConfigV1>;
+
+export function parseCollectionConfig(value: unknown): CollectionConfigV1 | null {
+	if (value === null) return null;
+	return Value.Decode(CollectionConfigV1, value);
+}
 
 export const UpdateProfileBody = t.Object(
 	{
@@ -20,7 +36,7 @@ export type UpdateProfileBody = Static<typeof UpdateProfileBody>;
 export const ReplacePreferencesBody = t.Object({
 	defaultLicense: t.Nullable(t.String({ minLength: 1, maxLength: 128 })),
 	defaultRealmManageMode: t.Boolean({ default: false }),
-	collectionConfig: t.Nullable(t.Record(t.String(), t.Unknown())),
+	collectionConfig: t.Nullable(CollectionConfigV1),
 	personalizedFeed: t.Boolean({ default: true }),
 	contentRatings: t.Array(t.Union(ContentRatingValues.map((value) => t.Literal(value))), {
 		uniqueItems: true,

@@ -26,6 +26,7 @@ import {
 } from "../schema/response";
 import {
 	ReplacePreferencesBody,
+	parseCollectionConfig,
 	UpdateProfileBody,
 	UserIdParams,
 	UserLookupParams,
@@ -158,7 +159,7 @@ export default new Elysia({ prefix: "/users" })
 				profileId: preference.profileId,
 				defaultLicense: preference.defaultLicense,
 				defaultRealmManageMode: preference.defaultRealmManageMode,
-				collectionConfig: preference.collectionConfig,
+				collectionConfig: parseCollectionConfig(preference.collectionConfig),
 				personalizedFeed: preference.personalizedFeed,
 				contentRatings: preference.contentRatings,
 				preferredLanguages: preference.preferredLanguages,

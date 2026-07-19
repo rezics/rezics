@@ -26,7 +26,10 @@ export const CommunityCatalogUnitKindValues = [
 	"tag",
 ] as const;
 
+export const VariantCapableUnitKindValues = ["book", "software", "media"] as const;
+
 export type UnitKind = (typeof UnitKindValues)[number];
+export type VariantCapableUnitKind = (typeof VariantCapableUnitKindValues)[number];
 
 export const SlugAddressKindValues = ["canonical", "redirect"] as const;
 export type SlugAddressKind = (typeof SlugAddressKindValues)[number];

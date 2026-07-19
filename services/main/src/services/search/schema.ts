@@ -17,6 +17,18 @@ export interface SearchHit {
 	type: string;
 	titles: string[];
 	summaries: string[];
+	variantRole?: "standalone" | "main" | "variant";
+	variantMain?:
+		| { readonly state: "unavailable" }
+		| {
+				readonly state: "available";
+				readonly unit: {
+					readonly id: string;
+					readonly type: "book" | "software" | "media";
+					readonly title: string | null;
+					readonly cover: { readonly id: string; readonly url: string } | null;
+				};
+		  };
 }
 
 export interface DomainSearchRequest {

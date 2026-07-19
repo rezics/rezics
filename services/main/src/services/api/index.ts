@@ -37,6 +37,7 @@ import {
 	isApiError,
 	ValidationError,
 } from "./errors";
+import { toUnitVariantConstraintError } from "../units/variants";
 
 export default new Elysia()
 	.model({ JsonValue })
@@ -56,6 +57,12 @@ export default new Elysia()
 				set.headers["Retry-After"] = String(error.retryAfterSeconds);
 			return status(error.status, toApiErrorBody(error, requestId));
 		}
+		const variantConstraintError = toUnitVariantConstraintError(error);
+		if (variantConstraintError)
+			return status(
+				variantConstraintError.status,
+				toApiErrorBody(variantConstraintError, requestId),
+			);
 		if (code === "VALIDATION") {
 			const validationError = new ValidationError();
 			return status(validationError.status, toApiErrorBody(validationError, requestId));

@@ -1,6 +1,7 @@
-import { sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import {
 	check,
+	foreignKey,
 	index,
 	integer,
 	pgEnum,
@@ -12,7 +13,12 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { AliasKindValues, toEnumValues } from "./contract-values";
+import {
+	AliasKindValues,
+	toEnumValues,
+	type VariantCapableUnitKind,
+	VariantCapableUnitKindValues,
+} from "./contract-values";
 import {
 	createCreatedAtColumn,
 	createTimestampMsColumn,
@@ -124,17 +130,29 @@ export const unitLink = pgTable(
 export const unitVariant = pgTable(
 	"unit_variant",
 	{
-		unitId: uuid()
-			.primaryKey()
-			.references(() => unit.id, { onDelete: "cascade" }),
-		canonicalUnitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "restrict" }),
+		variantUnitId: uuid().primaryKey(),
+		mainUnitId: uuid().notNull(),
+		unitKind: text().$type<VariantCapableUnitKind>().notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		index("unit_variant_canonical_idx").on(table.canonicalUnitId),
-		check("unit_variant_not_self_check", sql`${table.unitId} <> ${table.canonicalUnitId}`),
+		foreignKey({
+			columns: [table.variantUnitId, table.unitKind],
+			foreignColumns: [unit.id, unit.kind],
+			name: "unit_variant_variant_kind_fkey",
+		}).onDelete("cascade"),
+		foreignKey({
+			columns: [table.mainUnitId, table.unitKind],
+			foreignColumns: [unit.id, unit.kind],
+			name: "unit_variant_main_kind_fkey",
+		}).onDelete("restrict"),
+		index("unit_variant_main_created_at_idx").on(
+			table.mainUnitId,
+			table.createdAt,
+			table.variantUnitId,
+		),
+		check("unit_variant_kind_check", inArray(table.unitKind, VariantCapableUnitKindValues)),
+		check("unit_variant_not_self_check", sql`${table.variantUnitId} <> ${table.mainUnitId}`),
 	],
 );

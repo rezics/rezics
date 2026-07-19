@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, isNull, lte, ne, sql } from "drizzle-orm";
+import { and, desc, eq, exists, inArray, isNull, lte, not, sql } from "drizzle-orm";
 
 import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
@@ -10,6 +10,7 @@ import {
 	recommendationUnitStat,
 	unit,
 	unitLocalization,
+	unitVariant,
 } from "../database/schema";
 import type { RecommendationReason, RecommendationSurface } from "../api/recommendations/schema";
 import { presentImageAsset } from "../units/service";
@@ -33,7 +34,7 @@ interface CatalogCandidate extends RecommendationCandidate {
 function eligibleCatalogUnit(input: {
 	viewer: RecommendationViewer;
 	type?: RecommendedUnitKind;
-	seedUnitId?: string;
+	seedUnitIds?: readonly string[];
 	asOf: Date;
 	afterId?: string;
 }) {
@@ -44,7 +45,15 @@ function eligibleCatalogUnit(input: {
 		eq(unit.moderationStatus, "approved"),
 		isNull(unit.deletedAt),
 		lte(unit.createdAt, input.asOf),
-		input.seedUnitId ? ne(unit.id, input.seedUnitId) : undefined,
+		input.seedUnitIds?.length ? not(inArray(unit.id, [...input.seedUnitIds])) : undefined,
+		not(
+			exists(
+				database
+					.select({ id: unitVariant.variantUnitId })
+					.from(unitVariant)
+					.where(eq(unitVariant.variantUnitId, unit.id)),
+			),
+		),
 		input.viewer.contentRatings.length
 			? inArray(unit.contentRating, input.viewer.contentRatings)
 			: undefined,
@@ -97,13 +106,17 @@ export async function recommendUnits(input: {
 	snapshot: RecommendationSnapshotContext | null;
 	type?: RecommendedUnitKind;
 	seedUnitId?: string;
+	inheritedSeedUnitId?: string;
 	asOf: Date;
 	pageSize: number;
 	afterId?: string;
 	requestId: string;
 }) {
 	const snapshotId = input.snapshot?.id;
-	const condition = eligibleCatalogUnit(input);
+	const seedUnitIds = [input.seedUnitId, input.inheritedSeedUnitId].filter(
+		(value): value is string => Boolean(value),
+	);
+	const condition = eligibleCatalogUnit({ ...input, seedUnitIds });
 	const statJoin = snapshotId
 		? and(
 				eq(recommendationUnitStat.snapshotId, snapshotId),
@@ -125,7 +138,7 @@ export async function recommendUnits(input: {
 		.where(condition)
 		.orderBy(desc(unit.createdAt), desc(unit.id))
 		.limit(RecommendationPolicy.maxExplorationCandidates);
-	const seedPromise =
+	const directSeedPromise =
 		snapshotId && input.seedUnitId
 			? database
 					.select({
@@ -138,6 +151,25 @@ export async function recommendUnits(input: {
 						and(
 							eq(recommendationUnitEdge.snapshotId, snapshotId),
 							eq(recommendationUnitEdge.sourceUnitId, input.seedUnitId),
+							condition,
+						),
+					)
+					.orderBy(recommendationUnitEdge.rank, recommendationUnitEdge.targetUnitId)
+					.limit(RecommendationPolicy.maxGraphCandidates)
+			: Promise.resolve([]);
+	const inheritedSeedPromise =
+		snapshotId && input.inheritedSeedUnitId && input.inheritedSeedUnitId !== input.seedUnitId
+			? database
+					.select({
+						id: recommendationUnitEdge.targetUnitId,
+						score: recommendationUnitEdge.score,
+					})
+					.from(recommendationUnitEdge)
+					.innerJoin(unit, eq(unit.id, recommendationUnitEdge.targetUnitId))
+					.where(
+						and(
+							eq(recommendationUnitEdge.snapshotId, snapshotId),
+							eq(recommendationUnitEdge.sourceUnitId, input.inheritedSeedUnitId),
 							condition,
 						),
 					)
@@ -175,15 +207,21 @@ export async function recommendUnits(input: {
 					.orderBy(desc(profileScore), desc(recommendationUnitEdge.targetUnitId))
 					.limit(RecommendationPolicy.maxGraphCandidates)
 			: Promise.resolve([]);
-	const [objectiveRows, recentRows, seedRows, profileRows] = await Promise.all([
-		objectivePromise,
-		recentPromise,
-		seedPromise,
-		profilePromise,
-	]);
+	const [objectiveRows, recentRows, directSeedRows, inheritedSeedRows, profileRows] =
+		await Promise.all([
+			objectivePromise,
+			recentPromise,
+			directSeedPromise,
+			inheritedSeedPromise,
+			profilePromise,
+		]);
 	const relevance = new Map<string, number>();
 	const reasons = new Map<string, RecommendationReason>();
-	for (const row of seedRows) {
+	for (const row of inheritedSeedRows) {
+		relevance.set(row.id, (relevance.get(row.id) ?? 0) + Number(row.score));
+		reasons.set(row.id, "related_subject");
+	}
+	for (const row of directSeedRows) {
 		relevance.set(row.id, (relevance.get(row.id) ?? 0) + Number(row.score) * 2);
 		reasons.set(row.id, "related_subject");
 	}
@@ -196,7 +234,8 @@ export async function recommendUnits(input: {
 	for (const { id } of recentRows) if (!reasons.has(id)) reasons.set(id, "new_and_relevant");
 	const ids = [
 		...new Set([
-			...seedRows.map(({ id }) => id),
+			...directSeedRows.map(({ id }) => id),
+			...inheritedSeedRows.map(({ id }) => id),
 			...profileRows.map(({ id }) => id),
 			...objectiveRows.map(({ id }) => id),
 			...recentRows.map(({ id }) => id),
@@ -262,12 +301,20 @@ export async function recommendUnits(input: {
 			},
 		];
 	});
-	const ranked = rankRecommendations(candidates, {
+	const rankedByScore = rankRecommendations(candidates, {
 		sort: "best",
 		personalized: input.viewer.personalized || Boolean(input.seedUnitId),
 		asOf: input.asOf,
 		pageSize: input.pageSize,
 	});
+	const directIds = new Set(directSeedRows.map(({ id }) => id));
+	const inheritedIds = new Set(inheritedSeedRows.map(({ id }) => id));
+	const provenanceRank = (id: string) => (directIds.has(id) ? 0 : inheritedIds.has(id) ? 1 : 2);
+	const ranked = input.seedUnitId
+		? [...rankedByScore].sort(
+				(left, right) => provenanceRank(left.id) - provenanceRank(right.id),
+			)
+		: rankedByScore;
 	const start = input.afterId ? ranked.findIndex(({ id }) => id === input.afterId) + 1 : 0;
 	if (input.afterId && start === 0) return null;
 	const page = ranked.slice(start, start + input.pageSize);
@@ -325,6 +372,13 @@ export async function recommendUnits(input: {
 					summary: localization?.summary ?? null,
 					cover: presentImageAsset(detail.coverAssetId),
 					recommendationReason: reasons.get(detail.id) ?? null,
+					source: input.seedUnitId
+						? directIds.has(detail.id)
+							? ("direct" as const)
+							: inheritedIds.has(detail.id)
+								? ("main" as const)
+								: null
+						: null,
 					tracking: createRecommendationTracking(detail.id, {
 						requestId: input.requestId,
 						surface: surface(kind, Boolean(input.seedUnitId)),

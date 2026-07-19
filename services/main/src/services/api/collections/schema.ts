@@ -39,5 +39,31 @@ export const SaveCollectionItemBody = t.Object({
 });
 export type SaveCollectionItemBody = Static<typeof SaveCollectionItemBody>;
 
+export const AddCollectionItemsBatchBody = t.Object(
+	{
+		items: t.Array(
+			t.Object(
+				{
+					targetId: Uuid,
+					kind: t.Optional(t.String({ minLength: 1, maxLength: 32 })),
+				},
+				{ additionalProperties: false },
+			),
+			{ minItems: 1, maxItems: 20, uniqueItems: true },
+		),
+	},
+	{ additionalProperties: false },
+);
+export type AddCollectionItemsBatchBody = Static<typeof AddCollectionItemsBatchBody>;
+
+export const AddCollectionItemsBatchResponse = t.Object({
+	items: t.Array(
+		t.Object({
+			targetId: Uuid,
+			state: t.UnionEnum(["created", "existing"]),
+		}),
+	),
+});
+
 export const FavoriteItemParams = t.Object({ targetId: Uuid });
 export type FavoriteItemParams = Static<typeof FavoriteItemParams>;

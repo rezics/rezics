@@ -132,6 +132,17 @@ describe("domain search SQL", () => {
 		expect(execute).not.toHaveBeenCalled();
 	});
 
+	it("hides Variants from browse discovery but annotates exact Unit results", async () => {
+		await searchDomain("units", {});
+		expect(lastQuery()).toContain('select 1 from "unit_variant"');
+
+		await searchDomain("units", { query: "special edition" });
+		const exactQuery = lastQuery();
+		expect(exactQuery).toContain("'variantRole'");
+		expect(exactQuery).toContain("'variantMain'");
+		expect(exactQuery).toContain('"unit_variant"."variant_unit_id" = "unit"."id"');
+	});
+
 	it("batches bounded facet counts and omits unsupported category facets", async () => {
 		execute.mockResolvedValueOnce({
 			rows: [

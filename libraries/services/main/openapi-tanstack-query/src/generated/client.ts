@@ -205,6 +205,8 @@ import type {
 	ReplaceUnitSlugAddressAsStaffResponses,
 	ReleaseSlugRedirectAsStaffOptions,
 	ReleaseSlugRedirectAsStaffResponses,
+	GetApiUnitsByIdByUnitIdSeriesMembershipsOptions,
+	GetApiUnitsByIdByUnitIdSeriesMembershipsResponses,
 	GetApiUnitsByIdByUnitIdStatusEventsOptions,
 	GetApiUnitsByIdByUnitIdStatusEventsResponses,
 	GetApiUnitsByTypeOptions,
@@ -217,6 +219,10 @@ import type {
 	PatchApiUnitsByTypeByUnitIdResponses,
 	DeleteApiUnitsByTypeByUnitIdOptions,
 	DeleteApiUnitsByTypeByUnitIdResponses,
+	PatchApiUnitsByTypeByUnitIdVariantContextOptions,
+	PatchApiUnitsByTypeByUnitIdVariantContextResponses,
+	PostApiUnitsByTypeByUnitIdVariantContextPromoteOptions,
+	PostApiUnitsByTypeByUnitIdVariantContextPromoteResponses,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageOptions,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageResponses,
 	GetApiHistoryUnitsByUnitIdRevisionsOptions,
@@ -317,6 +323,8 @@ import type {
 	PatchApiCollectionsByCollectionIdResponses,
 	DeleteApiCollectionsByCollectionIdOptions,
 	DeleteApiCollectionsByCollectionIdResponses,
+	PostApiCollectionsByCollectionIdItemsBatchOptions,
+	PostApiCollectionsByCollectionIdItemsBatchResponses,
 	PutApiCollectionsByCollectionIdItemsByTargetIdOptions,
 	PutApiCollectionsByCollectionIdItemsByTargetIdResponses,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdOptions,
@@ -2158,6 +2166,22 @@ export function releaseSlugRedirectAsStaff<ThrowOnError extends boolean = true>(
 }
 
 /**
+ * @summary List Unit Series memberships
+ * {@link /api/units/by-id/:unitId/series-memberships}
+ */
+export function getApiUnitsByIdByUnitIdSeriesMemberships<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitsByIdByUnitIdSeriesMembershipsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitsByIdByUnitIdSeriesMembershipsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/units/by-id/{unitId}/series-memberships",
+		...config,
+	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdSeriesMembershipsResponses, ThrowOnError>>;
+}
+
+/**
  * @summary List Unit status events
  * {@link /api/units/by-id/:unitId/status-events}
  */
@@ -2240,6 +2264,42 @@ export function deleteApiUnitsByTypeByUnitId<ThrowOnError extends boolean = true
 
 	return request({ method: "DELETE", url: "/api/units/{type}/{unitId}", ...config }) as Promise<
 		RequestResult<DeleteApiUnitsByTypeByUnitIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Update Unit Main relationship
+ * {@link /api/units/:type/:unitId/variant-context}
+ */
+export function patchApiUnitsByTypeByUnitIdVariantContext<ThrowOnError extends boolean = true>(
+	options: Options<PatchApiUnitsByTypeByUnitIdVariantContextOptions, ThrowOnError>,
+): Promise<RequestResult<PatchApiUnitsByTypeByUnitIdVariantContextResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PATCH",
+		url: "/api/units/{type}/{unitId}/variant-context",
+		...config,
+	}) as Promise<RequestResult<PatchApiUnitsByTypeByUnitIdVariantContextResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Promote Unit Variant to Main
+ * {@link /api/units/:type/:unitId/variant-context/promote}
+ */
+export function postApiUnitsByTypeByUnitIdVariantContextPromote<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PostApiUnitsByTypeByUnitIdVariantContextPromoteOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiUnitsByTypeByUnitIdVariantContextPromoteResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/units/{type}/{unitId}/variant-context/promote",
+		...config,
+	}) as Promise<
+		RequestResult<PostApiUnitsByTypeByUnitIdVariantContextPromoteResponses, ThrowOnError>
 	>;
 }
 
@@ -2813,8 +2873,9 @@ export function deleteApiUnitsByTypeByUnitIdTagsByTagIdVote<ThrowOnError extends
 }
 
 /**
- * @summary Attach unit version
+ * @summary Attach unit version (legacy)
  * {@link /api/units/:type/:unitId/version-of/:canonicalId}
+ * @deprecated
  */
 export function putApiUnitsByTypeByUnitIdVersionOfByCanonicalId<
 	ThrowOnError extends boolean = true,
@@ -3103,6 +3164,22 @@ export function deleteApiCollectionsByCollectionId<ThrowOnError extends boolean 
 		url: "/api/collections/{collectionId}",
 		...config,
 	}) as Promise<RequestResult<DeleteApiCollectionsByCollectionIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Add collection items atomically
+ * {@link /api/collections/:collectionId/items/batch}
+ */
+export function postApiCollectionsByCollectionIdItemsBatch<ThrowOnError extends boolean = true>(
+	options: Options<PostApiCollectionsByCollectionIdItemsBatchOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiCollectionsByCollectionIdItemsBatchResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/collections/{collectionId}/items/batch",
+		...config,
+	}) as Promise<RequestResult<PostApiCollectionsByCollectionIdItemsBatchResponses, ThrowOnError>>;
 }
 
 /**

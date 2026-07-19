@@ -1,8 +1,8 @@
-import { Decode, Encode } from "@sinclair/typebox/value";
+import { Check, Decode, Encode } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
 import { DateTime } from ".";
-import { toPortableTextResponse } from "./response";
+import { toPortableTextResponse, UnitVariantContextResponse } from "./response";
 
 describe("API response values", () => {
 	it("keeps Date values in code and ISO timestamps on the wire", () => {
@@ -37,5 +37,37 @@ describe("API response values", () => {
 				content: [],
 			}),
 		).toThrow("Invalid Block document");
+	});
+
+	it("keeps every viewer-safe Main-Variant state explicit", () => {
+		const summary = {
+			id: "00000000-0000-7000-8000-000000000001",
+			type: "book",
+			title: "Main title",
+			cover: null,
+		};
+		expect(Check(UnitVariantContextResponse, { role: "standalone" })).toBe(true);
+		expect(Check(UnitVariantContextResponse, { role: "main", variants: [summary] })).toBe(true);
+		expect(
+			Check(UnitVariantContextResponse, {
+				role: "variant",
+				relationUpdatedAt: "2026-07-20T00:00:00.000Z",
+				main: { state: "available", unit: summary },
+			}),
+		).toBe(true);
+		expect(
+			Check(UnitVariantContextResponse, {
+				role: "variant",
+				relationUpdatedAt: "2026-07-20T00:00:00.000Z",
+				main: { state: "unavailable" },
+			}),
+		).toBe(true);
+		expect(
+			Check(UnitVariantContextResponse, {
+				role: "variant",
+				relationUpdatedAt: "2026-07-20T00:00:00.000Z",
+				main: { state: "unavailable", unit: summary },
+			}),
+		).toBe(false);
 	});
 });

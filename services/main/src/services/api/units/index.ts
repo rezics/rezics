@@ -24,9 +24,17 @@ import {
 	UnitStatusEventListQuery,
 	UnitStatusEventListResponse,
 	UnitStatusEventParams,
+	UpdateUnitVariantContextBody,
+	PromoteUnitVariantBody,
+	UnitSeriesMembershipListResponse,
 } from "./schema";
 import { toApiErrorResponse, UnitDetailResponse, UnitListResponse } from "../schema/response";
 import { NoContentResponse } from "../schema/action-response";
+import {
+	getUnitSeriesMemberships,
+	promoteUnitVariantToMain,
+	updateUnitVariantContext,
+} from "../../units/variants";
 
 const AuthenticationRequiredResponse = toApiErrorResponse(["AuthenticationRequired"]);
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
@@ -52,8 +60,34 @@ const UnitAuthorizationForbiddenResponse = toApiErrorResponse([
 	"UnitProtected",
 ]);
 const UnitChangedResponse = toApiErrorResponse(["UnitChanged"]);
+const UnitVariantConflictResponse = toApiErrorResponse([
+	"UnitVariantKindMismatch",
+	"UnitVariantTargetIsVariant",
+	"UnitVariantSourceHasVariants",
+	"UnitVariantChanged",
+	"UnitVariantMainUnavailable",
+]);
 export default new Elysia({ prefix: "/units" })
 	.use(session)
+	.get(
+		"/by-id/:unitId/series-memberships",
+		async ({ params, request }) => {
+			const authorization = (await resolveIdentity(request.headers, "unit:read"))
+				.authorization;
+			await authorization.unit.ensureCanRead(params.unitId);
+			return {
+				items: await getUnitSeriesMemberships(params.unitId, authorization.profileId),
+			};
+		},
+		{
+			params: UnitStatusEventParams,
+			response: {
+				[StatusCodes.OK]: UnitSeriesMembershipListResponse,
+				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+			},
+			detail: { summary: "List Unit Series memberships", tags: ["Units", "Series"] },
+		},
+	)
 	.get(
 		"/by-id/:unitId/status-events",
 		async ({ params, query, request }) => {
@@ -163,6 +197,59 @@ export default new Elysia({ prefix: "/units" })
 				[StatusCodes.CONFLICT]: UnitChangedResponse,
 			},
 			detail: { summary: "Update unit", tags: ["Units"] },
+		},
+	)
+	.patch(
+		"/:type/:unitId/variant-context",
+		async ({ params, authorization, body }) => {
+			await updateUnitVariantContext({
+				kind: params.type,
+				variantUnitId: params.unitId,
+				mainUnitId: body.mainUnitId,
+				expectedMainUnitId: body.expectedMainUnitId,
+				actorProfileId: authorization.profileId,
+				authorization: authorization.unit,
+			});
+			return getUnit(params.type, params.unitId, authorization);
+		},
+		{
+			access: "contribute:unit:update",
+			params: UnitUnitIdParams,
+			body: UpdateUnitVariantContextBody,
+			response: {
+				[StatusCodes.OK]: UnitDetailResponse,
+				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
+				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+				[StatusCodes.CONFLICT]: UnitVariantConflictResponse,
+			},
+			detail: { summary: "Update Unit Main relationship", tags: ["Units"] },
+		},
+	)
+	.post(
+		"/:type/:unitId/variant-context/promote",
+		async ({ params, authorization, body }) => {
+			await promoteUnitVariantToMain({
+				kind: params.type,
+				variantUnitId: params.unitId,
+				expectedMainUnitId: body.expectedMainUnitId,
+				actorProfileId: authorization.profileId,
+				authorization: authorization.unit,
+			});
+			return getUnit(params.type, params.unitId, authorization);
+		},
+		{
+			access: "contribute:unit:update",
+			params: UnitUnitIdParams,
+			body: PromoteUnitVariantBody,
+			response: {
+				[StatusCodes.OK]: UnitDetailResponse,
+				[StatusCodes.UNAUTHORIZED]: AuthenticationRequiredResponse,
+				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
+				[StatusCodes.CONFLICT]: UnitVariantConflictResponse,
+			},
+			detail: { summary: "Promote Unit Variant to Main", tags: ["Units"] },
 		},
 	)
 	.delete(

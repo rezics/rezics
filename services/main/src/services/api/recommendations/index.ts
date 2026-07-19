@@ -23,6 +23,7 @@ import { RecommendationPolicyVersion } from "../../recommendations/policy";
 import { recommendRelatedPosts } from "../../recommendations/related-posts";
 import { verifyRecommendationTracking } from "../../recommendations/tracking";
 import { UnitNotFound } from "../../units/errors";
+import { resolveMainUnitId } from "../../units/variants";
 import { getPublisherSummariesByUnitIds } from "../../units/status";
 import { ValidationError } from "../errors";
 import { FeedResponse, toApiErrorResponse } from "../schema/response";
@@ -156,6 +157,7 @@ export default new Elysia({ prefix: "/recommendations" })
 					Number.isNaN(Date.parse(cursor.asOf)))
 			)
 				throw new InvalidPaginationCursor();
+			let inheritedSeedUnitId: string | undefined;
 			if (query.seedUnitId) {
 				const [seed] = await database
 					.select({ id: unit.id })
@@ -169,6 +171,20 @@ export default new Elysia({ prefix: "/recommendations" })
 					)
 					.limit(1);
 				if (!seed) throw new UnitNotFound();
+				const resolvedMainUnitId = await resolveMainUnitId(database, query.seedUnitId);
+				if (resolvedMainUnitId !== query.seedUnitId) {
+					const [readableMain] = await database
+						.select({ id: unit.id })
+						.from(unit)
+						.where(
+							and(
+								eq(unit.id, resolvedMainUnitId),
+								getUnitReadCondition(identity.profile?.unitId),
+							),
+						)
+						.limit(1);
+					if (readableMain) inheritedSeedUnitId = resolvedMainUnitId;
+				}
 			}
 			const snapshot = await resolvePageSnapshot(cursor);
 			const policyVersion = snapshot?.policyVersion ?? RecommendationPolicyVersion;
@@ -180,6 +196,7 @@ export default new Elysia({ prefix: "/recommendations" })
 				snapshot,
 				...(query.type ? { type: query.type } : {}),
 				...(query.seedUnitId ? { seedUnitId: query.seedUnitId } : {}),
+				...(inheritedSeedUnitId ? { inheritedSeedUnitId } : {}),
 				asOf,
 				pageSize: query.limit ?? 20,
 				...(cursor ? { afterId: cursor.lastId } : {}),

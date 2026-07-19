@@ -77,6 +77,42 @@ export class UnitPrimaryLanguageMissing extends Data.TaggedError("UnitPrimaryLan
 	readonly message = "Primary language must have an existing Unit localization";
 }
 
+export class UnitVariantKindMismatch extends Data.TaggedError("UnitVariantKindMismatch") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitVariantKindMismatch.status;
+	readonly message = "A Variant and its Main must have the same supported Unit kind";
+}
+
+export class UnitVariantTargetIsVariant extends Data.TaggedError("UnitVariantTargetIsVariant") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitVariantTargetIsVariant.status;
+	readonly message = "A Variant must point directly to a Main";
+}
+
+export class UnitVariantSourceHasVariants extends Data.TaggedError("UnitVariantSourceHasVariants") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitVariantSourceHasVariants.status;
+	readonly message = "A Main with Variants cannot become a Variant through this operation";
+}
+
+export class UnitVariantChanged extends Data.TaggedError("UnitVariantChanged") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitVariantChanged.status;
+	readonly message = "The Unit Main relationship has changed";
+	readonly details: { readonly currentMainUnitId: string | null };
+
+	constructor(currentMainUnitId: string | null) {
+		super();
+		this.details = { currentMainUnitId };
+	}
+}
+
+export class UnitVariantMainUnavailable extends Data.TaggedError("UnitVariantMainUnavailable") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitVariantMainUnavailable.status;
+	readonly message = "The Main is unavailable for this Variant state";
+}
+
 export class InvalidSlug extends Data.TaggedError("InvalidSlug") {
 	static readonly status = StatusCodes.BAD_REQUEST as const;
 	readonly status = InvalidSlug.status;
@@ -145,6 +181,11 @@ export const UnitErrors = [
 	UnitChanged,
 	UnitRevisionConflict,
 	UnitPrimaryLanguageMissing,
+	UnitVariantKindMismatch,
+	UnitVariantTargetIsVariant,
+	UnitVariantSourceHasVariants,
+	UnitVariantChanged,
+	UnitVariantMainUnavailable,
 	InvalidSlug,
 	SlugTaken,
 	SlugScopeNotFound,

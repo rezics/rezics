@@ -112,6 +112,7 @@ export const UnitRecommendationResponse = t.Object({
 			summary: t.Nullable(t.String()),
 			cover: RecommendationCoverResponse,
 			recommendationReason: t.Nullable(RecommendationReasonSchema),
+			source: t.Nullable(t.UnionEnum(["direct", "main"])),
 			tracking: RecommendationTrackingSchema,
 		}),
 	),

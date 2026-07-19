@@ -57,6 +57,7 @@ import { checkUnitType, createCatalogUnit } from "./service";
 import { upsertLocalization } from "../../units/service";
 import { UnitLocalizationBody } from "../units/schema";
 import { recordUnitRevision } from "../../units/history";
+import { updateUnitVariantContext } from "../../units/variants";
 import { presentImageAsset } from "../../units/service";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
 import { UnitIdParams } from "../schema";
@@ -98,6 +99,13 @@ const EntityPolicyForbiddenResponse = toApiErrorResponse([
 	"UnitPermissionForbidden",
 	"UnitAccessRestricted",
 	"UnitProtected",
+]);
+const UnitVariantConflictResponse = toApiErrorResponse([
+	"UnitVariantKindMismatch",
+	"UnitVariantTargetIsVariant",
+	"UnitVariantSourceHasVariants",
+	"UnitVariantChanged",
+	"UnitVariantMainUnavailable",
 ]);
 
 const publiclyReadableUnitCondition = () =>
@@ -1170,31 +1178,31 @@ export default new Elysia()
 				async ({ params, authorization }) => {
 					await checkUnitType(params.unitId, params.type);
 					await checkUnitType(params.canonicalId, params.type);
-					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
-						"variant",
-					]);
-					return database.transaction(async (tx) => {
-						const [created] = await tx
-							.insert(unitVariant)
-							.values({
-								unitId: params.unitId,
-								canonicalUnitId: params.canonicalId,
-							})
-							.onConflictDoUpdate({
-								target: unitVariant.unitId,
-								set: {
-									canonicalUnitId: params.canonicalId,
-								},
-							})
-							.returning();
-						await recordUnitRevision(tx, {
-							unitId: params.unitId,
-							actorProfileId: authorization.profileId,
-							event: "update",
-						});
-						if (!created) throw new UnitVersionNotFound();
-						return created;
+					const [current] = await database
+						.select({ mainUnitId: unitVariant.mainUnitId })
+						.from(unitVariant)
+						.where(eq(unitVariant.variantUnitId, params.unitId))
+						.limit(1);
+					await updateUnitVariantContext({
+						kind: params.type,
+						variantUnitId: params.unitId,
+						mainUnitId: params.canonicalId,
+						expectedMainUnitId: current?.mainUnitId ?? null,
+						actorProfileId: authorization.profileId,
+						authorization: authorization.unit,
 					});
+					const [relationship] = await database
+						.select()
+						.from(unitVariant)
+						.where(eq(unitVariant.variantUnitId, params.unitId))
+						.limit(1);
+					if (!relationship) throw new UnitVersionNotFound();
+					return {
+						unitId: relationship.variantUnitId,
+						canonicalUnitId: relationship.mainUnitId,
+						createdAt: relationship.createdAt,
+						updatedAt: relationship.updatedAt,
+					};
 				},
 				{
 					access: "contribute:unit:update",
@@ -1206,8 +1214,13 @@ export default new Elysia()
 							"UnitNotFound",
 							"UnitVersionNotFound",
 						]),
+						[StatusCodes.CONFLICT]: UnitVariantConflictResponse,
 					},
-					detail: { summary: "Attach unit version", tags: ["Units"] },
+					detail: {
+						summary: "Attach unit version (legacy)",
+						tags: ["Units"],
+						deprecated: true,
+					},
 				},
 			),
 	);

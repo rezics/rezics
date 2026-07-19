@@ -72,6 +72,7 @@ export const unit = pgTable(
 			.on(table.status, table.visibility, table.createdAt.desc(), table.id.desc())
 			.where(sql`${table.deletedAt} is null`),
 		index("unit_moderation_status_idx").on(table.moderationStatus),
+		unique("unit_id_kind_key").on(table.id, table.kind),
 		check("unit_kind_check", inArray(table.kind, UnitKindValues)),
 		check(
 			"unit_publication_check",

@@ -6,7 +6,13 @@ import { RecommendationPolicy, RecommendationPolicyVersion } from "./policy";
 
 async function buildUnitStats(tx: DatabaseTransaction, snapshotId: string) {
 	await tx.execute(sql`
-		WITH event_stats AS (
+		WITH unit_identity AS (
+			SELECT source.id AS source_unit_id,
+				coalesce(relationship.main_unit_id, source.id) AS discovery_unit_id
+			FROM unit source
+			LEFT JOIN unit_variant relationship
+				ON relationship.variant_unit_id = source.id
+		), event_stats AS (
 			SELECT unit_id,
 				sum(signal_count) FILTER (WHERE kind = 'impression') AS impressions,
 				sum(signal_count) FILTER (WHERE kind = 'open') AS opens,
@@ -22,6 +28,32 @@ async function buildUnitStats(tx: DatabaseTransaction, snapshotId: string) {
 			FROM recommendation_unit_signal_hourly
 			WHERE bucket_start >= now() - interval '7 days' AND weight > 0
 			GROUP BY unit_id
+		), grouped AS (
+			SELECT identity.discovery_unit_id AS unit_id,
+				coalesce(sum(es.impressions), 0) AS impressions,
+				coalesce(sum(es.opens), 0) AS opens,
+				coalesce(sum(es.dwell30s), 0) AS dwell30s,
+				coalesce(sum(current_stat.upvotes), 0) AS upvotes,
+				coalesce(sum(current_stat.downvotes), 0) AS downvotes,
+				coalesce(sum(current_stat.replies), 0) AS replies,
+				coalesce(sum(current_stat.favorites), 0) AS favorites,
+				coalesce(sum(current_stat.shares), 0) AS shares,
+				coalesce(sum(current_stat.high_scores), 0) AS high_scores,
+				coalesce(sum(current_stat.active_progress), 0) AS active_progress,
+				coalesce(sum(current_stat.completions), 0) AS completions,
+				coalesce(sum(current_stat.negative_progress), 0) AS negative_progress,
+				coalesce(sum(ws.engagement6h), 0) AS engagement6h,
+				coalesce(sum(ws.engagement24h), 0) AS engagement24h,
+				coalesce(sum(ws.engagement7d), 0) AS engagement7d
+			FROM unit_identity identity
+			JOIN unit discovery ON discovery.id = identity.discovery_unit_id
+			LEFT JOIN event_stats es ON es.unit_id = identity.source_unit_id
+			LEFT JOIN unit_engagement_stat current_stat
+				ON current_stat.unit_id = identity.source_unit_id
+			LEFT JOIN window_stats ws ON ws.unit_id = identity.source_unit_id
+			WHERE discovery.status = 'published' AND discovery.visibility = 'public'
+				AND discovery.moderation_status = 'approved' AND discovery.deleted_at IS NULL
+			GROUP BY identity.discovery_unit_id
 		)
 		INSERT INTO recommendation_unit_stat (
 				snapshot_id, unit_id, context_realm_id, impressions, opens, dwell_30s,
@@ -29,21 +61,13 @@ async function buildUnitStats(tx: DatabaseTransaction, snapshotId: string) {
 			active_progress, completions, negative_progress,
 				engagement_6h, engagement_24h, engagement_7d
 		)
-		SELECT ${snapshotId}::uuid, u.id, NULL,
-			coalesce(es.impressions, 0), coalesce(es.opens, 0), coalesce(es.dwell30s, 0),
-			coalesce(current_stat.upvotes, 0), coalesce(current_stat.downvotes, 0),
-			coalesce(current_stat.replies, 0), coalesce(current_stat.favorites, 0),
-			coalesce(current_stat.shares, 0), coalesce(current_stat.high_scores, 0),
-			coalesce(current_stat.active_progress, 0),
-			coalesce(current_stat.completions, 0),
-			coalesce(current_stat.negative_progress, 0), coalesce(ws.engagement6h, 0),
-			coalesce(ws.engagement24h, 0), coalesce(ws.engagement7d, 0)
-		FROM unit u
-		LEFT JOIN event_stats es ON es.unit_id = u.id
-		LEFT JOIN unit_engagement_stat current_stat ON current_stat.unit_id = u.id
-		LEFT JOIN window_stats ws ON ws.unit_id = u.id
-		WHERE u.status = 'published' AND u.visibility = 'public'
-			AND u.moderation_status = 'approved' AND u.deleted_at IS NULL
+		SELECT ${snapshotId}::uuid, grouped.unit_id, NULL,
+			grouped.impressions, grouped.opens, grouped.dwell30s,
+			grouped.upvotes, grouped.downvotes, grouped.replies, grouped.favorites,
+			grouped.shares, grouped.high_scores, grouped.active_progress,
+			grouped.completions, grouped.negative_progress, grouped.engagement6h,
+			grouped.engagement24h, grouped.engagement7d
+		FROM grouped
 	`);
 }
 
@@ -56,14 +80,25 @@ async function buildProfileInterests(tx: DatabaseTransaction, snapshotId: string
 			WHERE weight <> 0
 				AND bucket_start >= now() - ${RecommendationPolicy.interestMaxAgeDays} * interval '1 day'
 			GROUP BY profile_id, unit_id
-		), ranked AS (
-			SELECT d.profile_id, d.unit_id, d.weight,
-				row_number() OVER (PARTITION BY d.profile_id ORDER BY d.weight DESC, d.unit_id) AS rank
+		), resolved AS (
+			SELECT d.profile_id, coalesce(relationship.main_unit_id, d.unit_id) AS unit_id,
+				sum(d.weight) AS weight
 			FROM decayed d
-			JOIN profile_preference preference ON preference.profile_id = d.profile_id
+			LEFT JOIN unit_variant relationship ON relationship.variant_unit_id = d.unit_id
+			GROUP BY d.profile_id, coalesce(relationship.main_unit_id, d.unit_id)
+		), ranked AS (
+			SELECT resolved.profile_id, resolved.unit_id, resolved.weight,
+				row_number() OVER (
+					PARTITION BY resolved.profile_id
+					ORDER BY resolved.weight DESC, resolved.unit_id
+				) AS rank
+			FROM resolved
+			JOIN profile_preference preference ON preference.profile_id = resolved.profile_id
 			LEFT JOIN recommendation_exclusion exclusion
-				ON exclusion.profile_id = d.profile_id AND exclusion.unit_id = d.unit_id
-			WHERE preference.personalized_feed AND d.weight > 0 AND exclusion.unit_id IS NULL
+				ON exclusion.profile_id = resolved.profile_id
+				AND exclusion.unit_id = resolved.unit_id
+			WHERE preference.personalized_feed
+				AND resolved.weight > 0 AND exclusion.unit_id IS NULL
 		)
 		INSERT INTO recommendation_profile_interest (snapshot_id, profile_id, unit_id, weight, rank)
 		SELECT ${snapshotId}::uuid, profile_id, unit_id, weight, rank::int
@@ -122,9 +157,6 @@ async function buildUnitEdges(tx: DatabaseTransaction, snapshotId: string) {
 				ON series_degree.series_id = a.series_id
 				AND series_degree.degree <= ${RecommendationPolicy.maxStructuralDegree}
 			UNION ALL
-			SELECT least(unit_id, canonical_unit_id), greatest(unit_id, canonical_unit_id), 3::double precision
-			FROM unit_variant
-			UNION ALL
 			SELECT least(id, subject_unit_id), greatest(id, subject_unit_id), 2::double precision
 			FROM post WHERE subject_unit_id IS NOT NULL
 		), structural_pair AS (
@@ -170,22 +202,36 @@ async function buildUnitEdges(tx: DatabaseTransaction, snapshotId: string) {
 		), behavioral AS (
 			SELECT left_id AS source_id, right_id AS target_id, score FROM behavioral_pair
 			UNION ALL SELECT right_id, left_id, score FROM behavioral_pair
-		), combined AS (
+		), combined_raw AS (
 			SELECT coalesce(s.source_id, b.source_id) AS source_id,
 				coalesce(s.target_id, b.target_id) AS target_id,
 				coalesce(s.score, 0) AS structural,
 				coalesce(b.score, 0) AS behavioral
 			FROM structural s FULL JOIN behavioral b
 				ON b.source_id = s.source_id AND b.target_id = s.target_id
+		), resolved_combined AS (
+			SELECT combined_raw.source_id,
+				coalesce(target_relationship.main_unit_id, combined_raw.target_id) AS target_id,
+				sum(combined_raw.structural) AS structural,
+				sum(combined_raw.behavioral) AS behavioral
+			FROM combined_raw
+			LEFT JOIN unit_variant target_relationship
+				ON target_relationship.variant_unit_id = combined_raw.target_id
+			LEFT JOIN unit_variant source_relationship
+				ON source_relationship.variant_unit_id = combined_raw.source_id
+			WHERE coalesce(target_relationship.main_unit_id, combined_raw.target_id)
+				<> coalesce(source_relationship.main_unit_id, combined_raw.source_id)
+			GROUP BY combined_raw.source_id,
+				coalesce(target_relationship.main_unit_id, combined_raw.target_id)
 		), normalized AS (
 			SELECT source_id, target_id,
 				CASE WHEN max(structural) OVER (PARTITION BY source_id) > 0
 					THEN structural / max(structural) OVER (PARTITION BY source_id) ELSE 0 END AS structural,
 				CASE WHEN max(behavioral) OVER (PARTITION BY source_id) > 0
 					THEN behavioral / max(behavioral) OVER (PARTITION BY source_id) ELSE 0 END AS behavioral
-			FROM combined
-			JOIN unit eligible_source ON eligible_source.id = combined.source_id
-			JOIN unit eligible_target ON eligible_target.id = combined.target_id
+			FROM resolved_combined
+			JOIN unit eligible_source ON eligible_source.id = resolved_combined.source_id
+			JOIN unit eligible_target ON eligible_target.id = resolved_combined.target_id
 			WHERE eligible_source.status = 'published'
 				AND eligible_source.visibility = 'public'
 				AND eligible_source.moderation_status = 'approved'

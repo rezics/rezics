@@ -22,8 +22,10 @@ import {
 	unitLocalization,
 	unitTag,
 	unitStatusEvent,
+	unitVariant,
 } from "../database/schema";
 import { AliasSearchScoreThreshold } from "../database/schema/contract-values";
+import { firstUnitLocalizationCoverAssetId, primaryUnitTitle } from "../units/localization";
 import { InvalidSearch } from "./errors";
 import {
 	SearchCategoryRules,
@@ -34,6 +36,8 @@ import {
 } from "./schema";
 
 const subjectUnit = alias(unit, "subject_unit");
+const searchVariantRelationship = alias(unitVariant, "search_variant_relationship");
+const searchMainUnit = alias(unit, "search_main_unit");
 const facetLocalization = alias(unitLocalization, "facet_unit_localization");
 const facetUnitTag = alias(unitTag, "facet_unit_tag");
 const facetRealmUnit = alias(realmUnit, "facet_realm_unit");
@@ -363,6 +367,11 @@ function buildSearchConditions(category: SearchCategory, request: DomainSearchRe
 
 	const query = request.query?.trim() ?? "";
 	if (query) conditions.push(sql`${unit.id} IN ${getUnitCandidateIds(query)}`);
+	if (category === "units" && !query)
+		conditions.push(sql`not exists (
+			select 1 from ${unitVariant}
+			where ${unitVariant.variantUnitId} = ${unit.id}
+		)`);
 	if (request.Languages?.length)
 		conditions.push(sql`(
 			NOT EXISTS (
@@ -464,6 +473,12 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 	const offset = request.offset ?? 0;
 	const limit = request.limit ?? 20;
 	const hitType = category === "posts" ? sql`${post.kind}::text` : sql`${unit.kind}::text`;
+	const readableSearchMain = getUnitReadCondition(
+		request.profileId,
+		{ discoverableOnly: true },
+		searchMainUnit,
+	);
+	const searchMainCoverAssetId = firstUnitLocalizationCoverAssetId(searchMainUnit.id);
 	const result = await database.execute<{ hit: SearchHit; total: string }>(sql`
 		SELECT jsonb_strip_nulls(jsonb_build_object(
 			'id', ${unit.id},
@@ -480,7 +495,35 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 					FILTER (WHERE ${unitLocalization.summary} IS NOT NULL)
 				FROM ${unitLocalization}
 				WHERE ${unitLocalization.unitId} = ${unit.id}
-			), '[]'::jsonb)
+			), '[]'::jsonb),
+			'variantRole', case when ${category}::text = 'units' then case
+				when exists (
+					select 1 from ${unitVariant}
+					where ${unitVariant.variantUnitId} = ${unit.id}
+				) then 'variant'
+				when exists (
+					select 1 from ${unitVariant}
+					where ${unitVariant.mainUnitId} = ${unit.id}
+				) then 'main'
+				else 'standalone'
+			end end,
+			'variantMain', case
+				when ${category}::text = 'units'
+					and ${searchVariantRelationship.variantUnitId} is not null
+				then case when ${readableSearchMain} then jsonb_build_object(
+					'state', 'available',
+					'unit', jsonb_build_object(
+						'id', ${searchMainUnit.id},
+						'type', ${searchMainUnit.kind},
+						'title', ${primaryUnitTitle(searchMainUnit.id)},
+						'cover', case when ${searchMainCoverAssetId} is null then null
+							else jsonb_build_object(
+								'id', ${searchMainCoverAssetId},
+								'url', '/image-assets/' || ${searchMainCoverAssetId} || '/content'
+							) end
+					)
+				) else jsonb_build_object('state', 'unavailable') end
+			end
 		)) AS hit, count(*) OVER ()::text AS total
 		FROM ${unit}
 		LEFT JOIN ${profile} ON ${profile.id} = ${unit.id}
@@ -490,6 +533,10 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 			LEFT JOIN ${postReplyStat} ON ${postReplyStat.postId} = ${unit.id}
 			LEFT JOIN ${unitFollowStat} ON ${unitFollowStat.unitId} = ${unit.id}
 		LEFT JOIN ${unit} AS ${subjectUnit} ON ${subjectUnit.id} = ${post.subjectUnitId}
+		LEFT JOIN ${unitVariant} AS ${searchVariantRelationship}
+			ON ${searchVariantRelationship.variantUnitId} = ${unit.id}
+		LEFT JOIN ${unit} AS ${searchMainUnit}
+			ON ${searchMainUnit.id} = ${searchVariantRelationship.mainUnitId}
 		LEFT JOIN ${realm} ON ${realm.id} = ${unit.id}
 		LEFT JOIN ${collection} ON ${collection.id} = ${unit.id}
 		LEFT JOIN ${poll} ON ${poll.id} = ${unit.id}
