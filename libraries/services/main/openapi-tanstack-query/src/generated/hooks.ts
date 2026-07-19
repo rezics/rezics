@@ -443,6 +443,35 @@ import type {
 	DeleteApiUsersByIdBlockStatus200,
 	DeleteApiUsersByIdBlockStatus422,
 	DeleteApiUsersByIdBlockStatus500,
+	PostApiUnitsResolveOptions,
+	PostApiUnitsResolveStatus200,
+	PostApiUnitsResolveStatus400,
+	PostApiUnitsResolveStatus404,
+	PostApiUnitsResolveStatus409,
+	PostApiUnitsResolveStatus422,
+	PostApiUnitsResolveStatus500,
+	PostApiUnitsSlugNamespacesOptions,
+	PostApiUnitsSlugNamespacesStatus200,
+	PostApiUnitsSlugNamespacesStatus400,
+	PostApiUnitsSlugNamespacesStatus403,
+	PostApiUnitsSlugNamespacesStatus404,
+	PostApiUnitsSlugNamespacesStatus409,
+	PostApiUnitsSlugNamespacesStatus422,
+	PostApiUnitsSlugNamespacesStatus500,
+	PutApiUnitsSlugAddressesByUnitIdOptions,
+	PutApiUnitsSlugAddressesByUnitIdStatus200,
+	PutApiUnitsSlugAddressesByUnitIdStatus400,
+	PutApiUnitsSlugAddressesByUnitIdStatus403,
+	PutApiUnitsSlugAddressesByUnitIdStatus404,
+	PutApiUnitsSlugAddressesByUnitIdStatus409,
+	PutApiUnitsSlugAddressesByUnitIdStatus422,
+	PutApiUnitsSlugAddressesByUnitIdStatus500,
+	DeleteApiUnitsSlugRedirectsByRedirectUnitIdOptions,
+	DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus204,
+	DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403,
+	DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus404,
+	DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus422,
+	DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus500,
 	GetApiUnitsByTypeOptions,
 	GetApiUnitsByTypeStatus200,
 	GetApiUnitsByTypeStatus400,
@@ -455,11 +484,6 @@ import type {
 	PostApiUnitsByTypeStatus404,
 	PostApiUnitsByTypeStatus422,
 	PostApiUnitsByTypeStatus500,
-	GetApiUnitsResolveByScopeBySlugOptions,
-	GetApiUnitsResolveByScopeBySlugStatus200,
-	GetApiUnitsResolveByScopeBySlugStatus404,
-	GetApiUnitsResolveByScopeBySlugStatus422,
-	GetApiUnitsResolveByScopeBySlugStatus500,
 	GetApiUnitsByTypeByUnitIdOptions,
 	GetApiUnitsByTypeByUnitIdStatus200,
 	GetApiUnitsByTypeByUnitIdStatus404,
@@ -1113,9 +1137,12 @@ import {
 	getApiUsersMeBlocks,
 	putApiUsersByIdBlock,
 	deleteApiUsersByIdBlock,
+	postApiUnitsResolve,
+	postApiUnitsSlugNamespaces,
+	putApiUnitsSlugAddressesByUnitId,
+	deleteApiUnitsSlugRedirectsByRedirectUnitId,
 	getApiUnitsByType,
 	postApiUnitsByType,
-	getApiUnitsResolveByScopeBySlug,
 	getApiUnitsByTypeByUnitId,
 	patchApiUnitsByTypeByUnitId,
 	deleteApiUnitsByTypeByUnitId,
@@ -8694,6 +8721,418 @@ export function useDeleteApiUsersByIdBlock<TContext>(
 	>;
 }
 
+export const postApiUnitsResolveMutationKey = () => [{ url: "/api/units/resolve" }] as const;
+
+export function postApiUnitsResolveMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiUnitsResolveMutationKey();
+	return mutationOptions<
+		PostApiUnitsResolveStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsResolveStatus400
+			| PostApiUnitsResolveStatus404
+			| PostApiUnitsResolveStatus409
+			| PostApiUnitsResolveStatus422
+			| PostApiUnitsResolveStatus500
+		>,
+		PostApiUnitsResolveOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await postApiUnitsResolve({ ...config, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Resolve a canonical Unit slug path
+ * {@link /api/units/resolve}
+ */
+export function usePostApiUnitsResolve<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiUnitsResolveStatus200,
+			ResponseErrorConfig<
+				| PostApiUnitsResolveStatus400
+				| PostApiUnitsResolveStatus404
+				| PostApiUnitsResolveStatus409
+				| PostApiUnitsResolveStatus422
+				| PostApiUnitsResolveStatus500
+			>,
+			PostApiUnitsResolveOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiUnitsResolveMutationKey();
+
+	const baseOptions = postApiUnitsResolveMutationOptions(config) as UseMutationOptions<
+		PostApiUnitsResolveStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsResolveStatus400
+			| PostApiUnitsResolveStatus404
+			| PostApiUnitsResolveStatus409
+			| PostApiUnitsResolveStatus422
+			| PostApiUnitsResolveStatus500
+		>,
+		PostApiUnitsResolveOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiUnitsResolveStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsResolveStatus400
+			| PostApiUnitsResolveStatus404
+			| PostApiUnitsResolveStatus409
+			| PostApiUnitsResolveStatus422
+			| PostApiUnitsResolveStatus500
+		>,
+		PostApiUnitsResolveOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiUnitsResolveStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsResolveStatus400
+			| PostApiUnitsResolveStatus404
+			| PostApiUnitsResolveStatus409
+			| PostApiUnitsResolveStatus422
+			| PostApiUnitsResolveStatus500
+		>,
+		PostApiUnitsResolveOptions,
+		TContext
+	>;
+}
+
+export const postApiUnitsSlugNamespacesMutationKey = () =>
+	[{ url: "/api/units/slug-namespaces" }] as const;
+
+export function postApiUnitsSlugNamespacesMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiUnitsSlugNamespacesMutationKey();
+	return mutationOptions<
+		PostApiUnitsSlugNamespacesStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsSlugNamespacesStatus400
+			| PostApiUnitsSlugNamespacesStatus403
+			| PostApiUnitsSlugNamespacesStatus404
+			| PostApiUnitsSlugNamespacesStatus409
+			| PostApiUnitsSlugNamespacesStatus422
+			| PostApiUnitsSlugNamespacesStatus500
+		>,
+		PostApiUnitsSlugNamespacesOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await postApiUnitsSlugNamespaces({
+				...config,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create a staff-managed slug namespace
+ * {@link /api/units/slug-namespaces}
+ */
+export function usePostApiUnitsSlugNamespaces<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiUnitsSlugNamespacesStatus200,
+			ResponseErrorConfig<
+				| PostApiUnitsSlugNamespacesStatus400
+				| PostApiUnitsSlugNamespacesStatus403
+				| PostApiUnitsSlugNamespacesStatus404
+				| PostApiUnitsSlugNamespacesStatus409
+				| PostApiUnitsSlugNamespacesStatus422
+				| PostApiUnitsSlugNamespacesStatus500
+			>,
+			PostApiUnitsSlugNamespacesOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiUnitsSlugNamespacesMutationKey();
+
+	const baseOptions = postApiUnitsSlugNamespacesMutationOptions(config) as UseMutationOptions<
+		PostApiUnitsSlugNamespacesStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsSlugNamespacesStatus400
+			| PostApiUnitsSlugNamespacesStatus403
+			| PostApiUnitsSlugNamespacesStatus404
+			| PostApiUnitsSlugNamespacesStatus409
+			| PostApiUnitsSlugNamespacesStatus422
+			| PostApiUnitsSlugNamespacesStatus500
+		>,
+		PostApiUnitsSlugNamespacesOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiUnitsSlugNamespacesStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsSlugNamespacesStatus400
+			| PostApiUnitsSlugNamespacesStatus403
+			| PostApiUnitsSlugNamespacesStatus404
+			| PostApiUnitsSlugNamespacesStatus409
+			| PostApiUnitsSlugNamespacesStatus422
+			| PostApiUnitsSlugNamespacesStatus500
+		>,
+		PostApiUnitsSlugNamespacesOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiUnitsSlugNamespacesStatus200,
+		ResponseErrorConfig<
+			| PostApiUnitsSlugNamespacesStatus400
+			| PostApiUnitsSlugNamespacesStatus403
+			| PostApiUnitsSlugNamespacesStatus404
+			| PostApiUnitsSlugNamespacesStatus409
+			| PostApiUnitsSlugNamespacesStatus422
+			| PostApiUnitsSlugNamespacesStatus500
+		>,
+		PostApiUnitsSlugNamespacesOptions,
+		TContext
+	>;
+}
+
+export const putApiUnitsSlugAddressesByUnitIdMutationKey = () =>
+	[{ url: "/api/units/slug-addresses/:unitId" }] as const;
+
+export function putApiUnitsSlugAddressesByUnitIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiUnitsSlugAddressesByUnitIdMutationKey();
+	return mutationOptions<
+		PutApiUnitsSlugAddressesByUnitIdStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsSlugAddressesByUnitIdStatus400
+			| PutApiUnitsSlugAddressesByUnitIdStatus403
+			| PutApiUnitsSlugAddressesByUnitIdStatus404
+			| PutApiUnitsSlugAddressesByUnitIdStatus409
+			| PutApiUnitsSlugAddressesByUnitIdStatus422
+			| PutApiUnitsSlugAddressesByUnitIdStatus500
+		>,
+		PutApiUnitsSlugAddressesByUnitIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiUnitsSlugAddressesByUnitId({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Change a Unit slug address as staff
+ * {@link /api/units/slug-addresses/:unitId}
+ */
+export function usePutApiUnitsSlugAddressesByUnitId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiUnitsSlugAddressesByUnitIdStatus200,
+			ResponseErrorConfig<
+				| PutApiUnitsSlugAddressesByUnitIdStatus400
+				| PutApiUnitsSlugAddressesByUnitIdStatus403
+				| PutApiUnitsSlugAddressesByUnitIdStatus404
+				| PutApiUnitsSlugAddressesByUnitIdStatus409
+				| PutApiUnitsSlugAddressesByUnitIdStatus422
+				| PutApiUnitsSlugAddressesByUnitIdStatus500
+			>,
+			PutApiUnitsSlugAddressesByUnitIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiUnitsSlugAddressesByUnitIdMutationKey();
+
+	const baseOptions = putApiUnitsSlugAddressesByUnitIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiUnitsSlugAddressesByUnitIdStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsSlugAddressesByUnitIdStatus400
+			| PutApiUnitsSlugAddressesByUnitIdStatus403
+			| PutApiUnitsSlugAddressesByUnitIdStatus404
+			| PutApiUnitsSlugAddressesByUnitIdStatus409
+			| PutApiUnitsSlugAddressesByUnitIdStatus422
+			| PutApiUnitsSlugAddressesByUnitIdStatus500
+		>,
+		PutApiUnitsSlugAddressesByUnitIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiUnitsSlugAddressesByUnitIdStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsSlugAddressesByUnitIdStatus400
+			| PutApiUnitsSlugAddressesByUnitIdStatus403
+			| PutApiUnitsSlugAddressesByUnitIdStatus404
+			| PutApiUnitsSlugAddressesByUnitIdStatus409
+			| PutApiUnitsSlugAddressesByUnitIdStatus422
+			| PutApiUnitsSlugAddressesByUnitIdStatus500
+		>,
+		PutApiUnitsSlugAddressesByUnitIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiUnitsSlugAddressesByUnitIdStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsSlugAddressesByUnitIdStatus400
+			| PutApiUnitsSlugAddressesByUnitIdStatus403
+			| PutApiUnitsSlugAddressesByUnitIdStatus404
+			| PutApiUnitsSlugAddressesByUnitIdStatus409
+			| PutApiUnitsSlugAddressesByUnitIdStatus422
+			| PutApiUnitsSlugAddressesByUnitIdStatus500
+		>,
+		PutApiUnitsSlugAddressesByUnitIdOptions,
+		TContext
+	>;
+}
+
+export const deleteApiUnitsSlugRedirectsByRedirectUnitIdMutationKey = () =>
+	[{ url: "/api/units/slug-redirects/:redirectUnitId" }] as const;
+
+export function deleteApiUnitsSlugRedirectsByRedirectUnitIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = deleteApiUnitsSlugRedirectsByRedirectUnitIdMutationKey();
+	return mutationOptions<
+		DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403
+			| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus404
+			| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus422
+			| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus500
+		>,
+		DeleteApiUnitsSlugRedirectsByRedirectUnitIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await deleteApiUnitsSlugRedirectsByRedirectUnitId({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Release a slug Redirect as staff
+ * {@link /api/units/slug-redirects/:redirectUnitId}
+ */
+export function useDeleteApiUnitsSlugRedirectsByRedirectUnitId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus204,
+			ResponseErrorConfig<
+				| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403
+				| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus404
+				| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus422
+				| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus500
+			>,
+			DeleteApiUnitsSlugRedirectsByRedirectUnitIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? deleteApiUnitsSlugRedirectsByRedirectUnitIdMutationKey();
+
+	const baseOptions = deleteApiUnitsSlugRedirectsByRedirectUnitIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403
+			| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus404
+			| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus422
+			| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus500
+		>,
+		DeleteApiUnitsSlugRedirectsByRedirectUnitIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403
+			| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus404
+			| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus422
+			| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus500
+		>,
+		DeleteApiUnitsSlugRedirectsByRedirectUnitIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403
+			| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus404
+			| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus422
+			| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus500
+		>,
+		DeleteApiUnitsSlugRedirectsByRedirectUnitIdOptions,
+		TContext
+	>;
+}
+
 export const getApiUnitsByTypeQueryKey = ({
 	path,
 	query,
@@ -8888,103 +9327,6 @@ export function usePostApiUnitsByType<TContext>(
 		PostApiUnitsByTypeOptions,
 		TContext
 	>;
-}
-
-export const getApiUnitsResolveByScopeBySlugQueryKey = ({
-	path,
-}: Omit<GetApiUnitsResolveByScopeBySlugOptions, "headers">) =>
-	[{ url: "/api/units/resolve/:scope/:slug", params: path }] as const;
-
-type GetApiUnitsResolveByScopeBySlugQueryKey = ReturnType<
-	typeof getApiUnitsResolveByScopeBySlugQueryKey
->;
-
-export function getApiUnitsResolveByScopeBySlugQueryOptions(
-	{ path }: GetApiUnitsResolveByScopeBySlugOptions,
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const queryKey = getApiUnitsResolveByScopeBySlugQueryKey({ path });
-	return queryOptions<
-		GetApiUnitsResolveByScopeBySlugStatus200,
-		ResponseErrorConfig<
-			| GetApiUnitsResolveByScopeBySlugStatus404
-			| GetApiUnitsResolveByScopeBySlugStatus422
-			| GetApiUnitsResolveByScopeBySlugStatus500
-		>,
-		GetApiUnitsResolveByScopeBySlugStatus200,
-		typeof queryKey
-	>({
-		queryKey,
-		queryFn: async ({ signal }) => {
-			const { data } = await getApiUnitsResolveByScopeBySlug({
-				...config,
-				path,
-				signal: config.signal ?? signal,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Resolve a scoped Unit slug
- * {@link /api/units/resolve/:scope/:slug}
- */
-export function useGetApiUnitsResolveByScopeBySlug<
-	TData = GetApiUnitsResolveByScopeBySlugStatus200,
-	TQueryData = GetApiUnitsResolveByScopeBySlugStatus200,
-	TQueryKey extends QueryKey = GetApiUnitsResolveByScopeBySlugQueryKey,
->(
-	{
-		path,
-	}: {
-		path:
-			| GetApiUnitsResolveByScopeBySlugOptions["path"]
-			| (() => GetApiUnitsResolveByScopeBySlugOptions["path"]);
-	},
-	options: {
-		query?: Partial<
-			QueryObserverOptions<
-				GetApiUnitsResolveByScopeBySlugStatus200,
-				ResponseErrorConfig<
-					| GetApiUnitsResolveByScopeBySlugStatus404
-					| GetApiUnitsResolveByScopeBySlugStatus422
-					| GetApiUnitsResolveByScopeBySlugStatus500
-				>,
-				TData,
-				TQueryData,
-				TQueryKey
-			>
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { query: queryConfig = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { path: typeof path === "function" ? path() : path };
-	const queryKey =
-		resolvedOptions?.queryKey ?? getApiUnitsResolveByScopeBySlugQueryKey(resolvedParams);
-
-	const queryResult = useQuery(
-		{
-			...getApiUnitsResolveByScopeBySlugQueryOptions(resolvedParams, config),
-			...resolvedOptions,
-			queryKey,
-		} as unknown as QueryObserverOptions,
-		queryClient,
-	) as UseQueryResult<
-		TData,
-		ResponseErrorConfig<
-			| GetApiUnitsResolveByScopeBySlugStatus404
-			| GetApiUnitsResolveByScopeBySlugStatus422
-			| GetApiUnitsResolveByScopeBySlugStatus500
-		>
-	> & { queryKey: TQueryKey };
-
-	queryResult.queryKey = queryKey as TQueryKey;
-
-	return queryResult;
 }
 
 export const getApiUnitsByTypeByUnitIdQueryKey = ({

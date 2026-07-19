@@ -6,6 +6,9 @@ import { isPrimaryUnitLocalization } from "../units/localization";
 import { profile, profilePreference, unit, unitLocalization, users } from "../database/schema";
 import { DefaultLanguage } from "../database/schema/contract-values";
 import { recordUnitRevision } from "../units/history";
+import { insertAddressedUnit } from "../units/slug-address";
+import { TopLevelSlugNamespaceUnitIds } from "../units/slug-system";
+import { generateSlugLabel } from "../units/slug";
 
 export interface SessionProfile {
 	unitId: string;
@@ -43,24 +46,14 @@ export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name"
 
 	try {
 		return await database.transaction(async (tx) => {
-			const stem = authUser.name
-				.normalize("NFKD")
-				.toLowerCase()
-				.replace(/[^a-z0-9]+/g, "-")
-				.replace(/^-|-$/g, "")
-				.slice(0, 40);
-			const slug = `${stem || "user"}-${crypto.randomUUID().slice(0, 8)}`;
-			const [profileUnit] = await tx
-				.insert(unit)
-				.values({
-					kind: "profile",
-					slug,
-					status: "published",
-					visibility: "public",
-					publishedAt: new Date(),
-				})
-				.returning({ id: unit.id, slug: unit.slug });
-			if (!profileUnit?.slug) throw new Error("Profile Unit insertion did not return a slug");
+			const profileUnit = await insertAddressedUnit(tx, {
+				kind: "profile",
+				slugScopeId: TopLevelSlugNamespaceUnitIds.users,
+				slug: generateSlugLabel(authUser.name, "user"),
+				status: "published",
+				visibility: "public",
+				publishedAt: new Date(),
+			});
 			await tx.insert(profile).values({
 				id: profileUnit.id,
 				authUserId: authUser.id,

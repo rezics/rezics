@@ -2179,6 +2179,16 @@ export const ApiErrorCode = {
 	UnitChanged: "UnitChanged",
 	UnitRevisionConflict: "UnitRevisionConflict",
 	UnitPrimaryLanguageMissing: "UnitPrimaryLanguageMissing",
+	InvalidSlug: "InvalidSlug",
+	SlugTaken: "SlugTaken",
+	SlugScopeNotFound: "SlugScopeNotFound",
+	SlugScopeUnavailable: "SlugScopeUnavailable",
+	SlugScopeCycle: "SlugScopeCycle",
+	SlugDepthExceeded: "SlugDepthExceeded",
+	UnitAddressUnchanged: "UnitAddressUnchanged",
+	UnitAddressMutationForbidden: "UnitAddressMutationForbidden",
+	SlugRedirectNotFound: "SlugRedirectNotFound",
+	SlugRedirectLoop: "SlugRedirectLoop",
 	ImageAssetNotFound: "ImageAssetNotFound",
 	ImageAssetUploadNotFound: "ImageAssetUploadNotFound",
 	ImageAssetUnsupportedType: "ImageAssetUnsupportedType",
@@ -10528,6 +10538,9 @@ export type PostApiGovernanceGrantsRequestAuthorityEnum =
 
 export const PostApiGovernanceGrantsRequestCapabilityEnum = {
 	"unit.edit": "unit.edit",
+	"unit.slug.manage": "unit.slug.manage",
+	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
+	"unit.slug.redirect.release": "unit.slug.redirect.release",
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"platform.grants.manage": "platform.grants.manage",
@@ -10764,7 +10777,7 @@ export type PostApiSeriesBody = {
 	kind: string;
 	/**
 	 * @minLength 3
-	 * @maxLength 72
+	 * @maxLength 63
 	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
 	 * @type string | undefined
 	 */
@@ -13127,7 +13140,7 @@ export type PostApiZonesStatus500 = InternalError;
 export type PostApiZonesBody = {
 	/**
 	 * @minLength 3
-	 * @maxLength 72
+	 * @maxLength 63
 	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
 	 * @type string | undefined
 	 */
@@ -14705,13 +14718,6 @@ export type PatchApiUsersMeBody = {
 	 */
 	updatedAt: string;
 	/**
-	 * @minLength 3
-	 * @maxLength 64
-	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
-	 * @type string | undefined
-	 */
-	slug?: string;
-	/**
 	 * @minLength 1
 	 * @maxLength 120
 	 * @type string | undefined
@@ -15822,6 +15828,864 @@ export type DeleteApiUsersByIdBlockResponse =
 	| DeleteApiUsersByIdBlockStatus422
 	| DeleteApiUsersByIdBlockStatus500;
 
+/**
+ * @type object
+ */
+export type PostApiUnitsResolveStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type string
+	 */
+	kind: string;
+	/**
+	 * @type array
+	 */
+	path: string[];
+	/**
+	 * @type array
+	 */
+	canonicalPath: string[];
+	/**
+	 * @type boolean
+	 */
+	redirected: boolean;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsResolveStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InvalidSlug'
+		 * @type string
+		 */
+		code: "InvalidSlug";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitsResolveStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	SlugRedirectNotFound: "SlugRedirectNotFound",
+} as const;
+
+export type PostApiUnitsResolveStatus404ErrorCodeEnum =
+	(typeof PostApiUnitsResolveStatus404ErrorCodeEnum)[keyof typeof PostApiUnitsResolveStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsResolveStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiUnitsResolveStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitsResolveStatus409ErrorCodeEnum = {
+	SlugScopeCycle: "SlugScopeCycle",
+	SlugScopeUnavailable: "SlugScopeUnavailable",
+	SlugRedirectLoop: "SlugRedirectLoop",
+} as const;
+
+export type PostApiUnitsResolveStatus409ErrorCodeEnum =
+	(typeof PostApiUnitsResolveStatus409ErrorCodeEnum)[keyof typeof PostApiUnitsResolveStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsResolveStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'SlugScopeCycle'
+		 * @type string
+		 */
+		code: PostApiUnitsResolveStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiUnitsResolveStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'SlugDepthExceeded'
+				 * @type string
+				 */
+				code: "SlugDepthExceeded";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsResolveStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsResolveBody = {
+	/**
+	 * @type array
+	 */
+	path: string[];
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsResolveOptions = {
+	body: PostApiUnitsResolveBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsResolveResponses = {
+	"200": PostApiUnitsResolveStatus200;
+	"400": PostApiUnitsResolveStatus400;
+	"404": PostApiUnitsResolveStatus404;
+	"409": PostApiUnitsResolveStatus409;
+	"422": PostApiUnitsResolveStatus422;
+	"500": PostApiUnitsResolveStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiUnitsResolveResponse =
+	| PostApiUnitsResolveStatus200
+	| PostApiUnitsResolveStatus400
+	| PostApiUnitsResolveStatus404
+	| PostApiUnitsResolveStatus409
+	| PostApiUnitsResolveStatus422
+	| PostApiUnitsResolveStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsSlugNamespacesStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type array
+	 */
+	canonicalPath: string[];
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsSlugNamespacesStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InvalidSlug'
+		 * @type string
+		 */
+		code: "InvalidSlug";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitsSlugNamespacesStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	UnitAddressMutationForbidden: "UnitAddressMutationForbidden",
+} as const;
+
+export type PostApiUnitsSlugNamespacesStatus403ErrorCodeEnum =
+	(typeof PostApiUnitsSlugNamespacesStatus403ErrorCodeEnum)[keyof typeof PostApiUnitsSlugNamespacesStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsSlugNamespacesStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: PostApiUnitsSlugNamespacesStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitsSlugNamespacesStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	SlugScopeNotFound: "SlugScopeNotFound",
+	SlugRedirectNotFound: "SlugRedirectNotFound",
+} as const;
+
+export type PostApiUnitsSlugNamespacesStatus404ErrorCodeEnum =
+	(typeof PostApiUnitsSlugNamespacesStatus404ErrorCodeEnum)[keyof typeof PostApiUnitsSlugNamespacesStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsSlugNamespacesStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PostApiUnitsSlugNamespacesStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PostApiUnitsSlugNamespacesStatus409ErrorCodeEnum = {
+	SlugTaken: "SlugTaken",
+	SlugScopeUnavailable: "SlugScopeUnavailable",
+	SlugScopeCycle: "SlugScopeCycle",
+	SlugRedirectLoop: "SlugRedirectLoop",
+} as const;
+
+export type PostApiUnitsSlugNamespacesStatus409ErrorCodeEnum =
+	(typeof PostApiUnitsSlugNamespacesStatus409ErrorCodeEnum)[keyof typeof PostApiUnitsSlugNamespacesStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PostApiUnitsSlugNamespacesStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'SlugTaken'
+		 * @type string
+		 */
+		code: PostApiUnitsSlugNamespacesStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PostApiUnitsSlugNamespacesStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'SlugDepthExceeded'
+				 * @type string
+				 */
+				code: "SlugDepthExceeded";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsSlugNamespacesStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiUnitsSlugNamespacesBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	scopeUnitId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 63
+	 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+	 * @type string
+	 */
+	slug: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 1000
+	 * @type string
+	 */
+	reason: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsSlugNamespacesOptions = {
+	body: PostApiUnitsSlugNamespacesBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiUnitsSlugNamespacesResponses = {
+	"200": PostApiUnitsSlugNamespacesStatus200;
+	"400": PostApiUnitsSlugNamespacesStatus400;
+	"403": PostApiUnitsSlugNamespacesStatus403;
+	"404": PostApiUnitsSlugNamespacesStatus404;
+	"409": PostApiUnitsSlugNamespacesStatus409;
+	"422": PostApiUnitsSlugNamespacesStatus422;
+	"500": PostApiUnitsSlugNamespacesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiUnitsSlugNamespacesResponse =
+	| PostApiUnitsSlugNamespacesStatus200
+	| PostApiUnitsSlugNamespacesStatus400
+	| PostApiUnitsSlugNamespacesStatus403
+	| PostApiUnitsSlugNamespacesStatus404
+	| PostApiUnitsSlugNamespacesStatus409
+	| PostApiUnitsSlugNamespacesStatus422
+	| PostApiUnitsSlugNamespacesStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiUnitsSlugAddressesByUnitIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsSlugAddressesByUnitIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	redirectUnitId: string;
+	/**
+	 * @type array
+	 */
+	canonicalPath: string[];
+};
+
+export const PutApiUnitsSlugAddressesByUnitIdStatus400ErrorCodeEnum = {
+	InvalidSlug: "InvalidSlug",
+	UnitAddressUnchanged: "UnitAddressUnchanged",
+} as const;
+
+export type PutApiUnitsSlugAddressesByUnitIdStatus400ErrorCodeEnum =
+	(typeof PutApiUnitsSlugAddressesByUnitIdStatus400ErrorCodeEnum)[keyof typeof PutApiUnitsSlugAddressesByUnitIdStatus400ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsSlugAddressesByUnitIdStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InvalidSlug'
+		 * @type string
+		 */
+		code: PutApiUnitsSlugAddressesByUnitIdStatus400ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiUnitsSlugAddressesByUnitIdStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	UnitAddressMutationForbidden: "UnitAddressMutationForbidden",
+} as const;
+
+export type PutApiUnitsSlugAddressesByUnitIdStatus403ErrorCodeEnum =
+	(typeof PutApiUnitsSlugAddressesByUnitIdStatus403ErrorCodeEnum)[keyof typeof PutApiUnitsSlugAddressesByUnitIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsSlugAddressesByUnitIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: PutApiUnitsSlugAddressesByUnitIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiUnitsSlugAddressesByUnitIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	SlugScopeNotFound: "SlugScopeNotFound",
+	SlugRedirectNotFound: "SlugRedirectNotFound",
+} as const;
+
+export type PutApiUnitsSlugAddressesByUnitIdStatus404ErrorCodeEnum =
+	(typeof PutApiUnitsSlugAddressesByUnitIdStatus404ErrorCodeEnum)[keyof typeof PutApiUnitsSlugAddressesByUnitIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsSlugAddressesByUnitIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PutApiUnitsSlugAddressesByUnitIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiUnitsSlugAddressesByUnitIdStatus409ErrorCodeEnum = {
+	SlugTaken: "SlugTaken",
+	SlugScopeUnavailable: "SlugScopeUnavailable",
+	SlugScopeCycle: "SlugScopeCycle",
+	SlugRedirectLoop: "SlugRedirectLoop",
+} as const;
+
+export type PutApiUnitsSlugAddressesByUnitIdStatus409ErrorCodeEnum =
+	(typeof PutApiUnitsSlugAddressesByUnitIdStatus409ErrorCodeEnum)[keyof typeof PutApiUnitsSlugAddressesByUnitIdStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUnitsSlugAddressesByUnitIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'SlugTaken'
+		 * @type string
+		 */
+		code: PutApiUnitsSlugAddressesByUnitIdStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiUnitsSlugAddressesByUnitIdStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'SlugDepthExceeded'
+				 * @type string
+				 */
+				code: "SlugDepthExceeded";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiUnitsSlugAddressesByUnitIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiUnitsSlugAddressesByUnitIdBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	scopeUnitId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 63
+	 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+	 * @type string
+	 */
+	slug: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 1000
+	 * @type string
+	 */
+	reason: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsSlugAddressesByUnitIdOptions = {
+	body: PutApiUnitsSlugAddressesByUnitIdBody;
+	path: PutApiUnitsSlugAddressesByUnitIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUnitsSlugAddressesByUnitIdResponses = {
+	"200": PutApiUnitsSlugAddressesByUnitIdStatus200;
+	"400": PutApiUnitsSlugAddressesByUnitIdStatus400;
+	"403": PutApiUnitsSlugAddressesByUnitIdStatus403;
+	"404": PutApiUnitsSlugAddressesByUnitIdStatus404;
+	"409": PutApiUnitsSlugAddressesByUnitIdStatus409;
+	"422": PutApiUnitsSlugAddressesByUnitIdStatus422;
+	"500": PutApiUnitsSlugAddressesByUnitIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiUnitsSlugAddressesByUnitIdResponse =
+	| PutApiUnitsSlugAddressesByUnitIdStatus200
+	| PutApiUnitsSlugAddressesByUnitIdStatus400
+	| PutApiUnitsSlugAddressesByUnitIdStatus403
+	| PutApiUnitsSlugAddressesByUnitIdStatus404
+	| PutApiUnitsSlugAddressesByUnitIdStatus409
+	| PutApiUnitsSlugAddressesByUnitIdStatus422
+	| PutApiUnitsSlugAddressesByUnitIdStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	redirectUnitId: string;
+};
+
+/**
+ * @type void
+ */
+export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus204 = void;
+
+export const DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403ErrorCodeEnum = {
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+	UnitAddressMutationForbidden: "UnitAddressMutationForbidden",
+} as const;
+
+export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403ErrorCodeEnum =
+	(typeof DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'SlugRedirectNotFound'
+		 * @type string
+		 */
+		code: "SlugRedirectNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdBody = {
+	/**
+	 * @minLength 1
+	 * @maxLength 1000
+	 * @type string
+	 */
+	reason: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdOptions = {
+	body: DeleteApiUnitsSlugRedirectsByRedirectUnitIdBody;
+	path: DeleteApiUnitsSlugRedirectsByRedirectUnitIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdResponses = {
+	"204": DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus204;
+	"403": DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403;
+	"404": DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus404;
+	"422": DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus422;
+	"500": DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiUnitsSlugRedirectsByRedirectUnitIdResponse =
+	| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus204
+	| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus403
+	| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus404
+	| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus422
+	| DeleteApiUnitsSlugRedirectsByRedirectUnitIdStatus500;
+
 export const GetApiUnitsByTypeType = {
 	book: "book",
 	software: "software",
@@ -16665,7 +17529,7 @@ export type PostApiUnitsByTypeBody = {
 	};
 	/**
 	 * @minLength 3
-	 * @maxLength 72
+	 * @maxLength 63
 	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
 	 * @type string | undefined
 	 */
@@ -16717,110 +17581,6 @@ export type PostApiUnitsByTypeResponse =
 	| PostApiUnitsByTypeStatus404
 	| PostApiUnitsByTypeStatus422
 	| PostApiUnitsByTypeStatus500;
-
-export const GetApiUnitsResolveByScopeBySlugScope = {
-	book: "book",
-	software: "software",
-	media: "media",
-} as const;
-
-export type GetApiUnitsResolveByScopeBySlugScope =
-	(typeof GetApiUnitsResolveByScopeBySlugScope)[keyof typeof GetApiUnitsResolveByScopeBySlugScope];
-
-/**
- * @type object
- */
-export type GetApiUnitsResolveByScopeBySlugPath = {
-	/**
-	 * @type string
-	 */
-	scope: GetApiUnitsResolveByScopeBySlugScope;
-	/**
-	 * @minLength 1
-	 * @maxLength 72
-	 * @type string
-	 */
-	slug: string;
-};
-
-/**
- * @type object
- */
-export type GetApiUnitsResolveByScopeBySlugStatus200 = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	id: string;
-};
-
-/**
- * @type object
- */
-export type GetApiUnitsResolveByScopeBySlugStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: "UnitNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type GetApiUnitsResolveByScopeBySlugStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type GetApiUnitsResolveByScopeBySlugStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type GetApiUnitsResolveByScopeBySlugOptions = {
-	body?: never;
-	path: GetApiUnitsResolveByScopeBySlugPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type GetApiUnitsResolveByScopeBySlugResponses = {
-	"200": GetApiUnitsResolveByScopeBySlugStatus200;
-	"404": GetApiUnitsResolveByScopeBySlugStatus404;
-	"422": GetApiUnitsResolveByScopeBySlugStatus422;
-	"500": GetApiUnitsResolveByScopeBySlugStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type GetApiUnitsResolveByScopeBySlugResponse =
-	| GetApiUnitsResolveByScopeBySlugStatus200
-	| GetApiUnitsResolveByScopeBySlugStatus404
-	| GetApiUnitsResolveByScopeBySlugStatus422
-	| GetApiUnitsResolveByScopeBySlugStatus500;
 
 export const GetApiUnitsByTypeByUnitIdType = {
 	book: "book",
@@ -20418,7 +21178,8 @@ export type PostApiEntitiesBody = {
 	kind?: string;
 	/**
 	 * @minLength 3
-	 * @maxLength 72
+	 * @maxLength 63
+	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
 	 * @type string | undefined
 	 */
 	slug?: string;
@@ -21003,7 +21764,8 @@ export type PostApiTagsBody = {
 	kind?: string;
 	/**
 	 * @minLength 3
-	 * @maxLength 72
+	 * @maxLength 63
+	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
 	 * @type string | undefined
 	 */
 	slug?: string;
@@ -21186,6 +21948,8 @@ export type PostApiTagsResponse =
 	PostApiTagsStatus200 | PostApiTagsStatus422 | PostApiTagsStatus500;
 
 export const GetApiUnitsByTypeByUnitIdAliasesType = {
+	slug_namespace: "slug_namespace",
+	redirect: "redirect",
 	profile: "profile",
 	book: "book",
 	software: "software",
@@ -21314,6 +22078,8 @@ export type GetApiUnitsByTypeByUnitIdAliasesResponse =
 	| GetApiUnitsByTypeByUnitIdAliasesStatus500;
 
 export const PostApiUnitsByTypeByUnitIdAliasesType = {
+	slug_namespace: "slug_namespace",
+	redirect: "redirect",
 	profile: "profile",
 	book: "book",
 	software: "software",
@@ -21542,6 +22308,8 @@ export type PostApiUnitsByTypeByUnitIdAliasesResponse =
 	| PostApiUnitsByTypeByUnitIdAliasesStatus500;
 
 export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdType = {
+	slug_namespace: "slug_namespace",
+	redirect: "redirect",
 	profile: "profile",
 	book: "book",
 	software: "software",
@@ -21702,6 +22470,8 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponse =
 	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500;
 
 export const PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteType = {
+	slug_namespace: "slug_namespace",
+	redirect: "redirect",
 	profile: "profile",
 	book: "book",
 	software: "software",
@@ -21846,6 +22616,8 @@ export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponse =
 	| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500;
 
 export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteType = {
+	slug_namespace: "slug_namespace",
+	redirect: "redirect",
 	profile: "profile",
 	book: "book",
 	software: "software",
@@ -25591,7 +26363,8 @@ export type PostApiCollectionsRequestPresentationDocumentOrderEnum =
 export type PostApiCollectionsBody = {
 	/**
 	 * @minLength 3
-	 * @maxLength 72
+	 * @maxLength 63
+	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
 	 * @type string
 	 */
 	slug: string;
@@ -33891,7 +34664,8 @@ export type PostApiRealmsRequestJoinPolicyEnum =
 export type PostApiRealmsBody = {
 	/**
 	 * @minLength 3
-	 * @maxLength 72
+	 * @maxLength 63
+	 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
 	 * @type string
 	 */
 	slug: string;

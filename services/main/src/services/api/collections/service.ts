@@ -19,6 +19,7 @@ import {
 	unitLocalization,
 } from "../../database/schema";
 import { recordUnitRevision } from "../../units/history";
+import { insertAddressedUnit } from "../../units/slug-address";
 import { DefaultLanguage } from "../../database/schema/contract-values";
 import { CollectionNotFound } from "./errors";
 import { CollectionDetailResponse } from "../schema/response";
@@ -40,17 +41,14 @@ export async function ensureFavorites(ownerId: string) {
 
 	try {
 		return await database.transaction(async (tx) => {
-			const [created] = await tx
-				.insert(unit)
-				.values({
-					kind: "collection",
-					slug: `favorites-${ownerId}`,
-					status: "published",
-					visibility: "private",
-					publishedAt: new Date(),
-				})
-				.returning({ id: unit.id });
-			if (!created) throw new Error("Favorites insertion did not return an id");
+			const created = await insertAddressedUnit(tx, {
+				kind: "collection",
+				slugScopeId: ownerId,
+				slug: "favorites",
+				status: "published",
+				visibility: "private",
+				publishedAt: new Date(),
+			});
 			await tx.insert(collectionTable).values({
 				id: created.id,
 				ownerProfileId: ownerId,

@@ -19,6 +19,8 @@ import { createNotification, deliverNotificationEmail } from "../../notification
 import { parseJsonCursor } from "../../pagination";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
+import { insertAddressedUnit } from "../../units/slug-address";
+import { generateSlugLabel } from "../../units/slug";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
 import {
 	ReplyListResponse,
@@ -193,16 +195,14 @@ export default new Elysia()
 						await authorization.unit.ensureCanRead(body.subjectId);
 					}
 					const id = await database.transaction(async (tx) => {
-						const [created] = await tx
-							.insert(unit)
-							.values({
-								kind: "post",
-								status: "published",
-								visibility: "public",
-								publishedAt: new Date(),
-							})
-							.returning({ id: unit.id });
-						if (!created) throw new Error("Post insertion did not return an id");
+						const created = await insertAddressedUnit(tx, {
+							kind: "post",
+							slugScopeId: profile.unitId,
+							slug: generateSlugLabel(body.title, "post"),
+							status: "published",
+							visibility: "public",
+							publishedAt: new Date(),
+						});
 						await tx.insert(post).values({
 							id: created.id,
 							authorProfileId: profile.unitId,
@@ -612,16 +612,14 @@ export default new Elysia()
 							depth = parent.depth + 1;
 							recipientId = parent.authorId;
 						}
-						const [created] = await tx
-							.insert(unit)
-							.values({
-								kind: "post",
-								status: "published",
-								visibility: "public",
-								publishedAt: new Date(),
-							})
-							.returning({ id: unit.id });
-						if (!created) throw new Error("Reply post insertion did not return an id");
+						const created = await insertAddressedUnit(tx, {
+							kind: "post",
+							slugScopeId: params.postId,
+							slug: generateSlugLabel("reply", "reply"),
+							status: "published",
+							visibility: "public",
+							publishedAt: new Date(),
+						});
 						await tx.insert(post).values({
 							id: created.id,
 							authorProfileId: profile.unitId,

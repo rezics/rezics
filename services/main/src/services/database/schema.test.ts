@@ -8,6 +8,9 @@ import {
 	unitAccessRestriction,
 	unitAlias,
 	unitLocalization,
+	unitRedirect,
+	PlatformCapabilityValues,
+	UnitKindValues,
 } from "./schema";
 
 const dialect = new PgDialect();
@@ -68,5 +71,43 @@ describe("database schema contracts", () => {
 			]),
 		);
 		expect(unitAccessRestriction.subjectKind.enumValues).toEqual(["profile", "realm"]);
+	});
+
+	it("models Unit slugs as one scoped address tree", () => {
+		const address = getTableConfig(unit);
+		expect(address.indexes.map((index) => index.config.name)).toEqual(
+			expect.arrayContaining(["unit_slug_scope_slug_key", "unit_slug_root_key"]),
+		);
+		expect(address.indexes.map((index) => index.config.name)).not.toContain(
+			"unit_kind_slug_key",
+		);
+		expect(address.checks.map((constraint) => constraint.name)).toEqual(
+			expect.arrayContaining([
+				"unit_slug_address_shape_check",
+				"unit_slug_label_check",
+				"unit_slug_scope_not_self_check",
+			]),
+		);
+		expect(address.foreignKeys.map((key) => key.getName())).toContain(
+			"unit_slug_scope_id_unit_id_fk",
+		);
+	});
+
+	it("keeps structural, Redirect, and staff capability meanings explicit", () => {
+		expect(UnitKindValues).toEqual(expect.arrayContaining(["slug_namespace", "redirect"]));
+		expect(PlatformCapabilityValues).toEqual(
+			expect.arrayContaining([
+				"unit.slug.manage",
+				"unit.slug.namespace.manage",
+				"unit.slug.redirect.release",
+			]),
+		);
+		const redirect = getTableConfig(unitRedirect);
+		expect(redirect.checks.map((constraint) => constraint.name)).toContain(
+			"unit_redirect_not_self_check",
+		);
+		expect(redirect.indexes.map((index) => index.config.name)).toContain(
+			"unit_redirect_target_unit_idx",
+		);
 	});
 });

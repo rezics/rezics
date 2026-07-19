@@ -4,6 +4,9 @@ import { database } from "../../database";
 import { entity, unit, unitAccessBinding, unitLocalization } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
+import { insertAddressedUnit } from "../../units/slug-address";
+import { TopLevelSlugNamespaceUnitIds } from "../../units/slug-system";
+import { generateSlugLabel } from "../../units/slug";
 import type { CreateCatalogUnitBody } from "./schema";
 
 export async function createCatalogUnit(
@@ -12,27 +15,17 @@ export async function createCatalogUnit(
 	body: CreateCatalogUnitBody,
 ) {
 	return database.transaction(async (tx) => {
-		const slug =
-			body.slug ??
-			`${
-				body.localization.title
-					.normalize("NFKD")
-					.toLowerCase()
-					.replace(/[^a-z0-9]+/g, "-")
-					.replace(/^-|-$/g, "")
-					.slice(0, 56) || "entry"
-			}-${crypto.randomUUID().slice(0, 8)}`;
-		const [created] = await tx
-			.insert(unit)
-			.values({
-				kind: type,
-				slug,
-				status: "published",
-				visibility: "public",
-				publishedAt: new Date(),
-			})
-			.returning({ id: unit.id });
-		if (!created) throw new Error("Catalog Unit insertion did not return an id");
+		const created = await insertAddressedUnit(tx, {
+			kind: type,
+			slugScopeId:
+				type === "entity"
+					? TopLevelSlugNamespaceUnitIds.entities
+					: TopLevelSlugNamespaceUnitIds.tags,
+			slug: body.slug ?? generateSlugLabel(body.localization.title, "entry"),
+			status: "published",
+			visibility: "public",
+			publishedAt: new Date(),
+		});
 		if (type === "entity")
 			await tx.insert(entity).values({ id: created.id, kind: body.kind ?? "person" });
 		await tx.insert(unitLocalization).values({ unitId: created.id, ...body.localization });

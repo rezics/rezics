@@ -5949,6 +5949,16 @@
 					"UnitChanged",
 					"UnitRevisionConflict",
 					"UnitPrimaryLanguageMissing",
+					"InvalidSlug",
+					"SlugTaken",
+					"SlugScopeNotFound",
+					"SlugScopeUnavailable",
+					"SlugScopeCycle",
+					"SlugDepthExceeded",
+					"UnitAddressUnchanged",
+					"UnitAddressMutationForbidden",
+					"SlugRedirectNotFound",
+					"SlugRedirectLoop",
 					"ImageAssetNotFound",
 					"ImageAssetUploadNotFound",
 					"ImageAssetUnsupportedType",
@@ -14415,6 +14425,9 @@
 										"type": "string",
 										"enum": [
 											"unit.edit",
+											"unit.slug.manage",
+											"unit.slug.namespace.manage",
+											"unit.slug.redirect.release",
 											"platform.moderate",
 											"platform.suppress",
 											"platform.grants.manage",
@@ -14708,7 +14721,7 @@
 									"kind": { "minLength": 1, "maxLength": 64, "type": "string" },
 									"slug": {
 										"minLength": 3,
-										"maxLength": 72,
+										"maxLength": 63,
 										"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
 										"type": "string"
 									},
@@ -16804,7 +16817,7 @@
 								"properties": {
 									"slug": {
 										"minLength": 3,
-										"maxLength": 72,
+										"maxLength": 63,
 										"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
 										"type": "string"
 									},
@@ -18417,12 +18430,6 @@
 								"required": ["updatedAt"],
 								"properties": {
 									"updatedAt": { "format": "date-time", "type": "string" },
-									"slug": {
-										"minLength": 3,
-										"maxLength": 64,
-										"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-										"type": "string"
-									},
 									"name": { "minLength": 1, "maxLength": 120, "type": "string" },
 									"avatarAssetId": {
 										"nullable": true,
@@ -20182,6 +20189,763 @@
 				"operationId": "deleteApiUsersByIdBlock"
 			}
 		},
+		"/api/units/resolve": {
+			"post": {
+				"summary": "Resolve a canonical Unit slug path",
+				"tags": ["Units"],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["path"],
+								"properties": {
+									"path": {
+										"minItems": 1,
+										"maxItems": 16,
+										"type": "array",
+										"items": {
+											"minLength": 1,
+											"maxLength": 63,
+											"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"kind",
+										"path",
+										"canonicalPath",
+										"redirected"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"kind": { "type": "string" },
+										"path": {
+											"type": "array",
+											"items": {
+												"minLength": 1,
+												"maxLength": 63,
+												"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+												"type": "string"
+											}
+										},
+										"canonicalPath": {
+											"type": "array",
+											"items": {
+												"minLength": 1,
+												"maxLength": 63,
+												"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+												"type": "string"
+											}
+										},
+										"redirected": { "type": "boolean" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "InvalidSlug",
+													"type": "string",
+													"enum": ["InvalidSlug"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound", "SlugRedirectNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "SlugScopeCycle",
+													"type": "string",
+													"enum": [
+														"SlugScopeCycle",
+														"SlugScopeUnavailable",
+														"SlugRedirectLoop"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "SlugDepthExceeded",
+															"type": "string",
+															"enum": ["SlugDepthExceeded"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiUnitsResolve"
+			}
+		},
+		"/api/units/slug-namespaces": {
+			"post": {
+				"summary": "Create a staff-managed slug namespace",
+				"tags": ["Units"],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["scopeUnitId", "slug", "reason"],
+								"properties": {
+									"scopeUnitId": { "format": "uuid", "type": "string" },
+									"slug": {
+										"minLength": 1,
+										"maxLength": 63,
+										"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+										"type": "string"
+									},
+									"reason": {
+										"minLength": 1,
+										"maxLength": 1000,
+										"type": "string"
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["id", "canonicalPath"],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"canonicalPath": {
+											"type": "array",
+											"items": {
+												"minLength": 1,
+												"maxLength": 63,
+												"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "InvalidSlug",
+													"type": "string",
+													"enum": ["InvalidSlug"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"PlatformCapabilityRequired",
+														"UnitAddressMutationForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"SlugScopeNotFound",
+														"SlugRedirectNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "SlugTaken",
+													"type": "string",
+													"enum": [
+														"SlugTaken",
+														"SlugScopeUnavailable",
+														"SlugScopeCycle",
+														"SlugRedirectLoop"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "SlugDepthExceeded",
+															"type": "string",
+															"enum": ["SlugDepthExceeded"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiUnitsSlug-namespaces"
+			}
+		},
+		"/api/units/slug-addresses/{unitId}": {
+			"put": {
+				"summary": "Change a Unit slug address as staff",
+				"tags": ["Units"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["scopeUnitId", "slug", "reason"],
+								"properties": {
+									"scopeUnitId": { "format": "uuid", "type": "string" },
+									"slug": {
+										"minLength": 1,
+										"maxLength": 63,
+										"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+										"type": "string"
+									},
+									"reason": {
+										"minLength": 1,
+										"maxLength": 1000,
+										"type": "string"
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["unitId", "redirectUnitId", "canonicalPath"],
+									"properties": {
+										"unitId": { "format": "uuid", "type": "string" },
+										"redirectUnitId": { "format": "uuid", "type": "string" },
+										"canonicalPath": {
+											"type": "array",
+											"items": {
+												"minLength": 1,
+												"maxLength": 63,
+												"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "InvalidSlug",
+													"type": "string",
+													"enum": ["InvalidSlug", "UnitAddressUnchanged"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"PlatformCapabilityRequired",
+														"UnitAddressMutationForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"SlugScopeNotFound",
+														"SlugRedirectNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "SlugTaken",
+													"type": "string",
+													"enum": [
+														"SlugTaken",
+														"SlugScopeUnavailable",
+														"SlugScopeCycle",
+														"SlugRedirectLoop"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "SlugDepthExceeded",
+															"type": "string",
+															"enum": ["SlugDepthExceeded"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiUnitsSlug-addressesByUnitId"
+			}
+		},
+		"/api/units/slug-redirects/{redirectUnitId}": {
+			"delete": {
+				"summary": "Release a slug Redirect as staff",
+				"tags": ["Units"],
+				"responses": {
+					"204": {
+						"description": "Response for status 204",
+						"content": { "type": "void" }
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"PlatformCapabilityRequired",
+														"UnitAddressMutationForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "SlugRedirectNotFound",
+													"type": "string",
+													"enum": ["SlugRedirectNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"parameters": [
+					{
+						"name": "redirectUnitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["reason"],
+								"properties": {
+									"reason": {
+										"minLength": 1,
+										"maxLength": 1000,
+										"type": "string"
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"operationId": "deleteApiUnitsSlug-redirectsByRedirectUnitId"
+			}
+		},
 		"/api/units/{type}": {
 			"get": {
 				"summary": "List published units",
@@ -20683,7 +21447,7 @@
 									},
 									"slug": {
 										"minLength": 3,
-										"maxLength": 72,
+										"maxLength": 63,
 										"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
 										"type": "string"
 									},
@@ -21484,84 +22248,6 @@
 					}
 				},
 				"operationId": "postApiUnitsByType"
-			}
-		},
-		"/api/units/resolve/{scope}/{slug}": {
-			"get": {
-				"summary": "Resolve a scoped Unit slug",
-				"tags": ["Units"],
-				"parameters": [
-					{
-						"name": "scope",
-						"in": "path",
-						"required": true,
-						"schema": { "type": "string", "enum": ["book", "software", "media"] }
-					},
-					{
-						"name": "slug",
-						"in": "path",
-						"required": true,
-						"schema": { "minLength": 1, "maxLength": 72, "type": "string" }
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["id"],
-									"properties": { "id": { "format": "uuid", "type": "string" } }
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitNotFound",
-													"type": "string",
-													"enum": ["UnitNotFound"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"operationId": "getApiUnitsResolveByScopeBySlug"
 			}
 		},
 		"/api/units/{type}/{unitId}": {
@@ -26079,7 +26765,12 @@
 								"required": ["localization"],
 								"properties": {
 									"kind": { "minLength": 1, "maxLength": 64, "type": "string" },
-									"slug": { "minLength": 3, "maxLength": 72, "type": "string" },
+									"slug": {
+										"minLength": 3,
+										"maxLength": 63,
+										"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+										"type": "string"
+									},
 									"localization": {
 										"additionalProperties": false,
 										"type": "object",
@@ -26990,7 +27681,12 @@
 								"required": ["localization"],
 								"properties": {
 									"kind": { "minLength": 1, "maxLength": 64, "type": "string" },
-									"slug": { "minLength": 3, "maxLength": 72, "type": "string" },
+									"slug": {
+										"minLength": 3,
+										"maxLength": 63,
+										"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+										"type": "string"
+									},
 									"localization": {
 										"additionalProperties": false,
 										"type": "object",
@@ -27334,6 +28030,8 @@
 						"schema": {
 							"type": "string",
 							"enum": [
+								"slug_namespace",
+								"redirect",
 								"profile",
 								"book",
 								"software",
@@ -27475,6 +28173,8 @@
 						"schema": {
 							"type": "string",
 							"enum": [
+								"slug_namespace",
+								"redirect",
 								"profile",
 								"book",
 								"software",
@@ -27766,6 +28466,8 @@
 						"schema": {
 							"type": "string",
 							"enum": [
+								"slug_namespace",
+								"redirect",
 								"profile",
 								"book",
 								"software",
@@ -27811,6 +28513,8 @@
 						"schema": {
 							"type": "string",
 							"enum": [
+								"slug_namespace",
+								"redirect",
 								"profile",
 								"book",
 								"software",
@@ -27961,6 +28665,8 @@
 						"schema": {
 							"type": "string",
 							"enum": [
+								"slug_namespace",
+								"redirect",
 								"profile",
 								"book",
 								"software",
@@ -31262,7 +31968,12 @@
 								"type": "object",
 								"required": ["slug", "localization"],
 								"properties": {
-									"slug": { "minLength": 3, "maxLength": 72, "type": "string" },
+									"slug": {
+										"minLength": 3,
+										"maxLength": 63,
+										"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+										"type": "string"
+									},
 									"localization": {
 										"additionalProperties": false,
 										"type": "object",
@@ -45375,7 +46086,12 @@
 								"type": "object",
 								"required": ["slug", "localization", "visibility", "joinPolicy"],
 								"properties": {
-									"slug": { "minLength": 3, "maxLength": 72, "type": "string" },
+									"slug": {
+										"minLength": 3,
+										"maxLength": 63,
+										"pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+										"type": "string"
+									},
 									"localization": {
 										"additionalProperties": false,
 										"type": "object",

@@ -15,6 +15,8 @@ import {
 	unitLocalization,
 } from "../../database/schema";
 import { recordUnitRevision } from "../../units/history";
+import { insertAddressedUnit } from "../../units/slug-address";
+import { generateSlugLabel } from "../../units/slug";
 import {
 	BookNotFound,
 	ChapterLanguageNotFound,
@@ -145,16 +147,14 @@ export default new Elysia()
 			const node = await database.transaction(async (tx) => {
 				const hasContent = body.content !== undefined;
 				const published = hasContent ? body.status === "published" : true;
-				const [contentUnit] = await tx
-					.insert(unit)
-					.values({
-						kind: "post",
-						status: published ? "published" : "draft",
-						visibility: "public",
-						publishedAt: published ? new Date() : null,
-					})
-					.returning({ id: unit.id });
-				if (!contentUnit) throw new Error("Content Unit insertion did not return an id");
+				const contentUnit = await insertAddressedUnit(tx, {
+					kind: "post",
+					slugScopeId: params.unitId,
+					slug: generateSlugLabel(body.title, hasContent ? "chapter" : "chapter-group"),
+					status: published ? "published" : "draft",
+					visibility: "public",
+					publishedAt: published ? new Date() : null,
+				});
 				await tx.insert(post).values({
 					id: contentUnit.id,
 					authorProfileId: profile.unitId,

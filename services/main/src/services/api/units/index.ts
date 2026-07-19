@@ -8,22 +8,35 @@ import {
 	deleteUnit,
 	getUnit,
 	listUnits,
-	resolveUnitSlug,
 	updateUnit,
 	upsertLocalization,
 } from "../../units/service";
 import {
+	createSlugNamespace,
+	releaseSlugRedirect,
+	resolveUnitPath,
+	updateUnitSlugAddress,
+} from "../../units/slug-address";
+import {
 	CreateUnitBody,
+	CreateSlugNamespaceBody,
 	ListUnitsQuery,
+	ReleaseSlugRedirectBody,
+	ResolveUnitPathBody,
+	ResolvedUnitPathResponse,
+	SlugNamespaceCreatedResponse,
+	SlugRedirectParams,
 	UpdateUnitBody,
+	UpdateUnitAddressBody,
+	UpdateUnitAddressParams,
+	UnitAddressMutationResponse,
 	UnitLocalizationBody,
 	UnitLocalizationParams,
 	UnitLookupParams,
-	UnitSlugResolverParams,
 	UnitUnitIdParams,
 	UnitTypeParams,
 } from "./schema";
-import { IdResponse, NoContentResponse } from "../schema/action-response";
+import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse, UnitDetailResponse, UnitListResponse } from "../schema/response";
 
 const AuthenticationRequiredResponse = toApiErrorResponse(["AuthenticationRequired"]);
@@ -50,9 +63,123 @@ const UnitAuthorizationForbiddenResponse = toApiErrorResponse([
 	"UnitProtected",
 ]);
 const UnitChangedResponse = toApiErrorResponse(["UnitChanged"]);
+const SlugMutationBadRequestResponse = toApiErrorResponse(["InvalidSlug", "UnitAddressUnchanged"]);
+const SlugMutationForbiddenResponse = toApiErrorResponse([
+	"PlatformCapabilityRequired",
+	"UnitAddressMutationForbidden",
+]);
+const SlugMutationConflictResponse = toApiErrorResponse([
+	"SlugTaken",
+	"SlugScopeUnavailable",
+	"SlugScopeCycle",
+	"SlugRedirectLoop",
+]);
+const SlugMutationNotFoundResponse = toApiErrorResponse([
+	"UnitNotFound",
+	"SlugScopeNotFound",
+	"SlugRedirectNotFound",
+]);
 
 export default new Elysia({ prefix: "/units" })
 	.use(session)
+	.post(
+		"/resolve",
+		async ({ body }) => {
+			const result = await resolveUnitPath(body.path);
+			return {
+				...result,
+				path: [...result.path],
+				canonicalPath: [...result.canonicalPath],
+			};
+		},
+		{
+			body: ResolveUnitPathBody,
+			response: {
+				[StatusCodes.OK]: ResolvedUnitPathResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidSlug"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"SlugRedirectNotFound",
+				]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"SlugScopeCycle",
+					"SlugScopeUnavailable",
+					"SlugRedirectLoop",
+				]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["SlugDepthExceeded"]),
+			},
+			detail: { summary: "Resolve a canonical Unit slug path", tags: ["Units"] },
+		},
+	)
+	.post(
+		"/slug-namespaces",
+		async ({ authorization, body }) => {
+			const result = await createSlugNamespace(authorization, body);
+			return { ...result, canonicalPath: [...result.canonicalPath] };
+		},
+		{
+			access: "session-only",
+			body: CreateSlugNamespaceBody,
+			response: {
+				[StatusCodes.OK]: SlugNamespaceCreatedResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidSlug"]),
+				[StatusCodes.FORBIDDEN]: SlugMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: SlugMutationNotFoundResponse,
+				[StatusCodes.CONFLICT]: SlugMutationConflictResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["SlugDepthExceeded"]),
+			},
+			detail: { summary: "Create a staff-managed slug namespace", tags: ["Units"] },
+		},
+	)
+	.put(
+		"/slug-addresses/:unitId",
+		async ({ params, authorization, body }) => {
+			const result = await updateUnitSlugAddress(authorization, {
+				unitId: params.unitId,
+				...body,
+			});
+			return { ...result, canonicalPath: [...result.canonicalPath] };
+		},
+		{
+			access: "session-only",
+			params: UpdateUnitAddressParams,
+			body: UpdateUnitAddressBody,
+			response: {
+				[StatusCodes.OK]: UnitAddressMutationResponse,
+				[StatusCodes.BAD_REQUEST]: SlugMutationBadRequestResponse,
+				[StatusCodes.FORBIDDEN]: SlugMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: SlugMutationNotFoundResponse,
+				[StatusCodes.CONFLICT]: SlugMutationConflictResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["SlugDepthExceeded"]),
+			},
+			detail: { summary: "Change a Unit slug address as staff", tags: ["Units"] },
+		},
+	)
+	.delete(
+		"/slug-redirects/:redirectUnitId",
+		async ({ params, authorization, body, status }) => {
+			await releaseSlugRedirect(authorization, {
+				redirectUnitId: params.redirectUnitId,
+				reason: body.reason,
+			});
+			return status(StatusCodes.NO_CONTENT, undefined);
+		},
+		{
+			access: "session-only",
+			params: SlugRedirectParams,
+			body: ReleaseSlugRedirectBody,
+			response: {
+				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.FORBIDDEN]: SlugMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["SlugRedirectNotFound"]),
+			},
+			detail: {
+				summary: "Release a slug Redirect as staff",
+				tags: ["Units"],
+				responses: NoContentResponse,
+			},
+		},
+	)
 	.get(
 		"/:type",
 		async ({ params, query }) => {
@@ -93,21 +220,6 @@ export default new Elysia({ prefix: "/units" })
 				[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 			},
 			detail: { summary: "Create unit", tags: ["Units"] },
-		},
-	)
-	.get(
-		"/resolve/:scope/:slug",
-		async ({ params }) => {
-			const result = await resolveUnitSlug(params.scope, params.slug);
-			return { id: result.id };
-		},
-		{
-			params: UnitSlugResolverParams,
-			response: {
-				[StatusCodes.OK]: IdResponse,
-				[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
-			},
-			detail: { summary: "Resolve a scoped Unit slug", tags: ["Units"] },
 		},
 	)
 	.get(

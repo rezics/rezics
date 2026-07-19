@@ -77,6 +77,72 @@ export class UnitPrimaryLanguageMissing extends Data.TaggedError("UnitPrimaryLan
 	readonly message = "Primary language must have an existing Unit localization";
 }
 
+export class InvalidSlug extends Data.TaggedError("InvalidSlug") {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = InvalidSlug.status;
+	readonly message = "Slug must be a lowercase ASCII kebab label between 1 and 63 characters";
+}
+
+export class SlugTaken extends Data.TaggedError("SlugTaken") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = SlugTaken.status;
+	readonly message = "Slug is already used in this Unit scope";
+	readonly details: { readonly scopeUnitId: string; readonly slug: string };
+
+	constructor(scopeUnitId: string, slug: string) {
+		super();
+		this.details = { scopeUnitId, slug };
+	}
+}
+
+export class SlugScopeNotFound extends Data.TaggedError("SlugScopeNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = SlugScopeNotFound.status;
+	readonly message = "Slug scope Unit not found";
+}
+
+export class SlugScopeUnavailable extends Data.TaggedError("SlugScopeUnavailable") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = SlugScopeUnavailable.status;
+	readonly message = "Redirect and deleted Units cannot be canonical slug scopes";
+}
+
+export class SlugScopeCycle extends Data.TaggedError("SlugScopeCycle") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = SlugScopeCycle.status;
+	readonly message = "Moving this Unit would create a slug scope cycle";
+}
+
+export class SlugDepthExceeded extends Data.TaggedError("SlugDepthExceeded") {
+	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
+	readonly status = SlugDepthExceeded.status;
+	readonly message = "Unit slug path exceeds the maximum depth";
+}
+
+export class UnitAddressUnchanged extends Data.TaggedError("UnitAddressUnchanged") {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = UnitAddressUnchanged.status;
+	readonly message = "Unit slug address is unchanged";
+}
+
+export class UnitAddressMutationForbidden extends Data.TaggedError("UnitAddressMutationForbidden") {
+	static readonly status = StatusCodes.FORBIDDEN as const;
+	readonly status = UnitAddressMutationForbidden.status;
+	readonly message = "This Unit address cannot be mutated by this operation";
+}
+
+export class SlugRedirectNotFound extends Data.TaggedError("SlugRedirectNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = SlugRedirectNotFound.status;
+	readonly message = "Slug Redirect not found";
+}
+
+export class SlugRedirectLoop extends Data.TaggedError("SlugRedirectLoop") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = SlugRedirectLoop.status;
+	readonly message = "Slug Redirect loop detected";
+}
+
 export const UnitErrors = [
 	UnitNotFound,
 	UnitPermissionForbidden,
@@ -85,4 +151,14 @@ export const UnitErrors = [
 	UnitChanged,
 	UnitRevisionConflict,
 	UnitPrimaryLanguageMissing,
+	InvalidSlug,
+	SlugTaken,
+	SlugScopeNotFound,
+	SlugScopeUnavailable,
+	SlugScopeCycle,
+	SlugDepthExceeded,
+	UnitAddressUnchanged,
+	UnitAddressMutationForbidden,
+	SlugRedirectNotFound,
+	SlugRedirectLoop,
 ] as const;

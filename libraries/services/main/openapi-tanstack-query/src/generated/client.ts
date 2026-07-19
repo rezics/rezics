@@ -165,12 +165,18 @@ import type {
 	PutApiUsersByIdBlockResponses,
 	DeleteApiUsersByIdBlockOptions,
 	DeleteApiUsersByIdBlockResponses,
+	PostApiUnitsResolveOptions,
+	PostApiUnitsResolveResponses,
+	PostApiUnitsSlugNamespacesOptions,
+	PostApiUnitsSlugNamespacesResponses,
+	PutApiUnitsSlugAddressesByUnitIdOptions,
+	PutApiUnitsSlugAddressesByUnitIdResponses,
+	DeleteApiUnitsSlugRedirectsByRedirectUnitIdOptions,
+	DeleteApiUnitsSlugRedirectsByRedirectUnitIdResponses,
 	GetApiUnitsByTypeOptions,
 	GetApiUnitsByTypeResponses,
 	PostApiUnitsByTypeOptions,
 	PostApiUnitsByTypeResponses,
-	GetApiUnitsResolveByScopeBySlugOptions,
-	GetApiUnitsResolveByScopeBySlugResponses,
 	GetApiUnitsByTypeByUnitIdOptions,
 	GetApiUnitsByTypeByUnitIdResponses,
 	PatchApiUnitsByTypeByUnitIdOptions,
@@ -1693,6 +1699,68 @@ export function deleteApiUsersByIdBlock<ThrowOnError extends boolean = true>(
 }
 
 /**
+ * @summary Resolve a canonical Unit slug path
+ * {@link /api/units/resolve}
+ */
+export function postApiUnitsResolve<ThrowOnError extends boolean = true>(
+	options: Options<PostApiUnitsResolveOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiUnitsResolveResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "POST", url: "/api/units/resolve", ...config }) as Promise<
+		RequestResult<PostApiUnitsResolveResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Create a staff-managed slug namespace
+ * {@link /api/units/slug-namespaces}
+ */
+export function postApiUnitsSlugNamespaces<ThrowOnError extends boolean = true>(
+	options: Options<PostApiUnitsSlugNamespacesOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiUnitsSlugNamespacesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "POST", url: "/api/units/slug-namespaces", ...config }) as Promise<
+		RequestResult<PostApiUnitsSlugNamespacesResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Change a Unit slug address as staff
+ * {@link /api/units/slug-addresses/:unitId}
+ */
+export function putApiUnitsSlugAddressesByUnitId<ThrowOnError extends boolean = true>(
+	options: Options<PutApiUnitsSlugAddressesByUnitIdOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiUnitsSlugAddressesByUnitIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/units/slug-addresses/{unitId}",
+		...config,
+	}) as Promise<RequestResult<PutApiUnitsSlugAddressesByUnitIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Release a slug Redirect as staff
+ * {@link /api/units/slug-redirects/:redirectUnitId}
+ */
+export function deleteApiUnitsSlugRedirectsByRedirectUnitId<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiUnitsSlugRedirectsByRedirectUnitIdOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiUnitsSlugRedirectsByRedirectUnitIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/units/slug-redirects/{redirectUnitId}",
+		...config,
+	}) as Promise<
+		RequestResult<DeleteApiUnitsSlugRedirectsByRedirectUnitIdResponses, ThrowOnError>
+	>;
+}
+
+/**
  * @summary List published units
  * {@link /api/units/:type}
  */
@@ -1718,22 +1786,6 @@ export function postApiUnitsByType<ThrowOnError extends boolean = true>(
 	return request({ method: "POST", url: "/api/units/{type}", ...config }) as Promise<
 		RequestResult<PostApiUnitsByTypeResponses, ThrowOnError>
 	>;
-}
-
-/**
- * @summary Resolve a scoped Unit slug
- * {@link /api/units/resolve/:scope/:slug}
- */
-export function getApiUnitsResolveByScopeBySlug<ThrowOnError extends boolean = true>(
-	options: Options<GetApiUnitsResolveByScopeBySlugOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsResolveByScopeBySlugResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({
-		method: "GET",
-		url: "/api/units/resolve/{scope}/{slug}",
-		...config,
-	}) as Promise<RequestResult<GetApiUnitsResolveByScopeBySlugResponses, ThrowOnError>>;
 }
 
 /**

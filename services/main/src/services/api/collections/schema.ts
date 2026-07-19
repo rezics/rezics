@@ -9,7 +9,7 @@ export const ListCollectionsQuery = t.Object({
 export type ListCollectionsQuery = Static<typeof ListCollectionsQuery>;
 
 export const CreateCollectionBody = t.Object({
-	slug: t.String({ minLength: 3, maxLength: 72 }),
+	slug: t.String({ minLength: 3, maxLength: 63, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
 	localization: LocalizationInput,
 	visibility: LifecycleInput.visibility,
 	definitionDocument: t.Optional(CollectionDefinitionDocument),

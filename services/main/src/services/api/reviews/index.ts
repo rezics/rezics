@@ -20,6 +20,8 @@ import {
 } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
+import { insertAddressedUnit } from "../../units/slug-address";
+import { generateSlugLabel } from "../../units/slug";
 import {
 	IdResponse,
 	NoContentResponse,
@@ -132,16 +134,14 @@ export default new Elysia()
 								scoreInput.score,
 							);
 						}
-						const [created] = await tx
-							.insert(unit)
-							.values({
-								kind: "post",
-								status: "published",
-								visibility: "public",
-								publishedAt: new Date(),
-							})
-							.returning({ id: unit.id });
-						if (!created) throw new Error("Review insertion did not return an id");
+						const created = await insertAddressedUnit(tx, {
+							kind: "post",
+							slugScopeId: profile.unitId,
+							slug: generateSlugLabel(body.title, "review"),
+							status: "published",
+							visibility: "public",
+							publishedAt: new Date(),
+						});
 						await tx.insert(post).values({
 							id: created.id,
 							authorProfileId: profile.unitId,

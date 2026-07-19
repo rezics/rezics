@@ -7,13 +7,6 @@ import { LanguageTag, Uuid } from "../schema";
 export const UpdateProfileBody = t.Object(
 	{
 		updatedAt: t.String({ format: "date-time" }),
-		slug: t.Optional(
-			t.String({
-				minLength: 3,
-				maxLength: 64,
-				pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-			}),
-		),
 		name: t.Optional(t.String({ minLength: 1, maxLength: 120 })),
 		avatarAssetId: t.Optional(t.Nullable(Uuid)),
 		summary: t.Optional(t.String({ maxLength: 500 })),

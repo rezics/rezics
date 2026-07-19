@@ -73,10 +73,7 @@ export default new Elysia({ prefix: "/users" })
 	.patch(
 		"/me",
 		async ({ profile, authorization, body }) => {
-			await authorization.unit.ensureCanUpdate(profile.unitId, [
-				["unit", "slug"],
-				["profile"],
-			]);
+			await authorization.unit.ensureCanUpdate(profile.unitId, [["profile"]]);
 			await database.transaction(async (tx) => {
 				await ensureImageAssetAttachable(tx, profile.unitId, body.avatarAssetId);
 				const [current] = await tx
@@ -87,7 +84,7 @@ export default new Elysia({ prefix: "/users" })
 				if (!current) throw new ProfileNotFound();
 				const [updated] = await tx
 					.update(unit)
-					.set(body.slug === undefined ? { updatedAt: new Date() } : { slug: body.slug })
+					.set({ updatedAt: new Date() })
 					.where(
 						and(
 							eq(unit.id, profile.unitId),

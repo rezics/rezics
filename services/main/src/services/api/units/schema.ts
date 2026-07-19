@@ -8,6 +8,12 @@ export type UnitType = Static<typeof UnitType>;
 export const UnitTypeParams = t.Object({ type: UnitType });
 export type UnitTypeParams = Static<typeof UnitTypeParams>;
 
+export const SlugLabelInput = t.String({
+	minLength: 1,
+	maxLength: 63,
+	pattern: "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+});
+
 const UnitLocalizationInput = t.Object(
 	{
 		...LocalizationInput.properties,
@@ -20,7 +26,7 @@ export const CreateUnitBody = t.Object(
 	{
 		localization: UnitLocalizationInput,
 		slug: t.Optional(
-			t.String({ minLength: 3, maxLength: 72, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
+			t.String({ minLength: 3, maxLength: 63, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
 		),
 		visibility: LifecycleInput.visibility,
 		contentRating: LifecycleInput.contentRating,
@@ -91,8 +97,57 @@ export type UnitLocalizationParams = Static<typeof UnitLocalizationParams>;
 export const UnitLocalizationBody = t.Omit(UnitLocalizationInput, ["language"]);
 export type UnitLocalizationBody = Static<typeof UnitLocalizationBody>;
 
-export const UnitSlugResolverParams = t.Object({
-	scope: UnitType,
-	slug: t.String({ minLength: 1, maxLength: 72 }),
+export const ResolveUnitPathBody = t.Object(
+	{
+		path: t.Array(SlugLabelInput, { minItems: 1, maxItems: 16 }),
+	},
+	{ additionalProperties: false },
+);
+export type ResolveUnitPathBody = Static<typeof ResolveUnitPathBody>;
+
+export const ResolvedUnitPathResponse = t.Object({
+	id: Uuid,
+	kind: t.String(),
+	path: t.Array(SlugLabelInput),
+	canonicalPath: t.Array(SlugLabelInput),
+	redirected: t.Boolean(),
 });
-export type UnitSlugResolverParams = Static<typeof UnitSlugResolverParams>;
+
+const StaffSlugMutationInput = {
+	scopeUnitId: Uuid,
+	slug: SlugLabelInput,
+	reason: t.String({ minLength: 1, maxLength: 1000 }),
+};
+
+export const CreateSlugNamespaceBody = t.Object(StaffSlugMutationInput, {
+	additionalProperties: false,
+});
+export type CreateSlugNamespaceBody = Static<typeof CreateSlugNamespaceBody>;
+
+export const UpdateUnitAddressParams = t.Object({ unitId: Uuid });
+export type UpdateUnitAddressParams = Static<typeof UpdateUnitAddressParams>;
+
+export const UpdateUnitAddressBody = t.Object(StaffSlugMutationInput, {
+	additionalProperties: false,
+});
+export type UpdateUnitAddressBody = Static<typeof UpdateUnitAddressBody>;
+
+export const UnitAddressMutationResponse = t.Object({
+	unitId: Uuid,
+	redirectUnitId: Uuid,
+	canonicalPath: t.Array(SlugLabelInput),
+});
+
+export const SlugNamespaceCreatedResponse = t.Object({
+	id: Uuid,
+	canonicalPath: t.Array(SlugLabelInput),
+});
+
+export const SlugRedirectParams = t.Object({ redirectUnitId: Uuid });
+export type SlugRedirectParams = Static<typeof SlugRedirectParams>;
+
+export const ReleaseSlugRedirectBody = t.Object(
+	{ reason: t.String({ minLength: 1, maxLength: 1000 }) },
+	{ additionalProperties: false },
+);
+export type ReleaseSlugRedirectBody = Static<typeof ReleaseSlugRedirectBody>;

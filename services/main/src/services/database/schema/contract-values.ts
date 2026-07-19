@@ -1,6 +1,8 @@
 export const DefaultLanguage = "zh-hant";
 
 export const UnitKindValues = [
+	"slug_namespace",
+	"redirect",
 	"profile",
 	"book",
 	"software",
@@ -148,6 +150,9 @@ export const RealmCapabilityValues = [
 ] as const;
 export const PlatformCapabilityValues = [
 	"unit.edit",
+	"unit.slug.manage",
+	"unit.slug.namespace.manage",
+	"unit.slug.redirect.release",
 	"platform.moderate",
 	"platform.suppress",
 	"platform.grants.manage",

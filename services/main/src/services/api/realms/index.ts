@@ -37,6 +37,9 @@ import { createNotification, deliverNotificationEmail } from "../../notification
 import { findRealmMembership, getCurrentRealmRules } from "../../realms/service";
 import type { DatabaseTransaction } from "../../database";
 import { recordUnitRevision } from "../../units/history";
+import { insertAddressedUnit } from "../../units/slug-address";
+import { TopLevelSlugNamespaceUnitIds } from "../../units/slug-system";
+import { generateSlugLabel } from "../../units/slug";
 import {
 	FollowResponse,
 	IdResponse,
@@ -168,17 +171,14 @@ export default new Elysia({ prefix: "/realms" })
 		"",
 		async ({ profile, body }) => {
 			const id = await database.transaction(async (tx) => {
-				const [created] = await tx
-					.insert(unit)
-					.values({
-						kind: "realm",
-						slug: body.slug,
-						status: "published",
-						visibility: body.visibility,
-						publishedAt: new Date(),
-					})
-					.returning({ id: unit.id });
-				if (!created) throw new Error("Realm insertion did not return an id");
+				const created = await insertAddressedUnit(tx, {
+					kind: "realm",
+					slugScopeId: TopLevelSlugNamespaceUnitIds.realms,
+					slug: body.slug,
+					status: "published",
+					visibility: body.visibility,
+					publishedAt: new Date(),
+				});
 				await tx.insert(realm).values({ id: created.id, joinPolicy: body.joinPolicy });
 				await tx.insert(unitLocalization).values({
 					unitId: created.id,
@@ -642,17 +642,14 @@ export default new Elysia({ prefix: "/realms" })
 					.returning();
 				if (!created) throw new Error("Realm rule revision insertion did not return a row");
 				for (const [index, rule] of body.rules.entries()) {
-					const [ruleUnit] = await tx
-						.insert(unit)
-						.values({
-							kind: "realm_rule",
-							status: "published",
-							visibility: "unlisted",
-							publishedAt: new Date(),
-						})
-						.returning({ id: unit.id });
-					if (!ruleUnit)
-						throw new Error("Realm rule Unit insertion did not return an id");
+					const ruleUnit = await insertAddressedUnit(tx, {
+						kind: "realm_rule",
+						slugScopeId: params.realmId,
+						slug: generateSlugLabel(rule.title, "rule"),
+						status: "published",
+						visibility: "unlisted",
+						publishedAt: new Date(),
+					});
 					await tx.insert(unitLocalization).values({
 						unitId: ruleUnit.id,
 						language: rule.language,

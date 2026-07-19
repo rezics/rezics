@@ -60,6 +60,8 @@ import {
 } from "../database/schema";
 import { isFractionalPosition } from "../ordering/position";
 import { UnitRevisionConflict } from "./errors";
+import { insertAddressedUnit } from "./slug-address";
+import { generateSlugLabel } from "./slug";
 
 export type UnitRevisionEvent = "create" | "update" | "delete" | "restore";
 
@@ -131,6 +133,7 @@ const schemaFactory = createSchemaFactory({ coerce: { date: true } });
 const unitStateSchema = schemaFactory.createSelectSchema(unit).omit({
 	id: true,
 	kind: true,
+	slugScopeId: true,
 	slug: true,
 	status: true,
 	visibility: true,
@@ -310,6 +313,8 @@ async function snapshotExtension(
 			);
 		case "tag":
 		case "realm_rule":
+		case "slug_namespace":
+		case "redirect":
 			return null;
 	}
 }
@@ -477,7 +482,8 @@ async function restoreExtension(
 	kind: UnitSnapshot["kind"],
 	value: SnapshotRow | null,
 ) {
-	if (kind === "tag") return;
+	if (kind === "tag" || kind === "realm_rule" || kind === "slug_namespace" || kind === "redirect")
+		return;
 	if (!value) throw new Error(`Missing ${kind} extension in Unit snapshot`);
 	switch (kind) {
 		case "profile":
@@ -602,16 +608,14 @@ async function restoreRealmRules(
 		.returning({ id: realmRuleRevision.id });
 	if (!revision) throw new Error("Realm rule restore did not return a revision");
 	for (const rule of value?.rules ?? []) {
-		const [ruleUnit] = await tx
-			.insert(unit)
-			.values({
-				kind: "realm_rule",
-				status: "published",
-				visibility: "unlisted",
-				publishedAt: new Date(),
-			})
-			.returning({ id: unit.id });
-		if (!ruleUnit) throw new Error("Realm rule Unit restore did not return an id");
+		const ruleUnit = await insertAddressedUnit(tx, {
+			kind: "realm_rule",
+			slugScopeId: realmId,
+			slug: generateSlugLabel(rule.title, "rule"),
+			status: "published",
+			visibility: "unlisted",
+			publishedAt: new Date(),
+		});
 		await tx.insert(unitLocalization).values({
 			unitId: ruleUnit.id,
 			language: rule.language,

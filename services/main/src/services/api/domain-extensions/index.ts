@@ -41,6 +41,9 @@ import {
 import { UnitNotFound } from "../../units/errors";
 import type { DatabaseTransaction } from "../../database";
 import { recordUnitRevision } from "../../units/history";
+import { insertAddressedUnit } from "../../units/slug-address";
+import { TopLevelSlugNamespaceUnitIds } from "../../units/slug-system";
+import { generateSlugLabel } from "../../units/slug";
 import { FollowResponse, IdResponse, NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
 import {
@@ -109,24 +112,14 @@ async function createBaseUnit(
 		ownerId: string;
 	},
 ) {
-	const stem = input.localization.title
-		.normalize("NFKD")
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, "-")
-		.replace(/^-|-$/g, "")
-		.slice(0, 56);
-	const slug = input.slug ?? `${stem || "unit"}-${crypto.randomUUID().slice(0, 8)}`;
-	const [created] = await tx
-		.insert(unit)
-		.values({
-			kind: input.kind,
-			slug,
-			status: "published",
-			visibility: "public",
-			publishedAt: new Date(),
-		})
-		.returning({ id: unit.id });
-	if (!created) throw new Error("Unit insertion did not return an id");
+	const created = await insertAddressedUnit(tx, {
+		kind: input.kind,
+		slugScopeId: input.kind === "zone" ? TopLevelSlugNamespaceUnitIds.zones : input.ownerId,
+		slug: input.slug ?? generateSlugLabel(input.localization.title),
+		status: "published",
+		visibility: "public",
+		publishedAt: new Date(),
+	});
 	await tx.insert(unitLocalization).values({ unitId: created.id, ...input.localization });
 	await tx.insert(unitAccessBinding).values({
 		unitId: created.id,

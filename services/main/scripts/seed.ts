@@ -12,7 +12,7 @@ import {
 } from "@rezics/block";
 import { defaultKeyHasher } from "@better-auth/api-key";
 import { hashPassword } from "better-auth/crypto";
-import { and, eq } from "drizzle-orm";
+import { and, eq, notInArray } from "drizzle-orm";
 
 import { env } from "../src/services/config";
 import { ApiPermissionValues, toApiKeyPermissions } from "../src/services/auth/api-permissions";
@@ -85,6 +85,10 @@ import { RecommendationPolicyVersion } from "../src/services/recommendations/pol
 import { fractionalPositionAt } from "../src/services/ordering/position";
 import { recordUnitRevision, restoreUnitRevision } from "../src/services/units/history";
 import {
+	SystemSlugNamespaceUnitIds,
+	TopLevelSlugNamespaceUnitIds,
+} from "../src/services/units/slug-system";
+import {
 	assertLocalDatabaseUrl,
 	chunks,
 	collectUnique,
@@ -108,6 +112,7 @@ type LocalizationKind = "description" | "post" | "reply" | "poll" | "title";
 
 interface UnitDescriptor {
 	kind: UnitKind;
+	slugScopeId: string;
 	slug: string;
 	ownerProfileId: string;
 	localizationKind: LocalizationKind;
@@ -173,6 +178,27 @@ function createdAtFor(data: SeedData, maximumAgeDays = 730): Date {
 	return data.pastDate(maximumAgeDays);
 }
 
+function seedSlugScopeId(kind: UnitKind, ownerProfileId: string): string {
+	switch (kind) {
+		case "profile":
+			return TopLevelSlugNamespaceUnitIds.users;
+		case "realm":
+			return TopLevelSlugNamespaceUnitIds.realms;
+		case "tag":
+			return TopLevelSlugNamespaceUnitIds.tags;
+		case "zone":
+			return TopLevelSlugNamespaceUnitIds.zones;
+		case "entity":
+			return TopLevelSlugNamespaceUnitIds.entities;
+		case "slug_namespace":
+		case "redirect":
+			throw new Error(`Seed content cannot create ${kind} Units`);
+		default:
+			if (!ownerProfileId) throw new Error(`Seed ${kind} Unit requires an address owner`);
+			return ownerProfileId;
+	}
+}
+
 function createDescriptor(
 	data: SeedData,
 	input: {
@@ -193,6 +219,7 @@ function createDescriptor(
 	const state = data.unitState(input.stateIndex, input.forcePublished);
 	return {
 		kind: input.kind,
+		slugScopeId: seedSlugScopeId(input.kind, input.ownerProfileId),
 		slug: input.slug,
 		ownerProfileId: input.ownerProfileId,
 		localizationKind: input.localizationKind ?? "description",
@@ -209,7 +236,7 @@ async function insertUnits(
 	tx: DatabaseTransaction,
 	descriptors: readonly UnitDescriptor[],
 ): Promise<CreatedUnit[]> {
-	const returned: { id: string; slug: string | null }[] = [];
+	const returned: { id: string; slugScopeId: string | null; slug: string | null }[] = [];
 	for (const batch of chunks(descriptors)) {
 		returned.push(
 			...(await tx
@@ -217,6 +244,7 @@ async function insertUnits(
 				.values(
 					batch.map((descriptor) => ({
 						kind: descriptor.kind,
+						slugScopeId: descriptor.slugScopeId,
 						slug: descriptor.slug,
 						status: descriptor.status,
 						visibility: descriptor.visibility,
@@ -226,18 +254,22 @@ async function insertUnits(
 						updatedAt: descriptor.updatedAt,
 					})),
 				)
-				.returning({ id: unit.id, slug: unit.slug })),
+				.returning({ id: unit.id, slugScopeId: unit.slugScopeId, slug: unit.slug })),
 		);
 	}
-	const idBySlug = new Map(
+	const idByAddress = new Map(
 		returned.map((row) => {
-			if (!row.slug) throw new Error("Seed Unit insertion returned a null slug");
-			return [row.slug, row.id];
+			if (!row.slugScopeId || !row.slug)
+				throw new Error("Seed Unit insertion returned an incomplete address");
+			return [`${row.slugScopeId}:${row.slug}`, row.id];
 		}),
 	);
 	return descriptors.map((descriptor) => {
-		const id = idBySlug.get(descriptor.slug);
-		if (!id) throw new Error(`Seed Unit insertion did not return ${descriptor.slug}`);
+		const id = idByAddress.get(`${descriptor.slugScopeId}:${descriptor.slug}`);
+		if (!id)
+			throw new Error(
+				`Seed Unit insertion did not return ${descriptor.slugScopeId}/${descriptor.slug}`,
+			);
 		return { ...descriptor, id };
 	});
 }
@@ -336,6 +368,7 @@ async function seedProfiles(
 	const userByEmail = new Map(returnedUsers.map((value) => [value.email, value]));
 	const profileDescriptors = userInputs.map((input, index) => ({
 		kind: "profile" as const,
+		slugScopeId: TopLevelSlugNamespaceUnitIds.users,
 		slug: index === 0 ? "demo" : `seed-profile-${position(index)}`,
 		ownerProfileId: "",
 		localizationKind: "description" as const,
@@ -505,7 +538,8 @@ async function seedCatalog(
 		if (index < SeedPlan.users) {
 			return {
 				kind: "collection" as const,
-				slug: index === 0 ? "demo-favorites" : `seed-favorites-${position(index)}`,
+				slugScopeId: owner.id,
+				slug: "favorites",
 				ownerProfileId: owner.id,
 				localizationKind: "description" as const,
 				status: "published" as const,
@@ -903,15 +937,42 @@ async function seedContent(
 	);
 
 	const rootPosts = await insertUnits(tx, rootDescriptors);
-	const replies = await insertUnits(tx, [
-		...firstLevelReplyDescriptors,
-		...nestedReplyDescriptors,
-	]);
+	const createdFirstLevelReplies = await insertUnits(
+		tx,
+		firstLevelReplyDescriptors.map((value, index) => ({
+			...value,
+			slugScopeId: itemAt(rootPosts, index).id,
+		})),
+	);
+	const createdNestedReplies = await insertUnits(
+		tx,
+		nestedReplyDescriptors.map((value, index) => ({
+			...value,
+			slugScopeId: itemAt(rootPosts, index * 7).id,
+		})),
+	);
+	const replies = [...createdFirstLevelReplies, ...createdNestedReplies];
 	const reviews = await insertUnits(tx, descriptors(SeedPlan.reviews, "review", "post"));
-	const chapters = await insertUnits(tx, descriptors(SeedPlan.chapters, "chapter", "post"));
+	const chapters = await insertUnits(
+		tx,
+		descriptors(SeedPlan.chapters, "chapter", "post").map((value, index) => ({
+			...value,
+			slugScopeId: itemAt(catalog.books, index).id,
+		})),
+	);
 	const chapterGroups = await insertUnits(
 		tx,
-		descriptors(SeedPlan.contentStructureNodes - SeedPlan.chapters, "chapter-group", "title"),
+		descriptors(
+			SeedPlan.contentStructureNodes - SeedPlan.chapters,
+			"chapter-group",
+			"title",
+		).map((value, index) => ({
+			...value,
+			slugScopeId:
+				index < catalog.books.length
+					? itemAt(catalog.books, index).id
+					: itemAt(catalog.books, SeedPlan.chapters + index - catalog.books.length).id,
+		})),
 	);
 	const allPosts = [...rootPosts, ...replies, ...reviews, ...chapters, ...chapterGroups];
 	await insertUnitDetails(tx, data, allPosts);
@@ -1198,15 +1259,18 @@ async function seedStructure(
 		return Array.from({ length: SeedPlan.realmRules / revisions.length }, (_, index) => ({
 			revision,
 			position: index,
-			descriptor: createDescriptor(data, {
-				kind: "realm_rule",
-				slug: `seed-realm-rule-${position(revisionIndex)}-${position(index)}`,
-				ownerProfileId,
-				localizationKind: "post",
-				stateIndex: revisionIndex * 100 + index,
-				forcePublished: true,
-				notBefore: [revision.publishedAt],
-			}),
+			descriptor: {
+				...createDescriptor(data, {
+					kind: "realm_rule",
+					slug: `seed-realm-rule-${position(revisionIndex)}-${position(index)}`,
+					ownerProfileId,
+					localizationKind: "post",
+					stateIndex: revisionIndex * 100 + index,
+					forcePublished: true,
+					notBefore: [revision.publishedAt],
+				}),
+				slugScopeId: revision.realmId,
+			},
 		}));
 	});
 	const ruleUnits = await insertUnits(
@@ -1309,6 +1373,20 @@ async function seedStructure(
 			};
 		}),
 		(batch) => tx.insert(capabilityGrant).values(batch),
+	);
+	const staff = itemAt(profiles, 0);
+	await tx.insert(capabilityGrant).values(
+		[
+			"platform.grants.manage",
+			"unit.slug.manage",
+			"unit.slug.namespace.manage",
+			"unit.slug.redirect.release",
+		].map((capability) => ({
+			authority: "platform" as const,
+			profileId: staff.id,
+			capability,
+			grantedByProfileId: staff.id,
+		})),
 	);
 	await writeBatches(
 		catalog.zones.flatMap((zoneUnit, zoneIndex) =>
@@ -2068,7 +2146,11 @@ async function seed(): Promise<void> {
 	await database.transaction(
 		async (tx) => {
 			const [existingUser] = await tx.select({ id: users.id }).from(users).limit(1);
-			const [existingUnit] = await tx.select({ id: unit.id }).from(unit).limit(1);
+			const [existingUnit] = await tx
+				.select({ id: unit.id })
+				.from(unit)
+				.where(notInArray(unit.id, [...SystemSlugNamespaceUnitIds]))
+				.limit(1);
 			if (existingUser || existingUnit) {
 				throw new Error(
 					"Seed requires an empty database; run `task services-main:db:reset -- --yes`",

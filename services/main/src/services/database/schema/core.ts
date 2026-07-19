@@ -54,6 +54,9 @@ export const unit = pgTable(
 	{
 		id: createUuidv7PrimaryKey(),
 		kind: unitKind().notNull(),
+		slugScopeId: uuid("slug_scope_id").references((): AnyPgColumn => unit.id, {
+			onDelete: "restrict",
+		}),
 		slug: text(),
 		status: unitStatus().default("draft").notNull(),
 		visibility: unitVisibility().default("public").notNull(),
@@ -67,9 +70,12 @@ export const unit = pgTable(
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		uniqueIndex("unit_kind_slug_key")
-			.on(table.kind, table.slug)
-			.where(sql`${table.slug} is not null`),
+		uniqueIndex("unit_slug_scope_slug_key")
+			.on(table.slugScopeId, table.slug)
+			.where(sql`${table.slugScopeId} is not null`),
+		uniqueIndex("unit_slug_root_key")
+			.on(sql`(true)`)
+			.where(sql`${table.slugScopeId} is null`),
 		index("unit_kind_status_created_at_idx")
 			.on(table.kind, table.status, table.createdAt.desc(), table.id.desc())
 			.where(sql`${table.deletedAt} is null`),
@@ -80,7 +86,25 @@ export const unit = pgTable(
 		index("unit_slug_search_idx")
 			.using("pgroonga", table.slug)
 			.where(sql`${table.deletedAt} is null`),
-		check("unit_slug_not_blank", sql`${table.slug} is null or btrim(${table.slug}) <> ''`),
+		check(
+			"unit_slug_address_shape_check",
+			sql`(
+				${table.slugScopeId} is null
+				and ${table.slug} is null
+				and ${table.kind} = 'slug_namespace'::unit_kind
+			) or (
+				${table.slugScopeId} is not null
+				and ${table.slug} is not null
+			)`,
+		),
+		check(
+			"unit_slug_label_check",
+			sql`${table.slug} is null or ${table.slug} ~ '^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$'`,
+		),
+		check(
+			"unit_slug_scope_not_self_check",
+			sql`${table.slugScopeId} is null or ${table.slugScopeId} <> ${table.id}`,
+		),
 		check(
 			"unit_publication_check",
 			sql`${table.status} <> 'published'::unit_status or ${table.publishedAt} is not null`,

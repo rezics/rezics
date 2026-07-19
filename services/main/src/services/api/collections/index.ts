@@ -18,6 +18,7 @@ import {
 	unitLocalization,
 } from "../../database/schema";
 import { recordUnitRevision } from "../../units/history";
+import { insertAddressedUnit } from "../../units/slug-address";
 import {
 	CollectionItemParams,
 	CollectionParams,
@@ -89,15 +90,12 @@ export default new Elysia({ prefix: "/collections" })
 			const id = await database.transaction(async (tx) => {
 				const definitionDocument =
 					body.definitionDocument ?? createManualCollectionDefinitionDocument();
-				const [created] = await tx
-					.insert(unit)
-					.values({
-						kind: "collection",
-						slug: body.slug,
-						visibility: body.visibility ?? "private",
-					})
-					.returning({ id: unit.id });
-				if (!created) throw new Error("Collection insertion did not return an id");
+				const created = await insertAddressedUnit(tx, {
+					kind: "collection",
+					slugScopeId: profile.unitId,
+					slug: body.slug,
+					visibility: body.visibility ?? "private",
+				});
 				await tx.insert(collection).values({
 					id: created.id,
 					ownerProfileId: profile.unitId,

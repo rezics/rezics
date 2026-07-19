@@ -21,6 +21,7 @@ export * from "./recommendation";
 export * from "./release";
 export * from "./score";
 export * from "./series";
+export * from "./slug";
 export * from "./software";
 export * from "./tag";
 export * from "./zone";

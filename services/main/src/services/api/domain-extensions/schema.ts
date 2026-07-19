@@ -32,7 +32,7 @@ export const CreateSeriesBody = t.Object(
 	{
 		kind: t.String({ minLength: 1, maxLength: 64 }),
 		slug: t.Optional(
-			t.String({ minLength: 3, maxLength: 72, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
+			t.String({ minLength: 3, maxLength: 63, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
 		),
 		localization: LocalizationInput,
 	},
@@ -66,7 +66,7 @@ export const SystemRequirementBody = t.Object(
 export const CreateZoneBody = t.Object(
 	{
 		slug: t.Optional(
-			t.String({ minLength: 3, maxLength: 72, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
+			t.String({ minLength: 3, maxLength: 63, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
 		),
 		localization: LocalizationInput,
 		boundaryDocument: ZoneBoundaryInputDocument,

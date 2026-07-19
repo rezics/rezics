@@ -32,6 +32,8 @@ import { ensureImageAssetAttachable, imageAssetContentUrl } from "../api/image-a
 import { UnitDetailResponse } from "../api/schema/response";
 import { UnitChanged, UnitNotFound, UnitPrimaryLanguageMissing } from "./errors";
 import { recordUnitRevision } from "./history";
+import { insertAddressedUnit } from "./slug-address";
+import { generateSlugLabel } from "./slug";
 
 export type UnitKind = "book" | "software" | "media";
 export type UnitDetail = Static<typeof UnitDetailResponse>;
@@ -80,16 +82,6 @@ export function presentImageAsset(assetId: string | null) {
 	return assetId ? { id: assetId, url: imageAssetContentUrl(assetId) } : null;
 }
 
-export async function resolveUnitSlug(kind: UnitKind, slug: string) {
-	const [resolved] = await database
-		.select({ id: unit.id, kind: unit.kind })
-		.from(unit)
-		.where(and(eq(unit.kind, kind), eq(unit.slug, slug), isNull(unit.deletedAt)))
-		.limit(1);
-	if (!resolved) throw new UnitNotFound();
-	return resolved;
-}
-
 export async function createUnit(
 	kind: UnitKind,
 	authorization: Authorization<string>,
@@ -98,25 +90,15 @@ export async function createUnit(
 	const ownerId = authorization.profileId;
 	const unitId = await database.transaction(async (tx) => {
 		await ensureImageAssetAttachable(tx, ownerId, input.localization.coverAssetId);
-		const stem = input.localization.title
-			.normalize("NFKD")
-			.toLowerCase()
-			.replace(/[^a-z0-9]+/g, "-")
-			.replace(/^-|-$/g, "")
-			.slice(0, 64);
-		const slug = input.slug ?? `${stem || "unit"}-${crypto.randomUUID().slice(0, 8)}`;
-		const [created] = await tx
-			.insert(unit)
-			.values({
-				kind,
-				slug,
-				visibility: input.visibility ?? "public",
-				contentRating: input.contentRating ?? "general",
-				aiDisclosure: input.aiDisclosure ?? "unknown",
-				license: input.license,
-			})
-			.returning({ id: unit.id });
-		if (!created) throw new Error("Unit insertion did not return an id");
+		const created = await insertAddressedUnit(tx, {
+			kind,
+			slugScopeId: ownerId,
+			slug: input.slug ?? generateSlugLabel(input.localization.title),
+			visibility: input.visibility ?? "public",
+			contentRating: input.contentRating ?? "general",
+			aiDisclosure: input.aiDisclosure ?? "unknown",
+			license: input.license,
+		});
 		if (kind === "book") await tx.insert(book).values({ id: created.id });
 		if (kind === "software") await tx.insert(software).values({ id: created.id });
 		if (kind === "media") await tx.insert(media).values({ id: created.id, kind: "other" });
