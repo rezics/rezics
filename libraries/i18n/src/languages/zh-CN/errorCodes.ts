@@ -75,6 +75,7 @@ export default {
 	CapabilityGrantNotFound: "没有找到这项有效授权。",
 	UnitAccessBindingNotFound: "没有找到这项条目访问授权。",
 	UnitOwnerRequired: "条目必须至少保留一名所有者。",
+	UnitOwnershipClaimUnavailable: "当前资料无法认领此条目的所有权。",
 	UnitAccessRestrictionNotFound: "没有找到这项条目访问限制。",
 	UnitProtectionNotFound: "没有找到这项条目保护。",
 	UnitAccessExpiryInvalid: "条目访问授权的过期时间必须晚于当前时间。",

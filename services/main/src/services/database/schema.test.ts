@@ -103,13 +103,9 @@ describe("database schema contracts", () => {
 			"profile",
 			"realm",
 			"authenticated",
-			"system",
 		]);
 		expect(binding.indexes.map((index) => index.config.name)).toEqual(
-			expect.arrayContaining([
-				"unit_access_binding_active_system_scope_key",
-				"unit_access_binding_active_owner_key",
-			]),
+			expect.arrayContaining(["unit_access_binding_active_owner_key"]),
 		);
 		expect(binding.checks.map((constraint) => constraint.name)).toContain(
 			"unit_access_binding_owner_scope_check",

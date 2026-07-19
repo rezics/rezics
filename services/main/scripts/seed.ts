@@ -16,6 +16,12 @@ import { and, eq, notInArray } from "drizzle-orm";
 
 import { env } from "../src/services/config";
 import { Authorization } from "../src/services/authorization";
+import {
+	BootstrapAuthUserIds,
+	BootstrapUnitIds,
+	OfficialProfileIds,
+} from "../src/services/bootstrap/manifest";
+import { isBootstrapReady } from "../src/services/bootstrap/service";
 import { ApiPermissionValues, toApiKeyPermissions } from "../src/services/auth/api-permissions";
 import { database, type DatabaseTransaction } from "../src/services/database";
 import { createGovernanceNotePost } from "../src/services/governance/note-service";
@@ -87,10 +93,7 @@ import {
 import { RecommendationPolicyVersion } from "../src/services/recommendations/policy";
 import { fractionalPositionAt } from "../src/services/ordering/position";
 import { recordUnitRevision, restoreUnitRevision } from "../src/services/units/history";
-import {
-	SystemSlugNamespaceUnitIds,
-	TopLevelSlugNamespaceUnitIds,
-} from "../src/services/units/slug-system";
+import { TopLevelSlugNamespaceUnitIds } from "../src/services/units/slug-system";
 import {
 	assertLocalDatabaseUrl,
 	chunks,
@@ -326,6 +329,7 @@ async function insertUnitDetails(
 	tx: DatabaseTransaction,
 	data: SeedData,
 	values: readonly CreatedUnit[],
+	communityOwnerProfileId: string = OfficialProfileIds.community,
 ): Promise<void> {
 	await writeBatches(
 		values.flatMap((value) => localizationRows(data, value)),
@@ -337,7 +341,6 @@ async function insertUnitDetails(
 		const common = {
 			unitId: value.id,
 			scope: [],
-			grantedByProfileId: value.ownerProfileId,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		};
@@ -345,12 +348,19 @@ async function insertUnitDetails(
 			const contributorRole =
 				value.kind === "entity" || value.kind === "tag" ? "editor" : "publisher";
 			accessRows.push(
-				{ ...common, subjectKind: "system", role: "owner" },
+				{
+					...common,
+					subjectKind: "profile",
+					profileId: communityOwnerProfileId,
+					role: "owner",
+					grantedByProfileId: communityOwnerProfileId,
+				},
 				{
 					...common,
 					subjectKind: "profile",
 					profileId: value.ownerProfileId,
 					role: contributorRole,
+					grantedByProfileId: communityOwnerProfileId,
 				},
 			);
 		} else {
@@ -359,6 +369,7 @@ async function insertUnitDetails(
 				subjectKind: "profile",
 				profileId: value.ownerProfileId,
 				role: "owner",
+				grantedByProfileId: value.ownerProfileId,
 			});
 		}
 	}
@@ -597,7 +608,7 @@ async function seedCatalog(
 		...collections,
 		...polls,
 	];
-	await insertUnitDetails(tx, data, allUnits);
+	await insertUnitDetails(tx, data, allUnits, OfficialProfileIds.community);
 
 	await writeBatches(
 		entities.map((value, index) => ({
@@ -1950,7 +1961,8 @@ async function seedGovernance(
 					actorProfileId: actor.id,
 					kind,
 					resultingStatus: kind === "remove" ? ("removed" as const) : null,
-					resultingLocked: kind === "lock" ? true : null,
+					previousLocked: kind === "lock" ? false : kind === "unlock" ? true : null,
+					resultingLocked: kind === "lock" ? true : kind === "unlock" ? false : null,
 					reasonCode: "administrative" as const,
 					requestId: `seed-request-${position(index)}`,
 					idempotencyKey: `seed-action-${position(index)}`,
@@ -2193,15 +2205,24 @@ async function seedHistory(
 
 async function seed(): Promise<void> {
 	assertLocalDatabaseUrl(env.DATABASE_URL);
+	if (!(await isBootstrapReady())) {
+		throw new Error(
+			"Seed requires a bootstrapped database; run `task services-main:db:bootstrap` first",
+		);
+	}
 	const data = createSeedData(new Date());
 	const demoPasswordHash = await hashPassword(DemoCredentials.password);
 	await database.transaction(
 		async (tx) => {
-			const [existingUser] = await tx.select({ id: users.id }).from(users).limit(1);
+			const [existingUser] = await tx
+				.select({ id: users.id })
+				.from(users)
+				.where(notInArray(users.id, [...BootstrapAuthUserIds]))
+				.limit(1);
 			const [existingUnit] = await tx
 				.select({ id: unit.id })
 				.from(unit)
-				.where(notInArray(unit.id, [...SystemSlugNamespaceUnitIds]))
+				.where(notInArray(unit.id, [...BootstrapUnitIds]))
 				.limit(1);
 			if (existingUser || existingUnit) {
 				throw new Error(

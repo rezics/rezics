@@ -5789,6 +5789,7 @@
 					"CapabilityGrantNotFound",
 					"UnitAccessBindingNotFound",
 					"UnitOwnerRequired",
+					"UnitOwnershipClaimUnavailable",
 					"UnitAccessRestrictionNotFound",
 					"UnitProtectionNotFound",
 					"UnitAccessExpiryInvalid",
@@ -13055,31 +13056,13 @@
 								"required": ["owner"],
 								"properties": {
 									"owner": {
-										"anyOf": [
-											{
-												"additionalProperties": false,
-												"type": "object",
-												"required": ["kind", "profileId"],
-												"properties": {
-													"kind": {
-														"const": "profile",
-														"type": "string"
-													},
-													"profileId": {
-														"format": "uuid",
-														"type": "string"
-													}
-												}
-											},
-											{
-												"additionalProperties": false,
-												"type": "object",
-												"required": ["kind"],
-												"properties": {
-													"kind": { "const": "system", "type": "string" }
-												}
-											}
-										]
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["kind", "profileId"],
+										"properties": {
+											"kind": { "const": "profile", "type": "string" },
+											"profileId": { "format": "uuid", "type": "string" }
+										}
 									}
 								}
 							}
@@ -13115,7 +13098,7 @@
 										"subjectKind": {
 											"default": "profile",
 											"type": "string",
-											"enum": ["profile", "realm", "authenticated", "system"]
+											"enum": ["profile", "realm", "authenticated"]
 										},
 										"profileId": {
 											"nullable": true,
@@ -13245,6 +13228,242 @@
 				"operationId": "putApiGovernanceUnitByUnitIdOwnership"
 			}
 		},
+		"/api/governance/unit/{unitId}/ownership/claim": {
+			"post": {
+				"summary": "Claim community Unit ownership",
+				"tags": ["Governance"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"properties": {}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"unitId",
+										"subjectKind",
+										"profileId",
+										"realmId",
+										"realmRelation",
+										"role",
+										"scope",
+										"grantedByProfileId",
+										"expiresAt",
+										"revokedAt",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"unitId": { "format": "uuid", "type": "string" },
+										"subjectKind": {
+											"default": "profile",
+											"type": "string",
+											"enum": ["profile", "realm", "authenticated"]
+										},
+										"profileId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"realmId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"realmRelation": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"role": { "type": "string" },
+										"scope": {
+											"maxItems": 8,
+											"type": "array",
+											"items": {
+												"minLength": 1,
+												"maxLength": 64,
+												"pattern": "^[a-z0-9][a-z0-9-]*$",
+												"type": "string"
+											}
+										},
+										"grantedByProfileId": {
+											"format": "uuid",
+											"type": "string"
+										},
+										"expiresAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"revokedAt": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "date-time", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Response for status 401",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "InteractiveSessionRequired",
+													"type": "string",
+													"enum": ["InteractiveSessionRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "FreshSessionRequired",
+													"type": "string",
+													"enum": ["FreshSessionRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitOwnershipClaimUnavailable",
+													"type": "string",
+													"enum": ["UnitOwnershipClaimUnavailable"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "postApiGovernanceUnitByUnitIdOwnershipClaim"
+			}
+		},
 		"/api/governance/unit/{unitId}/access-bindings": {
 			"get": {
 				"summary": "List Unit access bindings",
@@ -13297,8 +13516,7 @@
 														"enum": [
 															"profile",
 															"realm",
-															"authenticated",
-															"system"
+															"authenticated"
 														]
 													},
 													"profileId": {
@@ -13570,7 +13788,7 @@
 										"subjectKind": {
 											"default": "profile",
 											"type": "string",
-											"enum": ["profile", "realm", "authenticated", "system"]
+											"enum": ["profile", "realm", "authenticated"]
 										},
 										"profileId": {
 											"nullable": true,

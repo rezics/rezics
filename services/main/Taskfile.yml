@@ -127,6 +127,17 @@ tasks:
             - yarn exec atlas migrate apply --env main --url "${DATABASE_ADMIN_URL}"
             - yarn exec tsx scripts/ensure-database-privileges.ts
 
+    db:bootstrap:
+        desc: Provision required slug namespaces and official Rezics Units.
+        cmds:
+            - yarn exec tsx scripts/bootstrap.ts
+
+    db:prepare:
+        desc: Migrate and bootstrap a database for application traffic.
+        cmds:
+            - task: db:migrate
+            - task: db:bootstrap
+
     db:adopt-atlas:
         desc: One-time adoption of an existing Drizzle-managed database at the known baseline.
         cmds:
@@ -142,7 +153,7 @@ tasks:
             - yarn exec atlas migrate status --env main --url "${DATABASE_ADMIN_URL}"
 
     db:seed:
-        desc: Seed an empty local database and build its recommendation snapshot.
+        desc: Seed a bootstrapped empty local database and build its recommendation snapshot.
         cmds:
             - yarn exec tsx scripts/seed.ts
             - task: recommendations:refresh
@@ -151,5 +162,5 @@ tasks:
         desc: Destructively rebuild, migrate, and seed a local development database.
         cmds:
             - yarn exec tsx scripts/reset-database.ts {{.CLI_ARGS}}
-            - task: db:migrate
+            - task: db:prepare
             - task: db:seed

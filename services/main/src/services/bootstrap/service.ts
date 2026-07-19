@@ -1,0 +1,533 @@
+import { hashPassword } from "better-auth/crypto";
+import { and, count, eq, inArray, isNull, sql } from "drizzle-orm";
+
+import { database, type DatabaseTransaction } from "../database";
+import {
+	accounts,
+	profile,
+	profilePreference,
+	realm,
+	realmMember,
+	realmUnit,
+	unit,
+	unitAccessBinding,
+	unitLocalization,
+	users,
+	zone,
+} from "../database/schema";
+import { InitialFractionalPosition } from "../ordering/position";
+import { recordUnitRevision } from "../units/history";
+import { insertAddressedUnit } from "../units/slug-address";
+import { generateBootstrapPassword } from "./credentials";
+import {
+	assertBootstrapManifest,
+	BootstrapAccountIds,
+	BootstrapAuthUserIds,
+	BootstrapEpochIso,
+	BootstrapUnitIds,
+	OfficialProfileIdValues,
+	OfficialProfileManifest,
+	OfficialRealmManifest,
+	OfficialZoneManifest,
+	RootSlugNamespaceUnitId,
+	SlugNamespaceManifest,
+	TopLevelSlugNamespaceUnitIds,
+} from "./manifest";
+
+const BootstrapLockName = "rezics-bootstrap";
+
+export interface CreatedBootstrapCredential {
+	readonly name: string;
+	readonly email: string;
+	readonly password: string;
+}
+
+export interface BootstrapResult {
+	readonly createdCredentials: readonly CreatedBootstrapCredential[];
+}
+
+interface PreparedCredential {
+	readonly profile: (typeof OfficialProfileManifest)[number];
+	readonly password: string;
+	readonly passwordHash: string;
+}
+
+function bootstrapEpoch(): Date {
+	return new Date(BootstrapEpochIso);
+}
+
+function valuesEqual(actual: unknown, expected: unknown): boolean {
+	if (actual instanceof Date && expected instanceof Date)
+		return actual.getTime() === expected.getTime();
+	return actual === expected;
+}
+
+function assertFields(
+	label: string,
+	actual: Record<string, unknown> | undefined,
+	expected: Record<string, unknown>,
+): void {
+	if (!actual) throw new Error(`Bootstrap ${label} was not created`);
+	for (const [key, expectedValue] of Object.entries(expected)) {
+		if (!valuesEqual(actual[key], expectedValue))
+			throw new Error(
+				`Bootstrap ${label} has unexpected ${key}: expected ${String(expectedValue)}, received ${String(actual[key])}`,
+			);
+	}
+}
+
+async function ensureSlugNamespaces(tx: DatabaseTransaction): Promise<void> {
+	const createdAt = bootstrapEpoch();
+	for (const namespace of SlugNamespaceManifest) {
+		const slugScopeId = namespace.slug === null ? null : RootSlugNamespaceUnitId;
+		await tx
+			.insert(unit)
+			.values({
+				id: namespace.id,
+				kind: "slug_namespace",
+				slugScopeId,
+				slug: namespace.slug,
+				status: "published",
+				visibility: "public",
+				publishedAt: createdAt,
+				createdAt,
+				updatedAt: createdAt,
+			})
+			.onConflictDoNothing();
+		const [stored] = await tx
+			.select({
+				id: unit.id,
+				kind: unit.kind,
+				slugScopeId: unit.slugScopeId,
+				slug: unit.slug,
+				status: unit.status,
+				visibility: unit.visibility,
+				deletedAt: unit.deletedAt,
+			})
+			.from(unit)
+			.where(eq(unit.id, namespace.id))
+			.limit(1);
+		assertFields(`slug namespace ${namespace.slug ?? "<root>"}`, stored, {
+			id: namespace.id,
+			kind: "slug_namespace",
+			slugScopeId,
+			slug: namespace.slug,
+			status: "published",
+			visibility: "public",
+			deletedAt: null,
+		});
+	}
+}
+
+async function ensureAddressedUnit(
+	tx: DatabaseTransaction,
+	input: {
+		readonly id: string;
+		readonly kind: "profile" | "realm" | "zone";
+		readonly slugScopeId: string;
+		readonly slug: string;
+	},
+): Promise<boolean> {
+	const [existing] = await tx
+		.select({
+			id: unit.id,
+			kind: unit.kind,
+			slugScopeId: unit.slugScopeId,
+			slug: unit.slug,
+			status: unit.status,
+			visibility: unit.visibility,
+			deletedAt: unit.deletedAt,
+		})
+		.from(unit)
+		.where(eq(unit.id, input.id))
+		.limit(1);
+	if (existing) {
+		assertFields(`${input.kind} Unit ${input.slug}`, existing, {
+			id: input.id,
+			kind: input.kind,
+			slugScopeId: input.slugScopeId,
+			slug: input.slug,
+			status: "published",
+			visibility: "public",
+			deletedAt: null,
+		});
+		return false;
+	}
+
+	const createdAt = bootstrapEpoch();
+	await insertAddressedUnit(tx, {
+		id: input.id,
+		kind: input.kind,
+		slugScopeId: input.slugScopeId,
+		slug: input.slug,
+		status: "published",
+		visibility: "public",
+		publishedAt: createdAt,
+		createdAt,
+		updatedAt: createdAt,
+	});
+	return true;
+}
+
+async function ensureLocalization(
+	tx: DatabaseTransaction,
+	input: { readonly unitId: string; readonly title: string; readonly summary?: string },
+): Promise<boolean> {
+	const createdAt = bootstrapEpoch();
+	const result = await tx
+		.insert(unitLocalization)
+		.values({
+			unitId: input.unitId,
+			language: "zh-hant",
+			position: InitialFractionalPosition,
+			title: input.title,
+			summary: input.summary,
+			createdAt,
+			updatedAt: createdAt,
+		})
+		.onConflictDoNothing()
+		.returning({ unitId: unitLocalization.unitId });
+	return result.length > 0;
+}
+
+async function ensureOfficialProfiles(
+	tx: DatabaseTransaction,
+	credentials: readonly PreparedCredential[],
+): Promise<CreatedBootstrapCredential[]> {
+	const createdAt = bootstrapEpoch();
+	const createdCredentials: CreatedBootstrapCredential[] = [];
+	for (const prepared of credentials) {
+		const value = prepared.profile;
+		await tx
+			.insert(users)
+			.values({
+				id: value.authUserId,
+				name: value.name,
+				email: value.email,
+				emailVerified: true,
+				createdAt,
+				updatedAt: createdAt,
+			})
+			.onConflictDoNothing();
+		const [storedUser] = await tx
+			.select({
+				id: users.id,
+				name: users.name,
+				email: users.email,
+				emailVerified: users.emailVerified,
+			})
+			.from(users)
+			.where(eq(users.id, value.authUserId))
+			.limit(1);
+		assertFields(`auth user ${value.key}`, storedUser, {
+			id: value.authUserId,
+			name: value.name,
+			email: value.email,
+			emailVerified: true,
+		});
+
+		const [storedAccount] = await tx
+			.select({
+				id: accounts.id,
+				accountId: accounts.accountId,
+				providerId: accounts.providerId,
+				userId: accounts.userId,
+			})
+			.from(accounts)
+			.where(
+				and(
+					eq(accounts.providerId, "credential"),
+					eq(accounts.accountId, value.authUserId),
+				),
+			)
+			.limit(1);
+		if (storedAccount) {
+			assertFields(`credential account ${value.key}`, storedAccount, {
+				id: value.accountId,
+				accountId: value.authUserId,
+				providerId: "credential",
+				userId: value.authUserId,
+			});
+		} else {
+			await tx.insert(accounts).values({
+				id: value.accountId,
+				accountId: value.authUserId,
+				providerId: "credential",
+				userId: value.authUserId,
+				password: prepared.passwordHash,
+				createdAt,
+				updatedAt: createdAt,
+			});
+			createdCredentials.push({
+				name: value.name,
+				email: value.email,
+				password: prepared.password,
+			});
+		}
+
+		let changed = await ensureAddressedUnit(tx, {
+			id: value.profileId,
+			kind: "profile",
+			slugScopeId: TopLevelSlugNamespaceUnitIds.users,
+			slug: value.slug,
+		});
+		const insertedProfile = await tx
+			.insert(profile)
+			.values({
+				id: value.profileId,
+				authUserId: value.authUserId,
+				joinedAt: createdAt,
+				createdAt,
+				updatedAt: createdAt,
+			})
+			.onConflictDoNothing()
+			.returning({ id: profile.id });
+		changed ||= insertedProfile.length > 0;
+		const [storedProfile] = await tx
+			.select({ id: profile.id, authUserId: profile.authUserId })
+			.from(profile)
+			.where(eq(profile.id, value.profileId))
+			.limit(1);
+		assertFields(`Profile ${value.key}`, storedProfile, {
+			id: value.profileId,
+			authUserId: value.authUserId,
+		});
+		changed =
+			(await ensureLocalization(tx, {
+				unitId: value.profileId,
+				title: value.name,
+			})) || changed;
+		const insertedPreference = await tx
+			.insert(profilePreference)
+			.values({ profileId: value.profileId, createdAt, updatedAt: createdAt })
+			.onConflictDoNothing()
+			.returning({ profileId: profilePreference.profileId });
+		changed ||= insertedPreference.length > 0;
+		if (changed)
+			await recordUnitRevision(tx, {
+				unitId: value.profileId,
+				actorProfileId: value.profileId,
+				event: "create",
+				message: "Bootstrap official Profile",
+			});
+	}
+	return createdCredentials;
+}
+
+async function ensureOwnerBinding(
+	tx: DatabaseTransaction,
+	unitId: string,
+	ownerProfileId: string,
+): Promise<boolean> {
+	const [owner] = await tx
+		.select({
+			id: unitAccessBinding.id,
+			subjectKind: unitAccessBinding.subjectKind,
+			profileId: unitAccessBinding.profileId,
+			role: unitAccessBinding.role,
+			scope: unitAccessBinding.scope,
+			expiresAt: unitAccessBinding.expiresAt,
+		})
+		.from(unitAccessBinding)
+		.where(
+			and(
+				eq(unitAccessBinding.unitId, unitId),
+				eq(unitAccessBinding.role, "owner"),
+				isNull(unitAccessBinding.revokedAt),
+			),
+		)
+		.limit(1);
+	if (owner) {
+		if (
+			owner.subjectKind !== "profile" ||
+			owner.profileId !== ownerProfileId ||
+			owner.scope.length !== 0 ||
+			owner.expiresAt !== null
+		)
+			throw new Error(`Bootstrap Unit ${unitId} has an unexpected active owner`);
+		return false;
+	}
+	await tx.insert(unitAccessBinding).values({
+		unitId,
+		subjectKind: "profile",
+		profileId: ownerProfileId,
+		role: "owner",
+		scope: [],
+		grantedByProfileId: ownerProfileId,
+		createdAt: bootstrapEpoch(),
+		updatedAt: bootstrapEpoch(),
+	});
+	return true;
+}
+
+async function ensureOfficialRealm(tx: DatabaseTransaction): Promise<void> {
+	const value = OfficialRealmManifest;
+	const createdAt = bootstrapEpoch();
+	let changed = await ensureAddressedUnit(tx, {
+		id: value.id,
+		kind: "realm",
+		slugScopeId: TopLevelSlugNamespaceUnitIds.realms,
+		slug: value.slug,
+	});
+	const insertedRealm = await tx
+		.insert(realm)
+		.values({ id: value.id, joinPolicy: "open", createdAt, updatedAt: createdAt })
+		.onConflictDoNothing()
+		.returning({ id: realm.id });
+	changed ||= insertedRealm.length > 0;
+	changed =
+		(await ensureLocalization(tx, {
+			unitId: value.id,
+			title: value.title,
+			summary: value.summary,
+		})) || changed;
+	changed = (await ensureOwnerBinding(tx, value.id, value.ownerProfileId)) || changed;
+	for (const member of value.members) {
+		const insertedMember = await tx
+			.insert(realmMember)
+			.values({
+				realmId: value.id,
+				profileId: member.profileId,
+				role: member.role,
+				state: "active",
+				joinedAt: createdAt,
+				updatedAt: createdAt,
+			})
+			.onConflictDoNothing()
+			.returning({ profileId: realmMember.profileId });
+		changed ||= insertedMember.length > 0;
+		const [stored] = await tx
+			.select({ role: realmMember.role, state: realmMember.state })
+			.from(realmMember)
+			.where(
+				and(eq(realmMember.realmId, value.id), eq(realmMember.profileId, member.profileId)),
+			)
+			.limit(1);
+		assertFields(`Realm member ${member.profileId}`, stored, {
+			role: member.role,
+			state: "active",
+		});
+	}
+	if (changed)
+		await recordUnitRevision(tx, {
+			unitId: value.id,
+			actorProfileId: value.ownerProfileId,
+			event: "create",
+			message: "Bootstrap official Realm",
+		});
+}
+
+async function ensureOfficialZone(tx: DatabaseTransaction): Promise<void> {
+	const value = OfficialZoneManifest;
+	const createdAt = bootstrapEpoch();
+	let changed = await ensureAddressedUnit(tx, {
+		id: value.id,
+		kind: "zone",
+		slugScopeId: TopLevelSlugNamespaceUnitIds.zones,
+		slug: value.slug,
+	});
+	const insertedZone = await tx
+		.insert(zone)
+		.values({
+			id: value.id,
+			boundaryDocument: value.boundaryDocument,
+			themeDocument: value.themeDocument,
+			dockDocument: value.dockDocument,
+			createdAt,
+			updatedAt: createdAt,
+		})
+		.onConflictDoNothing()
+		.returning({ id: zone.id });
+	changed ||= insertedZone.length > 0;
+	changed =
+		(await ensureLocalization(tx, {
+			unitId: value.id,
+			title: value.title,
+			summary: value.summary,
+		})) || changed;
+	changed = (await ensureOwnerBinding(tx, value.id, value.ownerProfileId)) || changed;
+	const insertedRealmUnit = await tx
+		.insert(realmUnit)
+		.values({
+			realmId: OfficialRealmManifest.id,
+			unitId: value.id,
+			status: "visible",
+			locked: false,
+			createdAt,
+			updatedAt: createdAt,
+		})
+		.onConflictDoNothing()
+		.returning({ unitId: realmUnit.unitId });
+	changed ||= insertedRealmUnit.length > 0;
+	if (changed)
+		await recordUnitRevision(tx, {
+			unitId: value.id,
+			actorProfileId: value.ownerProfileId,
+			event: "create",
+			message: "Bootstrap official Zone",
+		});
+}
+
+export async function isBootstrapReady(): Promise<boolean> {
+	const [unitCount, userCount, accountCount, profileCount, officialRealm, officialZone] =
+		await Promise.all([
+			database
+				.select({ value: count() })
+				.from(unit)
+				.where(inArray(unit.id, [...BootstrapUnitIds])),
+			database
+				.select({ value: count() })
+				.from(users)
+				.where(inArray(users.id, BootstrapAuthUserIds)),
+			database
+				.select({ value: count() })
+				.from(accounts)
+				.where(inArray(accounts.id, BootstrapAccountIds)),
+			database
+				.select({ value: count() })
+				.from(profile)
+				.where(inArray(profile.id, OfficialProfileIdValues)),
+			database
+				.select({ id: realm.id })
+				.from(realm)
+				.where(eq(realm.id, OfficialRealmManifest.id))
+				.limit(1),
+			database
+				.select({ id: zone.id })
+				.from(zone)
+				.where(eq(zone.id, OfficialZoneManifest.id))
+				.limit(1),
+		]);
+	return (
+		unitCount[0]?.value === BootstrapUnitIds.length &&
+		userCount[0]?.value === BootstrapAuthUserIds.length &&
+		accountCount[0]?.value === BootstrapAccountIds.length &&
+		profileCount[0]?.value === OfficialProfileIdValues.length &&
+		Boolean(officialRealm[0] && officialZone[0])
+	);
+}
+
+export async function bootstrapDatabase(): Promise<BootstrapResult> {
+	assertBootstrapManifest();
+	const prepared = await Promise.all(
+		OfficialProfileManifest.map(async (profileValue): Promise<PreparedCredential> => {
+			const password = generateBootstrapPassword();
+			return {
+				profile: profileValue,
+				password,
+				passwordHash: await hashPassword(password),
+			};
+		}),
+	);
+	const createdCredentials = await database.transaction(async (tx) => {
+		await tx.execute(
+			sql`select pg_advisory_xact_lock(hashtextextended(${BootstrapLockName}, 0))`,
+		);
+		await ensureSlugNamespaces(tx);
+		const credentials = await ensureOfficialProfiles(tx, prepared);
+		await ensureOfficialRealm(tx);
+		await ensureOfficialZone(tx);
+		return credentials;
+	});
+	return { createdCredentials };
+}

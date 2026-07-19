@@ -1,8 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import Elysia from "elysia";
 
-import { database } from "../../database";
-import { unit } from "../../database/schema";
+import { isBootstrapReady } from "../../bootstrap/service";
 import { storage } from "../../storage";
 import { getRecommendationHealth } from "../../recommendations/worker";
 import { NoContentResponse } from "../schema/action-response";
@@ -24,18 +23,19 @@ export default new Elysia()
 		"/ready",
 		async ({ status }) => {
 			const [databaseCheck, storageCheck, recommendationCheck] = await Promise.allSettled([
-				database.select({ id: unit.id }).from(unit).limit(1),
+				isBootstrapReady(),
 				storage.health(),
 				getRecommendationHealth(),
 			]);
 			const ready =
 				databaseCheck.status === "fulfilled" &&
+				databaseCheck.value &&
 				storageCheck.status === "fulfilled" &&
 				recommendationCheck.status === "fulfilled";
 			return status(ready ? StatusCodes.OK : StatusCodes.SERVICE_UNAVAILABLE, {
 				status: ready ? "ready" : "unavailable",
 				services: {
-					database: databaseCheck.status === "fulfilled",
+					database: databaseCheck.status === "fulfilled" && databaseCheck.value,
 					storage: storageCheck.status === "fulfilled",
 					recommendations:
 						recommendationCheck.status === "fulfilled" &&

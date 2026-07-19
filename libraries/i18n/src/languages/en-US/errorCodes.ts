@@ -77,6 +77,8 @@ export default {
 	CapabilityGrantNotFound: "This active capability grant could not be found.",
 	UnitAccessBindingNotFound: "This Unit access binding could not be found.",
 	UnitOwnerRequired: "A Unit must keep at least one owner.",
+	UnitOwnershipClaimUnavailable:
+		"This Unit is not eligible for ownership claim by the current Profile.",
 	UnitAccessRestrictionNotFound: "This Unit access restriction could not be found.",
 	UnitProtectionNotFound: "This Unit protection could not be found.",
 	UnitAccessExpiryInvalid: "The Unit access expiry must be in the future.",

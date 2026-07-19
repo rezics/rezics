@@ -190,6 +190,7 @@ export const CreateGrantBody = t.Object(
 export const GrantParams = t.Object({ grantId: Uuid });
 
 export const UnitGovernanceParams = t.Object({ unitId: Uuid });
+export const ClaimUnitOwnershipBody = t.Object({}, { additionalProperties: false });
 export const UnitAccessBindingParams = t.Object({ unitId: Uuid, bindingId: Uuid });
 export const UnitEffectiveAccessQuery = t.Object(
 	{ scope: t.Optional(UnitScope) },
@@ -219,13 +220,10 @@ export const CreateUnitAccessBindingBody = t.Object(
 export const UnitAccessRestrictionParams = t.Object({ unitId: Uuid, restrictionId: Uuid });
 export const TransferUnitOwnershipBody = t.Object(
 	{
-		owner: t.Union([
-			t.Object(
-				{ kind: t.Literal("profile"), profileId: Uuid },
-				{ additionalProperties: false },
-			),
-			t.Object({ kind: t.Literal("system") }, { additionalProperties: false }),
-		]),
+		owner: t.Object(
+			{ kind: t.Literal("profile"), profileId: Uuid },
+			{ additionalProperties: false },
+		),
 	},
 	{ additionalProperties: false },
 );

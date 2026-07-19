@@ -99,7 +99,7 @@ tasks:
             - defer: { task: services:stop }
             - task: services:up
             - task: services-main:db:validate
-            - task: services-main:db:migrate
+            - task: services-main:db:prepare
             - task: dev:apps
 
     dev:apps:

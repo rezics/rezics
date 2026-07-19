@@ -160,6 +160,14 @@ import type {
 	PutApiGovernanceUnitByUnitIdOwnershipStatus404,
 	PutApiGovernanceUnitByUnitIdOwnershipStatus422,
 	PutApiGovernanceUnitByUnitIdOwnershipStatus500,
+	PostApiGovernanceUnitByUnitIdOwnershipClaimOptions,
+	PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200,
+	PostApiGovernanceUnitByUnitIdOwnershipClaimStatus401,
+	PostApiGovernanceUnitByUnitIdOwnershipClaimStatus403,
+	PostApiGovernanceUnitByUnitIdOwnershipClaimStatus404,
+	PostApiGovernanceUnitByUnitIdOwnershipClaimStatus409,
+	PostApiGovernanceUnitByUnitIdOwnershipClaimStatus422,
+	PostApiGovernanceUnitByUnitIdOwnershipClaimStatus500,
 	GetApiGovernanceUnitByUnitIdAccessBindingsOptions,
 	GetApiGovernanceUnitByUnitIdAccessBindingsStatus200,
 	GetApiGovernanceUnitByUnitIdAccessBindingsStatus403,
@@ -1145,6 +1153,7 @@ import {
 	postApiFeedback,
 	getApiGovernanceUnitByUnitIdAccessEffective,
 	putApiGovernanceUnitByUnitIdOwnership,
+	postApiGovernanceUnitByUnitIdOwnershipClaim,
 	getApiGovernanceUnitByUnitIdAccessBindings,
 	postApiGovernanceUnitByUnitIdAccessBindings,
 	deleteApiGovernanceUnitByUnitIdAccessBindingsByBindingId,
@@ -4138,6 +4147,116 @@ export function usePutApiGovernanceUnitByUnitIdOwnership<TContext>(
 			| PutApiGovernanceUnitByUnitIdOwnershipStatus500
 		>,
 		PutApiGovernanceUnitByUnitIdOwnershipOptions,
+		TContext
+	>;
+}
+
+export const postApiGovernanceUnitByUnitIdOwnershipClaimMutationKey = () =>
+	[{ url: "/api/governance/unit/:unitId/ownership/claim" }] as const;
+
+export function postApiGovernanceUnitByUnitIdOwnershipClaimMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiGovernanceUnitByUnitIdOwnershipClaimMutationKey();
+	return mutationOptions<
+		PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus401
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus403
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus404
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus409
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus422
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus500
+		>,
+		PostApiGovernanceUnitByUnitIdOwnershipClaimOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiGovernanceUnitByUnitIdOwnershipClaim({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Claim community Unit ownership
+ * {@link /api/governance/unit/:unitId/ownership/claim}
+ */
+export function usePostApiGovernanceUnitByUnitIdOwnershipClaim<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200,
+			ResponseErrorConfig<
+				| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus401
+				| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus403
+				| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus404
+				| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus409
+				| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus422
+				| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus500
+			>,
+			PostApiGovernanceUnitByUnitIdOwnershipClaimOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiGovernanceUnitByUnitIdOwnershipClaimMutationKey();
+
+	const baseOptions = postApiGovernanceUnitByUnitIdOwnershipClaimMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus401
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus403
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus404
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus409
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus422
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus500
+		>,
+		PostApiGovernanceUnitByUnitIdOwnershipClaimOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus401
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus403
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus404
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus409
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus422
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus500
+		>,
+		PostApiGovernanceUnitByUnitIdOwnershipClaimOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200,
+		ResponseErrorConfig<
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus401
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus403
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus404
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus409
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus422
+			| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus500
+		>,
+		PostApiGovernanceUnitByUnitIdOwnershipClaimOptions,
 		TContext
 	>;
 }

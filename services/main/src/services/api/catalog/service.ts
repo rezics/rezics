@@ -4,7 +4,7 @@ import { database } from "../../database";
 import { entity, entityAssociationPolicy, unit, unitLocalization } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
-import { createSystemOwnedCatalogAccess } from "../../authorization/unit/ownership";
+import { createCommunityCatalogAccess } from "../../authorization/unit/ownership";
 import { insertAddressedUnit } from "../../units/slug-address";
 import { TopLevelSlugNamespaceUnitIds } from "../../units/slug-system";
 import { generateSlugLabel } from "../../units/slug";
@@ -52,7 +52,7 @@ export async function createCatalogUnit(
 			]);
 		}
 		await tx.insert(unitLocalization).values({ unitId: created.id, ...body.localization });
-		await createSystemOwnedCatalogAccess(tx, created.id, ownerId);
+		await createCommunityCatalogAccess(tx, created.id, ownerId);
 		await recordUnitRevision(tx, {
 			unitId: created.id,
 			actorProfileId: ownerId,

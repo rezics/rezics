@@ -1,13 +1,9 @@
--- Add value to enum type: "unit_access_subject_kind"
-ALTER TYPE "unit_access_subject_kind" ADD VALUE 'system';
 -- Create enum type "entity_association_kind"
 CREATE TYPE "entity_association_kind" AS ENUM ('credit', 'subject');
 -- Create enum type "entity_association_policy_mode"
 CREATE TYPE "entity_association_policy_mode" AS ENUM ('open', 'owner_only', 'closed');
 -- Modify "unit_access_binding" table
-ALTER TABLE "unit_access_binding" DROP CONSTRAINT "unit_access_binding_subject_role_check", ADD CONSTRAINT "unit_access_binding_subject_role_check" CHECK (((subject_kind = ANY (ARRAY['profile'::unit_access_subject_kind, 'system'::unit_access_subject_kind])) OR (role <> 'owner'::unit_access_role)) AND ((subject_kind <> 'authenticated'::unit_access_subject_kind) OR (role = ANY (ARRAY['viewer'::unit_access_role, 'editor'::unit_access_role]))) AND ((subject_kind <> 'system'::unit_access_subject_kind) OR (role = 'owner'::unit_access_role))), DROP CONSTRAINT "unit_access_binding_subject_shape_check", ADD CONSTRAINT "unit_access_binding_subject_shape_check" CHECK (((subject_kind = 'profile'::unit_access_subject_kind) AND (profile_id IS NOT NULL) AND (realm_id IS NULL) AND (realm_relation IS NULL)) OR ((subject_kind = 'realm'::unit_access_subject_kind) AND (profile_id IS NULL) AND (realm_id IS NOT NULL) AND (realm_relation IS NOT NULL)) OR ((subject_kind = 'authenticated'::unit_access_subject_kind) AND (profile_id IS NULL) AND (realm_id IS NULL) AND (realm_relation IS NULL)) OR ((subject_kind = 'system'::unit_access_subject_kind) AND (profile_id IS NULL) AND (realm_id IS NULL) AND (realm_relation IS NULL))), ADD CONSTRAINT "unit_access_binding_owner_scope_check" CHECK ((role <> 'owner'::unit_access_role) OR (cardinality(scope) = 0));
--- Create index "unit_access_binding_active_system_scope_key" to table: "unit_access_binding"
-CREATE UNIQUE INDEX "unit_access_binding_active_system_scope_key" ON "unit_access_binding" ("unit_id", "scope") WHERE ((revoked_at IS NULL) AND (subject_kind = 'system'::unit_access_subject_kind));
+ALTER TABLE "unit_access_binding" ADD CONSTRAINT "unit_access_binding_owner_scope_check" CHECK ((role <> 'owner'::unit_access_role) OR (cardinality(scope) = 0));
 -- Create "entity_association_policy" table
 CREATE TABLE "entity_association_policy" (
   "entity_id" uuid NOT NULL,

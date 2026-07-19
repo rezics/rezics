@@ -7,7 +7,7 @@ import {
 import type { Static } from "elysia";
 
 import type { Authorization } from "../authorization";
-import { createSystemOwnedCatalogAccess } from "../authorization/unit/ownership";
+import { createCommunityCatalogAccess } from "../authorization/unit/ownership";
 import { isPubliclyReadableUnit } from "../authorization/unit/policy";
 import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
@@ -116,7 +116,7 @@ export async function createUnit(
 			unitId: created.id,
 			...input.localization,
 		});
-		await createSystemOwnedCatalogAccess(tx, created.id, ownerId, "publisher");
+		await createCommunityCatalogAccess(tx, created.id, ownerId, "publisher");
 		await recordUnitRevision(tx, {
 			unitId: created.id,
 			actorProfileId: ownerId,

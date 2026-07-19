@@ -2134,6 +2134,7 @@ export const ApiErrorCode = {
 	CapabilityGrantNotFound: "CapabilityGrantNotFound",
 	UnitAccessBindingNotFound: "UnitAccessBindingNotFound",
 	UnitOwnerRequired: "UnitOwnerRequired",
+	UnitOwnershipClaimUnavailable: "UnitOwnershipClaimUnavailable",
 	UnitAccessRestrictionNotFound: "UnitAccessRestrictionNotFound",
 	UnitProtectionNotFound: "UnitProtectionNotFound",
 	UnitAccessExpiryInvalid: "UnitAccessExpiryInvalid",
@@ -7853,7 +7854,6 @@ export const PutApiGovernanceUnitByUnitIdOwnershipStatus200SubjectKindEnum = {
 	profile: "profile",
 	realm: "realm",
 	authenticated: "authenticated",
-	system: "system",
 } as const;
 
 export type PutApiGovernanceUnitByUnitIdOwnershipStatus200SubjectKindEnum =
@@ -7991,25 +7991,21 @@ export type PutApiGovernanceUnitByUnitIdOwnershipStatus500 = InternalError;
  * @type object
  */
 export type PutApiGovernanceUnitByUnitIdOwnershipBody = {
-	owner:
-		| {
-				/**
-				 * @type string
-				 */
-				kind: "profile";
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				profileId: string;
-		  }
-		| {
-				/**
-				 * @type string
-				 */
-				kind: "system";
-		  };
+	/**
+	 * @type object
+	 */
+	owner: {
+		/**
+		 * @type string
+		 */
+		kind: "profile";
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+	};
 };
 
 /**
@@ -8046,6 +8042,243 @@ export type PutApiGovernanceUnitByUnitIdOwnershipResponse =
 /**
  * @type object
  */
+export type PostApiGovernanceUnitByUnitIdOwnershipClaimPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200SubjectKindEnum = {
+	profile: "profile",
+	realm: "realm",
+	authenticated: "authenticated",
+} as const;
+
+export type PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200SubjectKindEnum =
+	(typeof PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200SubjectKindEnum)[keyof typeof PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200SubjectKindEnum];
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @default 'profile'
+	 * @type string
+	 */
+	subjectKind: PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200SubjectKindEnum;
+	profileId: (string | null) | null;
+	realmId: (string | null) | null;
+	realmRelation: (string | null) | null;
+	/**
+	 * @type string
+	 */
+	role: string;
+	/**
+	 * @type array
+	 */
+	scope: string[];
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	grantedByProfileId: string;
+	expiresAt: (string | null) | null;
+	revokedAt: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdOwnershipClaimStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InteractiveSessionRequired'
+		 * @type string
+		 */
+		code: "InteractiveSessionRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdOwnershipClaimStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'FreshSessionRequired'
+		 * @type string
+		 */
+		code: "FreshSessionRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdOwnershipClaimStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdOwnershipClaimStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitOwnershipClaimUnavailable'
+		 * @type string
+		 */
+		code: "UnitOwnershipClaimUnavailable";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdOwnershipClaimStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdOwnershipClaimStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdOwnershipClaimBody = object;
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdOwnershipClaimOptions = {
+	body: PostApiGovernanceUnitByUnitIdOwnershipClaimBody;
+	path: PostApiGovernanceUnitByUnitIdOwnershipClaimPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiGovernanceUnitByUnitIdOwnershipClaimResponses = {
+	"200": PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200;
+	"401": PostApiGovernanceUnitByUnitIdOwnershipClaimStatus401;
+	"403": PostApiGovernanceUnitByUnitIdOwnershipClaimStatus403;
+	"404": PostApiGovernanceUnitByUnitIdOwnershipClaimStatus404;
+	"409": PostApiGovernanceUnitByUnitIdOwnershipClaimStatus409;
+	"422": PostApiGovernanceUnitByUnitIdOwnershipClaimStatus422;
+	"500": PostApiGovernanceUnitByUnitIdOwnershipClaimStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiGovernanceUnitByUnitIdOwnershipClaimResponse =
+	| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus200
+	| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus401
+	| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus403
+	| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus404
+	| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus409
+	| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus422
+	| PostApiGovernanceUnitByUnitIdOwnershipClaimStatus500;
+
+/**
+ * @type object
+ */
 export type GetApiGovernanceUnitByUnitIdAccessBindingsPath = {
 	/**
 	 * @description
@@ -8059,7 +8292,6 @@ export const GetApiGovernanceUnitByUnitIdAccessBindingsStatus200ItemsSubjectKind
 	profile: "profile",
 	realm: "realm",
 	authenticated: "authenticated",
-	system: "system",
 } as const;
 
 export type GetApiGovernanceUnitByUnitIdAccessBindingsStatus200ItemsSubjectKindEnum =
@@ -8246,7 +8478,6 @@ export const PostApiGovernanceUnitByUnitIdAccessBindingsStatus200SubjectKindEnum
 	profile: "profile",
 	realm: "realm",
 	authenticated: "authenticated",
-	system: "system",
 } as const;
 
 export type PostApiGovernanceUnitByUnitIdAccessBindingsStatus200SubjectKindEnum =

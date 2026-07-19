@@ -147,6 +147,14 @@ export class UnitOwnerRequired extends Data.TaggedError("UnitOwnerRequired") {
 	readonly message = "A Unit must keep at least one owner";
 }
 
+export class UnitOwnershipClaimUnavailable extends Data.TaggedError(
+	"UnitOwnershipClaimUnavailable",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = UnitOwnershipClaimUnavailable.status;
+	readonly message = "This Unit is not eligible for ownership claim by the current Profile";
+}
+
 export class UnitAccessRestrictionNotFound extends Data.TaggedError(
 	"UnitAccessRestrictionNotFound",
 ) {
@@ -221,6 +229,7 @@ export const GovernanceErrors = [
 	CapabilityGrantNotFound,
 	UnitAccessBindingNotFound,
 	UnitOwnerRequired,
+	UnitOwnershipClaimUnavailable,
 	UnitAccessRestrictionNotFound,
 	UnitProtectionNotFound,
 	UnitAccessExpiryInvalid,

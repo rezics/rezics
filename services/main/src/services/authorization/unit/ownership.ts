@@ -1,11 +1,12 @@
 import type { DatabaseTransaction } from "../../database";
 import { unitAccessBinding } from "../../database/schema";
+import { OfficialProfileIds } from "../../bootstrap/manifest";
 
 /**
- * Community catalog entries are stewarded by Rezics, while their submitter receives
- * editing access without acquiring governance ownership.
+ * Community catalog entries are stewarded by the ordinary Rezics Community Profile,
+ * while their submitter receives editing access without acquiring governance ownership.
  */
-export async function createSystemOwnedCatalogAccess(
+export async function createCommunityCatalogAccess(
 	tx: DatabaseTransaction,
 	unitId: string,
 	contributorProfileId: string,
@@ -14,10 +15,11 @@ export async function createSystemOwnedCatalogAccess(
 	await tx.insert(unitAccessBinding).values([
 		{
 			unitId,
-			subjectKind: "system",
+			subjectKind: "profile",
+			profileId: OfficialProfileIds.community,
 			role: "owner",
 			scope: [],
-			grantedByProfileId: contributorProfileId,
+			grantedByProfileId: OfficialProfileIds.community,
 		},
 		{
 			unitId,
@@ -25,7 +27,7 @@ export async function createSystemOwnedCatalogAccess(
 			profileId: contributorProfileId,
 			role: contributorRole,
 			scope: [],
-			grantedByProfileId: contributorProfileId,
+			grantedByProfileId: OfficialProfileIds.community,
 		},
 	]);
 }

@@ -3,6 +3,7 @@ import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
 import {
+	ClaimUnitOwnershipBody,
 	CreateAccountEnforcementBody,
 	CreateUnitAccessRestrictionBody,
 	CreateUnitAccessBindingBody,
@@ -74,7 +75,11 @@ describe("adjacent governance API contracts", () => {
 				owner: { kind: "profile", profileId },
 			}),
 		).toBe(true);
-		expect(Check(TransferUnitOwnershipBody, { owner: { kind: "system" } })).toBe(true);
+		expect(Check(TransferUnitOwnershipBody, { owner: { kind: "system" } })).toBe(false);
+		expect(Check(ClaimUnitOwnershipBody, {})).toBe(true);
+		expect(Check(ClaimUnitOwnershipBody, { owner: { kind: "profile", profileId } })).toBe(
+			false,
+		);
 	});
 
 	it("removes copied rationale and public messages from enforcement commands", () => {

@@ -67,6 +67,8 @@ import type {
 	GetApiGovernanceUnitByUnitIdAccessEffectiveResponses,
 	PutApiGovernanceUnitByUnitIdOwnershipOptions,
 	PutApiGovernanceUnitByUnitIdOwnershipResponses,
+	PostApiGovernanceUnitByUnitIdOwnershipClaimOptions,
+	PostApiGovernanceUnitByUnitIdOwnershipClaimResponses,
 	GetApiGovernanceUnitByUnitIdAccessBindingsOptions,
 	GetApiGovernanceUnitByUnitIdAccessBindingsResponses,
 	PostApiGovernanceUnitByUnitIdAccessBindingsOptions,
@@ -876,6 +878,24 @@ export function putApiGovernanceUnitByUnitIdOwnership<ThrowOnError extends boole
 		url: "/api/governance/unit/{unitId}/ownership",
 		...config,
 	}) as Promise<RequestResult<PutApiGovernanceUnitByUnitIdOwnershipResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Claim community Unit ownership
+ * {@link /api/governance/unit/:unitId/ownership/claim}
+ */
+export function postApiGovernanceUnitByUnitIdOwnershipClaim<ThrowOnError extends boolean = true>(
+	options: Options<PostApiGovernanceUnitByUnitIdOwnershipClaimOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiGovernanceUnitByUnitIdOwnershipClaimResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/governance/unit/{unitId}/ownership/claim",
+		...config,
+	}) as Promise<
+		RequestResult<PostApiGovernanceUnitByUnitIdOwnershipClaimResponses, ThrowOnError>
+	>;
 }
 
 /**
