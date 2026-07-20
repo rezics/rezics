@@ -2,6 +2,7 @@
 	"cSpell.words": [
 		"devenv",
 		"direnvrc",
+		"dotenv",
 		"elysia",
 		"Elysia",
 		"intee",
@@ -10,6 +11,8 @@
 		"portabletext",
 		"rezics",
 		"REZICS",
+		"taskfile",
+		"Uuidv",
 		"vike",
 		"vinext"
 	],
