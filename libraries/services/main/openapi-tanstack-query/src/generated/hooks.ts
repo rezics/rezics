@@ -1041,6 +1041,7 @@ import type {
 	PostApiPollsOptions,
 	PostApiPollsStatus200,
 	PostApiPollsStatus400,
+	PostApiPollsStatus404,
 	PostApiPollsStatus422,
 	PostApiPollsStatus500,
 	GetApiPollsByPollIdOptions,
@@ -19144,7 +19145,12 @@ export function postApiPollsMutationOptions<TContext = unknown>(
 	const mutationKey = postApiPollsMutationKey();
 	return mutationOptions<
 		PostApiPollsStatus200,
-		ResponseErrorConfig<PostApiPollsStatus400 | PostApiPollsStatus422 | PostApiPollsStatus500>,
+		ResponseErrorConfig<
+			| PostApiPollsStatus400
+			| PostApiPollsStatus404
+			| PostApiPollsStatus422
+			| PostApiPollsStatus500
+		>,
 		PostApiPollsOptions,
 		TContext
 	>({
@@ -19165,7 +19171,10 @@ export function usePostApiPolls<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiPollsStatus200,
 			ResponseErrorConfig<
-				PostApiPollsStatus400 | PostApiPollsStatus422 | PostApiPollsStatus500
+				| PostApiPollsStatus400
+				| PostApiPollsStatus404
+				| PostApiPollsStatus422
+				| PostApiPollsStatus500
 			>,
 			PostApiPollsOptions,
 			TContext
@@ -19179,14 +19188,24 @@ export function usePostApiPolls<TContext>(
 
 	const baseOptions = postApiPollsMutationOptions(config) as UseMutationOptions<
 		PostApiPollsStatus200,
-		ResponseErrorConfig<PostApiPollsStatus400 | PostApiPollsStatus422 | PostApiPollsStatus500>,
+		ResponseErrorConfig<
+			| PostApiPollsStatus400
+			| PostApiPollsStatus404
+			| PostApiPollsStatus422
+			| PostApiPollsStatus500
+		>,
 		PostApiPollsOptions,
 		TContext
 	>;
 
 	return useMutation<
 		PostApiPollsStatus200,
-		ResponseErrorConfig<PostApiPollsStatus400 | PostApiPollsStatus422 | PostApiPollsStatus500>,
+		ResponseErrorConfig<
+			| PostApiPollsStatus400
+			| PostApiPollsStatus404
+			| PostApiPollsStatus422
+			| PostApiPollsStatus500
+		>,
 		PostApiPollsOptions,
 		TContext
 	>(
@@ -19198,7 +19217,12 @@ export function usePostApiPolls<TContext>(
 		queryClient,
 	) as UseMutationResult<
 		PostApiPollsStatus200,
-		ResponseErrorConfig<PostApiPollsStatus400 | PostApiPollsStatus422 | PostApiPollsStatus500>,
+		ResponseErrorConfig<
+			| PostApiPollsStatus400
+			| PostApiPollsStatus404
+			| PostApiPollsStatus422
+			| PostApiPollsStatus500
+		>,
 		PostApiPollsOptions,
 		TContext
 	>;

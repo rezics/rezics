@@ -46705,6 +46705,34 @@ export type PostApiPollsStatus400 = {
 /**
  * @type object
  */
+export type PostApiPollsStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiPollsStatus422 = ValidationError;
 
 /**
@@ -46753,7 +46781,38 @@ export type PostApiPollsBody = {
 	/**
 	 * @type array
 	 */
-	options: string[];
+	options: (
+		| {
+				/**
+				 * @type string
+				 */
+				sourceKind: "literal";
+				/**
+				 * @minLength 1
+				 * @maxLength 500
+				 * @type string
+				 */
+				label: string;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				sourceKind: "unit";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				targetUnitId: string;
+				/**
+				 * @minLength 1
+				 * @maxLength 500
+				 * @type string
+				 */
+				label: string;
+		  }
+	)[];
 	/**
 	 * @type string
 	 */
@@ -46791,6 +46850,7 @@ export type PostApiPollsOptions = {
 export type PostApiPollsResponses = {
 	"200": PostApiPollsStatus200;
 	"400": PostApiPollsStatus400;
+	"404": PostApiPollsStatus404;
 	"422": PostApiPollsStatus422;
 	"500": PostApiPollsStatus500;
 };
@@ -46799,7 +46859,11 @@ export type PostApiPollsResponses = {
  * @description Union of all possible responses
  */
 export type PostApiPollsResponse =
-	PostApiPollsStatus200 | PostApiPollsStatus400 | PostApiPollsStatus422 | PostApiPollsStatus500;
+	| PostApiPollsStatus200
+	| PostApiPollsStatus400
+	| PostApiPollsStatus404
+	| PostApiPollsStatus422
+	| PostApiPollsStatus500;
 
 /**
  * @type object
@@ -46857,20 +46921,54 @@ export type GetApiPollsByPollIdStatus200 = {
 	/**
 	 * @type array
 	 */
-	options: {
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		id: string;
-		/**
-		 * @type string
-		 */
-		label: string;
-		position: string | number;
-		voteCount: ((string | number) | null) | null;
-	}[];
+	options: (
+		| {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				sourceKind: "literal";
+				/**
+				 * @type null
+				 */
+				targetUnitId: null;
+				/**
+				 * @type string
+				 */
+				label: string;
+				position: string | number;
+				voteCount: ((string | number) | null) | null;
+		  }
+		| {
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				id: string;
+				/**
+				 * @type string
+				 */
+				sourceKind: "unit";
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				targetUnitId: string;
+				/**
+				 * @type string
+				 */
+				label: string;
+				position: string | number;
+				voteCount: ((string | number) | null) | null;
+		  }
+	)[];
 };
 
 export const GetApiPollsByPollIdStatus404ErrorCodeEnum = {

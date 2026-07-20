@@ -7,7 +7,7 @@ import {
 	CollectionDefinitionDocument,
 	CollectionPresentationDocument,
 	NavigationDocument,
-	PollContentDocument,
+	PollContentBlock,
 	UnitReferencedBlockDocument,
 	ZoneBoundaryDocument,
 	ZoneThemeDocument,
@@ -34,6 +34,7 @@ import {
 	media,
 	poll,
 	pollOption,
+	PollOptionSourceKindValues,
 	post,
 	profile,
 	realm,
@@ -80,11 +81,8 @@ function createDocumentSchema<TSchemaValue extends TSchema>(schema: TSchemaValue
 	);
 }
 const PortableTextDocumentSchema = z.custom<PortableTextDocumentValue>(isPortableTextDocument);
-const PollContentDocumentSchema = createDocumentSchema(PollContentDocument);
-const UnitLocalizationContentDocumentSchema = z.union([
-	PortableTextDocumentSchema,
-	PollContentDocumentSchema,
-]);
+const PollContentBlockSchema = createDocumentSchema(PollContentBlock);
+const UnitLocalizationContentSchema = z.union([PortableTextDocumentSchema, PollContentBlockSchema]);
 const CollectionDefinitionDocumentSchema = createDocumentSchema(CollectionDefinitionDocument);
 const CollectionPresentationDocumentSchema = createDocumentSchema(CollectionPresentationDocument);
 const ZoneBoundaryDocumentSchema = createDocumentSchema(ZoneBoundaryDocument);
@@ -151,7 +149,7 @@ const unitLocalizationStateSchema = schemaFactory
 		language: z.enum(ContentLanguageValues),
 		position: FractionalPositionSchema,
 		description: PortableTextDocumentSchema.nullable(),
-		content: UnitLocalizationContentDocumentSchema.nullable(),
+		content: UnitLocalizationContentSchema.nullable(),
 	})
 	.omit({ unitId: true, createdAt: true, updatedAt: true });
 const profileStateSchema = schemaFactory
@@ -227,9 +225,17 @@ const collectionItemRowSchema = schemaFactory.createSelectSchema(collectionItem,
 const contentStructureNodeRowSchema = schemaFactory.createSelectSchema(contentStructureNode, {
 	position: FractionalPositionSchema,
 });
-const pollOptionRowSchema = schemaFactory.createSelectSchema(pollOption, {
-	position: z.int().nonnegative(),
-});
+const pollOptionRowSchema = schemaFactory
+	.createSelectSchema(pollOption, {
+		sourceKind: z.enum(PollOptionSourceKindValues),
+		position: z.int().nonnegative(),
+	})
+	.refine(
+		(row) =>
+			(row.sourceKind === "literal" && row.targetUnitId === null) ||
+			(row.sourceKind === "unit" && row.targetUnitId !== null),
+		{ message: "Poll option source and target Unit do not match" },
+	);
 const realmPinRowSchema = schemaFactory.createSelectSchema(realmPin, {
 	position: FractionalPositionSchema,
 });

@@ -4,7 +4,7 @@ import {
 	createCollectionPresentationDocument,
 	createBlockDocument,
 	createManualCollectionDefinitionDocument,
-	createPollContentDocument,
+	createPollContentBlock,
 	createPortableTextDocument,
 	createSystemCollectionDefinitionDocument,
 	createZoneBoundaryDocument,
@@ -848,6 +848,8 @@ async function seedCatalog(
 			const pollUnit = itemAt(polls, Math.floor(index / 4));
 			return {
 				pollId: pollUnit.id,
+				sourceKind: "literal" as const,
+				targetUnitId: null,
 				position: index % 4,
 				createdAt: pollUnit.createdAt,
 				updatedAt: pollUnit.updatedAt,
@@ -870,7 +872,7 @@ async function seedCatalog(
 			await tx
 				.update(unitLocalization)
 				.set({
-					content: createPollContentDocument(
+					content: createPollContentBlock(
 						options.map((option) => ({
 							optionId: option.id,
 							label: data.title(language),

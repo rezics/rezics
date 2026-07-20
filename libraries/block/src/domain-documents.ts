@@ -10,24 +10,30 @@ const Uuid = Type.String({
 		"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
 });
 
-export const PollOptionLocalization = Type.Object(
+/**
+ * Localized presentation for one stable Poll option.
+ *
+ * The label deliberately remains plain text. A future contract may add an
+ * optional `description: PortableText` without widening the label.
+ */
+export const PollContentOption = Type.Object(
 	{
 		optionId: Uuid,
 		label: Type.String({ minLength: 1, maxLength: 500 }),
 	},
 	{ additionalProperties: false },
 );
-export type PollOptionLocalization = Static<typeof PollOptionLocalization>;
+export type PollContentOption = Static<typeof PollContentOption>;
 
-export const PollContentDocument = Type.Object(
+export const PollContentBlock = Type.Object(
 	{
 		_type: Type.Literal("poll-content"),
 		_key: BlockKey,
-		options: Type.Array(PollOptionLocalization, { minItems: 2, maxItems: 50 }),
+		options: Type.Array(PollContentOption, { minItems: 2, maxItems: 50 }),
 	},
-	{ additionalProperties: false, $id: "PollContentDocument" },
+	{ additionalProperties: false, $id: "PollContentBlock" },
 );
-export type PollContentDocument = Static<typeof PollContentDocument>;
+export type PollContentBlock = Static<typeof PollContentBlock>;
 
 export const CollectionDefinitionDocument = Type.Union(
 	[
@@ -138,10 +144,10 @@ export const NavigationDocument = Type.Object(
 );
 export type NavigationDocument = Static<typeof NavigationDocument>;
 
-export function createPollContentDocument(
-	options: PollOptionLocalization[],
+export function createPollContentBlock(
+	options: PollContentOption[],
 	key: BlockKey = createBlockKey(),
-): PollContentDocument {
+): PollContentBlock {
 	return { _type: "poll-content", _key: key, options };
 }
 

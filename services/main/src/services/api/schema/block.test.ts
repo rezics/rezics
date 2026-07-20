@@ -5,7 +5,7 @@ import {
 	CollectionDefinitionDocument,
 	DefaultBlockHostPolicy,
 	NavigationDocument,
-	PollContentDocument,
+	PollContentBlock,
 	PortableTextDocument,
 	UnitReferencedBlockDocument,
 	ZoneDockBlockHostPolicy,
@@ -19,7 +19,7 @@ import {
 	collectNavigationReferences,
 	createBlockKey,
 	createManualCollectionDefinitionDocument,
-	createPollContentDocument,
+	createPollContentBlock,
 	createPortableTextDocument,
 	createSystemCollectionDefinitionDocument,
 	isDocument,
@@ -149,7 +149,7 @@ describe("Block document contracts", () => {
 	});
 
 	test("validates Poll option identifiers without external format registration", () => {
-		const document = createPollContentDocument(
+		const block = createPollContentBlock(
 			[
 				{ optionId: "019b0000-0000-7000-8000-000000000001", label: "First" },
 				{ optionId: "019b0000-0000-7000-8000-000000000002", label: "Second" },
@@ -157,11 +157,17 @@ describe("Block document contracts", () => {
 			"000000000008",
 		);
 
-		expect(isDocument(PollContentDocument, document)).toBe(true);
+		expect(isDocument(PollContentBlock, block)).toBe(true);
 		expect(
-			isDocument(PollContentDocument, {
-				...document,
-				options: [{ optionId: "not-a-uuid", label: "Invalid" }, document.options[1]],
+			isDocument(PollContentBlock, {
+				...block,
+				options: [{ optionId: "not-a-uuid", label: "Invalid" }, block.options[1]],
+			}),
+		).toBe(false);
+		expect(
+			isDocument(PollContentBlock, {
+				...block,
+				options: [{ ...block.options[0], description: [] }, block.options[1]],
 			}),
 		).toBe(false);
 	});

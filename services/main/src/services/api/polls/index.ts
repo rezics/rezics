@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { createPollContentDocument, parseDocument, PollContentDocument } from "@rezics/block";
+import { createPollContentBlock, parseDocument, PollContentBlock } from "@rezics/block";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import Elysia from "elysia";
 
@@ -33,12 +33,23 @@ export default new Elysia({ prefix: "/polls" })
 	.use(session)
 	.post(
 		"",
-		async ({ profile, body }) => {
-			if (
-				new Set(body.options.map((option) => option.trim().toLowerCase())).size !==
-				body.options.length
-			)
-				throw new PollOptionsDuplicated();
+		async ({ profile, authorization, body }) => {
+			const optionKeys = body.options.map((option) =>
+				option.sourceKind === "unit"
+					? `unit:${option.targetUnitId}`
+					: `literal:${option.label.trim().toLowerCase()}`,
+			);
+			if (new Set(optionKeys).size !== body.options.length) throw new PollOptionsDuplicated();
+			const targetUnitIds = [
+				...new Set(
+					body.options.flatMap((option) =>
+						option.sourceKind === "unit" ? [option.targetUnitId] : [],
+					),
+				),
+			];
+			await Promise.all(
+				targetUnitIds.map((targetUnitId) => authorization.unit.ensureCanRead(targetUnitId)),
+			);
 			const id = await database.transaction(async (tx) => {
 				const pollUnit = await insertUnit(tx, {
 					kind: "poll",
@@ -57,8 +68,10 @@ export default new Elysia({ prefix: "/polls" })
 				const options = await tx
 					.insert(pollOption)
 					.values(
-						body.options.map((_, position) => ({
+						body.options.map((option, position) => ({
 							pollId: pollUnit.id,
+							sourceKind: option.sourceKind,
+							targetUnitId: option.sourceKind === "unit" ? option.targetUnitId : null,
 							position,
 						})),
 					)
@@ -67,11 +80,12 @@ export default new Elysia({ prefix: "/polls" })
 					unitId: pollUnit.id,
 					language: body.language,
 					title: body.question,
-					content: createPollContentDocument(
-						options.map((option) => ({
-							optionId: option.id,
-							label: body.options[option.position] ?? "",
-						})),
+					content: createPollContentBlock(
+						options.map((option) => {
+							const input = body.options[option.position];
+							if (!input) throw new TypeError("Poll option position has no input");
+							return { optionId: option.id, label: input.label };
+						}),
 					),
 					contentStatus: "published",
 				});
@@ -98,6 +112,7 @@ export default new Elysia({ prefix: "/polls" })
 			response: {
 				[StatusCodes.OK]: IdResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["PollOptionsDuplicated"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
 			detail: { summary: "Create poll", tags: ["Polls"] },
 		},
@@ -129,7 +144,7 @@ export default new Elysia({ prefix: "/polls" })
 				.where(eq(poll.id, params.pollId))
 				.limit(1);
 			if (!pollRecord) throw new PollNotFound();
-			const content = parseDocument(PollContentDocument, pollRecord.content);
+			const content = parseDocument(PollContentBlock, pollRecord.content);
 			const labelByOptionId = new Map(
 				content.options.map((option) => [option.optionId, option.label]),
 			);
@@ -159,6 +174,8 @@ export default new Elysia({ prefix: "/polls" })
 			const options = await database
 				.select({
 					id: pollOption.id,
+					sourceKind: pollOption.sourceKind,
+					targetUnitId: pollOption.targetUnitId,
 					position: pollOption.position,
 					voteCount: sql<number>`(select count(*) from ${pollVote} where ${pollVote.optionId} = ${pollOption.id})::int`,
 				})
@@ -172,11 +189,22 @@ export default new Elysia({ prefix: "/polls" })
 				resultsVisibility: pollRecord.resultsVisibility,
 				closed,
 				viewerOptionIds: viewerVotes.map((vote) => vote.optionId),
-				options: options.map((option) => ({
-					...option,
-					label: labelByOptionId.get(option.id) ?? "",
-					voteCount: showResults ? option.voteCount : null,
-				})),
+				options: options.map((option) => {
+					const { sourceKind, targetUnitId, ...fields } = option;
+					const presentation = {
+						...fields,
+						label: labelByOptionId.get(option.id) ?? "",
+						voteCount: showResults ? option.voteCount : null,
+					};
+					if (sourceKind === "literal") {
+						if (targetUnitId !== null)
+							throw new TypeError("Literal Poll option has a target Unit");
+						return { ...presentation, sourceKind, targetUnitId };
+					}
+					if (targetUnitId === null)
+						throw new TypeError("Unit-backed Poll option has no target Unit");
+					return { ...presentation, sourceKind, targetUnitId };
+				}),
 			};
 		},
 		{

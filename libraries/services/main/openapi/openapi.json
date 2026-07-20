@@ -64698,9 +64698,48 @@
 										"maxItems": 50,
 										"type": "array",
 										"items": {
-											"minLength": 1,
-											"maxLength": 500,
-											"type": "string"
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["sourceKind", "label"],
+													"properties": {
+														"sourceKind": {
+															"const": "literal",
+															"type": "string"
+														},
+														"label": {
+															"minLength": 1,
+															"maxLength": 500,
+															"type": "string"
+														}
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"sourceKind",
+														"targetUnitId",
+														"label"
+													],
+													"properties": {
+														"sourceKind": {
+															"const": "unit",
+															"type": "string"
+														},
+														"targetUnitId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"label": {
+															"minLength": 1,
+															"maxLength": 500,
+															"type": "string"
+														}
+													}
+												}
+											]
 										}
 									},
 									"voteMode": {
@@ -64748,6 +64787,33 @@
 													"default": "PollOptionsDuplicated",
 													"type": "string",
 													"enum": ["PollOptionsDuplicated"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -64832,44 +64898,117 @@
 										"options": {
 											"type": "array",
 											"items": {
-												"type": "object",
-												"required": [
-													"id",
-													"label",
-													"position",
-													"voteCount"
-												],
-												"properties": {
-													"id": { "format": "uuid", "type": "string" },
-													"label": { "type": "string" },
-													"position": {
-														"minimum": 0,
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
+												"anyOf": [
+													{
+														"type": "object",
+														"required": [
+															"id",
+															"sourceKind",
+															"targetUnitId",
+															"label",
+															"position",
+															"voteCount"
+														],
+														"properties": {
+															"id": {
+																"format": "uuid",
 																"type": "string"
 															},
-															{ "minimum": 0, "type": "integer" }
-														]
-													},
-													"voteCount": {
-														"nullable": true,
-														"anyOf": [
-															{
+															"sourceKind": {
+																"const": "literal",
+																"type": "string"
+															},
+															"targetUnitId": { "type": "null" },
+															"label": { "type": "string" },
+															"position": {
+																"minimum": 0,
 																"anyOf": [
 																	{
 																		"format": "integer",
 																		"default": 0,
 																		"type": "string"
 																	},
-																	{ "type": "integer" }
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
 																]
 															},
-															{ "type": "null" }
-														]
+															"voteCount": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{ "type": "integer" }
+																		]
+																	},
+																	{ "type": "null" }
+																]
+															}
+														}
+													},
+													{
+														"type": "object",
+														"required": [
+															"id",
+															"sourceKind",
+															"targetUnitId",
+															"label",
+															"position",
+															"voteCount"
+														],
+														"properties": {
+															"id": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"sourceKind": {
+																"const": "unit",
+																"type": "string"
+															},
+															"targetUnitId": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"label": { "type": "string" },
+															"position": {
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
+															"voteCount": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"anyOf": [
+																			{
+																				"format": "integer",
+																				"default": 0,
+																				"type": "string"
+																			},
+																			{ "type": "integer" }
+																		]
+																	},
+																	{ "type": "null" }
+																]
+															}
+														}
 													}
-												}
+												]
 											}
 										}
 									}

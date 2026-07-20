@@ -113,7 +113,7 @@ export function PollCreate() {
 				body: {
 					question,
 					language: toContentLanguage(locale.target),
-					options: labels,
+					options: labels.map((label) => ({ sourceKind: "literal" as const, label })),
 					voteMode,
 					anonymous: form.get("anonymous") === "on",
 					resultsVisibility,

@@ -11,7 +11,12 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
-import { PollModeValues, PollResultVisibilityValues, toEnumValues } from "./contract-values";
+import {
+	PollModeValues,
+	PollOptionSourceKindValues,
+	PollResultVisibilityValues,
+	toEnumValues,
+} from "./contract-values";
 import {
 	createCreatedAtColumn,
 	ordinalPosition,
@@ -23,6 +28,10 @@ import { profile, unit } from "./core";
 import { realm } from "./realm";
 
 export const pollMode = pgEnum("poll_mode", toEnumValues(PollModeValues));
+export const pollOptionSourceKind = pgEnum(
+	"poll_option_source_kind",
+	toEnumValues(PollOptionSourceKindValues),
+);
 export const pollResultVisibility = pgEnum(
 	"poll_result_visibility",
 	toEnumValues(PollResultVisibilityValues),
@@ -61,6 +70,8 @@ export const pollOption = pgTable(
 		pollId: uuid()
 			.notNull()
 			.references(() => poll.id, { onDelete: "cascade" }),
+		sourceKind: pollOptionSourceKind().default("literal").notNull(),
+		targetUnitId: uuid().references(() => unit.id, { onDelete: "restrict" }),
 		position: ordinalPosition().notNull(),
 		deletedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
@@ -71,6 +82,11 @@ export const pollOption = pgTable(
 		index("poll_option_poll_position_idx")
 			.on(table.pollId, table.position, table.id)
 			.where(sql`${table.deletedAt} is null`),
+		index("poll_option_target_unit_idx").on(table.targetUnitId),
+		check(
+			"poll_option_source_check",
+			sql`(${table.sourceKind} = 'literal'::poll_option_source_kind and ${table.targetUnitId} is null) or (${table.sourceKind} = 'unit'::poll_option_source_kind and ${table.targetUnitId} is not null)`,
+		),
 		check(
 			"poll_option_deleted_at_check",
 			sql`${table.deletedAt} is null or ${table.deletedAt} >= ${table.createdAt}`,

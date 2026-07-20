@@ -3,10 +3,31 @@ import { type Static, t } from "elysia";
 import { PollModeValues, PollResultVisibilityValues } from "../../database/schema/contract-values";
 import { ContentLanguage, Uuid } from "../schema";
 
+const PollOptionLabel = t.String({ minLength: 1, maxLength: 500 });
+
+export const PollOptionInput = t.Union([
+	t.Object(
+		{
+			sourceKind: t.Literal("literal"),
+			label: PollOptionLabel,
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			sourceKind: t.Literal("unit"),
+			targetUnitId: Uuid,
+			label: PollOptionLabel,
+		},
+		{ additionalProperties: false },
+	),
+]);
+export type PollOptionInput = Static<typeof PollOptionInput>;
+
 export const CreatePollBody = t.Object({
 	question: t.String({ minLength: 1, maxLength: 500 }),
 	language: ContentLanguage,
-	options: t.Array(t.String({ minLength: 1, maxLength: 500 }), {
+	options: t.Array(PollOptionInput, {
 		minItems: 2,
 		maxItems: 50,
 	}),

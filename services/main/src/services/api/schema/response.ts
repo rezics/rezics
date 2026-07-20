@@ -456,12 +456,24 @@ export const PollDetailResponse = t.Object({
 	closed: t.Boolean(),
 	viewerOptionIds: t.Array(Uuid),
 	options: t.Array(
-		t.Object({
-			id: Uuid,
-			label: t.String(),
-			position: OrdinalPosition,
-			voteCount: t.Nullable(t.Integer()),
-		}),
+		t.Union([
+			t.Object({
+				id: Uuid,
+				sourceKind: t.Literal("literal"),
+				targetUnitId: t.Null(),
+				label: t.String(),
+				position: OrdinalPosition,
+				voteCount: t.Nullable(t.Integer()),
+			}),
+			t.Object({
+				id: Uuid,
+				sourceKind: t.Literal("unit"),
+				targetUnitId: Uuid,
+				label: t.String(),
+				position: OrdinalPosition,
+				voteCount: t.Nullable(t.Integer()),
+			}),
+		]),
 	),
 });
 const LocalizationSummary = t.Object({
