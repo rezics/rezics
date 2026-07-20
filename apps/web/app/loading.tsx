@@ -1,8 +1,1 @@
-import { Spinner } from "@rezics/ui";
-export default function Loading() {
-	return (
-		<main className="grid min-h-[40svh] place-items-center">
-			<Spinner />
-		</main>
-	);
-}
+export { LoadingPage as default } from "@/features/status-pages/loading-page";

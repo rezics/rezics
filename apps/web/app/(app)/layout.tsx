@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { ApplicationShell } from "./app-shell";
+import { ApplicationShell } from "@/features/application-shell/application-shell";
 import { AppShellTranslationNamespaces } from "@/i18n/namespaces";
 import { TranslationBoundary } from "@/i18n/translation-boundary";
 

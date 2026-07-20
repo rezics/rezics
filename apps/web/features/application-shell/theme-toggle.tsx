@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@rezics/ui";
 
+import { useTranslation } from "@/i18n/client";
+
 type Theme = "light" | "dark" | "system";
 type ResolvedTheme = Exclude<Theme, "system">;
 
@@ -24,6 +26,7 @@ function applyTheme(theme: ResolvedTheme) {
 }
 
 export function ThemeToggle() {
+	const { t } = useTranslation(["locale"]);
 	const [theme, setTheme] = useState<Theme>("system");
 	const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>("light");
 	const [ready, setReady] = useState(false);
@@ -52,7 +55,7 @@ export function ThemeToggle() {
 	const dark = ready && resolvedTheme === "dark";
 	return (
 		<Button
-			aria-label={dark ? "Use light theme" : "Use dark theme"}
+			aria-label={dark ? t.locale.useLightTheme : t.locale.useDarkTheme}
 			className="size-11"
 			onClick={() => {
 				const next: ResolvedTheme = resolvedTheme === "dark" ? "light" : "dark";

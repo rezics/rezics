@@ -2,12 +2,12 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import socialCard from "@rezics/brand/social-card.png?url&no-inline";
 
-import { AppProviders } from "./providers";
+import { AppProviders } from "@/lib/app-providers";
 import { RootTranslationNamespaces } from "@/i18n/namespaces";
 import { getTranslation } from "@/i18n/server";
 import { appTheme, appThemeCss } from "@/lib/theme";
 
-import "./styles.css";
+import "@/styles/global.css";
 
 const frontendOrigin =
 	process.env.FRONTEND_URL ??

@@ -4,11 +4,10 @@ ViNext-powered, Next.js-compatible frontend workspace. The current entry point p
 
 ## Directory conventions
 
-- `app/`: Next.js-compatible routes, the root layout, and global theme. `(app)` and `(auth)` organize application and authentication pages without changing public URLs.
-- `features/`: UI composition by business capability. New capabilities should have their own directory here rather than accumulating in page entry points.
-- `app/(app)/app-shell.tsx` and `app/providers.tsx`: Application adapters that provide routing, authentication, translations, and API access to the shared UI.
+- `app/`: Thin Next.js-compatible framework adapters. Keep App Router special files and only the routing/request glue they require here; `(app)` and `(auth)` organize routes without changing public URLs.
+- `features/`: Product UI and behavior composed by business capability, including page and application-shell implementations. New capabilities should have their own directory here rather than accumulating in route entry points.
+- `lib/` and `i18n/`: Cross-cutting frontend infrastructure that does not belong to a product capability. Route entries may adapt request-derived values into these owners, but ordinary implementation modules should not live under `app/`.
 - `@rezics/ui`: SharkUI and custom shared components in `libraries/ui`; import directly from the package root.
-- `lib/`: Stateless utilities shared across features.
 
 ## Common commands
 
@@ -54,4 +53,4 @@ Use components directly from the shared package:
 import { Button, Card } from "@rezics/ui";
 ```
 
-Add or update SharkUI components in `libraries/ui`, and review changes with `--dry-run` and `--diff` before writing. The shared theme is imported by `app/styles.css`.
+Add or update SharkUI components in `libraries/ui`, and review changes with `--dry-run` and `--diff` before writing. The shared theme is imported by `styles/global.css`.
