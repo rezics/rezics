@@ -5,6 +5,12 @@ tasks:
         desc: Start the backend API and recommendation worker.
         env:
             DATABASE_ADMIN_URL: ""
+        cmds:
+            - task --dir ../.. infra:up
+            - task: dev:processes
+
+    dev:processes:
+        internal: true
         deps:
             - dev:api
             - dev:worker

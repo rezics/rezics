@@ -39,10 +39,12 @@ must not depend on private libraries, applications, or services.
 
 ## Development
 
-The root workspace uses Node.js 26, Yarn 4, Bun, Go Task 3, and Aspire 13.4.6.
-Aspire owns the local PostgreSQL 18 + PGroonga and S3-compatible object-storage
-resources. Use the repository's pinned devenv/direnv environment or provide
-Aspire 13.4.6, Yarn 4.17.1, Go Task 3, and Bun 1.3.11 or newer locally.
+The root workspace uses Node.js 26, Yarn 4, Bun, Go Task 3, Docker Compose, and
+Aspire 13.4.6. Compose owns persistent local PostgreSQL 18 + PGroonga, RustFS,
+and optional Meilisearch resources. Aspire owns the API, recommendation worker,
+web development server, and Dashboard. Use the repository's pinned
+devenv/direnv environment or provide Aspire 13.4.6, Yarn 4.17.1, Go Task 3, and
+Bun 1.3.11 or newer locally.
 
 ```sh
 yarn install --immutable
@@ -50,26 +52,34 @@ task local:setup
 task dev
 ```
 
-`local:setup` owns local infrastructure and one-off database preparation. It is
-safe to rerun after pulling migrations or bootstrap-manifest changes. It starts
-an Aspire setup-only topology, applies pending migrations, initializes the
-RustFS bucket, fills missing bootstrap records, prints the database preparation
-logs, and then stops every session resource. Named container volumes preserve
-the PostgreSQL and RustFS data.
+`local:setup` starts the persistent Compose infrastructure, waits for PostgreSQL
+and RustFS health checks, initializes the RustFS bucket, applies pending
+migrations, and fills missing bootstrap records. It is safe to rerun after
+pulling migrations or bootstrap-manifest changes. Named container volumes
+preserve PostgreSQL and RustFS data independently from the Aspire AppHost.
 
-`dev` starts the complete Aspire topology in the foreground: PostgreSQL,
-RustFS, database/bucket preparation, the Bun API and recommendation worker, the
-Vinext web app, and the Aspire Dashboard. Aspire allocates service ports and
-injects endpoint configuration, so application code does not depend on fixed
-localhost ports. Stop it with Ctrl+C or `task dev:stop` for a detached
-or separately controlled instance. Aspire is a local-development control plane;
-it does not generate or replace the production Nomad deployment.
+`dev` ensures Compose infrastructure is healthy, prepares the database, and
+then starts the Bun API and recommendation worker, Vinext web app, and Aspire
+Dashboard in the foreground. The stable development endpoints are web
+`http://localhost:3000`, API `http://localhost:3001`, PostgreSQL
+`localhost:5432`, and RustFS `http://localhost:9000`. Aspire still injects
+endpoint references between application processes. Stop only the application
+processes with Ctrl+C or `task dev:stop`; use `task infra:stop` when the shared
+infrastructure should also stop. Aspire remains a local-development control
+plane and does not generate or replace the production Nomad deployment.
 
-Use `task dev:search` to add the opt-in Meilisearch resource. It is not
-part of the default graph until the versioned indexing lifecycle is
-implemented. Use `task aspire:doctor` for prerequisite diagnostics and
-`task aspire:describe` for machine-readable resource state. The static
-`apps/about` site remains independent from the AppHost.
+Use `task dev:search` to start the opt-in Compose Meilisearch service and pass
+its stable endpoint to the Aspire-managed applications. It is not part of the
+default development stack until the versioned indexing lifecycle is
+implemented. Use `task infra:status` for persistent infrastructure,
+`task aspire:doctor` for prerequisite diagnostics, and `task aspire:describe`
+for machine-readable application state. The static `apps/about` site remains
+independent from the AppHost.
+
+Infrastructure lifecycle commands are `task infra:up`, `task infra:stop`,
+`task infra:down`, and `task infra:logs`. `task infra:reset` intentionally
+deletes all local PostgreSQL, RustFS, and Meilisearch data before rebuilding the
+default infrastructure and database; it requires confirmation.
 
 The main checks are:
 

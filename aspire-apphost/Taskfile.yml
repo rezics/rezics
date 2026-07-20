@@ -26,6 +26,8 @@ tasks:
         dir: ..
         cmds:
             - task: doctor
+            - task infra:up
+            - task services-main:db:prepare
             - yarn exec aspire run --apphost aspire-apphost/apphost.mts
 
     run:search:
@@ -35,14 +37,9 @@ tasks:
             REZICS_ASPIRE_MODE: search
         cmds:
             - task: doctor
+            - task infra:up:search
+            - task services-main:db:prepare
             - yarn exec aspire run --apphost aspire-apphost/apphost.mts
-
-    setup:
-        desc: Start local infrastructure, migrate/bootstrap it, print bootstrap logs, and stop cleanly.
-        dir: ..
-        cmds:
-            - task: doctor
-            - yarn workspace @rezics/aspire-apphost exec tsx scripts/manage-apphost.mts setup
 
     stop:
         desc: Stop the REZICS AppHost selected by the rooted Aspire configuration.
@@ -61,4 +58,6 @@ tasks:
         dir: ..
         cmds:
             - task: doctor
+            - task infra:up
+            - task services-main:db:prepare
             - yarn workspace @rezics/aspire-apphost exec tsx scripts/manage-apphost.mts smoke

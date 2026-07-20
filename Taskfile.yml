@@ -81,13 +81,54 @@ tasks:
             - git diff --exit-code -- libraries/services/main/openapi/openapi.json libraries/services/main/openapi-fetch/src/generated libraries/services/main/openapi-tanstack-query/src/generated
             - test -z "$(git ls-files --others --exclude-standard -- libraries/services/main/openapi/openapi.json libraries/services/main/openapi-fetch/src/generated libraries/services/main/openapi-tanstack-query/src/generated)"
 
-    local:setup:
-        desc: Validate Aspire, prepare persistent local infrastructure, and stop cleanly.
+    infra:up:
+        desc: Start the persistent PostgreSQL and RustFS development services.
         cmds:
-            - task: aspire-apphost:setup
+            - docker compose up -d --wait postgres rustfs
+            - docker compose run --rm --no-deps rustfs-bucket-init
+
+    infra:up:search:
+        desc: Start persistent development infrastructure with opt-in Meilisearch.
+        cmds:
+            - docker compose --profile search up -d --wait postgres rustfs meilisearch
+            - docker compose run --rm --no-deps rustfs-bucket-init
+
+    infra:stop:
+        desc: Stop persistent development infrastructure without removing it.
+        cmds:
+            - docker compose --profile search stop --timeout 30 postgres rustfs meilisearch
+
+    infra:down:
+        desc: Remove development infrastructure containers and networks while preserving data.
+        cmds:
+            - docker compose --profile search down --timeout 30 --remove-orphans
+
+    infra:reset:
+        desc: Destructively remove and recreate all persistent development infrastructure data.
+        prompt: This deletes the local PostgreSQL, RustFS, and Meilisearch data. Continue?
+        cmds:
+            - docker compose --profile search --profile migration-test down --timeout 30 --remove-orphans --volumes
+            - task: infra:up
+            - task: services-main:db:prepare
+
+    infra:status:
+        desc: Show persistent development infrastructure status.
+        cmds:
+            - docker compose --profile search ps
+
+    infra:logs:
+        desc: Follow persistent development infrastructure logs.
+        cmds:
+            - docker compose --profile search logs --follow postgres rustfs meilisearch
+
+    local:setup:
+        desc: Start persistent local infrastructure and prepare the development database.
+        cmds:
+            - task: infra:up
+            - task: services-main:db:prepare
 
     dev:
-        desc: Run the Aspire-managed API, worker, web app, and local infrastructure.
+        desc: Run Aspire-managed applications against persistent Compose infrastructure.
         cmds:
             - task: aspire-apphost:run
 
@@ -97,7 +138,7 @@ tasks:
             - task: aspire-apphost:run:search
 
     dev:stop:
-        desc: Stop the currently running REZICS AppHost and all session resources.
+        desc: Stop the Aspire-managed application processes; keep Compose infrastructure running.
         cmds:
             - task: aspire-apphost:stop
 

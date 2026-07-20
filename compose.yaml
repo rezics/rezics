@@ -1,4 +1,81 @@
+name: rezics-dev
+
 services:
+    postgres:
+        image: groonga/pgroonga:4.0.6-debian-18
+        restart: unless-stopped
+        environment:
+            POSTGRES_DB: rezics
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_USER: postgres
+        ports:
+            - "127.0.0.1:5432:5432"
+        volumes:
+            - postgres-18-data:/var/lib/postgresql
+            - ./services/main/docker/postgres/init:/docker-entrypoint-initdb.d:ro
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres -d rezics"]
+            interval: 2s
+            timeout: 5s
+            retries: 15
+            start_period: 10s
+
+    rustfs:
+        image: rustfs/rustfs:1.0.0-beta.10
+        restart: unless-stopped
+        command: /data
+        environment:
+            RUSTFS_ACCESS_KEY: ${S3_ACCESS_KEY_ID:-rustfsadmin}
+            RUSTFS_CONSOLE_ENABLE: "true"
+            RUSTFS_SECRET_KEY: ${S3_SECRET_ACCESS_KEY:-rustfsadmin}
+        ports:
+            - "127.0.0.1:9000:9000"
+            - "127.0.0.1:9001:9001"
+        volumes:
+            - rustfs-data:/data
+        healthcheck:
+            test: ["CMD", "curl", "--fail", "http://localhost:9000/health"]
+            interval: 2s
+            timeout: 5s
+            retries: 15
+            start_period: 10s
+
+    rustfs-bucket-init:
+        image: minio/mc:RELEASE.2025-08-13T08-35-41Z
+        depends_on:
+            rustfs:
+                condition: service_healthy
+        entrypoint: /bin/sh
+        command:
+            - -c
+            - >-
+                mc alias set local http://rustfs:9000
+                "$${S3_ACCESS_KEY_ID}" "$${S3_SECRET_ACCESS_KEY}" &&
+                mc mb --ignore-existing "local/$${S3_BUCKET}"
+        environment:
+            S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-rustfsadmin}
+            S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-rustfsadmin}
+            S3_BUCKET: ${S3_BUCKET:-rezics}
+
+    meilisearch:
+        profiles: ["search"]
+        image: getmeili/meilisearch:v1.49.0
+        restart: unless-stopped
+        environment:
+            MEILI_ENV: development
+            MEILI_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-rezics-development-meilisearch-key}
+            MEILI_NO_ANALYTICS: "true"
+        ports:
+            - "127.0.0.1:7700:7700"
+        volumes:
+            - meilisearch-data:/meili_data
+        healthcheck:
+            test: ["CMD", "curl", "--fail", "http://localhost:7700/health"]
+            interval: 2s
+            timeout: 5s
+            retries: 15
+            start_period: 10s
+
     postgres-migration-test:
         profiles: ["migration-test"]
         image: groonga/pgroonga:4.0.6-debian-18
@@ -15,3 +92,12 @@ services:
             interval: 2s
             timeout: 5s
             retries: 15
+            start_period: 10s
+
+volumes:
+    postgres-18-data:
+        name: rezics-postgres-18-data
+    rustfs-data:
+        name: rezics-rustfs-data
+    meilisearch-data:
+        name: rezics-meilisearch-data

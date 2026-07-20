@@ -8,7 +8,6 @@ const appHostPath = fileURLToPath(new URL("../apphost.mts", import.meta.url));
 const appHostArgument = "aspire-apphost/apphost.mts";
 const startupTimeoutMs = 5 * 60 * 1000;
 
-type Mode = "setup" | "smoke";
 type ManagedChildProcess = ChildProcessByStdio<null, Readable, Readable>;
 
 interface RunningAppHost {
@@ -126,13 +125,6 @@ function requireRunningHealthy(resources: ResourceDescription[], displayName: st
 	return resource.state === "Running" && resource.healthStatus === "Healthy";
 }
 
-function requireSuccessfulCompletion(resources: ResourceDescription[], displayName: string) {
-	const resource = findResource(resources, displayName);
-	if (resource.exitCode !== undefined && resource.exitCode !== 0)
-		throw new Error(`${displayName} exited with code ${resource.exitCode}`);
-	return ["Exited", "Finished"].includes(resource.state) && resource.exitCode === 0;
-}
-
 function failOnTerminalResourceError(resources: ResourceDescription[]) {
 	const failed = resources.find(
 		(resource) =>
@@ -156,17 +148,10 @@ function summarize(resources: ResourceDescription[]) {
 		}));
 }
 
-async function waitForReady(mode: Mode, child: ManagedChildProcess) {
+async function waitForReady(child: ManagedChildProcess) {
 	const deadline = Date.now() + startupTimeoutMs;
 	let lastResources: ResourceDescription[] = [];
-	const expectedResources = [
-		"postgres",
-		"rezics-database",
-		"rustfs",
-		"rustfs-bucket-init",
-		"database-prepare",
-		...(mode === "smoke" ? ["main-api", "recommendation-worker", "web"] : []),
-	];
+	const expectedResources = ["main-api", "recommendation-worker", "web"];
 	while (Date.now() < deadline) {
 		if (child.exitCode !== null)
 			throw new Error(`Aspire exited before resources became ready (code ${child.exitCode})`);
@@ -185,18 +170,10 @@ async function waitForReady(mode: Mode, child: ManagedChildProcess) {
 			continue;
 		}
 		failOnTerminalResourceError(lastResources);
-		const infrastructureReady =
-			requireRunningHealthy(lastResources, "postgres") &&
-			requireRunningHealthy(lastResources, "rezics-database") &&
-			requireRunningHealthy(lastResources, "rustfs") &&
-			requireSuccessfulCompletion(lastResources, "rustfs-bucket-init") &&
-			requireSuccessfulCompletion(lastResources, "database-prepare");
 		if (
-			infrastructureReady &&
-			(mode === "setup" ||
-				(requireRunningHealthy(lastResources, "main-api") &&
-					requireRunningHealthy(lastResources, "recommendation-worker") &&
-					requireRunningHealthy(lastResources, "web")))
+			requireRunningHealthy(lastResources, "main-api") &&
+			requireRunningHealthy(lastResources, "recommendation-worker") &&
+			requireRunningHealthy(lastResources, "web")
 		)
 			return lastResources;
 		await delay(2_000);
@@ -272,8 +249,7 @@ async function waitForStopped() {
 
 async function main() {
 	const mode = process.argv[2];
-	if (mode !== "setup" && mode !== "smoke")
-		throw new Error("Usage: manage-apphost.mts <setup|smoke>");
+	if (mode !== "smoke") throw new Error("Usage: manage-apphost.mts smoke");
 	const existing = listMatchingAppHosts();
 	if (existing.length > 0)
 		throw new Error(
@@ -288,7 +264,7 @@ async function main() {
 			"run",
 			"--apphost",
 			appHostArgument,
-			...(mode === "smoke" ? ["--isolated"] : []),
+			"--isolated",
 			"--non-interactive",
 			"--nologo",
 		],
@@ -301,23 +277,8 @@ async function main() {
 	);
 	const getOutput = captureOutput(child);
 	try {
-		const resources = await waitForReady(mode, child);
-		if (mode === "smoke") await verifySmoke(resources);
-		else {
-			const logs = runAspire([
-				"logs",
-				"database-prepare",
-				"--apphost",
-				appHostArgument,
-				"--tail",
-				"80",
-				"--non-interactive",
-				"--nologo",
-			]);
-			if (logs.status !== 0)
-				throw new Error(logs.stderr.trim() || "Failed to read setup logs");
-			process.stdout.write(logs.stdout);
-		}
+		const resources = await waitForReady(child);
+		await verifySmoke(resources);
 		console.table(summarize(resources));
 	} catch (error) {
 		const output = getOutput();

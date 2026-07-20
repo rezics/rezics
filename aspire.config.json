@@ -8,7 +8,6 @@
 		"version": "13.4.6"
 	},
 	"packages": {
-		"Aspire.Hosting.JavaScript": "13.4.6",
-		"Aspire.Hosting.PostgreSQL": "13.4.6"
+		"Aspire.Hosting.JavaScript": "13.4.6"
 	}
 }
