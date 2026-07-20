@@ -1,12 +1,15 @@
 import { drizzleAdapter } from "@better-auth/drizzle-adapter/relations-v2";
 import { apiKey } from "@better-auth/api-key";
 import { betterAuth } from "better-auth/minimal";
+import { getActiveObservability } from "@rezics/observability";
 
 import { env } from "../config";
 import { database } from "../database";
 import * as schema from "../database/schema/auth";
 import { getRequestTranslation } from "../i18n";
 import { sendMail } from "../mailer";
+
+const { logger } = getActiveObservability();
 
 export const CredentialControlFreshAgeSeconds = 60 * 10;
 
@@ -67,7 +70,11 @@ export const auth = betterAuth({
 				to: user.email,
 				...translation.emails.resetPassword(url),
 			}).catch((error: unknown) => {
-				console.error("Failed to send password reset email", error);
+				logger.error("Failed to send password reset email", {
+					eventName: "email.password_reset.failed",
+					errorCode: "PasswordResetEmailFailed",
+					error,
+				});
 			});
 		},
 	},
@@ -80,7 +87,11 @@ export const auth = betterAuth({
 				to: user.email,
 				...translation.emails.verifyEmail(url),
 			}).catch((error: unknown) => {
-				console.error("Failed to send verification email", error);
+				logger.error("Failed to send verification email", {
+					eventName: "email.verification.failed",
+					errorCode: "VerificationEmailFailed",
+					error,
+				});
 			});
 		},
 	},

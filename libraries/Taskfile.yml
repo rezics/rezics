@@ -1,6 +1,9 @@
 version: "3"
 
 includes:
+    observability:
+        taskfile: ./observability/Taskfile.yml
+        dir: ./observability
     block:
         taskfile: ./block/Taskfile.yml
         dir: ./block
@@ -37,6 +40,7 @@ tasks:
     typecheck:
         desc: Type-check library packages.
         cmds:
+            - task: observability:typecheck
             - task: block:typecheck
             - task: search:typecheck
             - task: i18n:typecheck

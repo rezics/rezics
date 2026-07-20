@@ -1,4 +1,5 @@
 import { and, eq, sql } from "drizzle-orm";
+import { getActiveObservability } from "@rezics/observability";
 
 import { database } from "../database";
 import {
@@ -12,6 +13,8 @@ import type { GovernanceReasonCodeValues, ModerationActionKindValues } from "../
 import { getTranslation } from "../i18n";
 import { sendMail } from "../mailer";
 import type { DatabaseTransaction } from "../database";
+
+const { logger } = getActiveObservability();
 
 type GovernanceReasonCode = (typeof GovernanceReasonCodeValues)[number];
 type ModerationActionKind = (typeof ModerationActionKindValues)[number];
@@ -143,7 +146,11 @@ export async function deliverNotificationEmail(notificationId: string | undefine
 						eq(notification.emailStatus, "pending"),
 					),
 				);
-			console.error("Notification email delivery failed", { notificationId, error: message });
+			logger.error("Notification email delivery failed", {
+				eventName: "notification.email.failed",
+				errorCode: "NotificationEmailFailed",
+				error,
+			});
 		}
 	});
 }

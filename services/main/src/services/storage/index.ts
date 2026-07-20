@@ -14,6 +14,7 @@ import {
 	type PutObjectCommandInput,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { withDependencySpan } from "@rezics/observability";
 
 import { env } from "../config";
 
@@ -31,26 +32,38 @@ const storageClient = new S3Client({
 
 export const storage = {
 	health() {
-		return storageClient.send(new HeadBucketCommand({ Bucket: env.S3_BUCKET }));
+		return withDependencySpan({ dependency: "s3", operation: "health" }, () =>
+			storageClient.send(new HeadBucketCommand({ Bucket: env.S3_BUCKET })),
+		);
 	},
 	put(input: WithoutBucket<PutObjectCommandInput>) {
-		return storageClient.send(new PutObjectCommand({ ...input, Bucket: env.S3_BUCKET }));
+		return withDependencySpan({ dependency: "s3", operation: "put" }, () =>
+			storageClient.send(new PutObjectCommand({ ...input, Bucket: env.S3_BUCKET })),
+		);
 	},
 
 	get(input: WithoutBucket<GetObjectCommandInput>) {
-		return storageClient.send(new GetObjectCommand({ ...input, Bucket: env.S3_BUCKET }));
+		return withDependencySpan({ dependency: "s3", operation: "get" }, () =>
+			storageClient.send(new GetObjectCommand({ ...input, Bucket: env.S3_BUCKET })),
+		);
 	},
 
 	getTags(input: WithoutBucket<GetObjectTaggingCommandInput>) {
-		return storageClient.send(new GetObjectTaggingCommand({ ...input, Bucket: env.S3_BUCKET }));
+		return withDependencySpan({ dependency: "s3", operation: "get_tags" }, () =>
+			storageClient.send(new GetObjectTaggingCommand({ ...input, Bucket: env.S3_BUCKET })),
+		);
 	},
 
 	head(input: WithoutBucket<HeadObjectCommandInput>) {
-		return storageClient.send(new HeadObjectCommand({ ...input, Bucket: env.S3_BUCKET }));
+		return withDependencySpan({ dependency: "s3", operation: "head" }, () =>
+			storageClient.send(new HeadObjectCommand({ ...input, Bucket: env.S3_BUCKET })),
+		);
 	},
 
 	delete(input: WithoutBucket<DeleteObjectCommandInput>) {
-		return storageClient.send(new DeleteObjectCommand({ ...input, Bucket: env.S3_BUCKET }));
+		return withDependencySpan({ dependency: "s3", operation: "delete" }, () =>
+			storageClient.send(new DeleteObjectCommand({ ...input, Bucket: env.S3_BUCKET })),
+		);
 	},
 
 	presignPut(input: WithoutBucket<PutObjectCommandInput>, expiresIn = env.S3_PRESIGN_EXPIRES_IN) {

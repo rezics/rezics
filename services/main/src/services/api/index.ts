@@ -1,5 +1,7 @@
 import { cors } from "@elysiajs/cors";
 import { JsonValue } from "@rezics/portable-text";
+import { getActiveObservability } from "@rezics/observability";
+import { createElysiaObservability } from "@rezics/observability/elysia";
 import Elysia from "elysia";
 
 import catalog from "./catalog";
@@ -39,7 +41,10 @@ import {
 } from "./errors";
 import { toUnitVariantConstraintError } from "../units/variants";
 
+const { logger } = getActiveObservability();
+
 export default new Elysia()
+	.use(createElysiaObservability())
 	.model({ JsonValue })
 	.error(ApiErrorRegistry)
 	.use(
@@ -50,7 +55,7 @@ export default new Elysia()
 			allowedHeaders: ["Content-Type", "Authorization", "Accept-Language"],
 		}),
 	)
-	.onError(({ error, code, request, set, status }) => {
+	.onError(({ error, code, request, route, set, status }) => {
 		const requestId = crypto.randomUUID();
 		if (isApiError(error)) {
 			if (error._tag === "ApiTokenRateLimitExceeded")
@@ -67,11 +72,12 @@ export default new Elysia()
 			const validationError = new ValidationError();
 			return status(validationError.status, toApiErrorBody(validationError, requestId));
 		}
-		console.error("Request failed", {
-			requestId,
-			method: request.method,
-			url: request.url,
+		logger.error("Request failed", {
+			eventName: "http.request.failed",
+			errorCode: "InternalError",
+			request: { method: request.method, route: route || "unmatched" },
 			error,
+			attributes: { requestId },
 		});
 		const internalError = new InternalError(error);
 		return status(internalError.status, toApiErrorBody(internalError, requestId));

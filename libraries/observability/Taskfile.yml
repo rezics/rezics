@@ -1,0 +1,16 @@
+version: "3"
+
+tasks:
+    typecheck:
+        cmds:
+            - yarn exec tsc --noEmit -p tsconfig.json
+
+    smoke:bun:
+        desc: Prove the selected OpenTelemetry packages on the supported Bun runtime.
+        cmds:
+            - yarn run smoke:bun
+
+    smoke:load:
+        desc: Check sampled request latency and heap-growth budgets under Bun.
+        cmds:
+            - yarn run smoke:load

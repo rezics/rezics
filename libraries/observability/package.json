@@ -1,0 +1,37 @@
+{
+	"name": "@rezics/observability",
+	"private": true,
+	"type": "module",
+	"sideEffects": false,
+	"exports": {
+		".": "./src/index.ts",
+		"./elysia": "./src/elysia.ts"
+	},
+	"scripts": {
+		"smoke:bun": "bun scripts/bun-smoke.ts",
+		"smoke:load": "bun scripts/load-smoke.ts"
+	},
+	"dependencies": {
+		"@opentelemetry/api": "1.9.1",
+		"@opentelemetry/context-async-hooks": "2.9.0",
+		"@opentelemetry/core": "2.9.0",
+		"@opentelemetry/exporter-metrics-otlp-proto": "0.220.0",
+		"@opentelemetry/exporter-trace-otlp-proto": "0.220.0",
+		"@opentelemetry/resources": "2.9.0",
+		"@opentelemetry/sdk-metrics": "2.9.0",
+		"@opentelemetry/sdk-trace-base": "2.9.0",
+		"@opentelemetry/sdk-trace-node": "2.9.0"
+	},
+	"peerDependencies": {
+		"elysia": ">=1.4.0"
+	},
+	"devDependencies": {
+		"@sinclair/typebox": "^0.34.41",
+		"@types/node": "26",
+		"elysia": "^1.4.29",
+		"file-type": "^21.0.0",
+		"openapi-types": "^12.1.3",
+		"typescript": "7",
+		"vitest": "4.1.10"
+	}
+}

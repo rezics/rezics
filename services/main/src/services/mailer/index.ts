@@ -1,7 +1,10 @@
 import { Type } from "@sinclair/typebox";
 import { Check } from "@sinclair/typebox/value";
+import { getActiveObservability, observedFetch } from "@rezics/observability";
 
 import { env } from "../config";
+
+const { logger } = getActiveObservability();
 
 export interface MailMessage {
 	to: string;
@@ -34,14 +37,13 @@ const CloudflareEmailResponse = Type.Object({
 
 export async function sendMail(message: MailMessage) {
 	if (env.EMAIL_MODE === "log") {
-		console.info("Email delivery (log mode)", {
-			to: message.to,
-			from: env.EMAIL_FROM,
-			subject: message.subject,
+		logger.info("Email delivery accepted in log mode", {
+			eventName: "email.delivery.logged",
 		});
 		return { status: "logged" as const };
 	}
-	const response = await fetch(
+	const response = await observedFetch(
+		{ dependency: "cloudflare-email", operation: "send" },
 		`https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/email/sending/send`,
 		{
 			method: "POST",

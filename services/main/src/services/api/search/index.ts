@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import Elysia from "elysia";
 import { BlockDocument, BlockKey, parseDocument, type Block } from "@rezics/block";
 import { SearchConfiguration, SearchExecutionRequest } from "@rezics/search";
+import { getActiveObservability } from "@rezics/observability";
 import { and, eq } from "drizzle-orm";
 import { t } from "elysia";
 
@@ -17,6 +18,16 @@ import { ZonePageNotFound } from "../domain-extensions/errors";
 import { Uuid } from "../schema";
 import { DomainSearchBody, DomainSearchParams, GroupedSearchBody } from "./schema";
 import { toApiErrorResponse, DomainSearchResponse, SearchResponse } from "../schema/response";
+
+const { logger } = getActiveObservability();
+
+function logSearchFailure(message: string, eventName: string, error: unknown): void {
+	logger.error(message, {
+		eventName,
+		errorCode: "SearchUnavailable",
+		error,
+	});
+}
 
 const SearchUnavailableResponse = toApiErrorResponse(["SearchUnavailable"]);
 const InvalidSearchResponse = toApiErrorResponse(["InvalidSearch"]);
@@ -76,7 +87,7 @@ export default new Elysia({ prefix: "/search" })
 				);
 			} catch (cause) {
 				if (cause instanceof InvalidSearch) throw cause;
-				console.error("Configured search failed", cause);
+				logSearchFailure("Configured search failed", "search.configured.failed", cause);
 				throw new SearchUnavailable(cause);
 			}
 		},
@@ -113,7 +124,11 @@ export default new Elysia({ prefix: "/search" })
 				});
 			} catch (cause) {
 				if (cause instanceof InvalidSearch || cause instanceof UnitNotFound) throw cause;
-				console.error("Zone Dock Search Block execution failed", cause);
+				logSearchFailure(
+					"Zone Dock Search Block execution failed",
+					"search.zone_dock.failed",
+					cause,
+				);
 				throw new SearchUnavailable(cause);
 			}
 		},
@@ -157,7 +172,11 @@ export default new Elysia({ prefix: "/search" })
 					cause instanceof ZonePageNotFound
 				)
 					throw cause;
-				console.error("Zone Page Search Block execution failed", cause);
+				logSearchFailure(
+					"Zone Page Search Block execution failed",
+					"search.zone_page.failed",
+					cause,
+				);
 				throw new SearchUnavailable(cause);
 			}
 		},
@@ -185,7 +204,7 @@ export default new Elysia({ prefix: "/search" })
 				});
 			} catch (error) {
 				if (error instanceof InvalidSearch) throw error;
-				console.error("Grouped search failed", error);
+				logSearchFailure("Grouped search failed", "search.grouped.failed", error);
 				throw new SearchUnavailable(error);
 			}
 		},
@@ -210,7 +229,7 @@ export default new Elysia({ prefix: "/search" })
 				});
 			} catch (cause) {
 				if (cause instanceof InvalidSearch) throw cause;
-				console.error("Domain search failed", { index: params.index, error: cause });
+				logSearchFailure("Domain search failed", "search.domain.failed", cause);
 				throw new SearchUnavailable(cause);
 			}
 		},

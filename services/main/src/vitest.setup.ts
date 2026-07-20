@@ -12,3 +12,15 @@ const environment: Readonly<Record<string, string>> = {
 };
 
 for (const [name, value] of Object.entries(environment)) process.env[name] = value;
+
+const observability = initializeObservability({
+	service: {
+		name: "rezics-main-test",
+		version: "0.1.0",
+		environment: "test",
+	},
+});
+
+afterAll(() => observability.shutdown());
+import { afterAll } from "vitest";
+import { initializeObservability } from "@rezics/observability";
