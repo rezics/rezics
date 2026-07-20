@@ -39,15 +39,15 @@ must not depend on private libraries, applications, or services.
 
 ## Development
 
-The root workspace uses Node.js 26, Yarn 4, Bun, Go Task, and Aspire 13.4.6.
+The root workspace uses Node.js 26, Yarn 4, Bun, Go Task 3, and Aspire 13.4.6.
 Aspire owns the local PostgreSQL 18 + PGroonga and S3-compatible object-storage
 resources. Use the repository's pinned devenv/direnv environment or provide
-Aspire 13.4.6, Yarn 4.17.1, and Bun 1.3.11 or newer locally.
+Aspire 13.4.6, Yarn 4.17.1, Go Task 3, and Bun 1.3.11 or newer locally.
 
 ```sh
 yarn install --immutable
-yarn task local:setup
-yarn task dev
+task local:setup
+task dev
 ```
 
 `local:setup` owns local infrastructure and one-off database preparation. It is
@@ -61,30 +61,30 @@ the PostgreSQL and RustFS data.
 RustFS, database/bucket preparation, the Bun API and recommendation worker, the
 Vinext web app, and the Aspire Dashboard. Aspire allocates service ports and
 injects endpoint configuration, so application code does not depend on fixed
-localhost ports. Stop it with Ctrl+C or `yarn task dev:stop` for a detached
+localhost ports. Stop it with Ctrl+C or `task dev:stop` for a detached
 or separately controlled instance. Aspire is a local-development control plane;
 it does not generate or replace the production Nomad deployment.
 
-Use `yarn task dev:search` to add the opt-in Meilisearch resource. It is not
+Use `task dev:search` to add the opt-in Meilisearch resource. It is not
 part of the default graph until the versioned indexing lifecycle is
-implemented. Use `yarn task aspire:doctor` for prerequisite diagnostics and
-`yarn task aspire:describe` for machine-readable resource state. The static
+implemented. Use `task aspire:doctor` for prerequisite diagnostics and
+`task aspire:describe` for machine-readable resource state. The static
 `apps/about` site remains independent from the AppHost.
 
 The main checks are:
 
 ```sh
-yarn task format:check
-yarn task openapi:check
-yarn task typecheck
-yarn task test
-yarn task apps-web:build
-yarn task apps-about:build
-yarn task apps-about:test:dist
+task format:check
+task openapi:check
+task typecheck
+task test
+task apps-web:build
+task apps-about:build
+task apps-about:test:dist
 ```
 
 OpenAPI documents and generated clients are updated through
-`yarn task openapi:generate` and should not be edited by hand.
+`task openapi:generate` and should not be edited by hand.
 `libraries/ui` contains both local components and the tracked SharkUI mirror;
 preserve that upstream boundary.
 
@@ -99,24 +99,24 @@ always receives the complete schema instead of the CLI's size-limited output.
 
 ```sh
 # Change the Drizzle schema first, then generate and review SQL.
-yarn task services-main:db:generate -- add_example
+task services-main:db:generate -- add_example
 
 # Recompute atlas.sum after an intentional manual SQL edit.
-yarn task services-main:db:hash
+task services-main:db:hash
 
 # Replay the full history and verify it matches the Drizzle schema.
-yarn task db:check
+task db:check
 
 # Inspect or apply pending migrations with the owner connection.
-yarn task services-main:db:migrate:dry-run
-yarn task services-main:db:migrate
-yarn task services-main:db:status
+task services-main:db:migrate:dry-run
+task services-main:db:migrate
+task services-main:db:status
 
 # Fill missing required records without changing existing credentials.
-yarn task services-main:db:bootstrap
+task services-main:db:bootstrap
 
 # Explicitly replace all official Profile passwords and print the replacements.
-yarn task services-main:db:bootstrap:credentials:overwrite
+task services-main:db:bootstrap:credentials:overwrite
 ```
 
 Functions, triggers, extensions, and data backfills remain explicit SQL
@@ -125,7 +125,7 @@ Drizzle diff ownership so it does not delete those manually managed objects.
 The isolated dev database installs PGroonga as an infrastructure prerequisite.
 Every manual migration edit must be followed by `db:hash`.
 
-`yarn task db:check` owns the correctness workflow: it validates the migration
+`task db:check` owns the correctness workflow: it validates the migration
 checksum, replays the full history in an isolated PostgreSQL 18 + PGroonga
 database, and verifies that the result matches the Drizzle schema. CI runs this
 check for every pull request and main-branch push. It is intentionally separate
@@ -141,7 +141,7 @@ only through the separately confirmed
 Existing databases created by the previous Drizzle migrator need a one-time
 baseline before their first Atlas-managed deployment. After taking a backup,
 run
-`ATLAS_BASELINE_VERSION=20260718154924 yarn task services-main:db:adopt-atlas`;
+`ATLAS_BASELINE_VERSION=20260718154924 task services-main:db:adopt-atlas`;
 it records the last migration known to have committed under Drizzle and then
 applies the remaining migrations. Requiring the exact version makes this
 one-time path safe to automate without silently baselining the wrong state.

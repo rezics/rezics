@@ -39,17 +39,20 @@ jobs:
             - name: Enable Corepack
               run: corepack enable
 
+            - name: Install Task
+              uses: go-task/setup-task@v2
+
             - name: Install dependencies
               run: yarn install --immutable
 
             - name: Test
-              run: yarn task apps-about:test
+              run: task apps-about:test
 
             - name: Build
-              run: yarn task apps-about:build
+              run: task apps-about:build
 
             - name: Verify prerender output
-              run: yarn task apps-about:test:dist
+              run: task apps-about:test:dist
 
             - name: Deploy to Cloudflare Pages
               uses: cloudflare/wrangler-action@v3

@@ -29,12 +29,12 @@ jobs:
                   key: yarn-${{ runner.os }}-${{ hashFiles('yarn.lock', '.yarnrc.yml', '.yarn/releases/*.cjs') }}
                   restore-keys: yarn-${{ runner.os }}-
             - run: devenv shell yarn install --immutable
-            - run: devenv shell yarn task format:check
-            - run: devenv shell yarn task db:check
-            - run: devenv shell yarn task openapi:check
-            - run: devenv shell yarn task typecheck
-            - run: devenv shell yarn task test
-            - run: devenv shell yarn task aspire-apphost:smoke
-            - run: devenv shell yarn task apps-web:build
-            - run: devenv shell yarn task apps-about:build
-            - run: devenv shell yarn task apps-about:test:dist
+            - run: devenv shell task format:check
+            - run: devenv shell task db:check
+            - run: devenv shell task openapi:check
+            - run: devenv shell task typecheck
+            - run: devenv shell task test
+            - run: devenv shell task aspire-apphost:smoke
+            - run: devenv shell task apps-web:build
+            - run: devenv shell task apps-about:build
+            - run: devenv shell task apps-about:test:dist

@@ -33,7 +33,6 @@
 	},
 	"devDependencies": {
 		"@microsoft/aspire-cli": "13.4.6",
-		"@nmnmcc/task": "^3.52.0",
 		"@types/node": "26",
 		"@vitest/coverage-v8": "4.1.10",
 		"prettier": "3",

@@ -4,7 +4,7 @@ import { database } from "../src/services/database";
 try {
 	if (!(await isBootstrapReady())) {
 		throw new Error(
-			"Database bootstrap is incomplete; run `yarn task local:setup` before development",
+			"Database bootstrap is incomplete; run `task local:setup` before development",
 		);
 	}
 	console.info("Database bootstrap is ready.");

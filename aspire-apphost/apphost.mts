@@ -118,7 +118,7 @@ const rustfsBucketInit = await builder
 	.waitFor(rustfs);
 
 const databasePrepare = await builder
-	.addExecutable("database-prepare", "yarn", "..", ["task", "services-main:db:prepare"])
+	.addExecutable("database-prepare", "task", "..", ["services-main:db:prepare"])
 	.withEnvironment("DATABASE_ADMIN_URL", adminDatabaseUrl)
 	.withEnvironment("DATABASE_URL", applicationDatabaseUrl)
 	.waitFor(postgres);
