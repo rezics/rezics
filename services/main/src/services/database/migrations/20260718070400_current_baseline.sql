@@ -1148,7 +1148,6 @@ CREATE UNIQUE INDEX "book_isbn13_key" ON "book" ("isbn13") WHERE "isbn13" is not
 CREATE INDEX "book_publication_date_idx" ON "book" ("publication_date");--> statement-breakpoint
 CREATE UNIQUE INDEX "unit_alias_unit_language_normalized_key" ON "unit_alias" ("unit_id",coalesce("language", ''),"normalized_term") WHERE "deleted_at" is null;--> statement-breakpoint
 CREATE INDEX "unit_alias_normalized_idx" ON "unit_alias" ("normalized_term");--> statement-breakpoint
-CREATE INDEX "unit_alias_term_search_idx" ON "unit_alias" USING pgroonga ("term") WHERE "deleted_at" is null;--> statement-breakpoint
 CREATE INDEX "unit_alias_created_by_idx" ON "unit_alias" ("created_by_profile_id");--> statement-breakpoint
 CREATE INDEX "unit_alias_vote_profile_idx" ON "unit_alias_vote" ("profile_id");--> statement-breakpoint
 CREATE INDEX "unit_link_unit_position_idx" ON "unit_link" ("unit_id","position","id");--> statement-breakpoint
@@ -1181,15 +1180,10 @@ CREATE UNIQUE INDEX "unit_kind_slug_key" ON "unit" ("kind","slug") WHERE "slug" 
 CREATE INDEX "unit_kind_status_created_at_idx" ON "unit" ("kind","status","created_at" DESC NULLS LAST,"id" DESC NULLS LAST) WHERE "deleted_at" is null;--> statement-breakpoint
 CREATE INDEX "unit_status_visibility_created_at_idx" ON "unit" ("status","visibility","created_at" DESC NULLS LAST,"id" DESC NULLS LAST) WHERE "deleted_at" is null;--> statement-breakpoint
 CREATE INDEX "unit_moderation_status_idx" ON "unit" ("moderation_status");--> statement-breakpoint
-CREATE INDEX "unit_slug_search_idx" ON "unit" USING pgroonga ("slug") WHERE "deleted_at" is null;--> statement-breakpoint
 CREATE INDEX "unit_follow_unit_created_at_idx" ON "unit_follow" ("unit_id","created_at" DESC NULLS LAST,"follower_profile_id");--> statement-breakpoint
 CREATE INDEX "unit_localization_unit_position_idx" ON "unit_localization" ("unit_id","position","language");--> statement-breakpoint
 CREATE INDEX "unit_localization_language_unit_idx" ON "unit_localization" ("language","unit_id");--> statement-breakpoint
 CREATE INDEX "unit_localization_content_status_idx" ON "unit_localization" ("content_status","updated_at");--> statement-breakpoint
-CREATE INDEX "unit_localization_title_search_idx" ON "unit_localization" USING pgroonga ("title");--> statement-breakpoint
-CREATE INDEX "unit_localization_summary_search_idx" ON "unit_localization" USING pgroonga ("summary");--> statement-breakpoint
-CREATE INDEX "unit_localization_description_search_idx" ON "unit_localization" USING pgroonga ("description" pgroonga_jsonb_full_text_search_ops_v2);--> statement-breakpoint
-CREATE INDEX "unit_localization_content_search_idx" ON "unit_localization" USING pgroonga ("content" pgroonga_jsonb_full_text_search_ops_v2);--> statement-breakpoint
 CREATE INDEX "credit_attribution_entity_role_idx" ON "credit_attribution" ("entity_id","role");--> statement-breakpoint
 CREATE INDEX "credit_attribution_unit_position_idx" ON "credit_attribution" ("unit_id","position","id");--> statement-breakpoint
 CREATE INDEX "entity_kind_idx" ON "entity" ("kind");--> statement-breakpoint

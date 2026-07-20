@@ -53,15 +53,10 @@ const AllLanguagesValue = "all";
 
 type SearchLanguage = ContentLanguage | "";
 type ComboboxOption = { label: string; value: string };
-type SearchPageParam = { category: SearchCategory; offset: number };
+type SearchPageParam = { category: SearchCategory; cursor?: string };
 
 function readSearchLanguage(value: string | null): SearchLanguage {
 	return ContentLanguageValues.find((language) => language === value) ?? "";
-}
-
-function readTotal(value: string | number): number {
-	const total = Number(value);
-	return Number.isSafeInteger(total) && total >= 0 ? total : 0;
 }
 
 function searchHitHref(index: string, hit: SearchHit) {
@@ -139,34 +134,30 @@ export function SearchPage() {
 		queryKey: ["search", routeQuery, routeCategories, routeLanguage],
 		queryFn: async ({ pageParam, signal }) => {
 			const groups = await Promise.all(
-				pageParam.map(async ({ category, offset }) => {
+				pageParam.map(async ({ category, cursor }) => {
 					const { data } = await postApiSearchByIndex({
 						path: { index: category },
 						body: {
 							query: routeQuery,
-							offset,
+							...(cursor ? { cursor } : {}),
 							limit: SearchPageSize,
 							...(routeLanguage ? { Languages: [routeLanguage] } : {}),
 						},
 						signal,
 					});
-					const nextOffset = offset + data.hits.length;
 					return {
 						index: category,
 						hits: data.hits,
-						nextOffset:
-							data.hits.length > 0 && nextOffset < readTotal(data.total)
-								? nextOffset
-								: undefined,
+						nextCursor: data.nextCursor,
 					};
 				}),
 			);
 			return { groups };
 		},
-		initialPageParam: routeCategories.map((category) => ({ category, offset: 0 })),
+		initialPageParam: routeCategories.map((category): SearchPageParam => ({ category })),
 		getNextPageParam: (page) => {
-			const nextPage: SearchPageParam[] = page.groups.flatMap(({ index, nextOffset }) =>
-				nextOffset === undefined ? [] : [{ category: index, offset: nextOffset }],
+			const nextPage: SearchPageParam[] = page.groups.flatMap(({ index, nextCursor }) =>
+				nextCursor === undefined ? [] : [{ category: index, cursor: nextCursor }],
 			);
 			return nextPage.length ? nextPage : undefined;
 		},

@@ -13,7 +13,7 @@ const SearchLanguageList = t.Array(ContentLanguage, { maxItems: 50 });
 export const DomainSearchBody = t.Object(
 	{
 		query: t.Optional(t.String({ maxLength: 500, default: "" })),
-		offset: t.Optional(t.Integer({ minimum: 0, default: 0 })),
+		cursor: t.Optional(t.String({ maxLength: 4096, pattern: "^s2_[A-Za-z0-9_-]+$" })),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 		Languages: t.Optional(SearchLanguageList),
 		types: t.Optional(SearchStringList),

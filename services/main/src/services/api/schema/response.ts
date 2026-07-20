@@ -233,14 +233,18 @@ const SearchHit = t.Object({
 	name: t.Optional(NullableText),
 	summary: t.Optional(NullableText),
 });
+const SearchExactness = t.Object({
+	value: t.Integer({ minimum: 0 }),
+	relation: t.UnionEnum(["exact", "lower-bound"]),
+});
 export const SearchResponse = t.Object({
 	query: t.String(),
-	nextCursor: t.Optional(t.String({ pattern: "^s_[0-9a-z]+$" })),
+	nextCursor: t.Optional(t.String({ maxLength: 4096, pattern: "^s2_[A-Za-z0-9_-]+$" })),
 	facets: t.Optional(
 		t.Array(
 			t.Object({
 				field: t.String(),
-				options: t.Array(t.Object({ value: t.String(), count: t.Integer() })),
+				options: t.Array(t.Object({ value: t.String(), count: SearchExactness })),
 			}),
 		),
 	),
@@ -248,8 +252,7 @@ export const SearchResponse = t.Object({
 		t.Object({
 			index: t.String(),
 			hits: t.Array(SearchHit),
-			total: t.Integer(),
-			offset: t.Integer(),
+			total: SearchExactness,
 			limit: t.Integer(),
 			processingTimeMs: t.Number(),
 		}),
@@ -257,8 +260,8 @@ export const SearchResponse = t.Object({
 });
 export const DomainSearchResponse = t.Object({
 	hits: t.Array(SearchHit),
-	total: t.Integer(),
-	offset: t.Integer(),
+	total: SearchExactness,
+	nextCursor: t.Optional(t.String({ maxLength: 4096, pattern: "^s2_[A-Za-z0-9_-]+$" })),
 	limit: t.Integer(),
 	processingTimeMs: t.Number(),
 });

@@ -14,6 +14,7 @@ import { eq } from "drizzle-orm";
 import { database } from "../database";
 import { zone } from "../database/schema";
 import { InvalidSearch } from "./errors";
+import { getActiveSearchGeneration } from "./generation";
 import { SearchCategories, type SearchCategory } from "./schema";
 import { searchDomain, searchDomainFacets } from "./service";
 
@@ -254,14 +255,35 @@ export async function executeConfiguredSearch(
 	};
 	const fixedExpression = combineFilters([...compiled.constraints, ...scope.filters]);
 	const expression = combineExpressions(fixedExpression, compiled.expression);
-	let offset: number;
-	try {
-		offset = parseSearchCursor(compiled.cursor);
-	} catch (cause) {
-		throw new InvalidSearch(cause instanceof Error ? cause.message : "Invalid Search cursor");
-	}
-	if (offset + compiled.pageSize > trustedConfiguration.results.maxResultWindow)
-		throw new InvalidSearch("Search cursor exceeds the configured result window");
+	const generation = await getActiveSearchGeneration("current");
+	const requestHash = createHash("sha256")
+		.update(
+			JSON.stringify({
+				scope,
+				categories: scope.categories,
+				query: compiled.query.trim(),
+				sort: compiled.sort,
+				expression,
+				facets: compiled.facets,
+			}),
+		)
+		.digest("hex");
+	let cursor: ReturnType<typeof parseSearchCursor> | undefined;
+	if (compiled.cursor)
+		try {
+			cursor = parseSearchCursor(compiled.cursor);
+		} catch (cause) {
+			throw new InvalidSearch(
+				cause instanceof Error ? cause.message : "Invalid Search cursor",
+			);
+		}
+	if (
+		cursor &&
+		(cursor.generationId !== generation.id ||
+			cursor.requestHash !== requestHash ||
+			cursor.pageSize !== compiled.pageSize)
+	)
+		throw new InvalidSearch("Search cursor does not match this generation or request");
 	const results = (
 		await Promise.all(
 			scope.categories.map(async (category) => {
@@ -269,7 +291,7 @@ export async function executeConfiguredSearch(
 					const domainRequest = {
 						profileId,
 						query: compiled.query,
-						offset,
+						offset: cursor?.categories[category]?.offset ?? 0,
 						limit: compiled.pageSize,
 						sort: compiled.sort,
 						expression,
@@ -294,12 +316,26 @@ export async function executeConfiguredSearch(
 	if (!results.length && scope.categories.length)
 		throw new InvalidSearch("No selected Search category supports this filter combination");
 	const groups = results.map((result) => result.group);
-	const facetCounts = new Map<string, Map<string, number>>();
+	const facetCounts = new Map<
+		string,
+		Map<string, { value: number; relation: "exact" | "lower-bound" }>
+	>();
 	for (const result of results)
 		for (const facet of result.facets) {
-			const options = facetCounts.get(facet.field) ?? new Map<string, number>();
-			for (const option of facet.options)
-				options.set(option.value, (options.get(option.value) ?? 0) + option.count);
+			const options =
+				facetCounts.get(facet.field) ??
+				new Map<string, { value: number; relation: "exact" | "lower-bound" }>();
+			for (const option of facet.options) {
+				const existing = options.get(option.value);
+				options.set(option.value, {
+					value: (existing?.value ?? 0) + option.count.value,
+					relation:
+						existing?.relation === "lower-bound" ||
+						option.count.relation === "lower-bound"
+							? "lower-bound"
+							: "exact",
+				});
+			}
 			facetCounts.set(facet.field, options);
 		}
 	const facets = compiled.facets.flatMap((field) => {
@@ -312,17 +348,33 @@ export async function executeConfiguredSearch(
 					.map(([value, count]) => ({ value, count }))
 					.sort(
 						(left, right) =>
-							right.count - left.count || left.value.localeCompare(right.value),
+							right.count.value - left.count.value ||
+							left.value.localeCompare(right.value),
 					)
 					.slice(0, 100),
 			},
 		];
 	});
-	const hasNext = groups.some((group) => group.offset + group.hits.length < group.total);
+	const hasNext = groups.some((group) => !group.exhausted);
+	const categories = Object.fromEntries(
+		groups.map((group) => [
+			group.index,
+			{ offset: group.nextOffset, exhausted: group.exhausted },
+		]),
+	);
 	return {
 		query: compiled.query,
 		groups,
 		facets,
-		nextCursor: hasNext ? createSearchCursor(offset + compiled.pageSize) : undefined,
+		nextCursor: hasNext
+			? createSearchCursor({
+					version: 2,
+					generationId: generation.id,
+					requestHash,
+					pageSize: compiled.pageSize,
+					categories,
+				})
+			: undefined,
 	};
 }
+import { createHash } from "node:crypto";

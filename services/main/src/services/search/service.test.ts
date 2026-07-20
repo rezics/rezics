@@ -1,10 +1,22 @@
 import { type SQL } from "drizzle-orm";
 import { PgDialect } from "drizzle-orm/pg-core";
+import { parseSearchCursor } from "@rezics/search";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const execute = vi.hoisted(() => vi.fn());
+const searchCandidates = vi.hoisted(() => vi.fn());
 
 vi.mock("../database", () => ({ database: { execute } }));
+vi.mock("./generation", () => ({
+	getActiveSearchGeneration: vi.fn().mockResolvedValue({
+		id: "019f7eed-5d42-7102-8387-cc1d13b176d2",
+		kind: "current",
+		indexUid: "rezics_units_v1_20260720",
+		projectionVersion: 1,
+		settingsFingerprint: "a".repeat(64),
+	}),
+}));
+vi.mock("./meilisearch", () => ({ searchCandidates }));
 
 import { InvalidSearch } from "./errors";
 import { SearchCategories } from "./schema";
@@ -22,6 +34,21 @@ describe("domain search SQL", () => {
 	beforeEach(() => {
 		execute.mockReset();
 		execute.mockResolvedValue({ rows: [] });
+		searchCandidates.mockReset();
+		searchCandidates.mockResolvedValue([
+			{
+				hits: [
+					{
+						id: "019f7eed-5d42-7102-8387-cc1d13b176d2",
+						revision: 1,
+						category: "units",
+						unitType: "book",
+					},
+				],
+				estimatedTotalHits: 1,
+				processingTimeMs: 1,
+			},
+		]);
 	});
 
 	it("builds every public category from the current Drizzle schema", async () => {
@@ -66,10 +93,14 @@ describe("domain search SQL", () => {
 			licenses: ["cc-by"],
 			sort: "publishedAt:desc",
 		});
-		expect(lastQuery()).toContain('"unit"."published_at" DESC NULLS LAST');
+		expect(searchCandidates).toHaveBeenLastCalledWith([
+			expect.objectContaining({ sort: "publishedAt:desc" }),
+		]);
 
 		await searchDomain("users", { sort: "subscriberCount:desc" });
-		expect(lastQuery()).toContain('"unit_follow_stat"."follower_count"');
+		expect(searchCandidates).toHaveBeenLastCalledWith([
+			expect.objectContaining({ sort: "subscriberCount:desc" }),
+		]);
 
 		await searchDomain("entity", { types: ["person"] });
 		expect(lastQuery()).toContain('("entity"."kind")::text');
@@ -87,14 +118,17 @@ describe("domain search SQL", () => {
 		expect(postsQuery).toContain('FROM "realm_unit"');
 		expect(postsQuery).toContain('"post_reply"."root_post_id"');
 		expect(postsQuery).toContain('"post_reply"."parent_post_id"');
-		expect(postsQuery).toContain('"post_reply_stat"."undeleted_descendant_count"');
-		expect(postsQuery).toContain('"post_reply_stat"."undeleted_direct_count"');
+		expect(searchCandidates).toHaveBeenLastCalledWith([
+			expect.objectContaining({ sort: "replyCount:asc" }),
+		]);
 
 		await searchDomain("realms", {
 			joinPolicies: ["approval"],
 			sort: "subscriberCount:asc",
 		});
-		expect(lastQuery()).toContain('"unit_follow_stat"."follower_count"');
+		expect(searchCandidates).toHaveBeenLastCalledWith([
+			expect.objectContaining({ sort: "subscriberCount:asc" }),
+		]);
 
 		await searchDomain("collections", {
 			ownerId: "11111111-1111-1111-1111-111111111111",
@@ -116,7 +150,9 @@ describe("domain search SQL", () => {
 		const pollsQuery = lastQuery();
 		expect(pollsQuery).toContain('"poll"."mode" =');
 		expect(pollsQuery).toContain('"poll"."closed_at" IS NULL');
-		expect(pollsQuery).toContain('"poll"."closes_at" ASC NULLS LAST');
+		expect(searchCandidates).toHaveBeenLastCalledWith([
+			expect.objectContaining({ sort: "closesAt:asc" }),
+		]);
 	});
 
 	it("rejects category-specific combinations before executing SQL", async () => {
@@ -132,6 +168,47 @@ describe("domain search SQL", () => {
 		expect(execute).not.toHaveBeenCalled();
 	});
 
+	it("keeps catalog applicability and correlated requirements authoritative in PostgreSQL", async () => {
+		await searchDomain("units", {
+			expression: {
+				operator: "all",
+				clauses: [
+					{ field: "book-page-count", operator: "range", lower: 200 },
+					{
+						field: "book-publication-date",
+						operator: "range",
+						lower: "2020-01-01T00:00:00.000Z",
+					},
+				],
+			},
+		});
+		const bookQuery = lastQuery();
+		expect(bookQuery).toContain('"unit"."kind"::text =');
+		expect(bookQuery).toContain('"book"."page_count"');
+		expect(bookQuery).toContain('"book"."publication_date"');
+
+		await searchDomain("units", {
+			expression: {
+				operator: "all",
+				clauses: [
+					{
+						field: "software-platform",
+						operator: "equals",
+						value: "11111111-1111-1111-8111-111111111111",
+					},
+					{
+						field: "software-requirement-tier",
+						operator: "equals",
+						value: "recommended",
+					},
+				],
+			},
+		});
+		const softwareQuery = lastQuery();
+		expect(softwareQuery).toContain('from "software_requirement"');
+		expect(softwareQuery).toContain('"software_requirement"."software_id" = "unit"."id"');
+	});
+
 	it("hides Variants from browse discovery but annotates exact Unit results", async () => {
 		await searchDomain("units", {});
 		expect(lastQuery()).toContain('select 1 from "unit_variant"');
@@ -141,6 +218,32 @@ describe("domain search SQL", () => {
 		expect(exactQuery).toContain("'variantRole'");
 		expect(exactQuery).toContain("'variantMain'");
 		expect(exactQuery).toContain('"unit_variant"."variant_unit_id" = "unit"."id"');
+	});
+
+	it("keeps the page cursor at the last returned authorized hit while scanning totals", async () => {
+		const first = "019f7eed-5d42-7102-8387-cc1d13b176d2";
+		const second = "019f7eed-5d42-7102-8387-cc1d13b176d3";
+		searchCandidates.mockResolvedValueOnce([
+			{
+				hits: [
+					{ id: first, revision: 1, category: "units", unitType: "book" },
+					{ id: second, revision: 1, category: "units", unitType: "book" },
+				],
+				estimatedTotalHits: 2,
+				processingTimeMs: 1,
+			},
+		]);
+		execute.mockResolvedValueOnce({
+			rows: [
+				{ hit: { id: first }, ordinality: "1" },
+				{ hit: { id: second }, ordinality: "2" },
+			],
+		});
+		const result = await searchDomain("units", { query: "book", limit: 1 });
+		expect(result.hits).toEqual([{ id: first }]);
+		expect(result.total).toEqual({ value: 2, relation: "exact" });
+		expect(result.nextCursor).toBeDefined();
+		expect(parseSearchCursor(result.nextCursor ?? "").categories.units?.offset).toBe(1);
 	});
 
 	it("batches bounded facet counts and omits unsupported category facets", async () => {
@@ -160,8 +263,14 @@ describe("domain search SQL", () => {
 		const query = lastQuery();
 
 		expect(facets).toEqual([
-			{ field: "category", options: [{ value: "units", count: 12 }] },
-			{ field: "language", options: [{ value: "zh", count: 8 }] },
+			{
+				field: "category",
+				options: [{ value: "units", count: { value: 12, relation: "exact" } }],
+			},
+			{
+				field: "language",
+				options: [{ value: "zh", count: { value: 8, relation: "exact" } }],
+			},
 		]);
 		expect(query).toContain("union all");
 		expect(query).toContain('"facet_unit_localization"');

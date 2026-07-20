@@ -37,11 +37,12 @@ import {
 	unitAccessInvitation,
 	unitAccessRestriction,
 	unitProtection,
-	unitAlias,
 	unitAliasVoteStat,
 	unitReactionStat,
 	unitTagVoteStat,
-	unitLocalization,
+	searchIndexGeneration,
+	searchRevisionProjectionSource,
+	searchUnitProjectionSource,
 	unitSlugAddress,
 	unitStatusEvent,
 	unitVariant,
@@ -59,34 +60,20 @@ describe("database schema contracts", () => {
 		expect(dialect.sqlToQuery(unit.id.default as SQL).sql).toBe("uuidv7()");
 	});
 
-	it("tracks every PGroonga search index in the schema", () => {
-		const indexes = [unit, unitAlias, unitLocalization]
-			.flatMap((table) => getTableConfig(table).indexes)
-			.filter((index) => index.config.method === "pgroonga");
-
-		expect(indexes.map((index) => index.config.name).sort()).toEqual(
-			[
-				"unit_alias_term_search_idx",
-				"unit_localization_content_search_idx",
-				"unit_localization_description_search_idx",
-				"unit_localization_summary_search_idx",
-				"unit_localization_title_search_idx",
-			].sort(),
+	it("owns independent current/history projection ledgers and generation pointers", () => {
+		expect(getTableConfig(searchUnitProjectionSource).name).toBe(
+			"search_unit_projection_source",
 		);
-		for (const name of [
-			"unit_localization_content_search_idx",
-			"unit_localization_description_search_idx",
-		]) {
-			const index = indexes.find((candidate) => candidate.config.name === name);
-			const column = index?.config.columns[0];
-			expect(
-				column && "indexConfig" in column ? column.indexConfig?.opClass : undefined,
-			).toBe("pgroonga_jsonb_full_text_search_ops_v2");
-		}
-		expect(
-			indexes.find((index) => index.config.name === "unit_alias_term_search_idx")?.config
-				.where,
-		).toBeDefined();
+		expect(getTableConfig(searchRevisionProjectionSource).name).toBe(
+			"search_revision_projection_source",
+		);
+		const generation = getTableConfig(searchIndexGeneration);
+		expect(generation.indexes.map((index) => index.config.name)).toEqual(
+			expect.arrayContaining([
+				"search_index_generation_active_projection_key",
+				"search_index_generation_index_uid_key",
+			]),
+		);
 	});
 
 	it("enforces Unit access subject invariants at the database boundary", () => {

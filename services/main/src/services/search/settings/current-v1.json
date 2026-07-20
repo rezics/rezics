@@ -1,0 +1,80 @@
+{
+	"searchableAttributes": [
+		"search.primaryTitles",
+		"search.titles",
+		"search.aliases",
+		"search.summaries",
+		"search.descriptions",
+		"search.publishedContent",
+		"book.isbn13"
+	],
+	"displayedAttributes": ["id", "revision", "category", "unitType"],
+	"filterableAttributes": [
+		{
+			"attributePatterns": [
+				"category",
+				"unitType",
+				"subtype",
+				"languages",
+				"filters.*",
+				"access.*",
+				"catalog.licensed",
+				"book.isbn13",
+				"book.format",
+				"media.kind",
+				"software.versionLabel",
+				"software.platformIds",
+				"software.requirementTiers"
+			],
+			"features": {
+				"facetSearch": false,
+				"filter": { "equality": true, "comparison": false }
+			}
+		},
+		{
+			"attributePatterns": [
+				"catalog.releaseAt",
+				"book.publicationAt",
+				"book.pageCount",
+				"media.releaseAt",
+				"media.runtimeMinutes",
+				"media.episodeCount",
+				"media.seasonCount",
+				"software.releaseAt",
+				"ranking.*"
+			],
+			"features": { "facetSearch": false, "filter": { "equality": true, "comparison": true } }
+		}
+	],
+	"sortableAttributes": [
+		"id",
+		"filters.closesAt",
+		"catalog.releaseAt",
+		"book.publicationAt",
+		"book.pageCount",
+		"media.releaseAt",
+		"media.runtimeMinutes",
+		"software.releaseAt",
+		"ranking.createdAt",
+		"ranking.updatedAt",
+		"ranking.publishedAt",
+		"ranking.subscriberCount",
+		"ranking.replyCount",
+		"ranking.recommendationBest",
+		"ranking.engagement24h"
+	],
+	"rankingRules": [
+		"words",
+		"typo",
+		"proximity",
+		"attribute",
+		"sort",
+		"exactness",
+		"ranking.recommendationBest:desc",
+		"ranking.engagement24h:desc",
+		"ranking.updatedAt:desc"
+	],
+	"typoTolerance": { "enabled": true, "disableOnAttributes": ["book.isbn13"] },
+	"faceting": { "maxValuesPerFacet": 100 },
+	"pagination": { "maxTotalHits": 10000 }
+}

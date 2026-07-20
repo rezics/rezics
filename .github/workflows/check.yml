@@ -32,6 +32,7 @@ jobs:
             - run: devenv shell task format:check
             - run: devenv shell task db:check
             - run: devenv shell task openapi:check
+            - run: devenv shell task search:check
             - run: devenv shell task typecheck
             - run: devenv shell task test
             - run: devenv shell task aspire-apphost:smoke

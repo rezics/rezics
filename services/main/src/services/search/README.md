@@ -1,29 +1,54 @@
 # Search service
 
-Search runs directly against the authoritative PostgreSQL tables. Drizzle owns the PGroonga
-indexes on unit localizations, profiles, poll options, and unit slugs; the generated search
-migration also ensures that the extension exists. Soft-deleted slugs and poll options use partial
-indexes that match the query predicates. Replies are posts, so their localized content uses the
-same unit-localization indexes as every other post.
+PostgreSQL is authoritative for domain state, permissions, residual relational predicates,
+facets, totals, and response hydration. Meilisearch is the only full-text engine and produces an
+ordered candidate-ID superset. Every candidate is re-authorized with current PostgreSQL state;
+Meilisearch counts are never exposed as authorized counts.
 
-Search is a separate feature, not a Block renderer. `@rezics/search` owns its trusted configuration,
-basic/advanced input, controls, option policies, and bounded expression tree. `@rezics/block` embeds
-that configuration in a Search Block. The API exposes the server-owned global configuration at
-`GET /search/configuration` and executes it at `POST /search/execute`; clients never submit a
-configuration as authority. Zone execution resolves the stored Zone boundary, Realm execution adds
-a Realm constraint, and Unit execution can include Content Structure descendants. Zone Dock and
-Page endpoints load the named Search Block from the stored Block document and intersect its scope
-with the host Zone boundary. Cursor offsets are decoded only by Search and rejected outside the
-configuration's maximum result window. Configured execution also returns conjunctive facet counts
-for dynamic control options; category adapters batch all requested facets into one query and bound
-each facet to 100 values.
+`contracts.ts` owns runtime-validated current/history document versions. `field-registry.ts` owns
+the engine-independent public field policy. `settings/*.json` is the immutable settings contract
+for each projection generation. Search settings and document changes require a new index UID and
+an explicit reconcile, verify, and promote sequence.
 
-Every query is visibility-aware. Anonymous searches see discoverable, approved public Units.
-Authenticated searches additionally see Units readable through direct, authenticated, or Realm
-bindings, while unlisted Units are not globally enumerable. Structured filters compile separately
-from full-text matching and do not alter relevance.
+Two foreign-key-free ledgers are the only Sequin sources:
 
-[`schema.ts`](./schema.ts) owns public categories, sorts, and category capabilities.
-[`service.ts`](./service.ts) owns their mapping to the current Drizzle schema, filters, result
-projection, ordering, and pagination. When a searchable field changes, update its table index and
-the candidate query together, then generate a normal Drizzle migration.
+- `search_unit_projection_source` groups by Unit ID and retains deletion tombstones.
+- `search_revision_projection_source` groups by revision ID so intermediate revisions cannot be
+  coalesced.
+
+The source registry and trigger coverage live in `projection-sources.ts` and the search projection
+migration. Sequin configuration, enrichment SQL, transforms, and routing live under
+`services/main/search`. Enrichment always reads the latest authoritative state, emits one complete
+document, and routes missing/ineligible rows to an idempotent delete.
+
+`service.ts` scans bounded Meilisearch candidate batches, preserves their ordinality during
+PostgreSQL hydration, and refills after stale/deleted/unauthorized candidates. Cursors bind the
+active generation, normalized request hash, page size, and per-category scan state. An absent or
+incompatible active current generation produces `503 SearchUnavailable`; it never appears as an
+empty successful search.
+
+Lifecycle commands:
+
+```sh
+task services-main:search:index -- prepare --projection current --index rezics_units_v1_20260720
+task services-main:search:index -- reconcile --projection current --index rezics_units_v1_20260720
+task services-main:search:index -- promote --projection current --index rezics_units_v1_20260720
+task services-main:search:index -- retire --projection current --index rezics_units_v1_20260720
+task services-main:search:config:check
+```
+
+`prepare` and `reconcile` are idempotent for an unchanged generation. They reject an attempt to
+apply a different projection version or settings fingerprint to an existing UID. Promotion keeps
+the previous active generation in `verified` state for rollback; only a non-active verified
+generation can be retired. The reconciler holds a projection advisory lock, waits until Sequin's
+logical slot passes the captured WAL watermark and its backfill is inactive, then checks document
+count, runtime contracts, and sampled ledger revisions before setting `verified`.
+
+Before removing a retired index, remove/disable its concrete sink through a reviewed
+`sequin.yaml` deployment. Meilisearch dumps are the portable upgrade/restore format; same-version
+snapshots are for fast restart recovery. A lost volume or logical slot is never attached to an
+active pointer: declare a fresh UID/sink, run a full ledger backfill, reconcile, and explicitly
+promote it. PostgreSQL remains the complete rebuild source.
+
+History generation lifecycle is independent. Existing PostgreSQL history feeds, comparisons,
+restore, and undo never call Meilisearch.

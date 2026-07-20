@@ -132,16 +132,6 @@ export const unitLocalization = pgTable(
 		),
 		index("unit_localization_language_unit_idx").on(table.language, table.unitId),
 		index("unit_localization_content_status_idx").on(table.contentStatus, table.updatedAt),
-		index("unit_localization_title_search_idx").using("pgroonga", table.title),
-		index("unit_localization_summary_search_idx").using("pgroonga", table.summary),
-		index("unit_localization_description_search_idx").using(
-			"pgroonga",
-			table.description.op("pgroonga_jsonb_full_text_search_ops_v2"),
-		),
-		index("unit_localization_content_search_idx").using(
-			"pgroonga",
-			table.content.op("pgroonga_jsonb_full_text_search_ops_v2"),
-		),
 		check("unit_localization_language_check", sql`${table.language} in ('zh', 'en')`),
 		check(
 			"unit_localization_value_check",

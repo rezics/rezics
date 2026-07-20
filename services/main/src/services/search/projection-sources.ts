@@ -1,0 +1,37 @@
+/** Search-owned registry; the SQL migration installs one trigger for every declaration. */
+export const CurrentProjectionSources = {
+	unit: ["id"],
+	unit_localization: ["unit_id"],
+	unit_alias: ["unit_id"],
+	unit_alias_vote: ["alias_id"],
+	unit_alias_vote_stat: ["alias_id"],
+	unit_tag: ["unit_id"],
+	realm_unit: ["unit_id"],
+	unit_status_event: ["unit_id"],
+	content_structure_node: ["owner_unit_id", "content_unit_id"],
+	unit_variant: ["variant_unit_id", "main_unit_id"],
+	profile: ["id"],
+	entity: ["id"],
+	post: ["id"],
+	post_reply: ["post_id"],
+	post_reply_stat: ["post_id"],
+	realm: ["id"],
+	collection: ["id"],
+	poll: ["id"],
+	unit_follow_stat: ["unit_id"],
+	book: ["id"],
+	media: ["id"],
+	software: ["id"],
+	software_requirement: ["software_id"],
+	release: ["id"],
+	series: ["id"],
+	series_release: ["series_id", "release_unit_id"],
+	unit_access_binding: ["unit_id"],
+	unit_access_restriction: ["unit_id"],
+} as const;
+
+export const HistoryProjectionSources = {
+	unit_revision: ["id"],
+	unit_revision_slot: ["revision_id"],
+	unit_revision_tag: ["revision_id"],
+} as const;

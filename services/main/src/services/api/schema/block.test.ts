@@ -375,7 +375,14 @@ describe("Search configuration semantics", () => {
 	});
 
 	test("round-trips opaque cursors through the trusted request compiler", () => {
-		const cursor = createSearchCursor(720);
+		const state = {
+			version: 2 as const,
+			generationId: "019f7eed-5d42-7102-8387-cc1d13b176d2",
+			requestHash: "a".repeat(64),
+			pageSize: 20,
+			categories: { units: { offset: 720, exhausted: false } },
+		};
+		const cursor = createSearchCursor(state);
 		const compiled = compileSearchRequest(searchConfiguration, {
 			mode: "basic",
 			filters: [],
@@ -383,7 +390,8 @@ describe("Search configuration semantics", () => {
 		});
 
 		expect(compiled.cursor).toBe(cursor);
-		expect(parseSearchCursor(compiled.cursor)).toBe(720);
+		if (!compiled.cursor) throw new Error("Compiled cursor is missing");
+		expect(parseSearchCursor(compiled.cursor)).toEqual(state);
 		expect(() => parseSearchCursor("s_00")).toThrow("Invalid Search cursor");
 	});
 

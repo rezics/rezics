@@ -86,7 +86,8 @@ export default new Elysia({ prefix: "/search" })
 					identity.authorization.profileId,
 				);
 			} catch (cause) {
-				if (cause instanceof InvalidSearch) throw cause;
+				if (cause instanceof InvalidSearch || cause instanceof SearchUnavailable)
+					throw cause;
 				logSearchFailure("Configured search failed", "search.configured.failed", cause);
 				throw new SearchUnavailable(cause);
 			}
@@ -123,7 +124,12 @@ export default new Elysia({ prefix: "/search" })
 					profileId: identity.authorization.profileId,
 				});
 			} catch (cause) {
-				if (cause instanceof InvalidSearch || cause instanceof UnitNotFound) throw cause;
+				if (
+					cause instanceof InvalidSearch ||
+					cause instanceof SearchUnavailable ||
+					cause instanceof UnitNotFound
+				)
+					throw cause;
 				logSearchFailure(
 					"Zone Dock Search Block execution failed",
 					"search.zone_dock.failed",
@@ -168,6 +174,7 @@ export default new Elysia({ prefix: "/search" })
 			} catch (cause) {
 				if (
 					cause instanceof InvalidSearch ||
+					cause instanceof SearchUnavailable ||
 					cause instanceof UnitNotFound ||
 					cause instanceof ZonePageNotFound
 				)
@@ -203,7 +210,8 @@ export default new Elysia({ prefix: "/search" })
 					indexes: body.indexes ?? [...SearchCategories],
 				});
 			} catch (error) {
-				if (error instanceof InvalidSearch) throw error;
+				if (error instanceof InvalidSearch || error instanceof SearchUnavailable)
+					throw error;
 				logSearchFailure("Grouped search failed", "search.grouped.failed", error);
 				throw new SearchUnavailable(error);
 			}
@@ -228,7 +236,8 @@ export default new Elysia({ prefix: "/search" })
 					profileId: identity.authorization.profileId,
 				});
 			} catch (cause) {
-				if (cause instanceof InvalidSearch) throw cause;
+				if (cause instanceof InvalidSearch || cause instanceof SearchUnavailable)
+					throw cause;
 				logSearchFailure("Domain search failed", "search.domain.failed", cause);
 				throw new SearchUnavailable(cause);
 			}

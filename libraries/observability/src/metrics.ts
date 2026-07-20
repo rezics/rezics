@@ -80,6 +80,11 @@ export class ObservabilityMetrics {
 	readonly #readinessCheckFailures: Counter;
 	readonly #searchOutboxDepth: ReturnType<Meter["createUpDownCounter"]>;
 	readonly #searchOutboxAge: Histogram;
+	readonly #searchCandidates: Histogram;
+	readonly #searchOverfetchRounds: Histogram;
+	readonly #searchAuthoritativeRejections: Histogram;
+	readonly #searchScanLimitHits: Counter;
+	readonly #searchLowerBoundTotals: Counter;
 	#workerHeartbeatAt: number | undefined;
 	#activeWorkerJobStartedAt: number | undefined;
 
@@ -117,6 +122,22 @@ export class ObservabilityMetrics {
 		});
 		this.#searchOutboxAge = meter.createHistogram("rezics.search.outbox.oldest_age", {
 			unit: "s",
+		});
+		this.#searchCandidates = meter.createHistogram("rezics.search.candidates", {
+			unit: "{candidate}",
+		});
+		this.#searchOverfetchRounds = meter.createHistogram("rezics.search.overfetch.rounds", {
+			unit: "{round}",
+		});
+		this.#searchAuthoritativeRejections = meter.createHistogram(
+			"rezics.search.authoritative_rejections",
+			{ unit: "{candidate}" },
+		);
+		this.#searchScanLimitHits = meter.createCounter("rezics.search.scan_limit_hits", {
+			unit: "{query}",
+		});
+		this.#searchLowerBoundTotals = meter.createCounter("rezics.search.lower_bound_totals", {
+			unit: "{query}",
 		});
 
 		meter
@@ -231,5 +252,31 @@ export class ObservabilityMetrics {
 			throw new Error("Search outbox depth must be a non-negative safe integer");
 		this.#searchOutboxDepth.add(depth - previousDepth);
 		this.#searchOutboxAge.record(Math.max(0, oldestAgeSeconds));
+	}
+
+	searchCandidateScan(
+		projection: "current" | "history",
+		candidateCount: number,
+		authorizedCount: number,
+		rounds: number,
+		scanLimitHit: boolean,
+		lowerBound: boolean,
+	): void {
+		for (const [name, value] of [
+			["candidateCount", candidateCount],
+			["authorizedCount", authorizedCount],
+			["rounds", rounds],
+		] as const)
+			if (!Number.isSafeInteger(value) || value < 0)
+				throw new Error(`${name} must be a non-negative safe integer`);
+		const attributes = { "search.projection": projection };
+		this.#searchCandidates.record(candidateCount, attributes);
+		this.#searchOverfetchRounds.record(rounds, attributes);
+		this.#searchAuthoritativeRejections.record(
+			Math.max(0, candidateCount - authorizedCount),
+			attributes,
+		);
+		if (scanLimitHit) this.#searchScanLimitHits.add(1, attributes);
+		if (lowerBound) this.#searchLowerBoundTotals.add(1, attributes);
 	}
 }

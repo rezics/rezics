@@ -81,51 +81,69 @@ tasks:
             - git diff --exit-code -- libraries/services/main/openapi/openapi.json libraries/services/main/openapi-fetch/src/generated libraries/services/main/openapi-tanstack-query/src/generated
             - test -z "$(git ls-files --others --exclude-standard -- libraries/services/main/openapi/openapi.json libraries/services/main/openapi-fetch/src/generated libraries/services/main/openapi-tanstack-query/src/generated)"
 
-    infra:up:
-        desc: Start the persistent PostgreSQL and RustFS development services.
+    search:check:
+        desc: Enforce the clean PGroonga removal boundary.
         cmds:
-            - docker compose up -d --wait postgres rustfs
+            - >-
+                test -z "$(rg -i 'pgroonga|pgroonga_query_escape|&@~'
+                --glob '!.temp/**' --glob '!Taskfile.yml' .)"
+
+    infra:up:
+        desc: Start persistent databases, object storage, Meilisearch, and Sequin state services.
+        cmds:
+            - docker compose up -d --wait postgres rustfs meilisearch sequin-postgres sequin-redis
             - docker compose run --rm --no-deps rustfs-bucket-init
 
     infra:up:search:
-        desc: Start persistent development infrastructure with opt-in Meilisearch.
+        desc: Alias for the default search-capable infrastructure graph.
         cmds:
-            - docker compose --profile search up -d --wait postgres rustfs meilisearch
-            - docker compose run --rm --no-deps rustfs-bucket-init
+            - task: infra:up
+
+    infra:search:start:
+        desc: Start Sequin after migrations and the initial Meilisearch generation exist.
+        cmds:
+            - docker compose up -d --wait sequin
 
     infra:stop:
         desc: Stop persistent development infrastructure without removing it.
         cmds:
-            - docker compose --profile search stop --timeout 30 postgres rustfs meilisearch
+            - docker compose stop --timeout 30 postgres rustfs meilisearch sequin sequin-postgres sequin-redis
 
     infra:down:
         desc: Remove development infrastructure containers and networks while preserving data.
         cmds:
-            - docker compose --profile search down --timeout 30 --remove-orphans
+            - docker compose down --timeout 30 --remove-orphans
 
     infra:reset:
         desc: Destructively remove and recreate all persistent development infrastructure data.
         prompt: This deletes the local PostgreSQL, RustFS, and Meilisearch data. Continue?
         cmds:
-            - docker compose --profile search --profile migration-test down --timeout 30 --remove-orphans --volumes
+            - docker compose --profile migration-test down --timeout 30 --remove-orphans --volumes
             - task: infra:up
             - task: services-main:db:prepare
 
     infra:status:
         desc: Show persistent development infrastructure status.
         cmds:
-            - docker compose --profile search ps
+            - docker compose ps
 
     infra:logs:
         desc: Follow persistent development infrastructure logs.
         cmds:
-            - docker compose --profile search logs --follow postgres rustfs meilisearch
+            - docker compose logs --follow postgres rustfs meilisearch sequin sequin-postgres sequin-redis
 
     local:setup:
         desc: Start persistent local infrastructure and prepare the development database.
         cmds:
             - task: infra:up
             - task: services-main:db:prepare
+            - task: services-main:search:index
+              vars: { CLI_ARGS: "prepare --projection current --index rezics_units_v1_20260720" }
+            - task: infra:search:start
+            - task: services-main:search:index
+              vars: { CLI_ARGS: "reconcile --projection current --index rezics_units_v1_20260720" }
+            - task: services-main:search:index
+              vars: { CLI_ARGS: "promote --projection current --index rezics_units_v1_20260720" }
 
     dev:
         desc: Run Aspire-managed applications against persistent Compose infrastructure.
@@ -133,7 +151,7 @@ tasks:
             - task: aspire-apphost:run
 
     dev:search:
-        desc: Run the Aspire topology with the opt-in Meilisearch resource.
+        desc: Alias for the default search-capable Aspire topology.
         cmds:
             - task: aspire-apphost:run:search
 

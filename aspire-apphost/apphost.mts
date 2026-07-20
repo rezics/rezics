@@ -66,8 +66,8 @@ function seconds(milliseconds: number): number {
 }
 
 const appHostMode = resolveAppHostMode(process.env.REZICS_ASPIRE_MODE);
-const searchEnabled = appHostMode === "search";
 const isolatedSmoke = appHostMode === "smoke";
+const searchEnabled = !isolatedSmoke;
 
 const builder = await createBuilder();
 
@@ -100,15 +100,15 @@ const betterAuthSecret = await builder.addParameter("better-auth-secret", {
 });
 
 let meilisearch: Awaited<ReturnType<typeof builder.addExternalService>> | undefined;
-let meilisearchMasterKey: Awaited<ReturnType<typeof builder.addParameter>> | undefined;
+let meilisearchQueryKey: Awaited<ReturnType<typeof builder.addParameter>> | undefined;
 
 if (searchEnabled) {
 	const meilisearchUrl = await builder.addParameter("meilisearch-url", {
 		value: requireHttpOrigin("MEILISEARCH_URL"),
 	});
 	meilisearch = await builder.addExternalService("meilisearch", meilisearchUrl);
-	meilisearchMasterKey = await builder.addParameter("meilisearch-master-key", {
-		value: requireEnvironmentVariable("MEILISEARCH_MASTER_KEY"),
+	meilisearchQueryKey = await builder.addParameter("meilisearch-query-key", {
+		value: requireEnvironmentVariable("MEILISEARCH_QUERY_KEY"),
 		secret: true,
 	});
 }
@@ -166,10 +166,10 @@ let api = builder
 	.withReference(database)
 	.withReference(rustfs);
 
-if (meilisearch && meilisearchMasterKey) {
+if (meilisearch && meilisearchQueryKey) {
 	api = api
 		.withEnvironment("MEILISEARCH_URL", meilisearch)
-		.withEnvironment("MEILISEARCH_MASTER_KEY", meilisearchMasterKey)
+		.withEnvironment("MEILISEARCH_QUERY_KEY", meilisearchQueryKey)
 		.withReference(meilisearch);
 }
 
@@ -231,12 +231,6 @@ let worker = builder
 	.withReference(database)
 	.withReference(rustfs);
 
-if (meilisearch && meilisearchMasterKey) {
-	worker = worker
-		.withEnvironment("MEILISEARCH_URL", meilisearch)
-		.withEnvironment("MEILISEARCH_MASTER_KEY", meilisearchMasterKey)
-		.withReference(meilisearch);
-}
 await worker;
 
 const web = await builder

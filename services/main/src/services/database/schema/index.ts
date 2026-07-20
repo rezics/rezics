@@ -21,6 +21,7 @@ export * from "./realm";
 export * from "./recommendation";
 export * from "./release";
 export * from "./score";
+export * from "./search";
 export * from "./series";
 export * from "./slug";
 export * from "./software";

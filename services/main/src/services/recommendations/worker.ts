@@ -318,6 +318,11 @@ export async function refreshRecommendationSnapshot(): Promise<string | null> {
 					.update(recommendationSnapshot)
 					.set({ state: "ready", active: true, completedAt, error: null })
 					.where(eq(recommendationSnapshot.id, snapshot.id));
+				await tx.execute(sql`
+					SELECT touch_search_unit_projection(array_agg(distinct unit_id))
+					FROM recommendation_unit_stat
+					WHERE snapshot_id = ${snapshot.id}::uuid
+				`);
 				return snapshot.id;
 			},
 			{ isolationLevel: "repeatable read" },

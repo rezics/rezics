@@ -36,6 +36,17 @@ tasks:
         cmds:
             - yarn exec tsx scripts/reconcile-aggregates.ts
 
+    search:index:
+        desc: Reconcile, promote, or retire one versioned Meilisearch projection generation.
+        cmds:
+            - yarn exec tsx scripts/search-index.ts {{.CLI_ARGS}}
+
+    search:config:check:
+        desc: Interpolate and plan the canonical Sequin search configuration.
+        cmds:
+            - sequin config interpolate search/sequin.yaml --output ../../.temp/sequin.interpolated.yaml
+            - sequin config plan ../../.temp/sequin.interpolated.yaml
+
     build:
         desc: Build the backend.
         cmds:

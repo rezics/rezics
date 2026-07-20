@@ -40,8 +40,8 @@ must not depend on private libraries, applications, or services.
 ## Development
 
 The root workspace uses Node.js 26, Yarn 4, Bun, Go Task 3, Docker Compose, and
-Aspire 13.4.6. Compose owns persistent local PostgreSQL 18 + PGroonga, RustFS,
-and optional Meilisearch resources. Aspire owns the API, recommendation worker,
+Aspire 13.4.6. Compose owns persistent vanilla PostgreSQL 18, RustFS, Meilisearch,
+and Sequin PostgreSQL/Valkey resources. Aspire owns the API, recommendation worker,
 web development server, and Dashboard. Use the repository's pinned
 devenv/direnv environment or provide Aspire 13.4.6, Yarn 4.17.1, Go Task 3, and
 Bun 1.3.11 or newer locally.
@@ -52,26 +52,26 @@ task local:setup
 task dev
 ```
 
-`local:setup` starts the persistent Compose infrastructure, waits for PostgreSQL
-and RustFS health checks, initializes the RustFS bucket, applies pending
-migrations, and fills missing bootstrap records. It is safe to rerun after
-pulling migrations or bootstrap-manifest changes. Named container volumes
-preserve PostgreSQL and RustFS data independently from the Aspire AppHost.
+`local:setup` starts the persistent Compose infrastructure, initializes RustFS,
+applies migrations, prepares the current index generation, starts Sequin,
+verifies its backfill, promotes the generation, and fills missing bootstrap
+records. It is safe to rerun after pulling migrations or bootstrap-manifest
+changes. Named volumes preserve PostgreSQL, RustFS, Meilisearch, Sequin
+PostgreSQL, and Valkey data independently from the Aspire AppHost.
 
 `dev` ensures Compose infrastructure is healthy, prepares the database, and
 then starts the Bun API and recommendation worker, Vinext web app, and Aspire
 Dashboard in the foreground. The stable development endpoints are web
 `http://localhost:3000`, API `http://localhost:3001`, PostgreSQL
-`localhost:5432`, and RustFS `http://localhost:9000`. Aspire still injects
+`localhost:5432`, RustFS `http://localhost:9000`, Meilisearch
+`http://localhost:7700`, and Sequin `http://localhost:7376`. Aspire still injects
 endpoint references between application processes. Stop only the application
 processes with Ctrl+C or `task dev:stop`; use `task infra:stop` when the shared
 infrastructure should also stop. Aspire remains a local-development control
 plane and does not generate or replace the production Nomad deployment.
 
-Use `task dev:search` to start the opt-in Compose Meilisearch service and pass
-its stable endpoint to the Aspire-managed applications. It is not part of the
-default development stack until the versioned indexing lifecycle is
-implemented. Use `task infra:status` for persistent infrastructure,
+`task dev:search` remains an alias for the default search-capable topology. Use
+`task infra:status` for persistent infrastructure,
 `task aspire:doctor` for prerequisite diagnostics, and `task aspire:describe`
 for machine-readable application state. The static `apps/about` site remains
 independent from the AppHost.
@@ -87,7 +87,7 @@ machine-checkable contract when Plan 6 introduces the deployment artifacts.
 
 Infrastructure lifecycle commands are `task infra:up`, `task infra:stop`,
 `task infra:down`, and `task infra:logs`. `task infra:reset` intentionally
-deletes all local PostgreSQL, RustFS, and Meilisearch data before rebuilding the
+deletes all local PostgreSQL, RustFS, Meilisearch, and Sequin state before rebuilding the
 default infrastructure and database; it requires confirmation.
 
 The main checks are:
@@ -141,11 +141,11 @@ task services-main:db:bootstrap:credentials:overwrite
 Functions, triggers, extensions, and data backfills remain explicit SQL
 migrations. Atlas excludes functions, triggers, and extensions from automatic
 Drizzle diff ownership so it does not delete those manually managed objects.
-The isolated dev database installs PGroonga as an infrastructure prerequisite.
+The isolated migration database is vanilla PostgreSQL 18 with logical replication enabled.
 Every manual migration edit must be followed by `db:hash`.
 
 `task db:check` owns the correctness workflow: it validates the migration
-checksum, replays the full history in an isolated PostgreSQL 18 + PGroonga
+checksum, replays the full history in an isolated vanilla PostgreSQL 18
 database, and verifies that the result matches the Drizzle schema. CI runs this
 check for every pull request and main-branch push. It is intentionally separate
 from `dev` and from the target-database `db:migrate` operation.

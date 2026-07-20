@@ -1,8 +1,8 @@
 # Search configuration
 
 `@rezics/search` is the engine-independent contract for the Search feature and its component
-suite. A Search Block stores this configuration; it never stores PostgreSQL, PGroonga, Algolia,
-or Elasticsearch DSL.
+suite. A Search Block stores this configuration; it never stores PostgreSQL, Meilisearch,
+Algolia, or Elasticsearch DSL.
 
 Configuration has three different sources of state:
 

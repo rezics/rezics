@@ -37,6 +37,7 @@ export interface DomainSearchRequest {
 	profileId?: string;
 	query?: string;
 	offset?: number;
+	cursor?: string;
 	limit?: number;
 	Languages?: ContentLanguage[];
 	types?: string[];

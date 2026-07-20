@@ -2,7 +2,17 @@ name: rezics-dev
 
 services:
     postgres:
-        image: groonga/pgroonga:4.0.6-debian-18
+        image: postgres:18.4-trixie
+        command:
+            - postgres
+            - -c
+            - wal_level=logical
+            - -c
+            - max_replication_slots=10
+            - -c
+            - max_wal_senders=10
+            - -c
+            - max_slot_wal_keep_size=4GB
         restart: unless-stopped
         environment:
             POSTGRES_DB: rezics
@@ -58,7 +68,6 @@ services:
             S3_BUCKET: ${S3_BUCKET:-rezics}
 
     meilisearch:
-        profiles: ["search"]
         image: getmeili/meilisearch:v1.49.0
         restart: unless-stopped
         environment:
@@ -76,15 +85,95 @@ services:
             retries: 15
             start_period: 10s
 
+    sequin-postgres:
+        image: postgres:18.4-trixie
+        restart: unless-stopped
+        environment:
+            POSTGRES_DB: sequin
+            POSTGRES_PASSWORD: ${SEQUIN_STATE_POSTGRES_PASSWORD:-sequin}
+            POSTGRES_USER: sequin
+        volumes:
+            - sequin-postgres-data:/var/lib/postgresql
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U sequin -d sequin"]
+            interval: 2s
+            timeout: 5s
+            retries: 15
+            start_period: 10s
+
+    sequin-redis:
+        image: valkey/valkey:8.1.3-bookworm
+        restart: unless-stopped
+        command: ["valkey-server", "--appendonly", "yes"]
+        volumes:
+            - sequin-redis-data:/data
+        healthcheck:
+            test: ["CMD", "valkey-cli", "ping"]
+            interval: 2s
+            timeout: 5s
+            retries: 15
+            start_period: 5s
+
+    sequin:
+        image: sequin/sequin:v0.14.6
+        restart: unless-stopped
+        depends_on:
+            postgres:
+                condition: service_healthy
+            meilisearch:
+                condition: service_healthy
+            sequin-postgres:
+                condition: service_healthy
+            sequin-redis:
+                condition: service_healthy
+        environment:
+            PG_HOSTNAME: sequin-postgres
+            PG_DATABASE: sequin
+            PG_PORT: 5432
+            PG_USERNAME: sequin
+            PG_PASSWORD: ${SEQUIN_STATE_POSTGRES_PASSWORD:-sequin}
+            PG_POOL_SIZE: 20
+            SECRET_KEY_BASE: ${SEQUIN_SECRET_KEY_BASE:-wDPLYus0pvD6qJhKJICO4dauYPXfO/Yl782Zjtpew5qRBDp7CZvbWtQmY0eB13If}
+            VAULT_KEY: ${SEQUIN_VAULT_KEY:-2Sig69bIpuSm2kv0VQfDekET2qy8qUZGI8v3/h3ASiY=}
+            REDIS_URL: redis://sequin-redis:6379
+            CONFIG_FILE_PATH: /config/sequin.yaml
+            TELEMETRY_ENABLED: "false"
+            SEQUIN_ADMIN_PASSWORD: ${SEQUIN_ADMIN_PASSWORD:-rezics-development-sequin-admin}
+            SEQUIN_API_TOKEN: ${SEQUIN_API_TOKEN:-rezics-development-sequin-api-token}
+            SEQUIN_SOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+            MEILISEARCH_CURRENT_SINK_KEY: ${MEILISEARCH_MASTER_KEY:-rezics-development-meilisearch-key}
+            MEILISEARCH_HISTORY_SINK_KEY: ${MEILISEARCH_MASTER_KEY:-rezics-development-meilisearch-key}
+        ports:
+            - "127.0.0.1:7376:7376"
+            - "127.0.0.1:8376:8376"
+        volumes:
+            - ./services/main/search:/config:ro
+        healthcheck:
+            test: ["CMD", "curl", "--fail", "http://localhost:7376/health"]
+            interval: 5s
+            timeout: 5s
+            retries: 24
+            start_period: 15s
+
     postgres-migration-test:
         profiles: ["migration-test"]
-        image: groonga/pgroonga:4.0.6-debian-18
+        image: postgres:18.4-trixie
         environment:
             POSTGRES_DB: rezics_atlas
             POSTGRES_PASSWORD: postgres
             POSTGRES_USER: postgres
         ports:
             - "127.0.0.1:5433:5432"
+        command:
+            [
+                "postgres",
+                "-c",
+                "wal_level=logical",
+                "-c",
+                "max_replication_slots=4",
+                "-c",
+                "max_wal_senders=4",
+            ]
         volumes:
             - ./services/main/docker/postgres/migration-test-init:/docker-entrypoint-initdb.d:ro
         healthcheck:
@@ -101,3 +190,7 @@ volumes:
         name: rezics-rustfs-data
     meilisearch-data:
         name: rezics-meilisearch-data
+    sequin-postgres-data:
+        name: rezics-sequin-postgres-data
+    sequin-redis-data:
+        name: rezics-sequin-redis-data

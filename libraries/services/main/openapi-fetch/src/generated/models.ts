@@ -291,7 +291,22 @@ export type UnitReferencedBlockDocument = {
 												| "created-at"
 												| "updated-at"
 												| "published-at"
-												| "closes-at";
+												| "closes-at"
+												| "catalog-licensed"
+												| "catalog-release-date"
+												| "book-isbn13"
+												| "book-publication-date"
+												| "book-page-count"
+												| "book-format"
+												| "media-kind"
+												| "media-release-date"
+												| "media-runtime-minutes"
+												| "media-episode-count"
+												| "media-season-count"
+												| "software-release-date"
+												| "software-version-label"
+												| "software-platform"
+												| "software-requirement-tier";
 											/**
 											 * @type string
 											 */
@@ -322,7 +337,22 @@ export type UnitReferencedBlockDocument = {
 												| "created-at"
 												| "updated-at"
 												| "published-at"
-												| "closes-at";
+												| "closes-at"
+												| "catalog-licensed"
+												| "catalog-release-date"
+												| "book-isbn13"
+												| "book-publication-date"
+												| "book-page-count"
+												| "book-format"
+												| "media-kind"
+												| "media-release-date"
+												| "media-runtime-minutes"
+												| "media-episode-count"
+												| "media-season-count"
+												| "software-release-date"
+												| "software-version-label"
+												| "software-platform"
+												| "software-requirement-tier";
 											/**
 											 * @type string
 											 */
@@ -353,7 +383,22 @@ export type UnitReferencedBlockDocument = {
 												| "created-at"
 												| "updated-at"
 												| "published-at"
-												| "closes-at";
+												| "closes-at"
+												| "catalog-licensed"
+												| "catalog-release-date"
+												| "book-isbn13"
+												| "book-publication-date"
+												| "book-page-count"
+												| "book-format"
+												| "media-kind"
+												| "media-release-date"
+												| "media-runtime-minutes"
+												| "media-episode-count"
+												| "media-season-count"
+												| "software-release-date"
+												| "software-version-label"
+												| "software-platform"
+												| "software-requirement-tier";
 											operator: "any-of" | "all-of" | "none-of";
 											/**
 											 * @type array
@@ -385,7 +430,22 @@ export type UnitReferencedBlockDocument = {
 														| "created-at"
 														| "updated-at"
 														| "published-at"
-														| "closes-at";
+														| "closes-at"
+														| "catalog-licensed"
+														| "catalog-release-date"
+														| "book-isbn13"
+														| "book-publication-date"
+														| "book-page-count"
+														| "book-format"
+														| "media-kind"
+														| "media-release-date"
+														| "media-runtime-minutes"
+														| "media-episode-count"
+														| "media-season-count"
+														| "software-release-date"
+														| "software-version-label"
+														| "software-platform"
+														| "software-requirement-tier";
 													/**
 													 * @type string
 													 */
@@ -417,7 +477,22 @@ export type UnitReferencedBlockDocument = {
 														| "created-at"
 														| "updated-at"
 														| "published-at"
-														| "closes-at";
+														| "closes-at"
+														| "catalog-licensed"
+														| "catalog-release-date"
+														| "book-isbn13"
+														| "book-publication-date"
+														| "book-page-count"
+														| "book-format"
+														| "media-kind"
+														| "media-release-date"
+														| "media-runtime-minutes"
+														| "media-episode-count"
+														| "media-season-count"
+														| "software-release-date"
+														| "software-version-label"
+														| "software-platform"
+														| "software-requirement-tier";
 													/**
 													 * @type string
 													 */
@@ -450,7 +525,22 @@ export type UnitReferencedBlockDocument = {
 												| "created-at"
 												| "updated-at"
 												| "published-at"
-												| "closes-at";
+												| "closes-at"
+												| "catalog-licensed"
+												| "catalog-release-date"
+												| "book-isbn13"
+												| "book-publication-date"
+												| "book-page-count"
+												| "book-format"
+												| "media-kind"
+												| "media-release-date"
+												| "media-runtime-minutes"
+												| "media-episode-count"
+												| "media-season-count"
+												| "software-release-date"
+												| "software-version-label"
+												| "software-platform"
+												| "software-requirement-tier";
 											/**
 											 * @type string
 											 */
@@ -489,7 +579,22 @@ export type UnitReferencedBlockDocument = {
 												| "created-at"
 												| "updated-at"
 												| "published-at"
-												| "closes-at";
+												| "closes-at"
+												| "catalog-licensed"
+												| "catalog-release-date"
+												| "book-isbn13"
+												| "book-publication-date"
+												| "book-page-count"
+												| "book-format"
+												| "media-kind"
+												| "media-release-date"
+												| "media-runtime-minutes"
+												| "media-episode-count"
+												| "media-season-count"
+												| "software-release-date"
+												| "software-version-label"
+												| "software-platform"
+												| "software-requirement-tier";
 											/**
 											 * @type string
 											 */
@@ -520,7 +625,22 @@ export type UnitReferencedBlockDocument = {
 												| "created-at"
 												| "updated-at"
 												| "published-at"
-												| "closes-at";
+												| "closes-at"
+												| "catalog-licensed"
+												| "catalog-release-date"
+												| "book-isbn13"
+												| "book-publication-date"
+												| "book-page-count"
+												| "book-format"
+												| "media-kind"
+												| "media-release-date"
+												| "media-runtime-minutes"
+												| "media-episode-count"
+												| "media-season-count"
+												| "software-release-date"
+												| "software-version-label"
+												| "software-platform"
+												| "software-requirement-tier";
 											/**
 											 * @type string
 											 */
@@ -551,7 +671,22 @@ export type UnitReferencedBlockDocument = {
 												| "created-at"
 												| "updated-at"
 												| "published-at"
-												| "closes-at";
+												| "closes-at"
+												| "catalog-licensed"
+												| "catalog-release-date"
+												| "book-isbn13"
+												| "book-publication-date"
+												| "book-page-count"
+												| "book-format"
+												| "media-kind"
+												| "media-release-date"
+												| "media-runtime-minutes"
+												| "media-episode-count"
+												| "media-season-count"
+												| "software-release-date"
+												| "software-version-label"
+												| "software-platform"
+												| "software-requirement-tier";
 											operator: "any-of" | "all-of" | "none-of";
 											/**
 											 * @type array
@@ -583,7 +718,22 @@ export type UnitReferencedBlockDocument = {
 														| "created-at"
 														| "updated-at"
 														| "published-at"
-														| "closes-at";
+														| "closes-at"
+														| "catalog-licensed"
+														| "catalog-release-date"
+														| "book-isbn13"
+														| "book-publication-date"
+														| "book-page-count"
+														| "book-format"
+														| "media-kind"
+														| "media-release-date"
+														| "media-runtime-minutes"
+														| "media-episode-count"
+														| "media-season-count"
+														| "software-release-date"
+														| "software-version-label"
+														| "software-platform"
+														| "software-requirement-tier";
 													/**
 													 * @type string
 													 */
@@ -615,7 +765,22 @@ export type UnitReferencedBlockDocument = {
 														| "created-at"
 														| "updated-at"
 														| "published-at"
-														| "closes-at";
+														| "closes-at"
+														| "catalog-licensed"
+														| "catalog-release-date"
+														| "book-isbn13"
+														| "book-publication-date"
+														| "book-page-count"
+														| "book-format"
+														| "media-kind"
+														| "media-release-date"
+														| "media-runtime-minutes"
+														| "media-episode-count"
+														| "media-season-count"
+														| "software-release-date"
+														| "software-version-label"
+														| "software-platform"
+														| "software-requirement-tier";
 													/**
 													 * @type string
 													 */
@@ -648,7 +813,22 @@ export type UnitReferencedBlockDocument = {
 												| "created-at"
 												| "updated-at"
 												| "published-at"
-												| "closes-at";
+												| "closes-at"
+												| "catalog-licensed"
+												| "catalog-release-date"
+												| "book-isbn13"
+												| "book-publication-date"
+												| "book-page-count"
+												| "book-format"
+												| "media-kind"
+												| "media-release-date"
+												| "media-runtime-minutes"
+												| "media-episode-count"
+												| "media-season-count"
+												| "software-release-date"
+												| "software-version-label"
+												| "software-platform"
+												| "software-requirement-tier";
 											/**
 											 * @type string
 											 */
@@ -693,7 +873,22 @@ export type UnitReferencedBlockDocument = {
 										| "created-at"
 										| "updated-at"
 										| "published-at"
-										| "closes-at";
+										| "closes-at"
+										| "catalog-licensed"
+										| "catalog-release-date"
+										| "book-isbn13"
+										| "book-publication-date"
+										| "book-page-count"
+										| "book-format"
+										| "media-kind"
+										| "media-release-date"
+										| "media-runtime-minutes"
+										| "media-episode-count"
+										| "media-season-count"
+										| "software-release-date"
+										| "software-version-label"
+										| "software-platform"
+										| "software-requirement-tier";
 									component:
 										| "select"
 										| "multi-select"
@@ -864,6 +1059,21 @@ export type UnitReferencedBlockDocument = {
 										| "updated-at"
 										| "published-at"
 										| "closes-at"
+										| "catalog-licensed"
+										| "catalog-release-date"
+										| "book-isbn13"
+										| "book-publication-date"
+										| "book-page-count"
+										| "book-format"
+										| "media-kind"
+										| "media-release-date"
+										| "media-runtime-minutes"
+										| "media-episode-count"
+										| "media-season-count"
+										| "software-release-date"
+										| "software-version-label"
+										| "software-platform"
+										| "software-requirement-tier"
 									)[];
 								};
 							};
@@ -1007,7 +1217,22 @@ export type UnitReferencedBlockDocument = {
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -1038,7 +1263,22 @@ export type UnitReferencedBlockDocument = {
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -1069,7 +1309,22 @@ export type UnitReferencedBlockDocument = {
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								operator: "any-of" | "all-of" | "none-of";
 								/**
 								 * @type array
@@ -1101,7 +1356,22 @@ export type UnitReferencedBlockDocument = {
 											| "created-at"
 											| "updated-at"
 											| "published-at"
-											| "closes-at";
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
 										/**
 										 * @type string
 										 */
@@ -1133,7 +1403,22 @@ export type UnitReferencedBlockDocument = {
 											| "created-at"
 											| "updated-at"
 											| "published-at"
-											| "closes-at";
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
 										/**
 										 * @type string
 										 */
@@ -1166,7 +1451,22 @@ export type UnitReferencedBlockDocument = {
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -1205,7 +1505,22 @@ export type UnitReferencedBlockDocument = {
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -1236,7 +1551,22 @@ export type UnitReferencedBlockDocument = {
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -1267,7 +1597,22 @@ export type UnitReferencedBlockDocument = {
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								operator: "any-of" | "all-of" | "none-of";
 								/**
 								 * @type array
@@ -1299,7 +1644,22 @@ export type UnitReferencedBlockDocument = {
 											| "created-at"
 											| "updated-at"
 											| "published-at"
-											| "closes-at";
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
 										/**
 										 * @type string
 										 */
@@ -1331,7 +1691,22 @@ export type UnitReferencedBlockDocument = {
 											| "created-at"
 											| "updated-at"
 											| "published-at"
-											| "closes-at";
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
 										/**
 										 * @type string
 										 */
@@ -1364,7 +1739,22 @@ export type UnitReferencedBlockDocument = {
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -1409,7 +1799,22 @@ export type UnitReferencedBlockDocument = {
 							| "created-at"
 							| "updated-at"
 							| "published-at"
-							| "closes-at";
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
 						component:
 							"select" | "multi-select" | "toggle" | "date-range" | "value-range";
 						/**
@@ -1576,6 +1981,21 @@ export type UnitReferencedBlockDocument = {
 							| "updated-at"
 							| "published-at"
 							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier"
 						)[];
 					};
 				};
@@ -1816,7 +2236,22 @@ export type ZoneBoundaryDocument = {
 					| "created-at"
 					| "updated-at"
 					| "published-at"
-					| "closes-at";
+					| "closes-at"
+					| "catalog-licensed"
+					| "catalog-release-date"
+					| "book-isbn13"
+					| "book-publication-date"
+					| "book-page-count"
+					| "book-format"
+					| "media-kind"
+					| "media-release-date"
+					| "media-runtime-minutes"
+					| "media-episode-count"
+					| "media-season-count"
+					| "software-release-date"
+					| "software-version-label"
+					| "software-platform"
+					| "software-requirement-tier";
 				/**
 				 * @type string
 				 */
@@ -1847,7 +2282,22 @@ export type ZoneBoundaryDocument = {
 					| "created-at"
 					| "updated-at"
 					| "published-at"
-					| "closes-at";
+					| "closes-at"
+					| "catalog-licensed"
+					| "catalog-release-date"
+					| "book-isbn13"
+					| "book-publication-date"
+					| "book-page-count"
+					| "book-format"
+					| "media-kind"
+					| "media-release-date"
+					| "media-runtime-minutes"
+					| "media-episode-count"
+					| "media-season-count"
+					| "software-release-date"
+					| "software-version-label"
+					| "software-platform"
+					| "software-requirement-tier";
 				/**
 				 * @type string
 				 */
@@ -1878,7 +2328,22 @@ export type ZoneBoundaryDocument = {
 					| "created-at"
 					| "updated-at"
 					| "published-at"
-					| "closes-at";
+					| "closes-at"
+					| "catalog-licensed"
+					| "catalog-release-date"
+					| "book-isbn13"
+					| "book-publication-date"
+					| "book-page-count"
+					| "book-format"
+					| "media-kind"
+					| "media-release-date"
+					| "media-runtime-minutes"
+					| "media-episode-count"
+					| "media-season-count"
+					| "software-release-date"
+					| "software-version-label"
+					| "software-platform"
+					| "software-requirement-tier";
 				operator: "any-of" | "all-of" | "none-of";
 				/**
 				 * @type array
@@ -1910,7 +2375,22 @@ export type ZoneBoundaryDocument = {
 							| "created-at"
 							| "updated-at"
 							| "published-at"
-							| "closes-at";
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
 						/**
 						 * @type string
 						 */
@@ -1942,7 +2422,22 @@ export type ZoneBoundaryDocument = {
 							| "created-at"
 							| "updated-at"
 							| "published-at"
-							| "closes-at";
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
 						/**
 						 * @type string
 						 */
@@ -1975,7 +2470,22 @@ export type ZoneBoundaryDocument = {
 					| "created-at"
 					| "updated-at"
 					| "published-at"
-					| "closes-at";
+					| "closes-at"
+					| "catalog-licensed"
+					| "catalog-release-date"
+					| "book-isbn13"
+					| "book-publication-date"
+					| "book-page-count"
+					| "book-format"
+					| "media-kind"
+					| "media-release-date"
+					| "media-runtime-minutes"
+					| "media-episode-count"
+					| "media-season-count"
+					| "software-release-date"
+					| "software-version-label"
+					| "software-platform"
+					| "software-requirement-tier";
 				/**
 				 * @type string
 				 */
@@ -39810,7 +40320,22 @@ export type PostApiCollectionsStatus200 = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							/**
 							 * @type string
 							 */
@@ -39841,7 +40366,22 @@ export type PostApiCollectionsStatus200 = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							/**
 							 * @type string
 							 */
@@ -39872,7 +40412,22 @@ export type PostApiCollectionsStatus200 = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							operator: "any-of" | "all-of" | "none-of";
 							/**
 							 * @type array
@@ -39904,7 +40459,22 @@ export type PostApiCollectionsStatus200 = {
 										| "created-at"
 										| "updated-at"
 										| "published-at"
-										| "closes-at";
+										| "closes-at"
+										| "catalog-licensed"
+										| "catalog-release-date"
+										| "book-isbn13"
+										| "book-publication-date"
+										| "book-page-count"
+										| "book-format"
+										| "media-kind"
+										| "media-release-date"
+										| "media-runtime-minutes"
+										| "media-episode-count"
+										| "media-season-count"
+										| "software-release-date"
+										| "software-version-label"
+										| "software-platform"
+										| "software-requirement-tier";
 									/**
 									 * @type string
 									 */
@@ -39936,7 +40506,22 @@ export type PostApiCollectionsStatus200 = {
 										| "created-at"
 										| "updated-at"
 										| "published-at"
-										| "closes-at";
+										| "closes-at"
+										| "catalog-licensed"
+										| "catalog-release-date"
+										| "book-isbn13"
+										| "book-publication-date"
+										| "book-page-count"
+										| "book-format"
+										| "media-kind"
+										| "media-release-date"
+										| "media-runtime-minutes"
+										| "media-episode-count"
+										| "media-season-count"
+										| "software-release-date"
+										| "software-version-label"
+										| "software-platform"
+										| "software-requirement-tier";
 									/**
 									 * @type string
 									 */
@@ -39969,7 +40554,22 @@ export type PostApiCollectionsStatus200 = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							/**
 							 * @type string
 							 */
@@ -40436,7 +41036,22 @@ export type PostApiCollectionsBody = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							/**
 							 * @type string
 							 */
@@ -40467,7 +41082,22 @@ export type PostApiCollectionsBody = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							/**
 							 * @type string
 							 */
@@ -40498,7 +41128,22 @@ export type PostApiCollectionsBody = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							operator: "any-of" | "all-of" | "none-of";
 							/**
 							 * @type array
@@ -40530,7 +41175,22 @@ export type PostApiCollectionsBody = {
 										| "created-at"
 										| "updated-at"
 										| "published-at"
-										| "closes-at";
+										| "closes-at"
+										| "catalog-licensed"
+										| "catalog-release-date"
+										| "book-isbn13"
+										| "book-publication-date"
+										| "book-page-count"
+										| "book-format"
+										| "media-kind"
+										| "media-release-date"
+										| "media-runtime-minutes"
+										| "media-episode-count"
+										| "media-season-count"
+										| "software-release-date"
+										| "software-version-label"
+										| "software-platform"
+										| "software-requirement-tier";
 									/**
 									 * @type string
 									 */
@@ -40562,7 +41222,22 @@ export type PostApiCollectionsBody = {
 										| "created-at"
 										| "updated-at"
 										| "published-at"
-										| "closes-at";
+										| "closes-at"
+										| "catalog-licensed"
+										| "catalog-release-date"
+										| "book-isbn13"
+										| "book-publication-date"
+										| "book-page-count"
+										| "book-format"
+										| "media-kind"
+										| "media-release-date"
+										| "media-runtime-minutes"
+										| "media-episode-count"
+										| "media-season-count"
+										| "software-release-date"
+										| "software-version-label"
+										| "software-platform"
+										| "software-requirement-tier";
 									/**
 									 * @type string
 									 */
@@ -40595,7 +41270,22 @@ export type PostApiCollectionsBody = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							/**
 							 * @type string
 							 */
@@ -40810,7 +41500,22 @@ export type GetApiCollectionsFavoritesStatus200 = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							/**
 							 * @type string
 							 */
@@ -40841,7 +41546,22 @@ export type GetApiCollectionsFavoritesStatus200 = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							/**
 							 * @type string
 							 */
@@ -40872,7 +41592,22 @@ export type GetApiCollectionsFavoritesStatus200 = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							operator: "any-of" | "all-of" | "none-of";
 							/**
 							 * @type array
@@ -40904,7 +41639,22 @@ export type GetApiCollectionsFavoritesStatus200 = {
 										| "created-at"
 										| "updated-at"
 										| "published-at"
-										| "closes-at";
+										| "closes-at"
+										| "catalog-licensed"
+										| "catalog-release-date"
+										| "book-isbn13"
+										| "book-publication-date"
+										| "book-page-count"
+										| "book-format"
+										| "media-kind"
+										| "media-release-date"
+										| "media-runtime-minutes"
+										| "media-episode-count"
+										| "media-season-count"
+										| "software-release-date"
+										| "software-version-label"
+										| "software-platform"
+										| "software-requirement-tier";
 									/**
 									 * @type string
 									 */
@@ -40936,7 +41686,22 @@ export type GetApiCollectionsFavoritesStatus200 = {
 										| "created-at"
 										| "updated-at"
 										| "published-at"
-										| "closes-at";
+										| "closes-at"
+										| "catalog-licensed"
+										| "catalog-release-date"
+										| "book-isbn13"
+										| "book-publication-date"
+										| "book-page-count"
+										| "book-format"
+										| "media-kind"
+										| "media-release-date"
+										| "media-runtime-minutes"
+										| "media-episode-count"
+										| "media-season-count"
+										| "software-release-date"
+										| "software-version-label"
+										| "software-platform"
+										| "software-requirement-tier";
 									/**
 									 * @type string
 									 */
@@ -40969,7 +41734,22 @@ export type GetApiCollectionsFavoritesStatus200 = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							/**
 							 * @type string
 							 */
@@ -41328,7 +42108,22 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							/**
 							 * @type string
 							 */
@@ -41359,7 +42154,22 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							/**
 							 * @type string
 							 */
@@ -41390,7 +42200,22 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							operator: "any-of" | "all-of" | "none-of";
 							/**
 							 * @type array
@@ -41422,7 +42247,22 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 										| "created-at"
 										| "updated-at"
 										| "published-at"
-										| "closes-at";
+										| "closes-at"
+										| "catalog-licensed"
+										| "catalog-release-date"
+										| "book-isbn13"
+										| "book-publication-date"
+										| "book-page-count"
+										| "book-format"
+										| "media-kind"
+										| "media-release-date"
+										| "media-runtime-minutes"
+										| "media-episode-count"
+										| "media-season-count"
+										| "software-release-date"
+										| "software-version-label"
+										| "software-platform"
+										| "software-requirement-tier";
 									/**
 									 * @type string
 									 */
@@ -41454,7 +42294,22 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 										| "created-at"
 										| "updated-at"
 										| "published-at"
-										| "closes-at";
+										| "closes-at"
+										| "catalog-licensed"
+										| "catalog-release-date"
+										| "book-isbn13"
+										| "book-publication-date"
+										| "book-page-count"
+										| "book-format"
+										| "media-kind"
+										| "media-release-date"
+										| "media-runtime-minutes"
+										| "media-episode-count"
+										| "media-season-count"
+										| "software-release-date"
+										| "software-version-label"
+										| "software-platform"
+										| "software-requirement-tier";
 									/**
 									 * @type string
 									 */
@@ -41487,7 +42342,22 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							/**
 							 * @type string
 							 */
@@ -41853,7 +42723,22 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							/**
 							 * @type string
 							 */
@@ -41884,7 +42769,22 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							/**
 							 * @type string
 							 */
@@ -41915,7 +42815,22 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							operator: "any-of" | "all-of" | "none-of";
 							/**
 							 * @type array
@@ -41947,7 +42862,22 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 										| "created-at"
 										| "updated-at"
 										| "published-at"
-										| "closes-at";
+										| "closes-at"
+										| "catalog-licensed"
+										| "catalog-release-date"
+										| "book-isbn13"
+										| "book-publication-date"
+										| "book-page-count"
+										| "book-format"
+										| "media-kind"
+										| "media-release-date"
+										| "media-runtime-minutes"
+										| "media-episode-count"
+										| "media-season-count"
+										| "software-release-date"
+										| "software-version-label"
+										| "software-platform"
+										| "software-requirement-tier";
 									/**
 									 * @type string
 									 */
@@ -41979,7 +42909,22 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 										| "created-at"
 										| "updated-at"
 										| "published-at"
-										| "closes-at";
+										| "closes-at"
+										| "catalog-licensed"
+										| "catalog-release-date"
+										| "book-isbn13"
+										| "book-publication-date"
+										| "book-page-count"
+										| "book-format"
+										| "media-kind"
+										| "media-release-date"
+										| "media-runtime-minutes"
+										| "media-episode-count"
+										| "media-season-count"
+										| "software-release-date"
+										| "software-version-label"
+										| "software-platform"
+										| "software-requirement-tier";
 									/**
 									 * @type string
 									 */
@@ -42012,7 +42957,22 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							/**
 							 * @type string
 							 */
@@ -42548,7 +43508,22 @@ export type PatchApiCollectionsByCollectionIdBody = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							/**
 							 * @type string
 							 */
@@ -42579,7 +43554,22 @@ export type PatchApiCollectionsByCollectionIdBody = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							/**
 							 * @type string
 							 */
@@ -42610,7 +43600,22 @@ export type PatchApiCollectionsByCollectionIdBody = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							operator: "any-of" | "all-of" | "none-of";
 							/**
 							 * @type array
@@ -42642,7 +43647,22 @@ export type PatchApiCollectionsByCollectionIdBody = {
 										| "created-at"
 										| "updated-at"
 										| "published-at"
-										| "closes-at";
+										| "closes-at"
+										| "catalog-licensed"
+										| "catalog-release-date"
+										| "book-isbn13"
+										| "book-publication-date"
+										| "book-page-count"
+										| "book-format"
+										| "media-kind"
+										| "media-release-date"
+										| "media-runtime-minutes"
+										| "media-episode-count"
+										| "media-season-count"
+										| "software-release-date"
+										| "software-version-label"
+										| "software-platform"
+										| "software-requirement-tier";
 									/**
 									 * @type string
 									 */
@@ -42674,7 +43694,22 @@ export type PatchApiCollectionsByCollectionIdBody = {
 										| "created-at"
 										| "updated-at"
 										| "published-at"
-										| "closes-at";
+										| "closes-at"
+										| "catalog-licensed"
+										| "catalog-release-date"
+										| "book-isbn13"
+										| "book-publication-date"
+										| "book-page-count"
+										| "book-format"
+										| "media-kind"
+										| "media-release-date"
+										| "media-runtime-minutes"
+										| "media-episode-count"
+										| "media-season-count"
+										| "software-release-date"
+										| "software-version-label"
+										| "software-platform"
+										| "software-requirement-tier";
 									/**
 									 * @type string
 									 */
@@ -42707,7 +43742,22 @@ export type PatchApiCollectionsByCollectionIdBody = {
 								| "created-at"
 								| "updated-at"
 								| "published-at"
-								| "closes-at";
+								| "closes-at"
+								| "catalog-licensed"
+								| "catalog-release-date"
+								| "book-isbn13"
+								| "book-publication-date"
+								| "book-page-count"
+								| "book-format"
+								| "media-kind"
+								| "media-release-date"
+								| "media-runtime-minutes"
+								| "media-episode-count"
+								| "media-season-count"
+								| "software-release-date"
+								| "software-version-label"
+								| "software-platform"
+								| "software-requirement-tier";
 							/**
 							 * @type string
 							 */
@@ -53505,6 +54555,21 @@ export const GetApiSearchConfigurationStatus200ControlsFieldEnum = {
 	"updated-at": "updated-at",
 	"published-at": "published-at",
 	"closes-at": "closes-at",
+	"catalog-licensed": "catalog-licensed",
+	"catalog-release-date": "catalog-release-date",
+	"book-isbn13": "book-isbn13",
+	"book-publication-date": "book-publication-date",
+	"book-page-count": "book-page-count",
+	"book-format": "book-format",
+	"media-kind": "media-kind",
+	"media-release-date": "media-release-date",
+	"media-runtime-minutes": "media-runtime-minutes",
+	"media-episode-count": "media-episode-count",
+	"media-season-count": "media-season-count",
+	"software-release-date": "software-release-date",
+	"software-version-label": "software-version-label",
+	"software-platform": "software-platform",
+	"software-requirement-tier": "software-requirement-tier",
 } as const;
 
 export type GetApiSearchConfigurationStatus200ControlsFieldEnum =
@@ -53604,6 +54669,21 @@ export const GetApiSearchConfigurationStatus200ResultsFacetsEnum = {
 	"updated-at": "updated-at",
 	"published-at": "published-at",
 	"closes-at": "closes-at",
+	"catalog-licensed": "catalog-licensed",
+	"catalog-release-date": "catalog-release-date",
+	"book-isbn13": "book-isbn13",
+	"book-publication-date": "book-publication-date",
+	"book-page-count": "book-page-count",
+	"book-format": "book-format",
+	"media-kind": "media-kind",
+	"media-release-date": "media-release-date",
+	"media-runtime-minutes": "media-runtime-minutes",
+	"media-episode-count": "media-episode-count",
+	"media-season-count": "media-season-count",
+	"software-release-date": "software-release-date",
+	"software-version-label": "software-version-label",
+	"software-platform": "software-platform",
+	"software-requirement-tier": "software-requirement-tier",
 } as const;
 
 export type GetApiSearchConfigurationStatus200ResultsFacetsEnum =
@@ -53723,7 +54803,22 @@ export type GetApiSearchConfigurationStatus200 = {
 					| "created-at"
 					| "updated-at"
 					| "published-at"
-					| "closes-at";
+					| "closes-at"
+					| "catalog-licensed"
+					| "catalog-release-date"
+					| "book-isbn13"
+					| "book-publication-date"
+					| "book-page-count"
+					| "book-format"
+					| "media-kind"
+					| "media-release-date"
+					| "media-runtime-minutes"
+					| "media-episode-count"
+					| "media-season-count"
+					| "software-release-date"
+					| "software-version-label"
+					| "software-platform"
+					| "software-requirement-tier";
 				/**
 				 * @type string
 				 */
@@ -53754,7 +54849,22 @@ export type GetApiSearchConfigurationStatus200 = {
 					| "created-at"
 					| "updated-at"
 					| "published-at"
-					| "closes-at";
+					| "closes-at"
+					| "catalog-licensed"
+					| "catalog-release-date"
+					| "book-isbn13"
+					| "book-publication-date"
+					| "book-page-count"
+					| "book-format"
+					| "media-kind"
+					| "media-release-date"
+					| "media-runtime-minutes"
+					| "media-episode-count"
+					| "media-season-count"
+					| "software-release-date"
+					| "software-version-label"
+					| "software-platform"
+					| "software-requirement-tier";
 				/**
 				 * @type string
 				 */
@@ -53785,7 +54895,22 @@ export type GetApiSearchConfigurationStatus200 = {
 					| "created-at"
 					| "updated-at"
 					| "published-at"
-					| "closes-at";
+					| "closes-at"
+					| "catalog-licensed"
+					| "catalog-release-date"
+					| "book-isbn13"
+					| "book-publication-date"
+					| "book-page-count"
+					| "book-format"
+					| "media-kind"
+					| "media-release-date"
+					| "media-runtime-minutes"
+					| "media-episode-count"
+					| "media-season-count"
+					| "software-release-date"
+					| "software-version-label"
+					| "software-platform"
+					| "software-requirement-tier";
 				operator: "any-of" | "all-of" | "none-of";
 				/**
 				 * @type array
@@ -53817,7 +54942,22 @@ export type GetApiSearchConfigurationStatus200 = {
 							| "created-at"
 							| "updated-at"
 							| "published-at"
-							| "closes-at";
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
 						/**
 						 * @type string
 						 */
@@ -53849,7 +54989,22 @@ export type GetApiSearchConfigurationStatus200 = {
 							| "created-at"
 							| "updated-at"
 							| "published-at"
-							| "closes-at";
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
 						/**
 						 * @type string
 						 */
@@ -53882,7 +55037,22 @@ export type GetApiSearchConfigurationStatus200 = {
 					| "created-at"
 					| "updated-at"
 					| "published-at"
-					| "closes-at";
+					| "closes-at"
+					| "catalog-licensed"
+					| "catalog-release-date"
+					| "book-isbn13"
+					| "book-publication-date"
+					| "book-page-count"
+					| "book-format"
+					| "media-kind"
+					| "media-release-date"
+					| "media-runtime-minutes"
+					| "media-episode-count"
+					| "media-season-count"
+					| "software-release-date"
+					| "software-version-label"
+					| "software-platform"
+					| "software-requirement-tier";
 				/**
 				 * @type string
 				 */
@@ -53921,7 +55091,22 @@ export type GetApiSearchConfigurationStatus200 = {
 					| "created-at"
 					| "updated-at"
 					| "published-at"
-					| "closes-at";
+					| "closes-at"
+					| "catalog-licensed"
+					| "catalog-release-date"
+					| "book-isbn13"
+					| "book-publication-date"
+					| "book-page-count"
+					| "book-format"
+					| "media-kind"
+					| "media-release-date"
+					| "media-runtime-minutes"
+					| "media-episode-count"
+					| "media-season-count"
+					| "software-release-date"
+					| "software-version-label"
+					| "software-platform"
+					| "software-requirement-tier";
 				/**
 				 * @type string
 				 */
@@ -53952,7 +55137,22 @@ export type GetApiSearchConfigurationStatus200 = {
 					| "created-at"
 					| "updated-at"
 					| "published-at"
-					| "closes-at";
+					| "closes-at"
+					| "catalog-licensed"
+					| "catalog-release-date"
+					| "book-isbn13"
+					| "book-publication-date"
+					| "book-page-count"
+					| "book-format"
+					| "media-kind"
+					| "media-release-date"
+					| "media-runtime-minutes"
+					| "media-episode-count"
+					| "media-season-count"
+					| "software-release-date"
+					| "software-version-label"
+					| "software-platform"
+					| "software-requirement-tier";
 				/**
 				 * @type string
 				 */
@@ -53983,7 +55183,22 @@ export type GetApiSearchConfigurationStatus200 = {
 					| "created-at"
 					| "updated-at"
 					| "published-at"
-					| "closes-at";
+					| "closes-at"
+					| "catalog-licensed"
+					| "catalog-release-date"
+					| "book-isbn13"
+					| "book-publication-date"
+					| "book-page-count"
+					| "book-format"
+					| "media-kind"
+					| "media-release-date"
+					| "media-runtime-minutes"
+					| "media-episode-count"
+					| "media-season-count"
+					| "software-release-date"
+					| "software-version-label"
+					| "software-platform"
+					| "software-requirement-tier";
 				operator: "any-of" | "all-of" | "none-of";
 				/**
 				 * @type array
@@ -54015,7 +55230,22 @@ export type GetApiSearchConfigurationStatus200 = {
 							| "created-at"
 							| "updated-at"
 							| "published-at"
-							| "closes-at";
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
 						/**
 						 * @type string
 						 */
@@ -54047,7 +55277,22 @@ export type GetApiSearchConfigurationStatus200 = {
 							| "created-at"
 							| "updated-at"
 							| "published-at"
-							| "closes-at";
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
 						/**
 						 * @type string
 						 */
@@ -54080,7 +55325,22 @@ export type GetApiSearchConfigurationStatus200 = {
 					| "created-at"
 					| "updated-at"
 					| "published-at"
-					| "closes-at";
+					| "closes-at"
+					| "catalog-licensed"
+					| "catalog-release-date"
+					| "book-isbn13"
+					| "book-publication-date"
+					| "book-page-count"
+					| "book-format"
+					| "media-kind"
+					| "media-release-date"
+					| "media-runtime-minutes"
+					| "media-episode-count"
+					| "media-season-count"
+					| "software-release-date"
+					| "software-version-label"
+					| "software-platform"
+					| "software-requirement-tier";
 				/**
 				 * @type string
 				 */
@@ -54251,6 +55511,14 @@ export type GetApiSearchConfigurationResponses = {
 export type GetApiSearchConfigurationResponse =
 	GetApiSearchConfigurationStatus200 | GetApiSearchConfigurationStatus500;
 
+export const PostApiSearchExecuteStatus200FacetsOptionsCountRelationEnum = {
+	exact: "exact",
+	"lower-bound": "lower-bound",
+} as const;
+
+export type PostApiSearchExecuteStatus200FacetsOptionsCountRelationEnum =
+	(typeof PostApiSearchExecuteStatus200FacetsOptionsCountRelationEnum)[keyof typeof PostApiSearchExecuteStatus200FacetsOptionsCountRelationEnum];
+
 export const PostApiSearchExecuteStatus200GroupsHitsVariantRoleEnum = {
 	standalone: "standalone",
 	main: "main",
@@ -54269,6 +55537,14 @@ export const PostApiSearchExecuteStatus200GroupsHitsVariantMainUnitTypeEnum = {
 export type PostApiSearchExecuteStatus200GroupsHitsVariantMainUnitTypeEnum =
 	(typeof PostApiSearchExecuteStatus200GroupsHitsVariantMainUnitTypeEnum)[keyof typeof PostApiSearchExecuteStatus200GroupsHitsVariantMainUnitTypeEnum];
 
+export const PostApiSearchExecuteStatus200GroupsTotalRelationEnum = {
+	exact: "exact",
+	"lower-bound": "lower-bound",
+} as const;
+
+export type PostApiSearchExecuteStatus200GroupsTotalRelationEnum =
+	(typeof PostApiSearchExecuteStatus200GroupsTotalRelationEnum)[keyof typeof PostApiSearchExecuteStatus200GroupsTotalRelationEnum];
+
 /**
  * @type object
  */
@@ -54278,7 +55554,8 @@ export type PostApiSearchExecuteStatus200 = {
 	 */
 	query: string;
 	/**
-	 * @pattern ^s_[0-9a-z]+$
+	 * @maxLength 4096
+	 * @pattern ^s2_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -54298,7 +55575,17 @@ export type PostApiSearchExecuteStatus200 = {
 			 * @type string
 			 */
 			value: string;
-			count: string | number;
+			/**
+			 * @type object
+			 */
+			count: {
+				value: string | number;
+				/**
+				 * @default 'exact'
+				 * @type string
+				 */
+				relation: PostApiSearchExecuteStatus200FacetsOptionsCountRelationEnum;
+			};
 		}[];
 	}[];
 	/**
@@ -54387,8 +55674,17 @@ export type PostApiSearchExecuteStatus200 = {
 			name?: (string | null) | null;
 			summary?: (string | null) | null;
 		}[];
-		total: string | number;
-		offset: string | number;
+		/**
+		 * @type object
+		 */
+		total: {
+			value: string | number;
+			/**
+			 * @default 'exact'
+			 * @type string
+			 */
+			relation: PostApiSearchExecuteStatus200GroupsTotalRelationEnum;
+		};
 		limit: string | number;
 		/**
 		 * @type number
@@ -54485,8 +55781,8 @@ export type PostApiSearchExecuteBody =
 			 */
 			pageSize?: number;
 			/**
-			 * @maxLength 32
-			 * @pattern ^s_[0-9a-z]+$
+			 * @maxLength 4096
+			 * @pattern ^s2_[A-Za-z0-9_-]+$
 			 * @type string | undefined
 			 */
 			cursor?: string;
@@ -54522,7 +55818,22 @@ export type PostApiSearchExecuteBody =
 							| "created-at"
 							| "updated-at"
 							| "published-at"
-							| "closes-at";
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
 						/**
 						 * @type string
 						 */
@@ -54553,7 +55864,22 @@ export type PostApiSearchExecuteBody =
 							| "created-at"
 							| "updated-at"
 							| "published-at"
-							| "closes-at";
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
 						/**
 						 * @type string
 						 */
@@ -54584,7 +55910,22 @@ export type PostApiSearchExecuteBody =
 							| "created-at"
 							| "updated-at"
 							| "published-at"
-							| "closes-at";
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
 						operator: "any-of" | "all-of" | "none-of";
 						/**
 						 * @type array
@@ -54616,7 +55957,22 @@ export type PostApiSearchExecuteBody =
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -54648,7 +56004,22 @@ export type PostApiSearchExecuteBody =
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -54681,7 +56052,22 @@ export type PostApiSearchExecuteBody =
 							| "created-at"
 							| "updated-at"
 							| "published-at"
-							| "closes-at";
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
 						/**
 						 * @type string
 						 */
@@ -54720,8 +56106,8 @@ export type PostApiSearchExecuteBody =
 			 */
 			pageSize?: number;
 			/**
-			 * @maxLength 32
-			 * @pattern ^s_[0-9a-z]+$
+			 * @maxLength 4096
+			 * @pattern ^s2_[A-Za-z0-9_-]+$
 			 * @type string | undefined
 			 */
 			cursor?: string;
@@ -54755,7 +56141,22 @@ export type PostApiSearchExecuteBody =
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -54786,7 +56187,22 @@ export type PostApiSearchExecuteBody =
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -54817,7 +56233,22 @@ export type PostApiSearchExecuteBody =
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								operator: "any-of" | "all-of" | "none-of";
 								/**
 								 * @type array
@@ -54849,7 +56280,22 @@ export type PostApiSearchExecuteBody =
 											| "created-at"
 											| "updated-at"
 											| "published-at"
-											| "closes-at";
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
 										/**
 										 * @type string
 										 */
@@ -54881,7 +56327,22 @@ export type PostApiSearchExecuteBody =
 											| "created-at"
 											| "updated-at"
 											| "published-at"
-											| "closes-at";
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
 										/**
 										 * @type string
 										 */
@@ -54914,7 +56375,22 @@ export type PostApiSearchExecuteBody =
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -54990,6 +56466,15 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecutePath = {
 	blockKey: string;
 };
 
+export const PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum =
+	{
+		exact: "exact",
+		"lower-bound": "lower-bound",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum =
+	(typeof PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum];
+
 export const PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum =
 	{
 		standalone: "standalone",
@@ -55010,6 +56495,15 @@ export const PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200Group
 export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum =
 	(typeof PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum)[keyof typeof PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum];
 
+export const PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum =
+	{
+		exact: "exact",
+		"lower-bound": "lower-bound",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum =
+	(typeof PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum];
+
 /**
  * @type object
  */
@@ -55019,7 +56513,8 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200 = {
 	 */
 	query: string;
 	/**
-	 * @pattern ^s_[0-9a-z]+$
+	 * @maxLength 4096
+	 * @pattern ^s2_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -55039,7 +56534,17 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200 = {
 			 * @type string
 			 */
 			value: string;
-			count: string | number;
+			/**
+			 * @type object
+			 */
+			count: {
+				value: string | number;
+				/**
+				 * @default 'exact'
+				 * @type string
+				 */
+				relation: PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum;
+			};
 		}[];
 	}[];
 	/**
@@ -55128,8 +56633,17 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200 = {
 			name?: (string | null) | null;
 			summary?: (string | null) | null;
 		}[];
-		total: string | number;
-		offset: string | number;
+		/**
+		 * @type object
+		 */
+		total: {
+			value: string | number;
+			/**
+			 * @default 'exact'
+			 * @type string
+			 */
+			relation: PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum;
+		};
 		limit: string | number;
 		/**
 		 * @type number
@@ -55254,8 +56768,8 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 			 */
 			pageSize?: number;
 			/**
-			 * @maxLength 32
-			 * @pattern ^s_[0-9a-z]+$
+			 * @maxLength 4096
+			 * @pattern ^s2_[A-Za-z0-9_-]+$
 			 * @type string | undefined
 			 */
 			cursor?: string;
@@ -55291,7 +56805,22 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 							| "created-at"
 							| "updated-at"
 							| "published-at"
-							| "closes-at";
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
 						/**
 						 * @type string
 						 */
@@ -55322,7 +56851,22 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 							| "created-at"
 							| "updated-at"
 							| "published-at"
-							| "closes-at";
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
 						/**
 						 * @type string
 						 */
@@ -55353,7 +56897,22 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 							| "created-at"
 							| "updated-at"
 							| "published-at"
-							| "closes-at";
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
 						operator: "any-of" | "all-of" | "none-of";
 						/**
 						 * @type array
@@ -55385,7 +56944,22 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -55417,7 +56991,22 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -55450,7 +57039,22 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 							| "created-at"
 							| "updated-at"
 							| "published-at"
-							| "closes-at";
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
 						/**
 						 * @type string
 						 */
@@ -55489,8 +57093,8 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 			 */
 			pageSize?: number;
 			/**
-			 * @maxLength 32
-			 * @pattern ^s_[0-9a-z]+$
+			 * @maxLength 4096
+			 * @pattern ^s2_[A-Za-z0-9_-]+$
 			 * @type string | undefined
 			 */
 			cursor?: string;
@@ -55524,7 +57128,22 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -55555,7 +57174,22 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -55586,7 +57220,22 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								operator: "any-of" | "all-of" | "none-of";
 								/**
 								 * @type array
@@ -55618,7 +57267,22 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 											| "created-at"
 											| "updated-at"
 											| "published-at"
-											| "closes-at";
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
 										/**
 										 * @type string
 										 */
@@ -55650,7 +57314,22 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 											| "created-at"
 											| "updated-at"
 											| "published-at"
-											| "closes-at";
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
 										/**
 										 * @type string
 										 */
@@ -55683,7 +57362,22 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -55768,6 +57462,15 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecutePath = {
 	blockKey: string;
 };
 
+export const PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum =
+	{
+		exact: "exact",
+		"lower-bound": "lower-bound",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum];
+
 export const PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantRoleEnum =
 	{
 		standalone: "standalone",
@@ -55788,6 +57491,15 @@ export const PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus2
 export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum =
 	(typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsHitsVariantMainUnitTypeEnum];
 
+export const PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum =
+	{
+		exact: "exact",
+		"lower-bound": "lower-bound",
+	} as const;
+
+export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum =
+	(typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum)[keyof typeof PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum];
+
 /**
  * @type object
  */
@@ -55797,7 +57509,8 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus20
 	 */
 	query: string;
 	/**
-	 * @pattern ^s_[0-9a-z]+$
+	 * @maxLength 4096
+	 * @pattern ^s2_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -55817,7 +57530,17 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus20
 			 * @type string
 			 */
 			value: string;
-			count: string | number;
+			/**
+			 * @type object
+			 */
+			count: {
+				value: string | number;
+				/**
+				 * @default 'exact'
+				 * @type string
+				 */
+				relation: PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200FacetsOptionsCountRelationEnum;
+			};
 		}[];
 	}[];
 	/**
@@ -55906,8 +57629,17 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus20
 			name?: (string | null) | null;
 			summary?: (string | null) | null;
 		}[];
-		total: string | number;
-		offset: string | number;
+		/**
+		 * @type object
+		 */
+		total: {
+			value: string | number;
+			/**
+			 * @default 'exact'
+			 * @type string
+			 */
+			relation: PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus200GroupsTotalRelationEnum;
+		};
 		limit: string | number;
 		/**
 		 * @type number
@@ -56040,8 +57772,8 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 			 */
 			pageSize?: number;
 			/**
-			 * @maxLength 32
-			 * @pattern ^s_[0-9a-z]+$
+			 * @maxLength 4096
+			 * @pattern ^s2_[A-Za-z0-9_-]+$
 			 * @type string | undefined
 			 */
 			cursor?: string;
@@ -56077,7 +57809,22 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 							| "created-at"
 							| "updated-at"
 							| "published-at"
-							| "closes-at";
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
 						/**
 						 * @type string
 						 */
@@ -56108,7 +57855,22 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 							| "created-at"
 							| "updated-at"
 							| "published-at"
-							| "closes-at";
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
 						/**
 						 * @type string
 						 */
@@ -56139,7 +57901,22 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 							| "created-at"
 							| "updated-at"
 							| "published-at"
-							| "closes-at";
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
 						operator: "any-of" | "all-of" | "none-of";
 						/**
 						 * @type array
@@ -56171,7 +57948,22 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -56203,7 +57995,22 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -56236,7 +58043,22 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 							| "created-at"
 							| "updated-at"
 							| "published-at"
-							| "closes-at";
+							| "closes-at"
+							| "catalog-licensed"
+							| "catalog-release-date"
+							| "book-isbn13"
+							| "book-publication-date"
+							| "book-page-count"
+							| "book-format"
+							| "media-kind"
+							| "media-release-date"
+							| "media-runtime-minutes"
+							| "media-episode-count"
+							| "media-season-count"
+							| "software-release-date"
+							| "software-version-label"
+							| "software-platform"
+							| "software-requirement-tier";
 						/**
 						 * @type string
 						 */
@@ -56275,8 +58097,8 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 			 */
 			pageSize?: number;
 			/**
-			 * @maxLength 32
-			 * @pattern ^s_[0-9a-z]+$
+			 * @maxLength 4096
+			 * @pattern ^s2_[A-Za-z0-9_-]+$
 			 * @type string | undefined
 			 */
 			cursor?: string;
@@ -56310,7 +58132,22 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -56341,7 +58178,22 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -56372,7 +58224,22 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								operator: "any-of" | "all-of" | "none-of";
 								/**
 								 * @type array
@@ -56404,7 +58271,22 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 											| "created-at"
 											| "updated-at"
 											| "published-at"
-											| "closes-at";
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
 										/**
 										 * @type string
 										 */
@@ -56436,7 +58318,22 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 											| "created-at"
 											| "updated-at"
 											| "published-at"
-											| "closes-at";
+											| "closes-at"
+											| "catalog-licensed"
+											| "catalog-release-date"
+											| "book-isbn13"
+											| "book-publication-date"
+											| "book-page-count"
+											| "book-format"
+											| "media-kind"
+											| "media-release-date"
+											| "media-runtime-minutes"
+											| "media-episode-count"
+											| "media-season-count"
+											| "software-release-date"
+											| "software-version-label"
+											| "software-platform"
+											| "software-requirement-tier";
 										/**
 										 * @type string
 										 */
@@ -56469,7 +58366,22 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 									| "created-at"
 									| "updated-at"
 									| "published-at"
-									| "closes-at";
+									| "closes-at"
+									| "catalog-licensed"
+									| "catalog-release-date"
+									| "book-isbn13"
+									| "book-publication-date"
+									| "book-page-count"
+									| "book-format"
+									| "media-kind"
+									| "media-release-date"
+									| "media-runtime-minutes"
+									| "media-episode-count"
+									| "media-season-count"
+									| "software-release-date"
+									| "software-version-label"
+									| "software-platform"
+									| "software-requirement-tier";
 								/**
 								 * @type string
 								 */
@@ -56530,6 +58442,14 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteResponse
 	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus500
 	| PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus503;
 
+export const PostApiSearchStatus200FacetsOptionsCountRelationEnum = {
+	exact: "exact",
+	"lower-bound": "lower-bound",
+} as const;
+
+export type PostApiSearchStatus200FacetsOptionsCountRelationEnum =
+	(typeof PostApiSearchStatus200FacetsOptionsCountRelationEnum)[keyof typeof PostApiSearchStatus200FacetsOptionsCountRelationEnum];
+
 export const PostApiSearchStatus200GroupsHitsVariantRoleEnum = {
 	standalone: "standalone",
 	main: "main",
@@ -56548,6 +58468,14 @@ export const PostApiSearchStatus200GroupsHitsVariantMainUnitTypeEnum = {
 export type PostApiSearchStatus200GroupsHitsVariantMainUnitTypeEnum =
 	(typeof PostApiSearchStatus200GroupsHitsVariantMainUnitTypeEnum)[keyof typeof PostApiSearchStatus200GroupsHitsVariantMainUnitTypeEnum];
 
+export const PostApiSearchStatus200GroupsTotalRelationEnum = {
+	exact: "exact",
+	"lower-bound": "lower-bound",
+} as const;
+
+export type PostApiSearchStatus200GroupsTotalRelationEnum =
+	(typeof PostApiSearchStatus200GroupsTotalRelationEnum)[keyof typeof PostApiSearchStatus200GroupsTotalRelationEnum];
+
 /**
  * @type object
  */
@@ -56557,7 +58485,8 @@ export type PostApiSearchStatus200 = {
 	 */
 	query: string;
 	/**
-	 * @pattern ^s_[0-9a-z]+$
+	 * @maxLength 4096
+	 * @pattern ^s2_[A-Za-z0-9_-]+$
 	 * @type string | undefined
 	 */
 	nextCursor?: string;
@@ -56577,7 +58506,17 @@ export type PostApiSearchStatus200 = {
 			 * @type string
 			 */
 			value: string;
-			count: string | number;
+			/**
+			 * @type object
+			 */
+			count: {
+				value: string | number;
+				/**
+				 * @default 'exact'
+				 * @type string
+				 */
+				relation: PostApiSearchStatus200FacetsOptionsCountRelationEnum;
+			};
 		}[];
 	}[];
 	/**
@@ -56666,8 +58605,17 @@ export type PostApiSearchStatus200 = {
 			name?: (string | null) | null;
 			summary?: (string | null) | null;
 		}[];
-		total: string | number;
-		offset: string | number;
+		/**
+		 * @type object
+		 */
+		total: {
+			value: string | number;
+			/**
+			 * @default 'exact'
+			 * @type string
+			 */
+			relation: PostApiSearchStatus200GroupsTotalRelationEnum;
+		};
 		limit: string | number;
 		/**
 		 * @type number
@@ -56855,6 +58803,14 @@ export const PostApiSearchByIndexStatus200HitsVariantMainUnitTypeEnum = {
 export type PostApiSearchByIndexStatus200HitsVariantMainUnitTypeEnum =
 	(typeof PostApiSearchByIndexStatus200HitsVariantMainUnitTypeEnum)[keyof typeof PostApiSearchByIndexStatus200HitsVariantMainUnitTypeEnum];
 
+export const PostApiSearchByIndexStatus200TotalRelationEnum = {
+	exact: "exact",
+	"lower-bound": "lower-bound",
+} as const;
+
+export type PostApiSearchByIndexStatus200TotalRelationEnum =
+	(typeof PostApiSearchByIndexStatus200TotalRelationEnum)[keyof typeof PostApiSearchByIndexStatus200TotalRelationEnum];
+
 /**
  * @type object
  */
@@ -56937,8 +58893,23 @@ export type PostApiSearchByIndexStatus200 = {
 		name?: (string | null) | null;
 		summary?: (string | null) | null;
 	}[];
-	total: string | number;
-	offset: string | number;
+	/**
+	 * @type object
+	 */
+	total: {
+		value: string | number;
+		/**
+		 * @default 'exact'
+		 * @type string
+		 */
+		relation: PostApiSearchByIndexStatus200TotalRelationEnum;
+	};
+	/**
+	 * @maxLength 4096
+	 * @pattern ^s2_[A-Za-z0-9_-]+$
+	 * @type string | undefined
+	 */
+	nextCursor?: string;
 	limit: string | number;
 	/**
 	 * @type number
@@ -57044,9 +59015,11 @@ export type PostApiSearchByIndexBody = {
 	 */
 	query?: string;
 	/**
-	 * @default 0
+	 * @maxLength 4096
+	 * @pattern ^s2_[A-Za-z0-9_-]+$
+	 * @type string | undefined
 	 */
-	offset?: string | number;
+	cursor?: string;
 	/**
 	 * @default 20
 	 */

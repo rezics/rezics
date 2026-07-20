@@ -59,9 +59,6 @@ export const unitAlias = pgTable(
 			.on(table.unitId, table.normalizedTerm)
 			.where(sql`${table.deletedAt} is null and ${table.language} is null`),
 		index("unit_alias_normalized_idx").on(table.normalizedTerm),
-		index("unit_alias_term_search_idx")
-			.using("pgroonga", table.term)
-			.where(sql`${table.deletedAt} is null`),
 		index("unit_alias_created_by_idx").on(table.createdByProfileId),
 		check(
 			"unit_alias_term_not_blank",
