@@ -187,6 +187,10 @@ import type {
 	GetApiUsersMePreferencesResponses,
 	PutApiUsersMePreferencesOptions,
 	PutApiUsersMePreferencesResponses,
+	GetApiUsersMeSubscriptionsOptions,
+	GetApiUsersMeSubscriptionsResponses,
+	PatchApiUsersMeSubscriptionsByUnitIdOptions,
+	PatchApiUsersMeSubscriptionsByUnitIdResponses,
 	GetApiUsersByIdOptions,
 	GetApiUsersByIdResponses,
 	PutApiUsersByIdFollowOptions,
@@ -2033,6 +2037,36 @@ export function putApiUsersMePreferences<ThrowOnError extends boolean = true>(
 	return request({ method: "PUT", url: "/api/users/me/preferences", ...config }) as Promise<
 		RequestResult<PutApiUsersMePreferencesResponses, ThrowOnError>
 	>;
+}
+
+/**
+ * @summary List current user subscriptions
+ * {@link /api/users/me/subscriptions}
+ */
+export function getApiUsersMeSubscriptions<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUsersMeSubscriptionsOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiUsersMeSubscriptionsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/users/me/subscriptions", ...config }) as Promise<
+		RequestResult<GetApiUsersMeSubscriptionsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Update subscription presentation
+ * {@link /api/users/me/subscriptions/:unitId}
+ */
+export function patchApiUsersMeSubscriptionsByUnitId<ThrowOnError extends boolean = true>(
+	options: Options<PatchApiUsersMeSubscriptionsByUnitIdOptions, ThrowOnError>,
+): Promise<RequestResult<PatchApiUsersMeSubscriptionsByUnitIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PATCH",
+		url: "/api/users/me/subscriptions/{unitId}",
+		...config,
+	}) as Promise<RequestResult<PatchApiUsersMeSubscriptionsByUnitIdResponses, ThrowOnError>>;
 }
 
 /**

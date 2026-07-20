@@ -536,6 +536,13 @@ import type {
 	PutApiUsersMePreferencesStatus404,
 	PutApiUsersMePreferencesStatus422,
 	PutApiUsersMePreferencesStatus500,
+	GetApiUsersMeSubscriptionsStatus200,
+	GetApiUsersMeSubscriptionsStatus500,
+	PatchApiUsersMeSubscriptionsByUnitIdOptions,
+	PatchApiUsersMeSubscriptionsByUnitIdStatus200,
+	PatchApiUsersMeSubscriptionsByUnitIdStatus404,
+	PatchApiUsersMeSubscriptionsByUnitIdStatus422,
+	PatchApiUsersMeSubscriptionsByUnitIdStatus500,
 	GetApiUsersByIdOptions,
 	GetApiUsersByIdStatus200,
 	GetApiUsersByIdStatus404,
@@ -1397,6 +1404,8 @@ import {
 	patchApiUsersMe,
 	getApiUsersMePreferences,
 	putApiUsersMePreferences,
+	getApiUsersMeSubscriptions,
+	patchApiUsersMeSubscriptionsByUnitId,
 	getApiUsersById,
 	putApiUsersByIdFollow,
 	deleteApiUsersByIdFollow,
@@ -10282,6 +10291,170 @@ export function usePutApiUsersMePreferences<TContext>(
 			| PutApiUsersMePreferencesStatus500
 		>,
 		PutApiUsersMePreferencesOptions,
+		TContext
+	>;
+}
+
+export const getApiUsersMeSubscriptionsQueryKey = () =>
+	[{ url: "/api/users/me/subscriptions" }] as const;
+
+type GetApiUsersMeSubscriptionsQueryKey = ReturnType<typeof getApiUsersMeSubscriptionsQueryKey>;
+
+export function getApiUsersMeSubscriptionsQueryOptions(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiUsersMeSubscriptionsQueryKey();
+	return queryOptions<
+		GetApiUsersMeSubscriptionsStatus200,
+		ResponseErrorConfig<GetApiUsersMeSubscriptionsStatus500>,
+		GetApiUsersMeSubscriptionsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiUsersMeSubscriptions({
+				...config,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List current user subscriptions
+ * {@link /api/users/me/subscriptions}
+ */
+export function useGetApiUsersMeSubscriptions<
+	TData = GetApiUsersMeSubscriptionsStatus200,
+	TQueryData = GetApiUsersMeSubscriptionsStatus200,
+	TQueryKey extends QueryKey = GetApiUsersMeSubscriptionsQueryKey,
+>(
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiUsersMeSubscriptionsStatus200,
+				ResponseErrorConfig<GetApiUsersMeSubscriptionsStatus500>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const queryKey = resolvedOptions?.queryKey ?? getApiUsersMeSubscriptionsQueryKey();
+
+	const queryResult = useQuery(
+		{
+			...getApiUsersMeSubscriptionsQueryOptions(config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<TData, ResponseErrorConfig<GetApiUsersMeSubscriptionsStatus500>> & {
+		queryKey: TQueryKey;
+	};
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const patchApiUsersMeSubscriptionsByUnitIdMutationKey = () =>
+	[{ url: "/api/users/me/subscriptions/:unitId" }] as const;
+
+export function patchApiUsersMeSubscriptionsByUnitIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = patchApiUsersMeSubscriptionsByUnitIdMutationKey();
+	return mutationOptions<
+		PatchApiUsersMeSubscriptionsByUnitIdStatus200,
+		ResponseErrorConfig<
+			| PatchApiUsersMeSubscriptionsByUnitIdStatus404
+			| PatchApiUsersMeSubscriptionsByUnitIdStatus422
+			| PatchApiUsersMeSubscriptionsByUnitIdStatus500
+		>,
+		PatchApiUsersMeSubscriptionsByUnitIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await patchApiUsersMeSubscriptionsByUnitId({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Update subscription presentation
+ * {@link /api/users/me/subscriptions/:unitId}
+ */
+export function usePatchApiUsersMeSubscriptionsByUnitId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PatchApiUsersMeSubscriptionsByUnitIdStatus200,
+			ResponseErrorConfig<
+				| PatchApiUsersMeSubscriptionsByUnitIdStatus404
+				| PatchApiUsersMeSubscriptionsByUnitIdStatus422
+				| PatchApiUsersMeSubscriptionsByUnitIdStatus500
+			>,
+			PatchApiUsersMeSubscriptionsByUnitIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? patchApiUsersMeSubscriptionsByUnitIdMutationKey();
+
+	const baseOptions = patchApiUsersMeSubscriptionsByUnitIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PatchApiUsersMeSubscriptionsByUnitIdStatus200,
+		ResponseErrorConfig<
+			| PatchApiUsersMeSubscriptionsByUnitIdStatus404
+			| PatchApiUsersMeSubscriptionsByUnitIdStatus422
+			| PatchApiUsersMeSubscriptionsByUnitIdStatus500
+		>,
+		PatchApiUsersMeSubscriptionsByUnitIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PatchApiUsersMeSubscriptionsByUnitIdStatus200,
+		ResponseErrorConfig<
+			| PatchApiUsersMeSubscriptionsByUnitIdStatus404
+			| PatchApiUsersMeSubscriptionsByUnitIdStatus422
+			| PatchApiUsersMeSubscriptionsByUnitIdStatus500
+		>,
+		PatchApiUsersMeSubscriptionsByUnitIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PatchApiUsersMeSubscriptionsByUnitIdStatus200,
+		ResponseErrorConfig<
+			| PatchApiUsersMeSubscriptionsByUnitIdStatus404
+			| PatchApiUsersMeSubscriptionsByUnitIdStatus422
+			| PatchApiUsersMeSubscriptionsByUnitIdStatus500
+		>,
+		PatchApiUsersMeSubscriptionsByUnitIdOptions,
 		TContext
 	>;
 }

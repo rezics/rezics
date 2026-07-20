@@ -276,10 +276,21 @@ export const unitFollow = pgTable(
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
+		position: fractionalIndexPosition()
+			.default(sql`'a0' || replace(uuidv7()::text, '-', '') || 'V'`)
+			.notNull(),
+		favorite: boolean().default(false).notNull(),
 		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
 		primaryKey({ columns: [table.followerProfileId, table.unitId] }),
+		index("unit_follow_follower_favorite_position_idx").on(
+			table.followerProfileId,
+			table.favorite.desc(),
+			table.position,
+			table.unitId,
+		),
 		index("unit_follow_unit_created_at_idx").on(
 			table.unitId,
 			table.createdAt.desc(),

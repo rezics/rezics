@@ -3,7 +3,7 @@ import { Value } from "@sinclair/typebox/value";
 import { PortableTextDocument } from "@rezics/block";
 
 import { ContentRatingValues } from "../../database/schema/contract-values";
-import { LanguageTag, Uuid } from "../schema";
+import { FractionalPosition, LanguageTag, Uuid } from "../schema";
 
 export const CollectionConfigV1 = t.Object(
 	{
@@ -11,7 +11,7 @@ export const CollectionConfigV1 = t.Object(
 		view: t.Optional(t.UnionEnum(["grid", "list"])),
 		addMainWithVariantByDefault: t.Optional(t.Boolean()),
 	},
-	{ additionalProperties: false },
+	{ additionalProperties: false, minProperties: 1 },
 );
 export type CollectionConfigV1 = Static<typeof CollectionConfigV1>;
 
@@ -53,3 +53,15 @@ export type UserLookupParams = Static<typeof UserLookupParams>;
 
 export const UserIdParams = t.Object({ id: Uuid });
 export type UserIdParams = Static<typeof UserIdParams>;
+
+export const SubscriptionUnitParams = t.Object({ unitId: Uuid });
+export type SubscriptionUnitParams = Static<typeof SubscriptionUnitParams>;
+
+export const UpdateSubscriptionBody = t.Object(
+	{
+		favorite: t.Optional(t.Boolean()),
+		position: t.Optional(FractionalPosition),
+	},
+	{ additionalProperties: false },
+);
+export type UpdateSubscriptionBody = Static<typeof UpdateSubscriptionBody>;

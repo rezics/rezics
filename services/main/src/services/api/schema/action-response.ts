@@ -29,6 +29,27 @@ export const ReactionResponse = t.Object({ reaction: t.Nullable(t.String()) });
 export const PollVoteResponse = t.Object({ optionIds: t.Array(Uuid) });
 
 export const FollowResponse = t.Object({ following: t.Boolean() });
+export const SubscriptionListResponse = t.Object({
+	items: t.Array(
+		t.Object({
+			id: Uuid,
+			kind: t.String(),
+			title: t.Nullable(t.String()),
+			avatar: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
+			cover: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
+			position: FractionalPosition,
+			favorite: t.Boolean(),
+			createdAt: DateTime,
+			updatedAt: DateTime,
+		}),
+	),
+});
+export const SubscriptionPreferenceResponse = t.Object({
+	unitId: Uuid,
+	position: FractionalPosition,
+	favorite: t.Boolean(),
+	updatedAt: DateTime,
+});
 export const BlockResponse = t.Object({ blocked: t.Boolean() });
 export const UserBlockListResponse = t.Object({
 	items: t.Array(

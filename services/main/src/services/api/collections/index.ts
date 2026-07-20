@@ -25,6 +25,7 @@ import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
 import { transitionUnitStatus } from "../../units/status";
 import { UnitNotFound } from "../../units/errors";
+import { presentImageAsset } from "../../units/service";
 import {
 	AddCollectionItemsBatchBody,
 	AddCollectionItemsBatchResponse,
@@ -61,14 +62,15 @@ export default new Elysia({ prefix: "/collections" })
 	.use(session)
 	.get(
 		"",
-		async ({ query }) => ({
-			items: await database
+		async ({ query }) => {
+			const items = await database
 				.select({
 					id: collection.id,
 					ownerId: collection.ownerProfileId,
 					itemCount: sql<number>`(select count(*) from ${collectionItem} where ${collectionItem.collectionId} = ${collection.id})::int`,
 					title: unitLocalization.title,
 					summary: unitLocalization.summary,
+					coverAssetId: unitLocalization.coverAssetId,
 					updatedAt: unit.updatedAt,
 				})
 				.from(collection)
@@ -89,8 +91,14 @@ export default new Elysia({ prefix: "/collections" })
 					),
 				)
 				.orderBy(desc(unit.updatedAt))
-				.limit(query.limit ?? 20),
-		}),
+				.limit(query.limit ?? 20);
+			return {
+				items: items.map(({ coverAssetId, ...item }) => ({
+					...item,
+					cover: presentImageAsset(coverAssetId),
+				})),
+			};
+		},
 		{
 			query: ListCollectionsQuery,
 			response: { [StatusCodes.OK]: CollectionListResponse },

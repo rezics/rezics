@@ -30919,6 +30919,7 @@
 											"anyOf": [
 												{
 													"additionalProperties": false,
+													"minProperties": 1,
 													"type": "object",
 													"required": ["version"],
 													"properties": {
@@ -31021,6 +31022,7 @@
 										"anyOf": [
 											{
 												"additionalProperties": false,
+												"minProperties": 1,
 												"type": "object",
 												"required": ["version"],
 												"properties": {
@@ -31092,6 +31094,7 @@
 											"anyOf": [
 												{
 													"additionalProperties": false,
+													"minProperties": 1,
 													"type": "object",
 													"required": ["version"],
 													"properties": {
@@ -31195,6 +31198,215 @@
 					}
 				},
 				"operationId": "putApiUsersMePreferences"
+			}
+		},
+		"/api/users/me/subscriptions": {
+			"get": {
+				"summary": "List current user subscriptions",
+				"tags": ["Users"],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"id",
+													"kind",
+													"title",
+													"avatar",
+													"cover",
+													"position",
+													"favorite",
+													"createdAt",
+													"updatedAt"
+												],
+												"properties": {
+													"id": { "format": "uuid", "type": "string" },
+													"kind": { "type": "string" },
+													"title": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
+													"favorite": { "type": "boolean" },
+													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiUsersMeSubscriptions"
+			}
+		},
+		"/api/users/me/subscriptions/{unitId}": {
+			"patch": {
+				"summary": "Update subscription presentation",
+				"tags": ["Users"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"properties": {
+									"favorite": { "type": "boolean" },
+									"position": {
+										"format": "fractional-position",
+										"minLength": 2,
+										"maxLength": 512,
+										"type": "string"
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["unitId", "position", "favorite", "updatedAt"],
+									"properties": {
+										"unitId": { "format": "uuid", "type": "string" },
+										"position": {
+											"format": "fractional-position",
+											"minLength": 2,
+											"maxLength": 512,
+											"type": "string"
+										},
+										"favorite": { "type": "boolean" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "patchApiUsersMeSubscriptionsByUnitId"
 			}
 		},
 		"/api/users/{id}": {
@@ -49814,6 +50026,7 @@
 													"itemCount",
 													"title",
 													"summary",
+													"cover",
 													"updatedAt"
 												],
 												"properties": {
@@ -49843,6 +50056,23 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
 															{ "type": "null" }
 														]
 													},

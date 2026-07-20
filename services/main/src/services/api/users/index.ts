@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, eq, or } from "drizzle-orm";
+import { and, desc, eq, isNull, or } from "drizzle-orm";
 import Elysia from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -17,7 +17,13 @@ import { createNotification, deliverNotificationEmail } from "../../notification
 import { ensureImageAssetsAttachable } from "../image-assets/service";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
-import { BlockResponse, FollowResponse, UserBlockListResponse } from "../schema/action-response";
+import {
+	BlockResponse,
+	FollowResponse,
+	SubscriptionListResponse,
+	SubscriptionPreferenceResponse,
+	UserBlockListResponse,
+} from "../schema/action-response";
 import {
 	toApiErrorResponse,
 	CurrentProfileResponse,
@@ -27,11 +33,14 @@ import {
 import {
 	ReplacePreferencesBody,
 	parseCollectionConfig,
+	SubscriptionUnitParams,
 	UpdateProfileBody,
+	UpdateSubscriptionBody,
 	UserIdParams,
 	UserLookupParams,
 } from "./schema";
 import { getProfile, presentProfile, PublicProfileSelection } from "./service";
+import { presentImageAsset } from "../../units/service";
 import {
 	PreferencesNotFound,
 	ProfileChanged,
@@ -49,6 +58,39 @@ const ProfileMutationNotFoundResponse = toApiErrorResponse([
 ]);
 const UnitForbiddenResponse = toApiErrorResponse(["UnitProtected"]);
 const UserNotFoundResponse = toApiErrorResponse(["UnitNotFound", "UserNotFound"]);
+
+async function listSubscriptions(followerProfileId: string) {
+	const records = await database
+		.select({
+			id: unit.id,
+			kind: unit.kind,
+			title: unitLocalization.title,
+			avatarAssetId: unitLocalization.avatarAssetId,
+			coverAssetId: unitLocalization.coverAssetId,
+			position: unitFollow.position,
+			favorite: unitFollow.favorite,
+			createdAt: unitFollow.createdAt,
+			updatedAt: unitFollow.updatedAt,
+		})
+		.from(unitFollow)
+		.innerJoin(unit, eq(unit.id, unitFollow.unitId))
+		.leftJoin(
+			unitLocalization,
+			and(
+				eq(unitLocalization.unitId, unit.id),
+				isPrimaryUnitLocalization(unitLocalization.unitId),
+			),
+		)
+		.where(and(eq(unitFollow.followerProfileId, followerProfileId), isNull(unit.deletedAt)))
+		.orderBy(desc(unitFollow.favorite), unitFollow.position, unitFollow.unitId);
+	return {
+		items: records.map(({ avatarAssetId, coverAssetId, ...record }) => ({
+			...record,
+			avatar: presentImageAsset(avatarAssetId),
+			cover: presentImageAsset(coverAssetId),
+		})),
+	};
+}
 
 export default new Elysia({ prefix: "/users" })
 	.use(session)
@@ -207,6 +249,47 @@ export default new Elysia({ prefix: "/users" })
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
 			},
 			detail: { summary: "Replace current user preferences", tags: ["Users"] },
+		},
+	)
+	.get("/me/subscriptions", async ({ profile }) => listSubscriptions(profile.unitId), {
+		access: "interaction:read",
+		response: { [StatusCodes.OK]: SubscriptionListResponse },
+		detail: { summary: "List current user subscriptions", tags: ["Users"] },
+	})
+	.patch(
+		"/me/subscriptions/:unitId",
+		async ({ profile, params, body }) => {
+			const [updated] = await database
+				.update(unitFollow)
+				.set({
+					...(body.favorite === undefined ? {} : { favorite: body.favorite }),
+					...(body.position === undefined ? {} : { position: body.position }),
+					updatedAt: new Date(),
+				})
+				.where(
+					and(
+						eq(unitFollow.followerProfileId, profile.unitId),
+						eq(unitFollow.unitId, params.unitId),
+					),
+				)
+				.returning({
+					unitId: unitFollow.unitId,
+					position: unitFollow.position,
+					favorite: unitFollow.favorite,
+					updatedAt: unitFollow.updatedAt,
+				});
+			if (!updated) throw new UnitNotFound("Subscription");
+			return updated;
+		},
+		{
+			access: "write:interaction:write",
+			params: SubscriptionUnitParams,
+			body: UpdateSubscriptionBody,
+			response: {
+				[StatusCodes.OK]: SubscriptionPreferenceResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: { summary: "Update subscription presentation", tags: ["Users"] },
 		},
 	)
 	.get(

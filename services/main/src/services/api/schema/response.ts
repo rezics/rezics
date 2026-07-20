@@ -276,6 +276,7 @@ export const CollectionListResponse = t.Object({
 			itemCount: t.Integer(),
 			title: NullableText,
 			summary: NullableText,
+			cover: ImageAssetResponse,
 			updatedAt: DateTime,
 		}),
 	),

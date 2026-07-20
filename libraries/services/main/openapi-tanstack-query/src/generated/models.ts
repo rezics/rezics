@@ -23293,6 +23293,236 @@ export type PutApiUsersMePreferencesResponse =
 /**
  * @type object
  */
+export type GetApiUsersMeSubscriptionsStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @type string
+		 */
+		kind: string;
+		title: (string | null) | null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		/**
+		 * @type boolean
+		 */
+		favorite: boolean;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeSubscriptionsStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeSubscriptionsOptions = {
+	body?: never;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeSubscriptionsResponses = {
+	"200": GetApiUsersMeSubscriptionsStatus200;
+	"500": GetApiUsersMeSubscriptionsStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiUsersMeSubscriptionsResponse =
+	GetApiUsersMeSubscriptionsStatus200 | GetApiUsersMeSubscriptionsStatus500;
+
+/**
+ * @type object
+ */
+export type PatchApiUsersMeSubscriptionsByUnitIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUsersMeSubscriptionsByUnitIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
+	 * @type string
+	 */
+	position: string;
+	/**
+	 * @type boolean
+	 */
+	favorite: boolean;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUsersMeSubscriptionsByUnitIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUsersMeSubscriptionsByUnitIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PatchApiUsersMeSubscriptionsByUnitIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PatchApiUsersMeSubscriptionsByUnitIdBody = {
+	/**
+	 * @type boolean | undefined
+	 */
+	favorite?: boolean;
+	/**
+	 * @description
+	 * Format: `fractional-position`
+	 * @minLength 2
+	 * @maxLength 512
+	 * @type string | undefined
+	 */
+	position?: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUsersMeSubscriptionsByUnitIdOptions = {
+	body: PatchApiUsersMeSubscriptionsByUnitIdBody;
+	path: PatchApiUsersMeSubscriptionsByUnitIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUsersMeSubscriptionsByUnitIdResponses = {
+	"200": PatchApiUsersMeSubscriptionsByUnitIdStatus200;
+	"404": PatchApiUsersMeSubscriptionsByUnitIdStatus404;
+	"422": PatchApiUsersMeSubscriptionsByUnitIdStatus422;
+	"500": PatchApiUsersMeSubscriptionsByUnitIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PatchApiUsersMeSubscriptionsByUnitIdResponse =
+	| PatchApiUsersMeSubscriptionsByUnitIdStatus200
+	| PatchApiUsersMeSubscriptionsByUnitIdStatus404
+	| PatchApiUsersMeSubscriptionsByUnitIdStatus422
+	| PatchApiUsersMeSubscriptionsByUnitIdStatus500;
+
+/**
+ * @type object
+ */
 export type GetApiUsersByIdPath = {
 	/**
 	 * @description
@@ -39017,6 +39247,20 @@ export type GetApiCollectionsStatus200 = {
 		itemCount: string | number;
 		title: (string | null) | null;
 		summary: (string | null) | null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
 		/**
 		 * @description
 		 * Format: `date-time`
