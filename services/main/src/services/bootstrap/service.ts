@@ -500,55 +500,56 @@ async function ensureOfficialRealm(tx: DatabaseTransaction): Promise<void> {
 		});
 }
 
-async function ensureOfficialZone(tx: DatabaseTransaction): Promise<void> {
-	const value = OfficialZoneManifest;
+async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 	const createdAt = bootstrapEpoch();
-	let changed = await ensureBootstrapAddressedUnit(tx, {
-		id: value.id,
-		kind: "zone",
-		scopeUnitId: TopLevelSlugNamespaceUnitIds.zones,
-		slug: value.slug,
-	});
-	const insertedZone = await tx
-		.insert(zone)
-		.values({
+	for (const value of OfficialZoneManifest) {
+		let changed = await ensureBootstrapAddressedUnit(tx, {
 			id: value.id,
-			boundaryDocument: value.boundaryDocument,
-			themeDocument: value.themeDocument,
-			dockDocument: value.dockDocument,
-			createdAt,
-			updatedAt: createdAt,
-		})
-		.onConflictDoNothing()
-		.returning({ id: zone.id });
-	changed ||= insertedZone.length > 0;
-	changed =
-		(await ensureLocalization(tx, {
-			unitId: value.id,
-			title: value.title,
-			summary: value.summary,
-		})) || changed;
-	changed = (await ensureOwnerBinding(tx, value.id, value.ownerProfileId)) || changed;
-	const insertedRealmUnit = await tx
-		.insert(realmUnit)
-		.values({
-			realmId: OfficialRealmManifest.id,
-			unitId: value.id,
-			status: "visible",
-			locked: false,
-			createdAt,
-			updatedAt: createdAt,
-		})
-		.onConflictDoNothing()
-		.returning({ unitId: realmUnit.unitId });
-	changed ||= insertedRealmUnit.length > 0;
-	if (changed)
-		await recordUnitRevision(tx, {
-			unitId: value.id,
-			actorProfileId: value.ownerProfileId,
-			event: "create",
-			message: "Bootstrap official Zone",
+			kind: "zone",
+			scopeUnitId: TopLevelSlugNamespaceUnitIds.zones,
+			slug: value.slug,
 		});
+		const insertedZone = await tx
+			.insert(zone)
+			.values({
+				id: value.id,
+				boundaryDocument: value.boundaryDocument,
+				themeDocument: value.themeDocument,
+				dockDocument: value.dockDocument,
+				createdAt,
+				updatedAt: createdAt,
+			})
+			.onConflictDoNothing()
+			.returning({ id: zone.id });
+		changed ||= insertedZone.length > 0;
+		changed =
+			(await ensureLocalization(tx, {
+				unitId: value.id,
+				title: value.title,
+				summary: value.summary,
+			})) || changed;
+		changed = (await ensureOwnerBinding(tx, value.id, value.ownerProfileId)) || changed;
+		const insertedRealmUnit = await tx
+			.insert(realmUnit)
+			.values({
+				realmId: OfficialRealmManifest.id,
+				unitId: value.id,
+				status: "visible",
+				locked: false,
+				createdAt,
+				updatedAt: createdAt,
+			})
+			.onConflictDoNothing()
+			.returning({ unitId: realmUnit.unitId });
+		changed ||= insertedRealmUnit.length > 0;
+		if (changed)
+			await recordUnitRevision(tx, {
+				unitId: value.id,
+				actorProfileId: value.ownerProfileId,
+				event: "create",
+				message: "Bootstrap official Zone",
+			});
+	}
 }
 
 export async function isBootstrapReady(): Promise<boolean> {
@@ -559,7 +560,7 @@ export async function isBootstrapReady(): Promise<boolean> {
 		accountCount,
 		profileCount,
 		officialRealm,
-		officialZone,
+		officialZones,
 	] = await Promise.all([
 		database
 			.select({ value: count() })
@@ -594,8 +595,12 @@ export async function isBootstrapReady(): Promise<boolean> {
 		database
 			.select({ id: zone.id })
 			.from(zone)
-			.where(eq(zone.id, OfficialZoneManifest.id))
-			.limit(1),
+			.where(
+				inArray(
+					zone.id,
+					OfficialZoneManifest.map((value) => value.id),
+				),
+			),
 	]);
 	return (
 		unitCount[0]?.value === BootstrapUnitIds.length &&
@@ -603,7 +608,8 @@ export async function isBootstrapReady(): Promise<boolean> {
 		userCount[0]?.value === BootstrapAuthUserIds.length &&
 		accountCount[0]?.value === BootstrapAccountIds.length &&
 		profileCount[0]?.value === OfficialProfileIdValues.length &&
-		Boolean(officialRealm[0] && officialZone[0])
+		Boolean(officialRealm[0]) &&
+		officialZones.length === OfficialZoneManifest.length
 	);
 }
 
@@ -618,7 +624,7 @@ export async function bootstrapDatabase(
 		await ensureSlugNamespaces(tx);
 		const credentials = await ensureOfficialProfiles(tx, options.credentialMode);
 		await ensureOfficialRealm(tx);
-		await ensureOfficialZone(tx);
+		await ensureOfficialZones(tx);
 		return credentials;
 	});
 	return { issuedCredentials };

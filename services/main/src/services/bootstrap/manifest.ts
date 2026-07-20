@@ -69,22 +69,48 @@ export const OfficialRealmManifest = {
 	],
 } as const;
 
-export const OfficialZoneManifest = {
-	id: "019b76da-a800-7400-8000-000000000001",
-	slug: "rezics",
-	title: "Rezics",
-	summary: "The official Rezics discovery zone.",
-	ownerProfileId: OfficialProfileIds.editorial,
-	boundaryDocument: createZoneBoundaryDocument(["units"], [], "b00757a70001"),
-	themeDocument: createZoneThemeDocument({ accent: "#f59e0b" }, "b00757a70002"),
-	dockDocument: createBlockDocument([], "b00757a70003"),
-} as const;
+export const OfficialZoneManifest = [
+	{
+		id: "019b76da-a800-7400-8000-000000000001",
+		slug: "discover",
+		title: "Discover",
+		summary: "Works and conversations selected by Rezics Editorial.",
+		ownerProfileId: OfficialProfileIds.editorial,
+		boundaryDocument: createZoneBoundaryDocument(["units", "posts"], [], "b00757a70001"),
+		themeDocument: createZoneThemeDocument({ accent: "#f97360" }, "b00757a70002"),
+		dockDocument: createBlockDocument([], "b00757a70003"),
+	},
+	{
+		id: "019b76da-a800-7400-8000-000000000002",
+		slug: "communities",
+		title: "Communities",
+		summary: "Active Realms and the discussions growing around them.",
+		ownerProfileId: OfficialProfileIds.community,
+		boundaryDocument: createZoneBoundaryDocument(["realms", "posts"], [], "b00757a70004"),
+		themeDocument: createZoneThemeDocument({ accent: "#3b82f6" }, "b00757a70005"),
+		dockDocument: createBlockDocument([], "b00757a70006"),
+	},
+	{
+		id: "019b76da-a800-7400-8000-000000000003",
+		slug: "collections",
+		title: "Collections",
+		summary: "Curated shelves, reviews, and paths through the catalog.",
+		ownerProfileId: OfficialProfileIds.editorial,
+		boundaryDocument: createZoneBoundaryDocument(
+			["collections", "reviews"],
+			[],
+			"b00757a70007",
+		),
+		themeDocument: createZoneThemeDocument({ accent: "#8b5cf6" }, "b00757a70008"),
+		dockDocument: createBlockDocument([], "b00757a70009"),
+	},
+] as const;
 
 export const BootstrapUnitIds = [
 	...SlugNamespaceManifest.map((namespace) => namespace.id),
 	...OfficialProfileManifest.map((profile) => profile.profileId),
 	OfficialRealmManifest.id,
-	OfficialZoneManifest.id,
+	...OfficialZoneManifest.map((zone) => zone.id),
 ] as const;
 
 export const BootstrapAuthUserIds = OfficialProfileManifest.map((profile) => profile.authUserId);

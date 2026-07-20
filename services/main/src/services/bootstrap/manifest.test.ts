@@ -5,6 +5,7 @@ import {
 	assertBootstrapManifest,
 	BootstrapEpochUnixMilliseconds,
 	OfficialProfileManifest,
+	OfficialZoneManifest,
 	ReservedBootstrapUuidv7s,
 	SlugNamespaceManifest,
 	uuidv7UnixMilliseconds,
@@ -43,6 +44,14 @@ describe("database bootstrap manifest", () => {
 			expect(value).not.toHaveProperty("official");
 			expect(value).not.toHaveProperty("password");
 		}
+	});
+
+	it("bootstraps several official discovery Zones", () => {
+		expect(OfficialZoneManifest.map((value) => value.slug)).toEqual([
+			"discover",
+			"communities",
+			"collections",
+		]);
 	});
 
 	it("generates high-entropy URL-safe passwords without persisting them in the manifest", () => {
