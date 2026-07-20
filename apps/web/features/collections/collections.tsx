@@ -21,7 +21,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 
-import { EntityPicker } from "@rezics/ui";
+import { ChoiceSelect, Cover, EntityPicker, UnitList } from "@rezics/ui";
 import { PageHeading } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import {
@@ -40,10 +40,13 @@ import { Button } from "@rezics/ui";
 import { Card, CardAction, CardContent, CardHeader } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
-import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
+import {
+	LocalizationImageUploadField,
+	type LocalizationImageAssetValue,
+} from "@/features/units/localization-image-upload-field";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { selectLocalization } from "@/lib/localization";
@@ -96,9 +99,13 @@ async function invalidateCollections(queryClient: ReturnType<typeof useQueryClie
 }
 
 function CollectionFields({
+	cover,
+	onCoverChange,
 	initial,
 	includeStatus,
 }: {
+	cover: LocalizationImageAssetValue | null;
+	onCoverChange: (value: LocalizationImageAssetValue | null) => void;
 	initial?: {
 		title?: string | null;
 		summary?: string | null;
@@ -108,8 +115,33 @@ function CollectionFields({
 	includeStatus?: boolean;
 }) {
 	const { t } = useTranslation({ suspense: true });
+	const [visibility, setVisibility] = useState(
+		getCollectionVisibility(initial?.visibility ?? null),
+	);
+	const [status, setStatus] = useState(
+		CollectionStatuses.find((value) => value === initial?.status) ?? "draft",
+	);
+	const visibilityOptions = [
+		{ value: "public", label: t.ui.public },
+		{ value: "unlisted", label: t.ui.unlisted },
+		{ value: "private", label: t.ui.private },
+	] as const;
+	const statusOptions = [
+		{ value: "draft", label: t.ui.draft },
+		{ value: "published", label: t.ui.published },
+		{ value: "archived", label: t.ui.archived },
+	] as const;
 	return (
 		<FieldGroup>
+			<Field>
+				<FieldLabel>{t.cover.title}</FieldLabel>
+				<LocalizationImageUploadField
+					onChange={onCoverChange}
+					role="cover"
+					shape="portrait"
+					value={cover}
+				/>
+			</Field>
 			<Field required>
 				<FieldLabel>{t.ui.title}</FieldLabel>
 				<Input defaultValue={initial?.title ?? ""} maxLength={500} name="title" required />
@@ -120,20 +152,32 @@ function CollectionFields({
 			</Field>
 			<Field>
 				<FieldLabel>{t.ui.visibility}</FieldLabel>
-				<NativeSelect defaultValue={initial?.visibility ?? "private"} name="visibility">
-					<NativeSelectOption value="public">{t.ui.public}</NativeSelectOption>
-					<NativeSelectOption value="unlisted">{t.ui.unlisted}</NativeSelectOption>
-					<NativeSelectOption value="private">{t.ui.private}</NativeSelectOption>
-				</NativeSelect>
+				<ChoiceSelect
+					ariaLabel={t.ui.visibility}
+					className="w-full"
+					name="visibility"
+					onValueChange={([nextVisibility]) => {
+						if (nextVisibility) setVisibility(nextVisibility);
+					}}
+					options={visibilityOptions}
+					placeholder={t.ui.visibility}
+					value={[visibility]}
+				/>
 			</Field>
 			{includeStatus && (
 				<Field>
 					<FieldLabel>{t.ui.status}</FieldLabel>
-					<NativeSelect defaultValue={initial?.status ?? "draft"} name="status">
-						<NativeSelectOption value="draft">{t.ui.draft}</NativeSelectOption>
-						<NativeSelectOption value="published">{t.ui.published}</NativeSelectOption>
-						<NativeSelectOption value="archived">{t.ui.archived}</NativeSelectOption>
-					</NativeSelect>
+					<ChoiceSelect
+						ariaLabel={t.ui.status}
+						className="w-full"
+						name="status"
+						onValueChange={([nextStatus]) => {
+							if (nextStatus) setStatus(nextStatus);
+						}}
+						options={statusOptions}
+						placeholder={t.ui.status}
+						value={[status]}
+					/>
 				</Field>
 			)}
 		</FieldGroup>
@@ -156,25 +200,13 @@ export function CollectionsPage() {
 					</Button>
 				}
 			/>
-			{query.data?.items.length ? (
-				<div className="grid gap-3">
-					{query.data.items.map((collection) => (
-						<Link key={collection.id} href={`/collections/${collection.id}`}>
-							<Card className="transition-colors hover:bg-surface-hover">
-								<CardHeader
-									title={collection.title ?? t.ui.unnamed}
-									description={collection.summary ?? undefined}
-								/>
-								<CardContent className="text-muted-foreground text-sm">
-									{collection.itemCount} {t.engagement.items}
-								</CardContent>
-							</Card>
-						</Link>
-					))}
-				</div>
-			) : (
-				<p className="text-muted-foreground text-sm">{t.engagement.emptyCollections}</p>
-			)}
+			<UnitList
+				error={false}
+				href={(collection) => `/collections/${collection.id}`}
+				items={query.data?.items}
+				pending={false}
+				variant="shelf"
+			/>
 		</main>
 	);
 }
@@ -184,6 +216,7 @@ export function CollectionCreate() {
 	const queryClient = useQueryClient();
 	const router = useRouter();
 	const { locale, t } = useTranslation({ suspense: true });
+	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		const form = new FormData(event.currentTarget);
@@ -193,6 +226,7 @@ export function CollectionCreate() {
 					localization: {
 						language: locale.target,
 						title: String(form.get("title") ?? "").trim(),
+						coverAssetId: cover?.id ?? null,
 						...(String(form.get("summary") ?? "").trim()
 							? { summary: String(form.get("summary") ?? "").trim() }
 							: {}),
@@ -211,7 +245,7 @@ export function CollectionCreate() {
 			<main className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-10 sm:px-6">
 				<PageHeading title={t.engagement.newCollection} />
 				<form className="flex flex-col gap-6" onSubmit={(event) => void submit(event)}>
-					<CollectionFields />
+					<CollectionFields cover={cover} onCoverChange={setCover} />
 					<RequestFailure error={create.error} fallback={t.ui.retryLater} />
 					<Button isLoading={create.isPending} type="submit">
 						{t.ui.create}
@@ -319,6 +353,15 @@ export function CollectionDetail({ id }: { id: string }) {
 					) : undefined
 				}
 			/>
+			{localization?.cover ? (
+				<div className="w-32 sm:w-40">
+					<Cover
+						alt={localization.title ?? t.ui.unnamed}
+						className="rounded-xl border border-border-weak"
+						src={localization.cover.url}
+					/>
+				</div>
+			) : null}
 			{canManage && (
 				<Card>
 					<CardHeader title={t.engagement.addItem} />
@@ -400,6 +443,14 @@ export function CollectionEdit({ id }: { id: string }) {
 	const queryClient = useQueryClient();
 	const router = useRouter();
 	const { locale, t } = useTranslation({ suspense: true });
+	const localization = query.data
+		? selectLocalization(query.data.localizations, locale.target, query.data.language)
+		: undefined;
+	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
+	useEffect(
+		() => setCover(localization?.cover ?? null),
+		[localization?.cover?.id, localization?.cover?.url],
+	);
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -412,11 +463,6 @@ export function CollectionEdit({ id }: { id: string }) {
 				<p className="text-destructive text-sm">{t.errors.forbidden}</p>
 			</main>
 		);
-	const localization = selectLocalization(
-		collection.localizations,
-		locale.target,
-		collection.language,
-	);
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		const form = new FormData(event.currentTarget);
@@ -430,6 +476,7 @@ export function CollectionEdit({ id }: { id: string }) {
 					localization: {
 						language: locale.target,
 						title: String(form.get("title") ?? "").trim(),
+						coverAssetId: cover?.id ?? null,
 						...(String(form.get("summary") ?? "").trim()
 							? { summary: String(form.get("summary") ?? "").trim() }
 							: {}),
@@ -448,6 +495,7 @@ export function CollectionEdit({ id }: { id: string }) {
 				<PageHeading title={t.engagement.editCollection} />
 				<form className="flex flex-col gap-6" onSubmit={(event) => void submit(event)}>
 					<CollectionFields
+						cover={cover}
 						includeStatus
 						initial={{
 							title: localization?.title,
@@ -455,6 +503,7 @@ export function CollectionEdit({ id }: { id: string }) {
 							status: collection.status,
 							visibility: collection.visibility,
 						}}
+						onCoverChange={setCover}
 					/>
 					<RequestFailure error={update.error} fallback={t.ui.retryLater} />
 					<Button isLoading={update.isPending} type="submit">
