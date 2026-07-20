@@ -27,6 +27,8 @@ import type {
 	PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptResponses,
 	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineOptions,
 	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineResponses,
+	GetApiStartupOptions,
+	GetApiStartupResponses,
 	GetApiHealthOptions,
 	GetApiHealthResponses,
 	HeadApiHealthOptions,
@@ -615,6 +617,20 @@ export function deleteApiUnitByUnitIdAssociationProposalsByProposalId<
 		...config,
 	}) as Promise<
 		RequestResult<DeleteApiUnitByUnitIdAssociationProposalsByProposalIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Process startup
+ * {@link /api/startup}
+ */
+export function getApiStartup<ThrowOnError extends boolean = true>(
+	options: Options<GetApiStartupOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiStartupResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/startup", ...config }) as Promise<
+		RequestResult<GetApiStartupResponses, ThrowOnError>
 	>;
 }
 

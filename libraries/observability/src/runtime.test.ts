@@ -145,6 +145,24 @@ describe("observability runtime", () => {
 		expect(serialized).toContain("s3");
 	});
 
+	it("records bounded readiness and worker-health metrics", async () => {
+		const lines: string[] = [];
+		const { metricExporter } = inMemoryRuntime(lines);
+
+		active?.metrics.readinessCheckFinished("database", "unavailable", 12, "timeout");
+		active?.metrics.readinessTransition("ready", "not_ready");
+		active?.metrics.workerHeartbeat(Date.now() - 1_000);
+		await active?.flush();
+
+		const serialized = JSON.stringify(metricExporter.getMetrics());
+		expect(serialized).toContain("rezics.readiness.check.duration");
+		expect(serialized).toContain("rezics.readiness.check.failures");
+		expect(serialized).toContain("rezics.readiness.transitions");
+		expect(serialized).toContain("rezics.worker.heartbeat.age");
+		expect(serialized).toContain("rezics.worker.job.active_age");
+		expect(serialized).not.toContain("userId");
+	});
+
 	it("rejects repeated initialization instead of duplicating providers", () => {
 		const lines: string[] = [];
 		inMemoryRuntime(lines);

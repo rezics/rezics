@@ -46,6 +46,8 @@ export const env = createEnv({
 			.default(true),
 		S3_PRESIGN_EXPIRES_IN: z.coerce.number().int().min(1).max(604_800).default(900),
 		RECOMMENDATION_REFRESH_INTERVAL_MS: z.coerce.number().int().min(60_000).default(300_000),
+		WORKER_HEALTH_HOST: z.string().min(1).default("127.0.0.1"),
+		WORKER_HEALTH_PORT: z.coerce.number().int().min(1).max(65_535).default(3002),
 	},
 	runtimeEnv: process.env,
 	emptyStringAsUndefined: true,

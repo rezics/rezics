@@ -80,6 +80,8 @@ import type {
 	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus409,
 	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus422,
 	PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus500,
+	GetApiStartupStatus200,
+	GetApiStartupStatus500,
 	GetApiHealthStatus200,
 	GetApiHealthStatus500,
 	HeadApiHealthStatus204,
@@ -1324,6 +1326,7 @@ import {
 	postApiUnitByUnitIdAssociationProposalsInvitations,
 	postApiUnitByUnitIdAssociationProposalsByProposalIdAccept,
 	postApiUnitByUnitIdAssociationProposalsByProposalIdDecline,
+	getApiStartup,
 	getApiHealth,
 	headApiHealth,
 	getApiReady,
@@ -2288,6 +2291,74 @@ export function useDeleteApiUnitByUnitIdAssociationProposalsByProposalId<TContex
 		DeleteApiUnitByUnitIdAssociationProposalsByProposalIdOptions,
 		TContext
 	>;
+}
+
+export const getApiStartupQueryKey = () => [{ url: "/api/startup" }] as const;
+
+type GetApiStartupQueryKey = ReturnType<typeof getApiStartupQueryKey>;
+
+export function getApiStartupQueryOptions(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiStartupQueryKey();
+	return queryOptions<
+		GetApiStartupStatus200,
+		ResponseErrorConfig<GetApiStartupStatus500>,
+		GetApiStartupStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiStartup({
+				...config,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Process startup
+ * {@link /api/startup}
+ */
+export function useGetApiStartup<
+	TData = GetApiStartupStatus200,
+	TQueryData = GetApiStartupStatus200,
+	TQueryKey extends QueryKey = GetApiStartupQueryKey,
+>(
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiStartupStatus200,
+				ResponseErrorConfig<GetApiStartupStatus500>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const queryKey = resolvedOptions?.queryKey ?? getApiStartupQueryKey();
+
+	const queryResult = useQuery(
+		{
+			...getApiStartupQueryOptions(config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<TData, ResponseErrorConfig<GetApiStartupStatus500>> & {
+		queryKey: TQueryKey;
+	};
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
 }
 
 export const getApiHealthQueryKey = () => [{ url: "/api/health" }] as const;

@@ -7300,6 +7300,35 @@
 				"operationId": "deleteApiUnitByUnitIdAssociation-proposalsByProposalId"
 			}
 		},
+		"/api/startup": {
+			"get": {
+				"summary": "Process startup",
+				"tags": ["System"],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["status"],
+									"properties": { "status": { "const": "ok", "type": "string" } }
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiStartup"
+			}
+		},
 		"/api/health": {
 			"get": {
 				"summary": "Process health",
@@ -7364,19 +7393,94 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["status", "services"],
+									"required": ["status", "checks"],
 									"properties": {
 										"status": {
 											"type": "string",
 											"enum": ["ready", "unavailable"]
 										},
-										"services": {
+										"checks": {
 											"type": "object",
 											"required": ["database", "storage", "recommendations"],
 											"properties": {
-												"database": { "type": "boolean" },
-												"storage": { "type": "boolean" },
-												"recommendations": { "type": "boolean" }
+												"database": {
+													"type": "object",
+													"required": ["state", "latencyMs"],
+													"properties": {
+														"state": {
+															"default": "ready",
+															"type": "string",
+															"enum": [
+																"ready",
+																"degraded",
+																"unavailable"
+															]
+														},
+														"latencyMs": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														}
+													}
+												},
+												"storage": {
+													"type": "object",
+													"required": ["state", "latencyMs"],
+													"properties": {
+														"state": {
+															"default": "ready",
+															"type": "string",
+															"enum": [
+																"ready",
+																"degraded",
+																"unavailable"
+															]
+														},
+														"latencyMs": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														}
+													}
+												},
+												"recommendations": {
+													"type": "object",
+													"required": ["state", "latencyMs"],
+													"properties": {
+														"state": {
+															"default": "ready",
+															"type": "string",
+															"enum": [
+																"ready",
+																"degraded",
+																"unavailable"
+															]
+														},
+														"latencyMs": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														}
+													}
+												}
 											}
 										}
 									}
@@ -7398,19 +7502,94 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["status", "services"],
+									"required": ["status", "checks"],
 									"properties": {
 										"status": {
 											"type": "string",
 											"enum": ["ready", "unavailable"]
 										},
-										"services": {
+										"checks": {
 											"type": "object",
 											"required": ["database", "storage", "recommendations"],
 											"properties": {
-												"database": { "type": "boolean" },
-												"storage": { "type": "boolean" },
-												"recommendations": { "type": "boolean" }
+												"database": {
+													"type": "object",
+													"required": ["state", "latencyMs"],
+													"properties": {
+														"state": {
+															"default": "ready",
+															"type": "string",
+															"enum": [
+																"ready",
+																"degraded",
+																"unavailable"
+															]
+														},
+														"latencyMs": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														}
+													}
+												},
+												"storage": {
+													"type": "object",
+													"required": ["state", "latencyMs"],
+													"properties": {
+														"state": {
+															"default": "ready",
+															"type": "string",
+															"enum": [
+																"ready",
+																"degraded",
+																"unavailable"
+															]
+														},
+														"latencyMs": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														}
+													}
+												},
+												"recommendations": {
+													"type": "object",
+													"required": ["state", "latencyMs"],
+													"properties": {
+														"state": {
+															"default": "ready",
+															"type": "string",
+															"enum": [
+																"ready",
+																"degraded",
+																"unavailable"
+															]
+														},
+														"latencyMs": {
+															"minimum": 0,
+															"anyOf": [
+																{
+																	"format": "integer",
+																	"default": 0,
+																	"type": "string"
+																},
+																{ "minimum": 0, "type": "integer" }
+															]
+														}
+													}
+												}
 											}
 										}
 									}

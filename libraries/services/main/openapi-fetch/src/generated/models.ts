@@ -3966,6 +3966,44 @@ export type DeleteApiUnitByUnitIdAssociationProposalsByProposalIdResponse =
 /**
  * @type object
  */
+export type GetApiStartupStatus200 = {
+	/**
+	 * @type string
+	 */
+	status: "ok";
+};
+
+/**
+ * @type object
+ */
+export type GetApiStartupStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiStartupOptions = {
+	body?: never;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiStartupResponses = {
+	"200": GetApiStartupStatus200;
+	"500": GetApiStartupStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiStartupResponse = GetApiStartupStatus200 | GetApiStartupStatus500;
+
+/**
+ * @type object
+ */
 export type GetApiHealthStatus200 = {
 	/**
 	 * @type string
@@ -4049,6 +4087,33 @@ export const GetApiReadyStatus200StatusEnum = {
 export type GetApiReadyStatus200StatusEnum =
 	(typeof GetApiReadyStatus200StatusEnum)[keyof typeof GetApiReadyStatus200StatusEnum];
 
+export const GetApiReadyStatus200ChecksDatabaseStateEnum = {
+	ready: "ready",
+	degraded: "degraded",
+	unavailable: "unavailable",
+} as const;
+
+export type GetApiReadyStatus200ChecksDatabaseStateEnum =
+	(typeof GetApiReadyStatus200ChecksDatabaseStateEnum)[keyof typeof GetApiReadyStatus200ChecksDatabaseStateEnum];
+
+export const GetApiReadyStatus200ChecksStorageStateEnum = {
+	ready: "ready",
+	degraded: "degraded",
+	unavailable: "unavailable",
+} as const;
+
+export type GetApiReadyStatus200ChecksStorageStateEnum =
+	(typeof GetApiReadyStatus200ChecksStorageStateEnum)[keyof typeof GetApiReadyStatus200ChecksStorageStateEnum];
+
+export const GetApiReadyStatus200ChecksRecommendationsStateEnum = {
+	ready: "ready",
+	degraded: "degraded",
+	unavailable: "unavailable",
+} as const;
+
+export type GetApiReadyStatus200ChecksRecommendationsStateEnum =
+	(typeof GetApiReadyStatus200ChecksRecommendationsStateEnum)[keyof typeof GetApiReadyStatus200ChecksRecommendationsStateEnum];
+
 /**
  * @type object
  */
@@ -4060,19 +4125,40 @@ export type GetApiReadyStatus200 = {
 	/**
 	 * @type object
 	 */
-	services: {
+	checks: {
 		/**
-		 * @type boolean
+		 * @type object
 		 */
-		database: boolean;
+		database: {
+			/**
+			 * @default 'ready'
+			 * @type string
+			 */
+			state: GetApiReadyStatus200ChecksDatabaseStateEnum;
+			latencyMs: string | number;
+		};
 		/**
-		 * @type boolean
+		 * @type object
 		 */
-		storage: boolean;
+		storage: {
+			/**
+			 * @default 'ready'
+			 * @type string
+			 */
+			state: GetApiReadyStatus200ChecksStorageStateEnum;
+			latencyMs: string | number;
+		};
 		/**
-		 * @type boolean
+		 * @type object
 		 */
-		recommendations: boolean;
+		recommendations: {
+			/**
+			 * @default 'ready'
+			 * @type string
+			 */
+			state: GetApiReadyStatus200ChecksRecommendationsStateEnum;
+			latencyMs: string | number;
+		};
 	};
 };
 
@@ -4089,6 +4175,33 @@ export const GetApiReadyStatus503StatusEnum = {
 export type GetApiReadyStatus503StatusEnum =
 	(typeof GetApiReadyStatus503StatusEnum)[keyof typeof GetApiReadyStatus503StatusEnum];
 
+export const GetApiReadyStatus503ChecksDatabaseStateEnum = {
+	ready: "ready",
+	degraded: "degraded",
+	unavailable: "unavailable",
+} as const;
+
+export type GetApiReadyStatus503ChecksDatabaseStateEnum =
+	(typeof GetApiReadyStatus503ChecksDatabaseStateEnum)[keyof typeof GetApiReadyStatus503ChecksDatabaseStateEnum];
+
+export const GetApiReadyStatus503ChecksStorageStateEnum = {
+	ready: "ready",
+	degraded: "degraded",
+	unavailable: "unavailable",
+} as const;
+
+export type GetApiReadyStatus503ChecksStorageStateEnum =
+	(typeof GetApiReadyStatus503ChecksStorageStateEnum)[keyof typeof GetApiReadyStatus503ChecksStorageStateEnum];
+
+export const GetApiReadyStatus503ChecksRecommendationsStateEnum = {
+	ready: "ready",
+	degraded: "degraded",
+	unavailable: "unavailable",
+} as const;
+
+export type GetApiReadyStatus503ChecksRecommendationsStateEnum =
+	(typeof GetApiReadyStatus503ChecksRecommendationsStateEnum)[keyof typeof GetApiReadyStatus503ChecksRecommendationsStateEnum];
+
 /**
  * @type object
  */
@@ -4100,19 +4213,40 @@ export type GetApiReadyStatus503 = {
 	/**
 	 * @type object
 	 */
-	services: {
+	checks: {
 		/**
-		 * @type boolean
+		 * @type object
 		 */
-		database: boolean;
+		database: {
+			/**
+			 * @default 'ready'
+			 * @type string
+			 */
+			state: GetApiReadyStatus503ChecksDatabaseStateEnum;
+			latencyMs: string | number;
+		};
 		/**
-		 * @type boolean
+		 * @type object
 		 */
-		storage: boolean;
+		storage: {
+			/**
+			 * @default 'ready'
+			 * @type string
+			 */
+			state: GetApiReadyStatus503ChecksStorageStateEnum;
+			latencyMs: string | number;
+		};
 		/**
-		 * @type boolean
+		 * @type object
 		 */
-		recommendations: boolean;
+		recommendations: {
+			/**
+			 * @default 'ready'
+			 * @type string
+			 */
+			state: GetApiReadyStatus503ChecksRecommendationsStateEnum;
+			latencyMs: string | number;
+		};
 	};
 };
 

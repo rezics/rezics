@@ -12,6 +12,7 @@ import {
 	RecommendationReasonSchema,
 	RecommendationTrackingSchema,
 } from "../recommendations/schema";
+import { HealthCheckStateValues } from "../../health/model";
 import { CollectionConfigV1 } from "../users/schema";
 export { toApiErrorResponse } from "./error-response";
 
@@ -31,12 +32,16 @@ export const CompletionStateResponse = t.Object({ completed: t.Boolean() });
 export const UpdateStateResponse = t.Object({ updated: t.Boolean() });
 
 export const HealthResponse = t.Object({ status: t.Literal("ok") });
+const ReadinessCheckResponse = t.Object({
+	state: t.UnionEnum(HealthCheckStateValues),
+	latencyMs: t.Integer({ minimum: 0 }),
+});
 export const ReadinessResponse = t.Object({
 	status: t.Union([t.Literal("ready"), t.Literal("unavailable")]),
-	services: t.Object({
-		database: t.Boolean(),
-		storage: t.Boolean(),
-		recommendations: t.Boolean(),
+	checks: t.Object({
+		database: ReadinessCheckResponse,
+		storage: ReadinessCheckResponse,
+		recommendations: ReadinessCheckResponse,
 	}),
 });
 

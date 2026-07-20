@@ -76,6 +76,15 @@ implemented. Use `task infra:status` for persistent infrastructure,
 for machine-readable application state. The static `apps/about` site remains
 independent from the AppHost.
 
+The API exposes startup at `GET /api/startup`, dependency-free liveness at
+`GET/HEAD /api/health`, and traffic readiness at `GET /api/ready`. PostgreSQL is
+readiness-required; storage and recommendation freshness are reported as
+degraded without taking the core API out of service. The recommendation worker
+owns a scheduler-only health listener with `/startup`, `/health`, and `/ready`;
+it is not a public service endpoint. Aspire and CI consume the paths and timing policy from
+`services/main/src/health-contract.ts`. Production Nomad jobs consume that
+machine-checkable contract when Plan 6 introduces the deployment artifacts.
+
 Infrastructure lifecycle commands are `task infra:up`, `task infra:stop`,
 `task infra:down`, and `task infra:logs`. `task infra:reset` intentionally
 deletes all local PostgreSQL, RustFS, and Meilisearch data before rebuilding the

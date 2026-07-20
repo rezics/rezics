@@ -1,5 +1,9 @@
 import { refExpr } from "./.aspire/modules/base.mjs";
-import { createBuilder } from "./.aspire/modules/aspire.mjs";
+import { createBuilder, ProbeType } from "./.aspire/modules/aspire.mjs";
+import {
+	apiSchedulerHealthContract,
+	workerSchedulerHealthContract,
+} from "../services/main/src/health-contract.ts";
 
 type AppHostMode = "development" | "search" | "smoke";
 
@@ -51,6 +55,14 @@ function requireHttpOrigin(name: string): string {
 	if (url.pathname !== "/" || url.search || url.hash)
 		throw new Error(`${name} must be an origin without a path, query, or fragment`);
 	return url.origin;
+}
+
+function seconds(milliseconds: number): number {
+	if (!Number.isSafeInteger(milliseconds) || milliseconds <= 0 || milliseconds % 1_000 !== 0)
+		throw new Error(
+			`Probe duration must be a positive whole number of seconds: ${milliseconds}`,
+		);
+	return milliseconds / 1_000;
 }
 
 const appHostMode = resolveAppHostMode(process.env.REZICS_ASPIRE_MODE);
@@ -110,8 +122,36 @@ let api = builder
 			? { env: "PORT", name: "http" }
 			: { env: "PORT", name: "http", port: requirePort("PORT") },
 	)
-	.withHttpHealthCheck({ endpointName: "http", path: "/api/health" })
+	.withHttpProbe(ProbeType.Startup, {
+		endpointName: "http",
+		path: apiSchedulerHealthContract.startup.path,
+		initialDelaySeconds: seconds(apiSchedulerHealthContract.startup.initialGraceMs),
+		periodSeconds: seconds(apiSchedulerHealthContract.startup.intervalMs),
+		timeoutSeconds: seconds(apiSchedulerHealthContract.startup.timeoutMs),
+		failureThreshold: apiSchedulerHealthContract.startup.failureThreshold,
+		successThreshold: 1,
+	})
+	.withHttpProbe(ProbeType.Liveness, {
+		endpointName: "http",
+		path: apiSchedulerHealthContract.liveness.path,
+		initialDelaySeconds: seconds(apiSchedulerHealthContract.liveness.initialGraceMs),
+		periodSeconds: seconds(apiSchedulerHealthContract.liveness.intervalMs),
+		timeoutSeconds: seconds(apiSchedulerHealthContract.liveness.timeoutMs),
+		failureThreshold: apiSchedulerHealthContract.liveness.failureThreshold,
+		successThreshold: 1,
+	})
+	.withHttpProbe(ProbeType.Readiness, {
+		endpointName: "http",
+		path: apiSchedulerHealthContract.readiness.path,
+		initialDelaySeconds: seconds(apiSchedulerHealthContract.readiness.initialGraceMs),
+		periodSeconds: seconds(apiSchedulerHealthContract.readiness.intervalMs),
+		timeoutSeconds: seconds(apiSchedulerHealthContract.readiness.timeoutMs),
+		failureThreshold: apiSchedulerHealthContract.readiness.failureThreshold,
+		successThreshold: 1,
+	})
 	.withEnvironment("HOST", "0.0.0.0")
+	.withEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
+	.withEnvironment("OTEL_METRIC_EXPORT_TIMEOUT", "1000")
 	.withEnvironment("DATABASE_URL", database)
 	.withEnvironment("BETTER_AUTH_SECRET", betterAuthSecret)
 	.withEnvironment("EMAIL_MODE", requireEnvironmentVariable("EMAIL_MODE"))
@@ -140,6 +180,37 @@ let worker = builder
 	.addBunApp("recommendation-worker", "../services/main", "src/worker.ts")
 	.withBun({ install: false })
 	.withRunScript("dev:worker")
+	.withHttpEndpoint({ env: "WORKER_HEALTH_PORT", name: "health" })
+	.withHttpProbe(ProbeType.Startup, {
+		endpointName: "health",
+		path: workerSchedulerHealthContract.startup.path,
+		initialDelaySeconds: seconds(workerSchedulerHealthContract.startup.initialGraceMs),
+		periodSeconds: seconds(workerSchedulerHealthContract.startup.intervalMs),
+		timeoutSeconds: seconds(workerSchedulerHealthContract.startup.timeoutMs),
+		failureThreshold: workerSchedulerHealthContract.startup.failureThreshold,
+		successThreshold: 1,
+	})
+	.withHttpProbe(ProbeType.Liveness, {
+		endpointName: "health",
+		path: workerSchedulerHealthContract.liveness.path,
+		initialDelaySeconds: seconds(workerSchedulerHealthContract.liveness.initialGraceMs),
+		periodSeconds: seconds(workerSchedulerHealthContract.liveness.intervalMs),
+		timeoutSeconds: seconds(workerSchedulerHealthContract.liveness.timeoutMs),
+		failureThreshold: workerSchedulerHealthContract.liveness.failureThreshold,
+		successThreshold: 1,
+	})
+	.withHttpProbe(ProbeType.Readiness, {
+		endpointName: "health",
+		path: workerSchedulerHealthContract.readiness.path,
+		initialDelaySeconds: seconds(workerSchedulerHealthContract.readiness.initialGraceMs),
+		periodSeconds: seconds(workerSchedulerHealthContract.readiness.intervalMs),
+		timeoutSeconds: seconds(workerSchedulerHealthContract.readiness.timeoutMs),
+		failureThreshold: workerSchedulerHealthContract.readiness.failureThreshold,
+		successThreshold: 1,
+	})
+	.withEnvironment("WORKER_HEALTH_HOST", "0.0.0.0")
+	.withEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf")
+	.withEnvironment("OTEL_METRIC_EXPORT_TIMEOUT", "1000")
 	.withEnvironment("DATABASE_URL", database)
 	.withEnvironment("BETTER_AUTH_SECRET", betterAuthSecret)
 	.withEnvironment("BETTER_AUTH_URL", apiEndpoint)

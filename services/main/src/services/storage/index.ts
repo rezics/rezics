@@ -31,9 +31,11 @@ const storageClient = new S3Client({
 });
 
 export const storage = {
-	health() {
+	health(signal?: AbortSignal) {
 		return withDependencySpan({ dependency: "s3", operation: "health" }, () =>
-			storageClient.send(new HeadBucketCommand({ Bucket: env.S3_BUCKET })),
+			storageClient.send(new HeadBucketCommand({ Bucket: env.S3_BUCKET }), {
+				abortSignal: signal,
+			}),
 		);
 	},
 	put(input: WithoutBucket<PutObjectCommandInput>) {

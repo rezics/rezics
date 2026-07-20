@@ -9,7 +9,14 @@ export type {
 } from "./config";
 export { resolveObservabilityConfiguration } from "./config";
 export type { LogDetails, SafeRequestLogContext, StructuredLogger } from "./logger";
-export type { DependencyName, ReadinessState, RequestMethod, StatusClass } from "./metrics";
+export type {
+	DependencyName,
+	ReadinessCheckState,
+	ReadinessFailureCategory,
+	ReadinessState,
+	RequestMethod,
+	StatusClass,
+} from "./metrics";
 export { normalizeOperationName, normalizeRequestMethod, normalizeRouteTemplate } from "./metrics";
 export {
 	observedFetch,

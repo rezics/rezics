@@ -3,6 +3,8 @@ import type { Readable } from "node:stream";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
+import { apiSchedulerHealthContract } from "../../services/main/src/health-contract.ts";
+
 const repositoryRoot = fileURLToPath(new URL("../..", import.meta.url));
 const appHostPath = fileURLToPath(new URL("../apphost.mts", import.meta.url));
 const appHostArgument = "aspire-apphost/apphost.mts";
@@ -204,9 +206,12 @@ async function verifySmoke(resources: ResourceDescription[]) {
 	const webOrigin = web.urls.find((url) => url.name === "http")?.url;
 	if (!apiOrigin || !webOrigin)
 		throw new Error("Aspire did not discover API and web HTTP endpoints");
-	await requestOk("API health", new URL("/api/health", apiOrigin));
+	await requestOk("API readiness", new URL(apiSchedulerHealthContract.readiness.path, apiOrigin));
 	await requestOk("Web root", new URL("/", webOrigin));
-	await requestOk("Web proxy health", new URL("/api/health", webOrigin));
+	await requestOk(
+		"Web proxy readiness",
+		new URL(apiSchedulerHealthContract.readiness.path, webOrigin),
+	);
 }
 
 function captureOutput(child: ManagedChildProcess) {

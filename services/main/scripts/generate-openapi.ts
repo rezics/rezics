@@ -11,6 +11,10 @@ import { format, resolveConfig } from "prettier";
 
 import { ApiErrorCodes } from "../src/services/api/errors";
 
+const { initializeObservability } = await import("@rezics/observability");
+const observability = initializeObservability({
+	service: { name: "rezics-openapi-generator", version: "0.1.0", environment: "tooling" },
+});
 const { default: api } = await import("../src/services/api");
 
 const document = {
@@ -117,3 +121,4 @@ writeFileSync(
 	outputPath,
 	await format(JSON.stringify(document), { ...prettierConfig, filepath: outputPath }),
 );
+await observability.shutdown();

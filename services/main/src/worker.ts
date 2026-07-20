@@ -8,14 +8,23 @@ const observability = initializeObservability({
 	},
 });
 
-const [{ env }, { database }, recommendationWorker] = await Promise.all([
+const [{ serve }, { env }, { database }, recommendationWorker, workerHealth] = await Promise.all([
+	import("srvx"),
 	import("./services/config"),
 	import("./services/database"),
 	import("./services/recommendations/worker"),
+	import("./services/health/worker-health"),
 ]);
 const { aggregateRecommendationMetrics, purgeRecommendationData, refreshRecommendationSnapshot } =
 	recommendationWorker;
 const { logger } = observability;
+const healthState = new workerHealth.WorkerHealthState();
+const evaluateReadiness = workerHealth.createWorkerReadinessEvaluator(healthState);
+const healthServer = serve({
+	fetch: workerHealth.createWorkerHealthHandler(evaluateReadiness),
+	hostname: env.WORKER_HEALTH_HOST,
+	port: env.WORKER_HEALTH_PORT,
+});
 
 let stopping = false;
 let wake: (() => void) | undefined;
@@ -23,9 +32,18 @@ let wake: (() => void) | undefined;
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
 	process.on(signal, () => {
 		stopping = true;
+		healthState.stop();
 		wake?.();
 	});
 }
+
+healthState.start();
+const heartbeatTimer = setInterval(() => {
+	healthState.heartbeat();
+	observability.metrics.workerHeartbeat(healthState.activeJobStartedAt());
+}, 5_000);
+heartbeatTimer.unref?.();
+observability.metrics.workerHeartbeat();
 
 function wait(duration: number) {
 	return new Promise<void>((resolve) => {
@@ -43,6 +61,8 @@ function wait(duration: number) {
 
 async function run() {
 	while (!stopping) {
+		healthState.startJob();
+		observability.metrics.workerHeartbeat(healthState.activeJobStartedAt());
 		try {
 			await runWorkerJob({ name: "recommendation.refresh", retryCount: 0 }, async () => {
 				const snapshotId = await refreshRecommendationSnapshot();
@@ -59,7 +79,12 @@ async function run() {
 					},
 				);
 			});
-		} catch {}
+		} catch {
+			// runWorkerJob records the bounded failure telemetry before control returns here.
+		} finally {
+			healthState.finishJob();
+			observability.metrics.workerHeartbeat();
+		}
 		if (!stopping) await wait(env.RECOMMENDATION_REFRESH_INTERVAL_MS);
 	}
 }
@@ -67,6 +92,8 @@ async function run() {
 try {
 	await run();
 } finally {
+	clearInterval(heartbeatTimer);
+	await healthServer.close();
 	await database.$client.end();
 	await observability.shutdown();
 }

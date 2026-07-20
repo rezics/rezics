@@ -6,6 +6,9 @@ export type RequestMethod =
 	"GET" | "HEAD" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "OTHER";
 export type StatusClass = "1xx" | "2xx" | "3xx" | "4xx" | "5xx" | "unknown";
 export type ReadinessState = "ready" | "not_ready";
+export type ReadinessCheckState = "ready" | "degraded" | "unavailable";
+export type ReadinessFailureCategory =
+	"configuration" | "dependency" | "not_ready" | "timeout" | "overall_timeout";
 
 const StableName = /^[a-z][a-z0-9_.-]{0,63}$/;
 
@@ -73,8 +76,12 @@ export class ObservabilityMetrics {
 	readonly #dependencyDuration: Histogram;
 	readonly #dependencyFailures: Counter;
 	readonly #readinessTransitions: Counter;
+	readonly #readinessCheckDuration: Histogram;
+	readonly #readinessCheckFailures: Counter;
 	readonly #searchOutboxDepth: ReturnType<Meter["createUpDownCounter"]>;
 	readonly #searchOutboxAge: Histogram;
+	#workerHeartbeatAt: number | undefined;
+	#activeWorkerJobStartedAt: number | undefined;
 
 	constructor(meter: Meter) {
 		this.#requestCount = meter.createCounter("rezics.http.server.request.count");
@@ -99,6 +106,12 @@ export class ObservabilityMetrics {
 		this.#readinessTransitions = meter.createCounter("rezics.readiness.transitions", {
 			unit: "{transition}",
 		});
+		this.#readinessCheckDuration = meter.createHistogram("rezics.readiness.check.duration", {
+			unit: "ms",
+		});
+		this.#readinessCheckFailures = meter.createCounter("rezics.readiness.check.failures", {
+			unit: "{failure}",
+		});
 		this.#searchOutboxDepth = meter.createUpDownCounter("rezics.search.outbox.depth", {
 			unit: "{item}",
 		});
@@ -115,6 +128,20 @@ export class ObservabilityMetrics {
 		meter
 			.createObservableGauge("rezics.runtime.uptime", { unit: "s" })
 			.addCallback((result) => result.observe(process.uptime()));
+		meter
+			.createObservableGauge("rezics.worker.heartbeat.age", { unit: "s" })
+			.addCallback((result) => {
+				if (this.#workerHeartbeatAt !== undefined)
+					result.observe(Math.max(0, Date.now() - this.#workerHeartbeatAt) / 1_000);
+			});
+		meter
+			.createObservableGauge("rezics.worker.job.active_age", { unit: "s" })
+			.addCallback((result) => {
+				if (this.#activeWorkerJobStartedAt !== undefined)
+					result.observe(
+						Math.max(0, Date.now() - this.#activeWorkerJobStartedAt) / 1_000,
+					);
+			});
 	}
 
 	requestStarted(): void {
@@ -147,6 +174,16 @@ export class ObservabilityMetrics {
 		this.#workerDuration.record(Math.max(0, durationMillis), attributes);
 	}
 
+	workerHeartbeat(activeJobStartedAt?: number): void {
+		if (
+			activeJobStartedAt !== undefined &&
+			(!Number.isFinite(activeJobStartedAt) || activeJobStartedAt < 0)
+		)
+			throw new Error("Active worker job start time must be a non-negative finite number");
+		this.#workerHeartbeatAt = Date.now();
+		this.#activeWorkerJobStartedAt = activeJobStartedAt;
+	}
+
 	dependencyFinished(
 		dependency: DependencyName,
 		operation: string,
@@ -164,6 +201,24 @@ export class ObservabilityMetrics {
 	readinessTransition(from: ReadinessState, to: ReadinessState): void {
 		if (from === to) return;
 		this.#readinessTransitions.add(1, { from, to });
+	}
+
+	readinessCheckFinished(
+		name: string,
+		state: ReadinessCheckState,
+		durationMillis: number,
+		failureCategory?: ReadinessFailureCategory,
+	): void {
+		const attributes = {
+			"readiness.check.name": normalizeOperationName(name),
+			"readiness.check.state": state,
+		};
+		this.#readinessCheckDuration.record(Math.max(0, durationMillis), attributes);
+		if (failureCategory)
+			this.#readinessCheckFailures.add(1, {
+				...attributes,
+				"readiness.failure.category": failureCategory,
+			});
 	}
 
 	searchOutboxState(previousDepth: number, depth: number, oldestAgeSeconds: number): void {

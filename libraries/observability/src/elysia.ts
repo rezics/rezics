@@ -42,7 +42,9 @@ function numericStatus(status: unknown): number | undefined {
 export function createElysiaObservability(options: ElysiaObservabilityOptions = {}): Elysia {
 	const observability = getActiveObservability();
 	const requests = new WeakMap<Request, RequestTelemetry>();
-	const excludedPaths = new Set(options.excludedPaths ?? ["/api/health"]);
+	const excludedPaths = new Set(
+		options.excludedPaths ?? ["/api/startup", "/api/health", "/api/ready"],
+	);
 
 	function finish(request: Request, statusCode: number | undefined): void {
 		const telemetry = requests.get(request);
