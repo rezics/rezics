@@ -36,6 +36,7 @@ functions:
       file: "current-transform.exs"
     - name: "rezics-unit-search-routing-v1"
       type: "routing"
+      sink_type: "meilisearch"
       file: "current-routing.exs"
     - name: "rezics-revision-search-document-v1"
       type: "enrichment"
@@ -45,6 +46,7 @@ functions:
       file: "history-transform.exs"
     - name: "rezics-revision-search-routing-v1"
       type: "routing"
+      sink_type: "meilisearch"
       file: "history-routing.exs"
 
 sinks:
@@ -63,11 +65,13 @@ sinks:
       enrichment: "rezics-unit-search-document-v1"
       transform: "rezics-unit-search-transform-v1"
       routing: "rezics-unit-search-routing-v1"
+      annotations:
+          routing_index_name: &current_index_name "${MEILISEARCH_CURRENT_INDEX_UID:-rezics_units_v1_20260720}"
       load_shedding_policy: "pause_on_full"
       destination:
           type: "meilisearch"
           endpoint_url: "${MEILISEARCH_INTERNAL_URL:-http://meilisearch:7700}"
-          index_name: "${MEILISEARCH_CURRENT_INDEX_UID:-rezics_units_v1_20260720}"
+          index_name: *current_index_name
           primary_key: "id"
           api_key: "${MEILISEARCH_CURRENT_SINK_KEY}"
           batch_size: 100
@@ -87,11 +91,13 @@ sinks:
       enrichment: "rezics-revision-search-document-v1"
       transform: "rezics-revision-search-transform-v1"
       routing: "rezics-revision-search-routing-v1"
+      annotations:
+          routing_index_name: &history_index_name "${MEILISEARCH_HISTORY_INDEX_UID:-rezics_revisions_v1_20260720}"
       load_shedding_policy: "pause_on_full"
       destination:
           type: "meilisearch"
           endpoint_url: "${MEILISEARCH_INTERNAL_URL:-http://meilisearch:7700}"
-          index_name: "${MEILISEARCH_HISTORY_INDEX_UID:-rezics_revisions_v1_20260720}"
+          index_name: *history_index_name
           primary_key: "id"
           api_key: "${MEILISEARCH_HISTORY_SINK_KEY}"
           batch_size: 100

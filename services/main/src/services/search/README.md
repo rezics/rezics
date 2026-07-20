@@ -21,6 +21,10 @@ migration. Sequin configuration, enrichment SQL, transforms, and routing live un
 `services/main/search`. Enrichment always reads the latest authoritative state, emits one complete
 document, and routes missing/ineligible rows to an idempotent delete.
 
+Keep routing implementations in their `.exs` files. Index UIDs are resolved in `sequin.yaml` and
+passed to routing through sink `annotations`; the same anchored value configures the destination.
+This keeps executable code independent of CLI-specific environment interpolation behavior.
+
 `service.ts` scans bounded Meilisearch candidate batches, preserves their ordinality during
 PostgreSQL hydration, and refills after stale/deleted/unauthorized candidates. Cursors bind the
 active generation, normalized request hash, page size, and per-category scan state. An absent or
