@@ -20,6 +20,12 @@ export const feedSortParser = parseAsStringLiteral(FeedSorts)
 	.withDefault("best")
 	.withOptions({ ...urlStateOptions, history: "push" });
 
+export const FeedContentKinds = ["post", "reply"] as const;
+export type FeedContentKind = (typeof FeedContentKinds)[number];
+export const feedContentParser = parseAsArrayOf(parseAsStringLiteral(FeedContentKinds))
+	.withDefault([...FeedContentKinds])
+	.withOptions({ ...urlStateOptions, history: "push" });
+
 export const SearchScopes = Object.values(PostApiSearchByIndexIndex);
 export const searchParamsParsers = {
 	q: parseAsString.withDefault("").withOptions({ ...urlStateOptions, history: "push" }),

@@ -1,9 +1,17 @@
 export default {
-	title: "Community square",
+	title: "Feed",
 	subtitle: "Works become visible through discussion",
 	personalized: "For you",
 	sortLabel: "Feed sorting",
 	sort: { best: "Best", hot: "Hot", new: "New", top: "Top", rising: "Rising" },
+	contentFilterLabel: "Content filter",
+	contentFilterPlaceholder: "Content",
+	content: {
+		post: "Posts",
+		reply: "Replies",
+		postDescription: "Topics started by community members",
+		replyDescription: "Replies within ongoing discussions",
+	},
 	discoverWorks: "Discover works worth your time",
 	emptyTitle: "It is quiet here",
 	emptyBody: "Be the first to share a work or an idea.",

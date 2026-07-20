@@ -1,9 +1,17 @@
 export default {
-	title: "社区广场",
+	title: "信息流",
 	subtitle: "作品因讨论而被看见",
 	personalized: "为你推荐",
 	sortLabel: "信息流排序",
 	sort: { best: "最佳", hot: "热门", new: "最新", top: "高赞", rising: "上升" },
+	contentFilterLabel: "内容筛选",
+	contentFilterPlaceholder: "内容",
+	content: {
+		post: "主题帖",
+		reply: "回复",
+		postDescription: "由社区成员发起的主题内容",
+		replyDescription: "讨论中的回复与延伸内容",
+	},
 	discoverWorks: "发现值得投入的作品",
 	emptyTitle: "广场还很安静",
 	emptyBody: "成为第一个分享作品与见解的人。",

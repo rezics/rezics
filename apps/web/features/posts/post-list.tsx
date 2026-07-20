@@ -8,16 +8,7 @@ import {
 	usePutApiRecommendationsExclusionsByUnitId,
 } from "@rezics/openapi-tanstack-query";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import {
-	ArrowBigUp,
-	BookOpenIcon,
-	Bookmark,
-	ChevronRight,
-	Ellipsis,
-	EyeOff,
-	MessageCircle,
-	Share2,
-} from "lucide-react";
+import { ArrowBigUp, Bookmark, Ellipsis, EyeOff, MessageCircle, Share2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
@@ -27,15 +18,11 @@ import {
 	AlertDescription,
 	Avatar,
 	AvatarFallback,
-	Badge,
 	Button,
 	Card,
 	CardContent,
-	Item,
-	ItemContent,
-	ItemDescription,
-	ItemMedia,
-	ItemTitle,
+	cn,
+	Cover,
 	Menu,
 	MenuContent,
 	MenuItem,
@@ -49,6 +36,7 @@ import { invalidateRecommendationQueries } from "@/features/recommendations/quer
 import { useTranslation } from "@/i18n/client";
 import { readPortableText } from "@/lib/block";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
+import type { FeedContentKind } from "@/lib/search-params";
 import { firstPublisher, PublisherLinks } from "./publisher-list";
 
 type FeedSort = "best" | "hot" | "new" | "top" | "rising";
@@ -56,11 +44,13 @@ export type FeedPost = GetApiFeedStatus200["items"][number];
 
 export function PostList({
 	infinite = false,
+	postKinds,
 	realmId,
 	sort = "new",
 	personalized,
 }: {
 	infinite?: boolean;
+	postKinds?: readonly FeedContentKind[];
 	realmId?: string;
 	sort?: FeedSort;
 	personalized?: boolean;
@@ -113,9 +103,10 @@ export function PostList({
 		query.isFetchingNextPage,
 		query.isFetchNextPageError,
 	]);
+	const includedPostKinds = new Set<FeedContentKind>(postKinds ?? ["post", "reply"]);
 	const items = query.data?.pages
 		.flatMap((page) => page.items)
-		.filter(({ id }) => !hidden.has(id));
+		.filter(({ id, postKind }) => !hidden.has(id) && includedPostKinds.has(postKind));
 	const setItemHidden = (id: string, value: boolean) =>
 		setHidden((current) => {
 			const next = new Set(current);
@@ -153,7 +144,8 @@ export function PostList({
 		);
 	return (
 		<div
-			className="divide-y divide-border-weak py-1 sm:py-2"
+			className="divide-y divide-border-weak"
+			data-content={postKinds?.join(",")}
 			data-sort={sort}
 			data-personalized={personalized}
 		>
@@ -244,10 +236,10 @@ export function RelatedPostRecommendations({ postId }: { postId: string }) {
 
 function FeedSkeleton() {
 	return (
-		<Card className="rounded-none border-0 bg-background shadow-none [--space:--spacing(4)] sm:rounded-2xl sm:[--space:--spacing(5)]">
-			<CardContent className="flex gap-3">
-				<Skeleton className="size-9 shrink-0 rounded-full" />
-				<div className="grid flex-1 gap-3">
+		<Card className="rounded-none border-0 bg-background py-4 shadow-none [--space:--spacing(4)]">
+			<CardContent className="grid grid-cols-[5rem_minmax(0,1fr)] gap-4 px-0 sm:grid-cols-[7.5rem_minmax(0,1fr)]">
+				<Skeleton className="aspect-[3/4] w-full rounded-xl" />
+				<div className="grid content-start gap-3">
 					<Skeleton className="h-4 w-1/3" />
 					<Skeleton className="h-5 w-2/3" />
 					<Skeleton className="h-16 w-full" />
@@ -278,6 +270,7 @@ export function PostListItem({
 		},
 	});
 	const reason = recommendationReasonLabel(post.recommendationReason, t.feed);
+	const hasCover = Boolean(post.subject?.cover);
 	const markNotInterested = () => {
 		onHiddenChange?.(true);
 		exclude.mutate({
@@ -296,38 +289,49 @@ export function PostListItem({
 	return (
 		<Card
 			asChild
-			className="group w-full min-w-0 rounded-none border-0 bg-background shadow-none [--space:--spacing(4)] transition-colors hover:bg-surface-hover focus-within:bg-surface-hover sm:rounded-2xl sm:[--space:--spacing(5)]"
+			className="group w-full min-w-0 rounded-none border-0 bg-background shadow-none [--space:--spacing(4)] transition-colors hover:bg-surface-hover focus-within:bg-surface-hover"
 		>
 			<article ref={elementRef}>
-				<CardContent className="flex gap-3">
-					{primaryPublisher ? (
-						<Link
-							className="grid size-11 shrink-0 place-items-center sm:size-9"
-							href={`/users/${primaryPublisher.profileId}`}
-						>
-							<Avatar className="size-9">
-								<AvatarFallback className="bg-accent text-accent-foreground">
-									{initial}
-								</AvatarFallback>
-							</Avatar>
-						</Link>
-					) : (
-						<div className="grid size-11 shrink-0 place-items-center sm:size-9">
-							<Avatar className="size-9">
-								<AvatarFallback>{initial}</AvatarFallback>
-							</Avatar>
-						</div>
+				<CardContent
+					className={cn(
+						"grid gap-4 px-1 py-6 sm:px-2",
+						hasCover && "sm:grid-cols-[7.5rem_minmax(0,1fr)]",
 					)}
+				>
+					{post.subject?.cover ? (
+						<Link
+							aria-label={post.subject.title ?? t.feed.relatedWork}
+							className="block w-full max-w-72 sm:max-w-none"
+							href={`/units/${post.subject.type}/${post.subject.id}`}
+						>
+							<Cover
+								alt={post.subject.title ?? t.feed.relatedWork}
+								className="rounded-xl border border-border-weak shadow-sm/5"
+								sizes="(min-width: 640px) 120px, 72vw"
+								src={post.subject.cover.url}
+							/>
+						</Link>
+					) : null}
 					<div className="min-w-0 flex-1">
-						<div className="text-muted-foreground flex flex-wrap items-center gap-x-1.5 text-xs">
-							{post.postKind === "reply" && (
-								<Badge variant="secondary">{t.posts.replyPost}</Badge>
-							)}
+						<div className="flex min-h-8 flex-wrap items-center gap-x-1.5 text-muted-foreground text-xs">
+							{primaryPublisher ? (
+								<Link
+									className="me-1 grid size-7 shrink-0 place-items-center"
+									href={`/users/${primaryPublisher.profileId}`}
+								>
+									<Avatar className="size-7">
+										<AvatarFallback className="bg-accent text-accent-foreground text-[0.625rem]">
+											{initial}
+										</AvatarFallback>
+									</Avatar>
+								</Link>
+							) : null}
 							<PublisherLinks
 								className="inline-flex min-h-6 items-center text-foreground font-semibold hover:underline"
 								emptyLabel={t.posts.unknownPublisher}
 								publishers={post.publishers}
 							/>
+							{post.postKind === "reply" ? <span>· {t.posts.replyPost}</span> : null}
 							<span>·</span>
 							<span>{formatRelativeTime(post.createdAt)}</span>
 							{post.realmId && (
@@ -393,50 +397,26 @@ export function PostListItem({
 								/>
 							</div>
 						</Link>
-						{post.subjectId && (
-							<Item asChild className="mt-3" variant="muted">
-								<Link
-									href={`/units/${post.subject?.type ?? "book"}/${post.subjectId}`}
-								>
-									<ItemMedia
-										className="bg-accent text-accent-foreground size-auto aspect-[2/3] w-9 overflow-hidden rounded text-xs font-black"
-										variant="image"
-									>
-										{post.subject?.cover ? (
-											<img alt="" src={post.subject.cover.url} />
-										) : (
-											<BookOpenIcon aria-hidden className="size-4" />
-										)}
-									</ItemMedia>
-									<ItemContent className="min-w-0">
-										<ItemDescription className="text-[10px] font-semibold uppercase tracking-wider">
-											{t.feed.relatedWork}
-										</ItemDescription>
-										<ItemTitle>
-											{post.subject?.title ?? t.actions.view}
-										</ItemTitle>
-									</ItemContent>
-									<ChevronRight
-										aria-hidden
-										className="text-muted-foreground size-4"
-									/>
-								</Link>
-							</Item>
-						)}
-						<div className="mt-3 flex items-center justify-between gap-1 border-t border-border-weak pt-2">
+						{post.subject ? (
+							<Link
+								className="mt-3 block w-fit text-muted-foreground text-xs hover:text-foreground hover:underline"
+								href={`/units/${post.subject.type}/${post.subject.id}`}
+							>
+								{t.feed.relatedWork}: {post.subject.title ?? t.actions.view}
+							</Link>
+						) : null}
+						<div className="mt-3 flex items-center gap-1 pt-1 sm:gap-2">
 							<Button
-								className="min-h-11 text-xs sm:min-h-7"
-								pill
+								className="min-h-11 rounded-lg text-xs sm:min-h-8"
 								size="sm"
-								variant="secondary"
+								variant="ghost"
 							>
 								<ArrowBigUp aria-hidden data-icon="inline-start" />
 								{Number(post.reactions.upvote) - Number(post.reactions.downvote)}
 							</Button>
 							<Button
 								asChild
-								className="min-h-11 text-xs sm:min-h-7"
-								pill
+								className="min-h-11 rounded-lg text-xs sm:min-h-8"
 								size="sm"
 								variant="ghost"
 							>
@@ -447,8 +427,7 @@ export function PostListItem({
 							</Button>
 							<Button
 								aria-label="Save"
-								className="size-11 sm:size-7"
-								pill
+								className="ms-auto size-11 rounded-lg sm:size-8"
 								size="icon-sm"
 								variant="ghost"
 							>
@@ -456,8 +435,7 @@ export function PostListItem({
 							</Button>
 							<Button
 								aria-label="Share"
-								className="size-11 sm:size-7"
-								pill
+								className="size-11 rounded-lg sm:size-8"
 								size="icon-sm"
 								variant="ghost"
 							>
