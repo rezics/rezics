@@ -1,11 +1,12 @@
 import { StatusCodes } from "http-status-codes";
-import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import {
 	NavigationDocument,
+	DockDocument,
+	UnresolvedBlockReferenceError,
 	UnitReferencedBlockDocument,
 	ZoneBoundaryDocument,
-	ZoneDockBlockHostPolicy,
 	ZonePageBlockHostPolicy,
 	ZoneThemeDocument,
 	assertUnitReferencedBlockDocument,
@@ -15,28 +16,26 @@ import {
 	collectBlockReferences,
 	collectNavigationReferences,
 	parseDocument,
-	type BlockReferenceResolver,
 	type PortableTextDocument,
 } from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
 
 import session, { resolveIdentity } from "../../auth/session";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
-import { getUnitReadCondition } from "../../authorization/unit/query";
+import { createUnitBlockReferenceResolver } from "../../blocks/reference-resolver";
 import { database } from "../../database";
 import {
 	software,
 	softwareRequirement,
-	imageAsset,
 	series,
 	seriesRelease,
-	unit,
 	unitAccessBinding,
 	unitLink,
 	unitLocalization,
 	zone,
 	zoneNavigation,
 	zonePage,
+	unitDock,
 	unitFollow,
 } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
@@ -210,7 +209,6 @@ async function toZoneResponse(
 		),
 		boundaryDocument: parseDocument(ZoneBoundaryDocument, record.boundaryDocument),
 		themeDocument: parseDocument(ZoneThemeDocument, record.themeDocument),
-		dockDocument: parseDocument(UnitReferencedBlockDocument, record.dockDocument),
 	} satisfies typeof ZoneResponse.static;
 }
 
@@ -228,12 +226,9 @@ function toZoneNavigationResponse(record: typeof zoneNavigation.$inferSelect) {
 	} satisfies typeof ZoneNavigationResponse.static;
 }
 
-function ensureZoneBlockDocument(value: unknown, dock = false): void {
+function ensureZoneBlockDocument(value: unknown): void {
 	try {
-		assertUnitReferencedBlockDocument(
-			value,
-			dock ? ZoneDockBlockHostPolicy : ZonePageBlockHostPolicy,
-		);
+		assertUnitReferencedBlockDocument(value, ZonePageBlockHostPolicy);
 	} catch {
 		throw new ZoneDocumentInvalid();
 	}
@@ -247,99 +242,49 @@ function ensureZoneNavigationDocument(value: unknown): void {
 	}
 }
 
-function createZoneReferenceResolver(
-	tx: DatabaseTransaction,
-	input: {
-		readonly zoneId: string;
-		readonly profileId: string;
-		readonly additionalPageSlugs?: readonly string[];
-	},
-): BlockReferenceResolver {
-	return {
-		async resolve(kind, identifiers) {
-			if (!identifiers.length) return new Set<string>();
-			if (kind === "unit") {
-				const rows = await tx
-					.select({ id: unit.id })
-					.from(unit)
-					.where(
-						and(
-							inArray(unit.id, [...identifiers]),
-							getUnitReadCondition(input.profileId),
-						),
-					);
-				return new Set(rows.map((row) => row.id));
-			}
-			if (kind === "asset") {
-				const rows = await tx
-					.select({ id: imageAsset.id })
-					.from(imageAsset)
-					.where(
-						and(
-							inArray(imageAsset.id, [...identifiers]),
-							eq(imageAsset.status, "ready"),
-							isNull(imageAsset.deletedAt),
-							or(
-								eq(imageAsset.access, "public"),
-								eq(imageAsset.ownerProfileId, input.profileId),
-							),
-						),
-					);
-				return new Set(rows.map((row) => row.id));
-			}
-			if (kind === "navigation") {
-				const rows = await tx
-					.select({ id: zoneNavigation.id })
-					.from(zoneNavigation)
-					.where(
-						and(
-							eq(zoneNavigation.zoneId, input.zoneId),
-							inArray(zoneNavigation.id, [...identifiers]),
-						),
-					);
-				return new Set(rows.map((row) => row.id));
-			}
-			const rows = await tx
-				.select({ slug: zonePage.slug })
-				.from(zonePage)
-				.where(
-					and(
-						eq(zonePage.zoneId, input.zoneId),
-						inArray(zonePage.slug, [...identifiers]),
-					),
-				);
-			return new Set([...rows.map((row) => row.slug), ...(input.additionalPageSlugs ?? [])]);
-		},
-	};
+type ZoneReferenceInput = {
+	readonly zoneId: string;
+	readonly profileId: string;
+	readonly additionalPageSlugs?: readonly string[];
+};
+
+function createZoneReferenceResolver(tx: DatabaseTransaction, input: ZoneReferenceInput) {
+	return createUnitBlockReferenceResolver(tx, {
+		host: { unitId: input.zoneId, kind: "zone" },
+		profileId: input.profileId,
+		additionalZonePageSlugs: input.additionalPageSlugs,
+	});
 }
 
 async function ensureZoneBlockReferences(
 	tx: DatabaseTransaction,
 	document: unknown,
-	input: Parameters<typeof createZoneReferenceResolver>[1],
+	input: ZoneReferenceInput,
 ): Promise<void> {
 	try {
 		await assertResolvedBlockReferences(
 			parseDocument(UnitReferencedBlockDocument, document),
 			createZoneReferenceResolver(tx, input),
 		);
-	} catch {
-		throw new ZoneDocumentInvalid();
+	} catch (cause) {
+		if (cause instanceof UnresolvedBlockReferenceError) throw new ZoneDocumentInvalid();
+		throw cause;
 	}
 }
 
 async function ensureZoneNavigationReferences(
 	tx: DatabaseTransaction,
 	document: unknown,
-	input: Parameters<typeof createZoneReferenceResolver>[1],
+	input: ZoneReferenceInput,
 ): Promise<void> {
 	try {
 		await assertResolvedNavigationReferences(
 			parseDocument(NavigationDocument, document),
 			createZoneReferenceResolver(tx, input),
 		);
-	} catch {
-		throw new ZoneDocumentInvalid();
+	} catch (cause) {
+		if (cause instanceof UnresolvedBlockReferenceError) throw new ZoneDocumentInvalid();
+		throw cause;
 	}
 }
 
@@ -440,7 +385,6 @@ export default new Elysia()
 						scopes.push(["localizations", body.localization.language]);
 					if (body.boundaryDocument) scopes.push(["zone", "boundary"]);
 					if (body.themeDocument) scopes.push(["zone", "theme"]);
-					if (body.dockDocument) scopes.push(["zone", "dock"]);
 					if (body.startsAt !== undefined || body.endsAt !== undefined)
 						scopes.push(["zone", "settings"]);
 					for (const scope of scopes)
@@ -450,7 +394,6 @@ export default new Elysia()
 							scope,
 						);
 					const current = await getZone(params.zoneId);
-					if (body.dockDocument) ensureZoneBlockDocument(body.dockDocument, true);
 					const startsAt =
 						body.startsAt === undefined
 							? current.startsAt
@@ -468,11 +411,6 @@ export default new Elysia()
 						await tx.execute(
 							sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${params.zoneId}`}::text, 0))`,
 						);
-						if (body.dockDocument)
-							await ensureZoneBlockReferences(tx, body.dockDocument, {
-								zoneId: params.zoneId,
-								profileId: profile.unitId,
-							});
 						if (body.localization) {
 							await ensureImageAssetsAttachable(
 								tx,
@@ -495,7 +433,6 @@ export default new Elysia()
 						if (
 							body.boundaryDocument ||
 							body.themeDocument ||
-							body.dockDocument ||
 							body.startsAt !== undefined ||
 							body.endsAt !== undefined
 						)
@@ -507,9 +444,6 @@ export default new Elysia()
 										: {}),
 									...(body.themeDocument
 										? { themeDocument: body.themeDocument }
-										: {}),
-									...(body.dockDocument
-										? { dockDocument: body.dockDocument }
 										: {}),
 									...(body.startsAt !== undefined ? { startsAt } : {}),
 									...(body.endsAt !== undefined ? { endsAt } : {}),
@@ -532,10 +466,7 @@ export default new Elysia()
 					body: UpdateZoneBody,
 					response: {
 						[StatusCodes.OK]: ZoneResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"ZoneTimeRangeInvalid",
-							"ZoneDocumentInvalid",
-						]),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ZoneTimeRangeInvalid"]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 						[StatusCodes.NOT_FOUND]: UnitMutationNotFoundResponse,
 					},
@@ -649,7 +580,7 @@ export default new Elysia()
 					});
 				},
 				{
-					access: "contribute:unit:update",
+					access: "write:unit:delete",
 					params: ZonePageParams,
 					body: ZonePageBody,
 					response: {
@@ -685,7 +616,7 @@ export default new Elysia()
 							.limit(1);
 						if (!target) throw new ZonePageNotFound();
 						const [zoneRecord] = await tx
-							.select({ dockDocument: zone.dockDocument })
+							.select({ id: zone.id })
 							.from(zone)
 							.where(eq(zone.id, params.zoneId))
 							.limit(1);
@@ -698,16 +629,23 @@ export default new Elysia()
 							.select({ document: zoneNavigation.document })
 							.from(zoneNavigation)
 							.where(eq(zoneNavigation.zoneId, params.zoneId));
-						const referencedByBlock = [
-							zoneRecord.dockDocument,
-							...pages
+						const docks = await tx
+							.select({ document: unitDock.document })
+							.from(unitDock)
+							.where(eq(unitDock.unitId, params.zoneId));
+						const referencedByBlock =
+							docks.some((dock) =>
+								collectBlockReferences(
+									parseDocument(DockDocument, dock.document),
+								).zonePageSlugs.has(params.slug),
+							) ||
+							pages
 								.filter((page) => page.id !== target.id)
-								.map((page) => page.document),
-						].some((document) =>
-							collectBlockReferences(
-								parseDocument(UnitReferencedBlockDocument, document),
-							).zonePageSlugs.has(params.slug),
-						);
+								.some((page) =>
+									collectBlockReferences(
+										parseDocument(UnitReferencedBlockDocument, page.document),
+									).zonePageSlugs.has(params.slug),
+								);
 						const referencedByNavigation = navigations.some((navigation) =>
 							collectNavigationReferences(
 								parseDocument(NavigationDocument, navigation.document),
@@ -724,7 +662,7 @@ export default new Elysia()
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
 				},
 				{
-					access: "write:unit:delete",
+					access: "contribute:unit:update",
 					params: ZonePageParams,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
@@ -758,7 +696,7 @@ export default new Elysia()
 								.select()
 								.from(zoneNavigation)
 								.where(eq(zoneNavigation.zoneId, params.zoneId))
-								.orderBy(zoneNavigation.position, zoneNavigation.id)
+								.orderBy(zoneNavigation.createdAt, zoneNavigation.id)
 						).map(toZoneNavigationResponse),
 					};
 				},
@@ -771,8 +709,51 @@ export default new Elysia()
 					detail: { summary: "List Zone navigation resources", tags: ["Zones"] },
 				},
 			)
+			.post(
+				"/:zoneId/navigation",
+				async ({ params, profile, authorization, body }) => {
+					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
+						"zone",
+						"navigation",
+					]);
+					await getZone(params.zoneId);
+					ensureZoneNavigationDocument(body.document);
+					return database.transaction(async (tx) => {
+						await tx.execute(
+							sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${params.zoneId}`}::text, 0))`,
+						);
+						await ensureZoneNavigationReferences(tx, body.document, {
+							zoneId: params.zoneId,
+							profileId: profile.unitId,
+						});
+						const [saved] = await tx
+							.insert(zoneNavigation)
+							.values({ zoneId: params.zoneId, document: body.document })
+							.returning();
+						if (!saved) throw new Error("Zone navigation insert returned no row");
+						await recordUnitRevision(tx, {
+							unitId: params.zoneId,
+							actorProfileId: profile.unitId,
+							event: "update",
+						});
+						return toZoneNavigationResponse(saved);
+					});
+				},
+				{
+					access: "contribute:unit:update",
+					params: ZoneParams,
+					body: ZoneNavigationBody,
+					response: {
+						[StatusCodes.OK]: ZoneNavigationResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ZoneDocumentInvalid"]),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+					},
+					detail: { summary: "Create Zone navigation", tags: ["Zones"] },
+				},
+			)
 			.get(
-				"/:zoneId/navigation/:key",
+				"/:zoneId/navigation/:navigationId",
 				async ({ params, request }) => {
 					const authorization = (await resolveIdentity(request.headers, "unit:read"))
 						.authorization;
@@ -787,7 +768,7 @@ export default new Elysia()
 						.where(
 							and(
 								eq(zoneNavigation.zoneId, params.zoneId),
-								eq(zoneNavigation.key, params.key),
+								eq(zoneNavigation.id, params.navigationId),
 							),
 						)
 						.limit(1);
@@ -807,12 +788,12 @@ export default new Elysia()
 				},
 			)
 			.put(
-				"/:zoneId/navigation/:key",
+				"/:zoneId/navigation/:navigationId",
 				async ({ params, profile, authorization, body }) => {
 					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
 						"zone",
 						"navigation",
-						params.key,
+						params.navigationId,
 					]);
 					await getZone(params.zoneId);
 					ensureZoneNavigationDocument(body.document);
@@ -825,14 +806,16 @@ export default new Elysia()
 							profileId: profile.unitId,
 						});
 						const [saved] = await tx
-							.insert(zoneNavigation)
-							.values({ zoneId: params.zoneId, key: params.key, ...body })
-							.onConflictDoUpdate({
-								target: [zoneNavigation.zoneId, zoneNavigation.key],
-								set: body,
-							})
+							.update(zoneNavigation)
+							.set({ document: body.document })
+							.where(
+								and(
+									eq(zoneNavigation.zoneId, params.zoneId),
+									eq(zoneNavigation.id, params.navigationId),
+								),
+							)
 							.returning();
-						if (!saved) throw new Error("Zone navigation upsert returned no row");
+						if (!saved) throw new ZoneNavigationNotFound();
 						await recordUnitRevision(tx, {
 							unitId: params.zoneId,
 							actorProfileId: profile.unitId,
@@ -849,18 +832,21 @@ export default new Elysia()
 						[StatusCodes.OK]: ZoneNavigationResponse,
 						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ZoneDocumentInvalid"]),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"ZoneNavigationNotFound",
+						]),
 					},
-					detail: { summary: "Create or replace Zone navigation", tags: ["Zones"] },
+					detail: { summary: "Replace Zone navigation", tags: ["Zones"] },
 				},
 			)
 			.delete(
-				"/:zoneId/navigation/:key",
+				"/:zoneId/navigation/:navigationId",
 				async ({ params, profile, authorization }) => {
 					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
 						"zone",
 						"navigation",
-						params.key,
+						params.navigationId,
 					]);
 					await database.transaction(async (tx) => {
 						await tx.execute(
@@ -872,13 +858,13 @@ export default new Elysia()
 							.where(
 								and(
 									eq(zoneNavigation.zoneId, params.zoneId),
-									eq(zoneNavigation.key, params.key),
+									eq(zoneNavigation.id, params.navigationId),
 								),
 							)
 							.limit(1);
 						if (!target) throw new ZoneNavigationNotFound();
 						const [zoneRecord] = await tx
-							.select({ dockDocument: zone.dockDocument })
+							.select({ id: zone.id })
 							.from(zone)
 							.where(eq(zone.id, params.zoneId))
 							.limit(1);
@@ -887,14 +873,19 @@ export default new Elysia()
 							.select({ document: zonePage.document })
 							.from(zonePage)
 							.where(eq(zonePage.zoneId, params.zoneId));
-						const documents = [
-							zoneRecord.dockDocument,
-							...pages.map((page) => page.document),
-						];
+						const docks = await tx
+							.select({ document: unitDock.document })
+							.from(unitDock)
+							.where(eq(unitDock.unitId, params.zoneId));
 						if (
-							documents.some((document) =>
+							docks.some((dock) =>
 								collectBlockReferences(
-									parseDocument(UnitReferencedBlockDocument, document),
+									parseDocument(DockDocument, dock.document),
+								).navigationIds.has(target.id),
+							) ||
+							pages.some((page) =>
+								collectBlockReferences(
+									parseDocument(UnitReferencedBlockDocument, page.document),
 								).navigationIds.has(target.id),
 							)
 						)
@@ -909,7 +900,7 @@ export default new Elysia()
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
 				},
 				{
-					access: "write:unit:delete",
+					access: "contribute:unit:update",
 					params: ZoneNavigationParams,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
@@ -1024,7 +1015,6 @@ export default new Elysia()
 			.post(
 				"",
 				async ({ profile, body }) => {
-					ensureZoneBlockDocument(body.dockDocument, true);
 					const startsAt = body.startsAt ? new Date(body.startsAt) : null;
 					const endsAt = body.endsAt ? new Date(body.endsAt) : null;
 					if (startsAt && endsAt && endsAt <= startsAt) throw new ZoneTimeRangeInvalid();
@@ -1038,13 +1028,8 @@ export default new Elysia()
 							id: unitId,
 							boundaryDocument: body.boundaryDocument,
 							themeDocument: body.themeDocument,
-							dockDocument: body.dockDocument,
 							startsAt,
 							endsAt,
-						});
-						await ensureZoneBlockReferences(tx, body.dockDocument, {
-							zoneId: unitId,
-							profileId: profile.unitId,
 						});
 						await recordUnitRevision(tx, {
 							unitId,
@@ -1060,10 +1045,7 @@ export default new Elysia()
 					body: CreateZoneBody,
 					response: {
 						[StatusCodes.OK]: IdResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-							"ZoneTimeRangeInvalid",
-							"ZoneDocumentInvalid",
-						]),
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ZoneTimeRangeInvalid"]),
 						[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
 					},
 					detail: { summary: "Create Zone", tags: ["Zones"] },

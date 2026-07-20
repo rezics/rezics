@@ -24,6 +24,7 @@ import {
 } from "./contract-values";
 import {
 	createCreatedAtColumn,
+	createJsonDocumentColumn,
 	fractionalIndexPosition,
 	ordinalPosition,
 	createTimestampMsColumn,
@@ -50,6 +51,23 @@ export const realm = pgTable("realm", {
 	createdAt: createCreatedAtColumn(),
 	updatedAt: createUpdatedAtColumn(),
 });
+
+/** Realm-owned menu content, independent from the Menu Blocks that present it. */
+export const realmNavigation = pgTable(
+	"realm_navigation",
+	{
+		id: createUuidv7PrimaryKey(),
+		realmId: uuid()
+			.notNull()
+			.references(() => realm.id, { onDelete: "cascade" }),
+		document: createJsonDocumentColumn().notNull(),
+		createdAt: createCreatedAtColumn(),
+		updatedAt: createUpdatedAtColumn(),
+	},
+	(table) => [
+		index("realm_navigation_realm_created_idx").on(table.realmId, table.createdAt, table.id),
+	],
+);
 
 export const realmMember = pgTable(
 	"realm_member",

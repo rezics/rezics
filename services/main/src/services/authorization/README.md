@@ -38,9 +38,10 @@ tests are the executable contract for this order.
 
 Governance mutation is itself scope-aware: a maintainer delegated to `zone/page/welcome` may grant,
 restrict, or protect that subtree but cannot manage a sibling or the Unit root. Owner and
-maintainer assignment additionally requires a root owner or platform authority. Zone surfaces use
-`zone/boundary`, `zone/theme`, `zone/dock`, `zone/settings`, `zone/page/{slug}`, and
-`zone/navigation/{key}`. The effective-access endpoint returns permission decisions and their
+maintainer assignment additionally requires a root owner or platform authority. Dock surfaces use
+`dock/{surface}`. Zone resources use `zone/boundary`, `zone/theme`, `zone/settings`,
+`zone/page/{slug}`, and `zone/navigation/{navigationId}`; Realm Navigation uses
+`realm/navigation/{navigationId}`. The effective-access endpoint returns permission decisions and their
 source so clients never infer capabilities from role names.
 
 Decisions are memoized per request and expiry is checked at decision time. Visibility fails closed:

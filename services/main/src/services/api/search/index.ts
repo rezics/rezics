@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import Elysia from "elysia";
-import { BlockDocument, BlockKey, parseDocument, type Block } from "@rezics/block";
+import { BlockDocument, BlockKey, DockDocument, parseDocument, type Block } from "@rezics/block";
 import { SearchConfiguration, SearchExecutionRequest } from "@rezics/search";
 import { getActiveObservability } from "@rezics/observability";
 import { and, eq } from "drizzle-orm";
@@ -12,9 +12,10 @@ import { InvalidSearch, SearchUnavailable } from "../../search/errors";
 import { SearchCategories } from "../../search/schema";
 import { searchDomain, searchGrouped } from "../../search/service";
 import { database } from "../../database";
-import { zone, zonePage } from "../../database/schema";
+import { unitDock, zonePage } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import { ZonePageNotFound } from "../domain-extensions/errors";
+import { DockNotFound } from "../docks/errors";
 import { Uuid } from "../schema";
 import { DomainSearchBody, DomainSearchParams, GroupedSearchBody } from "./schema";
 import { toApiErrorResponse, DomainSearchResponse, SearchResponse } from "../schema/response";
@@ -39,7 +40,10 @@ const ZonePageSearchParams = t.Object({
 	blockKey: BlockKey,
 });
 
-function findSearchConfiguration(document: typeof BlockDocument.static, blockKey: string) {
+function findSearchConfiguration(
+	document: { readonly blocks: readonly Block[] },
+	blockKey: string,
+) {
 	let found: SearchConfiguration | undefined;
 	const visit = (block: Block): void => {
 		if (block._key === blockKey) {
@@ -59,14 +63,11 @@ function findSearchConfiguration(document: typeof BlockDocument.static, blockKey
 async function executeZoneBlock(input: {
 	zoneId: string;
 	blockKey: string;
-	document: unknown;
+	document: { readonly blocks: readonly Block[] };
 	body: unknown;
 	profileId?: string;
 }) {
-	const configuration = findSearchConfiguration(
-		parseDocument(BlockDocument, input.document),
-		input.blockKey,
-	);
+	const configuration = findSearchConfiguration(input.document, input.blockKey);
 	return executeConfiguredSearch(configuration, input.body, input.profileId, input.zoneId);
 }
 
@@ -111,15 +112,15 @@ export default new Elysia({ prefix: "/search" })
 				() => new UnitNotFound("Zone"),
 			);
 			const [record] = await database
-				.select({ document: zone.dockDocument })
-				.from(zone)
-				.where(eq(zone.id, params.zoneId))
+				.select({ document: unitDock.document })
+				.from(unitDock)
+				.where(and(eq(unitDock.unitId, params.zoneId), eq(unitDock.surface, "main")))
 				.limit(1);
-			if (!record) throw new UnitNotFound("Zone");
+			if (!record) throw new DockNotFound();
 			try {
 				return await executeZoneBlock({
 					...params,
-					document: record.document,
+					document: parseDocument(DockDocument, record.document),
 					body,
 					profileId: identity.authorization.profileId,
 				});
@@ -127,7 +128,8 @@ export default new Elysia({ prefix: "/search" })
 				if (
 					cause instanceof InvalidSearch ||
 					cause instanceof SearchUnavailable ||
-					cause instanceof UnitNotFound
+					cause instanceof UnitNotFound ||
+					cause instanceof DockNotFound
 				)
 					throw cause;
 				logSearchFailure(
@@ -143,7 +145,7 @@ export default new Elysia({ prefix: "/search" })
 			body: SearchExecutionRequest,
 			response: {
 				[StatusCodes.OK]: SearchResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "DockNotFound"]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
 			},
@@ -167,7 +169,7 @@ export default new Elysia({ prefix: "/search" })
 			try {
 				return await executeZoneBlock({
 					...params,
-					document: record.document,
+					document: parseDocument(BlockDocument, record.document),
 					body,
 					profileId: identity.authorization.profileId,
 				});

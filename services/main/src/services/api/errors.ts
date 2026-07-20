@@ -12,6 +12,7 @@ import { CatalogErrors } from "./catalog/errors";
 import { CollectionErrors } from "./collections/errors";
 import { ContentStructureErrors } from "./content-structure/errors";
 import { DomainExtensionErrors } from "./domain-extensions/errors";
+import { DockErrors } from "./docks/errors";
 import { FeedbackErrors } from "./feedback/errors";
 import { FeedErrors } from "./feed/errors";
 import { GovernanceErrors } from "./governance/errors";
@@ -60,6 +61,7 @@ export const ApiErrors = [
 	...PaginationErrors,
 	...UserErrors,
 	...DomainExtensionErrors,
+	...DockErrors,
 	...PollErrors,
 	...ProgressErrors,
 	...ContentStructureErrors,

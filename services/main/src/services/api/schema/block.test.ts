@@ -4,11 +4,13 @@ import {
 	type BlockDocument as BlockDocumentValue,
 	CollectionDefinitionDocument,
 	DefaultBlockHostPolicy,
+	DockBlockHostPolicy,
+	DockDocument,
 	NavigationDocument,
 	PollContentBlock,
 	PortableTextDocument,
 	UnitReferencedBlockDocument,
-	ZoneDockBlockHostPolicy,
+	assertDockDocument,
 	assertBlockDocument,
 	assertDocument,
 	assertNavigationDocument,
@@ -18,6 +20,7 @@ import {
 	collectBlockReferences,
 	collectNavigationReferences,
 	createBlockKey,
+	createDockDocument,
 	createManualCollectionDefinitionDocument,
 	createPollContentBlock,
 	createPortableTextDocument,
@@ -110,7 +113,7 @@ describe("Block document contracts", () => {
 					appearance: "card",
 				},
 			],
-		};
+		} satisfies typeof UnitReferencedBlockDocument.static;
 		const nestedInlineCopy = {
 			_type: "block-document",
 			_key: "000000000044",
@@ -129,8 +132,12 @@ describe("Block document contracts", () => {
 		expect(isDocument(UnitReferencedBlockDocument, nestedInlineCopy)).toBe(false);
 		expect(isDocument(UnitReferencedBlockDocument, referencedCopy)).toBe(true);
 		expect(() =>
-			assertUnitReferencedBlockDocument(referencedCopy, ZoneDockBlockHostPolicy),
+			assertUnitReferencedBlockDocument(referencedCopy, DockBlockHostPolicy),
 		).not.toThrow();
+		const dock = createDockDocument(referencedCopy.blocks, "000000000047");
+		expect(isDocument(DockDocument, dock)).toBe(true);
+		expect(isDocument(UnitReferencedBlockDocument, dock)).toBe(false);
+		expect(() => assertDockDocument(dock)).not.toThrow();
 	});
 
 	test("keeps Collection source variants mutually exclusive", () => {
@@ -204,7 +211,7 @@ describe("Block document contracts", () => {
 					...document,
 					blocks: [{ ...document.blocks[0], _key: document._key }],
 				},
-				ZoneDockBlockHostPolicy,
+				DockBlockHostPolicy,
 			),
 		).toThrow("Duplicate Block key");
 	});

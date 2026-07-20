@@ -42,6 +42,10 @@ const reviewedExemptions = [
 			"Machine diagnostic: raw delivery failure detail for operators, never display copy.",
 	},
 	{
+		file: "src/services/database/schema/dock.ts",
+		rationale: "Structured contract: Dock display copy is referenced through localized Units.",
+	},
+	{
 		file: "src/services/database/schema/history.ts",
 		rationale: "Authored snapshot: original point-in-time edit summary, never interface copy.",
 	},
@@ -49,10 +53,6 @@ const reviewedExemptions = [
 		file: "src/services/database/schema/recommendation.ts",
 		rationale:
 			"Machine diagnostic: raw snapshot failure detail for operators, never display copy.",
-	},
-	{
-		file: "src/services/database/schema/zone.ts",
-		rationale: "Structured contract: dock display copy is referenced through localized Units.",
 	},
 	{
 		file: "src/services/database/schema/zone.ts",

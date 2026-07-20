@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 
 import {
 	createCollectionPresentationDocument,
-	createBlockDocument,
+	createDockDocument,
 	createManualCollectionDefinitionDocument,
 	createPollContentBlock,
 	createPortableTextDocument,
@@ -81,6 +81,7 @@ import {
 	unitProtection,
 	unitLink,
 	unitLocalization,
+	unitDock,
 	unitProgress,
 	unitReaction,
 	unitShare,
@@ -663,13 +664,22 @@ async function seedCatalog(
 			themeDocument: createZoneThemeDocument({
 				accent: itemAt(["#f59e0b", "#3b82f6", "#8b5cf6"], index),
 			}),
-			dockDocument: createBlockDocument(),
 			startsAt: index % 3 === 0 ? data.pastDate(180) : null,
 			endsAt: index % 3 === 0 ? data.futureDate(180) : null,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
 		(batch) => tx.insert(zone).values(batch),
+	);
+	await writeBatches(
+		zones.map((value) => ({
+			unitId: value.id,
+			surface: "main" as const,
+			document: createDockDocument(),
+			createdAt: value.createdAt,
+			updatedAt: value.updatedAt,
+		})),
+		(batch) => tx.insert(unitDock).values(batch),
 	);
 	await writeBatches(
 		collections.map((value, index) => {

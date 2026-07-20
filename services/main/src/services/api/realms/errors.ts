@@ -44,6 +44,26 @@ export class RealmScoreContextPostNotMounted extends Data.TaggedError(
 	readonly message = "The score context Post must be mounted in the Realm";
 }
 
+export class RealmNavigationNotFound extends Data.TaggedError("RealmNavigationNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = RealmNavigationNotFound.status;
+	readonly message = "Realm navigation not found";
+}
+
+export class RealmNavigationInUse extends Data.TaggedError("RealmNavigationInUse") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = RealmNavigationInUse.status;
+	readonly message = "Realm navigation is still referenced by a Dock document";
+}
+
+export class RealmNavigationDocumentInvalid extends Data.TaggedError(
+	"RealmNavigationDocumentInvalid",
+) {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = RealmNavigationDocumentInvalid.status;
+	readonly message = "Realm navigation document is invalid";
+}
+
 export const RealmErrors = [
 	RealmNotFound,
 	RealmMembershipNotFound,
@@ -51,4 +71,7 @@ export const RealmErrors = [
 	RealmMemberNotFound,
 	RealmUnitNotFound,
 	RealmScoreContextPostNotMounted,
+	RealmNavigationNotFound,
+	RealmNavigationInUse,
+	RealmNavigationDocumentInvalid,
 ] as const;

@@ -12,6 +12,7 @@ import {
 	unit,
 	unitAccessBinding,
 	unitLocalization,
+	unitDock,
 	unitSlugAddress,
 	users,
 	zone,
@@ -515,13 +516,24 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 				id: value.id,
 				boundaryDocument: value.boundaryDocument,
 				themeDocument: value.themeDocument,
-				dockDocument: value.dockDocument,
 				createdAt,
 				updatedAt: createdAt,
 			})
 			.onConflictDoNothing()
 			.returning({ id: zone.id });
 		changed ||= insertedZone.length > 0;
+		const insertedDock = await tx
+			.insert(unitDock)
+			.values({
+				unitId: value.id,
+				surface: "main",
+				document: value.mainDockDocument,
+				createdAt,
+				updatedAt: createdAt,
+			})
+			.onConflictDoNothing()
+			.returning({ unitId: unitDock.unitId });
+		changed ||= insertedDock.length > 0;
 		changed =
 			(await ensureLocalization(tx, {
 				unitId: value.id,
@@ -561,6 +573,7 @@ export async function isBootstrapReady(): Promise<boolean> {
 		profileCount,
 		officialRealm,
 		officialZones,
+		officialZoneDocks,
 	] = await Promise.all([
 		database
 			.select({ value: count() })
@@ -601,6 +614,18 @@ export async function isBootstrapReady(): Promise<boolean> {
 					OfficialZoneManifest.map((value) => value.id),
 				),
 			),
+		database
+			.select({ unitId: unitDock.unitId })
+			.from(unitDock)
+			.where(
+				and(
+					eq(unitDock.surface, "main"),
+					inArray(
+						unitDock.unitId,
+						OfficialZoneManifest.map((value) => value.id),
+					),
+				),
+			),
 	]);
 	return (
 		unitCount[0]?.value === BootstrapUnitIds.length &&
@@ -609,7 +634,8 @@ export async function isBootstrapReady(): Promise<boolean> {
 		accountCount[0]?.value === BootstrapAccountIds.length &&
 		profileCount[0]?.value === OfficialProfileIdValues.length &&
 		Boolean(officialRealm[0]) &&
-		officialZones.length === OfficialZoneManifest.length
+		officialZones.length === OfficialZoneManifest.length &&
+		officialZoneDocks.length === OfficialZoneManifest.length
 	);
 }
 

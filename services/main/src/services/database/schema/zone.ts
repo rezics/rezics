@@ -22,8 +22,6 @@ export const zone = pgTable(
 		boundaryDocument: createJsonDocumentColumn().notNull(),
 		/** @UNIT_LOCALIZATION_EXEMPT Structured contract: theme contains only color and density tokens. */
 		themeDocument: createJsonDocumentColumn().notNull(),
-		/** @UNIT_LOCALIZATION_EXEMPT Structured contract: dock display copy is referenced through localized Units. */
-		dockDocument: createJsonDocumentColumn().notNull(),
 		startsAt: createTimestampMsColumn(),
 		endsAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),
@@ -77,18 +75,11 @@ export const zoneNavigation = pgTable(
 		zoneId: uuid()
 			.notNull()
 			.references(() => zone.id, { onDelete: "cascade" }),
-		key: text().notNull(),
 		document: createJsonDocumentColumn().notNull(),
-		position: fractionalIndexPosition().notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
 	(table) => [
-		unique("zone_navigation_zone_key").on(table.zoneId, table.key),
-		index("zone_navigation_zone_position_idx").on(table.zoneId, table.position, table.id),
-		check(
-			"zone_navigation_key_check",
-			sql`${table.key} ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and char_length(${table.key}) <= 64`,
-		),
+		index("zone_navigation_zone_created_idx").on(table.zoneId, table.createdAt, table.id),
 	],
 );

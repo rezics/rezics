@@ -7,6 +7,8 @@ import {
 	type Block,
 	type BlockDocument as BlockDocumentValue,
 	type BlockType,
+	DockDocument,
+	type DockDocument as DockDocumentValue,
 	PortableTextDocument,
 	type PortableTextDocument as PortableTextDocumentValue,
 	UnitReferencedBlockDocument,
@@ -72,7 +74,7 @@ export const DefaultBlockHostPolicy: BlockHostPolicy = {
 	allowExternalNavigation: false,
 };
 
-export const ZoneDockBlockHostPolicy: BlockHostPolicy = {
+export const DockBlockHostPolicy: BlockHostPolicy = {
 	allowedRootTypes: [
 		"unit-ref",
 		"unit-list",
@@ -168,16 +170,12 @@ function childBlocks(block: Block): readonly Block[] {
 	return [];
 }
 
-function assertSearchBlock(configuration: SearchConfiguration): void {
-	assertSearchConfiguration(configuration);
-}
+type BlockContainerDocument = {
+	readonly _key: string;
+	readonly blocks: readonly Block[];
+};
 
-/** Structural TypeBox validation plus host, identity, complexity, and Search semantics. */
-export function assertBlockDocument(
-	value: unknown,
-	policy: BlockHostPolicy = DefaultBlockHostPolicy,
-): asserts value is BlockDocumentValue {
-	assertDocument(BlockDocument, value);
+function assertBlockTree(value: BlockContainerDocument, policy: BlockHostPolicy): void {
 	const keys = new Set<string>([value._key]);
 	let count = 0;
 
@@ -217,12 +215,33 @@ export function assertBlockDocument(
 	for (const block of value.blocks) visit(block, 1);
 }
 
+function assertSearchBlock(configuration: SearchConfiguration): void {
+	assertSearchConfiguration(configuration);
+}
+
+/** Structural TypeBox validation plus host, identity, complexity, and Search semantics. */
+export function assertBlockDocument(
+	value: unknown,
+	policy: BlockHostPolicy = DefaultBlockHostPolicy,
+): asserts value is BlockDocumentValue {
+	assertDocument(BlockDocument, value);
+	assertBlockTree(value, policy);
+}
+
 export function assertUnitReferencedBlockDocument(
 	value: unknown,
 	policy: BlockHostPolicy,
 ): asserts value is UnitReferencedBlockDocumentValue {
 	assertDocument(UnitReferencedBlockDocument, value);
-	assertBlockDocument(value, policy);
+	assertBlockTree(value, policy);
+}
+
+export function assertDockDocument(
+	value: unknown,
+	policy: BlockHostPolicy = DockBlockHostPolicy,
+): asserts value is DockDocumentValue {
+	assertDocument(DockDocument, value);
+	assertBlockTree(value, policy);
 }
 
 export interface BlockReferences {
@@ -234,7 +253,7 @@ export interface BlockReferences {
 }
 
 /** Collect references for semantic resolution, authorization, cache tags, and link previews. */
-export function collectBlockReferences(document: BlockDocumentValue): BlockReferences {
+export function collectBlockReferences(document: BlockContainerDocument): BlockReferences {
 	const unitIds = new Set<string>();
 	const assetIds = new Set<string>();
 	const navigationIds = new Set<string>();
@@ -355,7 +374,7 @@ async function assertReferenceSet(
 
 /** Resolve all non-URL references in batches after structural validation. */
 export async function assertResolvedBlockReferences(
-	document: BlockDocumentValue,
+	document: BlockContainerDocument,
 	resolver: BlockReferenceResolver,
 ): Promise<void> {
 	const references = collectBlockReferences(document);

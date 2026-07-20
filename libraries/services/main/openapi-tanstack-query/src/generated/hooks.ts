@@ -448,25 +448,32 @@ import type {
 	GetApiZonesByZoneIdNavigationStatus404,
 	GetApiZonesByZoneIdNavigationStatus422,
 	GetApiZonesByZoneIdNavigationStatus500,
-	GetApiZonesByZoneIdNavigationByKeyOptions,
-	GetApiZonesByZoneIdNavigationByKeyStatus200,
-	GetApiZonesByZoneIdNavigationByKeyStatus404,
-	GetApiZonesByZoneIdNavigationByKeyStatus422,
-	GetApiZonesByZoneIdNavigationByKeyStatus500,
-	PutApiZonesByZoneIdNavigationByKeyOptions,
-	PutApiZonesByZoneIdNavigationByKeyStatus200,
-	PutApiZonesByZoneIdNavigationByKeyStatus400,
-	PutApiZonesByZoneIdNavigationByKeyStatus403,
-	PutApiZonesByZoneIdNavigationByKeyStatus404,
-	PutApiZonesByZoneIdNavigationByKeyStatus422,
-	PutApiZonesByZoneIdNavigationByKeyStatus500,
-	DeleteApiZonesByZoneIdNavigationByKeyOptions,
-	DeleteApiZonesByZoneIdNavigationByKeyStatus204,
-	DeleteApiZonesByZoneIdNavigationByKeyStatus403,
-	DeleteApiZonesByZoneIdNavigationByKeyStatus404,
-	DeleteApiZonesByZoneIdNavigationByKeyStatus409,
-	DeleteApiZonesByZoneIdNavigationByKeyStatus422,
-	DeleteApiZonesByZoneIdNavigationByKeyStatus500,
+	PostApiZonesByZoneIdNavigationOptions,
+	PostApiZonesByZoneIdNavigationStatus200,
+	PostApiZonesByZoneIdNavigationStatus400,
+	PostApiZonesByZoneIdNavigationStatus403,
+	PostApiZonesByZoneIdNavigationStatus404,
+	PostApiZonesByZoneIdNavigationStatus422,
+	PostApiZonesByZoneIdNavigationStatus500,
+	GetApiZonesByZoneIdNavigationByNavigationIdOptions,
+	GetApiZonesByZoneIdNavigationByNavigationIdStatus200,
+	GetApiZonesByZoneIdNavigationByNavigationIdStatus404,
+	GetApiZonesByZoneIdNavigationByNavigationIdStatus422,
+	GetApiZonesByZoneIdNavigationByNavigationIdStatus500,
+	PutApiZonesByZoneIdNavigationByNavigationIdOptions,
+	PutApiZonesByZoneIdNavigationByNavigationIdStatus200,
+	PutApiZonesByZoneIdNavigationByNavigationIdStatus400,
+	PutApiZonesByZoneIdNavigationByNavigationIdStatus403,
+	PutApiZonesByZoneIdNavigationByNavigationIdStatus404,
+	PutApiZonesByZoneIdNavigationByNavigationIdStatus422,
+	PutApiZonesByZoneIdNavigationByNavigationIdStatus500,
+	DeleteApiZonesByZoneIdNavigationByNavigationIdOptions,
+	DeleteApiZonesByZoneIdNavigationByNavigationIdStatus204,
+	DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403,
+	DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404,
+	DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409,
+	DeleteApiZonesByZoneIdNavigationByNavigationIdStatus422,
+	DeleteApiZonesByZoneIdNavigationByNavigationIdStatus500,
 	PutApiSeriesBySeriesIdReleasesByReleaseIdOptions,
 	PutApiSeriesBySeriesIdReleasesByReleaseIdStatus200,
 	PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403,
@@ -519,6 +526,32 @@ import type {
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404,
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422,
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500,
+	GetApiUnitsByIdByUnitIdDocksOptions,
+	GetApiUnitsByIdByUnitIdDocksStatus200,
+	GetApiUnitsByIdByUnitIdDocksStatus400,
+	GetApiUnitsByIdByUnitIdDocksStatus404,
+	GetApiUnitsByIdByUnitIdDocksStatus422,
+	GetApiUnitsByIdByUnitIdDocksStatus500,
+	GetApiUnitsByIdByUnitIdDocksBySurfaceOptions,
+	GetApiUnitsByIdByUnitIdDocksBySurfaceStatus200,
+	GetApiUnitsByIdByUnitIdDocksBySurfaceStatus400,
+	GetApiUnitsByIdByUnitIdDocksBySurfaceStatus404,
+	GetApiUnitsByIdByUnitIdDocksBySurfaceStatus422,
+	GetApiUnitsByIdByUnitIdDocksBySurfaceStatus500,
+	PutApiUnitsByIdByUnitIdDocksBySurfaceOptions,
+	PutApiUnitsByIdByUnitIdDocksBySurfaceStatus200,
+	PutApiUnitsByIdByUnitIdDocksBySurfaceStatus400,
+	PutApiUnitsByIdByUnitIdDocksBySurfaceStatus403,
+	PutApiUnitsByIdByUnitIdDocksBySurfaceStatus404,
+	PutApiUnitsByIdByUnitIdDocksBySurfaceStatus422,
+	PutApiUnitsByIdByUnitIdDocksBySurfaceStatus500,
+	DeleteApiUnitsByIdByUnitIdDocksBySurfaceOptions,
+	DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus204,
+	DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus400,
+	DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus403,
+	DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus404,
+	DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus422,
+	DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus500,
 	GetApiUsersMeStatus200,
 	GetApiUsersMeStatus404,
 	GetApiUsersMeStatus500,
@@ -1251,6 +1284,37 @@ import type {
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus409,
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus422,
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus500,
+	GetApiRealmsByRealmIdNavigationOptions,
+	GetApiRealmsByRealmIdNavigationStatus200,
+	GetApiRealmsByRealmIdNavigationStatus404,
+	GetApiRealmsByRealmIdNavigationStatus422,
+	GetApiRealmsByRealmIdNavigationStatus500,
+	PostApiRealmsByRealmIdNavigationOptions,
+	PostApiRealmsByRealmIdNavigationStatus200,
+	PostApiRealmsByRealmIdNavigationStatus400,
+	PostApiRealmsByRealmIdNavigationStatus403,
+	PostApiRealmsByRealmIdNavigationStatus404,
+	PostApiRealmsByRealmIdNavigationStatus422,
+	PostApiRealmsByRealmIdNavigationStatus500,
+	GetApiRealmsByRealmIdNavigationByNavigationIdOptions,
+	GetApiRealmsByRealmIdNavigationByNavigationIdStatus200,
+	GetApiRealmsByRealmIdNavigationByNavigationIdStatus404,
+	GetApiRealmsByRealmIdNavigationByNavigationIdStatus422,
+	GetApiRealmsByRealmIdNavigationByNavigationIdStatus500,
+	PutApiRealmsByRealmIdNavigationByNavigationIdOptions,
+	PutApiRealmsByRealmIdNavigationByNavigationIdStatus200,
+	PutApiRealmsByRealmIdNavigationByNavigationIdStatus400,
+	PutApiRealmsByRealmIdNavigationByNavigationIdStatus403,
+	PutApiRealmsByRealmIdNavigationByNavigationIdStatus404,
+	PutApiRealmsByRealmIdNavigationByNavigationIdStatus422,
+	PutApiRealmsByRealmIdNavigationByNavigationIdStatus500,
+	DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
+	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204,
+	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403,
+	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404,
+	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409,
+	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422,
+	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500,
 	GetApiSearchConfigurationStatus200,
 	GetApiSearchConfigurationStatus500,
 	PostApiSearchExecuteOptions,
@@ -1392,9 +1456,10 @@ import {
 	putApiZonesByZoneIdPagesBySlug,
 	deleteApiZonesByZoneIdPagesBySlug,
 	getApiZonesByZoneIdNavigation,
-	getApiZonesByZoneIdNavigationByKey,
-	putApiZonesByZoneIdNavigationByKey,
-	deleteApiZonesByZoneIdNavigationByKey,
+	postApiZonesByZoneIdNavigation,
+	getApiZonesByZoneIdNavigationByNavigationId,
+	putApiZonesByZoneIdNavigationByNavigationId,
+	deleteApiZonesByZoneIdNavigationByNavigationId,
 	putApiSeriesBySeriesIdReleasesByReleaseId,
 	deleteApiSeriesBySeriesIdReleasesByReleaseId,
 	postApiZones,
@@ -1404,6 +1469,10 @@ import {
 	postApiSoftwareBySoftwareIdSystemRequirements,
 	putApiSoftwareBySoftwareIdSystemRequirementsByRequirementId,
 	deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementId,
+	getApiUnitsByIdByUnitIdDocks,
+	getApiUnitsByIdByUnitIdDocksBySurface,
+	putApiUnitsByIdByUnitIdDocksBySurface,
+	deleteApiUnitsByIdByUnitIdDocksBySurface,
 	getApiUsersMe,
 	patchApiUsersMe,
 	getApiUsersMePreferences,
@@ -1537,6 +1606,11 @@ import {
 	getApiRealmsByRealmIdUnits,
 	getApiRealmsByRealmIdUnitsByUnitIdHistory,
 	patchApiRealmsByRealmIdUnitsByUnitId,
+	getApiRealmsByRealmIdNavigation,
+	postApiRealmsByRealmIdNavigation,
+	getApiRealmsByRealmIdNavigationByNavigationId,
+	putApiRealmsByRealmIdNavigationByNavigationId,
+	deleteApiRealmsByRealmIdNavigationByNavigationId,
 	getApiSearchConfiguration,
 	postApiSearchExecute,
 	postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute,
@@ -8856,33 +8930,135 @@ export function useGetApiZonesByZoneIdNavigation<
 	return queryResult;
 }
 
-export const getApiZonesByZoneIdNavigationByKeyQueryKey = ({
-	path,
-}: Omit<GetApiZonesByZoneIdNavigationByKeyOptions, "headers">) =>
-	[{ url: "/api/zones/:zoneId/navigation/:key", params: path }] as const;
+export const postApiZonesByZoneIdNavigationMutationKey = () =>
+	[{ url: "/api/zones/:zoneId/navigation" }] as const;
 
-type GetApiZonesByZoneIdNavigationByKeyQueryKey = ReturnType<
-	typeof getApiZonesByZoneIdNavigationByKeyQueryKey
->;
-
-export function getApiZonesByZoneIdNavigationByKeyQueryOptions(
-	{ path }: GetApiZonesByZoneIdNavigationByKeyOptions,
+export function postApiZonesByZoneIdNavigationMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiZonesByZoneIdNavigationByKeyQueryKey({ path });
-	return queryOptions<
-		GetApiZonesByZoneIdNavigationByKeyStatus200,
+	const mutationKey = postApiZonesByZoneIdNavigationMutationKey();
+	return mutationOptions<
+		PostApiZonesByZoneIdNavigationStatus200,
 		ResponseErrorConfig<
-			| GetApiZonesByZoneIdNavigationByKeyStatus404
-			| GetApiZonesByZoneIdNavigationByKeyStatus422
-			| GetApiZonesByZoneIdNavigationByKeyStatus500
+			| PostApiZonesByZoneIdNavigationStatus400
+			| PostApiZonesByZoneIdNavigationStatus403
+			| PostApiZonesByZoneIdNavigationStatus404
+			| PostApiZonesByZoneIdNavigationStatus422
+			| PostApiZonesByZoneIdNavigationStatus500
 		>,
-		GetApiZonesByZoneIdNavigationByKeyStatus200,
+		PostApiZonesByZoneIdNavigationOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiZonesByZoneIdNavigation({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create Zone navigation
+ * {@link /api/zones/:zoneId/navigation}
+ */
+export function usePostApiZonesByZoneIdNavigation<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiZonesByZoneIdNavigationStatus200,
+			ResponseErrorConfig<
+				| PostApiZonesByZoneIdNavigationStatus400
+				| PostApiZonesByZoneIdNavigationStatus403
+				| PostApiZonesByZoneIdNavigationStatus404
+				| PostApiZonesByZoneIdNavigationStatus422
+				| PostApiZonesByZoneIdNavigationStatus500
+			>,
+			PostApiZonesByZoneIdNavigationOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiZonesByZoneIdNavigationMutationKey();
+
+	const baseOptions = postApiZonesByZoneIdNavigationMutationOptions(config) as UseMutationOptions<
+		PostApiZonesByZoneIdNavigationStatus200,
+		ResponseErrorConfig<
+			| PostApiZonesByZoneIdNavigationStatus400
+			| PostApiZonesByZoneIdNavigationStatus403
+			| PostApiZonesByZoneIdNavigationStatus404
+			| PostApiZonesByZoneIdNavigationStatus422
+			| PostApiZonesByZoneIdNavigationStatus500
+		>,
+		PostApiZonesByZoneIdNavigationOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiZonesByZoneIdNavigationStatus200,
+		ResponseErrorConfig<
+			| PostApiZonesByZoneIdNavigationStatus400
+			| PostApiZonesByZoneIdNavigationStatus403
+			| PostApiZonesByZoneIdNavigationStatus404
+			| PostApiZonesByZoneIdNavigationStatus422
+			| PostApiZonesByZoneIdNavigationStatus500
+		>,
+		PostApiZonesByZoneIdNavigationOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiZonesByZoneIdNavigationStatus200,
+		ResponseErrorConfig<
+			| PostApiZonesByZoneIdNavigationStatus400
+			| PostApiZonesByZoneIdNavigationStatus403
+			| PostApiZonesByZoneIdNavigationStatus404
+			| PostApiZonesByZoneIdNavigationStatus422
+			| PostApiZonesByZoneIdNavigationStatus500
+		>,
+		PostApiZonesByZoneIdNavigationOptions,
+		TContext
+	>;
+}
+
+export const getApiZonesByZoneIdNavigationByNavigationIdQueryKey = ({
+	path,
+}: Omit<GetApiZonesByZoneIdNavigationByNavigationIdOptions, "headers">) =>
+	[{ url: "/api/zones/:zoneId/navigation/:navigationId", params: path }] as const;
+
+type GetApiZonesByZoneIdNavigationByNavigationIdQueryKey = ReturnType<
+	typeof getApiZonesByZoneIdNavigationByNavigationIdQueryKey
+>;
+
+export function getApiZonesByZoneIdNavigationByNavigationIdQueryOptions(
+	{ path }: GetApiZonesByZoneIdNavigationByNavigationIdOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiZonesByZoneIdNavigationByNavigationIdQueryKey({ path });
+	return queryOptions<
+		GetApiZonesByZoneIdNavigationByNavigationIdStatus200,
+		ResponseErrorConfig<
+			| GetApiZonesByZoneIdNavigationByNavigationIdStatus404
+			| GetApiZonesByZoneIdNavigationByNavigationIdStatus422
+			| GetApiZonesByZoneIdNavigationByNavigationIdStatus500
+		>,
+		GetApiZonesByZoneIdNavigationByNavigationIdStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiZonesByZoneIdNavigationByKey({
+			const { data } = await getApiZonesByZoneIdNavigationByNavigationId({
 				...config,
 				path,
 				signal: config.signal ?? signal,
@@ -8895,28 +9071,28 @@ export function getApiZonesByZoneIdNavigationByKeyQueryOptions(
 
 /**
  * @summary Get Zone navigation resource
- * {@link /api/zones/:zoneId/navigation/:key}
+ * {@link /api/zones/:zoneId/navigation/:navigationId}
  */
-export function useGetApiZonesByZoneIdNavigationByKey<
-	TData = GetApiZonesByZoneIdNavigationByKeyStatus200,
-	TQueryData = GetApiZonesByZoneIdNavigationByKeyStatus200,
-	TQueryKey extends QueryKey = GetApiZonesByZoneIdNavigationByKeyQueryKey,
+export function useGetApiZonesByZoneIdNavigationByNavigationId<
+	TData = GetApiZonesByZoneIdNavigationByNavigationIdStatus200,
+	TQueryData = GetApiZonesByZoneIdNavigationByNavigationIdStatus200,
+	TQueryKey extends QueryKey = GetApiZonesByZoneIdNavigationByNavigationIdQueryKey,
 >(
 	{
 		path,
 	}: {
 		path:
-			| GetApiZonesByZoneIdNavigationByKeyOptions["path"]
-			| (() => GetApiZonesByZoneIdNavigationByKeyOptions["path"]);
+			| GetApiZonesByZoneIdNavigationByNavigationIdOptions["path"]
+			| (() => GetApiZonesByZoneIdNavigationByNavigationIdOptions["path"]);
 	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiZonesByZoneIdNavigationByKeyStatus200,
+				GetApiZonesByZoneIdNavigationByNavigationIdStatus200,
 				ResponseErrorConfig<
-					| GetApiZonesByZoneIdNavigationByKeyStatus404
-					| GetApiZonesByZoneIdNavigationByKeyStatus422
-					| GetApiZonesByZoneIdNavigationByKeyStatus500
+					| GetApiZonesByZoneIdNavigationByNavigationIdStatus404
+					| GetApiZonesByZoneIdNavigationByNavigationIdStatus422
+					| GetApiZonesByZoneIdNavigationByNavigationIdStatus500
 				>,
 				TData,
 				TQueryData,
@@ -8930,11 +9106,12 @@ export function useGetApiZonesByZoneIdNavigationByKey<
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
 	const resolvedParams = { path: typeof path === "function" ? path() : path };
 	const queryKey =
-		resolvedOptions?.queryKey ?? getApiZonesByZoneIdNavigationByKeyQueryKey(resolvedParams);
+		resolvedOptions?.queryKey ??
+		getApiZonesByZoneIdNavigationByNavigationIdQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiZonesByZoneIdNavigationByKeyQueryOptions(resolvedParams, config),
+			...getApiZonesByZoneIdNavigationByNavigationIdQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
@@ -8942,9 +9119,9 @@ export function useGetApiZonesByZoneIdNavigationByKey<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			| GetApiZonesByZoneIdNavigationByKeyStatus404
-			| GetApiZonesByZoneIdNavigationByKeyStatus422
-			| GetApiZonesByZoneIdNavigationByKeyStatus500
+			| GetApiZonesByZoneIdNavigationByNavigationIdStatus404
+			| GetApiZonesByZoneIdNavigationByNavigationIdStatus422
+			| GetApiZonesByZoneIdNavigationByNavigationIdStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -8953,28 +9130,28 @@ export function useGetApiZonesByZoneIdNavigationByKey<
 	return queryResult;
 }
 
-export const putApiZonesByZoneIdNavigationByKeyMutationKey = () =>
-	[{ url: "/api/zones/:zoneId/navigation/:key" }] as const;
+export const putApiZonesByZoneIdNavigationByNavigationIdMutationKey = () =>
+	[{ url: "/api/zones/:zoneId/navigation/:navigationId" }] as const;
 
-export function putApiZonesByZoneIdNavigationByKeyMutationOptions<TContext = unknown>(
+export function putApiZonesByZoneIdNavigationByNavigationIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = putApiZonesByZoneIdNavigationByKeyMutationKey();
+	const mutationKey = putApiZonesByZoneIdNavigationByNavigationIdMutationKey();
 	return mutationOptions<
-		PutApiZonesByZoneIdNavigationByKeyStatus200,
+		PutApiZonesByZoneIdNavigationByNavigationIdStatus200,
 		ResponseErrorConfig<
-			| PutApiZonesByZoneIdNavigationByKeyStatus400
-			| PutApiZonesByZoneIdNavigationByKeyStatus403
-			| PutApiZonesByZoneIdNavigationByKeyStatus404
-			| PutApiZonesByZoneIdNavigationByKeyStatus422
-			| PutApiZonesByZoneIdNavigationByKeyStatus500
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus400
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus403
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus404
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus422
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus500
 		>,
-		PutApiZonesByZoneIdNavigationByKeyOptions,
+		PutApiZonesByZoneIdNavigationByNavigationIdOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } = await putApiZonesByZoneIdNavigationByKey({
+			const { data } = await putApiZonesByZoneIdNavigationByNavigationId({
 				...config,
 				path,
 				body,
@@ -8986,21 +9163,21 @@ export function putApiZonesByZoneIdNavigationByKeyMutationOptions<TContext = unk
 }
 
 /**
- * @summary Create or replace Zone navigation
- * {@link /api/zones/:zoneId/navigation/:key}
+ * @summary Replace Zone navigation
+ * {@link /api/zones/:zoneId/navigation/:navigationId}
  */
-export function usePutApiZonesByZoneIdNavigationByKey<TContext>(
+export function usePutApiZonesByZoneIdNavigationByNavigationId<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PutApiZonesByZoneIdNavigationByKeyStatus200,
+			PutApiZonesByZoneIdNavigationByNavigationIdStatus200,
 			ResponseErrorConfig<
-				| PutApiZonesByZoneIdNavigationByKeyStatus400
-				| PutApiZonesByZoneIdNavigationByKeyStatus403
-				| PutApiZonesByZoneIdNavigationByKeyStatus404
-				| PutApiZonesByZoneIdNavigationByKeyStatus422
-				| PutApiZonesByZoneIdNavigationByKeyStatus500
+				| PutApiZonesByZoneIdNavigationByNavigationIdStatus400
+				| PutApiZonesByZoneIdNavigationByNavigationIdStatus403
+				| PutApiZonesByZoneIdNavigationByNavigationIdStatus404
+				| PutApiZonesByZoneIdNavigationByNavigationIdStatus422
+				| PutApiZonesByZoneIdNavigationByNavigationIdStatus500
 			>,
-			PutApiZonesByZoneIdNavigationByKeyOptions,
+			PutApiZonesByZoneIdNavigationByNavigationIdOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -9009,33 +9186,33 @@ export function usePutApiZonesByZoneIdNavigationByKey<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ?? putApiZonesByZoneIdNavigationByKeyMutationKey();
+		mutationOptions.mutationKey ?? putApiZonesByZoneIdNavigationByNavigationIdMutationKey();
 
-	const baseOptions = putApiZonesByZoneIdNavigationByKeyMutationOptions(
+	const baseOptions = putApiZonesByZoneIdNavigationByNavigationIdMutationOptions(
 		config,
 	) as UseMutationOptions<
-		PutApiZonesByZoneIdNavigationByKeyStatus200,
+		PutApiZonesByZoneIdNavigationByNavigationIdStatus200,
 		ResponseErrorConfig<
-			| PutApiZonesByZoneIdNavigationByKeyStatus400
-			| PutApiZonesByZoneIdNavigationByKeyStatus403
-			| PutApiZonesByZoneIdNavigationByKeyStatus404
-			| PutApiZonesByZoneIdNavigationByKeyStatus422
-			| PutApiZonesByZoneIdNavigationByKeyStatus500
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus400
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus403
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus404
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus422
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus500
 		>,
-		PutApiZonesByZoneIdNavigationByKeyOptions,
+		PutApiZonesByZoneIdNavigationByNavigationIdOptions,
 		TContext
 	>;
 
 	return useMutation<
-		PutApiZonesByZoneIdNavigationByKeyStatus200,
+		PutApiZonesByZoneIdNavigationByNavigationIdStatus200,
 		ResponseErrorConfig<
-			| PutApiZonesByZoneIdNavigationByKeyStatus400
-			| PutApiZonesByZoneIdNavigationByKeyStatus403
-			| PutApiZonesByZoneIdNavigationByKeyStatus404
-			| PutApiZonesByZoneIdNavigationByKeyStatus422
-			| PutApiZonesByZoneIdNavigationByKeyStatus500
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus400
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus403
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus404
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus422
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus500
 		>,
-		PutApiZonesByZoneIdNavigationByKeyOptions,
+		PutApiZonesByZoneIdNavigationByNavigationIdOptions,
 		TContext
 	>(
 		{
@@ -9045,41 +9222,41 @@ export function usePutApiZonesByZoneIdNavigationByKey<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		PutApiZonesByZoneIdNavigationByKeyStatus200,
+		PutApiZonesByZoneIdNavigationByNavigationIdStatus200,
 		ResponseErrorConfig<
-			| PutApiZonesByZoneIdNavigationByKeyStatus400
-			| PutApiZonesByZoneIdNavigationByKeyStatus403
-			| PutApiZonesByZoneIdNavigationByKeyStatus404
-			| PutApiZonesByZoneIdNavigationByKeyStatus422
-			| PutApiZonesByZoneIdNavigationByKeyStatus500
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus400
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus403
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus404
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus422
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus500
 		>,
-		PutApiZonesByZoneIdNavigationByKeyOptions,
+		PutApiZonesByZoneIdNavigationByNavigationIdOptions,
 		TContext
 	>;
 }
 
-export const deleteApiZonesByZoneIdNavigationByKeyMutationKey = () =>
-	[{ url: "/api/zones/:zoneId/navigation/:key" }] as const;
+export const deleteApiZonesByZoneIdNavigationByNavigationIdMutationKey = () =>
+	[{ url: "/api/zones/:zoneId/navigation/:navigationId" }] as const;
 
-export function deleteApiZonesByZoneIdNavigationByKeyMutationOptions<TContext = unknown>(
+export function deleteApiZonesByZoneIdNavigationByNavigationIdMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = deleteApiZonesByZoneIdNavigationByKeyMutationKey();
+	const mutationKey = deleteApiZonesByZoneIdNavigationByNavigationIdMutationKey();
 	return mutationOptions<
-		DeleteApiZonesByZoneIdNavigationByKeyStatus204,
+		DeleteApiZonesByZoneIdNavigationByNavigationIdStatus204,
 		ResponseErrorConfig<
-			| DeleteApiZonesByZoneIdNavigationByKeyStatus403
-			| DeleteApiZonesByZoneIdNavigationByKeyStatus404
-			| DeleteApiZonesByZoneIdNavigationByKeyStatus409
-			| DeleteApiZonesByZoneIdNavigationByKeyStatus422
-			| DeleteApiZonesByZoneIdNavigationByKeyStatus500
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus422
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus500
 		>,
-		DeleteApiZonesByZoneIdNavigationByKeyOptions,
+		DeleteApiZonesByZoneIdNavigationByNavigationIdOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiZonesByZoneIdNavigationByKey({
+			const { data } = await deleteApiZonesByZoneIdNavigationByNavigationId({
 				...config,
 				path,
 				throwOnError: true,
@@ -9091,20 +9268,20 @@ export function deleteApiZonesByZoneIdNavigationByKeyMutationOptions<TContext = 
 
 /**
  * @summary Delete Zone navigation resource
- * {@link /api/zones/:zoneId/navigation/:key}
+ * {@link /api/zones/:zoneId/navigation/:navigationId}
  */
-export function useDeleteApiZonesByZoneIdNavigationByKey<TContext>(
+export function useDeleteApiZonesByZoneIdNavigationByNavigationId<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			DeleteApiZonesByZoneIdNavigationByKeyStatus204,
+			DeleteApiZonesByZoneIdNavigationByNavigationIdStatus204,
 			ResponseErrorConfig<
-				| DeleteApiZonesByZoneIdNavigationByKeyStatus403
-				| DeleteApiZonesByZoneIdNavigationByKeyStatus404
-				| DeleteApiZonesByZoneIdNavigationByKeyStatus409
-				| DeleteApiZonesByZoneIdNavigationByKeyStatus422
-				| DeleteApiZonesByZoneIdNavigationByKeyStatus500
+				| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403
+				| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404
+				| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409
+				| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus422
+				| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus500
 			>,
-			DeleteApiZonesByZoneIdNavigationByKeyOptions,
+			DeleteApiZonesByZoneIdNavigationByNavigationIdOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -9113,33 +9290,33 @@ export function useDeleteApiZonesByZoneIdNavigationByKey<TContext>(
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ?? deleteApiZonesByZoneIdNavigationByKeyMutationKey();
+		mutationOptions.mutationKey ?? deleteApiZonesByZoneIdNavigationByNavigationIdMutationKey();
 
-	const baseOptions = deleteApiZonesByZoneIdNavigationByKeyMutationOptions(
+	const baseOptions = deleteApiZonesByZoneIdNavigationByNavigationIdMutationOptions(
 		config,
 	) as UseMutationOptions<
-		DeleteApiZonesByZoneIdNavigationByKeyStatus204,
+		DeleteApiZonesByZoneIdNavigationByNavigationIdStatus204,
 		ResponseErrorConfig<
-			| DeleteApiZonesByZoneIdNavigationByKeyStatus403
-			| DeleteApiZonesByZoneIdNavigationByKeyStatus404
-			| DeleteApiZonesByZoneIdNavigationByKeyStatus409
-			| DeleteApiZonesByZoneIdNavigationByKeyStatus422
-			| DeleteApiZonesByZoneIdNavigationByKeyStatus500
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus422
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus500
 		>,
-		DeleteApiZonesByZoneIdNavigationByKeyOptions,
+		DeleteApiZonesByZoneIdNavigationByNavigationIdOptions,
 		TContext
 	>;
 
 	return useMutation<
-		DeleteApiZonesByZoneIdNavigationByKeyStatus204,
+		DeleteApiZonesByZoneIdNavigationByNavigationIdStatus204,
 		ResponseErrorConfig<
-			| DeleteApiZonesByZoneIdNavigationByKeyStatus403
-			| DeleteApiZonesByZoneIdNavigationByKeyStatus404
-			| DeleteApiZonesByZoneIdNavigationByKeyStatus409
-			| DeleteApiZonesByZoneIdNavigationByKeyStatus422
-			| DeleteApiZonesByZoneIdNavigationByKeyStatus500
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus422
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus500
 		>,
-		DeleteApiZonesByZoneIdNavigationByKeyOptions,
+		DeleteApiZonesByZoneIdNavigationByNavigationIdOptions,
 		TContext
 	>(
 		{
@@ -9149,15 +9326,15 @@ export function useDeleteApiZonesByZoneIdNavigationByKey<TContext>(
 		},
 		queryClient,
 	) as UseMutationResult<
-		DeleteApiZonesByZoneIdNavigationByKeyStatus204,
+		DeleteApiZonesByZoneIdNavigationByNavigationIdStatus204,
 		ResponseErrorConfig<
-			| DeleteApiZonesByZoneIdNavigationByKeyStatus403
-			| DeleteApiZonesByZoneIdNavigationByKeyStatus404
-			| DeleteApiZonesByZoneIdNavigationByKeyStatus409
-			| DeleteApiZonesByZoneIdNavigationByKeyStatus422
-			| DeleteApiZonesByZoneIdNavigationByKeyStatus500
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus403
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus422
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus500
 		>,
-		DeleteApiZonesByZoneIdNavigationByKeyOptions,
+		DeleteApiZonesByZoneIdNavigationByNavigationIdOptions,
 		TContext
 	>;
 }
@@ -10030,6 +10207,413 @@ export function useDeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementI
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
 		>,
 		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
+		TContext
+	>;
+}
+
+export const getApiUnitsByIdByUnitIdDocksQueryKey = ({
+	path,
+}: Omit<GetApiUnitsByIdByUnitIdDocksOptions, "headers">) =>
+	[{ url: "/api/units/by-id/:unitId/docks", params: path }] as const;
+
+type GetApiUnitsByIdByUnitIdDocksQueryKey = ReturnType<typeof getApiUnitsByIdByUnitIdDocksQueryKey>;
+
+export function getApiUnitsByIdByUnitIdDocksQueryOptions(
+	{ path }: GetApiUnitsByIdByUnitIdDocksOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiUnitsByIdByUnitIdDocksQueryKey({ path });
+	return queryOptions<
+		GetApiUnitsByIdByUnitIdDocksStatus200,
+		ResponseErrorConfig<
+			| GetApiUnitsByIdByUnitIdDocksStatus400
+			| GetApiUnitsByIdByUnitIdDocksStatus404
+			| GetApiUnitsByIdByUnitIdDocksStatus422
+			| GetApiUnitsByIdByUnitIdDocksStatus500
+		>,
+		GetApiUnitsByIdByUnitIdDocksStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiUnitsByIdByUnitIdDocks({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List configured Unit Docks
+ * {@link /api/units/by-id/:unitId/docks}
+ */
+export function useGetApiUnitsByIdByUnitIdDocks<
+	TData = GetApiUnitsByIdByUnitIdDocksStatus200,
+	TQueryData = GetApiUnitsByIdByUnitIdDocksStatus200,
+	TQueryKey extends QueryKey = GetApiUnitsByIdByUnitIdDocksQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiUnitsByIdByUnitIdDocksOptions["path"]
+			| (() => GetApiUnitsByIdByUnitIdDocksOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiUnitsByIdByUnitIdDocksStatus200,
+				ResponseErrorConfig<
+					| GetApiUnitsByIdByUnitIdDocksStatus400
+					| GetApiUnitsByIdByUnitIdDocksStatus404
+					| GetApiUnitsByIdByUnitIdDocksStatus422
+					| GetApiUnitsByIdByUnitIdDocksStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiUnitsByIdByUnitIdDocksQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiUnitsByIdByUnitIdDocksQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiUnitsByIdByUnitIdDocksStatus400
+			| GetApiUnitsByIdByUnitIdDocksStatus404
+			| GetApiUnitsByIdByUnitIdDocksStatus422
+			| GetApiUnitsByIdByUnitIdDocksStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getApiUnitsByIdByUnitIdDocksBySurfaceQueryKey = ({
+	path,
+}: Omit<GetApiUnitsByIdByUnitIdDocksBySurfaceOptions, "headers">) =>
+	[{ url: "/api/units/by-id/:unitId/docks/:surface", params: path }] as const;
+
+type GetApiUnitsByIdByUnitIdDocksBySurfaceQueryKey = ReturnType<
+	typeof getApiUnitsByIdByUnitIdDocksBySurfaceQueryKey
+>;
+
+export function getApiUnitsByIdByUnitIdDocksBySurfaceQueryOptions(
+	{ path }: GetApiUnitsByIdByUnitIdDocksBySurfaceOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiUnitsByIdByUnitIdDocksBySurfaceQueryKey({ path });
+	return queryOptions<
+		GetApiUnitsByIdByUnitIdDocksBySurfaceStatus200,
+		ResponseErrorConfig<
+			| GetApiUnitsByIdByUnitIdDocksBySurfaceStatus400
+			| GetApiUnitsByIdByUnitIdDocksBySurfaceStatus404
+			| GetApiUnitsByIdByUnitIdDocksBySurfaceStatus422
+			| GetApiUnitsByIdByUnitIdDocksBySurfaceStatus500
+		>,
+		GetApiUnitsByIdByUnitIdDocksBySurfaceStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiUnitsByIdByUnitIdDocksBySurface({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get a Unit Dock
+ * {@link /api/units/by-id/:unitId/docks/:surface}
+ */
+export function useGetApiUnitsByIdByUnitIdDocksBySurface<
+	TData = GetApiUnitsByIdByUnitIdDocksBySurfaceStatus200,
+	TQueryData = GetApiUnitsByIdByUnitIdDocksBySurfaceStatus200,
+	TQueryKey extends QueryKey = GetApiUnitsByIdByUnitIdDocksBySurfaceQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiUnitsByIdByUnitIdDocksBySurfaceOptions["path"]
+			| (() => GetApiUnitsByIdByUnitIdDocksBySurfaceOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiUnitsByIdByUnitIdDocksBySurfaceStatus200,
+				ResponseErrorConfig<
+					| GetApiUnitsByIdByUnitIdDocksBySurfaceStatus400
+					| GetApiUnitsByIdByUnitIdDocksBySurfaceStatus404
+					| GetApiUnitsByIdByUnitIdDocksBySurfaceStatus422
+					| GetApiUnitsByIdByUnitIdDocksBySurfaceStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiUnitsByIdByUnitIdDocksBySurfaceQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiUnitsByIdByUnitIdDocksBySurfaceQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiUnitsByIdByUnitIdDocksBySurfaceStatus400
+			| GetApiUnitsByIdByUnitIdDocksBySurfaceStatus404
+			| GetApiUnitsByIdByUnitIdDocksBySurfaceStatus422
+			| GetApiUnitsByIdByUnitIdDocksBySurfaceStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiUnitsByIdByUnitIdDocksBySurfaceMutationKey = () =>
+	[{ url: "/api/units/by-id/:unitId/docks/:surface" }] as const;
+
+export function putApiUnitsByIdByUnitIdDocksBySurfaceMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiUnitsByIdByUnitIdDocksBySurfaceMutationKey();
+	return mutationOptions<
+		PutApiUnitsByIdByUnitIdDocksBySurfaceStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus400
+			| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus403
+			| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus404
+			| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus422
+			| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus500
+		>,
+		PutApiUnitsByIdByUnitIdDocksBySurfaceOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiUnitsByIdByUnitIdDocksBySurface({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create or replace a Unit Dock
+ * {@link /api/units/by-id/:unitId/docks/:surface}
+ */
+export function usePutApiUnitsByIdByUnitIdDocksBySurface<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiUnitsByIdByUnitIdDocksBySurfaceStatus200,
+			ResponseErrorConfig<
+				| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus400
+				| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus403
+				| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus404
+				| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus422
+				| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus500
+			>,
+			PutApiUnitsByIdByUnitIdDocksBySurfaceOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiUnitsByIdByUnitIdDocksBySurfaceMutationKey();
+
+	const baseOptions = putApiUnitsByIdByUnitIdDocksBySurfaceMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiUnitsByIdByUnitIdDocksBySurfaceStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus400
+			| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus403
+			| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus404
+			| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus422
+			| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus500
+		>,
+		PutApiUnitsByIdByUnitIdDocksBySurfaceOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiUnitsByIdByUnitIdDocksBySurfaceStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus400
+			| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus403
+			| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus404
+			| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus422
+			| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus500
+		>,
+		PutApiUnitsByIdByUnitIdDocksBySurfaceOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiUnitsByIdByUnitIdDocksBySurfaceStatus200,
+		ResponseErrorConfig<
+			| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus400
+			| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus403
+			| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus404
+			| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus422
+			| PutApiUnitsByIdByUnitIdDocksBySurfaceStatus500
+		>,
+		PutApiUnitsByIdByUnitIdDocksBySurfaceOptions,
+		TContext
+	>;
+}
+
+export const deleteApiUnitsByIdByUnitIdDocksBySurfaceMutationKey = () =>
+	[{ url: "/api/units/by-id/:unitId/docks/:surface" }] as const;
+
+export function deleteApiUnitsByIdByUnitIdDocksBySurfaceMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = deleteApiUnitsByIdByUnitIdDocksBySurfaceMutationKey();
+	return mutationOptions<
+		DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus400
+			| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus403
+			| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus404
+			| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus422
+			| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus500
+		>,
+		DeleteApiUnitsByIdByUnitIdDocksBySurfaceOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiUnitsByIdByUnitIdDocksBySurface({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Delete a Unit Dock
+ * {@link /api/units/by-id/:unitId/docks/:surface}
+ */
+export function useDeleteApiUnitsByIdByUnitIdDocksBySurface<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus204,
+			ResponseErrorConfig<
+				| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus400
+				| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus403
+				| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus404
+				| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus422
+				| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus500
+			>,
+			DeleteApiUnitsByIdByUnitIdDocksBySurfaceOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? deleteApiUnitsByIdByUnitIdDocksBySurfaceMutationKey();
+
+	const baseOptions = deleteApiUnitsByIdByUnitIdDocksBySurfaceMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus400
+			| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus403
+			| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus404
+			| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus422
+			| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus500
+		>,
+		DeleteApiUnitsByIdByUnitIdDocksBySurfaceOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus400
+			| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus403
+			| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus404
+			| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus422
+			| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus500
+		>,
+		DeleteApiUnitsByIdByUnitIdDocksBySurfaceOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus204,
+		ResponseErrorConfig<
+			| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus400
+			| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus403
+			| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus404
+			| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus422
+			| DeleteApiUnitsByIdByUnitIdDocksBySurfaceStatus500
+		>,
+		DeleteApiUnitsByIdByUnitIdDocksBySurfaceOptions,
 		TContext
 	>;
 }
@@ -22697,6 +23281,516 @@ export function usePatchApiRealmsByRealmIdUnitsByUnitId<TContext>(
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus500
 		>,
 		PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
+		TContext
+	>;
+}
+
+export const getApiRealmsByRealmIdNavigationQueryKey = ({
+	path,
+}: Omit<GetApiRealmsByRealmIdNavigationOptions, "headers">) =>
+	[{ url: "/api/realms/:realmId/navigation", params: path }] as const;
+
+type GetApiRealmsByRealmIdNavigationQueryKey = ReturnType<
+	typeof getApiRealmsByRealmIdNavigationQueryKey
+>;
+
+export function getApiRealmsByRealmIdNavigationQueryOptions(
+	{ path }: GetApiRealmsByRealmIdNavigationOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiRealmsByRealmIdNavigationQueryKey({ path });
+	return queryOptions<
+		GetApiRealmsByRealmIdNavigationStatus200,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdNavigationStatus404
+			| GetApiRealmsByRealmIdNavigationStatus422
+			| GetApiRealmsByRealmIdNavigationStatus500
+		>,
+		GetApiRealmsByRealmIdNavigationStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiRealmsByRealmIdNavigation({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List Realm navigation resources
+ * {@link /api/realms/:realmId/navigation}
+ */
+export function useGetApiRealmsByRealmIdNavigation<
+	TData = GetApiRealmsByRealmIdNavigationStatus200,
+	TQueryData = GetApiRealmsByRealmIdNavigationStatus200,
+	TQueryKey extends QueryKey = GetApiRealmsByRealmIdNavigationQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiRealmsByRealmIdNavigationOptions["path"]
+			| (() => GetApiRealmsByRealmIdNavigationOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiRealmsByRealmIdNavigationStatus200,
+				ResponseErrorConfig<
+					| GetApiRealmsByRealmIdNavigationStatus404
+					| GetApiRealmsByRealmIdNavigationStatus422
+					| GetApiRealmsByRealmIdNavigationStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdNavigationQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiRealmsByRealmIdNavigationQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdNavigationStatus404
+			| GetApiRealmsByRealmIdNavigationStatus422
+			| GetApiRealmsByRealmIdNavigationStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const postApiRealmsByRealmIdNavigationMutationKey = () =>
+	[{ url: "/api/realms/:realmId/navigation" }] as const;
+
+export function postApiRealmsByRealmIdNavigationMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiRealmsByRealmIdNavigationMutationKey();
+	return mutationOptions<
+		PostApiRealmsByRealmIdNavigationStatus200,
+		ResponseErrorConfig<
+			| PostApiRealmsByRealmIdNavigationStatus400
+			| PostApiRealmsByRealmIdNavigationStatus403
+			| PostApiRealmsByRealmIdNavigationStatus404
+			| PostApiRealmsByRealmIdNavigationStatus422
+			| PostApiRealmsByRealmIdNavigationStatus500
+		>,
+		PostApiRealmsByRealmIdNavigationOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiRealmsByRealmIdNavigation({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Create Realm navigation
+ * {@link /api/realms/:realmId/navigation}
+ */
+export function usePostApiRealmsByRealmIdNavigation<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiRealmsByRealmIdNavigationStatus200,
+			ResponseErrorConfig<
+				| PostApiRealmsByRealmIdNavigationStatus400
+				| PostApiRealmsByRealmIdNavigationStatus403
+				| PostApiRealmsByRealmIdNavigationStatus404
+				| PostApiRealmsByRealmIdNavigationStatus422
+				| PostApiRealmsByRealmIdNavigationStatus500
+			>,
+			PostApiRealmsByRealmIdNavigationOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiRealmsByRealmIdNavigationMutationKey();
+
+	const baseOptions = postApiRealmsByRealmIdNavigationMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiRealmsByRealmIdNavigationStatus200,
+		ResponseErrorConfig<
+			| PostApiRealmsByRealmIdNavigationStatus400
+			| PostApiRealmsByRealmIdNavigationStatus403
+			| PostApiRealmsByRealmIdNavigationStatus404
+			| PostApiRealmsByRealmIdNavigationStatus422
+			| PostApiRealmsByRealmIdNavigationStatus500
+		>,
+		PostApiRealmsByRealmIdNavigationOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiRealmsByRealmIdNavigationStatus200,
+		ResponseErrorConfig<
+			| PostApiRealmsByRealmIdNavigationStatus400
+			| PostApiRealmsByRealmIdNavigationStatus403
+			| PostApiRealmsByRealmIdNavigationStatus404
+			| PostApiRealmsByRealmIdNavigationStatus422
+			| PostApiRealmsByRealmIdNavigationStatus500
+		>,
+		PostApiRealmsByRealmIdNavigationOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiRealmsByRealmIdNavigationStatus200,
+		ResponseErrorConfig<
+			| PostApiRealmsByRealmIdNavigationStatus400
+			| PostApiRealmsByRealmIdNavigationStatus403
+			| PostApiRealmsByRealmIdNavigationStatus404
+			| PostApiRealmsByRealmIdNavigationStatus422
+			| PostApiRealmsByRealmIdNavigationStatus500
+		>,
+		PostApiRealmsByRealmIdNavigationOptions,
+		TContext
+	>;
+}
+
+export const getApiRealmsByRealmIdNavigationByNavigationIdQueryKey = ({
+	path,
+}: Omit<GetApiRealmsByRealmIdNavigationByNavigationIdOptions, "headers">) =>
+	[{ url: "/api/realms/:realmId/navigation/:navigationId", params: path }] as const;
+
+type GetApiRealmsByRealmIdNavigationByNavigationIdQueryKey = ReturnType<
+	typeof getApiRealmsByRealmIdNavigationByNavigationIdQueryKey
+>;
+
+export function getApiRealmsByRealmIdNavigationByNavigationIdQueryOptions(
+	{ path }: GetApiRealmsByRealmIdNavigationByNavigationIdOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiRealmsByRealmIdNavigationByNavigationIdQueryKey({ path });
+	return queryOptions<
+		GetApiRealmsByRealmIdNavigationByNavigationIdStatus200,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdNavigationByNavigationIdStatus404
+			| GetApiRealmsByRealmIdNavigationByNavigationIdStatus422
+			| GetApiRealmsByRealmIdNavigationByNavigationIdStatus500
+		>,
+		GetApiRealmsByRealmIdNavigationByNavigationIdStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiRealmsByRealmIdNavigationByNavigationId({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get Realm navigation
+ * {@link /api/realms/:realmId/navigation/:navigationId}
+ */
+export function useGetApiRealmsByRealmIdNavigationByNavigationId<
+	TData = GetApiRealmsByRealmIdNavigationByNavigationIdStatus200,
+	TQueryData = GetApiRealmsByRealmIdNavigationByNavigationIdStatus200,
+	TQueryKey extends QueryKey = GetApiRealmsByRealmIdNavigationByNavigationIdQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiRealmsByRealmIdNavigationByNavigationIdOptions["path"]
+			| (() => GetApiRealmsByRealmIdNavigationByNavigationIdOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiRealmsByRealmIdNavigationByNavigationIdStatus200,
+				ResponseErrorConfig<
+					| GetApiRealmsByRealmIdNavigationByNavigationIdStatus404
+					| GetApiRealmsByRealmIdNavigationByNavigationIdStatus422
+					| GetApiRealmsByRealmIdNavigationByNavigationIdStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiRealmsByRealmIdNavigationByNavigationIdQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiRealmsByRealmIdNavigationByNavigationIdQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdNavigationByNavigationIdStatus404
+			| GetApiRealmsByRealmIdNavigationByNavigationIdStatus422
+			| GetApiRealmsByRealmIdNavigationByNavigationIdStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiRealmsByRealmIdNavigationByNavigationIdMutationKey = () =>
+	[{ url: "/api/realms/:realmId/navigation/:navigationId" }] as const;
+
+export function putApiRealmsByRealmIdNavigationByNavigationIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiRealmsByRealmIdNavigationByNavigationIdMutationKey();
+	return mutationOptions<
+		PutApiRealmsByRealmIdNavigationByNavigationIdStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus400
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus403
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus404
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus422
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus500
+		>,
+		PutApiRealmsByRealmIdNavigationByNavigationIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiRealmsByRealmIdNavigationByNavigationId({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Replace Realm navigation
+ * {@link /api/realms/:realmId/navigation/:navigationId}
+ */
+export function usePutApiRealmsByRealmIdNavigationByNavigationId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiRealmsByRealmIdNavigationByNavigationIdStatus200,
+			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdNavigationByNavigationIdStatus400
+				| PutApiRealmsByRealmIdNavigationByNavigationIdStatus403
+				| PutApiRealmsByRealmIdNavigationByNavigationIdStatus404
+				| PutApiRealmsByRealmIdNavigationByNavigationIdStatus422
+				| PutApiRealmsByRealmIdNavigationByNavigationIdStatus500
+			>,
+			PutApiRealmsByRealmIdNavigationByNavigationIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiRealmsByRealmIdNavigationByNavigationIdMutationKey();
+
+	const baseOptions = putApiRealmsByRealmIdNavigationByNavigationIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiRealmsByRealmIdNavigationByNavigationIdStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus400
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus403
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus404
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus422
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus500
+		>,
+		PutApiRealmsByRealmIdNavigationByNavigationIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiRealmsByRealmIdNavigationByNavigationIdStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus400
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus403
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus404
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus422
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus500
+		>,
+		PutApiRealmsByRealmIdNavigationByNavigationIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiRealmsByRealmIdNavigationByNavigationIdStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus400
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus403
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus404
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus422
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus500
+		>,
+		PutApiRealmsByRealmIdNavigationByNavigationIdOptions,
+		TContext
+	>;
+}
+
+export const deleteApiRealmsByRealmIdNavigationByNavigationIdMutationKey = () =>
+	[{ url: "/api/realms/:realmId/navigation/:navigationId" }] as const;
+
+export function deleteApiRealmsByRealmIdNavigationByNavigationIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = deleteApiRealmsByRealmIdNavigationByNavigationIdMutationKey();
+	return mutationOptions<
+		DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500
+		>,
+		DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiRealmsByRealmIdNavigationByNavigationId({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Delete Realm navigation
+ * {@link /api/realms/:realmId/navigation/:navigationId}
+ */
+export function useDeleteApiRealmsByRealmIdNavigationByNavigationId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204,
+			ResponseErrorConfig<
+				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403
+				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
+				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
+				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422
+				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500
+			>,
+			DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ??
+		deleteApiRealmsByRealmIdNavigationByNavigationIdMutationKey();
+
+	const baseOptions = deleteApiRealmsByRealmIdNavigationByNavigationIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500
+		>,
+		DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500
+		>,
+		DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus403
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500
+		>,
+		DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
 		TContext
 	>;
 }

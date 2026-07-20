@@ -70,7 +70,6 @@ export const CreateZoneBody = t.Object(
 		localization: LocalizationInput,
 		boundaryDocument: ZoneBoundaryInputDocument,
 		themeDocument: ZoneThemeInputDocument,
-		dockDocument: UnitReferencedBlockInputDocument,
 		startsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 		endsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 	},
@@ -84,14 +83,13 @@ export const ZonePageParams = t.Object({
 });
 export const ZoneNavigationParams = t.Object({
 	zoneId: Uuid,
-	key: t.String({ minLength: 1, maxLength: 64, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
+	navigationId: Uuid,
 });
 export const UpdateZoneBody = t.Object(
 	{
 		localization: t.Optional(LocalizationInput),
 		boundaryDocument: t.Optional(ZoneBoundaryInputDocument),
 		themeDocument: t.Optional(ZoneThemeInputDocument),
-		dockDocument: t.Optional(UnitReferencedBlockInputDocument),
 		startsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 		endsAt: t.Optional(t.Nullable(t.String({ format: "date-time" }))),
 	},
@@ -109,7 +107,6 @@ export const ZonePageBody = t.Object(
 export const ZoneNavigationBody = t.Object(
 	{
 		document: NavigationInputDocument,
-		position: FractionalPosition,
 	},
 	{ additionalProperties: false },
 );
@@ -156,7 +153,6 @@ export const ZoneResponse = t.Object({
 	),
 	boundaryDocument: ZoneBoundaryResponseDocument,
 	themeDocument: ZoneThemeResponseDocument,
-	dockDocument: UnitReferencedBlockResponseDocument,
 	startsAt: t.Nullable(DateTime),
 	endsAt: t.Nullable(DateTime),
 	createdAt: DateTime,
@@ -177,9 +173,7 @@ export const ZonePageListResponse = t.Object({ items: t.Array(ZonePageResponse) 
 export const ZoneNavigationResponse = t.Object({
 	id: Uuid,
 	zoneId: Uuid,
-	key: t.String(),
 	document: NavigationResponseDocument,
-	position: FractionalPosition,
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });

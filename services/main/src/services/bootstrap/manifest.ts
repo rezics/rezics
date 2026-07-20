@@ -1,5 +1,5 @@
 import {
-	createBlockDocument,
+	createDockDocument,
 	createZoneBoundaryDocument,
 	createZoneThemeDocument,
 } from "@rezics/block";
@@ -78,7 +78,7 @@ export const OfficialZoneManifest = [
 		ownerProfileId: OfficialProfileIds.editorial,
 		boundaryDocument: createZoneBoundaryDocument(["units", "posts"], [], "b00757a70001"),
 		themeDocument: createZoneThemeDocument({ accent: "#f97360" }, "b00757a70002"),
-		dockDocument: createBlockDocument([], "b00757a70003"),
+		mainDockDocument: createDockDocument([], "b00757a70003"),
 	},
 	{
 		id: "019b76da-a800-7400-8000-000000000002",
@@ -88,7 +88,7 @@ export const OfficialZoneManifest = [
 		ownerProfileId: OfficialProfileIds.community,
 		boundaryDocument: createZoneBoundaryDocument(["realms", "posts"], [], "b00757a70004"),
 		themeDocument: createZoneThemeDocument({ accent: "#3b82f6" }, "b00757a70005"),
-		dockDocument: createBlockDocument([], "b00757a70006"),
+		mainDockDocument: createDockDocument([], "b00757a70006"),
 	},
 	{
 		id: "019b76da-a800-7400-8000-000000000003",
@@ -102,7 +102,7 @@ export const OfficialZoneManifest = [
 			"b00757a70007",
 		),
 		themeDocument: createZoneThemeDocument({ accent: "#8b5cf6" }, "b00757a70008"),
-		dockDocument: createBlockDocument([], "b00757a70009"),
+		mainDockDocument: createDockDocument([], "b00757a70009"),
 	},
 ] as const;
 

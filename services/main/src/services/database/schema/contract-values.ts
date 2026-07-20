@@ -37,6 +37,28 @@ export const VariantCapableUnitKindValues = ["book", "software", "media"] as con
 export type UnitKind = (typeof UnitKindValues)[number];
 export type VariantCapableUnitKind = (typeof VariantCapableUnitKindValues)[number];
 
+export const DockSurfaceValues = ["main", "wiki"] as const;
+export type DockSurface = (typeof DockSurfaceValues)[number];
+export const DockOwnerUnitKindValues = ["book", "software", "media", "zone", "realm"] as const;
+export type DockOwnerUnitKind = (typeof DockOwnerUnitKindValues)[number];
+export const DockSurfacesByUnitKind = {
+	book: ["main"],
+	software: ["main"],
+	media: ["main"],
+	zone: ["main"],
+	realm: ["main", "wiki"],
+} as const satisfies Record<DockOwnerUnitKind, readonly DockSurface[]>;
+
+export function isDockOwnerUnitKind(kind: UnitKind): kind is DockOwnerUnitKind {
+	return (DockOwnerUnitKindValues as readonly UnitKind[]).includes(kind);
+}
+
+export function isDockSurfaceSupported(kind: UnitKind, surface: DockSurface): boolean {
+	return isDockOwnerUnitKind(kind)
+		? (DockSurfacesByUnitKind[kind] as readonly DockSurface[]).includes(surface)
+		: false;
+}
+
 export const SlugAddressKindValues = ["canonical", "redirect"] as const;
 export type SlugAddressKind = (typeof SlugAddressKindValues)[number];
 

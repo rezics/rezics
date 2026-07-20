@@ -8,6 +8,7 @@ import catalog from "./catalog";
 import associationProposals from "./association-proposals";
 import collections from "./collections";
 import realms from "./realms";
+import realmNavigation from "./realm-navigation";
 import contentStructure from "./content-structure";
 import posts from "./posts";
 import health from "./health";
@@ -21,6 +22,7 @@ import feed from "./feed";
 import feedback from "./feedback";
 import governance from "./governance";
 import domainExtensions from "./domain-extensions";
+import docks from "./docks";
 import polls from "./polls";
 import progress from "./progress";
 import reactions from "./reactions";
@@ -97,6 +99,7 @@ export default new Elysia()
 				.use(feedback)
 				.use(governance)
 				.use(domainExtensions)
+				.use(docks)
 				.use(users)
 				.use(slugAddresses)
 				.use(units)
@@ -110,6 +113,7 @@ export default new Elysia()
 				.use(polls)
 				.use(posts)
 				.use(realms)
+				.use(realmNavigation)
 				.use(search)
 				.use(imageAssets),
 		),

@@ -9,6 +9,7 @@ import {
 	subjectAssociation,
 	feedback,
 	unit,
+	unitDock,
 	conversationParticipantStat,
 	realmTagVoteStat,
 	realmScoreContext,
@@ -20,6 +21,8 @@ import {
 	GovernanceNoteRoleValues,
 	GovernanceReasonCodeValues,
 	CommunityCatalogUnitKindValues,
+	DockSurfaceValues,
+	DockSurfacesByUnitKind,
 	EntityAssociationKindValues,
 	EntityAssociationPolicyModeValues,
 	moderationAction,
@@ -28,6 +31,7 @@ import {
 	PostKindValues,
 	realmUnitStatus,
 	realmUnitStatusEvent,
+	realmNavigation,
 	RealmUnitMutationCommandValues,
 	scoreStat,
 	score,
@@ -51,6 +55,7 @@ import {
 	UnitKindValues,
 	UnitPermissionValues,
 	VariantCapableUnitKindValues,
+	zoneNavigation,
 } from "./schema";
 
 const dialect = new PgDialect();
@@ -350,6 +355,24 @@ describe("database schema contracts", () => {
 			]),
 		);
 		expect(unitSlugAddress.kind.getSQLType()).toBe("text");
+	});
+
+	it("keeps Dock surfaces closed and Navigation identity UUID-only", () => {
+		expect(DockSurfaceValues).toEqual(["main", "wiki"]);
+		expect(DockSurfacesByUnitKind).toEqual({
+			book: ["main"],
+			software: ["main"],
+			media: ["main"],
+			zone: ["main"],
+			realm: ["main", "wiki"],
+		});
+		expect(getTableConfig(unitDock).primaryKeys).toHaveLength(1);
+		expect(Object.keys(zoneNavigation)).not.toEqual(
+			expect.arrayContaining(["key", "position"]),
+		);
+		expect(Object.keys(realmNavigation)).not.toEqual(
+			expect.arrayContaining(["key", "position"]),
+		);
 	});
 
 	it("models global and Realm aggregate meanings separately", () => {

@@ -9,6 +9,7 @@ export * from "./communication";
 export * from "./content-structure";
 export * from "./contract-values";
 export * from "./core";
+export * from "./dock";
 export * from "./entity";
 export * from "./governance";
 export * from "./history";

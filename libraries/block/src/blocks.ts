@@ -257,6 +257,17 @@ export const UnitReferencedBlockDocument = Type.Object(
 );
 export type UnitReferencedBlockDocument = Static<typeof UnitReferencedBlockDocument>;
 
+/** Unit-owned composition rendered by a product route in a product-defined region. */
+export const DockDocument = Type.Object(
+	{
+		_type: Type.Literal("dock-document"),
+		_key: BlockKey,
+		blocks: Type.Array(UnitReferencedBlock, { maxItems: 100 }),
+	},
+	{ additionalProperties: false, $id: "DockDocument" },
+);
+export type DockDocument = Static<typeof DockDocument>;
+
 export function createBlockDocument(
 	blocks: Block[] = [],
 	key: BlockKey = createBlockKey(),
@@ -269,6 +280,13 @@ export function createUnitReferencedBlockDocument(
 	key: BlockKey = createBlockKey(),
 ): UnitReferencedBlockDocument {
 	return { _type: "block-document", _key: key, blocks };
+}
+
+export function createDockDocument(
+	blocks: UnitReferencedBlock[] = [],
+	key: BlockKey = createBlockKey(),
+): DockDocument {
+	return { _type: "dock-document", _key: key, blocks };
 }
 
 export const BlockTypeValues = [

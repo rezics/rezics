@@ -157,12 +157,14 @@ import type {
 	DeleteApiZonesByZoneIdPagesBySlugResponses,
 	GetApiZonesByZoneIdNavigationOptions,
 	GetApiZonesByZoneIdNavigationResponses,
-	GetApiZonesByZoneIdNavigationByKeyOptions,
-	GetApiZonesByZoneIdNavigationByKeyResponses,
-	PutApiZonesByZoneIdNavigationByKeyOptions,
-	PutApiZonesByZoneIdNavigationByKeyResponses,
-	DeleteApiZonesByZoneIdNavigationByKeyOptions,
-	DeleteApiZonesByZoneIdNavigationByKeyResponses,
+	PostApiZonesByZoneIdNavigationOptions,
+	PostApiZonesByZoneIdNavigationResponses,
+	GetApiZonesByZoneIdNavigationByNavigationIdOptions,
+	GetApiZonesByZoneIdNavigationByNavigationIdResponses,
+	PutApiZonesByZoneIdNavigationByNavigationIdOptions,
+	PutApiZonesByZoneIdNavigationByNavigationIdResponses,
+	DeleteApiZonesByZoneIdNavigationByNavigationIdOptions,
+	DeleteApiZonesByZoneIdNavigationByNavigationIdResponses,
 	PutApiSeriesBySeriesIdReleasesByReleaseIdOptions,
 	PutApiSeriesBySeriesIdReleasesByReleaseIdResponses,
 	DeleteApiSeriesBySeriesIdReleasesByReleaseIdOptions,
@@ -181,6 +183,14 @@ import type {
 	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses,
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses,
+	GetApiUnitsByIdByUnitIdDocksOptions,
+	GetApiUnitsByIdByUnitIdDocksResponses,
+	GetApiUnitsByIdByUnitIdDocksBySurfaceOptions,
+	GetApiUnitsByIdByUnitIdDocksBySurfaceResponses,
+	PutApiUnitsByIdByUnitIdDocksBySurfaceOptions,
+	PutApiUnitsByIdByUnitIdDocksBySurfaceResponses,
+	DeleteApiUnitsByIdByUnitIdDocksBySurfaceOptions,
+	DeleteApiUnitsByIdByUnitIdDocksBySurfaceResponses,
 	GetApiUsersMeOptions,
 	GetApiUsersMeResponses,
 	PatchApiUsersMeOptions,
@@ -447,6 +457,16 @@ import type {
 	GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponses,
 	PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
 	PatchApiRealmsByRealmIdUnitsByUnitIdResponses,
+	GetApiRealmsByRealmIdNavigationOptions,
+	GetApiRealmsByRealmIdNavigationResponses,
+	PostApiRealmsByRealmIdNavigationOptions,
+	PostApiRealmsByRealmIdNavigationResponses,
+	GetApiRealmsByRealmIdNavigationByNavigationIdOptions,
+	GetApiRealmsByRealmIdNavigationByNavigationIdResponses,
+	PutApiRealmsByRealmIdNavigationByNavigationIdOptions,
+	PutApiRealmsByRealmIdNavigationByNavigationIdResponses,
+	DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
+	DeleteApiRealmsByRealmIdNavigationByNavigationIdResponses,
 	GetApiSearchConfigurationOptions,
 	GetApiSearchConfigurationResponses,
 	PostApiSearchExecuteOptions,
@@ -1778,51 +1798,71 @@ export function getApiZonesByZoneIdNavigation<ThrowOnError extends boolean = tru
 }
 
 /**
- * @summary Get Zone navigation resource
- * {@link /api/zones/:zoneId/navigation/:key}
+ * @summary Create Zone navigation
+ * {@link /api/zones/:zoneId/navigation}
  */
-export function getApiZonesByZoneIdNavigationByKey<ThrowOnError extends boolean = true>(
-	options: Options<GetApiZonesByZoneIdNavigationByKeyOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiZonesByZoneIdNavigationByKeyResponses, ThrowOnError>> {
+export function postApiZonesByZoneIdNavigation<ThrowOnError extends boolean = true>(
+	options: Options<PostApiZonesByZoneIdNavigationOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiZonesByZoneIdNavigationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "POST", url: "/api/zones/{zoneId}/navigation", ...config }) as Promise<
+		RequestResult<PostApiZonesByZoneIdNavigationResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Get Zone navigation resource
+ * {@link /api/zones/:zoneId/navigation/:navigationId}
+ */
+export function getApiZonesByZoneIdNavigationByNavigationId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiZonesByZoneIdNavigationByNavigationIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/zones/{zoneId}/navigation/{key}",
+		url: "/api/zones/{zoneId}/navigation/{navigationId}",
 		...config,
-	}) as Promise<RequestResult<GetApiZonesByZoneIdNavigationByKeyResponses, ThrowOnError>>;
+	}) as Promise<
+		RequestResult<GetApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>
+	>;
 }
 
 /**
- * @summary Create or replace Zone navigation
- * {@link /api/zones/:zoneId/navigation/:key}
+ * @summary Replace Zone navigation
+ * {@link /api/zones/:zoneId/navigation/:navigationId}
  */
-export function putApiZonesByZoneIdNavigationByKey<ThrowOnError extends boolean = true>(
-	options: Options<PutApiZonesByZoneIdNavigationByKeyOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiZonesByZoneIdNavigationByKeyResponses, ThrowOnError>> {
+export function putApiZonesByZoneIdNavigationByNavigationId<ThrowOnError extends boolean = true>(
+	options: Options<PutApiZonesByZoneIdNavigationByNavigationIdOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/zones/{zoneId}/navigation/{key}",
+		url: "/api/zones/{zoneId}/navigation/{navigationId}",
 		...config,
-	}) as Promise<RequestResult<PutApiZonesByZoneIdNavigationByKeyResponses, ThrowOnError>>;
+	}) as Promise<
+		RequestResult<PutApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>
+	>;
 }
 
 /**
  * @summary Delete Zone navigation resource
- * {@link /api/zones/:zoneId/navigation/:key}
+ * {@link /api/zones/:zoneId/navigation/:navigationId}
  */
-export function deleteApiZonesByZoneIdNavigationByKey<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiZonesByZoneIdNavigationByKeyOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiZonesByZoneIdNavigationByKeyResponses, ThrowOnError>> {
+export function deleteApiZonesByZoneIdNavigationByNavigationId<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiZonesByZoneIdNavigationByNavigationIdOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "DELETE",
-		url: "/api/zones/{zoneId}/navigation/{key}",
+		url: "/api/zones/{zoneId}/navigation/{navigationId}",
 		...config,
-	}) as Promise<RequestResult<DeleteApiZonesByZoneIdNavigationByKeyResponses, ThrowOnError>>;
+	}) as Promise<
+		RequestResult<DeleteApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>
+	>;
 }
 
 /**
@@ -1997,6 +2037,68 @@ export function deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<
 			ThrowOnError
 		>
 	>;
+}
+
+/**
+ * @summary List configured Unit Docks
+ * {@link /api/units/by-id/:unitId/docks}
+ */
+export function getApiUnitsByIdByUnitIdDocks<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitsByIdByUnitIdDocksOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitsByIdByUnitIdDocksResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/units/by-id/{unitId}/docks", ...config }) as Promise<
+		RequestResult<GetApiUnitsByIdByUnitIdDocksResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Get a Unit Dock
+ * {@link /api/units/by-id/:unitId/docks/:surface}
+ */
+export function getApiUnitsByIdByUnitIdDocksBySurface<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitsByIdByUnitIdDocksBySurfaceOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitsByIdByUnitIdDocksBySurfaceResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/units/by-id/{unitId}/docks/{surface}",
+		...config,
+	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdDocksBySurfaceResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Create or replace a Unit Dock
+ * {@link /api/units/by-id/:unitId/docks/:surface}
+ */
+export function putApiUnitsByIdByUnitIdDocksBySurface<ThrowOnError extends boolean = true>(
+	options: Options<PutApiUnitsByIdByUnitIdDocksBySurfaceOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiUnitsByIdByUnitIdDocksBySurfaceResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/units/by-id/{unitId}/docks/{surface}",
+		...config,
+	}) as Promise<RequestResult<PutApiUnitsByIdByUnitIdDocksBySurfaceResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Delete a Unit Dock
+ * {@link /api/units/by-id/:unitId/docks/:surface}
+ */
+export function deleteApiUnitsByIdByUnitIdDocksBySurface<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiUnitsByIdByUnitIdDocksBySurfaceOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiUnitsByIdByUnitIdDocksBySurfaceResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/units/by-id/{unitId}/docks/{surface}",
+		...config,
+	}) as Promise<RequestResult<DeleteApiUnitsByIdByUnitIdDocksBySurfaceResponses, ThrowOnError>>;
 }
 
 /**
@@ -4110,6 +4212,94 @@ export function patchApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolea
 		url: "/api/realms/{realmId}/units/{unitId}",
 		...config,
 	}) as Promise<RequestResult<PatchApiRealmsByRealmIdUnitsByUnitIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List Realm navigation resources
+ * {@link /api/realms/:realmId/navigation}
+ */
+export function getApiRealmsByRealmIdNavigation<ThrowOnError extends boolean = true>(
+	options: Options<GetApiRealmsByRealmIdNavigationOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiRealmsByRealmIdNavigationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/realms/{realmId}/navigation",
+		...config,
+	}) as Promise<RequestResult<GetApiRealmsByRealmIdNavigationResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Create Realm navigation
+ * {@link /api/realms/:realmId/navigation}
+ */
+export function postApiRealmsByRealmIdNavigation<ThrowOnError extends boolean = true>(
+	options: Options<PostApiRealmsByRealmIdNavigationOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiRealmsByRealmIdNavigationResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/realms/{realmId}/navigation",
+		...config,
+	}) as Promise<RequestResult<PostApiRealmsByRealmIdNavigationResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get Realm navigation
+ * {@link /api/realms/:realmId/navigation/:navigationId}
+ */
+export function getApiRealmsByRealmIdNavigationByNavigationId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiRealmsByRealmIdNavigationByNavigationIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiRealmsByRealmIdNavigationByNavigationIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/realms/{realmId}/navigation/{navigationId}",
+		...config,
+	}) as Promise<
+		RequestResult<GetApiRealmsByRealmIdNavigationByNavigationIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Replace Realm navigation
+ * {@link /api/realms/:realmId/navigation/:navigationId}
+ */
+export function putApiRealmsByRealmIdNavigationByNavigationId<ThrowOnError extends boolean = true>(
+	options: Options<PutApiRealmsByRealmIdNavigationByNavigationIdOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiRealmsByRealmIdNavigationByNavigationIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/realms/{realmId}/navigation/{navigationId}",
+		...config,
+	}) as Promise<
+		RequestResult<PutApiRealmsByRealmIdNavigationByNavigationIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Delete Realm navigation
+ * {@link /api/realms/:realmId/navigation/:navigationId}
+ */
+export function deleteApiRealmsByRealmIdNavigationByNavigationId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiRealmsByRealmIdNavigationByNavigationIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/realms/{realmId}/navigation/{navigationId}",
+		...config,
+	}) as Promise<
+		RequestResult<DeleteApiRealmsByRealmIdNavigationByNavigationIdResponses, ThrowOnError>
+	>;
 }
 
 /**
