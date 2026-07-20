@@ -71,7 +71,13 @@ export function SignInButton({
 	destination?: string;
 }) {
 	const { openAuthPortal } = useAuthPortal();
-	return <Button {...props} onClick={() => openAuthPortal("login", { destination })} />;
+	return (
+		<Button
+			variant="brand"
+			{...props}
+			onClick={() => openAuthPortal("login", { destination })}
+		/>
+	);
 }
 
 export function AuthPortalProvider({ children }: { children: ReactNode }) {
@@ -332,7 +338,13 @@ function LoginForm({
 						</ModeButton>
 					</div>
 					<FormError error={error} />
-					<Button className="w-full" isLoading={isSubmitting} size="xl" type="submit">
+					<Button
+						className="w-full"
+						isLoading={isSubmitting}
+						size="xl"
+						type="submit"
+						variant="brand"
+					>
 						{t.actions.login}
 					</Button>
 				</FieldGroup>

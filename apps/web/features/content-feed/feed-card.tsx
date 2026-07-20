@@ -13,6 +13,7 @@ import {
 	CardContent,
 	CardFooter,
 	CardHeader,
+	Cover,
 	Item,
 	ItemContent,
 	ItemDescription,
@@ -185,12 +186,13 @@ export function FeedCardTarget({
 		<CardContent className="px-4 pt-3 sm:px-5" data-slot="feed-card-target">
 			<Item asChild variant="muted">
 				<a href={href}>
-					<ItemMedia className="aspect-[2/3] w-9 rounded-md" variant="image">
-						{imageUrl ? (
-							<img alt={imageAlt} src={imageUrl} />
-						) : (
-							<BookOpenIcon aria-hidden />
-						)}
+					<ItemMedia className="aspect-[3/4] w-9 rounded-md" variant="image">
+						<Cover
+							alt={imageAlt || title}
+							className="size-full rounded-md"
+							fallback={<BookOpenIcon aria-hidden />}
+							src={imageUrl}
+						/>
 					</ItemMedia>
 					<ItemContent className="min-w-0">
 						<ItemDescription className="text-xs">{label}</ItemDescription>

@@ -21,8 +21,8 @@ import {
 	Button,
 	Card,
 	CardContent,
-	CardMedia,
 	cn,
+	Cover,
 	Menu,
 	MenuContent,
 	MenuItem,
@@ -174,28 +174,15 @@ function UnitRecommendationCard({
 					href={`/units/${item.type}/${item.id}`}
 					onClick={trackOpen}
 				>
-					<CardMedia
+					<Cover
+						alt=""
 						className={cn(
-							item.type === "book"
-								? "bg-accent aspect-[2/3]"
-								: "bg-accent aspect-video",
-							featuredMobile &&
-								"h-full min-h-44 aspect-auto sm:h-auto sm:min-h-0 sm:aspect-[2/3]",
+							"rounded-none",
+							featuredMobile && "h-full min-h-44 sm:h-auto sm:min-h-0",
 						)}
-						variant="image"
-					>
-						{item.cover ? (
-							<img
-								alt=""
-								className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-								src={item.cover.url}
-							/>
-						) : (
-							<div className="text-accent-foreground grid size-full place-items-center">
-								<UnitIcon aria-hidden className="size-9" />
-							</div>
-						)}
-					</CardMedia>
+						fallback={<UnitIcon aria-hidden className="size-9" />}
+						src={item.cover?.url}
+					/>
 				</Link>
 				<CardContent
 					className={cn(

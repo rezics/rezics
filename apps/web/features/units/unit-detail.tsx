@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@rezics/ui";
 import { Badge } from "@rezics/ui";
 import { Button } from "@rezics/ui";
+import { Cover } from "@rezics/ui";
 import { PortableTextContent } from "@rezics/ui";
 import { DataList, DataListItem, DataListItemLabel, DataListItemValue } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
@@ -95,21 +96,12 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 	return (
 		<main className="mx-auto flex w-full max-w-[76rem] flex-col gap-8 px-4 py-6 sm:px-6 sm:py-10">
 			<section className="grid grid-cols-[7.5rem_minmax(0,1fr)] gap-4 border-b pb-8 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-6">
-				<div
-					className={
-						type === "book"
-							? "bg-accent aspect-[2/3] overflow-hidden rounded-lg shadow-sm"
-							: "bg-accent col-span-2 aspect-video overflow-hidden rounded-lg shadow-sm"
-					}
-				>
-					{item.cover ? (
-						<img alt="" className="size-full object-cover" src={item.cover.url} />
-					) : (
-						<div className="text-accent-foreground grid size-full place-items-center">
-							<Icon className="size-9" />
-						</div>
-					)}
-				</div>
+				<Cover
+					alt={localization?.title ?? t.ui.unnamed}
+					className="rounded-lg shadow-sm"
+					fallback={<Icon aria-hidden className="size-9" />}
+					src={item.cover?.url}
+				/>
 				<div className="flex min-w-0 flex-col gap-4">
 					<div className="flex flex-wrap gap-2">
 						<Badge variant="secondary">{t.units.types[type]}</Badge>

@@ -57,6 +57,7 @@ export function UnitBrowsePage({ type }: { type: UnitType }) {
 				href={(item) => `/units/${type}/${item.id}`}
 				items={items}
 				pending={query.isPending}
+				variant="shelf"
 			/>
 			{query.isError && (
 				<Button className="w-fit" onClick={() => void query.refetch()} variant="outline">

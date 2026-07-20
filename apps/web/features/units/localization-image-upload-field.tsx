@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 
 import {
 	Button,
+	Cover,
 	FileUpload,
 	FileUploadDropzone,
 	FileUploadDropzoneIcon,
@@ -156,7 +157,7 @@ export function LocalizationImageUploadField({
 							? "aspect-[3/1] max-w-2xl"
 							: shape === "landscape"
 								? "aspect-video"
-								: "aspect-[2/3] max-h-96",
+								: "aspect-[3/4] max-h-96",
 				)}
 				disableClick={Boolean(displayed)}
 				onPaste={(event) => {
@@ -167,7 +168,11 @@ export function LocalizationImageUploadField({
 				}}
 			>
 				{displayed ? (
-					<img alt="" className="size-full object-cover" src={displayed} />
+					shape === "portrait" ? (
+						<Cover alt="" className="size-full rounded-none" src={displayed} />
+					) : (
+						<img alt="" className="size-full object-cover" src={displayed} />
+					)
 				) : (
 					<>
 						<FileUploadDropzoneIcon>
