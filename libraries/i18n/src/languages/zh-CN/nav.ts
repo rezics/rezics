@@ -10,4 +10,16 @@ export default {
 	skipToContent: "跳到主要内容",
 	navigation: "导航",
 	content: "内容",
+	subscriptions: {
+		title: "我的订阅",
+		zones: "Zone",
+		realms: "Realm",
+		profiles: "用户",
+		manage: "管理订阅",
+		empty: "订阅 Zone 或 Realm 后会显示在这里。",
+		description: "筛选、置顶并整理你订阅的 Zone、Realm 与用户。",
+		filter: "筛选订阅类型",
+		favorite: "置顶",
+		unfavorite: "取消置顶",
+	},
 };

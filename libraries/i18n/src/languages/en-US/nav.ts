@@ -10,4 +10,16 @@ export default {
 	skipToContent: "Skip to main content",
 	navigation: "Navigation",
 	content: "Content",
+	subscriptions: {
+		title: "My subscriptions",
+		zones: "Zones",
+		realms: "Realms",
+		profiles: "Profiles",
+		manage: "Manage subscriptions",
+		empty: "Follow a Zone or Realm to keep it close at hand.",
+		description: "Filter, pin, and organize the Zones, Realms, and people you follow.",
+		filter: "Filter subscription types",
+		favorite: "Pin",
+		unfavorite: "Unpin",
+	},
 } satisfies typeof import("../zh-CN/nav").default;

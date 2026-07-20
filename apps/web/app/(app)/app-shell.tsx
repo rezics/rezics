@@ -7,6 +7,7 @@ import { forwardRef, useEffect, type ComponentPropsWithoutRef, type ReactNode } 
 import {
 	getApiUsersMePreferencesQueryKey,
 	useGetApiUsersMePreferences,
+	useGetApiUsersMeSubscriptions,
 	usePutApiUsersMePreferences,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
@@ -24,6 +25,24 @@ const Links = [
 	{ href: "/me/favorites", key: "favorites", icon: Bookmark },
 	{ href: "/me/progress", key: "progress", icon: TrendingUp },
 ] as const;
+
+const SidebarSubscriptionKinds = ["zone", "realm", "profile"] as const;
+type SidebarSubscriptionKind = (typeof SidebarSubscriptionKinds)[number];
+
+function isSidebarSubscriptionKind(value: string): value is SidebarSubscriptionKind {
+	return SidebarSubscriptionKinds.some((kind) => kind === value);
+}
+
+function subscriptionHref(kind: SidebarSubscriptionKind, id: string) {
+	switch (kind) {
+		case "zone":
+			return `/zones/${id}`;
+		case "realm":
+			return `/realms/${id}`;
+		case "profile":
+			return `/users/${id}`;
+	}
+}
 
 type AppLinkProps = ComponentPropsWithoutRef<typeof Link>;
 
@@ -68,6 +87,9 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 	const setLocale = useSetLocale();
 	const queryClient = useQueryClient();
 	const preferences = useGetApiUsersMePreferences({ query: { enabled: Boolean(session) } });
+	const subscriptions = useGetApiUsersMeSubscriptions({
+		query: { enabled: Boolean(session) },
+	});
 	const updatePreferences = usePutApiUsersMePreferences({
 		mutation: {
 			onSuccess: () =>
@@ -88,6 +110,7 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 				href: session ? "/settings/profile" : "/login",
 				label: session ? t.actions.account : t.actions.login,
 				icon: UserRound,
+				variant: session ? "ghost" : "brand",
 			}}
 			create={{
 				href: session ? "/create" : "/login?next=/create",
@@ -139,6 +162,28 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 				label: t.nav[key],
 				icon,
 			}))}
+			subscriptions={{
+				label: t.nav.subscriptions.title,
+				zonesLabel: t.nav.subscriptions.zones,
+				realmsLabel: t.nav.subscriptions.realms,
+				profilesLabel: t.nav.subscriptions.profiles,
+				manageLabel: t.nav.subscriptions.manage,
+				manageHref: "/me/subscriptions",
+				emptyLabel: t.nav.subscriptions.empty,
+				items: (subscriptions.data?.items ?? []).flatMap((item) => {
+					if (!isSidebarSubscriptionKind(item.kind)) return [];
+					return [
+						{
+							id: item.id,
+							kind: item.kind,
+							href: subscriptionHref(item.kind, item.id),
+							label: item.title ?? t.ui.unnamed,
+							imageUrl: item.avatar?.url ?? item.cover?.url,
+							favorite: item.favorite,
+						},
+					];
+				}),
+			}}
 			utilities={<ThemeToggle />}
 		>
 			{children}
