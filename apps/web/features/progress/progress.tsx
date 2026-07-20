@@ -8,6 +8,7 @@ import {
 	useGetApiProgressByUnitId,
 	usePutApiProgressByUnitId,
 } from "@rezics/openapi-tanstack-query";
+import type { Translation } from "@rezics/i18n";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
@@ -74,7 +75,7 @@ function ProgressList() {
 	const query = useGetApiProgress({ query: { limit: 100 } });
 	const remove = useDeleteApiProgressByUnitId();
 	const queryClient = useQueryClient();
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "engagement", "state", "ui"]);
 	async function removeProgress(unitId: string) {
 		try {
 			await remove.mutateAsync({ path: { unitId } });
@@ -167,7 +168,7 @@ export function ProgressRecordForm({ unitId }: { unitId: string }) {
 	);
 	const save = usePutApiProgressByUnitId();
 	const queryClient = useQueryClient();
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "engagement", "state", "ui"]);
 	const [status, setStatus] = useState<ProgressStatus>("active");
 	const [percentage, setPercentage] = useState("0");
 	const recordMissing = record.isError && hasErrorCode(record.error, "ProgressNotFound");
@@ -255,7 +256,7 @@ function toProgressStatus(status: string): ProgressStatus {
 	return ProgressStatuses.find((candidate) => candidate === status) ?? "active";
 }
 
-function getProgressStatusLabel(t: ReturnType<typeof useTranslation>["t"], status: string) {
+function getProgressStatusLabel(t: Pick<Translation, "engagement">, status: string) {
 	switch (status) {
 		case "backlog":
 			return t.engagement.backlog;

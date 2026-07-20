@@ -1,11 +1,11 @@
 import { type Static, t } from "elysia";
 
 import { PollModeValues, PollResultVisibilityValues } from "../../database/schema/contract-values";
-import { LanguageTag, Uuid } from "../schema";
+import { ContentLanguage, Uuid } from "../schema";
 
 export const CreatePollBody = t.Object({
 	question: t.String({ minLength: 1, maxLength: 500 }),
-	language: LanguageTag,
+	language: ContentLanguage,
 	options: t.Array(t.String({ minLength: 1, maxLength: 500 }), {
 		minItems: 2,
 		maxItems: 50,

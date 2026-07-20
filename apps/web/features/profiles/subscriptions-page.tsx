@@ -41,7 +41,7 @@ export function SubscriptionsPage() {
 }
 
 function SubscriptionsContent() {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["nav", "ui"]);
 	const queryClient = useQueryClient();
 	const query = useGetApiUsersMeSubscriptions();
 	const update = usePatchApiUsersMeSubscriptionsByUnitId({

@@ -1,5 +1,7 @@
 "use client";
 
+import { toContentLanguage } from "@rezics/i18n";
+
 import {
 	getApiPostsByPostIdReplies,
 	getApiPostsByPostIdRepliesQueryKey,
@@ -45,7 +47,7 @@ export function ReplyPostThread({
 	rootPostId: string;
 	parentPostId?: string;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "posts", "ui"]);
 	const baseQuery = {
 		limit: 25,
 		...(parentPostId ? { parentPostId } : {}),
@@ -155,7 +157,7 @@ function ReplyPostNode({
 	rootPostId: string;
 	canReply: boolean;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "posts", "ui"]);
 	const queryClient = useQueryClient();
 	const update = usePatchApiPostsByPostIdRepliesByReplyPostId();
 	const remove = useDeleteApiPostsByPostIdRepliesByReplyPostId();
@@ -358,7 +360,7 @@ function ReplyPostComposer({
 	action: string;
 	onComplete?: () => void;
 }) {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation(["actions", "posts", "ui"]);
 	const queryClient = useQueryClient();
 	const create = usePostApiPostsByPostIdReplies();
 	const [body, setBody] = useState<PortableTextValue>([]);
@@ -371,7 +373,7 @@ function ReplyPostComposer({
 				path: { postId: rootPostId },
 				body: {
 					...(parentPostId ? { parentPostId } : {}),
-					language: locale.target,
+					language: toContentLanguage(locale.target),
 					body: writePortableText(body),
 				},
 			},

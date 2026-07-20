@@ -15,12 +15,15 @@ import {
 import { pgTable } from "./base";
 import {
 	AiDisclosureValues,
+	type ContentLanguage,
 	ContentRatingValues,
 	ContentStatusValues,
-	DefaultLanguage,
+	DefaultContentLanguage,
+	DefaultStoredUiLocale,
 	ImageAssetAccessValues,
 	ImageAssetStatusValues,
 	ModerationStatusValues,
+	type StoredUiLocale,
 	type UnitKind,
 	UnitKindValues,
 	UnitStatusValues,
@@ -91,7 +94,7 @@ export const unitLocalization = pgTable(
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
-		language: text().notNull(),
+		language: text().$type<ContentLanguage>().notNull(),
 		/**
 		 * Fractional index in the Unit's localization sequence. The first item is
 		 * primary; fallback selection is one consumer of this general ordering.
@@ -139,10 +142,7 @@ export const unitLocalization = pgTable(
 			"pgroonga",
 			table.content.op("pgroonga_jsonb_full_text_search_ops_v2"),
 		),
-		check(
-			"unit_localization_language_check",
-			sql`btrim(${table.language}) <> '' and char_length(${table.language}) <= 35`,
-		),
+		check("unit_localization_language_check", sql`${table.language} in ('zh', 'en')`),
 		check(
 			"unit_localization_value_check",
 			sql`${table.avatarAssetId} is not null or ${table.bannerAssetId} is not null or ${table.coverAssetId} is not null or ${table.title} is not null or ${table.summary} is not null or ${table.description} is not null or ${table.content} is not null`,
@@ -240,13 +240,15 @@ export const profilePreference = pgTable(
 		defaultRealmManageMode: boolean().default(false).notNull(),
 		personalizedFeed: boolean().default(true).notNull(),
 		collectionConfig: createJsonObjectColumn(),
+		interfaceLocale: text().$type<StoredUiLocale>().default(DefaultStoredUiLocale).notNull(),
 		contentRatings: contentRating()
 			.array()
 			.default(sql`array[]::content_rating[]`)
 			.notNull(),
 		preferredLanguages: text()
+			.$type<ContentLanguage>()
 			.array()
-			.default(sql.raw(`array['${DefaultLanguage}']::text[]`))
+			.default(sql.raw(`array['${DefaultContentLanguage}']::text[]`))
 			.notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -258,7 +260,14 @@ export const profilePreference = pgTable(
 		),
 		check(
 			"profile_preference_languages_check",
-			sql`cardinality(${table.preferredLanguages}) > 0`,
+			sql`cardinality(${table.preferredLanguages}) > 0
+				and ${table.preferredLanguages} <@ array['zh', 'en']::text[]
+				and cardinality(array_positions(${table.preferredLanguages}, 'zh')) <= 1
+				and cardinality(array_positions(${table.preferredLanguages}, 'en')) <= 1`,
+		),
+		check(
+			"profile_preference_interface_locale_check",
+			sql`${table.interfaceLocale} in ('en', 'zh-hant')`,
 		),
 		createJsonObjectConstraint(
 			"profile_preference_collection_config_json_object_check",

@@ -1,10 +1,11 @@
-import { and, desc, eq, exists, isNull, lt, not, or } from "drizzle-orm";
+import { and, desc, eq, exists, isNull, lt, not, or, sql } from "drizzle-orm";
 import {
 	PortableTextDocument,
 	parseNullableDocument,
 	type PortableTextDocument as PortableTextDocumentValue,
 } from "@rezics/block";
 import type { Static } from "elysia";
+import type { ContentLanguage } from "@rezics/i18n";
 
 import type { Authorization } from "../authorization";
 import { createCommunityCatalogAccess } from "../authorization/unit/ownership";
@@ -45,7 +46,7 @@ export type UnitDetail = Static<typeof UnitDetailResponse>;
 
 export interface CreateUnitInput {
 	localization: {
-		language: string;
+		language: ContentLanguage;
 		title: string;
 		summary?: string;
 		description?: PortableTextDocumentValue;
@@ -67,7 +68,7 @@ export interface UpdateUnitInput {
 	aiDisclosure?: "unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
 	license?: string | null;
 	unit?: {
-		primaryLanguage?: string;
+		primaryLanguage?: ContentLanguage;
 		releasedOn?: string | null;
 	};
 	details?: {
@@ -191,7 +192,7 @@ export async function getUnit(
 			unitLocalization,
 			and(
 				eq(unitLocalization.unitId, entity.id),
-				eq(unitLocalization.language, primaryLanguage ?? ""),
+				primaryLanguage ? eq(unitLocalization.language, primaryLanguage) : sql`false`,
 			),
 		)
 		.where(eq(creditAttribution.unitId, base.id))
@@ -210,7 +211,7 @@ export async function getUnit(
 			unitLocalization,
 			and(
 				eq(unitLocalization.unitId, entity.id),
-				eq(unitLocalization.language, primaryLanguage ?? ""),
+				primaryLanguage ? eq(unitLocalization.language, primaryLanguage) : sql`false`,
 			),
 		)
 		.where(eq(subjectAssociation.unitId, base.id))
@@ -241,7 +242,7 @@ export async function getUnit(
 			unitLocalization,
 			and(
 				eq(unitLocalization.unitId, unitTag.tagId),
-				eq(unitLocalization.language, primaryLanguage ?? ""),
+				primaryLanguage ? eq(unitLocalization.language, primaryLanguage) : sql`false`,
 			),
 		)
 		.where(eq(unitTag.unitId, base.id))
@@ -537,7 +538,7 @@ export async function upsertLocalization(
 	unitId: string,
 	authorization: Authorization<string>,
 	input: {
-		language: string;
+		language: ContentLanguage;
 		title: string;
 		summary?: string;
 		description?: PortableTextDocumentValue;

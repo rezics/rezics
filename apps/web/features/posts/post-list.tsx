@@ -55,7 +55,7 @@ export function PostList({
 	sort?: FeedSort;
 	personalized?: boolean;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "feed", "posts", "state"]);
 	const { data: session } = useHydratedSession();
 	const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
 	const baseQuery = {
@@ -199,7 +199,7 @@ export function PostList({
 }
 
 export function RelatedPostRecommendations({ postId }: { postId: string }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "feed", "posts", "state"]);
 	const { data: session } = useHydratedSession();
 	const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
 	const query = useGetApiRecommendationsPostsByPostId({
@@ -258,7 +258,7 @@ export function PostListItem({
 	canExclude?: boolean;
 	onHiddenChange?: (hidden: boolean) => void;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "feed", "posts", "state"]);
 	const primaryPublisher = firstPublisher(post.publishers);
 	const initial = (primaryPublisher?.name ?? "R").slice(0, 1).toUpperCase();
 	const { elementRef, trackOpen } = useRecommendationTracking(post.id, post.tracking);

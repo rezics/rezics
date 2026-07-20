@@ -1,4 +1,4 @@
-h1:5nKuknnwY6wg0pPcdtg5hktFi2p6B++42cqFrt0mbRs=
+h1:3sv4aF/qE0n9VFDcoZ1lFmE2XbyoQjgjhZVvoheAxyY=
 20260718070359_enable_pgroonga.sql h1:tT2i+ShJU7VwHt0LVUKiIN8ltJzm9z3dOONNMaMGP3g=
 20260718070400_current_baseline.sql h1:8k2fN5VnnH6wRhaCsATcwJYQ2ZaMRQ2vfLB4JLNSgIg=
 20260718070401_history_invariants.sql h1:FueH3mEgeYZvUKGYVLOmnF8MOp0cFLWl2U1i0VmcqSg=
@@ -24,3 +24,6 @@ h1:5nKuknnwY6wg0pPcdtg5hktFi2p6B++42cqFrt0mbRs=
 20260719231433_main_variants_integrity.sql h1:54c7vblVYJmtjj3wWq9MLYSb0iqQ7i9UkL22HuGiVfg=
 20260720015654_post-score-design.sql h1:WP3TmaR4x6CZxY3MfAPPbpE0q5Sw1ELnheOBvwn+NlE=
 20260720032848_unit_follow_presentation.sql h1:kfLiBDuEo4zEH7il67D6IeL+t7uqpLkPRm1/OxQL6/k=
+20260720090357_normalize-language-values.sql h1:nyzdC4JvGI8sBD6Vh3hxOSbNVQDBo5b4GVL4JEVG+xY=
+20260720090358_native-i18n-language-contract.sql h1:hd1yNQGbf4CMUXlmOm+PD1u1bMjQaqqomd/oPLp+W3U=
+20260720090359_backfill-interface-locale.sql h1:4B3ENCCnDz95c0CnYr79a0fBJsLLplw7dod31tPwY28=

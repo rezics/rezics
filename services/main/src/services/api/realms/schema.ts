@@ -13,7 +13,7 @@ import {
 	UnitStatusValues,
 	UnitVisibilityValues,
 } from "../../database/schema/contract-values";
-import { DateTime, FractionalPosition, LanguageTag, LocalizationInput, Uuid } from "../schema";
+import { DateTime, FractionalPosition, ContentLanguage, LocalizationInput, Uuid } from "../schema";
 
 const RealmVisibility = t.Union(UnitVisibilityValues.map((value) => t.Literal(value)));
 
@@ -29,7 +29,7 @@ const RealmUnitStatus = t.UnionEnum(RealmUnitStatusValues, { default: undefined 
 const GovernanceReasonCode = t.UnionEnum(GovernanceReasonCodeValues);
 
 export const ListRealmsQuery = t.Object({
-	language: t.Optional(LanguageTag),
+	language: t.Optional(ContentLanguage),
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 });
 export type ListRealmsQuery = Static<typeof ListRealmsQuery>;
@@ -50,7 +50,7 @@ export const SetRealmScoreContextBody = t.Object(
 );
 export type SetRealmScoreContextBody = Static<typeof SetRealmScoreContextBody>;
 
-export const RealmDetailQuery = t.Object({ language: t.Optional(LanguageTag) });
+export const RealmDetailQuery = t.Object({ language: t.Optional(ContentLanguage) });
 export type RealmDetailQuery = Static<typeof RealmDetailQuery>;
 
 export const UpdateRealmBody = t.Object({
@@ -63,7 +63,7 @@ export type UpdateRealmBody = Static<typeof UpdateRealmBody>;
 
 export const JoinRealmBody = t.Object({
 	ruleRevisionId: t.Optional(Uuid),
-	language: t.Optional(LanguageTag),
+	language: t.Optional(ContentLanguage),
 });
 export type JoinRealmBody = Static<typeof JoinRealmBody>;
 
@@ -88,7 +88,7 @@ export const PublishRealmRulesBody = t.Object({
 	requireOnUpdate: t.Boolean(),
 	rules: t.Array(
 		t.Object({
-			language: LanguageTag,
+			language: ContentLanguage,
 			title: t.String({ minLength: 1, maxLength: 500 }),
 			content: PortableTextDocument,
 		}),
@@ -134,7 +134,7 @@ export type RealmUnitHistoryQuery = Static<typeof RealmUnitHistoryQuery>;
 const RealmModerationAnnotation = t.Object(
 	{
 		role: t.Union([t.Literal("internal_note"), t.Literal("public_notice")]),
-		language: LanguageTag,
+		language: ContentLanguage,
 		content: PortableTextDocument,
 	},
 	{ additionalProperties: false },
@@ -183,7 +183,7 @@ const RealmModerationNoteResponse = t.Object({
 	postId: Uuid,
 	latestRevisionId: t.Nullable(Uuid),
 	role: t.Union([t.Literal("internal_note"), t.Literal("public_notice")]),
-	language: LanguageTag,
+	language: ContentLanguage,
 	content: PortableTextDocument,
 	createdAt: DateTime,
 	updatedAt: DateTime,

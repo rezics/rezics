@@ -5,14 +5,14 @@ import {
 	FeedbackKindValues,
 	GovernanceReasonCodeValues,
 } from "../../database/schema/contract-values";
-import { DateTime, LanguageTag, Uuid } from "../schema";
+import { DateTime, ContentLanguage, Uuid } from "../schema";
 
 const FeedbackType = t.Union(FeedbackKindValues.map((value) => t.Literal(value)));
 
 export const CreateFeedbackBody = t.Object(
 	{
 		type: FeedbackType,
-		language: LanguageTag,
+		language: ContentLanguage,
 		content: PortableTextDocument,
 		url: t.Optional(t.String({ format: "uri", maxLength: 2_000 })),
 		subjectUnitId: t.Optional(Uuid),
@@ -29,7 +29,7 @@ export type ListFeedbackQuery = Static<typeof ListFeedbackQuery>;
 
 const FeedbackNoteResponse = t.Object({
 	postId: Uuid,
-	language: LanguageTag,
+	language: ContentLanguage,
 	content: PortableTextDocument,
 });
 

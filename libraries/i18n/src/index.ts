@@ -1,9 +1,15 @@
-import zhCN from "./languages/zh-CN";
-
-export const Languages = [
-	{ tag: "zh-CN", data: zhCN },
-	{ tag: "en-US", data: () => import("./languages/en-US").then((module) => module.default) },
-] as const;
-
-export type LanguageTag = (typeof Languages)[number]["tag"];
-export type Translation = typeof zhCN;
+export {
+	ContentLanguageValues,
+	DefaultContentLanguage,
+	DefaultStoredUiLocale,
+	isContentLanguage,
+	isStoredUiLocale,
+	isUiLocale,
+	StoredUiLocaleValues,
+	toStoredUiLocale,
+	toContentLanguage,
+	toUiLocale,
+	UiLocaleValues,
+} from "./locale-contract";
+export type { ContentLanguage, StoredUiLocale, UiLocale } from "./locale-contract";
+export type { Translation } from "./resources";

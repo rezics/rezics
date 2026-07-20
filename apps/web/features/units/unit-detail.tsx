@@ -1,5 +1,7 @@
 "use client";
 
+import { toContentLanguage } from "@rezics/i18n";
+
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
 import { BookOpen, Gamepad2, PlaySquare } from "lucide-react";
 import Link from "next/link";
@@ -38,7 +40,15 @@ function DetailSection({ title, children }: { title: string; children: React.Rea
 }
 
 export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation([
+		"engagement",
+		"feed",
+		"governance",
+		"posts",
+		"state",
+		"ui",
+		"units",
+	]);
 	const query = useGetApiUnitsByTypeByUnitId({ path: { type, unitId: unit } });
 
 	if (query.isPending) return <QueryPending />;
@@ -47,7 +57,11 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 	if (!query.data) return <QueryPending />;
 
 	const item = query.data;
-	const localization = selectLocalization(item.localizations, locale.target, item.language);
+	const localization = selectLocalization(
+		item.localizations,
+		toContentLanguage(locale.target),
+		item.language,
+	);
 	const Icon = Icons[type];
 	const rating =
 		item.contentRating === "r15"

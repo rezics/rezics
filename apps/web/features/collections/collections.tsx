@@ -1,5 +1,7 @@
 "use client";
 
+import { toContentLanguage } from "@rezics/i18n";
+
 import {
 	getApiCollectionsByCollectionIdQueryKey,
 	getApiCollectionsFavoritesQueryKey,
@@ -114,7 +116,7 @@ function CollectionFields({
 	};
 	includeStatus?: boolean;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "cover", "engagement", "errors", "ui"]);
 	const [visibility, setVisibility] = useState(
 		getCollectionVisibility(initial?.visibility ?? null),
 	);
@@ -186,7 +188,7 @@ function CollectionFields({
 
 export function CollectionsPage() {
 	const query = useGetApiCollections({ query: { limit: 50 } });
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "cover", "engagement", "errors", "ui"]);
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -215,7 +217,7 @@ export function CollectionCreate() {
 	const create = usePostApiCollections();
 	const queryClient = useQueryClient();
 	const router = useRouter();
-	const { locale, t } = useTranslation({ suspense: true });
+	const { locale, t } = useTranslation(["actions", "cover", "engagement", "errors", "ui"]);
 	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -224,7 +226,7 @@ export function CollectionCreate() {
 			const result = await create.mutateAsync({
 				body: {
 					localization: {
-						language: locale.target,
+						language: toContentLanguage(locale.target),
 						title: String(form.get("title") ?? "").trim(),
 						coverAssetId: cover?.id ?? null,
 						...(String(form.get("summary") ?? "").trim()
@@ -260,7 +262,7 @@ export function CollectionDetail({ id }: { id: string }) {
 	const query = useGetApiCollectionsByCollectionId({ path: { collectionId: id } });
 	const { data: session } = useHydratedSession();
 	const me = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
-	const { locale, t } = useTranslation({ suspense: true });
+	const { locale, t } = useTranslation(["actions", "cover", "engagement", "errors", "ui"]);
 	const queryClient = useQueryClient();
 	const addItem = usePutApiCollectionsByCollectionIdItemsByTargetId();
 	const removeItem = useDeleteApiCollectionsByCollectionIdItemsByTargetId();
@@ -276,7 +278,7 @@ export function CollectionDetail({ id }: { id: string }) {
 	const canManage = me.data?.id === collection.ownerId;
 	const localization = selectLocalization(
 		collection.localizations,
-		locale.target,
+		toContentLanguage(locale.target),
 		collection.language,
 	);
 	async function addSelectedItem() {
@@ -442,9 +444,13 @@ export function CollectionEdit({ id }: { id: string }) {
 	const update = usePatchApiCollectionsByCollectionId();
 	const queryClient = useQueryClient();
 	const router = useRouter();
-	const { locale, t } = useTranslation({ suspense: true });
+	const { locale, t } = useTranslation(["actions", "cover", "engagement", "errors", "ui"]);
 	const localization = query.data
-		? selectLocalization(query.data.localizations, locale.target, query.data.language)
+		? selectLocalization(
+				query.data.localizations,
+				toContentLanguage(locale.target),
+				query.data.language,
+			)
 		: undefined;
 	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
 	useEffect(
@@ -474,7 +480,7 @@ export function CollectionEdit({ id }: { id: string }) {
 					status,
 					visibility: getCollectionVisibility(form.get("visibility")),
 					localization: {
-						language: locale.target,
+						language: toContentLanguage(locale.target),
 						title: String(form.get("title") ?? "").trim(),
 						coverAssetId: cover?.id ?? null,
 						...(String(form.get("summary") ?? "").trim()
@@ -525,7 +531,7 @@ export function FavoritesPage() {
 
 function FavoritesList() {
 	const query = useGetApiCollectionsFavorites();
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "cover", "engagement", "errors", "ui"]);
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -575,7 +581,7 @@ export function FavoriteToggle({
 	const addFavorite = usePutApiCollectionsFavoritesItemsByTargetId();
 	const removeFavorite = useDeleteApiCollectionsFavoritesItemsByTargetId();
 	const queryClient = useQueryClient();
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "cover", "engagement", "errors", "ui"]);
 	const [favorited, setFavorited] = useState(isFavorited);
 	useEffect(() => setFavorited(isFavorited), [isFavorited]);
 	if (!session)

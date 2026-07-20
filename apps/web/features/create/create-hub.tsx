@@ -30,7 +30,7 @@ const Destinations = [
 ] as const;
 
 export function CreateHub() {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["create"]);
 	return (
 		<RequireSession>
 			<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6">

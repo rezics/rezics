@@ -1,4 +1,10 @@
-export const DefaultLanguage = "zh-hant";
+export {
+	ContentLanguageValues,
+	DefaultContentLanguage,
+	DefaultStoredUiLocale,
+	StoredUiLocaleValues,
+} from "@rezics/i18n";
+export type { ContentLanguage, StoredUiLocale } from "@rezics/i18n";
 
 export const UnitKindValues = [
 	"slug_namespace",

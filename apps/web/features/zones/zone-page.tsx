@@ -1,5 +1,7 @@
 "use client";
 
+import { toContentLanguage } from "@rezics/i18n";
+
 import { useGetApiZonesByZoneId } from "@rezics/openapi-tanstack-query";
 
 import { Avatar, AvatarFallback, AvatarImage, Cover, QueryFailure, QueryPending } from "@rezics/ui";
@@ -7,10 +9,10 @@ import { useTranslation } from "@/i18n/client";
 import { selectLocalization } from "@/lib/localization";
 
 export function ZonePage({ id }: { id: string }) {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation(["feed", "ui"]);
 	const query = useGetApiZonesByZoneId({
 		path: { zoneId: id },
-		query: { language: locale.target },
+		query: { language: toContentLanguage(locale.target) },
 	});
 
 	if (query.isPending) return <QueryPending />;
@@ -18,7 +20,11 @@ export function ZonePage({ id }: { id: string }) {
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 
 	const zone = query.data;
-	const localization = selectLocalization(zone.localizations, locale.target, zone.language);
+	const localization = selectLocalization(
+		zone.localizations,
+		toContentLanguage(locale.target),
+		zone.language,
+	);
 	const title = localization?.title ?? t.ui.unnamed;
 	const avatar = localization?.avatar ?? zone.avatar;
 	const banner = localization?.banner ?? zone.banner;

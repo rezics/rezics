@@ -1,14 +1,14 @@
 import { type Static, t } from "elysia";
 
 import { SearchCategories, SearchSorts } from "../../search/schema";
-import { LanguageTag } from "../schema";
+import { ContentLanguage } from "../schema";
 
 const SearchCategory = t.Union(SearchCategories.map((category) => t.Literal(category)));
 
 const SearchSort = t.Union(SearchSorts.map((sort) => t.Literal(sort)));
 
 const SearchStringList = t.Array(t.String({ minLength: 1 }), { maxItems: 50 });
-const SearchLanguageList = t.Array(LanguageTag, { maxItems: 50 });
+const SearchLanguageList = t.Array(ContentLanguage, { maxItems: 50 });
 
 export const DomainSearchBody = t.Object(
 	{

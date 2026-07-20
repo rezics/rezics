@@ -60,7 +60,7 @@ describe("moderation action contracts", () => {
 			notes: [
 				{
 					role: "internal_note" as const,
-					language: "zh-Hant",
+					language: "zh" as const,
 					content: createPortableTextDocument([], "0123456789ab"),
 				},
 			],

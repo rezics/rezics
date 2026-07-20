@@ -1,6 +1,7 @@
 import { sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { SearchExpression, SearchFilter, SearchScalar } from "@rezics/search";
+import type { ContentLanguage } from "@rezics/i18n";
 
 import { getUnitReadCondition } from "../authorization/unit/query";
 import { database } from "../database";
@@ -672,7 +673,7 @@ export async function searchGrouped(request: {
 	profileId?: string;
 	query?: string;
 	indexes: SearchCategory[];
-	Languages?: string[];
+	Languages?: ContentLanguage[];
 	limitPerIndex?: number;
 }) {
 	const groups = [];

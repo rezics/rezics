@@ -6,7 +6,14 @@ import {
 	parseDocument,
 	type PortableTextDocument as PortableTextDocumentValue,
 } from "@rezics/block";
-import { DateTime, FractionalPosition, OrdinalPosition, Uuid } from ".";
+import {
+	ContentLanguage,
+	DateTime,
+	FractionalPosition,
+	OrdinalPosition,
+	StoredUiLocale,
+	Uuid,
+} from ".";
 import { EntityAssociationPolicyModeValues } from "../../database/schema/contract-values";
 import {
 	RecommendationReasonSchema,
@@ -54,7 +61,7 @@ const LocalizationImageResponse = {
 
 const LocalizationResponse = t.Object({
 	unitId: Uuid,
-	language: t.String(),
+	language: ContentLanguage,
 	position: FractionalPosition,
 	title: NullableText,
 	summary: NullableText,
@@ -395,12 +402,13 @@ export const CurrentProfileResponse = t.Intersect([
 ]);
 export const PreferencesResponse = t.Object({
 	profileId: Uuid,
+	interfaceLocale: StoredUiLocale,
 	defaultLicense: NullableText,
 	defaultRealmManageMode: t.Boolean(),
 	collectionConfig: t.Nullable(CollectionConfigV1),
 	personalizedFeed: t.Boolean(),
 	contentRatings: t.Array(t.String()),
-	preferredLanguages: t.Array(t.String()),
+	preferredLanguages: t.Array(ContentLanguage),
 });
 export const ProgressListResponse = t.Object({
 	items: t.Array(
@@ -454,7 +462,7 @@ export const PollDetailResponse = t.Object({
 	),
 });
 const LocalizationSummary = t.Object({
-	language: t.String(),
+	language: ContentLanguage,
 	title: NullableText,
 	summary: NullableText,
 	...LocalizationImageResponse,
@@ -556,7 +564,7 @@ export const ContentStructureNodeListResponse = t.Object({
 			parentId: t.Nullable(Uuid),
 			contentUnitId: Uuid,
 			contentKind: t.Union([t.Literal("chapter"), t.Literal("chapter_group")]),
-			language: t.String(),
+			language: ContentLanguage,
 			title: t.String(),
 			position: FractionalPosition,
 		}),
@@ -568,7 +576,7 @@ export const ContentStructureNodeResponse = t.Object({
 	parentId: t.Nullable(Uuid),
 	contentUnitId: Uuid,
 	contentKind: t.Union([t.Literal("chapter"), t.Literal("chapter_group")]),
-	language: t.String(),
+	language: ContentLanguage,
 	title: t.String(),
 	position: FractionalPosition,
 	createdAt: DateTime,
@@ -580,7 +588,7 @@ export const ChapterDetailResponse = t.Object({
 	chapterId: Uuid,
 	title: t.String(),
 	position: FractionalPosition,
-	language: t.String(),
+	language: ContentLanguage,
 	content: PortableTextDocument,
 	status: t.String(),
 	updatedAt: DateTime,

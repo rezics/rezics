@@ -5,6 +5,7 @@ import {
 	type SearchExpression,
 	type SearchSort,
 } from "@rezics/search";
+import type { ContentLanguage } from "@rezics/i18n";
 
 export const SearchCategories = SearchCategoryValues;
 export type { SearchCategory };
@@ -37,7 +38,7 @@ export interface DomainSearchRequest {
 	query?: string;
 	offset?: number;
 	limit?: number;
-	Languages?: string[];
+	Languages?: ContentLanguage[];
 	types?: string[];
 	contentRatings?: string[];
 	aiDisclosures?: string[];

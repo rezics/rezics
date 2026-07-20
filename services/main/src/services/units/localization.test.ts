@@ -4,13 +4,13 @@ import { resolveUnitLocalizationImageAssetIdFromOrdered } from "./localization";
 
 const localizations = [
 	{
-		language: "en-US",
+		language: "en",
 		avatarAssetId: "avatar-default",
 		bannerAssetId: "banner-default",
 		coverAssetId: null,
 	},
 	{
-		language: "zh-CN",
+		language: "zh",
 		avatarAssetId: "avatar-zh",
 		bannerAssetId: null,
 		coverAssetId: "cover-zh",
@@ -19,15 +19,15 @@ const localizations = [
 
 describe("resolveUnitLocalizationImageAssetIdFromOrdered", () => {
 	it("prefers a requested localization override", () => {
-		expect(
-			resolveUnitLocalizationImageAssetIdFromOrdered(localizations, "avatar", "zh-CN"),
-		).toBe("avatar-zh");
+		expect(resolveUnitLocalizationImageAssetIdFromOrdered(localizations, "avatar", "zh")).toBe(
+			"avatar-zh",
+		);
 	});
 
 	it("inherits the first available asset when the requested localization is empty", () => {
-		expect(
-			resolveUnitLocalizationImageAssetIdFromOrdered(localizations, "banner", "zh-CN"),
-		).toBe("banner-default");
+		expect(resolveUnitLocalizationImageAssetIdFromOrdered(localizations, "banner", "zh")).toBe(
+			"banner-default",
+		);
 	});
 
 	it("falls forward when the primary localization has no asset", () => {

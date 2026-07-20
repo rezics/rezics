@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useQueryStates } from "nuqs";
+import type { Translation } from "@rezics/i18n";
 import {
 	createContext,
 	useCallback,
@@ -193,7 +194,14 @@ function AuthPortalDialog({
 	onModeChange: (mode: AuthPortalMode, options?: AuthPortalOptions) => void;
 	state: AuthPortalState | null;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation([
+		"actions",
+		"auth",
+		"betterAuthErrorCodes",
+		"errorCodes",
+		"errors",
+		"ui",
+	]);
 	if (!state) return null;
 
 	const heading = getAuthPortalHeading(state.mode, t.auth);
@@ -219,10 +227,7 @@ function AuthPortalDialog({
 	);
 }
 
-function getAuthPortalHeading(
-	mode: AuthPortalMode,
-	auth: ReturnType<typeof useTranslation>["t"]["auth"],
-) {
+function getAuthPortalHeading(mode: AuthPortalMode, auth: Translation["auth"]) {
 	switch (mode) {
 		case "login":
 			return { description: auth.loginDescription, title: auth.welcomeBack };
@@ -281,7 +286,14 @@ function LoginForm({
 	onComplete: (destination: string) => void;
 	onModeChange: (mode: AuthPortalMode, options?: AuthPortalOptions) => void;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation([
+		"actions",
+		"auth",
+		"betterAuthErrorCodes",
+		"errorCodes",
+		"errors",
+		"ui",
+	]);
 	const [error, setError] = useState<string>();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -361,7 +373,14 @@ function RegisterForm({
 }: {
 	onModeChange: (mode: AuthPortalMode, options?: AuthPortalOptions) => void;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation([
+		"actions",
+		"auth",
+		"betterAuthErrorCodes",
+		"errorCodes",
+		"errors",
+		"ui",
+	]);
 	const [error, setError] = useState<string>();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -442,7 +461,14 @@ function ForgotPasswordForm({
 }: {
 	onModeChange: (mode: AuthPortalMode, options?: AuthPortalOptions) => void;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation([
+		"actions",
+		"auth",
+		"betterAuthErrorCodes",
+		"errorCodes",
+		"errors",
+		"ui",
+	]);
 	const [error, setError] = useState<string>();
 	const [isSent, setIsSent] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -508,7 +534,14 @@ function ResetPasswordForm({
 	onModeChange: (mode: AuthPortalMode, options?: AuthPortalOptions) => void;
 	token: string | null;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation([
+		"actions",
+		"auth",
+		"betterAuthErrorCodes",
+		"errorCodes",
+		"errors",
+		"ui",
+	]);
 	const [error, setError] = useState<string>();
 	const [isComplete, setIsComplete] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -597,7 +630,14 @@ function VerifyEmailForm({
 	email: string;
 	onModeChange: (mode: AuthPortalMode, options?: AuthPortalOptions) => void;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation([
+		"actions",
+		"auth",
+		"betterAuthErrorCodes",
+		"errorCodes",
+		"errors",
+		"ui",
+	]);
 	const [email, setEmail] = useState(initialEmail);
 	const [error, setError] = useState<string>();
 	const [isSubmitting, setIsSubmitting] = useState(false);

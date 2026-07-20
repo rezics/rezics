@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-
-import enUS from "@rezics/i18n/languages/en-US";
-import zhCN from "@rezics/i18n/languages/zh-CN";
+import { create } from "native-i18n";
+import { resources } from "@rezics/i18n/resources";
 
 function isTranslationGroup(value: unknown): value is Readonly<Record<string, unknown>> {
 	return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -26,10 +25,23 @@ function assertSameTranslationShape(
 }
 
 describe("language dictionaries", () => {
-	it("keeps the same nested public shape", () => {
-		assertSameTranslationShape(zhCN, enUS);
-		expect(Object.keys(enUS.errorCodes).every((code) => /^[A-Z][A-Za-z0-9]*$/.test(code))).toBe(
-			true,
-		);
+	it("keeps the same nested public shape", async () => {
+		const i18n = create(resources);
+		const namespaces = [
+			"betterAuthErrorCodes",
+			"errorCodes",
+			"errors",
+			"locale",
+			"settings",
+		] as const;
+		const english = await i18n.getTranslation(namespaces, ["en"]);
+		const traditionalChinese = await i18n.getTranslation(namespaces, ["zh-Hant"]);
+
+		assertSameTranslationShape(traditionalChinese.t, english.t);
+		expect(
+			Object.keys(english.t.errorCodes).every((code) => /^[A-Z][A-Za-z0-9]*$/.test(code)),
+		).toBe(true);
+		expect(traditionalChinese.locale.current).toBe("zh-Hant");
+		expect(traditionalChinese.t.locale.zh).toBe("繁體中文");
 	});
 });

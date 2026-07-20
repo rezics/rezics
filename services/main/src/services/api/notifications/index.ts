@@ -3,6 +3,7 @@ import { Check } from "@sinclair/typebox/value";
 import { and, asc, count, desc, eq, gt, isNull, lt, or } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
+import { toUiLocale } from "@rezics/i18n";
 
 import session from "../../auth/session";
 import { database } from "../../database";
@@ -14,6 +15,7 @@ import {
 	profilePreference,
 } from "../../database/schema";
 import i18n from "../../i18n";
+import { DefaultStoredUiLocale } from "../../database/schema/contract-values";
 import { parseJsonCursor } from "../../pagination";
 import { toApiErrorResponse } from "../schema/response";
 import { InvalidNotificationCursor, NotificationNotFound } from "./errors";
@@ -113,13 +115,13 @@ export default new Elysia({ prefix: "/notifications" })
 			const cursor = decodeCursor(query.cursor, unreadOnly);
 			const boundary = cursor;
 			const [preference] = await database
-				.select({ preferredLanguages: profilePreference.preferredLanguages })
+				.select({ interfaceLocale: profilePreference.interfaceLocale })
 				.from(profilePreference)
 				.where(eq(profilePreference.profileId, profile.unitId))
 				.limit(1);
-			const { data: translation } = await i18n.getTranslation(
-				preference?.preferredLanguages ?? [],
-			);
+			const { t } = await i18n.getTranslation("notifications", [
+				toUiLocale(preference?.interfaceLocale ?? DefaultStoredUiLocale),
+			]);
 			const actor = alias(profileTable, "notification_actor");
 			const tupleCondition = boundary
 				? direction === "after"
@@ -170,7 +172,7 @@ export default new Elysia({ prefix: "/notifications" })
 			const items = candidates.slice(0, limit).map((item) => ({
 				...item,
 				...presentNotificationPayload(item.kind, item.payload),
-				...translation.notifications[item.kind],
+				...t[item.kind],
 			}));
 			const [unread] = await database
 				.select({ value: count() })

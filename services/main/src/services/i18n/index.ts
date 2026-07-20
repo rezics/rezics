@@ -1,23 +1,37 @@
-import { create, parseAcceptLanguage } from "@nmnmcc/intee";
-import { Languages } from "@rezics/i18n";
 import Elysia from "elysia";
+import { create, parseAcceptLanguage, type NamespaceSelection } from "native-i18n";
+import { resources } from "@rezics/i18n/resources";
 
-const matchTranslation = create(Languages);
+const nativeI18n = create(resources);
+type Selection = NamespaceSelection<typeof resources>;
 
-export async function getTranslation(tags: readonly string[]) {
-	const translation = matchTranslation([...tags]);
+export async function getTranslation<const Selected extends Selection>(
+	selection: Selected,
+	tags: readonly string[],
+) {
+	const translation = await nativeI18n.getTranslation(selection, tags);
 	return {
-		data: await translation,
-		locale: translation.locale.target,
+		data: translation.data,
+		t: translation.t,
+		locale: translation.locale.current,
 	};
 }
 
-export function getRequestTranslation(headers?: Headers) {
-	return getTranslation(parseAcceptLanguage(headers?.get("accept-language")));
+export function getRequestTranslation<const Selected extends Selection>(
+	selection: Selected,
+	headers?: Headers,
+) {
+	return getTranslation(selection, parseAcceptLanguage(headers?.get("accept-language")));
 }
 
+type ServiceTranslation<Selected extends Selection> = Awaited<
+	ReturnType<typeof getTranslation<Selected>>
+>;
+
 export default new Elysia({ name: "i18n-context" }).derive({ as: "scoped" }, ({ request, set }) => {
-	async function withContentLanguage(result: ReturnType<typeof getTranslation>) {
+	async function withContentLanguage<Selected extends Selection>(
+		result: Promise<ServiceTranslation<Selected>>,
+	) {
 		const translation = await result;
 		set.headers["content-language"] = translation.locale;
 		return translation;
@@ -25,11 +39,14 @@ export default new Elysia({ name: "i18n-context" }).derive({ as: "scoped" }, ({ 
 
 	return {
 		i18n: {
-			getTranslation(tags: readonly string[]) {
-				return withContentLanguage(getTranslation(tags));
+			getTranslation<const Selected extends Selection>(
+				selection: Selected,
+				tags: readonly string[],
+			) {
+				return withContentLanguage(getTranslation(selection, tags));
 			},
-			getRequestTranslation() {
-				return withContentLanguage(getRequestTranslation(request.headers));
+			getRequestTranslation<const Selected extends Selection>(selection: Selected) {
+				return withContentLanguage(getRequestTranslation(selection, request.headers));
 			},
 		},
 	};

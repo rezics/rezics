@@ -240,7 +240,7 @@ async function ensureLocalization(
 		.insert(unitLocalization)
 		.values({
 			unitId: input.unitId,
-			language: "zh-hant",
+			language: "zh",
 			position: InitialFractionalPosition,
 			title: input.title,
 			summary: input.summary,

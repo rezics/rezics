@@ -9,7 +9,7 @@ export default function ErrorPage({
 	error: Error & { digest?: string };
 	reset: () => void;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "state", "ui"]);
 	return (
 		<main className="grid min-h-[60svh] place-items-center px-4 text-center">
 			<div>

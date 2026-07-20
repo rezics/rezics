@@ -1,5 +1,7 @@
 "use client";
 
+import { toContentLanguage } from "@rezics/i18n";
+
 import {
 	useDeleteApiPostsByPostId,
 	useDeleteApiPostsByPostIdRepliesByReplyPostId,
@@ -48,7 +50,7 @@ import { PublisherLinks } from "./publisher-list";
 type PickedEntity = { id: string; label: string };
 
 export function PostsPage() {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["errors", "posts", "ui"]);
 	return (
 		<main className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6">
 			<PageHeading
@@ -65,7 +67,7 @@ export function PostsPage() {
 }
 
 export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation(["errors", "posts", "ui"]);
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const create = usePostApiPosts();
@@ -81,14 +83,14 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 		if (!defaultRealm.data || realm) return;
 		const localization = selectLocalization(
 			defaultRealm.data.localizations,
-			locale.target,
+			toContentLanguage(locale.target),
 			defaultRealm.data.language,
 		);
 		setRealm({
 			id: defaultRealm.data.id,
 			label: localization?.title ?? defaultRealm.data.id,
 		});
-	}, [defaultRealm.data, locale.target, realm]);
+	}, [defaultRealm.data, toContentLanguage(locale.target), realm]);
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -99,7 +101,7 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 			{
 				body: {
 					title,
-					language: locale.target,
+					language: toContentLanguage(locale.target),
 					body: writePortableText(body),
 					...(realm ? { realmId: realm.id } : {}),
 					...(subject ? { subjectId: subject.id } : {}),
@@ -167,7 +169,7 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 }
 
 export function PostDetailPage({ id }: { id: string }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["errors", "posts", "ui"]);
 	const query = useGetApiPostsByPostId({ path: { postId: id } });
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -254,7 +256,7 @@ export function PostEditPage({ id }: { id: string }) {
 }
 
 function PostEditLoader({ id }: { id: string }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["errors", "posts", "ui"]);
 	const query = useGetApiPostsByPostId({ path: { postId: id } });
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -273,7 +275,7 @@ function PostEditLoader({ id }: { id: string }) {
 }
 
 function PostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["errors", "posts", "ui"]);
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const update = usePatchApiPostsByPostId();
@@ -329,7 +331,7 @@ function PostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
 }
 
 function ReplyPostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["errors", "posts", "ui"]);
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const update = usePatchApiPostsByPostIdRepliesByReplyPostId();
@@ -395,7 +397,7 @@ function PostFields({
 	pending: boolean;
 	error: Parameters<typeof RequestFailure>[0]["error"];
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["errors", "posts", "ui"]);
 	return (
 		<>
 			<PortableTextEditor label={t.ui.body} onChange={onBodyChange} required value={body} />
@@ -409,7 +411,7 @@ function PostFields({
 }
 
 function PostDeleteButton({ postId, rootPostId }: { postId: string; rootPostId: string | null }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["errors", "posts", "ui"]);
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const removePost = useDeleteApiPostsByPostId();

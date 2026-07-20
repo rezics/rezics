@@ -59,7 +59,7 @@ describe("domain search SQL", () => {
 	it("maps current filters and sorts to their owning tables", async () => {
 		await searchDomain("units", {
 			query: "ocean",
-			Languages: ["zh-hant"],
+			Languages: ["zh"],
 			types: ["book"],
 			contentRatings: ["general"],
 			aiDisclosures: ["none"],
@@ -147,7 +147,7 @@ describe("domain search SQL", () => {
 		execute.mockResolvedValueOnce({
 			rows: [
 				{ field: "category", value: "units", count: "12" },
-				{ field: "language", value: "zh-hant", count: "8" },
+				{ field: "language", value: "zh", count: "8" },
 			],
 		});
 
@@ -161,7 +161,7 @@ describe("domain search SQL", () => {
 
 		expect(facets).toEqual([
 			{ field: "category", options: [{ value: "units", count: 12 }] },
-			{ field: "language", options: [{ value: "zh-hant", count: 8 }] },
+			{ field: "language", options: [{ value: "zh", count: 8 }] },
 		]);
 		expect(query).toContain("union all");
 		expect(query).toContain('"facet_unit_localization"');

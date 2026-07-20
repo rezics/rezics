@@ -1,12 +1,19 @@
 import { StatusCodes } from "http-status-codes";
-import enUS from "@rezics/i18n/languages/en-US";
+import { create } from "native-i18n";
+import { resources } from "@rezics/i18n/resources";
 import { ApiClientError } from "@rezics/openapi-tanstack-query";
 import { describe, expect, it } from "vitest";
 
 import { getErrorCode, getErrorText, getErrorStatus, hasErrorCode } from "./errors";
 
+const i18n = create(resources);
+
 describe("localized errors", () => {
-	it("reads generated API failures from their nested public code", () => {
+	it("reads generated API failures from their nested public code", async () => {
+		const { t } = await i18n.getTranslation(
+			["betterAuthErrorCodes", "errorCodes", "errors"],
+			["en"],
+		);
 		const error = new ApiClientError({
 			data: {
 				error: { code: "UnitChanged", message: "diagnostic only" },
@@ -20,22 +27,30 @@ describe("localized errors", () => {
 
 		expect(getErrorCode(error)).toBe("UnitChanged");
 		expect(getErrorStatus(error)).toBe(StatusCodes.CONFLICT);
-		expect(getErrorText(enUS, error)).toBe(enUS.errorCodes.UnitChanged);
+		expect(getErrorText(t, error)).toBe(t.errorCodes.UnitChanged);
 		expect(hasErrorCode(error, "UnitChanged")).toBe(true);
 	});
 
-	it("reads Better Auth failures from their direct code", () => {
+	it("reads Better Auth failures from their direct code", async () => {
+		const { t } = await i18n.getTranslation(
+			["betterAuthErrorCodes", "errorCodes", "errors"],
+			["en"],
+		);
 		const error = { code: "INVALID_EMAIL_OR_PASSWORD", message: "diagnostic only" };
 
 		expect(getErrorCode(error)).toBe("INVALID_EMAIL_OR_PASSWORD");
-		expect(getErrorText(enUS, error)).toBe(enUS.betterAuthErrorCodes.INVALID_EMAIL_OR_PASSWORD);
+		expect(getErrorText(t, error)).toBe(t.betterAuthErrorCodes.INVALID_EMAIL_OR_PASSWORD);
 	});
 
-	it("never exposes diagnostic messages for unknown or missing codes", () => {
-		expect(getErrorText(enUS, { code: "FUTURE_ERROR", message: "must not be shown" })).toBe(
-			enUS.errors.unknownWithCode("FUTURE_ERROR"),
+	it("never exposes diagnostic messages for unknown or missing codes", async () => {
+		const { t } = await i18n.getTranslation(
+			["betterAuthErrorCodes", "errorCodes", "errors"],
+			["en"],
 		);
-		expect(getErrorText(enUS, new TypeError("must not be shown"))).toBe(enUS.errors.unknown);
+		expect(getErrorText(t, { code: "FUTURE_ERROR", message: "must not be shown" })).toBe(
+			t.errors.unknownWithCode({ code: "FUTURE_ERROR" }),
+		);
+		expect(getErrorText(t, new TypeError("must not be shown"))).toBe(t.errors.unknown);
 	});
 
 	it("rejects malformed error fields at the schema boundary", () => {

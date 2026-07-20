@@ -419,21 +419,26 @@ async function seedProfiles(
 		(batch) => tx.insert(unitLocalization).values(batch),
 	);
 	await writeBatches(
-		profiles.map((value, index) => ({
-			profileId: value.id,
-			defaultLicense: index % 3 === 0 ? "CC-BY-4.0" : null,
-			personalizedFeed: index % 10 !== 0 || index === 0,
-			contentRatings:
-				index % 7 === 0 ? ["general" as const, "r15" as const] : ["general" as const],
-			preferredLanguages: [...data.languages(index)],
-			collectionConfig: {
-				version: 1,
-				view: index % 2 === 0 ? "grid" : "list",
-				addMainWithVariantByDefault: index % 3 !== 0,
-			},
-			createdAt: value.createdAt,
-			updatedAt: value.createdAt,
-		})),
+		profiles.map((value, index) => {
+			const interfaceLocale =
+				itemAt(data.languages(index), 0) === "zh" ? ("zh-hant" as const) : ("en" as const);
+			return {
+				profileId: value.id,
+				interfaceLocale,
+				defaultLicense: index % 3 === 0 ? "CC-BY-4.0" : null,
+				personalizedFeed: index % 10 !== 0 || index === 0,
+				contentRatings:
+					index % 7 === 0 ? ["general" as const, "r15" as const] : ["general" as const],
+				preferredLanguages: [...data.languages(index)],
+				collectionConfig: {
+					version: 1,
+					view: index % 2 === 0 ? "grid" : "list",
+					addMainWithVariantByDefault: index % 3 !== 0,
+				},
+				createdAt: value.createdAt,
+				updatedAt: value.createdAt,
+			};
+		}),
 		(batch) => tx.insert(profilePreference).values(batch),
 	);
 	const demo = itemAt(profiles, 0);

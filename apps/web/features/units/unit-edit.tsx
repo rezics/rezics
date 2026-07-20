@@ -1,6 +1,13 @@
 "use client";
 
 import {
+	ContentLanguageValues,
+	isContentLanguage,
+	toContentLanguage,
+	type ContentLanguage,
+} from "@rezics/i18n";
+
+import {
 	type GetApiUnitsByTypeByUnitIdStatus200,
 	useGetApiUnitsByTypeByUnitId,
 	usePatchApiUnitsByTypeByUnitId,
@@ -51,7 +58,7 @@ export function UnitEditWorkspace({ type, id }: { type: UnitType; id: string }) 
 
 function UnitEditWorkspaceContent({ type, id }: { type: UnitType; id: string }) {
 	const query = useGetApiUnitsByTypeByUnitId({ path: { type, unitId: id } });
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["cover", "errors", "ui", "units"]);
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -66,7 +73,7 @@ function UnitEditWorkspaceContent({ type, id }: { type: UnitType; id: string }) 
 }
 
 function UnitEditForm({ type, unit }: { type: UnitType; unit: Unit }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["cover", "errors", "ui", "units"]);
 	const queryClient = useQueryClient();
 	const router = useRouter();
 	const update = usePatchApiUnitsByTypeByUnitId({
@@ -78,7 +85,10 @@ function UnitEditForm({ type, unit }: { type: UnitType; unit: Unit }) {
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		const form = new FormData(event.currentTarget);
-		const primaryLanguage = String(form.get("primaryLanguage") ?? "").trim();
+		const submittedPrimaryLanguage = String(form.get("primaryLanguage") ?? "");
+		const primaryLanguage = isContentLanguage(submittedPrimaryLanguage)
+			? submittedPrimaryLanguage
+			: undefined;
 		const releasedOn = String(form.get("releasedOn") ?? "").trim();
 		const submittedStatus = form.get("status");
 		const submittedVisibility = form.get("visibility");
@@ -240,12 +250,8 @@ function UnitEditForm({ type, unit }: { type: UnitType; unit: Unit }) {
 }
 
 function UnitLocalizationEditor({ type, unit }: { type: UnitType; unit: Unit }) {
-	const { t, locale } = useTranslation({ suspense: true });
-	const [language, setLanguage] = useState<string>(locale.target);
-	const [enteredLanguage, setEnteredLanguage] = useState<string>(locale.target);
-	const Languages = Array.from(
-		new Set([...unit.localizations.map((entry) => entry.language), locale.target, language]),
-	);
+	const { t, locale } = useTranslation(["cover", "errors", "ui", "units"]);
+	const [language, setLanguage] = useState<ContentLanguage>(toContentLanguage(locale.target));
 	const selected = unit.localizations.find((entry) => entry.language === language);
 	return (
 		<Card>
@@ -257,34 +263,16 @@ function UnitLocalizationEditor({ type, unit }: { type: UnitType; unit: Unit }) 
 						<NativeSelect
 							value={language}
 							onChange={(event) => {
-								setLanguage(event.currentTarget.value);
-								setEnteredLanguage(event.currentTarget.value);
+								const value = event.currentTarget.value;
+								if (isContentLanguage(value)) setLanguage(value);
 							}}
 						>
-							{Languages.map((value) => (
+							{ContentLanguageValues.map((value) => (
 								<NativeSelectOption key={value} value={value}>
 									{value}
 								</NativeSelectOption>
 							))}
 						</NativeSelect>
-					</Field>
-					<Field>
-						<FieldLabel>{t.units.editor.languageCode}</FieldLabel>
-						<div className="flex gap-2">
-							<Input
-								maxLength={35}
-								onChange={(event) => setEnteredLanguage(event.currentTarget.value)}
-								value={enteredLanguage}
-							/>
-							<Button
-								disabled={!enteredLanguage.trim()}
-								onClick={() => setLanguage(enteredLanguage.trim())}
-								type="button"
-								variant="outline"
-							>
-								{t.units.editor.useLanguage}
-							</Button>
-						</div>
 					</Field>
 				</div>
 				<UnitLocalizationForm
@@ -307,10 +295,10 @@ function UnitLocalizationForm({
 }: {
 	type: UnitType;
 	unit: Unit;
-	language: string;
+	language: ContentLanguage;
 	localization: Unit["localizations"][number] | undefined;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["cover", "errors", "ui", "units"]);
 	const queryClient = useQueryClient();
 	const [description, setDescription] = useState<PortableTextValue>(() =>
 		readPortableText(localization?.description),
@@ -392,7 +380,7 @@ function UnitLocalizationForm({
 }
 
 function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["cover", "errors", "ui", "units"]);
 	const queryClient = useQueryClient();
 	const invalidate = () => invalidateUnitDetail(queryClient, type, unit.id);
 	const credit = usePostApiUnitsByTypeByUnitIdCreditAttributions({

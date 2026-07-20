@@ -17,6 +17,7 @@ import {
 } from "@rezics/block";
 import type { JsonValue } from "@rezics/portable-text";
 import type { Static, TSchema } from "@sinclair/typebox";
+import { ContentLanguageValues } from "@rezics/i18n";
 
 import type { DatabaseTransaction } from "../database";
 import type { EntityAuthorization } from "../authorization/entity/authorization";
@@ -98,7 +99,7 @@ const RuleSnapshotSchema = z.object({
 	rules: z.array(
 		z.object({
 			position: z.int().nonnegative(),
-			language: z.string(),
+			language: z.enum(ContentLanguageValues),
 			title: z.string(),
 			content: PortableTextDocumentSchema,
 		}),
@@ -147,6 +148,7 @@ const unitStateSchema = schemaFactory.createSelectSchema(unit).omit({
 });
 const unitLocalizationStateSchema = schemaFactory
 	.createSelectSchema(unitLocalization, {
+		language: z.enum(ContentLanguageValues),
 		position: FractionalPositionSchema,
 		description: PortableTextDocumentSchema.nullable(),
 		content: UnitLocalizationContentDocumentSchema.nullable(),
@@ -195,7 +197,9 @@ const collectionStateSchema = schemaFactory
 const pollStateSchema = schemaFactory
 	.createSelectSchema(poll)
 	.omit({ id: true, closedAt: true, createdAt: true, updatedAt: true });
-const unitAliasRowSchema = schemaFactory.createSelectSchema(unitAlias);
+const unitAliasRowSchema = schemaFactory.createSelectSchema(unitAlias, {
+	language: z.enum(ContentLanguageValues).nullable(),
+});
 const creditAttributionRowSchema = schemaFactory.createSelectSchema(creditAttribution, {
 	position: FractionalPositionSchema,
 });

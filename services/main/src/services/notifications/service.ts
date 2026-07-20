@@ -10,9 +10,11 @@ import {
 	users,
 } from "../database/schema";
 import type { GovernanceReasonCodeValues, ModerationActionKindValues } from "../database/schema";
+import { DefaultStoredUiLocale } from "../database/schema/contract-values";
 import { getTranslation } from "../i18n";
 import { sendMail } from "../mailer";
 import type { DatabaseTransaction } from "../database";
+import { toUiLocale } from "@rezics/i18n";
 
 const { logger } = getActiveObservability();
 
@@ -111,7 +113,7 @@ export async function deliverNotificationEmail(notificationId: string | undefine
 			.select({
 				kind: notification.kind,
 				email: users.email,
-				preferredLanguages: profilePreference.preferredLanguages,
+				interfaceLocale: profilePreference.interfaceLocale,
 			})
 			.from(notification)
 			.innerJoin(profile, eq(profile.id, notification.recipientProfileId))
@@ -123,8 +125,10 @@ export async function deliverNotificationEmail(notificationId: string | undefine
 			.limit(1);
 		if (!row) return;
 		try {
-			const { data: translation } = await getTranslation(row.preferredLanguages ?? []);
-			const copy = translation.notifications[row.kind];
+			const { t } = await getTranslation("notifications", [
+				toUiLocale(row.interfaceLocale ?? DefaultStoredUiLocale),
+			]);
+			const copy = t[row.kind];
 			await sendMail({ to: row.email, subject: copy.title, text: copy.body });
 			await tx
 				.update(notification)

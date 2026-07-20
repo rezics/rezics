@@ -1,6 +1,6 @@
 "use client";
 
-import { Languages, type LanguageTag } from "@rezics/i18n";
+import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 import {
 	postApiSearchByIndex,
 	type PostApiSearchByIndexIndex as SearchCategory,
@@ -51,12 +51,12 @@ const SearchCategories = SearchScopes;
 const SearchPageSize = 8;
 const AllLanguagesValue = "all";
 
-type SearchLanguage = LanguageTag | "";
+type SearchLanguage = ContentLanguage | "";
 type ComboboxOption = { label: string; value: string };
 type SearchPageParam = { category: SearchCategory; offset: number };
 
 function readSearchLanguage(value: string | null): SearchLanguage {
-	return Languages.find(({ tag }) => tag === value)?.tag ?? "";
+	return ContentLanguageValues.find((language) => language === value) ?? "";
 }
 
 function readTotal(value: string | number): number {
@@ -90,7 +90,18 @@ function searchHitHref(index: string, hit: SearchHit) {
 }
 
 export function SearchPage() {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation([
+		"actions",
+		"catalog",
+		"engagement",
+		"locale",
+		"nav",
+		"posts",
+		"realms",
+		"search",
+		"state",
+		"ui",
+	]);
 	const [route, setRoute] = useQueryStates(searchParamsParsers);
 	const routeQuery = route.q.trim();
 	const routeCategories = route.scope;
@@ -107,8 +118,8 @@ export function SearchPage() {
 	const languageOptions = useMemo<ComboboxOption[]>(
 		() => [
 			{ label: t.search.allLanguages, value: AllLanguagesValue },
-			{ label: t.locale.zh, value: "zh-CN" },
-			{ label: t.locale.en, value: "en-US" },
+			{ label: t.locale.zh, value: "zh" },
+			{ label: t.locale.en, value: "en" },
 		],
 		[t.locale.en, t.locale.zh, t.search.allLanguages],
 	);

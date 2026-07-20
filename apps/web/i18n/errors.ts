@@ -7,7 +7,7 @@ type BetterAuthErrorCode = keyof typeof authClient.$ERROR_CODES;
 export type ErrorTranslation = {
 	readonly errors: {
 		readonly unknown: string;
-		readonly unknownWithCode: (code: string) => string;
+		readonly unknownWithCode: (value: { readonly code: string }) => string;
 	};
 	readonly errorCodes: Readonly<Record<ApiErrorCode, string>>;
 	readonly betterAuthErrorCodes: Readonly<Record<BetterAuthErrorCode, string>>;
@@ -47,5 +47,5 @@ export const getErrorText = (
 	if (!code) return fallback;
 	const errorCodes: Readonly<Record<string, string>> = t.errorCodes;
 	const betterAuthErrorCodes: Readonly<Record<string, string>> = t.betterAuthErrorCodes;
-	return errorCodes[code] ?? betterAuthErrorCodes[code] ?? t.errors.unknownWithCode(code);
+	return errorCodes[code] ?? betterAuthErrorCodes[code] ?? t.errors.unknownWithCode({ code });
 };

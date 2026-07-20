@@ -1,4 +1,5 @@
 import { and, desc, eq, exists, inArray, isNull, lte, not, sql } from "drizzle-orm";
+import type { ContentLanguage } from "@rezics/i18n";
 
 import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
@@ -81,12 +82,12 @@ function surface(kind: RecommendedUnitKind, related: boolean): RecommendationSur
 function selectLocalization(
 	rows: readonly {
 		unitId: string;
-		language: string;
+		language: ContentLanguage;
 		position: string;
 		title: string | null;
 		summary: string | null;
 	}[],
-	preferredLanguages: readonly string[],
+	preferredLanguages: readonly ContentLanguage[],
 ) {
 	return [...rows].sort((left, right) => {
 		const leftPreferred = preferredLanguages.indexOf(left.language);

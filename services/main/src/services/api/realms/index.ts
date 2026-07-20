@@ -1181,7 +1181,7 @@ export default new Elysia({ prefix: "/realms" })
 					postId: string;
 					latestRevisionId: string | null;
 					role: "internal_note" | "public_notice";
-					language: string;
+					language: "en" | "zh";
 					content: ReturnType<typeof toPortableTextResponse>;
 					createdAt: Date;
 					updatedAt: Date;

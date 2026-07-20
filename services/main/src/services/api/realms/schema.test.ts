@@ -39,7 +39,7 @@ describe("Realm moderation API contract", () => {
 				reasonCode: "administrative",
 				annotation: {
 					role: "internal_note",
-					language: "zh-Hant",
+					language: "zh",
 					content: createPortableTextDocument([], "0123456789ab"),
 				},
 			}),

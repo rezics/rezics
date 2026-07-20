@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useTranslation } from "@/i18n/client";
 
 export default function NotFound() {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["routes"]);
 	return (
 		<main className="grid min-h-[60svh] place-items-center px-4 text-center">
 			<div>

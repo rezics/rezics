@@ -4,7 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { database } from "../database";
 import { isPrimaryUnitLocalization } from "../units/localization";
 import { profile, profilePreference, unit, unitLocalization, users } from "../database/schema";
-import { DefaultLanguage } from "../database/schema/contract-values";
+import { DefaultContentLanguage } from "../database/schema/contract-values";
 import { recordUnitRevision } from "../units/history";
 import { insertUnit } from "../units/create";
 
@@ -55,7 +55,7 @@ export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name"
 			});
 			await tx.insert(unitLocalization).values({
 				unitId: profileUnit.id,
-				language: DefaultLanguage,
+				language: DefaultContentLanguage,
 				title: authUser.name,
 			});
 			await tx.insert(profilePreference).values({ profileId: profileUnit.id });

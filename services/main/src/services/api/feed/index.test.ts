@@ -12,7 +12,7 @@ describe("feed eligibility SQL", () => {
 				{
 					personalized: true,
 					contentRatings: ["general", "r15"],
-					preferredLanguages: ["zh-hant"],
+					preferredLanguages: ["zh"],
 				},
 				{},
 				new Date("2026-07-16T00:00:00.000Z"),

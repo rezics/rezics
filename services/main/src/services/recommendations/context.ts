@@ -1,4 +1,5 @@
 import { and, desc, eq, gte } from "drizzle-orm";
+import type { ContentLanguage } from "@rezics/i18n";
 
 import { database } from "../database";
 import { ContentRatingValues, profilePreference, recommendationSnapshot } from "../database/schema";
@@ -8,7 +9,7 @@ export interface RecommendationViewer {
 	profileId?: string;
 	personalized: boolean;
 	contentRatings: (typeof ContentRatingValues)[number][];
-	preferredLanguages: string[];
+	preferredLanguages: ContentLanguage[];
 }
 
 export function resolvePersonalization(

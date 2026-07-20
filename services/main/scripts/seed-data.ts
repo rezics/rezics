@@ -1,4 +1,4 @@
-import { fakerEN, fakerJA, fakerZH_TW, type Faker } from "@faker-js/faker";
+import { fakerEN, fakerZH_TW, type Faker } from "@faker-js/faker";
 import type { PortableText } from "@rezics/portable-text";
 
 import type { EnforcementKindValues } from "../src/services/database/schema/contract-values";
@@ -73,34 +73,28 @@ export const SeedPlan = {
 	historyRestores: 10,
 } as const;
 
-export const SeedLanguages = ["zh-hant", "en", "ja"] as const;
+export const SeedLanguages = ["zh", "en"] as const;
 export type SeedLanguage = (typeof SeedLanguages)[number];
 
 const PrimaryLanguageCycle: readonly SeedLanguage[] = [
-	"zh-hant",
+	"zh",
 	"en",
-	"ja",
-	"zh-hant",
+	"zh",
 	"en",
-	"zh-hant",
-	"ja",
 	"en",
-	"zh-hant",
+	"zh",
 	"en",
-	"ja",
-	"zh-hant",
+	"zh",
 	"en",
-	"zh-hant",
-	"ja",
 	"en",
-	"zh-hant",
-	"ja",
-	"zh-hant",
+	"zh",
+	"en",
+	"zh",
 	"en",
 ];
 
 const LocalizationCountCycle = [
-	1, 2, 1, 1, 2, 1, 3, 1, 2, 1, 1, 2, 1, 2, 1, 3, 2, 1, 2, 1,
+	1, 2, 1, 1, 2, 1, 2, 1, 2, 1, 1, 2, 1, 2, 1, 2, 2, 1, 2, 1,
 ] as const;
 
 export interface SeedUnitState {
@@ -132,9 +126,8 @@ function cycleValue<T>(values: readonly T[], index: number): T {
 export function createSeedData(referenceTime: Date): SeedData {
 	if (Number.isNaN(referenceTime.getTime())) throw new Error("Seed reference time is invalid");
 	const fakerByLanguage = {
-		"zh-hant": fakerZH_TW,
+		zh: fakerZH_TW,
 		en: fakerEN,
-		ja: fakerJA,
 	} satisfies Record<SeedLanguage, Faker>;
 	for (const [index, language] of SeedLanguages.entries()) {
 		const languageFaker = fakerByLanguage[language];

@@ -1,9 +1,9 @@
 import type { ManifestOptions } from "vite-plugin-pwa";
-import type { LanguageTag } from "@rezics/i18n";
+import type { UiLocale } from "@rezics/i18n";
 
 import { appTheme } from "./lib/theme";
 
-type LocalizedText = Readonly<Record<LanguageTag, string>>;
+type LocalizedText = Readonly<Record<UiLocale, string>>;
 type LocalizedManifestOptions = Partial<ManifestOptions> & {
 	name_localized: LocalizedText;
 	short_name_localized: LocalizedText;
@@ -11,20 +11,20 @@ type LocalizedManifestOptions = Partial<ManifestOptions> & {
 };
 
 const localizedName = {
-	"zh-CN": "REZICS",
-	"en-US": "REZICS",
+	"zh-Hant": "REZICS",
+	en: "REZICS",
 } satisfies LocalizedText;
 
 const localizedDescription = {
-	"zh-CN": "发现作品，加入社区，展开深度讨论。",
-	"en-US": "Discover works, join communities, and take part in thoughtful discussion.",
+	"zh-Hant": "發現作品，加入社群，展開深度討論。",
+	en: "Discover works, join communities, and take part in thoughtful discussion.",
 } satisfies LocalizedText;
 
 export const pwaManifest = {
 	id: "/",
 	name: "REZICS",
 	short_name: "REZICS",
-	description: localizedDescription["zh-CN"],
+	description: localizedDescription["zh-Hant"],
 	name_localized: localizedName,
 	short_name_localized: localizedName,
 	description_localized: localizedDescription,
@@ -34,7 +34,7 @@ export const pwaManifest = {
 	background_color: appTheme.light.background,
 	theme_color: appTheme.light.primary,
 	dir: "ltr",
-	lang: "zh-CN",
+	lang: "zh-Hant",
 	categories: ["education", "social"],
 	icons: [
 		{

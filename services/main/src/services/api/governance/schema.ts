@@ -14,7 +14,7 @@ import {
 	UnitPermissionValues,
 	UnitProtectionModeValues,
 } from "../../database/schema/contract-values";
-import { DateTime, LanguageTag, Uuid } from "../schema";
+import { DateTime, ContentLanguage, Uuid } from "../schema";
 
 const NullableUuid = t.Nullable(Uuid);
 
@@ -23,7 +23,7 @@ const ModerationCaseState = t.Union(ModerationCaseStateValues.map((value) => t.L
 const GovernanceReasonCode = t.UnionEnum(GovernanceReasonCodeValues, { default: undefined });
 export const GovernanceInternalNote = t.Object(
 	{
-		language: LanguageTag,
+		language: ContentLanguage,
 		content: PortableTextDocument,
 	},
 	{ additionalProperties: false },
@@ -31,7 +31,7 @@ export const GovernanceInternalNote = t.Object(
 export const GovernanceActionNote = t.Object(
 	{
 		role: t.Union([t.Literal("internal_note"), t.Literal("public_notice")]),
-		language: LanguageTag,
+		language: ContentLanguage,
 		content: PortableTextDocument,
 	},
 	{ additionalProperties: false },
@@ -41,7 +41,7 @@ export const GovernanceNoteResponse = t.Object({
 	postId: Uuid,
 	latestRevisionId: t.Nullable(Uuid),
 	role: t.Union([t.Literal("evidence"), t.Literal("internal_note"), t.Literal("public_notice")]),
-	language: LanguageTag,
+	language: ContentLanguage,
 	content: PortableTextDocument,
 	createdAt: DateTime,
 	updatedAt: DateTime,
@@ -49,7 +49,7 @@ export const GovernanceNoteResponse = t.Object({
 export const GovernanceNoteParams = t.Object({ postId: Uuid });
 export const UpdateGovernanceNoteBody = t.Object(
 	{
-		language: LanguageTag,
+		language: ContentLanguage,
 		content: PortableTextDocument,
 		baseRevisionId: Uuid,
 		editSummary: t.Optional(t.String({ maxLength: 500 })),
@@ -149,7 +149,7 @@ export const ResolveFeedbackBody = t.Object(
 		publicNotice: t.Optional(
 			t.Object(
 				{
-					language: LanguageTag,
+					language: ContentLanguage,
 					content: PortableTextDocument,
 				},
 				{ additionalProperties: false },

@@ -1,5 +1,7 @@
 "use client";
 
+import { toContentLanguage } from "@rezics/i18n";
+
 import {
 	getApiPollsByPollIdQueryKey,
 	postApiSearchByIndex,
@@ -43,7 +45,7 @@ export function PollsPage() {
 			return data;
 		},
 	});
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "engagement", "errors", "ui"]);
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -81,7 +83,7 @@ export function PollCreate() {
 	const create = usePostApiPolls();
 	const queryClient = useQueryClient();
 	const router = useRouter();
-	const { locale, t } = useTranslation({ suspense: true });
+	const { locale, t } = useTranslation(["actions", "engagement", "errors", "ui"]);
 	const [options, setOptions] = useState([
 		{ key: crypto.randomUUID(), label: "" },
 		{ key: crypto.randomUUID(), label: "" },
@@ -110,7 +112,7 @@ export function PollCreate() {
 			const result = await create.mutateAsync({
 				body: {
 					question,
-					language: locale.target,
+					language: toContentLanguage(locale.target),
 					options: labels,
 					voteMode,
 					anonymous: form.get("anonymous") === "on",
@@ -244,7 +246,7 @@ export function PollDetail({ id }: { id: string }) {
 	const retract = useDeleteApiPollsByPollIdVote();
 	const queryClient = useQueryClient();
 	const { data: session } = useHydratedSession();
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "engagement", "errors", "ui"]);
 	const [selected, setSelected] = useState<string[]>([]);
 	useEffect(() => {
 		if (poll.data) setSelected(poll.data.viewerOptionIds);

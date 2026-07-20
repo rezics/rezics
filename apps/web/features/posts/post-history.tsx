@@ -29,7 +29,7 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { invalidatePostQueries } from "./query";
 
 export function PostHistoryPage({ postId }: { postId: string }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "errors", "posts"]);
 	const queryClient = useQueryClient();
 	const post = useGetApiPostsByPostId({ path: { postId } });
 	const history = useGetApiHistoryUnitsByUnitIdRevisions({
@@ -204,7 +204,7 @@ export function PostRevisionComparePage({
 	from: string | null;
 	to: string | null;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "errors", "posts"]);
 	if (!from || !to)
 		return (
 			<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6">
@@ -224,7 +224,7 @@ function PostRevisionCompareResult({
 	from: string;
 	to: string;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "errors", "posts"]);
 	const compare = useGetApiHistoryUnitsByUnitIdCompare({
 		path: { unitId: postId },
 		query: { from, to },

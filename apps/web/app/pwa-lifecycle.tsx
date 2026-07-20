@@ -9,7 +9,7 @@ import { useTranslation } from "@/i18n/client";
 type PwaStatus = "idle" | "offline-ready" | "update-available" | "updating";
 
 export function PwaLifecycle() {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "state"]);
 	const [status, setStatus] = useState<PwaStatus>("idle");
 	const updateServiceWorker = useRef<ReturnType<typeof registerSW> | null>(null);
 

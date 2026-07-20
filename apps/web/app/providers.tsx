@@ -4,6 +4,8 @@ import { PostApiSearchByIndexIndex, postApiSearchByIndex } from "@rezics/openapi
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import type { TranslationSnapshot } from "native-i18n";
+import type { resources } from "@rezics/i18n/resources";
 import { UiProvider, type EntitySearch } from "@rezics/ui";
 
 import { authClient } from "@/lib/auth-client";
@@ -13,6 +15,7 @@ import { shouldRetry } from "@/lib/query-policy";
 import { urlStateOptions } from "@/lib/search-params";
 import { getErrorText } from "@/i18n/errors";
 import { PwaLifecycle } from "./pwa-lifecycle";
+import { RootTranslationNamespaces } from "@/i18n/namespaces";
 
 function isSearchIndex(index: string): index is PostApiSearchByIndexIndex {
 	return Object.values(PostApiSearchByIndexIndex).some((candidate) => candidate === index);
@@ -32,7 +35,16 @@ const searchEntities: EntitySearch = async (index, query, signal) => {
 };
 
 function TranslatedUiProvider({ children }: { children: ReactNode }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation([
+		"actions",
+		"betterAuthErrorCodes",
+		"editor",
+		"errorCodes",
+		"errors",
+		"search",
+		"state",
+		"ui",
+	]);
 
 	return (
 		<UiProvider
@@ -90,10 +102,10 @@ function SessionCacheBoundary({ children }: { children: ReactNode }) {
 
 export function AppProviders({
 	children,
-	localeTags,
+	initialTranslation,
 }: {
 	children: ReactNode;
-	localeTags: readonly string[];
+	initialTranslation: TranslationSnapshot<typeof resources, typeof RootTranslationNamespaces>;
 }) {
 	const [queryClient] = useState(
 		() =>
@@ -104,7 +116,7 @@ export function AppProviders({
 
 	return (
 		<NuqsAdapter defaultOptions={urlStateOptions}>
-			<TranslationProvider tags={localeTags}>
+			<TranslationProvider initial={initialTranslation}>
 				<TranslatedUiProvider>
 					<QueryClientProvider client={queryClient}>
 						<SessionCacheBoundary>

@@ -15,6 +15,7 @@ import {
 import { pgTable } from "./base";
 import {
 	AliasKindValues,
+	type ContentLanguage,
 	toEnumValues,
 	type VariantCapableUnitKind,
 	VariantCapableUnitKindValues,
@@ -41,7 +42,7 @@ export const unitAlias = pgTable(
 		/** @UNIT_LOCALIZATION_EXEMPT Search synonym: language-tagged lookup term, never canonical Unit display copy. */
 		term: text().notNull(),
 		normalizedTerm: text().notNull(),
-		language: text(),
+		language: text().$type<ContentLanguage>(),
 		kind: aliasKind().default("common").notNull(),
 		createdByProfileId: uuid().references(() => profile.id, {
 			onDelete: "set null",
@@ -52,8 +53,11 @@ export const unitAlias = pgTable(
 	},
 	(table) => [
 		uniqueIndex("unit_alias_unit_language_normalized_key")
-			.on(table.unitId, sql`coalesce(${table.language}, '')`, table.normalizedTerm)
-			.where(sql`${table.deletedAt} is null`),
+			.on(table.unitId, table.language, table.normalizedTerm)
+			.where(sql`${table.deletedAt} is null and ${table.language} is not null`),
+		uniqueIndex("unit_alias_unit_unscoped_normalized_key")
+			.on(table.unitId, table.normalizedTerm)
+			.where(sql`${table.deletedAt} is null and ${table.language} is null`),
 		index("unit_alias_normalized_idx").on(table.normalizedTerm),
 		index("unit_alias_term_search_idx")
 			.using("pgroonga", table.term)
@@ -62,6 +66,10 @@ export const unitAlias = pgTable(
 		check(
 			"unit_alias_term_not_blank",
 			sql`btrim(${table.term}) <> '' and btrim(${table.normalizedTerm}) <> ''`,
+		),
+		check(
+			"unit_alias_language_check",
+			sql`${table.language} is null or ${table.language} in ('zh', 'en')`,
 		),
 		check(
 			"unit_alias_deleted_at_check",

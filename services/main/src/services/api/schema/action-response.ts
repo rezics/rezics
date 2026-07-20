@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
-import { DateTime, FractionalPosition, OrdinalPosition, Uuid } from ".";
+import { ContentLanguage, DateTime, FractionalPosition, OrdinalPosition, Uuid } from ".";
 
 const NullableUuid = t.Nullable(Uuid);
 
@@ -92,7 +92,7 @@ export const RealmRulesResponse = t.Object({
 		t.Object({
 			id: Uuid,
 			position: OrdinalPosition,
-			language: t.String(),
+			language: ContentLanguage,
 			title: t.String(),
 			content: PortableTextDocument,
 		}),

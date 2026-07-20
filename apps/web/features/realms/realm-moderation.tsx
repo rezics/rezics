@@ -1,6 +1,13 @@
 "use client";
 
 import {
+	ContentLanguageValues,
+	isContentLanguage,
+	toContentLanguage,
+	type ContentLanguage,
+} from "@rezics/i18n";
+
+import {
 	getApiRealmsByRealmIdUnitsByUnitIdHistoryQueryKey,
 	getApiRealmsByRealmIdUnitsQueryKey,
 	useGetApiRealmsByRealmIdUnits,
@@ -21,7 +28,6 @@ import {
 	Checkbox,
 	Field,
 	FieldLabel,
-	Input,
 	NativeSelect,
 	NativeSelectOption,
 	PortableTextContent,
@@ -53,7 +59,7 @@ type RealmModerationHistoryAction =
 type ModerationAnnotationRole = "internal_note" | "public_notice";
 
 export function RealmModeration({ realmId }: { realmId: string }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["posts", "realms", "state"]);
 	const units = useGetApiRealmsByRealmIdUnits({
 		path: { realmId },
 		query: RealmModerationListQuery,
@@ -126,7 +132,7 @@ function RealmModerationRow({
 	unit: RealmModerationUnit;
 	onSelect: () => void;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["posts", "realms", "state"]);
 	return (
 		<Card>
 			<CardContent className="grid gap-3 p-5 sm:grid-cols-[1fr_auto] sm:items-center">
@@ -159,7 +165,7 @@ function RealmModerationPanel({
 	unit: RealmModerationUnit;
 	onClose: () => void;
 }) {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation(["posts", "realms", "state"]);
 	const queryClient = useQueryClient();
 	const moderate = usePatchApiRealmsByRealmIdUnitsByUnitId();
 	const history = useGetApiRealmsByRealmIdUnitsByUnitIdHistory({
@@ -174,15 +180,12 @@ function RealmModerationPanel({
 		useState<(typeof GovernanceReasonCodes)[number]>("realm_rules");
 	const [includeAnnotation, setIncludeAnnotation] = useState(false);
 	const [annotationRole, setAnnotationRole] = useState<ModerationAnnotationRole>("internal_note");
-	const [annotationLanguage, setAnnotationLanguage] = useState<string>(locale.target);
+	const [annotationLanguage, setAnnotationLanguage] = useState<ContentLanguage>(
+		toContentLanguage(locale.target),
+	);
 	const [annotation, setAnnotation] = useState<PortableTextValue>([]);
 	const annotationRequested = command === "note" || includeAnnotation;
-	const normalizedLanguage = annotationLanguage.trim();
-	const annotationValid =
-		!annotationRequested ||
-		(normalizedLanguage.length >= 2 &&
-			normalizedLanguage.length <= 35 &&
-			hasAuthoredAnnotation(annotation));
+	const annotationValid = !annotationRequested || hasAuthoredAnnotation(annotation);
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -190,7 +193,7 @@ function RealmModerationPanel({
 		const authoredAnnotation = annotationRequested
 			? {
 					role: annotationRole,
-					language: normalizedLanguage,
+					language: annotationLanguage,
 					content: writePortableText(annotation),
 				}
 			: undefined;
@@ -334,15 +337,20 @@ function RealmModerationPanel({
 								</Field>
 								<Field required>
 									<FieldLabel>{t.realms.annotationLanguage}</FieldLabel>
-									<Input
-										required
-										minLength={2}
-										maxLength={35}
+									<NativeSelect
 										value={annotationLanguage}
-										onChange={(event) =>
-											setAnnotationLanguage(event.currentTarget.value)
-										}
-									/>
+										onChange={(event) => {
+											const value = event.currentTarget.value;
+											if (isContentLanguage(value))
+												setAnnotationLanguage(value);
+										}}
+									>
+										{ContentLanguageValues.map((value) => (
+											<NativeSelectOption key={value} value={value}>
+												{value}
+											</NativeSelectOption>
+										))}
+									</NativeSelect>
 								</Field>
 							</div>
 							<PortableTextEditor
@@ -392,7 +400,7 @@ function RealmModerationPanel({
 }
 
 function RealmModerationHistoryItem({ item }: { item: RealmModerationHistoryAction }) {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation(["posts", "realms", "state"]);
 	return (
 		<article className="grid gap-3 rounded-lg border p-4 text-sm">
 			<div className="flex flex-wrap items-start justify-between gap-2">

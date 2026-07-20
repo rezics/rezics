@@ -25,6 +25,7 @@ import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
+import { isContentLanguage, isStoredUiLocale, toUiLocale } from "@rezics/i18n";
 import { RequireSession } from "@/features/auth/require-session";
 import {
 	LocalizationImageUploadField,
@@ -60,7 +61,15 @@ export function ProfileSettings() {
 }
 
 function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation([
+		"errors",
+		"feed",
+		"governance",
+		"locale",
+		"media",
+		"settings",
+		"ui",
+	]);
 	const queryClient = useQueryClient();
 	const update = usePatchApiUsersMe({
 		mutation: {
@@ -140,7 +149,15 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 }
 
 export function PreferenceSettings() {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation([
+		"errors",
+		"feed",
+		"governance",
+		"locale",
+		"media",
+		"settings",
+		"ui",
+	]);
 	const queryClient = useQueryClient();
 	const preferences = useGetApiUsersMePreferences();
 	const update = usePutApiUsersMePreferences({
@@ -149,7 +166,7 @@ export function PreferenceSettings() {
 				queryClient.invalidateQueries({ queryKey: getApiUsersMePreferencesQueryKey() }),
 		},
 	});
-	const setLocale = useSetLocale();
+	const { setLocale } = useSetLocale();
 	const [saved, setSaved] = useState(false);
 	const [invalid, setInvalid] = useState(false);
 	if (preferences.isPending) return <QueryPending />;
@@ -162,29 +179,35 @@ export function PreferenceSettings() {
 		const current = preferences.data;
 		if (!current) return;
 		const data = new FormData(event.currentTarget);
-		const interfaceLanguage = String(data.get("interfaceLanguage"));
+		const interfaceLocale = String(data.get("interfaceLocale"));
+		const contentLanguage = String(data.get("contentLanguage"));
 		const selectedRatings = data.getAll("contentRating").filter(isContentRating);
-		if (!selectedRatings.length) {
+		if (
+			!selectedRatings.length ||
+			!isStoredUiLocale(interfaceLocale) ||
+			!isContentLanguage(contentLanguage)
+		) {
 			setInvalid(true);
 			return;
 		}
 		try {
 			await update.mutateAsync({
 				body: {
+					interfaceLocale,
 					defaultLicense: String(data.get("defaultLicense") ?? "") || null,
 					defaultRealmManageMode: data.get("defaultRealmManageMode") === "true",
 					collectionConfig: current.collectionConfig,
 					personalizedFeed: data.get("personalizedFeed") === "true",
 					contentRatings: selectedRatings,
 					preferredLanguages: [
-						interfaceLanguage,
+						contentLanguage,
 						...current.preferredLanguages.filter(
-							(language) => language !== interfaceLanguage,
+							(language) => language !== contentLanguage,
 						),
 					],
 				},
 			});
-			setLocale(interfaceLanguage);
+			setLocale(toUiLocale(interfaceLocale));
 			setSaved(true);
 		} catch {
 			setSaved(false);
@@ -195,13 +218,23 @@ export function PreferenceSettings() {
 			<form onSubmit={submit}>
 				<FieldGroup>
 					<Field>
-						<FieldLabel>{t.ui.language}</FieldLabel>
+						<FieldLabel>{t.settings.interfaceLanguage}</FieldLabel>
 						<NativeSelect
-							name="interfaceLanguage"
-							defaultValue={preferences.data.preferredLanguages[0] ?? "zh-CN"}
+							name="interfaceLocale"
+							defaultValue={preferences.data.interfaceLocale}
 						>
-							<NativeSelectOption value="zh-CN">{t.locale.zh}</NativeSelectOption>
-							<NativeSelectOption value="en-US">{t.locale.en}</NativeSelectOption>
+							<NativeSelectOption value="zh-hant">{t.locale.zh}</NativeSelectOption>
+							<NativeSelectOption value="en">{t.locale.en}</NativeSelectOption>
+						</NativeSelect>
+					</Field>
+					<Field>
+						<FieldLabel>{t.settings.contentLanguage}</FieldLabel>
+						<NativeSelect
+							name="contentLanguage"
+							defaultValue={preferences.data.preferredLanguages[0] ?? "zh"}
+						>
+							<NativeSelectOption value="zh">{t.locale.zh}</NativeSelectOption>
+							<NativeSelectOption value="en">{t.locale.en}</NativeSelectOption>
 						</NativeSelect>
 					</Field>
 					<Field>
@@ -268,7 +301,15 @@ export function PreferenceSettings() {
 }
 
 export function AccountSettings() {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation([
+		"errors",
+		"feed",
+		"governance",
+		"locale",
+		"media",
+		"settings",
+		"ui",
+	]);
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	return (

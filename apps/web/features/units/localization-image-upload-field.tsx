@@ -55,7 +55,7 @@ export function LocalizationImageUploadField({
 	role: LocalizationImageRole;
 	shape: LocalizationImageShape;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["media"]);
 	const copy = t.media.roles[role];
 	const requestUpload = usePostApiImageAssets();
 	const completeUpload = usePostApiImageAssetsByIdComplete();

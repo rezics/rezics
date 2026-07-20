@@ -1,22 +1,32 @@
 import { type Static, t } from "elysia";
 import { FormatRegistry } from "@sinclair/typebox";
 import { PortableTextDocument } from "@rezics/block";
-import tags from "language-tags";
 
 import {
 	AiDisclosureValues,
+	ContentLanguageValues,
 	ContentRatingValues,
+	StoredUiLocaleValues,
 	UnitStatusValues,
 	UnitVisibilityValues,
 } from "../../database/schema/contract-values";
 import { isFractionalPosition } from "../../ordering/position";
 
-FormatRegistry.Set("bcp-47", tags.check);
 FormatRegistry.Set("fractional-position", isFractionalPosition);
 
-/** A well-formed BCP 47 language tag from the IANA language subtag registry. */
-export const LanguageTag = t.String({ format: "bcp-47", minLength: 2, maxLength: 35 });
-export type LanguageTag = Static<typeof LanguageTag>;
+/** A content-language group accepted by authoring, discovery, and storage. */
+export const ContentLanguage = t.Union([
+	t.Literal(ContentLanguageValues[0]),
+	t.Literal(ContentLanguageValues[1]),
+]);
+export type ContentLanguage = Static<typeof ContentLanguage>;
+
+/** A lowercase UI locale value persisted in profile preferences. */
+export const StoredUiLocale = t.Union([
+	t.Literal(StoredUiLocaleValues[0]),
+	t.Literal(StoredUiLocaleValues[1]),
+]);
+export type StoredUiLocale = Static<typeof StoredUiLocale>;
 
 export const DateTime = t
 	.Transform(t.String({ format: "date-time" }))
@@ -51,7 +61,7 @@ export type UnitIdParams = Static<typeof UnitIdParams>;
 
 export const LocalizationInput = t.Object(
 	{
-		language: LanguageTag,
+		language: ContentLanguage,
 		title: t.String({ minLength: 1, maxLength: 500 }),
 		summary: t.Optional(t.String({ maxLength: 2_000 })),
 		description: t.Optional(PortableTextDocument),

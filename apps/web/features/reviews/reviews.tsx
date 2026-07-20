@@ -1,5 +1,7 @@
 "use client";
 
+import { toContentLanguage } from "@rezics/i18n";
+
 import {
 	type GetApiReviewsByReviewIdStatus200,
 	getApiReactionsUnitsByUnitIdQueryKey,
@@ -72,7 +74,7 @@ async function invalidateReviews(
 
 export function ReviewsPage() {
 	const query = useGetApiReviews({ query: { limit: 50 } });
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "engagement", "errors", "posts", "ui"]);
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -118,7 +120,7 @@ export function ReviewCreate() {
 	const bindScores = usePutApiPostsByPostIdScores();
 	const router = useRouter();
 	const queryClient = useQueryClient();
-	const { locale, t } = useTranslation({ suspense: true });
+	const { locale, t } = useTranslation(["actions", "engagement", "errors", "posts", "ui"]);
 	const [target, setTarget] = useState<{ id: string; label: string }>();
 	const [realm, setRealm] = useState<{ id: string; label: string }>();
 	const [body, setBody] = useState<PortableTextValue>([]);
@@ -148,7 +150,7 @@ export function ReviewCreate() {
 				body: {
 					targetId: target.id,
 					...(realm ? { realmId: realm.id } : {}),
-					language: locale.target,
+					language: toContentLanguage(locale.target),
 					title: String(form.get("title") ?? "").trim(),
 					...(String(form.get("summary") ?? "").trim()
 						? { summary: String(form.get("summary") ?? "").trim() }
@@ -222,7 +224,7 @@ export function ReviewDetail({ id }: { id: string }) {
 	const remove = useDeleteApiReviewsByReviewId();
 	const queryClient = useQueryClient();
 	const router = useRouter();
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "engagement", "errors", "posts", "ui"]);
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -301,7 +303,7 @@ export function ReviewDetail({ id }: { id: string }) {
 
 function BoundScores({ postId }: { postId: string }) {
 	const query = useGetApiPostsByPostIdScores({ path: { postId } });
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "engagement", "errors", "posts", "ui"]);
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (query.isPending || !query.data?.items.length) return null;
@@ -324,7 +326,7 @@ function BoundScores({ postId }: { postId: string }) {
 
 export function ReviewEdit({ id }: { id: string }) {
 	const query = useGetApiReviewsByReviewId({ path: { reviewId: id } });
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "engagement", "errors", "posts", "ui"]);
 	if (query.isPending) return <QueryPending />;
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
@@ -348,7 +350,7 @@ function ReviewEditForm({
 	const update = usePatchApiReviewsByReviewId();
 	const queryClient = useQueryClient();
 	const router = useRouter();
-	const { locale, t } = useTranslation({ suspense: true });
+	const { locale, t } = useTranslation(["actions", "engagement", "errors", "posts", "ui"]);
 	const [body, setBody] = useState<PortableTextValue>(() => readPortableText(review.body));
 	const [invalid, setInvalid] = useState(false);
 	async function submit(event: FormEvent<HTMLFormElement>) {
@@ -363,7 +365,7 @@ function ReviewEditForm({
 			await update.mutateAsync({
 				path: { reviewId },
 				body: {
-					language: locale.target,
+					language: toContentLanguage(locale.target),
 					title: String(form.get("title") ?? "").trim(),
 					...(String(form.get("summary") ?? "").trim()
 						? { summary: String(form.get("summary") ?? "").trim() }
@@ -426,7 +428,7 @@ function ScorePanel({ targetId, realmId }: { targetId: string; realmId: string }
 	const setScore = usePutApiScoresByTargetId();
 	const queryClient = useQueryClient();
 	const { data: session } = useHydratedSession();
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "engagement", "errors", "posts", "ui"]);
 	const [score, setScoreValue] = useState("5");
 	const count = Number(aggregate.data?.totalCount ?? 0);
 	const average = count ? Number(aggregate.data?.totalScore ?? 0) / count : 0;
@@ -494,7 +496,7 @@ function ReactionControls({ targetId }: { targetId: string }) {
 	const removeReaction = useDeleteApiReactionsUnitsByUnitId();
 	const queryClient = useQueryClient();
 	const { data: session } = useHydratedSession();
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "engagement", "errors", "posts", "ui"]);
 	const [selected, setSelected] = useState<"upvote" | "downvote" | null>(null);
 	const counts = new Map(reactions.data?.items.map((item) => [item.reaction, item.count]) ?? []);
 	async function change(reaction: "upvote" | "downvote") {

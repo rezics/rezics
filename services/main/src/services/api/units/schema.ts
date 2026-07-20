@@ -3,7 +3,7 @@ import { type Static, t } from "elysia";
 import {
 	DateTime,
 	FractionalPosition,
-	LanguageTag,
+	ContentLanguage,
 	LifecycleInput,
 	LocalizationInput,
 	Uuid,
@@ -94,7 +94,7 @@ export const UpdateUnitBody = t.Object(
 		unit: t.Optional(
 			t.Object(
 				{
-					primaryLanguage: t.Optional(LanguageTag),
+					primaryLanguage: t.Optional(ContentLanguage),
 					releasedOn: t.Optional(t.Nullable(t.String({ format: "date" }))),
 				},
 				{ additionalProperties: false },
@@ -139,7 +139,7 @@ export type PromoteUnitVariantBody = Static<typeof PromoteUnitVariantBody>;
 export const UnitLocalizationParams = t.Object({
 	type: UnitType,
 	unitId: t.String({ format: "uuid" }),
-	language: LanguageTag,
+	language: ContentLanguage,
 });
 export type UnitLocalizationParams = Static<typeof UnitLocalizationParams>;
 

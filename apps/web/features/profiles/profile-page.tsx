@@ -18,7 +18,7 @@ import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { useTranslation } from "@/i18n/client";
 
 export function ProfilePage({ id }: { id: string }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["profiles", "ui"]);
 	const queryClient = useQueryClient();
 	const { data: session } = useHydratedSession();
 	const profile = useGetApiUsersById({ path: { id } });

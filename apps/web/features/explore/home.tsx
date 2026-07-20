@@ -14,7 +14,7 @@ import {
 } from "@/lib/search-params";
 
 export function Home() {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["feed", "posts"]);
 	const [sort, setSort] = useQueryState("sort", feedSortParser);
 	const [contentKinds, setContentKinds] = useQueryState("content", feedContentParser);
 	const sortOptions = FeedSorts.map((value) => ({ value, label: t.feed.sort[value] }));

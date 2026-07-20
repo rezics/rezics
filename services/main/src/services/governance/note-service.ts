@@ -4,6 +4,7 @@ import {
 	type PortableTextDocument as PortableTextDocumentValue,
 } from "@rezics/block";
 import { and, eq, inArray } from "drizzle-orm";
+import type { ContentLanguage } from "@rezics/i18n";
 
 import type { DatabaseTransaction } from "../database";
 import {
@@ -24,7 +25,7 @@ export type GovernanceNoteSubjectKind = (typeof GovernanceNoteSubjectKindValues)
 
 export type GovernanceNote = {
 	role: GovernanceNoteRole;
-	language: string;
+	language: ContentLanguage;
 	content: PortableTextDocumentValue;
 };
 

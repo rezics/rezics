@@ -3,7 +3,8 @@ import type { ReactNode } from "react";
 import socialCard from "@rezics/brand/social-card.png?url&no-inline";
 
 import { AppProviders } from "./providers";
-import { getLocaleTags, getTranslation } from "@/i18n/server";
+import { RootTranslationNamespaces } from "@/i18n/namespaces";
+import { getTranslation } from "@/i18n/server";
 import { appTheme, appThemeCss } from "@/lib/theme";
 
 import "./styles.css";
@@ -49,8 +50,7 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
-	const tags = await getLocaleTags();
-	const { locale } = await getTranslation(tags);
+	const { locale, snapshot } = await getTranslation(RootTranslationNamespaces);
 	return (
 		<html lang={locale.current} suppressHydrationWarning>
 			<head>
@@ -68,7 +68,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 				/>
 			</head>
 			<body className="min-w-80">
-				<AppProviders localeTags={tags}>{children}</AppProviders>
+				<AppProviders initialTranslation={snapshot}>{children}</AppProviders>
 			</body>
 		</html>
 	);

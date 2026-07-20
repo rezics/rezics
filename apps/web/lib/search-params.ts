@@ -1,4 +1,4 @@
-import { Languages } from "@rezics/i18n";
+import { ContentLanguageValues } from "@rezics/i18n";
 import { PostApiSearchByIndexIndex } from "@rezics/openapi-tanstack-query";
 import { parseAsArrayOf, parseAsString, parseAsStringLiteral } from "nuqs/server";
 
@@ -32,7 +32,7 @@ export const searchParamsParsers = {
 	scope: parseAsArrayOf(parseAsStringLiteral(SearchScopes))
 		.withDefault([...SearchScopes])
 		.withOptions(urlStateOptions),
-	language: parseAsStringLiteral(Languages.map(({ tag }) => tag)).withOptions(urlStateOptions),
+	language: parseAsStringLiteral(ContentLanguageValues).withOptions(urlStateOptions),
 };
 
 export const authSearchParamsParsers = {

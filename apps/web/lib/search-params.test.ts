@@ -22,7 +22,8 @@ describe("URL state parsers", () => {
 			"units",
 		]);
 		expect(searchParamsParsers.scope.parseServerSide(undefined)).toEqual(SearchScopes);
-		expect(searchParamsParsers.language.parseServerSide("zh-CN")).toBe("zh-CN");
+		expect(searchParamsParsers.language.parseServerSide("zh")).toBe("zh");
+		expect(searchParamsParsers.language.parseServerSide("zh-Hant")).toBeNull();
 		expect(searchParamsParsers.language.parseServerSide("invalid")).toBeNull();
 	});
 

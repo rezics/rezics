@@ -1,4 +1,5 @@
 "use client";
+import { toContentLanguage } from "@rezics/i18n";
 
 import {
 	getApiEntitiesQueryKey,
@@ -46,7 +47,7 @@ function CatalogFrame({
 	createHref?: string;
 	children: React.ReactNode;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "catalog", "errors", "governance", "media", "ui"]);
 	return (
 		<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6">
 			<PageHeading
@@ -65,8 +66,17 @@ function CatalogFrame({
 }
 
 export function EntitiesPage() {
-	const { t, locale } = useTranslation({ suspense: true });
-	const query = useGetApiEntities({ query: { language: locale.target, limit: 50 } });
+	const { t, locale } = useTranslation([
+		"actions",
+		"catalog",
+		"errors",
+		"governance",
+		"media",
+		"ui",
+	]);
+	const query = useGetApiEntities({
+		query: { language: toContentLanguage(locale.target), limit: 50 },
+	});
 	return (
 		<CatalogFrame title={t.catalog.entities} createHref="/entities/new">
 			<UnitList
@@ -80,7 +90,7 @@ export function EntitiesPage() {
 }
 
 export function TagsPage() {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "catalog", "errors", "governance", "media", "ui"]);
 	const query = useGetApiTags({ query: { limit: 50 } });
 	return (
 		<CatalogFrame title={t.catalog.tags} createHref="/tags/new">
@@ -90,15 +100,25 @@ export function TagsPage() {
 }
 
 export function EntityDetailPage({ id }: { id: string }) {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation([
+		"actions",
+		"catalog",
+		"errors",
+		"governance",
+		"media",
+		"ui",
+	]);
 	const query = useGetApiEntitiesByUnitId({
 		path: { unitId: id },
-		query: { language: locale.target },
+		query: { language: toContentLanguage(locale.target) },
 	});
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	const localization = selectLocalization(query.data.localizations, locale.target);
+	const localization = selectLocalization(
+		query.data.localizations,
+		toContentLanguage(locale.target),
+	);
 	const avatar = localization?.avatar ?? query.data.avatar;
 	const banner = localization?.banner ?? query.data.banner;
 	return (
@@ -154,10 +174,17 @@ export function EntityEditPage({ id }: { id: string }) {
 }
 
 function EntityEditContent({ id }: { id: string }) {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation([
+		"actions",
+		"catalog",
+		"errors",
+		"governance",
+		"media",
+		"ui",
+	]);
 	const query = useGetApiEntitiesByUnitId({
 		path: { unitId: id },
-		query: { language: locale.target },
+		query: { language: toContentLanguage(locale.target) },
 	});
 	if (query.isPending) return <QueryPending />;
 	if (query.isError || !query.data)
@@ -170,25 +197,34 @@ function EntityEditContent({ id }: { id: string }) {
 		);
 	return (
 		<EntityLocalizationForm
-			key={`${query.data.id}:${locale.target}:${query.data.updatedAt}`}
+			key={`${query.data.id}:${toContentLanguage(locale.target)}:${query.data.updatedAt}`}
 			entity={query.data}
 		/>
 	);
 }
 
 function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStatus200 }) {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation([
+		"actions",
+		"catalog",
+		"errors",
+		"governance",
+		"media",
+		"ui",
+	]);
 	const router = useRouter();
 	const queryClient = useQueryClient();
-	const localization = entity.localizations.find((entry) => entry.language === locale.target);
+	const localization = entity.localizations.find(
+		(entry) => entry.language === toContentLanguage(locale.target),
+	);
 	const fallbackLocalization = selectLocalization(
 		entity.localizations,
-		locale.target,
+		toContentLanguage(locale.target),
 		entity.localizations[0]?.language,
 	);
 	const mediaOptions = (role: "avatar" | "banner"): LocalizationImageAssetOption[] =>
 		entity.localizations.flatMap((entry) =>
-			entry.language !== locale.target && entry[role]
+			entry.language !== toContentLanguage(locale.target) && entry[role]
 				? [{ ...entry[role], label: entry.language }]
 				: [],
 		);
@@ -207,7 +243,7 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 		const form = new FormData(event.currentTarget);
 		try {
 			await update.mutateAsync({
-				path: { unitId: entity.id, language: locale.target },
+				path: { unitId: entity.id, language: toContentLanguage(locale.target) },
 				body: {
 					title: String(form.get("title") ?? "").trim(),
 					summary: String(form.get("summary") ?? "").trim(),
@@ -218,7 +254,7 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 			await queryClient.invalidateQueries({
 				queryKey: getApiEntitiesByUnitIdQueryKey({
 					path: { unitId: entity.id },
-					query: { language: locale.target },
+					query: { language: toContentLanguage(locale.target) },
 				}),
 			});
 			router.push(`/entities/${entity.id}`);
@@ -294,7 +330,14 @@ function CreateFrame({ title, children }: { title: string; children: React.React
 }
 
 export function EntityCreatePage() {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation([
+		"actions",
+		"catalog",
+		"errors",
+		"governance",
+		"media",
+		"ui",
+	]);
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const [error, setError] = useState(false);
@@ -317,7 +360,7 @@ export function EntityCreatePage() {
 				body: {
 					kind: String(form.get("kind") ?? "person"),
 					localization: {
-						language: locale.target,
+						language: toContentLanguage(locale.target),
 						title: String(form.get("title") ?? "").trim(),
 						avatarAssetId: avatar?.id ?? null,
 						bannerAssetId: banner?.id ?? null,
@@ -384,7 +427,14 @@ export function EntityCreatePage() {
 }
 
 export function TagCreatePage() {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation([
+		"actions",
+		"catalog",
+		"errors",
+		"governance",
+		"media",
+		"ui",
+	]);
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const [error, setError] = useState(false);
@@ -404,7 +454,7 @@ export function TagCreatePage() {
 			await create.mutateAsync({
 				body: {
 					localization: {
-						language: locale.target,
+						language: toContentLanguage(locale.target),
 						title: String(form.get("title") ?? "").trim(),
 						...(String(form.get("summary") ?? "").trim()
 							? { summary: String(form.get("summary")).trim() }

@@ -1,6 +1,13 @@
 "use client";
 
 import {
+	ContentLanguageValues,
+	isContentLanguage,
+	toContentLanguage,
+	type ContentLanguage,
+} from "@rezics/i18n";
+
+import {
 	type GetApiChaptersByChapterIdStatus200,
 	useGetApiChaptersByChapterId,
 	useGetApiUnitsBookByUnitIdContentStructureNodes,
@@ -47,7 +54,7 @@ import { buildContentStructureTree, type ContentStructureTreeNode } from "./cont
 import { invalidateChapterContent } from "./unit-cache";
 
 export function BookChapters({ bookId }: { bookId: string }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "errors", "state", "ui", "units"]);
 	const query = useGetApiUnitsBookByUnitIdContentStructureNodes({
 		path: { unitId: bookId },
 	});
@@ -201,11 +208,11 @@ function getExpandedNodeIds(nodes: readonly ReadTreeNode[]): string[] {
 }
 
 export function Reader({ bookId, chapterId }: { bookId: string; chapterId: string }) {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation(["actions", "errors", "state", "ui", "units"]);
 	const [fontSize, setFontSize] = useState(1);
 	const query = useGetApiChaptersByChapterId({
 		path: { chapterId },
-		query: { language: locale.target },
+		query: { language: toContentLanguage(locale.target) },
 	});
 	const outline = useGetApiUnitsBookByUnitIdContentStructureNodes({
 		path: { unitId: bookId },
@@ -359,7 +366,7 @@ function ReaderOutline({
 	outline: ReturnType<typeof useGetApiUnitsBookByUnitIdContentStructureNodes>;
 	tree: readonly ContentStructureTreeNode[];
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "errors", "state", "ui", "units"]);
 	if (outline.isPending) return <Skeleton className="h-60" />;
 	if (outline.isError)
 		return (
@@ -404,7 +411,7 @@ function ChapterLocalizationEditorContent({
 	bookId: string;
 	chapterId: string;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "errors", "state", "ui", "units"]);
 	const book = useGetApiUnitsByTypeByUnitId({ path: { type: "book", unitId: bookId } });
 	if (book.isPending) return <QueryPending />;
 	if (book.isError) return <QueryFailure error={book.error} retry={() => void book.refetch()} />;
@@ -419,9 +426,8 @@ function ChapterLocalizationEditorContent({
 }
 
 function ChapterLocalizationEditor({ bookId, chapterId }: { bookId: string; chapterId: string }) {
-	const { t, locale } = useTranslation({ suspense: true });
-	const [language, setLanguage] = useState<string>(locale.target);
-	const [enteredLanguage, setEnteredLanguage] = useState<string>(locale.target);
+	const { t, locale } = useTranslation(["actions", "errors", "state", "ui", "units"]);
+	const [language, setLanguage] = useState<ContentLanguage>(toContentLanguage(locale.target));
 	const query = useGetApiChaptersByChapterId({
 		path: { chapterId },
 		query: { language },
@@ -436,23 +442,23 @@ function ChapterLocalizationEditor({ bookId, chapterId }: { bookId: string; chap
 			<PageHeading title={t.units.chapter.title} />
 			<Card>
 				<CardContent className="grid gap-6 p-6">
-					<div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+					<div className="grid gap-2">
 						<Field>
 							<FieldLabel>{t.units.chapter.language}</FieldLabel>
-							<Input
-								maxLength={35}
-								onChange={(event) => setEnteredLanguage(event.currentTarget.value)}
-								value={enteredLanguage}
-							/>
+							<NativeSelect
+								value={language}
+								onChange={(event) => {
+									const value = event.currentTarget.value;
+									if (isContentLanguage(value)) setLanguage(value);
+								}}
+							>
+								{ContentLanguageValues.map((value) => (
+									<NativeSelectOption key={value} value={value}>
+										{value}
+									</NativeSelectOption>
+								))}
+							</NativeSelect>
 						</Field>
-						<Button
-							disabled={!enteredLanguage.trim()}
-							onClick={() => setLanguage(enteredLanguage.trim())}
-							type="button"
-							variant="outline"
-						>
-							{t.units.chapter.useLanguage}
-						</Button>
 					</div>
 					<ChapterLocalizationForm
 						key={`${chapterId}:${language}:${query.data?.updatedAt ?? "new"}`}
@@ -475,10 +481,10 @@ function ChapterLocalizationForm({
 }: {
 	bookId: string;
 	chapterId: string;
-	language: string;
+	language: ContentLanguage;
 	chapter: GetApiChaptersByChapterIdStatus200 | undefined;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "errors", "state", "ui", "units"]);
 	const queryClient = useQueryClient();
 	const [content, setContent] = useState<PortableTextValue>(() =>
 		readPortableText(chapter?.content),

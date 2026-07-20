@@ -18,6 +18,7 @@ import {
 	type BlockReferenceResolver,
 	type PortableTextDocument,
 } from "@rezics/block";
+import type { ContentLanguage } from "@rezics/i18n";
 
 import session, { resolveIdentity } from "../../auth/session";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
@@ -111,7 +112,7 @@ async function createBaseUnit(
 	input: {
 		kind: "series" | "zone";
 		localization: {
-			language: string;
+			language: ContentLanguage;
 			title: string;
 			summary?: string;
 			description?: PortableTextDocument;

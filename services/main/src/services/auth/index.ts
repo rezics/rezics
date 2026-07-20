@@ -65,10 +65,11 @@ export const auth = betterAuth({
 		requireEmailVerification: true,
 		revokeSessionsOnPasswordReset: true,
 		async sendResetPassword({ user, url }, request) {
-			const { data: translation } = await getRequestTranslation(request?.headers);
+			const { t } = await getRequestTranslation("emails", request?.headers);
 			void sendMail({
 				to: user.email,
-				...translation.emails.resetPassword(url),
+				subject: t.resetPassword.subject,
+				text: t.resetPassword.text({ url }),
 			}).catch((error: unknown) => {
 				logger.error("Failed to send password reset email", {
 					eventName: "email.password_reset.failed",
@@ -82,10 +83,11 @@ export const auth = betterAuth({
 		sendOnSignUp: true,
 		autoSignInAfterVerification: true,
 		async sendVerificationEmail({ user, url }, request) {
-			const { data: translation } = await getRequestTranslation(request?.headers);
+			const { t } = await getRequestTranslation("emails", request?.headers);
 			void sendMail({
 				to: user.email,
-				...translation.emails.verifyEmail(url),
+				subject: t.verifyEmail.subject,
+				text: t.verifyEmail.text({ url }),
 			}).catch((error: unknown) => {
 				logger.error("Failed to send verification email", {
 					eventName: "email.verification.failed",

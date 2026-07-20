@@ -52,7 +52,7 @@ export function UnitShelf({
 	personalized?: boolean;
 	seedUnitId?: string;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "feed", "state", "ui"]);
 	const { data: session } = useHydratedSession();
 	const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
 	const query = useGetApiRecommendationsUnits({
@@ -107,7 +107,7 @@ function UnitRecommendationCard({
 	featuredMobile: boolean;
 	onHiddenChange: (hidden: boolean) => void;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "feed", "state", "ui"]);
 	const { elementRef, trackOpen } = useRecommendationTracking(item.id, item.tracking);
 	const queryClient = useQueryClient();
 	const exclude = usePutApiRecommendationsExclusionsByUnitId({

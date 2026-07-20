@@ -199,6 +199,7 @@ export default new Elysia({ prefix: "/users" })
 			if (!preference) throw new PreferencesNotFound();
 			return {
 				profileId: preference.profileId,
+				interfaceLocale: preference.interfaceLocale,
 				defaultLicense: preference.defaultLicense,
 				defaultRealmManageMode: preference.defaultRealmManageMode,
 				collectionConfig: parseCollectionConfig(preference.collectionConfig),
@@ -224,6 +225,7 @@ export default new Elysia({ prefix: "/users" })
 				const [preference] = await tx
 					.update(profilePreference)
 					.set({
+						interfaceLocale: body.interfaceLocale,
 						defaultLicense: body.defaultLicense,
 						defaultRealmManageMode: body.defaultRealmManageMode,
 						collectionConfig: body.collectionConfig,

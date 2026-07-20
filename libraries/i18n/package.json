@@ -5,8 +5,10 @@
 	"sideEffects": false,
 	"exports": {
 		".": "./src/index.ts",
-		"./languages/en-US": "./src/languages/en-US/index.ts",
-		"./languages/zh-CN": "./src/languages/zh-CN/index.ts"
+		"./resources": "./src/resources.ts"
+	},
+	"dependencies": {
+		"native-i18n": "0.1.0"
 	},
 	"devDependencies": {
 		"typescript": "7"

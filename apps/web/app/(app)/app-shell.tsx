@@ -12,6 +12,7 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { AppShell as SharedAppShell } from "@rezics/ui";
+import { isUiLocale, toStoredUiLocale, toUiLocale } from "@rezics/i18n";
 
 import { useAuthPortal } from "@/features/auth/auth-portal";
 import { useSetLocale, useTranslation } from "@/i18n/client";
@@ -83,8 +84,17 @@ const AppLink = forwardRef<HTMLAnchorElement, AppLinkProps>(function AppLink(
 export function ApplicationShell({ children }: { children: ReactNode }) {
 	const pathname = usePathname();
 	const { data: session } = useHydratedSession();
-	const { t, locale } = useTranslation({ suspense: true });
-	const setLocale = useSetLocale();
+	const { t, locale } = useTranslation([
+		"actions",
+		"betterAuthErrorCodes",
+		"errorCodes",
+		"errors",
+		"locale",
+		"nav",
+		"search",
+		"ui",
+	]);
+	const { setLocale } = useSetLocale();
 	const queryClient = useQueryClient();
 	const preferences = useGetApiUsersMePreferences({ query: { enabled: Boolean(session) } });
 	const subscriptions = useGetApiUsersMeSubscriptions({
@@ -98,9 +108,11 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 	});
 
 	useEffect(() => {
-		const preferred = preferences.data?.preferredLanguages[0];
-		if (preferred && preferred !== locale.target) setLocale(preferred);
-	}, [locale.target, preferences.data?.preferredLanguages, setLocale]);
+		const storedLocale = preferences.data?.interfaceLocale;
+		if (!storedLocale) return;
+		const preferred = toUiLocale(storedLocale);
+		if (preferred !== locale.target) setLocale(preferred);
+	}, [locale.target, preferences.data?.interfaceLocale, setLocale]);
 
 	if (/^\/units\/book\/[^/]+\/read\/[^/]+$/.test(pathname)) return children;
 
@@ -129,9 +141,11 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 			locale={{
 				label: t.locale.label,
 				onChange: async (nextLocale) => {
+					if (!isUiLocale(nextLocale)) return;
 					if (preferences.data)
 						await updatePreferences.mutateAsync({
 							body: {
+								interfaceLocale: toStoredUiLocale(nextLocale),
 								defaultLicense: preferences.data.defaultLicense,
 								defaultRealmManageMode: preferences.data.defaultRealmManageMode,
 								collectionConfig: preferences.data.collectionConfig,
@@ -141,19 +155,14 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 										? value
 										: "general",
 								),
-								preferredLanguages: [
-									nextLocale,
-									...preferences.data.preferredLanguages.filter(
-										(language) => language !== nextLocale,
-									),
-								],
+								preferredLanguages: preferences.data.preferredLanguages,
 							},
 						});
 					setLocale(nextLocale);
 				},
 				options: [
-					{ value: "zh-CN", label: t.locale.zh },
-					{ value: "en-US", label: t.locale.en },
+					{ value: "zh-Hant", label: t.locale.zh },
+					{ value: "en", label: t.locale.en },
 				],
 				value: locale.target,
 			}}

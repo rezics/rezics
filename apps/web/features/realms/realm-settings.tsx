@@ -1,6 +1,13 @@
 "use client";
 
 import {
+	ContentLanguageValues,
+	isContentLanguage,
+	toContentLanguage,
+	type ContentLanguage,
+} from "@rezics/i18n";
+
+import {
 	getApiRealmsByRealmIdMembersQueryKey,
 	getApiRealmsByRealmIdPinsQueryKey,
 	getApiRealmsByRealmIdRulesQueryKey,
@@ -53,7 +60,7 @@ const MemberStates = ["active", "pending", "muted", "removed", "banned"] as cons
 
 type PickedEntity = { id: string; label: string };
 type RuleDraft = {
-	language: string;
+	language: ContentLanguage;
 	title: string;
 	content: PortableTextValue;
 	document?: PortableTextDocument;
@@ -70,10 +77,10 @@ export function RealmSettingsPage({ id }: { id: string }) {
 }
 
 function RealmSettingsContent({ id }: { id: string }) {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation(["errors", "media", "realms", "state", "ui"]);
 	const realm = useGetApiRealmsByRealmId({
 		path: { realmId: id },
-		query: { language: locale.target },
+		query: { language: toContentLanguage(locale.target) },
 	});
 	const mayManage = canManageRealm(realm.data?.viewerMembership);
 	const members = useGetApiRealmsByRealmIdMembers(
@@ -112,7 +119,7 @@ function RealmSettingsContent({ id }: { id: string }) {
 				}
 			/>
 			<RealmProfileSettings
-				key={`${realm.data.id}:${locale.target}:${realm.data.updatedAt}`}
+				key={`${realm.data.id}:${toContentLanguage(locale.target)}:${realm.data.updatedAt}`}
 				realm={realm.data}
 			/>
 			<RealmMembers
@@ -139,18 +146,20 @@ function RealmSettingsContent({ id }: { id: string }) {
 }
 
 function RealmProfileSettings({ realm }: { realm: GetApiRealmsByRealmIdStatus200 }) {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation(["errors", "media", "realms", "state", "ui"]);
 	const queryClient = useQueryClient();
 	const update = usePatchApiRealmsByRealmId();
-	const localization = realm.localizations.find((entry) => entry.language === locale.target);
+	const localization = realm.localizations.find(
+		(entry) => entry.language === toContentLanguage(locale.target),
+	);
 	const fallbackLocalization = selectLocalization(
 		realm.localizations,
-		locale.target,
+		toContentLanguage(locale.target),
 		realm.language,
 	);
 	const mediaOptions = (role: "avatar" | "banner"): LocalizationImageAssetOption[] =>
 		realm.localizations.flatMap((entry) =>
-			entry.language !== locale.target && entry[role]
+			entry.language !== toContentLanguage(locale.target) && entry[role]
 				? [{ ...entry[role], label: entry.language }]
 				: [],
 		);
@@ -187,7 +196,7 @@ function RealmProfileSettings({ realm }: { realm: GetApiRealmsByRealmIdStatus200
 					visibility,
 					joinPolicy: data.get("joinPolicy") === "approval" ? "approval" : "open",
 					localization: {
-						language: locale.target,
+						language: toContentLanguage(locale.target),
 						title,
 						...(summary ? { summary } : {}),
 						avatarAssetId: avatar?.id ?? null,
@@ -317,7 +326,7 @@ function RealmMembers({
 	pending: boolean;
 	error: Parameters<typeof RequestFailure>[0]["error"];
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["errors", "media", "realms", "state", "ui"]);
 	return (
 		<section className="grid gap-3">
 			<h2 className="font-heading text-xl font-bold">{t.realms.members}</h2>
@@ -345,7 +354,7 @@ function RealmMember({
 	realmId: string;
 	member: { profileId: string; name: string | null; role: string; state: string };
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["errors", "media", "realms", "state", "ui"]);
 	const queryClient = useQueryClient();
 	const update = usePatchApiRealmsByRealmIdMembersByProfileId();
 	const [role, setRole] = useState<MemberRole>(toMemberRole(member.role));
@@ -427,7 +436,7 @@ function RealmRules({
 	pending: boolean;
 	error: Parameters<typeof RequestFailure>[0]["error"];
 }) {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation(["errors", "media", "realms", "state", "ui"]);
 	const queryClient = useQueryClient();
 	const save = usePutApiRealmsByRealmIdRules();
 	const [drafts, setDrafts] = useState<RuleDraft[]>();
@@ -445,12 +454,12 @@ function RealmRules({
 						content: readPortableText(rule.content),
 						document: rule.content,
 					}))
-				: [{ language: locale.target, title: "", content: [] }],
+				: [{ language: toContentLanguage(locale.target), title: "", content: [] }],
 		);
 		setRequireOnJoin(Boolean(data.requireOnJoin));
 		setRequireOnPost(Boolean(data.requireOnPost));
 		setRequireOnUpdate(Boolean(data.requireOnUpdate));
-	}, [data, locale.target]);
+	}, [data, toContentLanguage(locale.target)]);
 
 	if (error)
 		return (
@@ -521,22 +530,29 @@ function RealmRules({
 								<div className="grid gap-3 sm:grid-cols-[10rem_1fr_auto] sm:items-end">
 									<Field>
 										<FieldLabel>{t.realms.ruleLanguage}</FieldLabel>
-										<Input
+										<NativeSelect
 											value={rule.language}
-											onChange={(event) =>
+											onChange={(event) => {
+												const language = event.currentTarget.value;
+												if (!isContentLanguage(language)) return;
 												setDrafts((current) =>
 													current?.map((item, itemIndex) =>
 														itemIndex === index
 															? {
 																	...item,
-																	language:
-																		event.currentTarget.value,
+																	language,
 																}
 															: item,
 													),
-												)
-											}
-										/>
+												);
+											}}
+										>
+											{ContentLanguageValues.map((value) => (
+												<NativeSelectOption key={value} value={value}>
+													{value}
+												</NativeSelectOption>
+											))}
+										</NativeSelect>
 									</Field>
 									<Field required>
 										<FieldLabel>{t.realms.ruleTitle}</FieldLabel>
@@ -595,7 +611,11 @@ function RealmRules({
 								onClick={() =>
 									setDrafts((current) => [
 										...(current ?? []),
-										{ language: locale.target, title: "", content: [] },
+										{
+											language: toContentLanguage(locale.target),
+											title: "",
+											content: [],
+										},
 									])
 								}
 							>
@@ -644,7 +664,7 @@ function RealmPins({
 	pending: boolean;
 	error: Parameters<typeof RequestFailure>[0]["error"];
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["errors", "media", "realms", "state", "ui"]);
 	const queryClient = useQueryClient();
 	const pin = usePutApiRealmsByRealmIdPinsByUnitId();
 	const unpin = useDeleteApiRealmsByRealmIdPinsByUnitId();

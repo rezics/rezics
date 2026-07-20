@@ -1,5 +1,7 @@
 "use client";
 
+import { toContentLanguage } from "@rezics/i18n";
+
 import {
 	getApiEntitiesByUnitIdQueryKey,
 	getApiGovernanceUnitAccessInvitationsQueryKey,
@@ -72,7 +74,7 @@ function WorkflowFrame({ title, children }: { title: string; children: React.Rea
 }
 
 function AccessInvitationManager({ unitId }: { unitId: string }) {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation(["errors", "governance", "ui"]);
 	const queryClient = useQueryClient();
 	const queryOptions = { path: { unitId }, query: { includeResolved: true } } as const;
 	const invitations = useGetApiGovernanceUnitByUnitIdAccessInvitations(queryOptions);
@@ -232,7 +234,7 @@ function AccessInvitationManager({ unitId }: { unitId: string }) {
 }
 
 function ReceivedAccessInvitations() {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation(["errors", "governance", "ui"]);
 	const queryClient = useQueryClient();
 	const queryOptions = { query: { includeResolved: true } } as const;
 	const invitations = useGetApiGovernanceUnitAccessInvitations(queryOptions);
@@ -327,7 +329,7 @@ function AssociationProposalManager({
 	side: AssociationSide;
 	kind: AssociationKind;
 }) {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation(["errors", "governance", "ui"]);
 	const queryClient = useQueryClient();
 	const queryOptions = {
 		path: { unitId },
@@ -532,7 +534,7 @@ function EntityAssociationPolicy({
 	canManageCredit: boolean;
 	canManageSubject: boolean;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["errors", "governance", "ui"]);
 	const queryClient = useQueryClient();
 	const update = usePatchApiEntitiesByUnitIdAssociationPolicy({
 		mutation: {
@@ -608,7 +610,7 @@ function PolicyField({
 	label: string;
 	defaultValue: PolicyMode;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["errors", "governance", "ui"]);
 	return (
 		<Field>
 			<FieldLabel>{label}</FieldLabel>
@@ -624,7 +626,7 @@ function PolicyField({
 }
 
 export function ReceivedAccessInvitationsPage() {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["errors", "governance", "ui"]);
 	return (
 		<WorkflowFrame title={t.governance.receivedInvitations}>
 			<ReceivedAccessInvitations />
@@ -633,7 +635,7 @@ export function ReceivedAccessInvitationsPage() {
 }
 
 export function UnitGovernancePage({ type, id }: { type: UnitType; id: string }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["errors", "governance", "ui"]);
 	const unit = useGetApiUnitsByTypeByUnitId({ path: { type, unitId: id } });
 	if (unit.isPending) return <QueryPending />;
 	if (unit.isError || !unit.data)
@@ -664,10 +666,10 @@ export function UnitGovernancePage({ type, id }: { type: UnitType; id: string })
 }
 
 export function EntityGovernancePage({ id }: { id: string }) {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation(["errors", "governance", "ui"]);
 	const entity = useGetApiEntitiesByUnitId({
 		path: { unitId: id },
-		query: { language: locale.target },
+		query: { language: toContentLanguage(locale.target) },
 	});
 	if (entity.isPending) return <QueryPending />;
 	if (entity.isError || !entity.data)

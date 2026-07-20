@@ -1,5 +1,7 @@
 "use client";
 
+import { toContentLanguage } from "@rezics/i18n";
+
 import {
 	getApiUnitsByType,
 	getApiUnitsByTypeQueryKey,
@@ -27,7 +29,7 @@ import {
 } from "./localization-image-upload-field";
 
 export function UnitBrowsePage({ type }: { type: UnitType }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["actions", "media", "ui", "units"]);
 	const query = useInfiniteQuery({
 		queryKey: getApiUnitsByTypeQueryKey({ path: { type } }),
 		queryFn: async ({ pageParam, signal }) => {
@@ -79,7 +81,7 @@ export function UnitBrowsePage({ type }: { type: UnitType }) {
 }
 
 export function UnitCreatePage({ type }: { type: UnitType }) {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation(["actions", "media", "ui", "units"]);
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
@@ -102,7 +104,7 @@ export function UnitCreatePage({ type }: { type: UnitType }) {
 				path: { type },
 				body: {
 					localization: {
-						language: locale.target,
+						language: toContentLanguage(locale.target),
 						title: String(form.get("title") ?? "").trim(),
 						...(summary ? { summary } : {}),
 						coverAssetId: cover?.id ?? null,

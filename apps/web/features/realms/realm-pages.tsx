@@ -1,5 +1,7 @@
 "use client";
 
+import { toContentLanguage } from "@rezics/i18n";
+
 import {
 	useDeleteApiRealmsByRealmIdFollow,
 	useDeleteApiRealmsByRealmIdMembership,
@@ -46,8 +48,18 @@ import { canManageRealm, isRealmOwner } from "./realm-permissions";
 import { invalidateRealmDetails } from "./query";
 
 export function RealmsPage() {
-	const { t, locale } = useTranslation({ suspense: true });
-	const query = useGetApiRealms({ query: { language: locale.target, limit: 20 } });
+	const { t, locale } = useTranslation([
+		"actions",
+		"feed",
+		"media",
+		"posts",
+		"realms",
+		"state",
+		"ui",
+	]);
+	const query = useGetApiRealms({
+		query: { language: toContentLanguage(locale.target), limit: 20 },
+	});
 	return (
 		<main className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6">
 			<PageHeading
@@ -116,7 +128,15 @@ export function RealmsPage() {
 }
 
 export function RealmCreatePage() {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation([
+		"actions",
+		"feed",
+		"media",
+		"posts",
+		"realms",
+		"state",
+		"ui",
+	]);
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const [avatar, setAvatar] = useState<LocalizationImageAssetValue | null>(null);
@@ -133,7 +153,7 @@ export function RealmCreatePage() {
 			{
 				body: {
 					localization: {
-						language: locale.target,
+						language: toContentLanguage(locale.target),
 						title,
 						avatarAssetId: avatar?.id ?? null,
 						bannerAssetId: banner?.id ?? null,
@@ -207,10 +227,18 @@ export function RealmCreatePage() {
 }
 
 export function RealmDetailPage({ id }: { id: string }) {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation([
+		"actions",
+		"feed",
+		"media",
+		"posts",
+		"realms",
+		"state",
+		"ui",
+	]);
 	const query = useGetApiRealmsByRealmId({
 		path: { realmId: id },
-		query: { language: locale.target },
+		query: { language: toContentLanguage(locale.target) },
 	});
 	const rules = useGetApiRealmsByRealmIdRules(
 		{ path: { realmId: id } },
@@ -228,7 +256,11 @@ export function RealmDetailPage({ id }: { id: string }) {
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data) return <QueryPending />;
 	const realm = query.data;
-	const localization = selectLocalization(realm.localizations, locale.target, realm.language);
+	const localization = selectLocalization(
+		realm.localizations,
+		toContentLanguage(locale.target),
+		realm.language,
+	);
 	const canManage = canManageRealm(realm.viewerMembership);
 	const canPost = realm.viewerMembership?.state === "active";
 	return (
@@ -365,7 +397,15 @@ function RealmActions({
 	ruleRevisionId?: string;
 	canManage: boolean;
 }) {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation([
+		"actions",
+		"feed",
+		"media",
+		"posts",
+		"realms",
+		"state",
+		"ui",
+	]);
 	const queryClient = useQueryClient();
 	const { data: session } = useHydratedSession();
 	const follow = usePutApiRealmsByRealmIdFollow();
@@ -415,7 +455,7 @@ function RealmActions({
 									{
 										path: { realmId: realm.id },
 										body: {
-											language: locale.target,
+											language: toContentLanguage(locale.target),
 											...(ruleRevisionId ? { ruleRevisionId } : {}),
 										},
 									},

@@ -14,6 +14,7 @@ import {
 import { pgTable } from "./base";
 import {
 	CapabilityAuthorityValues,
+	type ContentLanguage,
 	RealmJoinPolicyValues,
 	RealmMemberRoleValues,
 	RealmMemberStateValues,
@@ -119,12 +120,16 @@ export const realmRuleAcceptance = pgTable(
 		profileId: uuid()
 			.notNull()
 			.references(() => profile.id, { onDelete: "cascade" }),
-		language: text(),
+		language: text().$type<ContentLanguage>(),
 		acceptedAt: createCreatedAtColumn(),
 	},
 	(table) => [
 		primaryKey({ columns: [table.revisionId, table.profileId] }),
 		index("realm_rule_acceptance_profile_idx").on(table.profileId, table.acceptedAt.desc()),
+		check(
+			"realm_rule_acceptance_language_check",
+			sql`${table.language} is null or ${table.language} in ('zh', 'en')`,
+		),
 	],
 );
 

@@ -20,7 +20,7 @@ import {
 } from "../../database/schema";
 import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
-import { DefaultLanguage } from "../../database/schema/contract-values";
+import { DefaultContentLanguage } from "../../database/schema/contract-values";
 import { CollectionNotFound } from "./errors";
 import { CollectionDetailResponse } from "../schema/response";
 import { presentImageAsset } from "../../units/service";
@@ -59,7 +59,7 @@ export async function ensureFavorites(ownerId: string) {
 			});
 			await tx.insert(unitLocalization).values({
 				unitId: created.id,
-				language: DefaultLanguage,
+				language: DefaultContentLanguage,
 				title: "Favorites",
 			});
 			await tx.insert(unitAccessBinding).values({

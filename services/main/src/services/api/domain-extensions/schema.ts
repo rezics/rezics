@@ -8,7 +8,7 @@ import {
 import { type Static, Type } from "@sinclair/typebox";
 import { t } from "elysia";
 
-import { DateTime, FractionalPosition, LanguageTag, LocalizationInput, Uuid } from "../schema";
+import { DateTime, FractionalPosition, ContentLanguage, LocalizationInput, Uuid } from "../schema";
 import { ImageAssetResponse } from "../schema/response";
 
 // Exact models are registered by the Zone route plugin. References keep one
@@ -77,7 +77,7 @@ export const CreateZoneBody = t.Object(
 	{ additionalProperties: false },
 );
 export const ZoneParams = t.Object({ zoneId: Uuid });
-export const ZoneDetailQuery = t.Object({ language: t.Optional(LanguageTag) });
+export const ZoneDetailQuery = t.Object({ language: t.Optional(ContentLanguage) });
 export const ZonePageParams = t.Object({
 	zoneId: Uuid,
 	slug: t.String({ minLength: 1, maxLength: 100, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
@@ -140,13 +140,13 @@ export const SystemRequirementListResponse = t.Object({
 
 export const ZoneResponse = t.Object({
 	id: Uuid,
-	language: t.Nullable(t.String()),
+	language: t.Nullable(ContentLanguage),
 	avatar: ImageAssetResponse,
 	banner: ImageAssetResponse,
 	cover: ImageAssetResponse,
 	localizations: t.Array(
 		t.Object({
-			language: t.String(),
+			language: ContentLanguage,
 			title: t.Nullable(t.String()),
 			summary: t.Nullable(t.String()),
 			avatar: ImageAssetResponse,

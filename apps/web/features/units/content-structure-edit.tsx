@@ -1,5 +1,7 @@
 "use client";
 
+import { toContentLanguage } from "@rezics/i18n";
+
 import {
 	type GetApiUnitsBookByUnitIdContentStructureNodesStatus200,
 	type PostApiUnitsBookByUnitIdContentStructureNodesOptions,
@@ -44,7 +46,7 @@ export function ContentStructureEdit({ bookId }: { bookId: string }) {
 }
 
 function ContentStructureEditContent({ bookId }: { bookId: string }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["create", "engagement", "errors", "ui", "units"]);
 	const book = useGetApiUnitsByTypeByUnitId({ path: { type: "book", unitId: bookId } });
 	if (book.isPending) return <QueryPending />;
 	if (book.isError) return <QueryFailure error={book.error} retry={() => void book.refetch()} />;
@@ -59,7 +61,7 @@ function ContentStructureEditContent({ bookId }: { bookId: string }) {
 }
 
 function BookContentStructureWorkspace({ bookId }: { bookId: string }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["create", "engagement", "errors", "ui", "units"]);
 	const queryClient = useQueryClient();
 	const tree = useGetApiUnitsBookByUnitIdContentStructureNodes({
 		path: { unitId: bookId },
@@ -140,7 +142,7 @@ function ContentCreateForm({
 	error: unknown;
 	pending: boolean;
 }) {
-	const { t, locale } = useTranslation({ suspense: true });
+	const { t, locale } = useTranslation(["create", "engagement", "errors", "ui", "units"]);
 	const [kind, setKind] = useState<"chapter" | "group">("chapter");
 	const [content, setContent] = useState<PortableTextValue>([]);
 	const [editorKey, setEditorKey] = useState(0);
@@ -154,7 +156,7 @@ function ContentCreateForm({
 				path: { unitId: bookId },
 				body: {
 					title: String(form.get("title") ?? "").trim(),
-					language: locale.target,
+					language: toContentLanguage(locale.target),
 					...(parentId ? { parentId } : {}),
 					...(kind === "chapter"
 						? {
@@ -302,7 +304,7 @@ function ContentStructureEditorRow({
 	onRename: (node: ContentStructureNode, title: string) => Promise<void>;
 	onMove: (nodeId: string, parentId: string | null) => Promise<void>;
 }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["create", "engagement", "errors", "ui", "units"]);
 	const [renaming, setRenaming] = useState(false);
 	const [moving, setMoving] = useState(false);
 	const validTargets = new Set(

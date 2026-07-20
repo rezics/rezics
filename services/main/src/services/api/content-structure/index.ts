@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
 import Elysia from "elysia";
+import type { ContentLanguage } from "@rezics/i18n";
 
 import { isContentStructureNodeReadable } from "../../authorization/content-structure/policy";
 import session, { resolveIdentity } from "../../auth/session";
@@ -46,7 +47,7 @@ const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 
 function toContentStructureNodeResponse(
 	node: typeof contentStructureNode.$inferSelect,
-	language: string,
+	language: ContentLanguage,
 	title: string,
 	contentKind: "chapter" | "chapter_group",
 ) {

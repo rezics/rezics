@@ -4,7 +4,7 @@ import { useTranslation } from "@/i18n/client";
 import { getErrorText } from "@/i18n/errors";
 
 export function RequestFailure({ error, fallback }: { error: unknown; fallback?: string }) {
-	const { t } = useTranslation({ suspense: true });
+	const { t } = useTranslation(["betterAuthErrorCodes", "errorCodes", "errors", "state"]);
 	if (!error) return null;
 	return (
 		<p className="text-destructive text-sm" role="alert">

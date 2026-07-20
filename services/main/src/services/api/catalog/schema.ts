@@ -5,7 +5,7 @@ import {
 	EntityAssociationPolicyModeValues,
 	UnitKindValues,
 } from "../../database/schema/contract-values";
-import { FractionalPosition, LanguageTag, LocalizationInput, Uuid } from "../schema";
+import { FractionalPosition, ContentLanguage, LocalizationInput, Uuid } from "../schema";
 import { UnitType } from "../units/schema";
 
 export const CreateCatalogUnitBody = t.Object(
@@ -19,15 +19,15 @@ export type CreateCatalogUnitBody = Static<typeof CreateCatalogUnitBody>;
 
 export const ListEntityEntriesQuery = t.Object({
 	kind: t.Optional(t.String({ maxLength: 64 })),
-	language: t.Optional(LanguageTag),
+	language: t.Optional(ContentLanguage),
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 });
 export type ListEntityEntriesQuery = Static<typeof ListEntityEntriesQuery>;
 
-export const EntityDetailQuery = t.Object({ language: t.Optional(LanguageTag) });
+export const EntityDetailQuery = t.Object({ language: t.Optional(ContentLanguage) });
 export type EntityDetailQuery = Static<typeof EntityDetailQuery>;
 
-export const EntityLocalizationParams = t.Object({ unitId: Uuid, language: LanguageTag });
+export const EntityLocalizationParams = t.Object({ unitId: Uuid, language: ContentLanguage });
 export type EntityLocalizationParams = Static<typeof EntityLocalizationParams>;
 
 export const ListTagsQuery = t.Object({
@@ -89,7 +89,7 @@ export type TagUnitBody = Static<typeof TagUnitBody>;
 export const AddUnitAliasBody = t.Object(
 	{
 		term: t.String({ minLength: 1, maxLength: 500 }),
-		language: t.Optional(LanguageTag),
+		language: t.Optional(ContentLanguage),
 		kind: t.Optional(t.Union(AliasKindValues.map((value) => t.Literal(value)))),
 	},
 	{ additionalProperties: false },
