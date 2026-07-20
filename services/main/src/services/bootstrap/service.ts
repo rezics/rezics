@@ -547,7 +547,7 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 				realmId: OfficialRealmManifest.id,
 				unitId: value.id,
 				status: "visible",
-				locked: false,
+				postTargetingLocked: false,
 				createdAt,
 				updatedAt: createdAt,
 			})

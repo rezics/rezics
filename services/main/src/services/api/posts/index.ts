@@ -24,6 +24,13 @@ import { fractionalPositionAt } from "../../ordering/position";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
+import {
+	ensurePostMountTargetingAllowed,
+	ensureReplyPostTargetingAllowed,
+	ensureSubjectPostTargetingAllowed,
+	findPostTargetingLock,
+	getPostTargetingLockedUnitIds,
+} from "../../posts/targeting";
 import { getPublisherSummariesByUnitIds, type UnitPublisherSummary } from "../../units/status";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
 import {
@@ -36,6 +43,7 @@ import {
 import {
 	CreateReplyBody,
 	CreatePostBody,
+	GetPostQuery,
 	ListRepliesQuery,
 	ListPostsQuery,
 	PostParams,
@@ -49,7 +57,6 @@ import {
 import {
 	ParentReplyNotFound,
 	PostLocalizationNotFound,
-	PostLocked,
 	PostNotFound,
 	PostScoreDuplicate,
 	PostScoreNotFound,
@@ -64,12 +71,6 @@ const UnitMutationForbiddenResponse = toApiErrorResponse([
 ]);
 const ordinaryPostKind = sql<"post" | "reply">`${post.kind}::text`;
 
-const primaryRealmId = sql<string | null>`(
-	select rc.realm_id from realm_unit rc
-	where rc.unit_id = ${post.id}
-		and rc.status = 'visible'
-	order by rc.created_at, rc.realm_id limit 1
-)`;
 const replyCount = sql<unknown>`coalesce(case when ${post.kind} = 'post'::post_kind
 	then ${postReplyStat.undeletedDescendantCount}
 	else ${postReplyStat.undeletedDirectCount} end, 0)`;
@@ -79,7 +80,6 @@ function toReplyResponse<
 		id: string;
 		rootPostId: string;
 		parentPostId: string | null;
-		contextRealmId: string | null;
 		depth: number;
 		body: unknown;
 		moderationStatus: string;
@@ -96,7 +96,6 @@ function toReplyResponse<
 		publishers: [...publishers],
 		rootPostId: row.rootPostId,
 		parentPostId: row.parentPostId,
-		contextRealmId: row.contextRealmId,
 		depth: row.depth,
 		body: row.deletedAt ? { ...body, content: [] } : body,
 		status: row.deletedAt ? "deleted" : row.moderationStatus,
@@ -110,7 +109,6 @@ const replySelection = {
 	id: postReply.postId,
 	rootPostId: postReply.rootPostId,
 	parentPostId: postReply.parentPostId,
-	contextRealmId: postReply.contextRealmId,
 	depth: postReply.depth,
 	body: unitLocalization.content,
 	moderationStatus: unit.moderationStatus,
@@ -224,7 +222,6 @@ export default new Elysia()
 						.select({
 							id: post.id,
 							postKind: ordinaryPostKind,
-							realmId: primaryRealmId,
 							subjectId: post.subjectUnitId,
 							rootPostId: postReply.rootPostId,
 							parentPostId: postReply.parentPostId,
@@ -269,6 +266,7 @@ export default new Elysia()
 					return {
 						items: rows.map((item) => ({
 							...item,
+							realmId: query.realmId ?? null,
 							publishers: publishers.get(item.id) ?? [],
 							replyCount: toSafeInteger(item.replyCount, "reply count"),
 							body: toPortableTextResponse(item.body),
@@ -301,6 +299,11 @@ export default new Elysia()
 							publishedAt: new Date(),
 							statusActor: { kind: "profile", profileId: profile.unitId },
 						});
+						await ensureSubjectPostTargetingAllowed(tx, {
+							sourcePostId: created.id,
+							subjectUnitId: body.subjectId,
+							...(body.realmId ? { realmId: body.realmId } : {}),
+						});
 						await tx.insert(post).values({
 							id: created.id,
 							subjectUnitId: body.subjectId,
@@ -320,10 +323,15 @@ export default new Elysia()
 							scope: [],
 							grantedByProfileId: profile.unitId,
 						});
-						if (body.realmId)
+						if (body.realmId) {
+							await ensurePostMountTargetingAllowed(tx, {
+								postId: created.id,
+								realmId: body.realmId,
+							});
 							await tx
 								.insert(realmUnit)
 								.values({ realmId: body.realmId, unitId: created.id });
+						}
 						await recordUnitRevision(tx, {
 							unitId: created.id,
 							actorProfileId: profile.unitId,
@@ -348,6 +356,7 @@ export default new Elysia()
 						]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"RealmRulesAcceptanceRequired",
+							"PostTargetingLocked",
 						]),
 					},
 					detail: { summary: "Create post", tags: ["Posts"] },
@@ -355,7 +364,7 @@ export default new Elysia()
 			)
 			.get(
 				"/:postId",
-				async ({ params, request }) => {
+				async ({ params, query, request }) => {
 					const authorization = (await resolveIdentity(request.headers, "unit:read"))
 						.authorization;
 					await authorization.unit.ensureCanRead(
@@ -366,7 +375,6 @@ export default new Elysia()
 						.select({
 							id: post.id,
 							postKind: ordinaryPostKind,
-							realmId: primaryRealmId,
 							subjectId: post.subjectUnitId,
 							rootPostId: postReply.rootPostId,
 							parentPostId: postReply.parentPostId,
@@ -393,6 +401,9 @@ export default new Elysia()
 							and(
 								eq(post.id, params.postId),
 								sql`${post.kind} in ('post'::post_kind, 'reply'::post_kind)`,
+								query.realmId
+									? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible')`
+									: undefined,
 							),
 						)
 						.limit(1);
@@ -401,14 +412,28 @@ export default new Elysia()
 						(await getPublisherSummariesByUnitIds([row.id])).get(row.id) ?? [];
 					return {
 						...row,
+						realmId: query.realmId ?? null,
 						publishers,
 						replyCount: toSafeInteger(row.replyCount, "reply count"),
 						body: toPortableTextResponse(row.body),
-						capabilities: { canEdit: await authorization.unit.canUpdate(row.id) },
+						capabilities: {
+							canEdit: await authorization.unit.canUpdate(row.id),
+							canReply: !(await findPostTargetingLock(database, {
+								targets:
+									row.postKind === "reply" && row.rootPostId
+										? [
+												{ relation: "root", unitId: row.rootPostId },
+												{ relation: "parent", unitId: row.id },
+											]
+										: [{ relation: "root", unitId: row.id }],
+								...(query.realmId ? { realmId: query.realmId } : {}),
+							})),
+						},
 					};
 				},
 				{
 					params: PostParams,
+					query: GetPostQuery,
 					response: {
 						[StatusCodes.OK]: PostDetailResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
@@ -521,9 +546,10 @@ export default new Elysia()
 						params.postId,
 						() => new UnitNotFound("Post"),
 					);
-					await ensureRootPost(params.postId);
+					await ensureRootPost(params.postId, query.realmId);
 					const selection = await selectReplyTree({
 						rootPostId: params.postId,
+						...(query.realmId ? { realmId: query.realmId } : {}),
 						...(query.parentPostId ? { parentPostId: query.parentPostId } : {}),
 						...(query.cursor ? { cursor: query.cursor } : {}),
 						...(query.limit ? { limit: query.limit } : {}),
@@ -552,6 +578,10 @@ export default new Elysia()
 					const publishers = await getPublisherSummariesByUnitIds(
 						rows.map(({ id }) => id),
 					);
+					const lockedTargetIds = await getPostTargetingLockedUnitIds(database, {
+						targetUnitIds: [params.postId, ...rows.map(({ id }) => id)],
+						...(query.realmId ? { realmId: query.realmId } : {}),
+					});
 					const rowById = new Map(rows.map((row) => [row.id, row]));
 					return {
 						items: await Promise.all(
@@ -567,6 +597,9 @@ export default new Elysia()
 									childEndCursor: selected.childEndCursor,
 									capabilities: {
 										canEdit: await authorization.unit.canUpdate(row.id),
+										canReply:
+											!lockedTargetIds.has(row.rootPostId) &&
+											!lockedTargetIds.has(row.id),
 									},
 								};
 							}),
@@ -595,28 +628,15 @@ export default new Elysia()
 						params.postId,
 						() => new UnitNotFound("Post"),
 					);
-					await ensureRootPost(params.postId);
-					const [realm] = await database
-						.select({ id: realmUnit.realmId })
-						.from(realmUnit)
-						.where(
-							and(
-								eq(realmUnit.unitId, params.postId),
-								body.realmId ? eq(realmUnit.realmId, body.realmId) : undefined,
-							),
-						)
-						.orderBy(realmUnit.realmId)
-						.limit(1);
-					if (body.realmId && !realm) throw new UnitNotFound("Realm");
-					await authorization.realm.ensureParticipation(realm?.id, "post");
+					await ensureRootPost(params.postId, body.realmId);
+					await authorization.realm.ensureParticipation(body.realmId, "post");
 					const createdReply = await database.transaction(async (tx) => {
 						const [root] = await tx
-							.select({ locked: post.locked })
+							.select({ id: post.id })
 							.from(post)
 							.where(and(eq(post.id, params.postId), eq(post.kind, "post")))
 							.limit(1);
 						if (!root) throw new PostNotFound();
-						if (root.locked) throw new PostLocked();
 						let depth = 0;
 						let recipientUnitId = params.postId;
 						if (body.parentPostId) {
@@ -624,7 +644,6 @@ export default new Elysia()
 								.select({
 									rootPostId: postReply.rootPostId,
 									depth: postReply.depth,
-									locked: post.locked,
 								})
 								.from(postReply)
 								.innerJoin(post, eq(post.id, postReply.postId))
@@ -633,12 +652,14 @@ export default new Elysia()
 									and(
 										eq(postReply.postId, body.parentPostId),
 										isNull(unit.deletedAt),
+										body.realmId
+											? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${postReply.postId} and rc.realm_id = ${body.realmId} and rc.status = 'visible')`
+											: undefined,
 									),
 								)
 								.limit(1);
 							if (!parent || parent.rootPostId !== params.postId)
 								throw new ParentReplyNotFound();
-							if (parent.locked) throw new PostLocked();
 							if (parent.depth >= 64) throw new ReplyDepthExceeded();
 							depth = parent.depth + 1;
 							recipientUnitId = body.parentPostId;
@@ -650,6 +671,12 @@ export default new Elysia()
 							publishedAt: new Date(),
 							statusActor: { kind: "profile", profileId: profile.unitId },
 						});
+						await ensureReplyPostTargetingAllowed(tx, {
+							sourcePostId: created.id,
+							rootPostId: params.postId,
+							parentPostId: body.parentPostId,
+							...(body.realmId ? { realmId: body.realmId } : {}),
+						});
 						await tx.insert(post).values({
 							id: created.id,
 							kind: "reply",
@@ -658,7 +685,6 @@ export default new Elysia()
 							postId: created.id,
 							rootPostId: params.postId,
 							parentPostId: body.parentPostId,
-							contextRealmId: realm?.id,
 							depth,
 						});
 						await tx.insert(unitLocalization).values({
@@ -675,11 +701,16 @@ export default new Elysia()
 							scope: [],
 							grantedByProfileId: profile.unitId,
 						});
-						if (realm)
+						if (body.realmId) {
+							await ensurePostMountTargetingAllowed(tx, {
+								postId: created.id,
+								realmId: body.realmId,
+							});
 							await tx.insert(realmUnit).values({
-								realmId: realm.id,
+								realmId: body.realmId,
 								unitId: created.id,
 							});
+						}
 						await recordUnitRevision(tx, {
 							unitId: created.id,
 							actorProfileId: profile.unitId,
@@ -721,7 +752,6 @@ export default new Elysia()
 						[StatusCodes.OK]: IdResponse,
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 							"RealmCapabilityRequired",
-							"PostLocked",
 							"ReplyDepthExceeded",
 						]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
@@ -731,6 +761,7 @@ export default new Elysia()
 						]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"RealmRulesAcceptanceRequired",
+							"PostTargetingLocked",
 						]),
 					},
 					detail: { summary: "Create reply post", tags: ["Posts"] },
@@ -739,18 +770,10 @@ export default new Elysia()
 			.patch(
 				"/:replyPostId",
 				async ({ params, profile, authorization, body }) => {
-					const row = await getReplyPost(params.postId, params.replyPostId);
-					if (!(await authorization.unit.canUpdate(params.replyPostId))) {
-						if (row.contextRealmId)
-							await authorization.realm.ensureCapability(
-								row.contextRealmId,
-								"realm.units.moderate",
-							);
-						else
-							await authorization.unit.ensureCanUpdate(params.replyPostId, [
-								["localizations"],
-							]);
-					}
+					await getReplyPost(params.postId, params.replyPostId);
+					await authorization.unit.ensureCanUpdate(params.replyPostId, [
+						["localizations"],
+					]);
 					await authorization.unit.ensureOperationAllowed(params.replyPostId, [
 						"localizations",
 					]);
@@ -784,7 +807,6 @@ export default new Elysia()
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 							"UnitPermissionForbidden",
 							"UnitProtected",
-							"RealmCapabilityRequired",
 						]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"ReplyPostNotFound",
@@ -798,15 +820,8 @@ export default new Elysia()
 			.delete(
 				"/:replyPostId",
 				async ({ params, profile, authorization }) => {
-					const row = await getReplyPost(params.postId, params.replyPostId);
-					if (!(await authorization.unit.canUpdate(params.replyPostId))) {
-						if (row.contextRealmId)
-							await authorization.realm.ensureCapability(
-								row.contextRealmId,
-								"realm.units.moderate",
-							);
-						else await authorization.unit.ensure(params.replyPostId, "unit.delete");
-					}
+					await getReplyPost(params.postId, params.replyPostId);
+					await authorization.unit.ensure(params.replyPostId, "unit.delete");
 					await authorization.unit.ensureOperationAllowed(params.replyPostId, ["unit"]);
 					await database.transaction(async (tx) => {
 						await tx
@@ -826,10 +841,7 @@ export default new Elysia()
 					params: ReplyParams,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
-						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
-							"UnitPermissionForbidden",
-							"RealmCapabilityRequired",
-						]),
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["UnitPermissionForbidden"]),
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 							"ReplyPostNotFound",
 							"UnitNotFound",
@@ -846,9 +858,7 @@ export default new Elysia()
 
 async function getReplyPost(rootPostId: string, postId: string) {
 	const [row] = await database
-		.select({
-			contextRealmId: postReply.contextRealmId,
-		})
+		.select({ postId: postReply.postId })
 		.from(postReply)
 		.innerJoin(unit, eq(unit.id, postReply.postId))
 		.where(
@@ -863,12 +873,21 @@ async function getReplyPost(rootPostId: string, postId: string) {
 	return row;
 }
 
-async function ensureRootPost(postId: string) {
+async function ensureRootPost(postId: string, realmId?: string) {
 	const [row] = await database
 		.select({ id: post.id })
 		.from(post)
 		.innerJoin(unit, eq(unit.id, post.id))
-		.where(and(eq(post.id, postId), eq(post.kind, "post"), isNull(unit.deletedAt)))
+		.where(
+			and(
+				eq(post.id, postId),
+				eq(post.kind, "post"),
+				isNull(unit.deletedAt),
+				realmId
+					? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${realmId} and rc.status = 'visible')`
+					: undefined,
+			),
+		)
 		.limit(1);
 	if (!row) throw new PostNotFound();
 }

@@ -416,6 +416,7 @@ export default new Elysia({ prefix: "/governance" })
 					"ModerationActionNoEffect",
 					"ModerationReversalUnavailable",
 					"ModerationIdempotencyConflict",
+					"PostTargetingLocked",
 				]),
 			},
 			detail: { summary: "Apply moderation action", tags: ["Governance"] },

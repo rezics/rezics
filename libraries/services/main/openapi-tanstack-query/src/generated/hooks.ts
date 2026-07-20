@@ -893,6 +893,7 @@ import type {
 	PostApiUnitsBookByUnitIdContentStructureNodesStatus200,
 	PostApiUnitsBookByUnitIdContentStructureNodesStatus403,
 	PostApiUnitsBookByUnitIdContentStructureNodesStatus404,
+	PostApiUnitsBookByUnitIdContentStructureNodesStatus409,
 	PostApiUnitsBookByUnitIdContentStructureNodesStatus422,
 	PostApiUnitsBookByUnitIdContentStructureNodesStatus500,
 	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
@@ -16446,6 +16447,7 @@ export function postApiUnitsBookByUnitIdContentStructureNodesMutationOptions<TCo
 		ResponseErrorConfig<
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus500
 		>,
@@ -16476,6 +16478,7 @@ export function usePostApiUnitsBookByUnitIdContentStructureNodes<TContext>(
 			ResponseErrorConfig<
 				| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
 				| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
+				| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
 				| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
 				| PostApiUnitsBookByUnitIdContentStructureNodesStatus500
 			>,
@@ -16497,6 +16500,7 @@ export function usePostApiUnitsBookByUnitIdContentStructureNodes<TContext>(
 		ResponseErrorConfig<
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus500
 		>,
@@ -16509,6 +16513,7 @@ export function usePostApiUnitsBookByUnitIdContentStructureNodes<TContext>(
 		ResponseErrorConfig<
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus500
 		>,
@@ -16526,6 +16531,7 @@ export function usePostApiUnitsBookByUnitIdContentStructureNodes<TContext>(
 		ResponseErrorConfig<
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus500
 		>,
@@ -18554,16 +18560,17 @@ export function usePostApiReviews<TContext>(
 
 export const getApiReviewsByReviewIdQueryKey = ({
 	path,
+	query,
 }: Omit<GetApiReviewsByReviewIdOptions, "headers">) =>
-	[{ url: "/api/reviews/:reviewId", params: path }] as const;
+	[{ url: "/api/reviews/:reviewId", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiReviewsByReviewIdQueryKey = ReturnType<typeof getApiReviewsByReviewIdQueryKey>;
 
 export function getApiReviewsByReviewIdQueryOptions(
-	{ path }: GetApiReviewsByReviewIdOptions,
+	{ path, query }: GetApiReviewsByReviewIdOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiReviewsByReviewIdQueryKey({ path });
+	const queryKey = getApiReviewsByReviewIdQueryKey({ path, query });
 	return queryOptions<
 		GetApiReviewsByReviewIdStatus200,
 		ResponseErrorConfig<
@@ -18579,6 +18586,7 @@ export function getApiReviewsByReviewIdQueryOptions(
 			const { data } = await getApiReviewsByReviewId({
 				...config,
 				path,
+				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -18598,9 +18606,13 @@ export function useGetApiReviewsByReviewId<
 >(
 	{
 		path,
+		query,
 	}: {
 		path:
 			GetApiReviewsByReviewIdOptions["path"] | (() => GetApiReviewsByReviewIdOptions["path"]);
+		query?:
+			| GetApiReviewsByReviewIdOptions["query"]
+			| (() => GetApiReviewsByReviewIdOptions["query"]);
 	},
 	options: {
 		query?: Partial<
@@ -18621,7 +18633,10 @@ export function useGetApiReviewsByReviewId<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
 	const queryKey = resolvedOptions?.queryKey ?? getApiReviewsByReviewIdQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
@@ -20568,16 +20583,17 @@ export function usePostApiPosts<TContext>(
 
 export const getApiPostsByPostIdQueryKey = ({
 	path,
+	query,
 }: Omit<GetApiPostsByPostIdOptions, "headers">) =>
-	[{ url: "/api/posts/:postId", params: path }] as const;
+	[{ url: "/api/posts/:postId", params: path }, ...(query ? [query] : [])] as const;
 
 type GetApiPostsByPostIdQueryKey = ReturnType<typeof getApiPostsByPostIdQueryKey>;
 
 export function getApiPostsByPostIdQueryOptions(
-	{ path }: GetApiPostsByPostIdOptions,
+	{ path, query }: GetApiPostsByPostIdOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiPostsByPostIdQueryKey({ path });
+	const queryKey = getApiPostsByPostIdQueryKey({ path, query });
 	return queryOptions<
 		GetApiPostsByPostIdStatus200,
 		ResponseErrorConfig<
@@ -20593,6 +20609,7 @@ export function getApiPostsByPostIdQueryOptions(
 			const { data } = await getApiPostsByPostId({
 				...config,
 				path,
+				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -20612,7 +20629,11 @@ export function useGetApiPostsByPostId<
 >(
 	{
 		path,
-	}: { path: GetApiPostsByPostIdOptions["path"] | (() => GetApiPostsByPostIdOptions["path"]) },
+		query,
+	}: {
+		path: GetApiPostsByPostIdOptions["path"] | (() => GetApiPostsByPostIdOptions["path"]);
+		query?: GetApiPostsByPostIdOptions["query"] | (() => GetApiPostsByPostIdOptions["query"]);
+	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
@@ -20632,7 +20653,10 @@ export function useGetApiPostsByPostId<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
 	const queryKey = resolvedOptions?.queryKey ?? getApiPostsByPostIdQueryKey(resolvedParams);
 
 	const queryResult = useQuery(

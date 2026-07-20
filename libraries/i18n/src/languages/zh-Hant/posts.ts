@@ -9,6 +9,7 @@ export default {
 	replies: "回覆帖",
 	replyPost: "回覆帖",
 	signInToReply: "登錄後回覆",
+	replyingLocked: "此對象目前禁止新的回覆帖。",
 	noReplies: "還沒有回覆帖。",
 	replyBody: "回覆內容",
 	reply: "回覆",

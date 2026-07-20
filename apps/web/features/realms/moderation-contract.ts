@@ -32,9 +32,13 @@ const StateCommands = {
 
 export function getRealmModerationCommands(
 	status: RealmModerationStatus,
-	locked: boolean,
+	postTargetingLocked: boolean,
 ): readonly RealmModerationCommand[] {
-	return [...StateCommands[status], locked ? "unlock" : "lock", "note"];
+	return [
+		...StateCommands[status],
+		postTargetingLocked ? "unlock_post_targeting" : "lock_post_targeting",
+		"note",
+	];
 }
 
 export function hasAuthoredAnnotation(value: PortableTextValue): boolean {

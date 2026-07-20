@@ -191,8 +191,8 @@ export const realmUnit = pgTable(
 		unitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
-		/** Realm-local moderation state; this is not a Unit field-edit lock. */
-		locked: boolean().default(false).notNull(),
+		/** Rejects new Post relations targeting this Unit in this Realm. */
+		postTargetingLocked: boolean().default(false).notNull(),
 		status: realmUnitStatus().default("visible").notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -205,7 +205,7 @@ export const realmUnit = pgTable(
 			table.createdAt.desc(),
 			table.unitId,
 		),
-		index("realm_unit_unit_idx").on(table.unitId),
+		index("realm_unit_unit_realm_idx").on(table.unitId, table.realmId),
 		check("realm_unit_not_self_check", sql`${table.realmId} <> ${table.unitId}`),
 	],
 );

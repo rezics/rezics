@@ -8,6 +8,10 @@ export const postCreateSearchParams = createSearchParamsCache({
 	realmId: parseAsString.withOptions(urlStateOptions),
 });
 
+export const postDetailSearchParams = createSearchParamsCache({
+	realmId: parseAsString.withOptions(urlStateOptions),
+});
+
 export const historyCompareSearchParams = createSearchParamsCache({
 	from: parseAsString.withOptions(urlStateOptions),
 	to: parseAsString.withOptions(urlStateOptions),

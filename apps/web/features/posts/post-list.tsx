@@ -38,6 +38,7 @@ import { readPortableText } from "@/lib/block";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import type { FeedContentKind } from "@/lib/search-params";
 import { firstPublisher, PublisherLinks } from "./publisher-list";
+import { postHref } from "./url";
 
 type FeedSort = "best" | "hot" | "new" | "top" | "rising";
 export type FeedPost = GetApiFeedStatus200["items"][number];
@@ -153,6 +154,7 @@ export function PostList({
 				<PostListItem
 					key={post.id}
 					post={post}
+					realmId={realmId}
 					canExclude={Boolean(session)}
 					onHiddenChange={(value) => setItemHidden(post.id, value)}
 				/>
@@ -251,10 +253,12 @@ function FeedSkeleton() {
 
 export function PostListItem({
 	post,
+	realmId: requestedRealmId,
 	canExclude = false,
 	onHiddenChange,
 }: {
 	post: FeedPost;
+	realmId?: string;
 	canExclude?: boolean;
 	onHiddenChange?: (hidden: boolean) => void;
 }) {
@@ -270,6 +274,7 @@ export function PostListItem({
 		},
 	});
 	const reason = recommendationReasonLabel(post.recommendationReason, t.feed);
+	const realmId = requestedRealmId ?? post.realmId ?? undefined;
 	const hasCover = Boolean(post.subject?.cover);
 	const markNotInterested = () => {
 		onHiddenChange?.(true);
@@ -334,12 +339,12 @@ export function PostListItem({
 							{post.postKind === "reply" ? <span>· {t.posts.replyPost}</span> : null}
 							<span>·</span>
 							<span>{formatRelativeTime(post.createdAt)}</span>
-							{post.realmId && (
+							{realmId && (
 								<>
 									<span>·</span>
 									<Link
 										className="inline-flex min-h-6 items-center text-foreground font-medium hover:underline"
-										href={`/realms/${post.realmId}`}
+										href={`/realms/${realmId}`}
 									>
 										r/community
 									</Link>
@@ -379,12 +384,16 @@ export function PostListItem({
 						{post.replyContext && (
 							<Link
 								className="text-muted-foreground mt-2 flex min-h-6 items-center truncate border-s-2 ps-2 text-xs hover:text-foreground"
-								href={`/posts/${post.replyContext.rootPostId}`}
+								href={postHref(post.replyContext.rootPostId, realmId)}
 							>
 								{t.feed.replyingIn} {post.replyContext.title ?? t.posts.untitled}
 							</Link>
 						)}
-						<Link href={`/posts/${post.id}`} className="block" onClick={trackOpen}>
+						<Link
+							href={postHref(post.id, realmId)}
+							className="block"
+							onClick={trackOpen}
+						>
 							<h2 className="font-heading mt-2 text-[1.05rem] font-black leading-snug">
 								{post.postKind === "reply"
 									? t.posts.replyPost
@@ -420,7 +429,7 @@ export function PostListItem({
 								size="sm"
 								variant="ghost"
 							>
-								<Link href={`/posts/${post.id}`} onClick={trackOpen}>
+								<Link href={postHref(post.id, realmId)} onClick={trackOpen}>
 									<MessageCircle aria-hidden data-icon="inline-start" />
 									{post.replyCount}
 								</Link>

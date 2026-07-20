@@ -21,6 +21,8 @@ export type CreatePostBody = Static<typeof CreatePostBody>;
 
 export const PostParams = t.Object({ postId: Uuid });
 export type PostParams = Static<typeof PostParams>;
+export const GetPostQuery = t.Object({ realmId: t.Optional(Uuid) });
+export type GetPostQuery = Static<typeof GetPostQuery>;
 
 const PostScoreInput = t.Object({ scoreId: Uuid }, { additionalProperties: false });
 export const ReplacePostScoresBody = t.Array(PostScoreInput, { maxItems: 5 });
@@ -47,6 +49,7 @@ export const UpdatePostBody = t.Object({
 export type UpdatePostBody = Static<typeof UpdatePostBody>;
 
 export const ListRepliesQuery = t.Object({
+	realmId: t.Optional(Uuid),
 	parentPostId: t.Optional(Uuid),
 	cursor: t.Optional(t.String({ maxLength: 512 })),
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 25 })),

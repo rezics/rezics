@@ -22,6 +22,8 @@ export type CreateReviewBody = Static<typeof CreateReviewBody>;
 
 export const ReviewParams = t.Object({ reviewId: Uuid });
 export type ReviewParams = Static<typeof ReviewParams>;
+export const GetReviewQuery = t.Object({ realmId: t.Optional(Uuid) });
+export type GetReviewQuery = Static<typeof GetReviewQuery>;
 
 export const UpdateReviewBody = t.Object({
 	language: ContentLanguage,

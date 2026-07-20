@@ -62,6 +62,8 @@ export const unit = pgTable(
 		aiDisclosure: aiDisclosure().default("unknown").notNull(),
 		license: text(),
 		moderationStatus: moderationStatus().default("approved").notNull(),
+		/** Rejects creation of new Post relations that target this Unit. */
+		postTargetingLocked: boolean().default(false).notNull(),
 		publishedAt: createTimestampMsColumn(),
 		deletedAt: createTimestampMsColumn(),
 		createdAt: createCreatedAtColumn(),

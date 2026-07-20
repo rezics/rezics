@@ -980,7 +980,6 @@ async function seedContent(
 			id: value.id,
 			subjectUnitId: index % 4 === 0 ? null : itemAt(catalog.works, index * 11).id,
 			kind: "post" as const,
-			locked: index % 29 === 0,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
@@ -991,7 +990,6 @@ async function seedContent(
 			id: value.id,
 			subjectUnitId: itemAt(catalog.works, index * 13).id,
 			kind: "review" as const,
-			locked: index % 37 === 0,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
@@ -1002,7 +1000,6 @@ async function seedContent(
 			id: value.id,
 			subjectUnitId: itemAt(catalog.books, index).id,
 			kind: "chapter" as const,
-			locked: false,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
@@ -1013,7 +1010,6 @@ async function seedContent(
 			id: value.id,
 			subjectUnitId: itemAt(catalog.books, index).id,
 			kind: "chapter_group" as const,
-			locked: false,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
@@ -1024,7 +1020,6 @@ async function seedContent(
 			id: value.id,
 			subjectUnitId: null,
 			kind: "reply" as const,
-			locked: false,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
@@ -1036,7 +1031,6 @@ async function seedContent(
 		postId: value.id,
 		rootPostId: itemAt(rootPosts, index).id,
 		parentPostId: null,
-		contextRealmId: index % 3 === 0 ? itemAt(catalog.realms, index).id : null,
 		depth: 0,
 		createdAt: value.createdAt,
 	}));
@@ -1048,7 +1042,6 @@ async function seedContent(
 				postId: value.id,
 				rootPostId: parent.rootPostId,
 				parentPostId: parent.postId,
-				contextRealmId: parent.contextRealmId,
 				depth: 1,
 				createdAt: value.createdAt,
 			};
@@ -1325,7 +1318,7 @@ async function seedStructure(
 			return {
 				realmId: realmUnit.id,
 				unitId: target.id,
-				locked: index % 19 === 0,
+				postTargetingLocked: index % 19 === 0,
 				status: itemAt(
 					["visible", "visible", "visible", "visible", "pending"] as const,
 					index,
@@ -1335,7 +1328,15 @@ async function seedStructure(
 			};
 		}),
 	);
-	await writeBatches(realmUnitRows, (batch) => tx.insert(realmUnit).values(batch));
+	await writeBatches(
+		realmUnitRows.map((row) => ({ ...row, postTargetingLocked: false })),
+		(batch) => tx.insert(realmUnit).values(batch),
+	);
+	for (const row of realmUnitRows.filter((candidate) => candidate.postTargetingLocked))
+		await tx
+			.update(realmUnit)
+			.set({ postTargetingLocked: true })
+			.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.unitId)));
 
 	const capabilities = [
 		"realm.contribute",
@@ -1896,8 +1897,8 @@ async function seedGovernance(
 		"approve",
 		"remove",
 		"restore",
-		"lock",
-		"unlock",
+		"lock_post_targeting",
+		"unlock_post_targeting",
 		"protect",
 		"unprotect",
 		"warning",
@@ -1921,8 +1922,18 @@ async function seedGovernance(
 					actorProfileId: actor.id,
 					kind,
 					resultingStatus: kind === "remove" ? ("removed" as const) : null,
-					previousLocked: kind === "lock" ? false : kind === "unlock" ? true : null,
-					resultingLocked: kind === "lock" ? true : kind === "unlock" ? false : null,
+					previousPostTargetingLocked:
+						kind === "lock_post_targeting"
+							? false
+							: kind === "unlock_post_targeting"
+								? true
+								: null,
+					resultingPostTargetingLocked:
+						kind === "lock_post_targeting"
+							? true
+							: kind === "unlock_post_targeting"
+								? false
+								: null,
 					reasonCode: "administrative" as const,
 					requestId: `seed-request-${position(index)}`,
 					idempotencyKey: `seed-action-${position(index)}`,

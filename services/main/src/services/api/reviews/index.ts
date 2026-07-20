@@ -18,6 +18,10 @@ import {
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
+import {
+	ensurePostMountTargetingAllowed,
+	ensureSubjectPostTargetingAllowed,
+} from "../../posts/targeting";
 import { getPublisherSummariesByUnitIds } from "../../units/status";
 import {
 	IdResponse,
@@ -34,6 +38,7 @@ import {
 } from "../schema/response";
 import {
 	CreateReviewBody,
+	GetReviewQuery,
 	ListReviewsQuery,
 	ReviewParams,
 	ScoreAggregateQuery,
@@ -52,13 +57,6 @@ const UnitMutationForbiddenResponse = toApiErrorResponse([
 	"UnitProtected",
 ]);
 
-const primaryRealmId = sql<string | null>`(
-	select rc.realm_id from realm_unit rc
-	where rc.unit_id = ${post.id}
-		and rc.status = 'visible'
-	order by rc.created_at, rc.realm_id limit 1
-)`;
-
 export default new Elysia()
 	.use(session)
 	.group("/reviews", (app) =>
@@ -70,7 +68,6 @@ export default new Elysia()
 						.select({
 							id: post.id,
 							targetId: post.subjectUnitId,
-							realmId: primaryRealmId,
 							title: unitLocalization.title,
 							summary: unitLocalization.summary,
 							createdAt: unit.createdAt,
@@ -108,6 +105,7 @@ export default new Elysia()
 								? [
 										{
 											...item,
+											realmId: query.realmId ?? null,
 											targetId: item.targetId,
 											publishers: publishers.get(item.id) ?? [],
 										},
@@ -139,6 +137,11 @@ export default new Elysia()
 							publishedAt: new Date(),
 							statusActor: { kind: "profile", profileId: profile.unitId },
 						});
+						await ensureSubjectPostTargetingAllowed(tx, {
+							sourcePostId: created.id,
+							subjectUnitId: body.targetId,
+							...(body.realmId ? { realmId: body.realmId } : {}),
+						});
 						await tx.insert(post).values({
 							id: created.id,
 							subjectUnitId: body.targetId,
@@ -160,10 +163,15 @@ export default new Elysia()
 							scope: [],
 							grantedByProfileId: profile.unitId,
 						});
-						if (body.realmId)
+						if (body.realmId) {
+							await ensurePostMountTargetingAllowed(tx, {
+								postId: created.id,
+								realmId: body.realmId,
+							});
 							await tx
 								.insert(realmUnit)
 								.values({ realmId: body.realmId, unitId: created.id });
+						}
 						await recordUnitRevision(tx, {
 							unitId: created.id,
 							actorProfileId: profile.unitId,
@@ -188,6 +196,7 @@ export default new Elysia()
 						]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"RealmRulesAcceptanceRequired",
+							"PostTargetingLocked",
 						]),
 					},
 					detail: { summary: "Create review", tags: ["Reviews"] },
@@ -195,7 +204,7 @@ export default new Elysia()
 			)
 			.get(
 				"/:reviewId",
-				async ({ params, request }) => {
+				async ({ params, query, request }) => {
 					const authorization = (await resolveIdentity(request.headers, "unit:read"))
 						.authorization;
 					await authorization.unit.ensureCanRead(
@@ -206,7 +215,6 @@ export default new Elysia()
 						.select({
 							id: post.id,
 							targetId: post.subjectUnitId,
-							realmId: primaryRealmId,
 							language: unitLocalization.language,
 							title: unitLocalization.title,
 							summary: unitLocalization.summary,
@@ -223,13 +231,22 @@ export default new Elysia()
 								isPrimaryUnitLocalization(unitLocalization.unitId),
 							),
 						)
-						.where(and(eq(post.id, params.reviewId), eq(post.kind, "review")))
+						.where(
+							and(
+								eq(post.id, params.reviewId),
+								eq(post.kind, "review"),
+								query.realmId
+									? sql`exists(select 1 from realm_unit rc where rc.unit_id = ${post.id} and rc.realm_id = ${query.realmId} and rc.status = 'visible')`
+									: undefined,
+							),
+						)
 						.limit(1);
 					if (!review?.targetId) throw new ReviewNotFound();
 					const publishers =
 						(await getPublisherSummariesByUnitIds([review.id])).get(review.id) ?? [];
 					return {
 						...review,
+						realmId: query.realmId ?? null,
 						publishers,
 						targetId: review.targetId,
 						body: review.body === null ? null : toPortableTextResponse(review.body),
@@ -240,6 +257,7 @@ export default new Elysia()
 				},
 				{
 					params: ReviewParams,
+					query: GetReviewQuery,
 					response: {
 						[StatusCodes.OK]: ReviewDetailResponse,
 						[StatusCodes.NOT_FOUND]: toApiErrorResponse([

@@ -24,8 +24,8 @@ const ActionsByTarget = {
 		"approve",
 		"remove",
 		"restore",
-		"lock",
-		"unlock",
+		"lock_post_targeting",
+		"unlock_post_targeting",
 		"protect",
 		"unprotect",
 		...SharedAdministrativeActions,
@@ -34,8 +34,6 @@ const ActionsByTarget = {
 		"approve",
 		"remove",
 		"restore",
-		"lock",
-		"unlock",
 		"protect",
 		"unprotect",
 		...SharedAdministrativeActions,
@@ -46,8 +44,8 @@ const ActionsByTarget = {
 		"hide",
 		"remove",
 		"restore",
-		"lock",
-		"unlock",
+		"lock_post_targeting",
+		"unlock_post_targeting",
 		...SharedAdministrativeActions,
 	],
 	realm_member: [
@@ -137,8 +135,11 @@ export function resolveRealmMemberState(
 	}
 }
 
-export function resolveLockState(current: boolean, action: "lock" | "unlock"): boolean {
-	const next = action === "lock";
+export function resolvePostTargetingLockState(
+	current: boolean,
+	action: "lock_post_targeting" | "unlock_post_targeting",
+): boolean {
+	const next = action === "lock_post_targeting";
 	if (current === next) throw new ModerationActionNoEffect();
 	return next;
 }

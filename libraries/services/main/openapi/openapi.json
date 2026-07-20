@@ -14607,7 +14607,7 @@
 					"FeedbackAlreadyResolved",
 					"PostNotFound",
 					"PostLocalizationNotFound",
-					"PostLocked",
+					"PostTargetingLocked",
 					"ReplyPostNotFound",
 					"ParentReplyNotFound",
 					"ReplyDepthExceeded",
@@ -16770,8 +16770,8 @@
 																					"hide",
 																					"remove",
 																					"restore",
-																					"lock",
-																					"unlock",
+																					"lock_post_targeting",
+																					"unlock_post_targeting",
 																					"protect",
 																					"unprotect",
 																					"warning",
@@ -30952,8 +30952,14 @@
 													{ "const": "hide", "type": "string" },
 													{ "const": "remove", "type": "string" },
 													{ "const": "restore", "type": "string" },
-													{ "const": "lock", "type": "string" },
-													{ "const": "unlock", "type": "string" },
+													{
+														"const": "lock_post_targeting",
+														"type": "string"
+													},
+													{
+														"const": "unlock_post_targeting",
+														"type": "string"
+													},
 													{ "const": "mute_member", "type": "string" },
 													{ "const": "remove_member", "type": "string" },
 													{ "const": "ban_member", "type": "string" },
@@ -32456,9 +32462,9 @@
 										"kind",
 										"previousState",
 										"resultingState",
-										"previousLocked",
+										"previousPostTargetingLocked",
 										"resultingStatus",
-										"resultingLocked",
+										"resultingPostTargetingLocked",
 										"reasonCode",
 										"reversesActionId",
 										"notes",
@@ -32477,7 +32483,7 @@
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
-										"previousLocked": {
+										"previousPostTargetingLocked": {
 											"nullable": true,
 											"anyOf": [{ "type": "boolean" }, { "type": "null" }]
 										},
@@ -32485,7 +32491,7 @@
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
-										"resultingLocked": {
+										"resultingPostTargetingLocked": {
 											"nullable": true,
 											"anyOf": [{ "type": "boolean" }, { "type": "null" }]
 										},
@@ -32635,7 +32641,8 @@
 														"ModerationTransitionInvalid",
 														"ModerationActionNoEffect",
 														"ModerationReversalUnavailable",
-														"ModerationIdempotencyConflict"
+														"ModerationIdempotencyConflict",
+														"PostTargetingLocked"
 													]
 												},
 												"message": { "type": "string" },
@@ -44109,6 +44116,7 @@
 										"contentRating",
 										"aiDisclosure",
 										"license",
+										"postTargetingLocked",
 										"publishedAt",
 										"publishers",
 										"createdAt",
@@ -44142,6 +44150,7 @@
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
+										"postTargetingLocked": { "type": "boolean" },
 										"publishedAt": {
 											"nullable": true,
 											"anyOf": [
@@ -45243,6 +45252,7 @@
 										"contentRating",
 										"aiDisclosure",
 										"license",
+										"postTargetingLocked",
 										"publishedAt",
 										"publishers",
 										"createdAt",
@@ -45276,6 +45286,7 @@
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
+										"postTargetingLocked": { "type": "boolean" },
 										"publishedAt": {
 											"nullable": true,
 											"anyOf": [
@@ -46476,6 +46487,7 @@
 										"contentRating",
 										"aiDisclosure",
 										"license",
+										"postTargetingLocked",
 										"publishedAt",
 										"publishers",
 										"createdAt",
@@ -46509,6 +46521,7 @@
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
+										"postTargetingLocked": { "type": "boolean" },
 										"publishedAt": {
 											"nullable": true,
 											"anyOf": [
@@ -47822,6 +47835,7 @@
 										"contentRating",
 										"aiDisclosure",
 										"license",
+										"postTargetingLocked",
 										"publishedAt",
 										"publishers",
 										"createdAt",
@@ -47855,6 +47869,7 @@
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
+										"postTargetingLocked": { "type": "boolean" },
 										"publishedAt": {
 											"nullable": true,
 											"anyOf": [
@@ -49006,6 +49021,7 @@
 										"contentRating",
 										"aiDisclosure",
 										"license",
+										"postTargetingLocked",
 										"publishedAt",
 										"publishers",
 										"createdAt",
@@ -49039,6 +49055,7 @@
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
+										"postTargetingLocked": { "type": "boolean" },
 										"publishedAt": {
 											"nullable": true,
 											"anyOf": [
@@ -50474,6 +50491,7 @@
 										"contentRating",
 										"aiDisclosure",
 										"license",
+										"postTargetingLocked",
 										"publishedAt",
 										"publishers",
 										"createdAt",
@@ -50507,6 +50525,7 @@
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
+										"postTargetingLocked": { "type": "boolean" },
 										"publishedAt": {
 											"nullable": true,
 											"anyOf": [
@@ -57943,6 +57962,33 @@
 													"default": "UnitNotFound",
 													"type": "string",
 													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PostTargetingLocked",
+													"type": "string",
+													"enum": ["PostTargetingLocked"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -70337,7 +70383,10 @@
 												"code": {
 													"default": "RealmRulesAcceptanceRequired",
 													"type": "string",
-													"enum": ["RealmRulesAcceptanceRequired"]
+													"enum": [
+														"RealmRulesAcceptanceRequired",
+														"PostTargetingLocked"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -70378,6 +70427,12 @@
 						"name": "reviewId",
 						"in": "path",
 						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "realmId",
+						"in": "query",
+						"required": false,
 						"schema": { "format": "uuid", "type": "string" }
 					}
 				],
@@ -74154,7 +74209,10 @@
 												"code": {
 													"default": "RealmRulesAcceptanceRequired",
 													"type": "string",
-													"enum": ["RealmRulesAcceptanceRequired"]
+													"enum": [
+														"RealmRulesAcceptanceRequired",
+														"PostTargetingLocked"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -74195,6 +74253,12 @@
 						"name": "postId",
 						"in": "path",
 						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "realmId",
+						"in": "query",
+						"required": false,
 						"schema": { "format": "uuid", "type": "string" }
 					}
 				],
@@ -74585,8 +74649,11 @@
 										"updatedAt": { "format": "date-time", "type": "string" },
 										"capabilities": {
 											"type": "object",
-											"required": ["canEdit"],
-											"properties": { "canEdit": { "type": "boolean" } }
+											"required": ["canEdit", "canReply"],
+											"properties": {
+												"canEdit": { "type": "boolean" },
+												"canReply": { "type": "boolean" }
+											}
 										}
 									}
 								}
@@ -75145,6 +75212,12 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
+						"name": "realmId",
+						"in": "query",
+						"required": false,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
 						"name": "parentPostId",
 						"in": "query",
 						"required": false,
@@ -75190,7 +75263,6 @@
 													"publishers",
 													"rootPostId",
 													"parentPostId",
-													"contextRealmId",
 													"depth",
 													"body",
 													"status",
@@ -75260,13 +75332,6 @@
 														"type": "string"
 													},
 													"parentPostId": {
-														"nullable": true,
-														"anyOf": [
-															{ "format": "uuid", "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"contextRealmId": {
 														"nullable": true,
 														"anyOf": [
 															{ "format": "uuid", "type": "string" },
@@ -75603,9 +75668,10 @@
 													},
 													"capabilities": {
 														"type": "object",
-														"required": ["canEdit"],
+														"required": ["canEdit", "canReply"],
 														"properties": {
-															"canEdit": { "type": "boolean" }
+															"canEdit": { "type": "boolean" },
+															"canReply": { "type": "boolean" }
 														}
 													}
 												}
@@ -76006,7 +76072,6 @@
 													"type": "string",
 													"enum": [
 														"RealmCapabilityRequired",
-														"PostLocked",
 														"ReplyDepthExceeded"
 													]
 												},
@@ -76066,7 +76131,10 @@
 												"code": {
 													"default": "RealmRulesAcceptanceRequired",
 													"type": "string",
-													"enum": ["RealmRulesAcceptanceRequired"]
+													"enum": [
+														"RealmRulesAcceptanceRequired",
+														"PostTargetingLocked"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -76418,8 +76486,7 @@
 													"type": "string",
 													"enum": [
 														"UnitPermissionForbidden",
-														"UnitProtected",
-														"RealmCapabilityRequired"
+														"UnitProtected"
 													]
 												},
 												"message": { "type": "string" },
@@ -76528,10 +76595,7 @@
 												"code": {
 													"default": "UnitPermissionForbidden",
 													"type": "string",
-													"enum": [
-														"UnitPermissionForbidden",
-														"RealmCapabilityRequired"
-													]
+													"enum": ["UnitPermissionForbidden"]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -79998,7 +80062,7 @@
 													"unitKind",
 													"title",
 													"status",
-													"locked",
+													"postTargetingLocked",
 													"moderationStatus",
 													"createdAt",
 													"updatedAt"
@@ -80029,7 +80093,7 @@
 															"removed"
 														]
 													},
-													"locked": { "type": "boolean" },
+													"postTargetingLocked": { "type": "boolean" },
 													"moderationStatus": { "type": "string" },
 													"createdAt": {
 														"format": "date-time",
@@ -80147,8 +80211,8 @@
 													"actorName",
 													"previousState",
 													"resultingState",
-													"previousLocked",
-													"resultingLocked",
+													"previousPostTargetingLocked",
+													"resultingPostTargetingLocked",
 													"reasonCode",
 													"reversesActionId",
 													"notes",
@@ -80168,8 +80232,8 @@
 															"hide",
 															"remove",
 															"restore",
-															"lock",
-															"unlock",
+															"lock_post_targeting",
+															"unlock_post_targeting",
 															"protect",
 															"unprotect",
 															"warning",
@@ -80229,14 +80293,14 @@
 															{ "type": "null" }
 														]
 													},
-													"previousLocked": {
+													"previousPostTargetingLocked": {
 														"nullable": true,
 														"anyOf": [
 															{ "type": "boolean" },
 															{ "type": "null" }
 														]
 													},
-													"resultingLocked": {
+													"resultingPostTargetingLocked": {
 														"nullable": true,
 														"anyOf": [
 															{ "type": "boolean" },
@@ -80761,8 +80825,8 @@
 													"hide",
 													"remove",
 													"restore",
-													"lock",
-													"unlock"
+													"lock_post_targeting",
+													"unlock_post_targeting"
 												]
 											},
 											"annotation": {
@@ -81456,9 +81520,9 @@
 										"kind",
 										"previousState",
 										"resultingState",
-										"previousLocked",
+										"previousPostTargetingLocked",
 										"resultingStatus",
-										"resultingLocked",
+										"resultingPostTargetingLocked",
 										"reasonCode",
 										"reversesActionId",
 										"notes",
@@ -81477,7 +81541,7 @@
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
-										"previousLocked": {
+										"previousPostTargetingLocked": {
 											"nullable": true,
 											"anyOf": [{ "type": "boolean" }, { "type": "null" }]
 										},
@@ -81485,7 +81549,7 @@
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										},
-										"resultingLocked": {
+										"resultingPostTargetingLocked": {
 											"nullable": true,
 											"anyOf": [{ "type": "boolean" }, { "type": "null" }]
 										},
@@ -81623,7 +81687,8 @@
 													"enum": [
 														"ModerationTransitionInvalid",
 														"ModerationActionNoEffect",
-														"ModerationIdempotencyConflict"
+														"ModerationIdempotencyConflict",
+														"PostTargetingLocked"
 													]
 												},
 												"message": { "type": "string" },

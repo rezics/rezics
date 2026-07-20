@@ -150,8 +150,8 @@ export const RealmUnitMutationCommandValues = [
 	"hide",
 	"remove",
 	"restore",
-	"lock",
-	"unlock",
+	"lock_post_targeting",
+	"unlock_post_targeting",
 ] as const;
 export const RealmModerationCommandValues = [...RealmUnitMutationCommandValues, "note"] as const;
 export const GovernanceReasonCodeValues = [
@@ -190,8 +190,8 @@ export const ModerationActionKindValues = [
 	"hide",
 	"remove",
 	"restore",
-	"lock",
-	"unlock",
+	"lock_post_targeting",
+	"unlock_post_targeting",
 	"protect",
 	"unprotect",
 	...EnforcementKindValues,

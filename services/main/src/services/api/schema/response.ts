@@ -143,6 +143,7 @@ export const UnitDetailResponse = t.Object({
 	contentRating: t.String(),
 	aiDisclosure: t.String(),
 	license: NullableText,
+	postTargetingLocked: t.Boolean(),
 	publishedAt: t.Nullable(DateTime),
 	publishers: t.Array(UnitPublisherSummaryResponse),
 	createdAt: DateTime,
@@ -557,7 +558,7 @@ export const PostDetailResponse = t.Object({
 	latestRevisionId: t.Nullable(Uuid),
 	createdAt: DateTime,
 	updatedAt: DateTime,
-	capabilities: t.Object({ canEdit: t.Boolean() }),
+	capabilities: t.Object({ canEdit: t.Boolean(), canReply: t.Boolean() }),
 });
 export const ReviewDetailResponse = t.Object({
 	id: Uuid,
@@ -618,7 +619,6 @@ export const ReplyListResponse = t.Object({
 			publishers: t.Array(UnitPublisherSummaryResponse),
 			rootPostId: Uuid,
 			parentPostId: t.Nullable(Uuid),
-			contextRealmId: t.Nullable(Uuid),
 			depth: t.Integer(),
 			body: PortableTextDocument,
 			status: t.String(),
@@ -627,7 +627,7 @@ export const ReplyListResponse = t.Object({
 			childEndCursor: NullableText,
 			createdAt: DateTime,
 			updatedAt: DateTime,
-			capabilities: t.Object({ canEdit: t.Boolean() }),
+			capabilities: t.Object({ canEdit: t.Boolean(), canReply: t.Boolean() }),
 		}),
 	),
 	nextCursor: NullableText,

@@ -13,6 +13,7 @@ const dialect = new PgDialect();
 const rootPostId = "11111111-1111-1111-8111-111111111111";
 const firstPostId = "22222222-2222-2222-8222-222222222222";
 const childPostId = "33333333-3333-3333-8333-333333333333";
+const realmId = "44444444-4444-4444-8444-444444444444";
 
 describe("bounded reply tree query", () => {
 	beforeEach(() => {
@@ -76,6 +77,36 @@ describe("bounded reply tree query", () => {
 				parentPostId: firstPostId,
 				cursor: childCursor ?? undefined,
 			}),
+		).resolves.toEqual({ items: [], nextCursor: null });
+	});
+
+	it("filters each tree level and scopes cursors to the explicit Realm", async () => {
+		execute.mockResolvedValueOnce({
+			rows: [
+				{
+					postId: firstPostId,
+					parentPostId: null,
+					createdAt: new Date("2026-07-19T00:00:00.000Z"),
+					relativeDepth: 0,
+					hasMoreChildren: false,
+					hasNextPage: true,
+				},
+			],
+		});
+
+		const page = await selectReplyTree({ rootPostId, realmId });
+		const statement = execute.mock.calls[0]?.[0] as SQL | undefined;
+		if (!statement) throw new Error("Realm reply tree query did not execute");
+		const query = dialect.sqlToQuery(statement);
+		expect(query.sql.match(/reply_realm/g)).toHaveLength(8);
+		expect(query.sql).toContain("omitted_realm");
+		expect(query.params).toContain(realmId);
+
+		await expect(
+			selectReplyTree({ rootPostId, cursor: page.nextCursor ?? undefined }),
+		).rejects.toBeInstanceOf(InvalidPaginationCursor);
+		await expect(
+			selectReplyTree({ rootPostId, realmId, cursor: page.nextCursor ?? undefined }),
 		).resolves.toEqual({ items: [], nextCursor: null });
 	});
 });

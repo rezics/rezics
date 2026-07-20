@@ -17,6 +17,7 @@ import {
 } from "../../database/schema";
 import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
+import { ensureSubjectPostTargetingAllowed } from "../../posts/targeting";
 import {
 	BookNotFound,
 	ChapterLanguageNotFound,
@@ -154,6 +155,10 @@ export default new Elysia()
 					publishedAt: published ? new Date() : null,
 					statusActor: { kind: "profile", profileId: profile.unitId },
 				});
+				await ensureSubjectPostTargetingAllowed(tx, {
+					sourcePostId: contentUnit.id,
+					subjectUnitId: params.unitId,
+				});
 				await tx.insert(post).values({
 					id: contentUnit.id,
 					subjectUnitId: params.unitId,
@@ -229,6 +234,7 @@ export default new Elysia()
 				[StatusCodes.OK]: ContentStructureNodeResponse,
 				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["PostTargetingLocked"]),
 			},
 			detail: { summary: "Create book group or chapter", tags: ["Books"] },
 		},

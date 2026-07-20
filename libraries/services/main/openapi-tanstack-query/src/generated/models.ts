@@ -4749,7 +4749,7 @@ export const ApiErrorCode = {
 	FeedbackAlreadyResolved: "FeedbackAlreadyResolved",
 	PostNotFound: "PostNotFound",
 	PostLocalizationNotFound: "PostLocalizationNotFound",
-	PostLocked: "PostLocked",
+	PostTargetingLocked: "PostTargetingLocked",
 	ReplyPostNotFound: "ReplyPostNotFound",
 	ParentReplyNotFound: "ParentReplyNotFound",
 	ReplyDepthExceeded: "ReplyDepthExceeded",
@@ -6905,8 +6905,8 @@ export const GetApiNotificationsStatus200ItemsPayloadActionKindEnum = {
 	hide: "hide",
 	remove: "remove",
 	restore: "restore",
-	lock: "lock",
-	unlock: "unlock",
+	lock_post_targeting: "lock_post_targeting",
+	unlock_post_targeting: "unlock_post_targeting",
 	protect: "protect",
 	unprotect: "unprotect",
 	warning: "warning",
@@ -18302,9 +18302,9 @@ export type PostApiGovernanceModerationActionsStatus200 = {
 	kind: string;
 	previousState: (string | null) | null;
 	resultingState: (string | null) | null;
-	previousLocked: (boolean | null) | null;
+	previousPostTargetingLocked: (boolean | null) | null;
 	resultingStatus: (string | null) | null;
-	resultingLocked: (boolean | null) | null;
+	resultingPostTargetingLocked: (boolean | null) | null;
 	/**
 	 * @type string
 	 */
@@ -18448,6 +18448,7 @@ export const PostApiGovernanceModerationActionsStatus409ErrorCodeEnum = {
 	ModerationActionNoEffect: "ModerationActionNoEffect",
 	ModerationReversalUnavailable: "ModerationReversalUnavailable",
 	ModerationIdempotencyConflict: "ModerationIdempotencyConflict",
+	PostTargetingLocked: "PostTargetingLocked",
 } as const;
 
 export type PostApiGovernanceModerationActionsStatus409ErrorCodeEnum =
@@ -18674,8 +18675,8 @@ export type PostApiGovernanceModerationActionsBody =
 				| "hide"
 				| "remove"
 				| "restore"
-				| "lock"
-				| "unlock"
+				| "lock_post_targeting"
+				| "unlock_post_targeting"
 				| "mute_member"
 				| "remove_member"
 				| "ban_member"
@@ -29942,6 +29943,10 @@ export type PostApiUnitsByTypeStatus200 = {
 	 */
 	aiDisclosure: string;
 	license: (string | null) | null;
+	/**
+	 * @type boolean
+	 */
+	postTargetingLocked: boolean;
 	publishedAt: (string | null) | null;
 	/**
 	 * @type array
@@ -30934,6 +30939,10 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 	 */
 	aiDisclosure: string;
 	license: (string | null) | null;
+	/**
+	 * @type boolean
+	 */
+	postTargetingLocked: boolean;
 	publishedAt: (string | null) | null;
 	/**
 	 * @type array
@@ -31642,6 +31651,10 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 	 */
 	aiDisclosure: string;
 	license: (string | null) | null;
+	/**
+	 * @type boolean
+	 */
+	postTargetingLocked: boolean;
 	publishedAt: (string | null) | null;
 	/**
 	 * @type array
@@ -32765,6 +32778,10 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 	 */
 	aiDisclosure: string;
 	license: (string | null) | null;
+	/**
+	 * @type boolean
+	 */
+	postTargetingLocked: boolean;
 	publishedAt: (string | null) | null;
 	/**
 	 * @type array
@@ -33595,6 +33612,10 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 	 */
 	aiDisclosure: string;
 	license: (string | null) | null;
+	/**
+	 * @type boolean
+	 */
+	postTargetingLocked: boolean;
 	publishedAt: (string | null) | null;
 	/**
 	 * @type array
@@ -34441,6 +34462,10 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 	 */
 	aiDisclosure: string;
 	license: (string | null) | null;
+	/**
+	 * @type boolean
+	 */
+	postTargetingLocked: boolean;
 	publishedAt: (string | null) | null;
 	/**
 	 * @type array
@@ -41345,6 +41370,34 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesStatus404 = {
 /**
  * @type object
  */
+export type PostApiUnitsBookByUnitIdContentStructureNodesStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PostTargetingLocked'
+		 * @type string
+		 */
+		code: "PostTargetingLocked";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiUnitsBookByUnitIdContentStructureNodesStatus422 = ValidationError;
 
 /**
@@ -41546,6 +41599,7 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesResponses = {
 	"200": PostApiUnitsBookByUnitIdContentStructureNodesStatus200;
 	"403": PostApiUnitsBookByUnitIdContentStructureNodesStatus403;
 	"404": PostApiUnitsBookByUnitIdContentStructureNodesStatus404;
+	"409": PostApiUnitsBookByUnitIdContentStructureNodesStatus409;
 	"422": PostApiUnitsBookByUnitIdContentStructureNodesStatus422;
 	"500": PostApiUnitsBookByUnitIdContentStructureNodesStatus500;
 };
@@ -41557,6 +41611,7 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesResponse =
 	| PostApiUnitsBookByUnitIdContentStructureNodesStatus200
 	| PostApiUnitsBookByUnitIdContentStructureNodesStatus403
 	| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
+	| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
 	| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
 	| PostApiUnitsBookByUnitIdContentStructureNodesStatus500;
 
@@ -47697,6 +47752,14 @@ export type PostApiReviewsStatus404 = {
 	requestId: string;
 };
 
+export const PostApiReviewsStatus409ErrorCodeEnum = {
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+	PostTargetingLocked: "PostTargetingLocked",
+} as const;
+
+export type PostApiReviewsStatus409ErrorCodeEnum =
+	(typeof PostApiReviewsStatus409ErrorCodeEnum)[keyof typeof PostApiReviewsStatus409ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -47709,7 +47772,7 @@ export type PostApiReviewsStatus409 = {
 		 * @default 'RealmRulesAcceptanceRequired'
 		 * @type string
 		 */
-		code: "RealmRulesAcceptanceRequired";
+		code: PostApiReviewsStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -47946,6 +48009,18 @@ export type GetApiReviewsByReviewIdPath = {
 	 * @type string
 	 */
 	reviewId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiReviewsByReviewIdQuery = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	realmId?: string;
 };
 
 /**
@@ -48194,7 +48269,7 @@ export type GetApiReviewsByReviewIdStatus500 = InternalError;
 export type GetApiReviewsByReviewIdOptions = {
 	body?: never;
 	path: GetApiReviewsByReviewIdPath;
-	query?: never;
+	query?: GetApiReviewsByReviewIdQuery;
 	headers?: never;
 };
 
@@ -51146,6 +51221,14 @@ export type PostApiPostsStatus404 = {
 	requestId: string;
 };
 
+export const PostApiPostsStatus409ErrorCodeEnum = {
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+	PostTargetingLocked: "PostTargetingLocked",
+} as const;
+
+export type PostApiPostsStatus409ErrorCodeEnum =
+	(typeof PostApiPostsStatus409ErrorCodeEnum)[keyof typeof PostApiPostsStatus409ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -51158,7 +51241,7 @@ export type PostApiPostsStatus409 = {
 		 * @default 'RealmRulesAcceptanceRequired'
 		 * @type string
 		 */
-		code: "RealmRulesAcceptanceRequired";
+		code: PostApiPostsStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -51392,6 +51475,18 @@ export type GetApiPostsByPostIdPath = {
 	postId: string;
 };
 
+/**
+ * @type object
+ */
+export type GetApiPostsByPostIdQuery = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	realmId?: string;
+};
+
 export const GetApiPostsByPostIdStatus200PostKindEnum = {
 	post: "post",
 	reply: "reply",
@@ -51593,6 +51688,10 @@ export type GetApiPostsByPostIdStatus200 = {
 		 * @type boolean
 		 */
 		canEdit: boolean;
+		/**
+		 * @type boolean
+		 */
+		canReply: boolean;
 	};
 };
 
@@ -51648,7 +51747,7 @@ export type GetApiPostsByPostIdStatus500 = InternalError;
 export type GetApiPostsByPostIdOptions = {
 	body?: never;
 	path: GetApiPostsByPostIdPath;
-	query?: never;
+	query?: GetApiPostsByPostIdQuery;
 	headers?: never;
 };
 
@@ -52136,6 +52235,12 @@ export type GetApiPostsByPostIdRepliesQuery = {
 	 * Format: `uuid`
 	 * @type string | undefined
 	 */
+	realmId?: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
 	parentPostId?: string;
 	/**
 	 * @maxLength 512
@@ -52198,7 +52303,6 @@ export type GetApiPostsByPostIdRepliesStatus200 = {
 		 */
 		rootPostId: string;
 		parentPostId: (string | null) | null;
-		contextRealmId: (string | null) | null;
 		depth: string | number;
 		/**
 		 * @type object
@@ -52357,6 +52461,10 @@ export type GetApiPostsByPostIdRepliesStatus200 = {
 			 * @type boolean
 			 */
 			canEdit: boolean;
+			/**
+			 * @type boolean
+			 */
+			canReply: boolean;
 		};
 	}[];
 	nextCursor: (string | null) | null;
@@ -52493,7 +52601,6 @@ export type PostApiPostsByPostIdRepliesStatus200 = {
 
 export const PostApiPostsByPostIdRepliesStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
-	PostLocked: "PostLocked",
 	ReplyDepthExceeded: "ReplyDepthExceeded",
 } as const;
 
@@ -52565,6 +52672,14 @@ export type PostApiPostsByPostIdRepliesStatus404 = {
 	requestId: string;
 };
 
+export const PostApiPostsByPostIdRepliesStatus409ErrorCodeEnum = {
+	RealmRulesAcceptanceRequired: "RealmRulesAcceptanceRequired",
+	PostTargetingLocked: "PostTargetingLocked",
+} as const;
+
+export type PostApiPostsByPostIdRepliesStatus409ErrorCodeEnum =
+	(typeof PostApiPostsByPostIdRepliesStatus409ErrorCodeEnum)[keyof typeof PostApiPostsByPostIdRepliesStatus409ErrorCodeEnum];
+
 /**
  * @type object
  */
@@ -52577,7 +52692,7 @@ export type PostApiPostsByPostIdRepliesStatus409 = {
 		 * @default 'RealmRulesAcceptanceRequired'
 		 * @type string
 		 */
-		code: "RealmRulesAcceptanceRequired";
+		code: PostApiPostsByPostIdRepliesStatus409ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -52826,7 +52941,6 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus200 = {
 export const PatchApiPostsByPostIdRepliesByReplyPostIdStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
-	RealmCapabilityRequired: "RealmCapabilityRequired",
 } as const;
 
 export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus403ErrorCodeEnum =
@@ -53138,14 +53252,6 @@ export type DeleteApiPostsByPostIdRepliesByReplyPostIdPath = {
  */
 export type DeleteApiPostsByPostIdRepliesByReplyPostIdStatus204 = void;
 
-export const DeleteApiPostsByPostIdRepliesByReplyPostIdStatus403ErrorCodeEnum = {
-	UnitPermissionForbidden: "UnitPermissionForbidden",
-	RealmCapabilityRequired: "RealmCapabilityRequired",
-} as const;
-
-export type DeleteApiPostsByPostIdRepliesByReplyPostIdStatus403ErrorCodeEnum =
-	(typeof DeleteApiPostsByPostIdRepliesByReplyPostIdStatus403ErrorCodeEnum)[keyof typeof DeleteApiPostsByPostIdRepliesByReplyPostIdStatus403ErrorCodeEnum];
-
 /**
  * @type object
  */
@@ -53158,7 +53264,7 @@ export type DeleteApiPostsByPostIdRepliesByReplyPostIdStatus403 = {
 		 * @default 'UnitPermissionForbidden'
 		 * @type string
 		 */
-		code: DeleteApiPostsByPostIdRepliesByReplyPostIdStatus403ErrorCodeEnum;
+		code: "UnitPermissionForbidden";
 		/**
 		 * @type string
 		 */
@@ -56420,7 +56526,7 @@ export type GetApiRealmsByRealmIdUnitsStatus200 = {
 		/**
 		 * @type boolean
 		 */
-		locked: boolean;
+		postTargetingLocked: boolean;
 		/**
 		 * @type string
 		 */
@@ -56540,8 +56646,8 @@ export const GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsKindEnum = {
 	hide: "hide",
 	remove: "remove",
 	restore: "restore",
-	lock: "lock",
-	unlock: "unlock",
+	lock_post_targeting: "lock_post_targeting",
+	unlock_post_targeting: "unlock_post_targeting",
 	protect: "protect",
 	unprotect: "unprotect",
 	warning: "warning",
@@ -56653,8 +56759,8 @@ export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200 = {
 			(GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsPreviousState | null) | null;
 		resultingState:
 			(GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200ItemsResultingState | null) | null;
-		previousLocked: (boolean | null) | null;
-		resultingLocked: (boolean | null) | null;
+		previousPostTargetingLocked: (boolean | null) | null;
+		resultingPostTargetingLocked: (boolean | null) | null;
 		/**
 		 * @default 'content_policy'
 		 * @type string
@@ -56981,9 +57087,9 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200 = {
 	kind: string;
 	previousState: (string | null) | null;
 	resultingState: (string | null) | null;
-	previousLocked: (boolean | null) | null;
+	previousPostTargetingLocked: (boolean | null) | null;
 	resultingStatus: (string | null) | null;
-	resultingLocked: (boolean | null) | null;
+	resultingPostTargetingLocked: (boolean | null) | null;
 	/**
 	 * @type string
 	 */
@@ -57100,6 +57206,7 @@ export const PatchApiRealmsByRealmIdUnitsByUnitIdStatus409ErrorCodeEnum = {
 	ModerationTransitionInvalid: "ModerationTransitionInvalid",
 	ModerationActionNoEffect: "ModerationActionNoEffect",
 	ModerationIdempotencyConflict: "ModerationIdempotencyConflict",
+	PostTargetingLocked: "PostTargetingLocked",
 } as const;
 
 export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus409ErrorCodeEnum =
@@ -57166,8 +57273,8 @@ export const PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum = {
 	hide: "hide",
 	remove: "remove",
 	restore: "restore",
-	lock: "lock",
-	unlock: "unlock",
+	lock_post_targeting: "lock_post_targeting",
+	unlock_post_targeting: "unlock_post_targeting",
 } as const;
 
 export type PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum =

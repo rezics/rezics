@@ -1,20 +1,10 @@
 import { sql } from "drizzle-orm";
-import {
-	boolean,
-	check,
-	foreignKey,
-	index,
-	integer,
-	pgEnum,
-	unique,
-	uuid,
-} from "drizzle-orm/pg-core";
+import { check, foreignKey, index, integer, pgEnum, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import { PostKindValues, toEnumValues } from "./contract-values";
 import { createCreatedAtColumn, createUpdatedAtColumn } from "./columns";
 import { unit } from "./core";
-import { realm } from "./realm";
 
 export const postKind = pgEnum("post_kind", toEnumValues(PostKindValues));
 
@@ -31,8 +21,6 @@ export const post = pgTable(
 		 */
 		subjectUnitId: uuid().references(() => unit.id, { onDelete: "restrict" }),
 		kind: postKind().default("post").notNull(),
-		/** Prevents new replies to this post; this is not a Unit field-edit lock. */
-		locked: boolean().default(false).notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},
@@ -64,9 +52,6 @@ export const postReply = pgTable(
 			.notNull()
 			.references(() => post.id, { onDelete: "restrict" }),
 		parentPostId: uuid(),
-		contextRealmId: uuid().references(() => realm.id, {
-			onDelete: "set null",
-		}),
 		depth: integer().notNull(),
 		createdAt: createCreatedAtColumn(),
 	},
@@ -83,7 +68,6 @@ export const postReply = pgTable(
 			table.createdAt,
 			table.postId,
 		),
-		index("post_reply_context_realm_idx").on(table.contextRealmId),
 		check("post_reply_not_root_check", sql`${table.postId} <> ${table.rootPostId}`),
 		check(
 			"post_reply_not_self_parent_check",

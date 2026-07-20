@@ -2,7 +2,7 @@ import { sql } from "drizzle-orm";
 import { t } from "elysia";
 
 import { database } from "../../database";
-import { postReply } from "../../database/schema";
+import { postReply, realmUnit } from "../../database/schema";
 import { parseJsonCursor } from "../../pagination";
 import { InvalidPaginationCursor } from "../../pagination/errors";
 import { Uuid } from "../schema";
@@ -15,9 +15,10 @@ export const ReplyTreePolicy = {
 
 const ReplyTreeCursor = t.Object(
 	{
-		v: t.Literal(1),
+		v: t.Literal(2),
 		rootPostId: Uuid,
 		parentPostId: t.Nullable(Uuid),
+		realmId: t.Nullable(Uuid),
 		createdAt: t.String(),
 		postId: Uuid,
 	},
@@ -48,6 +49,7 @@ function decodeReplyTreeCursor(
 	value: string | undefined,
 	rootPostId: string,
 	parentPostId: string | null,
+	realmId: string | null,
 ) {
 	if (!value) return undefined;
 	try {
@@ -55,6 +57,7 @@ function decodeReplyTreeCursor(
 		if (
 			cursor.rootPostId !== rootPostId ||
 			cursor.parentPostId !== parentPostId ||
+			cursor.realmId !== realmId ||
 			Number.isNaN(Date.parse(cursor.createdAt))
 		)
 			throw new InvalidPaginationCursor();
@@ -67,12 +70,14 @@ function decodeReplyTreeCursor(
 function cursorFor(
 	rootPostId: string,
 	parentPostId: string | null,
+	realmId: string | null,
 	boundary: Pick<ReplyTreeSelectionRow, "createdAt" | "postId">,
 ) {
 	return encodeReplyTreeCursor({
-		v: 1,
+		v: 2,
 		rootPostId,
 		parentPostId,
+		realmId,
 		createdAt: boundary.createdAt.toISOString(),
 		postId: boundary.postId,
 	});
@@ -81,17 +86,35 @@ function cursorFor(
 export async function selectReplyTree(input: {
 	rootPostId: string;
 	parentPostId?: string;
+	realmId?: string;
 	cursor?: string;
 	limit?: number;
 }) {
 	const parentPostId = input.parentPostId ?? null;
+	const realmId = input.realmId ?? null;
 	const limit = input.limit ?? ReplyTreePolicy.rootLimit;
-	const cursor = decodeReplyTreeCursor(input.cursor, input.rootPostId, parentPostId);
+	const cursor = decodeReplyTreeCursor(input.cursor, input.rootPostId, parentPostId, realmId);
 	const parentCondition = parentPostId
 		? sql`anchor_reply.parent_post_id = ${parentPostId}`
 		: sql`anchor_reply.parent_post_id IS NULL`;
 	const cursorCondition = cursor
 		? sql`AND (anchor_reply.created_at, anchor_reply.post_id) > (${cursor.createdAt}, ${cursor.postId})`
+		: sql``;
+	const realmCondition = input.realmId
+		? sql`AND EXISTS (
+			SELECT 1 FROM ${realmUnit} reply_realm
+			WHERE reply_realm.realm_id = ${input.realmId}
+				AND reply_realm.unit_id = anchor_reply.post_id
+				AND reply_realm.status = 'visible'
+		)`
+		: sql``;
+	const childRealmCondition = input.realmId
+		? sql`AND EXISTS (
+			SELECT 1 FROM ${realmUnit} reply_realm
+			WHERE reply_realm.realm_id = ${input.realmId}
+				AND reply_realm.unit_id = candidate_reply.post_id
+				AND reply_realm.status = 'visible'
+		)`
 		: sql``;
 
 	const result = await database.execute<ReplyTreeSelectionRow>(sql`
@@ -105,6 +128,7 @@ export async function selectReplyTree(input: {
 			WHERE anchor_reply.root_post_id = ${input.rootPostId}
 				AND ${parentCondition}
 				${cursorCondition}
+				${realmCondition}
 			ORDER BY anchor_reply.created_at, anchor_reply.post_id
 			LIMIT ${limit + 1}
 		),
@@ -156,6 +180,7 @@ export async function selectReplyTree(input: {
 				FROM ${postReply} candidate_reply
 				WHERE candidate_reply.root_post_id = ${input.rootPostId}
 					AND candidate_reply.parent_post_id = parent_reply.post_id
+					${childRealmCondition}
 				ORDER BY candidate_reply.created_at, candidate_reply.post_id
 				LIMIT ${ReplyTreePolicy.childPreviewLimit}
 			) child_reply
@@ -172,6 +197,16 @@ export async function selectReplyTree(input: {
 				FROM ${postReply} omitted_reply
 				WHERE omitted_reply.root_post_id = ${input.rootPostId}
 					AND omitted_reply.parent_post_id = reply_tree.post_id
+					${
+						input.realmId
+							? sql`AND EXISTS (
+							SELECT 1 FROM ${realmUnit} omitted_realm
+							WHERE omitted_realm.realm_id = ${input.realmId}
+								AND omitted_realm.unit_id = omitted_reply.post_id
+								AND omitted_realm.status = 'visible'
+						)`
+							: sql``
+					}
 					AND NOT EXISTS (
 						SELECT 1
 						FROM reply_tree loaded_reply
@@ -196,7 +231,7 @@ export async function selectReplyTree(input: {
 			hasMoreChildren: row.hasMoreChildren,
 			childEndCursor:
 				row.hasMoreChildren && childBoundary
-					? cursorFor(input.rootPostId, row.postId, childBoundary)
+					? cursorFor(input.rootPostId, row.postId, realmId, childBoundary)
 					: null,
 		};
 	});
@@ -206,7 +241,7 @@ export async function selectReplyTree(input: {
 		items,
 		nextCursor:
 			hasNextPage && lastAnchor
-				? cursorFor(input.rootPostId, parentPostId, lastAnchor)
+				? cursorFor(input.rootPostId, parentPostId, realmId, lastAnchor)
 				: null,
 	};
 }

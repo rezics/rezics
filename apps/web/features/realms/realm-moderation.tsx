@@ -143,8 +143,10 @@ function RealmModerationRow({
 							{t.realms.currentState}: {t.realms.moderationStates[unit.status]}
 						</span>
 						<span>
-							{t.realms.lockState}:{" "}
-							{unit.locked ? t.realms.locked : t.realms.unlocked}
+							{t.realms.postTargetingLockState}:{" "}
+							{unit.postTargetingLocked
+								? t.realms.postTargetingLocked
+								: t.realms.postTargetingUnlocked}
 						</span>
 					</div>
 				</div>
@@ -172,7 +174,7 @@ function RealmModerationPanel({
 		path: { realmId, unitId: unit.unitId },
 		query: RealmModerationHistoryQuery,
 	});
-	const allowedCommands = getRealmModerationCommands(unit.status, unit.locked);
+	const allowedCommands = getRealmModerationCommands(unit.status, unit.postTargetingLocked);
 	const [command, setCommand] = useState<RealmModerationCommand>(
 		() => allowedCommands[0] ?? "note",
 	);
@@ -252,7 +254,9 @@ function RealmModerationPanel({
 						</p>
 						<p className="text-muted-foreground text-sm">
 							{t.realms.currentState}: {t.realms.moderationStates[unit.status]} ·{" "}
-							{unit.locked ? t.realms.locked : t.realms.unlocked}
+							{unit.postTargetingLocked
+								? t.realms.postTargetingLocked
+								: t.realms.postTargetingUnlocked}
 						</p>
 					</div>
 					<Button type="button" size="sm" variant="ghost" onClick={onClose}>
@@ -422,11 +426,17 @@ function RealmModerationHistoryItem({ item }: { item: RealmModerationHistoryActi
 						→ {t.realms.moderationStates[item.resultingState]}
 					</p>
 				) : null}
-				{item.previousLocked !== null && item.resultingLocked !== null ? (
+				{item.previousPostTargetingLocked !== null &&
+				item.resultingPostTargetingLocked !== null ? (
 					<p>
-						{t.realms.lockTransition}:{" "}
-						{item.previousLocked ? t.realms.locked : t.realms.unlocked} →{" "}
-						{item.resultingLocked ? t.realms.locked : t.realms.unlocked}
+						{t.realms.postTargetingLockTransition}:{" "}
+						{item.previousPostTargetingLocked
+							? t.realms.postTargetingLocked
+							: t.realms.postTargetingUnlocked}{" "}
+						→{" "}
+						{item.resultingPostTargetingLocked
+							? t.realms.postTargetingLocked
+							: t.realms.postTargetingUnlocked}
 					</p>
 				) : null}
 			</div>

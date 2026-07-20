@@ -72,6 +72,7 @@ import { UnitRevisionConflict } from "./errors";
 import { insertUnit } from "./create";
 import { finalizeInitialUnitStatusRevision } from "./status";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
+import { ensureSubjectPostTargetingAllowed } from "../posts/targeting";
 
 export type UnitRevisionEvent = "create" | "update" | "delete" | "restore";
 
@@ -703,11 +704,20 @@ export async function restoreUnitSnapshot(
 	}
 	await lockUnitHistory(tx, unitId);
 	const [current] = await tx
-		.select({ kind: unit.kind })
+		.select({ kind: unit.kind, subjectUnitId: post.subjectUnitId })
 		.from(unit)
+		.leftJoin(post, eq(post.id, unit.id))
 		.where(eq(unit.id, unitId))
 		.limit(1);
 	if (!current || current.kind !== snapshot.kind) throw new Error("Unit snapshot kind mismatch");
+	if (snapshot.kind === "post" && snapshot.extension) {
+		const postState = postStateSchema.parse(snapshot.extension);
+		if (postState.subjectUnitId !== current.subjectUnitId)
+			await ensureSubjectPostTargetingAllowed(tx, {
+				sourcePostId: unitId,
+				subjectUnitId: postState.subjectUnitId,
+			});
+	}
 	await tx.update(unit).set(unitStateSchema.parse(snapshot.unit)).where(eq(unit.id, unitId));
 	await tx.delete(unitLocalization).where(eq(unitLocalization.unitId, unitId));
 	if (snapshot.localizations.length)

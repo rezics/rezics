@@ -263,6 +263,7 @@ export async function getUnit(
 		contentRating: base.contentRating,
 		aiDisclosure: base.aiDisclosure,
 		license: base.license,
+		postTargetingLocked: base.postTargetingLocked,
 		publishedAt: base.publishedAt,
 		publishers,
 		createdAt: base.createdAt,

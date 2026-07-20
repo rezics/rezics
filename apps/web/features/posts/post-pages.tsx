@@ -46,6 +46,7 @@ import { ReplyPostThread } from "./reply-thread";
 import { PostList, RelatedPostRecommendations } from "./post-list";
 import { invalidatePostQueries } from "./query";
 import { PublisherLinks } from "./publisher-list";
+import { postHref } from "./url";
 
 type PickedEntity = { id: string; label: string };
 
@@ -110,7 +111,7 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 			{
 				onSuccess: async (post) => {
 					await invalidatePostQueries(queryClient, post.id);
-					router.push(`/posts/${post.id}`);
+					router.push(postHref(post.id, realm?.id));
 				},
 			},
 		);
@@ -168,9 +169,12 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 	);
 }
 
-export function PostDetailPage({ id }: { id: string }) {
+export function PostDetailPage({ id, realmId }: { id: string; realmId?: string }) {
 	const { t } = useTranslation(["errors", "posts", "ui"]);
-	const query = useGetApiPostsByPostId({ path: { postId: id } });
+	const query = useGetApiPostsByPostId({
+		path: { postId: id },
+		query: { ...(realmId ? { realmId } : {}) },
+	});
 	if (query.isError)
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	if (!query.data) return <QueryPending />;
@@ -222,7 +226,7 @@ export function PostDetailPage({ id }: { id: string }) {
 						{post.rootPostId && (
 							<Link
 								className="text-link hover:text-link-hover"
-								href={`/posts/${post.rootPostId}#replies`}
+								href={postHref(post.rootPostId, realmId, "replies")}
 							>
 								{t.posts.viewThread}
 							</Link>
@@ -241,6 +245,8 @@ export function PostDetailPage({ id }: { id: string }) {
 			<ReplyPostThread
 				rootPostId={post.rootPostId ?? post.id}
 				parentPostId={post.postKind === "reply" ? post.id : undefined}
+				realmId={realmId}
+				canReply={post.capabilities.canReply}
 			/>
 			<RelatedPostRecommendations postId={post.id} />
 		</main>

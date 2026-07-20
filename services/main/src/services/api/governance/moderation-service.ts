@@ -8,7 +8,6 @@ import {
 	feedback,
 	moderationAction,
 	moderationCase,
-	post,
 	profile as profileTable,
 	realmMember,
 	realmUnit,
@@ -32,7 +31,7 @@ import {
 } from "./errors";
 import {
 	assertModerationActionCompatible,
-	resolveLockState,
+	resolvePostTargetingLockState,
 	resolveModerationCaseState,
 	resolveRealmMemberState,
 	resolveRealmUnitStatus,
@@ -50,9 +49,9 @@ export const moderationActionSelection = {
 	kind: moderationAction.kind,
 	previousState: moderationAction.previousState,
 	resultingState: moderationAction.resultingState,
-	previousLocked: moderationAction.previousLocked,
+	previousPostTargetingLocked: moderationAction.previousPostTargetingLocked,
 	resultingStatus: moderationAction.resultingStatus,
-	resultingLocked: moderationAction.resultingLocked,
+	resultingPostTargetingLocked: moderationAction.resultingPostTargetingLocked,
 	reasonCode: moderationAction.reasonCode,
 	reversesActionId: moderationAction.reversesActionId,
 	createdAt: moderationAction.createdAt,
@@ -87,9 +86,9 @@ type StateActionPlan =
 	  };
 
 type LockActionPlan = {
-	type: "post_lock" | "realm_unit_lock";
-	previousLocked: boolean;
-	resultingLocked: boolean;
+	type: "unit_post_targeting_lock" | "realm_unit_post_targeting_lock";
+	previousPostTargetingLocked: boolean;
+	resultingPostTargetingLocked: boolean;
 };
 
 type ProtectionActionPlan =
@@ -291,37 +290,51 @@ async function loadMemberStatePlan(
 	};
 }
 
-async function loadLockPlan(
+async function loadPostTargetingLockPlan(
 	tx: DatabaseTransaction,
 	row: ModerationCaseRecord,
-	action: "lock" | "unlock",
+	action: "lock_post_targeting" | "unlock_post_targeting",
 ): Promise<LockActionPlan> {
 	if (row.targetKind === "realm_unit") {
 		if (!row.realmId) throw new ModerationRealmMissing();
+		const [targetUnit] = await tx
+			.select({ id: unit.id })
+			.from(unit)
+			.where(eq(unit.id, row.targetId))
+			.for("share")
+			.limit(1);
+		if (!targetUnit) throw new ModerationTargetNotFound();
 		const [current] = await tx
-			.select({ locked: realmUnit.locked })
+			.select({ postTargetingLocked: realmUnit.postTargetingLocked })
 			.from(realmUnit)
 			.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetId)))
 			.for("update")
 			.limit(1);
 		if (!current) throw new ModerationTargetNotFound();
 		return {
-			type: "realm_unit_lock",
-			previousLocked: current.locked,
-			resultingLocked: resolveLockState(current.locked, action),
+			type: "realm_unit_post_targeting_lock",
+			previousPostTargetingLocked: current.postTargetingLocked,
+			resultingPostTargetingLocked: resolvePostTargetingLockState(
+				current.postTargetingLocked,
+				action,
+			),
 		};
 	}
+	if (row.targetKind !== "unit") throw new ModerationActionIncompatible();
 	const [current] = await tx
-		.select({ locked: post.locked })
-		.from(post)
-		.where(eq(post.id, row.targetId))
+		.select({ postTargetingLocked: unit.postTargetingLocked })
+		.from(unit)
+		.where(eq(unit.id, row.targetId))
 		.for("update")
 		.limit(1);
-	if (!current) throw new ModerationActionIncompatible();
+	if (!current) throw new ModerationTargetNotFound();
 	return {
-		type: "post_lock",
-		previousLocked: current.locked,
-		resultingLocked: resolveLockState(current.locked, action),
+		type: "unit_post_targeting_lock",
+		previousPostTargetingLocked: current.postTargetingLocked,
+		resultingPostTargetingLocked: resolvePostTargetingLockState(
+			current.postTargetingLocked,
+			action,
+		),
 	};
 }
 
@@ -366,8 +379,8 @@ async function loadReversalPlan(
 			kind: moderationAction.kind,
 			previousState: moderationAction.previousState,
 			resultingState: moderationAction.resultingState,
-			previousLocked: moderationAction.previousLocked,
-			resultingLocked: moderationAction.resultingLocked,
+			previousPostTargetingLocked: moderationAction.previousPostTargetingLocked,
+			resultingPostTargetingLocked: moderationAction.resultingPostTargetingLocked,
 		})
 		.from(moderationAction)
 		.where(eq(moderationAction.id, reversesActionId))
@@ -454,38 +467,48 @@ async function loadReversalPlan(
 		}
 	}
 
-	if (reversed.previousLocked !== null && reversed.resultingLocked !== null) {
+	if (
+		reversed.previousPostTargetingLocked !== null &&
+		reversed.resultingPostTargetingLocked !== null
+	) {
 		if (row.targetKind === "realm_unit") {
 			if (!row.realmId) throw new ModerationRealmMissing();
+			const [targetUnit] = await tx
+				.select({ id: unit.id })
+				.from(unit)
+				.where(eq(unit.id, row.targetId))
+				.for("share")
+				.limit(1);
+			if (!targetUnit) throw new ModerationTargetNotFound();
 			const [current] = await tx
-				.select({ locked: realmUnit.locked })
+				.select({ postTargetingLocked: realmUnit.postTargetingLocked })
 				.from(realmUnit)
 				.where(and(eq(realmUnit.realmId, row.realmId), eq(realmUnit.unitId, row.targetId)))
 				.for("update")
 				.limit(1);
 			if (!current) throw new ModerationTargetNotFound();
-			if (current.locked !== reversed.resultingLocked)
+			if (current.postTargetingLocked !== reversed.resultingPostTargetingLocked)
 				throw new ModerationReversalUnavailable();
 			return {
-				type: "realm_unit_lock",
-				previousLocked: current.locked,
-				resultingLocked: reversed.previousLocked,
+				type: "realm_unit_post_targeting_lock",
+				previousPostTargetingLocked: current.postTargetingLocked,
+				resultingPostTargetingLocked: reversed.previousPostTargetingLocked,
 			};
 		}
-		if (row.targetKind === "unit" || row.targetKind === "unit_field") {
+		if (row.targetKind === "unit") {
 			const [current] = await tx
-				.select({ locked: post.locked })
-				.from(post)
-				.where(eq(post.id, row.targetId))
+				.select({ postTargetingLocked: unit.postTargetingLocked })
+				.from(unit)
+				.where(eq(unit.id, row.targetId))
 				.for("update")
 				.limit(1);
 			if (!current) throw new ModerationTargetNotFound();
-			if (current.locked !== reversed.resultingLocked)
+			if (current.postTargetingLocked !== reversed.resultingPostTargetingLocked)
 				throw new ModerationReversalUnavailable();
 			return {
-				type: "post_lock",
-				previousLocked: current.locked,
-				resultingLocked: reversed.previousLocked,
+				type: "unit_post_targeting_lock",
+				previousPostTargetingLocked: current.postTargetingLocked,
+				resultingPostTargetingLocked: reversed.previousPostTargetingLocked,
 			};
 		}
 	}
@@ -504,7 +527,8 @@ async function deriveActionPlan(
 		return loadUnitStatePlan(tx, row, body.kind);
 	}
 	if (body.kind === "hide") return loadRealmUnitStatePlan(tx, row, body.kind);
-	if (body.kind === "lock" || body.kind === "unlock") return loadLockPlan(tx, row, body.kind);
+	if (body.kind === "lock_post_targeting" || body.kind === "unlock_post_targeting")
+		return loadPostTargetingLockPlan(tx, row, body.kind);
 	if (
 		body.kind === "mute_member" ||
 		body.kind === "remove_member" ||
@@ -577,25 +601,30 @@ async function executeActionPlan(
 		if (!updated) throw new ModerationTransitionInvalid();
 		return;
 	}
-	if (plan.type === "post_lock") {
+	if (plan.type === "unit_post_targeting_lock") {
 		const [updated] = await tx
-			.update(post)
-			.set({ locked: plan.resultingLocked })
-			.where(and(eq(post.id, row.targetId), eq(post.locked, plan.previousLocked)))
-			.returning({ id: post.id });
+			.update(unit)
+			.set({ postTargetingLocked: plan.resultingPostTargetingLocked })
+			.where(
+				and(
+					eq(unit.id, row.targetId),
+					eq(unit.postTargetingLocked, plan.previousPostTargetingLocked),
+				),
+			)
+			.returning({ id: unit.id });
 		if (!updated) throw new ModerationTransitionInvalid();
 		return;
 	}
-	if (plan.type === "realm_unit_lock") {
+	if (plan.type === "realm_unit_post_targeting_lock") {
 		if (!row.realmId) throw new ModerationRealmMissing();
 		const [updated] = await tx
 			.update(realmUnit)
-			.set({ locked: plan.resultingLocked })
+			.set({ postTargetingLocked: plan.resultingPostTargetingLocked })
 			.where(
 				and(
 					eq(realmUnit.realmId, row.realmId),
 					eq(realmUnit.unitId, row.targetId),
-					eq(realmUnit.locked, plan.previousLocked),
+					eq(realmUnit.postTargetingLocked, plan.previousPostTargetingLocked),
 				),
 			)
 			.returning({ unitId: realmUnit.unitId });
@@ -692,10 +721,14 @@ export async function executeAuthorizedModerationAction(
 		plan.type === "realm_member_state"
 			? plan.resultingState
 			: null;
-	const previousLocked =
-		plan.type === "post_lock" || plan.type === "realm_unit_lock" ? plan.previousLocked : null;
-	const resultingLocked =
-		plan.type === "post_lock" || plan.type === "realm_unit_lock" ? plan.resultingLocked : null;
+	const isPostTargetingLockPlan =
+		plan.type === "unit_post_targeting_lock" || plan.type === "realm_unit_post_targeting_lock";
+	const previousPostTargetingLocked = isPostTargetingLockPlan
+		? plan.previousPostTargetingLocked
+		: null;
+	const resultingPostTargetingLocked = isPostTargetingLockPlan
+		? plan.resultingPostTargetingLocked
+		: null;
 	const [created] = await tx
 		.insert(moderationAction)
 		.values({
@@ -704,9 +737,9 @@ export async function executeAuthorizedModerationAction(
 			kind: input.body.kind,
 			previousState,
 			resultingState,
-			previousLocked,
+			previousPostTargetingLocked,
 			resultingStatus: plan.type === "unit_state" ? plan.resultingState : null,
-			resultingLocked,
+			resultingPostTargetingLocked,
 			reasonCode: input.body.reasonCode,
 			reversesActionId:
 				input.body.kind === "reverse" ? input.body.reversesActionId : undefined,
@@ -715,27 +748,31 @@ export async function executeAuthorizedModerationAction(
 		})
 		.returning(moderationActionSelection);
 	if (!created) throw new Error("Moderation action insertion did not return a row");
+	const noteBindings: Array<{
+		postId: string;
+		role: "internal_note" | "public_notice";
+	}> = [];
+	const createNotes = async () => {
+		for (const note of input.body.notes ?? []) {
+			const binding = await createGovernanceNotePost(tx, {
+				actorProfileId: input.actorProfileId,
+				subjectKind: "moderation_action",
+				subjectId: created.id,
+				subjectUnitId: target.subjectUnitId,
+				realmId: input.caseRow.realmId,
+				publicRecipientProfileIds: target.recipientProfileIds,
+				note,
+			});
+			noteBindings.push({ ...binding, role: note.role });
+		}
+	};
+	if (isPostTargetingLockPlan && plan.resultingPostTargetingLocked) await createNotes();
 	await executeActionPlan(tx, input.caseRow, plan, {
 		actorProfileId: input.actorProfileId,
 		actionId: created.id,
 		reasonCode: input.body.reasonCode,
 	});
-	const noteBindings: Array<{
-		postId: string;
-		role: "internal_note" | "public_notice";
-	}> = [];
-	for (const note of input.body.notes ?? []) {
-		const binding = await createGovernanceNotePost(tx, {
-			actorProfileId: input.actorProfileId,
-			subjectKind: "moderation_action",
-			subjectId: created.id,
-			subjectUnitId: target.subjectUnitId,
-			realmId: input.caseRow.realmId,
-			publicRecipientProfileIds: target.recipientProfileIds,
-			note,
-		});
-		noteBindings.push({ ...binding, role: note.role });
-	}
+	if (!(isPostTargetingLockPlan && plan.resultingPostTargetingLocked)) await createNotes();
 	const notePostIds = noteBindings.map((binding) => binding.postId);
 	const nextCaseState = resolveModerationCaseState(input.caseRow.state, input.body.kind);
 	if (nextCaseState !== input.caseRow.state)

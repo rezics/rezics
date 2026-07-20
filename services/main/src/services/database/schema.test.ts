@@ -187,8 +187,8 @@ describe("database schema contracts", () => {
 			"hide",
 			"remove",
 			"restore",
-			"lock",
-			"unlock",
+			"lock_post_targeting",
+			"unlock_post_targeting",
 		]);
 		expect(PostKindValues).toContain("governance_note");
 		expect(ModerationActionKindValues).toEqual(
@@ -229,7 +229,7 @@ describe("database schema contracts", () => {
 		expect(action.checks.map((constraint) => constraint.name)).toEqual(
 			expect.arrayContaining([
 				"moderation_action_state_outcome_check",
-				"moderation_action_lock_outcome_check",
+				"moderation_action_post_targeting_lock_outcome_check",
 				"moderation_action_single_outcome_check",
 				"moderation_action_request_fingerprint_check",
 			]),

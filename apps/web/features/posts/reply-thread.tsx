@@ -39,17 +39,23 @@ import { readPortableText, writePortableText } from "@/lib/block";
 import { buildReplyPostTree, type ReplyPostTreeNode } from "./reply-tree";
 import { invalidatePostQueries } from "./query";
 import { PublisherLinks } from "./publisher-list";
+import { postHref } from "./url";
 
 export function ReplyPostThread({
 	rootPostId,
 	parentPostId,
+	realmId,
+	canReply,
 }: {
 	rootPostId: string;
 	parentPostId?: string;
+	realmId?: string;
+	canReply: boolean;
 }) {
 	const { t } = useTranslation(["actions", "posts", "ui"]);
 	const baseQuery = {
 		limit: 25,
+		...(realmId ? { realmId } : {}),
 		...(parentPostId ? { parentPostId } : {}),
 	};
 	const replies = useInfiniteQuery({
@@ -80,16 +86,19 @@ export function ReplyPostThread({
 	return (
 		<section className="flex flex-col gap-4" id="replies">
 			<h2 className="font-heading text-2xl font-bold">{t.posts.replies}</h2>
-			{session ? (
+			{!canReply ? (
+				<p className="text-muted-foreground text-sm">{t.posts.replyingLocked}</p>
+			) : session ? (
 				<ReplyPostComposer
 					rootPostId={rootPostId}
 					parentPostId={parentPostId}
+					realmId={realmId}
 					action={t.ui.postReply}
 				/>
 			) : (
 				<SignInButton
 					className="w-fit"
-					destination={`/posts/${parentPostId ?? rootPostId}`}
+					destination={postHref(parentPostId ?? rootPostId, realmId)}
 					variant="outline"
 				>
 					{t.posts.signInToReply}
@@ -115,7 +124,8 @@ export function ReplyPostThread({
 							key={reply.id}
 							reply={reply}
 							rootPostId={rootPostId}
-							canReply={Boolean(session)}
+							realmId={realmId}
+							signedIn={Boolean(session)}
 						/>
 					))}
 					{replies.isFetchNextPageError ? (
@@ -151,11 +161,13 @@ export function ReplyPostThread({
 function ReplyPostNode({
 	reply,
 	rootPostId,
-	canReply,
+	realmId,
+	signedIn,
 }: {
 	reply: ReplyPostTreeNode;
 	rootPostId: string;
-	canReply: boolean;
+	realmId?: string;
+	signedIn: boolean;
 }) {
 	const { t } = useTranslation(["actions", "posts", "ui"]);
 	const queryClient = useQueryClient();
@@ -198,7 +210,10 @@ function ReplyPostNode({
 						emptyLabel={t.posts.unknownPublisher}
 						publishers={reply.publishers}
 					/>
-					<Link className="text-muted-foreground text-xs" href={`/posts/${reply.id}`}>
+					<Link
+						className="text-muted-foreground text-xs"
+						href={postHref(reply.id, realmId)}
+					>
 						{new Date(reply.createdAt).toLocaleString()}
 					</Link>
 				</div>
@@ -243,7 +258,7 @@ function ReplyPostNode({
 				)}
 				{reply.status !== "deleted" && (
 					<div className="flex flex-wrap gap-1">
-						{canReply && (
+						{signedIn && reply.capabilities.canReply && (
 							<Button
 								type="button"
 								size="xs"
@@ -319,10 +334,11 @@ function ReplyPostNode({
 						)}
 					</div>
 				)}
-				{replying && (
+				{replying && reply.capabilities.canReply && (
 					<ReplyPostComposer
 						rootPostId={rootPostId}
 						parentPostId={reply.id}
+						realmId={realmId}
 						action={t.posts.reply}
 						onComplete={() => setReplying(false)}
 					/>
@@ -335,14 +351,15 @@ function ReplyPostNode({
 							key={child.id}
 							reply={child}
 							rootPostId={rootPostId}
-							canReply={canReply}
+							realmId={realmId}
+							signedIn={signedIn}
 						/>
 					))}
 				</div>
 			)}
 			{reply.hasMoreChildren && (
 				<Button className="mb-3 ms-3 w-fit sm:ms-5" size="xs" variant="ghost" asChild>
-					<Link href={`/posts/${reply.id}#replies`}>{t.actions.loadMore}</Link>
+					<Link href={postHref(reply.id, realmId, "replies")}>{t.actions.loadMore}</Link>
 				</Button>
 			)}
 		</div>
@@ -352,11 +369,13 @@ function ReplyPostNode({
 function ReplyPostComposer({
 	rootPostId,
 	parentPostId,
+	realmId,
 	action,
 	onComplete,
 }: {
 	rootPostId: string;
 	parentPostId?: string;
+	realmId?: string;
 	action: string;
 	onComplete?: () => void;
 }) {
@@ -373,6 +392,7 @@ function ReplyPostComposer({
 				path: { postId: rootPostId },
 				body: {
 					...(parentPostId ? { parentPostId } : {}),
+					...(realmId ? { realmId } : {}),
 					language: toContentLanguage(locale.target),
 					body: writePortableText(body),
 				},

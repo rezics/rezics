@@ -42,6 +42,7 @@ import {
 	ValidationError,
 } from "./errors";
 import { toUnitVariantConstraintError } from "../units/variants";
+import { toPostTargetingConstraintError } from "../posts/targeting";
 
 const { logger } = getActiveObservability();
 
@@ -69,6 +70,12 @@ export default new Elysia()
 			return status(
 				variantConstraintError.status,
 				toApiErrorBody(variantConstraintError, requestId),
+			);
+		const postTargetingConstraintError = toPostTargetingConstraintError(error);
+		if (postTargetingConstraintError)
+			return status(
+				postTargetingConstraintError.status,
+				toApiErrorBody(postTargetingConstraintError, requestId),
 			);
 		if (code === "VALIDATION") {
 			const validationError = new ValidationError();

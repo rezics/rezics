@@ -21,7 +21,6 @@ function createReplyPost(id: string, parentPostId: string | null = null): ApiRep
 		],
 		rootPostId: "post",
 		parentPostId,
-		contextRealmId: null,
 		depth: parentPostId ? 1 : 0,
 		body: createPortableTextDocument([], "000000000000"),
 		status: "approved",
@@ -30,7 +29,7 @@ function createReplyPost(id: string, parentPostId: string | null = null): ApiRep
 		childEndCursor: null,
 		createdAt: "2026-01-01T00:00:00.000Z",
 		updatedAt: "2026-01-01T00:00:00.000Z",
-		capabilities: { canEdit: true },
+		capabilities: { canEdit: true, canReply: true },
 	};
 }
 

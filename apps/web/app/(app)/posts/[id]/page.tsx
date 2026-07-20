@@ -1,4 +1,16 @@
 import { PostDetailPage } from "@/features/posts/post-pages";
-export default async function Page({ params }: { params: Promise<{ id: string }> }) {
-	return <PostDetailPage id={(await params).id} />;
+import { postDetailSearchParams } from "@/lib/search-params.server";
+
+export default async function Page({
+	params,
+	searchParams,
+}: {
+	params: Promise<{ id: string }>;
+	searchParams: Promise<{ realmId?: string | string[] }>;
+}) {
+	const [{ id }, { realmId }] = await Promise.all([
+		params,
+		postDetailSearchParams.parse(searchParams),
+	]);
+	return <PostDetailPage id={id} realmId={realmId ?? undefined} />;
 }

@@ -9,6 +9,7 @@ export default {
 	replies: "Reply posts",
 	replyPost: "Reply post",
 	signInToReply: "Sign in to reply",
+	replyingLocked: "New reply posts are disabled for this target.",
 	noReplies: "No reply posts yet.",
 	replyBody: "Reply body",
 	reply: "Reply",

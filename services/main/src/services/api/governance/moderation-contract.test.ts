@@ -4,7 +4,7 @@ import { createPortableTextDocument } from "@rezics/block";
 import {
 	assertModerationActionCompatible,
 	isModerationActionCompatible,
-	resolveLockState,
+	resolvePostTargetingLockState,
 	resolveModerationCaseState,
 	resolveRealmMemberState,
 	resolveRealmUnitStatus,
@@ -44,9 +44,11 @@ describe("moderation action contracts", () => {
 	});
 
 	it("rejects lock no-ops and keeps note-only cases open", () => {
-		expect(resolveLockState(false, "lock")).toBe(true);
-		expect(resolveLockState(true, "unlock")).toBe(false);
-		expect(() => resolveLockState(true, "lock")).toThrow("would not change the target");
+		expect(resolvePostTargetingLockState(false, "lock_post_targeting")).toBe(true);
+		expect(resolvePostTargetingLockState(true, "unlock_post_targeting")).toBe(false);
+		expect(() => resolvePostTargetingLockState(true, "lock_post_targeting")).toThrow(
+			"would not change the target",
+		);
 		expect(resolveModerationCaseState("reviewing", "note")).toBe("reviewing");
 		expect(resolveModerationCaseState("reviewing", "escalate")).toBe("escalated");
 		expect(resolveModerationCaseState("reviewing", "remove")).toBe("actioned");

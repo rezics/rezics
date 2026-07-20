@@ -19,6 +19,7 @@ import {
 import { recordUnitRevision } from "../units/history";
 import { insertUnit } from "../units/create";
 import { isPrimaryUnitLocalization } from "../units/localization";
+import { ensureSubjectPostTargetingAllowed } from "../posts/targeting";
 
 export type GovernanceNoteRole = (typeof GovernanceNoteRoleValues)[number];
 export type GovernanceNoteSubjectKind = (typeof GovernanceNoteSubjectKindValues)[number];
@@ -54,14 +55,19 @@ export async function createGovernanceNotePost(
 		kind: "post",
 		status: "published",
 		visibility: "private",
+		postTargetingLocked: true,
 		publishedAt: new Date(),
 		statusActor: { kind: "profile", profileId: input.actorProfileId },
+	});
+	await ensureSubjectPostTargetingAllowed(tx, {
+		sourcePostId: created.id,
+		subjectUnitId: input.subjectUnitId,
+		...(input.realmId ? { realmId: input.realmId } : {}),
 	});
 	await tx.insert(post).values({
 		id: created.id,
 		subjectUnitId: input.subjectUnitId,
 		kind: "governance_note",
-		locked: true,
 	});
 	await tx.insert(unitLocalization).values({
 		unitId: created.id,

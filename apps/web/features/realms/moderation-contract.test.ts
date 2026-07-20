@@ -10,12 +10,12 @@ import {
 
 describe("Realm moderation UI contract", () => {
 	it.each([
-		["pending", false, ["approve", "remove", "lock", "note"]],
-		["visible", true, ["hide", "remove", "unlock", "note"]],
-		["hidden", false, ["restore", "remove", "lock", "note"]],
-		["removed", true, ["restore", "unlock", "note"]],
-	] as const)("derives valid commands for %s", (status, locked, expected) => {
-		expect(getRealmModerationCommands(status, locked)).toEqual(expected);
+		["pending", false, ["approve", "remove", "lock_post_targeting", "note"]],
+		["visible", true, ["hide", "remove", "unlock_post_targeting", "note"]],
+		["hidden", false, ["restore", "remove", "lock_post_targeting", "note"]],
+		["removed", true, ["restore", "unlock_post_targeting", "note"]],
+	] as const)("derives valid commands for %s", (status, postTargetingLocked, expected) => {
+		expect(getRealmModerationCommands(status, postTargetingLocked)).toEqual(expected);
 	});
 
 	it("rejects stale select values at the generated contract boundary", () => {
