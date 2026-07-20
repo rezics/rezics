@@ -3,7 +3,7 @@ STUDY DEEPLY BEFORE ANYTHING, PROACTIVELY RESEARCH ONLINE TO ENSURE BEST PRACTIC
 # AI Agent Instructions
 
 - Read [CONTRIBUTING.md](./CONTRIBUTING.md) before making changes.
-- Put all agent-generated temporary artifacts, including design-QA screenshots, comparisons, and reports, under `.temp/`. Never put them in the repository root or product source directories.
+- Put all agent-generated temporary artifacts under `.temp/`, including design-QA screenshots, comparisons, reports, and any notes or checklists used to keep implementation aligned with an agreed plan. Remove artifacts created for the current task before finishing unless the user explicitly asks to retain them; never delete pre-existing or user-provided files.
 - This is still in the development phase, so unless specifically requested, any changes should not include any compatibility measures for legacy code.
 
 ## Project stack
