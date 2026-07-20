@@ -424,7 +424,7 @@ function RealmModerationHistoryItem({ item }: { item: RealmModerationHistoryActi
 			</div>
 			{item.notes.map((note) => (
 				<div
-					key={`${note.postId}:${note.revisionId}:${note.role}`}
+					key={`${note.postId}:${note.latestRevisionId ?? "current"}:${note.role}`}
 					className="grid gap-2 rounded-md bg-muted/35 p-3"
 				>
 					<div className="grid gap-1 text-muted-foreground text-xs">
@@ -434,9 +434,11 @@ function RealmModerationHistoryItem({ item }: { item: RealmModerationHistoryActi
 						<span>
 							{t.realms.annotationPost}: <code>{note.postId}</code>
 						</span>
-						<span>
-							{t.realms.annotationRevision}: <code>{note.revisionId}</code>
-						</span>
+						{note.latestRevisionId ? (
+							<span>
+								{t.realms.annotationRevision}: <code>{note.latestRevisionId}</code>
+							</span>
+						) : null}
 					</div>
 					<PortableTextContent value={readPortableText(note.content)} variant="compact" />
 				</div>

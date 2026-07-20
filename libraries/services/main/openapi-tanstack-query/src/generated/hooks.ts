@@ -317,6 +317,18 @@ import type {
 	DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus409,
 	DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus422,
 	DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus500,
+	GetApiGovernanceNotesByPostIdOptions,
+	GetApiGovernanceNotesByPostIdStatus200,
+	GetApiGovernanceNotesByPostIdStatus404,
+	GetApiGovernanceNotesByPostIdStatus422,
+	GetApiGovernanceNotesByPostIdStatus500,
+	PatchApiGovernanceNotesByPostIdOptions,
+	PatchApiGovernanceNotesByPostIdStatus200,
+	PatchApiGovernanceNotesByPostIdStatus403,
+	PatchApiGovernanceNotesByPostIdStatus404,
+	PatchApiGovernanceNotesByPostIdStatus409,
+	PatchApiGovernanceNotesByPostIdStatus422,
+	PatchApiGovernanceNotesByPostIdStatus500,
 	GetApiGovernanceModerationCasesOptions,
 	GetApiGovernanceModerationCasesStatus200,
 	GetApiGovernanceModerationCasesStatus403,
@@ -948,7 +960,6 @@ import type {
 	GetApiReviewsStatus500,
 	PostApiReviewsOptions,
 	PostApiReviewsStatus200,
-	PostApiReviewsStatus400,
 	PostApiReviewsStatus403,
 	PostApiReviewsStatus404,
 	PostApiReviewsStatus409,
@@ -983,6 +994,18 @@ import type {
 	GetApiScoresByTargetIdStatus404,
 	GetApiScoresByTargetIdStatus422,
 	GetApiScoresByTargetIdStatus500,
+	GetApiScoreContextStatus200,
+	GetApiScoreContextStatus404,
+	GetApiScoreContextStatus500,
+	PutApiScoreContextOptions,
+	PutApiScoreContextStatus200,
+	PutApiScoreContextStatus403,
+	PutApiScoreContextStatus404,
+	PutApiScoreContextStatus422,
+	PutApiScoreContextStatus500,
+	DeleteApiScoreContextStatus204,
+	DeleteApiScoreContextStatus403,
+	DeleteApiScoreContextStatus500,
 	GetApiReactionsUnitsByUnitIdOptions,
 	GetApiReactionsUnitsByUnitIdStatus200,
 	GetApiReactionsUnitsByUnitIdStatus404,
@@ -1037,6 +1060,17 @@ import type {
 	PostApiPollsByPollIdCloseStatus409,
 	PostApiPollsByPollIdCloseStatus422,
 	PostApiPollsByPollIdCloseStatus500,
+	GetApiPostsByPostIdScoresOptions,
+	GetApiPostsByPostIdScoresStatus200,
+	GetApiPostsByPostIdScoresStatus404,
+	GetApiPostsByPostIdScoresStatus422,
+	GetApiPostsByPostIdScoresStatus500,
+	PutApiPostsByPostIdScoresOptions,
+	PutApiPostsByPostIdScoresStatus200,
+	PutApiPostsByPostIdScoresStatus403,
+	PutApiPostsByPostIdScoresStatus404,
+	PutApiPostsByPostIdScoresStatus422,
+	PutApiPostsByPostIdScoresStatus500,
 	GetApiPostsOptions,
 	GetApiPostsStatus200,
 	GetApiPostsStatus422,
@@ -1112,6 +1146,22 @@ import type {
 	PatchApiRealmsByRealmIdStatus404,
 	PatchApiRealmsByRealmIdStatus422,
 	PatchApiRealmsByRealmIdStatus500,
+	GetApiRealmsByRealmIdScoreContextOptions,
+	GetApiRealmsByRealmIdScoreContextStatus200,
+	GetApiRealmsByRealmIdScoreContextStatus404,
+	GetApiRealmsByRealmIdScoreContextStatus422,
+	GetApiRealmsByRealmIdScoreContextStatus500,
+	PutApiRealmsByRealmIdScoreContextOptions,
+	PutApiRealmsByRealmIdScoreContextStatus200,
+	PutApiRealmsByRealmIdScoreContextStatus403,
+	PutApiRealmsByRealmIdScoreContextStatus404,
+	PutApiRealmsByRealmIdScoreContextStatus422,
+	PutApiRealmsByRealmIdScoreContextStatus500,
+	DeleteApiRealmsByRealmIdScoreContextOptions,
+	DeleteApiRealmsByRealmIdScoreContextStatus204,
+	DeleteApiRealmsByRealmIdScoreContextStatus403,
+	DeleteApiRealmsByRealmIdScoreContextStatus422,
+	DeleteApiRealmsByRealmIdScoreContextStatus500,
 	PutApiRealmsByRealmIdFollowOptions,
 	PutApiRealmsByRealmIdFollowStatus200,
 	PutApiRealmsByRealmIdFollowStatus404,
@@ -1310,6 +1360,8 @@ import {
 	postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAccept,
 	postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecline,
 	deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId,
+	getApiGovernanceNotesByPostId,
+	patchApiGovernanceNotesByPostId,
 	getApiGovernanceModerationCases,
 	getApiGovernanceModerationCasesByCaseId,
 	patchApiGovernanceModerationCasesByCaseId,
@@ -1427,6 +1479,9 @@ import {
 	deleteApiReviewsByReviewId,
 	putApiScoresByTargetId,
 	getApiScoresByTargetId,
+	getApiScoreContext,
+	putApiScoreContext,
+	deleteApiScoreContext,
 	getApiReactionsUnitsByUnitId,
 	putApiReactionsUnitsByUnitId,
 	deleteApiReactionsUnitsByUnitId,
@@ -1437,6 +1492,8 @@ import {
 	putApiPollsByPollIdVote,
 	deleteApiPollsByPollIdVote,
 	postApiPollsByPollIdClose,
+	getApiPostsByPostIdScores,
+	putApiPostsByPostIdScores,
 	getApiPosts,
 	postApiPosts,
 	getApiPostsByPostId,
@@ -1450,6 +1507,9 @@ import {
 	postApiRealms,
 	getApiRealmsByRealmId,
 	patchApiRealmsByRealmId,
+	getApiRealmsByRealmIdScoreContext,
+	putApiRealmsByRealmIdScoreContext,
+	deleteApiRealmsByRealmIdScoreContext,
 	putApiRealmsByRealmIdFollow,
 	deleteApiRealmsByRealmIdFollow,
 	putApiRealmsByRealmIdMembership,
@@ -6624,6 +6684,207 @@ export function useDeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationI
 			| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus500
 		>,
 		DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdOptions,
+		TContext
+	>;
+}
+
+export const getApiGovernanceNotesByPostIdQueryKey = ({
+	path,
+}: Omit<GetApiGovernanceNotesByPostIdOptions, "headers">) =>
+	[{ url: "/api/governance/notes/:postId", params: path }] as const;
+
+type GetApiGovernanceNotesByPostIdQueryKey = ReturnType<
+	typeof getApiGovernanceNotesByPostIdQueryKey
+>;
+
+export function getApiGovernanceNotesByPostIdQueryOptions(
+	{ path }: GetApiGovernanceNotesByPostIdOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiGovernanceNotesByPostIdQueryKey({ path });
+	return queryOptions<
+		GetApiGovernanceNotesByPostIdStatus200,
+		ResponseErrorConfig<
+			| GetApiGovernanceNotesByPostIdStatus404
+			| GetApiGovernanceNotesByPostIdStatus422
+			| GetApiGovernanceNotesByPostIdStatus500
+		>,
+		GetApiGovernanceNotesByPostIdStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiGovernanceNotesByPostId({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get governance note
+ * {@link /api/governance/notes/:postId}
+ */
+export function useGetApiGovernanceNotesByPostId<
+	TData = GetApiGovernanceNotesByPostIdStatus200,
+	TQueryData = GetApiGovernanceNotesByPostIdStatus200,
+	TQueryKey extends QueryKey = GetApiGovernanceNotesByPostIdQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiGovernanceNotesByPostIdOptions["path"]
+			| (() => GetApiGovernanceNotesByPostIdOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiGovernanceNotesByPostIdStatus200,
+				ResponseErrorConfig<
+					| GetApiGovernanceNotesByPostIdStatus404
+					| GetApiGovernanceNotesByPostIdStatus422
+					| GetApiGovernanceNotesByPostIdStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiGovernanceNotesByPostIdQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiGovernanceNotesByPostIdQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiGovernanceNotesByPostIdStatus404
+			| GetApiGovernanceNotesByPostIdStatus422
+			| GetApiGovernanceNotesByPostIdStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const patchApiGovernanceNotesByPostIdMutationKey = () =>
+	[{ url: "/api/governance/notes/:postId" }] as const;
+
+export function patchApiGovernanceNotesByPostIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = patchApiGovernanceNotesByPostIdMutationKey();
+	return mutationOptions<
+		PatchApiGovernanceNotesByPostIdStatus200,
+		ResponseErrorConfig<
+			| PatchApiGovernanceNotesByPostIdStatus403
+			| PatchApiGovernanceNotesByPostIdStatus404
+			| PatchApiGovernanceNotesByPostIdStatus409
+			| PatchApiGovernanceNotesByPostIdStatus422
+			| PatchApiGovernanceNotesByPostIdStatus500
+		>,
+		PatchApiGovernanceNotesByPostIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await patchApiGovernanceNotesByPostId({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Update governance note
+ * {@link /api/governance/notes/:postId}
+ */
+export function usePatchApiGovernanceNotesByPostId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PatchApiGovernanceNotesByPostIdStatus200,
+			ResponseErrorConfig<
+				| PatchApiGovernanceNotesByPostIdStatus403
+				| PatchApiGovernanceNotesByPostIdStatus404
+				| PatchApiGovernanceNotesByPostIdStatus409
+				| PatchApiGovernanceNotesByPostIdStatus422
+				| PatchApiGovernanceNotesByPostIdStatus500
+			>,
+			PatchApiGovernanceNotesByPostIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? patchApiGovernanceNotesByPostIdMutationKey();
+
+	const baseOptions = patchApiGovernanceNotesByPostIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PatchApiGovernanceNotesByPostIdStatus200,
+		ResponseErrorConfig<
+			| PatchApiGovernanceNotesByPostIdStatus403
+			| PatchApiGovernanceNotesByPostIdStatus404
+			| PatchApiGovernanceNotesByPostIdStatus409
+			| PatchApiGovernanceNotesByPostIdStatus422
+			| PatchApiGovernanceNotesByPostIdStatus500
+		>,
+		PatchApiGovernanceNotesByPostIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PatchApiGovernanceNotesByPostIdStatus200,
+		ResponseErrorConfig<
+			| PatchApiGovernanceNotesByPostIdStatus403
+			| PatchApiGovernanceNotesByPostIdStatus404
+			| PatchApiGovernanceNotesByPostIdStatus409
+			| PatchApiGovernanceNotesByPostIdStatus422
+			| PatchApiGovernanceNotesByPostIdStatus500
+		>,
+		PatchApiGovernanceNotesByPostIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PatchApiGovernanceNotesByPostIdStatus200,
+		ResponseErrorConfig<
+			| PatchApiGovernanceNotesByPostIdStatus403
+			| PatchApiGovernanceNotesByPostIdStatus404
+			| PatchApiGovernanceNotesByPostIdStatus409
+			| PatchApiGovernanceNotesByPostIdStatus422
+			| PatchApiGovernanceNotesByPostIdStatus500
+		>,
+		PatchApiGovernanceNotesByPostIdOptions,
 		TContext
 	>;
 }
@@ -17375,7 +17636,6 @@ export function postApiReviewsMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiReviewsStatus200,
 		ResponseErrorConfig<
-			| PostApiReviewsStatus400
 			| PostApiReviewsStatus403
 			| PostApiReviewsStatus404
 			| PostApiReviewsStatus409
@@ -17402,7 +17662,6 @@ export function usePostApiReviews<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiReviewsStatus200,
 			ResponseErrorConfig<
-				| PostApiReviewsStatus400
 				| PostApiReviewsStatus403
 				| PostApiReviewsStatus404
 				| PostApiReviewsStatus409
@@ -17422,7 +17681,6 @@ export function usePostApiReviews<TContext>(
 	const baseOptions = postApiReviewsMutationOptions(config) as UseMutationOptions<
 		PostApiReviewsStatus200,
 		ResponseErrorConfig<
-			| PostApiReviewsStatus400
 			| PostApiReviewsStatus403
 			| PostApiReviewsStatus404
 			| PostApiReviewsStatus409
@@ -17436,7 +17694,6 @@ export function usePostApiReviews<TContext>(
 	return useMutation<
 		PostApiReviewsStatus200,
 		ResponseErrorConfig<
-			| PostApiReviewsStatus400
 			| PostApiReviewsStatus403
 			| PostApiReviewsStatus404
 			| PostApiReviewsStatus409
@@ -17455,7 +17712,6 @@ export function usePostApiReviews<TContext>(
 	) as UseMutationResult<
 		PostApiReviewsStatus200,
 		ResponseErrorConfig<
-			| PostApiReviewsStatus400
 			| PostApiReviewsStatus403
 			| PostApiReviewsStatus404
 			| PostApiReviewsStatus409
@@ -17952,6 +18208,232 @@ export function useGetApiScoresByTargetId<
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
+}
+
+export const getApiScoreContextQueryKey = () => [{ url: "/api/score-context" }] as const;
+
+type GetApiScoreContextQueryKey = ReturnType<typeof getApiScoreContextQueryKey>;
+
+export function getApiScoreContextQueryOptions(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiScoreContextQueryKey();
+	return queryOptions<
+		GetApiScoreContextStatus200,
+		ResponseErrorConfig<GetApiScoreContextStatus404 | GetApiScoreContextStatus500>,
+		GetApiScoreContextStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiScoreContext({
+				...config,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get global Score context
+ * {@link /api/score-context}
+ */
+export function useGetApiScoreContext<
+	TData = GetApiScoreContextStatus200,
+	TQueryData = GetApiScoreContextStatus200,
+	TQueryKey extends QueryKey = GetApiScoreContextQueryKey,
+>(
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiScoreContextStatus200,
+				ResponseErrorConfig<GetApiScoreContextStatus404 | GetApiScoreContextStatus500>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const queryKey = resolvedOptions?.queryKey ?? getApiScoreContextQueryKey();
+
+	const queryResult = useQuery(
+		{
+			...getApiScoreContextQueryOptions(config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<GetApiScoreContextStatus404 | GetApiScoreContextStatus500>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiScoreContextMutationKey = () => [{ url: "/api/score-context" }] as const;
+
+export function putApiScoreContextMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiScoreContextMutationKey();
+	return mutationOptions<
+		PutApiScoreContextStatus200,
+		ResponseErrorConfig<
+			| PutApiScoreContextStatus403
+			| PutApiScoreContextStatus404
+			| PutApiScoreContextStatus422
+			| PutApiScoreContextStatus500
+		>,
+		PutApiScoreContextOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await putApiScoreContext({ ...config, body, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Set global Score context
+ * {@link /api/score-context}
+ */
+export function usePutApiScoreContext<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiScoreContextStatus200,
+			ResponseErrorConfig<
+				| PutApiScoreContextStatus403
+				| PutApiScoreContextStatus404
+				| PutApiScoreContextStatus422
+				| PutApiScoreContextStatus500
+			>,
+			PutApiScoreContextOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? putApiScoreContextMutationKey();
+
+	const baseOptions = putApiScoreContextMutationOptions(config) as UseMutationOptions<
+		PutApiScoreContextStatus200,
+		ResponseErrorConfig<
+			| PutApiScoreContextStatus403
+			| PutApiScoreContextStatus404
+			| PutApiScoreContextStatus422
+			| PutApiScoreContextStatus500
+		>,
+		PutApiScoreContextOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiScoreContextStatus200,
+		ResponseErrorConfig<
+			| PutApiScoreContextStatus403
+			| PutApiScoreContextStatus404
+			| PutApiScoreContextStatus422
+			| PutApiScoreContextStatus500
+		>,
+		PutApiScoreContextOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiScoreContextStatus200,
+		ResponseErrorConfig<
+			| PutApiScoreContextStatus403
+			| PutApiScoreContextStatus404
+			| PutApiScoreContextStatus422
+			| PutApiScoreContextStatus500
+		>,
+		PutApiScoreContextOptions,
+		TContext
+	>;
+}
+
+export const deleteApiScoreContextMutationKey = () => [{ url: "/api/score-context" }] as const;
+
+export function deleteApiScoreContextMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = deleteApiScoreContextMutationKey();
+	return mutationOptions<
+		DeleteApiScoreContextStatus204,
+		ResponseErrorConfig<DeleteApiScoreContextStatus403 | DeleteApiScoreContextStatus500>,
+		undefined,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async (_) => {
+			const { data } = await deleteApiScoreContext({ ...config, throwOnError: true });
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Clear global Score context
+ * {@link /api/score-context}
+ */
+export function useDeleteApiScoreContext<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiScoreContextStatus204,
+			ResponseErrorConfig<DeleteApiScoreContextStatus403 | DeleteApiScoreContextStatus500>,
+			undefined,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? deleteApiScoreContextMutationKey();
+
+	const baseOptions = deleteApiScoreContextMutationOptions(config) as UseMutationOptions<
+		DeleteApiScoreContextStatus204,
+		ResponseErrorConfig<DeleteApiScoreContextStatus403 | DeleteApiScoreContextStatus500>,
+		undefined,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiScoreContextStatus204,
+		ResponseErrorConfig<DeleteApiScoreContextStatus403 | DeleteApiScoreContextStatus500>,
+		undefined,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiScoreContextStatus204,
+		ResponseErrorConfig<DeleteApiScoreContextStatus403 | DeleteApiScoreContextStatus500>,
+		undefined,
+		TContext
+	>;
 }
 
 export const getApiReactionsUnitsByUnitIdQueryKey = ({
@@ -18868,6 +19350,197 @@ export function usePostApiPollsByPollIdClose<TContext>(
 			| PostApiPollsByPollIdCloseStatus500
 		>,
 		PostApiPollsByPollIdCloseOptions,
+		TContext
+	>;
+}
+
+export const getApiPostsByPostIdScoresQueryKey = ({
+	path,
+}: Omit<GetApiPostsByPostIdScoresOptions, "headers">) =>
+	[{ url: "/api/posts/:postId/scores", params: path }] as const;
+
+type GetApiPostsByPostIdScoresQueryKey = ReturnType<typeof getApiPostsByPostIdScoresQueryKey>;
+
+export function getApiPostsByPostIdScoresQueryOptions(
+	{ path }: GetApiPostsByPostIdScoresOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiPostsByPostIdScoresQueryKey({ path });
+	return queryOptions<
+		GetApiPostsByPostIdScoresStatus200,
+		ResponseErrorConfig<
+			| GetApiPostsByPostIdScoresStatus404
+			| GetApiPostsByPostIdScoresStatus422
+			| GetApiPostsByPostIdScoresStatus500
+		>,
+		GetApiPostsByPostIdScoresStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiPostsByPostIdScores({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List Post Scores
+ * {@link /api/posts/:postId/scores}
+ */
+export function useGetApiPostsByPostIdScores<
+	TData = GetApiPostsByPostIdScoresStatus200,
+	TQueryData = GetApiPostsByPostIdScoresStatus200,
+	TQueryKey extends QueryKey = GetApiPostsByPostIdScoresQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiPostsByPostIdScoresOptions["path"]
+			| (() => GetApiPostsByPostIdScoresOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiPostsByPostIdScoresStatus200,
+				ResponseErrorConfig<
+					| GetApiPostsByPostIdScoresStatus404
+					| GetApiPostsByPostIdScoresStatus422
+					| GetApiPostsByPostIdScoresStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey = resolvedOptions?.queryKey ?? getApiPostsByPostIdScoresQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiPostsByPostIdScoresQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiPostsByPostIdScoresStatus404
+			| GetApiPostsByPostIdScoresStatus422
+			| GetApiPostsByPostIdScoresStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiPostsByPostIdScoresMutationKey = () =>
+	[{ url: "/api/posts/:postId/scores" }] as const;
+
+export function putApiPostsByPostIdScoresMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiPostsByPostIdScoresMutationKey();
+	return mutationOptions<
+		PutApiPostsByPostIdScoresStatus200,
+		ResponseErrorConfig<
+			| PutApiPostsByPostIdScoresStatus403
+			| PutApiPostsByPostIdScoresStatus404
+			| PutApiPostsByPostIdScoresStatus422
+			| PutApiPostsByPostIdScoresStatus500
+		>,
+		PutApiPostsByPostIdScoresOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiPostsByPostIdScores({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Replace Post Scores
+ * {@link /api/posts/:postId/scores}
+ */
+export function usePutApiPostsByPostIdScores<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiPostsByPostIdScoresStatus200,
+			ResponseErrorConfig<
+				| PutApiPostsByPostIdScoresStatus403
+				| PutApiPostsByPostIdScoresStatus404
+				| PutApiPostsByPostIdScoresStatus422
+				| PutApiPostsByPostIdScoresStatus500
+			>,
+			PutApiPostsByPostIdScoresOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? putApiPostsByPostIdScoresMutationKey();
+
+	const baseOptions = putApiPostsByPostIdScoresMutationOptions(config) as UseMutationOptions<
+		PutApiPostsByPostIdScoresStatus200,
+		ResponseErrorConfig<
+			| PutApiPostsByPostIdScoresStatus403
+			| PutApiPostsByPostIdScoresStatus404
+			| PutApiPostsByPostIdScoresStatus422
+			| PutApiPostsByPostIdScoresStatus500
+		>,
+		PutApiPostsByPostIdScoresOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiPostsByPostIdScoresStatus200,
+		ResponseErrorConfig<
+			| PutApiPostsByPostIdScoresStatus403
+			| PutApiPostsByPostIdScoresStatus404
+			| PutApiPostsByPostIdScoresStatus422
+			| PutApiPostsByPostIdScoresStatus500
+		>,
+		PutApiPostsByPostIdScoresOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiPostsByPostIdScoresStatus200,
+		ResponseErrorConfig<
+			| PutApiPostsByPostIdScoresStatus403
+			| PutApiPostsByPostIdScoresStatus404
+			| PutApiPostsByPostIdScoresStatus422
+			| PutApiPostsByPostIdScoresStatus500
+		>,
+		PutApiPostsByPostIdScoresOptions,
 		TContext
 	>;
 }
@@ -20078,6 +20751,297 @@ export function usePatchApiRealmsByRealmId<TContext>(
 			| PatchApiRealmsByRealmIdStatus500
 		>,
 		PatchApiRealmsByRealmIdOptions,
+		TContext
+	>;
+}
+
+export const getApiRealmsByRealmIdScoreContextQueryKey = ({
+	path,
+}: Omit<GetApiRealmsByRealmIdScoreContextOptions, "headers">) =>
+	[{ url: "/api/realms/:realmId/score-context", params: path }] as const;
+
+type GetApiRealmsByRealmIdScoreContextQueryKey = ReturnType<
+	typeof getApiRealmsByRealmIdScoreContextQueryKey
+>;
+
+export function getApiRealmsByRealmIdScoreContextQueryOptions(
+	{ path }: GetApiRealmsByRealmIdScoreContextOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiRealmsByRealmIdScoreContextQueryKey({ path });
+	return queryOptions<
+		GetApiRealmsByRealmIdScoreContextStatus200,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdScoreContextStatus404
+			| GetApiRealmsByRealmIdScoreContextStatus422
+			| GetApiRealmsByRealmIdScoreContextStatus500
+		>,
+		GetApiRealmsByRealmIdScoreContextStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiRealmsByRealmIdScoreContext({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get Realm Score context
+ * {@link /api/realms/:realmId/score-context}
+ */
+export function useGetApiRealmsByRealmIdScoreContext<
+	TData = GetApiRealmsByRealmIdScoreContextStatus200,
+	TQueryData = GetApiRealmsByRealmIdScoreContextStatus200,
+	TQueryKey extends QueryKey = GetApiRealmsByRealmIdScoreContextQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiRealmsByRealmIdScoreContextOptions["path"]
+			| (() => GetApiRealmsByRealmIdScoreContextOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiRealmsByRealmIdScoreContextStatus200,
+				ResponseErrorConfig<
+					| GetApiRealmsByRealmIdScoreContextStatus404
+					| GetApiRealmsByRealmIdScoreContextStatus422
+					| GetApiRealmsByRealmIdScoreContextStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiRealmsByRealmIdScoreContextQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiRealmsByRealmIdScoreContextQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiRealmsByRealmIdScoreContextStatus404
+			| GetApiRealmsByRealmIdScoreContextStatus422
+			| GetApiRealmsByRealmIdScoreContextStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiRealmsByRealmIdScoreContextMutationKey = () =>
+	[{ url: "/api/realms/:realmId/score-context" }] as const;
+
+export function putApiRealmsByRealmIdScoreContextMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiRealmsByRealmIdScoreContextMutationKey();
+	return mutationOptions<
+		PutApiRealmsByRealmIdScoreContextStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdScoreContextStatus403
+			| PutApiRealmsByRealmIdScoreContextStatus404
+			| PutApiRealmsByRealmIdScoreContextStatus422
+			| PutApiRealmsByRealmIdScoreContextStatus500
+		>,
+		PutApiRealmsByRealmIdScoreContextOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiRealmsByRealmIdScoreContext({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Set Realm Score context
+ * {@link /api/realms/:realmId/score-context}
+ */
+export function usePutApiRealmsByRealmIdScoreContext<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiRealmsByRealmIdScoreContextStatus200,
+			ResponseErrorConfig<
+				| PutApiRealmsByRealmIdScoreContextStatus403
+				| PutApiRealmsByRealmIdScoreContextStatus404
+				| PutApiRealmsByRealmIdScoreContextStatus422
+				| PutApiRealmsByRealmIdScoreContextStatus500
+			>,
+			PutApiRealmsByRealmIdScoreContextOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiRealmsByRealmIdScoreContextMutationKey();
+
+	const baseOptions = putApiRealmsByRealmIdScoreContextMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiRealmsByRealmIdScoreContextStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdScoreContextStatus403
+			| PutApiRealmsByRealmIdScoreContextStatus404
+			| PutApiRealmsByRealmIdScoreContextStatus422
+			| PutApiRealmsByRealmIdScoreContextStatus500
+		>,
+		PutApiRealmsByRealmIdScoreContextOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiRealmsByRealmIdScoreContextStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdScoreContextStatus403
+			| PutApiRealmsByRealmIdScoreContextStatus404
+			| PutApiRealmsByRealmIdScoreContextStatus422
+			| PutApiRealmsByRealmIdScoreContextStatus500
+		>,
+		PutApiRealmsByRealmIdScoreContextOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiRealmsByRealmIdScoreContextStatus200,
+		ResponseErrorConfig<
+			| PutApiRealmsByRealmIdScoreContextStatus403
+			| PutApiRealmsByRealmIdScoreContextStatus404
+			| PutApiRealmsByRealmIdScoreContextStatus422
+			| PutApiRealmsByRealmIdScoreContextStatus500
+		>,
+		PutApiRealmsByRealmIdScoreContextOptions,
+		TContext
+	>;
+}
+
+export const deleteApiRealmsByRealmIdScoreContextMutationKey = () =>
+	[{ url: "/api/realms/:realmId/score-context" }] as const;
+
+export function deleteApiRealmsByRealmIdScoreContextMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = deleteApiRealmsByRealmIdScoreContextMutationKey();
+	return mutationOptions<
+		DeleteApiRealmsByRealmIdScoreContextStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdScoreContextStatus403
+			| DeleteApiRealmsByRealmIdScoreContextStatus422
+			| DeleteApiRealmsByRealmIdScoreContextStatus500
+		>,
+		DeleteApiRealmsByRealmIdScoreContextOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiRealmsByRealmIdScoreContext({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Clear Realm Score context
+ * {@link /api/realms/:realmId/score-context}
+ */
+export function useDeleteApiRealmsByRealmIdScoreContext<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiRealmsByRealmIdScoreContextStatus204,
+			ResponseErrorConfig<
+				| DeleteApiRealmsByRealmIdScoreContextStatus403
+				| DeleteApiRealmsByRealmIdScoreContextStatus422
+				| DeleteApiRealmsByRealmIdScoreContextStatus500
+			>,
+			DeleteApiRealmsByRealmIdScoreContextOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? deleteApiRealmsByRealmIdScoreContextMutationKey();
+
+	const baseOptions = deleteApiRealmsByRealmIdScoreContextMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiRealmsByRealmIdScoreContextStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdScoreContextStatus403
+			| DeleteApiRealmsByRealmIdScoreContextStatus422
+			| DeleteApiRealmsByRealmIdScoreContextStatus500
+		>,
+		DeleteApiRealmsByRealmIdScoreContextOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiRealmsByRealmIdScoreContextStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdScoreContextStatus403
+			| DeleteApiRealmsByRealmIdScoreContextStatus422
+			| DeleteApiRealmsByRealmIdScoreContextStatus500
+		>,
+		DeleteApiRealmsByRealmIdScoreContextOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiRealmsByRealmIdScoreContextStatus204,
+		ResponseErrorConfig<
+			| DeleteApiRealmsByRealmIdScoreContextStatus403
+			| DeleteApiRealmsByRealmIdScoreContextStatus422
+			| DeleteApiRealmsByRealmIdScoreContextStatus500
+		>,
+		DeleteApiRealmsByRealmIdScoreContextOptions,
 		TContext
 	>;
 }

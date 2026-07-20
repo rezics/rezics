@@ -47,7 +47,6 @@ export default {
 	PollAlreadyClosed: "这个投票已经关闭。",
 	ProgressNotFound: "没有找到进度记录。",
 	ContentStructureNodeNotFound: "没有找到这个内容结构节点。",
-	ReviewRealmRequired: "评分前请选择领域。",
 	ReviewNotFound: "没有找到这篇评价。",
 	ModerationTargetNotFound: "没有找到管理操作的目标。",
 	ModerationRealmMissing: "该管理案件缺少所属领域。",
@@ -150,4 +149,8 @@ export default {
 	UnitAddressMutationForbidden: "这个 Unit 的 Slug 地址不能执行这项操作。",
 	SlugRedirectNotFound: "没有找到 Slug 重定向。",
 	UnitSlugAddressNotFound: "这个 Unit 没有规范 Slug 地址。",
+	GovernanceNoteNotFound: "没有找到这条治理说明。",
+	PostScoreDuplicate: "一个 Post 不能重复展示同一个 Score。",
+	PostScoreNotFound: "没有找到所选的 Score。",
+	RealmScoreContextPostNotMounted: "评分规则说明 Post 必须挂载到该 Realm。",
 };

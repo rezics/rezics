@@ -13,12 +13,13 @@ export const NoContentResponse = {
 export const SavedResponse = t.Object({ saved: t.Boolean() });
 export const FavoriteResponse = t.Object({ favorited: t.Boolean(), collectionId: Uuid });
 
-export const ScoreResponse = t.Object({ scoreEntryId: Uuid, score: t.Integer() });
+export const ScoreResponse = t.Object({ scoreId: Uuid, score: t.Integer() });
 export const ScoreAggregateResponse = t.Object({
 	totalScore: t.Integer(),
 	totalCount: t.Integer(),
 	distribution: t.Record(t.String(), t.Integer()),
 });
+export const ScoreContextResponse = t.Object({ contextPostId: t.Nullable(Uuid) });
 
 export const ReactionSummaryResponse = t.Object({
 	items: t.Array(t.Object({ reaction: t.String(), count: t.Integer() })),

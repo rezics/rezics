@@ -1,6 +1,12 @@
 import { StatusCodes } from "http-status-codes";
 import * as Data from "effect/Data";
 
+export class GovernanceNoteNotFound extends Data.TaggedError("GovernanceNoteNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = GovernanceNoteNotFound.status;
+	readonly message = "Governance note not found";
+}
+
 export class ModerationTargetNotFound extends Data.TaggedError("ModerationTargetNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
 	readonly status = ModerationTargetNotFound.status;
@@ -240,6 +246,7 @@ export class UnitOwnerRestrictionForbidden extends Data.TaggedError(
 }
 
 export const GovernanceErrors = [
+	GovernanceNoteNotFound,
 	ModerationTargetNotFound,
 	ModerationRealmMissing,
 	ModerationTargetScopeRequired,

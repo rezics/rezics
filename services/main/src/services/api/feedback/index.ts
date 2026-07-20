@@ -57,14 +57,12 @@ async function presentFeedbackRecords(tx: DatabaseTransaction, rows: FeedbackRec
 			...row,
 			evidence: {
 				postId: evidence.postId,
-				revisionId: evidence.revisionId,
 				language: evidence.language,
 				content: evidence.content,
 			},
 			publicNotice: publicNotice
 				? {
 						postId: publicNotice.postId,
-						revisionId: publicNotice.revisionId,
 						language: publicNotice.language,
 						content: publicNotice.content,
 					}

@@ -5771,8 +5771,8 @@
 					"ContentStructureNodeNotFound",
 					"ChapterNotFound",
 					"ChapterLanguageNotFound",
-					"ReviewRealmRequired",
 					"ReviewNotFound",
+					"GovernanceNoteNotFound",
 					"ModerationTargetNotFound",
 					"ModerationRealmMissing",
 					"ModerationTargetScopeRequired",
@@ -5818,6 +5818,8 @@
 					"ReplyPostNotFound",
 					"ParentReplyNotFound",
 					"ReplyDepthExceeded",
+					"PostScoreNotFound",
+					"PostScoreDuplicate",
 					"InvalidNotificationCursor",
 					"NotificationNotFound",
 					"AliasNotFound",
@@ -5836,6 +5838,7 @@
 					"RealmOwnerLeaveForbidden",
 					"RealmMemberNotFound",
 					"RealmUnitNotFound",
+					"RealmScoreContextPostNotMounted",
 					"InvalidFeedCursor",
 					"InvalidHistoryCursor",
 					"UnitRevisionNotFound",
@@ -12496,16 +12499,11 @@
 														"type": "object",
 														"required": [
 															"postId",
-															"revisionId",
 															"language",
 															"content"
 														],
 														"properties": {
 															"postId": {
-																"format": "uuid",
-																"type": "string"
-															},
-															"revisionId": {
 																"format": "uuid",
 																"type": "string"
 															},
@@ -12860,16 +12858,11 @@
 																"type": "object",
 																"required": [
 																	"postId",
-																	"revisionId",
 																	"language",
 																	"content"
 																],
 																"properties": {
 																	"postId": {
-																		"format": "uuid",
-																		"type": "string"
-																	},
-																	"revisionId": {
 																		"format": "uuid",
 																		"type": "string"
 																	},
@@ -13529,18 +13522,9 @@
 										"type": { "type": "string" },
 										"evidence": {
 											"type": "object",
-											"required": [
-												"postId",
-												"revisionId",
-												"language",
-												"content"
-											],
+											"required": ["postId", "language", "content"],
 											"properties": {
 												"postId": { "format": "uuid", "type": "string" },
-												"revisionId": {
-													"format": "uuid",
-													"type": "string"
-												},
 												"language": {
 													"format": "bcp-47",
 													"minLength": 2,
@@ -13879,18 +13863,9 @@
 											"anyOf": [
 												{
 													"type": "object",
-													"required": [
-														"postId",
-														"revisionId",
-														"language",
-														"content"
-													],
+													"required": ["postId", "language", "content"],
 													"properties": {
 														"postId": {
-															"format": "uuid",
-															"type": "string"
-														},
-														"revisionId": {
 															"format": "uuid",
 															"type": "string"
 														},
@@ -18746,6 +18721,1071 @@
 				"operationId": "deleteApiGovernanceUnitByUnitIdAccess-invitationsByInvitationId"
 			}
 		},
+		"/api/governance/notes/{postId}": {
+			"get": {
+				"summary": "Get governance note",
+				"tags": ["Governance"],
+				"parameters": [
+					{
+						"name": "postId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"postId",
+										"latestRevisionId",
+										"role",
+										"language",
+										"content",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"postId": { "format": "uuid", "type": "string" },
+										"latestRevisionId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"role": {
+											"type": "string",
+											"enum": ["evidence", "internal_note", "public_notice"]
+										},
+										"language": {
+											"format": "bcp-47",
+											"minLength": 2,
+											"maxLength": 35,
+											"type": "string"
+										},
+										"content": {
+											"additionalProperties": false,
+											"$id": "PortableTextDocument",
+											"type": "object",
+											"required": ["_type", "_key", "content"],
+											"properties": {
+												"_type": {
+													"const": "portable-text",
+													"type": "string"
+												},
+												"_key": {
+													"pattern": "^[0-9a-f]{12}$",
+													"$id": "BlockKey",
+													"type": "string"
+												},
+												"content": {
+													"$id": "PortableText",
+													"type": "array",
+													"items": {
+														"$id": "PortableTextBlock",
+														"anyOf": [
+															{
+																"additionalProperties": {
+																	"$id": "#/components/schemas/JsonValue",
+																	"anyOf": [
+																		{ "type": "null" },
+																		{ "type": "boolean" },
+																		{ "type": "number" },
+																		{ "type": "string" },
+																		{
+																			"type": "array",
+																			"items": {
+																				"$ref": "#/components/schemas/JsonValue"
+																			}
+																		},
+																		{
+																			"type": "object",
+																			"patternProperties": {
+																				"^(.*)$": {
+																					"$ref": "#/components/schemas/JsonValue"
+																				}
+																			}
+																		}
+																	]
+																},
+																"$id": "PortableTextTextBlock",
+																"type": "object",
+																"required": [
+																	"_key",
+																	"_type",
+																	"children"
+																],
+																"properties": {
+																	"_key": { "type": "string" },
+																	"_type": {
+																		"const": "block",
+																		"type": "string"
+																	},
+																	"children": {
+																		"type": "array",
+																		"items": {
+																			"$id": "PortableTextChild",
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"$id": "PortableTextSpan",
+																					"type": "object",
+																					"required": [
+																						"_key",
+																						"_type",
+																						"text"
+																					],
+																					"properties": {
+																						"_key": {
+																							"type": "string"
+																						},
+																						"_type": {
+																							"const": "span",
+																							"type": "string"
+																						},
+																						"text": {
+																							"type": "string"
+																						},
+																						"marks": {
+																							"type": "array",
+																							"items": {
+																								"type": "string"
+																							}
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": {
+																						"$id": "#/components/schemas/JsonValue",
+																						"anyOf": [
+																							{
+																								"type": "null"
+																							},
+																							{
+																								"type": "boolean"
+																							},
+																							{
+																								"type": "number"
+																							},
+																							{
+																								"type": "string"
+																							},
+																							{
+																								"type": "array",
+																								"items": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							},
+																							{
+																								"type": "object",
+																								"patternProperties": {
+																									"^(.*)$": {
+																										"$ref": "#/components/schemas/JsonValue"
+																									}
+																								}
+																							}
+																						]
+																					},
+																					"type": "object",
+																					"required": [
+																						"_key",
+																						"_type"
+																					],
+																					"properties": {
+																						"_key": {
+																							"type": "string"
+																						},
+																						"_type": {
+																							"pattern": "^(?!span$).+",
+																							"type": "string"
+																						}
+																					}
+																				}
+																			]
+																		}
+																	},
+																	"markDefs": {
+																		"type": "array",
+																		"items": {
+																			"additionalProperties": {
+																				"$id": "#/components/schemas/JsonValue",
+																				"anyOf": [
+																					{
+																						"type": "null"
+																					},
+																					{
+																						"type": "boolean"
+																					},
+																					{
+																						"type": "number"
+																					},
+																					{
+																						"type": "string"
+																					},
+																					{
+																						"type": "array",
+																						"items": {
+																							"$ref": "#/components/schemas/JsonValue"
+																						}
+																					},
+																					{
+																						"type": "object",
+																						"patternProperties": {
+																							"^(.*)$": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						}
+																					}
+																				]
+																			},
+																			"$id": "PortableTextObject",
+																			"type": "object",
+																			"required": [
+																				"_key",
+																				"_type"
+																			],
+																			"properties": {
+																				"_key": {
+																					"type": "string"
+																				},
+																				"_type": {
+																					"type": "string"
+																				}
+																			}
+																		}
+																	},
+																	"listItem": {
+																		"type": "string"
+																	},
+																	"style": { "type": "string" },
+																	"level": {
+																		"minimum": 1,
+																		"type": "integer"
+																	}
+																}
+															},
+															{
+																"additionalProperties": false,
+																"$id": "PortableTextImage",
+																"type": "object",
+																"required": [
+																	"_key",
+																	"_type",
+																	"assetId"
+																],
+																"properties": {
+																	"_key": { "type": "string" },
+																	"_type": {
+																		"const": "image",
+																		"type": "string"
+																	},
+																	"assetId": {
+																		"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																		"type": "string"
+																	},
+																	"alt": { "type": "string" },
+																	"caption": { "type": "string" }
+																}
+															},
+															{
+																"additionalProperties": {
+																	"$id": "#/components/schemas/JsonValue",
+																	"anyOf": [
+																		{ "type": "null" },
+																		{ "type": "boolean" },
+																		{ "type": "number" },
+																		{ "type": "string" },
+																		{
+																			"type": "array",
+																			"items": {
+																				"$ref": "#/components/schemas/JsonValue"
+																			}
+																		},
+																		{
+																			"type": "object",
+																			"patternProperties": {
+																				"^(.*)$": {
+																					"$ref": "#/components/schemas/JsonValue"
+																				}
+																			}
+																		}
+																	]
+																},
+																"type": "object",
+																"required": ["_key", "_type"],
+																"properties": {
+																	"_key": { "type": "string" },
+																	"_type": {
+																		"pattern": "^(?!(?:block|image)$).+",
+																		"type": "string"
+																	}
+																}
+															}
+														]
+													}
+												}
+											}
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "GovernanceNoteNotFound",
+													"type": "string",
+													"enum": ["GovernanceNoteNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiGovernanceNotesByPostId"
+			},
+			"patch": {
+				"summary": "Update governance note",
+				"tags": ["Governance"],
+				"parameters": [
+					{
+						"name": "postId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["language", "content", "baseRevisionId"],
+								"properties": {
+									"language": {
+										"format": "bcp-47",
+										"minLength": 2,
+										"maxLength": 35,
+										"type": "string"
+									},
+									"content": {
+										"additionalProperties": false,
+										"$id": "PortableTextDocument",
+										"type": "object",
+										"required": ["_type", "_key", "content"],
+										"properties": {
+											"_type": { "const": "portable-text", "type": "string" },
+											"_key": {
+												"pattern": "^[0-9a-f]{12}$",
+												"$id": "BlockKey",
+												"type": "string"
+											},
+											"content": {
+												"$id": "PortableText",
+												"type": "array",
+												"items": {
+													"$id": "PortableTextBlock",
+													"anyOf": [
+														{
+															"additionalProperties": {
+																"$id": "#/components/schemas/JsonValue",
+																"anyOf": [
+																	{ "type": "null" },
+																	{ "type": "boolean" },
+																	{ "type": "number" },
+																	{ "type": "string" },
+																	{
+																		"type": "array",
+																		"items": {
+																			"$ref": "#/components/schemas/JsonValue"
+																		}
+																	},
+																	{
+																		"type": "object",
+																		"patternProperties": {
+																			"^(.*)$": {
+																				"$ref": "#/components/schemas/JsonValue"
+																			}
+																		}
+																	}
+																]
+															},
+															"$id": "PortableTextTextBlock",
+															"type": "object",
+															"required": [
+																"_key",
+																"_type",
+																"children"
+															],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"const": "block",
+																	"type": "string"
+																},
+																"children": {
+																	"type": "array",
+																	"items": {
+																		"$id": "PortableTextChild",
+																		"anyOf": [
+																			{
+																				"additionalProperties": false,
+																				"$id": "PortableTextSpan",
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type",
+																					"text"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"const": "span",
+																						"type": "string"
+																					},
+																					"text": {
+																						"type": "string"
+																					},
+																					"marks": {
+																						"type": "array",
+																						"items": {
+																							"type": "string"
+																						}
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": {
+																					"$id": "#/components/schemas/JsonValue",
+																					"anyOf": [
+																						{
+																							"type": "null"
+																						},
+																						{
+																							"type": "boolean"
+																						},
+																						{
+																							"type": "number"
+																						},
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "array",
+																							"items": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						},
+																						{
+																							"type": "object",
+																							"patternProperties": {
+																								"^(.*)$": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"type": "object",
+																				"required": [
+																					"_key",
+																					"_type"
+																				],
+																				"properties": {
+																					"_key": {
+																						"type": "string"
+																					},
+																					"_type": {
+																						"pattern": "^(?!span$).+",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		]
+																	}
+																},
+																"markDefs": {
+																	"type": "array",
+																	"items": {
+																		"additionalProperties": {
+																			"$id": "#/components/schemas/JsonValue",
+																			"anyOf": [
+																				{ "type": "null" },
+																				{
+																					"type": "boolean"
+																				},
+																				{
+																					"type": "number"
+																				},
+																				{
+																					"type": "string"
+																				},
+																				{
+																					"type": "array",
+																					"items": {
+																						"$ref": "#/components/schemas/JsonValue"
+																					}
+																				},
+																				{
+																					"type": "object",
+																					"patternProperties": {
+																						"^(.*)$": {
+																							"$ref": "#/components/schemas/JsonValue"
+																						}
+																					}
+																				}
+																			]
+																		},
+																		"$id": "PortableTextObject",
+																		"type": "object",
+																		"required": [
+																			"_key",
+																			"_type"
+																		],
+																		"properties": {
+																			"_key": {
+																				"type": "string"
+																			},
+																			"_type": {
+																				"type": "string"
+																			}
+																		}
+																	}
+																},
+																"listItem": { "type": "string" },
+																"style": { "type": "string" },
+																"level": {
+																	"minimum": 1,
+																	"type": "integer"
+																}
+															}
+														},
+														{
+															"additionalProperties": false,
+															"$id": "PortableTextImage",
+															"type": "object",
+															"required": [
+																"_key",
+																"_type",
+																"assetId"
+															],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"const": "image",
+																	"type": "string"
+																},
+																"assetId": {
+																	"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																	"type": "string"
+																},
+																"alt": { "type": "string" },
+																"caption": { "type": "string" }
+															}
+														},
+														{
+															"additionalProperties": {
+																"$id": "#/components/schemas/JsonValue",
+																"anyOf": [
+																	{ "type": "null" },
+																	{ "type": "boolean" },
+																	{ "type": "number" },
+																	{ "type": "string" },
+																	{
+																		"type": "array",
+																		"items": {
+																			"$ref": "#/components/schemas/JsonValue"
+																		}
+																	},
+																	{
+																		"type": "object",
+																		"patternProperties": {
+																			"^(.*)$": {
+																				"$ref": "#/components/schemas/JsonValue"
+																			}
+																		}
+																	}
+																]
+															},
+															"type": "object",
+															"required": ["_key", "_type"],
+															"properties": {
+																"_key": { "type": "string" },
+																"_type": {
+																	"pattern": "^(?!(?:block|image)$).+",
+																	"type": "string"
+																}
+															}
+														}
+													]
+												}
+											}
+										}
+									},
+									"baseRevisionId": { "format": "uuid", "type": "string" },
+									"editSummary": { "maxLength": 500, "type": "string" },
+									"minor": { "type": "boolean" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"postId",
+										"latestRevisionId",
+										"role",
+										"language",
+										"content",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"postId": { "format": "uuid", "type": "string" },
+										"latestRevisionId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"role": {
+											"type": "string",
+											"enum": ["evidence", "internal_note", "public_notice"]
+										},
+										"language": {
+											"format": "bcp-47",
+											"minLength": 2,
+											"maxLength": 35,
+											"type": "string"
+										},
+										"content": {
+											"additionalProperties": false,
+											"$id": "PortableTextDocument",
+											"type": "object",
+											"required": ["_type", "_key", "content"],
+											"properties": {
+												"_type": {
+													"const": "portable-text",
+													"type": "string"
+												},
+												"_key": {
+													"pattern": "^[0-9a-f]{12}$",
+													"$id": "BlockKey",
+													"type": "string"
+												},
+												"content": {
+													"$id": "PortableText",
+													"type": "array",
+													"items": {
+														"$id": "PortableTextBlock",
+														"anyOf": [
+															{
+																"additionalProperties": {
+																	"$id": "#/components/schemas/JsonValue",
+																	"anyOf": [
+																		{ "type": "null" },
+																		{ "type": "boolean" },
+																		{ "type": "number" },
+																		{ "type": "string" },
+																		{
+																			"type": "array",
+																			"items": {
+																				"$ref": "#/components/schemas/JsonValue"
+																			}
+																		},
+																		{
+																			"type": "object",
+																			"patternProperties": {
+																				"^(.*)$": {
+																					"$ref": "#/components/schemas/JsonValue"
+																				}
+																			}
+																		}
+																	]
+																},
+																"$id": "PortableTextTextBlock",
+																"type": "object",
+																"required": [
+																	"_key",
+																	"_type",
+																	"children"
+																],
+																"properties": {
+																	"_key": { "type": "string" },
+																	"_type": {
+																		"const": "block",
+																		"type": "string"
+																	},
+																	"children": {
+																		"type": "array",
+																		"items": {
+																			"$id": "PortableTextChild",
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"$id": "PortableTextSpan",
+																					"type": "object",
+																					"required": [
+																						"_key",
+																						"_type",
+																						"text"
+																					],
+																					"properties": {
+																						"_key": {
+																							"type": "string"
+																						},
+																						"_type": {
+																							"const": "span",
+																							"type": "string"
+																						},
+																						"text": {
+																							"type": "string"
+																						},
+																						"marks": {
+																							"type": "array",
+																							"items": {
+																								"type": "string"
+																							}
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": {
+																						"$id": "#/components/schemas/JsonValue",
+																						"anyOf": [
+																							{
+																								"type": "null"
+																							},
+																							{
+																								"type": "boolean"
+																							},
+																							{
+																								"type": "number"
+																							},
+																							{
+																								"type": "string"
+																							},
+																							{
+																								"type": "array",
+																								"items": {
+																									"$ref": "#/components/schemas/JsonValue"
+																								}
+																							},
+																							{
+																								"type": "object",
+																								"patternProperties": {
+																									"^(.*)$": {
+																										"$ref": "#/components/schemas/JsonValue"
+																									}
+																								}
+																							}
+																						]
+																					},
+																					"type": "object",
+																					"required": [
+																						"_key",
+																						"_type"
+																					],
+																					"properties": {
+																						"_key": {
+																							"type": "string"
+																						},
+																						"_type": {
+																							"pattern": "^(?!span$).+",
+																							"type": "string"
+																						}
+																					}
+																				}
+																			]
+																		}
+																	},
+																	"markDefs": {
+																		"type": "array",
+																		"items": {
+																			"additionalProperties": {
+																				"$id": "#/components/schemas/JsonValue",
+																				"anyOf": [
+																					{
+																						"type": "null"
+																					},
+																					{
+																						"type": "boolean"
+																					},
+																					{
+																						"type": "number"
+																					},
+																					{
+																						"type": "string"
+																					},
+																					{
+																						"type": "array",
+																						"items": {
+																							"$ref": "#/components/schemas/JsonValue"
+																						}
+																					},
+																					{
+																						"type": "object",
+																						"patternProperties": {
+																							"^(.*)$": {
+																								"$ref": "#/components/schemas/JsonValue"
+																							}
+																						}
+																					}
+																				]
+																			},
+																			"$id": "PortableTextObject",
+																			"type": "object",
+																			"required": [
+																				"_key",
+																				"_type"
+																			],
+																			"properties": {
+																				"_key": {
+																					"type": "string"
+																				},
+																				"_type": {
+																					"type": "string"
+																				}
+																			}
+																		}
+																	},
+																	"listItem": {
+																		"type": "string"
+																	},
+																	"style": { "type": "string" },
+																	"level": {
+																		"minimum": 1,
+																		"type": "integer"
+																	}
+																}
+															},
+															{
+																"additionalProperties": false,
+																"$id": "PortableTextImage",
+																"type": "object",
+																"required": [
+																	"_key",
+																	"_type",
+																	"assetId"
+																],
+																"properties": {
+																	"_key": { "type": "string" },
+																	"_type": {
+																		"const": "image",
+																		"type": "string"
+																	},
+																	"assetId": {
+																		"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																		"type": "string"
+																	},
+																	"alt": { "type": "string" },
+																	"caption": { "type": "string" }
+																}
+															},
+															{
+																"additionalProperties": {
+																	"$id": "#/components/schemas/JsonValue",
+																	"anyOf": [
+																		{ "type": "null" },
+																		{ "type": "boolean" },
+																		{ "type": "number" },
+																		{ "type": "string" },
+																		{
+																			"type": "array",
+																			"items": {
+																				"$ref": "#/components/schemas/JsonValue"
+																			}
+																		},
+																		{
+																			"type": "object",
+																			"patternProperties": {
+																				"^(.*)$": {
+																					"$ref": "#/components/schemas/JsonValue"
+																				}
+																			}
+																		}
+																	]
+																},
+																"type": "object",
+																"required": ["_key", "_type"],
+																"properties": {
+																	"_key": { "type": "string" },
+																	"_type": {
+																		"pattern": "^(?!(?:block|image)$).+",
+																		"type": "string"
+																	}
+																}
+															}
+														]
+													}
+												}
+											}
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitProtected"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"GovernanceNoteNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitRevisionConflict",
+													"type": "string",
+													"enum": ["UnitRevisionConflict"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "patchApiGovernanceNotesByPostId"
+			}
+		},
 		"/api/governance/moderation/cases": {
 			"get": {
 				"summary": "List moderation cases",
@@ -18869,20 +19909,27 @@
 															"type": "object",
 															"required": [
 																"postId",
-																"revisionId",
+																"latestRevisionId",
 																"role",
 																"language",
 																"content",
-																"createdAt"
+																"createdAt",
+																"updatedAt"
 															],
 															"properties": {
 																"postId": {
 																	"format": "uuid",
 																	"type": "string"
 																},
-																"revisionId": {
-																	"format": "uuid",
-																	"type": "string"
+																"latestRevisionId": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		{ "type": "null" }
+																	]
 																},
 																"role": {
 																	"type": "string",
@@ -19199,6 +20246,10 @@
 																"createdAt": {
 																	"format": "date-time",
 																	"type": "string"
+																},
+																"updatedAt": {
+																	"format": "date-time",
+																	"type": "string"
 																}
 															}
 														}
@@ -19347,20 +20398,24 @@
 												"type": "object",
 												"required": [
 													"postId",
-													"revisionId",
+													"latestRevisionId",
 													"role",
 													"language",
 													"content",
-													"createdAt"
+													"createdAt",
+													"updatedAt"
 												],
 												"properties": {
 													"postId": {
 														"format": "uuid",
 														"type": "string"
 													},
-													"revisionId": {
-														"format": "uuid",
-														"type": "string"
+													"latestRevisionId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
 													},
 													"role": {
 														"type": "string",
@@ -19671,6 +20726,10 @@
 														}
 													},
 													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
 														"format": "date-time",
 														"type": "string"
 													}
@@ -20165,20 +21224,24 @@
 												"type": "object",
 												"required": [
 													"postId",
-													"revisionId",
+													"latestRevisionId",
 													"role",
 													"language",
 													"content",
-													"createdAt"
+													"createdAt",
+													"updatedAt"
 												],
 												"properties": {
 													"postId": {
 														"format": "uuid",
 														"type": "string"
 													},
-													"revisionId": {
-														"format": "uuid",
-														"type": "string"
+													"latestRevisionId": {
+														"nullable": true,
+														"anyOf": [
+															{ "format": "uuid", "type": "string" },
+															{ "type": "null" }
+														]
 													},
 													"role": {
 														"type": "string",
@@ -20489,6 +21552,10 @@
 														}
 													},
 													"createdAt": {
+														"format": "date-time",
+														"type": "string"
+													},
+													"updatedAt": {
 														"format": "date-time",
 														"type": "string"
 													}
@@ -22498,13 +23565,9 @@
 											"type": "array",
 											"items": {
 												"type": "object",
-												"required": ["postId", "revisionId", "role"],
+												"required": ["postId", "role"],
 												"properties": {
 													"postId": {
-														"format": "uuid",
-														"type": "string"
-													},
-													"revisionId": {
 														"format": "uuid",
 														"type": "string"
 													},
@@ -24361,6 +25424,7 @@
 											"platform.moderate",
 											"platform.suppress",
 											"platform.grants.manage",
+											"platform.score-context.manage",
 											"realm.contribute",
 											"realm.settings.update",
 											"realm.members.read",
@@ -57265,14 +58329,6 @@
 												}
 											}
 										}
-									},
-									"score": {
-										"minimum": 1,
-										"maximum": 10,
-										"anyOf": [
-											{ "format": "integer", "default": 0, "type": "string" },
-											{ "minimum": 1, "maximum": 10, "type": "integer" }
-										]
 									}
 								}
 							}
@@ -57289,33 +58345,6 @@
 									"type": "object",
 									"required": ["id"],
 									"properties": { "id": { "format": "uuid", "type": "string" } }
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Response for status 400",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "ReviewRealmRequired",
-													"type": "string",
-													"enum": ["ReviewRealmRequired"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
 								}
 							}
 						}
@@ -58385,9 +59414,9 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["scoreEntryId", "score"],
+									"required": ["scoreId", "score"],
 									"properties": {
-										"scoreEntryId": { "format": "uuid", "type": "string" },
+										"scoreId": { "format": "uuid", "type": "string" },
 										"score": {
 											"anyOf": [
 												{
@@ -58614,6 +59643,228 @@
 					}
 				},
 				"operationId": "getApiScoresByTargetId"
+			}
+		},
+		"/api/score-context": {
+			"get": {
+				"summary": "Get global Score context",
+				"tags": ["Scores"],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["contextPostId"],
+									"properties": {
+										"contextPostId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PostNotFound",
+													"type": "string",
+													"enum": ["PostNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiScore-context"
+			},
+			"put": {
+				"summary": "Set global Score context",
+				"tags": ["Scores"],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["contextPostId"],
+								"properties": {
+									"contextPostId": { "format": "uuid", "type": "string" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["contextPostId"],
+									"properties": {
+										"contextPostId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PostNotFound",
+													"type": "string",
+													"enum": ["PostNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiScore-context"
+			},
+			"delete": {
+				"summary": "Clear global Score context",
+				"tags": ["Scores"],
+				"responses": {
+					"204": {
+						"description": "Response for status 204",
+						"content": { "type": "void" }
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PlatformCapabilityRequired",
+													"type": "string",
+													"enum": ["PlatformCapabilityRequired"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "deleteApiScore-context"
 			}
 		},
 		"/api/reactions/units/{unitId}": {
@@ -59661,6 +60912,345 @@
 					}
 				},
 				"operationId": "postApiPollsByPollIdClose"
+			}
+		},
+		"/api/posts/{postId}/scores": {
+			"get": {
+				"summary": "List Post Scores",
+				"tags": ["Posts"],
+				"parameters": [
+					{
+						"name": "postId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"scoreId",
+													"profileId",
+													"unitId",
+													"realmId",
+													"value",
+													"position",
+													"updatedAt"
+												],
+												"properties": {
+													"scoreId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"profileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"unitId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"realmId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"value": {
+														"minimum": 1,
+														"maximum": 10,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{
+																"minimum": 1,
+																"maximum": 10,
+																"type": "integer"
+															}
+														]
+													},
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PostNotFound",
+													"type": "string",
+													"enum": ["PostNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiPostsByPostIdScores"
+			},
+			"put": {
+				"summary": "Replace Post Scores",
+				"tags": ["Posts"],
+				"parameters": [
+					{
+						"name": "postId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"maxItems": 5,
+								"type": "array",
+								"items": {
+									"additionalProperties": false,
+									"type": "object",
+									"required": ["scoreId"],
+									"properties": {
+										"scoreId": { "format": "uuid", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": [
+													"scoreId",
+													"profileId",
+													"unitId",
+													"realmId",
+													"value",
+													"position",
+													"updatedAt"
+												],
+												"properties": {
+													"scoreId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"profileId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"unitId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"realmId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"value": {
+														"minimum": 1,
+														"maximum": 10,
+														"anyOf": [
+															{
+																"format": "integer",
+																"default": 0,
+																"type": "string"
+															},
+															{
+																"minimum": 1,
+																"maximum": 10,
+																"type": "integer"
+															}
+														]
+													},
+													"position": {
+														"format": "fractional-position",
+														"minLength": 2,
+														"maxLength": 512,
+														"type": "string"
+													},
+													"updatedAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitProtected"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"PostNotFound",
+														"PostScoreNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "PostScoreDuplicate",
+															"type": "string",
+															"enum": ["PostScoreDuplicate"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiPostsByPostIdScores"
 			}
 		},
 		"/api/posts": {
@@ -64217,6 +65807,300 @@
 				"operationId": "patchApiRealmsByRealmId"
 			}
 		},
+		"/api/realms/{realmId}/score-context": {
+			"get": {
+				"summary": "Get Realm Score context",
+				"tags": ["Realms"],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["contextPostId"],
+									"properties": {
+										"contextPostId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmNotFound",
+													"type": "string",
+													"enum": ["RealmNotFound", "PostNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiRealmsByRealmIdScore-context"
+			},
+			"put": {
+				"summary": "Set Realm Score context",
+				"tags": ["Realms"],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["contextPostId"],
+								"properties": {
+									"contextPostId": { "format": "uuid", "type": "string" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["contextPostId"],
+									"properties": {
+										"contextPostId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"RealmCapabilityRequired",
+														"UnitProtected"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PostNotFound",
+													"type": "string",
+													"enum": ["PostNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "RealmScoreContextPostNotMounted",
+															"type": "string",
+															"enum": [
+																"RealmScoreContextPostNotMounted"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiRealmsByRealmIdScore-context"
+			},
+			"delete": {
+				"summary": "Clear Realm Score context",
+				"tags": ["Realms"],
+				"responses": {
+					"204": {
+						"description": "Response for status 204",
+						"content": { "type": "void" }
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"RealmCapabilityRequired",
+														"UnitProtected"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"operationId": "deleteApiRealmsByRealmIdScore-context"
+			}
+		},
 		"/api/realms/{realmId}/follow": {
 			"put": {
 				"summary": "Follow Realm",
@@ -66376,20 +68260,27 @@
 															"type": "object",
 															"required": [
 																"postId",
-																"revisionId",
+																"latestRevisionId",
 																"role",
 																"language",
 																"content",
-																"createdAt"
+																"createdAt",
+																"updatedAt"
 															],
 															"properties": {
 																"postId": {
 																	"format": "uuid",
 																	"type": "string"
 																},
-																"revisionId": {
-																	"format": "uuid",
-																	"type": "string"
+																"latestRevisionId": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		{ "type": "null" }
+																	]
 																},
 																"role": {
 																	"type": "string",
@@ -66703,6 +68594,10 @@
 																	}
 																},
 																"createdAt": {
+																	"format": "date-time",
+																	"type": "string"
+																},
+																"updatedAt": {
 																	"format": "date-time",
 																	"type": "string"
 																}
@@ -67594,13 +69489,9 @@
 											"type": "array",
 											"items": {
 												"type": "object",
-												"required": ["postId", "revisionId", "role"],
+												"required": ["postId", "role"],
 												"properties": {
 													"postId": {
-														"format": "uuid",
-														"type": "string"
-													},
-													"revisionId": {
 														"format": "uuid",
 														"type": "string"
 													},

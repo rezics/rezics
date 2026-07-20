@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -10,7 +10,9 @@ import {
 	post,
 	postReply,
 	postReplyStat,
+	postScore,
 	realmUnit,
+	score,
 	unit,
 	unitAccessBinding,
 	unitLocalization,
@@ -18,6 +20,7 @@ import {
 	unitStatusEvent,
 } from "../../database/schema";
 import { createNotification, deliverNotificationEmail } from "../../notifications/service";
+import { fractionalPositionAt } from "../../ordering/position";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
@@ -36,7 +39,9 @@ import {
 	ListRepliesQuery,
 	ListPostsQuery,
 	PostParams,
+	PostScoreListResponse,
 	ReplyParams,
+	ReplacePostScoresBody,
 	RootPostParams,
 	UpdatePostBody,
 	UpdateReplyBody,
@@ -46,6 +51,8 @@ import {
 	PostLocalizationNotFound,
 	PostLocked,
 	PostNotFound,
+	PostScoreDuplicate,
+	PostScoreNotFound,
 	ReplyDepthExceeded,
 	ReplyPostNotFound,
 } from "./errors";
@@ -113,10 +120,103 @@ const replySelection = {
 	updatedAt: unit.updatedAt,
 };
 
+async function selectPostScores(postId: string) {
+	return database
+		.select({
+			scoreId: score.id,
+			profileId: score.profileId,
+			unitId: score.unitId,
+			realmId: score.realmId,
+			value: score.value,
+			position: postScore.position,
+			updatedAt: score.updatedAt,
+		})
+		.from(postScore)
+		.innerJoin(score, eq(score.id, postScore.scoreId))
+		.where(eq(postScore.postId, postId))
+		.orderBy(asc(postScore.position), asc(postScore.scoreId));
+}
+
 export default new Elysia()
 	.use(session)
 	.group("/posts", (app) =>
 		app
+			.get(
+				"/:postId/scores",
+				async ({ params, request }) => {
+					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+						.authorization;
+					await authorization.unit.ensureCanRead(params.postId, () => new PostNotFound());
+					const [record] = await database
+						.select({ id: post.id })
+						.from(post)
+						.where(eq(post.id, params.postId))
+						.limit(1);
+					if (!record) throw new PostNotFound();
+					return { items: await selectPostScores(params.postId) };
+				},
+				{
+					params: PostParams,
+					response: {
+						[StatusCodes.OK]: PostScoreListResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PostNotFound"]),
+					},
+					detail: { summary: "List Post Scores", tags: ["Posts"] },
+				},
+			)
+			.put(
+				"/:postId/scores",
+				async ({ params, authorization, body }) => {
+					await authorization.unit.ensureCanUpdate(params.postId, [
+						["relations", "scores"],
+					]);
+					const scoreIds = body.map(({ scoreId }) => scoreId);
+					if (new Set(scoreIds).size !== scoreIds.length) throw new PostScoreDuplicate();
+					await database.transaction(async (tx) => {
+						const [record] = await tx
+							.select({ id: post.id })
+							.from(post)
+							.where(eq(post.id, params.postId))
+							.limit(1);
+						if (!record) throw new PostNotFound();
+						if (scoreIds.length) {
+							const found = await tx
+								.select({ id: score.id })
+								.from(score)
+								.where(inArray(score.id, scoreIds));
+							if (found.length !== scoreIds.length) throw new PostScoreNotFound();
+						}
+						await tx.delete(postScore).where(eq(postScore.postId, params.postId));
+						if (body.length)
+							await tx.insert(postScore).values(
+								body.map(({ scoreId }, index) => ({
+									postId: params.postId,
+									scoreId,
+									position: fractionalPositionAt(index),
+								})),
+							);
+					});
+					return { items: await selectPostScores(params.postId) };
+				},
+				{
+					access: "contribute:unit:update",
+					params: PostParams,
+					body: ReplacePostScoresBody,
+					response: {
+						[StatusCodes.OK]: PostScoreListResponse,
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"PostNotFound",
+							"PostScoreNotFound",
+						]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+							"PostScoreDuplicate",
+						]),
+					},
+					detail: { summary: "Replace Post Scores", tags: ["Posts"] },
+				},
+			)
 			.get(
 				"",
 				async ({ query }) => {

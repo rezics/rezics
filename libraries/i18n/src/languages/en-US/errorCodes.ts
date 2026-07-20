@@ -48,7 +48,6 @@ export default {
 	PollAlreadyClosed: "This poll is already closed.",
 	ProgressNotFound: "No progress record was found.",
 	ContentStructureNodeNotFound: "This Content Structure node could not be found.",
-	ReviewRealmRequired: "Choose a Realm before adding a score.",
 	ReviewNotFound: "This review could not be found.",
 	ModerationTargetNotFound: "The moderation target could not be found.",
 	ModerationRealmMissing: "This moderation case is missing its Realm.",
@@ -157,4 +156,8 @@ export default {
 	UnitAddressMutationForbidden: "This Unit slug address cannot perform that operation.",
 	SlugRedirectNotFound: "The slug Redirect could not be found.",
 	UnitSlugAddressNotFound: "The Unit has no canonical slug address.",
+	GovernanceNoteNotFound: "This governance note could not be found.",
+	PostScoreDuplicate: "A Post cannot display the same Score more than once.",
+	PostScoreNotFound: "A selected Score could not be found.",
+	RealmScoreContextPostNotMounted: "The Score context Post must be mounted in the Realm.",
 } satisfies typeof import("../zh-CN/errorCodes").default;

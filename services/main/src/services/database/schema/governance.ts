@@ -33,7 +33,6 @@ import {
 	createUuidv7PrimaryKey,
 } from "./columns";
 import { moderationStatus, profile, unit } from "./core";
-import { unitRevision } from "./history";
 import { post } from "./post";
 
 export const feedbackKind = pgEnum("feedback_kind", toEnumValues(FeedbackKindValues));
@@ -271,18 +270,12 @@ export const governancePostBinding = pgTable(
 		postId: uuid()
 			.primaryKey()
 			.references(() => post.id, { onDelete: "restrict" }),
-		revisionId: uuid().notNull(),
 		subjectKind: governanceNoteSubjectKind().notNull(),
 		subjectId: uuid().notNull(),
 		role: governanceNoteRole().notNull(),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
-		foreignKey({
-			columns: [table.revisionId, table.postId],
-			foreignColumns: [unitRevision.id, unitRevision.unitId],
-			name: "governance_post_binding_revision_post_fkey",
-		}).onDelete("restrict"),
 		index("governance_post_binding_subject_idx").on(table.subjectKind, table.subjectId),
 		index("governance_post_binding_subject_role_idx").on(
 			table.subjectKind,

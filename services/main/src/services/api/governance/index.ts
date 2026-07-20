@@ -15,10 +15,17 @@ import {
 	profile as profileTable,
 	realmMember,
 	RealmCapabilityValues,
+	unitLocalization,
 } from "../../database/schema";
-import { createGovernanceNotePost, listGovernanceNotes } from "../../governance/note-service";
+import {
+	createGovernanceNotePost,
+	getGovernanceNote,
+	listGovernanceNotes,
+} from "../../governance/note-service";
 import { createNotification, deliverNotificationEmail } from "../../notifications/service";
 import type { DatabaseTransaction } from "../../database";
+import { recordUnitRevision } from "../../units/history";
+import { makePrimaryUnitLocalization } from "../../units/localization";
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
 import { FeedbackAlreadyResolved, FeedbackNotFound } from "../feedback/errors";
@@ -34,6 +41,8 @@ import {
 	GrantListResponse,
 	GrantParams,
 	GrantResponse,
+	GovernanceNoteParams,
+	GovernanceNoteResponse,
 	ListGrantsQuery,
 	ListModerationCasesQuery,
 	ModerationActionResponse,
@@ -43,6 +52,7 @@ import {
 	ResolveFeedbackBody,
 	RevokeAccountEnforcementBody,
 	UpdateModerationCaseBody,
+	UpdateGovernanceNoteBody,
 } from "./schema";
 import {
 	CapabilityGrantExpiryInvalid,
@@ -51,6 +61,7 @@ import {
 	EnforcementChanged,
 	EnforcementExpiryInvalid,
 	EnforcementNotFound,
+	GovernanceNoteNotFound,
 	ModerationCaseNotFound,
 	ModerationNoteRoleDuplicate,
 	PlatformGrantRealmForbidden,
@@ -173,6 +184,86 @@ export default new Elysia({ prefix: "/governance" })
 	.use(session)
 	.use(unitAccessRoutes)
 	.use(unitAccessInvitationRoutes)
+	.get(
+		"/notes/:postId",
+		async ({ params, authorization }) => {
+			await authorization.unit.ensureCanRead(
+				params.postId,
+				() => new GovernanceNoteNotFound(),
+			);
+			const note = await database.transaction((tx) => getGovernanceNote(tx, params.postId));
+			if (!note) throw new GovernanceNoteNotFound();
+			const { subjectId: _subjectId, ...response } = note;
+			return response;
+		},
+		{
+			access: "session-only",
+			params: GovernanceNoteParams,
+			response: {
+				[StatusCodes.OK]: GovernanceNoteResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["GovernanceNoteNotFound"]),
+			},
+			detail: { summary: "Get governance note", tags: ["Governance"] },
+		},
+	)
+	.patch(
+		"/notes/:postId",
+		async ({ params, profile, authorization, body }) => {
+			await authorization.unit.ensureCanUpdate(params.postId, [["localizations"]]);
+			const note = await database.transaction(async (tx) => {
+				if (!(await getGovernanceNote(tx, params.postId)))
+					throw new GovernanceNoteNotFound();
+				await tx
+					.insert(unitLocalization)
+					.values({
+						unitId: params.postId,
+						language: body.language,
+						content: body.content,
+						contentStatus: "published",
+					})
+					.onConflictDoUpdate({
+						target: [unitLocalization.unitId, unitLocalization.language],
+						set: {
+							content: body.content,
+							contentStatus: "published",
+							updatedAt: new Date(),
+						},
+					});
+				await makePrimaryUnitLocalization(tx, params.postId, body.language);
+				await recordUnitRevision(tx, {
+					unitId: params.postId,
+					actorProfileId: profile.unitId,
+					event: "update",
+					baseRevisionId: body.baseRevisionId,
+					message: body.editSummary,
+					minor: body.minor,
+				});
+				const updated = await getGovernanceNote(tx, params.postId);
+				if (!updated) throw new GovernanceNoteNotFound();
+				return updated;
+			});
+			const { subjectId: _subjectId, ...response } = note;
+			return response;
+		},
+		{
+			access: "contribute:unit:update",
+			params: GovernanceNoteParams,
+			body: UpdateGovernanceNoteBody,
+			response: {
+				[StatusCodes.OK]: GovernanceNoteResponse,
+				[StatusCodes.FORBIDDEN]: toApiErrorResponse([
+					"UnitPermissionForbidden",
+					"UnitProtected",
+				]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"GovernanceNoteNotFound",
+				]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
+			},
+			detail: { summary: "Update governance note", tags: ["Governance"] },
+		},
+	)
 	.get(
 		"/moderation/cases",
 		async ({ authorization, query }) => {

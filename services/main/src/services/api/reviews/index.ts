@@ -8,6 +8,7 @@ import { toSafeInteger } from "../../database/integer";
 import { isPrimaryUnitLocalization, makePrimaryUnitLocalization } from "../../units/localization";
 import {
 	post,
+	globalScoreContext,
 	realmUnit,
 	scoreStat,
 	unit,
@@ -22,6 +23,7 @@ import {
 	IdResponse,
 	NoContentResponse,
 	ScoreAggregateResponse,
+	ScoreContextResponse,
 	ScoreResponse,
 } from "../schema/action-response";
 import {
@@ -37,10 +39,12 @@ import {
 	ScoreAggregateQuery,
 	ScoreTargetParams,
 	SetScoreBody,
+	SetScoreContextBody,
 	UpdateReviewBody,
 } from "./schema";
 import { upsertScore } from "./service";
-import { ReviewNotFound, ReviewRealmRequired } from "./errors";
+import { ReviewNotFound } from "./errors";
+import { PostNotFound } from "../posts/errors";
 
 const UnitReadFailureResponse = toApiErrorResponse(["UnitNotFound"]);
 const UnitMutationForbiddenResponse = toApiErrorResponse([
@@ -123,25 +127,11 @@ export default new Elysia()
 				async ({ profile, authorization, body }) => {
 					await authorization.unit.ensureCanRead(body.targetId);
 					await authorization.realm.ensureParticipation(body.realmId);
-					let scoreInput: { realmId: string; score: number } | undefined;
-					if (body.score !== undefined) {
-						if (!body.realmId) throw new ReviewRealmRequired();
-						scoreInput = { realmId: body.realmId, score: body.score };
-					}
 					const id = await database.transaction(async (tx) => {
 						await authorization.entity.ensureSubjectAssociationAllowedIfEntity(
 							tx,
 							body.targetId,
 						);
-						if (scoreInput) {
-							await upsertScore(
-								tx,
-								profile.unitId,
-								body.targetId,
-								scoreInput.realmId,
-								scoreInput.score,
-							);
-						}
 						const created = await insertUnit(tx, {
 							kind: "post",
 							status: "published",
@@ -188,7 +178,6 @@ export default new Elysia()
 					body: CreateReviewBody,
 					response: {
 						[StatusCodes.OK]: IdResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ReviewRealmRequired"]),
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 							"RealmCapabilityRequired",
 							"EntityAssociationRestricted",
@@ -346,10 +335,10 @@ export default new Elysia()
 				async ({ params, profile, authorization, body }) => {
 					await authorization.unit.ensureCanRead(params.targetId);
 					await authorization.realm.ensureParticipation(body.realmId);
-					const scoreEntryId = await database.transaction((tx) =>
+					const scoreId = await database.transaction((tx) =>
 						upsertScore(tx, profile.unitId, params.targetId, body.realmId, body.score),
 					);
-					return { scoreEntryId, score: body.score };
+					return { scoreId, score: body.score };
 				},
 				{
 					access: "contribute:interaction:write",
@@ -412,6 +401,94 @@ export default new Elysia()
 						[StatusCodes.NOT_FOUND]: UnitReadFailureResponse,
 					},
 					detail: { summary: "Get score aggregate", tags: ["Reviews"] },
+				},
+			),
+	)
+	.group("/score-context", (app) =>
+		app
+			.get(
+				"",
+				async ({ request }) => {
+					const authorization = (await resolveIdentity(request.headers, "unit:read"))
+						.authorization;
+					const [context] = await database
+						.select({ contextPostId: globalScoreContext.contextPostId })
+						.from(globalScoreContext)
+						.where(eq(globalScoreContext.singleton, true))
+						.limit(1);
+					if (context)
+						await authorization.unit.ensureCanRead(
+							context.contextPostId,
+							() => new PostNotFound(),
+						);
+					return { contextPostId: context?.contextPostId ?? null };
+				},
+				{
+					response: {
+						[StatusCodes.OK]: ScoreContextResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PostNotFound"]),
+					},
+					detail: { summary: "Get global Score context", tags: ["Scores"] },
+				},
+			)
+			.put(
+				"",
+				async ({ profile, authorization, body }) => {
+					await authorization.platform.ensureCapability("platform.score-context.manage");
+					await authorization.unit.ensureCanRead(
+						body.contextPostId,
+						() => new PostNotFound(),
+					);
+					const [record] = await database
+						.select({ id: post.id })
+						.from(post)
+						.where(eq(post.id, body.contextPostId))
+						.limit(1);
+					if (!record) throw new PostNotFound();
+					await database
+						.insert(globalScoreContext)
+						.values({
+							singleton: true,
+							contextPostId: body.contextPostId,
+							createdByProfileId: profile.unitId,
+						})
+						.onConflictDoUpdate({
+							target: globalScoreContext.singleton,
+							set: { contextPostId: body.contextPostId, updatedAt: new Date() },
+						});
+					return { contextPostId: body.contextPostId };
+				},
+				{
+					access: "session-only",
+					body: SetScoreContextBody,
+					response: {
+						[StatusCodes.OK]: ScoreContextResponse,
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PostNotFound"]),
+					},
+					detail: { summary: "Set global Score context", tags: ["Scores"] },
+				},
+			)
+			.delete(
+				"",
+				async ({ authorization }) => {
+					await authorization.platform.ensureCapability("platform.score-context.manage");
+					await database
+						.delete(globalScoreContext)
+						.where(eq(globalScoreContext.singleton, true));
+					return new Response(null, { status: StatusCodes.NO_CONTENT });
+				},
+				{
+					access: "session-only",
+					response: {
+						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.FORBIDDEN]: toApiErrorResponse(["PlatformCapabilityRequired"]),
+					},
+					detail: {
+						summary: "Clear global Score context",
+						tags: ["Scores"],
+						responses: NoContentResponse,
+					},
 				},
 			),
 	);

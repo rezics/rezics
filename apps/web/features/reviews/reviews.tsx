@@ -11,10 +11,12 @@ import {
 	useGetApiReactionsUnitsByUnitId,
 	useGetApiReviews,
 	useGetApiReviewsByReviewId,
+	useGetApiPostsByPostIdScores,
 	useGetApiScoresByTargetId,
 	usePatchApiReviewsByReviewId,
 	usePostApiReviews,
 	usePutApiReactionsUnitsByUnitId,
+	usePutApiPostsByPostIdScores,
 	usePutApiScoresByTargetId,
 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
@@ -112,6 +114,8 @@ export function ReviewsPage() {
 
 export function ReviewCreate() {
 	const create = usePostApiReviews();
+	const setScore = usePutApiScoresByTargetId();
+	const bindScores = usePutApiPostsByPostIdScores();
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const { locale, t } = useTranslation({ suspense: true });
@@ -133,6 +137,13 @@ export function ReviewCreate() {
 		}
 		setInvalid(false);
 		try {
+			const scoreResult =
+				scoreValue && realm
+					? await setScore.mutateAsync({
+							path: { targetId: target.id },
+							body: { realmId: realm.id, score: Number(scoreValue) },
+						})
+					: undefined;
 			const result = await create.mutateAsync({
 				body: {
 					targetId: target.id,
@@ -143,9 +154,13 @@ export function ReviewCreate() {
 						? { summary: String(form.get("summary") ?? "").trim() }
 						: {}),
 					body: writePortableText(body),
-					...(scoreValue ? { score: Number(scoreValue) } : {}),
 				},
 			});
+			if (scoreResult)
+				await bindScores.mutateAsync({
+					path: { postId: result.id },
+					body: [{ scoreId: scoreResult.scoreId }],
+				});
 			await invalidateReviews(queryClient, result.id);
 			router.push(`/reviews/${result.id}`);
 		} catch {
@@ -187,9 +202,11 @@ export function ReviewCreate() {
 					</FieldGroup>
 					{invalid && <p className="text-destructive text-sm">{t.errors.invalid}</p>}
 					<RequestFailure error={create.error} fallback={t.ui.retryLater} />
+					<RequestFailure error={setScore.error} fallback={t.ui.retryLater} />
+					<RequestFailure error={bindScores.error} fallback={t.ui.retryLater} />
 					<Button
 						disabled={!target || !body.length}
-						isLoading={create.isPending}
+						isLoading={create.isPending || setScore.isPending || bindScores.isPending}
 						type="submit"
 					>
 						{t.ui.create}
@@ -274,10 +291,34 @@ export function ReviewDetail({ id }: { id: string }) {
 					</CardContent>
 				</Card>
 			)}
+			<BoundScores postId={review.id} />
 			{review.realmId && <ScorePanel realmId={review.realmId} targetId={review.targetId} />}
 			<ReactionControls targetId={review.id} />
 			<RequestFailure error={remove.error} fallback={t.ui.retryLater} />
 		</main>
+	);
+}
+
+function BoundScores({ postId }: { postId: string }) {
+	const query = useGetApiPostsByPostIdScores({ path: { postId } });
+	const { t } = useTranslation({ suspense: true });
+	if (query.isError)
+		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
+	if (query.isPending || !query.data?.items.length) return null;
+	return (
+		<Card>
+			<CardHeader title={t.engagement.reviewScore} />
+			<CardContent className="flex flex-wrap gap-2">
+				{query.data.items.map((item) => (
+					<span
+						className="bg-surface-muted rounded-md px-3 py-2 text-sm font-medium"
+						key={item.scoreId}
+					>
+						{item.value}/10
+					</span>
+				))}
+			</CardContent>
+		</Card>
 	);
 }
 

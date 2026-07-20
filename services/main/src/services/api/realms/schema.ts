@@ -44,6 +44,12 @@ export type CreateRealmBody = Static<typeof CreateRealmBody>;
 export const RealmParams = t.Object({ realmId: Uuid });
 export type RealmParams = Static<typeof RealmParams>;
 
+export const SetRealmScoreContextBody = t.Object(
+	{ contextPostId: Uuid },
+	{ additionalProperties: false },
+);
+export type SetRealmScoreContextBody = Static<typeof SetRealmScoreContextBody>;
+
 export const RealmDetailQuery = t.Object({ language: t.Optional(LanguageTag) });
 export type RealmDetailQuery = Static<typeof RealmDetailQuery>;
 
@@ -175,11 +181,12 @@ export const RealmUnitListResponse = t.Object({
 
 const RealmModerationNoteResponse = t.Object({
 	postId: Uuid,
-	revisionId: Uuid,
+	latestRevisionId: t.Nullable(Uuid),
 	role: t.Union([t.Literal("internal_note"), t.Literal("public_notice")]),
 	language: LanguageTag,
 	content: PortableTextDocument,
 	createdAt: DateTime,
+	updatedAt: DateTime,
 });
 
 export const RealmUnitModerationHistoryResponse = t.Object({

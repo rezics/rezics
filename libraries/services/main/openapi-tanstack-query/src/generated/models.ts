@@ -2116,8 +2116,8 @@ export const ApiErrorCode = {
 	ContentStructureNodeNotFound: "ContentStructureNodeNotFound",
 	ChapterNotFound: "ChapterNotFound",
 	ChapterLanguageNotFound: "ChapterLanguageNotFound",
-	ReviewRealmRequired: "ReviewRealmRequired",
 	ReviewNotFound: "ReviewNotFound",
+	GovernanceNoteNotFound: "GovernanceNoteNotFound",
 	ModerationTargetNotFound: "ModerationTargetNotFound",
 	ModerationRealmMissing: "ModerationRealmMissing",
 	ModerationTargetScopeRequired: "ModerationTargetScopeRequired",
@@ -2163,6 +2163,8 @@ export const ApiErrorCode = {
 	ReplyPostNotFound: "ReplyPostNotFound",
 	ParentReplyNotFound: "ParentReplyNotFound",
 	ReplyDepthExceeded: "ReplyDepthExceeded",
+	PostScoreNotFound: "PostScoreNotFound",
+	PostScoreDuplicate: "PostScoreDuplicate",
 	InvalidNotificationCursor: "InvalidNotificationCursor",
 	NotificationNotFound: "NotificationNotFound",
 	AliasNotFound: "AliasNotFound",
@@ -2181,6 +2183,7 @@ export const ApiErrorCode = {
 	RealmOwnerLeaveForbidden: "RealmOwnerLeaveForbidden",
 	RealmMemberNotFound: "RealmMemberNotFound",
 	RealmUnitNotFound: "RealmUnitNotFound",
+	RealmScoreContextPostNotMounted: "RealmScoreContextPostNotMounted",
 	InvalidFeedCursor: "InvalidFeedCursor",
 	InvalidHistoryCursor: "InvalidHistoryCursor",
 	UnitRevisionNotFound: "UnitRevisionNotFound",
@@ -8404,12 +8407,6 @@ export type GetApiFeedbackMeStatus200 = {
 			postId: string;
 			/**
 			 * @description
-			 * Format: `uuid`
-			 * @type string
-			 */
-			revisionId: string;
-			/**
-			 * @description
 			 * Format: `bcp-47`
 			 * @minLength 2
 			 * @maxLength 35
@@ -8559,12 +8556,6 @@ export type GetApiFeedbackMeStatus200 = {
 					 * @type string
 					 */
 					postId: string;
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					revisionId: string;
 					/**
 					 * @description
 					 * Format: `bcp-47`
@@ -8796,12 +8787,6 @@ export type PostApiFeedbackStatus200 = {
 		postId: string;
 		/**
 		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		revisionId: string;
-		/**
-		 * @description
 		 * Format: `bcp-47`
 		 * @minLength 2
 		 * @maxLength 35
@@ -8951,12 +8936,6 @@ export type PostApiFeedbackStatus200 = {
 				 * @type string
 				 */
 				postId: string;
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				revisionId: string;
 				/**
 				 * @description
 				 * Format: `bcp-47`
@@ -13616,6 +13595,742 @@ export type DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdRespon
 	| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus422
 	| DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdStatus500;
 
+/**
+ * @type object
+ */
+export type GetApiGovernanceNotesByPostIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	postId: string;
+};
+
+export const GetApiGovernanceNotesByPostIdStatus200RoleEnum = {
+	evidence: "evidence",
+	internal_note: "internal_note",
+	public_notice: "public_notice",
+} as const;
+
+export type GetApiGovernanceNotesByPostIdStatus200RoleEnum =
+	(typeof GetApiGovernanceNotesByPostIdStatus200RoleEnum)[keyof typeof GetApiGovernanceNotesByPostIdStatus200RoleEnum];
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceNotesByPostIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	postId: string;
+	latestRevisionId: (string | null) | null;
+	/**
+	 * @type string
+	 */
+	role: GetApiGovernanceNotesByPostIdStatus200RoleEnum;
+	/**
+	 * @description
+	 * Format: `bcp-47`
+	 * @minLength 2
+	 * @maxLength 35
+	 * @type string
+	 */
+	language: string;
+	/**
+	 * @type object
+	 */
+	content: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type string
+					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!span$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type string
+					 */
+					_type: "image";
+					/**
+					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+					 * @type string
+					 */
+					assetId: string;
+					/**
+					 * @type string | undefined
+					 */
+					alt?: string;
+					/**
+					 * @type string | undefined
+					 */
+					caption?: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!(?:block|image)$).+
+					 * @type string
+					 */
+					_type: string;
+					[key: string]: unknown;
+			  }
+		)[];
+	};
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceNotesByPostIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'GovernanceNoteNotFound'
+		 * @type string
+		 */
+		code: "GovernanceNoteNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceNotesByPostIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceNotesByPostIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceNotesByPostIdOptions = {
+	body?: never;
+	path: GetApiGovernanceNotesByPostIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiGovernanceNotesByPostIdResponses = {
+	"200": GetApiGovernanceNotesByPostIdStatus200;
+	"404": GetApiGovernanceNotesByPostIdStatus404;
+	"422": GetApiGovernanceNotesByPostIdStatus422;
+	"500": GetApiGovernanceNotesByPostIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiGovernanceNotesByPostIdResponse =
+	| GetApiGovernanceNotesByPostIdStatus200
+	| GetApiGovernanceNotesByPostIdStatus404
+	| GetApiGovernanceNotesByPostIdStatus422
+	| GetApiGovernanceNotesByPostIdStatus500;
+
+/**
+ * @type object
+ */
+export type PatchApiGovernanceNotesByPostIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	postId: string;
+};
+
+export const PatchApiGovernanceNotesByPostIdStatus200RoleEnum = {
+	evidence: "evidence",
+	internal_note: "internal_note",
+	public_notice: "public_notice",
+} as const;
+
+export type PatchApiGovernanceNotesByPostIdStatus200RoleEnum =
+	(typeof PatchApiGovernanceNotesByPostIdStatus200RoleEnum)[keyof typeof PatchApiGovernanceNotesByPostIdStatus200RoleEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiGovernanceNotesByPostIdStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	postId: string;
+	latestRevisionId: (string | null) | null;
+	/**
+	 * @type string
+	 */
+	role: PatchApiGovernanceNotesByPostIdStatus200RoleEnum;
+	/**
+	 * @description
+	 * Format: `bcp-47`
+	 * @minLength 2
+	 * @maxLength 35
+	 * @type string
+	 */
+	language: string;
+	/**
+	 * @type object
+	 */
+	content: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type string
+					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!span$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type string
+					 */
+					_type: "image";
+					/**
+					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+					 * @type string
+					 */
+					assetId: string;
+					/**
+					 * @type string | undefined
+					 */
+					alt?: string;
+					/**
+					 * @type string | undefined
+					 */
+					caption?: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!(?:block|image)$).+
+					 * @type string
+					 */
+					_type: string;
+					[key: string]: unknown;
+			  }
+		)[];
+	};
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export const PatchApiGovernanceNotesByPostIdStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type PatchApiGovernanceNotesByPostIdStatus403ErrorCodeEnum =
+	(typeof PatchApiGovernanceNotesByPostIdStatus403ErrorCodeEnum)[keyof typeof PatchApiGovernanceNotesByPostIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiGovernanceNotesByPostIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PatchApiGovernanceNotesByPostIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PatchApiGovernanceNotesByPostIdStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	GovernanceNoteNotFound: "GovernanceNoteNotFound",
+} as const;
+
+export type PatchApiGovernanceNotesByPostIdStatus404ErrorCodeEnum =
+	(typeof PatchApiGovernanceNotesByPostIdStatus404ErrorCodeEnum)[keyof typeof PatchApiGovernanceNotesByPostIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiGovernanceNotesByPostIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PatchApiGovernanceNotesByPostIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiGovernanceNotesByPostIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitRevisionConflict'
+		 * @type string
+		 */
+		code: "UnitRevisionConflict";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiGovernanceNotesByPostIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PatchApiGovernanceNotesByPostIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PatchApiGovernanceNotesByPostIdBody = {
+	/**
+	 * @description
+	 * Format: `bcp-47`
+	 * @minLength 2
+	 * @maxLength 35
+	 * @type string
+	 */
+	language: string;
+	/**
+	 * @type object
+	 */
+	content: {
+		/**
+		 * @type string
+		 */
+		_type: "portable-text";
+		/**
+		 * @pattern ^[0-9a-f]{12}$
+		 * @type string
+		 */
+		_key: string;
+		/**
+		 * @type array
+		 */
+		content: (
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type string
+					 */
+					_type: "block";
+					/**
+					 * @type array
+					 */
+					children: (
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @type string
+								 */
+								_type: "span";
+								/**
+								 * @type string
+								 */
+								text: string;
+								/**
+								 * @type array | undefined
+								 */
+								marks?: string[];
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								_key: string;
+								/**
+								 * @pattern ^(?!span$).+
+								 * @type string
+								 */
+								_type: string;
+								[key: string]: unknown;
+						  }
+					)[];
+					/**
+					 * @type array | undefined
+					 */
+					markDefs?: {
+						/**
+						 * @type string
+						 */
+						_key: string;
+						/**
+						 * @type string
+						 */
+						_type: string;
+						[key: string]: unknown;
+					}[];
+					/**
+					 * @type string | undefined
+					 */
+					listItem?: string;
+					/**
+					 * @type string | undefined
+					 */
+					style?: string;
+					/**
+					 * @minLength 1
+					 * @type integer | undefined
+					 */
+					level?: number;
+					[key: string]: unknown;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @type string
+					 */
+					_type: "image";
+					/**
+					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+					 * @type string
+					 */
+					assetId: string;
+					/**
+					 * @type string | undefined
+					 */
+					alt?: string;
+					/**
+					 * @type string | undefined
+					 */
+					caption?: string;
+			  }
+			| {
+					/**
+					 * @type string
+					 */
+					_key: string;
+					/**
+					 * @pattern ^(?!(?:block|image)$).+
+					 * @type string
+					 */
+					_type: string;
+					[key: string]: unknown;
+			  }
+		)[];
+	};
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	baseRevisionId: string;
+	/**
+	 * @maxLength 500
+	 * @type string | undefined
+	 */
+	editSummary?: string;
+	/**
+	 * @type boolean | undefined
+	 */
+	minor?: boolean;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiGovernanceNotesByPostIdOptions = {
+	body: PatchApiGovernanceNotesByPostIdBody;
+	path: PatchApiGovernanceNotesByPostIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiGovernanceNotesByPostIdResponses = {
+	"200": PatchApiGovernanceNotesByPostIdStatus200;
+	"403": PatchApiGovernanceNotesByPostIdStatus403;
+	"404": PatchApiGovernanceNotesByPostIdStatus404;
+	"409": PatchApiGovernanceNotesByPostIdStatus409;
+	"422": PatchApiGovernanceNotesByPostIdStatus422;
+	"500": PatchApiGovernanceNotesByPostIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PatchApiGovernanceNotesByPostIdResponse =
+	| PatchApiGovernanceNotesByPostIdStatus200
+	| PatchApiGovernanceNotesByPostIdStatus403
+	| PatchApiGovernanceNotesByPostIdStatus404
+	| PatchApiGovernanceNotesByPostIdStatus409
+	| PatchApiGovernanceNotesByPostIdStatus422
+	| PatchApiGovernanceNotesByPostIdStatus500;
+
 export const GetApiGovernanceModerationCasesState = {
 	new: "new",
 	triaged: "triaged",
@@ -13707,12 +14422,7 @@ export type GetApiGovernanceModerationCasesStatus200 = {
 			 * @type string
 			 */
 			postId: string;
-			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string
-			 */
-			revisionId: string;
+			latestRevisionId: (string | null) | null;
 			/**
 			 * @type string
 			 */
@@ -13858,6 +14568,12 @@ export type GetApiGovernanceModerationCasesStatus200 = {
 			 * @type string
 			 */
 			createdAt: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			updatedAt: string;
 		}[];
 		/**
 		 * @description
@@ -14013,12 +14729,7 @@ export type GetApiGovernanceModerationCasesByCaseIdStatus200 = {
 		 * @type string
 		 */
 		postId: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		revisionId: string;
+		latestRevisionId: (string | null) | null;
 		/**
 		 * @type string
 		 */
@@ -14164,6 +14875,12 @@ export type GetApiGovernanceModerationCasesByCaseIdStatus200 = {
 		 * @type string
 		 */
 		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
 	}[];
 	/**
 	 * @description
@@ -14348,12 +15065,7 @@ export type PatchApiGovernanceModerationCasesByCaseIdStatus200 = {
 		 * @type string
 		 */
 		postId: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		revisionId: string;
+		latestRevisionId: (string | null) | null;
 		/**
 		 * @type string
 		 */
@@ -14499,6 +15211,12 @@ export type PatchApiGovernanceModerationCasesByCaseIdStatus200 = {
 		 * @type string
 		 */
 		createdAt: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
 	}[];
 	/**
 	 * @description
@@ -14841,12 +15559,6 @@ export type PostApiGovernanceModerationActionsStatus200 = {
 		 * @type string
 		 */
 		postId: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		revisionId: string;
 		/**
 		 * @type string
 		 */
@@ -17429,6 +18141,7 @@ export const PostApiGovernanceGrantsRequestCapabilityEnum = {
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"platform.grants.manage": "platform.grants.manage",
+	"platform.score-context.manage": "platform.score-context.manage",
 	"realm.contribute": "realm.contribute",
 	"realm.settings.update": "realm.settings.update",
 	"realm.members.read": "realm.members.read",
@@ -42289,34 +43002,6 @@ export type PostApiReviewsStatus200 = {
 	id: string;
 };
 
-/**
- * @type object
- */
-export type PostApiReviewsStatus400 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'ReviewRealmRequired'
-		 * @type string
-		 */
-		code: "ReviewRealmRequired";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
 export const PostApiReviewsStatus403ErrorCodeEnum = {
 	RealmCapabilityRequired: "RealmCapabilityRequired",
 	EntityAssociationRestricted: "EntityAssociationRestricted",
@@ -42589,7 +43274,6 @@ export type PostApiReviewsBody = {
 			  }
 		)[];
 	};
-	score?: string | number;
 };
 
 /**
@@ -42607,7 +43291,6 @@ export type PostApiReviewsOptions = {
  */
 export type PostApiReviewsResponses = {
 	"200": PostApiReviewsStatus200;
-	"400": PostApiReviewsStatus400;
 	"403": PostApiReviewsStatus403;
 	"404": PostApiReviewsStatus404;
 	"409": PostApiReviewsStatus409;
@@ -42620,7 +43303,6 @@ export type PostApiReviewsResponses = {
  */
 export type PostApiReviewsResponse =
 	| PostApiReviewsStatus200
-	| PostApiReviewsStatus400
 	| PostApiReviewsStatus403
 	| PostApiReviewsStatus404
 	| PostApiReviewsStatus409
@@ -43324,7 +44006,7 @@ export type PutApiScoresByTargetIdStatus200 = {
 	 * Format: `uuid`
 	 * @type string
 	 */
-	scoreEntryId: string;
+	scoreId: string;
 	score: string | number;
 };
 
@@ -43572,6 +44254,252 @@ export type GetApiScoresByTargetIdResponse =
 	| GetApiScoresByTargetIdStatus404
 	| GetApiScoresByTargetIdStatus422
 	| GetApiScoresByTargetIdStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiScoreContextStatus200 = {
+	contextPostId: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type GetApiScoreContextStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PostNotFound'
+		 * @type string
+		 */
+		code: "PostNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiScoreContextStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiScoreContextOptions = {
+	body?: never;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiScoreContextResponses = {
+	"200": GetApiScoreContextStatus200;
+	"404": GetApiScoreContextStatus404;
+	"500": GetApiScoreContextStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiScoreContextResponse =
+	GetApiScoreContextStatus200 | GetApiScoreContextStatus404 | GetApiScoreContextStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiScoreContextStatus200 = {
+	contextPostId: (string | null) | null;
+};
+
+/**
+ * @type object
+ */
+export type PutApiScoreContextStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiScoreContextStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PostNotFound'
+		 * @type string
+		 */
+		code: "PostNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiScoreContextStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiScoreContextStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiScoreContextBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	contextPostId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiScoreContextOptions = {
+	body: PutApiScoreContextBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiScoreContextResponses = {
+	"200": PutApiScoreContextStatus200;
+	"403": PutApiScoreContextStatus403;
+	"404": PutApiScoreContextStatus404;
+	"422": PutApiScoreContextStatus422;
+	"500": PutApiScoreContextStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiScoreContextResponse =
+	| PutApiScoreContextStatus200
+	| PutApiScoreContextStatus403
+	| PutApiScoreContextStatus404
+	| PutApiScoreContextStatus422
+	| PutApiScoreContextStatus500;
+
+/**
+ * @type void
+ */
+export type DeleteApiScoreContextStatus204 = void;
+
+/**
+ * @type object
+ */
+export type DeleteApiScoreContextStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PlatformCapabilityRequired'
+		 * @type string
+		 */
+		code: "PlatformCapabilityRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiScoreContextStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiScoreContextOptions = {
+	body?: never;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiScoreContextResponses = {
+	"204": DeleteApiScoreContextStatus204;
+	"403": DeleteApiScoreContextStatus403;
+	"500": DeleteApiScoreContextStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiScoreContextResponse =
+	| DeleteApiScoreContextStatus204
+	| DeleteApiScoreContextStatus403
+	| DeleteApiScoreContextStatus500;
 
 /**
  * @type object
@@ -44804,6 +45732,345 @@ export type PostApiPollsByPollIdCloseResponse =
 	| PostApiPollsByPollIdCloseStatus409
 	| PostApiPollsByPollIdCloseStatus422
 	| PostApiPollsByPollIdCloseStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiPostsByPostIdScoresPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	postId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiPostsByPostIdScoresStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		scoreId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		realmId: string;
+		value: string | number;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiPostsByPostIdScoresStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PostNotFound'
+		 * @type string
+		 */
+		code: "PostNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiPostsByPostIdScoresStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiPostsByPostIdScoresStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiPostsByPostIdScoresOptions = {
+	body?: never;
+	path: GetApiPostsByPostIdScoresPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiPostsByPostIdScoresResponses = {
+	"200": GetApiPostsByPostIdScoresStatus200;
+	"404": GetApiPostsByPostIdScoresStatus404;
+	"422": GetApiPostsByPostIdScoresStatus422;
+	"500": GetApiPostsByPostIdScoresStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiPostsByPostIdScoresResponse =
+	| GetApiPostsByPostIdScoresStatus200
+	| GetApiPostsByPostIdScoresStatus404
+	| GetApiPostsByPostIdScoresStatus422
+	| GetApiPostsByPostIdScoresStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiPostsByPostIdScoresPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	postId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiPostsByPostIdScoresStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		scoreId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		profileId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		unitId: string;
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		realmId: string;
+		value: string | number;
+		/**
+		 * @description
+		 * Format: `fractional-position`
+		 * @minLength 2
+		 * @maxLength 512
+		 * @type string
+		 */
+		position: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+};
+
+export const PutApiPostsByPostIdScoresStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type PutApiPostsByPostIdScoresStatus403ErrorCodeEnum =
+	(typeof PutApiPostsByPostIdScoresStatus403ErrorCodeEnum)[keyof typeof PutApiPostsByPostIdScoresStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiPostsByPostIdScoresStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: PutApiPostsByPostIdScoresStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiPostsByPostIdScoresStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	PostNotFound: "PostNotFound",
+	PostScoreNotFound: "PostScoreNotFound",
+} as const;
+
+export type PutApiPostsByPostIdScoresStatus404ErrorCodeEnum =
+	(typeof PutApiPostsByPostIdScoresStatus404ErrorCodeEnum)[keyof typeof PutApiPostsByPostIdScoresStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiPostsByPostIdScoresStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PutApiPostsByPostIdScoresStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiPostsByPostIdScoresStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'PostScoreDuplicate'
+				 * @type string
+				 */
+				code: "PostScoreDuplicate";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiPostsByPostIdScoresStatus500 = InternalError;
+
+/**
+ * @type array
+ */
+export type PutApiPostsByPostIdScoresBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	scoreId: string;
+}[];
+
+/**
+ * @type object
+ */
+export type PutApiPostsByPostIdScoresOptions = {
+	body: PutApiPostsByPostIdScoresBody;
+	path: PutApiPostsByPostIdScoresPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiPostsByPostIdScoresResponses = {
+	"200": PutApiPostsByPostIdScoresStatus200;
+	"403": PutApiPostsByPostIdScoresStatus403;
+	"404": PutApiPostsByPostIdScoresStatus404;
+	"422": PutApiPostsByPostIdScoresStatus422;
+	"500": PutApiPostsByPostIdScoresStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiPostsByPostIdScoresResponse =
+	| PutApiPostsByPostIdScoresStatus200
+	| PutApiPostsByPostIdScoresStatus403
+	| PutApiPostsByPostIdScoresStatus404
+	| PutApiPostsByPostIdScoresStatus422
+	| PutApiPostsByPostIdScoresStatus500;
 
 /**
  * @type object
@@ -48217,6 +49484,350 @@ export type PatchApiRealmsByRealmIdResponse =
 /**
  * @type object
  */
+export type GetApiRealmsByRealmIdScoreContextPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdScoreContextStatus200 = {
+	contextPostId: (string | null) | null;
+};
+
+export const GetApiRealmsByRealmIdScoreContextStatus404ErrorCodeEnum = {
+	RealmNotFound: "RealmNotFound",
+	PostNotFound: "PostNotFound",
+} as const;
+
+export type GetApiRealmsByRealmIdScoreContextStatus404ErrorCodeEnum =
+	(typeof GetApiRealmsByRealmIdScoreContextStatus404ErrorCodeEnum)[keyof typeof GetApiRealmsByRealmIdScoreContextStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdScoreContextStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmNotFound'
+		 * @type string
+		 */
+		code: GetApiRealmsByRealmIdScoreContextStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdScoreContextStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdScoreContextStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdScoreContextOptions = {
+	body?: never;
+	path: GetApiRealmsByRealmIdScoreContextPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdScoreContextResponses = {
+	"200": GetApiRealmsByRealmIdScoreContextStatus200;
+	"404": GetApiRealmsByRealmIdScoreContextStatus404;
+	"422": GetApiRealmsByRealmIdScoreContextStatus422;
+	"500": GetApiRealmsByRealmIdScoreContextStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiRealmsByRealmIdScoreContextResponse =
+	| GetApiRealmsByRealmIdScoreContextStatus200
+	| GetApiRealmsByRealmIdScoreContextStatus404
+	| GetApiRealmsByRealmIdScoreContextStatus422
+	| GetApiRealmsByRealmIdScoreContextStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdScoreContextPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdScoreContextStatus200 = {
+	contextPostId: (string | null) | null;
+};
+
+export const PutApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum = {
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type PutApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdScoreContextStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: PutApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdScoreContextStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PostNotFound'
+		 * @type string
+		 */
+		code: "PostNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiRealmsByRealmIdScoreContextStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RealmScoreContextPostNotMounted'
+				 * @type string
+				 */
+				code: "RealmScoreContextPostNotMounted";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdScoreContextStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdScoreContextBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	contextPostId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdScoreContextOptions = {
+	body: PutApiRealmsByRealmIdScoreContextBody;
+	path: PutApiRealmsByRealmIdScoreContextPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdScoreContextResponses = {
+	"200": PutApiRealmsByRealmIdScoreContextStatus200;
+	"403": PutApiRealmsByRealmIdScoreContextStatus403;
+	"404": PutApiRealmsByRealmIdScoreContextStatus404;
+	"422": PutApiRealmsByRealmIdScoreContextStatus422;
+	"500": PutApiRealmsByRealmIdScoreContextStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiRealmsByRealmIdScoreContextResponse =
+	| PutApiRealmsByRealmIdScoreContextStatus200
+	| PutApiRealmsByRealmIdScoreContextStatus403
+	| PutApiRealmsByRealmIdScoreContextStatus404
+	| PutApiRealmsByRealmIdScoreContextStatus422
+	| PutApiRealmsByRealmIdScoreContextStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdScoreContextPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+/**
+ * @type void
+ */
+export type DeleteApiRealmsByRealmIdScoreContextStatus204 = void;
+
+export const DeleteApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum = {
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type DeleteApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum =
+	(typeof DeleteApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdScoreContextStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: DeleteApiRealmsByRealmIdScoreContextStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdScoreContextStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdScoreContextStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdScoreContextOptions = {
+	body?: never;
+	path: DeleteApiRealmsByRealmIdScoreContextPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdScoreContextResponses = {
+	"204": DeleteApiRealmsByRealmIdScoreContextStatus204;
+	"403": DeleteApiRealmsByRealmIdScoreContextStatus403;
+	"422": DeleteApiRealmsByRealmIdScoreContextStatus422;
+	"500": DeleteApiRealmsByRealmIdScoreContextStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiRealmsByRealmIdScoreContextResponse =
+	| DeleteApiRealmsByRealmIdScoreContextStatus204
+	| DeleteApiRealmsByRealmIdScoreContextStatus403
+	| DeleteApiRealmsByRealmIdScoreContextStatus422
+	| DeleteApiRealmsByRealmIdScoreContextStatus500;
+
+/**
+ * @type object
+ */
 export type PutApiRealmsByRealmIdFollowPath = {
 	/**
 	 * @description
@@ -50272,12 +51883,7 @@ export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200 = {
 			 * @type string
 			 */
 			postId: string;
-			/**
-			 * @description
-			 * Format: `uuid`
-			 * @type string
-			 */
-			revisionId: string;
+			latestRevisionId: (string | null) | null;
 			/**
 			 * @type string
 			 */
@@ -50423,6 +52029,12 @@ export type GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200 = {
 			 * @type string
 			 */
 			createdAt: string;
+			/**
+			 * @description
+			 * Format: `date-time`
+			 * @type string
+			 */
+			updatedAt: string;
 		}[];
 		/**
 		 * @description
@@ -50603,12 +52215,6 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus200 = {
 		 * @type string
 		 */
 		postId: string;
-		/**
-		 * @description
-		 * Format: `uuid`
-		 * @type string
-		 */
-		revisionId: string;
 		/**
 		 * @type string
 		 */

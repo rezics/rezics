@@ -39,17 +39,25 @@ export const GovernanceActionNote = t.Object(
 const GovernanceActionNotes = t.Array(GovernanceActionNote, { maxItems: 2 });
 export const GovernanceNoteResponse = t.Object({
 	postId: Uuid,
-	revisionId: Uuid,
+	latestRevisionId: t.Nullable(Uuid),
 	role: t.Union([t.Literal("evidence"), t.Literal("internal_note"), t.Literal("public_notice")]),
 	language: LanguageTag,
 	content: PortableTextDocument,
 	createdAt: DateTime,
+	updatedAt: DateTime,
 });
-const GovernanceNoteBindingResponse = t.Pick(GovernanceNoteResponse, [
-	"postId",
-	"revisionId",
-	"role",
-]);
+export const GovernanceNoteParams = t.Object({ postId: Uuid });
+export const UpdateGovernanceNoteBody = t.Object(
+	{
+		language: LanguageTag,
+		content: PortableTextDocument,
+		baseRevisionId: Uuid,
+		editSummary: t.Optional(t.String({ maxLength: 500 })),
+		minor: t.Optional(t.Boolean()),
+	},
+	{ additionalProperties: false },
+);
+const GovernanceNoteBindingResponse = t.Pick(GovernanceNoteResponse, ["postId", "role"]);
 const ModerationActionCommon = {
 	caseId: Uuid,
 	reasonCode: GovernanceReasonCode,

@@ -17,7 +17,6 @@ export const CreateReviewBody = t.Object({
 	title: t.String({ minLength: 1, maxLength: 500 }),
 	summary: t.Optional(t.String({ maxLength: 2_000 })),
 	body: PortableTextDocument,
-	score: t.Optional(t.Integer({ minimum: 1, maximum: 10 })),
 });
 export type CreateReviewBody = Static<typeof CreateReviewBody>;
 
@@ -43,3 +42,9 @@ export type SetScoreBody = Static<typeof SetScoreBody>;
 
 export const ScoreAggregateQuery = t.Object({ realmId: Uuid });
 export type ScoreAggregateQuery = Static<typeof ScoreAggregateQuery>;
+
+export const SetScoreContextBody = t.Object(
+	{ contextPostId: Uuid },
+	{ additionalProperties: false },
+);
+export type SetScoreContextBody = Static<typeof SetScoreContextBody>;

@@ -113,6 +113,10 @@ import type {
 	PostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDeclineResponses,
 	DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdOptions,
 	DeleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdResponses,
+	GetApiGovernanceNotesByPostIdOptions,
+	GetApiGovernanceNotesByPostIdResponses,
+	PatchApiGovernanceNotesByPostIdOptions,
+	PatchApiGovernanceNotesByPostIdResponses,
 	GetApiGovernanceModerationCasesOptions,
 	GetApiGovernanceModerationCasesResponses,
 	GetApiGovernanceModerationCasesByCaseIdOptions,
@@ -347,6 +351,12 @@ import type {
 	PutApiScoresByTargetIdResponses,
 	GetApiScoresByTargetIdOptions,
 	GetApiScoresByTargetIdResponses,
+	GetApiScoreContextOptions,
+	GetApiScoreContextResponses,
+	PutApiScoreContextOptions,
+	PutApiScoreContextResponses,
+	DeleteApiScoreContextOptions,
+	DeleteApiScoreContextResponses,
 	GetApiReactionsUnitsByUnitIdOptions,
 	GetApiReactionsUnitsByUnitIdResponses,
 	PutApiReactionsUnitsByUnitIdOptions,
@@ -367,6 +377,10 @@ import type {
 	DeleteApiPollsByPollIdVoteResponses,
 	PostApiPollsByPollIdCloseOptions,
 	PostApiPollsByPollIdCloseResponses,
+	GetApiPostsByPostIdScoresOptions,
+	GetApiPostsByPostIdScoresResponses,
+	PutApiPostsByPostIdScoresOptions,
+	PutApiPostsByPostIdScoresResponses,
 	GetApiPostsOptions,
 	GetApiPostsResponses,
 	PostApiPostsOptions,
@@ -393,6 +407,12 @@ import type {
 	GetApiRealmsByRealmIdResponses,
 	PatchApiRealmsByRealmIdOptions,
 	PatchApiRealmsByRealmIdResponses,
+	GetApiRealmsByRealmIdScoreContextOptions,
+	GetApiRealmsByRealmIdScoreContextResponses,
+	PutApiRealmsByRealmIdScoreContextOptions,
+	PutApiRealmsByRealmIdScoreContextResponses,
+	DeleteApiRealmsByRealmIdScoreContextOptions,
+	DeleteApiRealmsByRealmIdScoreContextResponses,
 	PutApiRealmsByRealmIdFollowOptions,
 	PutApiRealmsByRealmIdFollowResponses,
 	DeleteApiRealmsByRealmIdFollowOptions,
@@ -1400,6 +1420,36 @@ export function deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId<
 			ThrowOnError
 		>
 	>;
+}
+
+/**
+ * @summary Get governance note
+ * {@link /api/governance/notes/:postId}
+ */
+export function getApiGovernanceNotesByPostId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiGovernanceNotesByPostIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiGovernanceNotesByPostIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/governance/notes/{postId}", ...config }) as Promise<
+		RequestResult<GetApiGovernanceNotesByPostIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Update governance note
+ * {@link /api/governance/notes/:postId}
+ */
+export function patchApiGovernanceNotesByPostId<ThrowOnError extends boolean = true>(
+	options: Options<PatchApiGovernanceNotesByPostIdOptions, ThrowOnError>,
+): Promise<RequestResult<PatchApiGovernanceNotesByPostIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PATCH",
+		url: "/api/governance/notes/{postId}",
+		...config,
+	}) as Promise<RequestResult<PatchApiGovernanceNotesByPostIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -3355,6 +3405,48 @@ export function getApiScoresByTargetId<ThrowOnError extends boolean = true>(
 }
 
 /**
+ * @summary Get global Score context
+ * {@link /api/score-context}
+ */
+export function getApiScoreContext<ThrowOnError extends boolean = true>(
+	options: Options<GetApiScoreContextOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiScoreContextResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/score-context", ...config }) as Promise<
+		RequestResult<GetApiScoreContextResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Set global Score context
+ * {@link /api/score-context}
+ */
+export function putApiScoreContext<ThrowOnError extends boolean = true>(
+	options: Options<PutApiScoreContextOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiScoreContextResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "PUT", url: "/api/score-context", ...config }) as Promise<
+		RequestResult<PutApiScoreContextResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Clear global Score context
+ * {@link /api/score-context}
+ */
+export function deleteApiScoreContext<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiScoreContextOptions, ThrowOnError> = {},
+): Promise<RequestResult<DeleteApiScoreContextResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "DELETE", url: "/api/score-context", ...config }) as Promise<
+		RequestResult<DeleteApiScoreContextResponses, ThrowOnError>
+	>;
+}
+
+/**
  * @summary Get Unit reaction summary
  * {@link /api/reactions/units/:unitId}
  */
@@ -3495,6 +3587,34 @@ export function postApiPollsByPollIdClose<ThrowOnError extends boolean = true>(
 
 	return request({ method: "POST", url: "/api/polls/{pollId}/close", ...config }) as Promise<
 		RequestResult<PostApiPollsByPollIdCloseResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary List Post Scores
+ * {@link /api/posts/:postId/scores}
+ */
+export function getApiPostsByPostIdScores<ThrowOnError extends boolean = true>(
+	options: Options<GetApiPostsByPostIdScoresOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiPostsByPostIdScoresResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/posts/{postId}/scores", ...config }) as Promise<
+		RequestResult<GetApiPostsByPostIdScoresResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Replace Post Scores
+ * {@link /api/posts/:postId/scores}
+ */
+export function putApiPostsByPostIdScores<ThrowOnError extends boolean = true>(
+	options: Options<PutApiPostsByPostIdScoresOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiPostsByPostIdScoresResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "PUT", url: "/api/posts/{postId}/scores", ...config }) as Promise<
+		RequestResult<PutApiPostsByPostIdScoresResponses, ThrowOnError>
 	>;
 }
 
@@ -3682,6 +3802,54 @@ export function patchApiRealmsByRealmId<ThrowOnError extends boolean = true>(
 	return request({ method: "PATCH", url: "/api/realms/{realmId}", ...config }) as Promise<
 		RequestResult<PatchApiRealmsByRealmIdResponses, ThrowOnError>
 	>;
+}
+
+/**
+ * @summary Get Realm Score context
+ * {@link /api/realms/:realmId/score-context}
+ */
+export function getApiRealmsByRealmIdScoreContext<ThrowOnError extends boolean = true>(
+	options: Options<GetApiRealmsByRealmIdScoreContextOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiRealmsByRealmIdScoreContextResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/realms/{realmId}/score-context",
+		...config,
+	}) as Promise<RequestResult<GetApiRealmsByRealmIdScoreContextResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Set Realm Score context
+ * {@link /api/realms/:realmId/score-context}
+ */
+export function putApiRealmsByRealmIdScoreContext<ThrowOnError extends boolean = true>(
+	options: Options<PutApiRealmsByRealmIdScoreContextOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiRealmsByRealmIdScoreContextResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/realms/{realmId}/score-context",
+		...config,
+	}) as Promise<RequestResult<PutApiRealmsByRealmIdScoreContextResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Clear Realm Score context
+ * {@link /api/realms/:realmId/score-context}
+ */
+export function deleteApiRealmsByRealmIdScoreContext<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiRealmsByRealmIdScoreContextOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiRealmsByRealmIdScoreContextResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/realms/{realmId}/score-context",
+		...config,
+	}) as Promise<RequestResult<DeleteApiRealmsByRealmIdScoreContextResponses, ThrowOnError>>;
 }
 
 /**

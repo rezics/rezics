@@ -13,9 +13,9 @@ export async function upsertScore(
 		.values({ profileId: userId, unitId: targetId, realmId, value })
 		.onConflictDoUpdate({
 			target: [score.profileId, score.unitId, score.realmId],
-			set: { value },
+			set: { value, updatedAt: new Date() },
 		})
-		.returning({ id: score.unitId });
+		.returning({ id: score.id });
 	if (!entry) throw new Error("Score upsert did not return an id");
 	return entry.id;
 }

@@ -23,6 +23,7 @@ import {
 	auditEvent,
 	moderationAction,
 	moderationCase,
+	post,
 	profile as profileTable,
 	realm,
 	realmUnit,
@@ -31,6 +32,7 @@ import {
 	realmRule,
 	realmRuleAcceptance,
 	realmRuleRevision,
+	realmScoreContext,
 	unitFollow,
 	unit,
 	unitAccessBinding,
@@ -56,6 +58,7 @@ import {
 	RealmPinResponse,
 	RealmRuleRevisionResponse,
 	RealmRulesResponse,
+	ScoreContextResponse,
 } from "../schema/action-response";
 import {
 	toApiErrorResponse,
@@ -79,6 +82,7 @@ import {
 	RealmMemberParams,
 	RealmParams,
 	RealmDetailQuery,
+	SetRealmScoreContextBody,
 	RealmPinParams,
 	RemoveRealmPinQuery,
 	UpdateRealmBody,
@@ -99,7 +103,9 @@ import {
 	RealmMembershipNotFound,
 	RealmNotFound,
 	RealmOwnerLeaveForbidden,
+	RealmScoreContextPostNotMounted,
 } from "./errors";
+import { PostNotFound } from "../posts/errors";
 
 const RealmNotFoundResponse = toApiErrorResponse(["RealmNotFound"]);
 const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
@@ -365,6 +371,107 @@ export default new Elysia({ prefix: "/realms" })
 				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
 			},
 			detail: { summary: "Get Realm", tags: ["Realms"] },
+		},
+	)
+	.get(
+		"/:realmId/score-context",
+		async ({ params, request }) => {
+			const authorization = (await resolveIdentity(request.headers, "unit:read"))
+				.authorization;
+			await authorization.unit.ensureCanRead(params.realmId, () => new RealmNotFound());
+			const [context] = await database
+				.select({ contextPostId: realmScoreContext.contextPostId })
+				.from(realmScoreContext)
+				.where(eq(realmScoreContext.realmId, params.realmId))
+				.limit(1);
+			if (context)
+				await authorization.unit.ensureCanRead(
+					context.contextPostId,
+					() => new PostNotFound(),
+				);
+			return { contextPostId: context?.contextPostId ?? null };
+		},
+		{
+			params: RealmParams,
+			response: {
+				[StatusCodes.OK]: ScoreContextResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmNotFound", "PostNotFound"]),
+			},
+			detail: { summary: "Get Realm Score context", tags: ["Realms"] },
+		},
+	)
+	.put(
+		"/:realmId/score-context",
+		async ({ params, profile, authorization, body }) => {
+			await authorization.realm.ensureCapability(params.realmId, "realm.settings.update");
+			await authorization.unit.ensureOperationAllowed(params.realmId, [
+				"realm",
+				"score-context",
+			]);
+			await authorization.unit.ensureCanRead(body.contextPostId, () => new PostNotFound());
+			const [mountedPost] = await database
+				.select({ id: post.id })
+				.from(post)
+				.innerJoin(
+					realmUnit,
+					and(eq(realmUnit.realmId, params.realmId), eq(realmUnit.unitId, post.id)),
+				)
+				.where(eq(post.id, body.contextPostId))
+				.limit(1);
+			if (!mountedPost) throw new RealmScoreContextPostNotMounted();
+			await database
+				.insert(realmScoreContext)
+				.values({
+					realmId: params.realmId,
+					contextPostId: body.contextPostId,
+					createdByProfileId: profile.unitId,
+				})
+				.onConflictDoUpdate({
+					target: realmScoreContext.realmId,
+					set: { contextPostId: body.contextPostId, updatedAt: new Date() },
+				});
+			return { contextPostId: body.contextPostId };
+		},
+		{
+			access: "session-only",
+			params: RealmParams,
+			body: SetRealmScoreContextBody,
+			response: {
+				[StatusCodes.OK]: ScoreContextResponse,
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PostNotFound"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+					"RealmScoreContextPostNotMounted",
+				]),
+			},
+			detail: { summary: "Set Realm Score context", tags: ["Realms"] },
+		},
+	)
+	.delete(
+		"/:realmId/score-context",
+		async ({ params, authorization }) => {
+			await authorization.realm.ensureCapability(params.realmId, "realm.settings.update");
+			await authorization.unit.ensureOperationAllowed(params.realmId, [
+				"realm",
+				"score-context",
+			]);
+			await database
+				.delete(realmScoreContext)
+				.where(eq(realmScoreContext.realmId, params.realmId));
+			return new Response(null, { status: StatusCodes.NO_CONTENT });
+		},
+		{
+			access: "session-only",
+			params: RealmParams,
+			response: {
+				[StatusCodes.NO_CONTENT]: t.Void(),
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+			},
+			detail: {
+				summary: "Clear Realm Score context",
+				tags: ["Realms"],
+				responses: NoContentResponse,
+			},
 		},
 	)
 	.patch(
@@ -1072,11 +1179,12 @@ export default new Elysia({ prefix: "/realms" })
 				string,
 				Array<{
 					postId: string;
-					revisionId: string;
+					latestRevisionId: string | null;
 					role: "internal_note" | "public_notice";
 					language: string;
 					content: ReturnType<typeof toPortableTextResponse>;
 					createdAt: Date;
+					updatedAt: Date;
 				}>
 			>();
 			for (const note of notes) {
@@ -1084,11 +1192,12 @@ export default new Elysia({ prefix: "/realms" })
 				const items = notesByAction.get(note.subjectId) ?? [];
 				items.push({
 					postId: note.postId,
-					revisionId: note.revisionId,
+					latestRevisionId: note.latestRevisionId,
 					role: note.role,
 					language: note.language,
 					content: toPortableTextResponse(note.content),
 					createdAt: note.createdAt,
+					updatedAt: note.updatedAt,
 				});
 				notesByAction.set(note.subjectId, items);
 			}

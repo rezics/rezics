@@ -11,6 +11,7 @@ import {
 	unit,
 	conversationParticipantStat,
 	realmTagVoteStat,
+	realmScoreContext,
 	recommendationMetricDaily,
 	recommendationSignalKind,
 	recommendationUnitStat,
@@ -29,6 +30,9 @@ import {
 	realmUnitStatusEvent,
 	RealmUnitMutationCommandValues,
 	scoreStat,
+	score,
+	postScore,
+	globalScoreContext,
 	unitAccessBinding,
 	unitAccessInvitation,
 	unitAccessRestriction,
@@ -184,7 +188,7 @@ describe("database schema contracts", () => {
 		);
 	});
 
-	it("centralizes governance contracts and immutable note bindings", () => {
+	it("centralizes governance contracts and Post-identity note bindings", () => {
 		expect(realmUnitStatus.enumValues).toEqual(["pending", "visible", "hidden", "removed"]);
 		expect(RealmUnitMutationCommandValues).toEqual([
 			"approve",
@@ -204,9 +208,7 @@ describe("database schema contracts", () => {
 		expect(GovernanceNoteRoleValues).toEqual(["evidence", "internal_note", "public_notice"]);
 
 		const binding = getTableConfig(governancePostBinding);
-		expect(binding.foreignKeys.map((key) => key.getName())).toContain(
-			"governance_post_binding_revision_post_fkey",
-		);
+		expect(binding.columns.map((column) => column.name)).not.toContain("revision_id");
 		expect(binding.uniqueConstraints.map((constraint) => constraint.name)).not.toContain(
 			"governance_post_binding_subject_role_key",
 		);
@@ -252,6 +254,32 @@ describe("database schema contracts", () => {
 		expect(getTableConfig(auditEvent).columns.map((column) => column.name)).not.toContain(
 			"reason",
 		);
+	});
+
+	it("models live Score identity, ordered Post display, and current contexts", () => {
+		const scoreConfig = getTableConfig(score);
+		expect(scoreConfig.primaryKeys).toHaveLength(0);
+		expect(score.id.primary).toBe(true);
+		expect(scoreConfig.uniqueConstraints.map((constraint) => constraint.name)).toContain(
+			"score_profile_unit_realm_key",
+		);
+
+		const display = getTableConfig(postScore);
+		expect(display.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
+			"post_id",
+			"score_id",
+		]);
+		expect(display.uniqueConstraints.map((constraint) => constraint.name)).toContain(
+			"post_score_post_position_key",
+		);
+		expect(display.checks).toHaveLength(0);
+
+		expect(getTableConfig(realmScoreContext).foreignKeys.map((key) => key.getName())).toContain(
+			"realm_score_context_post_realm_fkey",
+		);
+		expect(
+			getTableConfig(globalScoreContext).checks.map((constraint) => constraint.name),
+		).toContain("global_score_context_singleton_check");
 	});
 
 	it("separates optional Unit slug addresses from ID-addressed Units", () => {
@@ -331,6 +359,7 @@ describe("database schema contracts", () => {
 				"unit.slug.redirect.release",
 				"entity.associations.override",
 				"unit.ownership.transfer",
+				"platform.score-context.manage",
 			]),
 		);
 		expect(unitSlugAddress.kind.getSQLType()).toBe("text");

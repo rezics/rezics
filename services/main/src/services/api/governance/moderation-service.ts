@@ -671,7 +671,7 @@ export async function executeAuthorizedModerationAction(
 					subjectKind: "moderation_action",
 					subjectIds: [created.id],
 				})
-			).map(({ postId, revisionId, role }) => ({ postId, revisionId, role }));
+			).map(({ postId, role }) => ({ postId, role }));
 			return { created: { ...created, notes }, notificationIds: [], replayed: true };
 		}
 	}
@@ -722,7 +722,6 @@ export async function executeAuthorizedModerationAction(
 	});
 	const noteBindings: Array<{
 		postId: string;
-		revisionId: string;
 		role: "internal_note" | "public_notice";
 	}> = [];
 	for (const note of input.body.notes ?? []) {

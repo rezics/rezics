@@ -9,15 +9,15 @@ import type { DatabaseTransaction } from "../database";
 import {
 	governancePostBinding,
 	post,
-	revisionContent,
 	unitAccessBinding,
 	unitLocalization,
-	unitRevisionSlot,
+	unitRevisionHead,
 	type GovernanceNoteRoleValues,
 	type GovernanceNoteSubjectKindValues,
 } from "../database/schema";
 import { recordUnitRevision } from "../units/history";
 import { insertUnit } from "../units/create";
+import { isPrimaryUnitLocalization } from "../units/localization";
 
 export type GovernanceNoteRole = (typeof GovernanceNoteRoleValues)[number];
 export type GovernanceNoteSubjectKind = (typeof GovernanceNoteSubjectKindValues)[number];
@@ -30,26 +30,11 @@ export type GovernanceNote = {
 
 export type GovernanceNoteRecord = GovernanceNote & {
 	postId: string;
-	revisionId: string;
+	latestRevisionId: string | null;
 	subjectId: string;
 	createdAt: Date;
+	updatedAt: Date;
 };
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-	return value !== null && typeof value === "object" && !Array.isArray(value);
-}
-
-function presentLocalization(payload: unknown): Pick<GovernanceNote, "language" | "content"> {
-	if (!isRecord(payload) || payload.version !== 1 || !Array.isArray(payload.items))
-		throw new Error("Governance note revision has an invalid localization snapshot");
-	const [localization] = payload.items;
-	if (!isRecord(localization) || typeof localization.language !== "string")
-		throw new Error("Governance note revision is missing its localization");
-	return {
-		language: localization.language,
-		content: parseDocument(PortableTextDocument, localization.content),
-	};
-}
 
 export async function createGovernanceNotePost(
 	tx: DatabaseTransaction,
@@ -63,7 +48,7 @@ export async function createGovernanceNotePost(
 		publicRecipientProfileIds?: readonly string[];
 		note: GovernanceNote;
 	},
-): Promise<{ postId: string; revisionId: string }> {
+): Promise<{ postId: string }> {
 	const created = await insertUnit(tx, {
 		kind: "post",
 		status: "published",
@@ -116,19 +101,18 @@ export async function createGovernanceNotePost(
 			scope: [],
 			grantedByProfileId: input.actorProfileId,
 		});
-	const revision = await recordUnitRevision(tx, {
+	await recordUnitRevision(tx, {
 		unitId: created.id,
 		actorProfileId: input.actorProfileId,
 		event: "create",
 	});
 	await tx.insert(governancePostBinding).values({
 		postId: created.id,
-		revisionId: revision.revisionId,
 		subjectKind: input.subjectKind,
 		subjectId: input.subjectId,
 		role: input.note.role,
 	});
-	return { postId: created.id, revisionId: revision.revisionId };
+	return { postId: created.id };
 }
 
 export async function listGovernanceNotes(
@@ -143,22 +127,23 @@ export async function listGovernanceNotes(
 	const rows = await tx
 		.select({
 			postId: governancePostBinding.postId,
-			revisionId: governancePostBinding.revisionId,
+			latestRevisionId: unitRevisionHead.revisionId,
 			subjectId: governancePostBinding.subjectId,
 			role: governancePostBinding.role,
-			payload: revisionContent.payload,
+			language: unitLocalization.language,
+			content: unitLocalization.content,
 			createdAt: governancePostBinding.createdAt,
+			updatedAt: unitLocalization.updatedAt,
 		})
 		.from(governancePostBinding)
 		.innerJoin(
-			unitRevisionSlot,
+			unitLocalization,
 			and(
-				eq(unitRevisionSlot.revisionId, governancePostBinding.revisionId),
-				eq(unitRevisionSlot.unitId, governancePostBinding.postId),
-				eq(unitRevisionSlot.role, "localizations"),
+				eq(unitLocalization.unitId, governancePostBinding.postId),
+				isPrimaryUnitLocalization(unitLocalization.unitId),
 			),
 		)
-		.innerJoin(revisionContent, eq(revisionContent.id, unitRevisionSlot.contentId))
+		.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, governancePostBinding.postId))
 		.where(
 			and(
 				eq(governancePostBinding.subjectKind, input.subjectKind),
@@ -168,10 +153,34 @@ export async function listGovernanceNotes(
 		);
 	return rows.map((row) => ({
 		postId: row.postId,
-		revisionId: row.revisionId,
+		latestRevisionId: row.latestRevisionId,
 		subjectId: row.subjectId,
 		role: row.role,
-		...presentLocalization(row.payload),
+		language: row.language,
+		content: parseDocument(PortableTextDocument, row.content),
 		createdAt: row.createdAt,
+		updatedAt: row.updatedAt,
 	}));
+}
+
+export async function getGovernanceNote(
+	tx: DatabaseTransaction,
+	postId: string,
+): Promise<GovernanceNoteRecord | undefined> {
+	const [binding] = await tx
+		.select({
+			subjectKind: governancePostBinding.subjectKind,
+			subjectId: governancePostBinding.subjectId,
+			role: governancePostBinding.role,
+		})
+		.from(governancePostBinding)
+		.where(eq(governancePostBinding.postId, postId))
+		.limit(1);
+	if (!binding) return undefined;
+	const notes = await listGovernanceNotes(tx, {
+		subjectKind: binding.subjectKind,
+		subjectIds: [binding.subjectId],
+		roles: [binding.role],
+	});
+	return notes.find((note) => note.postId === postId);
 }

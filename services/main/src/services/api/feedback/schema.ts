@@ -29,7 +29,6 @@ export type ListFeedbackQuery = Static<typeof ListFeedbackQuery>;
 
 const FeedbackNoteResponse = t.Object({
 	postId: Uuid,
-	revisionId: Uuid,
 	language: LanguageTag,
 	content: PortableTextDocument,
 });

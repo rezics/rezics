@@ -37,6 +37,18 @@ export class ReplyDepthExceeded extends Data.TaggedError("ReplyDepthExceeded") {
 	readonly message = "Maximum reply depth reached";
 }
 
+export class PostScoreNotFound extends Data.TaggedError("PostScoreNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = PostScoreNotFound.status;
+	readonly message = "Score not found";
+}
+
+export class PostScoreDuplicate extends Data.TaggedError("PostScoreDuplicate") {
+	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
+	readonly status = PostScoreDuplicate.status;
+	readonly message = "A Post cannot display the same Score more than once";
+}
+
 export const PostErrors = [
 	PostNotFound,
 	PostLocalizationNotFound,
@@ -44,4 +56,6 @@ export const PostErrors = [
 	ReplyPostNotFound,
 	ParentReplyNotFound,
 	ReplyDepthExceeded,
+	PostScoreNotFound,
+	PostScoreDuplicate,
 ] as const;

@@ -36,10 +36,19 @@ export class RealmUnitNotFound extends Data.TaggedError("RealmUnitNotFound") {
 	readonly message = "Realm Unit not found";
 }
 
+export class RealmScoreContextPostNotMounted extends Data.TaggedError(
+	"RealmScoreContextPostNotMounted",
+) {
+	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
+	readonly status = RealmScoreContextPostNotMounted.status;
+	readonly message = "The score context Post must be mounted in the Realm";
+}
+
 export const RealmErrors = [
 	RealmNotFound,
 	RealmMembershipNotFound,
 	RealmOwnerLeaveForbidden,
 	RealmMemberNotFound,
 	RealmUnitNotFound,
+	RealmScoreContextPostNotMounted,
 ] as const;

@@ -1,7 +1,7 @@
 import { type Static, t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 
-import { LanguageTag, Uuid } from "../schema";
+import { DateTime, FractionalPosition, LanguageTag, Uuid } from "../schema";
 
 export const ListPostsQuery = t.Object({
 	realmId: t.Optional(Uuid),
@@ -21,6 +21,21 @@ export type CreatePostBody = Static<typeof CreatePostBody>;
 
 export const PostParams = t.Object({ postId: Uuid });
 export type PostParams = Static<typeof PostParams>;
+
+const PostScoreInput = t.Object({ scoreId: Uuid }, { additionalProperties: false });
+export const ReplacePostScoresBody = t.Array(PostScoreInput, { maxItems: 5 });
+export type ReplacePostScoresBody = Static<typeof ReplacePostScoresBody>;
+
+export const PostScoreResponse = t.Object({
+	scoreId: Uuid,
+	profileId: Uuid,
+	unitId: Uuid,
+	realmId: Uuid,
+	value: t.Integer({ minimum: 1, maximum: 10 }),
+	position: FractionalPosition,
+	updatedAt: DateTime,
+});
+export const PostScoreListResponse = t.Object({ items: t.Array(PostScoreResponse) });
 
 export const UpdatePostBody = t.Object({
 	title: t.String({ minLength: 1, maxLength: 500 }),
