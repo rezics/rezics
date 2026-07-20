@@ -1,19 +1,6 @@
 version: "3"
 
 tasks:
-    storage:up:
-        desc: Start RustFS and create the development bucket.
-        dir: ../..
-        cmds:
-            - docker compose up -d --wait rustfs
-            - docker compose run --rm rustfs-setup
-
-    storage:down:
-        desc: Stop the development RustFS service.
-        dir: ../..
-        cmds:
-            - docker compose stop --timeout 30 rustfs
-
     dev:
         desc: Start the backend API and recommendation worker.
         env:
@@ -26,12 +13,12 @@ tasks:
     dev:api:
         internal: true
         cmds:
-            - yarn exec tsx watch src/index.ts
+            - yarn run dev:api
 
     dev:worker:
         internal: true
         cmds:
-            - yarn exec tsx watch src/worker.ts
+            - yarn run dev:worker
 
     recommendations:refresh:
         desc: Build one recommendation snapshot, aggregate metrics, and exit.

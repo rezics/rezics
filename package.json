@@ -4,12 +4,19 @@
 	"type": "module",
 	"packageManager": "yarn@4.17.1",
 	"workspaces": [
+		"aspire-apphost",
 		"apps/*",
 		"services/*",
 		"libraries/*",
 		"libraries/services/*/*",
 		"packages/*"
 	],
+	"scripts": {
+		"aspire:restore": "aspire restore --non-interactive",
+		"aspire:run": "aspire run",
+		"aspire:start": "aspire start",
+		"aspire:stop": "aspire stop --non-interactive"
+	},
 	"resolutions": {
 		"@kubb/adapter-oas": "5.0.0-beta.95",
 		"@kubb/plugin-fetch": "5.0.0-beta.95",
@@ -25,6 +32,7 @@
 		}
 	},
 	"devDependencies": {
+		"@microsoft/aspire-cli": "13.4.6",
 		"@nmnmcc/task": "^3.52.0",
 		"@types/node": "26",
 		"@vitest/coverage-v8": "4.1.10",

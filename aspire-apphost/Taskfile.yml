@@ -1,0 +1,64 @@
+version: "3"
+
+tasks:
+    restore:
+        desc: Restore the pinned Aspire SDK and regenerate the TypeScript modules.
+        dir: ..
+        cmds:
+            - yarn exec aspire restore --apphost aspire-apphost/apphost.mts --non-interactive
+
+    doctor:
+        desc: Verify the pinned Aspire/Yarn, supported Bun, and container runtime prerequisites.
+        dir: ..
+        cmds:
+            - node aspire-apphost/scripts/check-prerequisites.mjs
+            - yarn exec aspire doctor --format Table --non-interactive
+
+    typecheck:
+        desc: Type-check the TypeScript AppHost against its generated SDK.
+        deps:
+            - restore
+        cmds:
+            - yarn exec tsc -p tsconfig.apphost.json
+
+    run:
+        desc: Run the default REZICS development topology interactively.
+        dir: ..
+        cmds:
+            - task: doctor
+            - yarn exec aspire run --apphost aspire-apphost/apphost.mts
+
+    run:search:
+        desc: Run REZICS with the opt-in Meilisearch development resource.
+        dir: ..
+        env:
+            REZICS_ASPIRE_MODE: search
+        cmds:
+            - task: doctor
+            - yarn exec aspire run --apphost aspire-apphost/apphost.mts
+
+    setup:
+        desc: Start local infrastructure, migrate/bootstrap it, print bootstrap logs, and stop cleanly.
+        dir: ..
+        cmds:
+            - task: doctor
+            - yarn workspace @rezics/aspire-apphost exec tsx scripts/manage-apphost.mts setup
+
+    stop:
+        desc: Stop the REZICS AppHost selected by the rooted Aspire configuration.
+        dir: ..
+        cmds:
+            - yarn exec aspire stop --apphost aspire-apphost/apphost.mts --non-interactive
+
+    describe:
+        desc: Print the running resource graph as machine-readable JSON.
+        dir: ..
+        cmds:
+            - yarn exec aspire describe --apphost aspire-apphost/apphost.mts --format Json --non-interactive
+
+    smoke:
+        desc: Start an isolated topology and verify API and web endpoints.
+        dir: ..
+        cmds:
+            - task: doctor
+            - yarn workspace @rezics/aspire-apphost exec tsx scripts/manage-apphost.mts smoke

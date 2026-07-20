@@ -7,6 +7,17 @@ import { VitePWA } from "vite-plugin-pwa";
 
 import { pwaManifest } from "./pwa";
 
+function resolveApiProxyTarget(value: string | undefined) {
+	const target = new URL(value ?? "http://localhost:3001");
+	if (target.protocol !== "http:" && target.protocol !== "https:")
+		throw new Error("REZICS_API_ORIGIN must use HTTP or HTTPS");
+	if (target.pathname !== "/" || target.search || target.hash)
+		throw new Error("REZICS_API_ORIGIN must be an origin without a path, query, or fragment");
+	return target.origin;
+}
+
+const apiProxyTarget = resolveApiProxyTarget(process.env.REZICS_API_ORIGIN);
+
 const pwaPlugins = VitePWA({
 	registerType: "prompt",
 	outDir: "dist/client",
@@ -60,8 +71,8 @@ export default defineConfig({
 	server: {
 		strictPort: true,
 		proxy: {
-			"/api": "http://localhost:3001",
-			"/image-assets": "http://localhost:3001",
+			"/api": apiProxyTarget,
+			"/image-assets": apiProxyTarget,
 		},
 	},
 	resolve: {

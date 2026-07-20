@@ -1,21 +1,4 @@
 services:
-    postgres:
-        image: groonga/pgroonga:4.0.6-debian-18
-        environment:
-            POSTGRES_DB: rezics
-            POSTGRES_PASSWORD: postgres
-            POSTGRES_USER: postgres
-        ports:
-            - "5432:5432"
-        volumes:
-            - postgres-18-data:/var/lib/postgresql
-            - ./services/main/docker/postgres/init:/docker-entrypoint-initdb.d:ro
-        healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U postgres -d rezics"]
-            interval: 2s
-            timeout: 5s
-            retries: 15
-
     postgres-migration-test:
         profiles: ["migration-test"]
         image: groonga/pgroonga:4.0.6-debian-18
@@ -32,42 +15,3 @@ services:
             interval: 2s
             timeout: 5s
             retries: 15
-
-    rustfs:
-        image: rustfs/rustfs:latest
-        command: /data
-        environment:
-            RUSTFS_ACCESS_KEY: ${S3_ACCESS_KEY_ID:-rustfsadmin}
-            RUSTFS_CONSOLE_ENABLE: "true"
-            RUSTFS_SECRET_KEY: ${S3_SECRET_ACCESS_KEY:-rustfsadmin}
-        ports:
-            - "9000:9000"
-            - "9001:9001"
-        volumes:
-            - rustfs-data:/data
-        healthcheck:
-            test: ["CMD", "curl", "--fail", "http://localhost:9000/health"]
-            interval: 2s
-            timeout: 5s
-            retries: 15
-
-    rustfs-setup:
-        image: minio/mc:latest
-        depends_on:
-            rustfs:
-                condition: service_healthy
-        entrypoint: /bin/sh
-        command:
-            - -c
-            - >-
-                until mc alias set local http://rustfs:9000
-                "$${S3_ACCESS_KEY_ID}" "$${S3_SECRET_ACCESS_KEY}"; do sleep 1; done;
-                mc mb --ignore-existing "local/$${S3_BUCKET}"
-        environment:
-            S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-rustfsadmin}
-            S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-rustfsadmin}
-            S3_BUCKET: ${S3_BUCKET:-rezics}
-
-volumes:
-    postgres-18-data:
-    rustfs-data:

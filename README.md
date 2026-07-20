@@ -39,9 +39,10 @@ must not depend on private libraries, applications, or services.
 
 ## Development
 
-The root workspace uses Node.js 26, Yarn 4, Go Task, PostgreSQL 18 with
-PGroonga, and S3-compatible object storage. Use the repository's devenv/direnv
-environment or provide compatible tools locally.
+The root workspace uses Node.js 26, Yarn 4, Bun, Go Task, and Aspire 13.4.6.
+Aspire owns the local PostgreSQL 18 + PGroonga and S3-compatible object-storage
+resources. Use the repository's pinned devenv/direnv environment or provide
+Aspire 13.4.6, Yarn 4.17.1, and Bun 1.3.11 or newer locally.
 
 ```sh
 yarn install --immutable
@@ -50,15 +51,25 @@ yarn task dev
 ```
 
 `local:setup` owns local infrastructure and one-off database preparation. It is
-safe to rerun after pulling migrations or bootstrap-manifest changes: pending
-migrations are applied and bootstrap only fills missing records. On a fresh
-database it prints newly created official Profile credentials once, so store
-them before starting the long-running development processes.
+safe to rerun after pulling migrations or bootstrap-manifest changes. It starts
+an Aspire setup-only topology, applies pending migrations, initializes the
+RustFS bucket, fills missing bootstrap records, prints the database preparation
+logs, and then stops every session resource. Named container volumes preserve
+the PostgreSQL and RustFS data.
 
-`dev` only verifies bootstrap readiness and supervises the API, recommendation
-worker, and web development server. It does not start, migrate, bootstrap, or
-stop persistent infrastructure. Use `yarn task services:stop` when the local
-PostgreSQL and RustFS services are no longer needed.
+`dev` starts the complete Aspire topology in the foreground: PostgreSQL,
+RustFS, database/bucket preparation, the Bun API and recommendation worker, the
+Vinext web app, and the Aspire Dashboard. Aspire allocates service ports and
+injects endpoint configuration, so application code does not depend on fixed
+localhost ports. Stop it with Ctrl+C or `yarn task dev:stop` for a detached
+or separately controlled instance. Aspire is a local-development control plane;
+it does not generate or replace the production Nomad deployment.
+
+Use `yarn task dev:search` to add the opt-in Meilisearch resource. It is not
+part of the default graph until the versioned indexing lifecycle is
+implemented. Use `yarn task aspire:doctor` for prerequisite diagnostics and
+`yarn task aspire:describe` for machine-readable resource state. The static
+`apps/about` site remains independent from the AppHost.
 
 The main checks are:
 

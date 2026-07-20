@@ -17,6 +17,9 @@ includes:
     libraries:
         taskfile: ./libraries/Taskfile.yml
         dir: ./libraries
+    aspire-apphost:
+        taskfile: ./aspire-apphost/Taskfile.yml
+        dir: ./aspire-apphost
 
 tasks:
     format:
@@ -43,6 +46,7 @@ tasks:
     typecheck:
         desc: Type-check every application, service, and library workspace.
         cmds:
+            - task: aspire-apphost:typecheck
             - task: services-main:typecheck
             - task: apps-web:typecheck
             - task: apps-about:check
@@ -77,39 +81,32 @@ tasks:
             - git diff --exit-code -- libraries/services/main/openapi/openapi.json libraries/services/main/openapi-fetch/src/generated libraries/services/main/openapi-tanstack-query/src/generated
             - test -z "$(git ls-files --others --exclude-standard -- libraries/services/main/openapi/openapi.json libraries/services/main/openapi-fetch/src/generated libraries/services/main/openapi-tanstack-query/src/generated)"
 
-    services:up:
-        desc: Start persistent local infrastructure and initialize object storage.
-        cmds:
-            - docker compose up -d --wait postgres rustfs
-            - docker compose run --rm rustfs-setup
-
-    services:down:
-        desc: Remove every development container and network without deleting data.
-        cmds:
-            - docker compose down --timeout 30 --remove-orphans
-
-    services:stop:
-        desc: Gracefully stop persistent local infrastructure.
-        cmds:
-            - docker compose stop --timeout 30 postgres rustfs
-
     local:setup:
-        desc: Start infrastructure and prepare the local database for development.
+        desc: Validate Aspire, prepare persistent local infrastructure, and stop cleanly.
         cmds:
-            - task: services:up
-            - task: services-main:db:prepare
+            - task: aspire-apphost:setup
 
     dev:
-        desc: Start the API, recommendation worker, and web development server.
-        env:
-            DATABASE_ADMIN_URL: ""
+        desc: Run the Aspire-managed API, worker, web app, and local infrastructure.
         cmds:
-            - task: services-main:db:bootstrap:check
-            - task: dev:apps
+            - task: aspire-apphost:run
 
-    dev:apps:
-        internal: true
-        deps:
-            - services-main:dev
-            - apps-web:dev
-        failfast: true
+    dev:search:
+        desc: Run the Aspire topology with the opt-in Meilisearch resource.
+        cmds:
+            - task: aspire-apphost:run:search
+
+    dev:stop:
+        desc: Stop the currently running REZICS AppHost and all session resources.
+        cmds:
+            - task: aspire-apphost:stop
+
+    aspire:doctor:
+        desc: Diagnose the local Aspire development prerequisites.
+        cmds:
+            - task: aspire-apphost:doctor
+
+    aspire:describe:
+        desc: Describe the running Aspire resource graph as JSON.
+        cmds:
+            - task: aspire-apphost:describe

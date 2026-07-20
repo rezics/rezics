@@ -4,7 +4,8 @@
 	"type": "module",
 	"scripts": {
 		"cosmos": "cosmos",
-		"cosmos-export": "cosmos-export"
+		"cosmos-export": "cosmos-export",
+		"dev": "vinext dev"
 	},
 	"dependencies": {
 		"@nmnmcc/intee": "^3.2.0",

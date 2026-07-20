@@ -4,7 +4,7 @@ tasks:
     dev:
         desc: Start the frontend development server.
         cmds:
-            - yarn exec vinext dev --port "${FRONTEND_PORT:-3000}"
+            - PORT="${FRONTEND_PORT:-3000}" yarn run dev
 
     build:
         desc: Create the frontend production build.

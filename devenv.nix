@@ -8,6 +8,7 @@
     pkgs.inkscape
     pkgs.inter
     pkgs.fontconfig
+    pkgs.bun
   ];
 
   env.FONTCONFIG_FILE = pkgs.makeFontsConf {
