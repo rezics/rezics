@@ -1,5 +1,6 @@
 "use client";
 
+import { useFeedFixtureData } from "@rezics/fixture-client";
 import type { GetApiFeedSort } from "@rezics/openapi-tanstack-query";
 import { useState, type ReactNode } from "react";
 
@@ -10,9 +11,8 @@ import {
 	FeedCardContent,
 	FeedCardHeader,
 	FeedCardTitle,
-	type FeedActor,
-	type FeedRealm,
 } from "@/features/content-feed/feed-card";
+import { formatRelativeTime } from "@/features/content-feed/format-relative-time";
 import { FeedListControls, FeedListItems } from "@/features/content-feed/feed-list";
 import {
 	DefaultFeedContentKinds,
@@ -64,50 +64,37 @@ function PostListFixture() {
 }
 
 function MockFeedItems() {
-	const { t } = useTranslation(["feed"]);
-	const actor: FeedActor = {
-		name: t.feed.fixture.publisher,
-		href: "#publisher",
-		initials: t.feed.fixture.publisher.slice(0, 1),
-	};
-	const realms: readonly [FeedRealm, ...FeedRealm[]] = [
-		{
-			id: "fixture-realm",
-			name: t.feed.fixture.realm,
-			href: "#realm",
-			initials: t.feed.fixture.realm.slice(0, 1),
-		},
-	];
+	const fixture = useFeedFixtureData();
+	const { locale, t } = useTranslation(["feed"]);
+	const timestamp = formatRelativeTime(fixture.createdAt, locale.target, fixture.referenceTime);
 	return (
-		<FeedListItems aria-label={t.feed.fixture.canvasLabel}>
+		<FeedListItems aria-label={t.feed.title}>
 			<FeedCard aria-labelledby="fixture-feed-post">
 				<FeedCardHeader
-					actor={actor}
-					realms={realms}
-					timestamp={t.feed.fixture.timestamp}
+					actor={fixture.publisher}
+					realms={fixture.realms}
+					timestamp={timestamp}
 				/>
 				<FeedCardContent>
 					<Badge className="w-fit" size="sm" variant="outline">
 						{t.feed.content.kinds["post:post"]}
 					</Badge>
-					<FeedCardTitle id="fixture-feed-post">{t.feed.fixture.postTitle}</FeedCardTitle>
-					<FeedCardBody>{t.feed.fixture.postBody}</FeedCardBody>
+					<FeedCardTitle id="fixture-feed-post">{fixture.post.title}</FeedCardTitle>
+					<FeedCardBody>{fixture.post.body}</FeedCardBody>
 				</FeedCardContent>
 			</FeedCard>
 			<FeedCard aria-labelledby="fixture-feed-book">
 				<FeedCardHeader
-					actor={actor}
-					realms={realms}
-					timestamp={t.feed.fixture.timestamp}
+					actor={fixture.publisher}
+					realms={fixture.realms}
+					timestamp={timestamp}
 				/>
 				<FeedCardContent>
 					<Badge className="w-fit" size="sm" variant="info">
 						{t.feed.content.kinds["unit:book"]}
 					</Badge>
-					<FeedCardTitle id="fixture-feed-book">
-						{t.feed.fixture.collectionTitle}
-					</FeedCardTitle>
-					<FeedCardBody>{t.feed.fixture.collectionBody}</FeedCardBody>
+					<FeedCardTitle id="fixture-feed-book">{fixture.collection.title}</FeedCardTitle>
+					<FeedCardBody>{fixture.collection.body}</FeedCardBody>
 				</FeedCardContent>
 			</FeedCard>
 		</FeedListItems>

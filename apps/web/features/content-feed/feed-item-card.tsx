@@ -26,6 +26,7 @@ import { getFeedActionPolicy } from "./feed-action-policy";
 import { FeedCard } from "./feed-card";
 import { FeedEngagementBar, FeedOverflowMenu } from "./feed-card-actions";
 import { parseFeedReaction } from "./feed-reaction";
+import { formatRelativeTime } from "./format-relative-time";
 
 export type FeedItem = GetApiFeedStatus200["items"][number];
 export type FeedPost = Extract<FeedItem, { itemType: "post" }>;
@@ -366,14 +367,4 @@ function unitHref(kind: string, id: string): string | undefined {
 		default:
 			return undefined;
 	}
-}
-
-function formatRelativeTime(value: string | Date, locale: string) {
-	const elapsed = Date.now() - new Date(value).getTime();
-	const minutes = Math.max(1, Math.floor(elapsed / 60_000));
-	const formatter = new Intl.RelativeTimeFormat(locale, { numeric: "always", style: "narrow" });
-	if (minutes < 60) return formatter.format(-minutes, "minute");
-	const hours = Math.floor(minutes / 60);
-	if (hours < 24) return formatter.format(-hours, "hour");
-	return formatter.format(-Math.floor(hours / 24), "day");
 }

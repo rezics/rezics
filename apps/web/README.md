@@ -46,6 +46,13 @@ for example `features/content-feed/feed-card.tsx` and
 files for shared fixture providers or canvas setup; Cosmos does not own product
 components.
 
+Reusable, deterministic scenario content belongs to `@rezics/fixture-data`, and
+shared React access belongs to `@rezics/fixture-client`. Both are development-only
+dependencies: import them only from fixture, test, or Cosmos setup modules. Keep
+product interface copy in `@rezics/i18n`; localized fixture content is data, not a
+production translation namespace. Cosmos exposes UI locale and content language
+as independent controls so mixed-language product states remain representable.
+
 ## Authentication development
 
 The frontend accesses Better Auth through `/api/auth`. The development server proxies that path to `http://localhost:3001`, keeping session cookies first-party. Start the backend alongside the frontend, and configure an equivalent reverse proxy for `/api/auth` in deployed environments.

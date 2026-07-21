@@ -3753,11 +3753,36 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@rezics/fixture-client@workspace:*, @rezics/fixture-client@workspace:libraries/fixture-client":
+  version: 0.0.0-use.local
+  resolution: "@rezics/fixture-client@workspace:libraries/fixture-client"
+  dependencies:
+    "@rezics/fixture-data": "workspace:*"
+    "@types/react": "npm:19"
+    react: "npm:19.2"
+    typescript: "npm:7"
+  peerDependencies:
+    react: 19.2
+  languageName: unknown
+  linkType: soft
+
+"@rezics/fixture-data@workspace:*, @rezics/fixture-data@workspace:libraries/fixture-data":
+  version: 0.0.0-use.local
+  resolution: "@rezics/fixture-data@workspace:libraries/fixture-data"
+  dependencies:
+    "@rezics/i18n": "workspace:*"
+    typescript: "npm:7"
+    vitest: "npm:4.1.10"
+  languageName: unknown
+  linkType: soft
+
 "@rezics/frontend@workspace:apps/web":
   version: 0.0.0-use.local
   resolution: "@rezics/frontend@workspace:apps/web"
   dependencies:
     "@rezics/block": "workspace:*"
+    "@rezics/fixture-client": "workspace:*"
+    "@rezics/fixture-data": "workspace:*"
     "@rezics/i18n": "workspace:*"
     "@rezics/license": "workspace:*"
     "@rezics/openapi-tanstack-query": "workspace:*"

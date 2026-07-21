@@ -1,0 +1,12 @@
+version: "3"
+
+tasks:
+    typecheck:
+        desc: Type-check deterministic fixture data.
+        cmds:
+            - yarn exec tsc --noEmit -p tsconfig.json
+
+    test:
+        desc: Test fixture data invariants.
+        cmds:
+            - yarn exec vitest run --config vitest.config.ts

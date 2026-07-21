@@ -1,0 +1,16 @@
+{
+	"name": "@rezics/fixture-data",
+	"private": true,
+	"type": "module",
+	"sideEffects": false,
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"dependencies": {
+		"@rezics/i18n": "workspace:*"
+	},
+	"devDependencies": {
+		"typescript": "7",
+		"vitest": "4.1.10"
+	}
+}

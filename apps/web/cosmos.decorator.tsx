@@ -1,4 +1,6 @@
 import { resources } from "@rezics/i18n/resources";
+import { FixtureProvider } from "@rezics/fixture-client";
+import { FixtureContentLanguages, type FixtureContentLanguage } from "@rezics/fixture-data";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { create } from "native-i18n";
 import { useFixtureSelect } from "react-cosmos/client";
@@ -32,6 +34,10 @@ export default function CosmosDecorator({ children }: { children: ReactNode }) {
 		options: ["zh-Hant", "en"],
 		defaultValue: "zh-Hant",
 	});
+	const [contentLanguage] = useFixtureSelect<FixtureContentLanguage>("Content language", {
+		options: [...FixtureContentLanguages],
+		defaultValue: "zh",
+	});
 	const [queryClient] = useState(
 		() => new QueryClient({ defaultOptions: { queries: { retry: false } } }),
 	);
@@ -52,13 +58,15 @@ export default function CosmosDecorator({ children }: { children: ReactNode }) {
 		<>
 			<style>{appThemeCss}</style>
 			<TranslationProvider initial={initialTranslation} key={locale}>
-				<TranslatedUiProvider>
-					<QueryClientProvider client={queryClient}>
-						<main className="min-h-screen bg-background p-3 text-foreground sm:p-8">
-							<div className="mx-auto w-full max-w-3xl min-w-0">{children}</div>
-						</main>
-					</QueryClientProvider>
-				</TranslatedUiProvider>
+				<FixtureProvider contentLanguage={contentLanguage}>
+					<TranslatedUiProvider>
+						<QueryClientProvider client={queryClient}>
+							<main className="min-h-screen bg-background p-3 text-foreground sm:p-8">
+								<div className="mx-auto w-full max-w-3xl min-w-0">{children}</div>
+							</main>
+						</QueryClientProvider>
+					</TranslatedUiProvider>
+				</FixtureProvider>
 			</TranslationProvider>
 		</>
 	);

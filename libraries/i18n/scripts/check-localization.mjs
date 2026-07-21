@@ -22,6 +22,8 @@ const repositoryRoot = resolve(packageRoot, "../..");
 const sourceRoots = [
 	resolve(packageRoot, "src/languages/en"),
 	resolve(packageRoot, "src/languages/zh-Hant"),
+	resolve(repositoryRoot, "libraries/fixture-data/src/languages/en"),
+	resolve(repositoryRoot, "libraries/fixture-data/src/languages/zh-Hant"),
 	...["de", "en", "ja", "ko", "zh-hans", "zh-hant"].map((locale) =>
 		resolve(repositoryRoot, `apps/about/src/content/locales/${locale}`),
 	),

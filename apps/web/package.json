@@ -27,6 +27,8 @@
 		"vinext": "^1.0.0-beta.2"
 	},
 	"devDependencies": {
+		"@rezics/fixture-client": "workspace:*",
+		"@rezics/fixture-data": "workspace:*",
 		"@tailwindcss/vite": "^4.3.2",
 		"@testing-library/dom": "10.4.1",
 		"@testing-library/react": "16.3.2",

@@ -79,19 +79,6 @@ export default {
 		noOwnedCollections: "You do not have an available collection yet.",
 		manageCollections: "Manage collections",
 	},
-	fixture: {
-		canvasLabel: "Content feed component preview",
-		postTitle: "Why is the Misaka Network Academy City's most unusual group mind?",
-		postBody:
-			"The Misaka Network is more than a sum of individual minds. Its electromagnetic medium crosses the limits of personal ability while preserving differences between individuals.",
-		collectionTitle: "Where science and magic meet",
-		collectionBody:
-			"A collection of chapters, reviews, and worldbuilding notes worth revisiting.",
-		publisher: "Dolphin Reading Club",
-		realm: "A Certain Magical Index",
-		recommendation: `Because you ${followTerms.action} this publisher`,
-		timestamp: "2 hours ago",
-	},
 	replyingIn: "Replying in",
 	relatedPosts: "Related discussions",
 	relatedWorks: "Similar works",

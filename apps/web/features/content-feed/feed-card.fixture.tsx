@@ -1,5 +1,7 @@
 "use client";
 
+import { useFeedFixtureData } from "@rezics/fixture-client";
+import type { FeedFixtureAssetId } from "@rezics/fixture-data";
 import { useState, type ReactNode } from "react";
 import { LibraryIcon, MessageCircleIcon } from "lucide-react";
 
@@ -13,8 +15,6 @@ import {
 	FeedCardMedia,
 	FeedCardTarget,
 	FeedCardTitle,
-	type FeedActor,
-	type FeedRealm,
 } from "@/features/content-feed/feed-card";
 import {
 	FeedOverflowMenuView,
@@ -22,28 +22,23 @@ import {
 	FeedVoteControl,
 	type FeedReaction,
 } from "@/features/content-feed/feed-card-actions";
-import { bookCover, postMedia } from "@/features/content-feed/feed-card.mock";
+import { formatRelativeTime } from "@/features/content-feed/format-relative-time";
+import { recommendationReasonLabel } from "@/features/recommendations/reason";
 import { useTranslation } from "@/i18n/client";
 
-function useFixtureContext(): {
-	actor: FeedActor;
-	realms: readonly [FeedRealm, ...FeedRealm[]];
-} {
-	const { t } = useTranslation(["feed"]);
+const FeedFixtureAssetUrls = {
+	"book-cover": "/fixtures/content-feed/book-cover.svg",
+	"post-media": "/fixtures/content-feed/post-media.svg",
+} satisfies Readonly<Record<FeedFixtureAssetId, string>>;
+
+function useFixtureCardContext() {
+	const fixture = useFeedFixtureData();
+	const { locale, t } = useTranslation(["feed"]);
 	return {
-		actor: {
-			name: t.feed.fixture.publisher,
-			href: "#publisher",
-			initials: t.feed.fixture.publisher.slice(0, 1),
-		},
-		realms: [
-			{
-				id: "fixture-realm",
-				name: t.feed.fixture.realm,
-				href: "#realm",
-				initials: t.feed.fixture.realm.slice(0, 1),
-			},
-		],
+		feed: t.feed,
+		fixture,
+		recommendation: recommendationReasonLabel(fixture.recommendationReason, t.feed),
+		timestamp: formatRelativeTime(fixture.createdAt, locale.target, fixture.referenceTime),
 	};
 }
 
@@ -85,94 +80,100 @@ function FixtureActionBar({ comments, initialScore }: { comments: number; initia
 }
 
 function PostFeedCard() {
-	const { t } = useTranslation(["feed"]);
-	const { actor, realms } = useFixtureContext();
+	const { feed, fixture, recommendation, timestamp } = useFixtureCardContext();
 	return (
 		<FeedCard aria-labelledby="post-feed-title">
 			<FeedCardHeader
-				actor={actor}
+				actor={fixture.publisher}
 				menu={<FixtureMenu />}
-				realms={realms}
-				recommendation={t.feed.fixture.recommendation}
-				timestamp={t.feed.fixture.timestamp}
+				realms={fixture.realms}
+				recommendation={recommendation}
+				timestamp={timestamp}
 			/>
 			<FeedCardContent>
 				<Badge className="w-fit" size="sm" variant="outline">
-					{t.feed.content.kinds["post:post"]}
+					{feed.content.kinds["post:post"]}
 				</Badge>
-				<FeedCardTitle id="post-feed-title">{t.feed.fixture.postTitle}</FeedCardTitle>
-				<FeedCardBody>{t.feed.fixture.postBody}</FeedCardBody>
-				<FeedCardMedia alt={t.feed.fixture.postTitle} src={postMedia} />
+				<FeedCardTitle id="post-feed-title">{fixture.post.title}</FeedCardTitle>
+				<FeedCardBody>{fixture.post.body}</FeedCardBody>
+				<FeedCardMedia
+					alt={fixture.post.mediaAlt}
+					src={FeedFixtureAssetUrls[fixture.post.mediaAsset]}
+				/>
 			</FeedCardContent>
 			<FeedCardTarget
-				href="#related-work"
-				imageAlt={t.feed.fixture.collectionTitle}
-				imageUrl={bookCover}
-				label={t.feed.relatedWork}
-				title={t.feed.fixture.collectionTitle}
+				href={fixture.collection.href}
+				imageAlt={fixture.collection.coverAlt}
+				imageUrl={FeedFixtureAssetUrls[fixture.collection.coverAsset]}
+				label={feed.relatedWork}
+				title={fixture.collection.title}
 			/>
-			<FixtureActionBar comments={36} initialScore={2100} />
+			<FixtureActionBar
+				comments={fixture.metrics.post.replies}
+				initialScore={fixture.metrics.post.score}
+			/>
 		</FeedCard>
 	);
 }
 
 function ReviewFeedCard() {
-	const { t } = useTranslation(["feed"]);
-	const { actor, realms } = useFixtureContext();
+	const { feed, fixture, timestamp } = useFixtureCardContext();
 	return (
 		<FeedCard aria-labelledby="review-feed-title">
 			<FeedCardHeader
-				actor={actor}
+				actor={fixture.publisher}
 				menu={<FixtureMenu />}
-				realms={realms}
-				timestamp={t.feed.fixture.timestamp}
+				realms={fixture.realms}
+				timestamp={timestamp}
 			/>
 			<FeedCardContent>
 				<Badge className="w-fit" size="sm" variant="success">
-					{t.feed.content.kinds["post:review"]}
+					{feed.content.kinds["post:review"]}
 				</Badge>
-				<FeedCardTitle id="review-feed-title">
-					{t.feed.fixture.collectionTitle}
-				</FeedCardTitle>
-				<FeedCardBody>{t.feed.fixture.postBody}</FeedCardBody>
+				<FeedCardTitle id="review-feed-title">{fixture.collection.title}</FeedCardTitle>
+				<FeedCardBody>{fixture.post.body}</FeedCardBody>
 			</FeedCardContent>
-			<FixtureActionBar comments={18} initialScore={96} />
+			<FixtureActionBar
+				comments={fixture.metrics.review.replies}
+				initialScore={fixture.metrics.review.score}
+			/>
 		</FeedCard>
 	);
 }
 
 function BookFeedCard() {
-	const { t } = useTranslation(["feed"]);
-	const { actor, realms } = useFixtureContext();
+	const { feed, fixture, timestamp } = useFixtureCardContext();
 	return (
 		<FeedCard aria-labelledby="book-feed-title">
 			<FeedCardHeader
-				actor={actor}
+				actor={fixture.publisher}
 				menu={<FixtureMenu />}
-				realms={realms}
-				timestamp={t.feed.fixture.timestamp}
+				realms={fixture.realms}
+				timestamp={timestamp}
 			/>
 			<FeedCardContent className="flex-row gap-4">
 				<img
-					alt={t.feed.fixture.collectionTitle}
+					alt={fixture.collection.coverAlt}
 					className="aspect-[2/3] w-24 shrink-0 rounded-lg object-cover sm:w-28"
-					src={bookCover}
+					src={FeedFixtureAssetUrls[fixture.collection.coverAsset]}
 				/>
 				<div className="flex min-w-0 flex-1 flex-col gap-2">
 					<Badge className="w-fit" size="sm" variant="info">
-						{t.feed.content.kinds["unit:book"]}
+						{feed.content.kinds["unit:book"]}
 					</Badge>
-					<FeedCardTitle id="book-feed-title">
-						{t.feed.fixture.collectionTitle}
-					</FeedCardTitle>
-					<FeedCardBody>{t.feed.fixture.collectionBody}</FeedCardBody>
+					<FeedCardTitle id="book-feed-title">{fixture.collection.title}</FeedCardTitle>
+					<FeedCardBody>{fixture.collection.body}</FeedCardBody>
 				</div>
 			</FeedCardContent>
 			<FeedCardActionBar>
-				<FeedVoteControl onReactionChange={() => undefined} reaction={null} score="42" />
+				<FeedVoteControl
+					onReactionChange={() => undefined}
+					reaction={null}
+					score={String(fixture.metrics.book.score)}
+				/>
 				<Button className="min-h-11 sm:min-h-8" pill size="sm" variant="secondary">
 					<LibraryIcon aria-hidden data-icon="inline-start" />
-					{t.feed.actions.addToCollection}
+					{feed.actions.addToCollection}
 				</Button>
 			</FeedCardActionBar>
 		</FeedCard>
@@ -180,28 +181,30 @@ function BookFeedCard() {
 }
 
 function CollectionFeedCard() {
-	const { t } = useTranslation(["feed", "ui"]);
-	const { actor, realms } = useFixtureContext();
+	const { feed, fixture, timestamp } = useFixtureCardContext();
+	const { t } = useTranslation(["ui"]);
 	const [following, setFollowing] = useState(false);
 	return (
 		<FeedCard aria-labelledby="collection-feed-title">
 			<FeedCardHeader
-				actor={actor}
+				actor={fixture.publisher}
 				menu={<FixtureMenu />}
-				realms={realms}
-				timestamp={t.feed.fixture.timestamp}
+				realms={fixture.realms}
+				timestamp={timestamp}
 			/>
 			<FeedCardContent>
 				<Badge className="w-fit" size="sm" variant="info">
-					{t.feed.content.kinds["unit:collection"]}
+					{feed.content.kinds["unit:collection"]}
 				</Badge>
-				<FeedCardTitle id="collection-feed-title">
-					{t.feed.fixture.collectionTitle}
-				</FeedCardTitle>
-				<FeedCardBody>{t.feed.fixture.collectionBody}</FeedCardBody>
+				<FeedCardTitle id="collection-feed-title">{fixture.collection.title}</FeedCardTitle>
+				<FeedCardBody>{fixture.collection.body}</FeedCardBody>
 			</FeedCardContent>
 			<FeedCardActionBar>
-				<FeedVoteControl onReactionChange={() => undefined} reaction={null} score="128" />
+				<FeedVoteControl
+					onReactionChange={() => undefined}
+					reaction={null}
+					score={String(fixture.metrics.collection.score)}
+				/>
 				<Button
 					aria-pressed={following}
 					className="min-h-11 sm:min-h-8"

@@ -111,6 +111,10 @@ export function localeForLocalizationPath(path) {
 	const normalizedPath = path.replaceAll("\\", "/");
 	const coreMatch = normalizedPath.match(/\/libraries\/i18n\/src\/languages\/(en|zh-Hant)\//);
 	if (coreMatch) return coreMatch[1];
+	const fixtureMatch = normalizedPath.match(
+		/\/libraries\/fixture-data\/src\/languages\/(en|zh-Hant)\//,
+	);
+	if (fixtureMatch) return fixtureMatch[1];
 	const aboutMatch = normalizedPath.match(/\/apps\/about\/src\/content\/locales\/([^/]+)\//);
 	return aboutMatch ? aboutLocaleByDirectory[aboutMatch[1]] : undefined;
 }

@@ -6,6 +6,7 @@ export default defineConfig({
 			"./libraries/observability/vitest.config.ts",
 			"./libraries/license/vitest.config.ts",
 			"./libraries/i18n/vitest.config.ts",
+			"./libraries/fixture-data/vitest.config.ts",
 			"./services/main/vitest.config.ts",
 			"./apps/web/vitest.config.ts",
 			"./apps/about/vitest.config.ts",

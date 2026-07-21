@@ -19,6 +19,12 @@ includes:
     i18n:
         taskfile: ./i18n/Taskfile.yml
         dir: ./i18n
+    fixture-data:
+        taskfile: ./fixture-data/Taskfile.yml
+        dir: ./fixture-data
+    fixture-client:
+        taskfile: ./fixture-client/Taskfile.yml
+        dir: ./fixture-client
     ui:
         taskfile: ./ui/Taskfile.yml
         dir: ./ui
@@ -52,6 +58,8 @@ tasks:
             - task: slug:typecheck
             - task: license:typecheck
             - task: i18n:check
+            - task: fixture-data:typecheck
+            - task: fixture-client:typecheck
             - task: ui:typecheck
             - task: portable-text:typecheck
             - task: openapi:typecheck
