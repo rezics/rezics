@@ -3699,6 +3699,7 @@ __metadata:
     "@elysiajs/openapi": "npm:^1.4.15"
     "@faker-js/faker": "npm:^10.5.0"
     "@rezics/block": "workspace:*"
+    "@rezics/brand": "workspace:*"
     "@rezics/i18n": "workspace:*"
     "@rezics/license": "workspace:*"
     "@rezics/observability": "workspace:*"

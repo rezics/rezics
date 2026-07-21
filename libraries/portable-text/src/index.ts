@@ -63,13 +63,15 @@ export const PortableTextTextBlock = Type.Object(
 export type PortableTextTextBlock = Static<typeof PortableTextTextBlock> &
 	Record<string, JsonValue>;
 
-const PortableTextCustomBlock = Type.Object(
+export const PortableTextCustomBlock = Type.Object(
 	{
 		_key: Type.String(),
 		_type: Type.String({ pattern: "^(?!(?:block|image)$).+" }),
 	},
 	{ additionalProperties: JsonValue },
 );
+export type PortableTextCustomBlock = Static<typeof PortableTextCustomBlock> &
+	Record<string, JsonValue>;
 
 export const PortableTextImage = Type.Object(
 	{
@@ -138,8 +140,22 @@ export interface PortableTextValueBlock {
 	level?: number;
 }
 
-/** The Portable Text vocabulary supported by every REZICS editor and renderer. */
-export type PortableTextValue = (PortableTextValueBlock | PortableTextImageBlock)[];
+/**
+ * The Portable Text vocabulary supported by REZICS.
+ *
+ * Portable Text explicitly allows custom block objects beside text blocks. The
+ * owning host decides which custom `_type` values are valid; this package keeps
+ * those JSON-safe values lossless instead of coupling the format to a host.
+ */
+export type PortableTextValue = (
+	PortableTextValueBlock | PortableTextImageBlock | PortableTextCustomBlock
+)[];
+
+export function isPortableTextValueBlock(
+	value: PortableTextValue[number],
+): value is PortableTextValueBlock {
+	return value._type === "block" && Array.isArray(value.children);
+}
 
 const controlCharacters = /[\u0000-\u001f\u007f]/;
 const absoluteScheme = /^([a-z][a-z\d+.-]*):/i;
@@ -176,10 +192,42 @@ function keyOr(value: unknown, fallback: string): string {
 	return typeof value === "string" && value.length > 0 ? value : fallback;
 }
 
+function isJsonValue(value: unknown): value is JsonValue {
+	if (
+		value === null ||
+		typeof value === "string" ||
+		typeof value === "number" ||
+		typeof value === "boolean"
+	)
+		return true;
+	if (Array.isArray(value)) return value.every(isJsonValue);
+	if (!isRecord(value)) return false;
+	return Object.values(value).every(isJsonValue);
+}
+
+function normalizeCustomBlock(
+	candidate: Record<string, unknown>,
+	blockIndex: number,
+): PortableTextCustomBlock | null {
+	if (
+		typeof candidate._type !== "string" ||
+		candidate._type === "block" ||
+		candidate._type === "image"
+	)
+		return null;
+	const entries = Object.entries(candidate).filter(([, value]) => isJsonValue(value));
+	const normalized = Object.fromEntries(entries) as Record<string, JsonValue>;
+	return {
+		...normalized,
+		_key: keyOr(candidate._key, `custom-${blockIndex}`),
+		_type: candidate._type,
+	};
+}
+
 /**
- * Narrows arbitrary API/editor data to the single Portable Text vocabulary
- * understood by the product. Unsupported objects and marks are intentionally
- * omitted instead of leaking inconsistent rendering rules into feature code.
+ * Narrows arbitrary API/editor data to the Portable Text vocabulary understood
+ * by the product. Root custom objects are preserved for the owning block host to
+ * validate and render.
  */
 export function normalizePortableText(value: unknown): PortableTextValue {
 	if (!Array.isArray(value)) return [];
@@ -205,7 +253,11 @@ export function normalizePortableText(value: unknown): PortableTextValue {
 				},
 			];
 		}
-		if (!isRecord(candidate) || candidate._type !== "block") return [];
+		if (!isRecord(candidate)) return [];
+		if (candidate._type !== "block") {
+			const customBlock = normalizeCustomBlock(candidate, blockIndex);
+			return customBlock ? [customBlock] : [];
+		}
 
 		const markDefs = Array.isArray(candidate.markDefs)
 			? candidate.markDefs.flatMap(

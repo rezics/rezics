@@ -1,7 +1,7 @@
 import { fakerEN, fakerZH_TW, type Faker } from "@faker-js/faker";
 import type { PortableText } from "@rezics/portable-text";
 
-import type { EnforcementKindValues } from "../src/services/database/schema/contract-values";
+import type { EnforcementKindValues } from "../database/schema/contract-values";
 
 export const SeedValue = 20_260_715;
 

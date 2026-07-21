@@ -52,14 +52,11 @@ describe("database bootstrap manifest", () => {
 		}
 	});
 
-	it("bootstraps the official libraries and Popular as ordinary Zones", () => {
+	it("bootstraps exactly the three official libraries as renderable Zones", () => {
 		expect(OfficialZoneManifest.map((value) => value.slug)).toEqual([
 			"book",
 			"media",
 			"software",
-			"realms",
-			"zones",
-			"popular",
 		]);
 		expect(
 			OfficialZoneManifest.map((value) =>
@@ -78,20 +75,8 @@ describe("database bootstrap manifest", () => {
 				{ language: "zh", title: "軟體庫" },
 				{ language: "en", title: "Software Library" },
 			],
-			[
-				{ language: "zh", title: "領域庫" },
-				{ language: "en", title: "Realm Library" },
-			],
-			[
-				{ language: "zh", title: "專區庫" },
-				{ language: "en", title: "Zone Library" },
-			],
-			[
-				{ language: "zh", title: "熱門" },
-				{ language: "en", title: "Popular" },
-			],
 		]);
-		expect(OfficialZoneManifest.slice(0, 3).map((value) => value.boundaryDocument)).toEqual([
+		expect(OfficialZoneManifest.map((value) => value.boundaryDocument)).toEqual([
 			expect.objectContaining({
 				categories: ["units"],
 				filters: [{ field: "type", operator: "equals", value: "book" }],
@@ -105,29 +90,17 @@ describe("database bootstrap manifest", () => {
 				filters: [{ field: "type", operator: "equals", value: "software" }],
 			}),
 		]);
-		expect(OfficialZoneManifest.slice(3).map((value) => value.boundaryDocument)).toEqual([
-			expect.objectContaining({ categories: ["realms"], filters: [] }),
-			expect.objectContaining({
-				categories: ["units"],
-				filters: [{ field: "type", operator: "equals", value: "zone" }],
-			}),
-			expect.objectContaining({
-				categories: [
-					"units",
-					"users",
-					"entity",
-					"tags",
-					"posts",
-					"realms",
-					"collections",
-					"reviews",
-					"polls",
-				],
-				filters: [],
-			}),
-		]);
 		for (const value of OfficialZoneManifest) {
 			expect(value).not.toHaveProperty("official");
+			expect(value.homePage.document.blocks).toEqual([
+				expect.objectContaining({ _type: "post-full-view", postId: value.wikiPost.id }),
+			]);
+			expect(value.mainDockDocument.blocks).toEqual([
+				expect.objectContaining({
+					_type: "menu",
+					navigationId: value.navigation.id,
+				}),
+			]);
 		}
 	});
 

@@ -1,4 +1,4 @@
-import { type PortableText as PortableTextValue, PortableText } from "@rezics/portable-text";
+import { PortableText, type PortableTextValue } from "@rezics/portable-text";
 import { SearchConfiguration } from "@rezics/search";
 import { type Static, type TSchema, Type } from "@sinclair/typebox";
 
@@ -28,12 +28,22 @@ export const UnitRefBlock = Type.Object(
 			Type.Literal("inline"),
 			Type.Literal("card"),
 			Type.Literal("cover"),
-			Type.Literal("hero"),
 		]),
 	},
 	{ additionalProperties: false, $id: "UnitRefBlock" },
 );
 export type UnitRefBlock = Static<typeof UnitRefBlock>;
+
+/** Render a Wiki Post as a complete content surface within the current host. */
+export const PostFullViewBlock = Type.Object(
+	{
+		_type: Type.Literal("post-full-view"),
+		_key: BlockKey,
+		postId: Uuid,
+	},
+	{ additionalProperties: false, $id: "PostFullViewBlock" },
+);
+export type PostFullViewBlock = Static<typeof PostFullViewBlock>;
 
 const UnitListSource = Type.Union([
 	Type.Object(
@@ -159,6 +169,7 @@ export const DividerBlock = Type.Object(
 export type DividerBlock = Static<typeof DividerBlock>;
 
 const ReferencedAtomicBlocks = [
+	PostFullViewBlock,
 	UnitRefBlock,
 	UnitListBlock,
 	SearchBlock,
@@ -169,6 +180,24 @@ const ReferencedAtomicBlocks = [
 
 function createContainerBlocks<ThisSchema extends TSchema>(This: ThisSchema) {
 	return [
+		Type.Object(
+			{
+				_type: Type.Literal("columns"),
+				_key: BlockKey,
+				columns: Type.Array(
+					Type.Object(
+						{
+							_key: BlockKey,
+							weight: Type.Integer({ minimum: 1, maximum: 12 }),
+							blocks: Type.Array(This, { minItems: 1, maxItems: 50 }),
+						},
+						{ additionalProperties: false },
+					),
+					{ minItems: 2, maxItems: 12 },
+				),
+			},
+			{ additionalProperties: false },
+		),
 		Type.Object(
 			{
 				_type: Type.Literal("group"),
@@ -291,12 +320,14 @@ export function createDockDocument(
 
 export const BlockTypeValues = [
 	"portable-text",
+	"post-full-view",
 	"unit-ref",
 	"unit-list",
 	"search",
 	"menu",
 	"media",
 	"divider",
+	"columns",
 	"group",
 	"callout",
 	"tabs",

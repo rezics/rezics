@@ -1,4 +1,8 @@
-import { PortableText, type PortableTextComponents } from "@portabletext/react";
+import {
+	PortableText,
+	type PortableTextComponents,
+	type PortableTextTypeComponent,
+} from "@portabletext/react";
 import {
 	normalizePortableText,
 	normalizePortableTextUrl,
@@ -72,18 +76,25 @@ export function PortableTextContent({
 	value,
 	variant = "compact",
 	className,
+	types,
 }: {
 	value: unknown;
 	variant?: PortableTextContentVariant;
 	className?: string;
+	/** Custom Portable Text block-object renderers keyed by `_type`. */
+	types?: Readonly<Record<string, PortableTextTypeComponent | undefined>>;
 }) {
 	const normalized = normalizePortableText(value);
 	if (normalized.length === 0) return null;
+	const baseComponents = variant === "preview" ? previewComponents : components;
+	const resolvedComponents = types
+		? { ...baseComponents, types: { ...baseComponents.types, ...types } }
+		: baseComponents;
 
 	return (
 		<div className={cn(variantClasses[variant], className)} data-portable-text={variant}>
 			<PortableText
-				components={variant === "preview" ? previewComponents : components}
+				components={resolvedComponents}
 				onMissingComponent={false}
 				value={normalized}
 			/>

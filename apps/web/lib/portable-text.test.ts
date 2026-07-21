@@ -1,4 +1,5 @@
 import {
+	isPortableTextValueBlock,
 	normalizePortableText,
 	normalizePortableTextUrl,
 	type PortableTextValue,
@@ -100,7 +101,22 @@ describe("Portable Text boundaries", () => {
 		expect(normalized).toEqual(normalizePortableText(value));
 		const block = normalized[0];
 		expect(block?._key).toBe("block-0");
-		expect(block?._type === "block" ? block.children[0]?._key : undefined).toBe("span-0-0");
+		expect(block && isPortableTextValueBlock(block) ? block.children[0]?._key : undefined).toBe(
+			"span-0-0",
+		);
+	});
+
+	it("preserves JSON-safe custom block objects for host validation", () => {
+		const columnBlock = {
+			_type: "columns",
+			_key: "columns-one",
+			columns: [
+				{ _key: "left", weight: 7, blocks: [] },
+				{ _key: "right", weight: 3, blocks: [] },
+			],
+		};
+
+		expect(normalizePortableText([columnBlock])).toEqual([columnBlock]);
 	});
 
 	it.each([

@@ -20,6 +20,7 @@
 		"@elysiajs/cors": "^1.4.2",
 		"@elysiajs/openapi": "^1.4.15",
 		"@rezics/block": "workspace:*",
+		"@rezics/brand": "workspace:*",
 		"@rezics/i18n": "workspace:*",
 		"@rezics/license": "workspace:*",
 		"@rezics/observability": "workspace:*",

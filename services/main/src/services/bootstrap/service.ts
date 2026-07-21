@@ -1,10 +1,16 @@
 import { hashPassword } from "better-auth/crypto";
 import { and, count, eq, inArray, isNull, sql } from "drizzle-orm";
 import { isDeepStrictEqual } from "node:util";
+import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import type { PortableTextDocument } from "@rezics/block";
 
 import { database, type DatabaseTransaction } from "../database";
 import {
 	accounts,
+	imageAsset,
+	imageObject,
+	post,
 	profile,
 	profilePreference,
 	realm,
@@ -14,15 +20,20 @@ import {
 	unitAccessBinding,
 	unitLocalization,
 	unitDock,
+	unitFollow,
 	unitSlugAddress,
 	users,
 	zone,
+	zoneNavigation,
+	zonePage,
 } from "../database/schema";
 import type { ContentLanguage } from "../database/schema/contract-values";
-import { fractionalPositionAt } from "../ordering/position";
+import { compareFractionalPositions, fractionalPositionAt } from "../ordering/position";
+import { storage } from "../storage";
 import { insertUnit, insertUnitIfMissing } from "../units/create";
 import { recordUnitRevision } from "../units/history";
 import { type BootstrapCredentialMode, generateBootstrapPassword } from "./credentials";
+import { ensureOfficialZoneFollows } from "./official-zone-follows";
 import {
 	assertBootstrapManifest,
 	BootstrapAccountIds,
@@ -30,8 +41,10 @@ import {
 	BootstrapEpochIso,
 	BootstrapUnitIds,
 	OfficialProfileIdValues,
+	OfficialProfileIds,
 	OfficialProfileManifest,
 	OfficialRealmManifest,
+	OfficialZoneAvatarAsset,
 	OfficialZoneManifest,
 	SlugNamespaceManifest,
 	TopLevelSlugNamespaceUnitIds,
@@ -264,14 +277,26 @@ async function ensureLocalization(
 		readonly position: string;
 		readonly title: string;
 		readonly summary?: string;
+		readonly avatarAssetId?: string | null;
+		readonly content?: PortableTextDocument | null;
+		readonly contentStatus?: "published" | null;
 	},
 ): Promise<boolean> {
 	const createdAt = bootstrapEpoch();
+	const desired = {
+		summary: input.summary ?? null,
+		avatarAssetId: input.avatarAssetId ?? null,
+		content: input.content ?? null,
+		contentStatus: input.contentStatus ?? null,
+	};
 	const [stored] = await tx
 		.select({
 			position: unitLocalization.position,
 			title: unitLocalization.title,
 			summary: unitLocalization.summary,
+			avatarAssetId: unitLocalization.avatarAssetId,
+			content: unitLocalization.content,
+			contentStatus: unitLocalization.contentStatus,
 		})
 		.from(unitLocalization)
 		.where(
@@ -284,7 +309,10 @@ async function ensureLocalization(
 	if (
 		stored?.position === input.position &&
 		stored.title === input.title &&
-		stored.summary === (input.summary ?? null)
+		stored.summary === desired.summary &&
+		stored.avatarAssetId === desired.avatarAssetId &&
+		valuesEqual(stored.content, desired.content) &&
+		stored.contentStatus === desired.contentStatus
 	)
 		return false;
 	if (stored) {
@@ -293,7 +321,7 @@ async function ensureLocalization(
 			.set({
 				position: input.position,
 				title: input.title,
-				summary: input.summary,
+				...desired,
 				updatedAt: createdAt,
 			})
 			.where(
@@ -309,7 +337,7 @@ async function ensureLocalization(
 		language: input.language,
 		position: input.position,
 		title: input.title,
-		summary: input.summary,
+		...desired,
 		createdAt,
 		updatedAt: createdAt,
 	});
@@ -570,6 +598,127 @@ async function ensureOfficialRealm(tx: DatabaseTransaction): Promise<void> {
 		});
 }
 
+async function ensureOfficialZoneAvatar(tx: DatabaseTransaction): Promise<void> {
+	const createdAt = bootstrapEpoch();
+	const bytes = await readFile(fileURLToPath(import.meta.resolve("@rezics/brand/avatar.png")));
+	const tracking = {
+		image_asset_id: OfficialZoneAvatarAsset.id,
+		image_object_id: OfficialZoneAvatarAsset.objectId,
+		uploader_profile_id: OfficialProfileIds.editorial,
+	};
+	await storage.put({
+		Key: OfficialZoneAvatarAsset.storageKey,
+		Body: bytes,
+		ContentType: "image/png",
+		ContentLength: bytes.byteLength,
+		Metadata: tracking,
+		Tagging: new URLSearchParams(tracking).toString(),
+	});
+	await tx
+		.insert(imageAsset)
+		.values({
+			id: OfficialZoneAvatarAsset.id,
+			uploaderProfileId: OfficialProfileIds.editorial,
+			ownerProfileId: OfficialProfileIds.editorial,
+			status: "ready",
+			access: "public",
+			createdAt,
+			updatedAt: createdAt,
+		})
+		.onConflictDoUpdate({
+			target: imageAsset.id,
+			set: {
+				uploaderProfileId: OfficialProfileIds.editorial,
+				ownerProfileId: OfficialProfileIds.editorial,
+				status: "ready",
+				access: "public",
+				deletedAt: null,
+				updatedAt: createdAt,
+			},
+		});
+	await tx
+		.insert(imageObject)
+		.values({
+			id: OfficialZoneAvatarAsset.objectId,
+			assetId: OfficialZoneAvatarAsset.id,
+			storageKey: OfficialZoneAvatarAsset.storageKey,
+			mediaType: "image/png",
+			byteSize: bytes.byteLength,
+			createdAt,
+			updatedAt: createdAt,
+		})
+		.onConflictDoUpdate({
+			target: imageObject.id,
+			set: {
+				assetId: OfficialZoneAvatarAsset.id,
+				storageKey: OfficialZoneAvatarAsset.storageKey,
+				mediaType: "image/png",
+				byteSize: bytes.byteLength,
+				updatedAt: createdAt,
+			},
+		});
+}
+
+async function ensureOfficialWikiPost(
+	tx: DatabaseTransaction,
+	value: (typeof OfficialZoneManifest)[number],
+): Promise<boolean> {
+	const createdAt = bootstrapEpoch();
+	const created = await insertUnitIfMissing(tx, {
+		id: value.wikiPost.id,
+		kind: "post",
+		status: "published",
+		visibility: "public",
+		publishedAt: createdAt,
+		createdAt,
+		updatedAt: createdAt,
+		statusActor: { kind: "system" },
+	});
+	const insertedPost = await tx
+		.insert(post)
+		.values({
+			id: value.wikiPost.id,
+			kind: "wiki",
+			subjectUnitId: value.id,
+			createdAt,
+			updatedAt: createdAt,
+		})
+		.onConflictDoNothing()
+		.returning({ id: post.id });
+	let changed = Boolean(created) || insertedPost.length > 0;
+	for (const [index, localization] of value.wikiPost.localizations.entries()) {
+		changed =
+			(await ensureLocalization(tx, {
+				unitId: value.wikiPost.id,
+				language: localization.language,
+				position: fractionalPositionAt(index),
+				title: localization.title,
+				content: localization.body,
+				contentStatus: "published",
+			})) || changed;
+	}
+	changed = (await ensureOwnerBinding(tx, value.wikiPost.id, value.ownerProfileId)) || changed;
+	await tx
+		.insert(realmUnit)
+		.values({
+			realmId: OfficialRealmManifest.id,
+			unitId: value.wikiPost.id,
+			status: "visible",
+			postTargetingLocked: false,
+			createdAt,
+			updatedAt: createdAt,
+		})
+		.onConflictDoNothing();
+	if (changed)
+		await recordUnitRevision(tx, {
+			unitId: value.wikiPost.id,
+			actorProfileId: value.ownerProfileId,
+			event: "create",
+			message: "Bootstrap official Zone Wiki Post",
+		});
+	return changed;
+}
+
 async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 	const createdAt = bootstrapEpoch();
 	for (const value of OfficialZoneManifest) {
@@ -612,6 +761,65 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 			});
 			changed = true;
 		}
+		changed = (await ensureOfficialWikiPost(tx, value)) || changed;
+		const [storedNavigation] = await tx
+			.select({ document: zoneNavigation.document })
+			.from(zoneNavigation)
+			.where(eq(zoneNavigation.id, value.navigation.id))
+			.limit(1);
+		if (storedNavigation) {
+			if (!valuesEqual(storedNavigation.document, value.navigation.document)) {
+				await tx
+					.update(zoneNavigation)
+					.set({ document: value.navigation.document, updatedAt: createdAt })
+					.where(eq(zoneNavigation.id, value.navigation.id));
+				changed = true;
+			}
+		} else {
+			await tx.insert(zoneNavigation).values({
+				id: value.navigation.id,
+				zoneId: value.id,
+				document: value.navigation.document,
+				createdAt,
+				updatedAt: createdAt,
+			});
+			changed = true;
+		}
+		const homePageValue = {
+			id: value.homePage.id,
+			zoneId: value.id,
+			slug: value.homePage.slug,
+			titleUnitId: value.homePage.titleUnitId,
+			document: value.homePage.document,
+			position: fractionalPositionAt(0),
+			home: true,
+		};
+		const { id: _homePageId, ...homePageSet } = homePageValue;
+		const [storedPage] = await tx
+			.select({
+				id: zonePage.id,
+				zoneId: zonePage.zoneId,
+				slug: zonePage.slug,
+				titleUnitId: zonePage.titleUnitId,
+				document: zonePage.document,
+				position: zonePage.position,
+				home: zonePage.home,
+			})
+			.from(zonePage)
+			.where(eq(zonePage.id, value.homePage.id))
+			.limit(1);
+		if (storedPage) {
+			if (!valuesEqual(storedPage, homePageValue)) {
+				await tx
+					.update(zonePage)
+					.set({ ...homePageSet, updatedAt: createdAt })
+					.where(eq(zonePage.id, value.homePage.id));
+				changed = true;
+			}
+		} else {
+			await tx.insert(zonePage).values({ ...homePageValue, createdAt, updatedAt: createdAt });
+			changed = true;
+		}
 		const [storedDock] = await tx
 			.select({ document: unitDock.document })
 			.from(unitDock)
@@ -640,6 +848,7 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 				(await ensureLocalization(tx, {
 					unitId: value.id,
 					position: fractionalPositionAt(index),
+					avatarAssetId: value.avatarAssetId,
 					...localization,
 				})) || changed;
 		}
@@ -708,7 +917,21 @@ export async function isBootstrapReady(): Promise<boolean> {
 			officialZone.localizations.map((localization, index) => ({
 				unitId: officialZone.id,
 				position: fractionalPositionAt(index),
+				avatarAssetId: officialZone.avatarAssetId,
+				content: null,
 				...localization,
+			})),
+		),
+		...OfficialZoneManifest.flatMap((officialZone) =>
+			officialZone.wikiPost.localizations.map((localization, index) => ({
+				unitId: officialZone.wikiPost.id,
+				position: fractionalPositionAt(index),
+				summary: null,
+				avatarAssetId: null,
+				content: localization.body,
+				contentStatus: "published" as const,
+				language: localization.language,
+				title: localization.title,
 			})),
 		),
 	];
@@ -722,6 +945,12 @@ export async function isBootstrapReady(): Promise<boolean> {
 		officialRealm,
 		officialZones,
 		officialZoneDocks,
+		officialWikiPosts,
+		officialZonePages,
+		officialZoneNavigations,
+		officialZoneAvatar,
+		allProfiles,
+		profileFollows,
 		localizations,
 	] = await Promise.all([
 		database
@@ -800,12 +1029,72 @@ export async function isBootstrapReady(): Promise<boolean> {
 				),
 			),
 		database
+			.select({ id: post.id, kind: post.kind, subjectUnitId: post.subjectUnitId })
+			.from(post)
+			.where(
+				inArray(
+					post.id,
+					OfficialZoneManifest.map((value) => value.wikiPost.id),
+				),
+			),
+		database
+			.select({
+				id: zonePage.id,
+				zoneId: zonePage.zoneId,
+				document: zonePage.document,
+				home: zonePage.home,
+			})
+			.from(zonePage)
+			.where(
+				inArray(
+					zonePage.id,
+					OfficialZoneManifest.map((value) => value.homePage.id),
+				),
+			),
+		database
+			.select({
+				id: zoneNavigation.id,
+				zoneId: zoneNavigation.zoneId,
+				document: zoneNavigation.document,
+			})
+			.from(zoneNavigation)
+			.where(
+				inArray(
+					zoneNavigation.id,
+					OfficialZoneManifest.map((value) => value.navigation.id),
+				),
+			),
+		database
+			.select({
+				id: imageAsset.id,
+				status: imageAsset.status,
+				access: imageAsset.access,
+				objectId: imageObject.id,
+				storageKey: imageObject.storageKey,
+			})
+			.from(imageAsset)
+			.innerJoin(imageObject, eq(imageObject.assetId, imageAsset.id))
+			.where(eq(imageAsset.id, OfficialZoneAvatarAsset.id))
+			.limit(1),
+		database.select({ id: profile.id }).from(profile),
+		database
+			.select({
+				profileId: unitFollow.followerProfileId,
+				unitId: unitFollow.unitId,
+				position: unitFollow.position,
+				favorite: unitFollow.favorite,
+			})
+			.from(unitFollow),
+		database
 			.select({
 				unitId: unitLocalization.unitId,
 				language: unitLocalization.language,
 				position: unitLocalization.position,
 				title: unitLocalization.title,
 				summary: unitLocalization.summary,
+				avatarAssetId: unitLocalization.avatarAssetId,
+				content: unitLocalization.content,
+				contentStatus: unitLocalization.contentStatus,
 			})
 			.from(unitLocalization)
 			.where(
@@ -813,6 +1102,7 @@ export async function isBootstrapReady(): Promise<boolean> {
 					...OfficialProfileManifest.map((officialProfile) => officialProfile.profileId),
 					OfficialRealmManifest.id,
 					...OfficialZoneManifest.map((officialZone) => officialZone.id),
+					...OfficialZoneManifest.map((officialZone) => officialZone.wikiPost.id),
 				]),
 			),
 	]);
@@ -848,6 +1138,73 @@ export async function isBootstrapReady(): Promise<boolean> {
 					valuesEqual(actual.themeDocument, expected.themeDocument),
 			),
 		) &&
+		officialWikiPosts.length === OfficialZoneManifest.length &&
+		OfficialZoneManifest.every((expected) =>
+			officialWikiPosts.some(
+				(actual) =>
+					actual.id === expected.wikiPost.id &&
+					actual.kind === "wiki" &&
+					actual.subjectUnitId === expected.id,
+			),
+		) &&
+		officialZonePages.length === OfficialZoneManifest.length &&
+		OfficialZoneManifest.every((expected) =>
+			officialZonePages.some(
+				(actual) =>
+					actual.id === expected.homePage.id &&
+					actual.zoneId === expected.id &&
+					actual.home &&
+					valuesEqual(actual.document, expected.homePage.document),
+			),
+		) &&
+		officialZoneNavigations.length === OfficialZoneManifest.length &&
+		OfficialZoneManifest.every((expected) =>
+			officialZoneNavigations.some(
+				(actual) =>
+					actual.id === expected.navigation.id &&
+					actual.zoneId === expected.id &&
+					valuesEqual(actual.document, expected.navigation.document),
+			),
+		) &&
+		officialZoneAvatar[0]?.id === OfficialZoneAvatarAsset.id &&
+		officialZoneAvatar[0]?.status === "ready" &&
+		officialZoneAvatar[0]?.access === "public" &&
+		officialZoneAvatar[0]?.objectId === OfficialZoneAvatarAsset.objectId &&
+		officialZoneAvatar[0]?.storageKey === OfficialZoneAvatarAsset.storageKey &&
+		allProfiles.every((targetProfile) => {
+			const follows = profileFollows.filter(
+				(follow) => follow.profileId === targetProfile.id,
+			);
+			const officialFollows = OfficialZoneManifest.map((expected) =>
+				follows.find((follow) => follow.unitId === expected.id),
+			);
+			if (officialFollows.some((follow) => !follow)) return false;
+			const positions = officialFollows.flatMap((follow) =>
+				follow ? [follow.position] : [],
+			);
+			if (
+				positions.some((position, index) => {
+					if (index === 0) return false;
+					const previous = positions[index - 1];
+					return !previous || compareFractionalPositions(previous, position) >= 0;
+				})
+			)
+				return false;
+			const firstOrdinaryPosition = follows
+				.filter(
+					(follow) =>
+						!follow.favorite &&
+						!OfficialZoneManifest.some((official) => official.id === follow.unitId),
+				)
+				.map((follow) => follow.position)
+				.toSorted(compareFractionalPositions)[0];
+			return firstOrdinaryPosition
+				? positions.every(
+						(position) =>
+							compareFractionalPositions(position, firstOrdinaryPosition) < 0,
+					)
+				: true;
+		}) &&
 		officialZoneDocks.length === OfficialZoneManifest.length &&
 		OfficialZoneManifest.every((expected) =>
 			officialZoneDocks.some(
@@ -864,7 +1221,12 @@ export async function isBootstrapReady(): Promise<boolean> {
 					actual.language === expected.language &&
 					actual.position === expected.position &&
 					actual.title === expected.title &&
-					actual.summary === expected.summary,
+					actual.summary === expected.summary &&
+					actual.avatarAssetId ===
+						("avatarAssetId" in expected ? expected.avatarAssetId : null) &&
+					valuesEqual(actual.content, "content" in expected ? expected.content : null) &&
+					actual.contentStatus ===
+						("contentStatus" in expected ? expected.contentStatus : null),
 			),
 		)
 	);
@@ -881,7 +1243,9 @@ export async function bootstrapDatabase(
 		await ensureSlugNamespaces(tx);
 		const credentials = await ensureOfficialProfiles(tx, options.credentialMode);
 		await ensureOfficialRealm(tx);
+		await ensureOfficialZoneAvatar(tx);
 		await ensureOfficialZones(tx);
+		await ensureOfficialZoneFollows(tx);
 		return credentials;
 	});
 	return { issuedCredentials };

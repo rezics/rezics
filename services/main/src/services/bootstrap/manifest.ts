@@ -1,7 +1,14 @@
 import {
 	createDockDocument,
+	createPortableTextDocument,
+	createUnitReferencedBlockDocument,
 	createZoneBoundaryDocument,
 	createZoneThemeDocument,
+	assertDockDocument,
+	assertNavigationDocument,
+	assertUnitReferencedBlockDocument,
+	assertWikiPostPortableTextDocument,
+	ZonePageBlockHostPolicy,
 } from "@rezics/block";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
@@ -93,6 +100,85 @@ export const OfficialRealmManifest = {
 	],
 } as const;
 
+export const OfficialZoneAvatarAsset = {
+	id: "019b76da-a800-7800-8000-000000000001",
+	objectId: "019b76da-a800-7810-8000-000000000001",
+	storageKey: "bootstrap/image-objects/official-zone-avatar/original",
+} as const;
+
+function createOfficialZoneContent(input: {
+	readonly postId: string;
+	readonly pageId: string;
+	readonly navigationId: string;
+	readonly keys: readonly [string, string, string, string, string, string, string, string];
+	readonly zh: { readonly title: string; readonly body: string };
+	readonly en: { readonly title: string; readonly body: string };
+}) {
+	const [bodyKey, zhBlockKey, zhSpanKey, enBlockKey, enSpanKey, pageKey, fullViewKey, menuKey] =
+		input.keys;
+	const body = (language: "zh" | "en") => {
+		const localized = input[language];
+		const blockKey = language === "zh" ? zhBlockKey : enBlockKey;
+		const spanKey = language === "zh" ? zhSpanKey : enSpanKey;
+		return createPortableTextDocument(
+			[
+				{
+					_type: "block",
+					_key: blockKey,
+					style: "normal",
+					markDefs: [],
+					children: [{ _type: "span", _key: spanKey, text: localized.body, marks: [] }],
+				},
+			],
+			bodyKey,
+		);
+	};
+	return {
+		wikiPost: {
+			id: input.postId,
+			localizations: [
+				{ language: "zh" as const, title: input.zh.title, body: body("zh") },
+				{ language: "en" as const, title: input.en.title, body: body("en") },
+			],
+		},
+		homePage: {
+			id: input.pageId,
+			slug: "home",
+			titleUnitId: input.postId,
+			document: createUnitReferencedBlockDocument(
+				[{ _type: "post-full-view", _key: fullViewKey, postId: input.postId }],
+				pageKey,
+			),
+		},
+		navigation: {
+			id: input.navigationId,
+			document: {
+				_type: "navigation-document" as const,
+				_key: `0${menuKey.slice(1)}`,
+				items: [
+					{
+						_key: `1${menuKey.slice(1)}`,
+						labelUnitId: input.postId,
+						target: { kind: "zone-page" as const, slug: "home" },
+					},
+				],
+			},
+		},
+		mainDockDocument: createDockDocument(
+			[
+				{
+					_type: "menu",
+					_key: menuKey,
+					navigationId: input.navigationId,
+					orientation: "horizontal",
+					appearance: "links",
+				},
+			],
+			`2${menuKey.slice(1)}`,
+		),
+	};
+}
+
 export const OfficialZoneManifest = [
 	{
 		id: "019b76da-a800-7400-8000-000000000001",
@@ -116,7 +202,27 @@ export const OfficialZoneManifest = [
 			"b00757a70001",
 		),
 		themeDocument: createZoneThemeDocument({ accent: "#a16207" }, "b00757a70002"),
-		mainDockDocument: createDockDocument([], "b00757a70003"),
+		avatarAssetId: OfficialZoneAvatarAsset.id,
+		...createOfficialZoneContent({
+			postId: "019b76da-a800-7500-8000-000000000001",
+			pageId: "019b76da-a800-7600-8000-000000000001",
+			navigationId: "019b76da-a800-7700-8000-000000000001",
+			keys: [
+				"b00757010001",
+				"b00757010002",
+				"b00757010003",
+				"b00757010004",
+				"b00757010005",
+				"b00757010006",
+				"b00757010007",
+				"b00757010008",
+			],
+			zh: { title: "書庫首頁", body: "從書庫探索作品、版本與相關內容。" },
+			en: {
+				title: "Book Library Home",
+				body: "Explore works, editions, and related content.",
+			},
+		}),
 	},
 	{
 		id: "019b76da-a800-7400-8000-000000000002",
@@ -140,7 +246,27 @@ export const OfficialZoneManifest = [
 			"b00757a70004",
 		),
 		themeDocument: createZoneThemeDocument({ accent: "#db2777" }, "b00757a70005"),
-		mainDockDocument: createDockDocument([], "b00757a70006"),
+		avatarAssetId: OfficialZoneAvatarAsset.id,
+		...createOfficialZoneContent({
+			postId: "019b76da-a800-7500-8000-000000000002",
+			pageId: "019b76da-a800-7600-8000-000000000002",
+			navigationId: "019b76da-a800-7700-8000-000000000002",
+			keys: [
+				"b00757020001",
+				"b00757020002",
+				"b00757020003",
+				"b00757020004",
+				"b00757020005",
+				"b00757020006",
+				"b00757020007",
+				"b00757020008",
+			],
+			zh: { title: "媒體庫首頁", body: "從媒體庫探索電影、電視、動畫與相關內容。" },
+			en: {
+				title: "Media Library Home",
+				body: "Explore films, television, animation, and related content.",
+			},
+		}),
 	},
 	{
 		id: "019b76da-a800-7400-8000-000000000003",
@@ -164,85 +290,27 @@ export const OfficialZoneManifest = [
 			"b00757a70007",
 		),
 		themeDocument: createZoneThemeDocument({ accent: "#0d9488" }, "b00757a70008"),
-		mainDockDocument: createDockDocument([], "b00757a70009"),
-	},
-	{
-		id: "019b76da-a800-7400-8000-000000000004",
-		slug: "realms",
-		localizations: [
-			{
-				language: "zh",
-				title: "領域庫",
-				summary: "瀏覽整理共同興趣並參與討論的社群。",
-			},
-			{
-				language: "en",
-				title: "Realm Library",
-				summary: "Browse communities that organize and discuss shared interests.",
-			},
-		],
-		ownerProfileId: OfficialProfileIds.community,
-		boundaryDocument: createZoneBoundaryDocument(["realms"], [], "b00757a7000a"),
-		themeDocument: createZoneThemeDocument({ accent: "#2563eb" }, "b00757a7000b"),
-		mainDockDocument: createDockDocument([], "b00757a7000c"),
-	},
-	{
-		id: "019b76da-a800-7400-8000-000000000005",
-		slug: "zones",
-		localizations: [
-			{
-				language: "zh",
-				title: "專區庫",
-				summary: `瀏覽橫跨 ${RezicsBrandName} 內容的可自訂整理入口。`,
-			},
-			{
-				language: "en",
-				title: "Zone Library",
-				summary: `Browse customizable portals curated across ${RezicsBrandName}.`,
-			},
-		],
-		ownerProfileId: OfficialProfileIds.editorial,
-		boundaryDocument: createZoneBoundaryDocument(
-			["units"],
-			[{ field: "type", operator: "equals", value: "zone" }],
-			"b00757a7000d",
-		),
-		themeDocument: createZoneThemeDocument({ accent: "#7c3aed" }, "b00757a7000e"),
-		mainDockDocument: createDockDocument([], "b00757a7000f"),
-	},
-	{
-		id: "019b76da-a800-7400-8000-000000000006",
-		slug: "popular",
-		localizations: [
-			{
-				language: "zh",
-				title: "熱門",
-				summary: "探索熱門內容、對話與社群動態。",
-			},
-			{
-				language: "en",
-				title: "Popular",
-				summary: "Explore trending Units, conversations, and community activity.",
-			},
-		],
-		ownerProfileId: OfficialProfileIds.editorial,
-		boundaryDocument: createZoneBoundaryDocument(
-			[
-				"units",
-				"users",
-				"entity",
-				"tags",
-				"posts",
-				"realms",
-				"collections",
-				"reviews",
-				"polls",
+		avatarAssetId: OfficialZoneAvatarAsset.id,
+		...createOfficialZoneContent({
+			postId: "019b76da-a800-7500-8000-000000000003",
+			pageId: "019b76da-a800-7600-8000-000000000003",
+			navigationId: "019b76da-a800-7700-8000-000000000003",
+			keys: [
+				"b00757030001",
+				"b00757030002",
+				"b00757030003",
+				"b00757030004",
+				"b00757030005",
+				"b00757030006",
+				"b00757030007",
+				"b00757030008",
 			],
-			[],
-			"b00757a70010",
-		),
-		themeDocument: createZoneThemeDocument({ accent: "#ea580c" }, "b00757a70011"),
-		mainDockDocument: createDockDocument([], "b00757a70012"),
+			zh: { title: "軟體庫首頁", body: "從軟體庫探索應用程式、工具、遊戲與相關內容。" },
+			en: {
+				title: "Software Library Home",
+				body: "Explore applications, tools, games, and related content.",
+			},
+		}),
 	},
 ] as const;
 
@@ -251,6 +319,7 @@ export const BootstrapUnitIds = [
 	...OfficialProfileManifest.map((profile) => profile.profileId),
 	OfficialRealmManifest.id,
 	...OfficialZoneManifest.map((zone) => zone.id),
+	...OfficialZoneManifest.map((zone) => zone.wikiPost.id),
 ] as const;
 
 export const BootstrapAuthUserIds = OfficialProfileManifest.map((profile) => profile.authUserId);
@@ -260,6 +329,10 @@ export const ReservedBootstrapUuidv7s = [
 	...BootstrapUnitIds,
 	...BootstrapAuthUserIds,
 	...BootstrapAccountIds,
+	...OfficialZoneManifest.map((zone) => zone.homePage.id),
+	...OfficialZoneManifest.map((zone) => zone.navigation.id),
+	OfficialZoneAvatarAsset.id,
+	OfficialZoneAvatarAsset.objectId,
 ] as const;
 
 const UuidV7Pattern = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -276,5 +349,12 @@ export function assertBootstrapManifest(): void {
 	for (const id of ReservedBootstrapUuidv7s) {
 		if (uuidv7UnixMilliseconds(id) !== BootstrapEpochUnixMilliseconds)
 			throw new Error(`Bootstrap UUID does not use ${BootstrapEpochIso}: ${id}`);
+	}
+	for (const zone of OfficialZoneManifest) {
+		assertDockDocument(zone.mainDockDocument);
+		assertNavigationDocument(zone.navigation.document);
+		assertUnitReferencedBlockDocument(zone.homePage.document, ZonePageBlockHostPolicy);
+		for (const localization of zone.wikiPost.localizations)
+			assertWikiPostPortableTextDocument(localization.body);
 	}
 }

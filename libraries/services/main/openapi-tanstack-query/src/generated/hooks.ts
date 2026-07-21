@@ -427,6 +427,11 @@ import type {
 	PatchApiZonesByZoneIdStatus404,
 	PatchApiZonesByZoneIdStatus422,
 	PatchApiZonesByZoneIdStatus500,
+	GetZoneRenderProjectionOptions,
+	GetZoneRenderProjectionStatus200,
+	GetZoneRenderProjectionStatus404,
+	GetZoneRenderProjectionStatus422,
+	GetZoneRenderProjectionStatus500,
 	GetApiZonesByZoneIdPagesOptions,
 	GetApiZonesByZoneIdPagesStatus200,
 	GetApiZonesByZoneIdPagesStatus404,
@@ -1476,6 +1481,7 @@ import {
 	replaceZoneSlugAddress,
 	getApiZonesByZoneId,
 	patchApiZonesByZoneId,
+	getZoneRenderProjection,
 	getApiZonesByZoneIdPages,
 	getApiZonesByZoneIdPagesBySlug,
 	putApiZonesByZoneIdPagesBySlug,
@@ -8568,6 +8574,108 @@ export function usePatchApiZonesByZoneId<TContext>(
 		PatchApiZonesByZoneIdOptions,
 		TContext
 	>;
+}
+
+export const getZoneRenderProjectionQueryKey = ({
+	path,
+	query,
+}: Omit<GetZoneRenderProjectionOptions, "headers">) =>
+	[{ url: "/api/zones/:zoneId/render", params: path }, ...(query ? [query] : [])] as const;
+
+type GetZoneRenderProjectionQueryKey = ReturnType<typeof getZoneRenderProjectionQueryKey>;
+
+export function getZoneRenderProjectionQueryOptions(
+	{ path, query }: GetZoneRenderProjectionOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getZoneRenderProjectionQueryKey({ path, query });
+	return queryOptions<
+		GetZoneRenderProjectionStatus200,
+		ResponseErrorConfig<
+			| GetZoneRenderProjectionStatus404
+			| GetZoneRenderProjectionStatus422
+			| GetZoneRenderProjectionStatus500
+		>,
+		GetZoneRenderProjectionStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getZoneRenderProjection({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get a Zone render projection
+ * {@link /api/zones/:zoneId/render}
+ */
+export function useGetZoneRenderProjection<
+	TData = GetZoneRenderProjectionStatus200,
+	TQueryData = GetZoneRenderProjectionStatus200,
+	TQueryKey extends QueryKey = GetZoneRenderProjectionQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			GetZoneRenderProjectionOptions["path"] | (() => GetZoneRenderProjectionOptions["path"]);
+		query?:
+			| GetZoneRenderProjectionOptions["query"]
+			| (() => GetZoneRenderProjectionOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetZoneRenderProjectionStatus200,
+				ResponseErrorConfig<
+					| GetZoneRenderProjectionStatus404
+					| GetZoneRenderProjectionStatus422
+					| GetZoneRenderProjectionStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey = resolvedOptions?.queryKey ?? getZoneRenderProjectionQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getZoneRenderProjectionQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetZoneRenderProjectionStatus404
+			| GetZoneRenderProjectionStatus422
+			| GetZoneRenderProjectionStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
 }
 
 export const getApiZonesByZoneIdPagesQueryKey = ({

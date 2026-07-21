@@ -12,7 +12,7 @@ import {
 	position,
 	selectSeedRealmModerationTarget,
 	SeedLanguages,
-} from "./seed-data";
+} from "./data";
 
 describe("seed data", () => {
 	it("is deterministic for a fixed reference time", () => {

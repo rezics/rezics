@@ -10,6 +10,7 @@ import {
 	PollContentBlock,
 	PortableTextDocument,
 	UnitReferencedBlockDocument,
+	ZonePageBlockHostPolicy,
 	assertDockDocument,
 	assertBlockDocument,
 	assertDocument,
@@ -17,6 +18,7 @@ import {
 	assertResolvedBlockReferences,
 	assertResolvedNavigationReferences,
 	assertUnitReferencedBlockDocument,
+	assertWikiPostPortableTextDocument,
 	collectBlockReferences,
 	collectNavigationReferences,
 	createBlockKey,
@@ -94,6 +96,71 @@ describe("Block document contracts", () => {
 		expect(updated).not.toBe(original);
 		expect(updated._key).toBe(original._key);
 		expect(updated.content).toBe(nextContent);
+	});
+
+	test("validates Columns recursively when embedded as a Portable Text block object", () => {
+		const postId = "019b0000-0000-7000-8000-000000000001";
+		const body = createPortableTextDocument(
+			[
+				{
+					_type: "columns",
+					_key: "000000000051",
+					columns: [
+						{
+							_key: "000000000052",
+							weight: 7,
+							blocks: [createPortableTextDocument([], "000000000053")],
+						},
+						{
+							_key: "000000000054",
+							weight: 3,
+							blocks: [
+								{
+									_type: "unit-ref",
+									_key: "000000000055",
+									unitId: postId,
+									appearance: "card",
+								},
+							],
+						},
+					],
+				},
+			],
+			"000000000050",
+		);
+
+		expect(() => assertWikiPostPortableTextDocument(body)).not.toThrow();
+		expect([
+			...collectBlockReferences({ _key: "000000000056", blocks: [body] }).unitIds,
+		]).toEqual([postId]);
+		expect(() =>
+			assertWikiPostPortableTextDocument({
+				...body,
+				content: [
+					{
+						_type: "menu",
+						_key: "000000000057",
+						navigationId: postId,
+						orientation: "horizontal",
+						appearance: "links",
+					},
+				],
+			}),
+		).toThrow("not allowed");
+	});
+
+	test("treats Post Full View as a Wiki Post reference", () => {
+		const postId = "019b0000-0000-7000-8000-000000000001";
+		const document = {
+			_type: "block-document",
+			_key: "000000000060",
+			blocks: [{ _type: "post-full-view", _key: "000000000061", postId }],
+		} satisfies typeof UnitReferencedBlockDocument.static;
+
+		expect(() =>
+			assertUnitReferencedBlockDocument(document, ZonePageBlockHostPolicy),
+		).not.toThrow();
+		expect([...collectBlockReferences(document).wikiPostIds]).toEqual([postId]);
 	});
 
 	test("requires Zone composition copy to be referenced through localized Units", () => {

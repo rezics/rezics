@@ -1,6 +1,10 @@
 import { type Static, Type } from "@sinclair/typebox";
 import { Check } from "@sinclair/typebox/value";
-import { isPortableText, normalizePortableText } from "@rezics/portable-text";
+import {
+	isPortableText,
+	isPortableTextValueBlock,
+	normalizePortableText,
+} from "@rezics/portable-text";
 import { PublicationLicenseIds } from "@rezics/license";
 
 import type { SearchProjectionKind } from "../database/schema/search";
@@ -180,7 +184,9 @@ export function extractCanonicalSearchText(value: unknown): string {
 			: value;
 	if (!isPortableText(content)) return "";
 	return normalizePortableText(content)
-		.flatMap((block) => ("children" in block ? block.children.map((child) => child.text) : []))
+		.flatMap((block) =>
+			isPortableTextValueBlock(block) ? block.children.map((child) => child.text) : [],
+		)
 		.join(" ")
 		.replace(/\s+/g, " ")
 		.trim();

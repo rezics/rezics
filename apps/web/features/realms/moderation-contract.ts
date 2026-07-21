@@ -3,7 +3,7 @@ import {
 	type GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum,
 	type PatchApiRealmsByRealmIdUnitsByUnitIdRequestCommandEnum,
 } from "@rezics/openapi-tanstack-query";
-import type { PortableTextValue } from "@rezics/portable-text";
+import { isPortableTextValueBlock, type PortableTextValue } from "@rezics/portable-text";
 
 export type RealmModerationStatus = GetApiRealmsByRealmIdUnitsStatus200ItemsStatusEnum;
 export type RealmModerationCommand =
@@ -44,7 +44,9 @@ export function getRealmModerationCommands(
 export function hasAuthoredAnnotation(value: PortableTextValue): boolean {
 	return value.some(
 		(block) =>
-			block._type === "image" || block.children.some((child) => child.text.trim().length > 0),
+			block._type === "image" ||
+			(isPortableTextValueBlock(block) &&
+				block.children.some((child) => child.text.trim().length > 0)),
 	);
 }
 

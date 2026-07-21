@@ -1,6 +1,13 @@
 import { StatusCodes } from "http-status-codes";
 import Elysia from "elysia";
-import { BlockDocument, BlockKey, DockDocument, parseDocument, type Block } from "@rezics/block";
+import {
+	BlockDocument,
+	BlockKey,
+	DockDocument,
+	parseDocument,
+	type Block,
+	walkBlockTree,
+} from "@rezics/block";
 import { SearchConfiguration, SearchExecutionRequest } from "@rezics/search";
 import { getActiveObservability } from "@rezics/observability";
 import { and, eq } from "drizzle-orm";
@@ -45,17 +52,13 @@ function findSearchConfiguration(
 	blockKey: string,
 ) {
 	let found: SearchConfiguration | undefined;
-	const visit = (block: Block): void => {
+	walkBlockTree(document, (block) => {
 		if (block._key === blockKey) {
 			if (block._type !== "search")
 				throw new InvalidSearch("The selected Block is not a Search Block");
 			found = block.configuration;
-			return;
 		}
-		if (block._type === "group" || block._type === "callout") block.blocks.forEach(visit);
-		if (block._type === "tabs") block.tabs.forEach((tab) => tab.blocks.forEach(visit));
-	};
-	document.blocks.forEach(visit);
+	});
 	if (!found) throw new InvalidSearch("Search Block does not exist in this surface");
 	return found;
 }

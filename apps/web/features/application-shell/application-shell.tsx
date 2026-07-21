@@ -91,7 +91,7 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 						id: item.id,
 						href: sidebarFollowingHref("zone", item),
 						label: item.title ?? t.ui.unnamed,
-						imageUrl: item.avatar?.url ?? item.cover?.url,
+						imageUrl: item.avatar?.url,
 						favorite: item.favorite,
 					},
 				]

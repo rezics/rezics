@@ -31,7 +31,6 @@ vi.mock("../units/history", () => ({ recordUnitRevision }));
 
 import { OfficialRealmManifest, OfficialZoneManifest } from "../bootstrap/manifest";
 import { unitAccessBinding, unitFollow } from "../database/schema";
-import { fractionalPositionAt } from "../ordering/position";
 import { ensureProfile } from "./profile";
 
 const ProfileId = "019f82aa-db8f-7962-9924-7369b17f5502";
@@ -70,7 +69,7 @@ describe("Profile registration defaults", () => {
 			OfficialZoneManifest.map((officialZone, index) => ({
 				followerProfileId: ProfileId,
 				unitId: officialZone.id,
-				position: fractionalPositionAt(index),
+				position: ["Zy", "Zz", "a0"][index],
 			})),
 		);
 		expect(followValues).not.toEqual(

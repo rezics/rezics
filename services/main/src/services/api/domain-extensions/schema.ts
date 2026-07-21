@@ -1,6 +1,8 @@
 import { JsonValue } from "@rezics/portable-text";
 import {
+	DockDocument,
 	NavigationDocument,
+	PortableTextDocument,
 	UnitReferencedBlockDocument,
 	ZoneBoundaryDocument,
 	ZoneThemeDocument,
@@ -21,6 +23,8 @@ const UnitReferencedBlockResponseDocument = Type.Unsafe<unknown>(
 	Type.Ref("UnitReferencedBlockDocument"),
 );
 const NavigationResponseDocument = Type.Unsafe<unknown>(Type.Ref("NavigationDocument"));
+const DockResponseDocument = Type.Unsafe<unknown>(Type.Ref(DockDocument));
+const PortableTextResponseDocument = Type.Unsafe<unknown>(Type.Ref(PortableTextDocument));
 const ZoneBoundaryInputDocument = Type.Unsafe<Static<typeof ZoneBoundaryDocument>>(
 	Type.Ref("ZoneBoundaryDocument"),
 );
@@ -78,6 +82,12 @@ export const CreateZoneBody = t.Object(
 );
 export const ZoneParams = t.Object({ zoneId: Uuid });
 export const ZoneDetailQuery = t.Object({ language: t.Optional(ContentLanguage) });
+export const ZoneRenderQuery = t.Object({
+	language: t.Optional(ContentLanguage),
+	page: t.Optional(
+		t.String({ minLength: 1, maxLength: 100, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
+	),
+});
 export const ZonePageParams = t.Object({
 	zoneId: Uuid,
 	slug: t.String({ minLength: 1, maxLength: 100, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
@@ -180,3 +190,35 @@ export const ZoneNavigationResponse = t.Object({
 	updatedAt: DateTime,
 });
 export const ZoneNavigationListResponse = t.Object({ items: t.Array(ZoneNavigationResponse) });
+
+export const ZoneRenderUnitResponse = t.Object({
+	id: Uuid,
+	kind: t.String(),
+	language: t.Nullable(ContentLanguage),
+	title: t.Nullable(t.String()),
+	summary: t.Nullable(t.String()),
+	avatar: ImageAssetResponse,
+	banner: ImageAssetResponse,
+	cover: ImageAssetResponse,
+});
+export const ZoneRenderWikiPostResponse = t.Object({
+	...ZoneRenderUnitResponse.properties,
+	body: PortableTextResponseDocument,
+});
+export const ZoneRenderResponse = t.Object({
+	zone: ZoneResponse,
+	page: t.Nullable(ZonePageResponse),
+	dock: t.Nullable(
+		t.Object({
+			unitId: Uuid,
+			surface: t.Literal("main"),
+			document: DockResponseDocument,
+		}),
+	),
+	navigations: t.Array(ZoneNavigationResponse),
+	references: t.Object({
+		units: t.Array(ZoneRenderUnitResponse),
+		wikiPosts: t.Array(ZoneRenderWikiPostResponse),
+		assets: t.Array(t.Object({ id: Uuid, url: t.String() })),
+	}),
+});

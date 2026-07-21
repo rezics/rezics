@@ -9,5 +9,5 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
 	if (!resolved) notFound();
 	if (resolved.redirected || resolved.canonicalHref !== `/z/${slug}`)
 		redirect(resolved.canonicalHref);
-	return <ZonePage id={resolved.id} />;
+	return <ZonePage baseHref={resolved.canonicalHref} id={resolved.id} />;
 }

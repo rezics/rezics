@@ -5,6 +5,7 @@ import { getUnitReadCondition } from "../authorization/unit/query";
 import type { DatabaseTransaction } from "../database";
 import {
 	imageAsset,
+	post,
 	realmNavigation,
 	unit,
 	type UnitKind,
@@ -35,6 +36,20 @@ export function createUnitBlockReferenceResolver(
 					.where(
 						and(
 							inArray(unit.id, [...identifiers]),
+							getUnitReadCondition(input.profileId),
+						),
+					);
+				return new Set(rows.map((row) => row.id));
+			}
+			if (kind === "wiki-post") {
+				const rows = await tx
+					.select({ id: post.id })
+					.from(post)
+					.innerJoin(unit, eq(unit.id, post.id))
+					.where(
+						and(
+							inArray(post.id, [...identifiers]),
+							eq(post.kind, "wiki"),
 							getUnitReadCondition(input.profileId),
 						),
 					);

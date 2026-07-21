@@ -149,6 +149,8 @@ import type {
 	GetApiZonesByZoneIdResponses,
 	PatchApiZonesByZoneIdOptions,
 	PatchApiZonesByZoneIdResponses,
+	GetZoneRenderProjectionOptions,
+	GetZoneRenderProjectionResponses,
 	GetApiZonesByZoneIdPagesOptions,
 	GetApiZonesByZoneIdPagesResponses,
 	GetApiZonesByZoneIdPagesBySlugOptions,
@@ -1739,6 +1741,20 @@ export function patchApiZonesByZoneId<ThrowOnError extends boolean = true>(
 
 	return request({ method: "PATCH", url: "/api/zones/{zoneId}", ...config }) as Promise<
 		RequestResult<PatchApiZonesByZoneIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Get a Zone render projection
+ * {@link /api/zones/:zoneId/render}
+ */
+export function getZoneRenderProjection<ThrowOnError extends boolean = true>(
+	options: Options<GetZoneRenderProjectionOptions, ThrowOnError>,
+): Promise<RequestResult<GetZoneRenderProjectionResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "GET", url: "/api/zones/{zoneId}/render", ...config }) as Promise<
+		RequestResult<GetZoneRenderProjectionResponses, ThrowOnError>
 	>;
 }
 

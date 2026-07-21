@@ -38,6 +38,7 @@ export const resources = defineResources({
 			state: () => import("./languages/zh-Hant/state").then((module) => module.default),
 			ui: () => import("./languages/zh-Hant/ui").then((module) => module.default),
 			units: () => import("./languages/zh-Hant/units").then((module) => module.default),
+			zones: () => import("./languages/zh-Hant/zones").then((module) => module.default),
 		},
 		en: {
 			actions: () => import("./languages/en/actions").then((module) => module.default),
@@ -71,6 +72,7 @@ export const resources = defineResources({
 			state: () => import("./languages/en/state").then((module) => module.default),
 			ui: () => import("./languages/en/ui").then((module) => module.default),
 			units: () => import("./languages/en/units").then((module) => module.default),
+			zones: () => import("./languages/en/zones").then((module) => module.default),
 		},
 	},
 });

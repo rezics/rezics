@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import {
 	NavigationDocument,
@@ -10,18 +10,21 @@ import {
 	ZonePageBlockHostPolicy,
 	ZoneThemeDocument,
 	assertUnitReferencedBlockDocument,
+	assertWikiPostPortableTextDocument,
 	assertNavigationDocument,
 	assertResolvedBlockReferences,
 	assertResolvedNavigationReferences,
 	collectBlockReferences,
 	collectNavigationReferences,
 	parseDocument,
-	type PortableTextDocument,
+	PortableTextDocument,
+	type Block,
 } from "@rezics/block";
 import type { ContentLanguage } from "@rezics/i18n";
 
 import session, { resolveIdentity } from "../../auth/session";
 import type { UnitAuthorization } from "../../authorization/unit/authorization";
+import { getUnitReadCondition } from "../../authorization/unit/query";
 import { createUnitBlockReferenceResolver } from "../../blocks/reference-resolver";
 import { database } from "../../database";
 import {
@@ -30,12 +33,14 @@ import {
 	series,
 	seriesRelease,
 	unitAccessBinding,
+	unit,
 	unitLink,
 	unitLocalization,
 	zone,
 	zoneNavigation,
 	zonePage,
 	unitDock,
+	imageAsset,
 } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import type { DatabaseTransaction } from "../../database";
@@ -81,6 +86,8 @@ import {
 	ZonePageResponse,
 	ZoneParams,
 	ZoneResponse,
+	ZoneRenderQuery,
+	ZoneRenderResponse,
 } from "./schema";
 import {
 	SoftwareNotFound,
@@ -232,6 +239,54 @@ function toZoneNavigationResponse(record: typeof zoneNavigation.$inferSelect) {
 	} satisfies typeof ZoneNavigationResponse.static;
 }
 
+async function getReadableRenderLocalizationRows(ids: readonly string[], profileId?: string) {
+	if (!ids.length) return [];
+	return database
+		.select({
+			id: unit.id,
+			kind: unit.kind,
+			language: unitLocalization.language,
+			position: unitLocalization.position,
+			title: unitLocalization.title,
+			summary: unitLocalization.summary,
+			content: unitLocalization.content,
+			avatarAssetId: unitLocalization.avatarAssetId,
+			bannerAssetId: unitLocalization.bannerAssetId,
+			coverAssetId: unitLocalization.coverAssetId,
+		})
+		.from(unit)
+		.innerJoin(unitLocalization, eq(unitLocalization.unitId, unit.id))
+		.where(and(inArray(unit.id, [...ids]), getUnitReadCondition(profileId)))
+		.orderBy(unit.id, unitLocalization.position, unitLocalization.language);
+}
+
+function presentRenderUnit(
+	rows: Awaited<ReturnType<typeof getReadableRenderLocalizationRows>>,
+	preferredLanguage?: string | null,
+) {
+	const selected =
+		(preferredLanguage
+			? rows.find((localization) => localization.language === preferredLanguage)
+			: undefined) ?? rows[0];
+	if (!selected) return null;
+	return {
+		id: selected.id,
+		kind: selected.kind,
+		language: selected.language,
+		title: selected.title,
+		summary: selected.summary,
+		avatar: presentImageAsset(
+			resolveUnitLocalizationImageAssetIdFromOrdered(rows, "avatar", preferredLanguage),
+		),
+		banner: presentImageAsset(
+			resolveUnitLocalizationImageAssetIdFromOrdered(rows, "banner", preferredLanguage),
+		),
+		cover: presentImageAsset(
+			resolveUnitLocalizationImageAssetIdFromOrdered(rows, "cover", preferredLanguage),
+		),
+	};
+}
+
 function ensureZoneBlockDocument(value: unknown): void {
 	try {
 		assertUnitReferencedBlockDocument(value, ZonePageBlockHostPolicy);
@@ -296,7 +351,9 @@ async function ensureZoneNavigationReferences(
 
 export default new Elysia()
 	.model({
+		DockDocument,
 		NavigationDocument,
+		PortableTextDocument,
 		UnitReferencedBlockDocument,
 		ZoneBoundaryDocument,
 		ZoneThemeDocument,
@@ -417,6 +474,139 @@ export default new Elysia()
 						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 					},
 					detail: { summary: "Get Zone configuration", tags: ["Zones"] },
+				},
+			)
+			.get(
+				"/:zoneId/render",
+				async ({ params, query, request }) => {
+					const identity = await resolveIdentity(request.headers, "unit:read");
+					await identity.authorization.unit.ensureCanRead(
+						params.zoneId,
+						() => new UnitNotFound("Zone"),
+					);
+					const zoneRecord = await getZone(params.zoneId);
+					const [pageRecord] = await database
+						.select()
+						.from(zonePage)
+						.where(
+							query.page
+								? and(
+										eq(zonePage.zoneId, params.zoneId),
+										eq(zonePage.slug, query.page),
+									)
+								: and(eq(zonePage.zoneId, params.zoneId), eq(zonePage.home, true)),
+						)
+						.limit(1);
+					if (query.page && !pageRecord) throw new ZonePageNotFound();
+					const [dockRecord] = await database
+						.select()
+						.from(unitDock)
+						.where(
+							and(eq(unitDock.unitId, params.zoneId), eq(unitDock.surface, "main")),
+						)
+						.limit(1);
+					const navigationRecords = await database
+						.select()
+						.from(zoneNavigation)
+						.where(eq(zoneNavigation.zoneId, params.zoneId))
+						.orderBy(zoneNavigation.createdAt, zoneNavigation.id);
+					const page = pageRecord ? toZonePageResponse(pageRecord) : null;
+					const dock = dockRecord
+						? {
+								unitId: dockRecord.unitId,
+								surface: "main" as const,
+								document: parseDocument(DockDocument, dockRecord.document),
+							}
+						: null;
+					const navigations = navigationRecords.map(toZoneNavigationResponse);
+					const unitIds = new Set<string>(page ? [page.titleUnitId] : []);
+					const wikiPostIds = new Set<string>();
+					const assetIds = new Set<string>();
+					const mergeBlockReferences = (document: {
+						readonly blocks: readonly Block[];
+					}) => {
+						const references = collectBlockReferences(document);
+						for (const id of references.unitIds) unitIds.add(id);
+						for (const id of references.wikiPostIds) wikiPostIds.add(id);
+						for (const id of references.assetIds) assetIds.add(id);
+					};
+					if (page) mergeBlockReferences(page.document);
+					if (dock) mergeBlockReferences(dock.document);
+					for (const navigation of navigations) {
+						const references = collectNavigationReferences(navigation.document);
+						for (const id of references.unitIds) unitIds.add(id);
+					}
+
+					const wikiRows = await getReadableRenderLocalizationRows(
+						[...wikiPostIds],
+						identity.authorization.profileId,
+					);
+					const wikiPosts = [...wikiPostIds].flatMap((id) => {
+						const rows = wikiRows.filter((row) => row.id === id);
+						const presented = presentRenderUnit(rows, query.language);
+						const selected =
+							(query.language
+								? rows.find((row) => row.language === query.language)
+								: undefined) ?? rows[0];
+						if (!presented || !selected?.content) return [];
+						assertWikiPostPortableTextDocument(selected.content);
+						mergeBlockReferences({ blocks: [selected.content] });
+						return [{ ...presented, body: selected.content }];
+					});
+					for (const id of wikiPostIds) unitIds.delete(id);
+					const referenceRows = await getReadableRenderLocalizationRows(
+						[...unitIds],
+						identity.authorization.profileId,
+					);
+					const units = [...unitIds].flatMap((id) => {
+						const presented = presentRenderUnit(
+							referenceRows.filter((row) => row.id === id),
+							query.language,
+						);
+						return presented ? [presented] : [];
+					});
+					const assets = assetIds.size
+						? (
+								await database
+									.select({ id: imageAsset.id })
+									.from(imageAsset)
+									.where(
+										and(
+											inArray(imageAsset.id, [...assetIds]),
+											eq(imageAsset.status, "ready"),
+											eq(imageAsset.access, "public"),
+											isNull(imageAsset.deletedAt),
+										),
+									)
+							).flatMap(({ id }) => {
+								const presented = presentImageAsset(id);
+								return presented ? [presented] : [];
+							})
+						: [];
+
+					return {
+						zone: await toZoneResponse(zoneRecord, query.language),
+						page,
+						dock,
+						navigations,
+						references: { units, wikiPosts, assets },
+					} satisfies typeof ZoneRenderResponse.static;
+				},
+				{
+					params: ZoneParams,
+					query: ZoneRenderQuery,
+					response: {
+						[StatusCodes.OK]: ZoneRenderResponse,
+						[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+							"UnitNotFound",
+							"ZonePageNotFound",
+						]),
+					},
+					detail: {
+						operationId: "getZoneRenderProjection",
+						summary: "Get a Zone render projection",
+						tags: ["Zones"],
+					},
 				},
 			)
 			.patch(
