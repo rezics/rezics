@@ -1,12 +1,14 @@
+import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
+
 const content = {
 	consumers: "使用此能力的产品",
-	zone: "Zone",
-	realm: "Realm",
+	zone: zhHansTerminology.zone.forms.label,
+	realm: zhHansTerminology.realm.forms.label,
 	home: "首页",
-	zoneFeed: "专区动态",
-	realmFeed: "领域动态",
+	zoneFeed: `${zhHansTerminology.zone.forms.label}动态`,
+	realmFeed: `${zhHansTerminology.realm.forms.label}动态`,
 	homeFeed: "首页动态",
-	postCard: "Post 卡片",
+	postCard: `${zhHansTerminology.post.forms.label}卡片`,
 	bookCard: "Book 卡片",
 	commentCard: "Comment 卡片",
 	kindAware: "按 kind 区分",

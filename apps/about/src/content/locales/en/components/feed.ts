@@ -1,12 +1,14 @@
+import { enTerminology } from "@rezics/i18n/terminology/en";
+
 const content = {
 	consumers: "Products using this capability",
-	zone: "Zone",
-	realm: "Realm",
+	zone: enTerminology.zone.forms.label,
+	realm: enTerminology.realm.forms.label,
 	home: "Home",
-	zoneFeed: "Zone feed",
-	realmFeed: "Realm feed",
+	zoneFeed: `${enTerminology.zone.forms.label} feed`,
+	realmFeed: `${enTerminology.realm.forms.label} feed`,
 	homeFeed: "Home feed",
-	postCard: "Post card",
+	postCard: `${enTerminology.post.forms.label} card`,
 	bookCard: "Book card",
 	commentCard: "Comment card",
 	kindAware: "kind-aware",

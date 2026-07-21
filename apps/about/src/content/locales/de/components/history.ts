@@ -1,3 +1,4 @@
+import { deTerminology } from "@rezics/i18n/terminology/de";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const content = {
@@ -17,10 +18,10 @@ const content = {
 	initial: "initial",
 	previousTitle: "Vorheriger Titel",
 	currentTitle: "Aktuell veröffentlichter Titel",
-	postBlockHistory: "Verlauf des Post-Blocks",
+	postBlockHistory: `Verlauf des ${deTerminology.post.forms.label}-Blocks`,
 	previousPostBlock: `${verbatimTerms.paragraphBlockField.value} / veröffentlicht B`,
 	currentPostBlock: `${verbatimTerms.paragraphBlockField.value} / veröffentlicht C`,
-	zoneConfigurationHistory: "Verlauf der Zone-Konfiguration",
+	zoneConfigurationHistory: `Verlauf der ${deTerminology.zone.forms.label}-Konfiguration`,
 	previousZoneQuery: `${verbatimTerms.feedQueryField.value} / veröffentlicht A`,
 	currentZoneQuery: `${verbatimTerms.feedQueryField.value} / veröffentlicht B`,
 } satisfies typeof import("../../en/components/history").default;

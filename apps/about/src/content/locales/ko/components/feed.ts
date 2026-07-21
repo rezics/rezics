@@ -1,12 +1,14 @@
+import { koTerminology } from "@rezics/i18n/terminology/ko";
+
 const content = {
 	consumers: "이 기능을 사용하는 제품",
-	zone: "Zone",
-	realm: "Realm",
+	zone: koTerminology.zone.forms.label,
+	realm: koTerminology.realm.forms.label,
 	home: "Home",
-	zoneFeed: "구역 피드",
-	realmFeed: "영역 피드",
+	zoneFeed: `${koTerminology.zone.forms.label} 피드`,
+	realmFeed: `${koTerminology.realm.forms.label} 피드`,
 	homeFeed: "홈 피드",
-	postCard: "Post 카드",
+	postCard: `${koTerminology.post.forms.label} 카드`,
 	bookCard: "Book 카드",
 	commentCard: "Comment 카드",
 	kindAware: "종류 인식",

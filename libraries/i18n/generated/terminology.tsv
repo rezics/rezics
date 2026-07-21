@@ -1,0 +1,107 @@
+concept	definition	locale	status	slot	approved_form	forbidden_forms
+follow	A person's ongoing interest relationship with a Unit; this is not a content subscription or notification-delivery contract.	en	approved	actionLabel	Follow	Subscribe | Subscribed | Subscription | Unsubscribe
+follow	A person's ongoing interest relationship with a Unit; this is not a content subscription or notification-delivery contract.	en	approved	action	follow	Subscribe | Subscribed | Subscription | Unsubscribe
+follow	A person's ongoing interest relationship with a Unit; this is not a content subscription or notification-delivery contract.	en	approved	stateLabel	Following	Subscribe | Subscribed | Subscription | Unsubscribe
+follow	A person's ongoing interest relationship with a Unit; this is not a content subscription or notification-delivery contract.	en	approved	gerund	following	Subscribe | Subscribed | Subscription | Unsubscribe
+follow	A person's ongoing interest relationship with a Unit; this is not a content subscription or notification-delivery contract.	en	approved	followed	followed	Subscribe | Subscribed | Subscription | Unsubscribe
+follow	A person's ongoing interest relationship with a Unit; this is not a content subscription or notification-delivery contract.	en	approved	undoActionLabel	Unfollow	Subscribe | Subscribed | Subscription | Unsubscribe
+follow	A person's ongoing interest relationship with a Unit; this is not a content subscription or notification-delivery contract.	en	approved	undoAction	unfollow	Subscribe | Subscribed | Subscription | Unsubscribe
+follow	A person's ongoing interest relationship with a Unit; this is not a content subscription or notification-delivery contract.	en	approved	follower	follower	Subscribe | Subscribed | Subscription | Unsubscribe
+follow	A person's ongoing interest relationship with a Unit; this is not a content subscription or notification-delivery contract.	en	approved	collectionLabel	Following	Subscribe | Subscribed | Subscription | Unsubscribe
+follow	A person's ongoing interest relationship with a Unit; this is not a content subscription or notification-delivery contract.	zh-Hant	approved	actionLabel	追蹤	訂閱 | 關注 | 跟隨 | Subscribe | Subscription
+follow	A person's ongoing interest relationship with a Unit; this is not a content subscription or notification-delivery contract.	zh-Hant	approved	action	追蹤	訂閱 | 關注 | 跟隨 | Subscribe | Subscription
+follow	A person's ongoing interest relationship with a Unit; this is not a content subscription or notification-delivery contract.	zh-Hant	approved	stateLabel	追蹤中	訂閱 | 關注 | 跟隨 | Subscribe | Subscription
+follow	A person's ongoing interest relationship with a Unit; this is not a content subscription or notification-delivery contract.	zh-Hant	approved	gerund	追蹤	訂閱 | 關注 | 跟隨 | Subscribe | Subscription
+follow	A person's ongoing interest relationship with a Unit; this is not a content subscription or notification-delivery contract.	zh-Hant	approved	followed	追蹤	訂閱 | 關注 | 跟隨 | Subscribe | Subscription
+follow	A person's ongoing interest relationship with a Unit; this is not a content subscription or notification-delivery contract.	zh-Hant	approved	undoActionLabel	取消追蹤	訂閱 | 關注 | 跟隨 | Subscribe | Subscription
+follow	A person's ongoing interest relationship with a Unit; this is not a content subscription or notification-delivery contract.	zh-Hant	approved	undoAction	取消追蹤	訂閱 | 關注 | 跟隨 | Subscribe | Subscription
+follow	A person's ongoing interest relationship with a Unit; this is not a content subscription or notification-delivery contract.	zh-Hant	approved	follower	追蹤者	訂閱 | 關注 | 跟隨 | Subscribe | Subscription
+follow	A person's ongoing interest relationship with a Unit; this is not a content subscription or notification-delivery contract.	zh-Hant	approved	collectionLabel	追蹤項目	訂閱 | 關注 | 跟隨 | Subscribe | Subscription
+zone	The REZICS Zone product concept.	en	approved	label	Zone	-
+zone	The REZICS Zone product concept.	en	approved	pluralLabel	Zones	-
+zone	The REZICS Zone product concept.	en	approved	inline	zone	-
+zone	The REZICS Zone product concept.	en	approved	plural	zones	-
+zone	The REZICS Zone product concept.	zh-Hant	approved	label	專區	Zone | Zones
+zone	The REZICS Zone product concept.	zh-Hant	approved	pluralLabel	專區	Zone | Zones
+zone	The REZICS Zone product concept.	zh-Hant	approved	inline	專區	Zone | Zones
+zone	The REZICS Zone product concept.	zh-Hant	approved	plural	專區	Zone | Zones
+zone	The REZICS Zone product concept.	zh-Hans	approved	label	专区	Zone | Zones
+zone	The REZICS Zone product concept.	zh-Hans	approved	pluralLabel	专区	Zone | Zones
+zone	The REZICS Zone product concept.	zh-Hans	approved	inline	专区	Zone | Zones
+zone	The REZICS Zone product concept.	zh-Hans	approved	plural	专区	Zone | Zones
+zone	The REZICS Zone product concept.	de	approved	label	Community-Bereich	Zone | Zones
+zone	The REZICS Zone product concept.	de	approved	pluralLabel	Community-Bereiche	Zone | Zones
+zone	The REZICS Zone product concept.	de	approved	inline	Community-Bereich	Zone | Zones
+zone	The REZICS Zone product concept.	de	approved	plural	Community-Bereiche	Zone | Zones
+zone	The REZICS Zone product concept.	ja	approved	label	ゾーン	Zone | Zones
+zone	The REZICS Zone product concept.	ja	approved	pluralLabel	ゾーン	Zone | Zones
+zone	The REZICS Zone product concept.	ja	approved	inline	ゾーン	Zone | Zones
+zone	The REZICS Zone product concept.	ja	approved	plural	ゾーン	Zone | Zones
+zone	The REZICS Zone product concept.	ko	approved	label	구역	Zone | Zones
+zone	The REZICS Zone product concept.	ko	approved	pluralLabel	구역	Zone | Zones
+zone	The REZICS Zone product concept.	ko	approved	inline	구역	Zone | Zones
+zone	The REZICS Zone product concept.	ko	approved	plural	구역	Zone | Zones
+realm	The REZICS Realm product concept.	en	approved	label	Realm	-
+realm	The REZICS Realm product concept.	en	approved	pluralLabel	Realms	-
+realm	The REZICS Realm product concept.	en	approved	inline	realm	-
+realm	The REZICS Realm product concept.	en	approved	plural	realms	-
+realm	The REZICS Realm product concept.	zh-Hant	approved	label	領域	Realm | Realms
+realm	The REZICS Realm product concept.	zh-Hant	approved	pluralLabel	領域	Realm | Realms
+realm	The REZICS Realm product concept.	zh-Hant	approved	inline	領域	Realm | Realms
+realm	The REZICS Realm product concept.	zh-Hant	approved	plural	領域	Realm | Realms
+realm	The REZICS Realm product concept.	zh-Hans	approved	label	领域	Realm | Realms
+realm	The REZICS Realm product concept.	zh-Hans	approved	pluralLabel	领域	Realm | Realms
+realm	The REZICS Realm product concept.	zh-Hans	approved	inline	领域	Realm | Realms
+realm	The REZICS Realm product concept.	zh-Hans	approved	plural	领域	Realm | Realms
+realm	The REZICS Realm product concept.	de	approved	label	Themenraum	Realm | Realms
+realm	The REZICS Realm product concept.	de	approved	pluralLabel	Themenräume	Realm | Realms
+realm	The REZICS Realm product concept.	de	approved	inline	Themenraum	Realm | Realms
+realm	The REZICS Realm product concept.	de	approved	plural	Themenräume	Realm | Realms
+realm	The REZICS Realm product concept.	ja	approved	label	領域	Realm | Realms
+realm	The REZICS Realm product concept.	ja	approved	pluralLabel	領域	Realm | Realms
+realm	The REZICS Realm product concept.	ja	approved	inline	領域	Realm | Realms
+realm	The REZICS Realm product concept.	ja	approved	plural	領域	Realm | Realms
+realm	The REZICS Realm product concept.	ko	approved	label	영역	Realm | Realms
+realm	The REZICS Realm product concept.	ko	approved	pluralLabel	영역	Realm | Realms
+realm	The REZICS Realm product concept.	ko	approved	inline	영역	Realm | Realms
+realm	The REZICS Realm product concept.	ko	approved	plural	영역	Realm | Realms
+dock	The REZICS Dock content-placement concept.	en	approved	label	Dock	-
+dock	The REZICS Dock content-placement concept.	en	approved	pluralLabel	Docks	-
+dock	The REZICS Dock content-placement concept.	en	approved	inline	dock	-
+dock	The REZICS Dock content-placement concept.	en	approved	plural	docks	-
+dock	The REZICS Dock content-placement concept.	zh-Hant	approved	label	停靠區	Dock | Docks | 碼頭
+dock	The REZICS Dock content-placement concept.	zh-Hant	approved	pluralLabel	停靠區	Dock | Docks | 碼頭
+dock	The REZICS Dock content-placement concept.	zh-Hant	approved	inline	停靠區	Dock | Docks | 碼頭
+dock	The REZICS Dock content-placement concept.	zh-Hant	approved	plural	停靠區	Dock | Docks | 碼頭
+unitSlug	The optional human-facing path identifier of a Unit; slug remains the internal code and API identifier.	en	approved	label	Path identifier	Slug | slug
+unitSlug	The optional human-facing path identifier of a Unit; slug remains the internal code and API identifier.	en	approved	pluralLabel	Path identifiers	Slug | slug
+unitSlug	The optional human-facing path identifier of a Unit; slug remains the internal code and API identifier.	en	approved	inline	path identifier	Slug | slug
+unitSlug	The optional human-facing path identifier of a Unit; slug remains the internal code and API identifier.	en	approved	plural	path identifiers	Slug | slug
+unitSlug	The optional human-facing path identifier of a Unit; slug remains the internal code and API identifier.	zh-Hant	approved	label	路徑標識	Slug | slug | 公開網址標識 | 網址標識 | 路徑識別碼
+unitSlug	The optional human-facing path identifier of a Unit; slug remains the internal code and API identifier.	zh-Hant	approved	pluralLabel	路徑標識	Slug | slug | 公開網址標識 | 網址標識 | 路徑識別碼
+unitSlug	The optional human-facing path identifier of a Unit; slug remains the internal code and API identifier.	zh-Hant	approved	inline	路徑標識	Slug | slug | 公開網址標識 | 網址標識 | 路徑識別碼
+unitSlug	The optional human-facing path identifier of a Unit; slug remains the internal code and API identifier.	zh-Hant	approved	plural	路徑標識	Slug | slug | 公開網址標識 | 網址標識 | 路徑識別碼
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	en	approved	label	Post	-
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	en	approved	pluralLabel	Posts	-
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	en	approved	inline	post	-
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	en	approved	plural	posts	-
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	zh-Hant	approved	label	貼文	Post | Posts | 帖子
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	zh-Hant	approved	pluralLabel	貼文	Post | Posts | 帖子
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	zh-Hant	approved	inline	貼文	Post | Posts | 帖子
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	zh-Hant	approved	plural	貼文	Post | Posts | 帖子
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	zh-Hans	approved	label	帖子	Post | Posts
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	zh-Hans	approved	pluralLabel	帖子	Post | Posts
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	zh-Hans	approved	inline	帖子	Post | Posts
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	zh-Hans	approved	plural	帖子	Post | Posts
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	de	approved	label	Beitrag	Post | Posts
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	de	approved	pluralLabel	Beiträge	Post | Posts
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	de	approved	inline	Beitrag	Post | Posts
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	de	approved	plural	Beiträge	Post | Posts
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	ja	approved	label	投稿	Post | Posts
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	ja	approved	pluralLabel	投稿	Post | Posts
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	ja	approved	inline	投稿	Post | Posts
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	ja	approved	plural	投稿	Post | Posts
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	ko	approved	label	게시물	Post | Posts
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	ko	approved	pluralLabel	게시물	Post | Posts
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	ko	approved	inline	게시물	Post | Posts
+post	The REZICS Post product concept; this does not refer to the HTTP POST method or every Post subtype label.	ko	approved	plural	게시물	Post | Posts

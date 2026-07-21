@@ -1,4 +1,8 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import { enTerminology } from "@rezics/i18n/terminology/en";
+
+const { forms: followTerms } = enTerminology.follow;
+const { forms: realmTerms } = enTerminology.realm;
 
 export default {
 	reply: {
@@ -6,8 +10,8 @@ export default {
 		body: "Someone replied to a conversation you joined.",
 	},
 	new_follower: {
-		title: `New follower on ${verbatimTerms.rezics.value}`,
-		body: "Someone started following you.",
+		title: `New ${followTerms.follower} on ${verbatimTerms.rezics.value}`,
+		body: `Someone started ${followTerms.gerund} you.`,
 	},
 	direct_message: {
 		title: `New message on ${verbatimTerms.rezics.value}`,
@@ -18,8 +22,8 @@ export default {
 		body: "The moderation status of your content changed.",
 	},
 	realm: {
-		title: `${verbatimTerms.rezics.value} Realm update`,
-		body: "Something changed in a Realm you belong to.",
+		title: `${verbatimTerms.rezics.value} ${realmTerms.label} update`,
+		body: `Something changed in a ${realmTerms.inline} you belong to.`,
 	},
 	system: {
 		title: `${verbatimTerms.rezics.value} system notification`,

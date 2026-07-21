@@ -1,3 +1,4 @@
+import { enTerminology } from "@rezics/i18n/terminology/en";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 import type { ProductId } from "../../../productRegistry";
@@ -14,14 +15,14 @@ const content = {
 		software: "Software",
 		series: "Series",
 		release: "Release",
-		post: "Post",
+		post: enTerminology.post.forms.label,
 		wiki: "Wiki",
 		picture: "Picture",
 		review: "Review",
 		collection: "Collection",
 		library: "Library",
-		realm: "Realm",
-		zone: "Zone",
+		realm: enTerminology.realm.forms.label,
+		zone: enTerminology.zone.forms.label,
 		comment: "Comment",
 		score: "Score",
 		"content-structure": "Content Structure",
@@ -35,9 +36,9 @@ const content = {
 	} satisfies Record<ProductId, string>,
 	manifestationFormulas: {
 		gamebook: `Book + ${verbatimTerms.gameContentStructure.value} → GameBook`,
-		wiki: `Post(${verbatimTerms.kindWiki.value}) → Wiki`,
-		picture: `Post(${verbatimTerms.kindPicture.value}) → Picture`,
-		review: `Post(${verbatimTerms.kindReview.value}) → Review`,
+		wiki: `${enTerminology.post.forms.label}(${verbatimTerms.kindWiki.value}) → Wiki`,
+		picture: `${enTerminology.post.forms.label}(${verbatimTerms.kindPicture.value}) → Picture`,
+		review: `${enTerminology.post.forms.label}(${verbatimTerms.kindReview.value}) → Review`,
 		library: `${verbatimTerms.collectionArray.value} → Library`,
 	} satisfies Record<ProductManifestationKind, string>,
 	capabilityModeLabels: {

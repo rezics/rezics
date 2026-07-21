@@ -1,3 +1,4 @@
+import { enTerminology } from "@rezics/i18n/terminology/en";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const content = {
@@ -31,7 +32,7 @@ const content = {
 	characterEntity: "Character Entity",
 	fictionalEntity: "Fictional Entity",
 	entityUnitRelation: "Entity / Unit relation",
-	post: "Post",
+	post: enTerminology.post.forms.label,
 	relationshipEditor: "Relationship editor",
 	type: "Type",
 	targetUnit: "Target Unit",

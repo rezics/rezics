@@ -1,3 +1,10 @@
+import { enTerminology } from "@rezics/i18n/terminology/en";
+
+const { forms: followTerms } = enTerminology.follow;
+const { forms: postTerms } = enTerminology.post;
+const { forms: realmTerms } = enTerminology.realm;
+const { forms: zoneTerms } = enTerminology.zone;
+
 export default {
 	loading: "Loading…",
 	unnamed: "Untitled",
@@ -18,15 +25,15 @@ export default {
 	published: "Published",
 	archived: "Archived",
 	favorite: "Favorite",
-	follow: "Follow",
-	followed: "Following",
-	unfollow: "Unfollow",
+	follow: followTerms.actionLabel,
+	followed: followTerms.stateLabel,
+	unfollow: followTerms.undoActionLabel,
 	join: "Join",
 	upvote: "Upvote",
 	startTracking: "Start tracking",
 	score: "Score",
-	replies: "Reply posts",
-	postReply: "Post reply",
+	replies: `Reply ${postTerms.plural}`,
+	postReply: `${postTerms.label} reply`,
 	writeReply: "Write a reply",
 	profile: "Profile",
 	preferences: "Preferences",
@@ -61,8 +68,8 @@ export default {
 	longReview: "Long review",
 	publishReview: "Publish",
 	collection: "Collection",
-	realm: "Realm",
-	zone: "Zone",
+	realm: realmTerms.label,
+	zone: zoneTerms.label,
 	share: "Share",
 	joinPolicy: "Join policy",
 	open: "Open",

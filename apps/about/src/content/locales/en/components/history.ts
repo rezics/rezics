@@ -1,3 +1,4 @@
+import { enTerminology } from "@rezics/i18n/terminology/en";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const content = {
@@ -17,10 +18,10 @@ const content = {
 	initial: "initial",
 	previousTitle: "Previous title",
 	currentTitle: "Current published title",
-	postBlockHistory: "Post block history",
+	postBlockHistory: `${enTerminology.post.forms.label} block history`,
 	previousPostBlock: `${verbatimTerms.paragraphBlockField.value} / published B`,
 	currentPostBlock: `${verbatimTerms.paragraphBlockField.value} / published C`,
-	zoneConfigurationHistory: "Zone configuration history",
+	zoneConfigurationHistory: `${enTerminology.zone.forms.label} configuration history`,
 	previousZoneQuery: `${verbatimTerms.feedQueryField.value} / published A`,
 	currentZoneQuery: `${verbatimTerms.feedQueryField.value} / published B`,
 };

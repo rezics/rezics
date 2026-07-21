@@ -1,3 +1,4 @@
+import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 import type { ProductId } from "../../../productRegistry";
@@ -13,14 +14,14 @@ const content = {
 		software: "軟體",
 		series: "系列",
 		release: "發行",
-		post: "貼文",
+		post: zhHantTerminology.post.forms.label,
 		wiki: "維基",
 		picture: "圖片",
 		review: "評論",
 		collection: "收藏",
 		library: "書庫",
-		realm: "領域",
-		zone: "專區",
+		realm: zhHantTerminology.realm.forms.label,
+		zone: zhHantTerminology.zone.forms.label,
 		comment: "留言",
 		score: "評分",
 		"content-structure": "內容結構",
@@ -34,9 +35,9 @@ const content = {
 	} satisfies Record<ProductId, string>,
 	manifestationFormulas: {
 		gamebook: "書籍 + 遊戲內容結構 → 遊戲書",
-		wiki: `貼文（${verbatimTerms.kindWiki.value}）→ 維基`,
-		picture: `貼文（${verbatimTerms.kindPicture.value}）→ 圖片`,
-		review: `貼文（${verbatimTerms.kindReview.value}）→ 評論`,
+		wiki: `${zhHantTerminology.post.forms.label}（${verbatimTerms.kindWiki.value}）→ 維基`,
+		picture: `${zhHantTerminology.post.forms.label}（${verbatimTerms.kindPicture.value}）→ 圖片`,
+		review: `${zhHantTerminology.post.forms.label}（${verbatimTerms.kindReview.value}）→ 評論`,
 		library: `收藏（${verbatimTerms.collectionArray.value}）→ 書庫`,
 	},
 	capabilityModeLabels: {

@@ -1,3 +1,10 @@
+import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
+
+const { forms: followTerms } = zhHantTerminology.follow;
+const { forms: postTerms } = zhHantTerminology.post;
+const { forms: realmTerms } = zhHantTerminology.realm;
+const { forms: zoneTerms } = zhHantTerminology.zone;
+
 export default {
 	loading: "正在載入…",
 	unnamed: "未命名條目",
@@ -18,14 +25,14 @@ export default {
 	published: "發布",
 	archived: "歸檔",
 	favorite: "收藏",
-	follow: "追蹤",
-	followed: "追蹤中",
-	unfollow: "取消追蹤",
+	follow: followTerms.actionLabel,
+	followed: followTerms.stateLabel,
+	unfollow: followTerms.undoActionLabel,
 	join: "加入",
 	upvote: "贊成",
 	startTracking: "開始記錄",
 	score: "評分",
-	replies: "回覆貼文",
+	replies: `回覆${postTerms.pluralLabel}`,
 	postReply: "發布回覆",
 	writeReply: "撰寫回覆",
 	profile: "個人資料",
@@ -61,8 +68,8 @@ export default {
 	longReview: "長評",
 	publishReview: "發布",
 	collection: "收藏集",
-	realm: "領域",
-	zone: "專區",
+	realm: realmTerms.label,
+	zone: zoneTerms.label,
 	share: "分享",
 	joinPolicy: "加入方式",
 	open: "開放",

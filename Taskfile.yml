@@ -55,6 +55,7 @@ tasks:
     test:
         desc: Run behavior tests for every application and service workspace.
         cmds:
+            - task: libraries:i18n:test
             - task: services-main:test
             - task: apps-web:test
             - task: apps-about:test

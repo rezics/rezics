@@ -1,3 +1,4 @@
+import { jaTerminology } from "@rezics/i18n/terminology/ja";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const content = {
@@ -9,16 +10,16 @@ const content = {
 	orderedTree: `${verbatimTerms.contentStructure.value} · 順序付きツリー`,
 	bookRoot: "Book ルート",
 	partOccurrence: "パート I · occurrence",
-	postAOccurrence: "Post A · occurrence 01",
-	postBOccurrence: "Post B · occurrence 02",
-	reusedOccurrence: "Post A · 再利用 occurrence 03",
+	postAOccurrence: `${jaTerminology.post.forms.label} A · occurrence 01`,
+	postBOccurrence: `${jaTerminology.post.forms.label} B · occurrence 02`,
+	reusedOccurrence: `${jaTerminology.post.forms.label} A · 再利用 occurrence 03`,
 	bookReaderResult: "Book リーダーの表示結果",
 	partOne: "パート I",
 	section: "セクション",
 	chapterOne: "第 01 章",
 	chapterTwo: "第 02 章",
-	postA: "Post A",
-	postB: "Post B",
+	postA: `${jaTerminology.post.forms.label} A`,
+	postB: `${jaTerminology.post.forms.label} B`,
 	optionalGraph: `${verbatimTerms.gameContentStructure.value} · 任意のグラフレイヤー`,
 	entrance: verbatimTerms.entranceNode.value,
 	passage: verbatimTerms.passageNode.value,

@@ -1,3 +1,4 @@
+import { koTerminology } from "@rezics/i18n/terminology/ko";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const content = {
@@ -9,16 +10,16 @@ const content = {
 	orderedTree: `${verbatimTerms.contentStructure.value} · 순서형 트리`,
 	bookRoot: "Book 루트",
 	partOccurrence: "파트 I · occurrence",
-	postAOccurrence: "Post A · occurrence 01",
-	postBOccurrence: "Post B · occurrence 02",
-	reusedOccurrence: "Post A · 재사용 occurrence 03",
+	postAOccurrence: `${koTerminology.post.forms.label} A · occurrence 01`,
+	postBOccurrence: `${koTerminology.post.forms.label} B · occurrence 02`,
+	reusedOccurrence: `${koTerminology.post.forms.label} A · 재사용 occurrence 03`,
 	bookReaderResult: "Book 리더 결과",
 	partOne: "파트 I",
 	section: "섹션",
 	chapterOne: "제01장",
 	chapterTwo: "제02장",
-	postA: "Post A",
-	postB: "Post B",
+	postA: `${koTerminology.post.forms.label} A`,
+	postB: `${koTerminology.post.forms.label} B`,
 	optionalGraph: `${verbatimTerms.gameContentStructure.value} · 선택적 그래프 레이어`,
 	entrance: verbatimTerms.entranceNode.value,
 	passage: verbatimTerms.passageNode.value,

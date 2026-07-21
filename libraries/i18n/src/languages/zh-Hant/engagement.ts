@@ -1,5 +1,9 @@
 import { insert } from "native-i18n";
 
+import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
+
+const { forms: realmTerms } = zhHantTerminology.realm;
+
 export default {
 	collections: "收藏集",
 	favorites: "我的收藏",
@@ -20,7 +24,7 @@ export default {
 	deleteReview: "刪除評論",
 	deleteReviewPrompt: "刪除後將無法恢復這篇評論。",
 	reviewTarget: "評論對象",
-	reviewRealm: "所屬領域",
+	reviewRealm: `所屬${realmTerms.label}`,
 	reviewScore: "評分",
 	scoreOutOfTen: insert("{{score}}／10", { score: String }),
 	emptyReviews: "還沒有評論。",

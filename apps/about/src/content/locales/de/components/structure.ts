@@ -1,3 +1,4 @@
+import { deTerminology } from "@rezics/i18n/terminology/de";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const content = {
@@ -9,16 +10,16 @@ const content = {
 	orderedTree: `${verbatimTerms.contentStructure.value} · geordneter Baum`,
 	bookRoot: "Book-Wurzel",
 	partOccurrence: "Teil I · Vorkommen",
-	postAOccurrence: "Post A · Vorkommen 01",
-	postBOccurrence: "Post B · Vorkommen 02",
-	reusedOccurrence: "Post A · wiederverwendetes Vorkommen 03",
+	postAOccurrence: `${deTerminology.post.forms.label} A · Vorkommen 01`,
+	postBOccurrence: `${deTerminology.post.forms.label} B · Vorkommen 02`,
+	reusedOccurrence: `${deTerminology.post.forms.label} A · wiederverwendetes Vorkommen 03`,
 	bookReaderResult: "Book-Leseergebnis",
 	partOne: "Teil I",
 	section: "Abschnitt",
 	chapterOne: "Kapitel 01",
 	chapterTwo: "Kapitel 02",
-	postA: "Post A",
-	postB: "Post B",
+	postA: `${deTerminology.post.forms.label} A`,
+	postB: `${deTerminology.post.forms.label} B`,
 	optionalGraph: `${verbatimTerms.gameContentStructure.value} · optionale Graphschicht`,
 	entrance: verbatimTerms.entranceNode.value,
 	passage: verbatimTerms.passageNode.value,

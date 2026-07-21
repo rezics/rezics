@@ -1,3 +1,4 @@
+import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const content = {
@@ -31,7 +32,7 @@ const content = {
 	characterEntity: "角色 Entity",
 	fictionalEntity: "虚构 Entity",
 	entityUnitRelation: "Entity / Unit 关系",
-	post: "Post",
+	post: zhHansTerminology.post.forms.label,
 	relationshipEditor: "关系编辑器",
 	type: "类型",
 	targetUnit: "目标 Unit",

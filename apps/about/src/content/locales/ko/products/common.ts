@@ -1,3 +1,4 @@
+import { koTerminology } from "@rezics/i18n/terminology/ko";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 import type { ProductId } from "../../../productRegistry";
@@ -13,14 +14,14 @@ const content = {
 		software: "소프트웨어",
 		series: "시리즈",
 		release: "릴리스",
-		post: "게시물",
+		post: koTerminology.post.forms.label,
 		wiki: "위키",
 		picture: "이미지",
 		review: "리뷰",
 		collection: "컬렉션",
 		library: "라이브러리",
-		realm: "영역",
-		zone: "구역",
+		realm: koTerminology.realm.forms.label,
+		zone: koTerminology.zone.forms.label,
 		comment: "댓글",
 		score: "평점",
 		"content-structure": "콘텐츠 구조",
@@ -34,9 +35,9 @@ const content = {
 	} satisfies Record<ProductId, string>,
 	manifestationFormulas: {
 		gamebook: "도서 + 게임 콘텐츠 구조 → 게임북",
-		wiki: `게시물（${verbatimTerms.kindWiki.value}）→ 위키`,
-		picture: `게시물（${verbatimTerms.kindPicture.value}）→ 이미지`,
-		review: `게시물（${verbatimTerms.kindReview.value}）→ 리뷰`,
+		wiki: `${koTerminology.post.forms.label}（${verbatimTerms.kindWiki.value}）→ 위키`,
+		picture: `${koTerminology.post.forms.label}（${verbatimTerms.kindPicture.value}）→ 이미지`,
+		review: `${koTerminology.post.forms.label}（${verbatimTerms.kindReview.value}）→ 리뷰`,
 		library: `컬렉션（${verbatimTerms.collectionArray.value}）→ 라이브러리`,
 	},
 	capabilityModeLabels: {

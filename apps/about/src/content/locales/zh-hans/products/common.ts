@@ -1,3 +1,4 @@
+import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 import type { ProductId } from "../../../productRegistry";
@@ -13,14 +14,14 @@ const content = {
 		software: "软件",
 		series: "系列",
 		release: "发行",
-		post: "帖子",
+		post: zhHansTerminology.post.forms.label,
 		wiki: "维基",
 		picture: "图片",
 		review: "评测",
 		collection: "收藏",
 		library: "书库",
-		realm: "领域",
-		zone: "专区",
+		realm: zhHansTerminology.realm.forms.label,
+		zone: zhHansTerminology.zone.forms.label,
 		comment: "评论",
 		score: "评分",
 		"content-structure": "内容结构",
@@ -34,9 +35,9 @@ const content = {
 	} satisfies Record<ProductId, string>,
 	manifestationFormulas: {
 		gamebook: "书籍 + 游戏内容结构 → 游戏书",
-		wiki: `帖子（${verbatimTerms.kindWiki.value}）→ 维基`,
-		picture: `帖子（${verbatimTerms.kindPicture.value}）→ 图片`,
-		review: `帖子（${verbatimTerms.kindReview.value}）→ 评测`,
+		wiki: `${zhHansTerminology.post.forms.label}（${verbatimTerms.kindWiki.value}）→ 维基`,
+		picture: `${zhHansTerminology.post.forms.label}（${verbatimTerms.kindPicture.value}）→ 图片`,
+		review: `${zhHansTerminology.post.forms.label}（${verbatimTerms.kindReview.value}）→ 评测`,
 		library: `收藏（${verbatimTerms.collectionArray.value}）→ 书库`,
 	},
 	capabilityModeLabels: {

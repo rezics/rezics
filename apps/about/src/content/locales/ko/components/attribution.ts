@@ -1,3 +1,4 @@
+import { koTerminology } from "@rezics/i18n/terminology/ko";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const content = {
@@ -31,7 +32,7 @@ const content = {
 	characterEntity: "등장인물 Entity",
 	fictionalEntity: "가상 Entity",
 	entityUnitRelation: "Entity / Unit 관계",
-	post: "Post",
+	post: koTerminology.post.forms.label,
 	relationshipEditor: "관계 편집기",
 	type: "유형",
 	targetUnit: "대상 Unit",

@@ -1,12 +1,14 @@
+import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
+
 const content = {
 	consumers: "使用此能力的產品",
-	zone: "專區",
-	realm: "領域",
+	zone: zhHantTerminology.zone.forms.label,
+	realm: zhHantTerminology.realm.forms.label,
 	home: "首頁",
-	zoneFeed: "專區動態",
-	realmFeed: "領域動態",
+	zoneFeed: `${zhHantTerminology.zone.forms.label}動態`,
+	realmFeed: `${zhHantTerminology.realm.forms.label}動態`,
 	homeFeed: "首頁動態",
-	postCard: "貼文卡片",
+	postCard: `${zhHantTerminology.post.forms.label}卡片`,
 	bookCard: "書籍卡片",
 	commentCard: "留言卡片",
 	kindAware: "依類型區分",

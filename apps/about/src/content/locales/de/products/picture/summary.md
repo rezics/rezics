@@ -1,1 +1,1 @@
-Post(kind=PICTURE) mit einem oder mehreren geordneten Bildern.
+`Post(kind=PICTURE)` mit einem oder mehreren geordneten Bildern.

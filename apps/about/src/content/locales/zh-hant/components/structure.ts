@@ -1,3 +1,4 @@
+import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const content = {
@@ -9,16 +10,16 @@ const content = {
 	orderedTree: `${verbatimTerms.contentStructure.value} · 有序樹`,
 	bookRoot: "書籍根節點",
 	partOccurrence: "第一部分 · 出現位置",
-	postAOccurrence: "貼文 A · 出現位置 01",
-	postBOccurrence: "貼文 B · 出現位置 02",
-	reusedOccurrence: "貼文 A · 復用的出現位置 03",
+	postAOccurrence: `${zhHantTerminology.post.forms.label} A · 出現位置 01`,
+	postBOccurrence: `${zhHantTerminology.post.forms.label} B · 出現位置 02`,
+	reusedOccurrence: `${zhHantTerminology.post.forms.label} A · 復用的出現位置 03`,
 	bookReaderResult: "書籍閱讀器結果",
 	partOne: "第一部分",
 	section: "分區",
 	chapterOne: "章節 01",
 	chapterTwo: "章節 02",
-	postA: "貼文 A",
-	postB: "貼文 B",
+	postA: `${zhHantTerminology.post.forms.label} A`,
+	postB: `${zhHantTerminology.post.forms.label} B`,
 	optionalGraph: `${verbatimTerms.gameContentStructure.value} · 可選圖層`,
 	entrance: verbatimTerms.entranceNode.value,
 	passage: verbatimTerms.passageNode.value,

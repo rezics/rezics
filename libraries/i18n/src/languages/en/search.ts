@@ -1,6 +1,11 @@
+import { enTerminology } from "@rezics/i18n/terminology/en";
+
+const { forms: postTerms } = enTerminology.post;
+const { forms: realmTerms } = enTerminology.realm;
+
 export default {
 	title: "Search",
-	placeholder: "Search units, entities, tags, posts, realms, or users",
+	placeholder: `Search units, entities, tags, ${postTerms.plural}, ${realmTerms.plural}, or users`,
 	advancedFilters: "Advanced filters",
 	scope: "Search scope",
 	language: "Content language",

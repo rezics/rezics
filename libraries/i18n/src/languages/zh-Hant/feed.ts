@@ -1,5 +1,12 @@
 import { insert } from "native-i18n";
 
+import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
+
+const { forms: followTerms } = zhHantTerminology.follow;
+const { forms: postTerms } = zhHantTerminology.post;
+const { forms: realmTerms } = zhHantTerminology.realm;
+const { forms: zoneTerms } = zhHantTerminology.zone;
+
 export default {
 	title: "動態",
 	subtitle: "作品因討論而被看見",
@@ -16,7 +23,7 @@ export default {
 		noneSelected: "未選擇內容",
 		selectedCount: insert("已選 {{count}} 種", { count: Number }),
 		unitGroup: "單元",
-		postGroup: "貼文",
+		postGroup: postTerms.pluralLabel,
 		kinds: {
 			"unit:profile": "個人檔案",
 			"unit:book": "書籍",
@@ -26,17 +33,17 @@ export default {
 			"unit:entity": "目錄條目",
 			"unit:tag": "標籤",
 			"unit:series": "系列",
-			"unit:zone": "專區",
+			"unit:zone": zoneTerms.pluralLabel,
 			"unit:collection": "收藏集",
 			"unit:poll": "投票",
-			"unit:realm": "領域",
-			"post:post": "主題貼文",
+			"unit:realm": realmTerms.pluralLabel,
+			"post:post": `主題${postTerms.pluralLabel}`,
 			"post:reply": "回覆",
 			"post:review": "評論",
 			"post:chapter": "章節",
 			"post:chapter_group": "章節群組",
 			"post:wiki": "百科文章",
-			"post:picture": "圖片貼文",
+			"post:picture": `圖片${postTerms.pluralLabel}`,
 		},
 		postDescription: "由社群成員發起的主題內容",
 		replyDescription: "討論中的回覆與延伸內容",
@@ -45,8 +52,8 @@ export default {
 	emptyTitle: "廣場還很安靜",
 	emptyBody: "成為第一個分享作品與見解的人。",
 	reason: {
-		followedPublisher: "因為你追蹤了發布者",
-		followedRealm: "因為你追蹤了領域",
+		followedPublisher: `因為你${followTerms.followed}了發布者`,
+		followedRealm: `因為你${followTerms.followed}了${realmTerms.inline}`,
 		basedOnActivity: "根據你的近期活動",
 		relatedSubject: "與正在瀏覽的內容相關",
 		popularNow: "近期熱度較高",
@@ -58,17 +65,17 @@ export default {
 	relatedPosts: "相關推薦討論",
 	relatedWorks: "相似作品",
 	trending: "正在熱議",
-	activeRealms: "活躍領域",
+	activeRealms: `活躍${realmTerms.pluralLabel}`,
 	continueReading: "繼續閱讀",
 	viewAll: "檢視全部",
 	relatedWork: "討論關聯作品",
-	myRealms: "我的領域",
+	myRealms: `我的${realmTerms.pluralLabel}`,
 	realmContext: insert("位於 {{realm}}", { realm: String }),
-	realmContextWithMore: insert("位於 {{realm}} 及其他 {{count}} 個領域", {
+	realmContextWithMore: insert(`位於 {{realm}} 及其他 {{count}} 個${realmTerms.plural}`, {
 		realm: String,
 		count: Number,
 	}),
-	showRealmList: insert("{{summary}}。顯示領域清單", { summary: String }),
-	publishedInOneRealm: insert("發布於 {{count}} 個領域", { count: Number }),
-	publishedInRealms: insert("發布於 {{count}} 個領域", { count: Number }),
+	showRealmList: insert(`{{summary}}。顯示${realmTerms.inline}清單`, { summary: String }),
+	publishedInOneRealm: insert(`發布於 {{count}} 個${realmTerms.inline}`, { count: Number }),
+	publishedInRealms: insert(`發布於 {{count}} 個${realmTerms.plural}`, { count: Number }),
 };

@@ -18,6 +18,7 @@ STUDY DEEPLY BEFORE ANYTHING, PROACTIVELY RESEARCH ONLINE TO ENSURE BEST PRACTIC
 - Write each locale in natural, locally appropriate language. Do not leave source-language wording in another locale. If a product or domain term has no approved localized wording, ask the maintainer instead of retaining the foreign term or inventing a translation.
 - Treat `zh-Hant` as region-neutral Traditional Chinese, using Taiwan terminology and orthography as the project's house style.
 - Take invariant brands, protocols, formats, and technical identifiers only from [`libraries/i18n/src/verbatim-terms.ts`](./libraries/i18n/src/verbatim-terms.ts). Do not create another allowlist or duplicate their spellings in TypeScript locale resources; keep all other visible wording localized and run the i18n policy check when locale content changes.
+- Take localized product and domain terminology only from the typed termbase under [`libraries/i18n/src/terminology`](./libraries/i18n/src/terminology). Keep complete messages in their owner locale resources, use the termbase's semantic slot that fits the sentence, and do not invent synonyms or duplicate approved forms in TypeScript locale resources. Generated terminology documents are read-only views, not additional sources of truth.
 
 ## Frontend architecture
 

@@ -6,13 +6,29 @@ tasks:
         cmds:
             - yarn exec tsc --noEmit -p tsconfig.json
 
+    test:
+        desc: Test localization policy behavior.
+        cmds:
+            - yarn exec vitest run --config vitest.config.ts
+
     policy:check:
-        desc: Enforce canonical verbatim terms and reject untranslated zh-Hant prose.
+        desc: Enforce canonical terminology, verbatim terms, and localized prose.
         cmds:
             - yarn node scripts/check-localization.mjs
+
+    terminology:generate:
+        desc: Generate human- and tool-readable terminology exports.
+        cmds:
+            - yarn node scripts/generate-terminology.mjs
+
+    terminology:check:
+        desc: Verify generated terminology exports are current.
+        cmds:
+            - yarn node scripts/generate-terminology.mjs --check
 
     check:
         desc: Type-check the package and enforce localization policy.
         cmds:
             - task: typecheck
+            - task: terminology:check
             - task: policy:check

@@ -1,3 +1,4 @@
+import { jaTerminology } from "@rezics/i18n/terminology/ja";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const content = {
@@ -31,7 +32,7 @@ const content = {
 	characterEntity: "登場人物の Entity",
 	fictionalEntity: "架空の Entity",
 	entityUnitRelation: "Entity / Unit 関係",
-	post: "Post",
+	post: jaTerminology.post.forms.label,
 	relationshipEditor: "関係エディタ",
 	type: "種類",
 	targetUnit: "対象 Unit",

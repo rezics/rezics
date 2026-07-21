@@ -1,5 +1,12 @@
 import { insert } from "native-i18n";
 
+import { enTerminology } from "@rezics/i18n/terminology/en";
+
+const { forms: followTerms } = enTerminology.follow;
+const { forms: postTerms } = enTerminology.post;
+const { forms: realmTerms } = enTerminology.realm;
+const { forms: zoneTerms } = enTerminology.zone;
+
 export default {
 	title: "Feed",
 	subtitle: "Works become visible through discussion",
@@ -16,7 +23,7 @@ export default {
 		noneSelected: "No content selected",
 		selectedCount: insert("{{count}} selected", { count: Number }),
 		unitGroup: "Units",
-		postGroup: "Posts",
+		postGroup: postTerms.pluralLabel,
 		kinds: {
 			"unit:profile": "Profiles",
 			"unit:book": "Books",
@@ -26,17 +33,17 @@ export default {
 			"unit:entity": "Catalog entries",
 			"unit:tag": "Tags",
 			"unit:series": "Series",
-			"unit:zone": "Zones",
+			"unit:zone": zoneTerms.pluralLabel,
 			"unit:collection": "Collections",
 			"unit:poll": "Polls",
-			"unit:realm": "Realms",
-			"post:post": "Posts",
+			"unit:realm": realmTerms.pluralLabel,
+			"post:post": postTerms.pluralLabel,
 			"post:reply": "Replies",
 			"post:review": "Reviews",
 			"post:chapter": "Chapters",
 			"post:chapter_group": "Chapter groups",
 			"post:wiki": "Wiki articles",
-			"post:picture": "Picture posts",
+			"post:picture": `Picture ${postTerms.plural}`,
 		},
 		postDescription: "Topics started by community members",
 		replyDescription: "Replies within ongoing discussions",
@@ -45,8 +52,8 @@ export default {
 	emptyTitle: "It is quiet here",
 	emptyBody: "Be the first to share a work or an idea.",
 	reason: {
-		followedPublisher: "Because you follow a publisher",
-		followedRealm: "Because you follow the realm",
+		followedPublisher: `Because you ${followTerms.action} a publisher`,
+		followedRealm: `Because you ${followTerms.action} the ${realmTerms.inline}`,
 		basedOnActivity: "Based on your recent activity",
 		relatedSubject: "Related to what you are viewing",
 		popularNow: "Popular right now",
@@ -58,17 +65,17 @@ export default {
 	relatedPosts: "Related discussions",
 	relatedWorks: "Similar works",
 	trending: "Trending now",
-	activeRealms: "Active Realms",
+	activeRealms: `Active ${realmTerms.pluralLabel}`,
 	continueReading: "Continue reading",
 	viewAll: "View all",
 	relatedWork: "Related work",
-	myRealms: "My Realms",
+	myRealms: `My ${realmTerms.pluralLabel}`,
 	realmContext: insert("in {{realm}}", { realm: String }),
 	realmContextWithMore: insert("in {{realm}} and {{count}} more", {
 		realm: String,
 		count: Number,
 	}),
-	showRealmList: insert("{{summary}}. Show realm list", { summary: String }),
-	publishedInOneRealm: insert("Published in {{count}} Realm", { count: Number }),
-	publishedInRealms: insert("Published in {{count}} Realms", { count: Number }),
+	showRealmList: insert(`{{summary}}. Show ${realmTerms.inline} list`, { summary: String }),
+	publishedInOneRealm: insert(`Published in {{count}} ${realmTerms.inline}`, { count: Number }),
+	publishedInRealms: insert(`Published in {{count}} ${realmTerms.plural}`, { count: Number }),
 } satisfies typeof import("../zh-Hant/feed").default;

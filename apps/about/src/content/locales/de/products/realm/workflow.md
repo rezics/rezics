@@ -1,5 +1,5 @@
-Die Ansicht konzentriert sich auf die Kernaufgabe von Realm, ohne andere Produktseiten zu kopieren.
+Die Ansicht konzentriert sich auf die Kernaufgabe des Themenraums, ohne andere Produktseiten zu kopieren.
 
-- Stabilen Realm-Datensatz wählen.
+- Stabilen Datensatz für den Themenraum wählen.
 - Kernaufgabe in der eigenen Oberfläche erledigen.
 - Nach Veröffentlichung schließen History und API an.

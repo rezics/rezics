@@ -7,6 +7,14 @@
 		".": "./src/index.ts",
 		"./manifest": "./src/manifest.ts",
 		"./resources": "./src/resources.ts",
+		"./terminology": "./src/terminology/index.ts",
+		"./terminology/concepts": "./src/terminology/concepts.ts",
+		"./terminology/de": "./src/terminology/locales/de.ts",
+		"./terminology/en": "./src/terminology/locales/en.ts",
+		"./terminology/ja": "./src/terminology/locales/ja.ts",
+		"./terminology/ko": "./src/terminology/locales/ko.ts",
+		"./terminology/zh-Hans": "./src/terminology/locales/zh-Hans.ts",
+		"./terminology/zh-Hant": "./src/terminology/locales/zh-Hant.ts",
 		"./verbatim-terms": "./src/verbatim-terms.ts"
 	},
 	"dependencies": {
@@ -14,6 +22,7 @@
 	},
 	"devDependencies": {
 		"@babel/parser": "^7.29.7",
-		"typescript": "7"
+		"typescript": "7",
+		"vitest": "4.1.10"
 	}
 }

@@ -1,3 +1,4 @@
+import { jaTerminology } from "@rezics/i18n/terminology/ja";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const content = {
@@ -17,10 +18,10 @@ const content = {
 	initial: "初期",
 	previousTitle: "以前のタイトル",
 	currentTitle: "現在公開中のタイトル",
-	postBlockHistory: "Post ブロック履歴",
+	postBlockHistory: `${jaTerminology.post.forms.label}ブロック履歴`,
 	previousPostBlock: `${verbatimTerms.paragraphBlockField.value} / 公開 B`,
 	currentPostBlock: `${verbatimTerms.paragraphBlockField.value} / 公開 C`,
-	zoneConfigurationHistory: "Zone 設定履歴",
+	zoneConfigurationHistory: `${jaTerminology.zone.forms.label}設定履歴`,
 	previousZoneQuery: `${verbatimTerms.feedQueryField.value} / 公開 A`,
 	currentZoneQuery: `${verbatimTerms.feedQueryField.value} / 公開 B`,
 } satisfies typeof import("../../en/components/history").default;

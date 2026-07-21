@@ -1,3 +1,4 @@
+import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const content = {
@@ -17,10 +18,10 @@ const content = {
 	initial: "初始版本",
 	previousTitle: "上一版标题",
 	currentTitle: "当前已发布标题",
-	postBlockHistory: "Post 内容块历史",
+	postBlockHistory: `${zhHansTerminology.post.forms.label}内容块历史`,
 	previousPostBlock: `${verbatimTerms.paragraphBlockField.value} / 已发布 B`,
 	currentPostBlock: `${verbatimTerms.paragraphBlockField.value} / 已发布 C`,
-	zoneConfigurationHistory: "Zone 配置历史",
+	zoneConfigurationHistory: `${zhHansTerminology.zone.forms.label}配置历史`,
 	previousZoneQuery: `${verbatimTerms.feedQueryField.value} / 已发布 A`,
 	currentZoneQuery: `${verbatimTerms.feedQueryField.value} / 已发布 B`,
 } satisfies typeof import("../../en/components/history").default;

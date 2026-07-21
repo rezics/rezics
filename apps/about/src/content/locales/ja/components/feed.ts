@@ -1,12 +1,14 @@
+import { jaTerminology } from "@rezics/i18n/terminology/ja";
+
 const content = {
 	consumers: "この機能を使うプロダクト",
-	zone: "Zone",
-	realm: "Realm",
+	zone: jaTerminology.zone.forms.label,
+	realm: jaTerminology.realm.forms.label,
 	home: "Home",
-	zoneFeed: "ゾーンのフィード",
-	realmFeed: "領域のフィード",
+	zoneFeed: `${jaTerminology.zone.forms.label}のフィード`,
+	realmFeed: `${jaTerminology.realm.forms.label}のフィード`,
 	homeFeed: "ホームフィード",
-	postCard: "Post カード",
+	postCard: `${jaTerminology.post.forms.label}カード`,
 	bookCard: "Book カード",
 	commentCard: "Comment カード",
 	kindAware: "種別対応",

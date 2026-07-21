@@ -1,1 +1,1 @@
-Eine Wissensoberfläche auf Basis von Post(kind=WIKI).
+Eine Wissensoberfläche auf Basis von `Post(kind=WIKI)`.

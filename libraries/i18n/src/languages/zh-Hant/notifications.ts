@@ -1,4 +1,8 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
+
+const { forms: followTerms } = zhHantTerminology.follow;
+const { forms: realmTerms } = zhHantTerminology.realm;
 
 export default {
 	reply: {
@@ -6,8 +10,8 @@ export default {
 		body: "有人回覆了你參與的內容。",
 	},
 	new_follower: {
-		title: `${verbatimTerms.rezics.value} 有新的追蹤`,
-		body: "有人開始追蹤你。",
+		title: `${verbatimTerms.rezics.value} 有新的${followTerms.follower}`,
+		body: `有人開始${followTerms.action}你。`,
 	},
 	direct_message: {
 		title: `${verbatimTerms.rezics.value} 有新的私人訊息`,
@@ -18,8 +22,8 @@ export default {
 		body: "你的內容審核狀態已變更。",
 	},
 	realm: {
-		title: `${verbatimTerms.rezics.value} 領域更新`,
-		body: "你所在領域的相關狀態已變更。",
+		title: `${verbatimTerms.rezics.value} ${realmTerms.inline}更新`,
+		body: `你所在${realmTerms.inline}的相關狀態已變更。`,
 	},
 	system: {
 		title: `${verbatimTerms.rezics.value} 系統通知`,

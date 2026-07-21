@@ -1,8 +1,16 @@
+import { enTerminology } from "@rezics/i18n/terminology/en";
+
+const { forms: followTerms } = enTerminology.follow;
+const { forms: postTerms } = enTerminology.post;
+const { forms: realmTerms } = enTerminology.realm;
+const { forms: unitSlugTerms } = enTerminology.unitSlug;
+const { forms: zoneTerms } = enTerminology.zone;
+
 export default {
 	explore: "Explore",
 	units: "Units",
 	entity: "Entity",
-	realm: "Realm",
+	realm: realmTerms.label,
 	collections: "Collections",
 	favorites: "Saved",
 	progress: "Progress",
@@ -12,29 +20,29 @@ export default {
 	content: "Content",
 	sidebar: {
 		title: "Main navigation",
-		description: "Open Explore and the Zones and Realms you follow.",
+		description: `Open Explore and the ${zoneTerms.pluralLabel} and ${realmTerms.pluralLabel} you ${followTerms.action}.`,
 		open: "Open main navigation",
 		close: "Close main navigation",
 		expand: "Expand sidebar",
 		collapse: "Collapse sidebar",
-		zones: "Zones",
-		realms: "Realms",
-		zonesEmpty: "Zones you follow will appear here.",
-		realmsEmpty: "Realms you follow will appear here.",
+		zones: zoneTerms.pluralLabel,
+		realms: realmTerms.pluralLabel,
+		zonesEmpty: `${zoneTerms.pluralLabel} you ${followTerms.action} will appear here.`,
+		realmsEmpty: `${realmTerms.pluralLabel} you ${followTerms.action} will appear here.`,
 		loading: "Loading sidebar content.",
 		error: "Sidebar content could not be loaded.",
 	},
 	following: {
-		title: "Following",
-		manage: "Manage following",
+		title: followTerms.collectionLabel,
+		manage: `Manage ${followTerms.gerund}`,
 		all: "All types",
-		empty: "Units you follow will appear here.",
-		description: "Filter, pin, and organize the Units you follow.",
-		filter: "Filter followed Unit types",
+		empty: `Units you ${followTerms.action} will appear here.`,
+		description: `Filter, pin, and organize the Units you ${followTerms.action}.`,
+		filter: `Filter ${followTerms.followed} Unit types`,
 		favorite: "Pin",
 		unfavorite: "Unpin",
 		types: {
-			slug_namespace: "Path identifier namespace",
+			slug_namespace: `${unitSlugTerms.label} namespace`,
 			profile: "Profile",
 			book: "Book",
 			software: "Software",
@@ -43,12 +51,12 @@ export default {
 			entity: "Entity",
 			tag: "Tag",
 			series: "Series",
-			zone: "Zone",
+			zone: zoneTerms.label,
 			collection: "Collection",
-			post: "Post",
+			post: postTerms.label,
 			poll: "Poll",
-			realm: "Realm",
-			realm_rule: "Realm rule",
+			realm: realmTerms.label,
+			realm_rule: `${realmTerms.label} rule`,
 		},
 	},
 } satisfies typeof import("../zh-Hant/nav").default;

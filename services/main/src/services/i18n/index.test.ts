@@ -31,7 +31,7 @@ describe("backend internationalization", () => {
 
 		expect(response.headers.get("Content-Language")).toBe("zh-Hant");
 		expect(await response.json()).toEqual({
-			title: "REZICS 有新的追蹤",
+			title: "REZICS 有新的追蹤者",
 			body: "有人開始追蹤你。",
 		});
 	});
@@ -64,7 +64,7 @@ describe("backend internationalization", () => {
 
 		expect(locale).toBe("zh-Hant");
 		expect(t.new_follower).toEqual({
-			title: "REZICS 有新的追蹤",
+			title: "REZICS 有新的追蹤者",
 			body: "有人開始追蹤你。",
 		});
 	});

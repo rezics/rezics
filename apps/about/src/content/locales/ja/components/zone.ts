@@ -1,16 +1,18 @@
+import { jaTerminology } from "@rezics/i18n/terminology/ja";
+
 const content = {
-	zone: "Zone",
+	zone: jaTerminology.zone.forms.label,
 	blocks: "ブロック設定",
 	query: "コンテンツクエリ",
 	history: "History",
 	preview: "プロダクトプレビュー",
-	path: "Zone / 設定",
+	path: `${jaTerminology.zone.forms.label} / 設定`,
 	blockSchema: "ブロックスキーマ",
 	headerBlock: "ヘッダーブロック",
 	feedBlock: "Feed ブロック · query: recent",
 	collectionBlock: "Collection ブロック · 参照",
 	feedResult: "Feed の結果",
-	postCard: "Post カード",
+	postCard: `${jaTerminology.post.forms.label}カード`,
 	catalogResult: "Catalog の結果",
 	bookCard: "Book カード",
 	discussion: "ディスカッション",

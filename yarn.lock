@@ -3794,6 +3794,7 @@ __metadata:
     "@babel/parser": "npm:^7.29.7"
     native-i18n: "npm:0.1.0"
     typescript: "npm:7"
+    vitest: "npm:4.1.10"
   languageName: unknown
   linkType: soft
 

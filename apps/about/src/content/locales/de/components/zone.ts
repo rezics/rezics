@@ -1,16 +1,18 @@
+import { deTerminology } from "@rezics/i18n/terminology/de";
+
 const content = {
-	zone: "Zone",
+	zone: deTerminology.zone.forms.label,
 	blocks: "Blockkonfiguration",
 	query: "Inhaltsabfrage",
 	history: "History",
 	preview: "Produktvorschau",
-	path: "Zone / Konfiguration",
+	path: `${deTerminology.zone.forms.label} / Konfiguration`,
 	blockSchema: "Block-Schema",
 	headerBlock: "Kopfblock",
 	feedBlock: "Feed-Block · Abfrage: neueste",
 	collectionBlock: "Collection-Block · Referenz",
 	feedResult: "Feed-Ergebnis",
-	postCard: "Post-Karte",
+	postCard: `${deTerminology.post.forms.label}-Karte`,
 	catalogResult: "Catalog-Ergebnis",
 	bookCard: "Book-Karte",
 	discussion: "Diskussion",

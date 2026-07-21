@@ -1,3 +1,4 @@
+import { enTerminology } from "@rezics/i18n/terminology/en";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const content = {
@@ -16,8 +17,8 @@ const content = {
 	chapterOne: "01 · Chapter title",
 	chapterTwo: "02 · Chapter title",
 	reusedInterlude: "03 · Reused interlude",
-	postA: "Post A",
-	postB: "Post B",
+	postA: `${enTerminology.post.forms.label} A`,
+	postB: `${enTerminology.post.forms.label} B`,
 	credits: "Attribution",
 	creditAttribution: String(verbatimTerms.creditAttribution.value),
 	author: "Author",

@@ -1,3 +1,4 @@
+import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const content = {
@@ -31,7 +32,7 @@ const content = {
 	characterEntity: "角色實體",
 	fictionalEntity: "虛構實體",
 	entityUnitRelation: "實體 / 內容單元關係",
-	post: "貼文",
+	post: zhHantTerminology.post.forms.label,
 	relationshipEditor: "關係編輯器",
 	type: "類型",
 	targetUnit: "目標內容單元",

@@ -4,6 +4,7 @@ dist/
 .vinext/
 .vite/
 coverage/
+libraries/i18n/generated/
 references/
 journals/
 .agents/

@@ -1,3 +1,4 @@
+import { deTerminology } from "@rezics/i18n/terminology/de";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const content = {
@@ -16,8 +17,8 @@ const content = {
 	chapterOne: "01 · Kapitelüberschrift",
 	chapterTwo: "02 · Kapitelüberschrift",
 	reusedInterlude: "03 · Wiederverwendetes Intermezzo",
-	postA: "Post A",
-	postB: "Post B",
+	postA: `${deTerminology.post.forms.label} A`,
+	postB: `${deTerminology.post.forms.label} B`,
 	credits: "Zuordnungen",
 	creditAttribution: verbatimTerms.creditAttribution.value,
 	author: "Autor",

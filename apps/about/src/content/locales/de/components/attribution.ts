@@ -1,3 +1,4 @@
+import { deTerminology } from "@rezics/i18n/terminology/de";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const content = {
@@ -31,7 +32,7 @@ const content = {
 	characterEntity: "Figuren-Entity",
 	fictionalEntity: "Fiktive Entity",
 	entityUnitRelation: "Beziehung zwischen Entity und Unit",
-	post: "Post",
+	post: deTerminology.post.forms.label,
 	relationshipEditor: "Beziehungseditor",
 	type: "Typ",
 	targetUnit: "Ziel-Unit",

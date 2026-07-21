@@ -1,1 +1,1 @@
-Feldverlauf, veröffentlichte Versionen und Sperrbereiche für Book, Post und Zone.
+Feldverlauf, veröffentlichte Versionen und Sperrbereiche für Book, Beitrag und Community-Bereich.

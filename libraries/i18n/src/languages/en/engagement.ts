@@ -1,5 +1,9 @@
 import { insert } from "native-i18n";
 
+import { enTerminology } from "@rezics/i18n/terminology/en";
+
+const { forms: realmTerms } = enTerminology.realm;
+
 export default {
 	collections: "Collections",
 	favorites: "Favorites",
@@ -20,7 +24,7 @@ export default {
 	deleteReview: "Delete review",
 	deleteReviewPrompt: "This review cannot be restored after deletion.",
 	reviewTarget: "Review target",
-	reviewRealm: "Realm",
+	reviewRealm: realmTerms.label,
 	reviewScore: "Score",
 	scoreOutOfTen: insert("{{score}}/10", { score: String }),
 	emptyReviews: "No reviews yet.",

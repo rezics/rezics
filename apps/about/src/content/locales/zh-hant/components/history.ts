@@ -1,3 +1,4 @@
+import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const content = {
@@ -17,10 +18,10 @@ const content = {
 	initial: "初始版本",
 	previousTitle: "上一版標題",
 	currentTitle: "目前已發布標題",
-	postBlockHistory: "貼文內容區塊歷史",
+	postBlockHistory: `${zhHantTerminology.post.forms.label}內容區塊歷史`,
 	previousPostBlock: `${verbatimTerms.paragraphBlockField.value} / 已發布 B`,
 	currentPostBlock: `${verbatimTerms.paragraphBlockField.value} / 已發布 C`,
-	zoneConfigurationHistory: "專區配置歷史",
+	zoneConfigurationHistory: `${zhHantTerminology.zone.forms.label}配置歷史`,
 	previousZoneQuery: `${verbatimTerms.feedQueryField.value} / 已發布 A`,
 	currentZoneQuery: `${verbatimTerms.feedQueryField.value} / 已發布 B`,
 } satisfies typeof import("../../en/components/history").default;

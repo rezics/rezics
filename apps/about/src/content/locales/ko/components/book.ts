@@ -1,3 +1,4 @@
+import { koTerminology } from "@rezics/i18n/terminology/ko";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const content = {
@@ -16,8 +17,8 @@ const content = {
 	chapterOne: "01 · 장 제목",
 	chapterTwo: "02 · 장 제목",
 	reusedInterlude: "03 · 재사용된 막간",
-	postA: "Post A",
-	postB: "Post B",
+	postA: `${koTerminology.post.forms.label} A`,
+	postB: `${koTerminology.post.forms.label} B`,
 	credits: "귀속 관계",
 	creditAttribution: verbatimTerms.creditAttribution.value,
 	author: "저자",

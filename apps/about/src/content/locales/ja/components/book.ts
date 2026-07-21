@@ -1,3 +1,4 @@
+import { jaTerminology } from "@rezics/i18n/terminology/ja";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const content = {
@@ -16,8 +17,8 @@ const content = {
 	chapterOne: "01 · 章タイトル",
 	chapterTwo: "02 · 章タイトル",
 	reusedInterlude: "03 · 再利用された幕間",
-	postA: "Post A",
-	postB: "Post B",
+	postA: `${jaTerminology.post.forms.label} A`,
+	postB: `${jaTerminology.post.forms.label} B`,
 	credits: "帰属関係",
 	creditAttribution: verbatimTerms.creditAttribution.value,
 	author: "著者",

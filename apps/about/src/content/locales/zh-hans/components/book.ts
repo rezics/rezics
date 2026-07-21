@@ -1,3 +1,4 @@
+import { zhHansTerminology } from "@rezics/i18n/terminology/zh-Hans";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 const content = {
@@ -16,8 +17,8 @@ const content = {
 	chapterOne: "01 · 章节标题",
 	chapterTwo: "02 · 章节标题",
 	reusedInterlude: "03 · 复用的幕间章节",
-	postA: "Post A",
-	postB: "Post B",
+	postA: `${zhHansTerminology.post.forms.label} A`,
+	postB: `${zhHansTerminology.post.forms.label} B`,
 	credits: "归属关系",
 	creditAttribution: verbatimTerms.creditAttribution.value,
 	author: "作者",

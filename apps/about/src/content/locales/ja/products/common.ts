@@ -1,3 +1,4 @@
+import { jaTerminology } from "@rezics/i18n/terminology/ja";
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 import type { ProductId } from "../../../productRegistry";
@@ -13,14 +14,14 @@ const content = {
 		software: "ソフトウェア",
 		series: "シリーズ",
 		release: "リリース",
-		post: "投稿",
+		post: jaTerminology.post.forms.label,
 		wiki: "ウィキ",
 		picture: "画像",
 		review: "レビュー",
 		collection: "コレクション",
 		library: "ライブラリ",
-		realm: "領域",
-		zone: "ゾーン",
+		realm: jaTerminology.realm.forms.label,
+		zone: jaTerminology.zone.forms.label,
 		comment: "コメント",
 		score: "スコア",
 		"content-structure": "コンテンツ構造",
@@ -34,9 +35,9 @@ const content = {
 	} satisfies Record<ProductId, string>,
 	manifestationFormulas: {
 		gamebook: "書籍 + ゲームコンテンツ構造 → ゲームブック",
-		wiki: `投稿（${verbatimTerms.kindWiki.value}）→ ウィキ`,
-		picture: `投稿（${verbatimTerms.kindPicture.value}）→ 画像`,
-		review: `投稿（${verbatimTerms.kindReview.value}）→ レビュー`,
+		wiki: `${jaTerminology.post.forms.label}（${verbatimTerms.kindWiki.value}）→ ウィキ`,
+		picture: `${jaTerminology.post.forms.label}（${verbatimTerms.kindPicture.value}）→ 画像`,
+		review: `${jaTerminology.post.forms.label}（${verbatimTerms.kindReview.value}）→ レビュー`,
 		library: `コレクション（${verbatimTerms.collectionArray.value}）→ ライブラリ`,
 	},
 	capabilityModeLabels: {
