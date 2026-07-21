@@ -41483,6 +41483,138 @@
 				},
 				"operationId": "getApiUsersMePreferences"
 			},
+			"patch": {
+				"summary": "Update current user interface locale",
+				"tags": ["Users"],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["interfaceLocale"],
+								"properties": {
+									"interfaceLocale": {
+										"type": "string",
+										"enum": ["en", "zh-hant"]
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"profileId",
+										"interfaceLocale",
+										"defaultLicense",
+										"defaultRealmManageMode",
+										"collectionConfig",
+										"personalizedFeed",
+										"contentRatings",
+										"preferredLanguages"
+									],
+									"properties": {
+										"profileId": { "format": "uuid", "type": "string" },
+										"interfaceLocale": {
+											"type": "string",
+											"enum": ["en", "zh-hant"]
+										},
+										"defaultLicense": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"defaultRealmManageMode": { "type": "boolean" },
+										"collectionConfig": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"minProperties": 1,
+													"type": "object",
+													"required": ["version"],
+													"properties": {
+														"version": { "const": 1, "type": "number" },
+														"view": {
+															"default": "grid",
+															"type": "string",
+															"enum": ["grid", "list"]
+														},
+														"addMainWithVariantByDefault": {
+															"type": "boolean"
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
+										"personalizedFeed": { "type": "boolean" },
+										"contentRatings": {
+											"type": "array",
+											"items": { "type": "string" }
+										},
+										"preferredLanguages": {
+											"type": "array",
+											"items": { "type": "string", "enum": ["zh", "en"] }
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "PreferencesNotFound",
+													"type": "string",
+													"enum": ["PreferencesNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "patchApiUsersMePreferences"
+			},
 			"put": {
 				"summary": "Replace current user preferences",
 				"tags": ["Users"],

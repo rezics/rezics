@@ -3,13 +3,19 @@
 import { Compass, Plus, UserRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { forwardRef, useEffect, type ComponentPropsWithoutRef, type ReactNode } from "react";
+import {
+	forwardRef,
+	useEffect,
+	useRef,
+	type ComponentPropsWithoutRef,
+	type ReactNode,
+} from "react";
 import {
 	getApiUsersMePreferencesQueryKey,
 	useGetApiUsersMe,
 	useGetApiUsersMePreferences,
 	useGetApiUsersMeFollowing,
-	usePutApiUsersMePreferences,
+	usePatchApiUsersMePreferences,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { AppShell as SharedAppShell } from "@rezics/ui";
@@ -18,6 +24,7 @@ import { isUiLocale, toContentLanguage, toStoredUiLocale, toUiLocale } from "@re
 import { useAuthPortal } from "@/features/auth/auth-portal";
 import { profileHref } from "@/features/profiles/profile-route";
 import { useSetLocale, useTranslation } from "@/i18n/client";
+import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { isSidebarFollowingKind, sidebarFollowingHref } from "./sidebar-following";
 import { ThemeToggle } from "./theme-toggle";
@@ -75,6 +82,7 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 		"ui",
 	]);
 	const { setLocale } = useSetLocale();
+	const localeChangedByUser = useRef(false);
 	const queryClient = useQueryClient();
 	const currentProfile = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
 	const preferences = useGetApiUsersMePreferences({ query: { enabled: Boolean(session) } });
@@ -87,127 +95,143 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 		{ query: { kind: "realm", language: followingLanguage, limit: 50 } },
 		{ query: { enabled: Boolean(session) } },
 	);
-	const updatePreferences = usePutApiUsersMePreferences({
+	const updateInterfaceLocale = usePatchApiUsersMePreferences({
 		mutation: {
-			onSuccess: () =>
-				queryClient.invalidateQueries({ queryKey: getApiUsersMePreferencesQueryKey() }),
+			scope: { id: "interface-locale" },
+			onSuccess: (data) => queryClient.setQueryData(getApiUsersMePreferencesQueryKey(), data),
 		},
 	});
 
 	useEffect(() => {
+		localeChangedByUser.current = false;
+	}, [session?.user.id]);
+
+	useEffect(() => {
+		if (localeChangedByUser.current) return;
 		const storedLocale = preferences.data?.interfaceLocale;
-		if (!storedLocale) return;
-		const preferred = toUiLocale(storedLocale);
-		if (preferred !== locale.target) setLocale(preferred);
-	}, [locale.target, preferences.data?.interfaceLocale, setLocale]);
+		if (
+			!storedLocale ||
+			!currentProfile.data?.id ||
+			preferences.data?.profileId !== currentProfile.data.id
+		)
+			return;
+		setLocale(toUiLocale(storedLocale));
+	}, [
+		currentProfile.data?.id,
+		preferences.data?.interfaceLocale,
+		preferences.data?.profileId,
+		setLocale,
+	]);
 
 	if (/^\/units\/book\/[^/]+\/read\/[^/]+$/.test(pathname)) return children;
 
 	return (
-		<SharedAppShell
-			brandName={t.brand.name}
-			account={{
-				href: session
-					? currentProfile.data
-						? profileHref(currentProfile.data)
-						: "/settings/profile"
-					: "/login",
-				label: session ? t.ui.profile : t.actions.login,
-				icon: UserRound,
-				variant: session ? "ghost" : "brand",
-			}}
-			create={{
-				href: session ? "/create" : "/login?next=/create",
-				icon: Plus,
-				label: t.actions.create,
-			}}
-			currentPath={pathname}
-			link={AppLink}
-			navigationLabel={t.nav.navigation}
-			sidebar={{
-				title: t.nav.sidebar.title,
-				description: t.nav.sidebar.description,
-				open: t.nav.sidebar.open,
-				close: t.nav.sidebar.close,
-				expand: t.nav.sidebar.expand,
-				collapse: t.nav.sidebar.collapse,
-			}}
-			search={{
-				href: "/search",
-				label: t.actions.search,
-				placeholder: t.search.placeholder,
-			}}
-			skipToContentLabel={t.nav.skipToContent}
-			locale={{
-				label: t.locale.label,
-				onChange: async (nextLocale) => {
-					if (!isUiLocale(nextLocale)) return;
-					if (preferences.data)
-						await updatePreferences.mutateAsync({
-							body: {
-								interfaceLocale: toStoredUiLocale(nextLocale),
-								defaultLicense: preferences.data.defaultLicense,
-								defaultRealmManageMode: preferences.data.defaultRealmManageMode,
-								collectionConfig: preferences.data.collectionConfig,
-								personalizedFeed: preferences.data.personalizedFeed,
-								contentRatings: preferences.data.contentRatings.map((value) =>
-									value === "r15" || value === "r18" || value === "r18g"
-										? value
-										: "general",
-								),
-								preferredLanguages: preferences.data.preferredLanguages,
-							},
-						});
-					setLocale(nextLocale);
-				},
-				options: [
-					{ value: "zh-Hant", label: t.locale.zh },
-					{ value: "en", label: t.locale.en },
-				],
-				value: locale.target,
-			}}
-			navigation={Links.map(({ href, key, icon }) => ({
-				href,
-				label: t.nav[key],
-				icon,
-			}))}
-			following={
-				session
-					? {
-							zonesLabel: t.nav.sidebar.zones,
-							realmsLabel: t.nav.sidebar.realms,
-							zonesEmptyLabel: t.nav.sidebar.zonesEmpty,
-							realmsEmptyLabel: t.nav.sidebar.realmsEmpty,
-							loadingLabel: t.nav.sidebar.loading,
-							errorLabel: t.nav.sidebar.error,
-							zonesLoading: followedZones.isPending,
-							realmsLoading: followedRealms.isPending,
-							zonesError: followedZones.isError,
-							realmsError: followedRealms.isError,
-							manageLabel: t.nav.following.manage,
-							manageHref: "/me/following",
-							items: [
-								...(followedZones.data?.items ?? []),
-								...(followedRealms.data?.items ?? []),
-							].flatMap((item) => {
-								if (!isSidebarFollowingKind(item.kind)) return [];
-								return [
-									{
-										id: item.id,
-										kind: item.kind,
-										href: sidebarFollowingHref(item.kind, item),
-										label: item.title ?? t.ui.unnamed,
-										imageUrl: item.avatar?.url ?? item.cover?.url,
-										favorite: item.favorite,
-									},
-								];
-							}),
-						}
-					: undefined
-			}
-			utilities={<ThemeToggle />}
-		>
-			{children}
-		</SharedAppShell>
+		<>
+			<SharedAppShell
+				brandName={t.brand.name}
+				account={{
+					href: session
+						? currentProfile.data
+							? profileHref(currentProfile.data)
+							: "/settings/profile"
+						: "/login",
+					label: session ? t.ui.profile : t.actions.login,
+					icon: UserRound,
+					variant: session ? "ghost" : "brand",
+				}}
+				create={{
+					href: session ? "/create" : "/login?next=/create",
+					icon: Plus,
+					label: t.actions.create,
+				}}
+				currentPath={pathname}
+				link={AppLink}
+				navigationLabel={t.nav.navigation}
+				sidebar={{
+					title: t.nav.sidebar.title,
+					description: t.nav.sidebar.description,
+					open: t.nav.sidebar.open,
+					close: t.nav.sidebar.close,
+					expand: t.nav.sidebar.expand,
+					collapse: t.nav.sidebar.collapse,
+				}}
+				search={{
+					href: "/search",
+					label: t.actions.search,
+					placeholder: t.search.placeholder,
+				}}
+				skipToContentLabel={t.nav.skipToContent}
+				locale={{
+					label: t.locale.label,
+					onChange: (nextLocale) => {
+						if (!isUiLocale(nextLocale)) return;
+						localeChangedByUser.current = true;
+						updateInterfaceLocale.reset();
+						setLocale(nextLocale);
+						if (session)
+							updateInterfaceLocale.mutate({
+								body: { interfaceLocale: toStoredUiLocale(nextLocale) },
+							});
+					},
+					options: [
+						{ value: "zh-Hant", label: t.locale.zh },
+						{ value: "en", label: t.locale.en },
+					],
+					value: locale.target,
+				}}
+				navigation={Links.map(({ href, key, icon }) => ({
+					href,
+					label: t.nav[key],
+					icon,
+				}))}
+				following={
+					session
+						? {
+								zonesLabel: t.nav.sidebar.zones,
+								realmsLabel: t.nav.sidebar.realms,
+								zonesEmptyLabel: t.nav.sidebar.zonesEmpty,
+								realmsEmptyLabel: t.nav.sidebar.realmsEmpty,
+								loadingLabel: t.nav.sidebar.loading,
+								errorLabel: t.nav.sidebar.error,
+								zonesLoading: followedZones.isPending,
+								realmsLoading: followedRealms.isPending,
+								zonesError: followedZones.isError,
+								realmsError: followedRealms.isError,
+								manageLabel: t.nav.following.manage,
+								manageHref: "/me/following",
+								items: [
+									...(followedZones.data?.items ?? []),
+									...(followedRealms.data?.items ?? []),
+								].flatMap((item) => {
+									if (!isSidebarFollowingKind(item.kind)) return [];
+									return [
+										{
+											id: item.id,
+											kind: item.kind,
+											href: sidebarFollowingHref(item.kind, item),
+											label: item.title ?? t.ui.unnamed,
+											imageUrl: item.avatar?.url ?? item.cover?.url,
+											favorite: item.favorite,
+										},
+									];
+								}),
+							}
+						: undefined
+				}
+				utilities={<ThemeToggle />}
+			>
+				{children}
+			</SharedAppShell>
+			{updateInterfaceLocale.error ? (
+				<div className="pointer-events-none fixed inset-x-4 top-16 z-[60] flex justify-end">
+					<div className="max-w-sm rounded-xl border border-destructive/30 bg-background px-4 py-3 shadow-lg">
+						<RequestFailure
+							error={updateInterfaceLocale.error}
+							fallback={t.ui.retryLater}
+						/>
+					</div>
+				</div>
+			) : null}
+		</>
 	);
 }

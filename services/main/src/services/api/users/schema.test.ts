@@ -2,7 +2,7 @@ import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
 import { FollowingStatusResponse } from "../schema/action-response";
-import { CollectionConfigV1, FollowingListQuery } from "./schema";
+import { CollectionConfigV1, FollowingListQuery, UpdateInterfaceLocaleBody } from "./schema";
 
 describe("Collection preference contract", () => {
 	it("version-controls the Main-with-Variant default", () => {
@@ -47,6 +47,20 @@ describe("following API contracts", () => {
 				following: false,
 				favorite: false,
 				position: "a0V",
+			}),
+		).toBe(false);
+	});
+});
+
+describe("user preference inputs", () => {
+	it("accepts only a supported interface locale in the partial update", () => {
+		expect(Check(UpdateInterfaceLocaleBody, { interfaceLocale: "en" })).toBe(true);
+		expect(Check(UpdateInterfaceLocaleBody, { interfaceLocale: "zh-hant" })).toBe(true);
+		expect(Check(UpdateInterfaceLocaleBody, { interfaceLocale: "fr" })).toBe(false);
+		expect(
+			Check(UpdateInterfaceLocaleBody, {
+				interfaceLocale: "en",
+				preferredLanguages: ["en"],
 			}),
 		).toBe(false);
 	});

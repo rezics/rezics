@@ -448,6 +448,7 @@ async function ensureOfficialProfiles(
 			.onConflictDoNothing()
 			.returning({ profileId: profilePreference.profileId });
 		changed ||= insertedPreference.length > 0;
+		changed = (await ensureOwnerBinding(tx, value.profileId, value.profileId)) || changed;
 		if (changed)
 			await recordUnitRevision(tx, {
 				unitId: value.profileId,
@@ -714,9 +715,10 @@ export async function isBootstrapReady(): Promise<boolean> {
 	const [
 		unitCount,
 		addresses,
-		userCount,
+		officialUsers,
 		accountCount,
 		profileCount,
+		officialProfileOwners,
 		officialRealm,
 		officialZones,
 		officialZoneDocks,
@@ -740,7 +742,7 @@ export async function isBootstrapReady(): Promise<boolean> {
 				),
 			),
 		database
-			.select({ value: count() })
+			.select({ id: users.id, emailVerified: users.emailVerified })
 			.from(users)
 			.where(inArray(users.id, BootstrapAuthUserIds)),
 		database
@@ -751,6 +753,22 @@ export async function isBootstrapReady(): Promise<boolean> {
 			.select({ value: count() })
 			.from(profile)
 			.where(inArray(profile.id, OfficialProfileIdValues)),
+		database
+			.select({
+				unitId: unitAccessBinding.unitId,
+				profileId: unitAccessBinding.profileId,
+				scope: unitAccessBinding.scope,
+				expiresAt: unitAccessBinding.expiresAt,
+			})
+			.from(unitAccessBinding)
+			.where(
+				and(
+					inArray(unitAccessBinding.unitId, OfficialProfileIdValues),
+					eq(unitAccessBinding.subjectKind, "profile"),
+					eq(unitAccessBinding.role, "owner"),
+					isNull(unitAccessBinding.revokedAt),
+				),
+			),
 		database
 			.select({ id: realm.id })
 			.from(realm)
@@ -809,9 +827,17 @@ export async function isBootstrapReady(): Promise<boolean> {
 					actual.slug === expected.slug,
 			),
 		) &&
-		userCount[0]?.value === BootstrapAuthUserIds.length &&
+		officialUsers.length === BootstrapAuthUserIds.length &&
+		officialUsers.every((user) => user.emailVerified) &&
 		accountCount[0]?.value === BootstrapAccountIds.length &&
 		profileCount[0]?.value === OfficialProfileIdValues.length &&
+		officialProfileOwners.length === OfficialProfileIdValues.length &&
+		officialProfileOwners.every(
+			(owner) =>
+				owner.profileId === owner.unitId &&
+				owner.scope.length === 0 &&
+				owner.expiresAt === null,
+		) &&
 		Boolean(officialRealm[0]) &&
 		officialZones.length === OfficialZoneManifest.length &&
 		OfficialZoneManifest.every((expected) =>

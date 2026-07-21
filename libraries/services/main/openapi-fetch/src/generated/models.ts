@@ -27217,6 +27217,165 @@ export type GetApiUsersMePreferencesResponse =
 	| GetApiUsersMePreferencesStatus404
 	| GetApiUsersMePreferencesStatus500;
 
+export const PatchApiUsersMePreferencesStatus200InterfaceLocaleEnum = {
+	en: "en",
+	"zh-hant": "zh-hant",
+} as const;
+
+export type PatchApiUsersMePreferencesStatus200InterfaceLocaleEnum =
+	(typeof PatchApiUsersMePreferencesStatus200InterfaceLocaleEnum)[keyof typeof PatchApiUsersMePreferencesStatus200InterfaceLocaleEnum];
+
+export const PatchApiUsersMePreferencesStatus200CollectionConfigViewEnum = {
+	grid: "grid",
+	list: "list",
+} as const;
+
+export type PatchApiUsersMePreferencesStatus200CollectionConfigViewEnum =
+	(typeof PatchApiUsersMePreferencesStatus200CollectionConfigViewEnum)[keyof typeof PatchApiUsersMePreferencesStatus200CollectionConfigViewEnum];
+
+export const PatchApiUsersMePreferencesStatus200PreferredLanguagesEnum = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type PatchApiUsersMePreferencesStatus200PreferredLanguagesEnum =
+	(typeof PatchApiUsersMePreferencesStatus200PreferredLanguagesEnum)[keyof typeof PatchApiUsersMePreferencesStatus200PreferredLanguagesEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiUsersMePreferencesStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	profileId: string;
+	/**
+	 * @type string
+	 */
+	interfaceLocale: PatchApiUsersMePreferencesStatus200InterfaceLocaleEnum;
+	defaultLicense: (string | null) | null;
+	/**
+	 * @type boolean
+	 */
+	defaultRealmManageMode: boolean;
+	collectionConfig:
+		| ({
+				/**
+				 * @type number
+				 */
+				version: 1;
+				/**
+				 * @default 'grid'
+				 * @type string | undefined
+				 */
+				view?: PatchApiUsersMePreferencesStatus200CollectionConfigViewEnum;
+				/**
+				 * @type boolean | undefined
+				 */
+				addMainWithVariantByDefault?: boolean;
+		  } | null)
+		| null;
+	/**
+	 * @type boolean
+	 */
+	personalizedFeed: boolean;
+	/**
+	 * @type array
+	 */
+	contentRatings: string[];
+	/**
+	 * @type array
+	 */
+	preferredLanguages: PatchApiUsersMePreferencesStatus200PreferredLanguagesEnum[];
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUsersMePreferencesStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'PreferencesNotFound'
+		 * @type string
+		 */
+		code: "PreferencesNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUsersMePreferencesStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PatchApiUsersMePreferencesStatus500 = InternalError;
+
+export const PatchApiUsersMePreferencesRequestInterfaceLocaleEnum = {
+	en: "en",
+	"zh-hant": "zh-hant",
+} as const;
+
+export type PatchApiUsersMePreferencesRequestInterfaceLocaleEnum =
+	(typeof PatchApiUsersMePreferencesRequestInterfaceLocaleEnum)[keyof typeof PatchApiUsersMePreferencesRequestInterfaceLocaleEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiUsersMePreferencesBody = {
+	/**
+	 * @type string
+	 */
+	interfaceLocale: PatchApiUsersMePreferencesRequestInterfaceLocaleEnum;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUsersMePreferencesOptions = {
+	body: PatchApiUsersMePreferencesBody;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiUsersMePreferencesResponses = {
+	"200": PatchApiUsersMePreferencesStatus200;
+	"404": PatchApiUsersMePreferencesStatus404;
+	"422": PatchApiUsersMePreferencesStatus422;
+	"500": PatchApiUsersMePreferencesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PatchApiUsersMePreferencesResponse =
+	| PatchApiUsersMePreferencesStatus200
+	| PatchApiUsersMePreferencesStatus404
+	| PatchApiUsersMePreferencesStatus422
+	| PatchApiUsersMePreferencesStatus500;
+
 export const PutApiUsersMePreferencesStatus200InterfaceLocaleEnum = {
 	en: "en",
 	"zh-hant": "zh-hant",

@@ -33,6 +33,12 @@ export const UpdateProfileBody = t.Object(
 );
 export type UpdateProfileBody = Static<typeof UpdateProfileBody>;
 
+export const UpdateInterfaceLocaleBody = t.Object(
+	{ interfaceLocale: StoredUiLocale },
+	{ additionalProperties: false },
+);
+export type UpdateInterfaceLocaleBody = Static<typeof UpdateInterfaceLocaleBody>;
+
 export const ReplacePreferencesBody = t.Object({
 	interfaceLocale: StoredUiLocale,
 	defaultLicense: t.Nullable(t.String({ minLength: 1, maxLength: 128 })),

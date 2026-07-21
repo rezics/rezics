@@ -195,6 +195,8 @@ import type {
 	PatchApiUsersMeResponses,
 	GetApiUsersMePreferencesOptions,
 	GetApiUsersMePreferencesResponses,
+	PatchApiUsersMePreferencesOptions,
+	PatchApiUsersMePreferencesResponses,
 	PutApiUsersMePreferencesOptions,
 	PutApiUsersMePreferencesResponses,
 	GetApiUsersMeFollowingOptions,
@@ -2131,6 +2133,20 @@ export function getApiUsersMePreferences<ThrowOnError extends boolean = true>(
 
 	return request({ method: "GET", url: "/api/users/me/preferences", ...config }) as Promise<
 		RequestResult<GetApiUsersMePreferencesResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Update current user interface locale
+ * {@link /api/users/me/preferences}
+ */
+export function patchApiUsersMePreferences<ThrowOnError extends boolean = true>(
+	options: Options<PatchApiUsersMePreferencesOptions, ThrowOnError>,
+): Promise<RequestResult<PatchApiUsersMePreferencesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({ method: "PATCH", url: "/api/users/me/preferences", ...config }) as Promise<
+		RequestResult<PatchApiUsersMePreferencesResponses, ThrowOnError>
 	>;
 }
 

@@ -564,6 +564,11 @@ import type {
 	GetApiUsersMePreferencesStatus200,
 	GetApiUsersMePreferencesStatus404,
 	GetApiUsersMePreferencesStatus500,
+	PatchApiUsersMePreferencesOptions,
+	PatchApiUsersMePreferencesStatus200,
+	PatchApiUsersMePreferencesStatus404,
+	PatchApiUsersMePreferencesStatus422,
+	PatchApiUsersMePreferencesStatus500,
 	PutApiUsersMePreferencesOptions,
 	PutApiUsersMePreferencesStatus200,
 	PutApiUsersMePreferencesStatus403,
@@ -1494,6 +1499,7 @@ import {
 	getApiUsersMe,
 	patchApiUsersMe,
 	getApiUsersMePreferences,
+	patchApiUsersMePreferences,
 	putApiUsersMePreferences,
 	getApiUsersMeFollowing,
 	getApiUsersMeFollowingByUnitId,
@@ -10809,6 +10815,97 @@ export function useGetApiUsersMePreferences<
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
+}
+
+export const patchApiUsersMePreferencesMutationKey = () =>
+	[{ url: "/api/users/me/preferences" }] as const;
+
+export function patchApiUsersMePreferencesMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = patchApiUsersMePreferencesMutationKey();
+	return mutationOptions<
+		PatchApiUsersMePreferencesStatus200,
+		ResponseErrorConfig<
+			| PatchApiUsersMePreferencesStatus404
+			| PatchApiUsersMePreferencesStatus422
+			| PatchApiUsersMePreferencesStatus500
+		>,
+		PatchApiUsersMePreferencesOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ body }) => {
+			const { data } = await patchApiUsersMePreferences({
+				...config,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Update current user interface locale
+ * {@link /api/users/me/preferences}
+ */
+export function usePatchApiUsersMePreferences<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PatchApiUsersMePreferencesStatus200,
+			ResponseErrorConfig<
+				| PatchApiUsersMePreferencesStatus404
+				| PatchApiUsersMePreferencesStatus422
+				| PatchApiUsersMePreferencesStatus500
+			>,
+			PatchApiUsersMePreferencesOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? patchApiUsersMePreferencesMutationKey();
+
+	const baseOptions = patchApiUsersMePreferencesMutationOptions(config) as UseMutationOptions<
+		PatchApiUsersMePreferencesStatus200,
+		ResponseErrorConfig<
+			| PatchApiUsersMePreferencesStatus404
+			| PatchApiUsersMePreferencesStatus422
+			| PatchApiUsersMePreferencesStatus500
+		>,
+		PatchApiUsersMePreferencesOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PatchApiUsersMePreferencesStatus200,
+		ResponseErrorConfig<
+			| PatchApiUsersMePreferencesStatus404
+			| PatchApiUsersMePreferencesStatus422
+			| PatchApiUsersMePreferencesStatus500
+		>,
+		PatchApiUsersMePreferencesOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PatchApiUsersMePreferencesStatus200,
+		ResponseErrorConfig<
+			| PatchApiUsersMePreferencesStatus404
+			| PatchApiUsersMePreferencesStatus422
+			| PatchApiUsersMePreferencesStatus500
+		>,
+		PatchApiUsersMePreferencesOptions,
+		TContext
+	>;
 }
 
 export const putApiUsersMePreferencesMutationKey = () =>

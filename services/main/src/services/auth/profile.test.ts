@@ -30,7 +30,7 @@ vi.mock("../units/create", () => ({ insertUnit }));
 vi.mock("../units/history", () => ({ recordUnitRevision }));
 
 import { OfficialRealmManifest, OfficialZoneManifest } from "../bootstrap/manifest";
-import { unitFollow } from "../database/schema";
+import { unitAccessBinding, unitFollow } from "../database/schema";
 import { fractionalPositionAt } from "../ordering/position";
 import { ensureProfile } from "./profile";
 
@@ -77,5 +77,23 @@ describe("Profile registration defaults", () => {
 			expect.arrayContaining([expect.objectContaining({ unitId: OfficialRealmManifest.id })]),
 		);
 		expect(onConflictDoNothing).toHaveBeenCalledOnce();
+	});
+
+	it("owns the Profile Unit it creates", async () => {
+		await ensureProfile({
+			id: "019f82aa-db8f-7962-9924-7369b17f5501",
+			email: "reader@example.com",
+			name: "Reader",
+			image: null,
+		});
+
+		expect(valuesByTable.get(unitAccessBinding)).toEqual({
+			unitId: ProfileId,
+			subjectKind: "profile",
+			profileId: ProfileId,
+			role: "owner",
+			scope: [],
+			grantedByProfileId: ProfileId,
+		});
 	});
 });

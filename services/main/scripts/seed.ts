@@ -404,6 +404,19 @@ async function seedProfiles(
 		(batch) => tx.insert(profile).values(batch),
 	);
 	await writeBatches(
+		profiles.map((value) => ({
+			unitId: value.id,
+			subjectKind: "profile" as const,
+			profileId: value.id,
+			role: "owner" as const,
+			scope: [],
+			grantedByProfileId: value.id,
+			createdAt: value.createdAt,
+			updatedAt: value.createdAt,
+		})),
+		(batch) => tx.insert(unitAccessBinding).values(batch),
+	);
+	await writeBatches(
 		profiles.map((value, index) => {
 			const language = itemAt(data.languages(index), 0);
 			return {

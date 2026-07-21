@@ -35,6 +35,7 @@ import {
 	parseCollectionConfig,
 	FollowingListQuery,
 	FollowingUnitParams,
+	UpdateInterfaceLocaleBody,
 	UpdateProfileBody,
 	UpdateFollowingBody,
 	UserIdParams,
@@ -62,6 +63,20 @@ const ProfileMutationNotFoundResponse = toApiErrorResponse([
 	"ImageAssetNotFound",
 ]);
 const UnitForbiddenResponse = toApiErrorResponse(["UnitProtected"]);
+
+function presentPreferences(preference: typeof profilePreference.$inferSelect) {
+	return {
+		profileId: preference.profileId,
+		interfaceLocale: preference.interfaceLocale,
+		defaultLicense: preference.defaultLicense,
+		defaultRealmManageMode: preference.defaultRealmManageMode,
+		collectionConfig: parseCollectionConfig(preference.collectionConfig),
+		personalizedFeed: preference.personalizedFeed,
+		contentRatings: preference.contentRatings,
+		preferredLanguages: preference.preferredLanguages,
+	};
+}
+
 export default new Elysia({ prefix: "/users" })
 	.use(session)
 	.get(
@@ -167,16 +182,7 @@ export default new Elysia({ prefix: "/users" })
 				.where(eq(profilePreference.profileId, profile.unitId))
 				.limit(1);
 			if (!preference) throw new PreferencesNotFound();
-			return {
-				profileId: preference.profileId,
-				interfaceLocale: preference.interfaceLocale,
-				defaultLicense: preference.defaultLicense,
-				defaultRealmManageMode: preference.defaultRealmManageMode,
-				collectionConfig: parseCollectionConfig(preference.collectionConfig),
-				personalizedFeed: preference.personalizedFeed,
-				contentRatings: preference.contentRatings,
-				preferredLanguages: preference.preferredLanguages,
-			};
+			return presentPreferences(preference);
 		},
 		{
 			access: "profile:read",
@@ -185,6 +191,27 @@ export default new Elysia({ prefix: "/users" })
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
 			},
 			detail: { summary: "Current user preferences", tags: ["Users"] },
+		},
+	)
+	.patch(
+		"/me/preferences",
+		async ({ profile, body }) => {
+			const [preference] = await database
+				.update(profilePreference)
+				.set({ interfaceLocale: body.interfaceLocale })
+				.where(eq(profilePreference.profileId, profile.unitId))
+				.returning();
+			if (!preference) throw new PreferencesNotFound();
+			return presentPreferences(preference);
+		},
+		{
+			access: "profile:update",
+			body: UpdateInterfaceLocaleBody,
+			response: {
+				[StatusCodes.OK]: PreferencesResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["PreferencesNotFound"]),
+			},
+			detail: { summary: "Update current user interface locale", tags: ["Users"] },
 		},
 	)
 	.put(

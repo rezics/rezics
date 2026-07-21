@@ -8,6 +8,7 @@ import {
 	profile,
 	profilePreference,
 	unit,
+	unitAccessBinding,
 	unitFollow,
 	unitLocalization,
 	users,
@@ -68,6 +69,14 @@ export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name"
 				title: authUser.name,
 			});
 			await tx.insert(profilePreference).values({ profileId: profileUnit.id });
+			await tx.insert(unitAccessBinding).values({
+				unitId: profileUnit.id,
+				subjectKind: "profile",
+				profileId: profileUnit.id,
+				role: "owner",
+				scope: [],
+				grantedByProfileId: profileUnit.id,
+			});
 			await tx
 				.insert(unitFollow)
 				.values(
