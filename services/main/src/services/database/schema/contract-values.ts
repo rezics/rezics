@@ -87,6 +87,7 @@ export const PostKindValues = [
 	"picture",
 	"governance_note",
 ] as const;
+export type PostKind = (typeof PostKindValues)[number];
 export const ProgressStatusValues = [
 	"backlog",
 	"active",

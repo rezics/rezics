@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, desc, eq, inArray, isNull, lte, sql, type SQL } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, lte, or, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
 
@@ -9,6 +9,7 @@ import { toSafeInteger } from "../../database/integer";
 import {
 	isPrimaryUnitLocalization,
 	firstUnitLocalizationCoverAssetId,
+	resolvedUnitLocalizationImageAssetId,
 } from "../../units/localization";
 import {
 	post,
@@ -49,11 +50,24 @@ import {
 	type RecommendationReason,
 	type RecommendationSurface,
 } from "../recommendations/schema";
-import { toApiErrorResponse, FeedResponse, toPortableTextResponse } from "../schema/response";
+import {
+	toApiErrorResponse,
+	FeedResponse,
+	toPortableTextResponse,
+	type FeedItemResponseValue,
+} from "../schema/response";
 import { InvalidFeedCursor } from "./errors";
 import {
+	DefaultFeedContentKindValues,
+	type FeedContentKind,
+	FeedContentKindValues,
+	FeedContentKindSchema,
+	type FeedPostKind,
+	FeedPostKindValues,
 	FeedQuery,
 	FeedSortSchema,
+	type FeedUnitKind,
+	FeedUnitKindValues,
 	type FeedQuery as FeedQueryType,
 	type FeedSort,
 } from "./schema";
@@ -61,10 +75,61 @@ import {
 const preferredLocalization = alias(unitLocalization, "preferred_localization");
 const preferredRealmFollow = alias(unitFollow, "preferred_realm_follow");
 
+type FeedContentDefinition =
+	| { readonly itemType: "unit"; readonly unitKind: FeedUnitKind }
+	| { readonly itemType: "post"; readonly postKind: FeedPostKind };
+
+const FeedContentDefinitions = {
+	"unit:profile": { itemType: "unit", unitKind: "profile" },
+	"unit:book": { itemType: "unit", unitKind: "book" },
+	"unit:software": { itemType: "unit", unitKind: "software" },
+	"unit:media": { itemType: "unit", unitKind: "media" },
+	"unit:release": { itemType: "unit", unitKind: "release" },
+	"unit:entity": { itemType: "unit", unitKind: "entity" },
+	"unit:tag": { itemType: "unit", unitKind: "tag" },
+	"unit:series": { itemType: "unit", unitKind: "series" },
+	"unit:zone": { itemType: "unit", unitKind: "zone" },
+	"unit:collection": { itemType: "unit", unitKind: "collection" },
+	"unit:poll": { itemType: "unit", unitKind: "poll" },
+	"unit:realm": { itemType: "unit", unitKind: "realm" },
+	"post:post": { itemType: "post", postKind: "post" },
+	"post:reply": { itemType: "post", postKind: "reply" },
+	"post:review": { itemType: "post", postKind: "review" },
+	"post:chapter": { itemType: "post", postKind: "chapter" },
+	"post:chapter_group": { itemType: "post", postKind: "chapter_group" },
+	"post:wiki": { itemType: "post", postKind: "wiki" },
+	"post:picture": { itemType: "post", postKind: "picture" },
+} as const satisfies Record<FeedContentKind, FeedContentDefinition>;
+
+const FeedUnitKinds: ReadonlySet<string> = new Set(FeedUnitKindValues);
+const FeedPostKinds: ReadonlySet<string> = new Set(FeedPostKindValues);
+
+function isFeedUnitKind(value: string): value is FeedUnitKind {
+	return FeedUnitKinds.has(value);
+}
+
+function isFeedPostKind(value: string | null): value is FeedPostKind {
+	return value !== null && FeedPostKinds.has(value);
+}
+
+export function resolveFeedContentSelection(content?: readonly FeedContentKind[]) {
+	const requested = new Set(content ?? DefaultFeedContentKindValues);
+	const selected = FeedContentKindValues.filter((kind) => requested.has(kind));
+	const unitKinds: FeedUnitKind[] = [];
+	const postKinds: FeedPostKind[] = [];
+	for (const kind of selected) {
+		const definition = FeedContentDefinitions[kind];
+		if (definition.itemType === "unit") unitKinds.push(definition.unitKind);
+		else postKinds.push(definition.postKind);
+	}
+	return { selected: [...selected], unitKinds, postKinds } as const;
+}
+
 const FeedCursor = t.Object(
 	{
-		v: t.Literal(2),
+		v: t.Literal(3),
 		sort: FeedSortSchema,
+		content: t.Array(FeedContentKindSchema, { minItems: 1, uniqueItems: true }),
 		realmId: t.Nullable(t.String({ format: "uuid" })),
 		subjectId: t.Nullable(t.String({ format: "uuid" })),
 		personalized: t.Boolean(),
@@ -93,8 +158,11 @@ function validateCursor(
 	personalized: boolean,
 ) {
 	if (!cursor) return;
+	const content = resolveFeedContentSelection(query.content).selected;
 	if (
 		cursor.sort !== (query.sort ?? "best") ||
+		cursor.content.length !== content.length ||
+		cursor.content.some((kind, index) => kind !== content[index]) ||
 		cursor.realmId !== (query.realmId ?? null) ||
 		cursor.subjectId !== (query.subjectId ?? null) ||
 		cursor.personalized !== personalized ||
@@ -106,12 +174,17 @@ function validateCursor(
 
 export function getFeedEligibilityCondition(
 	viewer: RecommendationViewer,
-	query: Pick<FeedQueryType, "realmId" | "subjectId">,
+	query: Pick<FeedQueryType, "content" | "realmId" | "subjectId">,
 	asOf: Date,
 	anchorId?: string,
 ): SQL {
+	const { unitKinds, postKinds } = resolveFeedContentSelection(query.content);
+	const contentCondition = or(
+		unitKinds.length ? inArray(unit.kind, unitKinds) : undefined,
+		postKinds.length ? and(eq(unit.kind, "post"), inArray(post.kind, postKinds)) : undefined,
+	);
 	return and(
-		sql`${post.kind} in ('post'::post_kind, 'reply'::post_kind)`,
+		contentCondition,
 		eq(unit.status, "published"),
 		eq(unit.visibility, "public"),
 		eq(unit.moderationStatus, "approved"),
@@ -120,7 +193,7 @@ export function getFeedEligibilityCondition(
 		sql`exists (
 			select 1 from unit_status_event publisher_event
 			join unit publisher_unit on publisher_unit.id = publisher_event.changed_by_profile_id
-			where publisher_event.unit_id = ${post.id}
+			where publisher_event.unit_id = ${unit.id}
 				and publisher_event.to_status = 'published'
 				and publisher_event.actor_kind = 'profile'
 				and publisher_event.actor_hidden = false
@@ -129,7 +202,7 @@ export function getFeedEligibilityCondition(
 				and publisher_unit.moderation_status = 'approved'
 				and publisher_unit.deleted_at is null
 		)`,
-		sql`(${post.kind} <> 'reply'::post_kind or exists (
+		sql`(${unit.kind} <> 'post' or ${post.kind} <> 'reply'::post_kind or exists (
 			select 1 from post_reply readable_reply
 			join unit readable_root on readable_root.id = readable_reply.root_post_id
 			where readable_reply.post_id = ${post.id}
@@ -141,7 +214,7 @@ export function getFeedEligibilityCondition(
 		query.realmId
 			? sql`exists (
 				select 1 from realm_unit scoped_content
-				where scoped_content.unit_id = ${post.id}
+				where scoped_content.unit_id = ${unit.id}
 					and scoped_content.realm_id = ${query.realmId}::uuid
 					and scoped_content.status = 'visible'
 			)`
@@ -156,16 +229,16 @@ export function getFeedEligibilityCondition(
 				join profile_block blocked on
 					(blocked.blocker_profile_id = ${viewer.profileId}::uuid and blocked.blocked_profile_id = publisher_event.changed_by_profile_id)
 					or (blocked.blocker_profile_id = publisher_event.changed_by_profile_id and blocked.blocked_profile_id = ${viewer.profileId}::uuid)
-				where publisher_event.unit_id = ${post.id}
+				where publisher_event.unit_id = ${unit.id}
 					and publisher_event.to_status = 'published'
 					and publisher_event.actor_kind = 'profile'
 					and publisher_event.actor_hidden = false
 			)`
 			: undefined,
 		viewer.profileId
-			? sql`(${post.id} = ${anchorId ?? null}::uuid or not exists (
+			? sql`(${unit.id} = ${anchorId ?? null}::uuid or not exists (
 				select 1 from recommendation_exclusion excluded
-				where excluded.profile_id = ${viewer.profileId}::uuid and excluded.unit_id = ${post.id}
+				where excluded.profile_id = ${viewer.profileId}::uuid and excluded.unit_id = ${unit.id}
 			))`
 			: undefined,
 	)!;
@@ -197,7 +270,7 @@ async function getCandidateSources(input: {
 	const snapshotJoin = input.snapshotId
 		? and(
 				eq(recommendationUnitStat.snapshotId, input.snapshotId),
-				eq(recommendationUnitStat.unitId, post.id),
+				eq(recommendationUnitStat.unitId, unit.id),
 				isNull(recommendationUnitStat.contextRealmId),
 			)
 		: sql`false`;
@@ -207,20 +280,20 @@ async function getCandidateSources(input: {
 		: RecommendationPolicy.maxCandidates - RecommendationPolicy.maxExplorationCandidates;
 	const objectivePromise = database
 		.select({
-			id: post.id,
+			id: unit.id,
 			engagement6h: recommendationUnitStat.engagement6h,
 			engagement24h: recommendationUnitStat.engagement24h,
 		})
-		.from(post)
-		.innerJoin(unit, eq(unit.id, post.id))
+		.from(unit)
+		.leftJoin(post, eq(post.id, unit.id))
 		.leftJoin(recommendationUnitStat, snapshotJoin)
 		.where(condition)
 		.orderBy(desc(objective), desc(unit.createdAt), desc(unit.id))
 		.limit(objectiveLimit);
 	const recentPromise = database
-		.select({ id: post.id })
-		.from(post)
-		.innerJoin(unit, eq(unit.id, post.id))
+		.select({ id: unit.id })
+		.from(unit)
+		.leftJoin(post, eq(post.id, unit.id))
 		.where(condition)
 		.orderBy(desc(unit.createdAt), desc(unit.id))
 		.limit(RecommendationPolicy.maxExplorationCandidates);
@@ -243,8 +316,8 @@ async function getCandidateSources(input: {
 							),
 						),
 					)
-					.innerJoin(post, eq(post.id, recommendationUnitEdge.targetUnitId))
-					.innerJoin(unit, eq(unit.id, post.id))
+					.innerJoin(unit, eq(unit.id, recommendationUnitEdge.targetUnitId))
+					.leftJoin(post, eq(post.id, unit.id))
 					.where(
 						and(
 							eq(recommendationProfileInterest.snapshotId, input.snapshotId),
@@ -259,13 +332,13 @@ async function getCandidateSources(input: {
 	const followedPromise =
 		input.viewer.personalized && input.viewer.profileId
 			? database
-					.selectDistinct({ id: post.id, createdAt: unit.createdAt })
-					.from(post)
-					.innerJoin(unit, eq(unit.id, post.id))
+					.selectDistinct({ id: unit.id, createdAt: unit.createdAt })
+					.from(unit)
+					.leftJoin(post, eq(post.id, unit.id))
 					.innerJoin(
 						unitStatusEvent,
 						and(
-							eq(unitStatusEvent.unitId, post.id),
+							eq(unitStatusEvent.unitId, unit.id),
 							eq(unitStatusEvent.toStatus, "published"),
 							eq(unitStatusEvent.actorKind, "profile"),
 							eq(unitStatusEvent.actorHidden, false),
@@ -279,18 +352,18 @@ async function getCandidateSources(input: {
 						),
 					)
 					.where(condition)
-					.orderBy(desc(unit.createdAt), desc(post.id))
+					.orderBy(desc(unit.createdAt), desc(unit.id))
 					.limit(RecommendationPolicy.maxFollowCandidates)
 			: Promise.resolve([]);
 	const realmPromise =
 		input.viewer.personalized && input.viewer.profileId
 			? database
-					.selectDistinct({ id: post.id, createdAt: unit.createdAt })
-					.from(post)
-					.innerJoin(unit, eq(unit.id, post.id))
+					.selectDistinct({ id: unit.id, createdAt: unit.createdAt })
+					.from(unit)
+					.leftJoin(post, eq(post.id, unit.id))
 					.innerJoin(
 						realmUnit,
-						and(eq(realmUnit.unitId, post.id), eq(realmUnit.status, "visible")),
+						and(eq(realmUnit.unitId, unit.id), eq(realmUnit.status, "visible")),
 					)
 					.innerJoin(
 						unitFollow,
@@ -300,7 +373,7 @@ async function getCandidateSources(input: {
 						),
 					)
 					.where(condition)
-					.orderBy(desc(unit.createdAt), desc(post.id))
+					.orderBy(desc(unit.createdAt), desc(unit.id))
 					.limit(RecommendationPolicy.maxFollowCandidates)
 			: Promise.resolve([]);
 
@@ -360,7 +433,8 @@ async function getCandidateSources(input: {
 }
 
 export interface FeedRankingCandidate extends RecommendationCandidate {
-	postKind: "post" | "reply";
+	unitKind: FeedUnitKind | "post";
+	postKind: FeedPostKind | null;
 	publisherIds: readonly string[];
 	realmId: string | null;
 	subjectId: string | null;
@@ -390,7 +464,7 @@ export async function getFeedRankingCandidates(input: {
 		? sql<string>`${input.query.realmId}::uuid`
 		: sql<string | null>`(
 			select candidate_realm.realm_id from realm_unit candidate_realm
-			where candidate_realm.unit_id = ${post.id}
+			where candidate_realm.unit_id = ${unit.id}
 				and candidate_realm.status = 'visible'
 			order by
 				${
@@ -408,25 +482,26 @@ export async function getFeedRankingCandidates(input: {
 	const snapshotJoin = input.snapshotId
 		? and(
 				eq(recommendationUnitStat.snapshotId, input.snapshotId),
-				eq(recommendationUnitStat.unitId, post.id),
+				eq(recommendationUnitStat.unitId, unit.id),
 				isNull(recommendationUnitStat.contextRealmId),
 			)
 		: sql`false`;
 	const preferredLanguage = input.viewer.preferredLanguages.length
 		? sql<boolean>`exists (
 			select 1 from ${unitLocalization} ${preferredLocalization}
-			where ${preferredLocalization.unitId} = ${post.id}
+			where ${preferredLocalization.unitId} = ${unit.id}
 				and ${inArray(preferredLocalization.language, input.viewer.preferredLanguages)}
 		)`
 		: sql<boolean>`false`;
 	const rows = await database
 		.select({
-			id: post.id,
+			id: unit.id,
+			unitKind: unit.kind,
 			postKind: post.kind,
 			publisherIds: sql<string[]>`array(
 				select distinct publisher_event.changed_by_profile_id::text
 				from unit_status_event publisher_event
-				where publisher_event.unit_id = ${post.id}
+				where publisher_event.unit_id = ${unit.id}
 					and publisher_event.to_status = 'published'
 					and publisher_event.actor_kind = 'profile'
 					and publisher_event.actor_hidden = false
@@ -454,18 +529,24 @@ export async function getFeedRankingCandidates(input: {
 			engagement24h: recommendationUnitStat.engagement24h,
 			engagement7d: recommendationUnitStat.engagement7d,
 		})
-		.from(post)
-		.innerJoin(unit, eq(unit.id, post.id))
-		.leftJoin(postReply, eq(postReply.postId, post.id))
+		.from(unit)
+		.leftJoin(post, eq(post.id, unit.id))
+		.leftJoin(postReply, eq(postReply.postId, unit.id))
 		.leftJoin(recommendationUnitStat, snapshotJoin)
 		.where(
 			and(
-				inArray(post.id, input.ids),
+				inArray(unit.id, input.ids),
 				getFeedEligibilityCondition(input.viewer, input.query, input.asOf, input.anchorId),
 			),
 		);
 	return rows.flatMap((row): FeedRankingCandidate[] => {
-		if (row.postKind !== "post" && row.postKind !== "reply") return [];
+		const kind =
+			row.unitKind === "post" && isFeedPostKind(row.postKind)
+				? { unitKind: "post" as const, postKind: row.postKind }
+				: isFeedUnitKind(row.unitKind)
+					? { unitKind: row.unitKind, postKind: null }
+					: null;
+		if (!kind) return [];
 		const stats: RecommendationStats = {
 			...EmptyRecommendationStats,
 			impressions: toCount(row.impressions, "recommendation impressions"),
@@ -487,7 +568,7 @@ export async function getFeedRankingCandidates(input: {
 		return [
 			{
 				id: row.id,
-				postKind: row.postKind,
+				...kind,
 				publisherIds: row.publisherIds,
 				realmId: row.realmId,
 				subjectId: row.subjectId,
@@ -508,41 +589,44 @@ type RankedFeedCandidate = ReturnType<typeof rankRecommendations<FeedRankingCand
 export async function hydrateFeedItems(
 	page: readonly RankedFeedCandidate[],
 	viewer: RecommendationViewer,
-	query: Pick<FeedQueryType, "realmId" | "subjectId">,
+	query: Pick<FeedQueryType, "content" | "realmId" | "subjectId">,
 	asOf: Date,
 	reasons: CandidateSources["reason"],
 	surface: RecommendationSurface,
 	requestId: string,
 	positionOffset: number,
 	policyVersion: string,
-) {
+): Promise<FeedItemResponseValue[]> {
 	const pageIds = page.map(({ id }) => id);
 	if (!pageIds.length) return [];
 	const rows = await database
 		.select({
-			id: post.id,
+			id: unit.id,
+			unitKind: unit.kind,
 			postKind: post.kind,
 			subjectId: post.subjectUnitId,
 			rootPostId: postReply.rootPostId,
 			parentPostId: postReply.parentPostId,
 			body: unitLocalization.content,
 			title: unitLocalization.title,
+			summary: unitLocalization.summary,
+			coverAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "cover"),
 			latestRevisionId: unitRevisionHead.revisionId,
 			createdAt: unit.createdAt,
 			updatedAt: unit.updatedAt,
 		})
-		.from(post)
-		.innerJoin(unit, eq(unit.id, post.id))
-		.leftJoin(postReply, eq(postReply.postId, post.id))
-		.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, post.id))
+		.from(unit)
+		.leftJoin(post, eq(post.id, unit.id))
+		.leftJoin(postReply, eq(postReply.postId, unit.id))
+		.leftJoin(unitRevisionHead, eq(unitRevisionHead.unitId, unit.id))
 		.leftJoin(
 			unitLocalization,
 			and(
-				eq(unitLocalization.unitId, post.id),
+				eq(unitLocalization.unitId, unit.id),
 				isPrimaryUnitLocalization(unitLocalization.unitId),
 			),
 		)
-		.where(and(inArray(post.id, pageIds), getFeedEligibilityCondition(viewer, query, asOf)));
+		.where(and(inArray(unit.id, pageIds), getFeedEligibilityCondition(viewer, query, asOf)));
 	if (!rows.length) return [];
 	const validIds = rows.map(({ id }) => id);
 	const postIds = rows.filter(({ postKind }) => postKind === "post").map(({ id }) => id);
@@ -641,7 +725,11 @@ export async function hydrateFeedItems(
 						.where(
 							and(
 								inArray(post.id, rootIds),
-								getFeedEligibilityCondition(viewer, {}, asOf),
+								getFeedEligibilityCondition(
+									viewer,
+									{ content: ["post:post"] },
+									asOf,
+								),
 							),
 						)
 				: [],
@@ -687,20 +775,54 @@ export async function hydrateFeedItems(
 	const ownReaction = new Map(
 		viewerReactions.map((row) => [`${row.unitId}:${row.realmId ?? ""}`, row.reaction]),
 	);
-	return pageIds.flatMap((id, index) => {
+	return pageIds.flatMap((id, index): FeedItemResponseValue[] => {
 		const row = rowMap.get(id);
 		const ranked = pageMap.get(id);
-		if (!row || !ranked || (row.postKind !== "post" && row.postKind !== "reply")) return [];
+		if (!row || !ranked) return [];
+		const common = {
+			id: row.id,
+			publishers: publishers.get(row.id) ?? [],
+			realmId: ranked.realmId,
+			title: row.title,
+			createdAt: row.createdAt,
+			updatedAt: row.updatedAt,
+			reactions: {
+				upvote: reactionCount.get(`${row.id}:upvote`) ?? 0,
+				downvote: reactionCount.get(`${row.id}:downvote`) ?? 0,
+			},
+			viewerReaction: ownReaction.get(`${row.id}:${ranked.realmId ?? ""}`) ?? null,
+			recommendationReason: reasons.get(row.id) ?? null,
+			tracking: createRecommendationTracking(row.id, {
+				requestId,
+				surface,
+				position: positionOffset + index,
+				policyVersion,
+			}),
+		};
+		if (isFeedUnitKind(row.unitKind))
+			return [
+				{
+					...common,
+					itemType: "unit" as const,
+					unitKind: row.unitKind,
+					postKind: null,
+					summary: row.summary,
+					cover: presentImageAsset(row.coverAssetId),
+				},
+			];
+		if (row.unitKind !== "post" || !isFeedPostKind(row.postKind)) return [];
 		return [
 			{
-				id: row.id,
+				...common,
+				itemType: "post" as const,
+				unitKind: "post" as const,
 				postKind: row.postKind,
-				publishers: publishers.get(row.id) ?? [],
-				realmId: ranked.realmId,
+				summary: row.summary,
+				cover: presentImageAsset(row.coverAssetId),
 				subjectId: row.subjectId,
 				rootPostId: row.rootPostId,
 				parentPostId: row.parentPostId,
-				body: toPortableTextResponse(row.body),
+				body: row.body === null ? null : toPortableTextResponse(row.body),
 				replyCount:
 					row.postKind === "reply"
 						? (childCount.get(row.id) ?? 0)
@@ -709,20 +831,6 @@ export async function hydrateFeedItems(
 				latestRevisionId: row.latestRevisionId,
 				replyContext: row.rootPostId ? (rootContext.get(row.rootPostId) ?? null) : null,
 				subject: row.subjectId ? (subjects.get(row.subjectId) ?? null) : null,
-				createdAt: row.createdAt,
-				updatedAt: row.updatedAt,
-				reactions: {
-					upvote: reactionCount.get(`${row.id}:upvote`) ?? 0,
-					downvote: reactionCount.get(`${row.id}:downvote`) ?? 0,
-				},
-				viewerReaction: ownReaction.get(`${row.id}:${ranked.realmId ?? ""}`) ?? null,
-				recommendationReason: reasons.get(row.id) ?? null,
-				tracking: createRecommendationTracking(row.id, {
-					requestId,
-					surface,
-					position: positionOffset + index,
-					policyVersion,
-				}),
 			},
 		];
 	});
@@ -776,6 +884,7 @@ export default new Elysia({ prefix: "/feed" }).get(
 		const start = cursor ? ranked.findIndex(({ id }) => id === cursor.lastId) + 1 : 0;
 		if (cursor && start === 0) throw new InvalidFeedCursor();
 		const limit = query.limit ?? 20;
+		const content = resolveFeedContentSelection(query.content).selected;
 		const page = ranked.slice(start, start + limit);
 		const requestId = crypto.randomUUID();
 		const items = await hydrateFeedItems(
@@ -796,8 +905,9 @@ export default new Elysia({ prefix: "/feed" }).get(
 				start + page.length < ranked.length && last
 					? Buffer.from(
 							JSON.stringify({
-								v: 2,
+								v: 3,
 								sort,
+								content,
 								realmId: query.realmId ?? null,
 								subjectId: query.subjectId ?? null,
 								personalized: viewer.personalized,

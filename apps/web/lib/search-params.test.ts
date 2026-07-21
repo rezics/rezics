@@ -1,6 +1,7 @@
 import { createSerializer } from "nuqs/server";
 import { describe, expect, it } from "vitest";
 
+import { DefaultFeedContentKinds, feedContentParser } from "@/features/content-feed/feed-kind";
 import {
 	authSearchParamsParsers,
 	feedSortParser,
@@ -13,6 +14,9 @@ describe("URL state parsers", () => {
 		expect(feedSortParser.parseServerSide(undefined)).toBe("best");
 		expect(feedSortParser.parseServerSide("hot")).toBe("hot");
 		expect(feedSortParser.parseServerSide("unknown")).toBe("best");
+		expect(feedContentParser.parseServerSide(undefined)).toEqual(DefaultFeedContentKinds);
+		expect(feedContentParser.parseServerSide("post:reply")).toEqual(["post:reply"]);
+		expect(feedContentParser.parseServerSide("")).toEqual([]);
 	});
 
 	it("parses search state through its declared vocabulary", () => {

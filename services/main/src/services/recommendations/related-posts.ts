@@ -15,9 +15,14 @@ import {
 	unitStatusEvent,
 } from "../database/schema";
 import type { RecommendationReason } from "../api/recommendations/schema";
+import type { FeedQuery } from "../api/feed/schema";
 import type { RecommendationSnapshotContext, RecommendationViewer } from "./context";
 import { RecommendationPolicy, RecommendationPolicyVersion } from "./policy";
 import { rankRecommendations } from "./ranking";
+
+const RelatedPostFeedQuery = {
+	content: ["post:post", "post:reply"],
+} satisfies Pick<FeedQuery, "content">;
 
 export async function recommendRelatedPosts(input: {
 	viewer: RecommendationViewer;
@@ -30,7 +35,12 @@ export async function recommendRelatedPosts(input: {
 }) {
 	const snapshotId = input.snapshot?.id;
 	const seedIds = [input.seed.id, ...(input.seed.subjectId ? [input.seed.subjectId] : [])];
-	const eligible = getFeedEligibilityCondition(input.viewer, {}, input.asOf, input.afterId);
+	const eligible = getFeedEligibilityCondition(
+		input.viewer,
+		RelatedPostFeedQuery,
+		input.asOf,
+		input.afterId,
+	);
 	const graphScore = sql<number>`sum(${recommendationUnitEdge.score})`;
 	const graphPromise = snapshotId
 		? database
@@ -159,7 +169,7 @@ export async function recommendRelatedPosts(input: {
 		ids: sources.ids,
 		sources,
 		viewer: input.viewer,
-		query: {},
+		query: RelatedPostFeedQuery,
 		snapshotId: snapshotId ?? null,
 		asOf: input.asOf,
 		...(input.afterId ? { anchorId: input.afterId } : {}),
@@ -173,18 +183,19 @@ export async function recommendRelatedPosts(input: {
 	const start = input.afterId ? ranked.findIndex(({ id }) => id === input.afterId) + 1 : 0;
 	if (input.afterId && start === 0) return null;
 	const page = ranked.slice(start, start + input.pageSize);
+	const items = await hydrateFeedItems(
+		page,
+		input.viewer,
+		RelatedPostFeedQuery,
+		input.asOf,
+		reason,
+		"post_related",
+		input.requestId,
+		start,
+		input.snapshot?.policyVersion ?? RecommendationPolicyVersion,
+	);
 	return {
-		items: await hydrateFeedItems(
-			page,
-			input.viewer,
-			{},
-			input.asOf,
-			reason,
-			"post_related",
-			input.requestId,
-			start,
-			input.snapshot?.policyVersion ?? RecommendationPolicyVersion,
-		),
+		items: items.filter((item) => item.itemType === "post"),
 		nextId: start + page.length < ranked.length ? page.at(-1)?.id : undefined,
 	};
 }

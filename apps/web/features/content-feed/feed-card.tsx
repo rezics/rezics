@@ -1,6 +1,6 @@
 "use client";
 
-import { Children, Fragment, type ComponentProps, type ReactNode } from "react";
+import { type ComponentProps, type ReactNode } from "react";
 import { BookOpenIcon, ChevronRightIcon } from "lucide-react";
 
 import {
@@ -22,7 +22,6 @@ import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
-	Separator,
 	cn,
 } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
@@ -43,26 +42,6 @@ export interface FeedRealm {
 }
 
 export type FeedRealms = readonly [FeedRealm, ...FeedRealm[]];
-
-export function FeedCardList({ children, className, ...props }: ComponentProps<"div">) {
-	const cards = Children.toArray(children);
-
-	return (
-		<div
-			className={cn("w-full overflow-hidden bg-background", className)}
-			data-slot="feed-card-list"
-			role="feed"
-			{...props}
-		>
-			{cards.map((card, index) => (
-				<Fragment key={index}>
-					{card}
-					{index < cards.length - 1 ? <Separator className="bg-border-weak" /> : null}
-				</Fragment>
-			))}
-		</div>
-	);
-}
 
 export function FeedCard({ className, ...props }: ComponentProps<"article">) {
 	return (

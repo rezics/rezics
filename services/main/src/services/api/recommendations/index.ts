@@ -26,7 +26,7 @@ import { UnitNotFound } from "../../units/errors";
 import { resolveMainUnitId } from "../../units/variants";
 import { getPublisherSummariesByUnitIds } from "../../units/status";
 import { ValidationError } from "../errors";
-import { FeedResponse, toApiErrorResponse } from "../schema/response";
+import { PostFeedResponse, toApiErrorResponse } from "../schema/response";
 import {
 	RelatedPostParams,
 	RelatedPostQuery,
@@ -305,7 +305,7 @@ export default new Elysia({ prefix: "/recommendations" })
 			params: RelatedPostParams,
 			query: RelatedPostQuery,
 			response: {
-				[StatusCodes.OK]: FeedResponse,
+				[StatusCodes.OK]: PostFeedResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},

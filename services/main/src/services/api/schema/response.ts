@@ -1,4 +1,4 @@
-import { t } from "elysia";
+import { type Static, t } from "elysia";
 import {
 	CollectionDefinitionDocument,
 	CollectionPresentationDocument,
@@ -15,6 +15,7 @@ import {
 	Uuid,
 } from ".";
 import { EntityAssociationPolicyModeValues } from "../../database/schema/contract-values";
+import { FeedPostKindValues, FeedUnitKindValues } from "../feed/schema";
 import {
 	RecommendationReasonSchema,
 	RecommendationTrackingSchema,
@@ -331,44 +332,69 @@ export const PostListResponse = t.Object({
 		}),
 	),
 });
-export const FeedResponse = t.Object({
-	items: t.Array(
+const FeedItemBaseResponse = {
+	id: Uuid,
+	publishers: t.Array(UnitPublisherSummaryResponse),
+	realmId: t.Nullable(Uuid),
+	title: NullableText,
+	createdAt: DateTime,
+	updatedAt: DateTime,
+	reactions: t.Object({ upvote: t.Integer(), downvote: t.Integer() }),
+	viewerReaction: NullableText,
+	recommendationReason: t.Nullable(RecommendationReasonSchema),
+	tracking: RecommendationTrackingSchema,
+};
+
+export const FeedUnitItemResponse = t.Object({
+	...FeedItemBaseResponse,
+	itemType: t.Literal("unit"),
+	unitKind: t.UnionEnum(FeedUnitKindValues),
+	postKind: t.Null(),
+	summary: NullableText,
+	cover: ImageAssetResponse,
+});
+
+export const FeedPostItemResponse = t.Object({
+	...FeedItemBaseResponse,
+	itemType: t.Literal("post"),
+	unitKind: t.Literal("post"),
+	postKind: t.UnionEnum(FeedPostKindValues),
+	summary: NullableText,
+	cover: ImageAssetResponse,
+	subjectId: t.Nullable(Uuid),
+	rootPostId: t.Nullable(Uuid),
+	parentPostId: t.Nullable(Uuid),
+	body: t.Nullable(PortableTextDocument),
+	replyCount: t.Integer(),
+	latestRevisionId: t.Nullable(Uuid),
+	replyContext: t.Nullable(
 		t.Object({
-			id: Uuid,
-			postKind: OrdinaryPostKindResponse,
-			publishers: t.Array(UnitPublisherSummaryResponse),
-			realmId: t.Nullable(Uuid),
-			subjectId: t.Nullable(Uuid),
-			rootPostId: t.Nullable(Uuid),
-			parentPostId: t.Nullable(Uuid),
-			body: PortableTextDocument,
-			replyCount: t.Integer(),
+			rootPostId: Uuid,
 			title: NullableText,
-			latestRevisionId: t.Nullable(Uuid),
-			replyContext: t.Nullable(
-				t.Object({
-					rootPostId: Uuid,
-					title: NullableText,
-					publishers: t.Array(UnitPublisherSummaryResponse),
-					subjectId: t.Nullable(Uuid),
-				}),
-			),
-			subject: t.Nullable(
-				t.Object({
-					id: Uuid,
-					type: t.String(),
-					title: NullableText,
-					cover: ImageAssetResponse,
-				}),
-			),
-			createdAt: DateTime,
-			updatedAt: DateTime,
-			reactions: t.Object({ upvote: t.Integer(), downvote: t.Integer() }),
-			viewerReaction: NullableText,
-			recommendationReason: t.Nullable(RecommendationReasonSchema),
-			tracking: RecommendationTrackingSchema,
+			publishers: t.Array(UnitPublisherSummaryResponse),
+			subjectId: t.Nullable(Uuid),
 		}),
 	),
+	subject: t.Nullable(
+		t.Object({
+			id: Uuid,
+			type: t.String(),
+			title: NullableText,
+			cover: ImageAssetResponse,
+		}),
+	),
+});
+
+export type FeedItemResponseValue =
+	Static<typeof FeedUnitItemResponse> | Static<typeof FeedPostItemResponse>;
+
+export const FeedResponse = t.Object({
+	items: t.Array(t.Union([FeedUnitItemResponse, FeedPostItemResponse])),
+	nextCursor: NullableText,
+});
+
+export const PostFeedResponse = t.Object({
+	items: t.Array(FeedPostItemResponse),
 	nextCursor: NullableText,
 });
 export const ReviewListResponse = t.Object({

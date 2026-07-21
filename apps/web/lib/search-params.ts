@@ -1,7 +1,6 @@
 import { ContentLanguageValues } from "@rezics/i18n";
 import { PostApiSearchByIndexIndex } from "@rezics/openapi-tanstack-query";
 import { parseAsArrayOf, parseAsString, parseAsStringLiteral } from "nuqs/server";
-
 import { AuthPortalModes } from "./auth-redirect";
 
 export const urlStateOptions = {
@@ -18,12 +17,6 @@ export function isFeedSort(value: string): value is FeedSort {
 }
 export const feedSortParser = parseAsStringLiteral(FeedSorts)
 	.withDefault("best")
-	.withOptions({ ...urlStateOptions, history: "push" });
-
-export const FeedContentKinds = ["post", "reply"] as const;
-export type FeedContentKind = (typeof FeedContentKinds)[number];
-export const feedContentParser = parseAsArrayOf(parseAsStringLiteral(FeedContentKinds))
-	.withDefault([...FeedContentKinds])
 	.withOptions({ ...urlStateOptions, history: "push" });
 
 export const SearchScopes = Object.values(PostApiSearchByIndexIndex);
