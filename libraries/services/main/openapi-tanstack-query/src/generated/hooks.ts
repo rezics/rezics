@@ -12458,8 +12458,8 @@ export function releaseSlugRedirectAsStaffMutationOptions<TContext = unknown>(
 }
 
 /**
- * @description Deletes one non-public administrative redirect so the scope and label may be reused. Redirects in enabled public route namespaces are permanent and cannot be released.
- * @summary Release an administrative slug redirect as staff
+ * @description Deletes one temporary Redirect record so its scoped label may be reused. This is an audited staff action; retention and quarantine policy determines when a redirect is eligible for release.
+ * @summary Release a retained slug redirect as staff
  * {@link /api/slug-addresses/redirects/:redirectAddressId}
  */
 export function useReleaseSlugRedirectAsStaff<TContext>(

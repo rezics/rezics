@@ -16,8 +16,8 @@ import { unit } from "./core";
  * may preserve its former addresses. A null scope is the virtual address root.
  *
  * @todo
- * Finalize Redirect retention and quarantine policy before non-Profile slug
- * management is exposed beyond staff APIs.
+ * Automate Redirect retention and quarantine. Until that policy is finalized,
+ * release remains an explicit, audited staff action.
  */
 export const unitSlugAddress = pgTable(
 	"unit_slug_address",

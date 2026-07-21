@@ -91,8 +91,10 @@ that slug exists. Canonical selection is therefore state-dependent:
   supported route suffix.
 - An unaddressed Unit renders at its long ID route; there is no slug route to
   redirect to.
-- A retained former slug permanently redirects to the Unit's current short
-  route and cannot later be reassigned to another Unit.
+- A retained former slug temporarily redirects to the Unit's current short
+  route while its Redirect record remains active. It is not a permanent alias;
+  after retention and quarantine policy permits an audited release, the label
+  may be reassigned.
 
 The backend field `canonicalPath` names the current path in the slug registry;
 it does not imply that frontend slug paths use the long ID-route prefix.
@@ -143,8 +145,11 @@ may only target that Profile's system Favorites Collection.
   rename addresses.
 - An unaddressed Unit remains ID-only. After a public address is assigned it may
   be renamed, but not removed; this preserves link durability.
-- Renames retain the former address. Public retained addresses are permanent
-  and cannot be released for reuse.
+- Renames retain the former address as a temporary Redirect record. Retained
+  addresses issue temporary redirects and may be released for reuse through an
+  audited staff action. The automated retention and quarantine schedule remains
+  a separate policy decision; clients must not cache former-slug redirects as
+  permanent.
 - Public path and scoped lookup return not found for an unavailable scope,
   target, wrong target kind, or unauthorized resource without disclosing which
   check failed.
@@ -161,7 +166,8 @@ may only target that Profile's system Favorites Collection.
 - Wrong-scope and wrong-kind lookups fail without cross-resource disclosure.
 - Nested direct-scope lookup works without ancestor IDs while full-path lookup
   still validates every public ancestor.
-- Current-slug, former-slug, addressed-ID redirect, and unaddressed-ID rendering
-  behave as documented without dropping supported route suffixes.
+- Current-slug rendering, temporary former-slug redirects, addressed-ID
+  canonical redirects, and unaddressed-ID rendering behave as documented
+  without dropping supported route suffixes.
 - Stored content references remain ID-based while their rendered links prefer
   an enabled canonical slug address.

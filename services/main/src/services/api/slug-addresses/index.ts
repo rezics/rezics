@@ -258,9 +258,9 @@ export default new Elysia({ prefix: "/slug-addresses" })
 			},
 			detail: {
 				operationId: "releaseSlugRedirectAsStaff",
-				summary: "Release an administrative slug redirect as staff",
+				summary: "Release a retained slug redirect as staff",
 				description:
-					"Deletes one non-public administrative redirect so the scope and label may be reused. Redirects in enabled public route namespaces are permanent and cannot be released.",
+					"Deletes one temporary Redirect record so its scoped label may be reused. This is an audited staff action; retention and quarantine policy determines when a redirect is eligible for release.",
 				tags: ["Slug Addresses"],
 				responses: NoContentResponse,
 			},

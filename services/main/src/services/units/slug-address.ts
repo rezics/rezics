@@ -1,5 +1,5 @@
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
-import { PublicSlugRouteManifest, type PublicSlugAddressValue } from "@rezics/slug";
+import type { PublicSlugAddressValue } from "@rezics/slug";
 
 import type { Authorization } from "../authorization";
 import { database, type DatabaseTransaction } from "../database";
@@ -80,9 +80,6 @@ interface CanonicalAddressMutation {
 
 const SlugTreeMutationLock = "rezics-unit-slug-addresses";
 const SystemSlugNamespaceUnitIdSet: ReadonlySet<string> = new Set(SystemSlugNamespaceUnitIds);
-const PermanentPublicSlugScopeUnitIdSet: ReadonlySet<string> = new Set(
-	PublicSlugRouteManifest.map((route) => route.namespaceUnitId),
-);
 
 function fixedPublicSlugScope(kind: UnitKind): string | undefined {
 	switch (kind) {
@@ -921,8 +918,6 @@ export async function releaseSlugRedirect(
 			)
 			.limit(1);
 		if (!redirect) throw new SlugRedirectNotFound();
-		if (redirect.scopeUnitId && PermanentPublicSlugScopeUnitIdSet.has(redirect.scopeUnitId))
-			throw new UnitAddressMutationForbidden();
 		if (redirect.scopeUnitId === null)
 			await authorization.platform.ensureCapability("unit.slug.namespace.manage");
 		await tx.delete(unitSlugAddress).where(eq(unitSlugAddress.id, redirect.id));
