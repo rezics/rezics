@@ -30,6 +30,11 @@ export const verbatimTerms = {
 		category: "brand",
 		rationale: "Project brand spelling.",
 	},
+	studio: {
+		value: "Studio",
+		category: "product",
+		rationale: "User-confirmed name for the REZICS authoring workspace.",
+	},
 	github: {
 		value: "GitHub",
 		category: "brand",

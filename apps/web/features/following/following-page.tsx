@@ -7,7 +7,6 @@ import {
 	useDeleteApiUsersMeFollowingByUnitId,
 	usePatchApiUsersMeFollowingByUnitId,
 	type GetApiUsersMeFollowingQuery,
-	type GetApiUsersMeFollowingStatus200ItemsKindEnum as FollowingKind,
 } from "@rezics/openapi-tanstack-query";
 import {
 	Button,
@@ -20,16 +19,19 @@ import {
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Star, UserMinus } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useQueryState } from "nuqs";
 
 import { RequireSession } from "@/features/auth/require-session";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { invalidateFollowingQueries } from "./following-cache";
-import { FollowingKinds, followingHref } from "./following-route";
-
-const AllFollowingKinds = "all";
-type FollowingFilter = FollowingKind | typeof AllFollowingKinds;
+import {
+	AllFollowingKinds,
+	followingFilterParser,
+	FollowingKinds,
+	followingHref,
+	type FollowingFilter,
+} from "./following-route";
 
 export function FollowingPage() {
 	return (
@@ -42,7 +44,7 @@ export function FollowingPage() {
 function FollowingContent() {
 	const { t, locale } = useTranslation(["actions", "nav", "ui"]);
 	const queryClient = useQueryClient();
-	const [kind, setKind] = useState<FollowingFilter>(AllFollowingKinds);
+	const [kind, setKind] = useQueryState("kind", followingFilterParser);
 	const baseQuery = {
 		language: toContentLanguage(locale.target),
 		limit: 30,
@@ -92,7 +94,7 @@ function FollowingContent() {
 			<ChoiceSelect
 				ariaLabel={t.nav.following.filter}
 				className="w-full sm:w-fit"
-				onValueChange={(nextKinds) => setKind(nextKinds[0] ?? AllFollowingKinds)}
+				onValueChange={(nextKinds) => void setKind(nextKinds[0] ?? AllFollowingKinds)}
 				options={options}
 				placeholder={t.nav.following.filter}
 				value={[kind]}

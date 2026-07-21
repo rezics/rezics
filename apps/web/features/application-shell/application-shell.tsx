@@ -1,8 +1,8 @@
 "use client";
 
-import { Compass, Plus, UserRound } from "lucide-react";
+import { Bookmark, Gauge, Globe2, House, PanelsTopLeft, Plus, UserRound } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
 	forwardRef,
 	useEffect,
@@ -22,14 +22,20 @@ import { AppShell as SharedAppShell } from "@rezics/ui";
 import { isUiLocale, toContentLanguage, toStoredUiLocale, toUiLocale } from "@rezics/i18n";
 
 import { useAuthPortal } from "@/features/auth/auth-portal";
+import { followingManagementHref } from "@/features/following/following-route";
 import { profileHref } from "@/features/profiles/profile-route";
 import { useSetLocale, useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
-import { isSidebarFollowingKind, sidebarFollowingHref } from "./sidebar-following";
+import { sidebarFollowingHref } from "./sidebar-following";
 import { ThemeToggle } from "./theme-toggle";
 
-const Links = [{ href: "/", key: "explore", icon: Compass }] as const;
+const Links = [
+	{ href: "/", key: "home", icon: House },
+	{ href: "/create", key: "studio", icon: PanelsTopLeft },
+	{ href: "/me/favorites", key: "favorites", icon: Bookmark },
+	{ href: "/me/progress", key: "progress", icon: Gauge },
+] as const;
 
 type AppLinkProps = ComponentPropsWithoutRef<typeof Link>;
 
@@ -69,6 +75,7 @@ const AppLink = forwardRef<HTMLAnchorElement, AppLinkProps>(function AppLink(
 
 export function ApplicationShell({ children }: { children: ReactNode }) {
 	const pathname = usePathname();
+	const searchParams = useSearchParams();
 	const { data: session } = useHydratedSession();
 	const { t, locale } = useTranslation([
 		"actions",
@@ -101,6 +108,32 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 			onSuccess: (data) => queryClient.setQueryData(getApiUsersMePreferencesQueryKey(), data),
 		},
 	});
+	const zoneItems = (followedZones.data?.items ?? []).flatMap((item) =>
+		item.kind === "zone"
+			? [
+					{
+						id: item.id,
+						href: sidebarFollowingHref("zone", item),
+						label: item.title ?? t.ui.unnamed,
+						imageUrl: item.avatar?.url ?? item.cover?.url,
+						favorite: item.favorite,
+					},
+				]
+			: [],
+	);
+	const realmItems = (followedRealms.data?.items ?? []).flatMap((item) =>
+		item.kind === "realm"
+			? [
+					{
+						id: item.id,
+						href: sidebarFollowingHref("realm", item),
+						label: item.title ?? t.ui.unnamed,
+						imageUrl: item.avatar?.url ?? item.cover?.url,
+						favorite: item.favorite,
+					},
+				]
+			: [],
+	);
 
 	useEffect(() => {
 		localeChangedByUser.current = false;
@@ -145,6 +178,7 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 					label: t.actions.create,
 				}}
 				currentPath={pathname}
+				currentSearch={searchParams.toString()}
 				link={AppLink}
 				navigationLabel={t.nav.navigation}
 				sidebar={{
@@ -187,34 +221,32 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 				following={
 					session
 						? {
-								zonesLabel: t.nav.sidebar.zones,
-								realmsLabel: t.nav.sidebar.realms,
-								zonesEmptyLabel: t.nav.sidebar.zonesEmpty,
-								realmsEmptyLabel: t.nav.sidebar.realmsEmpty,
+								groups: [
+									{
+										id: "zone",
+										label: t.nav.sidebar.zones,
+										allLabel: t.nav.sidebar.allZones,
+										allHref: followingManagementHref("zone"),
+										emptyLabel: t.nav.sidebar.zonesEmpty,
+										icon: PanelsTopLeft,
+										isLoading: followedZones.isPending,
+										isError: followedZones.isError,
+										items: zoneItems,
+									},
+									{
+										id: "realm",
+										label: t.nav.sidebar.realms,
+										allLabel: t.nav.sidebar.allRealms,
+										allHref: followingManagementHref("realm"),
+										emptyLabel: t.nav.sidebar.realmsEmpty,
+										icon: Globe2,
+										isLoading: followedRealms.isPending,
+										isError: followedRealms.isError,
+										items: realmItems,
+									},
+								],
 								loadingLabel: t.nav.sidebar.loading,
 								errorLabel: t.nav.sidebar.error,
-								zonesLoading: followedZones.isPending,
-								realmsLoading: followedRealms.isPending,
-								zonesError: followedZones.isError,
-								realmsError: followedRealms.isError,
-								manageLabel: t.nav.following.manage,
-								manageHref: "/me/following",
-								items: [
-									...(followedZones.data?.items ?? []),
-									...(followedRealms.data?.items ?? []),
-								].flatMap((item) => {
-									if (!isSidebarFollowingKind(item.kind)) return [];
-									return [
-										{
-											id: item.id,
-											kind: item.kind,
-											href: sidebarFollowingHref(item.kind, item),
-											label: item.title ?? t.ui.unnamed,
-											imageUrl: item.avatar?.url ?? item.cover?.url,
-											favorite: item.favorite,
-										},
-									];
-								}),
 							}
 						: undefined
 				}

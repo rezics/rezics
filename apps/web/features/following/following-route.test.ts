@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { FollowingKinds, followingHref } from "./following-route";
+import {
+	AllFollowingKinds,
+	followingManagementHref,
+	FollowingFilters,
+	FollowingKinds,
+	followingHref,
+} from "./following-route";
 
 describe("following routes", () => {
 	it("maps every navigable Unit kind to its canonical route", () => {
@@ -39,5 +45,12 @@ describe("following routes", () => {
 			"realm",
 			"realm_rule",
 		]);
+		expect(FollowingFilters).toEqual([AllFollowingKinds, ...FollowingKinds]);
+	});
+
+	it("builds addressable management routes for sidebar All links", () => {
+		expect(followingManagementHref()).toBe("/me/following");
+		expect(followingManagementHref("zone")).toBe("/me/following?kind=zone");
+		expect(followingManagementHref("realm")).toBe("/me/following?kind=realm");
 	});
 });

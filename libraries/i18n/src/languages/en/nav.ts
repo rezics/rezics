@@ -1,3 +1,4 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { enTerminology } from "@rezics/i18n/terminology/en";
 
 const { forms: followTerms } = enTerminology.follow;
@@ -7,7 +8,8 @@ const { forms: unitSlugTerms } = enTerminology.unitSlug;
 const { forms: zoneTerms } = enTerminology.zone;
 
 export default {
-	explore: "Explore",
+	home: "Home",
+	studio: verbatimTerms.studio.value,
 	units: "Units",
 	entity: "Entity",
 	realm: realmTerms.label,
@@ -20,13 +22,15 @@ export default {
 	content: "Content",
 	sidebar: {
 		title: "Main navigation",
-		description: `Open Explore and the ${zoneTerms.pluralLabel} and ${realmTerms.pluralLabel} you ${followTerms.action}.`,
+		description: `Open Home, frequent destinations, and the ${zoneTerms.pluralLabel} and ${realmTerms.pluralLabel} you ${followTerms.action}.`,
 		open: "Open main navigation",
 		close: "Close main navigation",
 		expand: "Expand sidebar",
 		collapse: "Collapse sidebar",
 		zones: zoneTerms.pluralLabel,
 		realms: realmTerms.pluralLabel,
+		allZones: `All ${zoneTerms.pluralLabel}`,
+		allRealms: `All ${realmTerms.pluralLabel}`,
 		zonesEmpty: `${zoneTerms.pluralLabel} you ${followTerms.action} will appear here.`,
 		realmsEmpty: `${realmTerms.pluralLabel} you ${followTerms.action} will appear here.`,
 		loading: "Loading sidebar content.",
@@ -34,8 +38,7 @@ export default {
 	},
 	following: {
 		title: followTerms.collectionLabel,
-		manage: `Manage ${followTerms.gerund}`,
-		all: "All types",
+		all: `All ${followTerms.gerund}`,
 		empty: `Units you ${followTerms.action} will appear here.`,
 		description: `Filter, pin, and organize the Units you ${followTerms.action}.`,
 		filter: `Filter ${followTerms.followed} Unit types`,

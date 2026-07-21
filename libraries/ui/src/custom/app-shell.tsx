@@ -1,8 +1,9 @@
 "use client";
 
-import { Menu, Search, Star, X } from "lucide-react";
+import { List, Menu, Search, Star, X } from "lucide-react";
 import { useCallback, useEffect, useState, type ElementType, type ReactNode } from "react";
 
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "../ui/input-group";
 import { ScrollArea } from "../ui/scroll-area";
@@ -23,11 +24,17 @@ import { ChoiceSelect } from "./choice-select";
 import { Logo } from "./logo";
 
 const DesktopSidebarPreferenceKey = "rezics-app-sidebar-state-v1";
+const FollowingAccordionPreferenceKey = "rezics-app-sidebar-following:v1";
 const DesktopBreakpoint = "(min-width: 768px)";
 const DesktopSidebarId = "app-sidebar-desktop";
 const MobileSidebarId = "app-sidebar-mobile";
+const SidebarRowClassName =
+	"flex min-h-10 min-w-0 items-center gap-3 rounded-lg px-3 text-sm transition-colors hover:bg-surface-hover hover:text-foreground focus-visible:bg-surface-hover focus-visible:text-foreground";
 
 type DesktopSidebarState = "expanded" | "collapsed";
+export type AppShellFollowingGroupId = "zone" | "realm";
+
+const FollowingGroupIds: readonly AppShellFollowingGroupId[] = ["zone", "realm"];
 
 export type AppShellIcon = ElementType<{
 	className?: string;
@@ -51,25 +58,26 @@ export interface AppShellFollowingItem {
 	id: string;
 	href: string;
 	label: string;
-	kind: "zone" | "realm";
 	imageUrl?: string | null;
 	favorite?: boolean;
 }
 
+export interface AppShellFollowingGroup {
+	id: AppShellFollowingGroupId;
+	label: string;
+	allLabel: string;
+	allHref: string;
+	emptyLabel: string;
+	icon: AppShellIcon;
+	isLoading: boolean;
+	isError: boolean;
+	items: readonly AppShellFollowingItem[];
+}
+
 export interface AppShellFollowing {
-	zonesLabel: string;
-	realmsLabel: string;
-	zonesEmptyLabel: string;
-	realmsEmptyLabel: string;
-	manageLabel: string;
-	manageHref: string;
+	groups: readonly AppShellFollowingGroup[];
 	loadingLabel: string;
 	errorLabel: string;
-	zonesLoading: boolean;
-	realmsLoading: boolean;
-	zonesError: boolean;
-	realmsError: boolean;
-	items: readonly AppShellFollowingItem[];
 }
 
 export interface AppShellSidebarLabels {
@@ -85,8 +93,35 @@ function isCurrentPath(currentPath: string, href: string) {
 	return href === "/" ? currentPath === href : currentPath.startsWith(href);
 }
 
+function isCurrentHref(currentPath: string, currentSearch: string, href: string) {
+	const [targetPath, targetSearch] = href.split("?", 2);
+	if (!targetPath) return false;
+	if (targetSearch === undefined) return isCurrentPath(currentPath, targetPath);
+	if (currentPath !== targetPath) return false;
+	const currentParameters = new URLSearchParams(currentSearch);
+	const targetParameters = new URLSearchParams(targetSearch);
+	for (const [key, value] of targetParameters)
+		if (currentParameters.get(key) !== value) return false;
+	return true;
+}
+
 function parseDesktopSidebarState(value: string | null): DesktopSidebarState | null {
 	return value === "expanded" || value === "collapsed" ? value : null;
+}
+
+function isFollowingGroupId(value: unknown): value is AppShellFollowingGroupId {
+	return typeof value === "string" && FollowingGroupIds.some((groupId) => groupId === value);
+}
+
+function parseFollowingGroupIds(value: string | null): AppShellFollowingGroupId[] | null {
+	if (!value) return null;
+	try {
+		const parsed: unknown = JSON.parse(value);
+		if (!Array.isArray(parsed)) return null;
+		return [...new Set(parsed.filter(isFollowingGroupId))];
+	} catch {
+		return null;
+	}
 }
 
 function useDesktopSidebarState() {
@@ -126,6 +161,44 @@ function useDesktopSidebarState() {
 	return { state, toggle } as const;
 }
 
+function useFollowingAccordionState() {
+	const [value, setValue] = useState<AppShellFollowingGroupId[]>([...FollowingGroupIds]);
+
+	useEffect(() => {
+		try {
+			const storedValue = parseFollowingGroupIds(
+				window.localStorage.getItem(FollowingAccordionPreferenceKey),
+			);
+			if (storedValue) setValue(storedValue);
+		} catch {
+			// The default expanded state remains usable when storage is unavailable.
+		}
+
+		const handleStorage = (event: StorageEvent) => {
+			if (event.key !== FollowingAccordionPreferenceKey) return;
+			const storedValue = parseFollowingGroupIds(event.newValue);
+			if (storedValue) setValue(storedValue);
+		};
+		window.addEventListener("storage", handleStorage);
+		return () => window.removeEventListener("storage", handleStorage);
+	}, []);
+
+	const update = useCallback((nextValue: readonly string[]) => {
+		const verifiedValue = nextValue.filter(isFollowingGroupId);
+		setValue(verifiedValue);
+		try {
+			window.localStorage.setItem(
+				FollowingAccordionPreferenceKey,
+				JSON.stringify(verifiedValue),
+			);
+		} catch {
+			// The in-memory accordion state still works for this visit.
+		}
+	}, []);
+
+	return { value, update } as const;
+}
+
 function FollowingMark({
 	item,
 	fallbackLabel,
@@ -142,94 +215,138 @@ function FollowingMark({
 	);
 }
 
-function FollowingGroup({
-	emptyLabel,
+function FollowingAccordionGroup({
+	currentPath,
+	currentSearch,
 	errorLabel,
 	fallbackLabel,
-	isLoading,
-	isError,
-	items,
-	label,
+	group,
 	link,
 	onNavigate,
 }: {
-	emptyLabel: string;
+	currentPath: string;
+	currentSearch: string;
 	errorLabel: string;
 	fallbackLabel: string;
-	isLoading: boolean;
-	isError: boolean;
-	items: readonly AppShellFollowingItem[];
-	label: string;
+	group: AppShellFollowingGroup;
 	link: ElementType;
 	onNavigate?: () => void;
 }) {
 	const Link = link;
+	const GroupIcon = group.icon;
+	const allActive = isCurrentHref(currentPath, currentSearch, group.allHref);
 	return (
-		<section aria-busy={isLoading} aria-label={label} className="grid gap-1">
-			<h2 className="px-3 pt-2 font-semibold text-muted-foreground text-xs">{label}</h2>
-			{isLoading ? (
-				<div aria-hidden className="grid gap-1 px-2 py-1">
-					<Skeleton className="h-9 rounded-lg" />
-					<Skeleton className="h-9 rounded-lg" />
-				</div>
-			) : items.length ? (
-				items.map((item) => (
+		<AccordionItem aria-busy={group.isLoading} className="border-0" value={group.id}>
+			<h2>
+				<AccordionTrigger
+					className={`${SidebarRowClassName} w-full py-0 font-semibold text-muted-foreground`}
+				>
+					<span className="flex min-w-0 items-center gap-3">
+						<GroupIcon aria-hidden className="size-[1.15rem] shrink-0" />
+						<span className="truncate">{group.label}</span>
+					</span>
+				</AccordionTrigger>
+			</h2>
+			<AccordionContent className="[&>div]:pb-1">
+				<div className="grid gap-1 pt-1">
 					<Link
-						className="flex min-h-10 min-w-0 items-center gap-3 rounded-lg px-3 text-sm transition-colors hover:bg-surface-hover focus-visible:bg-surface-hover"
-						href={item.href}
-						key={item.id}
+						aria-current={allActive ? "page" : undefined}
+						className={cn(
+							SidebarRowClassName,
+							"text-muted-foreground",
+							allActive && "bg-surface-selected text-foreground",
+						)}
+						href={group.allHref}
 						onClick={onNavigate}
 					>
-						<FollowingMark fallbackLabel={fallbackLabel} item={item} />
-						<span className="min-w-0 flex-1 truncate">{item.label}</span>
-						{item.favorite ? (
-							<Star
-								aria-hidden
-								className="size-3 fill-current text-muted-foreground"
-							/>
-						) : null}
+						<span className="grid size-8 shrink-0 place-items-center rounded-full bg-surface-selected">
+							<List aria-hidden className="size-4" />
+						</span>
+						<span className="min-w-0 flex-1 truncate">{group.allLabel}</span>
 					</Link>
-				))
-			) : isError ? (
-				<p className="px-3 py-2 text-destructive text-xs leading-5">{errorLabel}</p>
-			) : (
-				<p className="px-3 py-2 text-muted-foreground text-xs leading-5">{emptyLabel}</p>
-			)}
-		</section>
+
+					{group.isLoading ? (
+						<div aria-hidden className="grid gap-1 py-1">
+							<Skeleton className="h-10 rounded-lg" />
+							<Skeleton className="h-10 rounded-lg" />
+						</div>
+					) : group.items.length ? (
+						group.items.map((item) => {
+							const active = isCurrentHref(currentPath, currentSearch, item.href);
+							return (
+								<Link
+									aria-current={active ? "page" : undefined}
+									className={cn(
+										SidebarRowClassName,
+										active && "bg-surface-selected text-foreground",
+									)}
+									href={item.href}
+									key={item.id}
+									onClick={onNavigate}
+								>
+									<FollowingMark fallbackLabel={fallbackLabel} item={item} />
+									<span className="min-w-0 flex-1 truncate">{item.label}</span>
+									{item.favorite ? (
+										<Star
+											aria-hidden
+											className="size-3 fill-current text-muted-foreground"
+										/>
+									) : null}
+								</Link>
+							);
+						})
+					) : group.isError ? (
+						<p className="px-3 py-2 text-destructive text-xs leading-5">{errorLabel}</p>
+					) : (
+						<p className="px-3 py-2 text-muted-foreground text-xs leading-5">
+							{group.emptyLabel}
+						</p>
+					)}
+				</div>
+			</AccordionContent>
+		</AccordionItem>
 	);
 }
 
 function SidebarContents({
 	brandName,
 	currentPath,
+	currentSearch,
+	expandedFollowingGroups,
 	following,
 	link,
 	navigation,
 	navigationLabel,
+	onFollowingGroupsChange,
 	onNavigate,
 }: {
 	brandName: string;
 	currentPath: string;
+	currentSearch: string;
+	expandedFollowingGroups: AppShellFollowingGroupId[];
 	following?: AppShellFollowing;
 	link: ElementType;
 	navigation: readonly AppShellNavigationItem[];
 	navigationLabel: string;
+	onFollowingGroupsChange: (value: readonly string[]) => void;
 	onNavigate?: () => void;
 }) {
 	const Link = link;
-	const zones = following?.items.filter((item) => item.kind === "zone") ?? [];
-	const realms = following?.items.filter((item) => item.kind === "realm") ?? [];
 
 	return (
-		<ScrollArea className="min-h-0 flex-1" scrollFade>
+		<ScrollArea
+			className="min-h-0 flex-1 [&_[data-slot=scroll-area-scrollbar][data-orientation=horizontal]]:hidden [&_[data-slot=scroll-area-viewport]]:overflow-x-hidden"
+			scrollFade
+		>
 			<nav aria-label={navigationLabel} className="grid gap-1 p-3">
 				{navigation.map(({ href, label, icon: Icon }) => {
-					const active = isCurrentPath(currentPath, href);
+					const active = isCurrentHref(currentPath, currentSearch, href);
 					return (
 						<Link
 							aria-current={active ? "page" : undefined}
 							className={cn(
-								"flex min-h-10 min-w-0 items-center gap-3 rounded-lg px-3 font-medium text-muted-foreground text-sm transition-colors hover:bg-surface-hover hover:text-foreground",
+								SidebarRowClassName,
+								"font-medium text-muted-foreground",
 								active && "bg-surface-selected text-foreground",
 							)}
 							href={href}
@@ -245,43 +362,31 @@ function SidebarContents({
 
 			{following ? (
 				<>
-					<Separator className="mx-4 w-auto" />
+					<Separator className="mx-4 data-[orientation=horizontal]:w-auto" />
 					<p aria-live="polite" className="sr-only" role="status">
-						{following.zonesLoading || following.realmsLoading
+						{following.groups.some((group) => group.isLoading)
 							? following.loadingLabel
 							: null}
 					</p>
-					<div className="grid gap-2 px-3 py-2">
-						<FollowingGroup
-							emptyLabel={following.zonesEmptyLabel}
-							errorLabel={following.errorLabel}
-							fallbackLabel={brandName}
-							isLoading={following.zonesLoading}
-							isError={following.zonesError}
-							items={zones}
-							label={following.zonesLabel}
-							link={link}
-							onNavigate={onNavigate}
-						/>
-						<FollowingGroup
-							emptyLabel={following.realmsEmptyLabel}
-							errorLabel={following.errorLabel}
-							fallbackLabel={brandName}
-							isLoading={following.realmsLoading}
-							isError={following.realmsError}
-							items={realms}
-							label={following.realmsLabel}
-							link={link}
-							onNavigate={onNavigate}
-						/>
-						<Link
-							className="mt-1 flex min-h-9 items-center rounded-lg px-3 font-medium text-muted-foreground text-xs hover:bg-surface-hover hover:text-foreground"
-							href={following.manageHref}
-							onClick={onNavigate}
-						>
-							{following.manageLabel}
-						</Link>
-					</div>
+					<Accordion
+						className="grid gap-1 px-3 py-2"
+						multiple
+						onValueChange={({ value }) => onFollowingGroupsChange(value)}
+						value={expandedFollowingGroups}
+					>
+						{following.groups.map((group) => (
+							<FollowingAccordionGroup
+								currentPath={currentPath}
+								currentSearch={currentSearch}
+								errorLabel={following.errorLabel}
+								fallbackLabel={brandName}
+								group={group}
+								key={group.id}
+								link={link}
+								onNavigate={onNavigate}
+							/>
+						))}
+					</Accordion>
 				</>
 			) : null}
 		</ScrollArea>
@@ -294,6 +399,7 @@ export function AppShell({
 	navigation,
 	navigationLabel,
 	currentPath,
+	currentSearch = "",
 	link,
 	search,
 	sidebar,
@@ -309,6 +415,7 @@ export function AppShell({
 	navigation: readonly AppShellNavigationItem[];
 	navigationLabel: string;
 	currentPath: string;
+	currentSearch?: string;
 	link: ElementType;
 	search: { href: string; label: string; placeholder: string };
 	sidebar: AppShellSidebarLabels;
@@ -328,6 +435,8 @@ export function AppShell({
 	const CreateIcon = create?.icon;
 	const AccountIcon = account.icon;
 	const { state: desktopSidebarState, toggle: toggleDesktopSidebar } = useDesktopSidebarState();
+	const { value: expandedFollowingGroups, update: updateFollowingGroups } =
+		useFollowingAccordionState();
 	const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 	const desktopSidebarExpanded = desktopSidebarState === "expanded";
 
@@ -344,40 +453,22 @@ export function AppShell({
 		<div className="min-h-svh bg-background" data-sidebar-state={desktopSidebarState}>
 			<SkipNavLink id="main-content">{skipToContentLabel}</SkipNavLink>
 
-			<header className="sticky top-0 z-50 h-16 border-b border-border-weak bg-background/96 backdrop-blur-xl">
+			<header className="sticky top-0 z-50 h-14 border-b border-border-weak bg-background/96 backdrop-blur-xl">
 				<div className="flex h-full">
-					<div
-						className={cn(
-							"hidden shrink-0 items-center overflow-hidden border-e border-border-weak transition-[width] duration-200 ease-out md:flex motion-reduce:transition-none",
-							desktopSidebarExpanded ? "w-64" : "w-8",
-						)}
-					>
+					<div className="hidden w-64 shrink-0 items-center overflow-hidden md:flex">
 						<Link
 							aria-label={brandName}
-							className={cn(
-								"flex h-full min-w-0 items-center gap-2",
-								desktopSidebarExpanded ? "px-5" : "justify-center",
-							)}
+							className="flex h-full min-w-0 items-center px-5"
 							href="/"
 							title={brandName}
 						>
-							<Logo
-								alt=""
-								aria-hidden="true"
-								className={cn(
-									"shrink-0",
-									desktopSidebarExpanded ? "size-8" : "size-6",
-								)}
-							/>
-							{desktopSidebarExpanded ? (
-								<span className="truncate text-base font-black text-foreground tracking-[0.14em]">
-									{brandName}
-								</span>
-							) : null}
+							<span className="truncate font-black text-base text-primary tracking-[0.14em]">
+								{brandName}
+							</span>
 						</Link>
 					</div>
 
-					<div className="flex shrink-0 items-center gap-1 border-e border-border-weak px-2 md:hidden">
+					<div className="flex shrink-0 items-center gap-1 px-2 md:hidden">
 						<Button
 							aria-controls={MobileSidebarId}
 							aria-expanded={mobileSidebarOpen}
@@ -390,24 +481,26 @@ export function AppShell({
 						</Button>
 						<Link
 							aria-label={brandName}
-							className="grid size-10 place-items-center"
+							className="flex h-10 items-center px-1"
 							href="/"
 						>
-							<Logo alt="" aria-hidden="true" className="size-8" />
+							<span className="font-black text-primary text-sm tracking-[0.12em]">
+								{brandName}
+							</span>
 						</Link>
 					</div>
 
 					<div className="flex min-w-0 flex-1 items-center gap-1 px-2 sm:gap-2 sm:px-3 lg:px-5">
 						<form
 							action={search.href}
-							className="hidden min-w-40 max-w-xl flex-1 sm:block"
+							className="hidden min-w-40 max-w-2xl flex-1 sm:block"
 						>
 							<InputGroup
-								className="h-10 rounded-xl border-border-weak bg-surface-container shadow-none"
+								className="h-10 rounded-full border-border-weak bg-surface-container shadow-none"
 								size="lg"
 							>
 								<InputGroupAddon align="inline-start">
-									<Search aria-hidden />
+									<Logo alt="" aria-hidden="true" className="size-6" />
 								</InputGroupAddon>
 								<InputGroupInput
 									aria-label={search.label}
@@ -496,7 +589,7 @@ export function AppShell({
 			<aside
 				aria-label={sidebar.title}
 				className={cn(
-					"fixed inset-y-0 start-0 z-40 mt-16 hidden border-e border-border-weak bg-background transition-[width] duration-200 ease-out md:flex motion-reduce:transition-none",
+					"fixed inset-y-0 start-0 z-40 mt-14 hidden border-e border-border-weak bg-background transition-[width] duration-200 ease-out md:flex motion-reduce:transition-none",
 					desktopSidebarExpanded ? "w-64" : "w-8",
 				)}
 				id={DesktopSidebarId}
@@ -505,10 +598,13 @@ export function AppShell({
 					<SidebarContents
 						brandName={brandName}
 						currentPath={currentPath}
+						currentSearch={currentSearch}
+						expandedFollowingGroups={expandedFollowingGroups}
 						following={following}
 						link={link}
 						navigation={navigation}
 						navigationLabel={navigationLabel}
+						onFollowingGroupsChange={updateFollowingGroups}
 					/>
 				) : null}
 				<Button
@@ -534,8 +630,7 @@ export function AppShell({
 					showCloseButton={false}
 				>
 					<SheetHeader className="flex-row items-center gap-3 border-b border-border-weak p-4">
-						<Logo alt="" aria-hidden="true" className="size-8 shrink-0" />
-						<span className="truncate font-black text-base tracking-[0.14em]">
+						<span className="truncate font-black text-base text-primary tracking-[0.14em]">
 							{brandName}
 						</span>
 						<SheetTitle className="sr-only">{sidebar.title}</SheetTitle>
@@ -556,10 +651,13 @@ export function AppShell({
 					<SidebarContents
 						brandName={brandName}
 						currentPath={currentPath}
+						currentSearch={currentSearch}
+						expandedFollowingGroups={expandedFollowingGroups}
 						following={following}
 						link={link}
 						navigation={navigation}
 						navigationLabel={navigationLabel}
+						onFollowingGroupsChange={updateFollowingGroups}
 						onNavigate={() => setMobileSidebarOpen(false)}
 					/>
 				</SheetContent>
@@ -567,7 +665,7 @@ export function AppShell({
 
 			<SkipNavContent
 				className={cn(
-					"min-h-[calc(100svh-4rem)] transition-[margin-inline-start] duration-200 ease-out motion-reduce:transition-none",
+					"min-h-[calc(100svh-3.5rem)] transition-[margin-inline-start] duration-200 ease-out motion-reduce:transition-none",
 					desktopSidebarExpanded ? "md:ms-64" : "md:ms-8",
 				)}
 				id="main-content"

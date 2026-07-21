@@ -2,11 +2,24 @@ import {
 	GetApiUsersMeFollowingStatus200ItemsKindEnum,
 	type GetApiUsersMeFollowingStatus200ItemsKindEnum as FollowingKind,
 } from "@rezics/openapi-tanstack-query";
+import { parseAsStringLiteral } from "nuqs/server";
 
 import { profileHref } from "@/features/profiles/profile-route";
 import { realmHref, type AddressableUnit, zoneHref } from "@/features/slugs/unit-route";
+import { urlStateOptions } from "@/lib/search-params";
 
 export const FollowingKinds = Object.values(GetApiUsersMeFollowingStatus200ItemsKindEnum);
+export const AllFollowingKinds = "all" as const;
+export const FollowingFilters = [AllFollowingKinds, ...FollowingKinds] as const;
+export type FollowingFilter = (typeof FollowingFilters)[number];
+
+export const followingFilterParser = parseAsStringLiteral(FollowingFilters)
+	.withDefault(AllFollowingKinds)
+	.withOptions({ ...urlStateOptions, history: "push" });
+
+export function followingManagementHref(kind: FollowingFilter = AllFollowingKinds): string {
+	return kind === AllFollowingKinds ? "/me/following" : `/me/following?kind=${kind}`;
+}
 
 export function followingHref(
 	kind: FollowingKind,
