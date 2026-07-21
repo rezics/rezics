@@ -1,6 +1,6 @@
 "use client";
 
-import { List, Menu, Search, Star, X } from "lucide-react";
+import { List, Menu, Star, X } from "lucide-react";
 import { useCallback, useEffect, useState, type ElementType, type ReactNode } from "react";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
@@ -259,7 +259,7 @@ function FollowingAccordionGroup({
 						href={group.allHref}
 						onClick={onNavigate}
 					>
-						<span className="grid size-8 shrink-0 place-items-center rounded-full bg-surface-selected">
+						<span className="grid size-8 shrink-0 place-items-center">
 							<List aria-hidden className="size-4" />
 						</span>
 						<span className="min-w-0 flex-1 truncate">{group.allLabel}</span>
@@ -453,8 +453,8 @@ export function AppShell({
 		<div className="min-h-svh bg-background" data-sidebar-state={desktopSidebarState}>
 			<SkipNavLink id="main-content">{skipToContentLabel}</SkipNavLink>
 
-			<header className="sticky top-0 z-50 h-14 border-b border-border-weak bg-background/96 backdrop-blur-xl">
-				<div className="flex h-full">
+			<header className="sticky top-0 z-50 h-28 border-b border-border-weak bg-background/96 backdrop-blur-xl sm:h-14">
+				<div className="grid h-full grid-cols-[auto_1fr] grid-rows-[3.5rem_3.5rem] sm:flex">
 					<div className="hidden w-64 shrink-0 items-center overflow-hidden md:flex">
 						<Link
 							aria-label={brandName}
@@ -490,10 +490,10 @@ export function AppShell({
 						</Link>
 					</div>
 
-					<div className="flex min-w-0 flex-1 items-center gap-1 px-2 sm:gap-2 sm:px-3 lg:px-5">
+					<div className="contents sm:flex sm:min-w-0 sm:flex-1 sm:items-center sm:gap-2 sm:px-3 lg:px-5">
 						<form
 							action={search.href}
-							className="hidden min-w-40 max-w-2xl flex-1 sm:block"
+							className="col-span-2 row-start-2 mx-3 block min-w-0 self-center sm:mx-0 sm:min-w-40 sm:max-w-2xl sm:flex-1 xl:absolute xl:start-1/2 xl:top-1/2 xl:w-[38vw] xl:-translate-x-1/2 xl:-translate-y-1/2 2xl:w-[46vw]"
 						>
 							<InputGroup
 								className="h-10 rounded-full border-border-weak bg-surface-container shadow-none"
@@ -514,19 +514,7 @@ export function AppShell({
 							</InputGroup>
 						</form>
 
-						<Button
-							aria-label={search.label}
-							asChild
-							className="size-11 sm:hidden"
-							size="icon-xl"
-							variant="ghost"
-						>
-							<Link href={search.href} title={search.label}>
-								<Search aria-hidden />
-							</Link>
-						</Button>
-
-						<div className="ms-auto flex shrink-0 items-center gap-1 sm:gap-2">
+						<div className="ms-auto flex shrink-0 items-center gap-1 justify-self-end sm:gap-2 sm:justify-self-auto">
 							{create ? (
 								<Button
 									asChild
