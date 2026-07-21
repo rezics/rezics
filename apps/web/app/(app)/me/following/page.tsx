@@ -1,1 +1,1 @@
-export { FollowingPage as default } from "@/features/profiles/following-page";
+export { FollowingPage as default } from "@/features/following/following-page";

@@ -3,14 +3,12 @@
 import { toContentLanguage } from "@rezics/i18n";
 
 import {
-	useDeleteApiRealmsByRealmIdFollow,
 	useDeleteApiRealmsByRealmIdMembership,
 	useGetApiRealms,
 	useGetApiRealmsByRealmId,
 	useGetApiRealmsByRealmIdPins,
 	useGetApiRealmsByRealmIdRules,
 	usePostApiRealms,
-	usePutApiRealmsByRealmIdFollow,
 	usePutApiRealmsByRealmIdMembership,
 	type GetApiRealmsByRealmIdStatus200,
 } from "@rezics/openapi-tanstack-query";
@@ -34,6 +32,7 @@ import { Skeleton } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
+import { FollowButton } from "@/features/following/follow-button";
 import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetValue,
@@ -408,8 +407,6 @@ function RealmActions({
 	]);
 	const queryClient = useQueryClient();
 	const { data: session } = useHydratedSession();
-	const follow = usePutApiRealmsByRealmIdFollow();
-	const unfollow = useDeleteApiRealmsByRealmIdFollow();
 	const join = usePutApiRealmsByRealmIdMembership();
 	const leave = useDeleteApiRealmsByRealmIdMembership();
 	const membership = realm.viewerMembership;
@@ -422,21 +419,11 @@ function RealmActions({
 	return (
 		<div className="flex flex-col items-end gap-2">
 			<div className="flex flex-wrap justify-end gap-2">
-				<Button
-					variant="outline"
-					isLoading={follow.isPending || unfollow.isPending}
-					onClick={() => {
-						const mutation = realm.viewerFollowing ? unfollow : follow;
-						mutation.mutate(
-							{ path: { realmId: realm.id } },
-							{
-								onSuccess: () => invalidateRealmDetails(queryClient, realm.id),
-							},
-						);
-					}}
-				>
-					{realm.viewerFollowing ? t.realms.unfollow : t.realms.follow}
-				</Button>
+				<FollowButton
+					initialFollowing={realm.viewerFollowing}
+					onChanged={() => invalidateRealmDetails(queryClient, realm.id)}
+					unitId={realm.id}
+				/>
 				{!isRealmOwner(membership) && (
 					<Button
 						variant="outline"
@@ -475,7 +462,7 @@ function RealmActions({
 					</Button>
 				)}
 			</div>
-			<RequestFailure error={follow.error ?? unfollow.error ?? join.error ?? leave.error} />
+			<RequestFailure error={join.error ?? leave.error} />
 		</div>
 	);
 }

@@ -8,6 +8,7 @@ import { PaginationErrors } from "../pagination/errors";
 import { SearchErrors } from "../search/errors";
 import { UnitErrors } from "../units/errors";
 import { EntityErrors } from "../entities/errors";
+import { FollowingErrors } from "../following/errors";
 import { CatalogErrors } from "./catalog/errors";
 import { CollectionErrors } from "./collections/errors";
 import { ContentStructureErrors } from "./content-structure/errors";
@@ -55,6 +56,7 @@ export const ApiErrors = [
 	...AuthorizationErrors,
 	...UnitErrors,
 	...EntityErrors,
+	...FollowingErrors,
 	...ImageAssetErrors,
 	...TokenErrors,
 	...SearchErrors,

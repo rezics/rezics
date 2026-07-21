@@ -1,5 +1,6 @@
 import { hashPassword } from "better-auth/crypto";
 import { and, count, eq, inArray, isNull, sql } from "drizzle-orm";
+import { isDeepStrictEqual } from "node:util";
 
 import { database, type DatabaseTransaction } from "../database";
 import {
@@ -17,7 +18,8 @@ import {
 	users,
 	zone,
 } from "../database/schema";
-import { InitialFractionalPosition } from "../ordering/position";
+import type { ContentLanguage } from "../database/schema/contract-values";
+import { fractionalPositionAt } from "../ordering/position";
 import { insertUnit, insertUnitIfMissing } from "../units/create";
 import { recordUnitRevision } from "../units/history";
 import { type BootstrapCredentialMode, generateBootstrapPassword } from "./credentials";
@@ -66,7 +68,7 @@ function bootstrapEpoch(): Date {
 function valuesEqual(actual: unknown, expected: unknown): boolean {
 	if (actual instanceof Date && expected instanceof Date)
 		return actual.getTime() === expected.getTime();
-	return actual === expected;
+	return isDeepStrictEqual(actual, expected);
 }
 
 function assertFields(
@@ -199,18 +201,40 @@ async function ensureBootstrapAddressedUnit(
 	}
 
 	const createdAt = bootstrapEpoch();
-	const insertedAddress = await tx
-		.insert(unitSlugAddress)
-		.values({
+	const [canonicalAddress] = await tx
+		.select({
+			id: unitSlugAddress.id,
+			scopeUnitId: unitSlugAddress.scopeUnitId,
+			slug: unitSlugAddress.slug,
+		})
+		.from(unitSlugAddress)
+		.where(
+			and(eq(unitSlugAddress.kind, "canonical"), eq(unitSlugAddress.targetUnitId, input.id)),
+		)
+		.limit(1);
+	let addressChanged = false;
+	if (canonicalAddress) {
+		if (
+			canonicalAddress.scopeUnitId !== input.scopeUnitId ||
+			canonicalAddress.slug !== input.slug
+		) {
+			await tx
+				.update(unitSlugAddress)
+				.set({ scopeUnitId: input.scopeUnitId, slug: input.slug, updatedAt: createdAt })
+				.where(eq(unitSlugAddress.id, canonicalAddress.id));
+			addressChanged = true;
+		}
+	} else {
+		await tx.insert(unitSlugAddress).values({
 			kind: "canonical",
 			scopeUnitId: input.scopeUnitId,
 			slug: input.slug,
 			targetUnitId: input.id,
 			createdAt,
 			updatedAt: createdAt,
-		})
-		.onConflictDoNothing()
-		.returning({ id: unitSlugAddress.id });
+		});
+		addressChanged = true;
+	}
 	const [address] = await tx
 		.select({
 			kind: unitSlugAddress.kind,
@@ -229,28 +253,67 @@ async function ensureBootstrapAddressedUnit(
 		slug: input.slug,
 		targetUnitId: input.id,
 	});
-	return !existing || insertedAddress.length > 0;
+	return !existing || addressChanged;
 }
 
 async function ensureLocalization(
 	tx: DatabaseTransaction,
-	input: { readonly unitId: string; readonly title: string; readonly summary?: string },
+	input: {
+		readonly unitId: string;
+		readonly language: ContentLanguage;
+		readonly position: string;
+		readonly title: string;
+		readonly summary?: string;
+	},
 ): Promise<boolean> {
 	const createdAt = bootstrapEpoch();
-	const result = await tx
-		.insert(unitLocalization)
-		.values({
-			unitId: input.unitId,
-			language: "zh",
-			position: InitialFractionalPosition,
-			title: input.title,
-			summary: input.summary,
-			createdAt,
-			updatedAt: createdAt,
+	const [stored] = await tx
+		.select({
+			position: unitLocalization.position,
+			title: unitLocalization.title,
+			summary: unitLocalization.summary,
 		})
-		.onConflictDoNothing()
-		.returning({ unitId: unitLocalization.unitId });
-	return result.length > 0;
+		.from(unitLocalization)
+		.where(
+			and(
+				eq(unitLocalization.unitId, input.unitId),
+				eq(unitLocalization.language, input.language),
+			),
+		)
+		.limit(1);
+	if (
+		stored?.position === input.position &&
+		stored.title === input.title &&
+		stored.summary === (input.summary ?? null)
+	)
+		return false;
+	if (stored) {
+		await tx
+			.update(unitLocalization)
+			.set({
+				position: input.position,
+				title: input.title,
+				summary: input.summary,
+				updatedAt: createdAt,
+			})
+			.where(
+				and(
+					eq(unitLocalization.unitId, input.unitId),
+					eq(unitLocalization.language, input.language),
+				),
+			);
+		return true;
+	}
+	await tx.insert(unitLocalization).values({
+		unitId: input.unitId,
+		language: input.language,
+		position: input.position,
+		title: input.title,
+		summary: input.summary,
+		createdAt,
+		updatedAt: createdAt,
+	});
+	return true;
 }
 
 async function ensureOfficialProfiles(
@@ -371,11 +434,14 @@ async function ensureOfficialProfiles(
 			id: value.profileId,
 			authUserId: value.authUserId,
 		});
-		changed =
-			(await ensureLocalization(tx, {
-				unitId: value.profileId,
-				title: value.name,
-			})) || changed;
+		for (const [index, localization] of value.localizations.entries()) {
+			changed =
+				(await ensureLocalization(tx, {
+					unitId: value.profileId,
+					position: fractionalPositionAt(index),
+					...localization,
+				})) || changed;
+		}
 		const insertedPreference = await tx
 			.insert(profilePreference)
 			.values({ profileId: value.profileId, createdAt, updatedAt: createdAt })
@@ -459,12 +525,14 @@ async function ensureOfficialRealm(tx: DatabaseTransaction): Promise<void> {
 		.onConflictDoNothing()
 		.returning({ id: realm.id });
 	changed ||= insertedRealm.length > 0;
-	changed =
-		(await ensureLocalization(tx, {
-			unitId: value.id,
-			title: value.title,
-			summary: value.summary,
-		})) || changed;
+	for (const [index, localization] of value.localizations.entries()) {
+		changed =
+			(await ensureLocalization(tx, {
+				unitId: value.id,
+				position: fractionalPositionAt(index),
+				...localization,
+			})) || changed;
+	}
 	changed = (await ensureOwnerBinding(tx, value.id, value.ownerProfileId)) || changed;
 	for (const member of value.members) {
 		const insertedMember = await tx
@@ -510,36 +578,70 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 			scopeUnitId: TopLevelSlugNamespaceUnitIds.zones,
 			slug: value.slug,
 		});
-		const insertedZone = await tx
-			.insert(zone)
-			.values({
+		const [storedZone] = await tx
+			.select({
+				boundaryDocument: zone.boundaryDocument,
+				themeDocument: zone.themeDocument,
+			})
+			.from(zone)
+			.where(eq(zone.id, value.id))
+			.limit(1);
+		if (storedZone) {
+			if (
+				!valuesEqual(storedZone.boundaryDocument, value.boundaryDocument) ||
+				!valuesEqual(storedZone.themeDocument, value.themeDocument)
+			) {
+				await tx
+					.update(zone)
+					.set({
+						boundaryDocument: value.boundaryDocument,
+						themeDocument: value.themeDocument,
+						updatedAt: createdAt,
+					})
+					.where(eq(zone.id, value.id));
+				changed = true;
+			}
+		} else {
+			await tx.insert(zone).values({
 				id: value.id,
 				boundaryDocument: value.boundaryDocument,
 				themeDocument: value.themeDocument,
 				createdAt,
 				updatedAt: createdAt,
-			})
-			.onConflictDoNothing()
-			.returning({ id: zone.id });
-		changed ||= insertedZone.length > 0;
-		const insertedDock = await tx
-			.insert(unitDock)
-			.values({
+			});
+			changed = true;
+		}
+		const [storedDock] = await tx
+			.select({ document: unitDock.document })
+			.from(unitDock)
+			.where(and(eq(unitDock.unitId, value.id), eq(unitDock.surface, "main")))
+			.limit(1);
+		if (storedDock) {
+			if (!valuesEqual(storedDock.document, value.mainDockDocument)) {
+				await tx
+					.update(unitDock)
+					.set({ document: value.mainDockDocument, updatedAt: createdAt })
+					.where(and(eq(unitDock.unitId, value.id), eq(unitDock.surface, "main")));
+				changed = true;
+			}
+		} else {
+			await tx.insert(unitDock).values({
 				unitId: value.id,
 				surface: "main",
 				document: value.mainDockDocument,
 				createdAt,
 				updatedAt: createdAt,
-			})
-			.onConflictDoNothing()
-			.returning({ unitId: unitDock.unitId });
-		changed ||= insertedDock.length > 0;
-		changed =
-			(await ensureLocalization(tx, {
-				unitId: value.id,
-				title: value.title,
-				summary: value.summary,
-			})) || changed;
+			});
+			changed = true;
+		}
+		for (const [index, localization] of value.localizations.entries()) {
+			changed =
+				(await ensureLocalization(tx, {
+					unitId: value.id,
+					position: fractionalPositionAt(index),
+					...localization,
+				})) || changed;
+		}
 		changed = (await ensureOwnerBinding(tx, value.id, value.ownerProfileId)) || changed;
 		const insertedRealmUnit = await tx
 			.insert(realmUnit)
@@ -565,22 +667,71 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 }
 
 export async function isBootstrapReady(): Promise<boolean> {
+	const expectedAddresses = [
+		...SlugNamespaceManifest.map((namespace) => ({
+			targetUnitId: namespace.id,
+			scopeUnitId: null,
+			slug: namespace.slug,
+		})),
+		...OfficialProfileManifest.map((officialProfile) => ({
+			targetUnitId: officialProfile.profileId,
+			scopeUnitId: TopLevelSlugNamespaceUnitIds.users,
+			slug: officialProfile.slug,
+		})),
+		{
+			targetUnitId: OfficialRealmManifest.id,
+			scopeUnitId: TopLevelSlugNamespaceUnitIds.realms,
+			slug: OfficialRealmManifest.slug,
+		},
+		...OfficialZoneManifest.map((officialZone) => ({
+			targetUnitId: officialZone.id,
+			scopeUnitId: TopLevelSlugNamespaceUnitIds.zones,
+			slug: officialZone.slug,
+		})),
+	];
+	const expectedLocalizations = [
+		...OfficialProfileManifest.flatMap((officialProfile) =>
+			officialProfile.localizations.map((localization, index) => ({
+				unitId: officialProfile.profileId,
+				position: fractionalPositionAt(index),
+				summary: null,
+				...localization,
+			})),
+		),
+		...OfficialRealmManifest.localizations.map((localization, index) => ({
+			unitId: OfficialRealmManifest.id,
+			position: fractionalPositionAt(index),
+			...localization,
+		})),
+		...OfficialZoneManifest.flatMap((officialZone) =>
+			officialZone.localizations.map((localization, index) => ({
+				unitId: officialZone.id,
+				position: fractionalPositionAt(index),
+				...localization,
+			})),
+		),
+	];
 	const [
 		unitCount,
-		addressCount,
+		addresses,
 		userCount,
 		accountCount,
 		profileCount,
 		officialRealm,
 		officialZones,
 		officialZoneDocks,
+		localizations,
 	] = await Promise.all([
 		database
 			.select({ value: count() })
 			.from(unit)
 			.where(inArray(unit.id, [...BootstrapUnitIds])),
 		database
-			.select({ value: count() })
+			.select({
+				targetUnitId: unitSlugAddress.targetUnitId,
+				scopeUnitId: unitSlugAddress.scopeUnitId,
+				slug: unitSlugAddress.slug,
+			})
 			.from(unitSlugAddress)
 			.where(
 				and(
@@ -606,7 +757,11 @@ export async function isBootstrapReady(): Promise<boolean> {
 			.where(eq(realm.id, OfficialRealmManifest.id))
 			.limit(1),
 		database
-			.select({ id: zone.id })
+			.select({
+				id: zone.id,
+				boundaryDocument: zone.boundaryDocument,
+				themeDocument: zone.themeDocument,
+			})
 			.from(zone)
 			.where(
 				inArray(
@@ -615,7 +770,7 @@ export async function isBootstrapReady(): Promise<boolean> {
 				),
 			),
 		database
-			.select({ unitId: unitDock.unitId })
+			.select({ unitId: unitDock.unitId, document: unitDock.document })
 			.from(unitDock)
 			.where(
 				and(
@@ -626,16 +781,66 @@ export async function isBootstrapReady(): Promise<boolean> {
 					),
 				),
 			),
+		database
+			.select({
+				unitId: unitLocalization.unitId,
+				language: unitLocalization.language,
+				position: unitLocalization.position,
+				title: unitLocalization.title,
+				summary: unitLocalization.summary,
+			})
+			.from(unitLocalization)
+			.where(
+				inArray(unitLocalization.unitId, [
+					...OfficialProfileManifest.map((officialProfile) => officialProfile.profileId),
+					OfficialRealmManifest.id,
+					...OfficialZoneManifest.map((officialZone) => officialZone.id),
+				]),
+			),
 	]);
 	return (
 		unitCount[0]?.value === BootstrapUnitIds.length &&
-		addressCount[0]?.value === BootstrapUnitIds.length &&
+		addresses.length === expectedAddresses.length &&
+		expectedAddresses.every((expected) =>
+			addresses.some(
+				(actual) =>
+					actual.targetUnitId === expected.targetUnitId &&
+					actual.scopeUnitId === expected.scopeUnitId &&
+					actual.slug === expected.slug,
+			),
+		) &&
 		userCount[0]?.value === BootstrapAuthUserIds.length &&
 		accountCount[0]?.value === BootstrapAccountIds.length &&
 		profileCount[0]?.value === OfficialProfileIdValues.length &&
 		Boolean(officialRealm[0]) &&
 		officialZones.length === OfficialZoneManifest.length &&
-		officialZoneDocks.length === OfficialZoneManifest.length
+		OfficialZoneManifest.every((expected) =>
+			officialZones.some(
+				(actual) =>
+					actual.id === expected.id &&
+					valuesEqual(actual.boundaryDocument, expected.boundaryDocument) &&
+					valuesEqual(actual.themeDocument, expected.themeDocument),
+			),
+		) &&
+		officialZoneDocks.length === OfficialZoneManifest.length &&
+		OfficialZoneManifest.every((expected) =>
+			officialZoneDocks.some(
+				(actual) =>
+					actual.unitId === expected.id &&
+					valuesEqual(actual.document, expected.mainDockDocument),
+			),
+		) &&
+		localizations.length === expectedLocalizations.length &&
+		expectedLocalizations.every((expected) =>
+			localizations.some(
+				(actual) =>
+					actual.unitId === expected.unitId &&
+					actual.language === expected.language &&
+					actual.position === expected.position &&
+					actual.title === expected.title &&
+					actual.summary === expected.summary,
+			),
+		)
 	);
 }
 

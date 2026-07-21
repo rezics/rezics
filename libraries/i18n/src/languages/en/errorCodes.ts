@@ -33,6 +33,7 @@ export default {
 	UserNotFound: "This user could not be found.",
 	UserSelfFollowForbidden: "You cannot follow yourself.",
 	UserFollowBlocked: "Following is unavailable between blocked users.",
+	UnitNotFollowable: "This item cannot be followed.",
 	UserSelfBlockForbidden: "You cannot block yourself.",
 	SoftwareSystemRequirementSourceInvalid:
 		"The system-requirement source must belong to this software.",

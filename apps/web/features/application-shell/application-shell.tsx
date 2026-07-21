@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Bookmark, Compass, Plus, TrendingUp, UserRound, Users } from "lucide-react";
+import { Compass, Plus, UserRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { forwardRef, useEffect, type ComponentPropsWithoutRef, type ReactNode } from "react";
@@ -12,38 +12,15 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { AppShell as SharedAppShell } from "@rezics/ui";
-import { isUiLocale, toStoredUiLocale, toUiLocale } from "@rezics/i18n";
+import { isUiLocale, toContentLanguage, toStoredUiLocale, toUiLocale } from "@rezics/i18n";
 
 import { useAuthPortal } from "@/features/auth/auth-portal";
 import { useSetLocale, useTranslation } from "@/i18n/client";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
+import { isSidebarFollowingKind, sidebarFollowingHref } from "./sidebar-following";
 import { ThemeToggle } from "./theme-toggle";
 
-const Links = [
-	{ href: "/", key: "explore", icon: Compass },
-	{ href: "/units/book", key: "units", icon: BookOpen },
-	{ href: "/realms", key: "realm", icon: Users },
-	{ href: "/me/favorites", key: "favorites", icon: Bookmark },
-	{ href: "/me/progress", key: "progress", icon: TrendingUp },
-] as const;
-
-const SidebarFollowingKinds = ["zone", "realm", "profile"] as const;
-type SidebarFollowingKind = (typeof SidebarFollowingKinds)[number];
-
-function isSidebarFollowingKind(value: string): value is SidebarFollowingKind {
-	return SidebarFollowingKinds.some((kind) => kind === value);
-}
-
-function followingHref(kind: SidebarFollowingKind, id: string) {
-	switch (kind) {
-		case "zone":
-			return `/zones/${id}`;
-		case "realm":
-			return `/realms/${id}`;
-		case "profile":
-			return `/users/${id}`;
-	}
-}
+const Links = [{ href: "/", key: "explore", icon: Compass }] as const;
 
 type AppLinkProps = ComponentPropsWithoutRef<typeof Link>;
 
@@ -98,9 +75,15 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 	const { setLocale } = useSetLocale();
 	const queryClient = useQueryClient();
 	const preferences = useGetApiUsersMePreferences({ query: { enabled: Boolean(session) } });
-	const following = useGetApiUsersMeFollowing({
-		query: { enabled: Boolean(session) },
-	});
+	const followingLanguage = toContentLanguage(locale.target);
+	const followedZones = useGetApiUsersMeFollowing(
+		{ query: { kind: "zone", language: followingLanguage, limit: 50 } },
+		{ query: { enabled: Boolean(session) } },
+	);
+	const followedRealms = useGetApiUsersMeFollowing(
+		{ query: { kind: "realm", language: followingLanguage, limit: 50 } },
+		{ query: { enabled: Boolean(session) } },
+	);
 	const updatePreferences = usePutApiUsersMePreferences({
 		mutation: {
 			onSuccess: () =>
@@ -134,6 +117,14 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 			currentPath={pathname}
 			link={AppLink}
 			navigationLabel={t.nav.navigation}
+			sidebar={{
+				title: t.nav.sidebar.title,
+				description: t.nav.sidebar.description,
+				open: t.nav.sidebar.open,
+				close: t.nav.sidebar.close,
+				expand: t.nav.sidebar.expand,
+				collapse: t.nav.sidebar.collapse,
+			}}
 			search={{
 				href: "/search",
 				label: t.actions.search,
@@ -173,28 +164,40 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 				label: t.nav[key],
 				icon,
 			}))}
-			following={{
-				label: t.nav.following.title,
-				zonesLabel: t.nav.following.types.zone,
-				realmsLabel: t.nav.following.types.realm,
-				profilesLabel: t.nav.following.types.profile,
-				manageLabel: t.nav.following.manage,
-				manageHref: "/me/following",
-				emptyLabel: t.nav.following.empty,
-				items: (following.data?.items ?? []).flatMap((item) => {
-					if (!isSidebarFollowingKind(item.kind)) return [];
-					return [
-						{
-							id: item.id,
-							kind: item.kind,
-							href: followingHref(item.kind, item.id),
-							label: item.title ?? t.ui.unnamed,
-							imageUrl: item.avatar?.url ?? item.cover?.url,
-							favorite: item.favorite,
-						},
-					];
-				}),
-			}}
+			following={
+				session
+					? {
+							zonesLabel: t.nav.sidebar.zones,
+							realmsLabel: t.nav.sidebar.realms,
+							zonesEmptyLabel: t.nav.sidebar.zonesEmpty,
+							realmsEmptyLabel: t.nav.sidebar.realmsEmpty,
+							loadingLabel: t.nav.sidebar.loading,
+							errorLabel: t.nav.sidebar.error,
+							zonesLoading: followedZones.isPending,
+							realmsLoading: followedRealms.isPending,
+							zonesError: followedZones.isError,
+							realmsError: followedRealms.isError,
+							manageLabel: t.nav.following.manage,
+							manageHref: "/me/following",
+							items: [
+								...(followedZones.data?.items ?? []),
+								...(followedRealms.data?.items ?? []),
+							].flatMap((item) => {
+								if (!isSidebarFollowingKind(item.kind)) return [];
+								return [
+									{
+										id: item.id,
+										kind: item.kind,
+										href: sidebarFollowingHref(item.kind, item.id),
+										label: item.title ?? t.ui.unnamed,
+										imageUrl: item.avatar?.url ?? item.cover?.url,
+										favorite: item.favorite,
+									},
+								];
+							}),
+						}
+					: undefined
+			}
 			utilities={<ThemeToggle />}
 		>
 			{children}

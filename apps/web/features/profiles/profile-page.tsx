@@ -1,44 +1,20 @@
 "use client";
 
-import {
-	getApiUsersByIdQueryKey,
-	useDeleteApiUsersByIdFollow,
-	useGetApiUsersById,
-	useGetApiUsersMe,
-	usePutApiUsersByIdFollow,
-} from "@rezics/openapi-tanstack-query";
-import { useQueryClient } from "@tanstack/react-query";
+import { useGetApiUsersById, useGetApiUsersMe } from "@rezics/openapi-tanstack-query";
 
 import { PageHeading } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
-import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui";
+import { FollowButton } from "@/features/following/follow-button";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { useTranslation } from "@/i18n/client";
 
 export function ProfilePage({ id }: { id: string }) {
 	const { t } = useTranslation(["profiles", "ui"]);
-	const queryClient = useQueryClient();
 	const { data: session } = useHydratedSession();
 	const profile = useGetApiUsersById({ path: { id } });
 	const me = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
-	const follow = usePutApiUsersByIdFollow({
-		mutation: {
-			onSuccess: () =>
-				queryClient.invalidateQueries({
-					queryKey: getApiUsersByIdQueryKey({ path: { id } }),
-				}),
-		},
-	});
-	const unfollow = useDeleteApiUsersByIdFollow({
-		mutation: {
-			onSuccess: () =>
-				queryClient.invalidateQueries({
-					queryKey: getApiUsersByIdQueryKey({ path: { id } }),
-				}),
-		},
-	});
 	if (profile.isPending) return <QueryPending />;
 	if (profile.isError || !profile.data)
 		return <QueryFailure error={profile.error} retry={() => void profile.refetch()} />;
@@ -56,16 +32,11 @@ export function ProfilePage({ id }: { id: string }) {
 				description={user.summary ?? undefined}
 				action={
 					canFollow ? (
-						<Button
-							isLoading={follow.isPending || unfollow.isPending}
-							onClick={() =>
-								user.viewerFollowing
-									? unfollow.mutate({ path: { id: user.id } })
-									: follow.mutate({ path: { id: user.id } })
-							}
-						>
-							{user.viewerFollowing ? t.ui.followed : t.ui.follow}
-						</Button>
+						<FollowButton
+							initialFollowing={user.viewerFollowing}
+							onChanged={() => profile.refetch()}
+							unitId={user.id}
+						/>
 					) : undefined
 				}
 			/>

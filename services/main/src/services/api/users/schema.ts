@@ -3,7 +3,7 @@ import { Value } from "@sinclair/typebox/value";
 import { PortableTextDocument } from "@rezics/block";
 
 import { ContentRatingValues } from "../../database/schema/contract-values";
-import { ContentLanguage, FractionalPosition, StoredUiLocale, Uuid } from "../schema";
+import { ContentLanguage, FractionalPosition, StoredUiLocale, UnitKind, Uuid } from "../schema";
 
 export const CollectionConfigV1 = t.Object(
 	{
@@ -57,6 +57,14 @@ export type UserIdParams = Static<typeof UserIdParams>;
 
 export const FollowingUnitParams = t.Object({ unitId: Uuid });
 export type FollowingUnitParams = Static<typeof FollowingUnitParams>;
+
+export const FollowingListQuery = t.Object({
+	kind: t.Optional(UnitKind),
+	language: t.Optional(ContentLanguage),
+	cursor: t.Optional(t.String({ maxLength: 1_024 })),
+	limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 30 })),
+});
+export type FollowingListQuery = Static<typeof FollowingListQuery>;
 
 export const UpdateFollowingBody = t.Object(
 	{

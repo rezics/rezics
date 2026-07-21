@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, desc, eq, isNull, or } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 import Elysia from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -13,7 +13,6 @@ import {
 	profilePreference,
 	unitLocalization,
 } from "../../database/schema";
-import { createNotification, deliverNotificationEmail } from "../../notifications/service";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
@@ -22,6 +21,7 @@ import {
 	FollowResponse,
 	FollowingListResponse,
 	FollowingPreferenceResponse,
+	FollowingStatusResponse,
 	UserBlockListResponse,
 } from "../schema/action-response";
 import {
@@ -33,6 +33,7 @@ import {
 import {
 	ReplacePreferencesBody,
 	parseCollectionConfig,
+	FollowingListQuery,
 	FollowingUnitParams,
 	UpdateProfileBody,
 	UpdateFollowingBody,
@@ -40,15 +41,19 @@ import {
 	UserLookupParams,
 } from "./schema";
 import { getProfile, presentProfile, PublicProfileSelection } from "./service";
-import { presentImageAsset } from "../../units/service";
+import {
+	followUnit,
+	getFollowingStatus,
+	listFollowing,
+	unfollowUnit,
+	updateFollowingPresentation,
+} from "../../following/service";
 import {
 	PreferencesNotFound,
 	ProfileChanged,
 	ProfileNotFound,
-	UserFollowBlocked,
 	UserNotFound,
 	UserSelfBlockForbidden,
-	UserSelfFollowForbidden,
 } from "./errors";
 
 const ProfileNotFoundResponse = toApiErrorResponse(["ProfileNotFound"]);
@@ -57,41 +62,6 @@ const ProfileMutationNotFoundResponse = toApiErrorResponse([
 	"ImageAssetNotFound",
 ]);
 const UnitForbiddenResponse = toApiErrorResponse(["UnitProtected"]);
-const UserNotFoundResponse = toApiErrorResponse(["UnitNotFound", "UserNotFound"]);
-
-async function listFollowing(followerProfileId: string) {
-	const records = await database
-		.select({
-			id: unit.id,
-			kind: unit.kind,
-			title: unitLocalization.title,
-			avatarAssetId: unitLocalization.avatarAssetId,
-			coverAssetId: unitLocalization.coverAssetId,
-			position: unitFollow.position,
-			favorite: unitFollow.favorite,
-			createdAt: unitFollow.createdAt,
-			updatedAt: unitFollow.updatedAt,
-		})
-		.from(unitFollow)
-		.innerJoin(unit, eq(unit.id, unitFollow.unitId))
-		.leftJoin(
-			unitLocalization,
-			and(
-				eq(unitLocalization.unitId, unit.id),
-				isPrimaryUnitLocalization(unitLocalization.unitId),
-			),
-		)
-		.where(and(eq(unitFollow.followerProfileId, followerProfileId), isNull(unit.deletedAt)))
-		.orderBy(desc(unitFollow.favorite), unitFollow.position, unitFollow.unitId);
-	return {
-		items: records.map(({ avatarAssetId, coverAssetId, ...record }) => ({
-			...record,
-			avatar: presentImageAsset(avatarAssetId),
-			cover: presentImageAsset(coverAssetId),
-		})),
-	};
-}
-
 export default new Elysia({ prefix: "/users" })
 	.use(session)
 	.get(
@@ -253,36 +223,82 @@ export default new Elysia({ prefix: "/users" })
 			detail: { summary: "Replace current user preferences", tags: ["Users"] },
 		},
 	)
-	.get("/me/following", async ({ profile }) => listFollowing(profile.unitId), {
-		access: "interaction:read",
-		response: { [StatusCodes.OK]: FollowingListResponse },
-		detail: { summary: "List Units followed by the current user", tags: ["Users"] },
-	})
+	.get(
+		"/me/following",
+		async ({ profile, query }) =>
+			listFollowing({
+				followerProfileId: profile.unitId,
+				kind: query.kind,
+				language: query.language,
+				cursor: query.cursor,
+				limit: query.limit ?? 30,
+			}),
+		{
+			access: "interaction:read",
+			query: FollowingListQuery,
+			response: {
+				[StatusCodes.OK]: FollowingListResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidPaginationCursor"]),
+			},
+			detail: { summary: "List Units followed by the current user", tags: ["Users"] },
+		},
+	)
+	.get(
+		"/me/following/:unitId",
+		async ({ profile, authorization, params }) =>
+			getFollowingStatus({
+				followerProfileId: profile.unitId,
+				unitId: params.unitId,
+				authorization: authorization.unit,
+			}),
+		{
+			access: "interaction:read",
+			params: FollowingUnitParams,
+			response: {
+				[StatusCodes.OK]: FollowingStatusResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitNotFollowable"]),
+			},
+			detail: { summary: "Get current user's follow state for a Unit", tags: ["Users"] },
+		},
+	)
+	.put(
+		"/me/following/:unitId",
+		async ({ profile, authorization, params }) =>
+			followUnit({
+				followerProfileId: profile.unitId,
+				unitId: params.unitId,
+				authorization: authorization.unit,
+			}),
+		{
+			access: "contribute:interaction:write",
+			params: FollowingUnitParams,
+			response: {
+				[StatusCodes.OK]: FollowResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"UnitNotFollowable",
+					"UserSelfFollowForbidden",
+					"UserFollowBlocked",
+				]),
+			},
+			detail: { summary: "Follow a Unit", tags: ["Users"] },
+		},
+	)
+	.delete(
+		"/me/following/:unitId",
+		async ({ profile, params }) => unfollowUnit(profile.unitId, params.unitId),
+		{
+			access: "write:interaction:write",
+			params: FollowingUnitParams,
+			response: { [StatusCodes.OK]: FollowResponse },
+			detail: { summary: "Unfollow a Unit", tags: ["Users"] },
+		},
+	)
 	.patch(
 		"/me/following/:unitId",
-		async ({ profile, params, body }) => {
-			const [updated] = await database
-				.update(unitFollow)
-				.set({
-					...(body.favorite === undefined ? {} : { favorite: body.favorite }),
-					...(body.position === undefined ? {} : { position: body.position }),
-					updatedAt: new Date(),
-				})
-				.where(
-					and(
-						eq(unitFollow.followerProfileId, profile.unitId),
-						eq(unitFollow.unitId, params.unitId),
-					),
-				)
-				.returning({
-					unitId: unitFollow.unitId,
-					position: unitFollow.position,
-					favorite: unitFollow.favorite,
-					updatedAt: unitFollow.updatedAt,
-				});
-			if (!updated) throw new UnitNotFound("Follow");
-			return updated;
-		},
+		async ({ profile, params, body }) =>
+			updateFollowingPresentation(profile.unitId, params.unitId, body),
 		{
 			access: "write:interaction:write",
 			params: FollowingUnitParams,
@@ -344,86 +360,6 @@ export default new Elysia({ prefix: "/users" })
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UserNotFound"]),
 			},
 			detail: { summary: "Public user profile", tags: ["Users"] },
-		},
-	)
-	.put(
-		"/:id/follow",
-		async ({ profile, authorization, params }) => {
-			if (params.id === profile.unitId) throw new UserSelfFollowForbidden();
-			await authorization.unit.ensureCanRead(params.id, () => new UnitNotFound("User"));
-			const [target] = await database
-				.select({ id: unit.id })
-				.from(unit)
-				.where(and(eq(unit.id, params.id), eq(unit.kind, "profile")))
-				.limit(1);
-			if (!target) throw new UserNotFound();
-			const [blocked] = await database
-				.select({ id: profileBlock.blockedProfileId })
-				.from(profileBlock)
-				.where(
-					or(
-						and(
-							eq(profileBlock.blockerProfileId, profile.unitId),
-							eq(profileBlock.blockedProfileId, params.id),
-						),
-						and(
-							eq(profileBlock.blockerProfileId, params.id),
-							eq(profileBlock.blockedProfileId, profile.unitId),
-						),
-					),
-				)
-				.limit(1);
-			if (blocked) throw new UserFollowBlocked();
-			const notificationId = await database.transaction(async (tx) => {
-				const [inserted] = await tx
-					.insert(unitFollow)
-					.values({ followerProfileId: profile.unitId, unitId: params.id })
-					.onConflictDoNothing()
-					.returning({ id: unitFollow.unitId });
-				if (!inserted) return undefined;
-				return createNotification(tx, {
-					recipientProfileId: params.id,
-					actorProfileId: profile.unitId,
-					kind: "new_follower",
-					subjectUnitId: profile.unitId,
-					dedupeKey: `new-follower:${profile.unitId}`,
-				});
-			});
-			await deliverNotificationEmail(notificationId);
-			return { following: true };
-		},
-		{
-			access: "contribute:interaction:write",
-			params: UserIdParams,
-			response: {
-				[StatusCodes.OK]: FollowResponse,
-				[StatusCodes.NOT_FOUND]: UserNotFoundResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse([
-					"UserSelfFollowForbidden",
-					"UserFollowBlocked",
-				]),
-			},
-			detail: { summary: "Follow user", tags: ["Users"] },
-		},
-	)
-	.delete(
-		"/:id/follow",
-		async ({ profile, params }) => {
-			await database
-				.delete(unitFollow)
-				.where(
-					and(
-						eq(unitFollow.followerProfileId, profile.unitId),
-						eq(unitFollow.unitId, params.id),
-					),
-				);
-			return { following: false };
-		},
-		{
-			access: "write:interaction:write",
-			params: UserIdParams,
-			response: { [StatusCodes.OK]: FollowResponse },
-			detail: { summary: "Unfollow user", tags: ["Users"] },
 		},
 	)
 	.get(

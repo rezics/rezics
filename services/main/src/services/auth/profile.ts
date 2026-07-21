@@ -1,10 +1,19 @@
 import type { User } from "better-auth";
 import { and, eq } from "drizzle-orm";
 
+import { OfficialZoneManifest } from "../bootstrap/manifest";
 import { database } from "../database";
 import { isPrimaryUnitLocalization } from "../units/localization";
-import { profile, profilePreference, unit, unitLocalization, users } from "../database/schema";
+import {
+	profile,
+	profilePreference,
+	unit,
+	unitFollow,
+	unitLocalization,
+	users,
+} from "../database/schema";
 import { DefaultContentLanguage } from "../database/schema/contract-values";
+import { fractionalPositionAt } from "../ordering/position";
 import { recordUnitRevision } from "../units/history";
 import { insertUnit } from "../units/create";
 
@@ -59,6 +68,16 @@ export async function ensureProfile(authUser: Pick<User, "id" | "email" | "name"
 				title: authUser.name,
 			});
 			await tx.insert(profilePreference).values({ profileId: profileUnit.id });
+			await tx
+				.insert(unitFollow)
+				.values(
+					OfficialZoneManifest.map((officialZone, index) => ({
+						followerProfileId: profileUnit.id,
+						unitId: officialZone.id,
+						position: fractionalPositionAt(index),
+					})),
+				)
+				.onConflictDoNothing();
 			await recordUnitRevision(tx, {
 				unitId: profileUnit.id,
 				actorProfileId: profileUnit.id,

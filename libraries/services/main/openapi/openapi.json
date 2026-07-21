@@ -14522,6 +14522,9 @@
 					"EntityAssociationProposalConflict",
 					"EntityAssociationProposalExpired",
 					"EntityAssociationProposalExpiryInvalid",
+					"UnitNotFollowable",
+					"UserSelfFollowForbidden",
+					"UserFollowBlocked",
 					"ImageAssetNotFound",
 					"ImageAssetUploadNotFound",
 					"ImageAssetUnsupportedType",
@@ -14537,8 +14540,6 @@
 					"ProfileChanged",
 					"PreferencesNotFound",
 					"UserNotFound",
-					"UserSelfFollowForbidden",
-					"UserFollowBlocked",
 					"UserSelfBlockForbidden",
 					"SoftwareSystemRequirementSourceInvalid",
 					"SeriesReleaseNotFound",
@@ -37911,121 +37912,6 @@
 				"operationId": "postApiZones"
 			}
 		},
-		"/api/zones/{zoneId}/follow": {
-			"put": {
-				"summary": "Follow Zone",
-				"tags": ["Zones"],
-				"parameters": [
-					{
-						"name": "zoneId",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["following"],
-									"properties": { "following": { "type": "boolean" } }
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitNotFound",
-													"type": "string",
-													"enum": ["UnitNotFound"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"operationId": "putApiZonesByZoneIdFollow"
-			},
-			"delete": {
-				"summary": "Unfollow Zone",
-				"tags": ["Zones"],
-				"parameters": [
-					{
-						"name": "zoneId",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["following"],
-									"properties": { "following": { "type": "boolean" } }
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"operationId": "deleteApiZonesByZoneIdFollow"
-			}
-		},
 		"/api/software/{softwareId}/system-requirements": {
 			"get": {
 				"summary": "List Software system requirements",
@@ -40773,6 +40659,59 @@
 			"get": {
 				"summary": "List Units followed by the current user",
 				"tags": ["Users"],
+				"parameters": [
+					{
+						"name": "kind",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"slug_namespace",
+								"profile",
+								"book",
+								"software",
+								"media",
+								"release",
+								"entity",
+								"tag",
+								"series",
+								"zone",
+								"collection",
+								"post",
+								"poll",
+								"realm",
+								"realm_rule"
+							]
+						}
+					},
+					{
+						"name": "language",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "string", "enum": ["zh", "en"] }
+					},
+					{
+						"name": "cursor",
+						"in": "query",
+						"required": false,
+						"schema": { "maxLength": 1024, "type": "string" }
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"minimum": 1,
+							"maximum": 100,
+							"default": 30,
+							"anyOf": [
+								{ "format": "integer", "default": 0, "type": "string" },
+								{ "minimum": 1, "maximum": 100, "default": 30, "type": "integer" }
+							]
+						}
+					}
+				],
 				"responses": {
 					"200": {
 						"description": "Response for status 200",
@@ -40780,7 +40719,7 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["items"],
+									"required": ["items", "nextCursor"],
 									"properties": {
 										"items": {
 											"type": "array",
@@ -40789,6 +40728,7 @@
 												"required": [
 													"id",
 													"kind",
+													"language",
 													"title",
 													"avatar",
 													"cover",
@@ -40817,6 +40757,24 @@
 															"poll",
 															"realm",
 															"realm_rule"
+														]
+													},
+													"language": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"anyOf": [
+																	{
+																		"const": "zh",
+																		"type": "string"
+																	},
+																	{
+																		"const": "en",
+																		"type": "string"
+																	}
+																]
+															},
+															{ "type": "null" }
 														]
 													},
 													"title": {
@@ -40877,9 +40835,48 @@
 													}
 												}
 											}
+										},
+										"nextCursor": {
+											"nullable": true,
+											"anyOf": [{ "type": "string" }, { "type": "null" }]
 										}
 									}
 								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "InvalidPaginationCursor",
+													"type": "string",
+													"enum": ["InvalidPaginationCursor"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
 							}
 						}
 					},
@@ -40896,6 +40893,269 @@
 			}
 		},
 		"/api/users/me/following/{unitId}": {
+			"get": {
+				"summary": "Get current user's follow state for a Unit",
+				"tags": ["Users"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"type": "object",
+											"required": ["following", "favorite", "position"],
+											"properties": {
+												"following": { "const": true, "type": "boolean" },
+												"favorite": { "type": "boolean" },
+												"position": {
+													"format": "fractional-position",
+													"minLength": 2,
+													"maxLength": 512,
+													"type": "string"
+												}
+											}
+										},
+										{
+											"type": "object",
+											"required": ["following", "favorite", "position"],
+											"properties": {
+												"following": { "const": false, "type": "boolean" },
+												"favorite": { "type": "null" },
+												"position": { "type": "null" }
+											}
+										}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFollowable",
+													"type": "string",
+													"enum": ["UnitNotFollowable"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiUsersMeFollowingByUnitId"
+			},
+			"put": {
+				"summary": "Follow a Unit",
+				"tags": ["Users"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["following"],
+									"properties": { "following": { "type": "boolean" } }
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFollowable",
+													"type": "string",
+													"enum": [
+														"UnitNotFollowable",
+														"UserSelfFollowForbidden",
+														"UserFollowBlocked"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiUsersMeFollowingByUnitId"
+			},
+			"delete": {
+				"summary": "Unfollow a Unit",
+				"tags": ["Users"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["following"],
+									"properties": { "following": { "type": "boolean" } }
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "deleteApiUsersMeFollowingByUnitId"
+			},
 			"patch": {
 				"summary": "Update followed Unit presentation",
 				"tags": ["Users"],
@@ -41428,151 +41688,6 @@
 					}
 				},
 				"operationId": "getApiUsersById"
-			}
-		},
-		"/api/users/{id}/follow": {
-			"put": {
-				"summary": "Follow user",
-				"tags": ["Users"],
-				"parameters": [
-					{
-						"name": "id",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["following"],
-									"properties": { "following": { "type": "boolean" } }
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UnitNotFound",
-													"type": "string",
-													"enum": ["UnitNotFound", "UserNotFound"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"409": {
-						"description": "Response for status 409",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "UserSelfFollowForbidden",
-													"type": "string",
-													"enum": [
-														"UserSelfFollowForbidden",
-														"UserFollowBlocked"
-													]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"operationId": "putApiUsersByIdFollow"
-			},
-			"delete": {
-				"summary": "Unfollow user",
-				"tags": ["Users"],
-				"parameters": [
-					{
-						"name": "id",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["following"],
-									"properties": { "following": { "type": "boolean" } }
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"operationId": "deleteApiUsersByIdFollow"
 			}
 		},
 		"/api/users/me/blocks": {
@@ -78200,121 +78315,6 @@
 					}
 				],
 				"operationId": "deleteApiRealmsByRealmIdScore-context"
-			}
-		},
-		"/api/realms/{realmId}/follow": {
-			"put": {
-				"summary": "Follow Realm",
-				"tags": ["Realms"],
-				"parameters": [
-					{
-						"name": "realmId",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["following"],
-									"properties": { "following": { "type": "boolean" } }
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Response for status 404",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["error", "requestId"],
-									"properties": {
-										"error": {
-											"type": "object",
-											"required": ["code", "message"],
-											"properties": {
-												"code": {
-													"default": "RealmNotFound",
-													"type": "string",
-													"enum": ["RealmNotFound"]
-												},
-												"message": { "type": "string" },
-												"details": {}
-											}
-										},
-										"requestId": { "type": "string" }
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"operationId": "putApiRealmsByRealmIdFollow"
-			},
-			"delete": {
-				"summary": "Unfollow Realm",
-				"tags": ["Realms"],
-				"parameters": [
-					{
-						"name": "realmId",
-						"in": "path",
-						"required": true,
-						"schema": { "format": "uuid", "type": "string" }
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "Response for status 200",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"required": ["following"],
-									"properties": { "following": { "type": "boolean" } }
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Request validation failed",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
-							}
-						}
-					},
-					"500": {
-						"description": "Unexpected internal failure",
-						"content": {
-							"application/json": {
-								"schema": { "$ref": "#/components/schemas/InternalError" }
-							}
-						}
-					}
-				},
-				"operationId": "deleteApiRealmsByRealmIdFollow"
 			}
 		},
 		"/api/realms/{realmId}/membership": {

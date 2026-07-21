@@ -171,10 +171,6 @@ import type {
 	DeleteApiSeriesBySeriesIdReleasesByReleaseIdResponses,
 	PostApiZonesOptions,
 	PostApiZonesResponses,
-	PutApiZonesByZoneIdFollowOptions,
-	PutApiZonesByZoneIdFollowResponses,
-	DeleteApiZonesByZoneIdFollowOptions,
-	DeleteApiZonesByZoneIdFollowResponses,
 	GetApiSoftwareBySoftwareIdSystemRequirementsOptions,
 	GetApiSoftwareBySoftwareIdSystemRequirementsResponses,
 	PostApiSoftwareBySoftwareIdSystemRequirementsOptions,
@@ -201,14 +197,16 @@ import type {
 	PutApiUsersMePreferencesResponses,
 	GetApiUsersMeFollowingOptions,
 	GetApiUsersMeFollowingResponses,
+	GetApiUsersMeFollowingByUnitIdOptions,
+	GetApiUsersMeFollowingByUnitIdResponses,
+	PutApiUsersMeFollowingByUnitIdOptions,
+	PutApiUsersMeFollowingByUnitIdResponses,
+	DeleteApiUsersMeFollowingByUnitIdOptions,
+	DeleteApiUsersMeFollowingByUnitIdResponses,
 	PatchApiUsersMeFollowingByUnitIdOptions,
 	PatchApiUsersMeFollowingByUnitIdResponses,
 	GetApiUsersByIdOptions,
 	GetApiUsersByIdResponses,
-	PutApiUsersByIdFollowOptions,
-	PutApiUsersByIdFollowResponses,
-	DeleteApiUsersByIdFollowOptions,
-	DeleteApiUsersByIdFollowResponses,
 	GetApiUsersMeBlocksOptions,
 	GetApiUsersMeBlocksResponses,
 	PutApiUsersByIdBlockOptions,
@@ -429,10 +427,6 @@ import type {
 	PutApiRealmsByRealmIdScoreContextResponses,
 	DeleteApiRealmsByRealmIdScoreContextOptions,
 	DeleteApiRealmsByRealmIdScoreContextResponses,
-	PutApiRealmsByRealmIdFollowOptions,
-	PutApiRealmsByRealmIdFollowResponses,
-	DeleteApiRealmsByRealmIdFollowOptions,
-	DeleteApiRealmsByRealmIdFollowResponses,
 	PutApiRealmsByRealmIdMembershipOptions,
 	PutApiRealmsByRealmIdMembershipResponses,
 	DeleteApiRealmsByRealmIdMembershipOptions,
@@ -1914,34 +1908,6 @@ export function postApiZones<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary Follow Zone
- * {@link /api/zones/:zoneId/follow}
- */
-export function putApiZonesByZoneIdFollow<ThrowOnError extends boolean = true>(
-	options: Options<PutApiZonesByZoneIdFollowOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiZonesByZoneIdFollowResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({ method: "PUT", url: "/api/zones/{zoneId}/follow", ...config }) as Promise<
-		RequestResult<PutApiZonesByZoneIdFollowResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary Unfollow Zone
- * {@link /api/zones/:zoneId/follow}
- */
-export function deleteApiZonesByZoneIdFollow<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiZonesByZoneIdFollowOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiZonesByZoneIdFollowResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({ method: "DELETE", url: "/api/zones/{zoneId}/follow", ...config }) as Promise<
-		RequestResult<DeleteApiZonesByZoneIdFollowResponses, ThrowOnError>
-	>;
-}
-
-/**
  * @summary List Software system requirements
  * {@link /api/software/:softwareId/system-requirements}
  */
@@ -2172,6 +2138,54 @@ export function getApiUsersMeFollowing<ThrowOnError extends boolean = true>(
 }
 
 /**
+ * @summary Get current user's follow state for a Unit
+ * {@link /api/users/me/following/:unitId}
+ */
+export function getApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUsersMeFollowingByUnitIdOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUsersMeFollowingByUnitIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/users/me/following/{unitId}",
+		...config,
+	}) as Promise<RequestResult<GetApiUsersMeFollowingByUnitIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Follow a Unit
+ * {@link /api/users/me/following/:unitId}
+ */
+export function putApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = true>(
+	options: Options<PutApiUsersMeFollowingByUnitIdOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiUsersMeFollowingByUnitIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/users/me/following/{unitId}",
+		...config,
+	}) as Promise<RequestResult<PutApiUsersMeFollowingByUnitIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Unfollow a Unit
+ * {@link /api/users/me/following/:unitId}
+ */
+export function deleteApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiUsersMeFollowingByUnitIdOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiUsersMeFollowingByUnitIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/users/me/following/{unitId}",
+		...config,
+	}) as Promise<RequestResult<DeleteApiUsersMeFollowingByUnitIdResponses, ThrowOnError>>;
+}
+
+/**
  * @summary Update followed Unit presentation
  * {@link /api/users/me/following/:unitId}
  */
@@ -2198,34 +2212,6 @@ export function getApiUsersById<ThrowOnError extends boolean = true>(
 
 	return request({ method: "GET", url: "/api/users/{id}", ...config }) as Promise<
 		RequestResult<GetApiUsersByIdResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary Follow user
- * {@link /api/users/:id/follow}
- */
-export function putApiUsersByIdFollow<ThrowOnError extends boolean = true>(
-	options: Options<PutApiUsersByIdFollowOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiUsersByIdFollowResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({ method: "PUT", url: "/api/users/{id}/follow", ...config }) as Promise<
-		RequestResult<PutApiUsersByIdFollowResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary Unfollow user
- * {@link /api/users/:id/follow}
- */
-export function deleteApiUsersByIdFollow<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiUsersByIdFollowOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiUsersByIdFollowResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({ method: "DELETE", url: "/api/users/{id}/follow", ...config }) as Promise<
-		RequestResult<DeleteApiUsersByIdFollowResponses, ThrowOnError>
 	>;
 }
 
@@ -4002,34 +3988,6 @@ export function deleteApiRealmsByRealmIdScoreContext<ThrowOnError extends boolea
 		url: "/api/realms/{realmId}/score-context",
 		...config,
 	}) as Promise<RequestResult<DeleteApiRealmsByRealmIdScoreContextResponses, ThrowOnError>>;
-}
-
-/**
- * @summary Follow Realm
- * {@link /api/realms/:realmId/follow}
- */
-export function putApiRealmsByRealmIdFollow<ThrowOnError extends boolean = true>(
-	options: Options<PutApiRealmsByRealmIdFollowOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiRealmsByRealmIdFollowResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({ method: "PUT", url: "/api/realms/{realmId}/follow", ...config }) as Promise<
-		RequestResult<PutApiRealmsByRealmIdFollowResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary Unfollow Realm
- * {@link /api/realms/:realmId/follow}
- */
-export function deleteApiRealmsByRealmIdFollow<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiRealmsByRealmIdFollowOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiRealmsByRealmIdFollowResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({ method: "DELETE", url: "/api/realms/{realmId}/follow", ...config }) as Promise<
-		RequestResult<DeleteApiRealmsByRealmIdFollowResponses, ThrowOnError>
-	>;
 }
 
 /**

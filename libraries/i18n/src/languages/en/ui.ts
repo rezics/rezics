@@ -20,6 +20,7 @@ export default {
 	favorite: "Favorite",
 	follow: "Follow",
 	followed: "Following",
+	unfollow: "Unfollow",
 	join: "Join",
 	upvote: "Upvote",
 	startTracking: "Start tracking",

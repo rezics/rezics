@@ -5,6 +5,7 @@ import { toContentLanguage } from "@rezics/i18n";
 import { useGetApiZonesByZoneId } from "@rezics/openapi-tanstack-query";
 
 import { Avatar, AvatarFallback, AvatarImage, Cover, QueryFailure, QueryPending } from "@rezics/ui";
+import { FollowButton } from "@/features/following/follow-button";
 import { useTranslation } from "@/i18n/client";
 import { selectLocalization } from "@/lib/localization";
 
@@ -38,12 +39,12 @@ export function ZonePage({ id }: { id: string }) {
 						<img alt="" className="size-full object-cover" src={banner.url} />
 					</div>
 				) : null}
-				<div className="mt-5 flex min-w-0 items-end gap-4">
+				<div className="mt-5 flex min-w-0 flex-wrap items-end gap-4">
 					<Avatar className="size-16 shrink-0 ring-4 ring-background sm:size-20">
 						{avatar ? <AvatarImage alt="" src={avatar.url} /> : null}
 						<AvatarFallback>{title.slice(0, 1).toUpperCase()}</AvatarFallback>
 					</Avatar>
-					<div className="min-w-0">
+					<div className="min-w-0 flex-1">
 						<p className="mb-1 font-semibold text-muted-foreground text-xs uppercase tracking-[0.14em]">
 							{t.ui.zone}
 						</p>
@@ -56,6 +57,7 @@ export function ZonePage({ id }: { id: string }) {
 							</p>
 						) : null}
 					</div>
+					<FollowButton className="shrink-0" unitId={zone.id} />
 				</div>
 			</header>
 

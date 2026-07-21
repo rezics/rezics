@@ -48,7 +48,6 @@ import { transitionUnitStatus } from "../../units/status";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
 import { presentImageAsset } from "../../units/service";
 import {
-	FollowResponse,
 	IdResponse,
 	MembershipResponse,
 	NoContentResponse,
@@ -553,46 +552,6 @@ export default new Elysia({ prefix: "/realms" })
 				[StatusCodes.NOT_FOUND]: RealmMutationNotFoundResponse,
 			},
 			detail: { summary: "Update Realm", tags: ["Realms"] },
-		},
-	)
-	.put(
-		"/:realmId/follow",
-		async ({ params, profile, request }) => {
-			await ensureRealmVisible(params.realmId, request.headers);
-			await database
-				.insert(unitFollow)
-				.values({ followerProfileId: profile.unitId, unitId: params.realmId })
-				.onConflictDoNothing();
-			return { following: true };
-		},
-		{
-			access: "write:interaction:write",
-			params: RealmParams,
-			response: {
-				[StatusCodes.OK]: FollowResponse,
-				[StatusCodes.NOT_FOUND]: RealmNotFoundResponse,
-			},
-			detail: { summary: "Follow Realm", tags: ["Realms"] },
-		},
-	)
-	.delete(
-		"/:realmId/follow",
-		async ({ params, profile }) => {
-			await database
-				.delete(unitFollow)
-				.where(
-					and(
-						eq(unitFollow.followerProfileId, profile.unitId),
-						eq(unitFollow.unitId, params.realmId),
-					),
-				);
-			return { following: false };
-		},
-		{
-			access: "write:interaction:write",
-			params: RealmParams,
-			response: { [StatusCodes.OK]: FollowResponse },
-			detail: { summary: "Unfollow Realm", tags: ["Realms"] },
 		},
 	)
 	.put(

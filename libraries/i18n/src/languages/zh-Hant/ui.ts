@@ -20,6 +20,7 @@ export default {
 	favorite: "收藏",
 	follow: "追蹤",
 	followed: "追蹤中",
+	unfollow: "取消追蹤",
 	join: "加入",
 	upvote: "贊成",
 	startTracking: "開始記錄",

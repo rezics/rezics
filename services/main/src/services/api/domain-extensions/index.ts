@@ -36,7 +36,6 @@ import {
 	zoneNavigation,
 	zonePage,
 	unitDock,
-	unitFollow,
 } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import type { DatabaseTransaction } from "../../database";
@@ -49,7 +48,7 @@ import {
 } from "../../units/localization";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
 import { presentImageAsset } from "../../units/service";
-import { FollowResponse, IdResponse, NoContentResponse } from "../schema/action-response";
+import { IdResponse, NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
 import {
 	CreateSeriesBody,
@@ -1011,90 +1010,45 @@ export default new Elysia()
 			),
 	)
 	.group("/zones", (app) =>
-		app
-			.post(
-				"",
-				async ({ profile, body }) => {
-					const startsAt = body.startsAt ? new Date(body.startsAt) : null;
-					const endsAt = body.endsAt ? new Date(body.endsAt) : null;
-					if (startsAt && endsAt && endsAt <= startsAt) throw new ZoneTimeRangeInvalid();
-					const id = await database.transaction(async (tx) => {
-						const unitId = await createBaseUnit(tx, {
-							kind: "zone",
-							localization: body.localization,
-							ownerId: profile.unitId,
-						});
-						await tx.insert(zone).values({
-							id: unitId,
-							boundaryDocument: body.boundaryDocument,
-							themeDocument: body.themeDocument,
-							startsAt,
-							endsAt,
-						});
-						await recordUnitRevision(tx, {
-							unitId,
-							actorProfileId: profile.unitId,
-							event: "create",
-						});
-						return unitId;
+		app.post(
+			"",
+			async ({ profile, body }) => {
+				const startsAt = body.startsAt ? new Date(body.startsAt) : null;
+				const endsAt = body.endsAt ? new Date(body.endsAt) : null;
+				if (startsAt && endsAt && endsAt <= startsAt) throw new ZoneTimeRangeInvalid();
+				const id = await database.transaction(async (tx) => {
+					const unitId = await createBaseUnit(tx, {
+						kind: "zone",
+						localization: body.localization,
+						ownerId: profile.unitId,
 					});
-					return { id };
+					await tx.insert(zone).values({
+						id: unitId,
+						boundaryDocument: body.boundaryDocument,
+						themeDocument: body.themeDocument,
+						startsAt,
+						endsAt,
+					});
+					await recordUnitRevision(tx, {
+						unitId,
+						actorProfileId: profile.unitId,
+						event: "create",
+					});
+					return unitId;
+				});
+				return { id };
+			},
+			{
+				access: "contribute:unit:create",
+				body: CreateZoneBody,
+				response: {
+					[StatusCodes.OK]: IdResponse,
+					[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ZoneTimeRangeInvalid"]),
+					[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
 				},
-				{
-					access: "contribute:unit:create",
-					body: CreateZoneBody,
-					response: {
-						[StatusCodes.OK]: IdResponse,
-						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ZoneTimeRangeInvalid"]),
-						[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
-					},
-					detail: { summary: "Create Zone", tags: ["Zones"] },
-				},
-			)
-			.put(
-				"/:zoneId/follow",
-				async ({ params, profile, authorization }) => {
-					await authorization.unit.ensureCanRead(
-						params.zoneId,
-						() => new UnitNotFound("Zone"),
-					);
-					await getZone(params.zoneId);
-					await database
-						.insert(unitFollow)
-						.values({ followerProfileId: profile.unitId, unitId: params.zoneId })
-						.onConflictDoNothing();
-					return { following: true };
-				},
-				{
-					access: "write:unit:update",
-					params: ZoneParams,
-					response: {
-						[StatusCodes.OK]: FollowResponse,
-						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-					},
-					detail: { summary: "Follow Zone", tags: ["Zones"] },
-				},
-			)
-			.delete(
-				"/:zoneId/follow",
-				async ({ params, profile }) => {
-					await database
-						.delete(unitFollow)
-						.where(
-							and(
-								eq(unitFollow.followerProfileId, profile.unitId),
-								eq(unitFollow.unitId, params.zoneId),
-							),
-						);
-					return { following: false };
-				},
-				{
-					access: "write:unit:delete",
-					params: ZoneParams,
-					response: { [StatusCodes.OK]: FollowResponse },
-					detail: { summary: "Unfollow Zone", tags: ["Zones"] },
-				},
-			),
+				detail: { summary: "Create Zone", tags: ["Zones"] },
+			},
+		),
 	)
 	.group("/software", (app) =>
 		app

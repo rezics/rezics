@@ -29,11 +29,24 @@ export const ReactionResponse = t.Object({ reaction: t.Nullable(t.String()) });
 export const PollVoteResponse = t.Object({ optionIds: t.Array(Uuid) });
 
 export const FollowResponse = t.Object({ following: t.Boolean() });
+export const FollowingStatusResponse = t.Union([
+	t.Object({
+		following: t.Literal(true),
+		favorite: t.Boolean(),
+		position: FractionalPosition,
+	}),
+	t.Object({
+		following: t.Literal(false),
+		favorite: t.Null(),
+		position: t.Null(),
+	}),
+]);
 export const FollowingListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			id: Uuid,
 			kind: UnitKind,
+			language: t.Nullable(ContentLanguage),
 			title: t.Nullable(t.String()),
 			avatar: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
 			cover: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
@@ -43,6 +56,7 @@ export const FollowingListResponse = t.Object({
 			updatedAt: DateTime,
 		}),
 	),
+	nextCursor: t.Nullable(t.String()),
 });
 export const FollowingPreferenceResponse = t.Object({
 	unitId: Uuid,

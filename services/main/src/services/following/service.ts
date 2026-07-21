@@ -1,0 +1,232 @@
+import { and, desc, eq, gt, or } from "drizzle-orm";
+import type { ContentLanguage } from "@rezics/i18n";
+
+import type { UnitAuthorization } from "../authorization/unit/authorization";
+import { getUnitReadCondition } from "../authorization/unit/query";
+import { database } from "../database";
+import { profile, profileBlock, realm, unit, unitFollow, zone } from "../database/schema";
+import type { UnitKind } from "../database/schema/contract-values";
+import { createNotification, deliverNotificationEmail } from "../notifications/service";
+import { UnitNotFound } from "../units/errors";
+import {
+	resolvedUnitLocalizationImageAssetId,
+	resolvedUnitLocalizationLanguage,
+	resolvedUnitLocalizationTitle,
+} from "../units/localization";
+import { presentImageAsset } from "../units/service";
+import {
+	decodeFollowingCursor,
+	encodeFollowingCursor,
+	type FollowingCursorBoundary,
+} from "./cursor";
+import { UnitNotFollowable, UserFollowBlocked, UserSelfFollowForbidden } from "./errors";
+import { isFollowableUnitKind, type FollowableUnitKind } from "./policy";
+
+type FollowTarget = {
+	readonly id: string;
+	readonly kind: FollowableUnitKind;
+};
+
+type ListFollowingInput = {
+	readonly followerProfileId: string;
+	readonly kind?: UnitKind;
+	readonly language?: ContentLanguage;
+	readonly cursor?: string;
+	readonly limit: number;
+};
+
+function followingCursorCondition(cursor: FollowingCursorBoundary | undefined) {
+	if (!cursor) return undefined;
+	const sameFavoriteAfterCursor = and(
+		eq(unitFollow.favorite, cursor.favorite),
+		or(
+			gt(unitFollow.position, cursor.position),
+			and(eq(unitFollow.position, cursor.position), gt(unitFollow.unitId, cursor.unitId)),
+		),
+	);
+	return cursor.favorite
+		? or(eq(unitFollow.favorite, false), sameFavoriteAfterCursor)
+		: sameFavoriteAfterCursor;
+}
+
+export async function listFollowing(input: ListFollowingInput) {
+	const cursor = decodeFollowingCursor(input.cursor, input.kind, input.language);
+	const rows = await database
+		.select({
+			id: unit.id,
+			kind: unit.kind,
+			language: resolvedUnitLocalizationLanguage(unit.id, input.language),
+			title: resolvedUnitLocalizationTitle(unit.id, input.language),
+			avatarAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "avatar", input.language),
+			coverAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "cover", input.language),
+			position: unitFollow.position,
+			favorite: unitFollow.favorite,
+			createdAt: unitFollow.createdAt,
+			updatedAt: unitFollow.updatedAt,
+		})
+		.from(unitFollow)
+		.innerJoin(unit, eq(unit.id, unitFollow.unitId))
+		.where(
+			and(
+				eq(unitFollow.followerProfileId, input.followerProfileId),
+				input.kind ? eq(unit.kind, input.kind) : undefined,
+				getUnitReadCondition(input.followerProfileId),
+				followingCursorCondition(cursor),
+			),
+		)
+		.orderBy(desc(unitFollow.favorite), unitFollow.position, unitFollow.unitId)
+		.limit(input.limit + 1);
+
+	const items = rows.slice(0, input.limit);
+	const last = items.at(-1);
+	return {
+		items: items.map(({ avatarAssetId, coverAssetId, ...record }) => ({
+			...record,
+			avatar: presentImageAsset(avatarAssetId),
+			cover: presentImageAsset(coverAssetId),
+		})),
+		nextCursor:
+			rows.length > input.limit && last
+				? encodeFollowingCursor(input.kind, input.language, {
+						favorite: last.favorite,
+						position: last.position,
+						unitId: last.id,
+					})
+				: null,
+	};
+}
+
+async function resolveFollowTarget(
+	unitId: string,
+	authorization: UnitAuthorization<string>,
+): Promise<FollowTarget> {
+	await authorization.ensureCanRead(unitId, () => new UnitNotFound());
+	const [target] = await database
+		.select({
+			id: unit.id,
+			kind: unit.kind,
+			profileId: profile.id,
+			zoneId: zone.id,
+			realmId: realm.id,
+		})
+		.from(unit)
+		.leftJoin(profile, eq(profile.id, unit.id))
+		.leftJoin(zone, eq(zone.id, unit.id))
+		.leftJoin(realm, eq(realm.id, unit.id))
+		.where(eq(unit.id, unitId))
+		.limit(1);
+	if (!target) throw new UnitNotFound();
+	if (!isFollowableUnitKind(target.kind)) throw new UnitNotFollowable();
+
+	const extensionId =
+		target.kind === "profile"
+			? target.profileId
+			: target.kind === "zone"
+				? target.zoneId
+				: target.realmId;
+	if (!extensionId) throw new UnitNotFound();
+	return { id: target.id, kind: target.kind };
+}
+
+export async function followUnit(input: {
+	readonly followerProfileId: string;
+	readonly unitId: string;
+	readonly authorization: UnitAuthorization<string>;
+}) {
+	const target = await resolveFollowTarget(input.unitId, input.authorization);
+	if (target.kind === "profile" && target.id === input.followerProfileId)
+		throw new UserSelfFollowForbidden();
+
+	const notificationId = await database.transaction(async (tx) => {
+		if (target.kind === "profile") {
+			const [blocked] = await tx
+				.select({ id: profileBlock.blockedProfileId })
+				.from(profileBlock)
+				.where(
+					or(
+						and(
+							eq(profileBlock.blockerProfileId, input.followerProfileId),
+							eq(profileBlock.blockedProfileId, target.id),
+						),
+						and(
+							eq(profileBlock.blockerProfileId, target.id),
+							eq(profileBlock.blockedProfileId, input.followerProfileId),
+						),
+					),
+				)
+				.limit(1);
+			if (blocked) throw new UserFollowBlocked();
+		}
+
+		const [inserted] = await tx
+			.insert(unitFollow)
+			.values({ followerProfileId: input.followerProfileId, unitId: target.id })
+			.onConflictDoNothing()
+			.returning({ id: unitFollow.unitId });
+		if (!inserted || target.kind !== "profile") return undefined;
+		return createNotification(tx, {
+			recipientProfileId: target.id,
+			actorProfileId: input.followerProfileId,
+			kind: "new_follower",
+			subjectUnitId: input.followerProfileId,
+			dedupeKey: `new-follower:${input.followerProfileId}`,
+		});
+	});
+	await deliverNotificationEmail(notificationId);
+	return { following: true as const };
+}
+
+export async function unfollowUnit(followerProfileId: string, unitId: string) {
+	await database
+		.delete(unitFollow)
+		.where(
+			and(eq(unitFollow.followerProfileId, followerProfileId), eq(unitFollow.unitId, unitId)),
+		);
+	return { following: false as const };
+}
+
+export async function getFollowingStatus(input: {
+	readonly followerProfileId: string;
+	readonly unitId: string;
+	readonly authorization: UnitAuthorization<string>;
+}) {
+	const target = await resolveFollowTarget(input.unitId, input.authorization);
+	const [record] = await database
+		.select({ favorite: unitFollow.favorite, position: unitFollow.position })
+		.from(unitFollow)
+		.where(
+			and(
+				eq(unitFollow.followerProfileId, input.followerProfileId),
+				eq(unitFollow.unitId, target.id),
+			),
+		)
+		.limit(1);
+	return record
+		? { following: true as const, favorite: record.favorite, position: record.position }
+		: { following: false as const, favorite: null, position: null };
+}
+
+export async function updateFollowingPresentation(
+	followerProfileId: string,
+	unitId: string,
+	input: { readonly favorite?: boolean; readonly position?: string },
+) {
+	const [updated] = await database
+		.update(unitFollow)
+		.set({
+			...(input.favorite === undefined ? {} : { favorite: input.favorite }),
+			...(input.position === undefined ? {} : { position: input.position }),
+			updatedAt: new Date(),
+		})
+		.where(
+			and(eq(unitFollow.followerProfileId, followerProfileId), eq(unitFollow.unitId, unitId)),
+		)
+		.returning({
+			unitId: unitFollow.unitId,
+			position: unitFollow.position,
+			favorite: unitFollow.favorite,
+			updatedAt: unitFollow.updatedAt,
+		});
+	if (!updated) throw new UnitNotFound("Follow");
+	return updated;
+}

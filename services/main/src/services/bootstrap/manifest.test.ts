@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 
 import { generateBootstrapPassword, parseBootstrapCredentialMode } from "./credentials";
 import {
 	assertBootstrapManifest,
 	BootstrapEpochUnixMilliseconds,
 	OfficialProfileManifest,
+	OfficialRealmManifest,
 	OfficialZoneManifest,
 	ReservedBootstrapUuidv7s,
 	SlugNamespaceManifest,
@@ -43,15 +45,100 @@ describe("database bootstrap manifest", () => {
 			expect(value).toHaveProperty("profileId");
 			expect(value).not.toHaveProperty("official");
 			expect(value).not.toHaveProperty("password");
+			expect(value.localizations.map((localization) => localization.language)).toEqual([
+				"zh",
+				"en",
+			]);
 		}
 	});
 
-	it("bootstraps several official discovery Zones", () => {
+	it("bootstraps the official libraries and Popular as ordinary Zones", () => {
 		expect(OfficialZoneManifest.map((value) => value.slug)).toEqual([
-			"discover",
-			"communities",
-			"collections",
+			"book",
+			"media",
+			"software",
+			"realms",
+			"zones",
+			"popular",
 		]);
+		expect(
+			OfficialZoneManifest.map((value) =>
+				value.localizations.map(({ language, title }) => ({ language, title })),
+			),
+		).toEqual([
+			[
+				{ language: "zh", title: "書庫" },
+				{ language: "en", title: "Book Library" },
+			],
+			[
+				{ language: "zh", title: "媒體庫" },
+				{ language: "en", title: "Media Library" },
+			],
+			[
+				{ language: "zh", title: "軟體庫" },
+				{ language: "en", title: "Software Library" },
+			],
+			[
+				{ language: "zh", title: "領域庫" },
+				{ language: "en", title: "Realm Library" },
+			],
+			[
+				{ language: "zh", title: "專區庫" },
+				{ language: "en", title: "Zone Library" },
+			],
+			[
+				{ language: "zh", title: "熱門" },
+				{ language: "en", title: "Popular" },
+			],
+		]);
+		expect(OfficialZoneManifest.slice(0, 3).map((value) => value.boundaryDocument)).toEqual([
+			expect.objectContaining({
+				categories: ["units"],
+				filters: [{ field: "type", operator: "equals", value: "book" }],
+			}),
+			expect.objectContaining({
+				categories: ["units"],
+				filters: [{ field: "type", operator: "equals", value: "media" }],
+			}),
+			expect.objectContaining({
+				categories: ["units"],
+				filters: [{ field: "type", operator: "equals", value: "software" }],
+			}),
+		]);
+		expect(OfficialZoneManifest.slice(3).map((value) => value.boundaryDocument)).toEqual([
+			expect.objectContaining({ categories: ["realms"], filters: [] }),
+			expect.objectContaining({
+				categories: ["units"],
+				filters: [{ field: "type", operator: "equals", value: "zone" }],
+			}),
+			expect.objectContaining({
+				categories: [
+					"units",
+					"users",
+					"entity",
+					"tags",
+					"posts",
+					"realms",
+					"collections",
+					"reviews",
+					"polls",
+				],
+				filters: [],
+			}),
+		]);
+		for (const value of OfficialZoneManifest) {
+			expect(value).not.toHaveProperty("official");
+		}
+	});
+
+	it("uses the REZICS title without making the official Realm a Zone default", () => {
+		expect(OfficialRealmManifest.localizations).toEqual([
+			expect.objectContaining({ language: "zh", title: verbatimTerms.rezics.value }),
+			expect.objectContaining({ language: "en", title: verbatimTerms.rezics.value }),
+		]);
+		expect(OfficialZoneManifest.map((value) => value.id)).not.toContain(
+			OfficialRealmManifest.id,
+		);
 	});
 
 	it("generates high-entropy URL-safe passwords without persisting them in the manifest", () => {

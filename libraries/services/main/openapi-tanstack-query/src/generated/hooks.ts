@@ -492,15 +492,6 @@ import type {
 	PostApiZonesStatus404,
 	PostApiZonesStatus422,
 	PostApiZonesStatus500,
-	PutApiZonesByZoneIdFollowOptions,
-	PutApiZonesByZoneIdFollowStatus200,
-	PutApiZonesByZoneIdFollowStatus404,
-	PutApiZonesByZoneIdFollowStatus422,
-	PutApiZonesByZoneIdFollowStatus500,
-	DeleteApiZonesByZoneIdFollowOptions,
-	DeleteApiZonesByZoneIdFollowStatus200,
-	DeleteApiZonesByZoneIdFollowStatus422,
-	DeleteApiZonesByZoneIdFollowStatus500,
 	GetApiSoftwareBySoftwareIdSystemRequirementsOptions,
 	GetApiSoftwareBySoftwareIdSystemRequirementsStatus200,
 	GetApiSoftwareBySoftwareIdSystemRequirementsStatus404,
@@ -571,8 +562,27 @@ import type {
 	PutApiUsersMePreferencesStatus404,
 	PutApiUsersMePreferencesStatus422,
 	PutApiUsersMePreferencesStatus500,
+	GetApiUsersMeFollowingOptions,
 	GetApiUsersMeFollowingStatus200,
+	GetApiUsersMeFollowingStatus400,
+	GetApiUsersMeFollowingStatus422,
 	GetApiUsersMeFollowingStatus500,
+	GetApiUsersMeFollowingByUnitIdOptions,
+	GetApiUsersMeFollowingByUnitIdStatus200,
+	GetApiUsersMeFollowingByUnitIdStatus404,
+	GetApiUsersMeFollowingByUnitIdStatus409,
+	GetApiUsersMeFollowingByUnitIdStatus422,
+	GetApiUsersMeFollowingByUnitIdStatus500,
+	PutApiUsersMeFollowingByUnitIdOptions,
+	PutApiUsersMeFollowingByUnitIdStatus200,
+	PutApiUsersMeFollowingByUnitIdStatus404,
+	PutApiUsersMeFollowingByUnitIdStatus409,
+	PutApiUsersMeFollowingByUnitIdStatus422,
+	PutApiUsersMeFollowingByUnitIdStatus500,
+	DeleteApiUsersMeFollowingByUnitIdOptions,
+	DeleteApiUsersMeFollowingByUnitIdStatus200,
+	DeleteApiUsersMeFollowingByUnitIdStatus422,
+	DeleteApiUsersMeFollowingByUnitIdStatus500,
 	PatchApiUsersMeFollowingByUnitIdOptions,
 	PatchApiUsersMeFollowingByUnitIdStatus200,
 	PatchApiUsersMeFollowingByUnitIdStatus404,
@@ -583,16 +593,6 @@ import type {
 	GetApiUsersByIdStatus404,
 	GetApiUsersByIdStatus422,
 	GetApiUsersByIdStatus500,
-	PutApiUsersByIdFollowOptions,
-	PutApiUsersByIdFollowStatus200,
-	PutApiUsersByIdFollowStatus404,
-	PutApiUsersByIdFollowStatus409,
-	PutApiUsersByIdFollowStatus422,
-	PutApiUsersByIdFollowStatus500,
-	DeleteApiUsersByIdFollowOptions,
-	DeleteApiUsersByIdFollowStatus200,
-	DeleteApiUsersByIdFollowStatus422,
-	DeleteApiUsersByIdFollowStatus500,
 	GetApiUsersMeBlocksStatus200,
 	GetApiUsersMeBlocksStatus500,
 	PutApiUsersByIdBlockOptions,
@@ -1206,15 +1206,6 @@ import type {
 	DeleteApiRealmsByRealmIdScoreContextStatus403,
 	DeleteApiRealmsByRealmIdScoreContextStatus422,
 	DeleteApiRealmsByRealmIdScoreContextStatus500,
-	PutApiRealmsByRealmIdFollowOptions,
-	PutApiRealmsByRealmIdFollowStatus200,
-	PutApiRealmsByRealmIdFollowStatus404,
-	PutApiRealmsByRealmIdFollowStatus422,
-	PutApiRealmsByRealmIdFollowStatus500,
-	DeleteApiRealmsByRealmIdFollowOptions,
-	DeleteApiRealmsByRealmIdFollowStatus200,
-	DeleteApiRealmsByRealmIdFollowStatus422,
-	DeleteApiRealmsByRealmIdFollowStatus500,
 	PutApiRealmsByRealmIdMembershipOptions,
 	PutApiRealmsByRealmIdMembershipStatus200,
 	PutApiRealmsByRealmIdMembershipStatus403,
@@ -1464,8 +1455,6 @@ import {
 	putApiSeriesBySeriesIdReleasesByReleaseId,
 	deleteApiSeriesBySeriesIdReleasesByReleaseId,
 	postApiZones,
-	putApiZonesByZoneIdFollow,
-	deleteApiZonesByZoneIdFollow,
 	getApiSoftwareBySoftwareIdSystemRequirements,
 	postApiSoftwareBySoftwareIdSystemRequirements,
 	putApiSoftwareBySoftwareIdSystemRequirementsByRequirementId,
@@ -1479,10 +1468,11 @@ import {
 	getApiUsersMePreferences,
 	putApiUsersMePreferences,
 	getApiUsersMeFollowing,
+	getApiUsersMeFollowingByUnitId,
+	putApiUsersMeFollowingByUnitId,
+	deleteApiUsersMeFollowingByUnitId,
 	patchApiUsersMeFollowingByUnitId,
 	getApiUsersById,
-	putApiUsersByIdFollow,
-	deleteApiUsersByIdFollow,
 	getApiUsersMeBlocks,
 	putApiUsersByIdBlock,
 	deleteApiUsersByIdBlock,
@@ -1593,8 +1583,6 @@ import {
 	getApiRealmsByRealmIdScoreContext,
 	putApiRealmsByRealmIdScoreContext,
 	deleteApiRealmsByRealmIdScoreContext,
-	putApiRealmsByRealmIdFollow,
-	deleteApiRealmsByRealmIdFollow,
 	putApiRealmsByRealmIdMembership,
 	deleteApiRealmsByRealmIdMembership,
 	getApiRealmsByRealmIdMembers,
@@ -9630,178 +9618,6 @@ export function usePostApiZones<TContext>(
 	>;
 }
 
-export const putApiZonesByZoneIdFollowMutationKey = () =>
-	[{ url: "/api/zones/:zoneId/follow" }] as const;
-
-export function putApiZonesByZoneIdFollowMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = putApiZonesByZoneIdFollowMutationKey();
-	return mutationOptions<
-		PutApiZonesByZoneIdFollowStatus200,
-		ResponseErrorConfig<
-			| PutApiZonesByZoneIdFollowStatus404
-			| PutApiZonesByZoneIdFollowStatus422
-			| PutApiZonesByZoneIdFollowStatus500
-		>,
-		PutApiZonesByZoneIdFollowOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path }) => {
-			const { data } = await putApiZonesByZoneIdFollow({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Follow Zone
- * {@link /api/zones/:zoneId/follow}
- */
-export function usePutApiZonesByZoneIdFollow<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PutApiZonesByZoneIdFollowStatus200,
-			ResponseErrorConfig<
-				| PutApiZonesByZoneIdFollowStatus404
-				| PutApiZonesByZoneIdFollowStatus422
-				| PutApiZonesByZoneIdFollowStatus500
-			>,
-			PutApiZonesByZoneIdFollowOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? putApiZonesByZoneIdFollowMutationKey();
-
-	const baseOptions = putApiZonesByZoneIdFollowMutationOptions(config) as UseMutationOptions<
-		PutApiZonesByZoneIdFollowStatus200,
-		ResponseErrorConfig<
-			| PutApiZonesByZoneIdFollowStatus404
-			| PutApiZonesByZoneIdFollowStatus422
-			| PutApiZonesByZoneIdFollowStatus500
-		>,
-		PutApiZonesByZoneIdFollowOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PutApiZonesByZoneIdFollowStatus200,
-		ResponseErrorConfig<
-			| PutApiZonesByZoneIdFollowStatus404
-			| PutApiZonesByZoneIdFollowStatus422
-			| PutApiZonesByZoneIdFollowStatus500
-		>,
-		PutApiZonesByZoneIdFollowOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PutApiZonesByZoneIdFollowStatus200,
-		ResponseErrorConfig<
-			| PutApiZonesByZoneIdFollowStatus404
-			| PutApiZonesByZoneIdFollowStatus422
-			| PutApiZonesByZoneIdFollowStatus500
-		>,
-		PutApiZonesByZoneIdFollowOptions,
-		TContext
-	>;
-}
-
-export const deleteApiZonesByZoneIdFollowMutationKey = () =>
-	[{ url: "/api/zones/:zoneId/follow" }] as const;
-
-export function deleteApiZonesByZoneIdFollowMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = deleteApiZonesByZoneIdFollowMutationKey();
-	return mutationOptions<
-		DeleteApiZonesByZoneIdFollowStatus200,
-		ResponseErrorConfig<
-			DeleteApiZonesByZoneIdFollowStatus422 | DeleteApiZonesByZoneIdFollowStatus500
-		>,
-		DeleteApiZonesByZoneIdFollowOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiZonesByZoneIdFollow({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Unfollow Zone
- * {@link /api/zones/:zoneId/follow}
- */
-export function useDeleteApiZonesByZoneIdFollow<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			DeleteApiZonesByZoneIdFollowStatus200,
-			ResponseErrorConfig<
-				DeleteApiZonesByZoneIdFollowStatus422 | DeleteApiZonesByZoneIdFollowStatus500
-			>,
-			DeleteApiZonesByZoneIdFollowOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? deleteApiZonesByZoneIdFollowMutationKey();
-
-	const baseOptions = deleteApiZonesByZoneIdFollowMutationOptions(config) as UseMutationOptions<
-		DeleteApiZonesByZoneIdFollowStatus200,
-		ResponseErrorConfig<
-			DeleteApiZonesByZoneIdFollowStatus422 | DeleteApiZonesByZoneIdFollowStatus500
-		>,
-		DeleteApiZonesByZoneIdFollowOptions,
-		TContext
-	>;
-
-	return useMutation<
-		DeleteApiZonesByZoneIdFollowStatus200,
-		ResponseErrorConfig<
-			DeleteApiZonesByZoneIdFollowStatus422 | DeleteApiZonesByZoneIdFollowStatus500
-		>,
-		DeleteApiZonesByZoneIdFollowOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		DeleteApiZonesByZoneIdFollowStatus200,
-		ResponseErrorConfig<
-			DeleteApiZonesByZoneIdFollowStatus422 | DeleteApiZonesByZoneIdFollowStatus500
-		>,
-		DeleteApiZonesByZoneIdFollowOptions,
-		TContext
-	>;
-}
-
 export const getApiSoftwareBySoftwareIdSystemRequirementsQueryKey = ({
 	path,
 }: Omit<GetApiSoftwareBySoftwareIdSystemRequirementsOptions, "headers">) =>
@@ -10952,17 +10768,25 @@ export function usePutApiUsersMePreferences<TContext>(
 	>;
 }
 
-export const getApiUsersMeFollowingQueryKey = () => [{ url: "/api/users/me/following" }] as const;
+export const getApiUsersMeFollowingQueryKey = ({
+	query,
+}: Omit<GetApiUsersMeFollowingOptions, "headers"> = {}) =>
+	[{ url: "/api/users/me/following" }, ...(query ? [query] : [])] as const;
 
 type GetApiUsersMeFollowingQueryKey = ReturnType<typeof getApiUsersMeFollowingQueryKey>;
 
 export function getApiUsersMeFollowingQueryOptions(
+	{ query }: GetApiUsersMeFollowingOptions = {},
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiUsersMeFollowingQueryKey();
+	const queryKey = getApiUsersMeFollowingQueryKey({ query });
 	return queryOptions<
 		GetApiUsersMeFollowingStatus200,
-		ResponseErrorConfig<GetApiUsersMeFollowingStatus500>,
+		ResponseErrorConfig<
+			| GetApiUsersMeFollowingStatus400
+			| GetApiUsersMeFollowingStatus422
+			| GetApiUsersMeFollowingStatus500
+		>,
 		GetApiUsersMeFollowingStatus200,
 		typeof queryKey
 	>({
@@ -10970,6 +10794,7 @@ export function getApiUsersMeFollowingQueryOptions(
 		queryFn: async ({ signal }) => {
 			const { data } = await getApiUsersMeFollowing({
 				...config,
+				query,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -10987,11 +10812,21 @@ export function useGetApiUsersMeFollowing<
 	TQueryData = GetApiUsersMeFollowingStatus200,
 	TQueryKey extends QueryKey = GetApiUsersMeFollowingQueryKey,
 >(
+	{
+		query,
+	}: {
+		query?:
+			GetApiUsersMeFollowingOptions["query"] | (() => GetApiUsersMeFollowingOptions["query"]);
+	} = {},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
 				GetApiUsersMeFollowingStatus200,
-				ResponseErrorConfig<GetApiUsersMeFollowingStatus500>,
+				ResponseErrorConfig<
+					| GetApiUsersMeFollowingStatus400
+					| GetApiUsersMeFollowingStatus422
+					| GetApiUsersMeFollowingStatus500
+				>,
 				TData,
 				TQueryData,
 				TQueryKey
@@ -11002,22 +10837,309 @@ export function useGetApiUsersMeFollowing<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const queryKey = resolvedOptions?.queryKey ?? getApiUsersMeFollowingQueryKey();
+	const resolvedParams = { query: typeof query === "function" ? query() : query };
+	const queryKey = resolvedOptions?.queryKey ?? getApiUsersMeFollowingQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiUsersMeFollowingQueryOptions(config),
+			...getApiUsersMeFollowingQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
 		queryClient,
-	) as UseQueryResult<TData, ResponseErrorConfig<GetApiUsersMeFollowingStatus500>> & {
-		queryKey: TQueryKey;
-	};
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiUsersMeFollowingStatus400
+			| GetApiUsersMeFollowingStatus422
+			| GetApiUsersMeFollowingStatus500
+		>
+	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
+}
+
+export const getApiUsersMeFollowingByUnitIdQueryKey = ({
+	path,
+}: Omit<GetApiUsersMeFollowingByUnitIdOptions, "headers">) =>
+	[{ url: "/api/users/me/following/:unitId", params: path }] as const;
+
+type GetApiUsersMeFollowingByUnitIdQueryKey = ReturnType<
+	typeof getApiUsersMeFollowingByUnitIdQueryKey
+>;
+
+export function getApiUsersMeFollowingByUnitIdQueryOptions(
+	{ path }: GetApiUsersMeFollowingByUnitIdOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiUsersMeFollowingByUnitIdQueryKey({ path });
+	return queryOptions<
+		GetApiUsersMeFollowingByUnitIdStatus200,
+		ResponseErrorConfig<
+			| GetApiUsersMeFollowingByUnitIdStatus404
+			| GetApiUsersMeFollowingByUnitIdStatus409
+			| GetApiUsersMeFollowingByUnitIdStatus422
+			| GetApiUsersMeFollowingByUnitIdStatus500
+		>,
+		GetApiUsersMeFollowingByUnitIdStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiUsersMeFollowingByUnitId({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get current user's follow state for a Unit
+ * {@link /api/users/me/following/:unitId}
+ */
+export function useGetApiUsersMeFollowingByUnitId<
+	TData = GetApiUsersMeFollowingByUnitIdStatus200,
+	TQueryData = GetApiUsersMeFollowingByUnitIdStatus200,
+	TQueryKey extends QueryKey = GetApiUsersMeFollowingByUnitIdQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiUsersMeFollowingByUnitIdOptions["path"]
+			| (() => GetApiUsersMeFollowingByUnitIdOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiUsersMeFollowingByUnitIdStatus200,
+				ResponseErrorConfig<
+					| GetApiUsersMeFollowingByUnitIdStatus404
+					| GetApiUsersMeFollowingByUnitIdStatus409
+					| GetApiUsersMeFollowingByUnitIdStatus422
+					| GetApiUsersMeFollowingByUnitIdStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiUsersMeFollowingByUnitIdQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiUsersMeFollowingByUnitIdQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiUsersMeFollowingByUnitIdStatus404
+			| GetApiUsersMeFollowingByUnitIdStatus409
+			| GetApiUsersMeFollowingByUnitIdStatus422
+			| GetApiUsersMeFollowingByUnitIdStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiUsersMeFollowingByUnitIdMutationKey = () =>
+	[{ url: "/api/users/me/following/:unitId" }] as const;
+
+export function putApiUsersMeFollowingByUnitIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiUsersMeFollowingByUnitIdMutationKey();
+	return mutationOptions<
+		PutApiUsersMeFollowingByUnitIdStatus200,
+		ResponseErrorConfig<
+			| PutApiUsersMeFollowingByUnitIdStatus404
+			| PutApiUsersMeFollowingByUnitIdStatus409
+			| PutApiUsersMeFollowingByUnitIdStatus422
+			| PutApiUsersMeFollowingByUnitIdStatus500
+		>,
+		PutApiUsersMeFollowingByUnitIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await putApiUsersMeFollowingByUnitId({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Follow a Unit
+ * {@link /api/users/me/following/:unitId}
+ */
+export function usePutApiUsersMeFollowingByUnitId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiUsersMeFollowingByUnitIdStatus200,
+			ResponseErrorConfig<
+				| PutApiUsersMeFollowingByUnitIdStatus404
+				| PutApiUsersMeFollowingByUnitIdStatus409
+				| PutApiUsersMeFollowingByUnitIdStatus422
+				| PutApiUsersMeFollowingByUnitIdStatus500
+			>,
+			PutApiUsersMeFollowingByUnitIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? putApiUsersMeFollowingByUnitIdMutationKey();
+
+	const baseOptions = putApiUsersMeFollowingByUnitIdMutationOptions(config) as UseMutationOptions<
+		PutApiUsersMeFollowingByUnitIdStatus200,
+		ResponseErrorConfig<
+			| PutApiUsersMeFollowingByUnitIdStatus404
+			| PutApiUsersMeFollowingByUnitIdStatus409
+			| PutApiUsersMeFollowingByUnitIdStatus422
+			| PutApiUsersMeFollowingByUnitIdStatus500
+		>,
+		PutApiUsersMeFollowingByUnitIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiUsersMeFollowingByUnitIdStatus200,
+		ResponseErrorConfig<
+			| PutApiUsersMeFollowingByUnitIdStatus404
+			| PutApiUsersMeFollowingByUnitIdStatus409
+			| PutApiUsersMeFollowingByUnitIdStatus422
+			| PutApiUsersMeFollowingByUnitIdStatus500
+		>,
+		PutApiUsersMeFollowingByUnitIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiUsersMeFollowingByUnitIdStatus200,
+		ResponseErrorConfig<
+			| PutApiUsersMeFollowingByUnitIdStatus404
+			| PutApiUsersMeFollowingByUnitIdStatus409
+			| PutApiUsersMeFollowingByUnitIdStatus422
+			| PutApiUsersMeFollowingByUnitIdStatus500
+		>,
+		PutApiUsersMeFollowingByUnitIdOptions,
+		TContext
+	>;
+}
+
+export const deleteApiUsersMeFollowingByUnitIdMutationKey = () =>
+	[{ url: "/api/users/me/following/:unitId" }] as const;
+
+export function deleteApiUsersMeFollowingByUnitIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = deleteApiUsersMeFollowingByUnitIdMutationKey();
+	return mutationOptions<
+		DeleteApiUsersMeFollowingByUnitIdStatus200,
+		ResponseErrorConfig<
+			DeleteApiUsersMeFollowingByUnitIdStatus422 | DeleteApiUsersMeFollowingByUnitIdStatus500
+		>,
+		DeleteApiUsersMeFollowingByUnitIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path }) => {
+			const { data } = await deleteApiUsersMeFollowingByUnitId({
+				...config,
+				path,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Unfollow a Unit
+ * {@link /api/users/me/following/:unitId}
+ */
+export function useDeleteApiUsersMeFollowingByUnitId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			DeleteApiUsersMeFollowingByUnitIdStatus200,
+			ResponseErrorConfig<
+				| DeleteApiUsersMeFollowingByUnitIdStatus422
+				| DeleteApiUsersMeFollowingByUnitIdStatus500
+			>,
+			DeleteApiUsersMeFollowingByUnitIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? deleteApiUsersMeFollowingByUnitIdMutationKey();
+
+	const baseOptions = deleteApiUsersMeFollowingByUnitIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		DeleteApiUsersMeFollowingByUnitIdStatus200,
+		ResponseErrorConfig<
+			DeleteApiUsersMeFollowingByUnitIdStatus422 | DeleteApiUsersMeFollowingByUnitIdStatus500
+		>,
+		DeleteApiUsersMeFollowingByUnitIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		DeleteApiUsersMeFollowingByUnitIdStatus200,
+		ResponseErrorConfig<
+			DeleteApiUsersMeFollowingByUnitIdStatus422 | DeleteApiUsersMeFollowingByUnitIdStatus500
+		>,
+		DeleteApiUsersMeFollowingByUnitIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		DeleteApiUsersMeFollowingByUnitIdStatus200,
+		ResponseErrorConfig<
+			DeleteApiUsersMeFollowingByUnitIdStatus422 | DeleteApiUsersMeFollowingByUnitIdStatus500
+		>,
+		DeleteApiUsersMeFollowingByUnitIdOptions,
+		TContext
+	>;
 }
 
 export const patchApiUsersMeFollowingByUnitIdMutationKey = () =>
@@ -11193,170 +11315,6 @@ export function useGetApiUsersById<
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
-}
-
-export const putApiUsersByIdFollowMutationKey = () => [{ url: "/api/users/:id/follow" }] as const;
-
-export function putApiUsersByIdFollowMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = putApiUsersByIdFollowMutationKey();
-	return mutationOptions<
-		PutApiUsersByIdFollowStatus200,
-		ResponseErrorConfig<
-			| PutApiUsersByIdFollowStatus404
-			| PutApiUsersByIdFollowStatus409
-			| PutApiUsersByIdFollowStatus422
-			| PutApiUsersByIdFollowStatus500
-		>,
-		PutApiUsersByIdFollowOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path }) => {
-			const { data } = await putApiUsersByIdFollow({ ...config, path, throwOnError: true });
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Follow user
- * {@link /api/users/:id/follow}
- */
-export function usePutApiUsersByIdFollow<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PutApiUsersByIdFollowStatus200,
-			ResponseErrorConfig<
-				| PutApiUsersByIdFollowStatus404
-				| PutApiUsersByIdFollowStatus409
-				| PutApiUsersByIdFollowStatus422
-				| PutApiUsersByIdFollowStatus500
-			>,
-			PutApiUsersByIdFollowOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? putApiUsersByIdFollowMutationKey();
-
-	const baseOptions = putApiUsersByIdFollowMutationOptions(config) as UseMutationOptions<
-		PutApiUsersByIdFollowStatus200,
-		ResponseErrorConfig<
-			| PutApiUsersByIdFollowStatus404
-			| PutApiUsersByIdFollowStatus409
-			| PutApiUsersByIdFollowStatus422
-			| PutApiUsersByIdFollowStatus500
-		>,
-		PutApiUsersByIdFollowOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PutApiUsersByIdFollowStatus200,
-		ResponseErrorConfig<
-			| PutApiUsersByIdFollowStatus404
-			| PutApiUsersByIdFollowStatus409
-			| PutApiUsersByIdFollowStatus422
-			| PutApiUsersByIdFollowStatus500
-		>,
-		PutApiUsersByIdFollowOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PutApiUsersByIdFollowStatus200,
-		ResponseErrorConfig<
-			| PutApiUsersByIdFollowStatus404
-			| PutApiUsersByIdFollowStatus409
-			| PutApiUsersByIdFollowStatus422
-			| PutApiUsersByIdFollowStatus500
-		>,
-		PutApiUsersByIdFollowOptions,
-		TContext
-	>;
-}
-
-export const deleteApiUsersByIdFollowMutationKey = () =>
-	[{ url: "/api/users/:id/follow" }] as const;
-
-export function deleteApiUsersByIdFollowMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = deleteApiUsersByIdFollowMutationKey();
-	return mutationOptions<
-		DeleteApiUsersByIdFollowStatus200,
-		ResponseErrorConfig<DeleteApiUsersByIdFollowStatus422 | DeleteApiUsersByIdFollowStatus500>,
-		DeleteApiUsersByIdFollowOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiUsersByIdFollow({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Unfollow user
- * {@link /api/users/:id/follow}
- */
-export function useDeleteApiUsersByIdFollow<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			DeleteApiUsersByIdFollowStatus200,
-			ResponseErrorConfig<
-				DeleteApiUsersByIdFollowStatus422 | DeleteApiUsersByIdFollowStatus500
-			>,
-			DeleteApiUsersByIdFollowOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? deleteApiUsersByIdFollowMutationKey();
-
-	const baseOptions = deleteApiUsersByIdFollowMutationOptions(config) as UseMutationOptions<
-		DeleteApiUsersByIdFollowStatus200,
-		ResponseErrorConfig<DeleteApiUsersByIdFollowStatus422 | DeleteApiUsersByIdFollowStatus500>,
-		DeleteApiUsersByIdFollowOptions,
-		TContext
-	>;
-
-	return useMutation<
-		DeleteApiUsersByIdFollowStatus200,
-		ResponseErrorConfig<DeleteApiUsersByIdFollowStatus422 | DeleteApiUsersByIdFollowStatus500>,
-		DeleteApiUsersByIdFollowOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		DeleteApiUsersByIdFollowStatus200,
-		ResponseErrorConfig<DeleteApiUsersByIdFollowStatus422 | DeleteApiUsersByIdFollowStatus500>,
-		DeleteApiUsersByIdFollowOptions,
-		TContext
-	>;
 }
 
 export const getApiUsersMeBlocksQueryKey = () => [{ url: "/api/users/me/blocks" }] as const;
@@ -21917,178 +21875,6 @@ export function useDeleteApiRealmsByRealmIdScoreContext<TContext>(
 			| DeleteApiRealmsByRealmIdScoreContextStatus500
 		>,
 		DeleteApiRealmsByRealmIdScoreContextOptions,
-		TContext
-	>;
-}
-
-export const putApiRealmsByRealmIdFollowMutationKey = () =>
-	[{ url: "/api/realms/:realmId/follow" }] as const;
-
-export function putApiRealmsByRealmIdFollowMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = putApiRealmsByRealmIdFollowMutationKey();
-	return mutationOptions<
-		PutApiRealmsByRealmIdFollowStatus200,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdFollowStatus404
-			| PutApiRealmsByRealmIdFollowStatus422
-			| PutApiRealmsByRealmIdFollowStatus500
-		>,
-		PutApiRealmsByRealmIdFollowOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path }) => {
-			const { data } = await putApiRealmsByRealmIdFollow({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Follow Realm
- * {@link /api/realms/:realmId/follow}
- */
-export function usePutApiRealmsByRealmIdFollow<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PutApiRealmsByRealmIdFollowStatus200,
-			ResponseErrorConfig<
-				| PutApiRealmsByRealmIdFollowStatus404
-				| PutApiRealmsByRealmIdFollowStatus422
-				| PutApiRealmsByRealmIdFollowStatus500
-			>,
-			PutApiRealmsByRealmIdFollowOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? putApiRealmsByRealmIdFollowMutationKey();
-
-	const baseOptions = putApiRealmsByRealmIdFollowMutationOptions(config) as UseMutationOptions<
-		PutApiRealmsByRealmIdFollowStatus200,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdFollowStatus404
-			| PutApiRealmsByRealmIdFollowStatus422
-			| PutApiRealmsByRealmIdFollowStatus500
-		>,
-		PutApiRealmsByRealmIdFollowOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PutApiRealmsByRealmIdFollowStatus200,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdFollowStatus404
-			| PutApiRealmsByRealmIdFollowStatus422
-			| PutApiRealmsByRealmIdFollowStatus500
-		>,
-		PutApiRealmsByRealmIdFollowOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PutApiRealmsByRealmIdFollowStatus200,
-		ResponseErrorConfig<
-			| PutApiRealmsByRealmIdFollowStatus404
-			| PutApiRealmsByRealmIdFollowStatus422
-			| PutApiRealmsByRealmIdFollowStatus500
-		>,
-		PutApiRealmsByRealmIdFollowOptions,
-		TContext
-	>;
-}
-
-export const deleteApiRealmsByRealmIdFollowMutationKey = () =>
-	[{ url: "/api/realms/:realmId/follow" }] as const;
-
-export function deleteApiRealmsByRealmIdFollowMutationOptions<TContext = unknown>(
-	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
-) {
-	const mutationKey = deleteApiRealmsByRealmIdFollowMutationKey();
-	return mutationOptions<
-		DeleteApiRealmsByRealmIdFollowStatus200,
-		ResponseErrorConfig<
-			DeleteApiRealmsByRealmIdFollowStatus422 | DeleteApiRealmsByRealmIdFollowStatus500
-		>,
-		DeleteApiRealmsByRealmIdFollowOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ path }) => {
-			const { data } = await deleteApiRealmsByRealmIdFollow({
-				...config,
-				path,
-				throwOnError: true,
-			});
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Unfollow Realm
- * {@link /api/realms/:realmId/follow}
- */
-export function useDeleteApiRealmsByRealmIdFollow<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			DeleteApiRealmsByRealmIdFollowStatus200,
-			ResponseErrorConfig<
-				DeleteApiRealmsByRealmIdFollowStatus422 | DeleteApiRealmsByRealmIdFollowStatus500
-			>,
-			DeleteApiRealmsByRealmIdFollowOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? deleteApiRealmsByRealmIdFollowMutationKey();
-
-	const baseOptions = deleteApiRealmsByRealmIdFollowMutationOptions(config) as UseMutationOptions<
-		DeleteApiRealmsByRealmIdFollowStatus200,
-		ResponseErrorConfig<
-			DeleteApiRealmsByRealmIdFollowStatus422 | DeleteApiRealmsByRealmIdFollowStatus500
-		>,
-		DeleteApiRealmsByRealmIdFollowOptions,
-		TContext
-	>;
-
-	return useMutation<
-		DeleteApiRealmsByRealmIdFollowStatus200,
-		ResponseErrorConfig<
-			DeleteApiRealmsByRealmIdFollowStatus422 | DeleteApiRealmsByRealmIdFollowStatus500
-		>,
-		DeleteApiRealmsByRealmIdFollowOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		DeleteApiRealmsByRealmIdFollowStatus200,
-		ResponseErrorConfig<
-			DeleteApiRealmsByRealmIdFollowStatus422 | DeleteApiRealmsByRealmIdFollowStatus500
-		>,
-		DeleteApiRealmsByRealmIdFollowOptions,
 		TContext
 	>;
 }

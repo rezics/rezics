@@ -1,7 +1,8 @@
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { CollectionConfigV1 } from "./schema";
+import { FollowingStatusResponse } from "../schema/action-response";
+import { CollectionConfigV1, FollowingListQuery } from "./schema";
 
 describe("Collection preference contract", () => {
 	it("version-controls the Main-with-Variant default", () => {
@@ -15,5 +16,38 @@ describe("Collection preference contract", () => {
 		expect(Check(CollectionConfigV1, { view: "grid" })).toBe(false);
 		expect(Check(CollectionConfigV1, { version: 2 })).toBe(false);
 		expect(Check(CollectionConfigV1, { version: 1, unknown: true })).toBe(false);
+	});
+});
+
+describe("following API contracts", () => {
+	it("accepts typed kind, language, and bounded pagination inputs", () => {
+		expect(Check(FollowingListQuery, { kind: "zone", language: "zh", limit: 30 })).toBe(true);
+		expect(Check(FollowingListQuery, { kind: "unknown" })).toBe(false);
+		expect(Check(FollowingListQuery, { language: "zh-Hant" })).toBe(false);
+		expect(Check(FollowingListQuery, { limit: 101 })).toBe(false);
+	});
+
+	it("keeps followed and not-followed presentation states discriminated", () => {
+		expect(
+			Check(FollowingStatusResponse, {
+				following: true,
+				favorite: false,
+				position: "a0V",
+			}),
+		).toBe(true);
+		expect(
+			Check(FollowingStatusResponse, {
+				following: false,
+				favorite: null,
+				position: null,
+			}),
+		).toBe(true);
+		expect(
+			Check(FollowingStatusResponse, {
+				following: false,
+				favorite: false,
+				position: "a0V",
+			}),
+		).toBe(false);
 	});
 });

@@ -31,18 +31,6 @@ export class UserNotFound extends Data.TaggedError("UserNotFound") {
 	readonly message = "User not found";
 }
 
-export class UserSelfFollowForbidden extends Data.TaggedError("UserSelfFollowForbidden") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UserSelfFollowForbidden.status;
-	readonly message = "You cannot follow yourself";
-}
-
-export class UserFollowBlocked extends Data.TaggedError("UserFollowBlocked") {
-	static readonly status = StatusCodes.CONFLICT as const;
-	readonly status = UserFollowBlocked.status;
-	readonly message = "Following is unavailable between blocked users";
-}
-
 export class UserSelfBlockForbidden extends Data.TaggedError("UserSelfBlockForbidden") {
 	static readonly status = StatusCodes.CONFLICT as const;
 	readonly status = UserSelfBlockForbidden.status;
@@ -54,7 +42,5 @@ export const UserErrors = [
 	ProfileChanged,
 	PreferencesNotFound,
 	UserNotFound,
-	UserSelfFollowForbidden,
-	UserFollowBlocked,
 	UserSelfBlockForbidden,
 ] as const;

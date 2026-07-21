@@ -4664,6 +4664,9 @@ export const ApiErrorCode = {
 	EntityAssociationProposalConflict: "EntityAssociationProposalConflict",
 	EntityAssociationProposalExpired: "EntityAssociationProposalExpired",
 	EntityAssociationProposalExpiryInvalid: "EntityAssociationProposalExpiryInvalid",
+	UnitNotFollowable: "UnitNotFollowable",
+	UserSelfFollowForbidden: "UserSelfFollowForbidden",
+	UserFollowBlocked: "UserFollowBlocked",
 	ImageAssetNotFound: "ImageAssetNotFound",
 	ImageAssetUploadNotFound: "ImageAssetUploadNotFound",
 	ImageAssetUnsupportedType: "ImageAssetUnsupportedType",
@@ -4679,8 +4682,6 @@ export const ApiErrorCode = {
 	ProfileChanged: "ProfileChanged",
 	PreferencesNotFound: "PreferencesNotFound",
 	UserNotFound: "UserNotFound",
-	UserSelfFollowForbidden: "UserSelfFollowForbidden",
-	UserFollowBlocked: "UserFollowBlocked",
 	UserSelfBlockForbidden: "UserSelfBlockForbidden",
 	SoftwareSystemRequirementSourceInvalid: "SoftwareSystemRequirementSourceInvalid",
 	SeriesReleaseNotFound: "SeriesReleaseNotFound",
@@ -24256,154 +24257,6 @@ export type PostApiZonesResponse =
 /**
  * @type object
  */
-export type PutApiZonesByZoneIdFollowPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdFollowStatus200 = {
-	/**
-	 * @type boolean
-	 */
-	following: boolean;
-};
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdFollowStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: "UnitNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdFollowStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdFollowStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdFollowOptions = {
-	body?: never;
-	path: PutApiZonesByZoneIdFollowPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PutApiZonesByZoneIdFollowResponses = {
-	"200": PutApiZonesByZoneIdFollowStatus200;
-	"404": PutApiZonesByZoneIdFollowStatus404;
-	"422": PutApiZonesByZoneIdFollowStatus422;
-	"500": PutApiZonesByZoneIdFollowStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PutApiZonesByZoneIdFollowResponse =
-	| PutApiZonesByZoneIdFollowStatus200
-	| PutApiZonesByZoneIdFollowStatus404
-	| PutApiZonesByZoneIdFollowStatus422
-	| PutApiZonesByZoneIdFollowStatus500;
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdFollowPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	zoneId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdFollowStatus200 = {
-	/**
-	 * @type boolean
-	 */
-	following: boolean;
-};
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdFollowStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdFollowStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdFollowOptions = {
-	body?: never;
-	path: DeleteApiZonesByZoneIdFollowPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiZonesByZoneIdFollowResponses = {
-	"200": DeleteApiZonesByZoneIdFollowStatus200;
-	"422": DeleteApiZonesByZoneIdFollowStatus422;
-	"500": DeleteApiZonesByZoneIdFollowStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiZonesByZoneIdFollowResponse =
-	| DeleteApiZonesByZoneIdFollowStatus200
-	| DeleteApiZonesByZoneIdFollowStatus422
-	| DeleteApiZonesByZoneIdFollowStatus500;
-
-/**
- * @type object
- */
 export type GetApiSoftwareBySoftwareIdSystemRequirementsPath = {
 	/**
 	 * @description
@@ -26954,6 +26807,58 @@ export type PutApiUsersMePreferencesResponse =
 	| PutApiUsersMePreferencesStatus422
 	| PutApiUsersMePreferencesStatus500;
 
+export const GetApiUsersMeFollowingKind = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	tag: "tag",
+	series: "series",
+	zone: "zone",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiUsersMeFollowingKind =
+	(typeof GetApiUsersMeFollowingKind)[keyof typeof GetApiUsersMeFollowingKind];
+
+export const GetApiUsersMeFollowingLanguage = {
+	zh: "zh",
+	en: "en",
+} as const;
+
+export type GetApiUsersMeFollowingLanguage =
+	(typeof GetApiUsersMeFollowingLanguage)[keyof typeof GetApiUsersMeFollowingLanguage];
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeFollowingQuery = {
+	/**
+	 * @type string | undefined
+	 */
+	kind?: GetApiUsersMeFollowingKind;
+	/**
+	 * @type string | undefined
+	 */
+	language?: GetApiUsersMeFollowingLanguage;
+	/**
+	 * @maxLength 1024
+	 * @type string | undefined
+	 */
+	cursor?: string;
+	/**
+	 * @default 30
+	 */
+	limit?: string | number;
+};
+
 export const GetApiUsersMeFollowingStatus200ItemsKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -26993,6 +26898,7 @@ export type GetApiUsersMeFollowingStatus200 = {
 		 * @type string
 		 */
 		kind: GetApiUsersMeFollowingStatus200ItemsKindEnum;
+		language: (("zh" | "en") | null) | null;
 		title: (string | null) | null;
 		avatar:
 			| ({
@@ -27047,7 +26953,41 @@ export type GetApiUsersMeFollowingStatus200 = {
 		 */
 		updatedAt: string;
 	}[];
+	nextCursor: (string | null) | null;
 };
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeFollowingStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InvalidPaginationCursor'
+		 * @type string
+		 */
+		code: "InvalidPaginationCursor";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeFollowingStatus422 = ValidationError;
 
 /**
  * @type object
@@ -27060,7 +27000,7 @@ export type GetApiUsersMeFollowingStatus500 = InternalError;
 export type GetApiUsersMeFollowingOptions = {
 	body?: never;
 	path?: never;
-	query?: never;
+	query?: GetApiUsersMeFollowingQuery;
 	headers?: never;
 };
 
@@ -27069,6 +27009,8 @@ export type GetApiUsersMeFollowingOptions = {
  */
 export type GetApiUsersMeFollowingResponses = {
 	"200": GetApiUsersMeFollowingStatus200;
+	"400": GetApiUsersMeFollowingStatus400;
+	"422": GetApiUsersMeFollowingStatus422;
 	"500": GetApiUsersMeFollowingStatus500;
 };
 
@@ -27076,7 +27018,340 @@ export type GetApiUsersMeFollowingResponses = {
  * @description Union of all possible responses
  */
 export type GetApiUsersMeFollowingResponse =
-	GetApiUsersMeFollowingStatus200 | GetApiUsersMeFollowingStatus500;
+	| GetApiUsersMeFollowingStatus200
+	| GetApiUsersMeFollowingStatus400
+	| GetApiUsersMeFollowingStatus422
+	| GetApiUsersMeFollowingStatus500;
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeFollowingByUnitIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export type GetApiUsersMeFollowingByUnitIdStatus200 =
+	| {
+			/**
+			 * @type boolean
+			 */
+			following: true;
+			/**
+			 * @type boolean
+			 */
+			favorite: boolean;
+			/**
+			 * @description
+			 * Format: `fractional-position`
+			 * @minLength 2
+			 * @maxLength 512
+			 * @type string
+			 */
+			position: string;
+	  }
+	| {
+			/**
+			 * @type boolean
+			 */
+			following: false;
+			/**
+			 * @type null
+			 */
+			favorite: null;
+			/**
+			 * @type null
+			 */
+			position: null;
+	  };
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeFollowingByUnitIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeFollowingByUnitIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFollowable'
+		 * @type string
+		 */
+		code: "UnitNotFollowable";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeFollowingByUnitIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeFollowingByUnitIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeFollowingByUnitIdOptions = {
+	body?: never;
+	path: GetApiUsersMeFollowingByUnitIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiUsersMeFollowingByUnitIdResponses = {
+	"200": GetApiUsersMeFollowingByUnitIdStatus200;
+	"404": GetApiUsersMeFollowingByUnitIdStatus404;
+	"409": GetApiUsersMeFollowingByUnitIdStatus409;
+	"422": GetApiUsersMeFollowingByUnitIdStatus422;
+	"500": GetApiUsersMeFollowingByUnitIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiUsersMeFollowingByUnitIdResponse =
+	| GetApiUsersMeFollowingByUnitIdStatus200
+	| GetApiUsersMeFollowingByUnitIdStatus404
+	| GetApiUsersMeFollowingByUnitIdStatus409
+	| GetApiUsersMeFollowingByUnitIdStatus422
+	| GetApiUsersMeFollowingByUnitIdStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeFollowingByUnitIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeFollowingByUnitIdStatus200 = {
+	/**
+	 * @type boolean
+	 */
+	following: boolean;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeFollowingByUnitIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiUsersMeFollowingByUnitIdStatus409ErrorCodeEnum = {
+	UnitNotFollowable: "UnitNotFollowable",
+	UserSelfFollowForbidden: "UserSelfFollowForbidden",
+	UserFollowBlocked: "UserFollowBlocked",
+} as const;
+
+export type PutApiUsersMeFollowingByUnitIdStatus409ErrorCodeEnum =
+	(typeof PutApiUsersMeFollowingByUnitIdStatus409ErrorCodeEnum)[keyof typeof PutApiUsersMeFollowingByUnitIdStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeFollowingByUnitIdStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFollowable'
+		 * @type string
+		 */
+		code: PutApiUsersMeFollowingByUnitIdStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeFollowingByUnitIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeFollowingByUnitIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeFollowingByUnitIdOptions = {
+	body?: never;
+	path: PutApiUsersMeFollowingByUnitIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiUsersMeFollowingByUnitIdResponses = {
+	"200": PutApiUsersMeFollowingByUnitIdStatus200;
+	"404": PutApiUsersMeFollowingByUnitIdStatus404;
+	"409": PutApiUsersMeFollowingByUnitIdStatus409;
+	"422": PutApiUsersMeFollowingByUnitIdStatus422;
+	"500": PutApiUsersMeFollowingByUnitIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiUsersMeFollowingByUnitIdResponse =
+	| PutApiUsersMeFollowingByUnitIdStatus200
+	| PutApiUsersMeFollowingByUnitIdStatus404
+	| PutApiUsersMeFollowingByUnitIdStatus409
+	| PutApiUsersMeFollowingByUnitIdStatus422
+	| PutApiUsersMeFollowingByUnitIdStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiUsersMeFollowingByUnitIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUsersMeFollowingByUnitIdStatus200 = {
+	/**
+	 * @type boolean
+	 */
+	following: boolean;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUsersMeFollowingByUnitIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUsersMeFollowingByUnitIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiUsersMeFollowingByUnitIdOptions = {
+	body?: never;
+	path: DeleteApiUsersMeFollowingByUnitIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiUsersMeFollowingByUnitIdResponses = {
+	"200": DeleteApiUsersMeFollowingByUnitIdStatus200;
+	"422": DeleteApiUsersMeFollowingByUnitIdStatus422;
+	"500": DeleteApiUsersMeFollowingByUnitIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiUsersMeFollowingByUnitIdResponse =
+	| DeleteApiUsersMeFollowingByUnitIdStatus200
+	| DeleteApiUsersMeFollowingByUnitIdStatus422
+	| DeleteApiUsersMeFollowingByUnitIdStatus500;
 
 /**
  * @type object
@@ -27476,200 +27751,6 @@ export type GetApiUsersByIdResponse =
 	| GetApiUsersByIdStatus404
 	| GetApiUsersByIdStatus422
 	| GetApiUsersByIdStatus500;
-
-/**
- * @type object
- */
-export type PutApiUsersByIdFollowPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	id: string;
-};
-
-/**
- * @type object
- */
-export type PutApiUsersByIdFollowStatus200 = {
-	/**
-	 * @type boolean
-	 */
-	following: boolean;
-};
-
-export const PutApiUsersByIdFollowStatus404ErrorCodeEnum = {
-	UnitNotFound: "UnitNotFound",
-	UserNotFound: "UserNotFound",
-} as const;
-
-export type PutApiUsersByIdFollowStatus404ErrorCodeEnum =
-	(typeof PutApiUsersByIdFollowStatus404ErrorCodeEnum)[keyof typeof PutApiUsersByIdFollowStatus404ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PutApiUsersByIdFollowStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UnitNotFound'
-		 * @type string
-		 */
-		code: PutApiUsersByIdFollowStatus404ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-export const PutApiUsersByIdFollowStatus409ErrorCodeEnum = {
-	UserSelfFollowForbidden: "UserSelfFollowForbidden",
-	UserFollowBlocked: "UserFollowBlocked",
-} as const;
-
-export type PutApiUsersByIdFollowStatus409ErrorCodeEnum =
-	(typeof PutApiUsersByIdFollowStatus409ErrorCodeEnum)[keyof typeof PutApiUsersByIdFollowStatus409ErrorCodeEnum];
-
-/**
- * @type object
- */
-export type PutApiUsersByIdFollowStatus409 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'UserSelfFollowForbidden'
-		 * @type string
-		 */
-		code: PutApiUsersByIdFollowStatus409ErrorCodeEnum;
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiUsersByIdFollowStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type PutApiUsersByIdFollowStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type PutApiUsersByIdFollowOptions = {
-	body?: never;
-	path: PutApiUsersByIdFollowPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PutApiUsersByIdFollowResponses = {
-	"200": PutApiUsersByIdFollowStatus200;
-	"404": PutApiUsersByIdFollowStatus404;
-	"409": PutApiUsersByIdFollowStatus409;
-	"422": PutApiUsersByIdFollowStatus422;
-	"500": PutApiUsersByIdFollowStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PutApiUsersByIdFollowResponse =
-	| PutApiUsersByIdFollowStatus200
-	| PutApiUsersByIdFollowStatus404
-	| PutApiUsersByIdFollowStatus409
-	| PutApiUsersByIdFollowStatus422
-	| PutApiUsersByIdFollowStatus500;
-
-/**
- * @type object
- */
-export type DeleteApiUsersByIdFollowPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	id: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiUsersByIdFollowStatus200 = {
-	/**
-	 * @type boolean
-	 */
-	following: boolean;
-};
-
-/**
- * @type object
- */
-export type DeleteApiUsersByIdFollowStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type DeleteApiUsersByIdFollowStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiUsersByIdFollowOptions = {
-	body?: never;
-	path: DeleteApiUsersByIdFollowPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiUsersByIdFollowResponses = {
-	"200": DeleteApiUsersByIdFollowStatus200;
-	"422": DeleteApiUsersByIdFollowStatus422;
-	"500": DeleteApiUsersByIdFollowStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiUsersByIdFollowResponse =
-	| DeleteApiUsersByIdFollowStatus200
-	| DeleteApiUsersByIdFollowStatus422
-	| DeleteApiUsersByIdFollowStatus500;
 
 /**
  * @type object
@@ -54715,154 +54796,6 @@ export type DeleteApiRealmsByRealmIdScoreContextResponse =
 	| DeleteApiRealmsByRealmIdScoreContextStatus403
 	| DeleteApiRealmsByRealmIdScoreContextStatus422
 	| DeleteApiRealmsByRealmIdScoreContextStatus500;
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdFollowPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdFollowStatus200 = {
-	/**
-	 * @type boolean
-	 */
-	following: boolean;
-};
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdFollowStatus404 = {
-	/**
-	 * @type object
-	 */
-	error: {
-		/**
-		 * @default 'RealmNotFound'
-		 * @type string
-		 */
-		code: "RealmNotFound";
-		/**
-		 * @type string
-		 */
-		message: string;
-		/**
-		 * @type void | undefined
-		 */
-		details?: void;
-	};
-	/**
-	 * @type string
-	 */
-	requestId: string;
-};
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdFollowStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdFollowStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdFollowOptions = {
-	body?: never;
-	path: PutApiRealmsByRealmIdFollowPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type PutApiRealmsByRealmIdFollowResponses = {
-	"200": PutApiRealmsByRealmIdFollowStatus200;
-	"404": PutApiRealmsByRealmIdFollowStatus404;
-	"422": PutApiRealmsByRealmIdFollowStatus422;
-	"500": PutApiRealmsByRealmIdFollowStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type PutApiRealmsByRealmIdFollowResponse =
-	| PutApiRealmsByRealmIdFollowStatus200
-	| PutApiRealmsByRealmIdFollowStatus404
-	| PutApiRealmsByRealmIdFollowStatus422
-	| PutApiRealmsByRealmIdFollowStatus500;
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdFollowPath = {
-	/**
-	 * @description
-	 * Format: `uuid`
-	 * @type string
-	 */
-	realmId: string;
-};
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdFollowStatus200 = {
-	/**
-	 * @type boolean
-	 */
-	following: boolean;
-};
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdFollowStatus422 = ValidationError;
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdFollowStatus500 = InternalError;
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdFollowOptions = {
-	body?: never;
-	path: DeleteApiRealmsByRealmIdFollowPath;
-	query?: never;
-	headers?: never;
-};
-
-/**
- * @type object
- */
-export type DeleteApiRealmsByRealmIdFollowResponses = {
-	"200": DeleteApiRealmsByRealmIdFollowStatus200;
-	"422": DeleteApiRealmsByRealmIdFollowStatus422;
-	"500": DeleteApiRealmsByRealmIdFollowStatus500;
-};
-
-/**
- * @description Union of all possible responses
- */
-export type DeleteApiRealmsByRealmIdFollowResponse =
-	| DeleteApiRealmsByRealmIdFollowStatus200
-	| DeleteApiRealmsByRealmIdFollowStatus422
-	| DeleteApiRealmsByRealmIdFollowStatus500;
 
 /**
  * @type object

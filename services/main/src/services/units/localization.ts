@@ -1,5 +1,6 @@
 import { and, eq, sql, type SQL, type SQLWrapper } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
+import type { ContentLanguage } from "@rezics/i18n";
 
 import type { DatabaseTransaction } from "../database";
 import { unitLocalization } from "../database/schema";
@@ -132,6 +133,44 @@ export function primaryUnitTitle(unitId: SQLWrapper): SQL<string | null> {
 		from ${unitLocalization}
 		where ${unitLocalization.unitId} = ${unitId}
 		order by ${unitLocalization.position}, ${unitLocalization.language}
+		limit 1
+	)`;
+}
+
+/** Resolve the requested localization, then fall back to the primary localization. */
+export function resolvedUnitLocalizationLanguage(
+	unitId: SQLWrapper,
+	preferredLanguage?: string | null,
+): SQL<ContentLanguage | null> {
+	return sql<ContentLanguage | null>`(
+		select ${unitLocalization.language}
+		from ${unitLocalization}
+		where ${unitLocalization.unitId} = ${unitId}
+		order by
+			case when ${preferredLanguage ?? null}::text is not null
+				and ${unitLocalization.language} = ${preferredLanguage ?? null}::text
+				then 0 else 1 end,
+			${unitLocalization.position},
+			${unitLocalization.language}
+		limit 1
+	)`;
+}
+
+/** Resolve the requested localization's title, then fall back to the primary localization. */
+export function resolvedUnitLocalizationTitle(
+	unitId: SQLWrapper,
+	preferredLanguage?: string | null,
+): SQL<string | null> {
+	return sql<string | null>`(
+		select ${unitLocalization.title}
+		from ${unitLocalization}
+		where ${unitLocalization.unitId} = ${unitId}
+		order by
+			case when ${preferredLanguage ?? null}::text is not null
+				and ${unitLocalization.language} = ${preferredLanguage ?? null}::text
+				then 0 else 1 end,
+			${unitLocalization.position},
+			${unitLocalization.language}
 		limit 1
 	)`;
 }
