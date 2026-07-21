@@ -58,7 +58,7 @@ export function PostsPage() {
 			<PageHeading
 				title={t.posts.title}
 				action={
-					<Button asChild>
+					<Button variant="solid" asChild>
 						<Link href="/posts/new">{t.posts.create}</Link>
 					</Button>
 				}
@@ -135,7 +135,7 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 								<Button
 									type="button"
 									size="xs"
-									variant="ghost"
+									variant="quiet"
 									onClick={() => setRealm(undefined)}
 								>
 									{t.posts.clearRealm}
@@ -149,7 +149,7 @@ export function PostCreatePage({ defaultRealmId }: { defaultRealmId?: string }) 
 								<Button
 									type="button"
 									size="xs"
-									variant="ghost"
+									variant="quiet"
 									onClick={() => setSubject(undefined)}
 								>
 									{t.posts.clearSubject}
@@ -378,6 +378,7 @@ function ReplyPostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
 					/>
 					<RequestFailure error={update.error} />
 					<Button
+						variant="solid"
 						type="submit"
 						className="w-fit"
 						disabled={!body.length || update.isPending}
@@ -409,7 +410,12 @@ function PostFields({
 		<>
 			<PortableTextEditor label={t.ui.body} onChange={onBodyChange} required value={body} />
 			<RequestFailure error={error} />
-			<Button type="submit" className="w-fit" disabled={!body.length || pending}>
+			<Button
+				variant="solid"
+				type="submit"
+				className="w-fit"
+				disabled={!body.length || pending}
+			>
 				{pending && <Spinner data-icon="inline-start" />}
 				{submitLabel}
 			</Button>

@@ -54,7 +54,6 @@ import {
 } from "lucide-react";
 import { type FormEvent, type ReactNode, useId, useState } from "react";
 
-import { Button } from "../ui/button";
 import { Field, FieldError, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import { NativeSelect, NativeSelectOption } from "../ui/native-select";
@@ -69,6 +68,7 @@ import {
 import { Switch } from "../ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { cn } from "../utils";
+import { Button } from "./button";
 import { PortableTextContent } from "./portable-text-content";
 import { useUiMessages } from "./ui-provider";
 
@@ -187,7 +187,7 @@ function HistoryButtons() {
 					disabled={disabled}
 					onClick={() => history.send({ type: "history.undo" })}
 					size="icon-sm"
-					variant="ghost"
+					variant="quiet"
 				>
 					<Undo2Icon />
 				</Button>
@@ -198,7 +198,7 @@ function HistoryButtons() {
 					disabled={disabled}
 					onClick={() => history.send({ type: "history.redo" })}
 					size="icon-sm"
-					variant="ghost"
+					variant="quiet"
 				>
 					<Redo2Icon />
 				</Button>
@@ -254,7 +254,7 @@ function DecoratorButton({ schemaType }: { schemaType: ToolbarDecoratorSchemaTyp
 				disabled={button.snapshot.matches("disabled")}
 				onClick={() => button.send({ type: "toggle" })}
 				size="icon-sm"
-				variant={active ? "secondary" : "ghost"}
+				variant={active ? "secondary" : "quiet"}
 			>
 				{Icon ? <Icon /> : label}
 			</Button>
@@ -279,7 +279,7 @@ function ListButton({ schemaType }: { schemaType: ToolbarListSchemaType }) {
 				disabled={button.snapshot.matches("disabled")}
 				onClick={() => button.send({ type: "toggle" })}
 				size="icon-sm"
-				variant={active ? "secondary" : "ghost"}
+				variant={active ? "secondary" : "quiet"}
 			>
 				{Icon ? <Icon /> : label}
 			</Button>
@@ -358,7 +358,7 @@ function LinkButton({ schemaType }: { schemaType: ToolbarAnnotationSchemaType })
 						aria-label={labels.addLink}
 						disabled={button.snapshot.matches("disabled")}
 						size="icon-sm"
-						variant="ghost"
+						variant="quiet"
 					>
 						<LinkIcon />
 					</Button>
@@ -401,7 +401,9 @@ function LinkButton({ schemaType }: { schemaType: ToolbarAnnotationSchemaType })
 						</div>
 					</PopoverBody>
 					<PopoverFooter>
-						<Button type="submit">{labels.addLink}</Button>
+						<Button variant="solid" type="submit">
+							{labels.addLink}
+						</Button>
 					</PopoverFooter>
 				</form>
 			</PopoverContent>

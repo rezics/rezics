@@ -230,6 +230,7 @@ function ReplyPostNode({
 							<RequestFailure error={update.error} />
 							<div className="flex flex-wrap gap-2">
 								<Button
+									variant="solid"
 									type="submit"
 									size="sm"
 									disabled={!body.length || update.isPending}
@@ -240,7 +241,7 @@ function ReplyPostNode({
 								<Button
 									type="button"
 									size="sm"
-									variant="ghost"
+									variant="quiet"
 									onClick={() => setEditing(false)}
 								>
 									{t.posts.cancel}
@@ -262,7 +263,7 @@ function ReplyPostNode({
 							<Button
 								type="button"
 								size="xs"
-								variant="ghost"
+								variant="quiet"
 								onClick={() => setReplying((value) => !value)}
 							>
 								{t.posts.reply}
@@ -273,7 +274,7 @@ function ReplyPostNode({
 								<Button
 									type="button"
 									size="xs"
-									variant="ghost"
+									variant="quiet"
 									onClick={() => {
 										setBody(readPortableText(reply.body));
 										setEditing(true);
@@ -283,7 +284,7 @@ function ReplyPostNode({
 								</Button>
 								<AlertDialog>
 									<AlertDialogTrigger asChild>
-										<Button type="button" size="xs" variant="ghost">
+										<Button type="button" size="xs" variant="quiet">
 											{t.posts.delete}
 										</Button>
 									</AlertDialogTrigger>
@@ -358,7 +359,7 @@ function ReplyPostNode({
 				</div>
 			)}
 			{reply.hasMoreChildren && (
-				<Button className="mb-3 ms-3 w-fit sm:ms-5" size="xs" variant="ghost" asChild>
+				<Button className="mb-3 ms-3 w-fit sm:ms-5" size="xs" variant="quiet" asChild>
 					<Link href={postHref(reply.id, realmId, "replies")}>{t.actions.loadMore}</Link>
 				</Button>
 			)}
@@ -419,6 +420,7 @@ function ReplyPostComposer({
 				/>
 				<RequestFailure error={create.error} />
 				<Button
+					variant="solid"
 					type="submit"
 					className="w-fit"
 					size="sm"

@@ -109,7 +109,7 @@ function ProgressList() {
 											)}
 											<AlertDialog>
 												<AlertDialogTrigger asChild>
-													<Button size="sm" variant="ghost">
+													<Button size="sm" variant="quiet">
 														{t.engagement.removeProgress}
 													</Button>
 												</AlertDialogTrigger>
@@ -243,7 +243,12 @@ export function ProgressRecordForm({ unitId }: { unitId: string }) {
 						<RequestFailure error={record.error} fallback={t.ui.retryLater} />
 					)}
 					<RequestFailure error={save.error} fallback={t.ui.retryLater} />
-					<Button disabled={!available} isLoading={save.isPending} type="submit">
+					<Button
+						variant="solid"
+						disabled={!available}
+						isLoading={save.isPending}
+						type="submit"
+					>
 						{t.engagement.updateProgress}
 					</Button>
 				</form>

@@ -54,7 +54,7 @@ export function SlugAddressForm({
 				</Field>
 				<RequestFailure error={error} />
 				{saved ? <p className="text-success-foreground text-sm">{t.ui.saved}</p> : null}
-				<Button className="w-fit" isLoading={isPending} type="submit">
+				<Button variant="solid" className="w-fit" isLoading={isPending} type="submit">
 					{t.ui.save}
 				</Button>
 			</FieldGroup>

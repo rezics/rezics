@@ -1,11 +1,29 @@
-import { Button as SharkButton, type ButtonProps as SharkButtonProps } from "../ui/button";
+import {
+	Button as SharkButton,
+	type ButtonProps as SharkButtonProps,
+	buttonVariants as sharkButtonVariants,
+} from "../ui/button";
 import { cn } from "../utils";
+import { quietControlVariants } from "./control-surface";
 
 type SharkButtonVariant = NonNullable<SharkButtonProps["variant"]>;
+export type ButtonVariant =
+	Exclude<SharkButtonVariant, "default" | "ghost"> | "brand" | "quiet" | "solid";
 
 export interface ButtonProps extends Omit<SharkButtonProps, "variant"> {
-	/** Use `brand` only for explicit primary actions such as authentication. */
-	variant?: SharkButtonVariant | "brand";
+	/**
+	 * Project visual policy: controls are `quiet` by default. Filled actions must explicitly use
+	 * `solid`, `brand`, `secondary`, or `destructive`.
+	 */
+	variant?: ButtonVariant;
+}
+
+export interface ButtonStyleProps {
+	className?: string;
+	clickEffect?: SharkButtonProps["clickEffect"];
+	pill?: SharkButtonProps["pill"];
+	size?: SharkButtonProps["size"];
+	variant?: ButtonVariant;
 }
 
 const neutralButtonClassName = [
@@ -18,18 +36,48 @@ const neutralButtonClassName = [
 
 const brandButtonClassName = "border-transparent bg-primary text-white hover:bg-primary/90";
 
-export function Button({ variant = "default", className, ...props }: ButtonProps) {
-	const sharkVariant = variant === "brand" ? "default" : variant;
-	const policyClassName =
-		variant === "brand"
-			? brandButtonClassName
-			: variant === "default"
-				? neutralButtonClassName
-				: undefined;
+function resolveButtonPolicy(variant: ButtonVariant): {
+	className?: string;
+	sharkVariant: SharkButtonVariant;
+} {
+	switch (variant) {
+		case "brand":
+			return { className: brandButtonClassName, sharkVariant: "default" };
+		case "solid":
+			return { className: neutralButtonClassName, sharkVariant: "default" };
+		case "quiet":
+			return {
+				className: quietControlVariants(),
+				sharkVariant: "ghost",
+			};
+		default:
+			return { sharkVariant: variant };
+	}
+}
 
-	return (
-		<SharkButton {...props} className={cn(policyClassName, className)} variant={sharkVariant} />
+export function buttonVariants({
+	className,
+	clickEffect,
+	pill,
+	size,
+	variant = "quiet",
+}: ButtonStyleProps = {}) {
+	const policy = resolveButtonPolicy(variant);
+	return cn(
+		sharkButtonVariants({ clickEffect, pill, size, variant: policy.sharkVariant }),
+		policy.className,
+		className,
 	);
 }
 
-export { buttonVariants } from "../ui/button";
+export function Button({ variant = "quiet", className, ...props }: ButtonProps) {
+	const policy = resolveButtonPolicy(variant);
+
+	return (
+		<SharkButton
+			{...props}
+			className={cn(policy.className, className)}
+			variant={policy.sharkVariant}
+		/>
+	);
+}

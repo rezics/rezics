@@ -133,7 +133,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 						<FavoriteToggle targetId={item.id} />
 						{item.capabilities.canEdit && (
 							<>
-								<Button asChild>
+								<Button variant="solid" asChild>
 									<Link href={`/units/${type}/${item.id}/edit`}>{t.ui.edit}</Link>
 								</Button>
 								{type === "book" && (

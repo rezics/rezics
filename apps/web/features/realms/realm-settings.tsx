@@ -319,7 +319,12 @@ function RealmProfileSettings({ realm }: { realm: GetApiRealmsByRealmIdStatus200
 								</Field>
 							</div>
 							<RequestFailure error={update.error} />
-							<Button type="submit" className="w-fit" isLoading={update.isPending}>
+							<Button
+								variant="solid"
+								type="submit"
+								className="w-fit"
+								isLoading={update.isPending}
+							>
 								{t.ui.save}
 							</Button>
 						</FieldGroup>
@@ -425,6 +430,7 @@ function RealmMember({
 				</Field>
 				<div className="grid gap-2">
 					<Button
+						variant="solid"
 						size="sm"
 						isLoading={update.isPending}
 						onClick={() =>
@@ -610,7 +616,7 @@ function RealmRules({
 									<Button
 										type="button"
 										size="sm"
-										variant="ghost"
+										variant="quiet"
 										disabled={drafts.length === 1}
 										onClick={() =>
 											setDrafts((current) =>
@@ -653,7 +659,7 @@ function RealmRules({
 							>
 								{t.realms.addRule}
 							</Button>
-							<Button type="submit" isLoading={save.isPending}>
+							<Button variant="solid" type="submit" isLoading={save.isPending}>
 								{t.ui.save}
 							</Button>
 						</div>
@@ -755,6 +761,7 @@ function RealmPins({
 						</div>
 						<RequestFailure error={pin.error} />
 						<Button
+							variant="solid"
 							type="submit"
 							className="w-fit"
 							disabled={!target}
@@ -784,7 +791,7 @@ function RealmPins({
 									</div>
 									<Button
 										size="sm"
-										variant="ghost"
+										variant="quiet"
 										isLoading={unpin.isPending}
 										onClick={() =>
 											unpin.mutate(

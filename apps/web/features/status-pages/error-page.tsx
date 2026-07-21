@@ -11,7 +11,7 @@ export function ErrorPage({ reset }: { reset: () => void }) {
 			<div>
 				<h1 className="text-2xl font-bold">{t.state.error}</h1>
 				<p className="text-muted-foreground mt-3">{t.ui.retryLater}</p>
-				<Button className="mt-6" onClick={reset}>
+				<Button variant="solid" className="mt-6" onClick={reset}>
 					{t.actions.retry}
 				</Button>
 			</div>

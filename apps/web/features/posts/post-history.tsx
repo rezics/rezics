@@ -161,6 +161,7 @@ export function PostHistoryPage({ postId }: { postId: string }) {
 										!revision.isCurrent &&
 										currentRevision && (
 											<Button
+												variant="solid"
 												size="sm"
 												disabled={pending}
 												onClick={() =>

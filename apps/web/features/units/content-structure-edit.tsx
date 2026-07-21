@@ -238,7 +238,7 @@ function ContentCreateForm({
 								/>
 							</>
 						)}
-						<Button isLoading={pending} type="submit">
+						<Button variant="solid" isLoading={pending} type="submit">
 							{kind === "chapter"
 								? t.units.content.createChapter
 								: t.units.content.createGroup}
@@ -339,14 +339,14 @@ function ContentStructureEditorRow({
 						name="title"
 						required
 					/>
-					<Button isLoading={pending} size="sm" type="submit">
+					<Button variant="solid" isLoading={pending} size="sm" type="submit">
 						{t.ui.save}
 					</Button>
 					<Button
 						onClick={() => setRenaming(false)}
 						size="sm"
 						type="button"
-						variant="ghost"
+						variant="quiet"
 					>
 						{t.engagement.cancel}
 					</Button>
@@ -381,14 +381,14 @@ function ContentStructureEditorRow({
 								</NativeSelectOption>
 							))}
 					</NativeSelect>
-					<Button isLoading={pending} size="sm" type="submit">
+					<Button variant="solid" isLoading={pending} size="sm" type="submit">
 						{t.ui.save}
 					</Button>
 					<Button
 						onClick={() => setMoving(false)}
 						size="sm"
 						type="button"
-						variant="ghost"
+						variant="quiet"
 					>
 						{t.engagement.cancel}
 					</Button>
@@ -398,7 +398,7 @@ function ContentStructureEditorRow({
 					<span className="min-w-0 flex-1 break-words font-medium">{node.title}</span>
 					<div className="flex shrink-0 flex-wrap gap-1">
 						{node.contentKind === "chapter" && (
-							<Button asChild size="xs" variant="ghost">
+							<Button asChild size="xs" variant="quiet">
 								<Link
 									href={`/units/book/${bookId}/edit/chapters/${node.contentUnitId}`}
 								>
@@ -410,7 +410,7 @@ function ContentStructureEditorRow({
 							onClick={() => setRenaming(true)}
 							size="xs"
 							type="button"
-							variant="ghost"
+							variant="quiet"
 						>
 							{t.units.content.rename}
 						</Button>
@@ -418,7 +418,7 @@ function ContentStructureEditorRow({
 							onClick={() => setMoving(true)}
 							size="xs"
 							type="button"
-							variant="ghost"
+							variant="quiet"
 						>
 							{t.units.content.move}
 						</Button>

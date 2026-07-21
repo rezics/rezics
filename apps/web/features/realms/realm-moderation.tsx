@@ -259,7 +259,7 @@ function RealmModerationPanel({
 								: t.realms.postTargetingUnlocked}
 						</p>
 					</div>
-					<Button type="button" size="sm" variant="ghost" onClick={onClose}>
+					<Button type="button" size="sm" variant="quiet" onClick={onClose}>
 						{t.realms.closeModeration}
 					</Button>
 				</div>
@@ -371,6 +371,7 @@ function RealmModerationPanel({
 
 					<RequestFailure error={moderate.error} />
 					<Button
+						variant="solid"
 						type="submit"
 						className="w-fit"
 						disabled={!annotationValid}

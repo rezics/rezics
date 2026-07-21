@@ -162,7 +162,7 @@ function FollowingContent() {
 											? t.nav.following.unfavorite
 											: t.nav.following.favorite
 									}
-									variant="ghost"
+									variant="quiet"
 								>
 									<Star
 										aria-hidden
@@ -176,7 +176,7 @@ function FollowingContent() {
 									onClick={() => unfollow.mutate({ path: { unitId: item.id } })}
 									size="icon-md"
 									title={t.ui.unfollow}
-									variant="ghost"
+									variant="quiet"
 								>
 									<UserMinus aria-hidden />
 								</Button>

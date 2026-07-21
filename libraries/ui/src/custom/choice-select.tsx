@@ -5,6 +5,7 @@ import { useEffect, type ReactNode } from "react";
 
 import { Select, SelectContent, SelectItem, SelectTrigger } from "../ui/select";
 import { cn } from "../utils";
+import { quietControlVariants } from "./control-surface";
 
 export interface ChoiceOption<Value extends string> {
 	readonly value: Value;
@@ -12,6 +13,17 @@ export interface ChoiceOption<Value extends string> {
 	readonly description?: string;
 	readonly icon?: ReactNode;
 }
+
+/**
+ * `quiet` is the default and stays transparent until interaction. `field` explicitly preserves
+ * a form boundary.
+ */
+export type ChoiceSelectAppearance = "field" | "quiet";
+
+const choiceSelectAppearanceClassNames = {
+	field: "border-input bg-background shadow-sm/5",
+	quiet: quietControlVariants(),
+} as const satisfies Record<ChoiceSelectAppearance, string>;
 
 function isChoiceValue<Value extends string>(
 	options: readonly ChoiceOption<Value>[],
@@ -21,6 +33,7 @@ function isChoiceValue<Value extends string>(
 }
 
 export function ChoiceSelect<Value extends string>({
+	appearance = "quiet",
 	ariaLabel,
 	className,
 	contentClassName,
@@ -32,6 +45,7 @@ export function ChoiceSelect<Value extends string>({
 	triggerIcon,
 	value,
 }: {
+	appearance?: ChoiceSelectAppearance;
 	ariaLabel: string;
 	className?: string;
 	contentClassName?: string;
@@ -70,7 +84,8 @@ export function ChoiceSelect<Value extends string>({
 			<SelectTrigger
 				aria-label={ariaLabel}
 				className={cn(
-					"h-10 min-w-32 rounded-xl border-border bg-background px-3.5 font-semibold shadow-sm/5",
+					"h-10 min-w-32 rounded-xl px-3.5 font-semibold",
+					choiceSelectAppearanceClassNames[appearance],
 					className,
 				)}
 			>
@@ -84,7 +99,7 @@ export function ChoiceSelect<Value extends string>({
 					{selectedLabels.length ? selectedLabels.join(", ") : placeholder}
 				</span>
 			</SelectTrigger>
-			<SelectContent className={cn("min-w-64 p-1.5", contentClassName)}>
+			<SelectContent className={cn("min-w-64 border-transparent p-1.5", contentClassName)}>
 				{options.map((option) => (
 					<SelectItem className="items-start py-2.5" item={option} key={option.value}>
 						{option.icon}

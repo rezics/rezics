@@ -83,7 +83,7 @@ export function ReviewsPage() {
 			<PageHeading
 				title={t.engagement.reviews}
 				action={
-					<Button asChild>
+					<Button variant="solid" asChild>
 						<Link href="/reviews/new">{t.engagement.newReview}</Link>
 					</Button>
 				}
@@ -207,6 +207,7 @@ export function ReviewCreate() {
 					<RequestFailure error={setScore.error} fallback={t.ui.retryLater} />
 					<RequestFailure error={bindScores.error} fallback={t.ui.retryLater} />
 					<Button
+						variant="solid"
 						disabled={!target || !body.length}
 						isLoading={create.isPending || setScore.isPending || bindScores.isPending}
 						type="submit"
@@ -411,7 +412,7 @@ function ReviewEditForm({
 					</FieldGroup>
 					{invalid && <p className="text-destructive text-sm">{t.errors.invalid}</p>}
 					<RequestFailure error={update.error} fallback={t.ui.retryLater} />
-					<Button isLoading={update.isPending} type="submit">
+					<Button variant="solid" isLoading={update.isPending} type="submit">
 						{t.ui.save}
 					</Button>
 				</form>
@@ -475,7 +476,7 @@ function ScorePanel({ targetId, realmId }: { targetId: string; realmId: string }
 								value={score}
 							/>
 						</Field>
-						<Button isLoading={setScore.isPending} type="submit">
+						<Button variant="solid" isLoading={setScore.isPending} type="submit">
 							{t.engagement.setScore}
 						</Button>
 					</form>

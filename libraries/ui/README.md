@@ -6,12 +6,26 @@ This shared UI workspace is the single source of truth for upstream SharkUI comp
 import { Button, PageHeading, QueryPending } from "@rezics/ui";
 ```
 
-Components can also be imported individually:
+Heavy project-owned components can be imported from their explicit custom entry point when they
+need an isolated client bundle:
 
 ```tsx
-import { Button } from "@rezics/ui/button";
-import { PageHeading } from "@rezics/ui/custom/page-heading";
+import { PortableTextEditor } from "@rezics/ui/custom/portable-text-editor";
 ```
+
+## Surface policy
+
+REZICS uses a ghost-first surface system. Static cards and ordinary controls are transparent and
+borderless at rest, then use semantic hover, pressed, selected, and focus states for affordance.
+Floating surfaces use shadow for elevation without an outline. Visible edges are intentional:
+
+- use `border-input` for form-field boundaries;
+- use `border-border-weak` for structural dividers;
+- use an explicit component appearance such as `Card appearance="outlined"` or a filled button
+  variant when the surface needs stronger emphasis.
+
+Import UI components from `@rezics/ui`. The upstream `src/ui` mirror is not a public application
+entry point, so project defaults cannot be bypassed accidentally.
 
 Each frontend app should import the shared theme in its global style entry point and declare the shared component sources for Tailwind scanning:
 

@@ -65,7 +65,7 @@ export function RealmsPage() {
 			<PageHeading
 				title={t.realms.title}
 				action={
-					<Button asChild>
+					<Button variant="solid" asChild>
 						<Link href="/realms/new">{t.realms.create}</Link>
 					</Button>
 				}
@@ -216,7 +216,12 @@ export function RealmCreatePage() {
 							</NativeSelect>
 						</Field>
 						<RequestFailure error={create.error} />
-						<Button type="submit" className="w-fit" isLoading={create.isPending}>
+						<Button
+							variant="solid"
+							type="submit"
+							className="w-fit"
+							isLoading={create.isPending}
+						>
 							{t.realms.create}
 						</Button>
 					</FieldGroup>
@@ -322,7 +327,7 @@ export function RealmDetailPage({ id }: { id: string }) {
 							<p className="mt-1 text-muted-foreground text-sm">{t.feed.trending}</p>
 						</div>
 						{canPost ? (
-							<Button asChild size="sm">
+							<Button variant="solid" asChild size="sm">
 								<Link href={`/posts/new?realmId=${realm.id}`}>
 									{t.posts.create}
 								</Link>
@@ -461,7 +466,7 @@ function RealmActions({
 					</Button>
 				)}
 				{canManage && (
-					<Button asChild>
+					<Button variant="solid" asChild>
 						<Link href={realmSettingsHref(realm)}>{t.realms.settings}</Link>
 					</Button>
 				)}

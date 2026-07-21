@@ -48,7 +48,7 @@ export function FeedCard({ className, ...props }: ComponentProps<"article">) {
 		<Card
 			asChild
 			className={cn(
-				"group/feed-card gap-0 rounded-none border-0 bg-background py-0 shadow-none sm:rounded-2xl",
+				"group/feed-card gap-0 rounded-none py-0 sm:rounded-2xl",
 				"transition-colors hover:bg-surface-hover focus-within:bg-surface-hover",
 				className,
 			)}
@@ -233,7 +233,7 @@ function FeedRealmContext({ realms }: { realms: FeedRealms }) {
 					className="max-w-full gap-1.5 px-1.5 data-[state=open]:bg-accent data-[state=open]:text-accent-foreground"
 					pill
 					size="xs"
-					variant="ghost"
+					variant="quiet"
 				>
 					<AvatarGroup className="-space-x-2">
 						{visibleRealms.map((realm) => (

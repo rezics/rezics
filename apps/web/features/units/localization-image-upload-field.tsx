@@ -206,14 +206,14 @@ export function LocalizationImageUploadField({
 						onClick={() => xhr.current?.abort()}
 						size="sm"
 						type="button"
-						variant="ghost"
+						variant="quiet"
 					>
 						<X aria-hidden className="size-3.5" />
 						{t.media.cancel}
 					</Button>
 				)}
 				{value && (
-					<Button onClick={remove} size="sm" type="button" variant="ghost">
+					<Button onClick={remove} size="sm" type="button" variant="quiet">
 						<Trash2 aria-hidden className="size-3.5" />
 						{t.media.remove}
 					</Button>

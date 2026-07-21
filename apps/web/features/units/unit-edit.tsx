@@ -235,7 +235,7 @@ function UnitEditForm({ type, unit }: { type: UnitType; unit: Unit }) {
 								<FieldLabel>{t.units.detail.license}</FieldLabel>
 								<Input defaultValue={unit.license ?? ""} name="license" />
 							</Field>
-							<Button isLoading={update.isPending} type="submit">
+							<Button variant="solid" isLoading={update.isPending} type="submit">
 								{t.units.editor.saveSettings}
 							</Button>
 							<RequestFailure error={update.error} fallback={t.ui.retryLater} />
@@ -370,7 +370,7 @@ function UnitLocalizationForm({
 						value={cover}
 					/>
 				</Field>
-				<Button isLoading={update.isPending} type="submit">
+				<Button variant="solid" isLoading={update.isPending} type="submit">
 					{t.ui.save}
 				</Button>
 				<RequestFailure error={update.error} fallback={t.ui.retryLater} />

@@ -241,6 +241,7 @@ export function SearchPage() {
 								/>
 							</InputGroup>
 							<Button
+								variant="solid"
 								className="h-14"
 								type="submit"
 								isLoading={search.isFetching && !search.isFetchingNextPage}
@@ -255,7 +256,7 @@ export function SearchPage() {
 						open={filtersOpen}
 					>
 						<CollapsibleTrigger
-							className={buttonVariants({ size: "sm", variant: "ghost" })}
+							className={buttonVariants({ size: "sm" })}
 							type="button"
 						>
 							<SlidersHorizontal data-icon="inline-start" />
@@ -350,7 +351,7 @@ export function SearchPage() {
 										}}
 										size="sm"
 										type="button"
-										variant="ghost"
+										variant="quiet"
 									>
 										{t.search.resetFilters}
 									</Button>

@@ -47,7 +47,6 @@ export function ThemePreferenceMenu({ preference, onChange }: ThemeSelectionProp
 					className="size-11"
 					size="icon-xl"
 					title={t.locale.displayMode}
-					variant="ghost"
 				>
 					<Palette aria-hidden />
 				</Button>

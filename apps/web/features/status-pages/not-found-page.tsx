@@ -15,7 +15,7 @@ export function NotFoundPage() {
 				<p className="text-destructive font-semibold">{StatusCodes.NOT_FOUND}</p>
 				<h1 className="mt-2 text-3xl font-bold">{t.routes.notFoundTitle}</h1>
 				<p className="text-muted-foreground mt-3">{t.routes.notFoundDescription}</p>
-				<Button className="mt-6" asChild>
+				<Button variant="solid" className="mt-6" asChild>
 					<Link href="/">{t.routes.home}</Link>
 				</Button>
 			</div>

@@ -81,7 +81,6 @@ export function UserMenu({
 					className="size-11 rounded-full p-0"
 					size="icon-xl"
 					title={t.nav.userMenu.label}
-					variant="ghost"
 				>
 					<Avatar size="lg">
 						{profile?.avatar ? <AvatarImage alt="" src={profile.avatar.url} /> : null}

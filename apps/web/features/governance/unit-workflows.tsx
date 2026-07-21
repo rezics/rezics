@@ -175,7 +175,7 @@ function AccessInvitationManager({ unitId }: { unitId: string }) {
 							</Field>
 						</div>
 						<RequestFailure error={create.error} />
-						<Button isLoading={create.isPending} type="submit">
+						<Button variant="solid" isLoading={create.isPending} type="submit">
 							{t.governance.invite}
 						</Button>
 					</FieldGroup>
@@ -279,6 +279,7 @@ function ReceivedAccessInvitations() {
 							{invitation.state === "pending" ? (
 								<>
 									<Button
+										variant="solid"
 										onClick={() =>
 											void accept.mutateAsync({
 												path: {
@@ -425,6 +426,7 @@ function AssociationProposalManager({
 						</div>
 						<RequestFailure error={side === "source" ? request.error : invite.error} />
 						<Button
+							variant="solid"
 							isLoading={side === "source" ? request.isPending : invite.isPending}
 							type="submit"
 						>
@@ -465,6 +467,7 @@ function AssociationProposalManager({
 										{receivingSide ? (
 											<>
 												<Button
+													variant="solid"
 													onClick={() =>
 														void accept.mutateAsync({
 															path: {
@@ -592,7 +595,7 @@ function EntityAssociationPolicy({
 							/>
 						) : null}
 						<RequestFailure error={update.error} />
-						<Button isLoading={update.isPending} type="submit">
+						<Button variant="solid" isLoading={update.isPending} type="submit">
 							{t.ui.save}
 						</Button>
 					</FieldGroup>

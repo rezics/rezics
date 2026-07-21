@@ -152,7 +152,7 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 						<Textarea name="summary" defaultValue={current.summary ?? ""} />
 					</Field>
 					{saved && <p className="text-success-foreground text-sm">{t.ui.saved}</p>}
-					<Button type="submit" isLoading={update.isPending}>
+					<Button variant="solid" type="submit" isLoading={update.isPending}>
 						{t.ui.save}
 					</Button>
 				</FieldGroup>
@@ -314,7 +314,7 @@ export function PreferenceSettings() {
 						</NativeSelect>
 					</Field>
 					{saved && <p className="text-success-foreground text-sm">{t.ui.saved}</p>}
-					<Button type="submit" isLoading={update.isPending}>
+					<Button variant="solid" type="submit" isLoading={update.isPending}>
 						{t.ui.save}
 					</Button>
 				</FieldGroup>

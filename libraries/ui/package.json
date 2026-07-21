@@ -7,9 +7,7 @@
 	],
 	"exports": {
 		".": "./src/index.ts",
-		"./*": "./src/ui/*.tsx",
 		"./custom/*": "./src/custom/*.tsx",
-		"./ui/*": "./src/ui/*.tsx",
 		"./utils": "./src/utils.ts",
 		"./use-is-mobile": "./src/use-is-mobile.tsx",
 		"./styles.css": "./src/styles.css"

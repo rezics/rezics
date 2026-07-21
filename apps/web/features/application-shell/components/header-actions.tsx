@@ -25,7 +25,12 @@ export interface HeaderThemeSelection {
 
 function CreateAction({ href, label }: { href: string; label: string }) {
 	return (
-		<Button asChild className="size-11 lg:h-9 lg:w-auto lg:px-3.5" size="icon-xl">
+		<Button
+			variant="solid"
+			asChild
+			className="size-11 lg:h-9 lg:w-auto lg:px-3.5"
+			size="icon-xl"
+		>
 			<AppLink aria-label={label} href={href} title={label}>
 				<Plus aria-hidden data-icon="inline-start" />
 				<span className="hidden lg:inline">{label}</span>
@@ -80,7 +85,7 @@ export function SignedOutHeaderActions({
 			<div className="hidden xl:block">
 				<ChoiceSelect
 					ariaLabel={locale.label}
-					className="h-9 min-w-28"
+					className="h-9 min-w-0 rounded-full px-2.5"
 					onValueChange={([nextLocale]) => {
 						if (nextLocale) locale.onChange(nextLocale);
 					}}

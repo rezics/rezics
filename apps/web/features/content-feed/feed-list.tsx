@@ -6,7 +6,6 @@ import {
 	type GetApiFeedSort,
 } from "@rezics/openapi-tanstack-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { ArrowUpDownIcon } from "lucide-react";
 import { Children, Fragment, useEffect, useRef, useState, type ComponentProps } from "react";
 
 import {
@@ -145,7 +144,7 @@ export function FeedList<ContentKind extends FeedContentKind>({
 				<Alert className="m-3 sm:m-4" variant="destructive">
 					<AlertDescription>{t.state.error}</AlertDescription>
 					<AlertAction>
-						<Button size="sm" variant="ghost" onClick={() => void query.refetch()}>
+						<Button size="sm" variant="quiet" onClick={() => void query.refetch()}>
 							{t.actions.retry}
 						</Button>
 					</AlertAction>
@@ -169,7 +168,7 @@ export function FeedList<ContentKind extends FeedContentKind>({
 							<AlertAction>
 								<Button
 									size="sm"
-									variant="ghost"
+									variant="quiet"
 									onClick={() => void query.fetchNextPage()}
 								>
 									{t.actions.retry}
@@ -240,19 +239,18 @@ export function FeedListControls<ContentKind extends FeedContentKind>({
 	return (
 		<div
 			aria-label={t.feed.filtersLabel}
-			className="flex flex-wrap items-center justify-start gap-2 border-b border-border-weak pb-5"
+			className="flex flex-wrap items-center justify-start gap-1 border-b border-border-weak pb-5"
 			role="group"
 		>
 			{onSortChange ? (
 				<ChoiceSelect
 					ariaLabel={t.feed.sortLabel}
-					className="min-w-32"
+					className="min-w-0 rounded-full px-2.5"
 					onValueChange={([nextSort]) => {
 						if (nextSort) onSortChange(nextSort);
 					}}
 					options={sortOptions}
 					placeholder={t.feed.sortLabel}
-					triggerIcon={<ArrowUpDownIcon aria-hidden className="size-4" />}
 					value={[sort ?? "new"]}
 				/>
 			) : null}

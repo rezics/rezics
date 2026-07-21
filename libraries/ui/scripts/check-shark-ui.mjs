@@ -12,6 +12,11 @@ const SourceDirectories = [
 	path.join(repositoryRoot, "frontend"),
 	path.join(repositoryRoot, "libraries/ui/src/custom"),
 ];
+const projectOwnedOverrides = new Map([
+	["button", "./custom/button"],
+	["card", "./custom/card"],
+	["menu", "./custom/menu"],
+]);
 
 async function getComponentNames(directory) {
 	return (await readdir(directory))
@@ -50,14 +55,21 @@ function findLocations(file, source, expression) {
 	return findings;
 }
 
-const [localComponents, upstreamComponents, indexSource, registrySource, ...uiSources] =
-	await Promise.all([
-		getComponentNames(localComponentsDirectory),
-		getComponentNames(upstreamComponentsDirectory),
-		readFile(path.join(repositoryRoot, "libraries/ui/src/index.ts"), "utf8"),
-		readFile(path.join(repositoryRoot, "libraries/ui/components.json"), "utf8"),
-		...SourceDirectories.map(findSourceFiles),
-	]);
+const [
+	localComponents,
+	upstreamComponents,
+	indexSource,
+	packageSource,
+	registrySource,
+	...uiSources
+] = await Promise.all([
+	getComponentNames(localComponentsDirectory),
+	getComponentNames(upstreamComponentsDirectory),
+	readFile(path.join(repositoryRoot, "libraries/ui/src/index.ts"), "utf8"),
+	readFile(path.join(repositoryRoot, "libraries/ui/package.json"), "utf8"),
+	readFile(path.join(repositoryRoot, "libraries/ui/components.json"), "utf8"),
+	...SourceDirectories.map(findSourceFiles),
+]);
 
 const failures = [];
 const missingLocalComponents = getMissingItems(upstreamComponents, localComponents);
@@ -76,9 +88,10 @@ if (missingLocalComponents.length || unexpectedLocalComponents.length) {
 	);
 }
 
-const missingExports = localComponents.filter(
-	(component) => !indexSource.includes(`export * from "./ui/${component}";`),
-);
+const missingExports = localComponents.filter((component) => {
+	const exportPath = projectOwnedOverrides.get(component) ?? `./ui/${component}`;
+	return !indexSource.includes(`export * from "${exportPath}";`);
+});
 if (missingExports.length) {
 	failures.push(`SharkUI components missing package-root exports: ${missingExports.join(", ")}`);
 }
@@ -86,6 +99,11 @@ if (missingExports.length) {
 const registry = JSON.parse(registrySource);
 if (registry.registries?.["@shark"] !== "https://shark.vini.one/r/{name}.json") {
 	failures.push("components.json must retain the official @shark registry URL.");
+}
+
+const packageManifest = JSON.parse(packageSource);
+if ("./*" in packageManifest.exports || "./ui/*" in packageManifest.exports) {
+	failures.push("Upstream SharkUI internals must not be exposed as public package subpaths.");
 }
 
 const SourcePolicies = [

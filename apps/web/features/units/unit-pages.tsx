@@ -49,7 +49,7 @@ export function UnitBrowsePage({ type }: { type: UnitType }) {
 			<PageHeading
 				title={t.units.types[type]}
 				action={
-					<Button asChild>
+					<Button variant="solid" asChild>
 						<Link href={`/units/${type}/new`}>{t.actions.create}</Link>
 					</Button>
 				}
@@ -219,7 +219,7 @@ export function UnitCreatePage({ type }: { type: UnitType }) {
 							<Input name="license" />
 						</Field>
 						<RequestFailure error={create.error} fallback={t.ui.retryLater} />
-						<Button isLoading={create.isPending} type="submit">
+						<Button variant="solid" isLoading={create.isPending} type="submit">
 							{t.actions.create}
 						</Button>
 					</FieldGroup>

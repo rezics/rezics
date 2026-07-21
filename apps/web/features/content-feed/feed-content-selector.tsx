@@ -66,10 +66,9 @@ export function FeedContentSelector<Value extends string>({
 				<Button
 					aria-label={t.feed.contentFilterLabel}
 					className={cn(
-						"h-10 max-w-[min(18rem,calc(100vw-2rem))] min-w-44 justify-start gap-2 rounded-xl border-border bg-background px-3.5 font-semibold shadow-sm/5",
+						"h-10 max-w-[min(18rem,calc(100vw-2rem))] min-w-44 justify-start gap-2 rounded-full px-3.5 font-semibold",
 						className,
 					)}
-					variant="outline"
 				>
 					<ListFilterIcon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
 					<span className="min-w-0 truncate">{summary}</span>

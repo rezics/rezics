@@ -229,7 +229,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 			id="main-content"
 		>
 			<header className="flex min-w-0 items-center gap-2 border-b bg-background/95 px-3 backdrop-blur sm:px-5">
-				<Button asChild className="size-11 sm:size-10" size="icon-xl" variant="ghost">
+				<Button asChild className="size-11 sm:size-10" size="icon-xl" variant="quiet">
 					<Link aria-label={t.ui.backToUnit} href={`/units/book/${bookId}`}>
 						<ArrowLeftIcon aria-hidden />
 					</Link>
@@ -246,7 +246,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 							aria-label={t.units.content.title}
 							className="size-11 sm:size-10 md:hidden"
 							size="icon-xl"
-							variant="ghost"
+							variant="quiet"
 						>
 							<ListTreeIcon aria-hidden />
 						</Button>
@@ -272,7 +272,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 						disabled={fontSize === 0}
 						onClick={() => setFontSize((value) => Math.max(0, value - 1))}
 						size="icon-xl"
-						variant="ghost"
+						variant="quiet"
 					>
 						<MinusIcon aria-hidden />
 					</Button>
@@ -285,7 +285,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 						disabled={fontSize === 2}
 						onClick={() => setFontSize((value) => Math.min(2, value + 1))}
 						size="icon-xl"
-						variant="ghost"
+						variant="quiet"
 					>
 						<PlusIcon aria-hidden />
 					</Button>
@@ -337,7 +337,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 								<span />
 							)}
 							{query.data.nextChapterId ? (
-								<Button asChild className="min-h-11 sm:min-h-8">
+								<Button variant="solid" asChild className="min-h-11 sm:min-h-8">
 									<Link
 										href={`/units/book/${bookId}/read/${query.data.nextChapterId}`}
 									>
@@ -545,7 +545,7 @@ function ChapterLocalizationForm({
 					variant="document"
 				/>
 				<div className="flex flex-wrap gap-2">
-					<Button isLoading={update.isPending} type="submit">
+					<Button variant="solid" isLoading={update.isPending} type="submit">
 						{t.units.chapter.save}
 					</Button>
 					<RequestFailure error={update.error} fallback={t.ui.retryLater} />

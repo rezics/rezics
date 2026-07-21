@@ -156,6 +156,7 @@ function CollectionFields({
 			<Field>
 				<FieldLabel>{t.ui.visibility}</FieldLabel>
 				<ChoiceSelect
+					appearance="field"
 					ariaLabel={t.ui.visibility}
 					className="w-full"
 					name="visibility"
@@ -171,6 +172,7 @@ function CollectionFields({
 				<Field>
 					<FieldLabel>{t.ui.status}</FieldLabel>
 					<ChoiceSelect
+						appearance="field"
 						ariaLabel={t.ui.status}
 						className="w-full"
 						name="status"
@@ -198,7 +200,7 @@ export function CollectionsPage() {
 			<PageHeading
 				title={t.engagement.collections}
 				action={
-					<Button asChild>
+					<Button variant="solid" asChild>
 						<Link href="/collections/new">{t.engagement.newCollection}</Link>
 					</Button>
 				}
@@ -250,7 +252,7 @@ export function CollectionCreate() {
 				<form className="flex flex-col gap-6" onSubmit={(event) => void submit(event)}>
 					<CollectionFields cover={cover} onCoverChange={setCover} />
 					<RequestFailure error={create.error} fallback={t.ui.retryLater} />
-					<Button isLoading={create.isPending} type="submit">
+					<Button variant="solid" isLoading={create.isPending} type="submit">
 						{t.ui.create}
 					</Button>
 				</form>
@@ -380,6 +382,7 @@ export function CollectionDetail({ id }: { id: string }) {
 								/>
 							</Field>
 							<Button
+								variant="solid"
 								disabled={!target}
 								isLoading={addItem.isPending}
 								onClick={() => void addSelectedItem()}
@@ -412,7 +415,7 @@ export function CollectionDetail({ id }: { id: string }) {
 												<Button
 													isLoading={removeItem.isPending}
 													size="sm"
-													variant="ghost"
+													variant="quiet"
 													onClick={() =>
 														void removeCollectionItem(item.targetId)
 													}
@@ -513,7 +516,7 @@ export function CollectionEdit({ id }: { id: string }) {
 						onCoverChange={setCover}
 					/>
 					<RequestFailure error={update.error} fallback={t.ui.retryLater} />
-					<Button isLoading={update.isPending} type="submit">
+					<Button variant="solid" isLoading={update.isPending} type="submit">
 						{t.ui.save}
 					</Button>
 				</form>

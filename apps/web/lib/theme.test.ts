@@ -72,6 +72,14 @@ describe("app theme", () => {
 		}
 	});
 
+	it("keeps ambient surfaces borderless and reserves visible edges for semantics", () => {
+		for (const colors of Object.values(appTheme)) {
+			expect(colors.border).toBe("transparent");
+			expect(colors.borderWeak).not.toBe("transparent");
+			expect(colors.input).not.toBe("transparent");
+		}
+	});
+
 	it("keeps every solid semantic color pair readable", () => {
 		for (const colors of Object.values(appTheme)) {
 			for (const [background, foreground] of foregroundPairs) {

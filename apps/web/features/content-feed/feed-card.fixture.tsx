@@ -82,7 +82,7 @@ function FeedMenu() {
 					className="data-[state=open]:bg-accent data-[state=open]:text-accent-foreground"
 					pill
 					size="icon-sm"
-					variant="ghost"
+					variant="quiet"
 				>
 					<EllipsisIcon aria-hidden />
 				</Button>
@@ -128,7 +128,7 @@ function DemoActionBar({
 					aria-pressed={vote === "up"}
 					onClick={() => setVote((current) => (current === "up" ? null : "up"))}
 					size="icon-sm"
-					variant={vote === "up" ? "secondary" : "ghost"}
+					variant={vote === "up" ? "secondary" : "quiet"}
 				>
 					<ArrowBigUpIcon aria-hidden />
 				</Button>
@@ -138,12 +138,12 @@ function DemoActionBar({
 					aria-pressed={vote === "down"}
 					onClick={() => setVote((current) => (current === "down" ? null : "down"))}
 					size="icon-sm"
-					variant={vote === "down" ? "secondary" : "ghost"}
+					variant={vote === "down" ? "secondary" : "quiet"}
 				>
 					<ArrowBigDownIcon aria-hidden />
 				</Button>
 			</ButtonGroup>
-			<Button pill size="sm" variant="ghost">
+			<Button pill size="sm" variant="quiet">
 				<MessageCircleIcon aria-hidden data-icon="inline-start" />
 				{comments}
 			</Button>
@@ -152,7 +152,7 @@ function DemoActionBar({
 				onClick={() => setCollected((current) => !current)}
 				pill
 				size="sm"
-				variant={collected ? "secondary" : "ghost"}
+				variant={collected ? "secondary" : "quiet"}
 			>
 				<LibraryIcon aria-hidden data-icon="inline-start" />
 				{collected ? "已收藏" : collectionLabel}
@@ -162,7 +162,7 @@ function DemoActionBar({
 				onClick={() => setShared(true)}
 				pill
 				size="sm"
-				variant={shared ? "secondary" : "ghost"}
+				variant={shared ? "secondary" : "quiet"}
 			>
 				<Share2Icon aria-hidden data-icon="inline-start" />
 				{shared ? "已複製連結" : "分享"}
@@ -174,7 +174,7 @@ function DemoActionBar({
 				onClick={() => setSaved((current) => !current)}
 				pill
 				size="icon-sm"
-				variant={saved ? "secondary" : "ghost"}
+				variant={saved ? "secondary" : "quiet"}
 			>
 				<BookmarkIcon aria-hidden fill={saved ? "currentColor" : "none"} />
 			</Button>

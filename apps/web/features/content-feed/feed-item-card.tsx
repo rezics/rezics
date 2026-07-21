@@ -300,7 +300,7 @@ function FeedItemMeta({
 							className="ms-auto size-11 sm:size-6"
 							pill
 							size="icon-xs"
-							variant="ghost"
+							variant="quiet"
 						>
 							<Ellipsis aria-hidden />
 						</Button>
@@ -353,7 +353,7 @@ function FeedItemActions({
 	const { t } = useTranslation(["ui"]);
 	return (
 		<div className="mt-3 flex items-center gap-1 pt-1 sm:gap-2">
-			<Button className="min-h-11 rounded-lg text-xs sm:min-h-8" size="sm" variant="ghost">
+			<Button className="min-h-11 rounded-lg text-xs sm:min-h-8" size="sm" variant="quiet">
 				<ArrowBigUp aria-hidden data-icon="inline-start" />
 				{Number(item.reactions.upvote) - Number(item.reactions.downvote)}
 			</Button>
@@ -362,7 +362,7 @@ function FeedItemActions({
 					asChild
 					className="min-h-11 rounded-lg text-xs sm:min-h-8"
 					size="sm"
-					variant="ghost"
+					variant="quiet"
 				>
 					<Link href={href} onClick={onOpen}>
 						<MessageCircle aria-hidden data-icon="inline-start" />
@@ -374,7 +374,7 @@ function FeedItemActions({
 				aria-label={t.ui.save}
 				className="ms-auto size-11 rounded-lg sm:size-8"
 				size="icon-sm"
-				variant="ghost"
+				variant="quiet"
 			>
 				<Bookmark aria-hidden />
 			</Button>
@@ -382,7 +382,7 @@ function FeedItemActions({
 				aria-label={t.ui.share}
 				className="size-11 rounded-lg sm:size-8"
 				size="icon-sm"
-				variant="ghost"
+				variant="quiet"
 			>
 				<Share2 aria-hidden />
 			</Button>

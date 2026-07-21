@@ -444,7 +444,13 @@ function RegisterForm({
 						/>
 					</Field>
 					<FormError error={error} />
-					<Button className="w-full" isLoading={isSubmitting} size="xl" type="submit">
+					<Button
+						variant="solid"
+						className="w-full"
+						isLoading={isSubmitting}
+						size="xl"
+						type="submit"
+					>
 						{t.auth.createAccount}
 					</Button>
 				</FieldGroup>
@@ -512,7 +518,13 @@ function ForgotPasswordForm({
 							/>
 						</Field>
 						<FormError error={error} />
-						<Button className="w-full" isLoading={isSubmitting} size="xl" type="submit">
+						<Button
+							variant="solid"
+							className="w-full"
+							isLoading={isSubmitting}
+							size="xl"
+							type="submit"
+						>
 							{t.auth.sendReset}
 						</Button>
 					</FieldGroup>
@@ -610,7 +622,13 @@ function ResetPasswordForm({
 							/>
 						</Field>
 						<FormError error={error} />
-						<Button className="w-full" isLoading={isSubmitting} size="xl" type="submit">
+						<Button
+							variant="solid"
+							className="w-full"
+							isLoading={isSubmitting}
+							size="xl"
+							type="submit"
+						>
 							{t.auth.updatePassword}
 						</Button>
 					</FieldGroup>

@@ -454,7 +454,7 @@ export function AppShell({
 							aria-label={sidebar.open}
 							onClick={() => setMobileSidebarOpen(true)}
 							size="icon-xl"
-							variant="ghost"
+							variant="quiet"
 						>
 							<Menu aria-hidden />
 						</Button>
@@ -487,7 +487,7 @@ export function AppShell({
 									placeholder={search.placeholder}
 									type="search"
 								/>
-								<Button className="sr-only" type="submit">
+								<Button variant="solid" className="sr-only" type="submit">
 									{search.label}
 								</Button>
 							</InputGroup>
@@ -556,7 +556,7 @@ export function AppShell({
 								aria-label={sidebar.close}
 								className="ms-auto"
 								size="icon-md"
-								variant="ghost"
+								variant="quiet"
 							>
 								<X aria-hidden />
 							</Button>

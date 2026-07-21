@@ -49,12 +49,13 @@ export function PwaLifecycle() {
 				</AlertDescription>
 				<AlertAction>
 					{status !== "updating" && (
-						<Button size="sm" variant="ghost" onClick={() => setStatus("idle")}>
+						<Button size="sm" variant="quiet" onClick={() => setStatus("idle")}>
 							{status === "offline-ready" ? t.actions.dismiss : t.actions.later}
 						</Button>
 					)}
 					{status !== "offline-ready" && (
 						<Button
+							variant="solid"
 							isLoading={status === "updating"}
 							size="sm"
 							onClick={() => void update()}

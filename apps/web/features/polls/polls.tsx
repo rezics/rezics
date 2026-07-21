@@ -54,7 +54,7 @@ export function PollsPage() {
 			<PageHeading
 				title={t.engagement.polls}
 				action={
-					<Button asChild>
+					<Button variant="solid" asChild>
 						<Link href="/polls/new">{t.engagement.newPoll}</Link>
 					</Button>
 				}
@@ -167,7 +167,7 @@ export function PollCreate() {
 											disabled={options.length <= 2}
 											size="sm"
 											type="button"
-											variant="ghost"
+											variant="quiet"
 											onClick={() =>
 												setOptions((current) =>
 													current.filter(
@@ -231,7 +231,7 @@ export function PollCreate() {
 					</FieldGroup>
 					{invalid && <p className="text-destructive text-sm">{t.errors.invalid}</p>}
 					<RequestFailure error={create.error} fallback={t.ui.retryLater} />
-					<Button isLoading={create.isPending} type="submit">
+					<Button variant="solid" isLoading={create.isPending} type="submit">
 						{t.ui.create}
 					</Button>
 				</form>
@@ -339,6 +339,7 @@ export function PollDetail({ id }: { id: string }) {
 						) : session ? (
 							<div className="flex flex-wrap gap-2">
 								<Button
+									variant="solid"
 									disabled={!selected.length}
 									isLoading={vote.isPending}
 									type="submit"

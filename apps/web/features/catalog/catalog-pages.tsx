@@ -54,7 +54,7 @@ function CatalogFrame({
 				title={title}
 				action={
 					createHref ? (
-						<Button asChild>
+						<Button variant="solid" asChild>
 							<Link href={createHref}>{t.actions.create}</Link>
 						</Button>
 					) : undefined
@@ -146,7 +146,7 @@ export function EntityDetailPage({ id }: { id: string }) {
 					</p>
 					{localization?.summary && <p>{localization.summary}</p>}
 					{query.data.capabilities.canEdit ? (
-						<Button asChild className="w-fit">
+						<Button variant="solid" asChild className="w-fit">
 							<Link href={`/entities/${query.data.id}/edit`}>{t.ui.edit}</Link>
 						</Button>
 					) : null}
@@ -309,7 +309,12 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 						/>
 					</Field>
 					<RequestFailure error={update.error} />
-					<Button className="w-fit" isLoading={update.isPending} type="submit">
+					<Button
+						variant="solid"
+						className="w-fit"
+						isLoading={update.isPending}
+						type="submit"
+					>
 						{t.ui.save}
 					</Button>
 				</FieldGroup>
@@ -417,7 +422,7 @@ export function EntityCreatePage() {
 						/>
 					</Field>
 					{error && <p className="text-destructive text-sm">{t.ui.retryLater}</p>}
-					<Button type="submit" isLoading={create.isPending}>
+					<Button variant="solid" type="submit" isLoading={create.isPending}>
 						{t.ui.submit}
 					</Button>
 				</FieldGroup>
@@ -479,7 +484,7 @@ export function TagCreatePage() {
 						<Textarea name="summary" maxLength={2000} />
 					</Field>
 					{error && <p className="text-destructive text-sm">{t.ui.retryLater}</p>}
-					<Button type="submit" isLoading={create.isPending}>
+					<Button variant="solid" type="submit" isLoading={create.isPending}>
 						{t.ui.submit}
 					</Button>
 				</FieldGroup>
