@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { forwardRef, useEffect, type ComponentPropsWithoutRef, type ReactNode } from "react";
 import {
 	getApiUsersMePreferencesQueryKey,
+	useGetApiUsersMe,
 	useGetApiUsersMePreferences,
 	useGetApiUsersMeFollowing,
 	usePutApiUsersMePreferences,
@@ -15,6 +16,7 @@ import { AppShell as SharedAppShell } from "@rezics/ui";
 import { isUiLocale, toContentLanguage, toStoredUiLocale, toUiLocale } from "@rezics/i18n";
 
 import { useAuthPortal } from "@/features/auth/auth-portal";
+import { profileHref } from "@/features/profiles/profile-route";
 import { useSetLocale, useTranslation } from "@/i18n/client";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { isSidebarFollowingKind, sidebarFollowingHref } from "./sidebar-following";
@@ -74,6 +76,7 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 	]);
 	const { setLocale } = useSetLocale();
 	const queryClient = useQueryClient();
+	const currentProfile = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
 	const preferences = useGetApiUsersMePreferences({ query: { enabled: Boolean(session) } });
 	const followingLanguage = toContentLanguage(locale.target);
 	const followedZones = useGetApiUsersMeFollowing(
@@ -104,8 +107,12 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 		<SharedAppShell
 			brandName={t.brand.name}
 			account={{
-				href: session ? "/settings/profile" : "/login",
-				label: session ? t.actions.account : t.actions.login,
+				href: session
+					? currentProfile.data
+						? profileHref(currentProfile.data.id)
+						: "/settings/profile"
+					: "/login",
+				label: session ? t.ui.profile : t.actions.login,
 				icon: UserRound,
 				variant: session ? "ghost" : "brand",
 			}}

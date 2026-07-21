@@ -3,6 +3,8 @@ import {
 	type GetApiUsersMeFollowingStatus200ItemsKindEnum as FollowingKind,
 } from "@rezics/openapi-tanstack-query";
 
+import { profileHref } from "@/features/profiles/profile-route";
+
 export const FollowingKinds = Object.values(GetApiUsersMeFollowingStatus200ItemsKindEnum);
 
 export function followingHref(kind: FollowingKind, id: string): string | undefined {
@@ -12,7 +14,7 @@ export function followingHref(kind: FollowingKind, id: string): string | undefin
 		case "realm":
 			return `/realms/${id}`;
 		case "profile":
-			return `/users/${id}`;
+			return profileHref(id);
 		case "book":
 		case "software":
 		case "media":

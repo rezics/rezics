@@ -36,6 +36,7 @@ import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { PageHeading } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
+import { profileHref } from "@/features/profiles/profile-route";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import type { UnitType } from "@/features/units/unit-types";
@@ -191,7 +192,7 @@ function AccessInvitationManager({ unitId }: { unitId: string }) {
 						<div className="rounded-lg border p-4 text-sm" key={invitation.id}>
 							<div className="flex flex-wrap items-center justify-between gap-3">
 								<div className="grid gap-1">
-									<Link href={`/users/${invitation.invitedProfileId}`}>
+									<Link href={profileHref(invitation.invitedProfileId)}>
 										{invitation.invitedProfileId}
 									</Link>
 									<span className="text-muted-foreground">

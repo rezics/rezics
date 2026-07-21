@@ -26,6 +26,7 @@ import {
 } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { profileHref } from "@/features/profiles/profile-route";
 import { invalidatePostQueries } from "./query";
 
 export function PostHistoryPage({ postId }: { postId: string }) {
@@ -109,7 +110,7 @@ export function PostHistoryPage({ postId }: { postId: string }) {
 												{t.posts.revisionBy}{" "}
 												<Link
 													className="text-link hover:text-link-hover"
-													href={`/users/${revision.actorProfileId}`}
+													href={profileHref(revision.actorProfileId)}
 												>
 													{revision.actorName ??
 														revision.actorProfileId.slice(0, 8)}

@@ -43,6 +43,7 @@ import {
 } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import { profileHref } from "@/features/profiles/profile-route";
 import { searchParamsParsers, SearchScopes } from "@/lib/search-params";
 
 type SearchHit = PostApiSearchByIndexStatus200["hits"][number];
@@ -62,7 +63,7 @@ function readSearchLanguage(value: string | null): SearchLanguage {
 function searchHitHref(index: string, hit: SearchHit) {
 	switch (index) {
 		case "users":
-			return `/users/${hit.id}`;
+			return profileHref(hit.id);
 		case "realms":
 			return `/realms/${hit.id}`;
 		case "posts":
