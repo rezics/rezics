@@ -3,8 +3,14 @@ STUDY DEEPLY BEFORE ANYTHING, PROACTIVELY RESEARCH ONLINE TO ENSURE BEST PRACTIC
 # AI Agent Instructions
 
 - Read [CONTRIBUTING.md](./CONTRIBUTING.md) before making changes.
-- Put all agent-generated temporary artifacts under `.temp/`, including design-QA screenshots, comparisons, reports, and any notes or checklists used to keep implementation aligned with an agreed plan. Remove artifacts created for the current task before finishing unless the user explicitly asks to retain them; never delete pre-existing or user-provided files.
+- Put all agent-generated temporary artifacts under `.temp/`, including reports and any notes or checklists used to keep implementation aligned with an agreed plan. Remove artifacts created for the current task before finishing unless the user explicitly asks to retain them; never delete pre-existing or user-provided files.
 - This is still in the development phase, so unless specifically requested, any changes should not include any compatibility measures for legacy code.
+
+## Frontend verification
+
+- Do not automatically perform AI-assisted browser, screenshot, visual, or design QA after frontend changes. This includes starting a frontend server solely for validation, controlling a browser, capturing or comparing rendered output, and assessing visual fidelity, responsive layout, or rendered interactions. Perform this validation only when the user explicitly requests it in the current task; otherwise, frontend acceptance belongs to the human maintainer.
+- Before handing off a frontend change, run the affected frontend workspace's TypeScript check at minimum. TypeScript errors and equivalent deterministic code-integrity failures are not acceptable. Run narrower non-rendering checks when they directly cover changed logic, but report them only as code-integrity evidence, not as frontend acceptance.
+- Do not remove, disable, or weaken deterministic repository checks or CI to implement this policy. They are code-integrity gates, not AI frontend acceptance.
 
 ## Project stack
 
