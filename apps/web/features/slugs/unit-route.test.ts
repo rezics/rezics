@@ -1,5 +1,6 @@
 import {
-	canonicalHrefFromShortPath,
+	publicSlugHref,
+	publicUnitIdHref,
 	PublicSlugRouteManifest,
 	TopLevelSlugNamespaceUnitIds,
 } from "@rezics/slug";
@@ -9,18 +10,30 @@ import { realmHref, zoneHref } from "./unit-route";
 
 describe("public Unit slug routes", () => {
 	it("keeps every enabled namespace and prefix unique", () => {
-		for (const key of [
-			"namespaceSlug",
-			"namespaceUnitId",
-			"canonicalSegment",
-			"shortSegment",
-		] as const)
+		for (const key of ["namespaceSlug", "namespaceUnitId", "idSegment", "slugSegment"] as const)
 			expect(new Set(PublicSlugRouteManifest.map((route) => route[key])).size).toBe(
 				PublicSlugRouteManifest.length,
 			);
+		expect(
+			PublicSlugRouteManifest.map(({ targetKind, idSegment, slugSegment }) => ({
+				targetKind,
+				idSegment,
+				slugSegment,
+			})),
+		).toEqual([
+			{ targetKind: "profile", idSegment: "user", slugSegment: "u" },
+			{ targetKind: "realm", idSegment: "realm", slugSegment: "r" },
+			{ targetKind: "zone", idSegment: "zone", slugSegment: "z" },
+		]);
 	});
 
-	it("prefers enabled canonical and short routes", () => {
+	it("uses long routes only for IDs", () => {
+		expect(publicUnitIdHref("profile", "profile-id")).toBe("/user/profile-id");
+		expect(publicUnitIdHref("realm", "realm-id")).toBe("/realm/realm-id");
+		expect(publicUnitIdHref("zone", "zone-id")).toBe("/zone/zone-id");
+	});
+
+	it("prefers enabled slug routes", () => {
 		const realm = {
 			id: "realm-id",
 			slugAddress: {
@@ -37,10 +50,8 @@ describe("public Unit slug routes", () => {
 				canonicalPath: ["zones", "summer"],
 			},
 		};
-		expect(realmHref(realm)).toBe("/realm/art");
-		expect(realmHref(realm, "short")).toBe("/r/art");
-		expect(zoneHref(zone)).toBe("/zone/summer");
-		expect(zoneHref(zone, "short")).toBe("/z/summer");
+		expect(realmHref(realm)).toBe("/r/art");
+		expect(zoneHref(zone)).toBe("/z/summer");
 	});
 
 	it("falls back to IDs when the address proof does not match the route", () => {
@@ -53,12 +64,16 @@ describe("public Unit slug routes", () => {
 					canonicalPath: ["realms", "art"],
 				},
 			}),
-		).toBe("/realms/realm-id");
+		).toBe("/realm/realm-id");
 	});
 
-	it("keeps the short-link manifest closed to unenabled nested routes", () => {
-		expect(canonicalHrefFromShortPath("u", ["alice"])).toBe("/user/alice");
-		expect(canonicalHrefFromShortPath("u", ["alice", "favorites"])).toBeUndefined();
-		expect(canonicalHrefFromShortPath("c", ["collection"])).toBeUndefined();
+	it("keeps unenabled nested slug routes closed", () => {
+		expect(
+			publicSlugHref("profile", {
+				slug: "favorites",
+				scopeUnitId: "profile-id",
+				canonicalPath: ["users", "alice", "favorites"],
+			}),
+		).toBeUndefined();
 	});
 });

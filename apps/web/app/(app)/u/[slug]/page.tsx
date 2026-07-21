@@ -1,13 +1,13 @@
 import { notFound, permanentRedirect } from "next/navigation";
 
+import { ProfilePage } from "@/features/profiles/profile-page";
 import { resolvePublicSlug } from "@/features/slugs/resolve-public-slug.server";
-import { ZonePage } from "@/features/zones/zone-page";
 
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
 	const { slug } = await params;
-	const resolved = await resolvePublicSlug("zone", slug);
+	const resolved = await resolvePublicSlug("profile", slug);
 	if (!resolved) notFound();
-	if (resolved.redirected || resolved.canonicalHref !== `/zone/${slug}`)
+	if (resolved.redirected || resolved.canonicalHref !== `/u/${slug}`)
 		permanentRedirect(resolved.canonicalHref);
-	return <ZonePage id={resolved.id} />;
+	return <ProfilePage />;
 }

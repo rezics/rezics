@@ -6,6 +6,7 @@ import {
 	toContentLanguage,
 	type ContentLanguage,
 } from "@rezics/i18n";
+import { publicSlugHref } from "@rezics/slug";
 
 import {
 	getApiRealmsByRealmIdMembersQueryKey,
@@ -28,6 +29,7 @@ import type { PortableTextDocument } from "@rezics/block";
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { EntityPicker } from "@rezics/ui";
@@ -150,11 +152,18 @@ function RealmSettingsContent({ id }: { id: string }) {
 
 function RealmProfileSettings({ realm }: { realm: GetApiRealmsByRealmIdStatus200 }) {
 	const { t, locale } = useTranslation(["errors", "media", "realms", "state", "ui"]);
+	const router = useRouter();
 	const queryClient = useQueryClient();
 	const update = usePatchApiRealmsByRealmId();
 	const replaceSlug = useReplaceRealmSlugAddress({
 		mutation: {
-			onSuccess: () => invalidateRealmDetails(queryClient, realm.id),
+			onSuccess: async (address) => {
+				await invalidateRealmDetails(queryClient, realm.id);
+				const { scopeUnitId } = address;
+				if (!scopeUnitId) return;
+				const slugHref = publicSlugHref("realm", { ...address, scopeUnitId });
+				if (slugHref) router.replace(`${slugHref}/settings`);
+			},
 		},
 	});
 	const localization = realm.localizations.find(

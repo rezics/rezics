@@ -45,6 +45,7 @@ import { Input } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
+import { realmHref } from "@/features/slugs/unit-route";
 import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetValue,
@@ -70,7 +71,7 @@ function getItemHref(type: string, id: string) {
 		case "entity":
 			return `/entities/${id}`;
 		case "realm":
-			return `/realms/${id}`;
+			return realmHref({ id });
 		case "post":
 			return `/posts/${id}`;
 		case "poll":

@@ -4,13 +4,13 @@ import { TopLevelSlugNamespaceUnitIds } from "@rezics/slug";
 import { profileHref } from "./profile-route";
 
 describe("profile routes", () => {
-	it("uses the id-based profile as the canonical user home", () => {
-		expect(profileHref("profile-id")).toBe("/user/by-id/profile-id");
-		expect(profileHref("profile-id", "profile")).toBe("/user/by-id/profile-id");
+	it("uses the long profile route for an ID-only profile", () => {
+		expect(profileHref("profile-id")).toBe("/user/profile-id");
+		expect(profileHref("profile-id", "profile")).toBe("/user/profile-id");
 	});
 
 	it("keeps profile tabs below the canonical profile route", () => {
-		expect(profileHref("profile-id", "content")).toBe("/user/by-id/profile-id/content");
+		expect(profileHref("profile-id", "content")).toBe("/user/profile-id/content");
 	});
 
 	it("prefers a proved Profile slug address", () => {
@@ -22,8 +22,7 @@ describe("profile routes", () => {
 				canonicalPath: ["users", "alice"],
 			},
 		};
-		expect(profileHref(profile)).toBe("/user/alice");
-		expect(profileHref(profile, "content")).toBe("/user/alice/content");
-		expect(profileHref(profile, "profile", "short")).toBe("/u/alice");
+		expect(profileHref(profile)).toBe("/u/alice");
+		expect(profileHref(profile, "content")).toBe("/u/alice/content");
 	});
 });

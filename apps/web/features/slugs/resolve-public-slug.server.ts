@@ -6,6 +6,7 @@ import {
 	type PublicSlugAddressValue,
 	type PublicSlugTargetKind,
 } from "@rezics/slug";
+import { cache } from "react";
 
 const UuidPattern =
 	/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
@@ -63,7 +64,7 @@ async function readJson(response: Response): Promise<unknown> {
 	}
 }
 
-export async function resolvePublicSlug(
+async function resolvePublicSlugUncached(
 	kind: PublicSlugTargetKind,
 	slug: string,
 ): Promise<ResolvedPublicSlug | null> {
@@ -99,6 +100,8 @@ export async function resolvePublicSlug(
 		redirected: value.redirected || address?.slug !== slug,
 	};
 }
+
+export const resolvePublicSlug = cache(resolvePublicSlugUncached);
 
 export async function getPublicSlugHrefByUnitId(
 	kind: PublicSlugTargetKind,

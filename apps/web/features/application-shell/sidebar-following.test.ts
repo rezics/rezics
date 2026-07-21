@@ -11,7 +11,7 @@ describe("sidebar following model", () => {
 	});
 
 	it("maps each admitted kind to its canonical product route", () => {
-		expect(sidebarFollowingHref("zone", "zone-id")).toBe("/zones/zone-id");
-		expect(sidebarFollowingHref("realm", "realm-id")).toBe("/realms/realm-id");
+		expect(sidebarFollowingHref("zone", "zone-id")).toBe("/zone/zone-id");
+		expect(sidebarFollowingHref("realm", "realm-id")).toBe("/realm/realm-id");
 	});
 });

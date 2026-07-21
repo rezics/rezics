@@ -29,6 +29,7 @@ import {
 } from "@/features/posts/publisher-list";
 import { postHref } from "@/features/posts/url";
 import { profileHref } from "@/features/profiles/profile-route";
+import { realmHref, zoneHref } from "@/features/slugs/unit-route";
 import { invalidateRecommendationQueries } from "@/features/recommendations/query";
 import { recommendationReasonLabel } from "@/features/recommendations/reason";
 import { useRecommendationTracking } from "@/features/recommendations/tracking";
@@ -406,13 +407,13 @@ function unitHref(kind: string, id: string): string | undefined {
 		case "entity":
 			return `/entities/${id}`;
 		case "zone":
-			return `/zones/${id}`;
+			return zoneHref({ id });
 		case "collection":
 			return `/collections/${id}`;
 		case "poll":
 			return `/polls/${id}`;
 		case "realm":
-			return `/realms/${id}`;
+			return realmHref({ id });
 		default:
 			return undefined;
 	}

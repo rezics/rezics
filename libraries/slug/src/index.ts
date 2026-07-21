@@ -23,33 +23,32 @@ export const PublicSlugRouteManifest = [
 	{
 		namespaceSlug: "users",
 		namespaceUnitId: TopLevelSlugNamespaceUnitIds.users,
-		canonicalSegment: "user",
-		shortSegment: "u",
+		idSegment: "user",
+		slugSegment: "u",
 		targetKind: "profile",
 		targetDepth: 2,
 	},
 	{
 		namespaceSlug: "realms",
 		namespaceUnitId: TopLevelSlugNamespaceUnitIds.realms,
-		canonicalSegment: "realm",
-		shortSegment: "r",
+		idSegment: "realm",
+		slugSegment: "r",
 		targetKind: "realm",
 		targetDepth: 2,
 	},
 	{
 		namespaceSlug: "zones",
 		namespaceUnitId: TopLevelSlugNamespaceUnitIds.zones,
-		canonicalSegment: "zone",
-		shortSegment: "z",
+		idSegment: "zone",
+		slugSegment: "z",
 		targetKind: "zone",
 		targetDepth: 2,
 	},
 ] as const;
 
 export type PublicSlugTargetKind = (typeof PublicSlugRouteManifest)[number]["targetKind"];
-export type PublicSlugCanonicalSegment =
-	(typeof PublicSlugRouteManifest)[number]["canonicalSegment"];
-export type PublicSlugShortSegment = (typeof PublicSlugRouteManifest)[number]["shortSegment"];
+export type PublicUnitIdSegment = (typeof PublicSlugRouteManifest)[number]["idSegment"];
+export type PublicSlugSegment = (typeof PublicSlugRouteManifest)[number]["slugSegment"];
 
 export interface PublicSlugAddressValue {
 	readonly slug: string;
@@ -57,12 +56,9 @@ export interface PublicSlugAddressValue {
 	readonly canonicalPath: readonly string[];
 }
 
-export type PublicSlugHrefStyle = "canonical" | "short";
-
 export function publicSlugHref(
 	kind: PublicSlugTargetKind,
 	address: PublicSlugAddressValue | null | undefined,
-	style: PublicSlugHrefStyle = "canonical",
 ): string | undefined {
 	if (!address || !isSlugLabel(address.slug)) return undefined;
 	if (
@@ -80,22 +76,11 @@ export function publicSlugHref(
 			candidate.targetDepth === address.canonicalPath.length,
 	);
 	if (!route || route.namespaceUnitId !== address.scopeUnitId) return undefined;
-	const prefix = style === "canonical" ? route.canonicalSegment : route.shortSegment;
-	return `/${[prefix, ...address.canonicalPath.slice(1)].join("/")}`;
+	return `/${[route.slugSegment, ...address.canonicalPath.slice(1)].join("/")}`;
 }
 
-export function canonicalHrefFromShortPath(
-	shortSegment: string,
-	path: readonly string[],
-): string | undefined {
-	const route = PublicSlugRouteManifest.find(
-		(candidate) => candidate.shortSegment === shortSegment,
-	);
-	if (
-		!route ||
-		path.length !== route.targetDepth - 1 ||
-		path.some((segment) => !isSlugLabel(segment))
-	)
-		return undefined;
-	return `/${[route.canonicalSegment, ...path].join("/")}`;
+export function publicUnitIdHref(kind: PublicSlugTargetKind, unitId: string): string {
+	const route = PublicSlugRouteManifest.find((candidate) => candidate.targetKind === kind);
+	if (!route) throw new Error(`Unsupported public Unit kind: ${kind}`);
+	return `/${route.idSegment}/${encodeURIComponent(unitId)}`;
 }

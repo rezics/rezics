@@ -33,7 +33,7 @@ import { Textarea } from "@rezics/ui";
 import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
 import { FollowButton } from "@/features/following/follow-button";
-import { realmHref } from "@/features/slugs/unit-route";
+import { realmHref, realmSettingsHref } from "@/features/slugs/unit-route";
 import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetValue,
@@ -166,7 +166,7 @@ export function RealmCreatePage() {
 			{
 				onSuccess: async (realm) => {
 					await invalidateRealmDetails(queryClient, realm.id);
-					router.push(`/realms/${realm.id}`);
+					router.push(realmHref(realm));
 				},
 			},
 		);
@@ -462,7 +462,7 @@ function RealmActions({
 				)}
 				{canManage && (
 					<Button asChild>
-						<Link href={`/realms/${realm.id}/settings`}>{t.realms.settings}</Link>
+						<Link href={realmSettingsHref(realm)}>{t.realms.settings}</Link>
 					</Button>
 				)}
 			</div>

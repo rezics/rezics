@@ -73,20 +73,29 @@ and cached by Unit ID.
 ## Public route contract
 
 The compile-time route manifest in `@rezics/slug` is the executable authority
-for enabled mappings. Backend namespace labels remain plural; frontend
-canonical segments are singular.
+for enabled mappings. Backend namespace labels remain plural. Each enabled kind
+has two deliberately distinct frontend address forms:
 
-| Backend namespace | Canonical prefix | Short prefix | Target  | Status  |
-| ----------------- | ---------------- | ------------ | ------- | ------- |
-| `users`           | `/user`          | `/u`         | Profile | Enabled |
-| `realms`          | `/realm`         | `/r`         | Realm   | Enabled |
-| `zones`           | `/zone`          | `/z`         | Zone    | Enabled |
+| Backend namespace | Long ID route     | Short slug route | Target  | Status  |
+| ----------------- | ----------------- | ---------------- | ------- | ------- |
+| `users`           | `/user/{unitId}`  | `/u/{slug}`      | Profile | Enabled |
+| `realms`          | `/realm/{unitId}` | `/r/{slug}`      | Realm   | Enabled |
+| `zones`           | `/zone/{unitId}`  | `/z/{slug}`      | Zone    | Enabled |
 
-Long slug routes are canonical. Short routes permanently redirect to the long
-route. A retained public former slug permanently redirects to the current
-canonical route and therefore must not later be reassigned to another Unit.
-An ID route remains the fallback for an unaddressed Unit and continues to load
-the resource by ID.
+The long route is the stable, always-available identity route. The short route
+exists only for a public slug and is the preferred canonical browser URL while
+that slug exists. Canonical selection is therefore state-dependent:
+
+- An addressed Unit renders at its short slug route. Visiting its long ID route
+  permanently redirects to the current short route while preserving any
+  supported route suffix.
+- An unaddressed Unit renders at its long ID route; there is no slug route to
+  redirect to.
+- A retained former slug permanently redirects to the Unit's current short
+  route and cannot later be reassigned to another Unit.
+
+The backend field `canonicalPath` names the current path in the slug registry;
+it does not imply that frontend slug paths use the long ID-route prefix.
 
 Candidates such as Collection `/collection` and `/c`, Entity `/entity` and
 `/e`, Tag `/tag` and `/t`, Post `/post` and `/p`, Poll `/poll` and `/q`, Book
@@ -107,12 +116,12 @@ scopeUnitId = ownerProfile.id
 canonicalPath = users/{profileSlug}/favorites
 ```
 
-It renders as `/user/{profileSlug}/favorites` and
-`/u/{profileSlug}/favorites`, never through `/collection` or `/c`. Future
-user-owned Collection slugs follow the same Profile-scoped policy. User-scope
-route labels such as `content`, `favorites`, `following`, `settings`, `edit`,
-and `new` must be reserved from arbitrary child addresses; `favorites` may only
-target that Profile's system Favorites Collection.
+It would render at `/u/{profileSlug}/favorites`; an ID-only fallback would use
+`/user/{profileId}/favorites`. It never routes through `/collection` or `/c`.
+Future user-owned Collection slugs follow the same Profile-scoped policy.
+User-scope route labels such as `content`, `favorites`, `following`, `settings`,
+`edit`, and `new` must be reserved from arbitrary child addresses; `favorites`
+may only target that Profile's system Favorites Collection.
 
 ## Assignment contract
 
@@ -146,11 +155,13 @@ target that Profile's system Favorites Collection.
 
 ## Required verification
 
-- The route manifest has unique backend, canonical, and short prefixes.
+- The route manifest has unique backend namespace, long ID, and short slug
+  prefixes.
 - ID and scoped-slug reads resolve to the same Unit and response contract.
 - Wrong-scope and wrong-kind lookups fail without cross-resource disclosure.
 - Nested direct-scope lookup works without ancestor IDs while full-path lookup
   still validates every public ancestor.
-- Canonical, former-slug, short, and ID-fallback routes behave as documented.
+- Current-slug, former-slug, addressed-ID redirect, and unaddressed-ID rendering
+  behave as documented without dropping supported route suffixes.
 - Stored content references remain ID-based while their rendered links prefer
   an enabled canonical slug address.

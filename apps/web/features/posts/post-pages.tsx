@@ -46,6 +46,7 @@ import { ReplyPostThread } from "./reply-thread";
 import { PostList, RelatedPostRecommendations } from "./post-list";
 import { invalidatePostQueries } from "./query";
 import { PublisherLinks } from "./publisher-list";
+import { realmHref } from "@/features/slugs/unit-route";
 import { postHref } from "./url";
 
 type PickedEntity = { id: string; label: string };
@@ -215,7 +216,7 @@ export function PostDetailPage({ id, realmId }: { id: string; realmId?: string }
 						{post.realmId && (
 							<Link
 								className="text-link hover:text-link-hover"
-								href={`/realms/${post.realmId}`}
+								href={realmHref({ id: post.realmId })}
 							>
 								{t.posts.viewRealm}
 							</Link>
