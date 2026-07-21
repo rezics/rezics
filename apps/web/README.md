@@ -9,6 +9,12 @@ ViNext-powered, Next.js-compatible frontend workspace. The current entry point p
 - `lib/` and `i18n/`: Cross-cutting frontend infrastructure that does not belong to a product capability. Route entries may adapt request-derived values into these owners, but ordinary implementation modules should not live under `app/`.
 - `@rezics/ui`: SharkUI and custom shared components in `libraries/ui`; import directly from the package root.
 
+Keep navigation loading boundaries below the shared layout they are allowed to
+replace. Do not add a root `app/loading.tsx`: a root fallback hides the
+application shell and every nested layout during a pending navigation. Put a
+route-specific `loading.tsx` beside the smallest shared layout that can remain
+interactive, and delegate its UI to the owning feature.
+
 ## Common commands
 
 Run from the repository root:
