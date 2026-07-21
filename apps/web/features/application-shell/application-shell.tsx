@@ -22,7 +22,7 @@ import { AppShell as SharedAppShell } from "@rezics/ui";
 import { isUiLocale, toContentLanguage, toStoredUiLocale, toUiLocale } from "@rezics/i18n";
 
 import { useAuthPortal } from "@/features/auth/auth-portal";
-import { followingManagementHref } from "@/features/following/following-route";
+import { followingManagementHref } from "@/features/following/routing/following-route";
 import { profileHref } from "@/features/profiles/profile-route";
 import { useSetLocale, useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";

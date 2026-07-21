@@ -32,7 +32,7 @@ import { Skeleton } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
-import { FollowButton } from "@/features/following/follow-button";
+import { FollowButton } from "@/features/following/components/follow-button";
 import { realmHref, realmSettingsHref } from "@/features/slugs/unit-route";
 import {
 	LocalizationImageUploadField,

@@ -11,7 +11,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
-import { invalidateFollowingQueries } from "./following-cache";
+import { invalidateFollowingQueries } from "../data/following-cache";
 
 export function FollowButton({
 	unitId,

@@ -5,7 +5,7 @@ import { toContentLanguage } from "@rezics/i18n";
 import { useGetApiZonesByZoneId } from "@rezics/openapi-tanstack-query";
 
 import { Avatar, AvatarFallback, AvatarImage, Cover, QueryFailure, QueryPending } from "@rezics/ui";
-import { FollowButton } from "@/features/following/follow-button";
+import { FollowButton } from "@/features/following/components/follow-button";
 import { useTranslation } from "@/i18n/client";
 import { selectLocalization } from "@/lib/localization";
 

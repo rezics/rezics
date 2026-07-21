@@ -24,14 +24,14 @@ import { useQueryState } from "nuqs";
 import { RequireSession } from "@/features/auth/require-session";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
-import { invalidateFollowingQueries } from "./following-cache";
+import { invalidateFollowingQueries } from "../data/following-cache";
 import {
 	AllFollowingKinds,
 	followingFilterParser,
 	FollowingKinds,
 	followingHref,
 	type FollowingFilter,
-} from "./following-route";
+} from "../routing/following-route";
 
 export function FollowingPage() {
 	return (
