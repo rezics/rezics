@@ -17907,7 +17907,7 @@ export function getApiCollectionsQueryOptions(
 }
 
 /**
- * @summary List public collections
+ * @summary List collections
  * {@link /api/collections}
  */
 export function useGetApiCollections<

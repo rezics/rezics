@@ -4,6 +4,15 @@
 	"exportPath": "../../.temp/cosmos-export",
 	"globalImports": ["./styles/global.css"],
 	"staticPath": "public",
+	"ui": {
+		"responsivePreview": {
+			"devices": [
+				{ "label": "Mobile · 390", "width": 390, "height": 844 },
+				{ "label": "Tablet · 768", "width": 768, "height": 1024 },
+				{ "label": "Desktop · 1280", "width": 1280, "height": 900 }
+			]
+		}
+	},
 	"vite": {
 		"configPath": "./cosmos.vite.config.ts"
 	}

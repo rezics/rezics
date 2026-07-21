@@ -62666,7 +62666,7 @@
 		},
 		"/api/collections": {
 			"get": {
-				"summary": "List public collections",
+				"summary": "List collections",
 				"tags": ["Collections"],
 				"parameters": [
 					{

@@ -1,8 +1,6 @@
 "use client";
 
 import type { GetApiFeedSort } from "@rezics/openapi-tanstack-query";
-import { resources } from "@rezics/i18n/resources";
-import type { TranslationSnapshot } from "native-i18n";
 import { useState, type ReactNode } from "react";
 
 import { Badge } from "@rezics/ui";
@@ -12,8 +10,9 @@ import {
 	FeedCardContent,
 	FeedCardHeader,
 	FeedCardTitle,
+	type FeedActor,
+	type FeedRealm,
 } from "@/features/content-feed/feed-card";
-import { author, realms, reviewer } from "@/features/content-feed/feed-card.mock";
 import { FeedListControls, FeedListItems } from "@/features/content-feed/feed-list";
 import {
 	DefaultFeedContentKinds,
@@ -23,38 +22,7 @@ import {
 	type FeedContentKind,
 	type PostListContentKind,
 } from "@/features/content-feed/feed-kind";
-import { TranslationProvider } from "@/i18n/client";
-
-const feedTranslations = await resources.loaders["zh-Hant"].feed();
-const feedTranslationSnapshot = {
-	locale: { current: "zh-Hant", target: "zh-Hant" },
-	namespaces: { feed: feedTranslations },
-	context: { locale: "zh-Hant", timeZone: "Asia/Taipei" },
-} satisfies TranslationSnapshot<typeof resources, "feed">;
-
-function FeedListFixtureCanvas({
-	children,
-	width = "wide",
-}: {
-	children: ReactNode;
-	width?: "wide" | "mobile";
-}) {
-	return (
-		<TranslationProvider<"feed"> initial={feedTranslationSnapshot}>
-			<main className="min-h-screen overflow-x-hidden bg-background p-3 text-foreground sm:p-8">
-				<div
-					className={
-						width === "mobile"
-							? "mx-auto w-[390px] max-w-full min-w-0 bg-background"
-							: "mx-auto w-full max-w-3xl min-w-0 bg-background"
-					}
-				>
-					{children}
-				</div>
-			</main>
-		</TranslationProvider>
-	);
-}
+import { useTranslation } from "@/i18n/client";
 
 function FullFeedListFixture() {
 	const [sort, setSort] = useState<GetApiFeedSort>("best");
@@ -96,28 +64,50 @@ function PostListFixture() {
 }
 
 function MockFeedItems() {
+	const { t } = useTranslation(["feed"]);
+	const actor: FeedActor = {
+		name: t.feed.fixture.publisher,
+		href: "#publisher",
+		initials: t.feed.fixture.publisher.slice(0, 1),
+	};
+	const realms: readonly [FeedRealm, ...FeedRealm[]] = [
+		{
+			id: "fixture-realm",
+			name: t.feed.fixture.realm,
+			href: "#realm",
+			initials: t.feed.fixture.realm.slice(0, 1),
+		},
+	];
 	return (
-		<FeedListItems aria-label="內容動態示例">
+		<FeedListItems aria-label={t.feed.fixture.canvasLabel}>
 			<FeedCard aria-labelledby="fixture-feed-post">
-				<FeedCardHeader actor={author} realms={realms} timestamp="2 小時前" />
+				<FeedCardHeader
+					actor={actor}
+					realms={realms}
+					timestamp={t.feed.fixture.timestamp}
+				/>
 				<FeedCardContent>
 					<Badge className="w-fit" size="sm" variant="outline">
-						主題貼文
+						{t.feed.content.kinds["post:post"]}
 					</Badge>
-					<FeedCardTitle id="fixture-feed-post">
-						為什麼御坂網絡是學園都市最特別的群體意識？
-					</FeedCardTitle>
-					<FeedCardBody>以多個單元與貼文種類組成的完整內容動態。</FeedCardBody>
+					<FeedCardTitle id="fixture-feed-post">{t.feed.fixture.postTitle}</FeedCardTitle>
+					<FeedCardBody>{t.feed.fixture.postBody}</FeedCardBody>
 				</FeedCardContent>
 			</FeedCard>
 			<FeedCard aria-labelledby="fixture-feed-book">
-				<FeedCardHeader actor={reviewer} realms={realms} timestamp="昨天" />
+				<FeedCardHeader
+					actor={actor}
+					realms={realms}
+					timestamp={t.feed.fixture.timestamp}
+				/>
 				<FeedCardContent>
 					<Badge className="w-fit" size="sm" variant="info">
-						書籍
+						{t.feed.content.kinds["unit:book"]}
 					</Badge>
-					<FeedCardTitle id="fixture-feed-book">新約 魔法禁書目錄 15</FeedCardTitle>
-					<FeedCardBody>不同內容種類仍共享一致的列表節奏與分隔。</FeedCardBody>
+					<FeedCardTitle id="fixture-feed-book">
+						{t.feed.fixture.collectionTitle}
+					</FeedCardTitle>
+					<FeedCardBody>{t.feed.fixture.collectionBody}</FeedCardBody>
 				</FeedCardContent>
 			</FeedCard>
 		</FeedListItems>
@@ -125,21 +115,8 @@ function MockFeedItems() {
 }
 
 const fixtures = {
-	"Full feed · bulk actions": (
-		<FeedListFixtureCanvas>
-			<FullFeedListFixture />
-		</FeedListFixtureCanvas>
-	),
-	"Post list · post default": (
-		<FeedListFixtureCanvas>
-			<PostListFixture />
-		</FeedListFixtureCanvas>
-	),
-	"Post list · mobile": (
-		<FeedListFixtureCanvas width="mobile">
-			<PostListFixture />
-		</FeedListFixtureCanvas>
-	),
+	"Full feed · bulk actions": <FullFeedListFixture />,
+	"Post list · post default": <PostListFixture />,
 } satisfies Record<string, ReactNode>;
 
 export default fixtures;

@@ -3766,12 +3766,15 @@ __metadata:
     "@rezics/ui": "workspace:*"
     "@tailwindcss/vite": "npm:^4.3.2"
     "@tanstack/react-query": "npm:^5.101.2"
+    "@testing-library/dom": "npm:10.4.1"
+    "@testing-library/react": "npm:16.3.2"
     "@types/react": "npm:19"
     "@types/react-dom": "npm:19"
     "@vitejs/plugin-react": "npm:^6.0.3"
     "@vitejs/plugin-rsc": "npm:^0.5.27"
     better-auth: "npm:1.7.0-rc.1"
     http-status-codes: "npm:^2.3.0"
+    jsdom: "npm:26.1.0"
     lucide-react: "npm:^1.24.0"
     native-i18n: "npm:0.1.0"
     next: "npm:^16.2.7"
@@ -4664,7 +4667,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/dom@npm:^10.4.1":
+"@testing-library/dom@npm:10.4.1, @testing-library/dom@npm:^10.4.1":
   version: 10.4.1
   resolution: "@testing-library/dom@npm:10.4.1"
   dependencies:
@@ -4680,7 +4683,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/react@npm:^16.3.1":
+"@testing-library/react@npm:16.3.2, @testing-library/react@npm:^16.3.1":
   version: 16.3.2
   resolution: "@testing-library/react@npm:16.3.2"
   dependencies:
@@ -10102,7 +10105,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsdom@npm:^26.1.0":
+"jsdom@npm:26.1.0, jsdom@npm:^26.1.0":
   version: 26.1.0
   resolution: "jsdom@npm:26.1.0"
   dependencies:

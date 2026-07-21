@@ -3358,7 +3358,7 @@ export function deleteApiProgressByUnitIdNodesByNodeId<ThrowOnError extends bool
 }
 
 /**
- * @summary List public collections
+ * @summary List collections
  * {@link /api/collections}
  */
 export function getApiCollections<ThrowOnError extends boolean = true>(

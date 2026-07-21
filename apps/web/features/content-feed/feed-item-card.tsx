@@ -5,23 +5,10 @@ import {
 	usePutApiRecommendationsExclusionsByUnitId,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowBigUp, Bookmark, Ellipsis, EyeOff, MessageCircle, Share2 } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import {
-	Avatar,
-	AvatarFallback,
-	Button,
-	CardContent,
-	cn,
-	Cover,
-	Menu,
-	MenuContent,
-	MenuItem,
-	MenuTrigger,
-	PortableTextContent,
-} from "@rezics/ui";
+import { Avatar, AvatarFallback, CardContent, cn, Cover, PortableTextContent } from "@rezics/ui";
 import {
 	firstPublisher,
 	PublisherLinks,
@@ -35,7 +22,10 @@ import { recommendationReasonLabel } from "@/features/recommendations/reason";
 import { useRecommendationTracking } from "@/features/recommendations/tracking";
 import { useTranslation } from "@/i18n/client";
 import { readPortableText } from "@/lib/block";
+import { getFeedActionPolicy } from "./feed-action-policy";
 import { FeedCard } from "./feed-card";
+import { FeedEngagementBar, FeedOverflowMenu } from "./feed-card-actions";
+import { parseFeedReaction } from "./feed-reaction";
 
 export type FeedItem = GetApiFeedStatus200["items"][number];
 export type FeedPost = Extract<FeedItem, { itemType: "post" }>;
@@ -292,31 +282,11 @@ function FeedItemMeta({
 			) : null}
 			<span>·</span>
 			<span>{timestamp}</span>
-			{canExclude ? (
-				<Menu>
-					<MenuTrigger asChild>
-						<Button
-							aria-label={t.feed.recommendationMenu}
-							className="ms-auto size-11 sm:size-6"
-							pill
-							size="icon-xs"
-							variant="quiet"
-						>
-							<Ellipsis aria-hidden />
-						</Button>
-					</MenuTrigger>
-					<MenuContent>
-						<MenuItem
-							disabled={exclude.isPending}
-							onSelect={markNotInterested}
-							value="not-interested"
-						>
-							<EyeOff aria-hidden />
-							{t.feed.notInterested}
-						</MenuItem>
-					</MenuContent>
-				</Menu>
-			) : null}
+			<FeedOverflowMenu
+				canExclude={canExclude && !exclude.isPending}
+				itemId={item.id}
+				onNotInterested={markNotInterested}
+			/>
 		</div>
 	);
 }
@@ -350,43 +320,22 @@ function FeedItemActions({
 	item: FeedItem;
 	onOpen: () => void;
 }) {
-	const { t } = useTranslation(["ui"]);
+	const policy = getFeedActionPolicy(
+		item.itemType === "post"
+			? { itemType: "post", postKind: item.postKind }
+			: { itemType: "unit", unitKind: item.unitKind },
+	);
 	return (
-		<div className="mt-3 flex items-center gap-1 pt-1 sm:gap-2">
-			<Button className="min-h-11 rounded-lg text-xs sm:min-h-8" size="sm" variant="quiet">
-				<ArrowBigUp aria-hidden data-icon="inline-start" />
-				{Number(item.reactions.upvote) - Number(item.reactions.downvote)}
-			</Button>
-			{item.itemType === "post" && href ? (
-				<Button
-					asChild
-					className="min-h-11 rounded-lg text-xs sm:min-h-8"
-					size="sm"
-					variant="quiet"
-				>
-					<Link href={href} onClick={onOpen}>
-						<MessageCircle aria-hidden data-icon="inline-start" />
-						{item.replyCount}
-					</Link>
-				</Button>
-			) : null}
-			<Button
-				aria-label={t.ui.save}
-				className="ms-auto size-11 rounded-lg sm:size-8"
-				size="icon-sm"
-				variant="quiet"
-			>
-				<Bookmark aria-hidden />
-			</Button>
-			<Button
-				aria-label={t.ui.share}
-				className="size-11 rounded-lg sm:size-8"
-				size="icon-sm"
-				variant="quiet"
-			>
-				<Share2 aria-hidden />
-			</Button>
-		</div>
+		<FeedEngagementBar
+			href={href}
+			initialReaction={parseFeedReaction(item.viewerReaction)}
+			itemId={item.id}
+			onCommentsClick={onOpen}
+			policy={policy}
+			realmId={item.realmId ?? undefined}
+			replyCount={item.itemType === "post" ? Number(item.replyCount) : 0}
+			score={Number(item.reactions.upvote) - Number(item.reactions.downvote)}
+		/>
 	);
 }
 

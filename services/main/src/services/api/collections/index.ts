@@ -38,6 +38,7 @@ import {
 	UpdateCollectionBody,
 } from "./schema";
 import { ensureFavorites, getCollection } from "./service";
+import { canListAllOwnedCollections } from "./list-access";
 import { FavoriteResponse, NoContentResponse, SavedResponse } from "../schema/action-response";
 import {
 	toApiErrorResponse,
@@ -62,7 +63,14 @@ export default new Elysia({ prefix: "/collections" })
 	.use(session)
 	.get(
 		"",
-		async ({ query }) => {
+		async ({ query, request }) => {
+			const viewerId = query.ownerId
+				? (await resolveIdentity(request.headers, "unit:read")).profile?.unitId
+				: undefined;
+			const isOwnerQuery = canListAllOwnedCollections({
+				ownerId: query.ownerId,
+				viewerId,
+			});
 			const items = await database
 				.select({
 					id: collection.id,
@@ -84,8 +92,8 @@ export default new Elysia({ prefix: "/collections" })
 				)
 				.where(
 					and(
-						eq(unit.status, "published"),
-						eq(unit.visibility, "public"),
+						isOwnerQuery ? undefined : eq(unit.status, "published"),
+						isOwnerQuery ? undefined : eq(unit.visibility, "public"),
 						ne(collection.source, "system"),
 						query.ownerId ? eq(collection.ownerProfileId, query.ownerId) : undefined,
 					),
@@ -102,7 +110,7 @@ export default new Elysia({ prefix: "/collections" })
 		{
 			query: ListCollectionsQuery,
 			response: { [StatusCodes.OK]: CollectionListResponse },
-			detail: { summary: "List public collections", tags: ["Collections"] },
+			detail: { summary: "List collections", tags: ["Collections"] },
 		},
 	)
 	.post(
