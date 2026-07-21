@@ -1,13 +1,12 @@
 import { createHash } from "node:crypto";
 
-import { and, desc, eq, max, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, max, sql } from "drizzle-orm";
 import { createSchemaFactory } from "drizzle-orm/zod";
 import { z } from "zod";
 import {
 	CollectionDefinitionDocument,
 	CollectionPresentationDocument,
 	DockDocument,
-	NavigationDocument,
 	PollContentBlock,
 	UnitReferencedBlockDocument,
 	ZoneBoundaryDocument,
@@ -23,13 +22,30 @@ import { PublicationLicenseIds } from "@rezics/license";
 
 import type { DatabaseTransaction } from "../database";
 import type { EntityAuthorization } from "../authorization/entity/authorization";
+import {
+	ContentStructureCheckpointDepth,
+	ContentStructureContentModel,
+	ContentStructureDeltaSchema,
+	ContentStructureLargeDeltaBytes,
+	ContentStructureLogicalStateSchema,
+	applyContentStructureDelta,
+	contentStructureSlotRole,
+	parseContentStructureSlotRole,
+	type ContentStructureDelta,
+	type ContentStructureLogicalState,
+} from "../content-structure/contracts";
+import {
+	detachContentStructureZonePageTargets,
+	loadContentStructureSnapshot,
+	restoreContentStructureStates,
+} from "../content-structure/storage";
 import { isPrimaryUnitLocalization } from "./localization";
 import {
 	auditEvent,
 	book,
 	collection,
 	collectionItem,
-	contentStructureNode,
+	contentStructure,
 	entity,
 	software,
 	softwareRequirement,
@@ -40,7 +56,6 @@ import {
 	post,
 	profile,
 	realm,
-	realmNavigation,
 	realmPin,
 	realmRule,
 	realmRuleRevision,
@@ -59,13 +74,14 @@ import {
 	unitLink,
 	unitLocalization,
 	unitRevision,
+	unitRevisionComponentHead,
 	unitRevisionHead,
 	unitRevisionSlot,
+	UnitRevisionSlotRoleValues,
 	unitRevisionTag,
 	unitTag,
 	unitVariant,
 	zone,
-	zoneNavigation,
 	zonePage,
 } from "../database/schema";
 import { isFractionalPosition } from "../ordering/position";
@@ -95,7 +111,6 @@ const ZoneBoundaryDocumentSchema = createDocumentSchema(ZoneBoundaryDocument);
 const ZoneThemeDocumentSchema = createDocumentSchema(ZoneThemeDocument);
 const UnitReferencedBlockDocumentSchema = createDocumentSchema(UnitReferencedBlockDocument);
 const DockDocumentSchema = createDocumentSchema(DockDocument);
-const NavigationDocumentSchema = createDocumentSchema(NavigationDocument);
 const FractionalPositionSchema = z.string().refine(isFractionalPosition);
 const RuleSnapshotSchema = z.object({
 	requireOnJoin: z.boolean(),
@@ -127,13 +142,10 @@ const UnitSnapshotSchema = z.object({
 		seriesReleases: z.array(SnapshotRowSchema),
 		softwareRequirements: z.array(SnapshotRowSchema),
 		collectionItems: z.array(SnapshotRowSchema),
-		contentStructureNodes: z.array(SnapshotRowSchema),
 		pollOptions: z.array(SnapshotRowSchema),
 		realmPins: z.array(SnapshotRowSchema),
 		docks: z.array(SnapshotRowSchema),
-		realmNavigations: z.array(SnapshotRowSchema),
 		zonePages: z.array(SnapshotRowSchema),
-		zoneNavigations: z.array(SnapshotRowSchema),
 		realmUnit: z.array(SnapshotRowSchema),
 		realmRules: RuleSnapshotSchema.nullable(),
 	}),
@@ -232,9 +244,6 @@ const softwareRequirementRowSchema = schemaFactory.createSelectSchema(softwareRe
 const collectionItemRowSchema = schemaFactory.createSelectSchema(collectionItem, {
 	position: FractionalPositionSchema,
 });
-const contentStructureNodeRowSchema = schemaFactory.createSelectSchema(contentStructureNode, {
-	position: FractionalPositionSchema,
-});
 const pollOptionRowSchema = schemaFactory
 	.createSelectSchema(pollOption, {
 		sourceKind: z.enum(PollOptionSourceKindValues),
@@ -253,15 +262,9 @@ const unitDockRowSchema = schemaFactory.createSelectSchema(unitDock, {
 	surface: z.enum(DockSurfaceValues),
 	document: DockDocumentSchema,
 });
-const realmNavigationRowSchema = schemaFactory.createSelectSchema(realmNavigation, {
-	document: NavigationDocumentSchema,
-});
 const zonePageRowSchema = schemaFactory.createSelectSchema(zonePage, {
 	document: UnitReferencedBlockDocumentSchema,
 	position: FractionalPositionSchema,
-});
-const zoneNavigationRowSchema = schemaFactory.createSelectSchema(zoneNavigation, {
-	document: NavigationDocumentSchema,
 });
 
 function parseSnapshotState(
@@ -342,6 +345,7 @@ async function snapshotExtension(
 				(await tx.select().from(poll).where(eq(poll.id, unitId)).limit(1))[0],
 			);
 		case "tag":
+		case "label":
 		case "realm_rule":
 		case "slug_namespace":
 			return null;
@@ -452,11 +456,6 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 						.where(eq(collectionItem.collectionId, unitId))
 						.orderBy(collectionItem.position, collectionItem.unitId)
 				: empty,
-		contentStructureNodes: await tx
-			.select()
-			.from(contentStructureNode)
-			.where(eq(contentStructureNode.ownerUnitId, unitId))
-			.orderBy(contentStructureNode.position, contentStructureNode.id),
 		pollOptions:
 			record.kind === "poll"
 				? await tx
@@ -478,14 +477,6 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 			.from(unitDock)
 			.where(eq(unitDock.unitId, unitId))
 			.orderBy(unitDock.surface),
-		realmNavigations:
-			record.kind === "realm"
-				? await tx
-						.select()
-						.from(realmNavigation)
-						.where(eq(realmNavigation.realmId, unitId))
-						.orderBy(realmNavigation.createdAt, realmNavigation.id)
-				: empty,
 		zonePages:
 			record.kind === "zone"
 				? await tx
@@ -493,14 +484,6 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 						.from(zonePage)
 						.where(eq(zonePage.zoneId, unitId))
 						.orderBy(zonePage.position, zonePage.id)
-				: empty,
-		zoneNavigations:
-			record.kind === "zone"
-				? await tx
-						.select()
-						.from(zoneNavigation)
-						.where(eq(zoneNavigation.zoneId, unitId))
-						.orderBy(zoneNavigation.createdAt, zoneNavigation.id)
 				: empty,
 		realmUnit: empty,
 		realmRules: record.kind === "realm" ? await snapshotRealmRules(tx, unitId) : null,
@@ -524,7 +507,8 @@ async function restoreExtension(
 	kind: UnitSnapshot["kind"],
 	value: SnapshotRow | null,
 ) {
-	if (kind === "tag" || kind === "realm_rule" || kind === "slug_namespace") return;
+	if (kind === "tag" || kind === "label" || kind === "realm_rule" || kind === "slug_namespace")
+		return;
 	if (!value) throw new Error(`Missing ${kind} extension in Unit snapshot`);
 	switch (kind) {
 		case "profile":
@@ -596,27 +580,7 @@ async function restoreAliases(tx: DatabaseTransaction, unitId: string, rows: Sna
 	}
 }
 
-async function restoreSoftRows(
-	tx: DatabaseTransaction,
-	unitId: string,
-	table: "contentStructureNode" | "pollOption",
-	rows: SnapshotRow[],
-) {
-	if (table === "contentStructureNode") {
-		await tx
-			.update(contentStructureNode)
-			.set({ deletedAt: new Date() })
-			.where(eq(contentStructureNode.ownerUnitId, unitId));
-		for (const value of rows) {
-			const row = contentStructureNodeRowSchema.parse(value);
-			const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...state } = row;
-			await tx
-				.insert(contentStructureNode)
-				.values(row)
-				.onConflictDoUpdate({ target: contentStructureNode.id, set: state });
-		}
-		return;
-	}
+async function restoreSoftRows(tx: DatabaseTransaction, unitId: string, rows: SnapshotRow[]) {
 	await tx.update(pollOption).set({ deletedAt: new Date() }).where(eq(pollOption.pollId, unitId));
 	for (const value of rows) {
 		const row = pollOptionRowSchema.parse(value);
@@ -786,24 +750,14 @@ export async function restoreUnitSnapshot(
 					snapshot.owned.collectionItems.map((row) => collectionItemRowSchema.parse(row)),
 				);
 	}
-	await restoreSoftRows(tx, unitId, "contentStructureNode", snapshot.owned.contentStructureNodes);
-	if (snapshot.kind === "poll")
-		await restoreSoftRows(tx, unitId, "pollOption", snapshot.owned.pollOptions);
+	// Dynamic Content Structure slots are restored by their content-model adapter.
+	if (snapshot.kind === "poll") await restoreSoftRows(tx, unitId, snapshot.owned.pollOptions);
 	if (snapshot.kind === "realm") {
 		await tx.delete(realmPin).where(eq(realmPin.realmId, unitId));
-		await tx.delete(realmNavigation).where(eq(realmNavigation.realmId, unitId));
 		if (snapshot.owned.realmPins.length)
 			await tx
 				.insert(realmPin)
 				.values(snapshot.owned.realmPins.map((row) => realmPinRowSchema.parse(row)));
-		if (snapshot.owned.realmNavigations.length)
-			await tx
-				.insert(realmNavigation)
-				.values(
-					snapshot.owned.realmNavigations.map((row) =>
-						realmNavigationRowSchema.parse(row),
-					),
-				);
 		await restoreRealmRules(
 			tx,
 			unitId,
@@ -813,17 +767,10 @@ export async function restoreUnitSnapshot(
 	}
 	if (snapshot.kind === "zone") {
 		await tx.delete(zonePage).where(eq(zonePage.zoneId, unitId));
-		await tx.delete(zoneNavigation).where(eq(zoneNavigation.zoneId, unitId));
 		if (snapshot.owned.zonePages.length)
 			await tx
 				.insert(zonePage)
 				.values(snapshot.owned.zonePages.map((row) => zonePageRowSchema.parse(row)));
-		if (snapshot.owned.zoneNavigations.length)
-			await tx
-				.insert(zoneNavigation)
-				.values(
-					snapshot.owned.zoneNavigations.map((row) => zoneNavigationRowSchema.parse(row)),
-				);
 	}
 	await ensureUnitVariantLifecycle(tx, unitId);
 }
@@ -831,22 +778,57 @@ export async function restoreUnitSnapshot(
 export const UnitRevisionChangeTags = ["mw-undo", "mw-manual-revert"] as const;
 export type UnitRevisionChangeTag = (typeof UnitRevisionChangeTags)[number];
 
-type SlotRole = (typeof unitRevisionSlot.role.enumValues)[number];
+type SlotRole = string;
 type SlotDocument = { readonly model: string; readonly payload: unknown };
 export type UnitRevisionDocuments = Partial<Record<SlotRole, SlotDocument>>;
+
+export type UnitRevisionComponentChange = {
+	readonly role: string;
+	readonly model: string;
+	readonly delta: unknown;
+	readonly checkpoint: () => Promise<unknown>;
+	readonly forceCheckpoint?: boolean;
+};
+
+export type UnitRevisionExpectedComponent = {
+	readonly role: string;
+	readonly revisionId: string | null;
+};
 
 export type UnitRevisionCommitResult = {
 	readonly revisionId: string;
 	readonly revisionCreated: boolean;
 };
 
+function assertContentStructureComponentIdentity(
+	role: string,
+	value: unknown,
+): ContentStructureLogicalState {
+	const structureId = parseContentStructureSlotRole(role);
+	if (!structureId) throw new TypeError(`Invalid Content Structure component role ${role}`);
+	const state = ContentStructureLogicalStateSchema.parse(value);
+	const payloadStructureId = "deleted" in state ? state.structureId : state.structure.id;
+	if (payloadStructureId !== structureId)
+		throw new TypeError(`Content Structure component ${role} contains another structure`);
+	return state;
+}
+
+function assertContentStructureDeltaIdentity(role: string, value: unknown): ContentStructureDelta {
+	const structureId = parseContentStructureSlotRole(role);
+	if (!structureId) throw new TypeError(`Invalid Content Structure component role ${role}`);
+	const delta = ContentStructureDeltaSchema.parse(value);
+	if (delta.structureId !== structureId)
+		throw new TypeError(`Content Structure delta ${role} contains another structure`);
+	return delta;
+}
+
 const SlotModels = {
 	main: "rezics.unit.main.v1",
 	localizations: "rezics.unit.localizations.v1",
 	relations: "rezics.unit.relations.v2",
-	structure: "rezics.unit.structure.v2",
+	structure: "rezics.unit.structure.v3",
 	rules: "rezics.unit.rules.v1",
-} as const satisfies Record<SlotRole, string>;
+} as const satisfies Record<(typeof UnitRevisionSlotRoleValues)[number], string>;
 
 function normalizeJson(value: unknown): unknown {
 	return JSON.parse(JSON.stringify(value)) as unknown;
@@ -891,17 +873,14 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 		structure: {
 			model: SlotModels.structure,
 			payload: {
-				version: 2,
+				version: 3,
 				seriesReleases: snapshot.owned.seriesReleases,
 				softwareRequirements: snapshot.owned.softwareRequirements,
 				collectionItems: snapshot.owned.collectionItems,
-				contentStructureNodes: snapshot.owned.contentStructureNodes,
 				pollOptions: snapshot.owned.pollOptions,
 				realmPins: snapshot.owned.realmPins,
 				docks: snapshot.owned.docks,
-				realmNavigations: snapshot.owned.realmNavigations,
 				zonePages: snapshot.owned.zonePages,
-				zoneNavigations: snapshot.owned.zoneNavigations,
 			},
 		},
 	};
@@ -942,13 +921,10 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 			seriesReleases: structure.seriesReleases,
 			softwareRequirements: structure.softwareRequirements,
 			collectionItems: structure.collectionItems,
-			contentStructureNodes: structure.contentStructureNodes,
 			pollOptions: structure.pollOptions,
 			realmPins: structure.realmPins,
 			docks: structure.docks,
-			realmNavigations: structure.realmNavigations,
 			zonePages: structure.zonePages,
-			zoneNavigations: structure.zoneNavigations,
 			realmUnit: [],
 			realmRules: rules
 				? {
@@ -965,14 +941,39 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 async function findOrCreateContent(
 	tx: DatabaseTransaction,
 	document: SlotDocument,
-): Promise<{ readonly id: string; readonly byteSize: number }> {
+	storage: {
+		readonly encoding: "full" | "delta";
+		readonly baseContentId: string | null;
+		readonly deltaDepth: number;
+	} = { encoding: "full", baseContentId: null, deltaDepth: 0 },
+): Promise<{
+	readonly id: string;
+	readonly byteSize: number;
+	readonly encoding: "full" | "delta";
+	readonly deltaDepth: number;
+}> {
 	const payload = normalizeJson(document.payload) as JsonValue;
-	const canonical = canonicalJson(payload);
+	const canonical =
+		storage.encoding === "full"
+			? canonicalJson(payload)
+			: canonicalJson({
+					encoding: storage.encoding,
+					baseContentId: storage.baseContentId,
+					payload,
+				});
 	const sha256 = createHash("sha256").update(canonical).digest("hex");
-	const byteSize = Buffer.byteLength(canonical);
+	const byteSize = Buffer.byteLength(canonicalJson(payload));
 	await tx
 		.insert(revisionContent)
-		.values({ model: document.model, sha256, byteSize, payload })
+		.values({
+			model: document.model,
+			sha256,
+			byteSize,
+			encoding: storage.encoding,
+			baseContentId: storage.baseContentId,
+			deltaDepth: storage.deltaDepth,
+			payload,
+		})
 		.onConflictDoNothing({
 			target: [revisionContent.model, revisionContent.sha256],
 		});
@@ -980,15 +981,85 @@ async function findOrCreateContent(
 		.select({
 			id: revisionContent.id,
 			byteSize: revisionContent.byteSize,
+			encoding: revisionContent.encoding,
+			baseContentId: revisionContent.baseContentId,
+			deltaDepth: revisionContent.deltaDepth,
 			payload: revisionContent.payload,
 		})
 		.from(revisionContent)
 		.where(and(eq(revisionContent.model, document.model), eq(revisionContent.sha256, sha256)))
 		.limit(1);
-	if (!content || canonicalJson(content.payload) !== canonical)
-		throw new Error("Revision content hash collision");
+	if (!content) throw new Error("Revision content hash collision");
+	const storedCanonical =
+		content.encoding === "full"
+			? canonicalJson(content.payload)
+			: canonicalJson({
+					encoding: content.encoding,
+					baseContentId: content.baseContentId,
+					payload: content.payload,
+				});
+	if (storedCanonical !== canonical) throw new Error("Revision content hash collision");
 	return content;
 }
+
+async function materializeRevisionContent(
+	tx: DatabaseTransaction,
+	contentId: string,
+	cache: Map<string, MaterializedRevisionContent>,
+	visiting = new Set<string>(),
+): Promise<MaterializedRevisionContent> {
+	const cached = cache.get(contentId);
+	if (cached) return cached;
+	if (visiting.has(contentId)) throw new Error(`Revision content delta cycle at ${contentId}`);
+	visiting.add(contentId);
+	const [content] = await tx
+		.select({
+			model: revisionContent.model,
+			encoding: revisionContent.encoding,
+			baseContentId: revisionContent.baseContentId,
+			deltaDepth: revisionContent.deltaDepth,
+			payload: revisionContent.payload,
+		})
+		.from(revisionContent)
+		.where(eq(revisionContent.id, contentId))
+		.limit(1);
+	if (!content) throw new Error(`Missing revision content ${contentId}`);
+	if (content.encoding === "full") {
+		const materialized = {
+			model: content.model,
+			payload: content.payload,
+			deltaDepth: content.deltaDepth,
+		};
+		cache.set(contentId, materialized);
+		visiting.delete(contentId);
+		return materialized;
+	}
+	if (
+		!content.baseContentId ||
+		content.deltaDepth < 1 ||
+		content.deltaDepth > ContentStructureCheckpointDepth
+	)
+		throw new Error(`Invalid delta chain at revision content ${contentId}`);
+	const base = await materializeRevisionContent(tx, content.baseContentId, cache, visiting);
+	if (base.model !== content.model || base.deltaDepth !== content.deltaDepth - 1)
+		throw new Error(`Invalid delta base at revision content ${contentId}`);
+	const payload =
+		content.model === ContentStructureContentModel
+			? applyContentStructureDelta(base.payload, content.payload)
+			: (() => {
+					throw new Error(`Unsupported delta content model ${content.model}`);
+				})();
+	const materialized = { model: content.model, payload, deltaDepth: content.deltaDepth };
+	cache.set(contentId, materialized);
+	visiting.delete(contentId);
+	return materialized;
+}
+
+type MaterializedRevisionContent = {
+	readonly model: string;
+	readonly payload: unknown;
+	readonly deltaDepth: number;
+};
 
 export async function getUnitRevisionDocuments(
 	tx: DatabaseTransaction,
@@ -997,15 +1068,20 @@ export async function getUnitRevisionDocuments(
 	const rows = await tx
 		.select({
 			role: unitRevisionSlot.role,
+			contentId: unitRevisionSlot.contentId,
 			model: revisionContent.model,
-			payload: revisionContent.payload,
 		})
 		.from(unitRevisionSlot)
 		.innerJoin(revisionContent, eq(revisionContent.id, unitRevisionSlot.contentId))
 		.where(eq(unitRevisionSlot.revisionId, revisionId));
-	return Object.fromEntries(
-		rows.map((row) => [row.role, { model: row.model, payload: row.payload }]),
-	) as UnitRevisionDocuments;
+	const cache = new Map<string, MaterializedRevisionContent>();
+	const documents: UnitRevisionDocuments = {};
+	for (const row of rows)
+		documents[row.role] = {
+			model: row.model,
+			payload: (await materializeRevisionContent(tx, row.contentId, cache)).payload,
+		};
+	return documents;
 }
 
 export async function recordUnitRevision(
@@ -1019,6 +1095,7 @@ export async function recordUnitRevision(
 		baseRevisionId?: string;
 		sourceRevisionId?: string;
 		tags?: readonly UnitRevisionChangeTag[];
+		componentChanges?: readonly UnitRevisionComponentChange[];
 	},
 ): Promise<UnitRevisionCommitResult> {
 	await lockUnitHistory(tx, input.unitId);
@@ -1046,11 +1123,49 @@ export async function recordUnitRevision(
 					role: unitRevisionSlot.role,
 					contentId: unitRevisionSlot.contentId,
 					originRevisionId: unitRevisionSlot.originRevisionId,
+					model: revisionContent.model,
+					byteSize: revisionContent.byteSize,
+					encoding: revisionContent.encoding,
+					deltaDepth: revisionContent.deltaDepth,
 				})
 				.from(unitRevisionSlot)
+				.innerJoin(revisionContent, eq(revisionContent.id, unitRevisionSlot.contentId))
 				.where(eq(unitRevisionSlot.revisionId, head.revisionId))
 		: [];
 	const previousByRole = new Map(previousSlots.map((slot) => [slot.role, slot]));
+	const componentChanges = [...(input.componentChanges ?? [])];
+	const changedRoles = new Set<string>();
+	for (const change of componentChanges) {
+		if (changedRoles.has(change.role))
+			throw new TypeError(`Duplicate Unit revision component role ${change.role}`);
+		if (change.model !== ContentStructureContentModel)
+			throw new TypeError(`Unsupported Unit revision component model ${change.model}`);
+		if (!parseContentStructureSlotRole(change.role))
+			throw new TypeError(`Invalid Content Structure component role ${change.role}`);
+		changedRoles.add(change.role);
+	}
+	const activeStructures = await tx
+		.select({ id: contentStructure.id })
+		.from(contentStructure)
+		.where(
+			and(eq(contentStructure.ownerUnitId, input.unitId), isNull(contentStructure.deletedAt)),
+		);
+	for (const structure of activeStructures) {
+		const role = contentStructureSlotRole(structure.id);
+		if (previousByRole.has(role) || changedRoles.has(role)) continue;
+		const checkpoint = await loadContentStructureSnapshot(tx, {
+			structureId: structure.id,
+			ownerUnitId: input.unitId,
+		});
+		componentChanges.push({
+			role,
+			model: ContentStructureContentModel,
+			delta: checkpoint,
+			checkpoint: async () => checkpoint,
+			forceCheckpoint: true,
+		});
+		changedRoles.add(role);
+	}
 	const sourceSlots = input.sourceRevisionId
 		? await tx
 				.select({
@@ -1063,12 +1178,57 @@ export async function recordUnitRevision(
 		: [];
 	const sourceByRole = new Map(sourceSlots.map((slot) => [slot.role, slot]));
 
-	const contents: { role: SlotRole; id: string; byteSize: number }[] = [];
+	const contentByRole = new Map(
+		previousSlots.map((slot) => [
+			slot.role,
+			{
+				id: slot.contentId,
+				byteSize: slot.byteSize,
+				encoding: slot.encoding,
+				deltaDepth: slot.deltaDepth,
+			},
+		]),
+	);
 	for (const [role, document] of Object.entries(documents)) {
+		if (!document) continue;
 		const content = await findOrCreateContent(tx, document);
-		contents.push({ role: role as SlotRole, ...content });
+		contentByRole.set(role, content);
 	}
-	const contentByRole = new Map(contents.map((content) => [content.role, content]));
+	for (const change of componentChanges) {
+		if (change.role.trim() === "" || change.role.length > 200)
+			throw new TypeError("Invalid Unit revision component role");
+		const previous = previousByRole.get(change.role);
+		if (previous && previous.model !== change.model)
+			throw new TypeError(`Unit revision component model changed for ${change.role}`);
+		const deltaBytes = Buffer.byteLength(canonicalJson(normalizeJson(change.delta)));
+		const checkpoint =
+			change.forceCheckpoint === true ||
+			!previous ||
+			previous.deltaDepth >= ContentStructureCheckpointDepth - 1 ||
+			deltaBytes >= ContentStructureLargeDeltaBytes;
+		const content = checkpoint
+			? await findOrCreateContent(tx, {
+					model: change.model,
+					payload: assertContentStructureComponentIdentity(
+						change.role,
+						await change.checkpoint(),
+					),
+				})
+			: await findOrCreateContent(
+					tx,
+					{
+						model: change.model,
+						payload: assertContentStructureDeltaIdentity(change.role, change.delta),
+					},
+					{
+						encoding: "delta",
+						baseContentId: previous.contentId,
+						deltaDepth: previous.deltaDepth + 1,
+					},
+				);
+		contentByRole.set(change.role, content);
+	}
+	const contents = [...contentByRole].map(([role, content]) => ({ role, ...content }));
 	const unchanged =
 		Boolean(head) &&
 		previousSlots.length === contents.length &&
@@ -1114,6 +1274,18 @@ export async function recordUnitRevision(
 			target: unitRevisionHead.unitId,
 			set: { revisionId: revision.id },
 		});
+	for (const change of componentChanges)
+		await tx
+			.insert(unitRevisionComponentHead)
+			.values({
+				unitId: input.unitId,
+				componentKey: change.role,
+				revisionId: revision.id,
+			})
+			.onConflictDoUpdate({
+				target: [unitRevisionComponentHead.unitId, unitRevisionComponentHead.componentKey],
+				set: { revisionId: revision.id },
+			});
 	if (!head)
 		await finalizeInitialUnitStatusRevision(tx, {
 			unitId: input.unitId,
@@ -1134,6 +1306,55 @@ export async function recordUnitRevision(
 	return { revisionId: revision.id, revisionCreated: true };
 }
 
+/**
+ * Service-layer History middleware for an atomic domain mutation.
+ *
+ * The caller owns the surrounding database transaction. This coordinator owns
+ * locking, component concurrency validation, mutation ordering, and revision
+ * persistence for HTTP, worker, and bootstrap writers alike.
+ */
+export async function mutateUnitWithHistory<Result extends object>(
+	tx: DatabaseTransaction,
+	input: {
+		readonly unitId: string;
+		readonly actorProfileId?: string | null;
+		readonly event: UnitRevisionEvent;
+		readonly message?: string;
+		readonly minor?: boolean;
+		readonly expectedComponents?: readonly UnitRevisionExpectedComponent[];
+	},
+	mutate: () => Promise<{
+		readonly result: Result;
+		readonly componentChanges?: readonly UnitRevisionComponentChange[];
+	}>,
+): Promise<Result & UnitRevisionCommitResult> {
+	await lockUnitHistory(tx, input.unitId);
+	for (const expected of input.expectedComponents ?? []) {
+		const [head] = await tx
+			.select({ revisionId: unitRevisionComponentHead.revisionId })
+			.from(unitRevisionComponentHead)
+			.where(
+				and(
+					eq(unitRevisionComponentHead.unitId, input.unitId),
+					eq(unitRevisionComponentHead.componentKey, expected.role),
+				),
+			)
+			.limit(1);
+		if ((head?.revisionId ?? null) !== expected.revisionId)
+			throw new UnitRevisionConflict(head?.revisionId ?? null, [`/${expected.role}`]);
+	}
+	const outcome = await mutate();
+	const revision = await recordUnitRevision(tx, {
+		unitId: input.unitId,
+		actorProfileId: input.actorProfileId,
+		event: input.event,
+		message: input.message,
+		minor: input.minor,
+		componentChanges: outcome.componentChanges,
+	});
+	return { ...outcome.result, ...revision };
+}
+
 export async function restoreUnitRevision(
 	tx: DatabaseTransaction,
 	input: {
@@ -1146,14 +1367,33 @@ export async function restoreUnitRevision(
 		entityAuthorization: EntityAuthorization<string>;
 	},
 ) {
+	await lockUnitHistory(tx, input.unitId);
+	const [head] = await tx
+		.select({ revisionId: unitRevisionHead.revisionId })
+		.from(unitRevisionHead)
+		.where(eq(unitRevisionHead.unitId, input.unitId))
+		.limit(1);
+	if (head?.revisionId !== input.baseRevisionId)
+		throw new UnitRevisionConflict(head?.revisionId ?? null);
+	const [source] = await tx
+		.select({ unitId: unitRevision.unitId })
+		.from(unitRevision)
+		.where(eq(unitRevision.id, input.sourceRevisionId))
+		.limit(1);
+	if (!source || source.unitId !== input.unitId)
+		throw new UnitRevisionConflict(head.revisionId, ["/"]);
 	const documents = await getUnitRevisionDocuments(tx, input.sourceRevisionId);
 	if (!documents.main) throw new Error("Unit revision not found");
+	const currentDocuments = await getUnitRevisionDocuments(tx, input.baseRevisionId);
+	const contentStructures = prepareContentStructureRestoration(currentDocuments, documents);
+	await detachContentStructureZonePageTargets(tx, input.unitId);
 	await restoreUnitSnapshot(
 		tx,
 		input.unitId,
 		documentsToSnapshot(documents),
 		input.entityAuthorization,
 	);
+	await restoreContentStructureStates(tx, input.unitId, contentStructures.states);
 	return recordUnitRevision(tx, {
 		unitId: input.unitId,
 		actorProfileId: input.actorProfileId,
@@ -1162,7 +1402,64 @@ export async function restoreUnitRevision(
 		minor: input.minor,
 		baseRevisionId: input.baseRevisionId,
 		sourceRevisionId: input.sourceRevisionId,
+		componentChanges: contentStructures.changes,
 	});
+}
+
+function contentStructureDocuments(
+	documents: UnitRevisionDocuments,
+): Map<string, ContentStructureLogicalState> {
+	const structures = new Map<string, ContentStructureLogicalState>();
+	for (const [role, document] of Object.entries(documents)) {
+		const structureId = parseContentStructureSlotRole(role);
+		if (!structureId) {
+			if (document?.model === ContentStructureContentModel)
+				throw new Error(`Invalid Content Structure slot role ${role}`);
+			continue;
+		}
+		if (!document || document.model !== ContentStructureContentModel)
+			throw new Error(`Invalid Content Structure model for ${role}`);
+		const state = ContentStructureLogicalStateSchema.parse(document.payload);
+		const payloadStructureId = "deleted" in state ? state.structureId : state.structure.id;
+		if (payloadStructureId !== structureId)
+			throw new Error(`Content Structure slot ${role} contains another structure`);
+		structures.set(role, state);
+	}
+	return structures;
+}
+
+function prepareContentStructureRestoration(
+	currentDocuments: UnitRevisionDocuments,
+	desiredDocuments: UnitRevisionDocuments,
+): {
+	readonly states: readonly ContentStructureLogicalState[];
+	readonly changes: readonly UnitRevisionComponentChange[];
+} {
+	const current = contentStructureDocuments(currentDocuments);
+	const desired = contentStructureDocuments(desiredDocuments);
+	for (const [role] of current) {
+		if (desired.has(role)) continue;
+		const structureId = parseContentStructureSlotRole(role);
+		if (!structureId) throw new Error(`Invalid Content Structure slot role ${role}`);
+		desired.set(role, { version: 1, deleted: true, structureId });
+	}
+	const changes: UnitRevisionComponentChange[] = [];
+	for (const [role, state] of desired) {
+		const previous = current.get(role);
+		if (
+			previous &&
+			canonicalJson(normalizeJson(previous)) === canonicalJson(normalizeJson(state))
+		)
+			continue;
+		changes.push({
+			role,
+			model: ContentStructureContentModel,
+			delta: state,
+			checkpoint: async () => state,
+			forceCheckpoint: true,
+		});
+	}
+	return { states: [...desired.values()], changes };
 }
 
 const Missing = Symbol("missing revision value");
@@ -1362,12 +1659,15 @@ export async function undoUnitRevision(
 	const result = undoRevisionDocuments(before, after, current);
 	if (result.conflictPaths.length)
 		throw new UnitRevisionConflict(head.revisionId, result.conflictPaths);
+	const contentStructures = prepareContentStructureRestoration(current, result.documents);
+	await detachContentStructureZonePageTargets(tx, input.unitId);
 	await restoreUnitSnapshot(
 		tx,
 		input.unitId,
 		documentsToSnapshot(result.documents),
 		input.entityAuthorization,
 	);
+	await restoreContentStructureStates(tx, input.unitId, contentStructures.states);
 	return recordUnitRevision(tx, {
 		unitId: input.unitId,
 		actorProfileId: input.actorProfileId,
@@ -1377,5 +1677,6 @@ export async function undoUnitRevision(
 		baseRevisionId: input.baseRevisionId,
 		sourceRevisionId: input.targetRevisionId,
 		tags: ["mw-undo"],
+		componentChanges: contentStructures.changes,
 	});
 }

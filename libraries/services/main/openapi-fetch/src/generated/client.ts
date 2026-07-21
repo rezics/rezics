@@ -317,6 +317,20 @@ import type {
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses,
 	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdOptions,
 	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdResponses,
+	GetApiUnitsByIdByUnitIdContentStructuresOptions,
+	GetApiUnitsByIdByUnitIdContentStructuresResponses,
+	PostApiUnitsByIdByUnitIdContentStructuresOptions,
+	PostApiUnitsByIdByUnitIdContentStructuresResponses,
+	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions,
+	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses,
+	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions,
+	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses,
+	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesOptions,
+	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesResponses,
+	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
+	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdResponses,
+	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
+	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdResponses,
 	GetApiUnitsBookByUnitIdContentStructureNodesOptions,
 	GetApiUnitsBookByUnitIdContentStructureNodesResponses,
 	PostApiUnitsBookByUnitIdContentStructureNodesOptions,
@@ -3169,6 +3183,178 @@ export function putApiUnitsByTypeByUnitIdVersionOfByCanonicalId<
 		...config,
 	}) as Promise<
 		RequestResult<PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary List Unit Content Structures
+ * {@link /api/units/by-id/:unitId/content-structures}
+ */
+export function getApiUnitsByIdByUnitIdContentStructures<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitsByIdByUnitIdContentStructuresOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitsByIdByUnitIdContentStructuresResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/units/by-id/{unitId}/content-structures",
+		...config,
+	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdContentStructuresResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Create Content Structure
+ * {@link /api/units/by-id/:unitId/content-structures}
+ */
+export function postApiUnitsByIdByUnitIdContentStructures<ThrowOnError extends boolean = true>(
+	options: Options<PostApiUnitsByIdByUnitIdContentStructuresOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiUnitsByIdByUnitIdContentStructuresResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/units/by-id/{unitId}/content-structures",
+		...config,
+	}) as Promise<RequestResult<PostApiUnitsByIdByUnitIdContentStructuresResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get Content Structure
+ * {@link /api/units/by-id/:unitId/content-structures/:structureId}
+ */
+export function getApiUnitsByIdByUnitIdContentStructuresByStructureId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<GetApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions, ThrowOnError>,
+): Promise<
+	RequestResult<GetApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/units/by-id/{unitId}/content-structures/{structureId}",
+		...config,
+	}) as Promise<
+		RequestResult<GetApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Delete Content Structure
+ * {@link /api/units/by-id/:unitId/content-structures/:structureId}
+ */
+export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions, ThrowOnError>,
+): Promise<
+	RequestResult<DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/units/by-id/{unitId}/content-structures/{structureId}",
+		...config,
+	}) as Promise<
+		RequestResult<
+			DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Insert Content Structure node
+ * {@link /api/units/by-id/:unitId/content-structures/:structureId/nodes}
+ */
+export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/units/by-id/{unitId}/content-structures/{structureId}/nodes",
+		...config,
+	}) as Promise<
+		RequestResult<
+			PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Update Content Structure node
+ * {@link /api/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId}
+ */
+export function patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PATCH",
+		url: "/api/units/by-id/{unitId}/content-structures/{structureId}/nodes/{nodeId}",
+		...config,
+	}) as Promise<
+		RequestResult<
+			PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Delete Content Structure node subtree
+ * {@link /api/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId}
+ */
+export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/units/by-id/{unitId}/content-structures/{structureId}/nodes/{nodeId}",
+		...config,
+	}) as Promise<
+		RequestResult<
+			DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdResponses,
+			ThrowOnError
+		>
 	>;
 }
 

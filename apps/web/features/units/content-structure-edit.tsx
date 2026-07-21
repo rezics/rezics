@@ -79,6 +79,13 @@ function BookContentStructureWorkspace({ bookId }: { bookId: string }) {
 	);
 	if (tree.isPending) return <QueryPending />;
 	if (tree.isError) return <QueryFailure error={tree.error} retry={() => void tree.refetch()} />;
+	if (!tree.data?.structureId || !tree.data.latestRevisionId)
+		return (
+			<main className="mx-auto grid min-h-64 w-full max-w-4xl place-items-center px-4 py-10">
+				<p className="text-destructive text-sm">{t.ui.retryLater}</p>
+			</main>
+		);
+	const baseRevisionId = tree.data.latestRevisionId;
 	return (
 		<main className="mx-auto flex w-full max-w-[90rem] flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
 			<PageHeading
@@ -90,6 +97,7 @@ function BookContentStructureWorkspace({ bookId }: { bookId: string }) {
 				}
 			/>
 			<ContentCreateForm
+				baseRevisionId={baseRevisionId}
 				bookId={bookId}
 				create={create.mutateAsync}
 				error={create.error}
@@ -106,7 +114,7 @@ function BookContentStructureWorkspace({ bookId }: { bookId: string }) {
 							onMove={async (nodeId, parentId) => {
 								await update.mutateAsync({
 									path: { unitId: bookId, nodeId },
-									body: { parentId },
+									body: { baseRevisionId, parentId },
 								});
 							}}
 							onRename={async (node, title) => {
@@ -130,12 +138,14 @@ function BookContentStructureWorkspace({ bookId }: { bookId: string }) {
 }
 
 function ContentCreateForm({
+	baseRevisionId,
 	bookId,
 	flatNodes,
 	create,
 	error,
 	pending,
 }: {
+	baseRevisionId: string;
 	bookId: string;
 	flatNodes: readonly FlattenedContentStructureTreeNode[];
 	create: (variables: PostApiUnitsBookByUnitIdContentStructureNodesOptions) => Promise<unknown>;
@@ -155,6 +165,7 @@ function ContentCreateForm({
 			await create({
 				path: { unitId: bookId },
 				body: {
+					baseRevisionId,
 					title: String(form.get("title") ?? "").trim(),
 					language: toContentLanguage(locale.target),
 					...(parentId ? { parentId } : {}),

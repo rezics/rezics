@@ -134,8 +134,13 @@ LEFT JOIN LATERAL (
 	WHERE unit_id = source.unit_id AND to_status = 'published' AND actor_kind = 'profile' AND NOT actor_hidden
 ) AS publisher_data ON true
 LEFT JOIN LATERAL (
-	SELECT jsonb_agg(DISTINCT owner_unit_id ORDER BY owner_unit_id) AS owner_ids
-	FROM public.content_structure_node WHERE content_unit_id = source.unit_id AND deleted_at IS NULL
+	SELECT jsonb_agg(DISTINCT node.owner_unit_id ORDER BY node.owner_unit_id) AS owner_ids
+	FROM public.content_structure_node AS node
+	JOIN public.content_structure AS structure ON structure.id = node.structure_id
+	WHERE node.content_unit_id = source.unit_id
+		AND node.deleted_at IS NULL
+		AND structure.deleted_at IS NULL
+		AND structure.purpose IN ('book.contents', 'post.contents')
 ) AS scope_data ON true
 LEFT JOIN LATERAL (
 	SELECT

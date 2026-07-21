@@ -2,6 +2,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { enTerminology } from "@rezics/i18n/terminology/en";
 
 const { forms: followTerms } = enTerminology.follow;
+const { forms: labelTerms } = enTerminology.label;
 const { forms: postTerms } = enTerminology.post;
 const { forms: realmTerms } = enTerminology.realm;
 const { forms: unitSlugTerms } = enTerminology.unitSlug;
@@ -66,6 +67,7 @@ export default {
 			media: "Media",
 			release: "Release",
 			entity: "Entity",
+			label: labelTerms.label,
 			tag: "Tag",
 			series: "Series",
 			zone: zoneTerms.label,

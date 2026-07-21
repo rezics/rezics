@@ -26,7 +26,8 @@ export const UnitRevisionSlotRoleValues = [
 	"rules",
 ] as const;
 
-export const unitRevisionSlotRole = pgEnum("unit_revision_slot_role", UnitRevisionSlotRoleValues);
+export const RevisionContentEncodingValues = ["full", "delta"] as const;
+export type RevisionContentEncoding = (typeof RevisionContentEncodingValues)[number];
 export const unitStatusActorKind = pgEnum(
 	"unit_status_actor_kind",
 	toEnumValues(UnitStatusActorKindValues),
@@ -39,14 +40,35 @@ export const revisionContent = pgTable(
 		model: text().notNull(),
 		sha256: text().notNull(),
 		byteSize: integer().notNull(),
+		encoding: text().$type<RevisionContentEncoding>().default("full").notNull(),
+		baseContentId: uuid(),
+		deltaDepth: integer().default(0).notNull(),
 		payload: jsonb().$type<unknown>().notNull(),
 		createdAt: createCreatedAtColumn(),
 	},
 	(table) => [
+		foreignKey({
+			columns: [table.baseContentId],
+			foreignColumns: [table.id],
+			name: "revision_content_base_fkey",
+		}).onDelete("restrict"),
 		unique("revision_content_model_sha256_key").on(table.model, table.sha256),
 		check("revision_content_model_not_blank", sql`btrim(${table.model}) <> ''`),
 		check("revision_content_sha256_check", sql`${table.sha256} ~ '^[0-9a-f]{64}$'`),
 		check("revision_content_byte_size_check", sql`${table.byteSize} >= 0`),
+		check("revision_content_encoding_check", sql`${table.encoding} in ('full', 'delta')`),
+		check(
+			"revision_content_delta_shape_check",
+			sql`(
+				${table.encoding} = 'full'
+				and ${table.baseContentId} is null
+				and ${table.deltaDepth} = 0
+			) or (
+				${table.encoding} = 'delta'
+				and ${table.baseContentId} is not null
+				and ${table.deltaDepth} > 0
+			)`,
+		),
 		check(
 			"revision_content_payload_check",
 			sql`jsonb_typeof(${table.payload}) in ('object', 'array')`,
@@ -159,7 +181,7 @@ export const unitRevisionSlot = pgTable(
 	{
 		revisionId: uuid().notNull(),
 		unitId: uuid().notNull(),
-		role: unitRevisionSlotRole().notNull(),
+		role: text().notNull(),
 		contentId: uuid()
 			.notNull()
 			.references(() => revisionContent.id, { onDelete: "restrict" }),
@@ -179,6 +201,10 @@ export const unitRevisionSlot = pgTable(
 		}).onDelete("restrict"),
 		index("unit_revision_slot_content_idx").on(table.contentId),
 		index("unit_revision_slot_origin_idx").on(table.originRevisionId),
+		check(
+			"unit_revision_slot_role_check",
+			sql`btrim(${table.role}) <> '' and char_length(${table.role}) <= 200`,
+		),
 	],
 );
 
@@ -197,6 +223,31 @@ export const unitRevisionHead = pgTable(
 			foreignColumns: [unitRevision.id, unitRevision.unitId],
 			name: "unit_revision_head_revision_unit_fkey",
 		}).onDelete("restrict"),
+	],
+);
+
+/** Current optimistic-concurrency token for one independently edited Unit component. */
+export const unitRevisionComponentHead = pgTable(
+	"unit_revision_component_head",
+	{
+		unitId: uuid()
+			.notNull()
+			.references(() => unit.id, { onDelete: "cascade" }),
+		componentKey: text().notNull(),
+		revisionId: uuid().notNull(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.unitId, table.componentKey] }),
+		foreignKey({
+			columns: [table.revisionId, table.unitId],
+			foreignColumns: [unitRevision.id, unitRevision.unitId],
+			name: "unit_revision_component_head_revision_unit_fkey",
+		}).onDelete("restrict"),
+		index("unit_revision_component_head_revision_idx").on(table.revisionId),
+		check(
+			"unit_revision_component_head_key_check",
+			sql`btrim(${table.componentKey}) <> '' and char_length(${table.componentKey}) <= 200`,
+		),
 	],
 );
 

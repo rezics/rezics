@@ -15,10 +15,19 @@ export const RealmNavigationBody = t.Object(
 	{ document: NavigationInputDocument },
 	{ additionalProperties: false },
 );
+export const RealmNavigationReplaceBody = t.Object(
+	{ document: NavigationInputDocument, baseRevisionId: Uuid },
+	{ additionalProperties: false },
+);
+export const RealmNavigationRevisionBody = t.Object(
+	{ baseRevisionId: Uuid },
+	{ additionalProperties: false },
+);
 export const RealmNavigationResponse = t.Object({
 	id: Uuid,
 	realmId: Uuid,
 	document: NavigationResponseDocument,
+	latestRevisionId: Uuid,
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });

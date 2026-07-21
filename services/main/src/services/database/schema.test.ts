@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 
 import {
 	auditEvent,
+	contentStructure,
+	contentStructureNode,
 	entityAssociationProposal,
 	entityAssociationPolicy,
 	subjectAssociation,
@@ -31,7 +33,6 @@ import {
 	PostKindValues,
 	realmUnitStatus,
 	realmUnitStatusEvent,
-	realmNavigation,
 	RealmUnitMutationCommandValues,
 	scoreStat,
 	score,
@@ -55,7 +56,6 @@ import {
 	UnitKindValues,
 	UnitPermissionValues,
 	VariantCapableUnitKindValues,
-	zoneNavigation,
 } from "./schema";
 
 const dialect = new PgDialect();
@@ -357,7 +357,7 @@ describe("database schema contracts", () => {
 		expect(unitSlugAddress.kind.getSQLType()).toBe("text");
 	});
 
-	it("keeps Dock surfaces closed and Navigation identity UUID-only", () => {
+	it("keeps Dock surfaces closed and models navigation as Content Structures", () => {
 		expect(DockSurfaceValues).toEqual(["main", "wiki"]);
 		expect(DockSurfacesByUnitKind).toEqual({
 			book: ["main"],
@@ -367,12 +367,11 @@ describe("database schema contracts", () => {
 			realm: ["main", "wiki"],
 		});
 		expect(getTableConfig(unitDock).primaryKeys).toHaveLength(1);
-		expect(Object.keys(zoneNavigation)).not.toEqual(
-			expect.arrayContaining(["key", "position"]),
-		);
-		expect(Object.keys(realmNavigation)).not.toEqual(
-			expect.arrayContaining(["key", "position"]),
-		);
+		expect(contentStructure.purpose.getSQLType()).toBe("text");
+		expect(contentStructureNode.targetKind.getSQLType()).toBe("text");
+		expect(
+			getTableConfig(contentStructureNode).foreignKeys.map((key) => key.reference().name),
+		).toContain("content_structure_node_parent_structure_fkey");
 	});
 
 	it("models global and Realm aggregate meanings separately", () => {

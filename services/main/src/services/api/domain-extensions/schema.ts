@@ -121,6 +121,17 @@ export const ZoneNavigationBody = t.Object(
 	},
 	{ additionalProperties: false },
 );
+export const ZoneNavigationReplaceBody = t.Object(
+	{
+		document: NavigationInputDocument,
+		baseRevisionId: Uuid,
+	},
+	{ additionalProperties: false },
+);
+export const ZoneNavigationRevisionBody = t.Object(
+	{ baseRevisionId: Uuid },
+	{ additionalProperties: false },
+);
 
 export const SeriesReleaseResponse = t.Object({
 	seriesId: Uuid,
@@ -186,6 +197,7 @@ export const ZoneNavigationResponse = t.Object({
 	id: Uuid,
 	zoneId: Uuid,
 	document: NavigationResponseDocument,
+	latestRevisionId: Uuid,
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });

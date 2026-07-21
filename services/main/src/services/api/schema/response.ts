@@ -15,7 +15,11 @@ import {
 	StoredUiLocale,
 	Uuid,
 } from ".";
-import { EntityAssociationPolicyModeValues } from "../../database/schema/contract-values";
+import {
+	ContentRatingValues,
+	ContentStructurePurposeValues,
+	EntityAssociationPolicyModeValues,
+} from "../../database/schema/contract-values";
 import { FeedPostKindValues, FeedUnitKindValues } from "../feed/schema";
 import {
 	RecommendationReasonSchema,
@@ -607,6 +611,8 @@ export const ReviewDetailResponse = t.Object({
 	capabilities: t.Object({ canEdit: t.Boolean() }),
 });
 export const ContentStructureNodeListResponse = t.Object({
+	structureId: t.Nullable(Uuid),
+	latestRevisionId: t.Nullable(Uuid),
 	items: t.Array(
 		t.Object({
 			id: Uuid,
@@ -619,9 +625,61 @@ export const ContentStructureNodeListResponse = t.Object({
 		}),
 	),
 });
+const GenericContentStructureTargetResponse = t.Union([
+	t.Object({ kind: t.Literal("content") }, { additionalProperties: false }),
+	t.Object({ kind: t.Literal("none") }, { additionalProperties: false }),
+	t.Object({ kind: t.Literal("unit"), unitId: Uuid }, { additionalProperties: false }),
+	t.Object({ kind: t.Literal("zone_page"), zonePageId: Uuid }, { additionalProperties: false }),
+	t.Object({ kind: t.Literal("external"), url: t.String() }, { additionalProperties: false }),
+]);
+export const GenericContentStructureNodeResponse = t.Object({
+	id: Uuid,
+	structureId: Uuid,
+	ownerUnitId: Uuid,
+	parentId: t.Nullable(Uuid),
+	contentUnitId: Uuid,
+	documentKey: t.Nullable(t.String()),
+	target: GenericContentStructureTargetResponse,
+	position: FractionalPosition,
+	contentRating: t.Nullable(t.UnionEnum(ContentRatingValues)),
+	createdAt: DateTime,
+	updatedAt: DateTime,
+});
+export const ContentStructureSummaryResponse = t.Object({
+	id: Uuid,
+	ownerUnitId: Uuid,
+	purpose: t.UnionEnum(ContentStructurePurposeValues),
+	documentKey: t.Nullable(t.String()),
+	latestRevisionId: t.Nullable(Uuid),
+	createdAt: DateTime,
+	updatedAt: DateTime,
+});
+export const ContentStructureListResponse = t.Object({
+	items: t.Array(ContentStructureSummaryResponse),
+});
+export const ContentStructureDetailResponse = t.Intersect([
+	ContentStructureSummaryResponse,
+	t.Object({ nodes: t.Array(GenericContentStructureNodeResponse) }),
+]);
+export const ContentStructureMutationResponse = t.Object({
+	structure: ContentStructureSummaryResponse,
+	revisionCreated: t.Boolean(),
+});
+export const ContentStructureNodeMutationResponse = t.Object({
+	node: GenericContentStructureNodeResponse,
+	latestRevisionId: Uuid,
+	revisionCreated: t.Boolean(),
+});
+export const ContentStructureDeleteResponse = t.Object({
+	updated: t.Literal(true),
+	latestRevisionId: Uuid,
+	revisionCreated: t.Boolean(),
+});
 export const ContentStructureNodeResponse = t.Object({
 	id: Uuid,
 	unitId: Uuid,
+	structureId: Uuid,
+	latestRevisionId: Uuid,
 	parentId: t.Nullable(Uuid),
 	contentUnitId: Uuid,
 	contentKind: t.Union([t.Literal("chapter"), t.Literal("chapter_group")]),

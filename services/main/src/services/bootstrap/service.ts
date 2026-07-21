@@ -8,6 +8,7 @@ import type { PortableTextDocument } from "@rezics/block";
 import { database, type DatabaseTransaction } from "../database";
 import {
 	accounts,
+	contentStructure,
 	imageAsset,
 	imageObject,
 	post,
@@ -24,9 +25,15 @@ import {
 	unitSlugAddress,
 	users,
 	zone,
-	zoneNavigation,
 	zonePage,
 } from "../database/schema";
+import {
+	createNavigationStructure,
+	presentNavigationStructure,
+	replaceNavigationStructure,
+} from "../content-structure/navigation";
+import { ContentStructureNotFound } from "../content-structure/errors";
+import { getContentStructureComponentRevision } from "../content-structure/service";
 import type { ContentLanguage } from "../database/schema/contract-values";
 import { compareFractionalPositions, fractionalPositionAt } from "../ordering/position";
 import { storage } from "../storage";
@@ -554,6 +561,26 @@ async function ensureOfficialRealm(tx: DatabaseTransaction): Promise<void> {
 		.onConflictDoNothing()
 		.returning({ id: realm.id });
 	changed ||= insertedRealm.length > 0;
+	const [storedTaxonomy] = await tx
+		.select({ id: contentStructure.id })
+		.from(contentStructure)
+		.where(
+			and(
+				eq(contentStructure.ownerUnitId, value.id),
+				eq(contentStructure.purpose, "realm.taxonomy"),
+				isNull(contentStructure.deletedAt),
+			),
+		)
+		.limit(1);
+	if (!storedTaxonomy) {
+		await tx.insert(contentStructure).values({
+			ownerUnitId: value.id,
+			purpose: "realm.taxonomy",
+			createdAt,
+			updatedAt: createdAt,
+		});
+		changed = true;
+	}
 	for (const [index, localization] of value.localizations.entries()) {
 		changed =
 			(await ensureLocalization(tx, {
@@ -762,29 +789,6 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 			changed = true;
 		}
 		changed = (await ensureOfficialWikiPost(tx, value)) || changed;
-		const [storedNavigation] = await tx
-			.select({ document: zoneNavigation.document })
-			.from(zoneNavigation)
-			.where(eq(zoneNavigation.id, value.navigation.id))
-			.limit(1);
-		if (storedNavigation) {
-			if (!valuesEqual(storedNavigation.document, value.navigation.document)) {
-				await tx
-					.update(zoneNavigation)
-					.set({ document: value.navigation.document, updatedAt: createdAt })
-					.where(eq(zoneNavigation.id, value.navigation.id));
-				changed = true;
-			}
-		} else {
-			await tx.insert(zoneNavigation).values({
-				id: value.navigation.id,
-				zoneId: value.id,
-				document: value.navigation.document,
-				createdAt,
-				updatedAt: createdAt,
-			});
-			changed = true;
-		}
 		const homePageValue = {
 			id: value.homePage.id,
 			zoneId: value.id,
@@ -818,6 +822,52 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 			}
 		} else {
 			await tx.insert(zonePage).values({ ...homePageValue, createdAt, updatedAt: createdAt });
+			changed = true;
+		}
+		const [storedNavigation] = await tx
+			.select({ id: contentStructure.id })
+			.from(contentStructure)
+			.where(
+				and(
+					eq(contentStructure.id, value.navigation.id),
+					eq(contentStructure.ownerUnitId, value.id),
+					eq(contentStructure.purpose, "zone.navigation"),
+					isNull(contentStructure.deletedAt),
+				),
+			)
+			.limit(1);
+		if (storedNavigation) {
+			const current = await presentNavigationStructure(tx, {
+				ownerUnitId: value.id,
+				structureId: value.navigation.id,
+				purpose: "zone.navigation",
+			});
+			if (!valuesEqual(current.document, value.navigation.document)) {
+				const revisionId = await getContentStructureComponentRevision(
+					tx,
+					value.id,
+					value.navigation.id,
+				);
+				if (!revisionId)
+					throw new Error("Official Zone navigation has no component revision");
+				await replaceNavigationStructure(tx, {
+					ownerUnitId: value.id,
+					structureId: value.navigation.id,
+					purpose: "zone.navigation",
+					document: value.navigation.document,
+					actorProfileId: value.ownerProfileId,
+					baseRevisionId: revisionId,
+				});
+				changed = true;
+			}
+		} else {
+			await createNavigationStructure(tx, {
+				ownerUnitId: value.id,
+				structureId: value.navigation.id,
+				purpose: "zone.navigation",
+				document: value.navigation.document,
+				actorProfileId: value.ownerProfileId,
+			});
 			changed = true;
 		}
 		const [storedDock] = await tx
@@ -1051,19 +1101,27 @@ export async function isBootstrapReady(): Promise<boolean> {
 					OfficialZoneManifest.map((value) => value.homePage.id),
 				),
 			),
-		database
-			.select({
-				id: zoneNavigation.id,
-				zoneId: zoneNavigation.zoneId,
-				document: zoneNavigation.document,
-			})
-			.from(zoneNavigation)
-			.where(
-				inArray(
-					zoneNavigation.id,
-					OfficialZoneManifest.map((value) => value.navigation.id),
-				),
-			),
+		database.transaction(async (tx) => {
+			const navigations = [];
+			for (const value of OfficialZoneManifest) {
+				try {
+					const navigation = await presentNavigationStructure(tx, {
+						ownerUnitId: value.id,
+						structureId: value.navigation.id,
+						purpose: "zone.navigation",
+					});
+					navigations.push({
+						id: navigation.id,
+						zoneId: navigation.ownerUnitId,
+						document: navigation.document,
+					});
+				} catch (cause) {
+					if (cause instanceof ContentStructureNotFound) continue;
+					throw cause;
+				}
+			}
+			return navigations;
+		}),
 		database
 			.select({
 				id: imageAsset.id,

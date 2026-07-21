@@ -60,6 +60,8 @@ export default {
 	PollOptionInvalid: "選擇的投票選項無效。",
 	PollAlreadyClosed: "這個投票已經關閉。",
 	ProgressNotFound: "找不到進度記錄。",
+	ContentStructureInvalid: "這個內容結構不符合其用途規則。",
+	ContentStructureNotFound: "找不到這個內容結構。",
 	ContentStructureNodeNotFound: "找不到這個內容結構節點。",
 	ReviewNotFound: "找不到這篇評論。",
 	ModerationTargetNotFound: "找不到管理操作的目標。",

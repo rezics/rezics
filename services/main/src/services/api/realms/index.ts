@@ -11,6 +11,11 @@ import {
 	type RealmCapability,
 } from "../../authorization/realm/policy";
 import { database } from "../../database";
+import {
+	ContentStructureContentModel,
+	ContentStructureSnapshotSchema,
+	contentStructureSlotRole,
+} from "../../content-structure/contracts";
 import { fractionalPositionBetween } from "../../ordering/position";
 import {
 	isPrimaryUnitLocalization,
@@ -21,6 +26,7 @@ import {
 } from "../../units/localization";
 import {
 	auditEvent,
+	contentStructure,
 	moderationAction,
 	moderationCase,
 	post,
@@ -255,6 +261,11 @@ export default new Elysia({ prefix: "/realms" })
 					statusActor: { kind: "profile", profileId: profile.unitId },
 				});
 				await tx.insert(realm).values({ id: created.id, joinPolicy: body.joinPolicy });
+				const [taxonomy] = await tx
+					.insert(contentStructure)
+					.values({ ownerUnitId: created.id, purpose: "realm.taxonomy" })
+					.returning();
+				if (!taxonomy) throw new Error("Realm taxonomy insertion returned no row");
 				await tx.insert(unitLocalization).values({
 					unitId: created.id,
 					...body.localization,
@@ -276,10 +287,23 @@ export default new Elysia({ prefix: "/realms" })
 					followerProfileId: profile.unitId,
 					unitId: created.id,
 				});
+				const taxonomySnapshot = ContentStructureSnapshotSchema.parse({
+					version: 1,
+					structure: taxonomy,
+					nodes: [],
+				});
 				await recordUnitRevision(tx, {
 					unitId: created.id,
 					actorProfileId: profile.unitId,
 					event: "create",
+					componentChanges: [
+						{
+							role: contentStructureSlotRole(taxonomy.id),
+							model: ContentStructureContentModel,
+							delta: taxonomySnapshot,
+							checkpoint: async () => taxonomySnapshot,
+						},
+					],
 				});
 				return created.id;
 			});

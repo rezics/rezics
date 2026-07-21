@@ -72,13 +72,7 @@ export const UnitHistoryResponse = t.Object({
 });
 
 export const RevisionSlotResponse = t.Object({
-	role: t.Union([
-		t.Literal("main"),
-		t.Literal("localizations"),
-		t.Literal("relations"),
-		t.Literal("structure"),
-		t.Literal("rules"),
-	]),
+	role: t.String({ minLength: 1, maxLength: 200 }),
 	model: t.String(),
 	originRevisionId: Uuid,
 	content: t.Nullable(t.Unknown()),

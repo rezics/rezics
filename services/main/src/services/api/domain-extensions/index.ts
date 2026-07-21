@@ -37,7 +37,6 @@ import {
 	unitLink,
 	unitLocalization,
 	zone,
-	zoneNavigation,
 	zonePage,
 	unitDock,
 	imageAsset,
@@ -45,6 +44,15 @@ import {
 import { UnitNotFound } from "../../units/errors";
 import type { DatabaseTransaction } from "../../database";
 import { recordUnitRevision } from "../../units/history";
+import {
+	createNavigationStructure,
+	deleteNavigationStructure,
+	listNavigationStructures,
+	presentNavigationStructure,
+	replaceNavigationStructure,
+} from "../../content-structure/navigation";
+import { getContentStructureComponentRevision } from "../../content-structure/service";
+import { ContentStructureNotFound } from "../../content-structure/errors";
 import { insertUnit } from "../../units/create";
 import {
 	makePrimaryUnitLocalization,
@@ -79,6 +87,8 @@ import {
 	ZoneNavigationListResponse,
 	ZoneNavigationParams,
 	ZoneNavigationResponse,
+	ZoneNavigationReplaceBody,
+	ZoneNavigationRevisionBody,
 	ZoneDetailQuery,
 	ZonePageBody,
 	ZonePageListResponse,
@@ -232,11 +242,23 @@ function toZonePageResponse(record: typeof zonePage.$inferSelect) {
 	} satisfies typeof ZonePageResponse.static;
 }
 
-function toZoneNavigationResponse(record: typeof zoneNavigation.$inferSelect) {
+function toZoneNavigationResponse(
+	record: Awaited<ReturnType<typeof presentNavigationStructure>>,
+	latestRevisionId: string,
+) {
 	return {
-		...record,
-		document: parseDocument(NavigationDocument, record.document),
+		id: record.id,
+		zoneId: record.ownerUnitId,
+		document: record.document,
+		latestRevisionId,
+		createdAt: record.createdAt,
+		updatedAt: record.updatedAt,
 	} satisfies typeof ZoneNavigationResponse.static;
+}
+
+function rethrowZoneNavigationNotFound(cause: unknown): never {
+	if (cause instanceof ContentStructureNotFound) throw new ZoneNavigationNotFound();
+	throw cause;
 }
 
 async function getReadableRenderLocalizationRows(ids: readonly string[], profileId?: string) {
@@ -505,11 +527,21 @@ export default new Elysia()
 							and(eq(unitDock.unitId, params.zoneId), eq(unitDock.surface, "main")),
 						)
 						.limit(1);
-					const navigationRecords = await database
-						.select()
-						.from(zoneNavigation)
-						.where(eq(zoneNavigation.zoneId, params.zoneId))
-						.orderBy(zoneNavigation.createdAt, zoneNavigation.id);
+					const navigations = await database.transaction(async (tx) =>
+						Promise.all(
+							(
+								await listNavigationStructures(tx, params.zoneId, "zone.navigation")
+							).map(async (record) => {
+								const revisionId = await getContentStructureComponentRevision(
+									tx,
+									params.zoneId,
+									record.id,
+								);
+								if (!revisionId) throw new ZoneNavigationNotFound();
+								return toZoneNavigationResponse(record, revisionId);
+							}),
+						),
+					);
 					const page = pageRecord ? toZonePageResponse(pageRecord) : null;
 					const dock = dockRecord
 						? {
@@ -518,7 +550,6 @@ export default new Elysia()
 								document: parseDocument(DockDocument, dockRecord.document),
 							}
 						: null;
-					const navigations = navigationRecords.map(toZoneNavigationResponse);
 					const unitIds = new Set<string>(page ? [page.titleUnitId] : []);
 					const wikiPostIds = new Set<string>();
 					const assetIds = new Set<string>();
@@ -857,10 +888,11 @@ export default new Elysia()
 							.select({ id: zonePage.id, document: zonePage.document })
 							.from(zonePage)
 							.where(eq(zonePage.zoneId, params.zoneId));
-						const navigations = await tx
-							.select({ document: zoneNavigation.document })
-							.from(zoneNavigation)
-							.where(eq(zoneNavigation.zoneId, params.zoneId));
+						const navigations = await listNavigationStructures(
+							tx,
+							params.zoneId,
+							"zone.navigation",
+						);
 						const docks = await tx
 							.select({ document: unitDock.document })
 							.from(unitDock)
@@ -879,9 +911,9 @@ export default new Elysia()
 									).zonePageSlugs.has(params.slug),
 								);
 						const referencedByNavigation = navigations.some((navigation) =>
-							collectNavigationReferences(
-								parseDocument(NavigationDocument, navigation.document),
-							).zonePageSlugs.has(params.slug),
+							collectNavigationReferences(navigation.document).zonePageSlugs.has(
+								params.slug,
+							),
 						);
 						if (referencedByBlock || referencedByNavigation) throw new ZonePageInUse();
 						await tx.delete(zonePage).where(eq(zonePage.id, target.id));
@@ -922,15 +954,21 @@ export default new Elysia()
 						() => new UnitNotFound("Zone"),
 					);
 					await getZone(params.zoneId);
-					return {
-						items: (
-							await database
-								.select()
-								.from(zoneNavigation)
-								.where(eq(zoneNavigation.zoneId, params.zoneId))
-								.orderBy(zoneNavigation.createdAt, zoneNavigation.id)
-						).map(toZoneNavigationResponse),
-					};
+					return database.transaction(async (tx) => ({
+						items: await Promise.all(
+							(
+								await listNavigationStructures(tx, params.zoneId, "zone.navigation")
+							).map(async (record) => {
+								const revisionId = await getContentStructureComponentRevision(
+									tx,
+									params.zoneId,
+									record.id,
+								);
+								if (!revisionId) throw new ZoneNavigationNotFound();
+								return toZoneNavigationResponse(record, revisionId);
+							}),
+						),
+					}));
 				},
 				{
 					params: ZoneParams,
@@ -958,17 +996,18 @@ export default new Elysia()
 							zoneId: params.zoneId,
 							profileId: profile.unitId,
 						});
-						const [saved] = await tx
-							.insert(zoneNavigation)
-							.values({ zoneId: params.zoneId, document: body.document })
-							.returning();
-						if (!saved) throw new Error("Zone navigation insert returned no row");
-						await recordUnitRevision(tx, {
-							unitId: params.zoneId,
+						const result = await createNavigationStructure(tx, {
+							ownerUnitId: params.zoneId,
+							purpose: "zone.navigation",
+							document: body.document,
 							actorProfileId: profile.unitId,
-							event: "update",
 						});
-						return toZoneNavigationResponse(saved);
+						const record = await presentNavigationStructure(tx, {
+							ownerUnitId: params.zoneId,
+							structureId: result.structure.id,
+							purpose: "zone.navigation",
+						});
+						return toZoneNavigationResponse(record, result.revisionId);
 					});
 				},
 				{
@@ -994,18 +1033,27 @@ export default new Elysia()
 						() => new UnitNotFound("Zone"),
 					);
 					await getZone(params.zoneId);
-					const [navigation] = await database
-						.select()
-						.from(zoneNavigation)
-						.where(
-							and(
-								eq(zoneNavigation.zoneId, params.zoneId),
-								eq(zoneNavigation.id, params.navigationId),
-							),
-						)
-						.limit(1);
-					if (!navigation) throw new ZoneNavigationNotFound();
-					return toZoneNavigationResponse(navigation);
+					return database.transaction(async (tx) => {
+						try {
+							const [record, revisionId] = await Promise.all([
+								presentNavigationStructure(tx, {
+									ownerUnitId: params.zoneId,
+									structureId: params.navigationId,
+									purpose: "zone.navigation",
+								}),
+								getContentStructureComponentRevision(
+									tx,
+									params.zoneId,
+									params.navigationId,
+								),
+							]);
+							if (!revisionId) throw new ZoneNavigationNotFound();
+							return toZoneNavigationResponse(record, revisionId);
+						} catch (cause) {
+							if (!(cause instanceof ContentStructureNotFound)) throw cause;
+							throw new ZoneNavigationNotFound();
+						}
+					});
 				},
 				{
 					params: ZoneNavigationParams,
@@ -1029,37 +1077,41 @@ export default new Elysia()
 					]);
 					await getZone(params.zoneId);
 					ensureZoneNavigationDocument(body.document);
-					return database.transaction(async (tx) => {
-						await tx.execute(
-							sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${params.zoneId}`}::text, 0))`,
-						);
-						await ensureZoneNavigationReferences(tx, body.document, {
-							zoneId: params.zoneId,
-							profileId: profile.unitId,
+					try {
+						return await database.transaction(async (tx) => {
+							await tx.execute(
+								sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${params.zoneId}`}::text, 0))`,
+							);
+							await ensureZoneNavigationReferences(tx, body.document, {
+								zoneId: params.zoneId,
+								profileId: profile.unitId,
+							});
+							const result = await replaceNavigationStructure(tx, {
+								ownerUnitId: params.zoneId,
+								structureId: params.navigationId,
+								purpose: "zone.navigation",
+								document: body.document,
+								actorProfileId: profile.unitId,
+								baseRevisionId: body.baseRevisionId,
+							});
+							const record = await presentNavigationStructure(tx, {
+								ownerUnitId: params.zoneId,
+								structureId: params.navigationId,
+								purpose: "zone.navigation",
+							});
+							return toZoneNavigationResponse(
+								record,
+								result.revisionCreated ? result.revisionId : body.baseRevisionId,
+							);
 						});
-						const [saved] = await tx
-							.update(zoneNavigation)
-							.set({ document: body.document })
-							.where(
-								and(
-									eq(zoneNavigation.zoneId, params.zoneId),
-									eq(zoneNavigation.id, params.navigationId),
-								),
-							)
-							.returning();
-						if (!saved) throw new ZoneNavigationNotFound();
-						await recordUnitRevision(tx, {
-							unitId: params.zoneId,
-							actorProfileId: profile.unitId,
-							event: "update",
-						});
-						return toZoneNavigationResponse(saved);
-					});
+					} catch (cause) {
+						rethrowZoneNavigationNotFound(cause);
+					}
 				},
 				{
 					access: "contribute:unit:update",
 					params: ZoneNavigationParams,
-					body: ZoneNavigationBody,
+					body: ZoneNavigationReplaceBody,
 					response: {
 						[StatusCodes.OK]: ZoneNavigationResponse,
 						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["ZoneDocumentInvalid"]),
@@ -1068,72 +1120,68 @@ export default new Elysia()
 							"UnitNotFound",
 							"ZoneNavigationNotFound",
 						]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
 					},
 					detail: { summary: "Replace Zone navigation", tags: ["Zones"] },
 				},
 			)
 			.delete(
 				"/:zoneId/navigation/:navigationId",
-				async ({ params, profile, authorization }) => {
+				async ({ params, body, profile, authorization }) => {
 					await ensureUnitMutationAuthorized(authorization.unit, params.zoneId, [
 						"zone",
 						"navigation",
 						params.navigationId,
 					]);
-					await database.transaction(async (tx) => {
-						await tx.execute(
-							sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${params.zoneId}`}::text, 0))`,
-						);
-						const [target] = await tx
-							.select({ id: zoneNavigation.id })
-							.from(zoneNavigation)
-							.where(
-								and(
-									eq(zoneNavigation.zoneId, params.zoneId),
-									eq(zoneNavigation.id, params.navigationId),
-								),
+					try {
+						await database.transaction(async (tx) => {
+							await tx.execute(
+								sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${params.zoneId}`}::text, 0))`,
+							);
+							const [zoneRecord] = await tx
+								.select({ id: zone.id })
+								.from(zone)
+								.where(eq(zone.id, params.zoneId))
+								.limit(1);
+							if (!zoneRecord) throw new UnitNotFound("Zone");
+							const pages = await tx
+								.select({ document: zonePage.document })
+								.from(zonePage)
+								.where(eq(zonePage.zoneId, params.zoneId));
+							const docks = await tx
+								.select({ document: unitDock.document })
+								.from(unitDock)
+								.where(eq(unitDock.unitId, params.zoneId));
+							if (
+								docks.some((dock) =>
+									collectBlockReferences(
+										parseDocument(DockDocument, dock.document),
+									).navigationIds.has(params.navigationId),
+								) ||
+								pages.some((page) =>
+									collectBlockReferences(
+										parseDocument(UnitReferencedBlockDocument, page.document),
+									).navigationIds.has(params.navigationId),
+								)
 							)
-							.limit(1);
-						if (!target) throw new ZoneNavigationNotFound();
-						const [zoneRecord] = await tx
-							.select({ id: zone.id })
-							.from(zone)
-							.where(eq(zone.id, params.zoneId))
-							.limit(1);
-						if (!zoneRecord) throw new UnitNotFound("Zone");
-						const pages = await tx
-							.select({ document: zonePage.document })
-							.from(zonePage)
-							.where(eq(zonePage.zoneId, params.zoneId));
-						const docks = await tx
-							.select({ document: unitDock.document })
-							.from(unitDock)
-							.where(eq(unitDock.unitId, params.zoneId));
-						if (
-							docks.some((dock) =>
-								collectBlockReferences(
-									parseDocument(DockDocument, dock.document),
-								).navigationIds.has(target.id),
-							) ||
-							pages.some((page) =>
-								collectBlockReferences(
-									parseDocument(UnitReferencedBlockDocument, page.document),
-								).navigationIds.has(target.id),
-							)
-						)
-							throw new ZoneNavigationInUse();
-						await tx.delete(zoneNavigation).where(eq(zoneNavigation.id, target.id));
-						await recordUnitRevision(tx, {
-							unitId: params.zoneId,
-							actorProfileId: profile.unitId,
-							event: "update",
+								throw new ZoneNavigationInUse();
+							await deleteNavigationStructure(tx, {
+								ownerUnitId: params.zoneId,
+								structureId: params.navigationId,
+								purpose: "zone.navigation",
+								actorProfileId: profile.unitId,
+								baseRevisionId: body.baseRevisionId,
+							});
 						});
-					});
+					} catch (cause) {
+						rethrowZoneNavigationNotFound(cause);
+					}
 					return new Response(null, { status: StatusCodes.NO_CONTENT });
 				},
 				{
 					access: "contribute:unit:update",
 					params: ZoneNavigationParams,
+					body: ZoneNavigationRevisionBody,
 					response: {
 						[StatusCodes.NO_CONTENT]: t.Void(),
 						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
@@ -1141,7 +1189,10 @@ export default new Elysia()
 							"UnitNotFound",
 							"ZoneNavigationNotFound",
 						]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse(["ZoneNavigationInUse"]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"ZoneNavigationInUse",
+							"UnitRevisionConflict",
+						]),
 					},
 					detail: {
 						summary: "Delete Zone navigation resource",

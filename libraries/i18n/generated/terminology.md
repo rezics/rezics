@@ -152,6 +152,21 @@ The REZICS Post product concept; this does not refer to the HTTP POST method or 
 | ko | approved | inline | 게시물 | Post, Posts |
 | ko | approved | plural | 게시물 | Post, Posts |
 
+## label
+
+A lightweight localized-title Unit used as a structural heading or taxonomy entry; this is distinct from an assignable Tag.
+
+| Locale | Status | Slot | Approved form | Forbidden forms |
+| --- | --- | --- | --- | --- |
+| en | approved | label | Taxonomy label |  |
+| en | approved | pluralLabel | Taxonomy labels |  |
+| en | approved | inline | taxonomy label |  |
+| en | approved | plural | taxonomy labels |  |
+| zh-Hant | approved | label | 分類標目 |  |
+| zh-Hant | approved | pluralLabel | 分類標目 |  |
+| zh-Hant | approved | inline | 分類標目 |  |
+| zh-Hant | approved | plural | 分類標目 |  |
+
 ## publicationLicense
 
 The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.

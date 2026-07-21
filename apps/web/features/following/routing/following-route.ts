@@ -48,6 +48,7 @@ export function followingHref(
 			return `/polls/${id}`;
 		case "slug_namespace":
 		case "release":
+		case "label":
 		case "tag":
 		case "series":
 		case "realm_rule":

@@ -13,6 +13,7 @@ export * from "./dock";
 export * from "./entity";
 export * from "./governance";
 export * from "./history";
+export * from "./label";
 export * from "./media";
 export * from "./poll";
 export * from "./post";

@@ -71,6 +71,12 @@ export const terminologyConcepts = defineTerminologyConcepts({
 		slots: ["label", "pluralLabel", "inline", "plural"] as const,
 		locales: AllTerminologyLocales,
 	},
+	label: {
+		definition:
+			"A lightweight localized-title Unit used as a structural heading or taxonomy entry; this is distinct from an assignable Tag.",
+		slots: ["label", "pluralLabel", "inline", "plural"] as const,
+		locales: WebTerminologyLocales,
+	},
 	publicationLicense: {
 		definition:
 			"The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.",

@@ -17,6 +17,7 @@ import { database } from "../database";
 import {
 	book,
 	collection,
+	contentStructure,
 	contentStructureNode,
 	entity,
 	media,
@@ -587,10 +588,15 @@ function buildSearchConditions(category: SearchCategory, request: DomainSearchRe
 		conditions.push(
 			request.includeScopeDescendants
 				? sql`(${direct} or exists (
-					select 1 from ${contentStructureNode}
+					select 1
+					from ${contentStructureNode}
+					inner join ${contentStructure}
+						on ${contentStructure.id} = ${contentStructureNode.structureId}
 					where ${contentStructureNode.ownerUnitId} = ${request.scopeUnitId}::uuid
 						and ${contentStructureNode.contentUnitId} = ${unit.id}
 						and ${contentStructureNode.deletedAt} is null
+						and ${contentStructure.deletedAt} is null
+						and ${contentStructure.purpose} in ('book.contents', 'post.contents')
 				))`
 				: direct,
 		);

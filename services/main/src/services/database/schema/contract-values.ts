@@ -14,6 +14,7 @@ export const UnitKindValues = [
 	"media",
 	"release",
 	"entity",
+	"label",
 	"tag",
 	"series",
 	"zone",
@@ -88,6 +89,25 @@ export const PostKindValues = [
 	"governance_note",
 ] as const;
 export type PostKind = (typeof PostKindValues)[number];
+
+/** Persisted as text so purpose schemas can evolve without a PostgreSQL enum migration. */
+export const ContentStructurePurposeValues = [
+	"book.contents",
+	"post.contents",
+	"realm.taxonomy",
+	"realm.navigation",
+	"zone.navigation",
+] as const;
+export type ContentStructurePurpose = (typeof ContentStructurePurposeValues)[number];
+
+export const ContentStructureTargetKindValues = [
+	"content",
+	"none",
+	"unit",
+	"zone_page",
+	"external",
+] as const;
+export type ContentStructureTargetKind = (typeof ContentStructureTargetKindValues)[number];
 export const ProgressStatusValues = [
 	"backlog",
 	"active",

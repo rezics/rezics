@@ -61,6 +61,8 @@ export default {
 	PollOptionInvalid: "The selected poll option is invalid.",
 	PollAlreadyClosed: "This poll is already closed.",
 	ProgressNotFound: "No progress record was found.",
+	ContentStructureInvalid: "This Content Structure does not satisfy its purpose rules.",
+	ContentStructureNotFound: "This Content Structure could not be found.",
 	ContentStructureNodeNotFound: "This Content Structure node could not be found.",
 	ReviewNotFound: "This review could not be found.",
 	ModerationTargetNotFound: "The moderation target could not be found.",

@@ -243,22 +243,24 @@ export default new Elysia({ prefix: "/history" })
 			await authorization.unit.ensureCanRead(row.unitId);
 			const access = await getVisibilityAccess(authorization);
 			const canSeeContent = !row.contentHidden || canSeeHidden(row, access);
-			const slots = await database
-				.select({
-					role: unitRevisionSlot.role,
-					model: revisionContent.model,
-					originRevisionId: unitRevisionSlot.originRevisionId,
-					content: revisionContent.payload,
-				})
-				.from(unitRevisionSlot)
-				.innerJoin(revisionContent, eq(revisionContent.id, unitRevisionSlot.contentId))
-				.where(eq(unitRevisionSlot.revisionId, row.id))
-				.orderBy(unitRevisionSlot.role);
+			const { slots, documents } = await database.transaction(async (tx) => ({
+				slots: await tx
+					.select({
+						role: unitRevisionSlot.role,
+						model: revisionContent.model,
+						originRevisionId: unitRevisionSlot.originRevisionId,
+					})
+					.from(unitRevisionSlot)
+					.innerJoin(revisionContent, eq(revisionContent.id, unitRevisionSlot.contentId))
+					.where(eq(unitRevisionSlot.revisionId, row.id))
+					.orderBy(unitRevisionSlot.role),
+				documents: canSeeContent ? await getUnitRevisionDocuments(tx, row.id) : {},
+			}));
 			return {
 				...presentSummary(row, access),
 				slots: slots.map((slot) => ({
 					...slot,
-					content: canSeeContent ? slot.content : null,
+					content: canSeeContent ? documents[slot.role]?.payload : null,
 				})),
 			} satisfies Static<typeof UnitRevisionResponse>;
 		},

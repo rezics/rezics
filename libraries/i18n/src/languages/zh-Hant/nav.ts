@@ -2,6 +2,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 
 const { forms: followTerms } = zhHantTerminology.follow;
+const { forms: labelTerms } = zhHantTerminology.label;
 const { forms: postTerms } = zhHantTerminology.post;
 const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: unitSlugTerms } = zhHantTerminology.unitSlug;
@@ -66,6 +67,7 @@ export default {
 			media: "媒體",
 			release: "發行",
 			entity: "實體",
+			label: labelTerms.label,
 			tag: "標籤",
 			series: "系列",
 			zone: zoneTerms.label,

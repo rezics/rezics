@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, isNull } from "drizzle-orm";
 import Elysia from "elysia";
 import type { ContentLanguage } from "@rezics/i18n";
 
@@ -7,15 +7,29 @@ import { isContentStructureNodeReadable } from "../../authorization/content-stru
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
 import { isPrimaryUnitLocalization } from "../../units/localization";
-import { fractionalPositionBetween } from "../../ordering/position";
 import {
+	contentStructure,
 	contentStructureNode,
+	label,
 	post,
 	unit,
 	unitAccessBinding,
 	unitLocalization,
 } from "../../database/schema";
 import { recordUnitRevision } from "../../units/history";
+import {
+	createContentStructure,
+	deleteContentStructure,
+	deleteContentStructureNode,
+	getContentStructureComponentRevision,
+	insertContentStructureNode,
+	listContentStructures,
+	updateContentStructureNode,
+} from "../../content-structure/service";
+import {
+	loadContentStructureSnapshot,
+	contentStructureTargetFromRow,
+} from "../../content-structure/storage";
 import { insertUnit } from "../../units/create";
 import { ensureSubjectPostTargetingAllowed } from "../../posts/targeting";
 import {
@@ -33,6 +47,13 @@ import {
 	ReadChapterQuery,
 	UpdateContentStructureNodeBody,
 	UpsertChapterLocalizationBody,
+	ContentStructureParams,
+	ContentStructureRevisionBody,
+	CreateContentStructureBody,
+	CreateGenericContentStructureNodeBody,
+	GenericContentStructureNodeParams,
+	UnitContentStructuresParams,
+	UpdateGenericContentStructureNodeBody,
 } from "./schema";
 import {
 	ChapterDetailResponse,
@@ -40,21 +61,60 @@ import {
 	ContentStructureNodeResponse,
 	toPortableTextResponse,
 	UpdateStateResponse,
+	ContentStructureDetailResponse,
+	ContentStructureListResponse,
+	ContentStructureMutationResponse,
+	ContentStructureNodeMutationResponse,
+	ContentStructureDeleteResponse,
 } from "../schema/response";
 import { toApiErrorResponse } from "../schema/response";
 
 const UnitForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden", "UnitProtected"]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 
+function presentGenericContentStructureNode(node: typeof contentStructureNode.$inferSelect) {
+	return {
+		id: node.id,
+		structureId: node.structureId,
+		ownerUnitId: node.ownerUnitId,
+		parentId: node.parentId,
+		contentUnitId: node.contentUnitId,
+		documentKey: node.documentKey,
+		target: contentStructureTargetFromRow(node),
+		position: node.position,
+		contentRating: node.contentRating,
+		createdAt: node.createdAt,
+		updatedAt: node.updatedAt,
+	};
+}
+
+function presentContentStructure(
+	structure: typeof contentStructure.$inferSelect,
+	latestRevisionId: string | null,
+) {
+	return {
+		id: structure.id,
+		ownerUnitId: structure.ownerUnitId,
+		purpose: structure.purpose,
+		documentKey: structure.documentKey,
+		latestRevisionId,
+		createdAt: structure.createdAt,
+		updatedAt: structure.updatedAt,
+	};
+}
+
 function toContentStructureNodeResponse(
 	node: typeof contentStructureNode.$inferSelect,
 	language: ContentLanguage,
 	title: string,
 	contentKind: "chapter" | "chapter_group",
+	latestRevisionId: string,
 ) {
 	return {
 		id: node.id,
 		unitId: node.ownerUnitId,
+		structureId: node.structureId,
+		latestRevisionId,
 		parentId: node.parentId,
 		contentUnitId: node.contentUnitId,
 		contentKind,
@@ -69,11 +129,320 @@ function toContentStructureNodeResponse(
 export default new Elysia()
 	.use(session)
 	.get(
+		"/units/by-id/:unitId/content-structures",
+		async ({ params, request }) => {
+			const { authorization } = await resolveIdentity(request.headers, "unit:read");
+			await authorization.unit.ensureCanRead(params.unitId);
+			return database.transaction(async (tx) => {
+				const structures = await listContentStructures(tx, params.unitId);
+				return {
+					items: await Promise.all(
+						structures.map(async (structure) =>
+							presentContentStructure(
+								structure,
+								await getContentStructureComponentRevision(
+									tx,
+									params.unitId,
+									structure.id,
+								),
+							),
+						),
+					),
+				};
+			});
+		},
+		{
+			params: UnitContentStructuresParams,
+			response: {
+				[StatusCodes.OK]: ContentStructureListResponse,
+				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+			},
+			detail: { summary: "List Unit Content Structures", tags: ["Content Structure"] },
+		},
+	)
+	.post(
+		"/units/by-id/:unitId/content-structures",
+		async ({ params, body, profile, authorization }) => {
+			await authorization.unit.ensureCanUpdate(params.unitId, [["content-structure"]]);
+			const result = await database.transaction((tx) =>
+				createContentStructure(tx, {
+					ownerUnitId: params.unitId,
+					purpose: body.purpose,
+					actorProfileId: profile.unitId,
+				}),
+			);
+			return {
+				structure: presentContentStructure(result.structure, result.revisionId),
+				revisionCreated: result.revisionCreated,
+			};
+		},
+		{
+			access: "contribute:unit:update",
+			params: UnitContentStructuresParams,
+			body: CreateContentStructureBody,
+			response: {
+				[StatusCodes.OK]: ContentStructureMutationResponse,
+				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
+			},
+			detail: { summary: "Create Content Structure", tags: ["Content Structure"] },
+		},
+	)
+	.get(
+		"/units/by-id/:unitId/content-structures/:structureId",
+		async ({ params, request }) => {
+			const { authorization } = await resolveIdentity(request.headers, "unit:read");
+			await authorization.unit.ensureCanRead(params.unitId);
+			return database.transaction(async (tx) => {
+				const snapshot = await loadContentStructureSnapshot(tx, {
+					structureId: params.structureId,
+					ownerUnitId: params.unitId,
+				});
+				const latestRevisionId = await getContentStructureComponentRevision(
+					tx,
+					params.unitId,
+					params.structureId,
+				);
+				return {
+					...presentContentStructure(snapshot.structure, latestRevisionId),
+					nodes: snapshot.nodes.map(presentGenericContentStructureNode),
+				};
+			});
+		},
+		{
+			params: ContentStructureParams,
+			response: {
+				[StatusCodes.OK]: ContentStructureDetailResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ContentStructureNotFound",
+				]),
+			},
+			detail: { summary: "Get Content Structure", tags: ["Content Structure"] },
+		},
+	)
+	.post(
+		"/units/by-id/:unitId/content-structures/:structureId/nodes",
+		async ({ params, body, profile, authorization }) => {
+			await authorization.unit.ensureCanUpdate(params.unitId, [
+				["content-structure", params.structureId],
+			]);
+			if (body.content.kind === "unit")
+				await authorization.unit.ensureCanRead(body.content.unitId);
+			if (body.target?.kind === "unit")
+				await authorization.unit.ensureCanRead(body.target.unitId);
+			const result = await database.transaction(async (tx) => {
+				let contentUnitId: string;
+				if (body.content.kind === "unit") contentUnitId = body.content.unitId;
+				else {
+					const created = await insertUnit(tx, {
+						kind: "label",
+						status: "published",
+						visibility: "public",
+						publishedAt: new Date(),
+						statusActor: { kind: "profile", profileId: profile.unitId },
+					});
+					await tx.insert(label).values({ id: created.id });
+					await tx.insert(unitLocalization).values({
+						unitId: created.id,
+						language: body.content.language,
+						title: body.content.title,
+					});
+					await tx.insert(unitAccessBinding).values({
+						unitId: created.id,
+						subjectKind: "profile",
+						profileId: profile.unitId,
+						role: "owner",
+						scope: [],
+						grantedByProfileId: profile.unitId,
+					});
+					await recordUnitRevision(tx, {
+						unitId: created.id,
+						actorProfileId: profile.unitId,
+						event: "create",
+					});
+					contentUnitId = created.id;
+				}
+				return insertContentStructureNode(tx, {
+					ownerUnitId: params.unitId,
+					structureId: params.structureId,
+					baseRevisionId: body.baseRevisionId,
+					actorProfileId: profile.unitId,
+					parentId: body.parentId,
+					contentUnitId,
+					documentKey: body.documentKey,
+					target: body.target,
+					position: body.position,
+					contentRating: body.contentRating,
+				});
+			});
+			return {
+				node: presentGenericContentStructureNode(result.node),
+				latestRevisionId: result.revisionId,
+				revisionCreated: result.revisionCreated,
+			};
+		},
+		{
+			access: "contribute:unit:update",
+			params: ContentStructureParams,
+			body: CreateGenericContentStructureNodeBody,
+			response: {
+				[StatusCodes.OK]: ContentStructureNodeMutationResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
+				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ContentStructureNotFound",
+				]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
+			},
+			detail: { summary: "Insert Content Structure node", tags: ["Content Structure"] },
+		},
+	)
+	.patch(
+		"/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId",
+		async ({ params, body, profile, authorization }) => {
+			await authorization.unit.ensureCanUpdate(params.unitId, [
+				["content-structure", params.structureId],
+			]);
+			if (body.contentUnitId) await authorization.unit.ensureCanRead(body.contentUnitId);
+			if (body.target?.kind === "unit")
+				await authorization.unit.ensureCanRead(body.target.unitId);
+			const result = await database.transaction((tx) =>
+				updateContentStructureNode(tx, {
+					ownerUnitId: params.unitId,
+					structureId: params.structureId,
+					nodeId: params.nodeId,
+					baseRevisionId: body.baseRevisionId,
+					actorProfileId: profile.unitId,
+					parentId: body.parentId,
+					contentUnitId: body.contentUnitId,
+					documentKey: body.documentKey,
+					target: body.target,
+					position: body.position,
+					contentRating: body.contentRating,
+				}),
+			);
+			return {
+				node: presentGenericContentStructureNode(result.node),
+				latestRevisionId: result.revisionId,
+				revisionCreated: result.revisionCreated,
+			};
+		},
+		{
+			access: "contribute:unit:update",
+			params: GenericContentStructureNodeParams,
+			body: UpdateGenericContentStructureNodeBody,
+			response: {
+				[StatusCodes.OK]: ContentStructureNodeMutationResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
+				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ContentStructureNotFound",
+				]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
+			},
+			detail: { summary: "Update Content Structure node", tags: ["Content Structure"] },
+		},
+	)
+	.delete(
+		"/units/by-id/:unitId/content-structures/:structureId/nodes/:nodeId",
+		async ({ params, body, profile, authorization }) => {
+			await authorization.unit.ensureCanUpdate(params.unitId, [
+				["content-structure", params.structureId],
+			]);
+			const result = await database.transaction((tx) =>
+				deleteContentStructureNode(tx, {
+					ownerUnitId: params.unitId,
+					structureId: params.structureId,
+					nodeId: params.nodeId,
+					baseRevisionId: body.baseRevisionId,
+					actorProfileId: profile.unitId,
+				}),
+			);
+			return {
+				updated: true as const,
+				latestRevisionId: result.revisionId,
+				revisionCreated: result.revisionCreated,
+			};
+		},
+		{
+			access: "contribute:unit:update",
+			params: GenericContentStructureNodeParams,
+			body: ContentStructureRevisionBody,
+			response: {
+				[StatusCodes.OK]: ContentStructureDeleteResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
+				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ContentStructureNotFound",
+				]),
+			},
+			detail: {
+				summary: "Delete Content Structure node subtree",
+				tags: ["Content Structure"],
+			},
+		},
+	)
+	.delete(
+		"/units/by-id/:unitId/content-structures/:structureId",
+		async ({ params, body, profile, authorization }) => {
+			await authorization.unit.ensureCanUpdate(params.unitId, [
+				["content-structure", params.structureId],
+			]);
+			const result = await database.transaction((tx) =>
+				deleteContentStructure(tx, {
+					ownerUnitId: params.unitId,
+					structureId: params.structureId,
+					binding: "direct",
+					baseRevisionId: body.baseRevisionId,
+					actorProfileId: profile.unitId,
+				}),
+			);
+			return {
+				updated: true as const,
+				latestRevisionId: result.revisionId,
+				revisionCreated: result.revisionCreated,
+			};
+		},
+		{
+			access: "contribute:unit:update",
+			params: ContentStructureParams,
+			body: ContentStructureRevisionBody,
+			response: {
+				[StatusCodes.OK]: ContentStructureDeleteResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
+				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ContentStructureNotFound",
+				]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ContentStructureInvalid"]),
+			},
+			detail: { summary: "Delete Content Structure", tags: ["Content Structure"] },
+		},
+	)
+	.get(
 		"/units/book/:unitId/content-structure/nodes",
 		async ({ params, request }) => {
 			const { authorization } = await resolveIdentity(request.headers, "unit:read");
 			if (!(await authorization.unit.canRead(params.unitId))) throw new BookNotFound();
 			const canEditBook = await authorization.unit.canUpdate(params.unitId);
+			const [structure] = await database
+				.select({ id: contentStructure.id })
+				.from(contentStructure)
+				.where(
+					and(
+						eq(contentStructure.ownerUnitId, params.unitId),
+						eq(contentStructure.purpose, "book.contents"),
+						isNull(contentStructure.deletedAt),
+					),
+				)
+				.limit(1);
+			if (!structure) return { structureId: null, latestRevisionId: null, items: [] };
 			const rows = await database
 				.select({
 					id: contentStructureNode.id,
@@ -99,12 +468,17 @@ export default new Elysia()
 				)
 				.where(
 					and(
-						eq(contentStructureNode.ownerUnitId, params.unitId),
+						eq(contentStructureNode.structureId, structure.id),
 						isNull(contentStructureNode.deletedAt),
 					),
 				)
 				.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
+			const latestRevisionId = await database.transaction((tx) =>
+				getContentStructureComponentRevision(tx, params.unitId, structure.id),
+			);
 			return {
+				structureId: structure.id,
+				latestRevisionId,
 				items: rows
 					.filter((row) =>
 						isContentStructureNodeReadable(
@@ -145,7 +519,7 @@ export default new Elysia()
 		"/units/book/:unitId/content-structure/nodes",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(params.unitId, [["content-structure"]]);
-			const node = await database.transaction(async (tx) => {
+			const result = await database.transaction(async (tx) => {
 				const hasContent = body.content !== undefined;
 				const published = hasContent ? body.status === "published" : true;
 				const contentUnit = await insertUnit(tx, {
@@ -184,46 +558,34 @@ export default new Elysia()
 					actorProfileId: profile.unitId,
 					event: "create",
 				});
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${params.unitId}::text, 0))`,
-				);
-				const parentId = body.parentId ?? null;
-				const [last] = await tx
-					.select({ position: contentStructureNode.position })
-					.from(contentStructureNode)
+				const [structure] = await tx
+					.select({ id: contentStructure.id })
+					.from(contentStructure)
 					.where(
 						and(
-							eq(contentStructureNode.ownerUnitId, params.unitId),
-							parentId === null
-								? isNull(contentStructureNode.parentId)
-								: eq(contentStructureNode.parentId, parentId),
-							isNull(contentStructureNode.deletedAt),
+							eq(contentStructure.ownerUnitId, params.unitId),
+							eq(contentStructure.purpose, "book.contents"),
+							isNull(contentStructure.deletedAt),
 						),
 					)
-					.orderBy(desc(contentStructureNode.position), desc(contentStructureNode.id))
 					.limit(1);
-				const [created] = await tx
-					.insert(contentStructureNode)
-					.values({
-						ownerUnitId: params.unitId,
-						parentId,
-						contentUnitId: contentUnit.id,
-						position: body.position ?? fractionalPositionBetween(last?.position, null),
-					})
-					.returning();
-				if (!created) throw new Error("Content node insertion did not return a row");
-				await recordUnitRevision(tx, {
-					unitId: params.unitId,
+				if (!structure) throw new BookNotFound();
+				return insertContentStructureNode(tx, {
+					ownerUnitId: params.unitId,
+					structureId: structure.id,
+					baseRevisionId: body.baseRevisionId,
 					actorProfileId: profile.unitId,
-					event: "update",
+					parentId: body.parentId,
+					contentUnitId: contentUnit.id,
+					position: body.position,
 				});
-				return created;
 			});
 			return toContentStructureNodeResponse(
-				node,
+				result.node,
 				body.language,
 				body.title,
 				body.content !== undefined ? "chapter" : "chapter_group",
+				result.revisionId,
 			);
 		},
 		{
@@ -234,7 +596,10 @@ export default new Elysia()
 				[StatusCodes.OK]: ContentStructureNodeResponse,
 				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["PostTargetingLocked"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"PostTargetingLocked",
+					"UnitRevisionConflict",
+				]),
 			},
 			detail: { summary: "Create book group or chapter", tags: ["Books"] },
 		},
@@ -243,45 +608,58 @@ export default new Elysia()
 		"/units/book/:unitId/content-structure/nodes/:nodeId",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.unit.ensureCanUpdate(params.unitId, [["content-structure"]]);
-			const node = await database.transaction(async (tx) => {
+			const result = await database.transaction(async (tx) => {
 				const condition = and(
 					eq(contentStructureNode.id, params.nodeId),
 					eq(contentStructureNode.ownerUnitId, params.unitId),
 					isNull(contentStructureNode.deletedAt),
 				);
-				const [updated] =
-					body.parentId !== undefined || body.position !== undefined
-						? await tx
-								.update(contentStructureNode)
-								.set({ parentId: body.parentId, position: body.position })
-								.where(condition)
-								.returning()
-						: await tx.select().from(contentStructureNode).where(condition).limit(1);
-				if (!updated) throw new ContentStructureNodeNotFound();
+				const [current] = await tx
+					.select()
+					.from(contentStructureNode)
+					.where(condition)
+					.limit(1);
+				if (!current) throw new ContentStructureNodeNotFound();
 				if (body.title !== undefined) {
 					const localized = await tx
 						.update(unitLocalization)
 						.set({ title: body.title })
 						.where(
 							and(
-								eq(unitLocalization.unitId, updated.contentUnitId),
+								eq(unitLocalization.unitId, current.contentUnitId),
 								isPrimaryUnitLocalization(unitLocalization.unitId),
 							),
 						)
 						.returning({ unitId: unitLocalization.unitId });
 					if (!localized.length) throw new ContentStructureNodeNotFound();
 					await recordUnitRevision(tx, {
-						unitId: updated.contentUnitId,
+						unitId: current.contentUnitId,
 						actorProfileId: profile.unitId,
 						event: "update",
 					});
 				}
-				await recordUnitRevision(tx, {
-					unitId: params.unitId,
-					actorProfileId: profile.unitId,
-					event: "update",
-				});
-				return updated;
+				const structural = "baseRevisionId" in body;
+				const structuralResult = structural
+					? await updateContentStructureNode(tx, {
+							ownerUnitId: params.unitId,
+							structureId: current.structureId,
+							nodeId: current.id,
+							baseRevisionId: body.baseRevisionId,
+							actorProfileId: profile.unitId,
+							parentId: body.parentId,
+							position: body.position,
+						})
+					: null;
+				const updated = structuralResult?.node ?? current;
+				const latestRevisionId =
+					structuralResult?.revisionId ??
+					(await getContentStructureComponentRevision(
+						tx,
+						params.unitId,
+						current.structureId,
+					));
+				if (!latestRevisionId) throw new ContentStructureNodeNotFound();
+				return { node: updated, latestRevisionId };
 			});
 			const [localization] = await database
 				.select({
@@ -293,7 +671,7 @@ export default new Elysia()
 				.innerJoin(post, eq(post.id, unitLocalization.unitId))
 				.where(
 					and(
-						eq(unitLocalization.unitId, node.contentUnitId),
+						eq(unitLocalization.unitId, result.node.contentUnitId),
 						isPrimaryUnitLocalization(unitLocalization.unitId),
 					),
 				)
@@ -305,10 +683,11 @@ export default new Elysia()
 			)
 				throw new ContentStructureNodeNotFound();
 			return toContentStructureNodeResponse(
-				node,
+				result.node,
 				localization.language,
 				localization.title,
 				localization.contentKind,
+				result.latestRevisionId,
 			);
 		},
 		{
@@ -322,6 +701,7 @@ export default new Elysia()
 					"UnitNotFound",
 					"ContentStructureNodeNotFound",
 				]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
 			},
 			detail: {
 				summary: "Move or rename Content Structure node",
@@ -342,9 +722,15 @@ export default new Elysia()
 					position: contentStructureNode.position,
 				})
 				.from(contentStructureNode)
+				.innerJoin(
+					contentStructure,
+					eq(contentStructure.id, contentStructureNode.structureId),
+				)
 				.where(
 					and(
 						eq(contentStructureNode.contentUnitId, params.chapterId),
+						eq(contentStructure.purpose, "book.contents"),
+						isNull(contentStructure.deletedAt),
 						isNull(contentStructureNode.deletedAt),
 					),
 				)
@@ -391,7 +777,12 @@ export default new Elysia()
 					contentStatus: unitLocalization.contentStatus,
 				})
 				.from(contentStructureNode)
+				.innerJoin(
+					contentStructure,
+					eq(contentStructure.id, contentStructureNode.structureId),
+				)
 				.innerJoin(unit, eq(unit.id, contentStructureNode.contentUnitId))
+				.innerJoin(post, eq(post.id, contentStructureNode.contentUnitId))
 				.innerJoin(
 					unitLocalization,
 					and(
@@ -402,6 +793,8 @@ export default new Elysia()
 				.where(
 					and(
 						eq(contentStructureNode.ownerUnitId, node.bookId),
+						eq(contentStructure.purpose, "book.contents"),
+						isNull(contentStructure.deletedAt),
 						eq(post.kind, "chapter"),
 						isNull(contentStructureNode.deletedAt),
 					),

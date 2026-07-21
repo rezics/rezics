@@ -66,20 +66,3 @@ export const zonePage = pgTable(
 		),
 	],
 );
-
-/** Menu content is independent from Menu Block presentation and can be reused by many pages. */
-export const zoneNavigation = pgTable(
-	"zone_navigation",
-	{
-		id: createUuidv7PrimaryKey(),
-		zoneId: uuid()
-			.notNull()
-			.references(() => zone.id, { onDelete: "cascade" }),
-		document: createJsonDocumentColumn().notNull(),
-		createdAt: createCreatedAtColumn(),
-		updatedAt: createUpdatedAtColumn(),
-	},
-	(table) => [
-		index("zone_navigation_zone_created_idx").on(table.zoneId, table.createdAt, table.id),
-	],
-);

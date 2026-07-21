@@ -13,6 +13,11 @@ import { createCommunityCatalogAccess } from "../authorization/unit/ownership";
 import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
 import {
+	ContentStructureContentModel,
+	ContentStructureSnapshotSchema,
+	contentStructureSlotRole,
+} from "../content-structure/contracts";
+import {
 	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
 	firstUnitLocalizationCoverAssetId,
@@ -21,6 +26,7 @@ import {
 } from "./localization";
 import {
 	book,
+	contentStructure,
 	entity,
 	software,
 	media,
@@ -110,7 +116,15 @@ export async function createUnit(
 			license: input.license,
 			statusActor: { kind: "profile", profileId: ownerId },
 		});
-		if (kind === "book") await tx.insert(book).values({ id: created.id });
+		let bookStructure: typeof contentStructure.$inferSelect | undefined;
+		if (kind === "book") {
+			await tx.insert(book).values({ id: created.id });
+			[bookStructure] = await tx
+				.insert(contentStructure)
+				.values({ ownerUnitId: created.id, purpose: "book.contents" })
+				.returning();
+			if (!bookStructure) throw new Error("Book Content Structure insertion returned no row");
+		}
 		if (kind === "software") await tx.insert(software).values({ id: created.id });
 		if (kind === "media") await tx.insert(media).values({ id: created.id, kind: "other" });
 		await tx.insert(unitLocalization).values({
@@ -118,10 +132,27 @@ export async function createUnit(
 			...input.localization,
 		});
 		await createCommunityCatalogAccess(tx, created.id, ownerId, "publishing_editor");
+		const bookStructureSnapshot = bookStructure
+			? ContentStructureSnapshotSchema.parse({
+					version: 1,
+					structure: bookStructure,
+					nodes: [],
+				})
+			: null;
 		await recordUnitRevision(tx, {
 			unitId: created.id,
 			actorProfileId: ownerId,
 			event: "create",
+			componentChanges: bookStructureSnapshot
+				? [
+						{
+							role: contentStructureSlotRole(bookStructureSnapshot.structure.id),
+							model: ContentStructureContentModel,
+							delta: bookStructureSnapshot,
+							checkpoint: async () => bookStructureSnapshot,
+						},
+					]
+				: undefined,
 		});
 		return created.id;
 	});

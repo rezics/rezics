@@ -2,12 +2,91 @@ import { type Static, t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 
 import { FractionalPosition, ContentLanguage, Uuid } from "../schema";
+import { ContentRatingValues } from "../../database/schema/contract-values";
+
+export const UnitContentStructuresParams = t.Object({ unitId: Uuid });
+export const ContentStructureParams = t.Object({ unitId: Uuid, structureId: Uuid });
+export const GenericContentStructureNodeParams = t.Object({
+	unitId: Uuid,
+	structureId: Uuid,
+	nodeId: Uuid,
+});
+
+export const ContentStructureTarget = t.Union([
+	t.Object({ kind: t.Literal("content") }, { additionalProperties: false }),
+	t.Object({ kind: t.Literal("none") }, { additionalProperties: false }),
+	t.Object({ kind: t.Literal("unit"), unitId: Uuid }, { additionalProperties: false }),
+	t.Object({ kind: t.Literal("zone_page"), zonePageId: Uuid }, { additionalProperties: false }),
+	t.Object(
+		{
+			kind: t.Literal("external"),
+			url: t.String({ minLength: 1, maxLength: 2_000, pattern: "^https://" }),
+		},
+		{ additionalProperties: false },
+	),
+]);
+
+export const CreateContentStructureBody = t.Object(
+	{
+		purpose: t.Union([
+			t.Literal("book.contents"),
+			t.Literal("post.contents"),
+			t.Literal("realm.taxonomy"),
+		]),
+	},
+	{ additionalProperties: false },
+);
+
+const ExistingContentUnit = t.Object(
+	{ kind: t.Literal("unit"), unitId: Uuid },
+	{ additionalProperties: false },
+);
+const InlineLabelContent = t.Object(
+	{
+		kind: t.Literal("label"),
+		language: ContentLanguage,
+		title: t.String({ minLength: 1, maxLength: 500 }),
+	},
+	{ additionalProperties: false },
+);
+
+export const CreateGenericContentStructureNodeBody = t.Object(
+	{
+		baseRevisionId: Uuid,
+		parentId: t.Optional(Uuid),
+		content: t.Union([ExistingContentUnit, InlineLabelContent]),
+		documentKey: t.Optional(t.String({ pattern: "^[0-9a-f]{12}$" })),
+		target: t.Optional(ContentStructureTarget),
+		position: t.Optional(FractionalPosition),
+		contentRating: t.Optional(t.UnionEnum(ContentRatingValues)),
+	},
+	{ additionalProperties: false },
+);
+
+export const UpdateGenericContentStructureNodeBody = t.Object(
+	{
+		baseRevisionId: Uuid,
+		parentId: t.Optional(t.Nullable(Uuid)),
+		contentUnitId: t.Optional(Uuid),
+		documentKey: t.Optional(t.Nullable(t.String({ pattern: "^[0-9a-f]{12}$" }))),
+		target: t.Optional(ContentStructureTarget),
+		position: t.Optional(FractionalPosition),
+		contentRating: t.Optional(t.Nullable(t.UnionEnum(ContentRatingValues))),
+	},
+	{ additionalProperties: false, minProperties: 2 },
+);
+
+export const ContentStructureRevisionBody = t.Object(
+	{ baseRevisionId: Uuid },
+	{ additionalProperties: false },
+);
 
 export const BookContentStructureParams = t.Object({ unitId: Uuid });
 export type BookContentStructureParams = Static<typeof BookContentStructureParams>;
 
 export const CreateContentStructureNodeBody = t.Object(
 	{
+		baseRevisionId: Uuid,
 		parentId: t.Optional(Uuid),
 		title: t.String({ minLength: 1, maxLength: 500 }),
 		language: ContentLanguage,
@@ -22,11 +101,21 @@ export type CreateContentStructureNodeBody = Static<typeof CreateContentStructur
 export const ContentStructureNodeParams = t.Object({ unitId: Uuid, nodeId: Uuid });
 export type ContentStructureNodeParams = Static<typeof ContentStructureNodeParams>;
 
-export const UpdateContentStructureNodeBody = t.Object({
-	parentId: t.Optional(t.Nullable(Uuid)),
-	position: t.Optional(FractionalPosition),
-	title: t.Optional(t.String({ minLength: 1, maxLength: 500 })),
-});
+export const UpdateContentStructureNodeBody = t.Union([
+	t.Object(
+		{ title: t.String({ minLength: 1, maxLength: 500 }) },
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			baseRevisionId: Uuid,
+			parentId: t.Optional(t.Nullable(Uuid)),
+			position: t.Optional(FractionalPosition),
+			title: t.Optional(t.String({ minLength: 1, maxLength: 500 })),
+		},
+		{ additionalProperties: false, minProperties: 2 },
+	),
+]);
 export type UpdateContentStructureNodeBody = Static<typeof UpdateContentStructureNodeBody>;
 
 export const ChapterParams = t.Object({ chapterId: Uuid });

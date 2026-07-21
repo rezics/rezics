@@ -8,15 +8,26 @@ import {
 	collectBlockReferences,
 	parseDocument,
 } from "@rezics/block";
-import { and, eq, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
-import { createUnitBlockReferenceResolver } from "../../blocks/reference-resolver";
+import {
+	createUnitBlockReferenceResolver,
+	unitBlockGraphLockName,
+} from "../../blocks/reference-resolver";
 import { database, type DatabaseTransaction } from "../../database";
-import { realm, realmNavigation, unitDock } from "../../database/schema";
+import { realm, unitDock } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
-import { recordUnitRevision } from "../../units/history";
+import {
+	createNavigationStructure,
+	deleteNavigationStructure,
+	listNavigationStructures,
+	presentNavigationStructure,
+	replaceNavigationStructure,
+} from "../../content-structure/navigation";
+import { getContentStructureComponentRevision } from "../../content-structure/service";
+import { ContentStructureNotFound } from "../../content-structure/errors";
 import {
 	RealmNavigationDocumentInvalid,
 	RealmNavigationInUse,
@@ -30,6 +41,8 @@ import {
 	RealmNavigationOwnerParams,
 	RealmNavigationParams,
 	RealmNavigationResponse,
+	RealmNavigationReplaceBody,
+	RealmNavigationRevisionBody,
 } from "./schema";
 
 const UnitMutationForbiddenResponse = toApiErrorResponse([
@@ -54,10 +67,22 @@ function ensureDocument(value: unknown): asserts value is typeof NavigationDocum
 	}
 }
 
-function present(record: typeof realmNavigation.$inferSelect) {
+function rethrowRealmNavigationNotFound(cause: unknown): never {
+	if (cause instanceof ContentStructureNotFound) throw new RealmNavigationNotFound();
+	throw cause;
+}
+
+function present(
+	record: Awaited<ReturnType<typeof presentNavigationStructure>>,
+	latestRevisionId: string,
+) {
 	return {
-		...record,
-		document: parseDocument(NavigationDocument, record.document),
+		id: record.id,
+		realmId: record.ownerUnitId,
+		document: record.document,
+		latestRevisionId,
+		createdAt: record.createdAt,
+		updatedAt: record.updatedAt,
 	} satisfies typeof RealmNavigationResponse.static;
 }
 
@@ -94,15 +119,21 @@ export default new Elysia({ prefix: "/realms" })
 				() => new UnitNotFound("Realm"),
 			);
 			await ensureRealm(params.realmId);
-			return {
-				items: (
-					await database
-						.select()
-						.from(realmNavigation)
-						.where(eq(realmNavigation.realmId, params.realmId))
-						.orderBy(realmNavigation.createdAt, realmNavigation.id)
-				).map(present),
-			};
+			return database.transaction(async (tx) => ({
+				items: await Promise.all(
+					(await listNavigationStructures(tx, params.realmId, "realm.navigation")).map(
+						async (record) => {
+							const revisionId = await getContentStructureComponentRevision(
+								tx,
+								params.realmId,
+								record.id,
+							);
+							if (!revisionId) throw new RealmNavigationNotFound();
+							return present(record, revisionId);
+						},
+					),
+				),
+			}));
 		},
 		{
 			params: RealmNavigationOwnerParams,
@@ -121,20 +152,21 @@ export default new Elysia({ prefix: "/realms" })
 			ensureDocument(body.document);
 			return database.transaction(async (tx) => {
 				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${`realm-graph:${params.realmId}`}::text, 0))`,
+					sql`select pg_advisory_xact_lock(hashtextextended(${unitBlockGraphLockName({ unitId: params.realmId, kind: "realm" })}::text, 0))`,
 				);
 				await ensureReferences(tx, params.realmId, body.document, profile.unitId);
-				const [saved] = await tx
-					.insert(realmNavigation)
-					.values({ realmId: params.realmId, document: body.document })
-					.returning();
-				if (!saved) throw new Error("Realm navigation insert returned no row");
-				await recordUnitRevision(tx, {
-					unitId: params.realmId,
+				const result = await createNavigationStructure(tx, {
+					ownerUnitId: params.realmId,
+					purpose: "realm.navigation",
+					document: body.document,
 					actorProfileId: profile.unitId,
-					event: "update",
 				});
-				return present(saved);
+				const record = await presentNavigationStructure(tx, {
+					ownerUnitId: params.realmId,
+					structureId: result.structure.id,
+					purpose: "realm.navigation",
+				});
+				return present(record, result.revisionId);
 			});
 		},
 		{
@@ -159,18 +191,27 @@ export default new Elysia({ prefix: "/realms" })
 				() => new UnitNotFound("Realm"),
 			);
 			await ensureRealm(params.realmId);
-			const [record] = await database
-				.select()
-				.from(realmNavigation)
-				.where(
-					and(
-						eq(realmNavigation.realmId, params.realmId),
-						eq(realmNavigation.id, params.navigationId),
-					),
-				)
-				.limit(1);
-			if (!record) throw new RealmNavigationNotFound();
-			return present(record);
+			return database.transaction(async (tx) => {
+				try {
+					const [record, revisionId] = await Promise.all([
+						presentNavigationStructure(tx, {
+							ownerUnitId: params.realmId,
+							structureId: params.navigationId,
+							purpose: "realm.navigation",
+						}),
+						getContentStructureComponentRevision(
+							tx,
+							params.realmId,
+							params.navigationId,
+						),
+					]);
+					if (!revisionId) throw new RealmNavigationNotFound();
+					return present(record, revisionId);
+				} catch (cause) {
+					if (!(cause instanceof ContentStructureNotFound)) throw cause;
+					throw new RealmNavigationNotFound();
+				}
+			});
 		},
 		{
 			params: RealmNavigationParams,
@@ -192,34 +233,38 @@ export default new Elysia({ prefix: "/realms" })
 			]);
 			await ensureRealm(params.realmId);
 			ensureDocument(body.document);
-			return database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${`realm-graph:${params.realmId}`}::text, 0))`,
-				);
-				await ensureReferences(tx, params.realmId, body.document, profile.unitId);
-				const [saved] = await tx
-					.update(realmNavigation)
-					.set({ document: body.document })
-					.where(
-						and(
-							eq(realmNavigation.realmId, params.realmId),
-							eq(realmNavigation.id, params.navigationId),
-						),
-					)
-					.returning();
-				if (!saved) throw new RealmNavigationNotFound();
-				await recordUnitRevision(tx, {
-					unitId: params.realmId,
-					actorProfileId: profile.unitId,
-					event: "update",
+			try {
+				return await database.transaction(async (tx) => {
+					await tx.execute(
+						sql`select pg_advisory_xact_lock(hashtextextended(${unitBlockGraphLockName({ unitId: params.realmId, kind: "realm" })}::text, 0))`,
+					);
+					await ensureReferences(tx, params.realmId, body.document, profile.unitId);
+					const result = await replaceNavigationStructure(tx, {
+						ownerUnitId: params.realmId,
+						structureId: params.navigationId,
+						purpose: "realm.navigation",
+						document: body.document,
+						actorProfileId: profile.unitId,
+						baseRevisionId: body.baseRevisionId,
+					});
+					const record = await presentNavigationStructure(tx, {
+						ownerUnitId: params.realmId,
+						structureId: params.navigationId,
+						purpose: "realm.navigation",
+					});
+					return present(
+						record,
+						result.revisionCreated ? result.revisionId : body.baseRevisionId,
+					);
 				});
-				return present(saved);
-			});
+			} catch (cause) {
+				rethrowRealmNavigationNotFound(cause);
+			}
 		},
 		{
 			access: "contribute:unit:update",
 			params: RealmNavigationParams,
-			body: RealmNavigationBody,
+			body: RealmNavigationReplaceBody,
 			response: {
 				[StatusCodes.OK]: RealmNavigationResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["RealmNavigationDocumentInvalid"]),
@@ -228,56 +273,52 @@ export default new Elysia({ prefix: "/realms" })
 					"UnitNotFound",
 					"RealmNavigationNotFound",
 				]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
 			},
 			detail: { summary: "Replace Realm navigation", tags: ["Realms"] },
 		},
 	)
 	.delete(
 		"/:realmId/navigation/:navigationId",
-		async ({ params, profile, authorization }) => {
+		async ({ params, body, profile, authorization }) => {
 			await authorization.unit.ensureCanUpdate(params.realmId, [
 				["realm", "navigation", params.navigationId],
 			]);
 			await ensureRealm(params.realmId);
-			await database.transaction(async (tx) => {
-				await tx.execute(
-					sql`select pg_advisory_xact_lock(hashtextextended(${`realm-graph:${params.realmId}`}::text, 0))`,
-				);
-				const [target] = await tx
-					.select({ id: realmNavigation.id })
-					.from(realmNavigation)
-					.where(
-						and(
-							eq(realmNavigation.realmId, params.realmId),
-							eq(realmNavigation.id, params.navigationId),
-						),
+			try {
+				await database.transaction(async (tx) => {
+					await tx.execute(
+						sql`select pg_advisory_xact_lock(hashtextextended(${unitBlockGraphLockName({ unitId: params.realmId, kind: "realm" })}::text, 0))`,
+					);
+					const docks = await tx
+						.select({ document: unitDock.document })
+						.from(unitDock)
+						.where(eq(unitDock.unitId, params.realmId));
+					if (
+						docks.some((dock) =>
+							collectBlockReferences(
+								parseDocument(DockDocument, dock.document),
+							).navigationIds.has(params.navigationId),
+						)
 					)
-					.limit(1);
-				if (!target) throw new RealmNavigationNotFound();
-				const docks = await tx
-					.select({ document: unitDock.document })
-					.from(unitDock)
-					.where(eq(unitDock.unitId, params.realmId));
-				if (
-					docks.some((dock) =>
-						collectBlockReferences(
-							parseDocument(DockDocument, dock.document),
-						).navigationIds.has(target.id),
-					)
-				)
-					throw new RealmNavigationInUse();
-				await tx.delete(realmNavigation).where(eq(realmNavigation.id, target.id));
-				await recordUnitRevision(tx, {
-					unitId: params.realmId,
-					actorProfileId: profile.unitId,
-					event: "update",
+						throw new RealmNavigationInUse();
+					await deleteNavigationStructure(tx, {
+						ownerUnitId: params.realmId,
+						structureId: params.navigationId,
+						purpose: "realm.navigation",
+						actorProfileId: profile.unitId,
+						baseRevisionId: body.baseRevisionId,
+					});
 				});
-			});
+			} catch (cause) {
+				rethrowRealmNavigationNotFound(cause);
+			}
 			return new Response(null, { status: StatusCodes.NO_CONTENT });
 		},
 		{
 			access: "contribute:unit:update",
 			params: RealmNavigationParams,
+			body: RealmNavigationRevisionBody,
 			response: {
 				[StatusCodes.NO_CONTENT]: t.Void(),
 				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
@@ -285,7 +326,10 @@ export default new Elysia({ prefix: "/realms" })
 					"UnitNotFound",
 					"RealmNavigationNotFound",
 				]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["RealmNavigationInUse"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"RealmNavigationInUse",
+					"UnitRevisionConflict",
+				]),
 			},
 			detail: {
 				summary: "Delete Realm navigation",

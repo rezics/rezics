@@ -40,6 +40,7 @@ import {
 	capabilityGrant,
 	collection,
 	collectionItem,
+	contentStructure,
 	contentStructureNode,
 	contentStructureNodeProgress,
 	conversation,
@@ -47,6 +48,7 @@ import {
 	entity,
 	EnforcementKindValues,
 	feedback,
+	label,
 	software,
 	softwareRequirement,
 	media,
@@ -97,9 +99,9 @@ import {
 	unitVariant,
 	users,
 	zone,
-	zoneNavigation,
 	zonePage,
 } from "../database/schema";
+import { createNavigationStructure } from "../content-structure/navigation";
 import { RecommendationPolicyVersion } from "../recommendations/policy";
 import { fractionalPositionAt } from "../ordering/position";
 import { recordUnitRevision, restoreUnitRevision } from "../units/history";
@@ -680,6 +682,15 @@ async function seedCatalog(
 		(batch) => tx.insert(realm).values(batch),
 	);
 	await writeBatches(
+		realms.map((value) => ({
+			ownerUnitId: value.id,
+			purpose: "realm.taxonomy" as const,
+			createdAt: value.createdAt,
+			updatedAt: value.updatedAt,
+		})),
+		(batch) => tx.insert(contentStructure).values(batch),
+	);
+	await writeBatches(
 		zones.map((value, index) => ({
 			id: value.id,
 			boundaryDocument: createZoneBoundaryDocument(["units"]),
@@ -1100,7 +1111,7 @@ async function seedToaruWiki(
 		tx,
 		labelCopy.map((_, index) =>
 			createDescriptor(data, {
-				kind: "tag",
+				kind: "label",
 				seedKey: `toaru-navigation-${position(index)}`,
 				ownerProfileId: owner.id,
 				localizationKind: "title",
@@ -1110,7 +1121,7 @@ async function seedToaruWiki(
 			}),
 		),
 	);
-	await tx.insert(tag).values(
+	await tx.insert(label).values(
 		labelUnits.map((label) => ({
 			id: label.id,
 			createdAt: label.createdAt,
@@ -1215,34 +1226,6 @@ async function seedToaruWiki(
 				: { ...common, target: { kind: "zone-page" as const, slug: "home" } };
 		}),
 	};
-	const [navigation] = await tx
-		.insert(zoneNavigation)
-		.values({
-			zoneId: zoneUnit.id,
-			document: navigationDocument,
-			createdAt,
-			updatedAt: createdAt,
-		})
-		.returning({ id: zoneNavigation.id });
-	if (!navigation) throw new Error("Toaru navigation insertion failed");
-	await tx
-		.update(unitDock)
-		.set({
-			document: createDockDocument(
-				[
-					{
-						_type: "menu",
-						_key: "a30000000002",
-						navigationId: navigation.id,
-						orientation: "horizontal",
-						appearance: "links",
-					},
-				],
-				"a30000000001",
-			),
-			updatedAt: createdAt,
-		})
-		.where(and(eq(unitDock.unitId, zoneUnit.id), eq(unitDock.surface, "main")));
 	await tx.insert(zonePage).values({
 		zoneId: zoneUnit.id,
 		slug: "home",
@@ -1256,6 +1239,30 @@ async function seedToaruWiki(
 		createdAt,
 		updatedAt: createdAt,
 	});
+	const navigation = await createNavigationStructure(tx, {
+		ownerUnitId: zoneUnit.id,
+		purpose: "zone.navigation",
+		document: navigationDocument,
+		actorProfileId: owner.id,
+	});
+	await tx
+		.update(unitDock)
+		.set({
+			document: createDockDocument(
+				[
+					{
+						_type: "menu",
+						_key: "a30000000002",
+						navigationId: navigation.structure.id,
+						orientation: "horizontal",
+						appearance: "links",
+					},
+				],
+				"a30000000001",
+			),
+			updatedAt: createdAt,
+		})
+		.where(and(eq(unitDock.unitId, zoneUnit.id), eq(unitDock.surface, "main")));
 	for (const label of labelUnits)
 		await recordUnitRevision(tx, {
 			unitId: label.id,
@@ -1268,6 +1275,12 @@ async function seedToaruWiki(
 		actorProfileId: owner.id,
 		event: "create",
 		message: "Seed Toaru Wiki Post",
+	});
+	await recordUnitRevision(tx, {
+		unitId: zoneUnit.id,
+		actorProfileId: owner.id,
+		event: "update",
+		message: "Seed Toaru Zone layout",
 	});
 }
 
@@ -1407,7 +1420,29 @@ async function seedContent(
 
 	const rootGroups = chapterGroups.slice(0, catalog.books.length);
 	const childGroups = chapterGroups.slice(catalog.books.length);
+	const structures = await tx
+		.insert(contentStructure)
+		.values(
+			catalog.books.map((bookUnit) => ({
+				ownerUnitId: bookUnit.id,
+				purpose: "book.contents" as const,
+				createdAt: bookUnit.createdAt,
+				updatedAt: bookUnit.updatedAt,
+			})),
+		)
+		.returning({
+			id: contentStructure.id,
+			ownerUnitId: contentStructure.ownerUnitId,
+		});
+	const structureByBook = new Map(
+		structures.map((structure) => [structure.ownerUnitId, structure.id]),
+	);
 	const rootNodeInputs = catalog.books.map((bookUnit, index) => ({
+		structureId:
+			structureByBook.get(bookUnit.id) ??
+			(() => {
+				throw new Error(`Missing seed Content Structure for book ${bookUnit.id}`);
+			})(),
 		ownerUnitId: bookUnit.id,
 		parentId: null,
 		contentUnitId: itemAt(rootGroups, index).id,
@@ -1435,6 +1470,11 @@ async function seedContent(
 			const parent = rootByBook.get(bookUnit.id);
 			if (!parent) throw new Error(`Missing seed root node for book ${bookUnit.id}`);
 			return {
+				structureId:
+					structureByBook.get(bookUnit.id) ??
+					(() => {
+						throw new Error(`Missing seed Content Structure for book ${bookUnit.id}`);
+					})(),
 				ownerUnitId: bookUnit.id,
 				parentId: parent.id,
 				contentUnitId:

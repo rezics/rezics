@@ -6,10 +6,9 @@ import type { DatabaseTransaction } from "../database";
 import {
 	imageAsset,
 	post,
-	realmNavigation,
+	contentStructure,
 	unit,
 	type UnitKind,
-	zoneNavigation,
 	zonePage,
 } from "../database/schema";
 
@@ -73,31 +72,25 @@ export function createUnitBlockReferenceResolver(
 				return new Set(rows.map((row) => row.id));
 			}
 			if (kind === "navigation") {
-				if (input.host.kind === "zone") {
-					const rows = await tx
-						.select({ id: zoneNavigation.id })
-						.from(zoneNavigation)
-						.where(
-							and(
-								eq(zoneNavigation.zoneId, input.host.unitId),
-								inArray(zoneNavigation.id, [...identifiers]),
-							),
-						);
-					return new Set(rows.map((row) => row.id));
-				}
-				if (input.host.kind === "realm") {
-					const rows = await tx
-						.select({ id: realmNavigation.id })
-						.from(realmNavigation)
-						.where(
-							and(
-								eq(realmNavigation.realmId, input.host.unitId),
-								inArray(realmNavigation.id, [...identifiers]),
-							),
-						);
-					return new Set(rows.map((row) => row.id));
-				}
-				return new Set<string>();
+				const purpose =
+					input.host.kind === "zone"
+						? "zone.navigation"
+						: input.host.kind === "realm"
+							? "realm.navigation"
+							: null;
+				if (!purpose) return new Set<string>();
+				const rows = await tx
+					.select({ id: contentStructure.id })
+					.from(contentStructure)
+					.where(
+						and(
+							eq(contentStructure.ownerUnitId, input.host.unitId),
+							eq(contentStructure.purpose, purpose),
+							inArray(contentStructure.id, [...identifiers]),
+							isNull(contentStructure.deletedAt),
+						),
+					);
+				return new Set(rows.map((row) => row.id));
 			}
 			if (input.host.kind !== "zone") return new Set<string>();
 			const rows = await tx

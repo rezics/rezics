@@ -7,6 +7,7 @@ import session from "../../auth/session";
 import { database } from "../../database";
 import { isPrimaryUnitLocalization } from "../../units/localization";
 import {
+	contentStructure,
 	contentStructureNodeProgress,
 	contentStructureNode,
 	unitLocalization,
@@ -28,8 +29,6 @@ import {
 } from "../schema/response";
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
-
-const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 
 function toProgressResponse<
 	T extends { status: string; totalTimeMs: bigint; deletedAt?: Date | null },
@@ -123,6 +122,26 @@ export default new Elysia({ prefix: "/progress" })
 		"/:unitId",
 		async ({ profile, authorization, params, body }) => {
 			await authorization.unit.ensureCanRead(params.unitId);
+			if (body.lastContentStructureNodeId) {
+				const [node] = await database
+					.select({ id: contentStructureNode.id })
+					.from(contentStructureNode)
+					.innerJoin(
+						contentStructure,
+						eq(contentStructure.id, contentStructureNode.structureId),
+					)
+					.where(
+						and(
+							eq(contentStructureNode.id, body.lastContentStructureNodeId),
+							eq(contentStructureNode.ownerUnitId, params.unitId),
+							eq(contentStructure.purpose, "book.contents"),
+							isNull(contentStructureNode.deletedAt),
+							isNull(contentStructure.deletedAt),
+						),
+					)
+					.limit(1);
+				if (!node) throw new ContentStructureNodeNotFound();
+			}
 			const now = new Date();
 			const progress = (
 				await database
@@ -165,7 +184,10 @@ export default new Elysia({ prefix: "/progress" })
 			body: UpsertProgressBody,
 			response: {
 				[StatusCodes.OK]: ProgressResponse,
-				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ContentStructureNodeNotFound",
+				]),
 			},
 			detail: { summary: "Create or replace progress", tags: ["Progress"] },
 		},
@@ -201,10 +223,17 @@ export default new Elysia({ prefix: "/progress" })
 			const [node] = await database
 				.select({ id: contentStructureNode.id })
 				.from(contentStructureNode)
+				.innerJoin(
+					contentStructure,
+					eq(contentStructure.id, contentStructureNode.structureId),
+				)
 				.where(
 					and(
 						eq(contentStructureNode.id, params.nodeId),
 						eq(contentStructureNode.ownerUnitId, params.unitId),
+						eq(contentStructure.purpose, "book.contents"),
+						isNull(contentStructureNode.deletedAt),
+						isNull(contentStructure.deletedAt),
 					),
 				)
 				.limit(1);
