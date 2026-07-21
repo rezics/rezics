@@ -1,6 +1,16 @@
 "use client";
 
-import { Button, Menu, MenuContent, MenuRadioGroup, MenuRadioItem, MenuTrigger } from "@rezics/ui";
+import {
+	Button,
+	Menu,
+	MenuContent,
+	MenuRadioGroup,
+	MenuRadioItem,
+	MenuTrigger,
+	RadioGroup,
+	RadioGroupItem,
+	RadioGroupLabel,
+} from "@rezics/ui";
 import { Laptop, Moon, Palette, Sun } from "lucide-react";
 
 import { useTranslation } from "@/i18n/client";
@@ -34,6 +44,42 @@ export function ThemePreferenceRadioGroup({ preference, onChange }: ThemeSelecti
 				{t.locale.displayModes.dark}
 			</MenuRadioItem>
 		</MenuRadioGroup>
+	);
+}
+
+export function ThemePreferenceRadioList({ preference, onChange }: ThemeSelectionProps) {
+	const { t } = useTranslation(["locale"]);
+	return (
+		<RadioGroup
+			className="gap-1"
+			onValueChange={({ value }) => {
+				if (value && isThemePreference(value)) onChange(value);
+			}}
+			value={preference}
+		>
+			<RadioGroupLabel className="sr-only">{t.locale.displayMode}</RadioGroupLabel>
+			<RadioGroupItem
+				className="min-h-12 rounded-xl px-3 py-2 transition-colors hover:bg-accent data-[state=checked]:bg-accent"
+				value="system"
+			>
+				<Laptop aria-hidden />
+				{t.locale.displayModes.system}
+			</RadioGroupItem>
+			<RadioGroupItem
+				className="min-h-12 rounded-xl px-3 py-2 transition-colors hover:bg-accent data-[state=checked]:bg-accent"
+				value="light"
+			>
+				<Sun aria-hidden />
+				{t.locale.displayModes.light}
+			</RadioGroupItem>
+			<RadioGroupItem
+				className="min-h-12 rounded-xl px-3 py-2 transition-colors hover:bg-accent data-[state=checked]:bg-accent"
+				value="dark"
+			>
+				<Moon aria-hidden />
+				{t.locale.displayModes.dark}
+			</RadioGroupItem>
+		</RadioGroup>
 	);
 }
 

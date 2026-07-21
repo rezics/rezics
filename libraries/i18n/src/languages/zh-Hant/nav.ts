@@ -22,6 +22,9 @@ export default {
 	content: "內容",
 	userMenu: {
 		label: "使用者選單",
+		description: "查看個人資料、調整偏好與設定，或登出帳戶。",
+		back: "返回使用者選單",
+		close: "關閉使用者選單",
 		viewProfile: "查看個人資料",
 		myContent: "我的內容",
 		settings: "設定",

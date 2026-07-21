@@ -288,7 +288,7 @@ export function FeedListItems({ children, className, ...props }: ComponentProps<
 function FeedEmptyState() {
 	const { t } = useTranslation(["feed"]);
 	return (
-		<div className="grid min-h-56 place-items-center border-b border-border-weak p-8 text-center">
+		<div className="grid min-h-56 place-items-center p-8 text-center">
 			<div>
 				<p className="font-heading font-bold">{t.feed.emptyTitle}</p>
 				<p className="mt-1 text-muted-foreground text-sm">{t.feed.emptyBody}</p>

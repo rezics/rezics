@@ -22,6 +22,9 @@ export default {
 	content: "Content",
 	userMenu: {
 		label: "User menu",
+		description: "View your profile, adjust preferences and settings, or sign out.",
+		back: "Back to user menu",
+		close: "Close user menu",
 		viewProfile: "View profile",
 		myContent: "My content",
 		settings: "Settings",

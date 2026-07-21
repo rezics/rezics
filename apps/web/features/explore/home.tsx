@@ -14,7 +14,7 @@ export function Home() {
 
 	return (
 		<main className="w-full px-4 py-6 sm:px-7 sm:py-8 lg:px-12">
-			<div className="w-full max-w-[58rem]">
+			<div className="mx-auto w-full max-w-[58rem]">
 				<h1 className="sr-only">{t.feed.title}</h1>
 				<FeedList
 					contentKinds={contentKinds}

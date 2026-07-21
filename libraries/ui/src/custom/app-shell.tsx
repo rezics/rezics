@@ -1,5 +1,7 @@
 "use client";
 
+import { Dialog as ArkDialog } from "@ark-ui/react/dialog";
+import { Portal } from "@ark-ui/react/portal";
 import { List, Menu, Star, X } from "lucide-react";
 import { useCallback, useEffect, useState, type ElementType, type ReactNode } from "react";
 
@@ -11,9 +13,10 @@ import { Separator } from "../ui/separator";
 import {
 	Sheet,
 	SheetClose,
-	SheetContent,
 	SheetDescription,
 	SheetHeader,
+	SheetOverlay,
+	SheetPositioner,
 	SheetTitle,
 } from "../ui/sheet";
 import { Skeleton } from "../ui/skeleton";
@@ -79,6 +82,29 @@ export interface AppShellSidebarLabels {
 	close: string;
 	expand: string;
 	collapse: string;
+}
+
+function MobileSidebarSheetContent({ children }: { children: ReactNode }) {
+	return (
+		<Portal>
+			<SheetOverlay className="pointer-events-auto" />
+			<SheetPositioner className="pointer-events-none" placement="left">
+				<ArkDialog.Content
+					className={cn(
+						"pointer-events-auto relative max-h-full min-h-0 w-[calc(100%-(--spacing(12)))] max-w-80 min-w-0",
+						"flex flex-col border-e bg-popover text-popover-foreground shadow-lg/5",
+						"transition-[opacity,translate] duration-200 ease-in-out will-change-transform",
+						"data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-start-10 data-[state=closed]:animate-out",
+						"data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-start-10 data-[state=open]:animate-in",
+						"motion-reduce:animate-none! motion-reduce:transition-none!",
+					)}
+					data-slot="sheet-content"
+				>
+					{children}
+				</ArkDialog.Content>
+			</SheetPositioner>
+		</Portal>
+	);
 }
 
 function isCurrentPath(currentPath: string, href: string) {
@@ -447,11 +473,12 @@ export function AppShell({
 						</Link>
 					</div>
 
-					<div className="flex shrink-0 items-center gap-1 px-2 md:hidden">
+					<div className="flex shrink-0 items-center gap-1 px-2 sm:ps-3 md:hidden">
 						<Button
 							aria-controls={MobileSidebarId}
 							aria-expanded={mobileSidebarOpen}
 							aria-label={sidebar.open}
+							className="size-11"
 							onClick={() => setMobileSidebarOpen(true)}
 							size="icon-xl"
 							variant="quiet"
@@ -493,7 +520,7 @@ export function AppShell({
 							</InputGroup>
 						</form>
 
-						<div className="ms-auto flex shrink-0 items-center gap-1 justify-self-end sm:gap-2 sm:justify-self-auto">
+						<div className="ms-auto flex shrink-0 items-center gap-1 justify-self-end pe-2 sm:gap-2 sm:justify-self-auto sm:pe-0">
 							{headerActions}
 						</div>
 					</div>
@@ -536,13 +563,12 @@ export function AppShell({
 				</Button>
 			</aside>
 
-			<Sheet onOpenChange={({ open }) => setMobileSidebarOpen(open)} open={mobileSidebarOpen}>
-				<SheetContent
-					className="max-w-80 p-0"
-					id={MobileSidebarId}
-					placement="left"
-					showCloseButton={false}
-				>
+			<Sheet
+				ids={{ content: MobileSidebarId }}
+				onOpenChange={({ open }) => setMobileSidebarOpen(open)}
+				open={mobileSidebarOpen}
+			>
+				<MobileSidebarSheetContent>
 					<SheetHeader className="flex-row items-center gap-3 border-b border-border-weak p-4">
 						<span className="truncate font-black text-base text-primary tracking-[0.14em]">
 							{brandName}
@@ -574,7 +600,7 @@ export function AppShell({
 						onFollowingGroupsChange={updateFollowingGroups}
 						onNavigate={() => setMobileSidebarOpen(false)}
 					/>
-				</SheetContent>
+				</MobileSidebarSheetContent>
 			</Sheet>
 
 			<SkipNavContent
