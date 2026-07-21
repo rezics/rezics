@@ -26,12 +26,10 @@ tasks:
         dir: ..
         cmds:
             - task: doctor
-            - task infra:up
+            - task infra:start
             - task services-main:db:prepare
-            - task services-main:search:index -- prepare --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
             - task infra:search:start
-            - task services-main:search:index -- reconcile --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
-            - task services-main:search:index -- promote --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
+            - task services-main:search:index -- check --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
             - yarn exec aspire run --apphost aspire-apphost/apphost.mts
 
     run:search:

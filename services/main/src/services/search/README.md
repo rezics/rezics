@@ -34,22 +34,53 @@ empty successful search.
 Lifecycle commands:
 
 ```sh
-task services-main:search:index -- prepare --projection current --index rezics_units_v2_20260721
-task services-main:search:index -- reconcile --projection current --index rezics_units_v2_20260721
-task services-main:search:index -- promote --projection current --index rezics_units_v2_20260721
-task services-main:search:index -- retire --projection current --index rezics_units_v2_20260721
+task services-main:search:index -- check --projection current --index rezics_units_v2_20260721
+task services-main:search:index -- prepare --projection current --index rezics_units_v2_20260721_143000
+task services-main:search:index -- reconcile --projection current --index rezics_units_v2_20260721_143000
+task services-main:search:index -- promote --projection current --index rezics_units_v2_20260721_143000
+task services-main:search:index -- retire --projection current --index rezics_units_v2_20260721_143000
 task services-main:search:config:check
 ```
 
-`prepare` and `reconcile` are idempotent for an unchanged generation. They reject an attempt to
-apply a different projection version or settings fingerprint to an existing UID. Promotion keeps
-the previous active generation in `verified` state for rollback; only a non-active verified
-generation can be retired. The reconciler holds a projection advisory lock, waits until Sequin's
-logical slot passes the captured WAL watermark and its backfill is inactive, then checks document
-count, runtime contracts, and sampled ledger revisions before setting `verified`.
+Routine development startup only runs `check`; it never prepares, rebuilds, or promotes an index.
+`prepare` declares a new generation and applies settings without copying documents. `reconcile`
+waits for Sequin's incremental CDC stream and any explicit backfill, verifies the result, and marks
+the generation `verified`. It reports progress every five seconds, fails a stable integrity
+mismatch after a short grace period, and has a bounded timeout (30 minutes by default, configurable
+with `--timeout-seconds`). A session advisory lock serializes lifecycle commands, while database
+state changes use short transactions so waiting on Sequin never holds a long transaction open.
+
+`prepare` and `reconcile` are idempotent for a healthy unchanged generation. They reject a changed
+projection version or settings fingerprint, a failed/retired generation, and an index that exists
+without matching PostgreSQL generation metadata. Promotion keeps the previous active generation in
+`verified` state for rollback; only a non-active verified generation can be retired. Reconciliation
+captures a PostgreSQL WAL watermark, waits until Sequin's logical slot passes it and its backfill is
+inactive, then checks document count, runtime contracts, and sampled ledger revisions.
+
+For local recovery after a database-only reset or a stale persistent index, run:
+
+```sh
+task --yes local:search:rebuild
+```
+
+This loopback-only command cancels target and malformed orphan backfills, deletes and recreates the
+configured index, explicitly starts a Sequin source-table backfill, reconciles it, and promotes it.
+It requires both the Task confirmation and the script's `--yes` guard and refuses non-loopback
+PostgreSQL, Meilisearch, or Sequin endpoints. Use `task --yes local:reset` when resetting the local
+application database so Sequin is stopped during the reset and search is rebuilt in the same
+workflow. Do not run the database-only reset task directly.
+
+Production remains incremental for an unchanged active generation: Sequin consumes committed WAL
+changes and no full scan runs during application startup. A document contract or settings change
+requires blue/green rollout with a fresh timestamped UID and matching sink: prepare the new index,
+deploy the new sink while leaving the active sink running, explicitly backfill the new sink,
+reconcile, then promote. Retain the previous verified generation and sink for the rollback window;
+retire and remove them only after that window. The destructive `rebuild-local` action is never a
+production rollout path.
 
 Before removing a retired index, remove/disable its concrete sink through a reviewed
-`sequin.yaml` deployment. Meilisearch dumps are the portable upgrade/restore format; same-version
+`sequin.yaml` deployment. Sequin's `initial_backfill` applies when a sink is first created; restarting
+an existing persistent sink does not replay it. Meilisearch dumps are the portable upgrade/restore format; same-version
 snapshots are for fast restart recovery. A lost volume or logical slot is never attached to an
 active pointer: declare a fresh UID/sink, run a full ledger backfill, reconcile, and explicitly
 promote it. PostgreSQL remains the complete rebuild source.

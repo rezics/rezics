@@ -12,6 +12,15 @@ async function readRepositoryFile(path: string): Promise<string> {
 	return readFile(new URL(`../../../../../${path}`, import.meta.url), "utf8");
 }
 
+function taskDefinition(taskfile: string, name: string): string {
+	const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	const match = taskfile.match(
+		new RegExp(`^    ${escapedName}:\\n([\\s\\S]*?)(?=^    [^ \\n]+:|(?![\\s\\S]))`, "m"),
+	);
+	if (!match?.[0]) throw new Error(`Task ${name} is missing`);
+	return match[0];
+}
+
 describe("current search generation deployment wiring", () => {
 	it("keeps the versioned index, sink, settings, and enrichment configuration aligned", async () => {
 		const [environment, compose, sequin, settings, rootTaskfile, appHostTaskfile] =
@@ -39,5 +48,28 @@ describe("current search generation deployment wiring", () => {
 		expect(settings).toContain(`"./settings/current-v${CurrentSearchProjectionVersion}.json"`);
 		for (const taskfile of [rootTaskfile, appHostTaskfile])
 			expect(taskfile).toContain("{{.MEILISEARCH_CURRENT_INDEX_UID}}");
+	});
+
+	it("keeps routine startup read-only while making rebuild and configuration replacement explicit", async () => {
+		const [rootTaskfile, appHostTaskfile] = await Promise.all([
+			readRepositoryFile("Taskfile.yml"),
+			readRepositoryFile("aspire-apphost/Taskfile.yml"),
+		]);
+
+		const run = taskDefinition(appHostTaskfile, "run");
+		expect(run).toContain("search:index -- check --projection current");
+		expect(run).not.toContain("search:index -- prepare");
+		expect(run).not.toContain("search:index -- reconcile");
+		expect(run).not.toContain("search:index -- promote");
+
+		const searchStart = taskDefinition(rootTaskfile, "infra:search:start");
+		expect(searchStart).not.toContain("--force-recreate");
+		expect(taskDefinition(rootTaskfile, "infra:search:apply")).toContain("--force-recreate");
+		expect(taskDefinition(rootTaskfile, "local:search:rebuild")).toContain(
+			"rebuild-local --projection current",
+		);
+		expect(taskDefinition(rootTaskfile, "local:reset")).toContain(
+			"rebuild-local --projection current",
+		);
 	});
 });

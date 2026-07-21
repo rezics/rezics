@@ -2196,9 +2196,7 @@ async function seed(): Promise<void> {
 				.where(notInArray(unit.id, [...BootstrapUnitIds]))
 				.limit(1);
 			if (existingUser || existingUnit) {
-				throw new Error(
-					"Seed requires an empty database; run `task services-main:db:reset -- --yes`",
-				);
+				throw new Error("Seed requires an empty database; run `task --yes local:reset`");
 			}
 
 			console.info("Seeding profiles and authentication");

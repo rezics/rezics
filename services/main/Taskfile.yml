@@ -6,7 +6,7 @@ tasks:
         env:
             DATABASE_ADMIN_URL: ""
         cmds:
-            - task --dir ../.. infra:up
+            - task --dir ../.. infra:start
             - task: dev:processes
 
     dev:processes:
@@ -37,7 +37,7 @@ tasks:
             - yarn exec tsx scripts/reconcile-aggregates.ts
 
     search:index:
-        desc: Reconcile, promote, or retire one versioned Meilisearch projection generation.
+        desc: Check or explicitly manage one versioned Meilisearch projection generation.
         cmds:
             - yarn exec tsx scripts/search-index.ts {{.CLI_ARGS}}
 
@@ -176,7 +176,8 @@ tasks:
             - task: recommendations:refresh
 
     db:reset:
-        desc: Destructively rebuild, migrate, and seed a local development database.
+        desc: Internal database-only reset; use the root local:reset task to keep search consistent.
+        internal: true
         cmds:
             - yarn exec tsx scripts/reset-database.ts {{.CLI_ARGS}}
             - task: db:prepare

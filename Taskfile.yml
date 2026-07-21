@@ -88,10 +88,15 @@ tasks:
                 test -z "$(rg -i 'pgroonga|pgroonga_query_escape|&@~'
                 --glob '!.temp/**' --glob '!Taskfile.yml' .)"
 
-    infra:up:
+    infra:start:
         desc: Start persistent databases, object storage, Meilisearch, and Sequin state services.
         cmds:
             - docker compose up -d --wait postgres rustfs meilisearch sequin-postgres sequin-redis
+
+    infra:up:
+        desc: Start persistent infrastructure and idempotently initialize object storage.
+        cmds:
+            - task: infra:start
             - docker compose run --rm --no-deps rustfs-bucket-init
 
     infra:up:search:
@@ -100,9 +105,19 @@ tasks:
             - task: infra:up
 
     infra:search:start:
-        desc: Start Sequin after migrations and the initial Meilisearch generation exist.
+        desc: Start the existing Sequin container without forcing a configuration redeploy.
+        cmds:
+            - docker compose up -d --wait sequin
+
+    infra:search:apply:
+        desc: Recreate Sequin to apply a reviewed configuration after migrations and index preparation.
         cmds:
             - docker compose up -d --wait --force-recreate sequin
+
+    infra:search:stop:
+        desc: Stop Sequin before a coordinated PostgreSQL reset.
+        cmds:
+            - docker compose stop --timeout 30 sequin
 
     infra:stop:
         desc: Stop persistent development infrastructure without removing it.
@@ -121,6 +136,19 @@ tasks:
             - docker compose --profile migration-test down --timeout 30 --remove-orphans --volumes
             - task: infra:up
             - task: services-main:db:prepare
+            - task: services-main:search:index
+              vars:
+                  CLI_ARGS: >-
+                      prepare --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
+            - task: infra:search:apply
+            - task: services-main:search:index
+              vars:
+                  CLI_ARGS: >-
+                      reconcile --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
+            - task: services-main:search:index
+              vars:
+                  CLI_ARGS: >-
+                      promote --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
 
     infra:status:
         desc: Show persistent development infrastructure status.
@@ -141,7 +169,50 @@ tasks:
               vars:
                   CLI_ARGS: >-
                       prepare --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
-            - task: infra:search:start
+            - task: infra:search:apply
+            - task: services-main:search:index
+              vars:
+                  CLI_ARGS: >-
+                      reconcile --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
+            - task: services-main:search:index
+              vars:
+                  CLI_ARGS: >-
+                      promote --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
+
+    local:search:rebuild:
+        desc: Repair the local current search generation from PostgreSQL with an explicit full backfill.
+        prompt: This deletes and fully rebuilds the local current Meilisearch index. Continue?
+        cmds:
+            - task: infra:start
+            - task: services-main:db:prepare
+            - task: infra:search:apply
+            - task: services-main:search:index
+              vars:
+                  CLI_ARGS: >-
+                      rebuild-local --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}} --yes
+            - task: services-main:search:index
+              vars:
+                  CLI_ARGS: >-
+                      reconcile --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
+            - task: services-main:search:index
+              vars:
+                  CLI_ARGS: >-
+                      promote --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
+
+    local:reset:
+        desc: Coordinately reset, seed, and rebuild the local database and current search projection.
+        prompt: This deletes the local application database and fully rebuilds its search index. Continue?
+        cmds:
+            - task: infra:start
+            - task: infra:search:stop
+            - task: services-main:db:reset
+              vars:
+                  CLI_ARGS: --yes
+            - task: infra:search:apply
+            - task: services-main:search:index
+              vars:
+                  CLI_ARGS: >-
+                      rebuild-local --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}} --yes
             - task: services-main:search:index
               vars:
                   CLI_ARGS: >-

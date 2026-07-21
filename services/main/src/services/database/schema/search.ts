@@ -97,7 +97,7 @@ export const searchIndexGeneration = pgTable(
 		),
 		check(
 			"search_index_generation_index_uid_check",
-			sql`${table.indexUid} ~ '^rezics_(units|revisions)_v[1-9][0-9]*_[0-9]{8}$'`,
+			sql`${table.indexUid} ~ '^rezics_(units|revisions)_v[1-9][0-9]*_[0-9]{8}(_[0-9]{6})?$'`,
 		),
 		check(
 			"search_index_generation_settings_fingerprint_check",

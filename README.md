@@ -52,16 +52,20 @@ task local:setup
 task dev
 ```
 
-`local:setup` starts the persistent Compose infrastructure, initializes RustFS,
-applies migrations, prepares the current index generation, starts Sequin,
-verifies its backfill, promotes the generation, and fills missing bootstrap
-records. It is safe to rerun after pulling migrations or bootstrap-manifest
-changes. Named volumes preserve PostgreSQL, RustFS, Meilisearch, Sequin
-PostgreSQL, and Valkey data independently from the Aspire AppHost.
+`local:setup` is the explicit first-run/configuration workflow. It starts the
+persistent Compose infrastructure, initializes RustFS, applies migrations,
+prepares the current index generation, reapplies the reviewed Sequin
+configuration, verifies its backfill, promotes the generation, and fills
+missing bootstrap records. It is safe to rerun for a healthy unchanged
+generation after pulling migrations or bootstrap-manifest changes. Named
+volumes preserve PostgreSQL, RustFS, Meilisearch, Sequin PostgreSQL, and Valkey
+data independently from the Aspire AppHost.
 
-`dev` ensures Compose infrastructure is healthy, prepares the database, and
-then starts the Bun API and recommendation worker, Vinext web app, and Aspire
-Dashboard in the foreground. The stable development endpoints are web
+`dev` ensures Compose infrastructure is healthy, prepares the database, starts
+the existing Sequin container without forcing recreation, and performs a
+bounded read-only check of the active search generation. It does not rebuild or
+promote search data. It then starts the Bun API and recommendation worker,
+Vinext web app, and Aspire Dashboard in the foreground. The stable development endpoints are web
 `http://localhost:3000`, API `http://localhost:3001`, PostgreSQL
 `localhost:5432`, RustFS `http://localhost:9000`, Meilisearch
 `http://localhost:7700`, and Sequin `http://localhost:7376`. Aspire still injects
@@ -85,10 +89,17 @@ it is not a public service endpoint. Aspire and CI consume the paths and timing 
 `services/main/src/health-contract.ts`. Production Nomad jobs consume that
 machine-checkable contract when Plan 6 introduces the deployment artifacts.
 
-Infrastructure lifecycle commands are `task infra:up`, `task infra:stop`,
-`task infra:down`, and `task infra:logs`. `task infra:reset` intentionally
-deletes all local PostgreSQL, RustFS, Meilisearch, and Sequin state before rebuilding the
-default infrastructure and database; it requires confirmation.
+Infrastructure lifecycle commands are `task infra:start`, `task infra:up`,
+`task infra:stop`, `task infra:down`, and `task infra:logs`. `infra:start` only
+starts persistent services; `infra:up` additionally performs the idempotent
+RustFS bucket initialization. `task infra:reset` intentionally deletes all
+local PostgreSQL, RustFS, Meilisearch, and Sequin state before rebuilding a
+consistent default database and search generation; it requires confirmation.
+Use `task --yes local:reset` to reset and seed only the application database
+while coordinating Sequin and rebuilding search. Use
+`task --yes local:search:rebuild` to repair a stale local current index without
+resetting PostgreSQL. Both rebuild workflows are destructive, explicit, and
+restricted to loopback service endpoints.
 
 The main checks are:
 
