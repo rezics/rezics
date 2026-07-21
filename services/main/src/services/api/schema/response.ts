@@ -11,6 +11,7 @@ import {
 	DateTime,
 	FractionalPosition,
 	OrdinalPosition,
+	PublicationLicense,
 	StoredUiLocale,
 	Uuid,
 } from ".";
@@ -145,7 +146,7 @@ export const UnitDetailResponse = t.Object({
 	language: NullableText,
 	contentRating: t.String(),
 	aiDisclosure: t.String(),
-	license: NullableText,
+	license: t.Nullable(PublicationLicense),
 	postTargetingLocked: t.Boolean(),
 	publishedAt: t.Nullable(DateTime),
 	publishers: t.Array(UnitPublisherSummaryResponse),
@@ -438,7 +439,7 @@ export const CurrentProfileResponse = t.Intersect([
 export const PreferencesResponse = t.Object({
 	profileId: Uuid,
 	interfaceLocale: StoredUiLocale,
-	defaultLicense: NullableText,
+	defaultLicense: t.Nullable(PublicationLicense),
 	defaultRealmManageMode: t.Boolean(),
 	collectionConfig: t.Nullable(CollectionConfigV1),
 	personalizedFeed: t.Boolean(),

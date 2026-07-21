@@ -10,6 +10,7 @@
 	"dependencies": {
 		"@rezics/block": "workspace:*",
 		"@rezics/i18n": "workspace:*",
+		"@rezics/license": "workspace:*",
 		"@rezics/openapi-tanstack-query": "workspace:*",
 		"@rezics/portable-text": "workspace:*",
 		"@rezics/slug": "workspace:*",

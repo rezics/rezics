@@ -6,6 +6,7 @@ import {
 	type SearchSort,
 } from "@rezics/search";
 import type { ContentLanguage } from "@rezics/i18n";
+import type { PublicationLicenseId } from "@rezics/license";
 import type { PublicSlugAddressValue } from "@rezics/slug";
 
 export const SearchCategories = SearchCategoryValues;
@@ -45,7 +46,7 @@ export interface DomainSearchRequest {
 	types?: string[];
 	contentRatings?: string[];
 	aiDisclosures?: string[];
-	licenses?: string[];
+	licenses?: PublicationLicenseId[];
 	publisherId?: string;
 	realmId?: string;
 	subjectId?: string;

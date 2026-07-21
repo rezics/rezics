@@ -6,6 +6,7 @@ import {
 } from "@rezics/block";
 import type { Static } from "elysia";
 import type { ContentLanguage } from "@rezics/i18n";
+import { parseNullablePublicationLicenseId, type PublicationLicenseId } from "@rezics/license";
 
 import type { Authorization } from "../authorization";
 import { createCommunityCatalogAccess } from "../authorization/unit/ownership";
@@ -57,7 +58,7 @@ export interface CreateUnitInput {
 	visibility?: "public" | "unlisted" | "private";
 	contentRating?: "general" | "r15" | "r18" | "r18g";
 	aiDisclosure?: "unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
-	license?: string | null;
+	license?: PublicationLicenseId | null;
 }
 
 export interface UpdateUnitInput {
@@ -66,7 +67,7 @@ export interface UpdateUnitInput {
 	visibility?: "public" | "unlisted" | "private";
 	contentRating?: "general" | "r15" | "r18" | "r18g";
 	aiDisclosure?: "unknown" | "none" | "ai_assisted" | "ai_originated" | "machine_generated";
-	license?: string | null;
+	license?: PublicationLicenseId | null;
 	unit?: {
 		primaryLanguage?: ContentLanguage;
 		releasedOn?: string | null;
@@ -262,7 +263,7 @@ export async function getUnit(
 		language: primaryLanguage,
 		contentRating: base.contentRating,
 		aiDisclosure: base.aiDisclosure,
-		license: base.license,
+		license: parseNullablePublicationLicenseId(base.license),
 		postTargetingLocked: base.postTargetingLocked,
 		publishedAt: base.publishedAt,
 		publishers,

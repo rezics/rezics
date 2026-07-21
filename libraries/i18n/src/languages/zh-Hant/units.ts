@@ -1,4 +1,7 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
+
+const { forms: publicationLicenseTerms } = zhHantTerminology.publicationLicense;
 
 export default {
 	types: { book: "書籍", software: "軟體", media: "媒體" },
@@ -14,7 +17,7 @@ export default {
 		aliases: "別名",
 		primaryLanguage: "主要語言",
 		releasedOn: "發布日期",
-		license: verbatimTerms.license.value,
+		license: publicationLicenseTerms.label,
 		aiDisclosure: `${verbatimTerms.ai.value} 使用揭露`,
 		type: "類型",
 		updatedAt: "最後更新",

@@ -31,6 +31,7 @@ describe("language dictionaries", () => {
 			"betterAuthErrorCodes",
 			"errorCodes",
 			"errors",
+			"licenses",
 			"locale",
 			"settings",
 		] as const;

@@ -111,4 +111,63 @@ describe("versioned search projection contracts", () => {
 		};
 		expect(parseRevisionSearchDocument(hidden)).toBe(hidden);
 	});
+
+	it("rejects unregistered publication License filters", () => {
+		const document = {
+			id: unitId,
+			projectionVersion: 2,
+			revision: 1,
+			category: "units",
+			unitType: "book",
+			subtype: "book",
+			search: {
+				primaryTitles: [],
+				titles: [],
+				aliases: [],
+				summaries: [],
+				descriptions: [],
+				publishedContent: [],
+			},
+			languages: [],
+			filters: {
+				contentRating: "general",
+				aiDisclosure: "unknown",
+				license: "unknown",
+				tagIds: [],
+				realmIds: [],
+				publisherIds: [],
+				subjectId: null,
+				rootId: null,
+				parentId: null,
+				ownerId: null,
+				joinPolicy: null,
+				pollMode: null,
+				resultsVisibility: null,
+				closesAt: null,
+				scopeOwnerIds: [],
+			},
+			access: {
+				publicDiscoverable: true,
+				authenticated: false,
+				profileIds: [],
+				realmIds: [],
+			},
+			catalog: { licensed: false, releaseAt: null },
+			book: { isbn13: null, publicationAt: null, pageCount: null, format: null },
+			media: null,
+			software: null,
+			variant: { role: "standalone", mainUnitId: null },
+			ranking: {
+				createdAt: 1,
+				updatedAt: 1,
+				publishedAt: null,
+				followerCount: 0,
+				replyCount: 0,
+				recommendationSnapshotId: null,
+				recommendationBest: 0,
+				engagement24h: 0,
+			},
+		};
+		expect(() => parseCurrentSearchDocument(document)).toThrow();
+	});
 });

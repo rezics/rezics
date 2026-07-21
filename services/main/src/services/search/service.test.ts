@@ -96,7 +96,7 @@ describe("domain search SQL", () => {
 			types: ["book"],
 			contentRatings: ["general"],
 			aiDisclosures: ["none"],
-			licenses: ["cc-by"],
+			licenses: ["cc-by-4.0"],
 			sort: "publishedAt:desc",
 		});
 		expect(searchCandidates).toHaveBeenLastCalledWith([

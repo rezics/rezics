@@ -24,6 +24,7 @@ export const resources = defineResources({
 				import("./languages/zh-Hant/governance").then((module) => module.default),
 			home: () => import("./languages/zh-Hant/home").then((module) => module.default),
 			locale: () => import("./languages/zh-Hant/locale").then((module) => module.default),
+			licenses: () => import("./languages/zh-Hant/licenses").then((module) => module.default),
 			media: () => import("./languages/zh-Hant/media").then((module) => module.default),
 			nav: () => import("./languages/zh-Hant/nav").then((module) => module.default),
 			notifications: () =>
@@ -56,6 +57,7 @@ export const resources = defineResources({
 			governance: () => import("./languages/en/governance").then((module) => module.default),
 			home: () => import("./languages/en/home").then((module) => module.default),
 			locale: () => import("./languages/en/locale").then((module) => module.default),
+			licenses: () => import("./languages/en/licenses").then((module) => module.default),
 			media: () => import("./languages/en/media").then((module) => module.default),
 			nav: () => import("./languages/en/nav").then((module) => module.default),
 			notifications: () =>

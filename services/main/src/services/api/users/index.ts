@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { and, eq, or } from "drizzle-orm";
 import Elysia from "elysia";
+import { parseNullablePublicationLicenseId } from "@rezics/license";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
@@ -68,7 +69,7 @@ function presentPreferences(preference: typeof profilePreference.$inferSelect) {
 	return {
 		profileId: preference.profileId,
 		interfaceLocale: preference.interfaceLocale,
-		defaultLicense: preference.defaultLicense,
+		defaultLicense: parseNullablePublicationLicenseId(preference.defaultLicense),
 		defaultRealmManageMode: preference.defaultRealmManageMode,
 		collectionConfig: parseCollectionConfig(preference.collectionConfig),
 		personalizedFeed: preference.personalizedFeed,

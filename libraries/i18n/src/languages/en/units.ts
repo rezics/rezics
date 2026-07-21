@@ -1,4 +1,7 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import { enTerminology } from "@rezics/i18n/terminology/en";
+
+const { forms: publicationLicenseTerms } = enTerminology.publicationLicense;
 
 export default {
 	types: { book: "Book", software: "Software", media: "Media" },
@@ -14,7 +17,7 @@ export default {
 		aliases: "Aliases",
 		primaryLanguage: "Primary language",
 		releasedOn: "Release date",
-		license: verbatimTerms.license.value,
+		license: publicationLicenseTerms.label,
 		aiDisclosure: `${verbatimTerms.ai.value} disclosure`,
 		type: "Type",
 		updatedAt: "Last updated",

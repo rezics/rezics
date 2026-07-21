@@ -1,4 +1,5 @@
 import { inArray, sql } from "drizzle-orm";
+import type { PublicationLicenseId } from "@rezics/license";
 import {
 	boolean,
 	bigint,
@@ -60,7 +61,8 @@ export const unit = pgTable(
 		visibility: unitVisibility().default("public").notNull(),
 		contentRating: contentRating().default("general").notNull(),
 		aiDisclosure: aiDisclosure().default("unknown").notNull(),
-		license: text(),
+		/** Public-facing License selected for this Unit's work; never a grant to REZICS. */
+		license: text().$type<PublicationLicenseId>(),
 		moderationStatus: moderationStatus().default("approved").notNull(),
 		/** Rejects creation of new Post relations that target this Unit. */
 		postTargetingLocked: boolean().default(false).notNull(),
@@ -228,7 +230,7 @@ export const profilePreference = pgTable(
 		profileId: uuid()
 			.primaryKey()
 			.references(() => profile.id, { onDelete: "cascade" }),
-		defaultLicense: text(),
+		defaultLicense: text().$type<PublicationLicenseId>(),
 		defaultRealmManageMode: boolean().default(false).notNull(),
 		personalizedFeed: boolean().default(true).notNull(),
 		collectionConfig: createJsonObjectColumn(),

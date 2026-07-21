@@ -439,7 +439,7 @@ async function seedProfiles(
 			return {
 				profileId: value.id,
 				interfaceLocale,
-				defaultLicense: index % 3 === 0 ? "CC-BY-4.0" : null,
+				defaultLicense: index % 3 === 0 ? ("cc-by-4.0" as const) : null,
 				personalizedFeed: index % 10 !== 0 || index === 0,
 				contentRatings:
 					index % 7 === 0 ? ["general" as const, "r15" as const] : ["general" as const],

@@ -71,6 +71,12 @@ export const terminologyConcepts = defineTerminologyConcepts({
 		slots: ["label", "pluralLabel", "inline", "plural"] as const,
 		locales: AllTerminologyLocales,
 	},
+	publicationLicense: {
+		definition:
+			"The terms under which a Unit's work is made available to the public; this is not an agreement granting rights to REZICS.",
+		slots: ["label", "inline"] as const,
+		locales: WebTerminologyLocales,
+	},
 });
 
 export type TerminologyConceptKey = keyof typeof terminologyConcepts;

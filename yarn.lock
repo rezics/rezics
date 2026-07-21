@@ -3700,6 +3700,7 @@ __metadata:
     "@faker-js/faker": "npm:^10.5.0"
     "@rezics/block": "workspace:*"
     "@rezics/i18n": "workspace:*"
+    "@rezics/license": "workspace:*"
     "@rezics/observability": "workspace:*"
     "@rezics/portable-text": "workspace:*"
     "@rezics/search": "workspace:*"
@@ -3757,6 +3758,7 @@ __metadata:
   dependencies:
     "@rezics/block": "workspace:*"
     "@rezics/i18n": "workspace:*"
+    "@rezics/license": "workspace:*"
     "@rezics/openapi-tanstack-query": "workspace:*"
     "@rezics/portable-text": "workspace:*"
     "@rezics/slug": "workspace:*"
@@ -3792,7 +3794,17 @@ __metadata:
   resolution: "@rezics/i18n@workspace:libraries/i18n"
   dependencies:
     "@babel/parser": "npm:^7.29.7"
+    "@rezics/license": "workspace:*"
     native-i18n: "npm:0.1.0"
+    typescript: "npm:7"
+    vitest: "npm:4.1.10"
+  languageName: unknown
+  linkType: soft
+
+"@rezics/license@workspace:*, @rezics/license@workspace:libraries/license":
+  version: 0.0.0-use.local
+  resolution: "@rezics/license@workspace:libraries/license"
+  dependencies:
     typescript: "npm:7"
     vitest: "npm:4.1.10"
   languageName: unknown

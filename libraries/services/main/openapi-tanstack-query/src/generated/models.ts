@@ -27091,6 +27091,18 @@ export const GetApiUsersMePreferencesStatus200InterfaceLocaleEnum = {
 export type GetApiUsersMePreferencesStatus200InterfaceLocaleEnum =
 	(typeof GetApiUsersMePreferencesStatus200InterfaceLocaleEnum)[keyof typeof GetApiUsersMePreferencesStatus200InterfaceLocaleEnum];
 
+export const GetApiUsersMePreferencesStatus200DefaultLicense = {
+	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
+	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"all-rights-reserved": "all-rights-reserved",
+	"cc-by-nc-4.0": "cc-by-nc-4.0",
+	"cc-by-4.0": "cc-by-4.0",
+	"cc0-1.0": "cc0-1.0",
+} as const;
+
+export type GetApiUsersMePreferencesStatus200DefaultLicense =
+	(typeof GetApiUsersMePreferencesStatus200DefaultLicense)[keyof typeof GetApiUsersMePreferencesStatus200DefaultLicense];
+
 export const GetApiUsersMePreferencesStatus200CollectionConfigViewEnum = {
 	grid: "grid",
 	list: "list",
@@ -27121,7 +27133,7 @@ export type GetApiUsersMePreferencesStatus200 = {
 	 * @type string
 	 */
 	interfaceLocale: GetApiUsersMePreferencesStatus200InterfaceLocaleEnum;
-	defaultLicense: (string | null) | null;
+	defaultLicense: (GetApiUsersMePreferencesStatus200DefaultLicense | null) | null;
 	/**
 	 * @type boolean
 	 */
@@ -27225,6 +27237,18 @@ export const PatchApiUsersMePreferencesStatus200InterfaceLocaleEnum = {
 export type PatchApiUsersMePreferencesStatus200InterfaceLocaleEnum =
 	(typeof PatchApiUsersMePreferencesStatus200InterfaceLocaleEnum)[keyof typeof PatchApiUsersMePreferencesStatus200InterfaceLocaleEnum];
 
+export const PatchApiUsersMePreferencesStatus200DefaultLicense = {
+	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
+	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"all-rights-reserved": "all-rights-reserved",
+	"cc-by-nc-4.0": "cc-by-nc-4.0",
+	"cc-by-4.0": "cc-by-4.0",
+	"cc0-1.0": "cc0-1.0",
+} as const;
+
+export type PatchApiUsersMePreferencesStatus200DefaultLicense =
+	(typeof PatchApiUsersMePreferencesStatus200DefaultLicense)[keyof typeof PatchApiUsersMePreferencesStatus200DefaultLicense];
+
 export const PatchApiUsersMePreferencesStatus200CollectionConfigViewEnum = {
 	grid: "grid",
 	list: "list",
@@ -27255,7 +27279,7 @@ export type PatchApiUsersMePreferencesStatus200 = {
 	 * @type string
 	 */
 	interfaceLocale: PatchApiUsersMePreferencesStatus200InterfaceLocaleEnum;
-	defaultLicense: (string | null) | null;
+	defaultLicense: (PatchApiUsersMePreferencesStatus200DefaultLicense | null) | null;
 	/**
 	 * @type boolean
 	 */
@@ -27384,6 +27408,18 @@ export const PutApiUsersMePreferencesStatus200InterfaceLocaleEnum = {
 export type PutApiUsersMePreferencesStatus200InterfaceLocaleEnum =
 	(typeof PutApiUsersMePreferencesStatus200InterfaceLocaleEnum)[keyof typeof PutApiUsersMePreferencesStatus200InterfaceLocaleEnum];
 
+export const PutApiUsersMePreferencesStatus200DefaultLicense = {
+	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
+	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"all-rights-reserved": "all-rights-reserved",
+	"cc-by-nc-4.0": "cc-by-nc-4.0",
+	"cc-by-4.0": "cc-by-4.0",
+	"cc0-1.0": "cc0-1.0",
+} as const;
+
+export type PutApiUsersMePreferencesStatus200DefaultLicense =
+	(typeof PutApiUsersMePreferencesStatus200DefaultLicense)[keyof typeof PutApiUsersMePreferencesStatus200DefaultLicense];
+
 export const PutApiUsersMePreferencesStatus200CollectionConfigViewEnum = {
 	grid: "grid",
 	list: "list",
@@ -27414,7 +27450,7 @@ export type PutApiUsersMePreferencesStatus200 = {
 	 * @type string
 	 */
 	interfaceLocale: PutApiUsersMePreferencesStatus200InterfaceLocaleEnum;
-	defaultLicense: (string | null) | null;
+	defaultLicense: (PutApiUsersMePreferencesStatus200DefaultLicense | null) | null;
 	/**
 	 * @type boolean
 	 */
@@ -27524,6 +27560,18 @@ export const PutApiUsersMePreferencesRequestInterfaceLocaleEnum = {
 export type PutApiUsersMePreferencesRequestInterfaceLocaleEnum =
 	(typeof PutApiUsersMePreferencesRequestInterfaceLocaleEnum)[keyof typeof PutApiUsersMePreferencesRequestInterfaceLocaleEnum];
 
+export const PutApiUsersMePreferencesRequestDefaultLicense = {
+	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
+	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"all-rights-reserved": "all-rights-reserved",
+	"cc-by-nc-4.0": "cc-by-nc-4.0",
+	"cc-by-4.0": "cc-by-4.0",
+	"cc0-1.0": "cc0-1.0",
+} as const;
+
+export type PutApiUsersMePreferencesRequestDefaultLicense =
+	(typeof PutApiUsersMePreferencesRequestDefaultLicense)[keyof typeof PutApiUsersMePreferencesRequestDefaultLicense];
+
 export const PutApiUsersMePreferencesRequestCollectionConfigViewEnum = {
 	grid: "grid",
 	list: "list",
@@ -27558,7 +27606,7 @@ export type PutApiUsersMePreferencesBody = {
 	 * @type string
 	 */
 	interfaceLocale: PutApiUsersMePreferencesRequestInterfaceLocaleEnum;
-	defaultLicense: (string | null) | null;
+	defaultLicense: (PutApiUsersMePreferencesRequestDefaultLicense | null) | null;
 	/**
 	 * @default false
 	 * @type boolean
@@ -31189,6 +31237,18 @@ export type PostApiUnitsByTypePath = {
 	type: PostApiUnitsByTypeType;
 };
 
+export const PostApiUnitsByTypeStatus200License = {
+	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
+	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"all-rights-reserved": "all-rights-reserved",
+	"cc-by-nc-4.0": "cc-by-nc-4.0",
+	"cc-by-4.0": "cc-by-4.0",
+	"cc0-1.0": "cc0-1.0",
+} as const;
+
+export type PostApiUnitsByTypeStatus200License =
+	(typeof PostApiUnitsByTypeStatus200License)[keyof typeof PostApiUnitsByTypeStatus200License];
+
 export const PostApiUnitsByTypeStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -31246,7 +31306,7 @@ export type PostApiUnitsByTypeStatus200 = {
 	 * @type string
 	 */
 	aiDisclosure: string;
-	license: (string | null) | null;
+	license: (PostApiUnitsByTypeStatus200License | null) | null;
 	/**
 	 * @type boolean
 	 */
@@ -31979,6 +32039,18 @@ export const PostApiUnitsByTypeRequestAiDisclosureEnum = {
 export type PostApiUnitsByTypeRequestAiDisclosureEnum =
 	(typeof PostApiUnitsByTypeRequestAiDisclosureEnum)[keyof typeof PostApiUnitsByTypeRequestAiDisclosureEnum];
 
+export const PostApiUnitsByTypeRequestLicense = {
+	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
+	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"all-rights-reserved": "all-rights-reserved",
+	"cc-by-nc-4.0": "cc-by-nc-4.0",
+	"cc-by-4.0": "cc-by-4.0",
+	"cc0-1.0": "cc0-1.0",
+} as const;
+
+export type PostApiUnitsByTypeRequestLicense =
+	(typeof PostApiUnitsByTypeRequestLicense)[keyof typeof PostApiUnitsByTypeRequestLicense];
+
 /**
  * @type object
  */
@@ -32145,7 +32217,7 @@ export type PostApiUnitsByTypeBody = {
 	 * @type string | undefined
 	 */
 	aiDisclosure?: PostApiUnitsByTypeRequestAiDisclosureEnum;
-	license?: (string | null) | null;
+	license?: (PostApiUnitsByTypeRequestLicense | null) | null;
 };
 
 /**
@@ -32206,6 +32278,18 @@ export type GetApiUnitsByTypeByUnitIdPath = {
 	unitId: string;
 };
 
+export const GetApiUnitsByTypeByUnitIdStatus200License = {
+	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
+	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"all-rights-reserved": "all-rights-reserved",
+	"cc-by-nc-4.0": "cc-by-nc-4.0",
+	"cc-by-4.0": "cc-by-4.0",
+	"cc0-1.0": "cc0-1.0",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200License =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200License)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200License];
+
 export const GetApiUnitsByTypeByUnitIdStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -32263,7 +32347,7 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 	 * @type string
 	 */
 	aiDisclosure: string;
-	license: (string | null) | null;
+	license: (GetApiUnitsByTypeByUnitIdStatus200License | null) | null;
 	/**
 	 * @type boolean
 	 */
@@ -32939,6 +33023,18 @@ export type PatchApiUnitsByTypeByUnitIdPath = {
 	unitId: string;
 };
 
+export const PatchApiUnitsByTypeByUnitIdStatus200License = {
+	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
+	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"all-rights-reserved": "all-rights-reserved",
+	"cc-by-nc-4.0": "cc-by-nc-4.0",
+	"cc-by-4.0": "cc-by-4.0",
+	"cc0-1.0": "cc0-1.0",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200License =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200License)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200License];
+
 export const PatchApiUnitsByTypeByUnitIdStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -32996,7 +33092,7 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 	 * @type string
 	 */
 	aiDisclosure: string;
-	license: (string | null) | null;
+	license: (PatchApiUnitsByTypeByUnitIdStatus200License | null) | null;
 	/**
 	 * @type boolean
 	 */
@@ -33788,6 +33884,18 @@ export const PatchApiUnitsByTypeByUnitIdRequestAiDisclosureEnum = {
 export type PatchApiUnitsByTypeByUnitIdRequestAiDisclosureEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdRequestAiDisclosureEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdRequestAiDisclosureEnum];
 
+export const PatchApiUnitsByTypeByUnitIdRequestLicense = {
+	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
+	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"all-rights-reserved": "all-rights-reserved",
+	"cc-by-nc-4.0": "cc-by-nc-4.0",
+	"cc-by-4.0": "cc-by-4.0",
+	"cc0-1.0": "cc0-1.0",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdRequestLicense =
+	(typeof PatchApiUnitsByTypeByUnitIdRequestLicense)[keyof typeof PatchApiUnitsByTypeByUnitIdRequestLicense];
+
 export const PatchApiUnitsByTypeByUnitIdRequestUnitPrimaryLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -33822,7 +33930,7 @@ export type PatchApiUnitsByTypeByUnitIdBody = {
 	 * @type string | undefined
 	 */
 	aiDisclosure?: PatchApiUnitsByTypeByUnitIdRequestAiDisclosureEnum;
-	license?: (string | null) | null;
+	license?: (PatchApiUnitsByTypeByUnitIdRequestLicense | null) | null;
 	/**
 	 * @type object | undefined
 	 */
@@ -34087,6 +34195,18 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextPath = {
 	unitId: string;
 };
 
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200License = {
+	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
+	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"all-rights-reserved": "all-rights-reserved",
+	"cc-by-nc-4.0": "cc-by-nc-4.0",
+	"cc-by-4.0": "cc-by-4.0",
+	"cc0-1.0": "cc0-1.0",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200License =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200License)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200License];
+
 export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -34144,7 +34264,7 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 	 * @type string
 	 */
 	aiDisclosure: string;
-	license: (string | null) | null;
+	license: (PatchApiUnitsByTypeByUnitIdVariantContextStatus200License | null) | null;
 	/**
 	 * @type boolean
 	 */
@@ -34940,6 +35060,18 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromotePath = {
 	unitId: string;
 };
 
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License = {
+	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
+	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"all-rights-reserved": "all-rights-reserved",
+	"cc-by-nc-4.0": "cc-by-nc-4.0",
+	"cc-by-4.0": "cc-by-4.0",
+	"cc0-1.0": "cc0-1.0",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License];
+
 export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -34999,7 +35131,7 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 	 * @type string
 	 */
 	aiDisclosure: string;
-	license: (string | null) | null;
+	license: (PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License | null) | null;
 	/**
 	 * @type boolean
 	 */
@@ -35811,6 +35943,18 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguagePath = {
 	language: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageLanguage;
 };
 
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License = {
+	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
+	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"all-rights-reserved": "all-rights-reserved",
+	"cc-by-nc-4.0": "cc-by-nc-4.0",
+	"cc-by-4.0": "cc-by-4.0",
+	"cc0-1.0": "cc0-1.0",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License];
+
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -35870,7 +36014,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 	 * @type string
 	 */
 	aiDisclosure: string;
-	license: (string | null) | null;
+	license: (PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License | null) | null;
 	/**
 	 * @type boolean
 	 */
@@ -64714,6 +64858,18 @@ export const PostApiSearchByIndexRequestLanguagesEnum = {
 export type PostApiSearchByIndexRequestLanguagesEnum =
 	(typeof PostApiSearchByIndexRequestLanguagesEnum)[keyof typeof PostApiSearchByIndexRequestLanguagesEnum];
 
+export const PostApiSearchByIndexRequestLicensesEnum = {
+	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
+	"cc-by-sa-4.0": "cc-by-sa-4.0",
+	"all-rights-reserved": "all-rights-reserved",
+	"cc-by-nc-4.0": "cc-by-nc-4.0",
+	"cc-by-4.0": "cc-by-4.0",
+	"cc0-1.0": "cc0-1.0",
+} as const;
+
+export type PostApiSearchByIndexRequestLicensesEnum =
+	(typeof PostApiSearchByIndexRequestLicensesEnum)[keyof typeof PostApiSearchByIndexRequestLicensesEnum];
+
 export const PostApiSearchByIndexRequestSortEnum = {
 	relevance: "relevance",
 	"createdAt:asc": "createdAt:asc",
@@ -64772,7 +64928,7 @@ export type PostApiSearchByIndexBody = {
 	/**
 	 * @type array | undefined
 	 */
-	licenses?: string[];
+	licenses?: PostApiSearchByIndexRequestLicensesEnum[];
 	/**
 	 * @minLength 1
 	 * @type string | undefined

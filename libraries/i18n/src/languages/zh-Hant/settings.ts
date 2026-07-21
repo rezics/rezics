@@ -3,6 +3,7 @@ import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 
 const { forms: realmTerms } = zhHantTerminology.realm;
 const { forms: unitSlugTerms } = zhHantTerminology.unitSlug;
+const { forms: publicationLicenseTerms } = zhHantTerminology.publicationLicense;
 
 export default {
 	profile: "個人資料",
@@ -13,7 +14,7 @@ export default {
 	contentLanguage: "內容語言偏好",
 	account: "帳戶",
 	accountDescription: "管理目前的登入階段。",
-	defaultLicense: `預設 ${verbatimTerms.license.value}`,
+	defaultLicense: `預設${publicationLicenseTerms.label}`,
 	general: "一般",
 	realmManageMode: `預設以${realmTerms.inline}管理模式建立`,
 	on: "開啟",

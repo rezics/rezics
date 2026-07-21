@@ -1,6 +1,7 @@
 import { type Static, t } from "elysia";
 import { FormatRegistry } from "@sinclair/typebox";
 import { PortableTextDocument } from "@rezics/block";
+import { PublicationLicenseIds } from "@rezics/license";
 
 import {
 	AiDisclosureValues,
@@ -32,6 +33,12 @@ export type StoredUiLocale = Static<typeof StoredUiLocale>;
 /** A persisted Unit discriminator accepted and returned by the public API. */
 export const UnitKind = t.UnionEnum(UnitKindValues, { default: undefined });
 export type UnitKind = Static<typeof UnitKind>;
+
+/** A REZICS publication License ID accepted and returned by the public API. */
+export const PublicationLicense = t.UnionEnum(PublicationLicenseIds, {
+	default: undefined,
+});
+export type PublicationLicense = Static<typeof PublicationLicense>;
 
 export const DateTime = t
 	.Transform(t.String({ format: "date-time" }))
@@ -81,7 +88,7 @@ export const LifecycleInput = {
 	visibility: t.Optional(t.Union(UnitVisibilityValues.map((value) => t.Literal(value)))),
 	contentRating: t.Optional(t.Union(ContentRatingValues.map((value) => t.Literal(value)))),
 	aiDisclosure: t.Optional(t.Union(AiDisclosureValues.map((value) => t.Literal(value)))),
-	license: t.Optional(t.Nullable(t.String({ maxLength: 64 }))),
+	license: t.Optional(t.Nullable(PublicationLicense)),
 };
 export type LifecycleInput = {
 	[K in keyof typeof LifecycleInput]: Static<(typeof LifecycleInput)[K]>;

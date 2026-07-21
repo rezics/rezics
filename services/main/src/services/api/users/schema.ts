@@ -3,7 +3,14 @@ import { Value } from "@sinclair/typebox/value";
 import { PortableTextDocument } from "@rezics/block";
 
 import { ContentRatingValues } from "../../database/schema/contract-values";
-import { ContentLanguage, FractionalPosition, StoredUiLocale, UnitKind, Uuid } from "../schema";
+import {
+	ContentLanguage,
+	FractionalPosition,
+	PublicationLicense,
+	StoredUiLocale,
+	UnitKind,
+	Uuid,
+} from "../schema";
 
 export const CollectionConfigV1 = t.Object(
 	{
@@ -41,7 +48,7 @@ export type UpdateInterfaceLocaleBody = Static<typeof UpdateInterfaceLocaleBody>
 
 export const ReplacePreferencesBody = t.Object({
 	interfaceLocale: StoredUiLocale,
-	defaultLicense: t.Nullable(t.String({ minLength: 1, maxLength: 128 })),
+	defaultLicense: t.Nullable(PublicationLicense),
 	defaultRealmManageMode: t.Boolean({ default: false }),
 	collectionConfig: t.Nullable(CollectionConfigV1),
 	personalizedFeed: t.Boolean({ default: true }),

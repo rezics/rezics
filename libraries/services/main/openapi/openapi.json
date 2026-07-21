@@ -41405,7 +41405,20 @@
 										},
 										"defaultLicense": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"type": "string",
+													"enum": [
+														"cc-by-nc-sa-4.0",
+														"cc-by-sa-4.0",
+														"all-rights-reserved",
+														"cc-by-nc-4.0",
+														"cc-by-4.0",
+														"cc0-1.0"
+													]
+												},
+												{ "type": "null" }
+											]
 										},
 										"defaultRealmManageMode": { "type": "boolean" },
 										"collectionConfig": {
@@ -41529,7 +41542,20 @@
 										},
 										"defaultLicense": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"type": "string",
+													"enum": [
+														"cc-by-nc-sa-4.0",
+														"cc-by-sa-4.0",
+														"all-rights-reserved",
+														"cc-by-nc-4.0",
+														"cc-by-4.0",
+														"cc0-1.0"
+													]
+												},
+												{ "type": "null" }
+											]
 										},
 										"defaultRealmManageMode": { "type": "boolean" },
 										"collectionConfig": {
@@ -41640,7 +41666,17 @@
 									"defaultLicense": {
 										"nullable": true,
 										"anyOf": [
-											{ "minLength": 1, "maxLength": 128, "type": "string" },
+											{
+												"type": "string",
+												"enum": [
+													"cc-by-nc-sa-4.0",
+													"cc-by-sa-4.0",
+													"all-rights-reserved",
+													"cc-by-nc-4.0",
+													"cc-by-4.0",
+													"cc0-1.0"
+												]
+											},
 											{ "type": "null" }
 										]
 									},
@@ -41717,7 +41753,20 @@
 										},
 										"defaultLicense": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"type": "string",
+													"enum": [
+														"cc-by-nc-sa-4.0",
+														"cc-by-sa-4.0",
+														"all-rights-reserved",
+														"cc-by-nc-4.0",
+														"cc-by-4.0",
+														"cc0-1.0"
+													]
+												},
+												{ "type": "null" }
+											]
 										},
 										"defaultRealmManageMode": { "type": "boolean" },
 										"collectionConfig": {
@@ -45816,7 +45865,17 @@
 									"license": {
 										"nullable": true,
 										"anyOf": [
-											{ "maxLength": 64, "type": "string" },
+											{
+												"type": "string",
+												"enum": [
+													"cc-by-nc-sa-4.0",
+													"cc-by-sa-4.0",
+													"all-rights-reserved",
+													"cc-by-nc-4.0",
+													"cc-by-4.0",
+													"cc0-1.0"
+												]
+											},
 											{ "type": "null" }
 										]
 									}
@@ -45874,7 +45933,20 @@
 										"aiDisclosure": { "type": "string" },
 										"license": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"type": "string",
+													"enum": [
+														"cc-by-nc-sa-4.0",
+														"cc-by-sa-4.0",
+														"all-rights-reserved",
+														"cc-by-nc-4.0",
+														"cc-by-4.0",
+														"cc0-1.0"
+													]
+												},
+												{ "type": "null" }
+											]
 										},
 										"postTargetingLocked": { "type": "boolean" },
 										"publishedAt": {
@@ -47049,7 +47121,20 @@
 										"aiDisclosure": { "type": "string" },
 										"license": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"type": "string",
+													"enum": [
+														"cc-by-nc-sa-4.0",
+														"cc-by-sa-4.0",
+														"all-rights-reserved",
+														"cc-by-nc-4.0",
+														"cc-by-4.0",
+														"cc0-1.0"
+													]
+												},
+												{ "type": "null" }
+											]
 										},
 										"postTargetingLocked": { "type": "boolean" },
 										"publishedAt": {
@@ -48150,7 +48235,17 @@
 									"license": {
 										"nullable": true,
 										"anyOf": [
-											{ "maxLength": 64, "type": "string" },
+											{
+												"type": "string",
+												"enum": [
+													"cc-by-nc-sa-4.0",
+													"cc-by-sa-4.0",
+													"all-rights-reserved",
+													"cc-by-nc-4.0",
+													"cc-by-4.0",
+													"cc0-1.0"
+												]
+											},
 											{ "type": "null" }
 										]
 									},
@@ -48323,7 +48418,20 @@
 										"aiDisclosure": { "type": "string" },
 										"license": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"type": "string",
+													"enum": [
+														"cc-by-nc-sa-4.0",
+														"cc-by-sa-4.0",
+														"all-rights-reserved",
+														"cc-by-nc-4.0",
+														"cc-by-4.0",
+														"cc0-1.0"
+													]
+												},
+												{ "type": "null" }
+											]
 										},
 										"postTargetingLocked": { "type": "boolean" },
 										"publishedAt": {
@@ -49710,7 +49818,20 @@
 										"aiDisclosure": { "type": "string" },
 										"license": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"type": "string",
+													"enum": [
+														"cc-by-nc-sa-4.0",
+														"cc-by-sa-4.0",
+														"all-rights-reserved",
+														"cc-by-nc-4.0",
+														"cc-by-4.0",
+														"cc0-1.0"
+													]
+												},
+												{ "type": "null" }
+											]
 										},
 										"postTargetingLocked": { "type": "boolean" },
 										"publishedAt": {
@@ -50935,7 +51056,20 @@
 										"aiDisclosure": { "type": "string" },
 										"license": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"type": "string",
+													"enum": [
+														"cc-by-nc-sa-4.0",
+														"cc-by-sa-4.0",
+														"all-rights-reserved",
+														"cc-by-nc-4.0",
+														"cc-by-4.0",
+														"cc0-1.0"
+													]
+												},
+												{ "type": "null" }
+											]
 										},
 										"postTargetingLocked": { "type": "boolean" },
 										"publishedAt": {
@@ -52444,7 +52578,20 @@
 										"aiDisclosure": { "type": "string" },
 										"license": {
 											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+											"anyOf": [
+												{
+													"type": "string",
+													"enum": [
+														"cc-by-nc-sa-4.0",
+														"cc-by-sa-4.0",
+														"all-rights-reserved",
+														"cc-by-nc-4.0",
+														"cc-by-4.0",
+														"cc0-1.0"
+													]
+												},
+												{ "type": "null" }
+											]
 										},
 										"postTargetingLocked": { "type": "boolean" },
 										"publishedAt": {
@@ -96590,7 +96737,18 @@
 									"licenses": {
 										"maxItems": 50,
 										"type": "array",
-										"items": { "minLength": 1, "type": "string" }
+										"items": {
+											"default": "cc-by-nc-sa-4.0",
+											"type": "string",
+											"enum": [
+												"cc-by-nc-sa-4.0",
+												"cc-by-sa-4.0",
+												"all-rights-reserved",
+												"cc-by-nc-4.0",
+												"cc-by-4.0",
+												"cc0-1.0"
+											]
+										}
 									},
 									"publisherId": { "minLength": 1, "type": "string" },
 									"realmId": { "minLength": 1, "type": "string" },

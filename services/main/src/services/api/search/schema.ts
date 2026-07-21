@@ -1,4 +1,5 @@
 import { type Static, t } from "elysia";
+import { PublicationLicenseIds } from "@rezics/license";
 
 import { SearchCategories, SearchSorts } from "../../search/schema";
 import { ContentLanguage } from "../schema";
@@ -9,6 +10,7 @@ const SearchSort = t.Union(SearchSorts.map((sort) => t.Literal(sort)));
 
 const SearchStringList = t.Array(t.String({ minLength: 1 }), { maxItems: 50 });
 const SearchLanguageList = t.Array(ContentLanguage, { maxItems: 50 });
+const SearchLicenseList = t.Array(t.UnionEnum(PublicationLicenseIds), { maxItems: 50 });
 
 export const DomainSearchBody = t.Object(
 	{
@@ -19,7 +21,7 @@ export const DomainSearchBody = t.Object(
 		types: t.Optional(SearchStringList),
 		contentRatings: t.Optional(SearchStringList),
 		aiDisclosures: t.Optional(SearchStringList),
-		licenses: t.Optional(SearchStringList),
+		licenses: t.Optional(SearchLicenseList),
 		publisherId: t.Optional(t.String({ minLength: 1 })),
 		realmId: t.Optional(t.String({ minLength: 1 })),
 		subjectId: t.Optional(t.String({ minLength: 1 })),

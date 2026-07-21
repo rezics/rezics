@@ -21,6 +21,7 @@
 		"@elysiajs/openapi": "^1.4.15",
 		"@rezics/block": "workspace:*",
 		"@rezics/i18n": "workspace:*",
+		"@rezics/license": "workspace:*",
 		"@rezics/observability": "workspace:*",
 		"@rezics/portable-text": "workspace:*",
 		"@rezics/search": "workspace:*",

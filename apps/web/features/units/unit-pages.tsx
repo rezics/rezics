@@ -1,6 +1,7 @@
 "use client";
 
 import { toContentLanguage } from "@rezics/i18n";
+import { isPublicationLicenseId, PublicationLicenseIds } from "@rezics/license";
 
 import {
 	getApiUnitsByType,
@@ -81,7 +82,7 @@ export function UnitBrowsePage({ type }: { type: UnitType }) {
 }
 
 export function UnitCreatePage({ type }: { type: UnitType }) {
-	const { t, locale } = useTranslation(["actions", "media", "ui", "units"]);
+	const { t, locale } = useTranslation(["actions", "licenses", "media", "ui", "units"]);
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
@@ -99,6 +100,13 @@ export function UnitCreatePage({ type }: { type: UnitType }) {
 		event.preventDefault();
 		const form = new FormData(event.currentTarget);
 		const summary = String(form.get("summary") ?? "").trim();
+		const submittedLicense = form.get("license");
+		if (
+			submittedLicense !== null &&
+			submittedLicense !== "" &&
+			!isPublicationLicenseId(submittedLicense)
+		)
+			return;
 		try {
 			await create.mutateAsync({
 				path: { type },
@@ -133,7 +141,7 @@ export function UnitCreatePage({ type }: { type: UnitType }) {
 									: form.get("aiDisclosure") === "machine_generated"
 										? "machine_generated"
 										: "unknown",
-					license: String(form.get("license") ?? "").trim() || null,
+					license: isPublicationLicenseId(submittedLicense) ? submittedLicense : null,
 				},
 			});
 		} catch {
@@ -216,7 +224,16 @@ export function UnitCreatePage({ type }: { type: UnitType }) {
 						</Field>
 						<Field>
 							<FieldLabel>{t.units.detail.license}</FieldLabel>
-							<Input name="license" />
+							<NativeSelect defaultValue="" name="license">
+								<NativeSelectOption value="">
+									{t.licenses.unspecified}
+								</NativeSelectOption>
+								{PublicationLicenseIds.map((id) => (
+									<NativeSelectOption key={id} value={id}>
+										{t.licenses.options[id].label}
+									</NativeSelectOption>
+								))}
+							</NativeSelect>
 						</Field>
 						<RequestFailure error={create.error} fallback={t.ui.retryLater} />
 						<Button variant="solid" isLoading={create.isPending} type="submit">

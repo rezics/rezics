@@ -4,6 +4,7 @@ export default defineConfig({
 	test: {
 		projects: [
 			"./libraries/observability/vitest.config.ts",
+			"./libraries/license/vitest.config.ts",
 			"./libraries/i18n/vitest.config.ts",
 			"./services/main/vitest.config.ts",
 			"./apps/web/vitest.config.ts",

@@ -55,10 +55,10 @@ export const verbatimTerms = {
 		category: "brand",
 		rationale: "Framework brand spelling.",
 	},
-	license: {
-		value: "License",
-		category: "product",
-		rationale: "Approved invariant product terminology.",
+	cc: {
+		value: "CC",
+		category: "brand",
+		rationale: "Creative Commons brand initialism.",
 	},
 	api: {
 		value: "API",

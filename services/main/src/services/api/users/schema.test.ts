@@ -2,7 +2,12 @@ import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
 import { FollowingStatusResponse } from "../schema/action-response";
-import { CollectionConfigV1, FollowingListQuery, UpdateInterfaceLocaleBody } from "./schema";
+import {
+	CollectionConfigV1,
+	FollowingListQuery,
+	ReplacePreferencesBody,
+	UpdateInterfaceLocaleBody,
+} from "./schema";
 
 describe("Collection preference contract", () => {
 	it("version-controls the Main-with-Variant default", () => {
@@ -62,6 +67,22 @@ describe("user preference inputs", () => {
 				interfaceLocale: "en",
 				preferredLanguages: ["en"],
 			}),
+		).toBe(false);
+	});
+
+	it("accepts only registered default publication License IDs", () => {
+		const preferences = {
+			interfaceLocale: "en",
+			defaultLicense: "cc-by-nc-sa-4.0",
+			defaultRealmManageMode: false,
+			collectionConfig: null,
+			personalizedFeed: true,
+			contentRatings: ["general"],
+			preferredLanguages: ["en"],
+		};
+		expect(Check(ReplacePreferencesBody, preferences)).toBe(true);
+		expect(
+			Check(ReplacePreferencesBody, { ...preferences, defaultLicense: "custom terms" }),
 		).toBe(false);
 	});
 });

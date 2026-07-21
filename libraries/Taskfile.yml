@@ -13,6 +13,9 @@ includes:
     slug:
         taskfile: ./slug/Taskfile.yml
         dir: ./slug
+    license:
+        taskfile: ./license/Taskfile.yml
+        dir: ./license
     i18n:
         taskfile: ./i18n/Taskfile.yml
         dir: ./i18n
@@ -47,6 +50,7 @@ tasks:
             - task: block:typecheck
             - task: search:typecheck
             - task: slug:typecheck
+            - task: license:typecheck
             - task: i18n:check
             - task: ui:typecheck
             - task: portable-text:typecheck

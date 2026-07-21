@@ -1,6 +1,7 @@
 "use client";
 
 import { toContentLanguage } from "@rezics/i18n";
+import { PublicationLicenseRegistry } from "@rezics/license";
 
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
 import { BookOpen, Gamepad2, PlaySquare } from "lucide-react";
@@ -44,6 +45,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 		"engagement",
 		"feed",
 		"governance",
+		"licenses",
 		"posts",
 		"state",
 		"ui",
@@ -81,6 +83,22 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 					: item.aiDisclosure === "machine_generated"
 						? t.units.aiDisclosure.machine_generated
 						: t.units.aiDisclosure.unknown;
+	const licenseDefinition = item.license ? PublicationLicenseRegistry[item.license] : null;
+	const licenseLabel = item.license ? t.licenses.options[item.license].label : null;
+	const licenseValue =
+		licenseDefinition?.kind === "license" ? (
+			<a
+				aria-label={`${t.licenses.viewTerms}: ${licenseLabel}`}
+				className="text-link hover:text-link-hover hover:underline"
+				href={licenseDefinition.url}
+				rel="noreferrer"
+				target="_blank"
+			>
+				{licenseLabel}
+			</a>
+		) : (
+			licenseLabel
+		);
 	const facts = [
 		[t.units.detail.type, t.units.types[type]],
 		[
@@ -103,7 +121,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 		[t.units.detail.aiDisclosure, aiDisclosure],
 		[t.units.detail.primaryLanguage, item.primaryLanguage],
 		[t.units.detail.releasedOn, formatDate(item.releasedOn, locale.current)],
-		[t.units.detail.license, item.license],
+		[t.units.detail.license, licenseValue],
 		[t.units.detail.updatedAt, formatDate(item.updatedAt, locale.current)],
 	] as const;
 

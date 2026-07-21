@@ -19,6 +19,7 @@ import {
 import type { JsonValue } from "@rezics/portable-text";
 import type { Static, TSchema } from "@sinclair/typebox";
 import { ContentLanguageValues } from "@rezics/i18n";
+import { PublicationLicenseIds } from "@rezics/license";
 
 import type { DatabaseTransaction } from "../database";
 import type { EntityAuthorization } from "../authorization/entity/authorization";
@@ -141,17 +142,19 @@ type RuleSnapshot = z.infer<typeof RuleSnapshotSchema>;
 type UnitSnapshot = z.infer<typeof UnitSnapshotSchema>;
 
 const schemaFactory = createSchemaFactory({ coerce: { date: true } });
-const unitStateSchema = schemaFactory.createSelectSchema(unit).omit({
-	id: true,
-	kind: true,
-	status: true,
-	visibility: true,
-	moderationStatus: true,
-	publishedAt: true,
-	deletedAt: true,
-	createdAt: true,
-	updatedAt: true,
-});
+const unitStateSchema = schemaFactory
+	.createSelectSchema(unit, { license: z.enum(PublicationLicenseIds).nullable() })
+	.omit({
+		id: true,
+		kind: true,
+		status: true,
+		visibility: true,
+		moderationStatus: true,
+		publishedAt: true,
+		deletedAt: true,
+		createdAt: true,
+		updatedAt: true,
+	});
 const unitLocalizationStateSchema = schemaFactory
 	.createSelectSchema(unitLocalization, {
 		language: z.enum(ContentLanguageValues),

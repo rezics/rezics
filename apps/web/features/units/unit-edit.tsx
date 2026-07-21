@@ -6,6 +6,7 @@ import {
 	toContentLanguage,
 	type ContentLanguage,
 } from "@rezics/i18n";
+import { isPublicationLicenseId, PublicationLicenseIds } from "@rezics/license";
 
 import {
 	type GetApiUnitsByTypeByUnitIdStatus200,
@@ -73,7 +74,7 @@ function UnitEditWorkspaceContent({ type, id }: { type: UnitType; id: string }) 
 }
 
 function UnitEditForm({ type, unit }: { type: UnitType; unit: Unit }) {
-	const { t } = useTranslation(["cover", "errors", "ui", "units"]);
+	const { t } = useTranslation(["cover", "errors", "licenses", "ui", "units"]);
 	const queryClient = useQueryClient();
 	const router = useRouter();
 	const update = usePatchApiUnitsByTypeByUnitId({
@@ -94,6 +95,13 @@ function UnitEditForm({ type, unit }: { type: UnitType; unit: Unit }) {
 		const submittedVisibility = form.get("visibility");
 		const submittedContentRating = form.get("contentRating");
 		const submittedAiDisclosure = form.get("aiDisclosure");
+		const submittedLicense = form.get("license");
+		if (
+			submittedLicense !== null &&
+			submittedLicense !== "" &&
+			!isPublicationLicenseId(submittedLicense)
+		)
+			return;
 		const status =
 			submittedStatus === "published" || submittedStatus === "archived"
 				? submittedStatus
@@ -124,7 +132,7 @@ function UnitEditForm({ type, unit }: { type: UnitType; unit: Unit }) {
 					visibility,
 					contentRating,
 					aiDisclosure,
-					license: String(form.get("license") ?? "").trim() || null,
+					license: isPublicationLicenseId(submittedLicense) ? submittedLicense : null,
 					unit: {
 						...(primaryLanguage ? { primaryLanguage } : {}),
 						releasedOn: releasedOn || null,
@@ -233,7 +241,16 @@ function UnitEditForm({ type, unit }: { type: UnitType; unit: Unit }) {
 							</Field>
 							<Field>
 								<FieldLabel>{t.units.detail.license}</FieldLabel>
-								<Input defaultValue={unit.license ?? ""} name="license" />
+								<NativeSelect defaultValue={unit.license ?? ""} name="license">
+									<NativeSelectOption value="">
+										{t.licenses.unspecified}
+									</NativeSelectOption>
+									{PublicationLicenseIds.map((id) => (
+										<NativeSelectOption key={id} value={id}>
+											{t.licenses.options[id].label}
+										</NativeSelectOption>
+									))}
+								</NativeSelect>
 							</Field>
 							<Button variant="solid" isLoading={update.isPending} type="submit">
 								{t.units.editor.saveSettings}

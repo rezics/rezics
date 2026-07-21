@@ -1,6 +1,7 @@
 import { type Static, Type } from "@sinclair/typebox";
 import { Check } from "@sinclair/typebox/value";
 import { isPortableText, normalizePortableText } from "@rezics/portable-text";
+import { PublicationLicenseIds } from "@rezics/license";
 
 import type { SearchProjectionKind } from "../database/schema/search";
 
@@ -10,6 +11,10 @@ const Uuid = Type.String({
 });
 const NullableUuid = Type.Union([Uuid, Type.Null()]);
 const NullableString = Type.Union([Type.String(), Type.Null()]);
+const NullablePublicationLicense = Type.Union([
+	Type.Union(PublicationLicenseIds.map((id) => Type.Literal(id))),
+	Type.Null(),
+]);
 const NullableInteger = Type.Union([Type.Integer(), Type.Null()]);
 const StringList = Type.Array(Type.String());
 const UuidList = Type.Array(Uuid);
@@ -41,7 +46,7 @@ export const CurrentSearchDocument = Type.Object(
 		filters: Type.Object({
 			contentRating: Type.String(),
 			aiDisclosure: Type.String(),
-			license: NullableString,
+			license: NullablePublicationLicense,
 			tagIds: UuidList,
 			realmIds: UuidList,
 			publisherIds: UuidList,

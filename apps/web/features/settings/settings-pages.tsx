@@ -27,6 +27,7 @@ import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { isContentLanguage, isStoredUiLocale, toUiLocale } from "@rezics/i18n";
+import { isPublicationLicenseId, PublicationLicenseIds } from "@rezics/license";
 import { RequireSession } from "@/features/auth/require-session";
 import { SlugAddressForm } from "@/features/slugs/slug-address-form";
 import {
@@ -176,6 +177,7 @@ export function PreferenceSettings() {
 		"errors",
 		"feed",
 		"governance",
+		"licenses",
 		"locale",
 		"media",
 		"settings",
@@ -205,10 +207,14 @@ export function PreferenceSettings() {
 		const interfaceLocale = String(data.get("interfaceLocale"));
 		const contentLanguage = String(data.get("contentLanguage"));
 		const selectedRatings = data.getAll("contentRating").filter(isContentRating);
+		const submittedDefaultLicense = data.get("defaultLicense");
 		if (
 			!selectedRatings.length ||
 			!isStoredUiLocale(interfaceLocale) ||
-			!isContentLanguage(contentLanguage)
+			!isContentLanguage(contentLanguage) ||
+			(submittedDefaultLicense !== null &&
+				submittedDefaultLicense !== "" &&
+				!isPublicationLicenseId(submittedDefaultLicense))
 		) {
 			setInvalid(true);
 			return;
@@ -217,7 +223,9 @@ export function PreferenceSettings() {
 			await update.mutateAsync({
 				body: {
 					interfaceLocale,
-					defaultLicense: String(data.get("defaultLicense") ?? "") || null,
+					defaultLicense: isPublicationLicenseId(submittedDefaultLicense)
+						? submittedDefaultLicense
+						: null,
 					defaultRealmManageMode: data.get("defaultRealmManageMode") === "true",
 					collectionConfig: current.collectionConfig,
 					personalizedFeed: data.get("personalizedFeed") === "true",
@@ -262,10 +270,19 @@ export function PreferenceSettings() {
 					</Field>
 					<Field>
 						<FieldLabel>{t.settings.defaultLicense}</FieldLabel>
-						<Input
+						<NativeSelect
 							name="defaultLicense"
 							defaultValue={preferences.data.defaultLicense ?? ""}
-						/>
+						>
+							<NativeSelectOption value="">
+								{t.licenses.unspecified}
+							</NativeSelectOption>
+							{PublicationLicenseIds.map((id) => (
+								<NativeSelectOption key={id} value={id}>
+									{t.licenses.options[id].label}
+								</NativeSelectOption>
+							))}
+						</NativeSelect>
 					</Field>
 					<FieldSet>
 						<FieldLegend variant="label">{t.ui.contentRating}</FieldLegend>
