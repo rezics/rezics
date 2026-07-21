@@ -1,12 +1,6 @@
-export const TopLevelSlugNamespaceUnitIds = {
-	users: "019b76da-a800-7000-8000-000000000001",
-	realms: "019b76da-a800-7000-8000-000000000002",
-	tags: "019b76da-a800-7000-8000-000000000003",
-	zones: "019b76da-a800-7000-8000-000000000004",
-	entities: "019b76da-a800-7000-8000-000000000005",
-} as const;
+import { TopLevelSlugNamespaceUnitIds, type TopLevelSlugNamespace } from "@rezics/slug";
 
-export type TopLevelSlugNamespace = keyof typeof TopLevelSlugNamespaceUnitIds;
+export { TopLevelSlugNamespaceUnitIds, type TopLevelSlugNamespace };
 
 /**
  * Immutable process-local routing data for permanent platform namespaces.

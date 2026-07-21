@@ -22,7 +22,11 @@ import {
 	MenuTrigger,
 	PortableTextContent,
 } from "@rezics/ui";
-import { firstPublisher, PublisherLinks } from "@/features/posts/publisher-list";
+import {
+	firstPublisher,
+	PublisherLinks,
+	type PublisherSummary,
+} from "@/features/posts/publisher-list";
 import { postHref } from "@/features/posts/url";
 import { profileHref } from "@/features/profiles/profile-route";
 import { invalidateRecommendationQueries } from "@/features/recommendations/query";
@@ -230,7 +234,7 @@ function FeedItemMeta({
 	initial: string;
 	item: FeedItem;
 	onHiddenChange?: (hidden: boolean) => void;
-	publisher?: { readonly profileId: string; readonly name: string | null };
+	publisher?: PublisherSummary;
 	timestamp: string;
 }) {
 	const { t } = useTranslation(["feed", "posts"]);
@@ -262,7 +266,10 @@ function FeedItemMeta({
 			{publisher ? (
 				<Link
 					className="me-1 grid size-7 shrink-0 place-items-center"
-					href={profileHref(publisher.profileId)}
+					href={profileHref({
+						id: publisher.profileId,
+						slugAddress: publisher.slugAddress,
+					})}
 				>
 					<Avatar className="size-7">
 						<AvatarFallback className="bg-accent text-accent-foreground text-[0.625rem]">

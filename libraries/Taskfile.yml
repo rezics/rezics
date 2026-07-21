@@ -10,6 +10,9 @@ includes:
     search:
         taskfile: ./search/Taskfile.yml
         dir: ./search
+    slug:
+        taskfile: ./slug/Taskfile.yml
+        dir: ./slug
     i18n:
         taskfile: ./i18n/Taskfile.yml
         dir: ./i18n
@@ -43,6 +46,7 @@ tasks:
             - task: observability:typecheck
             - task: block:typecheck
             - task: search:typecheck
+            - task: slug:typecheck
             - task: i18n:check
             - task: ui:typecheck
             - task: portable-text:typecheck

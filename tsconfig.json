@@ -32,6 +32,9 @@
 			"path": "./libraries/search"
 		},
 		{
+			"path": "./libraries/slug"
+		},
+		{
 			"path": "./libraries/ui"
 		}
 	]

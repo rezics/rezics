@@ -8079,6 +8079,27 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 			 * @type string
 			 */
 			profileId: string;
+			slugAddress:
+				| ({
+						/**
+						 * @minLength 1
+						 * @maxLength 63
+						 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+						 * @type string
+						 */
+						slug: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						scopeUnitId: string;
+						/**
+						 * @type array
+						 */
+						canonicalPath: string[];
+				  } | null)
+				| null;
 			name: (string | null) | null;
 			/**
 			 * @description
@@ -8327,6 +8348,27 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 						 * @type string
 						 */
 						profileId: string;
+						slugAddress:
+							| ({
+									/**
+									 * @minLength 1
+									 * @maxLength 63
+									 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+									 * @type string
+									 */
+									slug: string;
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									scopeUnitId: string;
+									/**
+									 * @type array
+									 */
+									canonicalPath: string[];
+							  } | null)
+							| null;
 						name: (string | null) | null;
 						/**
 						 * @description
@@ -10819,6 +10861,27 @@ export type GetApiFeedStatus200 = {
 					 * @type string
 					 */
 					profileId: string;
+					slugAddress:
+						| ({
+								/**
+								 * @minLength 1
+								 * @maxLength 63
+								 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+								 * @type string
+								 */
+								slug: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								scopeUnitId: string;
+								/**
+								 * @type array
+								 */
+								canonicalPath: string[];
+						  } | null)
+						| null;
 					name: (string | null) | null;
 					/**
 					 * @description
@@ -10934,6 +10997,27 @@ export type GetApiFeedStatus200 = {
 					 * @type string
 					 */
 					profileId: string;
+					slugAddress:
+						| ({
+								/**
+								 * @minLength 1
+								 * @maxLength 63
+								 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+								 * @type string
+								 */
+								slug: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								scopeUnitId: string;
+								/**
+								 * @type array
+								 */
+								canonicalPath: string[];
+						  } | null)
+						| null;
 					name: (string | null) | null;
 					/**
 					 * @description
@@ -11181,6 +11265,27 @@ export type GetApiFeedStatus200 = {
 								 * @type string
 								 */
 								profileId: string;
+								slugAddress:
+									| ({
+											/**
+											 * @minLength 1
+											 * @maxLength 63
+											 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+											 * @type string
+											 */
+											slug: string;
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											scopeUnitId: string;
+											/**
+											 * @type array
+											 */
+											canonicalPath: string[];
+									  } | null)
+									| null;
 								name: (string | null) | null;
 								/**
 								 * @description
@@ -21677,6 +21782,258 @@ export type GetApiSeriesBySeriesIdReleasesResponse =
 /**
  * @type object
  */
+export type ReplaceZoneSlugAddressPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	zoneId: string;
+};
+
+/**
+ * @type object
+ */
+export type ReplaceZoneSlugAddressStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	addressId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	scopeUnitId: (string | null) | null;
+	/**
+	 * @minLength 1
+	 * @maxLength 63
+	 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+	 * @type string
+	 */
+	slug: string;
+	redirectAddressId: (string | null) | null;
+	/**
+	 * @type array
+	 */
+	canonicalPath: string[];
+};
+
+/**
+ * @type object
+ */
+export type ReplaceZoneSlugAddressStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InvalidSlug'
+		 * @type string
+		 */
+		code: "InvalidSlug";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const ReplaceZoneSlugAddressStatus403ErrorCodeEnum = {
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type ReplaceZoneSlugAddressStatus403ErrorCodeEnum =
+	(typeof ReplaceZoneSlugAddressStatus403ErrorCodeEnum)[keyof typeof ReplaceZoneSlugAddressStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type ReplaceZoneSlugAddressStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitPermissionForbidden'
+		 * @type string
+		 */
+		code: ReplaceZoneSlugAddressStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ReplaceZoneSlugAddressStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const ReplaceZoneSlugAddressStatus409ErrorCodeEnum = {
+	SlugTaken: "SlugTaken",
+	SlugScopeUnavailable: "SlugScopeUnavailable",
+	SlugScopeCycle: "SlugScopeCycle",
+} as const;
+
+export type ReplaceZoneSlugAddressStatus409ErrorCodeEnum =
+	(typeof ReplaceZoneSlugAddressStatus409ErrorCodeEnum)[keyof typeof ReplaceZoneSlugAddressStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type ReplaceZoneSlugAddressStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'SlugTaken'
+		 * @type string
+		 */
+		code: ReplaceZoneSlugAddressStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type ReplaceZoneSlugAddressStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'SlugDepthExceeded'
+				 * @type string
+				 */
+				code: "SlugDepthExceeded";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type ReplaceZoneSlugAddressStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type ReplaceZoneSlugAddressBody = {
+	/**
+	 * @minLength 1
+	 * @maxLength 63
+	 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+	 * @type string
+	 */
+	slug: string;
+};
+
+/**
+ * @type object
+ */
+export type ReplaceZoneSlugAddressOptions = {
+	body: ReplaceZoneSlugAddressBody;
+	path: ReplaceZoneSlugAddressPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type ReplaceZoneSlugAddressResponses = {
+	"200": ReplaceZoneSlugAddressStatus200;
+	"400": ReplaceZoneSlugAddressStatus400;
+	"403": ReplaceZoneSlugAddressStatus403;
+	"404": ReplaceZoneSlugAddressStatus404;
+	"409": ReplaceZoneSlugAddressStatus409;
+	"422": ReplaceZoneSlugAddressStatus422;
+	"500": ReplaceZoneSlugAddressStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ReplaceZoneSlugAddressResponse =
+	| ReplaceZoneSlugAddressStatus200
+	| ReplaceZoneSlugAddressStatus400
+	| ReplaceZoneSlugAddressStatus403
+	| ReplaceZoneSlugAddressStatus404
+	| ReplaceZoneSlugAddressStatus409
+	| ReplaceZoneSlugAddressStatus422
+	| ReplaceZoneSlugAddressStatus500;
+
+/**
+ * @type object
+ */
 export type GetApiZonesByZoneIdPath = {
 	/**
 	 * @description
@@ -21722,6 +22079,27 @@ export type GetApiZonesByZoneIdStatus200 = {
 	 * @type string
 	 */
 	id: string;
+	slugAddress:
+		| ({
+				/**
+				 * @minLength 1
+				 * @maxLength 63
+				 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+				 * @type string
+				 */
+				slug: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				scopeUnitId: string;
+				/**
+				 * @type array
+				 */
+				canonicalPath: string[];
+		  } | null)
+		| null;
 	language: (("zh" | "en") | null) | null;
 	avatar:
 		| ({
@@ -21939,6 +22317,27 @@ export type PatchApiZonesByZoneIdStatus200 = {
 	 * @type string
 	 */
 	id: string;
+	slugAddress:
+		| ({
+				/**
+				 * @minLength 1
+				 * @maxLength 63
+				 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+				 * @type string
+				 */
+				slug: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				scopeUnitId: string;
+				/**
+				 * @type array
+				 */
+				canonicalPath: string[];
+		  } | null)
+		| null;
 	language: (("zh" | "en") | null) | null;
 	avatar:
 		| ({
@@ -25908,6 +26307,27 @@ export type GetApiUsersMeStatus200 = {
 	 * @type string
 	 */
 	id: string;
+	slugAddress:
+		| ({
+				/**
+				 * @minLength 1
+				 * @maxLength 63
+				 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+				 * @type string
+				 */
+				slug: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				scopeUnitId: string;
+				/**
+				 * @type array
+				 */
+				canonicalPath: string[];
+		  } | null)
+		| null;
 	/**
 	 * @type string
 	 */
@@ -26172,6 +26592,27 @@ export type PatchApiUsersMeStatus200 = {
 	 * @type string
 	 */
 	id: string;
+	slugAddress:
+		| ({
+				/**
+				 * @minLength 1
+				 * @maxLength 63
+				 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+				 * @type string
+				 */
+				slug: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				scopeUnitId: string;
+				/**
+				 * @type array
+				 */
+				canonicalPath: string[];
+		  } | null)
+		| null;
 	/**
 	 * @type string
 	 */
@@ -27114,6 +27555,27 @@ export type GetApiUsersMeFollowingStatus200 = {
 		 * @type string
 		 */
 		id: string;
+		slugAddress:
+			| ({
+					/**
+					 * @minLength 1
+					 * @maxLength 63
+					 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+					 * @type string
+					 */
+					slug: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					scopeUnitId: string;
+					/**
+					 * @type array
+					 */
+					canonicalPath: string[];
+			  } | null)
+			| null;
 		/**
 		 * @type string
 		 */
@@ -27722,6 +28184,27 @@ export type GetApiUsersByIdStatus200 = {
 	 * @type string
 	 */
 	id: string;
+	slugAddress:
+		| ({
+				/**
+				 * @minLength 1
+				 * @maxLength 63
+				 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+				 * @type string
+				 */
+				slug: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				scopeUnitId: string;
+				/**
+				 * @type array
+				 */
+				canonicalPath: string[];
+		  } | null)
+		| null;
 	/**
 	 * @type string
 	 */
@@ -28203,6 +28686,27 @@ export type DeleteApiUsersByIdBlockResponse =
 	| DeleteApiUsersByIdBlockStatus422
 	| DeleteApiUsersByIdBlockStatus500;
 
+export const ResolveUnitSlugAddressStatus200KindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	tag: "tag",
+	series: "series",
+	zone: "zone",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type ResolveUnitSlugAddressStatus200KindEnum =
+	(typeof ResolveUnitSlugAddressStatus200KindEnum)[keyof typeof ResolveUnitSlugAddressStatus200KindEnum];
+
 /**
  * @type object
  */
@@ -28216,7 +28720,7 @@ export type ResolveUnitSlugAddressStatus200 = {
 	/**
 	 * @type string
 	 */
-	kind: string;
+	kind: ResolveUnitSlugAddressStatus200KindEnum;
 	/**
 	 * @type array
 	 */
@@ -28389,6 +28893,304 @@ export type ResolveUnitSlugAddressResponse =
 	| ResolveUnitSlugAddressStatus409
 	| ResolveUnitSlugAddressStatus422
 	| ResolveUnitSlugAddressStatus500;
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSlugAddressPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSlugAddressStatus200 = {
+	/**
+	 * @minLength 1
+	 * @maxLength 63
+	 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+	 * @type string
+	 */
+	slug: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	scopeUnitId: string;
+	/**
+	 * @type array
+	 */
+	canonicalPath: string[];
+};
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSlugAddressStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSlugAddressStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSlugAddressStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSlugAddressOptions = {
+	body?: never;
+	path: GetPublicUnitSlugAddressPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetPublicUnitSlugAddressResponses = {
+	"200": GetPublicUnitSlugAddressStatus200;
+	"404": GetPublicUnitSlugAddressStatus404;
+	"422": GetPublicUnitSlugAddressStatus422;
+	"500": GetPublicUnitSlugAddressStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetPublicUnitSlugAddressResponse =
+	| GetPublicUnitSlugAddressStatus200
+	| GetPublicUnitSlugAddressStatus404
+	| GetPublicUnitSlugAddressStatus422
+	| GetPublicUnitSlugAddressStatus500;
+
+/**
+ * @type object
+ */
+export type ResolveScopedUnitSlugAddressPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	scopeUnitId: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 63
+	 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+	 * @type string
+	 */
+	slug: string;
+};
+
+export const ResolveScopedUnitSlugAddressKind = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	tag: "tag",
+	series: "series",
+	zone: "zone",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type ResolveScopedUnitSlugAddressKind =
+	(typeof ResolveScopedUnitSlugAddressKind)[keyof typeof ResolveScopedUnitSlugAddressKind];
+
+/**
+ * @type object
+ */
+export type ResolveScopedUnitSlugAddressQuery = {
+	/**
+	 * @type string | undefined
+	 */
+	kind?: ResolveScopedUnitSlugAddressKind;
+};
+
+export const ResolveScopedUnitSlugAddressStatus200KindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	tag: "tag",
+	series: "series",
+	zone: "zone",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type ResolveScopedUnitSlugAddressStatus200KindEnum =
+	(typeof ResolveScopedUnitSlugAddressStatus200KindEnum)[keyof typeof ResolveScopedUnitSlugAddressStatus200KindEnum];
+
+/**
+ * @type object
+ */
+export type ResolveScopedUnitSlugAddressStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type string
+	 */
+	kind: ResolveScopedUnitSlugAddressStatus200KindEnum;
+	/**
+	 * @type array
+	 */
+	path: string[];
+	/**
+	 * @type array
+	 */
+	canonicalPath: string[];
+	/**
+	 * @type boolean
+	 */
+	redirected: boolean;
+};
+
+/**
+ * @type object
+ */
+export type ResolveScopedUnitSlugAddressStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InvalidSlug'
+		 * @type string
+		 */
+		code: "InvalidSlug";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ResolveScopedUnitSlugAddressStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type ResolveScopedUnitSlugAddressStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type ResolveScopedUnitSlugAddressStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type ResolveScopedUnitSlugAddressOptions = {
+	body?: never;
+	path: ResolveScopedUnitSlugAddressPath;
+	query?: ResolveScopedUnitSlugAddressQuery;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type ResolveScopedUnitSlugAddressResponses = {
+	"200": ResolveScopedUnitSlugAddressStatus200;
+	"400": ResolveScopedUnitSlugAddressStatus400;
+	"404": ResolveScopedUnitSlugAddressStatus404;
+	"422": ResolveScopedUnitSlugAddressStatus422;
+	"500": ResolveScopedUnitSlugAddressStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ResolveScopedUnitSlugAddressResponse =
+	| ResolveScopedUnitSlugAddressStatus200
+	| ResolveScopedUnitSlugAddressStatus400
+	| ResolveScopedUnitSlugAddressStatus404
+	| ResolveScopedUnitSlugAddressStatus422
+	| ResolveScopedUnitSlugAddressStatus500;
 
 /**
  * @type object
@@ -30060,6 +30862,27 @@ export type GetApiUnitsByTypeStatus200 = {
 			 * @type string
 			 */
 			profileId: string;
+			slugAddress:
+				| ({
+						/**
+						 * @minLength 1
+						 * @maxLength 63
+						 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+						 * @type string
+						 */
+						slug: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						scopeUnitId: string;
+						/**
+						 * @type array
+						 */
+						canonicalPath: string[];
+				  } | null)
+				| null;
 			name: (string | null) | null;
 			/**
 			 * @description
@@ -30280,6 +31103,27 @@ export type PostApiUnitsByTypeStatus200 = {
 		 * @type string
 		 */
 		profileId: string;
+		slugAddress:
+			| ({
+					/**
+					 * @minLength 1
+					 * @maxLength 63
+					 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+					 * @type string
+					 */
+					slug: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					scopeUnitId: string;
+					/**
+					 * @type array
+					 */
+					canonicalPath: string[];
+			  } | null)
+			| null;
 		name: (string | null) | null;
 		/**
 		 * @description
@@ -31276,6 +32120,27 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		 * @type string
 		 */
 		profileId: string;
+		slugAddress:
+			| ({
+					/**
+					 * @minLength 1
+					 * @maxLength 63
+					 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+					 * @type string
+					 */
+					slug: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					scopeUnitId: string;
+					/**
+					 * @type array
+					 */
+					canonicalPath: string[];
+			  } | null)
+			| null;
 		name: (string | null) | null;
 		/**
 		 * @description
@@ -31988,6 +32853,27 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		 * @type string
 		 */
 		profileId: string;
+		slugAddress:
+			| ({
+					/**
+					 * @minLength 1
+					 * @maxLength 63
+					 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+					 * @type string
+					 */
+					slug: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					scopeUnitId: string;
+					/**
+					 * @type array
+					 */
+					canonicalPath: string[];
+			  } | null)
+			| null;
 		name: (string | null) | null;
 		/**
 		 * @description
@@ -33115,6 +34001,27 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		 * @type string
 		 */
 		profileId: string;
+		slugAddress:
+			| ({
+					/**
+					 * @minLength 1
+					 * @maxLength 63
+					 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+					 * @type string
+					 */
+					slug: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					scopeUnitId: string;
+					/**
+					 * @type array
+					 */
+					canonicalPath: string[];
+			  } | null)
+			| null;
 		name: (string | null) | null;
 		/**
 		 * @description
@@ -33949,6 +34856,27 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		 * @type string
 		 */
 		profileId: string;
+		slugAddress:
+			| ({
+					/**
+					 * @minLength 1
+					 * @maxLength 63
+					 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+					 * @type string
+					 */
+					slug: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					scopeUnitId: string;
+					/**
+					 * @type array
+					 */
+					canonicalPath: string[];
+			  } | null)
+			| null;
 		name: (string | null) | null;
 		/**
 		 * @description
@@ -34799,6 +35727,27 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 * @type string
 		 */
 		profileId: string;
+		slugAddress:
+			| ({
+					/**
+					 * @minLength 1
+					 * @maxLength 63
+					 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+					 * @type string
+					 */
+					slug: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					scopeUnitId: string;
+					/**
+					 * @type array
+					 */
+					canonicalPath: string[];
+			  } | null)
+			| null;
 		name: (string | null) | null;
 		/**
 		 * @description
@@ -47916,6 +48865,27 @@ export type GetApiReviewsStatus200 = {
 			 * @type string
 			 */
 			profileId: string;
+			slugAddress:
+				| ({
+						/**
+						 * @minLength 1
+						 * @maxLength 63
+						 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+						 * @type string
+						 */
+						slug: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						scopeUnitId: string;
+						/**
+						 * @type array
+						 */
+						canonicalPath: string[];
+				  } | null)
+				| null;
 			name: (string | null) | null;
 			/**
 			 * @description
@@ -48365,6 +49335,27 @@ export type GetApiReviewsByReviewIdStatus200 = {
 		 * @type string
 		 */
 		profileId: string;
+		slugAddress:
+			| ({
+					/**
+					 * @minLength 1
+					 * @maxLength 63
+					 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+					 * @type string
+					 */
+					slug: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					scopeUnitId: string;
+					/**
+					 * @type array
+					 */
+					canonicalPath: string[];
+			  } | null)
+			| null;
 		name: (string | null) | null;
 		/**
 		 * @description
@@ -51260,6 +52251,27 @@ export type GetApiPostsStatus200 = {
 			 * @type string
 			 */
 			profileId: string;
+			slugAddress:
+				| ({
+						/**
+						 * @minLength 1
+						 * @maxLength 63
+						 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+						 * @type string
+						 */
+						slug: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						scopeUnitId: string;
+						/**
+						 * @type array
+						 */
+						canonicalPath: string[];
+				  } | null)
+				| null;
 			name: (string | null) | null;
 			/**
 			 * @description
@@ -51841,6 +52853,27 @@ export type GetApiPostsByPostIdStatus200 = {
 		 * @type string
 		 */
 		profileId: string;
+		slugAddress:
+			| ({
+					/**
+					 * @minLength 1
+					 * @maxLength 63
+					 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+					 * @type string
+					 */
+					slug: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					scopeUnitId: string;
+					/**
+					 * @type array
+					 */
+					canonicalPath: string[];
+			  } | null)
+			| null;
 		name: (string | null) | null;
 		/**
 		 * @description
@@ -52603,6 +53636,27 @@ export type GetApiPostsByPostIdRepliesStatus200 = {
 			 * @type string
 			 */
 			profileId: string;
+			slugAddress:
+				| ({
+						/**
+						 * @minLength 1
+						 * @maxLength 63
+						 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+						 * @type string
+						 */
+						slug: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						scopeUnitId: string;
+						/**
+						 * @type array
+						 */
+						canonicalPath: string[];
+				  } | null)
+				| null;
 			name: (string | null) | null;
 			/**
 			 * @description
@@ -53714,6 +54768,27 @@ export type GetApiRealmsStatus200 = {
 		 * @type string
 		 */
 		id: string;
+		slugAddress:
+			| ({
+					/**
+					 * @minLength 1
+					 * @maxLength 63
+					 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+					 * @type string
+					 */
+					slug: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					scopeUnitId: string;
+					/**
+					 * @type array
+					 */
+					canonicalPath: string[];
+			  } | null)
+			| null;
 		/**
 		 * @type string
 		 */
@@ -54083,6 +55158,266 @@ export type PostApiRealmsResponse =
 /**
  * @type object
  */
+export type ReplaceRealmSlugAddressPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+};
+
+/**
+ * @type object
+ */
+export type ReplaceRealmSlugAddressStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	addressId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	scopeUnitId: (string | null) | null;
+	/**
+	 * @minLength 1
+	 * @maxLength 63
+	 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+	 * @type string
+	 */
+	slug: string;
+	redirectAddressId: (string | null) | null;
+	/**
+	 * @type array
+	 */
+	canonicalPath: string[];
+};
+
+/**
+ * @type object
+ */
+export type ReplaceRealmSlugAddressStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InvalidSlug'
+		 * @type string
+		 */
+		code: "InvalidSlug";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const ReplaceRealmSlugAddressStatus403ErrorCodeEnum = {
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+	UnitProtected: "UnitProtected",
+} as const;
+
+export type ReplaceRealmSlugAddressStatus403ErrorCodeEnum =
+	(typeof ReplaceRealmSlugAddressStatus403ErrorCodeEnum)[keyof typeof ReplaceRealmSlugAddressStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type ReplaceRealmSlugAddressStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: ReplaceRealmSlugAddressStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const ReplaceRealmSlugAddressStatus404ErrorCodeEnum = {
+	RealmNotFound: "RealmNotFound",
+	UnitNotFound: "UnitNotFound",
+} as const;
+
+export type ReplaceRealmSlugAddressStatus404ErrorCodeEnum =
+	(typeof ReplaceRealmSlugAddressStatus404ErrorCodeEnum)[keyof typeof ReplaceRealmSlugAddressStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type ReplaceRealmSlugAddressStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmNotFound'
+		 * @type string
+		 */
+		code: ReplaceRealmSlugAddressStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const ReplaceRealmSlugAddressStatus409ErrorCodeEnum = {
+	SlugTaken: "SlugTaken",
+	SlugScopeUnavailable: "SlugScopeUnavailable",
+	SlugScopeCycle: "SlugScopeCycle",
+} as const;
+
+export type ReplaceRealmSlugAddressStatus409ErrorCodeEnum =
+	(typeof ReplaceRealmSlugAddressStatus409ErrorCodeEnum)[keyof typeof ReplaceRealmSlugAddressStatus409ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type ReplaceRealmSlugAddressStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'SlugTaken'
+		 * @type string
+		 */
+		code: ReplaceRealmSlugAddressStatus409ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type ReplaceRealmSlugAddressStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'SlugDepthExceeded'
+				 * @type string
+				 */
+				code: "SlugDepthExceeded";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type ReplaceRealmSlugAddressStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type ReplaceRealmSlugAddressBody = {
+	/**
+	 * @minLength 1
+	 * @maxLength 63
+	 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+	 * @type string
+	 */
+	slug: string;
+};
+
+/**
+ * @type object
+ */
+export type ReplaceRealmSlugAddressOptions = {
+	body: ReplaceRealmSlugAddressBody;
+	path: ReplaceRealmSlugAddressPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type ReplaceRealmSlugAddressResponses = {
+	"200": ReplaceRealmSlugAddressStatus200;
+	"400": ReplaceRealmSlugAddressStatus400;
+	"403": ReplaceRealmSlugAddressStatus403;
+	"404": ReplaceRealmSlugAddressStatus404;
+	"409": ReplaceRealmSlugAddressStatus409;
+	"422": ReplaceRealmSlugAddressStatus422;
+	"500": ReplaceRealmSlugAddressStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type ReplaceRealmSlugAddressResponse =
+	| ReplaceRealmSlugAddressStatus200
+	| ReplaceRealmSlugAddressStatus400
+	| ReplaceRealmSlugAddressStatus403
+	| ReplaceRealmSlugAddressStatus404
+	| ReplaceRealmSlugAddressStatus409
+	| ReplaceRealmSlugAddressStatus422
+	| ReplaceRealmSlugAddressStatus500;
+
+/**
+ * @type object
+ */
 export type GetApiRealmsByRealmIdPath = {
 	/**
 	 * @description
@@ -54128,6 +55463,27 @@ export type GetApiRealmsByRealmIdStatus200 = {
 	 * @type string
 	 */
 	id: string;
+	slugAddress:
+		| ({
+				/**
+				 * @minLength 1
+				 * @maxLength 63
+				 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+				 * @type string
+				 */
+				slug: string;
+				/**
+				 * @description
+				 * Format: `uuid`
+				 * @type string
+				 */
+				scopeUnitId: string;
+				/**
+				 * @type array
+				 */
+				canonicalPath: string[];
+		  } | null)
+		| null;
 	/**
 	 * @type string
 	 */
@@ -59707,6 +61063,27 @@ export type PostApiSearchExecuteStatus200 = {
 			 * @type string
 			 */
 			id: string;
+			slugAddress:
+				| ({
+						/**
+						 * @minLength 1
+						 * @maxLength 63
+						 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+						 * @type string
+						 */
+						slug: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						scopeUnitId: string;
+						/**
+						 * @type array
+						 */
+						canonicalPath: string[];
+				  } | null)
+				| null;
 			/**
 			 * @type string
 			 */
@@ -60666,6 +62043,27 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200 = {
 			 * @type string
 			 */
 			id: string;
+			slugAddress:
+				| ({
+						/**
+						 * @minLength 1
+						 * @maxLength 63
+						 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+						 * @type string
+						 */
+						slug: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						scopeUnitId: string;
+						/**
+						 * @type array
+						 */
+						canonicalPath: string[];
+				  } | null)
+				| null;
 			/**
 			 * @type string
 			 */
@@ -61670,6 +63068,27 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteStatus20
 			 * @type string
 			 */
 			id: string;
+			slugAddress:
+				| ({
+						/**
+						 * @minLength 1
+						 * @maxLength 63
+						 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+						 * @type string
+						 */
+						slug: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						scopeUnitId: string;
+						/**
+						 * @type array
+						 */
+						canonicalPath: string[];
+				  } | null)
+				| null;
 			/**
 			 * @type string
 			 */
@@ -62646,6 +64065,27 @@ export type PostApiSearchStatus200 = {
 			 * @type string
 			 */
 			id: string;
+			slugAddress:
+				| ({
+						/**
+						 * @minLength 1
+						 * @maxLength 63
+						 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+						 * @type string
+						 */
+						slug: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						scopeUnitId: string;
+						/**
+						 * @type array
+						 */
+						canonicalPath: string[];
+				  } | null)
+				| null;
 			/**
 			 * @type string
 			 */
@@ -62934,6 +64374,27 @@ export type PostApiSearchByIndexStatus200 = {
 		 * @type string
 		 */
 		id: string;
+		slugAddress:
+			| ({
+					/**
+					 * @minLength 1
+					 * @maxLength 63
+					 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+					 * @type string
+					 */
+					slug: string;
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					scopeUnitId: string;
+					/**
+					 * @type array
+					 */
+					canonicalPath: string[];
+			  } | null)
+			| null;
 		/**
 		 * @type string
 		 */

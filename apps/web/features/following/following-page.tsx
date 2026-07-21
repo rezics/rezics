@@ -102,7 +102,7 @@ function FollowingContent() {
 				<div className="divide-y divide-border-weak border-y border-border-weak">
 					{items.map((item) => {
 						const imageUrl = item.avatar?.url ?? item.cover?.url;
-						const destination = followingHref(item.kind, item.id);
+						const destination = followingHref(item.kind, item);
 						const identity = (
 							<>
 								<span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full bg-surface-selected font-bold text-sm">

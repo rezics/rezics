@@ -8,6 +8,7 @@ import {
 	useGetApiUsersMePreferences,
 	usePatchApiUsersMe,
 	usePutApiUsersMePreferences,
+	useReplaceOwnProfileSlugAddress,
 	type GetApiUsersMeStatus200,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
@@ -27,6 +28,7 @@ import { Textarea } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { isContentLanguage, isStoredUiLocale, toUiLocale } from "@rezics/i18n";
 import { RequireSession } from "@/features/auth/require-session";
+import { SlugAddressForm } from "@/features/slugs/slug-address-form";
 import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetValue,
@@ -78,6 +80,17 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 					queryClient.invalidateQueries({ queryKey: getApiUsersMeQueryKey() }),
 					queryClient.invalidateQueries({
 						queryKey: getApiUsersByIdQueryKey({ path: { id: profile.id } }),
+					}),
+				]),
+		},
+	});
+	const replaceSlug = useReplaceOwnProfileSlugAddress({
+		mutation: {
+			onSuccess: () =>
+				Promise.all([
+					queryClient.invalidateQueries({ queryKey: getApiUsersMeQueryKey() }),
+					queryClient.invalidateQueries({
+						queryKey: getApiUsersByIdQueryKey({ path: { id: current.id } }),
 					}),
 				]),
 		},
@@ -144,6 +157,16 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 					</Button>
 				</FieldGroup>
 			</form>
+			<Card>
+				<CardContent className="p-5">
+					<SlugAddressForm
+						error={replaceSlug.error}
+						initialSlug={current.slugAddress?.slug}
+						isPending={replaceSlug.isPending}
+						onSubmit={(slug) => replaceSlug.mutateAsync({ body: { slug } })}
+					/>
+				</CardContent>
+			</Card>
 		</SettingsFrame>
 	);
 }

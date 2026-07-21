@@ -4,9 +4,14 @@ import { parseSearchCursor } from "@rezics/search";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const execute = vi.hoisted(() => vi.fn());
+const select = vi.hoisted(() =>
+	vi.fn(() => ({
+		from: () => ({ innerJoin: () => ({ where: () => Promise.resolve([]) }) }),
+	})),
+);
 const searchCandidates = vi.hoisted(() => vi.fn());
 
-vi.mock("../database", () => ({ database: { execute } }));
+vi.mock("../database", () => ({ database: { execute, select } }));
 vi.mock("./generation", () => ({
 	getActiveSearchGeneration: vi.fn().mockResolvedValue({
 		id: "019f7eed-5d42-7102-8387-cc1d13b176d2",
@@ -34,6 +39,7 @@ describe("domain search SQL", () => {
 	beforeEach(() => {
 		execute.mockReset();
 		execute.mockResolvedValue({ rows: [] });
+		select.mockClear();
 		searchCandidates.mockReset();
 		searchCandidates.mockResolvedValue([
 			{
@@ -240,7 +246,7 @@ describe("domain search SQL", () => {
 			],
 		});
 		const result = await searchDomain("units", { query: "book", limit: 1 });
-		expect(result.hits).toEqual([{ id: first }]);
+		expect(result.hits).toEqual([{ id: first, slugAddress: null }]);
 		expect(result.total).toEqual({ value: 2, relation: "exact" });
 		expect(result.nextCursor).toBeDefined();
 		expect(parseSearchCursor(result.nextCursor ?? "").categories.units?.offset).toBe(1);

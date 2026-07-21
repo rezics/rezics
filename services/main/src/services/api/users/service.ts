@@ -8,6 +8,7 @@ import {
 } from "../../units/localization";
 import { profile as profileTable, unit, unitLocalization } from "../../database/schema";
 import { presentImageAsset } from "../../units/service";
+import { getPublicCanonicalUnitSlugAddress } from "../../units/slug-address";
 import { ProfileNotFound } from "./errors";
 
 export const PublicProfileSelection = {
@@ -46,6 +47,7 @@ export async function getProfile(unitId: string) {
 
 export async function presentProfile<
 	T extends {
+		id: string;
 		avatarAssetId: string | null;
 		bannerAssetId: string | null;
 		status: string;
@@ -56,6 +58,7 @@ export async function presentProfile<
 	const { avatarAssetId, bannerAssetId, ...publicProfile } = profile;
 	return {
 		...publicProfile,
+		slugAddress: await getPublicCanonicalUnitSlugAddress(profile.id),
 		status: profile.status.toLowerCase(),
 		visibility: profile.visibility.toLowerCase(),
 		description: parseNullableDocument(PortableTextDocument, profile.description),

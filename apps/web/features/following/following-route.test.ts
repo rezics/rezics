@@ -4,7 +4,7 @@ import { FollowingKinds, followingHref } from "./following-route";
 
 describe("following routes", () => {
 	it("maps every navigable Unit kind to its canonical route", () => {
-		expect(followingHref("profile", "profile-id")).toBe("/user/profile-id/profile");
+		expect(followingHref("profile", "profile-id")).toBe("/user/by-id/profile-id");
 		expect(followingHref("zone", "zone-id")).toBe("/zones/zone-id");
 		expect(followingHref("realm", "realm-id")).toBe("/realms/realm-id");
 		expect(followingHref("book", "book-id")).toBe("/units/book/book-id");

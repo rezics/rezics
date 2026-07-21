@@ -20,6 +20,7 @@ import {
 	usePatchApiRealmsByRealmIdMembersByProfileId,
 	usePutApiRealmsByRealmIdPinsByUnitId,
 	usePutApiRealmsByRealmIdRules,
+	useReplaceRealmSlugAddress,
 	type GetApiRealmsByRealmIdRulesStatus200,
 	type GetApiRealmsByRealmIdStatus200,
 } from "@rezics/openapi-tanstack-query";
@@ -48,6 +49,8 @@ import {
 import { RequireSession } from "@/features/auth/require-session";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
+import { realmHref } from "@/features/slugs/unit-route";
+import { SlugAddressForm } from "@/features/slugs/slug-address-form";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
@@ -114,7 +117,7 @@ function RealmSettingsContent({ id }: { id: string }) {
 				title={t.realms.settings}
 				action={
 					<Button variant="outline" asChild>
-						<Link href={`/realms/${realm.data.id}`}>{t.realms.backToRealm}</Link>
+						<Link href={realmHref(realm.data)}>{t.realms.backToRealm}</Link>
 					</Button>
 				}
 			/>
@@ -149,6 +152,11 @@ function RealmProfileSettings({ realm }: { realm: GetApiRealmsByRealmIdStatus200
 	const { t, locale } = useTranslation(["errors", "media", "realms", "state", "ui"]);
 	const queryClient = useQueryClient();
 	const update = usePatchApiRealmsByRealmId();
+	const replaceSlug = useReplaceRealmSlugAddress({
+		mutation: {
+			onSuccess: () => invalidateRealmDetails(queryClient, realm.id),
+		},
+	});
 	const localization = realm.localizations.find(
 		(entry) => entry.language === toContentLanguage(locale.target),
 	);
@@ -307,6 +315,21 @@ function RealmProfileSettings({ realm }: { realm: GetApiRealmsByRealmIdStatus200
 							</Button>
 						</FieldGroup>
 					</form>
+				</CardContent>
+			</Card>
+			<Card>
+				<CardContent className="p-5">
+					<SlugAddressForm
+						error={replaceSlug.error}
+						initialSlug={realm.slugAddress?.slug}
+						isPending={replaceSlug.isPending}
+						onSubmit={(slug) =>
+							replaceSlug.mutateAsync({
+								path: { realmId: realm.id },
+								body: { slug },
+							})
+						}
+					/>
 				</CardContent>
 			</Card>
 		</section>

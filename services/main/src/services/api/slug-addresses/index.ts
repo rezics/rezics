@@ -2,12 +2,15 @@ import { StatusCodes } from "http-status-codes";
 import Elysia, { t } from "elysia";
 
 import session from "../../auth/session";
+import { UnitNotFound } from "../../units/errors";
 import {
 	createSlugNamespace,
 	getCanonicalUnitSlugAddressAsStaff,
+	getPublicCanonicalUnitSlugAddress,
 	releaseSlugRedirect,
 	replaceOwnProfileSlugAddress,
 	replaceUnitSlugAddressAsStaff,
+	resolveScopedUnitAddress,
 	resolveUnitPath,
 } from "../../units/slug-address";
 import { NoContentResponse } from "../schema/action-response";
@@ -20,6 +23,9 @@ import {
 	ReplaceUnitSlugAddressBody,
 	ResolvedSlugAddressResponse,
 	ResolveSlugAddressBody,
+	ResolveScopedSlugAddressQuery,
+	ScopedSlugAddressParams,
+	PublicSlugAddressResponse,
 	SlugAddressMutationResponse,
 	SlugRedirectAddressParams,
 	UnitSlugAddressParams,
@@ -41,14 +47,7 @@ function presentPath<T extends { readonly canonicalPath: readonly string[] }>(re
 	return { ...result, canonicalPath: [...result.canonicalPath] };
 }
 
-/**
- * Backend-only slug address API.
- *
- * @remarks
- * Core Unit resources remain ID-addressed. The frontend must not call this API
- * until routing, abuse controls, caching, and canonical redirect behavior have
- * been designed and implemented as a separate project.
- */
+/** Public resolution and privileged mutation APIs for scoped Unit addresses. */
 export default new Elysia({ prefix: "/slug-addresses" })
 	.use(session)
 	.post(
@@ -68,9 +67,58 @@ export default new Elysia({ prefix: "/slug-addresses" })
 			},
 			detail: {
 				operationId: "resolveUnitSlugAddress",
-				summary: "Resolve a backend Unit slug address",
+				summary: "Resolve a complete public Unit slug path",
 				description:
-					"Resolves one to three slug labels to a public Unit ID and reports its canonical path. This isolated backend lookup does not alter the ID-based Unit API or enable frontend slug routing.",
+					"Resolves one to three slug labels to a public Unit ID and reports its canonical path. Browser routes use the resolved ID for subsequent resource reads and cache identity.",
+				tags: ["Slug Addresses"],
+			},
+		},
+	)
+	.get(
+		"/public-units/:unitId",
+		async ({ params }) => {
+			const address = await getPublicCanonicalUnitSlugAddress(params.unitId);
+			if (!address) throw new UnitNotFound();
+			return address;
+		},
+		{
+			params: UnitSlugAddressParams,
+			response: {
+				[StatusCodes.OK]: PublicSlugAddressResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: {
+				operationId: "getPublicUnitSlugAddress",
+				summary: "Get a Unit public canonical slug address",
+				description:
+					"Returns a public Unit's optional canonical slug address for ID-route canonicalization. Missing, private, moderated, deleted, or unaddressed Units all return not found.",
+				tags: ["Slug Addresses"],
+			},
+		},
+	)
+	.get(
+		"/scopes/:scopeUnitId/:slug",
+		async ({ params, query }) => {
+			const result = await resolveScopedUnitAddress(
+				params.scopeUnitId,
+				params.slug,
+				query.kind,
+			);
+			return { ...presentPath(result), path: [...result.path] };
+		},
+		{
+			params: ScopedSlugAddressParams,
+			query: ResolveScopedSlugAddressQuery,
+			response: {
+				[StatusCodes.OK]: ResolvedSlugAddressResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidSlug"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: {
+				operationId: "resolveScopedUnitSlugAddress",
+				summary: "Resolve a Unit slug in its direct scope",
+				description:
+					"Resolves a direct scope Unit ID and slug label to a public Unit ID. An optional expected kind prevents cross-resource matches. The response includes the complete canonical path so callers can redirect former addresses.",
 				tags: ["Slug Addresses"],
 			},
 		},
@@ -125,7 +173,7 @@ export default new Elysia({ prefix: "/slug-addresses" })
 				operationId: "getUnitSlugAddressAsStaff",
 				summary: "Get a Unit canonical slug address as staff",
 				description:
-					"Returns the optional canonical slug address stored independently from the Unit. This administrative read is intentionally absent from core Unit responses.",
+					"Returns canonical address registry details for staff workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.",
 				tags: ["Slug Addresses"],
 			},
 		},
@@ -210,9 +258,9 @@ export default new Elysia({ prefix: "/slug-addresses" })
 			},
 			detail: {
 				operationId: "releaseSlugRedirectAsStaff",
-				summary: "Release a retained slug redirect as staff",
+				summary: "Release an administrative slug redirect as staff",
 				description:
-					"Deletes one redirect address so the scope and label may be reused. This is explicit because retained redirects protect existing backend links.",
+					"Deletes one non-public administrative redirect so the scope and label may be reused. Redirects in enabled public route namespaces are permanent and cannot be released.",
 				tags: ["Slug Addresses"],
 				responses: NoContentResponse,
 			},

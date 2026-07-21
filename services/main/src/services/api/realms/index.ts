@@ -45,6 +45,10 @@ import type { DatabaseTransaction } from "../../database";
 import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
 import { transitionUnitStatus } from "../../units/status";
+import {
+	getPublicCanonicalUnitSlugAddress,
+	getPublicCanonicalUnitSlugAddresses,
+} from "../../units/slug-address";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
 import { presentImageAsset } from "../../units/service";
 import {
@@ -105,6 +109,11 @@ import {
 	RealmScoreContextPostNotMounted,
 } from "./errors";
 import { PostNotFound } from "../posts/errors";
+import {
+	ReplacePublicUnitSlugAddressBody,
+	SlugAddressMutationResponse,
+} from "../slug-addresses/schema";
+import { replaceRealmSlugAddress } from "../../units/slug-address";
 
 const RealmNotFoundResponse = toApiErrorResponse(["RealmNotFound"]);
 const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
@@ -173,8 +182,8 @@ export default new Elysia({ prefix: "/realms" })
 	.use(session)
 	.get(
 		"",
-		async ({ query }) => ({
-			items: await database
+		async ({ query }) => {
+			const items = await database
 				.select({
 					id: realm.id,
 					joinPolicy: realm.joinPolicy,
@@ -209,16 +218,20 @@ export default new Elysia({ prefix: "/realms" })
 				)
 				.where(and(eq(unit.status, "published"), eq(unit.visibility, "public")))
 				.orderBy(desc(unit.createdAt), desc(unit.id))
-				.limit(query.limit ?? 20)
-				.then((items) =>
-					items.map(({ avatarAssetId, bannerAssetId, coverAssetId, ...item }) => ({
-						...item,
-						avatar: presentImageAsset(avatarAssetId),
-						banner: presentImageAsset(bannerAssetId),
-						cover: presentImageAsset(coverAssetId),
-					})),
-				),
-		}),
+				.limit(query.limit ?? 20);
+			const slugAddresses = await getPublicCanonicalUnitSlugAddresses(
+				items.map((item) => item.id),
+			);
+			return {
+				items: items.map(({ avatarAssetId, bannerAssetId, coverAssetId, ...item }) => ({
+					...item,
+					slugAddress: slugAddresses.get(item.id) ?? null,
+					avatar: presentImageAsset(avatarAssetId),
+					banner: presentImageAsset(bannerAssetId),
+					cover: presentImageAsset(coverAssetId),
+				})),
+			};
+		},
 		{
 			query: ListRealmsQuery,
 			response: { [StatusCodes.OK]: RealmListResponse },
@@ -280,6 +293,40 @@ export default new Elysia({ prefix: "/realms" })
 				[StatusCodes.NOT_FOUND]: ImageAssetNotFoundResponse,
 			},
 			detail: { summary: "Create Realm", tags: ["Realms"] },
+		},
+	)
+	.put(
+		"/:realmId/slug-address",
+		async ({ params, authorization, body }) => {
+			const result = await replaceRealmSlugAddress(authorization, {
+				realmId: params.realmId,
+				slug: body.slug,
+			});
+			return { ...result, canonicalPath: [...result.canonicalPath] };
+		},
+		{
+			access: "contribute:unit:update",
+			params: RealmParams,
+			body: ReplacePublicUnitSlugAddressBody,
+			response: {
+				[StatusCodes.OK]: SlugAddressMutationResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidSlug"]),
+				[StatusCodes.FORBIDDEN]: RealmMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["RealmNotFound", "UnitNotFound"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse([
+					"SlugTaken",
+					"SlugScopeUnavailable",
+					"SlugScopeCycle",
+				]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["SlugDepthExceeded"]),
+			},
+			detail: {
+				operationId: "replaceRealmSlugAddress",
+				summary: "Replace a Realm slug address",
+				description:
+					"Assigns or renames a Realm's optional public slug in the permanent realms namespace. The former address is retained as a redirect.",
+				tags: ["Realms", "Slug Addresses"],
+			},
 		},
 	)
 	.get(
@@ -344,6 +391,7 @@ export default new Elysia({ prefix: "/realms" })
 			const { avatarAssetId, bannerAssetId, coverAssetId, ...realmRecord } = record;
 			return {
 				...realmRecord,
+				slugAddress: await getPublicCanonicalUnitSlugAddress(record.id),
 				language: localizations[0]?.language ?? null,
 				avatar: presentImageAsset(avatarAssetId),
 				banner: presentImageAsset(bannerAssetId),

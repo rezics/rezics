@@ -14,6 +14,7 @@ import {
 	resolvedUnitLocalizationTitle,
 } from "../units/localization";
 import { presentImageAsset } from "../units/service";
+import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
 import {
 	decodeFollowingCursor,
 	encodeFollowingCursor,
@@ -79,9 +80,11 @@ export async function listFollowing(input: ListFollowingInput) {
 
 	const items = rows.slice(0, input.limit);
 	const last = items.at(-1);
+	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(items.map((item) => item.id));
 	return {
 		items: items.map(({ avatarAssetId, coverAssetId, ...record }) => ({
 			...record,
+			slugAddress: slugAddresses.get(record.id) ?? null,
 			avatar: presentImageAsset(avatarAssetId),
 			cover: presentImageAsset(coverAssetId),
 		})),

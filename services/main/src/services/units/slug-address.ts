@@ -1,4 +1,5 @@
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
+import { PublicSlugRouteManifest, type PublicSlugAddressValue } from "@rezics/slug";
 
 import type { Authorization } from "../authorization";
 import { database, type DatabaseTransaction } from "../database";
@@ -52,6 +53,12 @@ export interface ResolvedUnitPath {
 	readonly redirected: boolean;
 }
 
+export interface PublicCanonicalUnitSlugAddress extends PublicSlugAddressValue {
+	readonly slug: SlugLabel;
+	readonly scopeUnitId: string;
+	readonly canonicalPath: SlugLabel[];
+}
+
 export interface UnitAddressMutationResult extends CanonicalUnitSlugAddress {
 	readonly redirectAddressId: string | null;
 	readonly canonicalPath: readonly SlugLabel[];
@@ -73,6 +80,22 @@ interface CanonicalAddressMutation {
 
 const SlugTreeMutationLock = "rezics-unit-slug-addresses";
 const SystemSlugNamespaceUnitIdSet: ReadonlySet<string> = new Set(SystemSlugNamespaceUnitIds);
+const PermanentPublicSlugScopeUnitIdSet: ReadonlySet<string> = new Set(
+	PublicSlugRouteManifest.map((route) => route.namespaceUnitId),
+);
+
+function fixedPublicSlugScope(kind: UnitKind): string | undefined {
+	switch (kind) {
+		case "profile":
+			return TopLevelSlugNamespaceUnitIds.users;
+		case "realm":
+			return TopLevelSlugNamespaceUnitIds.realms;
+		case "zone":
+			return TopLevelSlugNamespaceUnitIds.zones;
+		default:
+			return undefined;
+	}
+}
 
 function objectField(value: unknown, key: string): unknown {
 	return typeof value === "object" && value !== null && key in value
@@ -297,6 +320,121 @@ function isPublicAddressNode(value: {
 	);
 }
 
+interface PublicAddressProjectionState {
+	readonly unitId: string;
+	readonly visited: Set<string>;
+	readonly reversePath: SlugLabel[];
+	currentUnitId: string;
+	directAddress?: {
+		readonly scopeUnitId: string | null;
+		readonly slug: SlugLabel;
+	};
+	finished: boolean;
+}
+
+function finishPublicAddressProjection(
+	state: PublicAddressProjectionState,
+	result: Map<string, PublicCanonicalUnitSlugAddress>,
+): void {
+	state.finished = true;
+	const directAddress = state.directAddress;
+	if (!directAddress?.scopeUnitId || state.reversePath.length < 2) return;
+	result.set(state.unitId, {
+		slug: directAddress.slug,
+		scopeUnitId: directAddress.scopeUnitId,
+		canonicalPath: [...state.reversePath].reverse(),
+	});
+}
+
+/**
+ * Projects public canonical addresses for resource responses in bounded batches.
+ *
+ * The result is keyed by immutable Unit ID. Missing, private, moderated,
+ * deleted, malformed, cyclic, or unaddressed Units are deliberately omitted.
+ */
+export async function getPublicCanonicalUnitSlugAddresses(
+	unitIds: readonly string[],
+): Promise<ReadonlyMap<string, PublicCanonicalUnitSlugAddress>> {
+	const result = new Map<string, PublicCanonicalUnitSlugAddress>();
+	const states = [...new Set(unitIds)].map<PublicAddressProjectionState>((unitId) => ({
+		unitId,
+		currentUnitId: unitId,
+		visited: new Set<string>(),
+		reversePath: [],
+		finished: false,
+	}));
+
+	for (let depth = 0; depth < SlugAddressMaximumDepth; depth += 1) {
+		for (const state of states) {
+			if (state.finished) continue;
+			if (state.visited.has(state.currentUnitId)) {
+				state.finished = true;
+				continue;
+			}
+			state.visited.add(state.currentUnitId);
+			const namespaceSlug = TopLevelSlugNamespaceSlugByUnitId.get(state.currentUnitId);
+			if (!namespaceSlug) continue;
+			state.reversePath.push(parseSlugLabel(namespaceSlug));
+			finishPublicAddressProjection(state, result);
+		}
+
+		const targetIds = [
+			...new Set(
+				states.filter((state) => !state.finished).map((state) => state.currentUnitId),
+			),
+		];
+		if (!targetIds.length) break;
+		const records = await database
+			.select({
+				targetUnitId: unitSlugAddress.targetUnitId,
+				scopeUnitId: unitSlugAddress.scopeUnitId,
+				slug: unitSlugAddress.slug,
+				status: unit.status,
+				visibility: unit.visibility,
+				moderationStatus: unit.moderationStatus,
+				deletedAt: unit.deletedAt,
+			})
+			.from(unitSlugAddress)
+			.innerJoin(unit, eq(unit.id, unitSlugAddress.targetUnitId))
+			.where(
+				and(
+					eq(unitSlugAddress.kind, "canonical"),
+					inArray(unitSlugAddress.targetUnitId, targetIds),
+				),
+			);
+		const recordByUnitId = new Map(records.map((record) => [record.targetUnitId, record]));
+
+		for (const state of states) {
+			if (state.finished) continue;
+			const record = recordByUnitId.get(state.currentUnitId);
+			if (!record || !isPublicAddressNode(record)) {
+				state.finished = true;
+				continue;
+			}
+			let slug: SlugLabel;
+			try {
+				slug = parseSlugLabel(record.slug);
+			} catch {
+				state.finished = true;
+				continue;
+			}
+			state.directAddress ??= { scopeUnitId: record.scopeUnitId, slug };
+			state.reversePath.push(slug);
+			if (record.scopeUnitId === null) finishPublicAddressProjection(state, result);
+			else state.currentUnitId = record.scopeUnitId;
+		}
+	}
+
+	return result;
+}
+
+/** Returns one Unit's public canonical address, or null when it has none. */
+export async function getPublicCanonicalUnitSlugAddress(
+	unitId: string,
+): Promise<PublicCanonicalUnitSlugAddress | null> {
+	return (await getPublicCanonicalUnitSlugAddresses([unitId])).get(unitId) ?? null;
+}
+
 async function loadCanonicalUnitPath(
 	unitId: string,
 	requirePublicAncestors: boolean,
@@ -342,11 +480,29 @@ async function loadCanonicalUnitPath(
 	throw new SlugDepthExceeded();
 }
 
+async function loadPublicCanonicalUnitPathOrNotFound(
+	unitId: string,
+): Promise<readonly SlugLabel[]> {
+	try {
+		return await loadCanonicalUnitPath(unitId, true);
+	} catch (error) {
+		if (
+			error instanceof InvalidSlug ||
+			error instanceof UnitSlugAddressNotFound ||
+			error instanceof SlugDepthExceeded ||
+			error instanceof SlugScopeCycle
+		)
+			throw new UnitNotFound();
+		throw error;
+	}
+}
+
 /**
- * Returns a Unit's optional canonical address as a proved address value.
+ * Returns canonical registry details after proving the staff capability.
  *
  * @remarks
- * Core Unit reads deliberately do not call this function or expose slug data.
+ * Ordinary resource reads use the public projection helpers and do not expose
+ * administrative address IDs.
  */
 export async function getCanonicalUnitSlugAddressAsStaff(
 	authorization: Authorization<string>,
@@ -377,17 +533,7 @@ export async function getCanonicalUnitSlugAddressAsStaff(
 	};
 }
 
-/**
- * Resolves a backend slug path without changing the ID-based Unit contract.
- *
- * @remarks
- * Permanent platform namespaces use immutable process-local routing data. The
- * frontend intentionally does not consume this resolver yet.
- *
- * @todo
- * Define frontend routing, cache observability, and canonical redirect behavior
- * before enabling public slug routes.
- */
+/** Resolves a complete public slug path to an immutable Unit identity. */
 export async function resolveUnitPath(segments: readonly string[]): Promise<ResolvedUnitPath> {
 	if (!segments.length || segments.length > SlugAddressMaximumDepth)
 		throw new SlugDepthExceeded();
@@ -458,16 +604,61 @@ export async function resolveUnitPath(segments: readonly string[]): Promise<Reso
 }
 
 /**
+ * Resolves exactly one label under its direct scope Unit.
+ *
+ * Callers do not supply ancestor IDs. The backend proves that the scope has a
+ * public canonical path, validates the target's public state and optional kind,
+ * and returns the target's complete canonical path for redirect handling.
+ */
+export async function resolveScopedUnitAddress(
+	scopeUnitId: string,
+	slugValue: string,
+	expectedKind?: UnitKind,
+): Promise<ResolvedUnitPath> {
+	const slug = parseSlugLabel(slugValue);
+	const scopePath = await loadPublicCanonicalUnitPathOrNotFound(scopeUnitId);
+	const [address] = await database
+		.select({
+			addressKind: unitSlugAddress.kind,
+			id: unit.id,
+			kind: unit.kind,
+			status: unit.status,
+			visibility: unit.visibility,
+			moderationStatus: unit.moderationStatus,
+			deletedAt: unit.deletedAt,
+		})
+		.from(unitSlugAddress)
+		.innerJoin(unit, eq(unit.id, unitSlugAddress.targetUnitId))
+		.where(and(eq(unitSlugAddress.scopeUnitId, scopeUnitId), eq(unitSlugAddress.slug, slug)))
+		.limit(1);
+	if (
+		!address ||
+		!isPublicAddressNode(address) ||
+		(expectedKind && address.kind !== expectedKind)
+	)
+		throw new UnitNotFound();
+	const path = [...scopePath, slug];
+	if (path.length > SlugAddressMaximumDepth) throw new UnitNotFound();
+	const canonicalPath = await loadPublicCanonicalUnitPathOrNotFound(address.id);
+	return {
+		id: address.id,
+		kind: address.kind,
+		path,
+		canonicalPath,
+		redirected:
+			address.addressKind === "redirect" ||
+			path.length !== canonicalPath.length ||
+			path.some((segment, index) => canonicalPath[index] !== segment),
+	};
+}
+
+/**
  * Replaces the current Profile's canonical slug address.
  *
  * @remarks
- * This is the only non-staff slug mutation. The caller supplies only the label;
- * the backend proves Profile ownership from the session and fixes the scope to
- * the permanent `users` namespace. Repeating the same replacement is idempotent.
- *
- * @todo
- * Complete abuse controls and the public Profile slug lifecycle before frontend
- * integration.
+ * The caller supplies only the label; the backend proves Profile ownership
+ * from the session and fixes the scope to the permanent `users` namespace.
+ * Repeating the same replacement is idempotent.
  */
 export async function replaceOwnProfileSlugAddress(
 	authorization: Authorization<string>,
@@ -511,17 +702,95 @@ export async function replaceOwnProfileSlugAddress(
 	};
 }
 
+type PublicAddressableUnitKind = "realm" | "zone";
+
+const PublicUnitSlugScopeByKind = {
+	realm: TopLevelSlugNamespaceUnitIds.realms,
+	zone: TopLevelSlugNamespaceUnitIds.zones,
+} satisfies Record<PublicAddressableUnitKind, string>;
+
+async function replacePublicUnitSlugAddress(
+	authorization: Authorization<string>,
+	input: {
+		readonly unitId: string;
+		readonly kind: PublicAddressableUnitKind;
+		readonly slug: string;
+	},
+): Promise<UnitAddressMutationResult> {
+	const slug = parseSlugLabel(input.slug);
+	const scopeUnitId = PublicUnitSlugScopeByKind[input.kind];
+	const mutation = await database.transaction(async (tx) => {
+		const [target] = await tx
+			.select({ kind: unit.kind, deletedAt: unit.deletedAt })
+			.from(unit)
+			.where(eq(unit.id, input.unitId))
+			.limit(1);
+		if (!target || target.deletedAt || target.kind !== input.kind) throw new UnitNotFound();
+		const result = await replaceCanonicalAddress(tx, {
+			unitId: input.unitId,
+			scopeUnitId,
+			slug,
+		});
+		if (result.changed)
+			await tx.insert(auditEvent).values({
+				actorProfileId: authorization.profileId,
+				action: result.before ? "unit.slug.rename" : "unit.slug.assign",
+				decisionCode: "allowed",
+				subjectKind: "unit",
+				subjectId: input.unitId,
+				metadata: {
+					before: result.before,
+					after: result.after,
+					redirectAddressId: result.redirectAddressId,
+				},
+			});
+		return result;
+	});
+	return {
+		addressId: mutation.addressId,
+		unitId: input.unitId,
+		scopeUnitId: mutation.after.scopeUnitId,
+		slug: mutation.after.slug,
+		redirectAddressId: mutation.redirectAddressId,
+		canonicalPath: await loadCanonicalUnitPath(input.unitId, false),
+	};
+}
+
+/** Replaces a Realm address after proving Realm settings authority. */
+export async function replaceRealmSlugAddress(
+	authorization: Authorization<string>,
+	input: { readonly realmId: string; readonly slug: string },
+): Promise<UnitAddressMutationResult> {
+	await authorization.realm.ensureCapability(input.realmId, "realm.settings.update");
+	await authorization.unit.ensureOperationAllowed(input.realmId, ["slug-address"]);
+	return replacePublicUnitSlugAddress(authorization, {
+		unitId: input.realmId,
+		kind: "realm",
+		slug: input.slug,
+	});
+}
+
+/** Replaces a Zone address after proving Unit update authority. */
+export async function replaceZoneSlugAddress(
+	authorization: Authorization<string>,
+	input: { readonly zoneId: string; readonly slug: string },
+): Promise<UnitAddressMutationResult> {
+	await authorization.unit.ensureCanUpdate(input.zoneId, [["slug-address"]]);
+	return replacePublicUnitSlugAddress(authorization, {
+		unitId: input.zoneId,
+		kind: "zone",
+		slug: input.slug,
+	});
+}
+
 /**
  * Replaces any Unit's canonical slug address through the staff-only contract.
  *
  * @remarks
- * Non-Profile public slug mutation is intentionally unavailable. Permanent
- * platform namespace addresses are immutable because the resolver caches them.
- *
- * @todo
- * Design per-kind public policies before exposing any narrower non-staff API.
- * In particular, define ownership validation and rendering semantics for posts
- * whose explicit staff-selected scope differs from their author Profile ID.
+ * Resource-specific Profile, Realm, and Zone commands fix their namespaces and
+ * prove narrower authority. This command remains for staff-governed kinds and
+ * namespace administration. Permanent platform namespaces are immutable
+ * because the resolver caches them.
  */
 export async function replaceUnitSlugAddressAsStaff(
 	authorization: Authorization<string>,
@@ -541,6 +810,9 @@ export async function replaceUnitSlugAddressAsStaff(
 			.where(eq(unit.id, input.unitId))
 			.limit(1);
 		if (!target) throw new UnitNotFound();
+		const fixedScopeUnitId = fixedPublicSlugScope(target.kind);
+		if (fixedScopeUnitId && input.scopeUnitId !== fixedScopeUnitId)
+			throw new UnitAddressMutationForbidden();
 		if (target.kind === "slug_namespace" || input.scopeUnitId === null)
 			await authorization.platform.ensureCapability("unit.slug.namespace.manage");
 		const result = await replaceCanonicalAddress(tx, { ...input, slug });
@@ -649,6 +921,8 @@ export async function releaseSlugRedirect(
 			)
 			.limit(1);
 		if (!redirect) throw new SlugRedirectNotFound();
+		if (redirect.scopeUnitId && PermanentPublicSlugScopeUnitIdSet.has(redirect.scopeUnitId))
+			throw new UnitAddressMutationForbidden();
 		if (redirect.scopeUnitId === null)
 			await authorization.platform.ensureCapability("unit.slug.namespace.manage");
 		await tx.delete(unitSlugAddress).where(eq(unitSlugAddress.id, redirect.id));

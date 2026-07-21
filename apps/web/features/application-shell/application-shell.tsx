@@ -109,7 +109,7 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 			account={{
 				href: session
 					? currentProfile.data
-						? profileHref(currentProfile.data.id)
+						? profileHref(currentProfile.data)
 						: "/settings/profile"
 					: "/login",
 				label: session ? t.ui.profile : t.actions.login,
@@ -195,7 +195,7 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 									{
 										id: item.id,
 										kind: item.kind,
-										href: sidebarFollowingHref(item.kind, item.id),
+										href: sidebarFollowingHref(item.kind, item),
 										label: item.title ?? t.ui.unnamed,
 										imageUrl: item.avatar?.url ?? item.cover?.url,
 										favorite: item.favorite,

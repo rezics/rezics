@@ -58,7 +58,7 @@ export function ProfileLayout({ children, profileId }: { children: ReactNode; pr
 	const name = user.name ?? t.ui.unnamed;
 	const isCurrentUser = me.data?.id === user.id;
 	const canFollow = Boolean(session && me.data && !isCurrentUser);
-	const contentHref = profileHref(user.id, "content");
+	const contentHref = profileHref(user, "content");
 	const activeSection: ProfileSection =
 		pathname === contentHref || pathname.startsWith(`${contentHref}/`) ? "content" : "profile";
 	const joinedAt = new Date(user.createdAt);
@@ -66,7 +66,7 @@ export function ProfileLayout({ children, profileId }: { children: ReactNode; pr
 		? null
 		: new Intl.DateTimeFormat(locale.target, { dateStyle: "medium" }).format(joinedAt);
 	const tabs = [
-		{ value: "profile", label: t.profiles.tabs.profile, href: profileHref(user.id) },
+		{ value: "profile", label: t.profiles.tabs.profile, href: profileHref(user) },
 		{ value: "content", label: t.profiles.tabs.content, href: contentHref },
 	] as const;
 
@@ -115,6 +115,11 @@ export function ProfileLayout({ children, profileId }: { children: ReactNode; pr
 							<h1 className="font-heading font-black text-2xl tracking-tight text-balance sm:text-4xl">
 								{name}
 							</h1>
+							{user.slugAddress ? (
+								<p className="mt-1 font-mono text-muted-foreground text-sm">
+									@{user.slugAddress.slug}
+								</p>
+							) : null}
 							{user.summary ? (
 								<p className="mt-2 max-w-2xl text-muted-foreground text-sm leading-6 sm:text-base">
 									{user.summary}

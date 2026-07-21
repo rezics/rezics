@@ -33,6 +33,7 @@ import { Textarea } from "@rezics/ui";
 import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
 import { FollowButton } from "@/features/following/follow-button";
+import { realmHref } from "@/features/slugs/unit-route";
 import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetValue,
@@ -85,7 +86,7 @@ export function RealmsPage() {
 			) : query.data?.items.length ? (
 				<div className="grid gap-3">
 					{query.data.items.map((realm) => (
-						<Link key={realm.id} href={`/realms/${realm.id}`}>
+						<Link key={realm.id} href={realmHref(realm)}>
 							<Card className="transition-colors hover:bg-surface-hover">
 								<CardContent className="grid grid-cols-[auto_minmax(0,1fr)] gap-4 p-5">
 									<Avatar className="size-12">
@@ -295,6 +296,11 @@ export function RealmDetailPage({ id }: { id: string }) {
 					<h1 className="break-words font-serif font-semibold text-3xl tracking-tight sm:text-5xl">
 						{localization?.title ?? t.realms.untitled}
 					</h1>
+					{realm.slugAddress ? (
+						<p className="mt-1 font-mono text-muted-foreground text-sm">
+							/{realm.slugAddress.slug}
+						</p>
+					) : null}
 					{localization?.summary ? (
 						<p className="mt-3 max-w-3xl text-base text-muted-foreground leading-7 sm:text-lg">
 							{localization.summary}
@@ -412,9 +418,7 @@ function RealmActions({
 	const membership = realm.viewerMembership;
 
 	if (!session)
-		return (
-			<SignInButton destination={`/realms/${realm.id}`}>{t.realms.signInToJoin}</SignInButton>
-		);
+		return <SignInButton destination={realmHref(realm)}>{t.realms.signInToJoin}</SignInButton>;
 
 	return (
 		<div className="flex flex-col items-end gap-2">

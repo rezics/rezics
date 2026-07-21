@@ -6,11 +6,13 @@ export function isSidebarFollowingKind(value: string): value is SidebarFollowing
 	return SidebarFollowingKinds.some((kind) => kind === value);
 }
 
-export function sidebarFollowingHref(kind: SidebarFollowingKind, id: string) {
+export function sidebarFollowingHref(kind: SidebarFollowingKind, value: string | AddressableUnit) {
+	const unit = typeof value === "string" ? { id: value } : value;
 	switch (kind) {
 		case "zone":
-			return `/zones/${id}`;
+			return zoneHref(unit);
 		case "realm":
-			return `/realms/${id}`;
+			return realmHref(unit);
 	}
 }
+import { realmHref, type AddressableUnit, zoneHref } from "@/features/slugs/unit-route";

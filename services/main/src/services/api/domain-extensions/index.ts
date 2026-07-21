@@ -48,8 +48,14 @@ import {
 } from "../../units/localization";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
 import { presentImageAsset } from "../../units/service";
+import { getPublicCanonicalUnitSlugAddress } from "../../units/slug-address";
+import { replaceZoneSlugAddress } from "../../units/slug-address";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
+import {
+	ReplacePublicUnitSlugAddressBody,
+	SlugAddressMutationResponse,
+} from "../slug-addresses/schema";
 import {
 	CreateSeriesBody,
 	CreateZoneBody,
@@ -194,6 +200,7 @@ async function toZoneResponse(
 	);
 	return {
 		...record,
+		slugAddress: await getPublicCanonicalUnitSlugAddress(record.id),
 		language: localizations[0]?.language ?? null,
 		avatar: presentImageAsset(avatarAssetId),
 		banner: presentImageAsset(bannerAssetId),
@@ -355,6 +362,42 @@ export default new Elysia()
 	)
 	.group("/zones", (app) =>
 		app
+			.put(
+				"/:zoneId/slug-address",
+				async ({ params, authorization, body }) => {
+					const result = await replaceZoneSlugAddress(authorization, {
+						zoneId: params.zoneId,
+						slug: body.slug,
+					});
+					return { ...result, canonicalPath: [...result.canonicalPath] };
+				},
+				{
+					access: "contribute:unit:update",
+					params: ZoneParams,
+					body: ReplacePublicUnitSlugAddressBody,
+					response: {
+						[StatusCodes.OK]: SlugAddressMutationResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidSlug"]),
+						[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+						[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"SlugTaken",
+							"SlugScopeUnavailable",
+							"SlugScopeCycle",
+						]),
+						[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse([
+							"SlugDepthExceeded",
+						]),
+					},
+					detail: {
+						operationId: "replaceZoneSlugAddress",
+						summary: "Replace a Zone slug address",
+						description:
+							"Assigns or renames a Zone's optional public slug in the permanent zones namespace. The former address is retained as a redirect.",
+						tags: ["Zones", "Slug Addresses"],
+					},
+				},
+			)
 			.get(
 				"/:zoneId",
 				async ({ params, query, request }) => {

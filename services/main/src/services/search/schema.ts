@@ -6,6 +6,7 @@ import {
 	type SearchSort,
 } from "@rezics/search";
 import type { ContentLanguage } from "@rezics/i18n";
+import type { PublicSlugAddressValue } from "@rezics/slug";
 
 export const SearchCategories = SearchCategoryValues;
 export type { SearchCategory };
@@ -14,6 +15,7 @@ export type { SearchSort };
 
 export interface SearchHit {
 	id: string;
+	slugAddress: PublicSlugAddressValue | null;
 	kind: string;
 	type: string;
 	titles: string[];

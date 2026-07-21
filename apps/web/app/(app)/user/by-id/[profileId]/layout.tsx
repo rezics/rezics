@@ -1,10 +1,8 @@
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { ProfileLayout } from "@/features/profiles/profile-layout";
-
-const UuidPattern =
-	/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
+import { getPublicSlugHrefByUnitId, isUuid } from "@/features/slugs/resolve-public-slug.server";
 
 export default async function Layout({
 	children,
@@ -14,6 +12,8 @@ export default async function Layout({
 	params: Promise<{ profileId: string }>;
 }) {
 	const { profileId } = await params;
-	if (!UuidPattern.test(profileId)) notFound();
+	if (!isUuid(profileId)) notFound();
+	const canonicalHref = await getPublicSlugHrefByUnitId("profile", profileId);
+	if (canonicalHref) permanentRedirect(canonicalHref);
 	return <ProfileLayout profileId={profileId}>{children}</ProfileLayout>;
 }

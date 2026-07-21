@@ -3703,6 +3703,7 @@ __metadata:
     "@rezics/observability": "workspace:*"
     "@rezics/portable-text": "workspace:*"
     "@rezics/search": "workspace:*"
+    "@rezics/slug": "workspace:*"
     "@sinclair/typebox": "npm:^0.34.41"
     "@t3-oss/env-core": "npm:^0.13.11"
     "@types/node": "npm:26"
@@ -3758,6 +3759,7 @@ __metadata:
     "@rezics/i18n": "workspace:*"
     "@rezics/openapi-tanstack-query": "workspace:*"
     "@rezics/portable-text": "workspace:*"
+    "@rezics/slug": "workspace:*"
     "@rezics/ui": "workspace:*"
     "@tailwindcss/vite": "npm:^4.3.2"
     "@tanstack/react-query": "npm:^5.101.2"
@@ -3874,6 +3876,14 @@ __metadata:
   resolution: "@rezics/search@workspace:libraries/search"
   dependencies:
     "@sinclair/typebox": "npm:^0.34.41"
+    typescript: "npm:7"
+  languageName: unknown
+  linkType: soft
+
+"@rezics/slug@workspace:*, @rezics/slug@workspace:libraries/slug":
+  version: 0.0.0-use.local
+  resolution: "@rezics/slug@workspace:libraries/slug"
+  dependencies:
     typescript: "npm:7"
   languageName: unknown
   linkType: soft

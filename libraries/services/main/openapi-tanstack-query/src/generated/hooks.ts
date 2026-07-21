@@ -407,6 +407,14 @@ import type {
 	GetApiSeriesBySeriesIdReleasesStatus404,
 	GetApiSeriesBySeriesIdReleasesStatus422,
 	GetApiSeriesBySeriesIdReleasesStatus500,
+	ReplaceZoneSlugAddressOptions,
+	ReplaceZoneSlugAddressStatus200,
+	ReplaceZoneSlugAddressStatus400,
+	ReplaceZoneSlugAddressStatus403,
+	ReplaceZoneSlugAddressStatus404,
+	ReplaceZoneSlugAddressStatus409,
+	ReplaceZoneSlugAddressStatus422,
+	ReplaceZoneSlugAddressStatus500,
 	GetApiZonesByZoneIdOptions,
 	GetApiZonesByZoneIdStatus200,
 	GetApiZonesByZoneIdStatus404,
@@ -612,6 +620,17 @@ import type {
 	ResolveUnitSlugAddressStatus409,
 	ResolveUnitSlugAddressStatus422,
 	ResolveUnitSlugAddressStatus500,
+	GetPublicUnitSlugAddressOptions,
+	GetPublicUnitSlugAddressStatus200,
+	GetPublicUnitSlugAddressStatus404,
+	GetPublicUnitSlugAddressStatus422,
+	GetPublicUnitSlugAddressStatus500,
+	ResolveScopedUnitSlugAddressOptions,
+	ResolveScopedUnitSlugAddressStatus200,
+	ResolveScopedUnitSlugAddressStatus400,
+	ResolveScopedUnitSlugAddressStatus404,
+	ResolveScopedUnitSlugAddressStatus422,
+	ResolveScopedUnitSlugAddressStatus500,
 	ReplaceOwnProfileSlugAddressOptions,
 	ReplaceOwnProfileSlugAddressStatus200,
 	ReplaceOwnProfileSlugAddressStatus400,
@@ -1179,6 +1198,14 @@ import type {
 	PostApiRealmsStatus404,
 	PostApiRealmsStatus422,
 	PostApiRealmsStatus500,
+	ReplaceRealmSlugAddressOptions,
+	ReplaceRealmSlugAddressStatus200,
+	ReplaceRealmSlugAddressStatus400,
+	ReplaceRealmSlugAddressStatus403,
+	ReplaceRealmSlugAddressStatus404,
+	ReplaceRealmSlugAddressStatus409,
+	ReplaceRealmSlugAddressStatus422,
+	ReplaceRealmSlugAddressStatus500,
 	GetApiRealmsByRealmIdOptions,
 	GetApiRealmsByRealmIdStatus200,
 	GetApiRealmsByRealmIdStatus404,
@@ -1441,6 +1468,7 @@ import {
 	deleteApiGovernanceGrantsByGrantId,
 	postApiSeries,
 	getApiSeriesBySeriesIdReleases,
+	replaceZoneSlugAddress,
 	getApiZonesByZoneId,
 	patchApiZonesByZoneId,
 	getApiZonesByZoneIdPages,
@@ -1477,6 +1505,8 @@ import {
 	putApiUsersByIdBlock,
 	deleteApiUsersByIdBlock,
 	resolveUnitSlugAddress,
+	getPublicUnitSlugAddress,
+	resolveScopedUnitSlugAddress,
 	replaceOwnProfileSlugAddress,
 	getUnitSlugAddressAsStaff,
 	replaceUnitSlugAddressAsStaff,
@@ -1578,6 +1608,7 @@ import {
 	deleteApiPostsByPostIdRepliesByReplyPostId,
 	getApiRealms,
 	postApiRealms,
+	replaceRealmSlugAddress,
 	getApiRealmsByRealmId,
 	patchApiRealmsByRealmId,
 	getApiRealmsByRealmIdScoreContext,
@@ -8225,6 +8256,114 @@ export function useGetApiSeriesBySeriesIdReleases<
 	return queryResult;
 }
 
+export const replaceZoneSlugAddressMutationKey = () =>
+	[{ url: "/api/zones/:zoneId/slug-address" }] as const;
+
+export function replaceZoneSlugAddressMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = replaceZoneSlugAddressMutationKey();
+	return mutationOptions<
+		ReplaceZoneSlugAddressStatus200,
+		ResponseErrorConfig<
+			| ReplaceZoneSlugAddressStatus400
+			| ReplaceZoneSlugAddressStatus403
+			| ReplaceZoneSlugAddressStatus404
+			| ReplaceZoneSlugAddressStatus409
+			| ReplaceZoneSlugAddressStatus422
+			| ReplaceZoneSlugAddressStatus500
+		>,
+		ReplaceZoneSlugAddressOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await replaceZoneSlugAddress({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @description Assigns or renames a Zone's optional public slug in the permanent zones namespace. The former address is retained as a redirect.
+ * @summary Replace a Zone slug address
+ * {@link /api/zones/:zoneId/slug-address}
+ */
+export function useReplaceZoneSlugAddress<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			ReplaceZoneSlugAddressStatus200,
+			ResponseErrorConfig<
+				| ReplaceZoneSlugAddressStatus400
+				| ReplaceZoneSlugAddressStatus403
+				| ReplaceZoneSlugAddressStatus404
+				| ReplaceZoneSlugAddressStatus409
+				| ReplaceZoneSlugAddressStatus422
+				| ReplaceZoneSlugAddressStatus500
+			>,
+			ReplaceZoneSlugAddressOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? replaceZoneSlugAddressMutationKey();
+
+	const baseOptions = replaceZoneSlugAddressMutationOptions(config) as UseMutationOptions<
+		ReplaceZoneSlugAddressStatus200,
+		ResponseErrorConfig<
+			| ReplaceZoneSlugAddressStatus400
+			| ReplaceZoneSlugAddressStatus403
+			| ReplaceZoneSlugAddressStatus404
+			| ReplaceZoneSlugAddressStatus409
+			| ReplaceZoneSlugAddressStatus422
+			| ReplaceZoneSlugAddressStatus500
+		>,
+		ReplaceZoneSlugAddressOptions,
+		TContext
+	>;
+
+	return useMutation<
+		ReplaceZoneSlugAddressStatus200,
+		ResponseErrorConfig<
+			| ReplaceZoneSlugAddressStatus400
+			| ReplaceZoneSlugAddressStatus403
+			| ReplaceZoneSlugAddressStatus404
+			| ReplaceZoneSlugAddressStatus409
+			| ReplaceZoneSlugAddressStatus422
+			| ReplaceZoneSlugAddressStatus500
+		>,
+		ReplaceZoneSlugAddressOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		ReplaceZoneSlugAddressStatus200,
+		ResponseErrorConfig<
+			| ReplaceZoneSlugAddressStatus400
+			| ReplaceZoneSlugAddressStatus403
+			| ReplaceZoneSlugAddressStatus404
+			| ReplaceZoneSlugAddressStatus409
+			| ReplaceZoneSlugAddressStatus422
+			| ReplaceZoneSlugAddressStatus500
+		>,
+		ReplaceZoneSlugAddressOptions,
+		TContext
+	>;
+}
+
 export const getApiZonesByZoneIdQueryKey = ({
 	path,
 	query,
@@ -11572,8 +11711,8 @@ export function resolveUnitSlugAddressMutationOptions<TContext = unknown>(
 }
 
 /**
- * @description Resolves one to three slug labels to a public Unit ID and reports its canonical path. This isolated backend lookup does not alter the ID-based Unit API or enable frontend slug routing.
- * @summary Resolve a backend Unit slug address
+ * @description Resolves one to three slug labels to a public Unit ID and reports its canonical path. Browser routes use the resolved ID for subsequent resource reads and cache identity.
+ * @summary Resolve a complete public Unit slug path
  * {@link /api/slug-addresses/resolve}
  */
 export function useResolveUnitSlugAddress<TContext>(
@@ -11640,6 +11779,212 @@ export function useResolveUnitSlugAddress<TContext>(
 		ResolveUnitSlugAddressOptions,
 		TContext
 	>;
+}
+
+export const getPublicUnitSlugAddressQueryKey = ({
+	path,
+}: Omit<GetPublicUnitSlugAddressOptions, "headers">) =>
+	[{ url: "/api/slug-addresses/public-units/:unitId", params: path }] as const;
+
+type GetPublicUnitSlugAddressQueryKey = ReturnType<typeof getPublicUnitSlugAddressQueryKey>;
+
+export function getPublicUnitSlugAddressQueryOptions(
+	{ path }: GetPublicUnitSlugAddressOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getPublicUnitSlugAddressQueryKey({ path });
+	return queryOptions<
+		GetPublicUnitSlugAddressStatus200,
+		ResponseErrorConfig<
+			| GetPublicUnitSlugAddressStatus404
+			| GetPublicUnitSlugAddressStatus422
+			| GetPublicUnitSlugAddressStatus500
+		>,
+		GetPublicUnitSlugAddressStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getPublicUnitSlugAddress({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @description Returns a public Unit's optional canonical slug address for ID-route canonicalization. Missing, private, moderated, deleted, or unaddressed Units all return not found.
+ * @summary Get a Unit public canonical slug address
+ * {@link /api/slug-addresses/public-units/:unitId}
+ */
+export function useGetPublicUnitSlugAddress<
+	TData = GetPublicUnitSlugAddressStatus200,
+	TQueryData = GetPublicUnitSlugAddressStatus200,
+	TQueryKey extends QueryKey = GetPublicUnitSlugAddressQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetPublicUnitSlugAddressOptions["path"]
+			| (() => GetPublicUnitSlugAddressOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetPublicUnitSlugAddressStatus200,
+				ResponseErrorConfig<
+					| GetPublicUnitSlugAddressStatus404
+					| GetPublicUnitSlugAddressStatus422
+					| GetPublicUnitSlugAddressStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey = resolvedOptions?.queryKey ?? getPublicUnitSlugAddressQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getPublicUnitSlugAddressQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetPublicUnitSlugAddressStatus404
+			| GetPublicUnitSlugAddressStatus422
+			| GetPublicUnitSlugAddressStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const resolveScopedUnitSlugAddressQueryKey = ({
+	path,
+	query,
+}: Omit<ResolveScopedUnitSlugAddressOptions, "headers">) =>
+	[
+		{ url: "/api/slug-addresses/scopes/:scopeUnitId/:slug", params: path },
+		...(query ? [query] : []),
+	] as const;
+
+type ResolveScopedUnitSlugAddressQueryKey = ReturnType<typeof resolveScopedUnitSlugAddressQueryKey>;
+
+export function resolveScopedUnitSlugAddressQueryOptions(
+	{ path, query }: ResolveScopedUnitSlugAddressOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = resolveScopedUnitSlugAddressQueryKey({ path, query });
+	return queryOptions<
+		ResolveScopedUnitSlugAddressStatus200,
+		ResponseErrorConfig<
+			| ResolveScopedUnitSlugAddressStatus400
+			| ResolveScopedUnitSlugAddressStatus404
+			| ResolveScopedUnitSlugAddressStatus422
+			| ResolveScopedUnitSlugAddressStatus500
+		>,
+		ResolveScopedUnitSlugAddressStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await resolveScopedUnitSlugAddress({
+				...config,
+				path,
+				query,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @description Resolves a direct scope Unit ID and slug label to a public Unit ID. An optional expected kind prevents cross-resource matches. The response includes the complete canonical path so callers can redirect former addresses.
+ * @summary Resolve a Unit slug in its direct scope
+ * {@link /api/slug-addresses/scopes/:scopeUnitId/:slug}
+ */
+export function useResolveScopedUnitSlugAddress<
+	TData = ResolveScopedUnitSlugAddressStatus200,
+	TQueryData = ResolveScopedUnitSlugAddressStatus200,
+	TQueryKey extends QueryKey = ResolveScopedUnitSlugAddressQueryKey,
+>(
+	{
+		path,
+		query,
+	}: {
+		path:
+			| ResolveScopedUnitSlugAddressOptions["path"]
+			| (() => ResolveScopedUnitSlugAddressOptions["path"]);
+		query?:
+			| ResolveScopedUnitSlugAddressOptions["query"]
+			| (() => ResolveScopedUnitSlugAddressOptions["query"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				ResolveScopedUnitSlugAddressStatus200,
+				ResponseErrorConfig<
+					| ResolveScopedUnitSlugAddressStatus400
+					| ResolveScopedUnitSlugAddressStatus404
+					| ResolveScopedUnitSlugAddressStatus422
+					| ResolveScopedUnitSlugAddressStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = {
+		path: typeof path === "function" ? path() : path,
+		query: typeof query === "function" ? query() : query,
+	};
+	const queryKey =
+		resolvedOptions?.queryKey ?? resolveScopedUnitSlugAddressQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...resolveScopedUnitSlugAddressQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| ResolveScopedUnitSlugAddressStatus400
+			| ResolveScopedUnitSlugAddressStatus404
+			| ResolveScopedUnitSlugAddressStatus422
+			| ResolveScopedUnitSlugAddressStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
 }
 
 export const replaceOwnProfileSlugAddressMutationKey = () =>
@@ -11792,7 +12137,7 @@ export function getUnitSlugAddressAsStaffQueryOptions(
 }
 
 /**
- * @description Returns the optional canonical slug address stored independently from the Unit. This administrative read is intentionally absent from core Unit responses.
+ * @description Returns canonical address registry details for staff workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.
  * @summary Get a Unit canonical slug address as staff
  * {@link /api/slug-addresses/units/:unitId}
  */
@@ -12113,8 +12458,8 @@ export function releaseSlugRedirectAsStaffMutationOptions<TContext = unknown>(
 }
 
 /**
- * @description Deletes one redirect address so the scope and label may be reused. This is explicit because retained redirects protect existing backend links.
- * @summary Release a retained slug redirect as staff
+ * @description Deletes one non-public administrative redirect so the scope and label may be reused. Redirects in enabled public route namespaces are permanent and cannot be released.
+ * @summary Release an administrative slug redirect as staff
  * {@link /api/slug-addresses/redirects/:redirectAddressId}
  */
 export function useReleaseSlugRedirectAsStaff<TContext>(
@@ -21388,6 +21733,114 @@ export function usePostApiRealms<TContext>(
 			PostApiRealmsStatus404 | PostApiRealmsStatus422 | PostApiRealmsStatus500
 		>,
 		PostApiRealmsOptions,
+		TContext
+	>;
+}
+
+export const replaceRealmSlugAddressMutationKey = () =>
+	[{ url: "/api/realms/:realmId/slug-address" }] as const;
+
+export function replaceRealmSlugAddressMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = replaceRealmSlugAddressMutationKey();
+	return mutationOptions<
+		ReplaceRealmSlugAddressStatus200,
+		ResponseErrorConfig<
+			| ReplaceRealmSlugAddressStatus400
+			| ReplaceRealmSlugAddressStatus403
+			| ReplaceRealmSlugAddressStatus404
+			| ReplaceRealmSlugAddressStatus409
+			| ReplaceRealmSlugAddressStatus422
+			| ReplaceRealmSlugAddressStatus500
+		>,
+		ReplaceRealmSlugAddressOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await replaceRealmSlugAddress({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @description Assigns or renames a Realm's optional public slug in the permanent realms namespace. The former address is retained as a redirect.
+ * @summary Replace a Realm slug address
+ * {@link /api/realms/:realmId/slug-address}
+ */
+export function useReplaceRealmSlugAddress<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			ReplaceRealmSlugAddressStatus200,
+			ResponseErrorConfig<
+				| ReplaceRealmSlugAddressStatus400
+				| ReplaceRealmSlugAddressStatus403
+				| ReplaceRealmSlugAddressStatus404
+				| ReplaceRealmSlugAddressStatus409
+				| ReplaceRealmSlugAddressStatus422
+				| ReplaceRealmSlugAddressStatus500
+			>,
+			ReplaceRealmSlugAddressOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? replaceRealmSlugAddressMutationKey();
+
+	const baseOptions = replaceRealmSlugAddressMutationOptions(config) as UseMutationOptions<
+		ReplaceRealmSlugAddressStatus200,
+		ResponseErrorConfig<
+			| ReplaceRealmSlugAddressStatus400
+			| ReplaceRealmSlugAddressStatus403
+			| ReplaceRealmSlugAddressStatus404
+			| ReplaceRealmSlugAddressStatus409
+			| ReplaceRealmSlugAddressStatus422
+			| ReplaceRealmSlugAddressStatus500
+		>,
+		ReplaceRealmSlugAddressOptions,
+		TContext
+	>;
+
+	return useMutation<
+		ReplaceRealmSlugAddressStatus200,
+		ResponseErrorConfig<
+			| ReplaceRealmSlugAddressStatus400
+			| ReplaceRealmSlugAddressStatus403
+			| ReplaceRealmSlugAddressStatus404
+			| ReplaceRealmSlugAddressStatus409
+			| ReplaceRealmSlugAddressStatus422
+			| ReplaceRealmSlugAddressStatus500
+		>,
+		ReplaceRealmSlugAddressOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		ReplaceRealmSlugAddressStatus200,
+		ResponseErrorConfig<
+			| ReplaceRealmSlugAddressStatus400
+			| ReplaceRealmSlugAddressStatus403
+			| ReplaceRealmSlugAddressStatus404
+			| ReplaceRealmSlugAddressStatus409
+			| ReplaceRealmSlugAddressStatus422
+			| ReplaceRealmSlugAddressStatus500
+		>,
+		ReplaceRealmSlugAddressOptions,
 		TContext
 	>;
 }

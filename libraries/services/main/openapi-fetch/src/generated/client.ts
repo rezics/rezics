@@ -143,6 +143,8 @@ import type {
 	PostApiSeriesResponses,
 	GetApiSeriesBySeriesIdReleasesOptions,
 	GetApiSeriesBySeriesIdReleasesResponses,
+	ReplaceZoneSlugAddressOptions,
+	ReplaceZoneSlugAddressResponses,
 	GetApiZonesByZoneIdOptions,
 	GetApiZonesByZoneIdResponses,
 	PatchApiZonesByZoneIdOptions,
@@ -215,6 +217,10 @@ import type {
 	DeleteApiUsersByIdBlockResponses,
 	ResolveUnitSlugAddressOptions,
 	ResolveUnitSlugAddressResponses,
+	GetPublicUnitSlugAddressOptions,
+	GetPublicUnitSlugAddressResponses,
+	ResolveScopedUnitSlugAddressOptions,
+	ResolveScopedUnitSlugAddressResponses,
 	ReplaceOwnProfileSlugAddressOptions,
 	ReplaceOwnProfileSlugAddressResponses,
 	GetUnitSlugAddressAsStaffOptions,
@@ -417,6 +423,8 @@ import type {
 	GetApiRealmsResponses,
 	PostApiRealmsOptions,
 	PostApiRealmsResponses,
+	ReplaceRealmSlugAddressOptions,
+	ReplaceRealmSlugAddressResponses,
 	GetApiRealmsByRealmIdOptions,
 	GetApiRealmsByRealmIdResponses,
 	PatchApiRealmsByRealmIdOptions,
@@ -1688,6 +1696,23 @@ export function getApiSeriesBySeriesIdReleases<ThrowOnError extends boolean = tr
 }
 
 /**
+ * @description Assigns or renames a Zone's optional public slug in the permanent zones namespace. The former address is retained as a redirect.
+ * @summary Replace a Zone slug address
+ * {@link /api/zones/:zoneId/slug-address}
+ */
+export function replaceZoneSlugAddress<ThrowOnError extends boolean = true>(
+	options: Options<ReplaceZoneSlugAddressOptions, ThrowOnError>,
+): Promise<RequestResult<ReplaceZoneSlugAddressResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/zones/{zoneId}/slug-address",
+		...config,
+	}) as Promise<RequestResult<ReplaceZoneSlugAddressResponses, ThrowOnError>>;
+}
+
+/**
  * @summary Get Zone configuration
  * {@link /api/zones/:zoneId}
  */
@@ -2258,8 +2283,8 @@ export function deleteApiUsersByIdBlock<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @description Resolves one to three slug labels to a public Unit ID and reports its canonical path. This isolated backend lookup does not alter the ID-based Unit API or enable frontend slug routing.
- * @summary Resolve a backend Unit slug address
+ * @description Resolves one to three slug labels to a public Unit ID and reports its canonical path. Browser routes use the resolved ID for subsequent resource reads and cache identity.
+ * @summary Resolve a complete public Unit slug path
  * {@link /api/slug-addresses/resolve}
  */
 export function resolveUnitSlugAddress<ThrowOnError extends boolean = true>(
@@ -2270,6 +2295,40 @@ export function resolveUnitSlugAddress<ThrowOnError extends boolean = true>(
 	return request({ method: "POST", url: "/api/slug-addresses/resolve", ...config }) as Promise<
 		RequestResult<ResolveUnitSlugAddressResponses, ThrowOnError>
 	>;
+}
+
+/**
+ * @description Returns a public Unit's optional canonical slug address for ID-route canonicalization. Missing, private, moderated, deleted, or unaddressed Units all return not found.
+ * @summary Get a Unit public canonical slug address
+ * {@link /api/slug-addresses/public-units/:unitId}
+ */
+export function getPublicUnitSlugAddress<ThrowOnError extends boolean = true>(
+	options: Options<GetPublicUnitSlugAddressOptions, ThrowOnError>,
+): Promise<RequestResult<GetPublicUnitSlugAddressResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/slug-addresses/public-units/{unitId}",
+		...config,
+	}) as Promise<RequestResult<GetPublicUnitSlugAddressResponses, ThrowOnError>>;
+}
+
+/**
+ * @description Resolves a direct scope Unit ID and slug label to a public Unit ID. An optional expected kind prevents cross-resource matches. The response includes the complete canonical path so callers can redirect former addresses.
+ * @summary Resolve a Unit slug in its direct scope
+ * {@link /api/slug-addresses/scopes/:scopeUnitId/:slug}
+ */
+export function resolveScopedUnitSlugAddress<ThrowOnError extends boolean = true>(
+	options: Options<ResolveScopedUnitSlugAddressOptions, ThrowOnError>,
+): Promise<RequestResult<ResolveScopedUnitSlugAddressResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/slug-addresses/scopes/{scopeUnitId}/{slug}",
+		...config,
+	}) as Promise<RequestResult<ResolveScopedUnitSlugAddressResponses, ThrowOnError>>;
 }
 
 /**
@@ -2288,7 +2347,7 @@ export function replaceOwnProfileSlugAddress<ThrowOnError extends boolean = true
 }
 
 /**
- * @description Returns the optional canonical slug address stored independently from the Unit. This administrative read is intentionally absent from core Unit responses.
+ * @description Returns canonical address registry details for staff workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.
  * @summary Get a Unit canonical slug address as staff
  * {@link /api/slug-addresses/units/:unitId}
  */
@@ -2337,8 +2396,8 @@ export function createSlugNamespaceAsStaff<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @description Deletes one redirect address so the scope and label may be reused. This is explicit because retained redirects protect existing backend links.
- * @summary Release a retained slug redirect as staff
+ * @description Deletes one non-public administrative redirect so the scope and label may be reused. Redirects in enabled public route namespaces are permanent and cannot be released.
+ * @summary Release an administrative slug redirect as staff
  * {@link /api/slug-addresses/redirects/:redirectAddressId}
  */
 export function releaseSlugRedirectAsStaff<ThrowOnError extends boolean = true>(
@@ -3912,6 +3971,23 @@ export function postApiRealms<ThrowOnError extends boolean = true>(
 	return request({ method: "POST", url: "/api/realms", ...config }) as Promise<
 		RequestResult<PostApiRealmsResponses, ThrowOnError>
 	>;
+}
+
+/**
+ * @description Assigns or renames a Realm's optional public slug in the permanent realms namespace. The former address is retained as a redirect.
+ * @summary Replace a Realm slug address
+ * {@link /api/realms/:realmId/slug-address}
+ */
+export function replaceRealmSlugAddress<ThrowOnError extends boolean = true>(
+	options: Options<ReplaceRealmSlugAddressOptions, ThrowOnError>,
+): Promise<RequestResult<ReplaceRealmSlugAddressResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/realms/{realmId}/slug-address",
+		...config,
+	}) as Promise<RequestResult<ReplaceRealmSlugAddressResponses, ThrowOnError>>;
 }
 
 /**

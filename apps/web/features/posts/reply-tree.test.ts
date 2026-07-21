@@ -13,6 +13,7 @@ function createReplyPost(id: string, parentPostId: string | null = null): ApiRep
 		publishers: [
 			{
 				profileId: "019b1234-1234-7000-8000-000000000001",
+				slugAddress: null,
 				name: "Publisher",
 				firstPublishedAt: "2026-01-01T00:00:00.000Z",
 				lastPublishedAt: "2026-01-01T00:00:00.000Z",

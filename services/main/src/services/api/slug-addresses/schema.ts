@@ -1,31 +1,67 @@
 import { type Static, t } from "elysia";
+import { SlugAddressMaximumDepth, SlugLabelPatternSource } from "@rezics/slug";
 
 import { GovernanceReasonCodeValues } from "../../database/schema/contract-values";
-import { Uuid } from "../schema";
+import { UnitKind, Uuid } from "../schema";
 
 export const SlugLabelInput = t.String({
 	minLength: 1,
 	maxLength: 63,
-	pattern: "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+	pattern: SlugLabelPatternSource,
 });
 
 export const ResolveSlugAddressBody = t.Object(
-	{ path: t.Array(SlugLabelInput, { minItems: 1, maxItems: 3 }) },
+	{
+		path: t.Array(SlugLabelInput, {
+			minItems: 1,
+			maxItems: SlugAddressMaximumDepth,
+		}),
+	},
 	{ additionalProperties: false },
 );
+
+export const ScopedSlugAddressParams = t.Object({
+	scopeUnitId: Uuid,
+	slug: SlugLabelInput,
+});
+
+export const ResolveScopedSlugAddressQuery = t.Object({
+	kind: t.Optional(UnitKind),
+});
+
+export const PublicSlugAddressResponse = t.Object(
+	{
+		slug: SlugLabelInput,
+		scopeUnitId: Uuid,
+		canonicalPath: t.Array(SlugLabelInput, {
+			minItems: 2,
+			maxItems: SlugAddressMaximumDepth,
+		}),
+	},
+	{ additionalProperties: false },
+);
+
+export const NullablePublicSlugAddressResponse = t.Nullable(PublicSlugAddressResponse);
 
 export const ResolvedSlugAddressResponse = t.Object({
 	id: Uuid,
-	kind: t.String(),
-	path: t.Array(SlugLabelInput, { minItems: 1, maxItems: 3 }),
-	canonicalPath: t.Array(SlugLabelInput, { minItems: 1, maxItems: 3 }),
+	kind: UnitKind,
+	path: t.Array(SlugLabelInput, {
+		minItems: 1,
+		maxItems: SlugAddressMaximumDepth,
+	}),
+	canonicalPath: t.Array(SlugLabelInput, {
+		minItems: 1,
+		maxItems: SlugAddressMaximumDepth,
+	}),
 	redirected: t.Boolean(),
 });
 
-export const ReplaceOwnProfileSlugAddressBody = t.Object(
+export const ReplacePublicUnitSlugAddressBody = t.Object(
 	{ slug: SlugLabelInput },
 	{ additionalProperties: false },
 );
+export const ReplaceOwnProfileSlugAddressBody = ReplacePublicUnitSlugAddressBody;
 
 export const UnitSlugAddressParams = t.Object({ unitId: Uuid });
 
@@ -56,7 +92,10 @@ export const SlugAddressMutationResponse = t.Object({
 	scopeUnitId: t.Nullable(Uuid),
 	slug: SlugLabelInput,
 	redirectAddressId: t.Nullable(Uuid),
-	canonicalPath: t.Array(SlugLabelInput, { minItems: 1, maxItems: 3 }),
+	canonicalPath: t.Array(SlugLabelInput, {
+		minItems: 1,
+		maxItems: SlugAddressMaximumDepth,
+	}),
 });
 
 export const SlugRedirectAddressParams = t.Object({ redirectAddressId: Uuid });
@@ -69,7 +108,10 @@ export const ReleaseSlugRedirectBody = t.Object(
 );
 
 export type ResolveSlugAddressBody = Static<typeof ResolveSlugAddressBody>;
+export type ScopedSlugAddressParams = Static<typeof ScopedSlugAddressParams>;
+export type ResolveScopedSlugAddressQuery = Static<typeof ResolveScopedSlugAddressQuery>;
 export type ReplaceOwnProfileSlugAddressBody = Static<typeof ReplaceOwnProfileSlugAddressBody>;
+export type ReplacePublicUnitSlugAddressBody = Static<typeof ReplacePublicUnitSlugAddressBody>;
 export type UnitSlugAddressParams = Static<typeof UnitSlugAddressParams>;
 export type ReplaceUnitSlugAddressBody = Static<typeof ReplaceUnitSlugAddressBody>;
 export type CreateSlugNamespaceBody = Static<typeof CreateSlugNamespaceBody>;

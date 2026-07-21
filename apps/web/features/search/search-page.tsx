@@ -44,6 +44,7 @@ import {
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { profileHref } from "@/features/profiles/profile-route";
+import { realmHref } from "@/features/slugs/unit-route";
 import { searchParamsParsers, SearchScopes } from "@/lib/search-params";
 
 type SearchHit = PostApiSearchByIndexStatus200["hits"][number];
@@ -63,9 +64,9 @@ function readSearchLanguage(value: string | null): SearchLanguage {
 function searchHitHref(index: string, hit: SearchHit) {
 	switch (index) {
 		case "users":
-			return profileHref(hit.id);
+			return profileHref(hit);
 		case "realms":
-			return `/realms/${hit.id}`;
+			return realmHref(hit);
 		case "posts":
 			return `/posts/${hit.id}`;
 		case "collections":

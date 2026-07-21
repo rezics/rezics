@@ -13,6 +13,10 @@ import {
 import { primaryUnitTitle } from "./localization";
 import { UnitChanged, UnitNotFound, UnitPermissionForbidden } from "./errors";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
+import {
+	getPublicCanonicalUnitSlugAddresses,
+	type PublicCanonicalUnitSlugAddress,
+} from "./slug-address";
 
 export type UnitStatus = (typeof UnitStatusValues)[number];
 export type UnitStatusActorKind = (typeof UnitStatusActorKindValues)[number];
@@ -31,6 +35,7 @@ export function crossesPublishedBoundary(fromStatus: UnitStatus, toStatus: UnitS
 
 export type UnitPublisherSummary = {
 	readonly profileId: string;
+	readonly slugAddress: PublicCanonicalUnitSlugAddress | null;
 	readonly name: string | null;
 	readonly firstPublishedAt: Date;
 	readonly lastPublishedAt: Date;
@@ -255,10 +260,14 @@ export async function getPublisherSummariesByUnitIds(
 		)
 		.groupBy(unitStatusEvent.unitId, profile.id)
 		.orderBy(asc(min(unitStatusEvent.createdAt)), asc(profile.id));
+	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(
+		rows.map((row) => row.profileId),
+	);
 	for (const row of rows) {
 		if (!row.firstPublishedAt || !row.lastPublishedAt) continue;
 		result.get(row.unitId)?.push({
 			profileId: row.profileId,
+			slugAddress: slugAddresses.get(row.profileId) ?? null,
 			name: row.name,
 			firstPublishedAt: row.firstPublishedAt,
 			lastPublishedAt: row.lastPublishedAt,

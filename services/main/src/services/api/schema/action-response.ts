@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 import { ContentLanguage, DateTime, FractionalPosition, OrdinalPosition, UnitKind, Uuid } from ".";
+import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 
 const NullableUuid = t.Nullable(Uuid);
 
@@ -45,6 +46,7 @@ export const FollowingListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			id: Uuid,
+			slugAddress: NullablePublicSlugAddressResponse,
 			kind: UnitKind,
 			language: t.Nullable(ContentLanguage),
 			title: t.Nullable(t.String()),

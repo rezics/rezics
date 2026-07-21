@@ -12,6 +12,7 @@
 		"@rezics/i18n": "workspace:*",
 		"@rezics/openapi-tanstack-query": "workspace:*",
 		"@rezics/portable-text": "workspace:*",
+		"@rezics/slug": "workspace:*",
 		"@rezics/ui": "workspace:*",
 		"@tanstack/react-query": "^5.101.2",
 		"better-auth": "1.7.0-rc.1",

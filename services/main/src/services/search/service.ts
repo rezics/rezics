@@ -48,6 +48,7 @@ import {
 	type SearchHit,
 	type SearchSort,
 } from "./schema";
+import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
 
 const subjectUnit = alias(unit, "subject_unit");
 const searchVariantRelationship = alias(unitVariant, "search_variant_relationship");
@@ -57,6 +58,7 @@ const facetUnitTag = alias(unitTag, "facet_unit_tag");
 const facetRealmUnit = alias(realmUnit, "facet_realm_unit");
 const facetPublisherEvent = alias(unitStatusEvent, "facet_publisher_event");
 const { metrics } = getActiveObservability();
+type SearchHitWithoutSlugAddress = Omit<SearchHit, "slugAddress">;
 
 const categoryKinds: Record<SearchCategory, readonly string[]> = {
 	units: ["book", "software", "media"],
@@ -703,7 +705,7 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 		searchMainUnit,
 	);
 	const searchMainCoverAssetId = firstUnitLocalizationCoverAssetId(searchMainUnit.id);
-	const hits: SearchHit[] = [];
+	const hits: SearchHitWithoutSlugAddress[] = [];
 	const seen = new Set<string>();
 	let authorizedCount = 0;
 	let scanOffset = initialOffset;
@@ -740,7 +742,10 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 		const candidatePositions = candidateEntries.map((candidate) => candidate.position);
 		const batchOffset = scanOffset;
 		const result = candidateIds.length
-			? await database.execute<{ hit: SearchHit; ordinality: number | string }>(sql`
+			? await database.execute<{
+					hit: SearchHitWithoutSlugAddress;
+					ordinality: number | string;
+				}>(sql`
 		WITH search_candidate(unit_id, ordinality) AS (
 			SELECT * FROM unnest(${toUuidArray(candidateIds)}, ${toIntegerArray(candidatePositions)})
 		)
@@ -846,8 +851,12 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 		scanLimitHit,
 		!exhausted,
 	);
+	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(hits.map((hit) => hit.id));
 	return {
-		hits,
+		hits: hits.map((hit) => ({
+			...hit,
+			slugAddress: slugAddresses.get(hit.id) ?? null,
+		})),
 		total: { value: authorizedCount, relation: exhausted ? "exact" : "lower-bound" } as const,
 		offset: initialOffset,
 		nextOffset: nextOffset ?? scanOffset,

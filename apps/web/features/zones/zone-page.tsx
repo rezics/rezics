@@ -51,6 +51,11 @@ export function ZonePage({ id }: { id: string }) {
 						<h1 className="truncate font-bold text-3xl tracking-tight sm:text-4xl">
 							{title}
 						</h1>
+						{zone.slugAddress ? (
+							<p className="mt-1 font-mono text-muted-foreground text-sm">
+								/{zone.slugAddress.slug}
+							</p>
+						) : null}
 						{localization?.summary ? (
 							<p className="mt-2 max-w-3xl text-muted-foreground leading-7">
 								{localization.summary}

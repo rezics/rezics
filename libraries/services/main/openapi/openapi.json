@@ -17837,6 +17837,7 @@
 															"type": "object",
 															"required": [
 																"profileId",
+																"slugAddress",
 																"name",
 																"firstPublishedAt",
 																"lastPublishedAt",
@@ -17846,6 +17847,44 @@
 																"profileId": {
 																	"format": "uuid",
 																	"type": "string"
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
 																},
 																"name": {
 																	"nullable": true,
@@ -18425,6 +18464,7 @@
 																			"type": "object",
 																			"required": [
 																				"profileId",
+																				"slugAddress",
 																				"name",
 																				"firstPublishedAt",
 																				"lastPublishedAt",
@@ -18434,6 +18474,46 @@
 																				"profileId": {
 																					"format": "uuid",
 																					"type": "string"
+																				},
+																				"slugAddress": {
+																					"nullable": true,
+																					"anyOf": [
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"slug",
+																								"scopeUnitId",
+																								"canonicalPath"
+																							],
+																							"properties": {
+																								"slug": {
+																									"minLength": 1,
+																									"maxLength": 63,
+																									"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																									"type": "string"
+																								},
+																								"scopeUnitId": {
+																									"format": "uuid",
+																									"type": "string"
+																								},
+																								"canonicalPath": {
+																									"minItems": 2,
+																									"maxItems": 3,
+																									"type": "array",
+																									"items": {
+																										"minLength": 1,
+																										"maxLength": 63,
+																										"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																										"type": "string"
+																									}
+																								}
+																							}
+																						},
+																						{
+																							"type": "null"
+																						}
+																					]
 																				},
 																				"name": {
 																					"nullable": true,
@@ -20806,6 +20886,7 @@
 																	"type": "object",
 																	"required": [
 																		"profileId",
+																		"slugAddress",
 																		"name",
 																		"firstPublishedAt",
 																		"lastPublishedAt",
@@ -20815,6 +20896,44 @@
 																		"profileId": {
 																			"format": "uuid",
 																			"type": "string"
+																		},
+																		"slugAddress": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"slug",
+																						"scopeUnitId",
+																						"canonicalPath"
+																					],
+																					"properties": {
+																						"slug": {
+																							"minLength": 1,
+																							"maxLength": 63,
+																							"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																							"type": "string"
+																						},
+																						"scopeUnitId": {
+																							"format": "uuid",
+																							"type": "string"
+																						},
+																						"canonicalPath": {
+																							"minItems": 2,
+																							"maxItems": 3,
+																							"type": "array",
+																							"items": {
+																								"minLength": 1,
+																								"maxLength": 63,
+																								"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																								"type": "string"
+																							}
+																						}
+																					}
+																				},
+																				{ "type": "null" }
+																			]
 																		},
 																		"name": {
 																			"nullable": true,
@@ -21072,6 +21191,7 @@
 																	"type": "object",
 																	"required": [
 																		"profileId",
+																		"slugAddress",
 																		"name",
 																		"firstPublishedAt",
 																		"lastPublishedAt",
@@ -21081,6 +21201,44 @@
 																		"profileId": {
 																			"format": "uuid",
 																			"type": "string"
+																		},
+																		"slugAddress": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"slug",
+																						"scopeUnitId",
+																						"canonicalPath"
+																					],
+																					"properties": {
+																						"slug": {
+																							"minLength": 1,
+																							"maxLength": 63,
+																							"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																							"type": "string"
+																						},
+																						"scopeUnitId": {
+																							"format": "uuid",
+																							"type": "string"
+																						},
+																						"canonicalPath": {
+																							"minItems": 2,
+																							"maxItems": 3,
+																							"type": "array",
+																							"items": {
+																								"minLength": 1,
+																								"maxLength": 63,
+																								"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																								"type": "string"
+																							}
+																						}
+																					}
+																				},
+																				{ "type": "null" }
+																			]
 																		},
 																		"name": {
 																			"nullable": true,
@@ -21683,6 +21841,7 @@
 																					"type": "object",
 																					"required": [
 																						"profileId",
+																						"slugAddress",
 																						"name",
 																						"firstPublishedAt",
 																						"lastPublishedAt",
@@ -21692,6 +21851,46 @@
 																						"profileId": {
 																							"format": "uuid",
 																							"type": "string"
+																						},
+																						"slugAddress": {
+																							"nullable": true,
+																							"anyOf": [
+																								{
+																									"additionalProperties": false,
+																									"type": "object",
+																									"required": [
+																										"slug",
+																										"scopeUnitId",
+																										"canonicalPath"
+																									],
+																									"properties": {
+																										"slug": {
+																											"minLength": 1,
+																											"maxLength": 63,
+																											"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																											"type": "string"
+																										},
+																										"scopeUnitId": {
+																											"format": "uuid",
+																											"type": "string"
+																										},
+																										"canonicalPath": {
+																											"minItems": 2,
+																											"maxItems": 3,
+																											"type": "array",
+																											"items": {
+																												"minLength": 1,
+																												"maxLength": 63,
+																												"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																												"type": "string"
+																											}
+																										}
+																									}
+																								},
+																								{
+																									"type": "null"
+																								}
+																							]
 																						},
 																						"name": {
 																							"nullable": true,
@@ -35583,6 +35782,252 @@
 				"operationId": "getApiSeriesBySeriesIdReleases"
 			}
 		},
+		"/api/zones/{zoneId}/slug-address": {
+			"put": {
+				"operationId": "replaceZoneSlugAddress",
+				"summary": "Replace a Zone slug address",
+				"description": "Assigns or renames a Zone's optional public slug in the permanent zones namespace. The former address is retained as a redirect.",
+				"tags": ["Zones", "Slug Addresses"],
+				"parameters": [
+					{
+						"name": "zoneId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["slug"],
+								"properties": {
+									"slug": {
+										"minLength": 1,
+										"maxLength": 63,
+										"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+										"type": "string"
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"addressId",
+										"unitId",
+										"scopeUnitId",
+										"slug",
+										"redirectAddressId",
+										"canonicalPath"
+									],
+									"properties": {
+										"addressId": { "format": "uuid", "type": "string" },
+										"unitId": { "format": "uuid", "type": "string" },
+										"scopeUnitId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"slug": {
+											"minLength": 1,
+											"maxLength": 63,
+											"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+											"type": "string"
+										},
+										"redirectAddressId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"canonicalPath": {
+											"minItems": 1,
+											"maxItems": 3,
+											"type": "array",
+											"items": {
+												"minLength": 1,
+												"maxLength": 63,
+												"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "InvalidSlug",
+													"type": "string",
+													"enum": ["InvalidSlug"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitPermissionForbidden",
+													"type": "string",
+													"enum": [
+														"UnitPermissionForbidden",
+														"UnitProtected"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "SlugTaken",
+													"type": "string",
+													"enum": [
+														"SlugTaken",
+														"SlugScopeUnavailable",
+														"SlugScopeCycle"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "SlugDepthExceeded",
+															"type": "string",
+															"enum": ["SlugDepthExceeded"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/zones/{zoneId}": {
 			"get": {
 				"summary": "Get Zone configuration",
@@ -35610,6 +36055,7 @@
 									"type": "object",
 									"required": [
 										"id",
+										"slugAddress",
 										"language",
 										"avatar",
 										"banner",
@@ -35624,6 +36070,44 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
+										"slugAddress": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"slug",
+														"scopeUnitId",
+														"canonicalPath"
+													],
+													"properties": {
+														"slug": {
+															"minLength": 1,
+															"maxLength": 63,
+															"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+															"type": "string"
+														},
+														"scopeUnitId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"canonicalPath": {
+															"minItems": 2,
+															"maxItems": 3,
+															"type": "array",
+															"items": {
+																"minLength": 1,
+																"maxLength": 63,
+																"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																"type": "string"
+															}
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
 										"language": {
 											"nullable": true,
 											"anyOf": [
@@ -36199,6 +36683,7 @@
 									"type": "object",
 									"required": [
 										"id",
+										"slugAddress",
 										"language",
 										"avatar",
 										"banner",
@@ -36213,6 +36698,44 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
+										"slugAddress": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"slug",
+														"scopeUnitId",
+														"canonicalPath"
+													],
+													"properties": {
+														"slug": {
+															"minLength": 1,
+															"maxLength": 63,
+															"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+															"type": "string"
+														},
+														"scopeUnitId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"canonicalPath": {
+															"minItems": 2,
+															"maxItems": 3,
+															"type": "array",
+															"items": {
+																"minLength": 1,
+																"maxLength": 63,
+																"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																"type": "string"
+															}
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
 										"language": {
 											"nullable": true,
 											"anyOf": [
@@ -39570,6 +40093,7 @@
 											"type": "object",
 											"required": [
 												"id",
+												"slugAddress",
 												"status",
 												"visibility",
 												"language",
@@ -39583,6 +40107,44 @@
 											],
 											"properties": {
 												"id": { "format": "uuid", "type": "string" },
+												"slugAddress": {
+													"nullable": true,
+													"anyOf": [
+														{
+															"additionalProperties": false,
+															"type": "object",
+															"required": [
+																"slug",
+																"scopeUnitId",
+																"canonicalPath"
+															],
+															"properties": {
+																"slug": {
+																	"minLength": 1,
+																	"maxLength": 63,
+																	"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																	"type": "string"
+																},
+																"scopeUnitId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"canonicalPath": {
+																	"minItems": 2,
+																	"maxItems": 3,
+																	"type": "array",
+																	"items": {
+																		"minLength": 1,
+																		"maxLength": 63,
+																		"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																		"type": "string"
+																	}
+																}
+															}
+														},
+														{ "type": "null" }
+													]
+												},
 												"status": { "type": "string" },
 												"visibility": { "type": "string" },
 												"language": {
@@ -40306,6 +40868,7 @@
 									"type": "object",
 									"required": [
 										"id",
+										"slugAddress",
 										"status",
 										"visibility",
 										"language",
@@ -40319,6 +40882,44 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
+										"slugAddress": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"slug",
+														"scopeUnitId",
+														"canonicalPath"
+													],
+													"properties": {
+														"slug": {
+															"minLength": 1,
+															"maxLength": 63,
+															"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+															"type": "string"
+														},
+														"scopeUnitId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"canonicalPath": {
+															"minItems": 2,
+															"maxItems": 3,
+															"type": "array",
+															"items": {
+																"minLength": 1,
+																"maxLength": 63,
+																"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																"type": "string"
+															}
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
 										"language": {
@@ -41170,6 +41771,7 @@
 												"type": "object",
 												"required": [
 													"id",
+													"slugAddress",
 													"kind",
 													"language",
 													"title",
@@ -41182,6 +41784,44 @@
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
+													"slugAddress": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"slug",
+																	"scopeUnitId",
+																	"canonicalPath"
+																],
+																"properties": {
+																	"slug": {
+																		"minLength": 1,
+																		"maxLength": 63,
+																		"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																		"type": "string"
+																	},
+																	"scopeUnitId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"canonicalPath": {
+																		"minItems": 2,
+																		"maxItems": 3,
+																		"type": "array",
+																		"items": {
+																			"minLength": 1,
+																			"maxLength": 63,
+																			"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																			"type": "string"
+																		}
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
 													"kind": {
 														"type": "string",
 														"enum": [
@@ -41721,6 +42361,7 @@
 									"type": "object",
 									"required": [
 										"id",
+										"slugAddress",
 										"status",
 										"visibility",
 										"language",
@@ -41734,6 +42375,44 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
+										"slugAddress": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"slug",
+														"scopeUnitId",
+														"canonicalPath"
+													],
+													"properties": {
+														"slug": {
+															"minLength": 1,
+															"maxLength": 63,
+															"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+															"type": "string"
+														},
+														"scopeUnitId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"canonicalPath": {
+															"minItems": 2,
+															"maxItems": 3,
+															"type": "array",
+															"items": {
+																"minLength": 1,
+																"maxLength": 63,
+																"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																"type": "string"
+															}
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
 										"language": {
@@ -42332,8 +43011,8 @@
 		"/api/slug-addresses/resolve": {
 			"post": {
 				"operationId": "resolveUnitSlugAddress",
-				"summary": "Resolve a backend Unit slug address",
-				"description": "Resolves one to three slug labels to a public Unit ID and reports its canonical path. This isolated backend lookup does not alter the ID-based Unit API or enable frontend slug routing.",
+				"summary": "Resolve a complete public Unit slug path",
+				"description": "Resolves one to three slug labels to a public Unit ID and reports its canonical path. Browser routes use the resolved ID for subsequent resource reads and cache identity.",
 				"tags": ["Slug Addresses"],
 				"requestBody": {
 					"content": {
@@ -42376,7 +43055,26 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
-										"kind": { "type": "string" },
+										"kind": {
+											"type": "string",
+											"enum": [
+												"slug_namespace",
+												"profile",
+												"book",
+												"software",
+												"media",
+												"release",
+												"entity",
+												"tag",
+												"series",
+												"zone",
+												"collection",
+												"post",
+												"poll",
+												"realm",
+												"realm_rule"
+											]
+										},
 										"path": {
 											"minItems": 1,
 											"maxItems": 3,
@@ -42515,6 +43213,286 @@
 										{ "$ref": "#/components/schemas/ValidationError" }
 									]
 								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/slug-addresses/public-units/{unitId}": {
+			"get": {
+				"operationId": "getPublicUnitSlugAddress",
+				"summary": "Get a Unit public canonical slug address",
+				"description": "Returns a public Unit's optional canonical slug address for ID-route canonicalization. Missing, private, moderated, deleted, or unaddressed Units all return not found.",
+				"tags": ["Slug Addresses"],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"additionalProperties": false,
+									"type": "object",
+									"required": ["slug", "scopeUnitId", "canonicalPath"],
+									"properties": {
+										"slug": {
+											"minLength": 1,
+											"maxLength": 63,
+											"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+											"type": "string"
+										},
+										"scopeUnitId": { "format": "uuid", "type": "string" },
+										"canonicalPath": {
+											"minItems": 2,
+											"maxItems": 3,
+											"type": "array",
+											"items": {
+												"minLength": 1,
+												"maxLength": 63,
+												"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/slug-addresses/scopes/{scopeUnitId}/{slug}": {
+			"get": {
+				"operationId": "resolveScopedUnitSlugAddress",
+				"summary": "Resolve a Unit slug in its direct scope",
+				"description": "Resolves a direct scope Unit ID and slug label to a public Unit ID. An optional expected kind prevents cross-resource matches. The response includes the complete canonical path so callers can redirect former addresses.",
+				"tags": ["Slug Addresses"],
+				"parameters": [
+					{
+						"name": "scopeUnitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "slug",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"minLength": 1,
+							"maxLength": 63,
+							"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+							"type": "string"
+						}
+					},
+					{
+						"name": "kind",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"slug_namespace",
+								"profile",
+								"book",
+								"software",
+								"media",
+								"release",
+								"entity",
+								"tag",
+								"series",
+								"zone",
+								"collection",
+								"post",
+								"poll",
+								"realm",
+								"realm_rule"
+							]
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"id",
+										"kind",
+										"path",
+										"canonicalPath",
+										"redirected"
+									],
+									"properties": {
+										"id": { "format": "uuid", "type": "string" },
+										"kind": {
+											"type": "string",
+											"enum": [
+												"slug_namespace",
+												"profile",
+												"book",
+												"software",
+												"media",
+												"release",
+												"entity",
+												"tag",
+												"series",
+												"zone",
+												"collection",
+												"post",
+												"poll",
+												"realm",
+												"realm_rule"
+											]
+										},
+										"path": {
+											"minItems": 1,
+											"maxItems": 3,
+											"type": "array",
+											"items": {
+												"minLength": 1,
+												"maxLength": 63,
+												"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+												"type": "string"
+											}
+										},
+										"canonicalPath": {
+											"minItems": 1,
+											"maxItems": 3,
+											"type": "array",
+											"items": {
+												"minLength": 1,
+												"maxLength": 63,
+												"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+												"type": "string"
+											}
+										},
+										"redirected": { "type": "boolean" }
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "InvalidSlug",
+													"type": "string",
+													"enum": ["InvalidSlug"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
 							}
 						}
 					},
@@ -42800,7 +43778,7 @@
 			"get": {
 				"operationId": "getUnitSlugAddressAsStaff",
 				"summary": "Get a Unit canonical slug address as staff",
-				"description": "Returns the optional canonical slug address stored independently from the Unit. This administrative read is intentionally absent from core Unit responses.",
+				"description": "Returns canonical address registry details for staff workflows, including the administrative address ID. Ordinary resource responses expose only the nullable public slugAddress projection.",
 				"tags": ["Slug Addresses"],
 				"parameters": [
 					{
@@ -43529,8 +44507,8 @@
 		"/api/slug-addresses/redirects/{redirectAddressId}": {
 			"delete": {
 				"operationId": "releaseSlugRedirectAsStaff",
-				"summary": "Release a retained slug redirect as staff",
-				"description": "Deletes one redirect address so the scope and label may be reused. This is explicit because retained redirects protect existing backend links.",
+				"summary": "Release an administrative slug redirect as staff",
+				"description": "Deletes one non-public administrative redirect so the scope and label may be reused. Redirects in enabled public route namespaces are permanent and cannot be released.",
 				"tags": ["Slug Addresses"],
 				"responses": {
 					"204": {
@@ -44168,6 +45146,7 @@
 															"type": "object",
 															"required": [
 																"profileId",
+																"slugAddress",
 																"name",
 																"firstPublishedAt",
 																"lastPublishedAt",
@@ -44177,6 +45156,44 @@
 																"profileId": {
 																	"format": "uuid",
 																	"type": "string"
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
 																},
 																"name": {
 																	"nullable": true,
@@ -44741,6 +45758,7 @@
 												"type": "object",
 												"required": [
 													"profileId",
+													"slugAddress",
 													"name",
 													"firstPublishedAt",
 													"lastPublishedAt",
@@ -44750,6 +45768,44 @@
 													"profileId": {
 														"format": "uuid",
 														"type": "string"
+													},
+													"slugAddress": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"slug",
+																	"scopeUnitId",
+																	"canonicalPath"
+																],
+																"properties": {
+																	"slug": {
+																		"minLength": 1,
+																		"maxLength": 63,
+																		"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																		"type": "string"
+																	},
+																	"scopeUnitId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"canonicalPath": {
+																		"minItems": 2,
+																		"maxItems": 3,
+																		"type": "array",
+																		"items": {
+																			"minLength": 1,
+																			"maxLength": 63,
+																			"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																			"type": "string"
+																		}
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
 													},
 													"name": {
 														"nullable": true,
@@ -45877,6 +46933,7 @@
 												"type": "object",
 												"required": [
 													"profileId",
+													"slugAddress",
 													"name",
 													"firstPublishedAt",
 													"lastPublishedAt",
@@ -45886,6 +46943,44 @@
 													"profileId": {
 														"format": "uuid",
 														"type": "string"
+													},
+													"slugAddress": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"slug",
+																	"scopeUnitId",
+																	"canonicalPath"
+																],
+																"properties": {
+																	"slug": {
+																		"minLength": 1,
+																		"maxLength": 63,
+																		"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																		"type": "string"
+																	},
+																	"scopeUnitId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"canonicalPath": {
+																		"minItems": 2,
+																		"maxItems": 3,
+																		"type": "array",
+																		"items": {
+																			"minLength": 1,
+																			"maxLength": 63,
+																			"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																			"type": "string"
+																		}
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
 													},
 													"name": {
 														"nullable": true,
@@ -47112,6 +48207,7 @@
 												"type": "object",
 												"required": [
 													"profileId",
+													"slugAddress",
 													"name",
 													"firstPublishedAt",
 													"lastPublishedAt",
@@ -47121,6 +48217,44 @@
 													"profileId": {
 														"format": "uuid",
 														"type": "string"
+													},
+													"slugAddress": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"slug",
+																	"scopeUnitId",
+																	"canonicalPath"
+																],
+																"properties": {
+																	"slug": {
+																		"minLength": 1,
+																		"maxLength": 63,
+																		"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																		"type": "string"
+																	},
+																	"scopeUnitId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"canonicalPath": {
+																		"minItems": 2,
+																		"maxItems": 3,
+																		"type": "array",
+																		"items": {
+																			"minLength": 1,
+																			"maxLength": 63,
+																			"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																			"type": "string"
+																		}
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
 													},
 													"name": {
 														"nullable": true,
@@ -48460,6 +49594,7 @@
 												"type": "object",
 												"required": [
 													"profileId",
+													"slugAddress",
 													"name",
 													"firstPublishedAt",
 													"lastPublishedAt",
@@ -48469,6 +49604,44 @@
 													"profileId": {
 														"format": "uuid",
 														"type": "string"
+													},
+													"slugAddress": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"slug",
+																	"scopeUnitId",
+																	"canonicalPath"
+																],
+																"properties": {
+																	"slug": {
+																		"minLength": 1,
+																		"maxLength": 63,
+																		"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																		"type": "string"
+																	},
+																	"scopeUnitId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"canonicalPath": {
+																		"minItems": 2,
+																		"maxItems": 3,
+																		"type": "array",
+																		"items": {
+																			"minLength": 1,
+																			"maxLength": 63,
+																			"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																			"type": "string"
+																		}
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
 													},
 													"name": {
 														"nullable": true,
@@ -49646,6 +50819,7 @@
 												"type": "object",
 												"required": [
 													"profileId",
+													"slugAddress",
 													"name",
 													"firstPublishedAt",
 													"lastPublishedAt",
@@ -49655,6 +50829,44 @@
 													"profileId": {
 														"format": "uuid",
 														"type": "string"
+													},
+													"slugAddress": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"slug",
+																	"scopeUnitId",
+																	"canonicalPath"
+																],
+																"properties": {
+																	"slug": {
+																		"minLength": 1,
+																		"maxLength": 63,
+																		"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																		"type": "string"
+																	},
+																	"scopeUnitId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"canonicalPath": {
+																		"minItems": 2,
+																		"maxItems": 3,
+																		"type": "array",
+																		"items": {
+																			"minLength": 1,
+																			"maxLength": 63,
+																			"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																			"type": "string"
+																		}
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
 													},
 													"name": {
 														"nullable": true,
@@ -51116,6 +52328,7 @@
 												"type": "object",
 												"required": [
 													"profileId",
+													"slugAddress",
 													"name",
 													"firstPublishedAt",
 													"lastPublishedAt",
@@ -51125,6 +52338,44 @@
 													"profileId": {
 														"format": "uuid",
 														"type": "string"
+													},
+													"slugAddress": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"slug",
+																	"scopeUnitId",
+																	"canonicalPath"
+																],
+																"properties": {
+																	"slug": {
+																		"minLength": 1,
+																		"maxLength": 63,
+																		"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																		"type": "string"
+																	},
+																	"scopeUnitId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"canonicalPath": {
+																		"minItems": 2,
+																		"maxItems": 3,
+																		"type": "array",
+																		"items": {
+																			"minLength": 1,
+																			"maxLength": 63,
+																			"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																			"type": "string"
+																		}
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
 													},
 													"name": {
 														"nullable": true,
@@ -70496,6 +71747,7 @@
 															"type": "object",
 															"required": [
 																"profileId",
+																"slugAddress",
 																"name",
 																"firstPublishedAt",
 																"lastPublishedAt",
@@ -70505,6 +71757,44 @@
 																"profileId": {
 																	"format": "uuid",
 																	"type": "string"
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
 																},
 																"name": {
 																	"nullable": true,
@@ -71041,6 +72331,7 @@
 												"type": "object",
 												"required": [
 													"profileId",
+													"slugAddress",
 													"name",
 													"firstPublishedAt",
 													"lastPublishedAt",
@@ -71050,6 +72341,44 @@
 													"profileId": {
 														"format": "uuid",
 														"type": "string"
+													},
+													"slugAddress": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"slug",
+																	"scopeUnitId",
+																	"canonicalPath"
+																],
+																"properties": {
+																	"slug": {
+																		"minLength": 1,
+																		"maxLength": 63,
+																		"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																		"type": "string"
+																	},
+																	"scopeUnitId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"canonicalPath": {
+																		"minItems": 2,
+																		"maxItems": 3,
+																		"type": "array",
+																		"items": {
+																			"minLength": 1,
+																			"maxLength": 63,
+																			"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																			"type": "string"
+																		}
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
 													},
 													"name": {
 														"nullable": true,
@@ -74002,6 +75331,7 @@
 															"type": "object",
 															"required": [
 																"profileId",
+																"slugAddress",
 																"name",
 																"firstPublishedAt",
 																"lastPublishedAt",
@@ -74011,6 +75341,44 @@
 																"profileId": {
 																	"format": "uuid",
 																	"type": "string"
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
 																},
 																"name": {
 																	"nullable": true,
@@ -74871,6 +76239,7 @@
 												"type": "object",
 												"required": [
 													"profileId",
+													"slugAddress",
 													"name",
 													"firstPublishedAt",
 													"lastPublishedAt",
@@ -74880,6 +76249,44 @@
 													"profileId": {
 														"format": "uuid",
 														"type": "string"
+													},
+													"slugAddress": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"slug",
+																	"scopeUnitId",
+																	"canonicalPath"
+																],
+																"properties": {
+																	"slug": {
+																		"minLength": 1,
+																		"maxLength": 63,
+																		"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																		"type": "string"
+																	},
+																	"scopeUnitId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"canonicalPath": {
+																		"minItems": 2,
+																		"maxItems": 3,
+																		"type": "array",
+																		"items": {
+																			"minLength": 1,
+																			"maxLength": 63,
+																			"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																			"type": "string"
+																		}
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
 													},
 													"name": {
 														"nullable": true,
@@ -75862,6 +77269,7 @@
 															"type": "object",
 															"required": [
 																"profileId",
+																"slugAddress",
 																"name",
 																"firstPublishedAt",
 																"lastPublishedAt",
@@ -75871,6 +77279,44 @@
 																"profileId": {
 																	"format": "uuid",
 																	"type": "string"
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
 																},
 																"name": {
 																	"nullable": true,
@@ -77286,6 +78732,7 @@
 												"type": "object",
 												"required": [
 													"id",
+													"slugAddress",
 													"joinPolicy",
 													"title",
 													"summary",
@@ -77297,6 +78744,44 @@
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
+													"slugAddress": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"slug",
+																	"scopeUnitId",
+																	"canonicalPath"
+																],
+																"properties": {
+																	"slug": {
+																		"minLength": 1,
+																		"maxLength": 63,
+																		"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																		"type": "string"
+																	},
+																	"scopeUnitId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"canonicalPath": {
+																		"minItems": 2,
+																		"maxItems": 3,
+																		"type": "array",
+																		"items": {
+																			"minLength": 1,
+																			"maxLength": 63,
+																			"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																			"type": "string"
+																		}
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
 													"joinPolicy": { "type": "string" },
 													"title": {
 														"nullable": true,
@@ -77787,6 +79272,252 @@
 				"operationId": "postApiRealms"
 			}
 		},
+		"/api/realms/{realmId}/slug-address": {
+			"put": {
+				"operationId": "replaceRealmSlugAddress",
+				"summary": "Replace a Realm slug address",
+				"description": "Assigns or renames a Realm's optional public slug in the permanent realms namespace. The former address is retained as a redirect.",
+				"tags": ["Realms", "Slug Addresses"],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["slug"],
+								"properties": {
+									"slug": {
+										"minLength": 1,
+										"maxLength": 63,
+										"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+										"type": "string"
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"addressId",
+										"unitId",
+										"scopeUnitId",
+										"slug",
+										"redirectAddressId",
+										"canonicalPath"
+									],
+									"properties": {
+										"addressId": { "format": "uuid", "type": "string" },
+										"unitId": { "format": "uuid", "type": "string" },
+										"scopeUnitId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"slug": {
+											"minLength": 1,
+											"maxLength": 63,
+											"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+											"type": "string"
+										},
+										"redirectAddressId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"canonicalPath": {
+											"minItems": 1,
+											"maxItems": 3,
+											"type": "array",
+											"items": {
+												"minLength": 1,
+												"maxLength": 63,
+												"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+												"type": "string"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "InvalidSlug",
+													"type": "string",
+													"enum": ["InvalidSlug"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"RealmCapabilityRequired",
+														"UnitProtected"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmNotFound",
+													"type": "string",
+													"enum": ["RealmNotFound", "UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Response for status 409",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "SlugTaken",
+													"type": "string",
+													"enum": [
+														"SlugTaken",
+														"SlugScopeUnavailable",
+														"SlugScopeCycle"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "SlugDepthExceeded",
+															"type": "string",
+															"enum": ["SlugDepthExceeded"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/realms/{realmId}": {
 			"get": {
 				"summary": "Get Realm",
@@ -77814,6 +79545,7 @@
 									"type": "object",
 									"required": [
 										"id",
+										"slugAddress",
 										"status",
 										"visibility",
 										"language",
@@ -77828,6 +79560,44 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
+										"slugAddress": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"slug",
+														"scopeUnitId",
+														"canonicalPath"
+													],
+													"properties": {
+														"slug": {
+															"minLength": 1,
+															"maxLength": 63,
+															"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+															"type": "string"
+														},
+														"scopeUnitId": {
+															"format": "uuid",
+															"type": "string"
+														},
+														"canonicalPath": {
+															"minItems": 2,
+															"maxItems": 3,
+															"type": "array",
+															"items": {
+																"minLength": 1,
+																"maxLength": 63,
+																"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																"type": "string"
+															}
+														}
+													}
+												},
+												{ "type": "null" }
+											]
+										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
 										"language": {
@@ -88129,6 +89899,7 @@
 															"type": "object",
 															"required": [
 																"id",
+																"slugAddress",
 																"kind",
 																"type",
 																"titles",
@@ -88138,6 +89909,44 @@
 																"id": {
 																	"format": "uuid",
 																	"type": "string"
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
 																},
 																"kind": { "type": "string" },
 																"type": { "type": "string" },
@@ -90942,6 +92751,7 @@
 															"type": "object",
 															"required": [
 																"id",
+																"slugAddress",
 																"kind",
 																"type",
 																"titles",
@@ -90951,6 +92761,44 @@
 																"id": {
 																	"format": "uuid",
 																	"type": "string"
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
 																},
 																"kind": { "type": "string" },
 																"type": { "type": "string" },
@@ -93793,6 +95641,7 @@
 															"type": "object",
 															"required": [
 																"id",
+																"slugAddress",
 																"kind",
 																"type",
 																"titles",
@@ -93802,6 +95651,44 @@
 																"id": {
 																	"format": "uuid",
 																	"type": "string"
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
 																},
 																"kind": { "type": "string" },
 																"type": { "type": "string" },
@@ -94209,6 +96096,7 @@
 															"type": "object",
 															"required": [
 																"id",
+																"slugAddress",
 																"kind",
 																"type",
 																"titles",
@@ -94218,6 +96106,44 @@
 																"id": {
 																	"format": "uuid",
 																	"type": "string"
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
 																},
 																"kind": { "type": "string" },
 																"type": { "type": "string" },
@@ -94592,6 +96518,7 @@
 												"type": "object",
 												"required": [
 													"id",
+													"slugAddress",
 													"kind",
 													"type",
 													"titles",
@@ -94599,6 +96526,44 @@
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
+													"slugAddress": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"additionalProperties": false,
+																"type": "object",
+																"required": [
+																	"slug",
+																	"scopeUnitId",
+																	"canonicalPath"
+																],
+																"properties": {
+																	"slug": {
+																		"minLength": 1,
+																		"maxLength": 63,
+																		"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																		"type": "string"
+																	},
+																	"scopeUnitId": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"canonicalPath": {
+																		"minItems": 2,
+																		"maxItems": 3,
+																		"type": "array",
+																		"items": {
+																			"minLength": 1,
+																			"maxLength": 63,
+																			"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																			"type": "string"
+																		}
+																	}
+																}
+															},
+															{ "type": "null" }
+														]
+													},
 													"kind": { "type": "string" },
 													"type": { "type": "string" },
 													"titles": {

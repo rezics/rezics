@@ -22,6 +22,7 @@ import {
 } from "../recommendations/schema";
 import { HealthCheckStateValues } from "../../health/model";
 import { CollectionConfigV1 } from "../users/schema";
+import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 export { toApiErrorResponse } from "./error-response";
 
 const NullableText = t.Nullable(t.String());
@@ -74,6 +75,7 @@ const LocalizationResponse = t.Object({
 
 export const UnitPublisherSummaryResponse = t.Object({
 	profileId: Uuid,
+	slugAddress: NullablePublicSlugAddressResponse,
 	name: NullableText,
 	firstPublishedAt: DateTime,
 	lastPublishedAt: DateTime,
@@ -218,6 +220,7 @@ export const UnitDetailResponse = t.Object({
 
 const SearchHit = t.Object({
 	id: Uuid,
+	slugAddress: NullablePublicSlugAddressResponse,
 	kind: t.String(),
 	type: t.String(),
 	titles: t.Array(t.String()),
@@ -302,6 +305,7 @@ export const RealmListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			id: Uuid,
+			slugAddress: NullablePublicSlugAddressResponse,
 			joinPolicy: t.String(),
 			title: NullableText,
 			summary: NullableText,
@@ -414,6 +418,7 @@ export const ReviewListResponse = t.Object({
 
 export const PublicProfileResponse = t.Object({
 	id: Uuid,
+	slugAddress: NullablePublicSlugAddressResponse,
 	status: t.String(),
 	visibility: t.String(),
 	language: NullableText,
@@ -557,6 +562,7 @@ export const CollectionDetailResponse = t.Object({
 });
 export const RealmDetailResponse = t.Object({
 	id: Uuid,
+	slugAddress: NullablePublicSlugAddressResponse,
 	status: t.String(),
 	visibility: t.String(),
 	language: NullableText,

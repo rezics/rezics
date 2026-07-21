@@ -4,17 +4,23 @@ import {
 } from "@rezics/openapi-tanstack-query";
 
 import { profileHref } from "@/features/profiles/profile-route";
+import { realmHref, type AddressableUnit, zoneHref } from "@/features/slugs/unit-route";
 
 export const FollowingKinds = Object.values(GetApiUsersMeFollowingStatus200ItemsKindEnum);
 
-export function followingHref(kind: FollowingKind, id: string): string | undefined {
+export function followingHref(
+	kind: FollowingKind,
+	value: string | AddressableUnit,
+): string | undefined {
+	const unit = typeof value === "string" ? { id: value } : value;
+	const { id } = unit;
 	switch (kind) {
 		case "zone":
-			return `/zones/${id}`;
+			return zoneHref(unit);
 		case "realm":
-			return `/realms/${id}`;
+			return realmHref(unit);
 		case "profile":
-			return profileHref(id);
+			return profileHref(unit);
 		case "book":
 		case "software":
 		case "media":

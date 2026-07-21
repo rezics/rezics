@@ -10,6 +10,7 @@ import { t } from "elysia";
 
 import { DateTime, FractionalPosition, ContentLanguage, LocalizationInput, Uuid } from "../schema";
 import { ImageAssetResponse } from "../schema/response";
+import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 
 // Exact models are registered by the Zone route plugin. References keep one
 // OpenAPI component and prevent recursive Block static types from expanding
@@ -137,6 +138,7 @@ export const SystemRequirementListResponse = t.Object({
 
 export const ZoneResponse = t.Object({
 	id: Uuid,
+	slugAddress: NullablePublicSlugAddressResponse,
 	language: t.Nullable(ContentLanguage),
 	avatar: ImageAssetResponse,
 	banner: ImageAssetResponse,
