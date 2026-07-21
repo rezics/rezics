@@ -55,14 +55,14 @@ export type UserLookupParams = Static<typeof UserLookupParams>;
 export const UserIdParams = t.Object({ id: Uuid });
 export type UserIdParams = Static<typeof UserIdParams>;
 
-export const SubscriptionUnitParams = t.Object({ unitId: Uuid });
-export type SubscriptionUnitParams = Static<typeof SubscriptionUnitParams>;
+export const FollowingUnitParams = t.Object({ unitId: Uuid });
+export type FollowingUnitParams = Static<typeof FollowingUnitParams>;
 
-export const UpdateSubscriptionBody = t.Object(
+export const UpdateFollowingBody = t.Object(
 	{
 		favorite: t.Optional(t.Boolean()),
 		position: t.Optional(FractionalPosition),
 	},
 	{ additionalProperties: false },
 );
-export type UpdateSubscriptionBody = Static<typeof UpdateSubscriptionBody>;
+export type UpdateFollowingBody = Static<typeof UpdateFollowingBody>;

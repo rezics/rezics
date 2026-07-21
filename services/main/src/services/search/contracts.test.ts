@@ -33,7 +33,7 @@ describe("versioned search projection contracts", () => {
 	it("validates a complete current document and rejects private extras", () => {
 		const document = {
 			id: unitId,
-			projectionVersion: 1,
+			projectionVersion: 2,
 			revision: 4,
 			category: "units",
 			unitType: "book",
@@ -84,7 +84,7 @@ describe("versioned search projection contracts", () => {
 				createdAt: 1,
 				updatedAt: 2,
 				publishedAt: 2,
-				subscriberCount: 0,
+				followerCount: 0,
 				replyCount: 0,
 				recommendationSnapshotId: null,
 				recommendationBest: 0,

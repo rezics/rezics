@@ -1,10 +1,13 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
+	siteName: verbatimTerms.rezics.value,
 	nav: {
 		products: "プロダクト",
 		platform: "プラットフォーム",
 		history: "History",
 		docs: "ドキュメント",
-		github: "GitHub",
+		github: verbatimTerms.github.value,
 		language: "言語",
 		theme: "テーマ",
 		openMenu: "メニューを開く",
@@ -33,7 +36,7 @@ const content = {
 		viewProduct: "プロダクトを見る",
 		viewAll: "すべて見る",
 		learnMore: "詳しく見る",
-		documentation: "Outline ドキュメント",
+		documentation: `${verbatimTerms.outline.value} ドキュメント`,
 		sourceCode: "ソースコード",
 		relatedProducts: "関連プロダクト",
 		usedCapabilities: "利用する共有機能",
@@ -42,11 +45,11 @@ const content = {
 		sourceBasis: "情報源",
 	},
 	footer: {
-		statement:
-			"Rezics はコンテンツの同一性、構造、履歴を中心にしたオープンなプロダクト体系です。",
+		statement: `${verbatimTerms.rezics.value} はコンテンツの同一性、構造、履歴を中心にしたオープンなプロダクト体系です。`,
 		productLinks: "プロダクト",
 		platformLinks: "プラットフォーム",
 		openLinks: "オープン",
+		implementation: `${verbatimTerms.agpl30.value} · ${verbatimTerms.vike.value} と ${verbatimTerms.react.value} で構築した静的サイト`,
 	},
 	notFound: {
 		title: "ページが見つかりません",
@@ -54,6 +57,7 @@ const content = {
 		back: "ホームへ戻る",
 	},
 	a11y: {
+		home: `${verbatimTerms.rezics.value} ホーム`,
 		skipContent: "メインコンテンツへ移動",
 		primaryNavigation: "メインナビゲーション",
 		mobileNavigation: "モバイルナビゲーション",

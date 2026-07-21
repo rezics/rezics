@@ -4,7 +4,7 @@ SELECT
 	(unit_row.id IS NOT NULL AND category.value IS NOT NULL) AS indexable,
 	CASE WHEN unit_row.id IS NULL OR category.value IS NULL THEN NULL ELSE jsonb_build_object(
 		'id', source.unit_id,
-		'projectionVersion', 1,
+		'projectionVersion', 2,
 		'revision', source.revision,
 		'category', category.value,
 		'unitType', unit_row.kind,
@@ -72,7 +72,7 @@ SELECT
 			'createdAt', extract(epoch FROM unit_row.created_at)::bigint,
 			'updatedAt', extract(epoch FROM unit_row.updated_at)::bigint,
 			'publishedAt', CASE WHEN unit_row.published_at IS NULL THEN NULL ELSE extract(epoch FROM unit_row.published_at)::bigint END,
-			'subscriberCount', coalesce(follow_stat.follower_count, 0),
+			'followerCount', coalesce(follow_stat.follower_count, 0),
 			'replyCount', CASE WHEN post_row.kind = 'post' THEN coalesce(reply_stat.undeleted_descendant_count, 0) ELSE coalesce(reply_stat.undeleted_direct_count, 0) END,
 			'recommendationSnapshotId', recommendation_data.snapshot_id,
 			'recommendationBest', coalesce(recommendation_data.engagement_24h, 0),

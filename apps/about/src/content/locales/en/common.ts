@@ -1,10 +1,13 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
+	siteName: String(verbatimTerms.rezics.value),
 	nav: {
 		products: "Products",
 		platform: "Platform",
 		history: "History",
 		docs: "Docs",
-		github: "GitHub",
+		github: String(verbatimTerms.github.value),
 		language: "Language",
 		theme: "Theme",
 		openMenu: "Open menu",
@@ -34,7 +37,7 @@ const content = {
 		viewProduct: "View product",
 		viewAll: "View all",
 		learnMore: "Learn more",
-		documentation: "Outline docs",
+		documentation: `${verbatimTerms.outline.value} docs`,
 		sourceCode: "Source code",
 		relatedProducts: "Related products",
 		usedCapabilities: "Shared capabilities used",
@@ -43,11 +46,11 @@ const content = {
 		sourceBasis: "Fact sources",
 	},
 	footer: {
-		statement:
-			"Rezics is an open product system built around content identity, structure, and history.",
+		statement: `${verbatimTerms.rezics.value} is an open product system built around content identity, structure, and history.`,
 		productLinks: "Products",
 		platformLinks: "Platform",
 		openLinks: "Open",
+		implementation: `${verbatimTerms.agpl30.value} · Static site built with ${verbatimTerms.vike.value} and ${verbatimTerms.react.value}`,
 	},
 	notFound: {
 		title: "Page not found",
@@ -55,6 +58,7 @@ const content = {
 		back: "Back home",
 	},
 	a11y: {
+		home: `${verbatimTerms.rezics.value} home`,
 		skipContent: "Skip to main content",
 		primaryNavigation: "Primary navigation",
 		mobileNavigation: "Mobile navigation",

@@ -2,6 +2,7 @@ export const RootTranslationNamespaces = [
 	"actions",
 	"auth",
 	"betterAuthErrorCodes",
+	"brand",
 	"editor",
 	"errorCodes",
 	"errors",

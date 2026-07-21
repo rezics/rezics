@@ -43,7 +43,7 @@ tasks:
             - task: observability:typecheck
             - task: block:typecheck
             - task: search:typecheck
-            - task: i18n:typecheck
+            - task: i18n:check
             - task: ui:typecheck
             - task: portable-text:typecheck
             - task: openapi:typecheck

@@ -47,6 +47,10 @@ export default {
 	addRule: "Add rule",
 	pinTarget: "Content to pin",
 	pinKind: "Pin kind",
+	pinKinds: {
+		pinned: "Pinned",
+		highlight: "Highlight",
+	},
 	pin: "Pin",
 	unpin: "Unpin",
 	moderation: "Content moderation",

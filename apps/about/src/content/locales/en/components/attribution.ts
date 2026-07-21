@@ -1,8 +1,10 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
 	implemented: "Implemented",
 	modes: "Attribution modes",
-	credit: "CreditAttribution",
-	subject: "SubjectAssociation",
+	credit: String(verbatimTerms.creditAttribution.value),
+	subject: String(verbatimTerms.subjectAssociation.value),
 	bookCredits: "Book credits",
 	relationship: "Relationship type",
 	entity: "Entity",

@@ -42,6 +42,7 @@ export function InteractiveProductDirectory({
 			>
 				{products.map((entry, index) => {
 					const { Summary } = productContent.byId[entry.id as ProductId];
+					const productName = productContent.common.names[entry.id as ProductId];
 					return (
 						<button
 							ref={(node) => {
@@ -62,7 +63,7 @@ export function InteractiveProductDirectory({
 							onKeyDown={activateFromKey}
 						>
 							<span>
-								<strong>{entry.name}</strong>
+								<strong>{productName}</strong>
 								<Summary
 									components={{
 										p: ({ children }) => (
@@ -89,7 +90,7 @@ export function InteractiveProductDirectory({
 				<section id={instanceId + "-panel-" + product.slug} role="tabpanel">
 					<ProductDemo
 						kind={product.demoKind}
-						productName={product.name}
+						productName={productContent.common.names[product.id as ProductId]}
 						locale={locale}
 						label={common.labels.conceptPreview}
 						caption={common.labels.conceptCaption}
@@ -99,7 +100,8 @@ export function InteractiveProductDirectory({
 						style={{ marginTop: "1rem" }}
 						href={getProductPath(locale, product.slug)}
 					>
-						{common.labels.viewProduct} · {product.name} →
+						{common.labels.viewProduct} ·{" "}
+						{productContent.common.names[product.id as ProductId]} →
 					</a>
 				</section>
 			</div>

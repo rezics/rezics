@@ -1,6 +1,9 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 export default {
 	types: { book: "Book", software: "Software", media: "Media" },
 	detail: {
+		sections: "Unit sections",
 		information: "Unit information",
 		localizations: "Localizations",
 		credits: "Credits",
@@ -11,19 +14,24 @@ export default {
 		aliases: "Aliases",
 		primaryLanguage: "Primary language",
 		releasedOn: "Release date",
-		license: "License",
-		aiDisclosure: "AI disclosure",
+		license: verbatimTerms.license.value,
+		aiDisclosure: `${verbatimTerms.ai.value} disclosure`,
 		type: "Type",
 		updatedAt: "Last updated",
 		primary: "Primary",
 		version: "Variant",
 	},
-	rating: { general: "General", r15: "R15", r18: "R18", r18g: "R18G" },
+	rating: {
+		general: "General",
+		r15: verbatimTerms.r15.value,
+		r18: verbatimTerms.r18.value,
+		r18g: verbatimTerms.r18g.value,
+	},
 	aiDisclosure: {
 		unknown: "Unknown",
 		none: "None",
-		ai_assisted: "AI-assisted",
-		ai_originated: "AI-originated",
+		ai_assisted: `${verbatimTerms.ai.value}-assisted`,
+		ai_originated: `${verbatimTerms.ai.value}-originated`,
 		machine_generated: "Machine-generated",
 	},
 	editor: {
@@ -38,7 +46,7 @@ export default {
 		subjectRole: "Subject role",
 		linkRole: "Link type",
 		linkLabel: "Link label",
-		linkUrl: "Link URL",
+		linkUrl: `Link ${verbatimTerms.url.value}`,
 		credit: "Add credit",
 		subjectAssociation: "Add subject association",
 		link: "Add link",
@@ -67,5 +75,10 @@ export default {
 		language: "Chapter language",
 		useLanguage: "Switch language",
 		save: "Save chapter",
+	},
+	reader: {
+		decreaseFontSize: "Decrease font size",
+		fontSize: "Font size",
+		increaseFontSize: "Increase font size",
 	},
 } satisfies typeof import("../zh-Hant/units").default;

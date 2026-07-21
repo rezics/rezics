@@ -90,7 +90,7 @@ export const SystemNotificationPayload = t.Object(
 
 export const NotificationItemResponse = t.Union([
 	t.Object({ ...NotificationItemBase, kind: t.Literal("reply"), payload: t.Null() }),
-	t.Object({ ...NotificationItemBase, kind: t.Literal("follow"), payload: t.Null() }),
+	t.Object({ ...NotificationItemBase, kind: t.Literal("new_follower"), payload: t.Null() }),
 	t.Object({
 		...NotificationItemBase,
 		kind: t.Literal("direct_message"),

@@ -1,3 +1,5 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
 	zone: "Zone",
 	blocks: "Block configuration",
@@ -5,7 +7,7 @@ const content = {
 	history: "History",
 	preview: "Product preview",
 	path: "Zone / configuration",
-	blockSchema: "Block Schema",
+	blockSchema: String(verbatimTerms.blockSchema.value),
 	headerBlock: "Header block",
 	feedBlock: "Feed block · query: recent",
 	collectionBlock: "Collection block · reference",

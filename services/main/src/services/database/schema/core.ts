@@ -268,6 +268,18 @@ export const profilePreference = pgTable(
 	],
 );
 
+/**
+ * A Profile's one-way interest relation to a Unit and the source of truth for
+ * follow state.
+ *
+ * This relation does not enable notification delivery channels or define which
+ * activities are surfaced to followers.
+ *
+ * @todo Classify every UnitKind as followable or internal-only, and define the
+ * follower-visible activity set for every followable kind. For example, define
+ * which Book updates are surfaced to its followers. Keep per-follow notification
+ * preferences separate from this relation.
+ */
 export const unitFollow = pgTable(
 	"unit_follow",
 	{

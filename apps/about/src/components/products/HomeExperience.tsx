@@ -8,7 +8,7 @@ import { InteractiveProductDirectory } from "./InteractiveProductDirectory";
 import { ProductDemo } from "./ProductDemo";
 
 export function HomeExperience({ locale }: { locale: AboutLocale }) {
-	const { common, home } = getLocaleContent(locale);
+	const { common, components, home, products: productContent } = getLocaleContent(locale);
 	const { Hero, Stage, Products, Platform, Composition, History, OpenSource } = home.sections;
 	const { book: HistoryBook, post: HistoryPost, zone: HistoryZone } = home.historyConsumers;
 	const { outline: OpenOutline, api: OpenApi, github: OpenGithub } = home.openDescriptions;
@@ -18,13 +18,29 @@ export function HomeExperience({ locale }: { locale: AboutLocale }) {
 			if (!product) throw new Error("Unknown product: " + id);
 			return product;
 		});
-	const products = select(["content-structure", "collection", "realm", "zone", "tag", "entity"]);
+	const productNames = productContent.common.names;
+	const productEntries = select([
+		"content-structure",
+		"collection",
+		"realm",
+		"zone",
+		"tag",
+		"entity",
+	]);
 	const platform = select(["history", "editor", "feed", "progress", "api-oauth"]);
 	const formulas = [
-		["Book", "ContentStructure", home.labels.formulaResults.chapters],
-		["Book", "GameContentStructure", "GameBook"],
-		["Unit", "CreditAttribution", home.labels.formulaResults.credits],
-		["Unit", "SubjectAssociation", home.labels.formulaResults.subjects],
+		[productNames.book, components.book.contentStructure, home.labels.formulaResults.chapters],
+		[productNames.book, components.book.gameContentStructure, productNames.gamebook],
+		[
+			components.generic.unit,
+			components.attribution.credit,
+			home.labels.formulaResults.credits,
+		],
+		[
+			components.generic.unit,
+			components.attribution.subject,
+			home.labels.formulaResults.subjects,
+		],
 	];
 
 	return (
@@ -87,7 +103,7 @@ export function HomeExperience({ locale }: { locale: AboutLocale }) {
 					</div>
 					<InteractiveProductDirectory
 						locale={locale}
-						products={products}
+						products={productEntries}
 						instanceId="home-products"
 					/>
 					<div style={{ marginTop: "2rem" }}>
@@ -149,22 +165,22 @@ export function HomeExperience({ locale }: { locale: AboutLocale }) {
 					</div>
 					<ProductDemo
 						kind="history"
-						productName="History"
+						productName={productNames.history}
 						locale={locale}
 						label={common.labels.conceptPreview}
 						caption={common.labels.conceptCaption}
 					/>
 					<div className="info-columns" style={{ marginTop: "2rem" }}>
 						<article className="info-column">
-							<h3>Book</h3>
+							<h3>{productNames.book}</h3>
 							<HistoryBook />
 						</article>
 						<article className="info-column">
-							<h3>Post</h3>
+							<h3>{productNames.post}</h3>
 							<HistoryPost />
 						</article>
 						<article className="info-column">
-							<h3>Zone</h3>
+							<h3>{productNames.zone}</h3>
 							<HistoryZone />
 						</article>
 					</div>
@@ -173,7 +189,7 @@ export function HomeExperience({ locale }: { locale: AboutLocale }) {
 						style={{ marginTop: "1.5rem" }}
 						href={getProductPath(locale, "history")}
 					>
-						{common.labels.learnMore} · History →
+						{common.labels.learnMore} · {productNames.history} →
 					</a>
 				</div>
 			</section>
@@ -189,7 +205,7 @@ export function HomeExperience({ locale }: { locale: AboutLocale }) {
 					</div>
 					<div className="info-columns">
 						<article className="info-column">
-							<h3>Outline</h3>
+							<h3>{common.labels.documentation}</h3>
 							<OpenOutline />
 							<a
 								className="text-link"
@@ -199,14 +215,14 @@ export function HomeExperience({ locale }: { locale: AboutLocale }) {
 							</a>
 						</article>
 						<article className="info-column">
-							<h3>API & OAuth</h3>
+							<h3>{productNames["api-oauth"]}</h3>
 							<OpenApi />
 							<a className="text-link" href={getProductPath(locale, "api-oauth")}>
 								{common.labels.learnMore} →
 							</a>
 						</article>
 						<article className="info-column">
-							<h3>GitHub</h3>
+							<h3>{common.nav.github}</h3>
 							<OpenGithub />
 							<a className="text-link" href="https://github.com/rezics">
 								{common.nav.github} →

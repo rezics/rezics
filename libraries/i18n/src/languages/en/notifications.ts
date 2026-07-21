@@ -1,23 +1,28 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 export default {
 	reply: {
-		title: "New reply on REZICS",
+		title: `New reply on ${verbatimTerms.rezics.value}`,
 		body: "Someone replied to a conversation you joined.",
 	},
-	follow: { title: "New follower on REZICS", body: "Someone started following you." },
+	new_follower: {
+		title: `New follower on ${verbatimTerms.rezics.value}`,
+		body: "Someone started following you.",
+	},
 	direct_message: {
-		title: "New message on REZICS",
+		title: `New message on ${verbatimTerms.rezics.value}`,
 		body: "You received a new direct message.",
 	},
 	moderation: {
-		title: "REZICS moderation update",
+		title: `${verbatimTerms.rezics.value} moderation update`,
 		body: "The moderation status of your content changed.",
 	},
 	realm: {
-		title: "REZICS Realm update",
+		title: `${verbatimTerms.rezics.value} Realm update`,
 		body: "Something changed in a Realm you belong to.",
 	},
 	system: {
-		title: "REZICS system notification",
+		title: `${verbatimTerms.rezics.value} system notification`,
 		body: "You received a system notification.",
 	},
 } satisfies typeof import("../zh-Hant/notifications").default;

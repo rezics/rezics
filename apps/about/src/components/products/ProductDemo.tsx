@@ -26,6 +26,11 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 		generic,
 	} = components;
 	const instanceId = useId();
+	const feedConsumers = [
+		{ id: "zone", label: feed.zone, heading: feed.zoneFeed },
+		{ id: "realm", label: feed.realm, heading: feed.realmFeed },
+		{ id: "home", label: feed.home, heading: feed.homeFeed },
+	] as const;
 	const panelId = (suffix: string) => `${instanceId}-${suffix}`;
 	const figureRef = useRef<HTMLElement>(null);
 	const [activePanelId, setActivePanelId] = useState<string | null>(null);
@@ -139,14 +144,18 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 						</aside>
 						<div className="demo-main">
 							<div className="demo-toolbar">
-								<span className="demo-toolbar__path">{book.book} / main</span>
+								<span className="demo-toolbar__path">
+									{book.book} / {book.main}
+								</span>
 								<span className="demo-status">{book.published}</span>
 							</div>
 							<h2 className="demo-title">{book.title}</h2>
 							<p className="demo-muted">{book.variantDescription}</p>
 							<div className="demo-grid">
 								<section className="demo-panel">
-									<h3>{book.contents} · ContentStructure</h3>
+									<h3>
+										{book.contents} · {book.contentStructure}
+									</h3>
 									<ol className="demo-list">
 										<li>
 											<strong>{book.chapterOne}</strong>
@@ -163,7 +172,9 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 									</ol>
 								</section>
 								<section className="demo-panel">
-									<h3>{book.credits} · CreditAttribution</h3>
+									<h3>
+										{book.credits} · {book.creditAttribution}
+									</h3>
 									<ul className="demo-list">
 										<li>
 											<strong>{book.author}</strong>
@@ -188,7 +199,7 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 					<div className="demo-main" data-choice-demo>
 						<div className="demo-toolbar">
 							<span className="demo-toolbar__path">
-								{book.book} / GameContentStructure
+								{book.book} / {book.gameContentStructure}
 							</span>
 							<span className="demo-status">{name}</span>
 						</div>
@@ -444,7 +455,9 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 										</ul>
 									</div>
 									<div className="demo-panel">
-										<h3>{history.diff} · Book.title</h3>
+										<h3>
+											{history.diff} · {history.bookTitle}
+										</h3>
 										<div className="diff-line">
 											<span>−</span>
 											<span>{history.previousTitle}</span>
@@ -692,28 +705,30 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 							<span className="demo-status">{name}</span>
 						</div>
 						<div role="tablist" className="tab-list" aria-label={feed.consumers}>
-							{["Zone", "Realm", "Home"].map((consumer, index) => (
+							{feedConsumers.map((consumer, index) => (
 								<button
+									key={consumer.id}
 									className="tab-button"
 									type="button"
 									role="tab"
 									aria-selected={index === 0 ? "true" : "false"}
 									tabIndex={index === 0 ? 0 : -1}
-									aria-controls={panelId(`feed-${consumer.toLowerCase()}`)}
+									aria-controls={panelId(`feed-${consumer.id}`)}
 								>
-									{consumer}
+									{consumer.label}
 								</button>
 							))}
 						</div>
-						{["Zone", "Realm", "Home"].map((consumer, index) => (
+						{feedConsumers.map((consumer, index) => (
 							<section
-								id={panelId(`feed-${consumer.toLowerCase()}`)}
+								key={consumer.id}
+								id={panelId(`feed-${consumer.id}`)}
 								role="tabpanel"
 								hidden={index !== 0}
 							>
 								<div className="demo-grid">
 									<div className="demo-panel">
-										<h3>{consumer} feed</h3>
+										<h3>{consumer.heading}</h3>
 										<ul className="demo-list">
 											<li>
 												<strong>{feed.postCard}</strong>
@@ -817,7 +832,9 @@ export function ProductDemo({ kind, productName: name, locale, label, caption }:
 						</aside>
 						<div className="demo-main">
 							<div className="demo-toolbar">
-								<span className="demo-toolbar__path">Editor / {name}</span>
+								<span className="demo-toolbar__path">
+									{name} / {editor.document}
+								</span>
 								<span className="demo-status">{editor.draftBoundary}</span>
 							</div>
 							<h2 className="demo-title">{editor.contentTitle}</h2>

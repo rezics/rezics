@@ -5,6 +5,7 @@ export default {
 	createAccount: "Create account",
 	welcomeBack: "Welcome back",
 	email: "Email",
+	emailPlaceholder: "you@example.com",
 	password: "Password",
 	forgotPassword: "Forgot password?",
 	registerFailed: "Registration failed.",

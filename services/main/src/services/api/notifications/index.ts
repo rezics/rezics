@@ -46,7 +46,7 @@ type NotificationCursor = typeof NotificationCursor.static;
 
 const preferenceKinds = [
 	"reply",
-	"follow",
+	"new_follower",
 	"direct_message",
 	"moderation",
 	"realm",
@@ -82,7 +82,7 @@ function presentNotificationPayload(
 ) {
 	switch (kind) {
 		case "reply":
-		case "follow":
+		case "new_follower":
 			if (payload !== null) throw new Error(`${kind} notification has an invalid payload`);
 			return { kind, payload };
 		case "direct_message":

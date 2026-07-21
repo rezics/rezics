@@ -1,12 +1,14 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 export default {
 	title: "Unit governance",
 	open: "Open governance settings",
 	accessInvitations: "Access invitations",
 	receivedInvitations: "Received access invitations",
 	accessInvitationDescription: "No access is granted until the invitation is accepted.",
-	invitedProfile: "Invitee Profile ID",
+	invitedProfile: `Invitee Profile ${verbatimTerms.id.value}`,
 	invitedBy: "Invited by",
-	unitId: "Unit ID",
+	unitId: `Unit ${verbatimTerms.id.value}`,
 	role: "Access role",
 	scope: "Access scope",
 	scopeHint: "Leave empty for the whole Unit; separate nested scopes with /.",
@@ -25,8 +27,8 @@ export default {
 	associationProposals: "Association proposals",
 	associationProposalDescription:
 		"The real association is created only after the other side accepts the proposal.",
-	targetEntity: "Target Entity ID",
-	sourceUnit: "Source Unit ID",
+	targetEntity: `Target Entity ${verbatimTerms.id.value}`,
+	sourceUnit: `Source Unit ${verbatimTerms.id.value}`,
 	associationRole: "Association role",
 	proposalExpiry: "Proposal expiry",
 	requestAssociation: "Request association",

@@ -21,6 +21,8 @@ export function ProductPage({
 	const { common, products } = getLocaleContent(locale);
 	const page = products.common;
 	const localized = products.byId[product.id as ProductId];
+	const productName = page.names[product.id as ProductId];
+	const localizedName = (entry: ProductDefinition) => page.names[entry.id as ProductId];
 	const { Summary, Scenarios, Workflow, Boundaries } = localized;
 	const parent = product.canonicalParentId
 		? getProductById(product.canonicalParentId)
@@ -41,22 +43,24 @@ export function ProductPage({
 						{parent && (
 							<>
 								<span aria-hidden>/</span>
-								<a href={getProductPath(locale, parent.slug)}>{parent.name}</a>
+								<a href={getProductPath(locale, parent.slug)}>
+									{localizedName(parent)}
+								</a>
 							</>
 						)}
 						<span aria-hidden>/</span>
-						<span aria-current="page">{product.name}</span>
+						<span aria-current="page">{productName}</span>
 					</nav>
 					<div className="product-hero">
 						<div>
 							<p className="eyebrow">{common.classes[product.pageClass]}</p>
-							<h1 className="display-title">{product.name}</h1>
+							<h1 className="display-title">{productName}</h1>
 							<div className="product-hero__lead markdown-copy">
 								<Summary />
 							</div>
 							{product.manifestation && (
 								<p className="formula-token" style={{ marginTop: "1.5rem" }}>
-									{product.manifestation.formula}
+									{page.manifestationFormulas[product.manifestation.kind]}
 								</p>
 							)}
 						</div>
@@ -74,7 +78,7 @@ export function ProductPage({
 								<dd>
 									{parent ? (
 										<a href={getProductPath(locale, parent.slug)}>
-											{parent.name}
+											{localizedName(parent)}
 										</a>
 									) : (
 										common.labels.noParent
@@ -84,7 +88,11 @@ export function ProductPage({
 							{product.capabilityModes && (
 								<div className="product-fact">
 									<dt>{common.a11y.modes}</dt>
-									<dd>{product.capabilityModes.join(" · ")}</dd>
+									<dd>
+										{product.capabilityModes
+											.map((mode) => page.capabilityModeLabels[mode])
+											.join(" · ")}
+									</dd>
 								</div>
 							)}
 						</dl>
@@ -97,7 +105,7 @@ export function ProductPage({
 					<div className="site-container">
 						<ProductDemo
 							kind={product.demoKind}
-							productName={product.name}
+							productName={productName}
 							locale={locale}
 							label={common.labels.conceptPreview}
 							caption={common.labels.conceptCaption}
@@ -106,14 +114,14 @@ export function ProductPage({
 							<div style={{ display: "grid", gap: "2rem", marginTop: "2rem" }}>
 								<ProductDemo
 									kind="attribution"
-									productName="Book · Entity"
+									productName={`${page.names.book} · ${page.names.entity}`}
 									locale={locale}
 									label={common.labels.conceptPreview}
 									caption={common.labels.conceptCaption}
 								/>
 								<ProductDemo
 									kind="history"
-									productName="Book · History"
+									productName={`${page.names.book} · ${page.names.history}`}
 									locale={locale}
 									label={common.labels.conceptPreview}
 									caption={common.labels.conceptCaption}
@@ -128,7 +136,7 @@ export function ProductPage({
 				<section className="site-section">
 					<div className="site-container">
 						<div className="section-heading reveal">
-							<p className="eyebrow">01 · Use</p>
+							<p className="eyebrow">01 · {page.sectionEyebrows.use}</p>
 							<h2 className="section-title">{page.scenarios}</h2>
 						</div>
 						<div className="markdown-section reveal">
@@ -142,7 +150,7 @@ export function ProductPage({
 				<section className="site-section">
 					<div className="site-container">
 						<div className="section-heading reveal">
-							<p className="eyebrow">02 · Workflow</p>
+							<p className="eyebrow">02 · {page.sectionEyebrows.workflow}</p>
 							<h2 className="section-title">{page.workflow}</h2>
 						</div>
 						<div className="markdown-section reveal">
@@ -156,7 +164,7 @@ export function ProductPage({
 				<section className="site-section">
 					<div className="site-container">
 						<div className="section-heading reveal">
-							<p className="eyebrow">03 · Platform</p>
+							<p className="eyebrow">03 · {page.sectionEyebrows.platform}</p>
 							<h2 className="section-title">
 								{capabilities.length ? page.capabilities : page.consumers}
 							</h2>
@@ -170,9 +178,9 @@ export function ProductPage({
 										href={getProductPath(locale, item.slug)}
 										key={item.id}
 									>
-										<span className="demo-status">{item.name}</span>
+										<span className="demo-status">{localizedName(item)}</span>
 										<div>
-											<strong>{item.name}</strong>
+											<strong>{localizedName(item)}</strong>
 											<div className="markdown-copy">
 												<ItemSummary />
 											</div>
@@ -193,7 +201,7 @@ export function ProductPage({
 				<section className="site-section">
 					<div className="site-container">
 						<div className="section-heading reveal">
-							<p className="eyebrow">04 · Scope</p>
+							<p className="eyebrow">04 · {page.sectionEyebrows.scope}</p>
 							<h2 className="section-title">{page.boundaries}</h2>
 						</div>
 						<div className="markdown-section reveal">
@@ -207,7 +215,7 @@ export function ProductPage({
 				<section className="site-section">
 					<div className="site-container">
 						<div className="section-heading reveal">
-							<p className="eyebrow">05 · FAQ</p>
+							<p className="eyebrow">05 · {page.sectionEyebrows.faq}</p>
 							<h2 className="section-title">{page.faq}</h2>
 						</div>
 						<div className="accordion-list">
@@ -228,7 +236,7 @@ export function ProductPage({
 				<section className="site-section">
 					<div className="site-container">
 						<div className="section-heading reveal">
-							<p className="eyebrow">06 · Next</p>
+							<p className="eyebrow">06 · {page.sectionEyebrows.next}</p>
 							<h2 className="section-title">{common.labels.relatedProducts}</h2>
 						</div>
 						<div className="product-rows">
@@ -244,7 +252,7 @@ export function ProductPage({
 											<span className="product-row__index">
 												{String(index + 1).padStart(2, "0")}
 											</span>
-											{item.name}
+											{localizedName(item)}
 										</span>
 										<div className="product-row__summary markdown-copy">
 											<ItemSummary />

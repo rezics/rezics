@@ -5,6 +5,6 @@ export default {
 	verification: "驗證狀態",
 	verified: "已驗證",
 	unverified: "未驗證",
-	newEntity: "新建目錄條目",
-	newTag: "新建標籤",
+	newEntity: "建立目錄條目",
+	newTag: "建立標籤",
 };

@@ -708,9 +708,11 @@ function RealmPins({
 							<Field>
 								<FieldLabel>{t.realms.pinKind}</FieldLabel>
 								<NativeSelect name="kind" defaultValue="pinned">
-									<NativeSelectOption value="pinned">pinned</NativeSelectOption>
+									<NativeSelectOption value="pinned">
+										{t.realms.pinKinds.pinned}
+									</NativeSelectOption>
 									<NativeSelectOption value="highlight">
-										highlight
+										{t.realms.pinKinds.highlight}
 									</NativeSelectOption>
 								</NativeSelect>
 							</Field>

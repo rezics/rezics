@@ -1,8 +1,10 @@
 import { Head } from "vike-react/Head";
 import { ABOUT_LOCALES, DEFAULT_LOCALE } from "../../src/i18n/locales";
 import { getHomePath } from "../../src/i18n/productPaths";
+import { getLocaleContent } from "../../src/content/locales";
 
 const defaultPath = getHomePath(DEFAULT_LOCALE);
+const siteName = getLocaleContent(DEFAULT_LOCALE).common.siteName;
 const localizedPaths = Object.fromEntries(
 	ABOUT_LOCALES.map((locale) => [locale, getHomePath(locale)]),
 );
@@ -22,7 +24,7 @@ export default function Page() {
 					<meta httpEquiv="refresh" content={"0; url=" + defaultPath} />
 				</noscript>
 			</Head>
-			<a href={defaultPath}>Rezics</a>
+			<a href={defaultPath}>{siteName}</a>
 		</>
 	);
 }

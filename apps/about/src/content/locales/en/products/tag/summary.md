@@ -1,1 +1,1 @@
-Shared, queryable tagging infrastructure for Rezics products.
+Shared, queryable tagging infrastructure for REZICS products.

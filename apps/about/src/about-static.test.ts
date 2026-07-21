@@ -102,7 +102,7 @@ describe("product fact registry", () => {
 
 		expect(gamebook.pageClass).toBe("manifestation");
 		expect(gamebook.canonicalParentId).toBe("book");
-		expect(gamebook.manifestation?.formula).toBe("Book + GameContentStructure → GameBook");
+		expect(gamebook.manifestation?.kind).toBe("gamebook");
 
 		expect(structure.pageClass).toBe("surface");
 		expect(structure.navGroup).toBe("products");
@@ -170,7 +170,7 @@ describe("confirmed product claims", () => {
 
 		const publicText = await readProductMarkdown("zh-hant", "entity");
 		for (const fact of [
-			"Entity",
+			"實體",
 			"CreditAttribution",
 			"SubjectAssociation",
 			"作者",
@@ -179,8 +179,8 @@ describe("confirmed product claims", () => {
 			"角色",
 			"主角",
 			"二創",
-			"Unit",
-			"Tag",
+			"內容單元",
+			"標籤",
 		]) {
 			expect(publicText).toContain(fact);
 		}
@@ -238,6 +238,21 @@ describe("complete localized content and media", () => {
 			expect(localized.common.a11y.primaryNavigation.trim().length).toBeGreaterThan(0);
 			if (locale !== "en") expect(JSON.stringify(localized.common)).not.toBe(english);
 		}
+	});
+
+	test("provides an exhaustive localized display name for every product", () => {
+		const productIds = PRODUCT_DEFINITIONS.map(({ id }) => id).sort();
+
+		for (const locale of ABOUT_LOCALES) {
+			const { names } = getLocaleContent(locale).products.common;
+			expect(Object.keys(names).sort()).toEqual(productIds);
+			for (const name of Object.values(names)) expect(name.trim().length).toBeGreaterThan(0);
+		}
+
+		const traditionalChinese = getLocaleContent("zh-hant").products.common.names;
+		expect(traditionalChinese.post).toBe("貼文");
+		expect(traditionalChinese.realm).toBe("領域");
+		expect(traditionalChinese.zone).toBe("專區");
 	});
 
 	test("mirrors the English locale file tree in every language", async () => {

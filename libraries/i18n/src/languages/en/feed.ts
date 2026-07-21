@@ -1,3 +1,5 @@
+import { insert } from "native-i18n";
+
 export default {
 	title: "Feed",
 	subtitle: "Works become visible through discussion",
@@ -34,4 +36,12 @@ export default {
 	viewAll: "View all",
 	relatedWork: "Related work",
 	myRealms: "My Realms",
+	realmContext: insert("in {{realm}}", { realm: String }),
+	realmContextWithMore: insert("in {{realm}} and {{count}} more", {
+		realm: String,
+		count: Number,
+	}),
+	showRealmList: insert("{{summary}}. Show realm list", { summary: String }),
+	publishedInOneRealm: insert("Published in {{count}} Realm", { count: Number }),
+	publishedInRealms: insert("Published in {{count}} Realms", { count: Number }),
 } satisfies typeof import("../zh-Hant/feed").default;

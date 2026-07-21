@@ -1,3 +1,5 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
 	unitTypes: "Unit 类型",
 	identity: "Catalog 身份",
@@ -10,7 +12,7 @@ const content = {
 	composition: "组合",
 	selectedIdentity: "已选择的身份",
 	canonicalUnit: "规范 Unit",
-	stableId: "稳定 ID",
+	stableId: `稳定 ${verbatimTerms.id.value}`,
 	release: "Release",
 	editionContext: "版本语境",
 	attribution: "归属关系",

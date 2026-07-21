@@ -69,7 +69,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 					content={data.kind === "product" ? "product" : "website"}
 				/>
 				<meta property="og:url" content={canonical} />
-				<meta property="og:site_name" content="Rezics" />
+				<meta property="og:site_name" content={copy.siteName} />
 				<meta name="twitter:card" content="summary" />
 				{meta.jsonLd && (
 					<script
@@ -89,7 +89,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 						alternatePathByLocale={meta.alternates}
 					/>
 					<main id="main-content">{children}</main>
-					<GlobalFooter locale={locale} copy={copy} />
+					<GlobalFooter locale={locale} />
 				</>
 			)}
 		</MDXProvider>

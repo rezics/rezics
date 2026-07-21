@@ -26,6 +26,7 @@
 		"vitest": "4.1.10"
 	},
 	"dependencies": {
+		"@rezics/i18n": "workspace:^",
 		"lucide-react": "^1.24.0",
 		"react": "19.2",
 		"react-dom": "19.2",

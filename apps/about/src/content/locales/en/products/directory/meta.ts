@@ -1,6 +1,8 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
-	title: "Rezics Products & Platform",
-	description: "Browse every Rezics product, product manifestation, and shared capability.",
+	title: `${verbatimTerms.rezics.value} Products & Platform`,
+	description: `Browse every ${verbatimTerms.rezics.value} product, product manifestation, and shared capability.`,
 };
 
 export default content;

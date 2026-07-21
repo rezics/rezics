@@ -7,7 +7,7 @@ import { forwardRef, useEffect, type ComponentPropsWithoutRef, type ReactNode } 
 import {
 	getApiUsersMePreferencesQueryKey,
 	useGetApiUsersMePreferences,
-	useGetApiUsersMeSubscriptions,
+	useGetApiUsersMeFollowing,
 	usePutApiUsersMePreferences,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
@@ -27,14 +27,14 @@ const Links = [
 	{ href: "/me/progress", key: "progress", icon: TrendingUp },
 ] as const;
 
-const SidebarSubscriptionKinds = ["zone", "realm", "profile"] as const;
-type SidebarSubscriptionKind = (typeof SidebarSubscriptionKinds)[number];
+const SidebarFollowingKinds = ["zone", "realm", "profile"] as const;
+type SidebarFollowingKind = (typeof SidebarFollowingKinds)[number];
 
-function isSidebarSubscriptionKind(value: string): value is SidebarSubscriptionKind {
-	return SidebarSubscriptionKinds.some((kind) => kind === value);
+function isSidebarFollowingKind(value: string): value is SidebarFollowingKind {
+	return SidebarFollowingKinds.some((kind) => kind === value);
 }
 
-function subscriptionHref(kind: SidebarSubscriptionKind, id: string) {
+function followingHref(kind: SidebarFollowingKind, id: string) {
 	switch (kind) {
 		case "zone":
 			return `/zones/${id}`;
@@ -87,6 +87,7 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 	const { t, locale } = useTranslation([
 		"actions",
 		"betterAuthErrorCodes",
+		"brand",
 		"errorCodes",
 		"errors",
 		"locale",
@@ -97,7 +98,7 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 	const { setLocale } = useSetLocale();
 	const queryClient = useQueryClient();
 	const preferences = useGetApiUsersMePreferences({ query: { enabled: Boolean(session) } });
-	const subscriptions = useGetApiUsersMeSubscriptions({
+	const following = useGetApiUsersMeFollowing({
 		query: { enabled: Boolean(session) },
 	});
 	const updatePreferences = usePutApiUsersMePreferences({
@@ -118,6 +119,7 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 
 	return (
 		<SharedAppShell
+			brandName={t.brand.name}
 			account={{
 				href: session ? "/settings/profile" : "/login",
 				label: session ? t.actions.account : t.actions.login,
@@ -171,21 +173,21 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 				label: t.nav[key],
 				icon,
 			}))}
-			subscriptions={{
-				label: t.nav.subscriptions.title,
-				zonesLabel: t.nav.subscriptions.zones,
-				realmsLabel: t.nav.subscriptions.realms,
-				profilesLabel: t.nav.subscriptions.profiles,
-				manageLabel: t.nav.subscriptions.manage,
-				manageHref: "/me/subscriptions",
-				emptyLabel: t.nav.subscriptions.empty,
-				items: (subscriptions.data?.items ?? []).flatMap((item) => {
-					if (!isSidebarSubscriptionKind(item.kind)) return [];
+			following={{
+				label: t.nav.following.title,
+				zonesLabel: t.nav.following.types.zone,
+				realmsLabel: t.nav.following.types.realm,
+				profilesLabel: t.nav.following.types.profile,
+				manageLabel: t.nav.following.manage,
+				manageHref: "/me/following",
+				emptyLabel: t.nav.following.empty,
+				items: (following.data?.items ?? []).flatMap((item) => {
+					if (!isSidebarFollowingKind(item.kind)) return [];
 					return [
 						{
 							id: item.id,
 							kind: item.kind,
-							href: subscriptionHref(item.kind, item.id),
+							href: followingHref(item.kind, item.id),
 							label: item.title ?? t.ui.unnamed,
 							imageUrl: item.avatar?.url ?? item.cover?.url,
 							favorite: item.favorite,

@@ -58,7 +58,7 @@
 		"ranking.createdAt",
 		"ranking.updatedAt",
 		"ranking.publishedAt",
-		"ranking.subscriberCount",
+		"ranking.followerCount",
 		"ranking.replyCount",
 		"ranking.recommendationBest",
 		"ranking.engagement24h"

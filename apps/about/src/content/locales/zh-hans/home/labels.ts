@@ -1,11 +1,13 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
-	eyebrow: "Rezics 产品体系",
+	eyebrow: `${verbatimTerms.rezics.value} 产品体系`,
 	title: "内容不只被发布，也能保有身份、结构与历史。",
-	stageTitle: "从真实产品表面认识 Rezics",
+	stageTitle: `从真实产品表面认识 ${verbatimTerms.rezics.value}`,
 	productsTitle: "每个产品都有自己的入口",
 	platformTitle: "共享能力在不同产品之间工作",
 	formulaTitle: "能力如何形成产品",
-	historyTitle: "History 是 Rezics 的信息骨架",
+	historyTitle: `History 是 ${verbatimTerms.rezics.value} 的信息骨架`,
 	openTitle: "从文档到源代码都是开放入口",
 	eyebrows: {
 		stage: "产品展台",

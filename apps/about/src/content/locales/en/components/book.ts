@@ -1,6 +1,9 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
 	sectionsLabel: "Book sections",
 	book: "Book",
+	main: "main",
 	identity: "Book identity",
 	variants: "main and variants",
 	contents: "Chapter structure",
@@ -8,14 +11,15 @@ const content = {
 	published: "Published",
 	title: "Book title",
 	variantDescription: "main · variant: translation-edition · Unit / Book",
-	contentStructure: "ContentStructure",
+	contentStructure: String(verbatimTerms.contentStructure.value),
+	gameContentStructure: String(verbatimTerms.gameContentStructure.value),
 	chapterOne: "01 · Chapter title",
 	chapterTwo: "02 · Chapter title",
 	reusedInterlude: "03 · Reused interlude",
 	postA: "Post A",
 	postB: "Post B",
 	credits: "Attribution",
-	creditAttribution: "CreditAttribution",
+	creditAttribution: String(verbatimTerms.creditAttribution.value),
 	author: "Author",
 	translator: "Translator",
 	publisher: "Publisher",

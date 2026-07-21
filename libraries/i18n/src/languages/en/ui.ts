@@ -61,6 +61,8 @@ export default {
 	publishReview: "Publish",
 	collection: "Collection",
 	realm: "Realm",
+	zone: "Zone",
+	share: "Share",
 	joinPolicy: "Join policy",
 	open: "Open",
 	approval: "Approval",

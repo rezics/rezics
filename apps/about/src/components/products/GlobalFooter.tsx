@@ -1,41 +1,43 @@
-import type { LocaleContent } from "../../content/locales";
+import { getLocaleContent } from "../../content/locales";
 import type { AboutLocale } from "../../i18n/locales";
 import { getHomePath, getProductPath, getProductsPath } from "../../i18n/productPaths";
 
-export function GlobalFooter({
-	locale,
-	copy,
-}: {
-	locale: AboutLocale;
-	copy: LocaleContent["common"];
-}) {
+export function GlobalFooter({ locale }: { locale: AboutLocale }) {
 	const outlineUrl = "https://outline.rezics.com/collection/rezics-ud1QiRBQYV/recent";
+	const { common: copy, products } = getLocaleContent(locale);
+	const names = products.common.names;
 	return (
 		<footer className="global-footer">
 			<div className="site-container">
 				<div className="footer-grid">
 					<div className="footer-brand">
-						<a className="global-logo" href={getHomePath(locale)} aria-label="Rezics">
+						<a
+							className="global-logo"
+							href={getHomePath(locale)}
+							aria-label={copy.a11y.home}
+						>
 							<img src="/logo.svg" width="34" height="24" alt="" />
 						</a>
 						<p>{copy.footer.statement}</p>
 					</div>
 					<nav aria-label={copy.footer.productLinks}>
 						<h2>{copy.footer.productLinks}</h2>
-						<a href={getProductPath(locale, "book")}>Book</a>
-						<a href={getProductPath(locale, "content-structure")}>Content Structure</a>
-						<a href={getProductPath(locale, "collection")}>Collection</a>
-						<a href={getProductPath(locale, "entity")}>Entity</a>
-						<a href={getProductPath(locale, "zone")}>Zone</a>
+						<a href={getProductPath(locale, "book")}>{names.book}</a>
+						<a href={getProductPath(locale, "content-structure")}>
+							{names["content-structure"]}
+						</a>
+						<a href={getProductPath(locale, "collection")}>{names.collection}</a>
+						<a href={getProductPath(locale, "entity")}>{names.entity}</a>
+						<a href={getProductPath(locale, "zone")}>{names.zone}</a>
 						<a href={getProductsPath(locale)}>{copy.labels.viewAll}</a>
 					</nav>
 					<nav aria-label={copy.footer.platformLinks}>
 						<h2>{copy.footer.platformLinks}</h2>
-						<a href={getProductPath(locale, "history")}>History</a>
-						<a href={getProductPath(locale, "editor")}>Editor</a>
-						<a href={getProductPath(locale, "feed")}>Feed</a>
-						<a href={getProductPath(locale, "progress")}>Progress</a>
-						<a href={getProductPath(locale, "api-oauth")}>API & OAuth</a>
+						<a href={getProductPath(locale, "history")}>{names.history}</a>
+						<a href={getProductPath(locale, "editor")}>{names.editor}</a>
+						<a href={getProductPath(locale, "feed")}>{names.feed}</a>
+						<a href={getProductPath(locale, "progress")}>{names.progress}</a>
+						<a href={getProductPath(locale, "api-oauth")}>{names["api-oauth"]}</a>
 					</nav>
 					<nav aria-label={copy.footer.openLinks}>
 						<h2>{copy.footer.openLinks}</h2>
@@ -51,8 +53,10 @@ export function GlobalFooter({
 					</nav>
 				</div>
 				<div className="footer-meta">
-					<span>© {new Date().getFullYear()} Rezics</span>
-					<span>AGPL-3.0 · Static Vike + React site</span>
+					<span>
+						© {new Date().getFullYear()} {copy.siteName}
+					</span>
+					<span>{copy.footer.implementation}</span>
 				</div>
 			</div>
 		</footer>

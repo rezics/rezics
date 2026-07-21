@@ -5,12 +5,15 @@
 	"sideEffects": false,
 	"exports": {
 		".": "./src/index.ts",
-		"./resources": "./src/resources.ts"
+		"./manifest": "./src/manifest.ts",
+		"./resources": "./src/resources.ts",
+		"./verbatim-terms": "./src/verbatim-terms.ts"
 	},
 	"dependencies": {
 		"native-i18n": "0.1.0"
 	},
 	"devDependencies": {
+		"@babel/parser": "^7.29.7",
 		"typescript": "7"
 	}
 }

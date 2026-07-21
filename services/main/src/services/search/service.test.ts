@@ -12,7 +12,7 @@ vi.mock("./generation", () => ({
 		id: "019f7eed-5d42-7102-8387-cc1d13b176d2",
 		kind: "current",
 		indexUid: "rezics_units_v1_20260720",
-		projectionVersion: 1,
+		projectionVersion: 2,
 		settingsFingerprint: "a".repeat(64),
 	}),
 }));
@@ -97,9 +97,9 @@ describe("domain search SQL", () => {
 			expect.objectContaining({ sort: "publishedAt:desc" }),
 		]);
 
-		await searchDomain("users", { sort: "subscriberCount:desc" });
+		await searchDomain("users", { sort: "followerCount:desc" });
 		expect(searchCandidates).toHaveBeenLastCalledWith([
-			expect.objectContaining({ sort: "subscriberCount:desc" }),
+			expect.objectContaining({ sort: "followerCount:desc" }),
 		]);
 
 		await searchDomain("entity", { types: ["person"] });
@@ -124,10 +124,10 @@ describe("domain search SQL", () => {
 
 		await searchDomain("realms", {
 			joinPolicies: ["approval"],
-			sort: "subscriberCount:asc",
+			sort: "followerCount:asc",
 		});
 		expect(searchCandidates).toHaveBeenLastCalledWith([
-			expect.objectContaining({ sort: "subscriberCount:asc" }),
+			expect.objectContaining({ sort: "followerCount:asc" }),
 		]);
 
 		await searchDomain("collections", {
@@ -156,9 +156,9 @@ describe("domain search SQL", () => {
 	});
 
 	it("rejects category-specific combinations before executing SQL", async () => {
-		await expect(
-			searchDomain("units", { sort: "subscriberCount:desc" }),
-		).rejects.toBeInstanceOf(InvalidSearch);
+		await expect(searchDomain("units", { sort: "followerCount:desc" })).rejects.toBeInstanceOf(
+			InvalidSearch,
+		);
 		await expect(searchDomain("tags", { multiple: true })).rejects.toBeInstanceOf(
 			InvalidSearch,
 		);

@@ -1,11 +1,13 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
-	eyebrow: "Rezics プロダクトシステム",
+	eyebrow: `${verbatimTerms.rezics.value} プロダクトシステム`,
 	title: "コンテンツに、同一性と構造と履歴を。",
-	stageTitle: "実際のプロダクト画面から Rezics を知る",
+	stageTitle: `実際のプロダクト画面から ${verbatimTerms.rezics.value} を知る`,
 	productsTitle: "すべてのプロダクトに独立した入口",
 	platformTitle: "複数のプロダクトを支える共有機能",
 	formulaTitle: "機能がプロダクトを形作る方法",
-	historyTitle: "History は Rezics の情報基盤",
+	historyTitle: `History は ${verbatimTerms.rezics.value} の情報基盤`,
 	openTitle: "ドキュメントからソースまでオープン",
 	eyebrows: {
 		stage: "プロダクトステージ",

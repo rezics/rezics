@@ -1,3 +1,5 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 export default {
 	FAILED_TO_CREATE_USER: "The account could not be created.",
 	FAILED_TO_CREATE_SESSION: "A sign-in session could not be created.",
@@ -34,12 +36,12 @@ export default {
 	SESSION_NOT_FRESH: "Sign in again to continue.",
 	LINKED_ACCOUNT_ALREADY_EXISTS: "This linked account already exists.",
 	INVALID_ORIGIN: "The request origin is invalid.",
-	INVALID_CALLBACK_URL: "The callback URL is invalid.",
-	INVALID_REDIRECT_URL: "The redirect URL is invalid.",
-	INVALID_ERROR_CALLBACK_URL: "The error callback URL is invalid.",
-	INVALID_NEW_USER_CALLBACK_URL: "The new-user callback URL is invalid.",
+	INVALID_CALLBACK_URL: `The callback ${verbatimTerms.url.value} is invalid.`,
+	INVALID_REDIRECT_URL: `The redirect ${verbatimTerms.url.value} is invalid.`,
+	INVALID_ERROR_CALLBACK_URL: `The error callback ${verbatimTerms.url.value} is invalid.`,
+	INVALID_NEW_USER_CALLBACK_URL: `The new-user callback ${verbatimTerms.url.value} is invalid.`,
 	MISSING_OR_NULL_ORIGIN: "The request origin is missing.",
-	CALLBACK_URL_REQUIRED: "A callback URL is required.",
+	CALLBACK_URL_REQUIRED: `A callback ${verbatimTerms.url.value} is required.`,
 	FAILED_TO_CREATE_VERIFICATION: "The verification request could not be created.",
 	VALIDATION_ERROR: "The submitted data is invalid.",
 	FIELD_NOT_ALLOWED: "This field cannot be changed.",

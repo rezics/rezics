@@ -7,6 +7,7 @@ import {
 	ContentLanguageValues,
 	ContentRatingValues,
 	StoredUiLocaleValues,
+	UnitKindValues,
 	UnitStatusValues,
 	UnitVisibilityValues,
 } from "../../database/schema/contract-values";
@@ -27,6 +28,10 @@ export const StoredUiLocale = t.Union([
 	t.Literal(StoredUiLocaleValues[1]),
 ]);
 export type StoredUiLocale = Static<typeof StoredUiLocale>;
+
+/** A persisted Unit discriminator accepted and returned by the public API. */
+export const UnitKind = t.UnionEnum(UnitKindValues, { default: undefined });
+export type UnitKind = Static<typeof UnitKind>;
 
 export const DateTime = t
 	.Transform(t.String({ format: "date-time" }))

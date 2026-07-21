@@ -199,10 +199,10 @@ import type {
 	GetApiUsersMePreferencesResponses,
 	PutApiUsersMePreferencesOptions,
 	PutApiUsersMePreferencesResponses,
-	GetApiUsersMeSubscriptionsOptions,
-	GetApiUsersMeSubscriptionsResponses,
-	PatchApiUsersMeSubscriptionsByUnitIdOptions,
-	PatchApiUsersMeSubscriptionsByUnitIdResponses,
+	GetApiUsersMeFollowingOptions,
+	GetApiUsersMeFollowingResponses,
+	PatchApiUsersMeFollowingByUnitIdOptions,
+	PatchApiUsersMeFollowingByUnitIdResponses,
 	GetApiUsersByIdOptions,
 	GetApiUsersByIdResponses,
 	PutApiUsersByIdFollowOptions,
@@ -2158,33 +2158,33 @@ export function putApiUsersMePreferences<ThrowOnError extends boolean = true>(
 }
 
 /**
- * @summary List current user subscriptions
- * {@link /api/users/me/subscriptions}
+ * @summary List Units followed by the current user
+ * {@link /api/users/me/following}
  */
-export function getApiUsersMeSubscriptions<ThrowOnError extends boolean = true>(
-	options: Options<GetApiUsersMeSubscriptionsOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiUsersMeSubscriptionsResponses, ThrowOnError>> {
+export function getApiUsersMeFollowing<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUsersMeFollowingOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiUsersMeFollowingResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/users/me/subscriptions", ...config }) as Promise<
-		RequestResult<GetApiUsersMeSubscriptionsResponses, ThrowOnError>
+	return request({ method: "GET", url: "/api/users/me/following", ...config }) as Promise<
+		RequestResult<GetApiUsersMeFollowingResponses, ThrowOnError>
 	>;
 }
 
 /**
- * @summary Update subscription presentation
- * {@link /api/users/me/subscriptions/:unitId}
+ * @summary Update followed Unit presentation
+ * {@link /api/users/me/following/:unitId}
  */
-export function patchApiUsersMeSubscriptionsByUnitId<ThrowOnError extends boolean = true>(
-	options: Options<PatchApiUsersMeSubscriptionsByUnitIdOptions, ThrowOnError>,
-): Promise<RequestResult<PatchApiUsersMeSubscriptionsByUnitIdResponses, ThrowOnError>> {
+export function patchApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = true>(
+	options: Options<PatchApiUsersMeFollowingByUnitIdOptions, ThrowOnError>,
+): Promise<RequestResult<PatchApiUsersMeFollowingByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PATCH",
-		url: "/api/users/me/subscriptions/{unitId}",
+		url: "/api/users/me/following/{unitId}",
 		...config,
-	}) as Promise<RequestResult<PatchApiUsersMeSubscriptionsByUnitIdResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PatchApiUsersMeFollowingByUnitIdResponses, ThrowOnError>>;
 }
 
 /**

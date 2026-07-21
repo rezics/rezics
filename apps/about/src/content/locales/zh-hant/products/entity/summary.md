@@ -1,1 +1,1 @@
-以 Entity、CreditAttribution 與 SubjectAssociation 表達真實與虛構對象的歸屬關係。
+以實體、CreditAttribution 與 SubjectAssociation 表達真實與虛構對象的歸屬關係。

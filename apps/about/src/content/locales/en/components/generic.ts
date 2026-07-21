@@ -1,3 +1,5 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
 	record: "Record",
 	relations: "Relations",
@@ -16,7 +18,7 @@ const content = {
 	entity: "Entity",
 	tags: "Tags",
 	queryable: "queryable",
-	api: "API",
+	api: String(verbatimTerms.api.value),
 	permissioned: "permissioned",
 };
 

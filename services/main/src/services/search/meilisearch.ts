@@ -141,7 +141,7 @@ function meilisearchSort(sort: SearchSort, hasQuery: boolean): string[] {
 		createdAt: "ranking.createdAt",
 		updatedAt: "ranking.updatedAt",
 		publishedAt: "ranking.publishedAt",
-		subscriberCount: "ranking.subscriberCount",
+		followerCount: "ranking.followerCount",
 		replyCount: "ranking.replyCount",
 		closesAt: "filters.closesAt",
 	};

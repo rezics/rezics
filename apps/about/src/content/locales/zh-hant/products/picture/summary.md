@@ -1,1 +1,1 @@
-以 Post(kind=PICTURE) 承載一張或多張有序圖片。
+由貼文的 `Post(kind=PICTURE)` 類型承載一張或多張有序圖片。

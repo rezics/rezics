@@ -1,1 +1,1 @@
-Source, issues, and contribution entry points for the Rezics ecosystem.
+Source, issues, and contribution entry points for the REZICS ecosystem.

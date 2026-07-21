@@ -59,6 +59,7 @@ import {
 } from "./schema";
 
 const preferredLocalization = alias(unitLocalization, "preferred_localization");
+const preferredRealmFollow = alias(unitFollow, "preferred_realm_follow");
 
 const FeedCursor = t.Object(
 	{
@@ -395,9 +396,9 @@ export async function getFeedRankingCandidates(input: {
 				${
 					input.viewer.personalized && input.viewer.profileId
 						? sql`case when exists (
-					select 1 from realm_subscription preferred_realm
-					where preferred_realm.profile_id = ${input.viewer.profileId}::uuid
-						and preferred_realm.realm_id = candidate_realm.realm_id
+					select 1 from ${preferredRealmFollow}
+					where ${preferredRealmFollow.followerProfileId} = ${input.viewer.profileId}::uuid
+						and ${preferredRealmFollow.unitId} = candidate_realm.realm_id
 				) then 0 else 1 end,`
 						: sql``
 				}

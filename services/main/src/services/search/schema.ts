@@ -78,7 +78,7 @@ export const SearchCategoryRules = {
 	},
 	users: {
 		filterableAttributes: CommonFilterableAttributes,
-		sortableAttributes: [...CommonSortableAttributes, "subscriberCount"],
+		sortableAttributes: [...CommonSortableAttributes, "followerCount"],
 	},
 	entity: {
 		filterableAttributes: [...CommonFilterableAttributes, "type"],
@@ -100,7 +100,7 @@ export const SearchCategoryRules = {
 	},
 	realms: {
 		filterableAttributes: [...CommonFilterableAttributes, "joinPolicy"],
-		sortableAttributes: [...CommonSortableAttributes, "subscriberCount"],
+		sortableAttributes: [...CommonSortableAttributes, "followerCount"],
 	},
 	collections: {
 		filterableAttributes: [...CommonFilterableAttributes, "ownerId"],

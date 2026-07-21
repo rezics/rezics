@@ -1,14 +1,67 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
+import type { ProductId } from "../../../productRegistry";
+
 const content = {
 	breadcrumbsHome: "首頁",
 	breadcrumbsProducts: "產品",
+	names: {
+		catalog: "作品目錄",
+		book: "書籍",
+		gamebook: "遊戲書",
+		media: "媒體",
+		software: "軟體",
+		series: "系列",
+		release: "發行",
+		post: "貼文",
+		wiki: "維基",
+		picture: "圖片",
+		review: "評論",
+		collection: "收藏",
+		library: "書庫",
+		realm: "領域",
+		zone: "專區",
+		comment: "留言",
+		score: "評分",
+		"content-structure": "內容結構",
+		history: "歷史",
+		editor: "編輯器",
+		feed: "動態",
+		tag: "標籤",
+		progress: "進度",
+		entity: "實體",
+		"api-oauth": `${verbatimTerms.api.value} 與 ${verbatimTerms.oauth.value}`,
+	} satisfies Record<ProductId, string>,
+	manifestationFormulas: {
+		gamebook: "書籍 + 遊戲內容結構 → 遊戲書",
+		wiki: `貼文（${verbatimTerms.kindWiki.value}）→ 維基`,
+		picture: `貼文（${verbatimTerms.kindPicture.value}）→ 圖片`,
+		review: `貼文（${verbatimTerms.kindReview.value}）→ 評論`,
+		library: `收藏（${verbatimTerms.collectionArray.value}）→ 書庫`,
+	},
+	capabilityModeLabels: {
+		ContentStructure: "內容結構",
+		GameContentStructure: "遊戲內容結構",
+		Entity: "實體",
+		CreditAttribution: "貢獻歸屬",
+		SubjectAssociation: "主題關聯",
+	},
 	scenarios: "具體使用場景",
-	workflow: "核心工作流",
+	workflow: "核心工作流程",
 	capabilities: "使用的共享能力",
 	boundaries: "產品邊界",
 	faq: "常見問題",
 	statusLabel: "狀態",
 	classificationLabel: "類型",
 	consumers: "使用此能力的產品",
+	sectionEyebrows: {
+		use: "使用方式",
+		workflow: "工作流程",
+		platform: "平台能力",
+		scope: "適用範圍",
+		faq: "常見問題",
+		next: "延伸閱讀",
+	},
 } satisfies typeof import("../../en/products/common").default;
 
 export default content;

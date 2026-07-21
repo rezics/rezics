@@ -1,10 +1,13 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
+	siteName: verbatimTerms.rezics.value,
 	nav: {
 		products: "제품",
 		platform: "플랫폼",
 		history: "History",
 		docs: "문서",
-		github: "GitHub",
+		github: verbatimTerms.github.value,
 		language: "언어",
 		theme: "테마",
 		openMenu: "메뉴 열기",
@@ -34,7 +37,7 @@ const content = {
 		viewProduct: "제품 보기",
 		viewAll: "전체 보기",
 		learnMore: "자세히 보기",
-		documentation: "Outline 문서",
+		documentation: `${verbatimTerms.outline.value} 문서`,
 		sourceCode: "소스 코드",
 		relatedProducts: "관련 제품",
 		usedCapabilities: "사용하는 공유 기능",
@@ -43,10 +46,11 @@ const content = {
 		sourceBasis: "사실 출처",
 	},
 	footer: {
-		statement: "Rezics는 콘텐츠의 정체성, 구조, 이력을 중심으로 한 오픈 제품 체계입니다.",
+		statement: `${verbatimTerms.rezics.value}는 콘텐츠의 정체성, 구조, 이력을 중심으로 한 오픈 제품 체계입니다.`,
 		productLinks: "제품",
 		platformLinks: "플랫폼",
 		openLinks: "오픈",
+		implementation: `${verbatimTerms.agpl30.value} · ${verbatimTerms.vike.value}와 ${verbatimTerms.react.value}로 만든 정적 사이트`,
 	},
 	notFound: {
 		title: "페이지를 찾을 수 없습니다",
@@ -54,6 +58,7 @@ const content = {
 		back: "홈으로 돌아가기",
 	},
 	a11y: {
+		home: `${verbatimTerms.rezics.value} 홈`,
 		skipContent: "주요 콘텐츠로 건너뛰기",
 		primaryNavigation: "주요 내비게이션",
 		mobileNavigation: "모바일 내비게이션",

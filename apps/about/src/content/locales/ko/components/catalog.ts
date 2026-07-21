@@ -1,3 +1,5 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
 	unitTypes: "Unit 유형",
 	identity: "Catalog 정체성",
@@ -11,7 +13,7 @@ const content = {
 	composition: "구성",
 	selectedIdentity: "선택한 정체성",
 	canonicalUnit: "표준 Unit",
-	stableId: "안정적 ID",
+	stableId: `안정적 ${verbatimTerms.id.value}`,
 	release: "Release",
 	editionContext: "판 컨텍스트",
 	attribution: "귀속",

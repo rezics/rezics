@@ -1,5 +1,6 @@
 import type { ManifestOptions } from "vite-plugin-pwa";
 import type { UiLocale } from "@rezics/i18n";
+import { LocalizedAppName, LocalizedPwaDescription } from "@rezics/i18n/manifest";
 
 import { appTheme } from "./lib/theme";
 
@@ -10,24 +11,14 @@ type LocalizedManifestOptions = Partial<ManifestOptions> & {
 	description_localized: LocalizedText;
 };
 
-const localizedName = {
-	"zh-Hant": "REZICS",
-	en: "REZICS",
-} satisfies LocalizedText;
-
-const localizedDescription = {
-	"zh-Hant": "發現作品，加入社群，展開深度討論。",
-	en: "Discover works, join communities, and take part in thoughtful discussion.",
-} satisfies LocalizedText;
-
 export const pwaManifest = {
 	id: "/",
-	name: "REZICS",
-	short_name: "REZICS",
-	description: localizedDescription["zh-Hant"],
-	name_localized: localizedName,
-	short_name_localized: localizedName,
-	description_localized: localizedDescription,
+	name: LocalizedAppName["zh-Hant"],
+	short_name: LocalizedAppName["zh-Hant"],
+	description: LocalizedPwaDescription["zh-Hant"],
+	name_localized: LocalizedAppName,
+	short_name_localized: LocalizedAppName,
+	description_localized: LocalizedPwaDescription,
 	start_url: "/",
 	scope: "/",
 	display: "standalone",

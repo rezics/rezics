@@ -326,7 +326,7 @@ function LoginForm({
 						<Input
 							autoComplete="email"
 							name="email"
-							placeholder="you@example.com"
+							placeholder={t.auth.emailPlaceholder}
 							required
 							size="lg"
 							type="email"
@@ -425,7 +425,7 @@ function RegisterForm({
 						<Input
 							autoComplete="email"
 							name="email"
-							placeholder="you@example.com"
+							placeholder={t.auth.emailPlaceholder}
 							required
 							size="lg"
 							type="email"
@@ -505,7 +505,7 @@ function ForgotPasswordForm({
 							<Input
 								autoComplete="email"
 								name="email"
-								placeholder="you@example.com"
+								placeholder={t.auth.emailPlaceholder}
 								required
 								size="lg"
 								type="email"

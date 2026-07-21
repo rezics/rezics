@@ -1,3 +1,5 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
 	unitTypes: "Unit-Typen",
 	identity: "Catalog-Identität",
@@ -11,7 +13,7 @@ const content = {
 	composition: "Zusammensetzung",
 	selectedIdentity: "Ausgewählte Identität",
 	canonicalUnit: "Kanonische Unit",
-	stableId: "stabile ID",
+	stableId: `stabile ${verbatimTerms.id.value}`,
 	release: "Release",
 	editionContext: "Editionskontext",
 	attribution: "Attribution",

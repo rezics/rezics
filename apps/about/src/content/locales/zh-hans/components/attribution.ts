@@ -1,8 +1,10 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
 	implemented: "已实现",
 	modes: "归属模式",
-	credit: "CreditAttribution",
-	subject: "SubjectAssociation",
+	credit: verbatimTerms.creditAttribution.value,
+	subject: verbatimTerms.subjectAssociation.value,
 	bookCredits: "Book 贡献归属",
 	relationship: "关系类型",
 	entity: "Entity",

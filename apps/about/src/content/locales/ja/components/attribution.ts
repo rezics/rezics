@@ -1,8 +1,10 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
 	implemented: "実装済み",
 	modes: "帰属モード",
-	credit: "CreditAttribution",
-	subject: "SubjectAssociation",
+	credit: verbatimTerms.creditAttribution.value,
+	subject: verbatimTerms.subjectAssociation.value,
 	bookCredits: "Book のクレジット",
 	relationship: "関係タイプ",
 	entity: "Entity",

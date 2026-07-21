@@ -985,8 +985,8 @@ export type UnitReferencedBlockDocument = {
 										| "updatedAt:desc"
 										| "publishedAt:asc"
 										| "publishedAt:desc"
-										| "subscriberCount:asc"
-										| "subscriberCount:desc"
+										| "followerCount:asc"
+										| "followerCount:desc"
 										| "replyCount:asc"
 										| "replyCount:desc"
 										| "closesAt:asc"
@@ -1002,8 +1002,8 @@ export type UnitReferencedBlockDocument = {
 										| "updatedAt:desc"
 										| "publishedAt:asc"
 										| "publishedAt:desc"
-										| "subscriberCount:asc"
-										| "subscriberCount:desc"
+										| "followerCount:asc"
+										| "followerCount:desc"
 										| "replyCount:asc"
 										| "replyCount:desc"
 										| "closesAt:asc"
@@ -1907,8 +1907,8 @@ export type UnitReferencedBlockDocument = {
 							| "updatedAt:desc"
 							| "publishedAt:asc"
 							| "publishedAt:desc"
-							| "subscriberCount:asc"
-							| "subscriberCount:desc"
+							| "followerCount:asc"
+							| "followerCount:desc"
 							| "replyCount:asc"
 							| "replyCount:desc"
 							| "closesAt:asc"
@@ -1924,8 +1924,8 @@ export type UnitReferencedBlockDocument = {
 							| "updatedAt:desc"
 							| "publishedAt:asc"
 							| "publishedAt:desc"
-							| "subscriberCount:asc"
-							| "subscriberCount:desc"
+							| "followerCount:asc"
+							| "followerCount:desc"
 							| "replyCount:asc"
 							| "replyCount:desc"
 							| "closesAt:asc"
@@ -3429,8 +3429,8 @@ export type DockDocument = {
 										| "updatedAt:desc"
 										| "publishedAt:asc"
 										| "publishedAt:desc"
-										| "subscriberCount:asc"
-										| "subscriberCount:desc"
+										| "followerCount:asc"
+										| "followerCount:desc"
 										| "replyCount:asc"
 										| "replyCount:desc"
 										| "closesAt:asc"
@@ -3446,8 +3446,8 @@ export type DockDocument = {
 										| "updatedAt:desc"
 										| "publishedAt:asc"
 										| "publishedAt:desc"
-										| "subscriberCount:asc"
-										| "subscriberCount:desc"
+										| "followerCount:asc"
+										| "followerCount:desc"
 										| "replyCount:asc"
 										| "replyCount:desc"
 										| "closesAt:asc"
@@ -4351,8 +4351,8 @@ export type DockDocument = {
 							| "updatedAt:desc"
 							| "publishedAt:asc"
 							| "publishedAt:desc"
-							| "subscriberCount:asc"
-							| "subscriberCount:desc"
+							| "followerCount:asc"
+							| "followerCount:desc"
 							| "replyCount:asc"
 							| "replyCount:desc"
 							| "closesAt:asc"
@@ -4368,8 +4368,8 @@ export type DockDocument = {
 							| "updatedAt:desc"
 							| "publishedAt:asc"
 							| "publishedAt:desc"
-							| "subscriberCount:asc"
-							| "subscriberCount:desc"
+							| "followerCount:asc"
+							| "followerCount:desc"
 							| "replyCount:asc"
 							| "replyCount:desc"
 							| "closesAt:asc"
@@ -7034,7 +7034,7 @@ export type GetApiNotificationsStatus200 = {
 				/**
 				 * @type string
 				 */
-				kind: "follow";
+				kind: "new_follower";
 				/**
 				 * @type null
 				 */
@@ -7660,7 +7660,7 @@ export type PutApiNotificationsPreferencesStatus500 = InternalError;
 
 export const PutApiNotificationsPreferencesRequestItemsKindEnum = {
 	reply: "reply",
-	follow: "follow",
+	new_follower: "new_follower",
 	direct_message: "direct_message",
 	moderation: "moderation",
 	realm: "realm",
@@ -26954,10 +26954,31 @@ export type PutApiUsersMePreferencesResponse =
 	| PutApiUsersMePreferencesStatus422
 	| PutApiUsersMePreferencesStatus500;
 
+export const GetApiUsersMeFollowingStatus200ItemsKindEnum = {
+	slug_namespace: "slug_namespace",
+	profile: "profile",
+	book: "book",
+	software: "software",
+	media: "media",
+	release: "release",
+	entity: "entity",
+	tag: "tag",
+	series: "series",
+	zone: "zone",
+	collection: "collection",
+	post: "post",
+	poll: "poll",
+	realm: "realm",
+	realm_rule: "realm_rule",
+} as const;
+
+export type GetApiUsersMeFollowingStatus200ItemsKindEnum =
+	(typeof GetApiUsersMeFollowingStatus200ItemsKindEnum)[keyof typeof GetApiUsersMeFollowingStatus200ItemsKindEnum];
+
 /**
  * @type object
  */
-export type GetApiUsersMeSubscriptionsStatus200 = {
+export type GetApiUsersMeFollowingStatus200 = {
 	/**
 	 * @type array
 	 */
@@ -26971,7 +26992,7 @@ export type GetApiUsersMeSubscriptionsStatus200 = {
 		/**
 		 * @type string
 		 */
-		kind: string;
+		kind: GetApiUsersMeFollowingStatus200ItemsKindEnum;
 		title: (string | null) | null;
 		avatar:
 			| ({
@@ -27031,12 +27052,12 @@ export type GetApiUsersMeSubscriptionsStatus200 = {
 /**
  * @type object
  */
-export type GetApiUsersMeSubscriptionsStatus500 = InternalError;
+export type GetApiUsersMeFollowingStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type GetApiUsersMeSubscriptionsOptions = {
+export type GetApiUsersMeFollowingOptions = {
 	body?: never;
 	path?: never;
 	query?: never;
@@ -27046,21 +27067,21 @@ export type GetApiUsersMeSubscriptionsOptions = {
 /**
  * @type object
  */
-export type GetApiUsersMeSubscriptionsResponses = {
-	"200": GetApiUsersMeSubscriptionsStatus200;
-	"500": GetApiUsersMeSubscriptionsStatus500;
+export type GetApiUsersMeFollowingResponses = {
+	"200": GetApiUsersMeFollowingStatus200;
+	"500": GetApiUsersMeFollowingStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type GetApiUsersMeSubscriptionsResponse =
-	GetApiUsersMeSubscriptionsStatus200 | GetApiUsersMeSubscriptionsStatus500;
+export type GetApiUsersMeFollowingResponse =
+	GetApiUsersMeFollowingStatus200 | GetApiUsersMeFollowingStatus500;
 
 /**
  * @type object
  */
-export type PatchApiUsersMeSubscriptionsByUnitIdPath = {
+export type PatchApiUsersMeFollowingByUnitIdPath = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -27072,7 +27093,7 @@ export type PatchApiUsersMeSubscriptionsByUnitIdPath = {
 /**
  * @type object
  */
-export type PatchApiUsersMeSubscriptionsByUnitIdStatus200 = {
+export type PatchApiUsersMeFollowingByUnitIdStatus200 = {
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -27102,7 +27123,7 @@ export type PatchApiUsersMeSubscriptionsByUnitIdStatus200 = {
 /**
  * @type object
  */
-export type PatchApiUsersMeSubscriptionsByUnitIdStatus404 = {
+export type PatchApiUsersMeFollowingByUnitIdStatus404 = {
 	/**
 	 * @type object
 	 */
@@ -27130,17 +27151,17 @@ export type PatchApiUsersMeSubscriptionsByUnitIdStatus404 = {
 /**
  * @type object
  */
-export type PatchApiUsersMeSubscriptionsByUnitIdStatus422 = ValidationError;
+export type PatchApiUsersMeFollowingByUnitIdStatus422 = ValidationError;
 
 /**
  * @type object
  */
-export type PatchApiUsersMeSubscriptionsByUnitIdStatus500 = InternalError;
+export type PatchApiUsersMeFollowingByUnitIdStatus500 = InternalError;
 
 /**
  * @type object
  */
-export type PatchApiUsersMeSubscriptionsByUnitIdBody = {
+export type PatchApiUsersMeFollowingByUnitIdBody = {
 	/**
 	 * @type boolean | undefined
 	 */
@@ -27158,9 +27179,9 @@ export type PatchApiUsersMeSubscriptionsByUnitIdBody = {
 /**
  * @type object
  */
-export type PatchApiUsersMeSubscriptionsByUnitIdOptions = {
-	body: PatchApiUsersMeSubscriptionsByUnitIdBody;
-	path: PatchApiUsersMeSubscriptionsByUnitIdPath;
+export type PatchApiUsersMeFollowingByUnitIdOptions = {
+	body: PatchApiUsersMeFollowingByUnitIdBody;
+	path: PatchApiUsersMeFollowingByUnitIdPath;
 	query?: never;
 	headers?: never;
 };
@@ -27168,21 +27189,21 @@ export type PatchApiUsersMeSubscriptionsByUnitIdOptions = {
 /**
  * @type object
  */
-export type PatchApiUsersMeSubscriptionsByUnitIdResponses = {
-	"200": PatchApiUsersMeSubscriptionsByUnitIdStatus200;
-	"404": PatchApiUsersMeSubscriptionsByUnitIdStatus404;
-	"422": PatchApiUsersMeSubscriptionsByUnitIdStatus422;
-	"500": PatchApiUsersMeSubscriptionsByUnitIdStatus500;
+export type PatchApiUsersMeFollowingByUnitIdResponses = {
+	"200": PatchApiUsersMeFollowingByUnitIdStatus200;
+	"404": PatchApiUsersMeFollowingByUnitIdStatus404;
+	"422": PatchApiUsersMeFollowingByUnitIdStatus422;
+	"500": PatchApiUsersMeFollowingByUnitIdStatus500;
 };
 
 /**
  * @description Union of all possible responses
  */
-export type PatchApiUsersMeSubscriptionsByUnitIdResponse =
-	| PatchApiUsersMeSubscriptionsByUnitIdStatus200
-	| PatchApiUsersMeSubscriptionsByUnitIdStatus404
-	| PatchApiUsersMeSubscriptionsByUnitIdStatus422
-	| PatchApiUsersMeSubscriptionsByUnitIdStatus500;
+export type PatchApiUsersMeFollowingByUnitIdResponse =
+	| PatchApiUsersMeFollowingByUnitIdStatus200
+	| PatchApiUsersMeFollowingByUnitIdStatus404
+	| PatchApiUsersMeFollowingByUnitIdStatus422
+	| PatchApiUsersMeFollowingByUnitIdStatus500;
 
 /**
  * @type object
@@ -58542,8 +58563,8 @@ export const GetApiSearchConfigurationStatus200SortDefaultEnum = {
 	"updatedAt:desc": "updatedAt:desc",
 	"publishedAt:asc": "publishedAt:asc",
 	"publishedAt:desc": "publishedAt:desc",
-	"subscriberCount:asc": "subscriberCount:asc",
-	"subscriberCount:desc": "subscriberCount:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
 	"replyCount:asc": "replyCount:asc",
 	"replyCount:desc": "replyCount:desc",
 	"closesAt:asc": "closesAt:asc",
@@ -58561,8 +58582,8 @@ export const GetApiSearchConfigurationStatus200SortOptionsEnum = {
 	"updatedAt:desc": "updatedAt:desc",
 	"publishedAt:asc": "publishedAt:asc",
 	"publishedAt:desc": "publishedAt:desc",
-	"subscriberCount:asc": "subscriberCount:asc",
-	"subscriberCount:desc": "subscriberCount:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
 	"replyCount:asc": "replyCount:asc",
 	"replyCount:desc": "replyCount:desc",
 	"closesAt:asc": "closesAt:asc",
@@ -59695,8 +59716,8 @@ export type PostApiSearchExecuteBody =
 				| "updatedAt:desc"
 				| "publishedAt:asc"
 				| "publishedAt:desc"
-				| "subscriberCount:asc"
-				| "subscriberCount:desc"
+				| "followerCount:asc"
+				| "followerCount:desc"
 				| "replyCount:asc"
 				| "replyCount:desc"
 				| "closesAt:asc"
@@ -60020,8 +60041,8 @@ export type PostApiSearchExecuteBody =
 				| "updatedAt:desc"
 				| "publishedAt:asc"
 				| "publishedAt:desc"
-				| "subscriberCount:asc"
-				| "subscriberCount:desc"
+				| "followerCount:asc"
+				| "followerCount:desc"
 				| "replyCount:asc"
 				| "replyCount:desc"
 				| "closesAt:asc"
@@ -60690,8 +60711,8 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 				| "updatedAt:desc"
 				| "publishedAt:asc"
 				| "publishedAt:desc"
-				| "subscriberCount:asc"
-				| "subscriberCount:desc"
+				| "followerCount:asc"
+				| "followerCount:desc"
 				| "replyCount:asc"
 				| "replyCount:desc"
 				| "closesAt:asc"
@@ -61015,8 +61036,8 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody =
 				| "updatedAt:desc"
 				| "publishedAt:asc"
 				| "publishedAt:desc"
-				| "subscriberCount:asc"
-				| "subscriberCount:desc"
+				| "followerCount:asc"
+				| "followerCount:desc"
 				| "replyCount:asc"
 				| "replyCount:desc"
 				| "closesAt:asc"
@@ -61694,8 +61715,8 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 				| "updatedAt:desc"
 				| "publishedAt:asc"
 				| "publishedAt:desc"
-				| "subscriberCount:asc"
-				| "subscriberCount:desc"
+				| "followerCount:asc"
+				| "followerCount:desc"
 				| "replyCount:asc"
 				| "replyCount:desc"
 				| "closesAt:asc"
@@ -62019,8 +62040,8 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody =
 				| "updatedAt:desc"
 				| "publishedAt:asc"
 				| "publishedAt:desc"
-				| "subscriberCount:asc"
-				| "subscriberCount:desc"
+				| "followerCount:asc"
+				| "followerCount:desc"
 				| "replyCount:asc"
 				| "replyCount:desc"
 				| "closesAt:asc"
@@ -62928,8 +62949,8 @@ export const PostApiSearchByIndexRequestSortEnum = {
 	"updatedAt:desc": "updatedAt:desc",
 	"publishedAt:asc": "publishedAt:asc",
 	"publishedAt:desc": "publishedAt:desc",
-	"subscriberCount:asc": "subscriberCount:asc",
-	"subscriberCount:desc": "subscriberCount:desc",
+	"followerCount:asc": "followerCount:asc",
+	"followerCount:desc": "followerCount:desc",
 	"replyCount:asc": "replyCount:asc",
 	"replyCount:desc": "replyCount:desc",
 	"closesAt:asc": "closesAt:asc",

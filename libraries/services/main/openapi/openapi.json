@@ -3204,11 +3204,11 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "subscriberCount:asc",
+																					"const": "followerCount:asc",
 																					"type": "string"
 																				},
 																				{
-																					"const": "subscriberCount:desc",
+																					"const": "followerCount:desc",
 																					"type": "string"
 																				},
 																				{
@@ -3264,11 +3264,11 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "subscriberCount:asc",
+																						"const": "followerCount:asc",
 																						"type": "string"
 																					},
 																					{
-																						"const": "subscriberCount:desc",
+																						"const": "followerCount:desc",
 																						"type": "string"
 																					},
 																					{
@@ -6426,11 +6426,11 @@
 																	"type": "string"
 																},
 																{
-																	"const": "subscriberCount:asc",
+																	"const": "followerCount:asc",
 																	"type": "string"
 																},
 																{
-																	"const": "subscriberCount:desc",
+																	"const": "followerCount:desc",
 																	"type": "string"
 																},
 																{
@@ -6486,11 +6486,11 @@
 																		"type": "string"
 																	},
 																	{
-																		"const": "subscriberCount:asc",
+																		"const": "followerCount:asc",
 																		"type": "string"
 																	},
 																	{
-																		"const": "subscriberCount:desc",
+																		"const": "followerCount:desc",
 																		"type": "string"
 																	},
 																	{
@@ -10698,11 +10698,11 @@
 																					"type": "string"
 																				},
 																				{
-																					"const": "subscriberCount:asc",
+																					"const": "followerCount:asc",
 																					"type": "string"
 																				},
 																				{
-																					"const": "subscriberCount:desc",
+																					"const": "followerCount:desc",
 																					"type": "string"
 																				},
 																				{
@@ -10758,11 +10758,11 @@
 																						"type": "string"
 																					},
 																					{
-																						"const": "subscriberCount:asc",
+																						"const": "followerCount:asc",
 																						"type": "string"
 																					},
 																					{
-																						"const": "subscriberCount:desc",
+																						"const": "followerCount:desc",
 																						"type": "string"
 																					},
 																					{
@@ -13920,11 +13920,11 @@
 																	"type": "string"
 																},
 																{
-																	"const": "subscriberCount:asc",
+																	"const": "followerCount:asc",
 																	"type": "string"
 																},
 																{
-																	"const": "subscriberCount:desc",
+																	"const": "followerCount:desc",
 																	"type": "string"
 																},
 																{
@@ -13980,11 +13980,11 @@
 																		"type": "string"
 																	},
 																	{
-																		"const": "subscriberCount:asc",
+																		"const": "followerCount:asc",
 																		"type": "string"
 																	},
 																	{
-																		"const": "subscriberCount:desc",
+																		"const": "followerCount:desc",
 																		"type": "string"
 																	},
 																	{
@@ -16585,7 +16585,7 @@
 																"type": "string"
 															},
 															"kind": {
-																"const": "follow",
+																"const": "new_follower",
 																"type": "string"
 															},
 															"payload": { "type": "null" }
@@ -17381,7 +17381,7 @@
 													"type": "string",
 													"enum": [
 														"reply",
-														"follow",
+														"new_follower",
 														"direct_message",
 														"moderation",
 														"realm",
@@ -40769,9 +40769,9 @@
 				"operationId": "putApiUsersMePreferences"
 			}
 		},
-		"/api/users/me/subscriptions": {
+		"/api/users/me/following": {
 			"get": {
-				"summary": "List current user subscriptions",
+				"summary": "List Units followed by the current user",
 				"tags": ["Users"],
 				"responses": {
 					"200": {
@@ -40799,7 +40799,26 @@
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
-													"kind": { "type": "string" },
+													"kind": {
+														"type": "string",
+														"enum": [
+															"slug_namespace",
+															"profile",
+															"book",
+															"software",
+															"media",
+															"release",
+															"entity",
+															"tag",
+															"series",
+															"zone",
+															"collection",
+															"post",
+															"poll",
+															"realm",
+															"realm_rule"
+														]
+													},
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -40873,12 +40892,12 @@
 						}
 					}
 				},
-				"operationId": "getApiUsersMeSubscriptions"
+				"operationId": "getApiUsersMeFollowing"
 			}
 		},
-		"/api/users/me/subscriptions/{unitId}": {
+		"/api/users/me/following/{unitId}": {
 			"patch": {
-				"summary": "Update subscription presentation",
+				"summary": "Update followed Unit presentation",
 				"tags": ["Users"],
 				"parameters": [
 					{
@@ -40975,7 +40994,7 @@
 						}
 					}
 				},
-				"operationId": "patchApiUsersMeSubscriptionsByUnitId"
+				"operationId": "patchApiUsersMeFollowingByUnitId"
 			}
 		},
 		"/api/users/{id}": {
@@ -84996,8 +85015,8 @@
 														"updatedAt:desc",
 														"publishedAt:asc",
 														"publishedAt:desc",
-														"subscriberCount:asc",
-														"subscriberCount:desc",
+														"followerCount:asc",
+														"followerCount:desc",
 														"replyCount:asc",
 														"replyCount:desc",
 														"closesAt:asc",
@@ -85018,8 +85037,8 @@
 															"updatedAt:desc",
 															"publishedAt:asc",
 															"publishedAt:desc",
-															"subscriberCount:asc",
-															"subscriberCount:desc",
+															"followerCount:asc",
+															"followerCount:desc",
 															"replyCount:asc",
 															"replyCount:desc",
 															"closesAt:asc",
@@ -85152,11 +85171,11 @@
 														"type": "string"
 													},
 													{
-														"const": "subscriberCount:asc",
+														"const": "followerCount:asc",
 														"type": "string"
 													},
 													{
-														"const": "subscriberCount:desc",
+														"const": "followerCount:desc",
 														"type": "string"
 													},
 													{ "const": "replyCount:asc", "type": "string" },
@@ -86353,11 +86372,11 @@
 														"type": "string"
 													},
 													{
-														"const": "subscriberCount:asc",
+														"const": "followerCount:asc",
 														"type": "string"
 													},
 													{
-														"const": "subscriberCount:desc",
+														"const": "followerCount:desc",
 														"type": "string"
 													},
 													{ "const": "replyCount:asc", "type": "string" },
@@ -87965,11 +87984,11 @@
 														"type": "string"
 													},
 													{
-														"const": "subscriberCount:asc",
+														"const": "followerCount:asc",
 														"type": "string"
 													},
 													{
-														"const": "subscriberCount:desc",
+														"const": "followerCount:desc",
 														"type": "string"
 													},
 													{ "const": "replyCount:asc", "type": "string" },
@@ -89166,11 +89185,11 @@
 														"type": "string"
 													},
 													{
-														"const": "subscriberCount:asc",
+														"const": "followerCount:asc",
 														"type": "string"
 													},
 													{
-														"const": "subscriberCount:desc",
+														"const": "followerCount:desc",
 														"type": "string"
 													},
 													{ "const": "replyCount:asc", "type": "string" },
@@ -90816,11 +90835,11 @@
 														"type": "string"
 													},
 													{
-														"const": "subscriberCount:asc",
+														"const": "followerCount:asc",
 														"type": "string"
 													},
 													{
-														"const": "subscriberCount:desc",
+														"const": "followerCount:desc",
 														"type": "string"
 													},
 													{ "const": "replyCount:asc", "type": "string" },
@@ -92017,11 +92036,11 @@
 														"type": "string"
 													},
 													{
-														"const": "subscriberCount:asc",
+														"const": "followerCount:asc",
 														"type": "string"
 													},
 													{
-														"const": "subscriberCount:desc",
+														"const": "followerCount:desc",
 														"type": "string"
 													},
 													{ "const": "replyCount:asc", "type": "string" },
@@ -94101,8 +94120,8 @@
 											"updatedAt:desc",
 											"publishedAt:asc",
 											"publishedAt:desc",
-											"subscriberCount:asc",
-											"subscriberCount:desc",
+											"followerCount:asc",
+											"followerCount:desc",
 											"replyCount:asc",
 											"replyCount:desc",
 											"closesAt:asc",

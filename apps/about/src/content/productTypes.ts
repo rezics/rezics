@@ -22,7 +22,15 @@ export type ProductClaim = {
 	status: "confirmed" | "planned" | "research";
 };
 
-export type ProductManifestation = { formula: string; description: string };
+export type ProductManifestationKind = "gamebook" | "wiki" | "picture" | "review" | "library";
+export type ProductManifestation = { kind: ProductManifestationKind };
+
+export type ProductCapabilityMode =
+	| "ContentStructure"
+	| "GameContentStructure"
+	| "Entity"
+	| "CreditAttribution"
+	| "SubjectAssociation";
 
 export type ProductSectionId =
 	| "identity"
@@ -41,7 +49,7 @@ export type ProductDefinition = {
 	pageClass: ProductClass;
 	navGroup: ProductNavGroup;
 	canonicalParentId?: string;
-	capabilityModes?: readonly string[];
+	capabilityModes?: readonly ProductCapabilityMode[];
 	consumesCapabilities: readonly string[];
 	manifestation?: ProductManifestation;
 	relatedProductIds: readonly string[];

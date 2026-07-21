@@ -23,7 +23,7 @@ describe("backend internationalization", () => {
 	it("lets an Elysia route use explicit language preferences", async () => {
 		const app = new Elysia().use(i18n).get("/", async ({ i18n }) => {
 			const { t } = await i18n.getTranslation("notifications", ["zh-Hant"]);
-			return t.follow;
+			return t.new_follower;
 		});
 		const response = await app.handle(
 			new Request("http://localhost/", { headers: { "Accept-Language": "en-US" } }),
@@ -31,8 +31,8 @@ describe("backend internationalization", () => {
 
 		expect(response.headers.get("Content-Language")).toBe("zh-Hant");
 		expect(await response.json()).toEqual({
-			title: "REZICS 有新的關注",
-			body: "有人開始關注你。",
+			title: "REZICS 有新的追蹤",
+			body: "有人開始追蹤你。",
 		});
 	});
 
@@ -63,9 +63,9 @@ describe("backend internationalization", () => {
 		const { t, locale } = await getTranslation("notifications", ["ja-JP"]);
 
 		expect(locale).toBe("zh-Hant");
-		expect(t.follow).toEqual({
-			title: "REZICS 有新的關注",
-			body: "有人開始關注你。",
+		expect(t.new_follower).toEqual({
+			title: "REZICS 有新的追蹤",
+			body: "有人開始追蹤你。",
 		});
 	});
 });

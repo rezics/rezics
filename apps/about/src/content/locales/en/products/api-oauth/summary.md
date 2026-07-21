@@ -1,1 +1,1 @@
-Permissioned API, OAuth, and MCP entry points for connecting Rezics.
+Permissioned API, OAuth, and MCP entry points for connecting REZICS.

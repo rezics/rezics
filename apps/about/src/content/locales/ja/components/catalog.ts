@@ -1,3 +1,5 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
 	unitTypes: "Unit の種類",
 	identity: "Catalog の同一性",
@@ -11,7 +13,7 @@ const content = {
 	composition: "構成",
 	selectedIdentity: "選択中の同一性",
 	canonicalUnit: "正規 Unit",
-	stableId: "安定 ID",
+	stableId: `安定 ${verbatimTerms.id.value}`,
 	release: "Release",
 	editionContext: "版のコンテキスト",
 	attribution: "帰属",

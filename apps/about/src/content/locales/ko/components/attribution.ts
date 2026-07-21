@@ -1,8 +1,10 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
 	implemented: "구현됨",
 	modes: "귀속 모드",
-	credit: "CreditAttribution",
-	subject: "SubjectAssociation",
+	credit: verbatimTerms.creditAttribution.value,
+	subject: verbatimTerms.subjectAssociation.value,
 	bookCredits: "Book 크레딧",
 	relationship: "관계 유형",
 	entity: "Entity",

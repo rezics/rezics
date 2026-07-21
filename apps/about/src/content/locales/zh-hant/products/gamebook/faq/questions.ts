@@ -1,5 +1,5 @@
 const content = {
-	preview: "GameBook 的畫面是真實產品截圖嗎？",
+	preview: "遊戲書的畫面是真實產品截圖嗎？",
 	status: "頁面上的實作狀態如何判定？",
 } satisfies typeof import("../../../../en/products/gamebook/faq/questions").default;
 

@@ -1,10 +1,13 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
+	siteName: verbatimTerms.rezics.value,
 	nav: {
 		products: "Produkte",
 		platform: "Plattform",
 		history: "History",
 		docs: "Dokumentation",
-		github: "GitHub",
+		github: verbatimTerms.github.value,
 		language: "Sprache",
 		theme: "Darstellung",
 		openMenu: "Menü öffnen",
@@ -34,7 +37,7 @@ const content = {
 		viewProduct: "Produkt ansehen",
 		viewAll: "Alle ansehen",
 		learnMore: "Mehr erfahren",
-		documentation: "Outline-Dokumentation",
+		documentation: `${verbatimTerms.outline.value}-Dokumentation`,
 		sourceCode: "Quellcode",
 		relatedProducts: "Verwandte Produkte",
 		usedCapabilities: "Genutzte Plattformfähigkeiten",
@@ -43,11 +46,11 @@ const content = {
 		sourceBasis: "Faktenquellen",
 	},
 	footer: {
-		statement:
-			"Rezics ist ein offenes Produktsystem für Identität, Struktur und Verlauf von Inhalten.",
+		statement: `${verbatimTerms.rezics.value} ist ein offenes Produktsystem für Identität, Struktur und Verlauf von Inhalten.`,
 		productLinks: "Produkte",
 		platformLinks: "Plattform",
 		openLinks: "Offen",
+		implementation: `${verbatimTerms.agpl30.value} · Statische Website mit ${verbatimTerms.vike.value} und ${verbatimTerms.react.value}`,
 	},
 	notFound: {
 		title: "Seite nicht gefunden",
@@ -55,6 +58,7 @@ const content = {
 		back: "Zur Startseite",
 	},
 	a11y: {
+		home: `${verbatimTerms.rezics.value}-Startseite`,
 		skipContent: "Zum Hauptinhalt",
 		primaryNavigation: "Hauptnavigation",
 		mobileNavigation: "Mobile Navigation",

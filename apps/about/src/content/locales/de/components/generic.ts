@@ -1,3 +1,5 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
 	record: "Datensatz",
 	relations: "Beziehungen",
@@ -16,7 +18,7 @@ const content = {
 	entity: "Entity",
 	tags: "Tags",
 	queryable: "abfragbar",
-	api: "API",
+	api: verbatimTerms.api.value,
 	permissioned: "zugriffsbeschränkt",
 } satisfies typeof import("../../en/components/generic").default;
 

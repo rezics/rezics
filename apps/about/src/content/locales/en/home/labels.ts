@@ -1,11 +1,13 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
-	eyebrow: "Rezics product system",
+	eyebrow: `${verbatimTerms.rezics.value} product system`,
 	title: "Content can keep its identity, structure, and history.",
-	stageTitle: "Meet Rezics through product surfaces",
+	stageTitle: `Meet ${verbatimTerms.rezics.value} through product surfaces`,
 	productsTitle: "Every product has its own entrance",
 	platformTitle: "Shared capabilities work across products",
 	formulaTitle: "How capabilities form products",
-	historyTitle: "History is Rezics’ information backbone",
+	historyTitle: `History is ${verbatimTerms.rezics.value}’ information backbone`,
 	openTitle: "Open from documentation to source",
 	eyebrows: {
 		stage: "Product stage",

@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
-import { ContentLanguage, DateTime, FractionalPosition, OrdinalPosition, Uuid } from ".";
+import { ContentLanguage, DateTime, FractionalPosition, OrdinalPosition, UnitKind, Uuid } from ".";
 
 const NullableUuid = t.Nullable(Uuid);
 
@@ -29,11 +29,11 @@ export const ReactionResponse = t.Object({ reaction: t.Nullable(t.String()) });
 export const PollVoteResponse = t.Object({ optionIds: t.Array(Uuid) });
 
 export const FollowResponse = t.Object({ following: t.Boolean() });
-export const SubscriptionListResponse = t.Object({
+export const FollowingListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			id: Uuid,
-			kind: t.String(),
+			kind: UnitKind,
 			title: t.Nullable(t.String()),
 			avatar: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
 			cover: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
@@ -44,7 +44,7 @@ export const SubscriptionListResponse = t.Object({
 		}),
 	),
 });
-export const SubscriptionPreferenceResponse = t.Object({
+export const FollowingPreferenceResponse = t.Object({
 	unitId: Uuid,
 	position: FractionalPosition,
 	favorite: t.Boolean(),

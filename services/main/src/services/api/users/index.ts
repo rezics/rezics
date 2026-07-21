@@ -20,8 +20,8 @@ import { recordUnitRevision } from "../../units/history";
 import {
 	BlockResponse,
 	FollowResponse,
-	SubscriptionListResponse,
-	SubscriptionPreferenceResponse,
+	FollowingListResponse,
+	FollowingPreferenceResponse,
 	UserBlockListResponse,
 } from "../schema/action-response";
 import {
@@ -33,9 +33,9 @@ import {
 import {
 	ReplacePreferencesBody,
 	parseCollectionConfig,
-	SubscriptionUnitParams,
+	FollowingUnitParams,
 	UpdateProfileBody,
-	UpdateSubscriptionBody,
+	UpdateFollowingBody,
 	UserIdParams,
 	UserLookupParams,
 } from "./schema";
@@ -59,7 +59,7 @@ const ProfileMutationNotFoundResponse = toApiErrorResponse([
 const UnitForbiddenResponse = toApiErrorResponse(["UnitProtected"]);
 const UserNotFoundResponse = toApiErrorResponse(["UnitNotFound", "UserNotFound"]);
 
-async function listSubscriptions(followerProfileId: string) {
+async function listFollowing(followerProfileId: string) {
 	const records = await database
 		.select({
 			id: unit.id,
@@ -253,13 +253,13 @@ export default new Elysia({ prefix: "/users" })
 			detail: { summary: "Replace current user preferences", tags: ["Users"] },
 		},
 	)
-	.get("/me/subscriptions", async ({ profile }) => listSubscriptions(profile.unitId), {
+	.get("/me/following", async ({ profile }) => listFollowing(profile.unitId), {
 		access: "interaction:read",
-		response: { [StatusCodes.OK]: SubscriptionListResponse },
-		detail: { summary: "List current user subscriptions", tags: ["Users"] },
+		response: { [StatusCodes.OK]: FollowingListResponse },
+		detail: { summary: "List Units followed by the current user", tags: ["Users"] },
 	})
 	.patch(
-		"/me/subscriptions/:unitId",
+		"/me/following/:unitId",
 		async ({ profile, params, body }) => {
 			const [updated] = await database
 				.update(unitFollow)
@@ -280,18 +280,18 @@ export default new Elysia({ prefix: "/users" })
 					favorite: unitFollow.favorite,
 					updatedAt: unitFollow.updatedAt,
 				});
-			if (!updated) throw new UnitNotFound("Subscription");
+			if (!updated) throw new UnitNotFound("Follow");
 			return updated;
 		},
 		{
 			access: "write:interaction:write",
-			params: SubscriptionUnitParams,
-			body: UpdateSubscriptionBody,
+			params: FollowingUnitParams,
+			body: UpdateFollowingBody,
 			response: {
-				[StatusCodes.OK]: SubscriptionPreferenceResponse,
+				[StatusCodes.OK]: FollowingPreferenceResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},
-			detail: { summary: "Update subscription presentation", tags: ["Users"] },
+			detail: { summary: "Update followed Unit presentation", tags: ["Users"] },
 		},
 	)
 	.get(
@@ -384,9 +384,9 @@ export default new Elysia({ prefix: "/users" })
 				return createNotification(tx, {
 					recipientProfileId: params.id,
 					actorProfileId: profile.unitId,
-					kind: "follow",
+					kind: "new_follower",
 					subjectUnitId: profile.unitId,
-					dedupeKey: `follow:${profile.unitId}`,
+					dedupeKey: `new-follower:${profile.unitId}`,
 				});
 			});
 			await deliverNotificationEmail(notificationId);

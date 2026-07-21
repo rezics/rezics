@@ -45,7 +45,7 @@ export function ZonePage({ id }: { id: string }) {
 					</Avatar>
 					<div className="min-w-0">
 						<p className="mb-1 font-semibold text-muted-foreground text-xs uppercase tracking-[0.14em]">
-							Zone
+							{t.ui.zone}
 						</p>
 						<h1 className="truncate font-bold text-3xl tracking-tight sm:text-4xl">
 							{title}

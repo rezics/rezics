@@ -12,7 +12,7 @@ const NullableInteger = Type.Union([Type.Integer(), Type.Null()]);
 const StringList = Type.Array(Type.String());
 const UuidList = Type.Array(Uuid);
 
-export const CurrentSearchProjectionVersion = 1 as const;
+export const CurrentSearchProjectionVersion = 2 as const;
 export const HistorySearchProjectionVersion = 1 as const;
 
 export const CurrentSearchDocument = Type.Object(
@@ -96,14 +96,14 @@ export const CurrentSearchDocument = Type.Object(
 			createdAt: Type.Integer(),
 			updatedAt: Type.Integer(),
 			publishedAt: NullableInteger,
-			subscriberCount: Type.Integer({ minimum: 0 }),
+			followerCount: Type.Integer({ minimum: 0 }),
 			replyCount: Type.Integer({ minimum: 0 }),
 			recommendationSnapshotId: NullableUuid,
 			recommendationBest: Type.Number({ minimum: 0 }),
 			engagement24h: Type.Number({ minimum: 0 }),
 		}),
 	},
-	{ additionalProperties: false, $id: "CurrentSearchDocumentV1" },
+	{ additionalProperties: false, $id: "CurrentSearchDocumentV2" },
 );
 export type CurrentSearchDocument = Static<typeof CurrentSearchDocument>;
 

@@ -1,3 +1,5 @@
+import { insert } from "native-i18n";
+
 export default {
 	collections: "Collections",
 	favorites: "Favorites",
@@ -20,6 +22,7 @@ export default {
 	reviewTarget: "Review target",
 	reviewRealm: "Realm",
 	reviewScore: "Score",
+	scoreOutOfTen: insert("{{score}}/10", { score: String }),
 	emptyReviews: "No reviews yet.",
 	reaction: "Reaction",
 	upvote: "Upvote",

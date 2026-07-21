@@ -17,6 +17,7 @@ export function HomeProductStage({ locale }: { locale: AboutLocale }) {
 	const { common, home, products } = getLocaleContent(locale);
 	const product = featured[active]!;
 	const { Summary } = products.byId[product.id as ProductId];
+	const productName = products.common.names[product.id as ProductId];
 	const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
 		let next = active;
 		if (event.key === "ArrowRight") next = (active + 1) % featured.length;
@@ -46,7 +47,7 @@ export function HomeProductStage({ locale }: { locale: AboutLocale }) {
 						onClick={() => setActive(index)}
 						onKeyDown={onKeyDown}
 					>
-						{entry.name}
+						{products.common.names[entry.id as ProductId]}
 					</button>
 				))}
 			</div>
@@ -57,7 +58,7 @@ export function HomeProductStage({ locale }: { locale: AboutLocale }) {
 			>
 				<ProductDemo
 					kind={product.demoKind}
-					productName={product.name}
+					productName={productName}
 					locale={locale}
 					label={common.labels.conceptPreview}
 					caption={common.labels.conceptCaption}

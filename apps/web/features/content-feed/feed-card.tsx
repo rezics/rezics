@@ -25,6 +25,7 @@ import {
 	Separator,
 	cn,
 } from "@rezics/ui";
+import { useTranslation } from "@/i18n/client";
 
 export interface FeedActor {
 	name: string;
@@ -236,17 +237,20 @@ function FeedActorContext({ actor }: { actor: FeedActor }) {
 }
 
 function FeedRealmContext({ realms }: { realms: FeedRealms }) {
+	const { t } = useTranslation(["feed"]);
 	const [primaryRealm, ...additionalRealms] = realms;
 	const visibleRealms = [primaryRealm, ...additionalRealms.slice(0, 2)];
 	const moreCount = additionalRealms.length;
 	const realmSummary =
-		moreCount > 0 ? `in ${primaryRealm.name} and ${moreCount} more` : `in ${primaryRealm.name}`;
+		moreCount > 0
+			? t.feed.realmContextWithMore({ realm: primaryRealm.name, count: moreCount })
+			: t.feed.realmContext({ realm: primaryRealm.name });
 
 	return (
 		<Popover positioning={{ placement: "bottom-start" }}>
 			<PopoverTrigger asChild>
 				<Button
-					aria-label={`${realmSummary}. Show Realm list`}
+					aria-label={t.feed.showRealmList({ summary: realmSummary })}
 					className="max-w-full gap-1.5 px-1.5 data-[state=open]:bg-accent data-[state=open]:text-accent-foreground"
 					pill
 					size="xs"
@@ -262,14 +266,15 @@ function FeedRealmContext({ realms }: { realms: FeedRealms }) {
 							/>
 						))}
 					</AvatarGroup>
-					<span className="truncate text-muted-foreground">
-						in <span className="font-medium text-foreground">{primaryRealm.name}</span>
-						{moreCount > 0 ? ` and ${moreCount} more` : null}
-					</span>
+					<span className="truncate text-muted-foreground">{realmSummary}</span>
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className="w-72 p-3">
-				<p className="mb-2 font-medium text-sm">Published in {realms.length} Realm</p>
+				<p className="mb-2 font-medium text-sm">
+					{realms.length === 1
+						? t.feed.publishedInOneRealm({ count: realms.length })
+						: t.feed.publishedInRealms({ count: realms.length })}
+				</p>
 				<div className="flex flex-col gap-1" role="list">
 					{realms.map((realm) => (
 						<a

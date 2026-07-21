@@ -1,10 +1,13 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
+	siteName: verbatimTerms.rezics.value,
 	nav: {
 		products: "产品",
 		platform: "平台",
 		history: "History",
 		docs: "文档",
-		github: "GitHub",
+		github: verbatimTerms.github.value,
 		language: "语言",
 		theme: "主题",
 		openMenu: "打开菜单",
@@ -33,7 +36,7 @@ const content = {
 		viewProduct: "查看产品",
 		viewAll: "查看全部",
 		learnMore: "深入了解",
-		documentation: "Outline 文档",
+		documentation: `${verbatimTerms.outline.value} 文档`,
 		sourceCode: "源代码",
 		relatedProducts: "相关产品",
 		usedCapabilities: "使用的共享能力",
@@ -42,10 +45,11 @@ const content = {
 		sourceBasis: "事实来源",
 	},
 	footer: {
-		statement: "Rezics 是一套以内容身份、结构与历史为核心的开放产品系统。",
+		statement: `${verbatimTerms.rezics.value} 是一套以内容身份、结构与历史为核心的开放产品系统。`,
 		productLinks: "产品",
 		platformLinks: "平台",
 		openLinks: "开放",
+		implementation: `${verbatimTerms.agpl30.value} · 使用 ${verbatimTerms.vike.value} 与 ${verbatimTerms.react.value} 构建的静态网站`,
 	},
 	notFound: {
 		title: "找不到这个页面",
@@ -53,6 +57,7 @@ const content = {
 		back: "返回首页",
 	},
 	a11y: {
+		home: `${verbatimTerms.rezics.value} 首页`,
 		skipContent: "跳到主要内容",
 		primaryNavigation: "主要导航",
 		mobileNavigation: "移动端导航",

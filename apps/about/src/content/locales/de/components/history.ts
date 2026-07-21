@@ -1,12 +1,14 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
 	versions: "Versionen",
 	publishedVersions: "Veröffentlichte Versionen",
 	fieldHistory: "Feldverlauf",
 	diff: "Felddifferenz",
 	locked: "Dieses Feld ist im aktiven Bearbeitungsbereich gesperrt",
-	bookTitle: "Book.title",
-	postBlock: "Post.block",
-	zoneConfig: "Zone.config",
+	bookTitle: verbatimTerms.bookTitleField.value,
+	postBlock: verbatimTerms.postBlockField.value,
+	zoneConfig: verbatimTerms.zoneConfigField.value,
 	publishedVersionC: "Veröffentlichte Version C",
 	publishedVersionB: "Veröffentlichte Version B",
 	publishedVersionA: "Veröffentlichte Version A",
@@ -16,11 +18,11 @@ const content = {
 	previousTitle: "Vorheriger Titel",
 	currentTitle: "Aktuell veröffentlichter Titel",
 	postBlockHistory: "Verlauf des Post-Blocks",
-	previousPostBlock: "paragraph.block / veröffentlicht B",
-	currentPostBlock: "paragraph.block / veröffentlicht C",
+	previousPostBlock: `${verbatimTerms.paragraphBlockField.value} / veröffentlicht B`,
+	currentPostBlock: `${verbatimTerms.paragraphBlockField.value} / veröffentlicht C`,
 	zoneConfigurationHistory: "Verlauf der Zone-Konfiguration",
-	previousZoneQuery: "feed.query / veröffentlicht A",
-	currentZoneQuery: "feed.query / veröffentlicht B",
+	previousZoneQuery: `${verbatimTerms.feedQueryField.value} / veröffentlicht A`,
+	currentZoneQuery: `${verbatimTerms.feedQueryField.value} / veröffentlicht B`,
 } satisfies typeof import("../../en/components/history").default;
 
 export default content;

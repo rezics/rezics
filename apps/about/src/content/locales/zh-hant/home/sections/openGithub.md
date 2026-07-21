@@ -1,1 +1,1 @@
-Rezics 生態的源碼、Issue 與貢獻入口。
+REZICS 生態的原始碼、GitHub 議題與貢獻入口。

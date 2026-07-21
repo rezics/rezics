@@ -30,7 +30,7 @@ databases:
 functions:
     - name: "rezics-unit-search-document-v1"
       type: "enrichment"
-      file: "rezics_unit_search_document_v1.sql"
+      file: "rezics_unit_search_document_v2.sql"
     - name: "rezics-unit-search-transform-v1"
       type: "transform"
       file: "current-transform.exs"

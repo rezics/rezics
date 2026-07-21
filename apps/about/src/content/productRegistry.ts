@@ -63,8 +63,7 @@ export const PRODUCT_DEFINITIONS = [
 		canonicalParentId: "book",
 		consumesCapabilities: ["history", "editor", "progress"],
 		manifestation: {
-			formula: "Book + GameContentStructure → GameBook",
-			description: "A Book presented through the optional game structure mode.",
+			kind: "gamebook",
 		},
 		relatedProductIds: ["book", "content-structure", "progress"],
 		implementationStatus: "documented",
@@ -161,8 +160,7 @@ export const PRODUCT_DEFINITIONS = [
 		canonicalParentId: "post",
 		consumesCapabilities: ["editor", "history", "feed"],
 		manifestation: {
-			formula: "Post(kind=WIKI) → Wiki",
-			description: "A Post with the WIKI kind.",
+			kind: "wiki",
 		},
 		relatedProductIds: ["post", "picture", "review", "entity", "tag"],
 		implementationStatus: "documented",
@@ -180,8 +178,7 @@ export const PRODUCT_DEFINITIONS = [
 		canonicalParentId: "post",
 		consumesCapabilities: ["editor", "history", "feed"],
 		manifestation: {
-			formula: "Post(kind=PICTURE) → Picture",
-			description: "A Post with ordered picture media.",
+			kind: "picture",
 		},
 		relatedProductIds: ["post", "wiki", "review", "entity", "tag"],
 		implementationStatus: "documented",
@@ -199,8 +196,7 @@ export const PRODUCT_DEFINITIONS = [
 		canonicalParentId: "post",
 		consumesCapabilities: ["editor", "history", "feed", "score"],
 		manifestation: {
-			formula: "Post(kind=REVIEW) → Review",
-			description: "A Post with review semantics.",
+			kind: "review",
 		},
 		relatedProductIds: ["post", "score", "wiki", "entity", "tag"],
 		implementationStatus: "documented",
@@ -232,8 +228,7 @@ export const PRODUCT_DEFINITIONS = [
 		canonicalParentId: "collection",
 		consumesCapabilities: ["progress", "history"],
 		manifestation: {
-			formula: "Collection[] → Library",
-			description: "A personal library composed from a Profile's Collections.",
+			kind: "library",
 		},
 		relatedProductIds: ["collection", "catalog", "progress", "tag"],
 		implementationStatus: "planned",

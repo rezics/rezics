@@ -1,7 +1,9 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
-	eyebrow: "Rezics-Produktsystem",
+	eyebrow: `${verbatimTerms.rezics.value}-Produktsystem`,
 	title: "Inhalte behalten Identität, Struktur und Verlauf.",
-	stageTitle: "Rezics über echte Produktoberflächen kennenlernen",
+	stageTitle: `${verbatimTerms.rezics.value} über echte Produktoberflächen kennenlernen`,
 	productsTitle: "Jedes Produkt hat einen eigenen Einstieg",
 	platformTitle: "Geteilte Fähigkeiten arbeiten produktübergreifend",
 	formulaTitle: "Wie Fähigkeiten Produkte formen",

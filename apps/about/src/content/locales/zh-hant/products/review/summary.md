@@ -1,1 +1,1 @@
-以 Post(kind=REVIEW) 形成的評論內容，並可連接 Score。
+由貼文的 `Post(kind=REVIEW)` 類型形成評論內容，並可連接評分。

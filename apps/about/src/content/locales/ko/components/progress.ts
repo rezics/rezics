@@ -1,3 +1,5 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
 	generalProgress: "일반 진행 상황",
 	readingPosition: "읽기 위치",
@@ -12,7 +14,7 @@ const content = {
 	generalSummary: "전체 요약",
 	journey: "Journey",
 	gamebookOwned: "GameBook 관리",
-	journeyStep: "JourneyStep",
+	journeyStep: verbatimTerms.journeyStep.value,
 	pathHistory: "경로 이력",
 } satisfies typeof import("../../en/components/progress").default;
 

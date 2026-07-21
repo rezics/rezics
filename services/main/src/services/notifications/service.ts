@@ -31,7 +31,7 @@ type NotificationBase = {
 export type NotificationInput = NotificationBase &
 	(
 		| { kind: "reply"; payload?: never }
-		| { kind: "follow"; payload?: never }
+		| { kind: "new_follower"; payload?: never }
 		| {
 				kind: "direct_message";
 				payload: { type: "direct_message"; conversationId: string };

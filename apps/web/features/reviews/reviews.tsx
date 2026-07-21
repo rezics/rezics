@@ -316,7 +316,7 @@ function BoundScores({ postId }: { postId: string }) {
 						className="bg-surface-muted rounded-md px-3 py-2 text-sm font-medium"
 						key={item.scoreId}
 					>
-						{item.value}/10
+						{t.engagement.scoreOutOfTen({ score: String(item.value) })}
 					</span>
 				))}
 			</CardContent>

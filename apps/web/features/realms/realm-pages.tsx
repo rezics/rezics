@@ -282,7 +282,7 @@ export function RealmDetailPage({ id }: { id: string }) {
 							</AvatarFallback>
 						</Avatar>
 						<div className="flex flex-wrap items-center gap-2">
-							<Badge variant="secondary">Realm</Badge>
+							<Badge variant="secondary">{t.ui.realm}</Badge>
 							<Badge variant="outline">
 								{realm.joinPolicy === "approval"
 									? t.realms.approval

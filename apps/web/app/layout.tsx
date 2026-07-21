@@ -13,36 +13,39 @@ const frontendOrigin =
 	process.env.FRONTEND_URL ??
 	process.env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",").find((origin) => origin.trim());
 
-export const metadata: Metadata = {
-	metadataBase: new URL(frontendOrigin?.trim() || "http://localhost:3000"),
-	title: "REZICS",
-	description: "Where objects, relationships, discussion, and knowledge grow together.",
-	applicationName: "REZICS",
-	manifest: "/manifest.webmanifest",
-	appleWebApp: {
-		capable: true,
-		title: "REZICS",
-		statusBarStyle: "default",
-	},
-	icons: {
-		icon: [
-			{ url: "/icons/favicon.svg", sizes: "any", type: "image/svg+xml" },
-			{ url: "/icons/pwa-192x192.png", sizes: "192x192", type: "image/png" },
-		],
-		apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
-	},
-	openGraph: {
-		title: "REZICS",
-		description: "Where works, communities, and thoughtful discussion connect.",
-		images: [{ url: socialCard, width: 1200, height: 630, alt: "REZICS" }],
-	},
-	twitter: {
-		card: "summary_large_image",
-		title: "REZICS",
-		description: "Where works, communities, and thoughtful discussion connect.",
-		images: [socialCard],
-	},
-};
+export async function generateMetadata(): Promise<Metadata> {
+	const { t } = await getTranslation(["brand"]);
+	return {
+		metadataBase: new URL(frontendOrigin?.trim() || "http://localhost:3000"),
+		title: t.brand.name,
+		description: t.brand.description,
+		applicationName: t.brand.name,
+		manifest: "/manifest.webmanifest",
+		appleWebApp: {
+			capable: true,
+			title: t.brand.name,
+			statusBarStyle: "default",
+		},
+		icons: {
+			icon: [
+				{ url: "/icons/favicon.svg", sizes: "any", type: "image/svg+xml" },
+				{ url: "/icons/pwa-192x192.png", sizes: "192x192", type: "image/png" },
+			],
+			apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+		},
+		openGraph: {
+			title: t.brand.name,
+			description: t.brand.socialDescription,
+			images: [{ url: socialCard, width: 1200, height: 630, alt: t.brand.name }],
+		},
+		twitter: {
+			card: "summary_large_image",
+			title: t.brand.name,
+			description: t.brand.socialDescription,
+			images: [socialCard],
+		},
+	};
+}
 
 export const viewport: Viewport = {
 	colorScheme: "light dark",

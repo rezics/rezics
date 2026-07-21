@@ -93,7 +93,11 @@ export function GlobalHeader({ locale, copy, active, alternatePathByLocale }: Pr
 			</a>
 			<header className="global-header" ref={headerRef}>
 				<div className="site-container global-header__inner">
-					<a className="global-logo" href={getHomePath(locale)} aria-label="Rezics">
+					<a
+						className="global-logo"
+						href={getHomePath(locale)}
+						aria-label={copy.a11y.home}
+					>
 						<img src="/logo.svg" width="34" height="24" alt="" />
 					</a>
 					<nav className="global-nav" aria-label={copy.a11y.primaryNavigation}>

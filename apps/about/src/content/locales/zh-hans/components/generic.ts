@@ -1,3 +1,5 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 const content = {
 	record: "记录",
 	relations: "关系",
@@ -15,7 +17,7 @@ const content = {
 	entity: "Entity",
 	tags: "Tags",
 	queryable: "可查询",
-	api: "API",
+	api: verbatimTerms.api.value,
 	permissioned: "受权限控制",
 } satisfies typeof import("../../en/components/generic").default;
 

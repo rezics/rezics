@@ -12,6 +12,13 @@ STUDY DEEPLY BEFORE ANYTHING, PROACTIVELY RESEARCH ONLINE TO ENSURE BEST PRACTIC
 - SharkUI is the canonical UI system. Do not introduce or substitute another UI library.
 - Treat `libraries/ui/src/ui` as the upstream SharkUI mirror; put project-owned shared components in `libraries/ui/src/custom`.
 
+## Localization
+
+- Put every user-visible frontend string in its owner's typed localization resources (`@rezics/i18n` for `apps/web`, and the locale content contract for `apps/about`). This includes visible copy, accessibility labels, placeholders, validation feedback, notifications, empty/loading states, and user-visible metadata; do not write these strings directly in components.
+- Write each locale in natural, locally appropriate language. Do not leave source-language wording in another locale. If a product or domain term has no approved localized wording, ask the maintainer instead of retaining the foreign term or inventing a translation.
+- Treat `zh-Hant` as region-neutral Traditional Chinese, using Taiwan terminology and orthography as the project's house style.
+- Take invariant brands, protocols, formats, and technical identifiers only from [`libraries/i18n/src/verbatim-terms.ts`](./libraries/i18n/src/verbatim-terms.ts). Do not create another allowlist or duplicate their spellings in TypeScript locale resources; keep all other visible wording localized and run the i18n policy check when locale content changes.
+
 ## Frontend architecture
 
 - Treat `apps/web/app` as a framework adapter layer, not an implementation layer. Keep only App Router special files and narrowly scoped adapters that must run at the routing or request boundary there. A route entry may read and validate framework inputs such as `params`, `searchParams`, headers, and cookies; declare metadata or route configuration; invoke framework control flow such as `redirect` or `notFound`; compose required root providers and boundaries; and then delegate immediately to project-owned code.

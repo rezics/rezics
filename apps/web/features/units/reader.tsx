@@ -208,7 +208,7 @@ function getExpandedNodeIds(nodes: readonly ReadTreeNode[]): string[] {
 }
 
 export function Reader({ bookId, chapterId }: { bookId: string; chapterId: string }) {
-	const { t, locale } = useTranslation(["actions", "errors", "state", "ui", "units"]);
+	const { t, locale } = useTranslation(["actions", "brand", "errors", "state", "ui", "units"]);
 	const [fontSize, setFontSize] = useState(1);
 	const query = useGetApiChaptersByChapterId({
 		path: { chapterId },
@@ -235,7 +235,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 					</Link>
 				</Button>
 				<span className="hidden font-serif font-semibold text-foreground sm:block">
-					REZICS
+					{t.brand.name}
 				</span>
 				<span aria-hidden className="hidden h-5 w-px bg-border sm:block" />
 				<p className="min-w-0 flex-1 truncate font-medium text-sm">{query.data.title}</p>
@@ -267,7 +267,7 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 
 				<div className="flex items-center rounded-lg border bg-card">
 					<Button
-						aria-label="A−"
+						aria-label={t.units.reader.decreaseFontSize}
 						className="size-11 sm:size-10"
 						disabled={fontSize === 0}
 						onClick={() => setFontSize((value) => Math.max(0, value - 1))}
@@ -276,9 +276,11 @@ export function Reader({ bookId, chapterId }: { bookId: string; chapterId: strin
 					>
 						<MinusIcon aria-hidden />
 					</Button>
-					<span className="min-w-8 text-center font-serif font-semibold text-sm">Aa</span>
+					<span className="min-w-8 text-center font-serif font-semibold text-sm">
+						{t.units.reader.fontSize}
+					</span>
 					<Button
-						aria-label="A+"
+						aria-label={t.units.reader.increaseFontSize}
 						className="size-11 sm:size-10"
 						disabled={fontSize === 2}
 						onClick={() => setFontSize((value) => Math.min(2, value + 1))}

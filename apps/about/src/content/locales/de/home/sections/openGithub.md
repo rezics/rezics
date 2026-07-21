@@ -1,1 +1,1 @@
-Quellcode, Issues und Beitragswege für das Rezics-Ökosystem.
+Quellcode, Issues und Beitragswege für das REZICS-Ökosystem.

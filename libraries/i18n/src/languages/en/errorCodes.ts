@@ -1,9 +1,11 @@
+import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+
 export default {
 	ValidationError: "The submitted content is invalid.",
 	InternalError: "The service is temporarily unavailable. Try again later.",
 	AuthenticationRequired: "Sign in to continue.",
-	ApiTokenPermissionRequired: "This API token does not have the required permission.",
-	ApiTokenRateLimitExceeded: "This API token is sending requests too quickly. Try again shortly.",
+	ApiTokenPermissionRequired: `This ${verbatimTerms.api.value} token does not have the required permission.`,
+	ApiTokenRateLimitExceeded: `This ${verbatimTerms.api.value} token is sending requests too quickly. Try again shortly.`,
 	InteractiveSessionRequired: "Sign in interactively to manage credentials.",
 	FreshSessionRequired: "Sign in again before managing credentials.",
 	EmailVerificationRequired: "Verify your email to continue.",
@@ -17,7 +19,7 @@ export default {
 	DockNotFound: "This dock could not be found.",
 	DockNotSupported: "This content does not support that dock.",
 	DockDocumentInvalid: "The dock document is invalid.",
-	ApiTokenNotFound: "The active API token could not be found.",
+	ApiTokenNotFound: `The active ${verbatimTerms.api.value} token could not be found.`,
 	InvalidSearch: "The search request is invalid.",
 	SearchUnavailable: "Search is temporarily unavailable. Try again later.",
 	RealmCapabilityRequired: "You do not have the required Realm permission.",
@@ -153,7 +155,7 @@ export default {
 	ImageAssetInvalidState: "The image asset state does not allow this operation.",
 	ImageAssetInUse: "An image asset in use cannot be deleted.",
 	UnitPrimaryLanguageMissing: "The primary language must have an existing localization.",
-	InvalidSlug: "A slug must be a 1-63 character lowercase ASCII hyphenated label.",
+	InvalidSlug: `A slug must be a 1-63 character lowercase ${verbatimTerms.ascii.value} hyphenated label.`,
 	SlugTaken: "That slug is already used in this Unit namespace.",
 	SlugScopeNotFound: "The Unit namespace for this slug could not be found.",
 	SlugScopeUnavailable: "Unaddressed and deleted Units cannot be canonical slug namespaces.",

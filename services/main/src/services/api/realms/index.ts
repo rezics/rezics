@@ -328,7 +328,7 @@ export default new Elysia({ prefix: "/realms" })
 				.from(unitLocalization)
 				.where(eq(unitLocalization.unitId, params.realmId))
 				.orderBy(unitLocalization.position, unitLocalization.language);
-			const [viewerMembership, subscriptions] = viewer
+			const [viewerMembership, following] = viewer
 				? await Promise.all([
 						findRealmMembership(params.realmId, viewer.unitId),
 						database
@@ -360,7 +360,7 @@ export default new Elysia({ prefix: "/realms" })
 				viewerMembership: viewerMembership
 					? { role: viewerMembership.role, state: viewerMembership.state }
 					: undefined,
-				viewerFollowing: subscriptions.length > 0,
+				viewerFollowing: following.length > 0,
 			};
 		},
 		{

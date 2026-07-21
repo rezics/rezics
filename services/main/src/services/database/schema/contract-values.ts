@@ -96,7 +96,7 @@ export const ProgressStatusValues = [
 ] as const;
 export const NotificationKindValues = [
 	"reply",
-	"follow",
+	"new_follower",
 	"direct_message",
 	"moderation",
 	"realm",

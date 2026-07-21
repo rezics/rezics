@@ -158,7 +158,10 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 					</div>
 				</div>
 			</section>
-			<nav className="-mt-8 flex gap-1 overflow-x-auto border-b" aria-label="Unit sections">
+			<nav
+				className="-mt-8 flex gap-1 overflow-x-auto border-b"
+				aria-label={t.units.detail.sections}
+			>
 				{[
 					[t.units.detail.information, "#overview"],
 					[t.units.content.title, "#contents"],

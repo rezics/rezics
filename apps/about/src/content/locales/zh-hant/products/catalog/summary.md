@@ -1,1 +1,1 @@
-統一承載 Book、Media、Software、Series 與 Release 身份的作品目錄。
+統一承載書籍、媒體、軟體、系列與發行身分的作品目錄。

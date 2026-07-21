@@ -28,7 +28,7 @@ export interface AppShellAction {
 	variant?: "brand" | "ghost";
 }
 
-export interface AppShellSubscriptionItem {
+export interface AppShellFollowingItem {
 	id: string;
 	href: string;
 	label: string;
@@ -37,7 +37,7 @@ export interface AppShellSubscriptionItem {
 	favorite?: boolean;
 }
 
-export interface AppShellSubscriptions {
+export interface AppShellFollowing {
 	label: string;
 	zonesLabel: string;
 	realmsLabel: string;
@@ -45,15 +45,21 @@ export interface AppShellSubscriptions {
 	manageLabel: string;
 	manageHref: string;
 	emptyLabel: string;
-	items: readonly AppShellSubscriptionItem[];
+	items: readonly AppShellFollowingItem[];
 }
 
 function isCurrentPath(currentPath: string, href: string) {
 	return href === "/" ? currentPath === href : currentPath.startsWith(href);
 }
 
-function SubscriptionMark({ item }: { item: AppShellSubscriptionItem }) {
-	const fallback = (item.label || "R").slice(0, 1).toUpperCase();
+function FollowingMark({
+	item,
+	fallbackLabel,
+}: {
+	item: AppShellFollowingItem;
+	fallbackLabel: string;
+}) {
+	const fallback = (item.label || fallbackLabel).slice(0, 1).toUpperCase();
 	return (
 		<span className="relative grid size-7 shrink-0 place-items-center overflow-hidden rounded-full bg-surface-selected font-bold text-[0.6875rem] text-foreground">
 			{item.imageUrl ? (
@@ -65,12 +71,14 @@ function SubscriptionMark({ item }: { item: AppShellSubscriptionItem }) {
 	);
 }
 
-function SubscriptionGroup({
+function FollowingGroup({
+	fallbackLabel,
 	items,
 	label,
 	link,
 }: {
-	items: readonly AppShellSubscriptionItem[];
+	fallbackLabel: string;
+	items: readonly AppShellFollowingItem[];
 	label: string;
 	link: ElementType;
 }) {
@@ -87,7 +95,7 @@ function SubscriptionGroup({
 					href={item.href}
 					key={item.id}
 				>
-					<SubscriptionMark item={item} />
+					<FollowingMark fallbackLabel={fallbackLabel} item={item} />
 					<span className="min-w-0 flex-1 truncate">{item.label}</span>
 					{item.favorite ? (
 						<Star aria-hidden className="size-3 fill-current text-muted-foreground" />
@@ -100,6 +108,7 @@ function SubscriptionGroup({
 
 export function AppShell({
 	children,
+	brandName,
 	navigation,
 	navigationLabel,
 	currentPath,
@@ -109,10 +118,11 @@ export function AppShell({
 	locale,
 	create,
 	account,
-	subscriptions,
+	following,
 	utilities,
 }: {
 	children: ReactNode;
+	brandName: string;
 	navigation: readonly AppShellNavigationItem[];
 	navigationLabel: string;
 	currentPath: string;
@@ -127,16 +137,16 @@ export function AppShell({
 	};
 	create?: AppShellAction;
 	account: AppShellAction;
-	subscriptions?: AppShellSubscriptions;
+	following?: AppShellFollowing;
 	utilities?: ReactNode;
 }) {
 	const Link = link;
 	const CreateIcon = create?.icon;
 	const AccountIcon = account.icon;
-	const zones = subscriptions?.items.filter((item) => item.kind === "zone") ?? [];
-	const realms = subscriptions?.items.filter((item) => item.kind === "realm") ?? [];
-	const profiles = subscriptions?.items.filter((item) => item.kind === "profile") ?? [];
-	const compactSubscriptions = subscriptions?.items.slice(0, 5) ?? [];
+	const zones = following?.items.filter((item) => item.kind === "zone") ?? [];
+	const realms = following?.items.filter((item) => item.kind === "realm") ?? [];
+	const profiles = following?.items.filter((item) => item.kind === "profile") ?? [];
+	const compactFollowing = following?.items.slice(0, 5) ?? [];
 
 	return (
 		<div className="min-h-svh bg-background">
@@ -147,11 +157,11 @@ export function AppShell({
 					<Link
 						className="flex min-w-0 items-center justify-center gap-2 border-e border-border-weak px-2 md:justify-start md:px-5"
 						href="/"
-						title="REZICS"
+						title={brandName}
 					>
 						<Logo alt="" aria-hidden="true" className="size-8 shrink-0" />
 						<span className="hidden truncate text-base font-black text-foreground tracking-[0.14em] md:inline">
-							REZICS
+							{brandName}
 						</span>
 					</Link>
 
@@ -281,44 +291,47 @@ export function AppShell({
 					})}
 				</nav>
 
-				{subscriptions ? (
+				{following ? (
 					<>
 						<div className="mx-3 my-2 border-t border-border-weak md:mx-4" />
 						<div className="hidden px-3 md:block">
 							<p className="px-3 py-2 font-semibold text-[0.6875rem] text-muted-foreground uppercase tracking-[0.14em]">
-								{subscriptions.label}
+								{following.label}
 							</p>
 							<div className="grid gap-2">
-								<SubscriptionGroup
+								<FollowingGroup
+									fallbackLabel={brandName}
 									items={zones}
-									label={subscriptions.zonesLabel}
+									label={following.zonesLabel}
 									link={link}
 								/>
-								<SubscriptionGroup
+								<FollowingGroup
+									fallbackLabel={brandName}
 									items={realms}
-									label={subscriptions.realmsLabel}
+									label={following.realmsLabel}
 									link={link}
 								/>
-								<SubscriptionGroup
+								<FollowingGroup
+									fallbackLabel={brandName}
 									items={profiles}
-									label={subscriptions.profilesLabel}
+									label={following.profilesLabel}
 									link={link}
 								/>
 							</div>
-							{!subscriptions.items.length ? (
+							{!following.items.length ? (
 								<p className="px-3 py-3 text-muted-foreground text-xs leading-5">
-									{subscriptions.emptyLabel}
+									{following.emptyLabel}
 								</p>
 							) : null}
 							<Link
 								className="mt-3 flex min-h-10 items-center rounded-lg px-3 font-medium text-muted-foreground text-xs hover:bg-surface-hover hover:text-foreground"
-								href={subscriptions.manageHref}
+								href={following.manageHref}
 							>
-								{subscriptions.manageLabel}
+								{following.manageLabel}
 							</Link>
 						</div>
 						<div className="grid justify-items-center gap-2 px-2 pb-4 md:hidden">
-							{compactSubscriptions.map((item) => (
+							{compactFollowing.map((item) => (
 								<Link
 									aria-label={item.label}
 									className="grid size-11 place-items-center rounded-xl hover:bg-surface-hover"
@@ -326,7 +339,7 @@ export function AppShell({
 									key={item.id}
 									title={item.label}
 								>
-									<SubscriptionMark item={item} />
+									<FollowingMark fallbackLabel={brandName} item={item} />
 								</Link>
 							))}
 						</div>

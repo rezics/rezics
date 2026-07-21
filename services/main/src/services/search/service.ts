@@ -489,9 +489,9 @@ function getSort(category: SearchCategory, sort: SearchSort): SQL {
 		return sql`coalesce(case when ${post.kind} = 'post'::post_kind
 			then ${postReplyStat.undeletedDescendantCount}
 			else ${postReplyStat.undeletedDirectCount} end, 0) ${direction}`;
-	if (sort.startsWith("subscriberCount:") && category === "users")
+	if (sort.startsWith("followerCount:") && category === "users")
 		return sql`coalesce(${unitFollowStat.followerCount}, 0) ${direction}`;
-	if (sort.startsWith("subscriberCount:") && category === "realms")
+	if (sort.startsWith("followerCount:") && category === "realms")
 		return sql`coalesce(${unitFollowStat.followerCount}, 0) ${direction}`;
 	throw new InvalidSearch(`${sort} is not supported by the ${category} category`);
 }

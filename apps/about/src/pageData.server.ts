@@ -26,7 +26,7 @@ export function createRootPageData(): AboutPageData {
 	return {
 		kind: "root",
 		metadata: makeMetadata(
-			"Rezics",
+			content.common.siteName,
 			content.home.meta.description,
 			getHomePath(DEFAULT_LOCALE),
 			"home",
@@ -69,7 +69,9 @@ export function createProductPageData(
 ): AboutPageData {
 	const product = PRODUCT_DEFINITIONS.find((entry) => entry.id === productId);
 	if (!product) throw new Error("Unknown product: " + productId);
-	const summary = getLocaleContent(locale).products.byId[productId].summaryText;
+	const localeContent = getLocaleContent(locale);
+	const summary = localeContent.products.byId[productId].summaryText;
+	const productName = localeContent.products.common.names[productId];
 	const canonicalPath = getProductPath(locale, slug);
 	return {
 		kind: "product",
@@ -77,7 +79,7 @@ export function createProductPageData(
 		productId,
 		slug,
 		metadata: makeMetadata(
-			product.name + " — Rezics",
+			productName + " — " + localeContent.common.siteName,
 			summary,
 			canonicalPath,
 			"product",
@@ -85,7 +87,7 @@ export function createProductPageData(
 			{
 				"@context": "https://schema.org",
 				"@type": "SoftwareApplication",
-				name: product.name,
+				name: productName,
 				description: summary,
 				url: new URL(canonicalPath, "https://about.rezics.com").toString(),
 				applicationCategory: "WebApplication",
@@ -102,7 +104,7 @@ export function createErrorPageData(statusCode: 404 | 500 = 404): AboutPageData 
 		locale,
 		statusCode,
 		metadata: makeMetadata(
-			content.common.notFound.title + " — Rezics",
+			content.common.notFound.title + " — " + content.common.siteName,
 			content.common.notFound.body,
 			getHomePath(locale),
 			"home",

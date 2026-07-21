@@ -1,1 +1,1 @@
-Berechtigte API-, OAuth- und MCP-Schnittstellen für Rezics.
+Berechtigte API-, OAuth- und MCP-Schnittstellen für REZICS.

@@ -1684,7 +1684,7 @@ async function seedCommunications(
 
 	const notificationKinds = [
 		"reply",
-		"follow",
+		"new_follower",
 		"direct_message",
 		"moderation",
 		"realm",
@@ -1707,7 +1707,7 @@ async function seedCommunications(
 		(batch) => tx.insert(notificationPreference).values(batch),
 	);
 	const notificationSubjects = [...content.rootPosts, ...content.reviews, ...content.replies];
-	const seededNotificationKinds = ["reply", "follow", "direct_message"] as const;
+	const seededNotificationKinds = ["reply", "new_follower", "direct_message"] as const;
 	await writeBatches(
 		profiles.flatMap((recipient, profileIndex) =>
 			Array.from({ length: SeedPlan.notifications / profiles.length }, (_, index) => {
@@ -1729,7 +1729,7 @@ async function seedCommunications(
 					subjectUnitId:
 						kind === "reply"
 							? itemAt(notificationSubjects, profileIndex * 13 + index).id
-							: kind === "follow"
+							: kind === "new_follower"
 								? actor.id
 								: null,
 					payload:

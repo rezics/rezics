@@ -5,3 +5,14 @@ tasks:
         desc: Type-check the internationalization package.
         cmds:
             - yarn exec tsc --noEmit -p tsconfig.json
+
+    policy:check:
+        desc: Enforce canonical verbatim terms and reject untranslated zh-Hant prose.
+        cmds:
+            - yarn node scripts/check-localization.mjs
+
+    check:
+        desc: Type-check the package and enforce localization policy.
+        cmds:
+            - task: typecheck
+            - task: policy:check

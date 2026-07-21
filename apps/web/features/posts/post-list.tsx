@@ -262,9 +262,9 @@ export function PostListItem({
 	canExclude?: boolean;
 	onHiddenChange?: (hidden: boolean) => void;
 }) {
-	const { t } = useTranslation(["actions", "feed", "posts", "state"]);
+	const { t, locale } = useTranslation(["actions", "brand", "feed", "posts", "state", "ui"]);
 	const primaryPublisher = firstPublisher(post.publishers);
-	const initial = (primaryPublisher?.name ?? "R").slice(0, 1).toUpperCase();
+	const initial = (primaryPublisher?.name ?? t.brand.name).slice(0, 1).toUpperCase();
 	const { elementRef, trackOpen } = useRecommendationTracking(post.id, post.tracking);
 	const queryClient = useQueryClient();
 	const exclude = usePutApiRecommendationsExclusionsByUnitId({
@@ -338,7 +338,7 @@ export function PostListItem({
 							/>
 							{post.postKind === "reply" ? <span>· {t.posts.replyPost}</span> : null}
 							<span>·</span>
-							<span>{formatRelativeTime(post.createdAt)}</span>
+							<span>{formatRelativeTime(post.createdAt, locale.target)}</span>
 							{realmId && (
 								<>
 									<span>·</span>
@@ -346,7 +346,7 @@ export function PostListItem({
 										className="inline-flex min-h-6 items-center text-foreground font-medium hover:underline"
 										href={`/realms/${realmId}`}
 									>
-										r/community
+										{t.ui.realm}
 									</Link>
 								</>
 							)}
@@ -435,7 +435,7 @@ export function PostListItem({
 								</Link>
 							</Button>
 							<Button
-								aria-label="Save"
+								aria-label={t.ui.save}
 								className="ms-auto size-11 rounded-lg sm:size-8"
 								size="icon-sm"
 								variant="ghost"
@@ -443,7 +443,7 @@ export function PostListItem({
 								<Bookmark aria-hidden />
 							</Button>
 							<Button
-								aria-label="Share"
+								aria-label={t.ui.share}
 								className="size-11 rounded-lg sm:size-8"
 								size="icon-sm"
 								variant="ghost"
@@ -458,11 +458,12 @@ export function PostListItem({
 	);
 }
 
-function formatRelativeTime(value: string | Date) {
+function formatRelativeTime(value: string | Date, locale: string) {
 	const elapsed = Date.now() - new Date(value).getTime();
 	const minutes = Math.max(1, Math.floor(elapsed / 60_000));
-	if (minutes < 60) return `${minutes}m`;
+	const formatter = new Intl.RelativeTimeFormat(locale, { numeric: "always", style: "narrow" });
+	if (minutes < 60) return formatter.format(-minutes, "minute");
 	const hours = Math.floor(minutes / 60);
-	if (hours < 24) return `${hours}h`;
-	return `${Math.floor(hours / 24)}d`;
+	if (hours < 24) return formatter.format(-hours, "hour");
+	return formatter.format(-Math.floor(hours / 24), "day");
 }
