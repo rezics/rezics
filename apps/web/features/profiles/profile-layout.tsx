@@ -12,12 +12,9 @@ import {
 	AvatarImage,
 	Banner,
 	Button,
+	cn,
 	QueryFailure,
 	QueryPending,
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
 } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { CalendarDaysIcon, PencilIcon } from "lucide-react";
@@ -137,25 +134,37 @@ export function ProfileLayout({ children, profileId }: { children: ReactNode; pr
 					</div>
 				</header>
 
-				<Tabs
-					activationMode="manual"
-					className="mt-7 min-w-0 gap-0"
-					translations={{ listLabel: t.profiles.tabsLabel }}
-					value={activeSection}
-				>
+				<div className="mt-7 min-w-0">
 					<div className="overflow-x-auto border-b border-border-weak overscroll-x-contain">
-						<TabsList className="min-w-full justify-start" variant="underline">
-							{tabs.map((tab) => (
-								<TabsTrigger asChild key={tab.value} value={tab.value}>
-									<Link href={tab.href}>{tab.label}</Link>
-								</TabsTrigger>
-							))}
-						</TabsList>
+						<nav
+							aria-label={t.profiles.tabsLabel}
+							className="flex min-w-full items-center justify-start gap-x-0.5"
+						>
+							{tabs.map((tab) => {
+								const active = tab.value === activeSection;
+
+								return (
+									<Link
+										aria-current={active ? "page" : undefined}
+										className={cn(
+											"relative flex h-10 shrink-0 items-center justify-center rounded-t-lg border border-transparent border-b-2 px-2.5",
+											"whitespace-nowrap font-medium text-muted-foreground text-sm",
+											"transition-[color,background-color,border-color,box-shadow] hover:bg-accent hover:text-foreground/72",
+											"outline-none focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-ring/32",
+											"motion-reduce:transition-none! sm:h-9",
+											active && "border-b-primary text-foreground",
+										)}
+										href={tab.href}
+										key={tab.value}
+									>
+										{tab.label}
+									</Link>
+								);
+							})}
+						</nav>
 					</div>
-					<TabsContent className="pt-6 sm:pt-8" value={activeSection}>
-						{children}
-					</TabsContent>
-				</Tabs>
+					<div className="pt-6 sm:pt-8">{children}</div>
+				</div>
 			</main>
 		</ProfileContext.Provider>
 	);

@@ -3782,7 +3782,7 @@ __metadata:
     react-server-dom-webpack: "npm:19.2.7"
     tailwindcss: "npm:^4.3.2"
     typescript: "npm:7"
-    vinext: "npm:^1.0.0-beta.1"
+    vinext: "npm:^1.0.0-beta.2"
     vite: "npm:^8.1.3"
     vite-plugin-pwa: "npm:^1.3.0"
     webpack: "npm:^5.103.0"
@@ -5346,6 +5346,13 @@ __metadata:
   version: 1.1.0
   resolution: "@vercel/stega@npm:1.1.0"
   checksum: 10c0/64df5aff0e60c609be4a56dd8411085ad15d85bbad98627bfce2902ae3fbade5d5d7ecdcc1308b45896cf6f62303780f90387a5f70b7e08963726174efd0c149
+  languageName: node
+  linkType: hard
+
+"@vinext/types@npm:^1.0.0-beta.2":
+  version: 1.0.0-beta.2
+  resolution: "@vinext/types@npm:1.0.0-beta.2"
+  checksum: 10c0/ed4070e86b875cb261609ee4dc8a82af9d8b50ae2c56daf8f25562030ac426187f2bf171a7fdfffa679f5cf89a1aed3488f24143daabb7456a37d6b5c1ea1e6e
   languageName: node
   linkType: hard
 
@@ -14323,12 +14330,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vinext@npm:^1.0.0-beta.1":
-  version: 1.0.0-beta.1
-  resolution: "vinext@npm:1.0.0-beta.1"
+"vinext@npm:^1.0.0-beta.2":
+  version: 1.0.0-beta.2
+  resolution: "vinext@npm:1.0.0-beta.2"
   dependencies:
     "@unpic/react": "npm:^1.0.2"
     "@vercel/og": "npm:^0.8.6"
+    "@vinext/types": "npm:^1.0.0-beta.2"
     image-size: "npm:2.0.2"
     ipaddr.js: "npm:^2.1.0"
     magic-string: "npm:^0.30.21"
@@ -14351,7 +14359,7 @@ __metadata:
       optional: true
   bin:
     vinext: dist/cli.js
-  checksum: 10c0/75a858d890def559d1ceb2b85a9fb77d3e27762bad7ab018a45e86945869c167c4710c658a9ce931c932b139aaff9bb78e7f3f62cf73b943cda9cae5806a2f37
+  checksum: 10c0/39d1cf36549c9041a214bdb59c07b011cdf9b2c1bf055bf8ba73f4ebbf8d55449e0bda7e89ece06a16843f3c9b0bc64eeff5da62c2f8fc72b763d067a6c0232f
   languageName: node
   linkType: hard
 
