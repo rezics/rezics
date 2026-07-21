@@ -18,7 +18,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
-import { PageHeading } from "@rezics/ui";
+import { Banner, PageHeading } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { UnitList } from "@rezics/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui";
@@ -124,9 +124,7 @@ export function EntityDetailPage({ id }: { id: string }) {
 	return (
 		<CatalogFrame title={localization?.title ?? t.ui.unnamed}>
 			{banner ? (
-				<div className="aspect-[3/1] overflow-hidden rounded-2xl bg-muted">
-					<img alt="" className="size-full object-cover" src={banner.url} />
-				</div>
+				<Banner alt="" className="rounded-2xl bg-muted" priority src={banner.url} />
 			) : null}
 			<Card>
 				<CardContent className="grid gap-3 p-5 text-sm">

@@ -10,6 +10,13 @@ export default {
 	cancel: "取消",
 	invalid: `請選擇不超過 10 ${verbatimTerms.mib.value} 的 ${SupportedImageFormats} 圖片。`,
 	current: "目前語言的覆蓋圖片",
+	displayPreview: "實際顯示範圍",
+	bannerPreview: {
+		description: "圖片會完整保存；框外區域不會顯示。建議使用 4:1 圖片。",
+		showOriginal: "查看完整圖片",
+		hideOriginal: "隱藏完整圖片",
+		original: "完整圖片",
+	},
 	roles: {
 		avatar: {
 			title: "頭像",

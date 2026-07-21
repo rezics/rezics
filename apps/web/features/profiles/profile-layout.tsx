@@ -10,6 +10,7 @@ import {
 	Avatar,
 	AvatarFallback,
 	AvatarImage,
+	Banner,
 	Button,
 	QueryFailure,
 	QueryPending,
@@ -74,11 +75,12 @@ export function ProfileLayout({ children, profileId }: { children: ReactNode; pr
 		<ProfileContext.Provider value={{ profile: user, isCurrentUser }}>
 			<main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
 				<header>
-					<div className="aspect-[3/1] min-h-28 overflow-hidden rounded-2xl bg-surface-selected sm:min-h-40">
-						{user.banner ? (
-							<img alt="" className="size-full object-cover" src={user.banner.url} />
-						) : null}
-					</div>
+					<Banner
+						alt=""
+						className="rounded-2xl bg-surface-selected"
+						priority
+						src={user.banner?.url}
+					/>
 
 					<div className="px-2 sm:px-5">
 						<div className="-mt-10 flex items-end justify-between gap-4 sm:-mt-14">

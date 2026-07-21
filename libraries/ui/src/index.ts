@@ -91,6 +91,7 @@ export * from "./ui/tooltip";
 export * from "./ui/tour";
 export * from "./ui/tree-view";
 export * from "./custom/app-shell";
+export * from "./custom/banner";
 export * from "./custom/button";
 export * from "./custom/card";
 export * from "./custom/choice-select";

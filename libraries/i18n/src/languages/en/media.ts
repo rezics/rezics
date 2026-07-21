@@ -10,6 +10,14 @@ export default {
 	cancel: "Cancel",
 	invalid: `Choose a ${SupportedImageFormats} image under 10 ${verbatimTerms.mib.value}.`,
 	current: "Current language override",
+	displayPreview: "Displayed area",
+	bannerPreview: {
+		description:
+			"The original is preserved. Areas outside this frame are not shown. A 4:1 image is recommended.",
+		showOriginal: "View full image",
+		hideOriginal: "Hide full image",
+		original: "Full image",
+	},
 	roles: {
 		avatar: {
 			title: "Avatar",

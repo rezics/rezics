@@ -6,10 +6,11 @@ import {
 	usePostApiImageAssets,
 	usePostApiImageAssetsByIdComplete,
 } from "@rezics/openapi-tanstack-query";
-import { ImagePlus, RefreshCw, Trash2, UploadCloud, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Eye, EyeOff, ImagePlus, RefreshCw, Trash2, UploadCloud, X } from "lucide-react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import {
+	Banner,
 	Button,
 	Cover,
 	FileUpload,
@@ -26,8 +27,13 @@ import {
 } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
 
-export type LocalizationImageRole = "avatar" | "banner" | "cover";
-export type LocalizationImageShape = "avatar" | "banner" | "landscape" | "portrait";
+export type LocalizationImagePresentation =
+	| { role: "avatar"; shape: "avatar" }
+	| { role: "banner"; shape: "banner" }
+	| { role: "cover"; shape: "landscape" | "portrait" };
+
+export type LocalizationImageRole = LocalizationImagePresentation["role"];
+export type LocalizationImageShape = LocalizationImagePresentation["shape"];
 
 export interface LocalizationImageAssetValue {
 	id: string;
@@ -38,6 +44,13 @@ export interface LocalizationImageAssetOption extends LocalizationImageAssetValu
 	label: string;
 }
 
+type LocalizationImageUploadFieldProps = LocalizationImagePresentation & {
+	value: LocalizationImageAssetValue | null;
+	onChange: (value: LocalizationImageAssetValue | null) => void;
+	fallback?: LocalizationImageAssetValue | null;
+	options?: readonly LocalizationImageAssetOption[];
+};
+
 const AcceptedTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 
 export function LocalizationImageUploadField({
@@ -47,14 +60,7 @@ export function LocalizationImageUploadField({
 	options = [],
 	role,
 	shape,
-}: {
-	value: LocalizationImageAssetValue | null;
-	onChange: (value: LocalizationImageAssetValue | null) => void;
-	fallback?: LocalizationImageAssetValue | null;
-	options?: readonly LocalizationImageAssetOption[];
-	role: LocalizationImageRole;
-	shape: LocalizationImageShape;
-}) {
+}: LocalizationImageUploadFieldProps) {
 	const { t } = useTranslation(["media"]);
 	const copy = t.media.roles[role];
 	const requestUpload = usePostApiImageAssets();
@@ -63,8 +69,10 @@ export function LocalizationImageUploadField({
 	const xhr = useRef<XMLHttpRequest | null>(null);
 	const [files, setFiles] = useState<File[]>([]);
 	const [preview, setPreview] = useState<string>();
+	const [showOriginal, setShowOriginal] = useState(false);
 	const [progress, setProgress] = useState(0);
 	const [error, setError] = useState<string>();
+	const originalPreviewId = useId();
 	const displayed = preview ?? value?.url ?? fallback?.url;
 
 	useEffect(
@@ -78,6 +86,7 @@ export function LocalizationImageUploadField({
 	async function choose(file?: File) {
 		if (!file) return;
 		setError(undefined);
+		setShowOriginal(false);
 		if (!AcceptedTypes.includes(file.type) || file.size > 10_485_760) {
 			setError(t.media.invalid);
 			return;
@@ -108,6 +117,7 @@ export function LocalizationImageUploadField({
 		onChange(null);
 		setProgress(0);
 		setFiles([]);
+		setShowOriginal(false);
 		if (preview) URL.revokeObjectURL(preview);
 		setPreview(undefined);
 		setError(undefined);
@@ -135,6 +145,7 @@ export function LocalizationImageUploadField({
 						const selected = options.find(({ id }) => id === event.currentTarget.value);
 						onChange(selected ? { id: selected.id, url: selected.url } : null);
 						setPreview(undefined);
+						setShowOriginal(false);
 					}}
 				>
 					<NativeSelectOption value="">{copy.inherit}</NativeSelectOption>
@@ -148,13 +159,16 @@ export function LocalizationImageUploadField({
 					))}
 				</NativeSelect>
 			)}
+			{displayed ? (
+				<p className="font-medium text-foreground text-sm">{t.media.displayPreview}</p>
+			) : null}
 			<FileUploadDropzone
 				className={cn(
 					"group bg-muted/45 relative grid max-w-md place-items-center overflow-hidden border-dashed p-0 transition-colors",
 					shape === "avatar"
 						? "aspect-square max-w-48 rounded-full"
 						: shape === "banner"
-							? "aspect-[3/1] max-w-2xl"
+							? "aspect-[4/1] max-w-2xl"
 							: shape === "landscape"
 								? "aspect-video"
 								: "aspect-[3/4] max-h-96",
@@ -170,6 +184,8 @@ export function LocalizationImageUploadField({
 				{displayed ? (
 					shape === "portrait" ? (
 						<Cover alt="" className="size-full rounded-none" src={displayed} />
+					) : shape === "banner" ? (
+						<Banner alt="" className="size-full rounded-none" src={displayed} />
 					) : (
 						<img alt="" className="size-full object-cover" src={displayed} />
 					)
@@ -190,6 +206,54 @@ export function LocalizationImageUploadField({
 					</div>
 				)}
 			</FileUploadDropzone>
+			{displayed && shape === "banner" ? (
+				<div className="grid max-w-2xl gap-2">
+					<p className="text-muted-foreground text-xs leading-5">
+						{t.media.bannerPreview.description}
+					</p>
+					<Button
+						aria-controls={originalPreviewId}
+						aria-expanded={showOriginal}
+						className="w-fit"
+						onClick={() => setShowOriginal((visible) => !visible)}
+						size="sm"
+						type="button"
+						variant="quiet"
+					>
+						{showOriginal ? (
+							<EyeOff aria-hidden className="size-3.5" />
+						) : (
+							<Eye aria-hidden className="size-3.5" />
+						)}
+						{showOriginal
+							? t.media.bannerPreview.hideOriginal
+							: t.media.bannerPreview.showOriginal}
+					</Button>
+					{showOriginal ? (
+						<div
+							className="grid gap-2 rounded-xl border bg-muted/30 p-3"
+							id={originalPreviewId}
+						>
+							<p className="font-medium text-foreground text-xs">
+								{t.media.bannerPreview.original}
+							</p>
+							<div className="flex max-h-80 justify-center overflow-hidden rounded-lg bg-surface-container">
+								<div className="relative inline-block max-h-72 max-w-full overflow-hidden">
+									<img
+										alt=""
+										className="block max-h-72 max-w-full object-contain"
+										src={displayed}
+									/>
+									<div
+										aria-hidden
+										className="pointer-events-none absolute inset-x-0 top-1/2 aspect-[4/1] -translate-y-1/2 border-2 border-primary shadow-[0_0_0_9999px_rgb(0_0_0/0.5)]"
+									/>
+								</div>
+							</div>
+						</div>
+					) : null}
+				</div>
+			) : null}
 			<div className="flex flex-wrap gap-2">
 				<FileUploadTrigger asChild>
 					<Button disabled={busy} size="sm" type="button" variant="outline">

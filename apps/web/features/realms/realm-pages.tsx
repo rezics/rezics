@@ -18,7 +18,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
-import { PageHeading } from "@rezics/ui";
+import { Banner, PageHeading } from "@rezics/ui";
 import { PortableTextContent } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { Button } from "@rezics/ui";
@@ -272,9 +272,12 @@ export function RealmDetailPage({ id }: { id: string }) {
 		<main className="mx-auto flex w-full max-w-[76rem] flex-col gap-7 px-4 py-6 sm:px-6 sm:py-9">
 			<header className="grid gap-6 border-b pb-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
 				{realm.banner ? (
-					<div className="col-span-full aspect-[3/1] overflow-hidden rounded-2xl bg-muted">
-						<img alt="" className="size-full object-cover" src={realm.banner.url} />
-					</div>
+					<Banner
+						alt=""
+						className="col-span-full rounded-2xl bg-muted"
+						priority
+						src={realm.banner.url}
+					/>
 				) : null}
 				<div className="min-w-0">
 					<div className="mb-4 flex items-center gap-4">

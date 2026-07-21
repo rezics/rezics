@@ -4,7 +4,15 @@ import { toContentLanguage } from "@rezics/i18n";
 
 import { useGetApiZonesByZoneId } from "@rezics/openapi-tanstack-query";
 
-import { Avatar, AvatarFallback, AvatarImage, Cover, QueryFailure, QueryPending } from "@rezics/ui";
+import {
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+	Banner,
+	Cover,
+	QueryFailure,
+	QueryPending,
+} from "@rezics/ui";
 import { FollowButton } from "@/features/following/components/follow-button";
 import { useTranslation } from "@/i18n/client";
 import { selectLocalization } from "@/lib/localization";
@@ -35,9 +43,7 @@ export function ZonePage({ id }: { id: string }) {
 		<main className="mx-auto flex w-full max-w-6xl flex-col gap-7 px-4 py-6 sm:px-6 sm:py-9">
 			<header className="overflow-hidden border-b border-border-weak pb-7">
 				{banner ? (
-					<div className="aspect-[4/1] min-h-32 overflow-hidden rounded-2xl bg-surface-container">
-						<img alt="" className="size-full object-cover" src={banner.url} />
-					</div>
+					<Banner alt="" className="rounded-2xl" priority src={banner.url} />
 				) : null}
 				<div className="mt-5 flex min-w-0 flex-wrap items-end gap-4">
 					<Avatar className="size-16 shrink-0 ring-4 ring-background sm:size-20">
