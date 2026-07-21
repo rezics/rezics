@@ -2,6 +2,7 @@ import { and, eq } from "drizzle-orm";
 
 import { database } from "../database";
 import { searchIndexGeneration } from "../database/schema";
+import { SearchProjectionVersions } from "./contracts";
 import { SearchUnavailable } from "./errors";
 import { getSearchSettingsFingerprint, type SearchProjectionKind } from "./settings";
 
@@ -45,9 +46,12 @@ export async function getActiveSearchGeneration(
 		.limit(1);
 	if (!row) throw new SearchUnavailable(new Error(`No active ${kind} search generation`));
 	const expectedFingerprint = getSearchSettingsFingerprint(kind);
-	if (row.settingsFingerprint !== expectedFingerprint)
+	if (
+		row.projectionVersion !== SearchProjectionVersions[kind] ||
+		row.settingsFingerprint !== expectedFingerprint
+	)
 		throw new SearchUnavailable(
-			new Error(`Active ${kind} search generation settings do not match this application`),
+			new Error(`Active ${kind} search generation contract does not match this application`),
 		);
 	const generation = { ...row, kind } satisfies ActiveSearchGeneration;
 	cache.set(kind, { expiresAt: Date.now() + ActiveGenerationCacheMs, generation });

@@ -34,10 +34,10 @@ empty successful search.
 Lifecycle commands:
 
 ```sh
-task services-main:search:index -- prepare --projection current --index rezics_units_v1_20260720
-task services-main:search:index -- reconcile --projection current --index rezics_units_v1_20260720
-task services-main:search:index -- promote --projection current --index rezics_units_v1_20260720
-task services-main:search:index -- retire --projection current --index rezics_units_v1_20260720
+task services-main:search:index -- prepare --projection current --index rezics_units_v2_20260721
+task services-main:search:index -- reconcile --projection current --index rezics_units_v2_20260721
+task services-main:search:index -- promote --projection current --index rezics_units_v2_20260721
+task services-main:search:index -- retire --projection current --index rezics_units_v2_20260721
 task services-main:search:config:check
 ```
 

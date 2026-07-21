@@ -11,6 +11,7 @@ import {
 import {
 	parseCurrentSearchDocument,
 	parseRevisionSearchDocument,
+	SearchProjectionVersions,
 } from "../src/services/search/contracts";
 import { clearActiveSearchGenerationCache } from "../src/services/search/generation";
 import {
@@ -103,13 +104,9 @@ async function taskRequest(path: string, init: RequestInit): Promise<void> {
 	await waitForTask(body.taskUid);
 }
 
-function projectionVersion(kind: SearchProjectionKind): number {
-	return kind === "current" ? 1 : 1;
-}
-
 function defaultIndexUid(kind: SearchProjectionKind): string {
 	const prefix = kind === "current" ? "rezics_units" : "rezics_revisions";
-	return `${prefix}_v${projectionVersion(kind)}_${new Date().toISOString().slice(0, 10).replaceAll("-", "")}`;
+	return `${prefix}_v${SearchProjectionVersions[kind]}_${new Date().toISOString().slice(0, 10).replaceAll("-", "")}`;
 }
 
 async function findGeneration(kind: SearchProjectionKind, indexUid: string) {
@@ -137,7 +134,7 @@ function assertCompatibleGeneration(
 	fingerprint: string,
 ): void {
 	if (
-		generation.projectionVersion !== projectionVersion(kind) ||
+		generation.projectionVersion !== SearchProjectionVersions[kind] ||
 		generation.settingsFingerprint !== fingerprint
 	)
 		throw new Error(
@@ -302,7 +299,7 @@ async function reconcile(options: Options): Promise<void> {
 			.values({
 				projectionKind: kind,
 				indexUid,
-				projectionVersion: projectionVersion(kind),
+				projectionVersion: SearchProjectionVersions[kind],
 				settingsFingerprint: fingerprint,
 				sequinSinkName: sinkName,
 			})
@@ -381,7 +378,7 @@ async function prepare(options: Options): Promise<void> {
 		.values({
 			projectionKind: kind,
 			indexUid,
-			projectionVersion: projectionVersion(kind),
+			projectionVersion: SearchProjectionVersions[kind],
 			settingsFingerprint: fingerprint,
 			sequinSinkName: indexUid.replaceAll("_", "-"),
 			state: "building",

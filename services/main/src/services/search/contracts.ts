@@ -2,6 +2,8 @@ import { type Static, Type } from "@sinclair/typebox";
 import { Check } from "@sinclair/typebox/value";
 import { isPortableText, normalizePortableText } from "@rezics/portable-text";
 
+import type { SearchProjectionKind } from "../database/schema/search";
+
 const Uuid = Type.String({
 	pattern:
 		"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
@@ -14,6 +16,10 @@ const UuidList = Type.Array(Uuid);
 
 export const CurrentSearchProjectionVersion = 2 as const;
 export const HistorySearchProjectionVersion = 1 as const;
+export const SearchProjectionVersions = {
+	current: CurrentSearchProjectionVersion,
+	history: HistorySearchProjectionVersion,
+} as const satisfies Record<SearchProjectionKind, number>;
 
 export const CurrentSearchDocument = Type.Object(
 	{
@@ -138,7 +144,7 @@ export type RevisionSearchDocument = Static<typeof RevisionSearchDocument>;
 
 export function parseCurrentSearchDocument(value: unknown): CurrentSearchDocument {
 	if (!Check(CurrentSearchDocument, value))
-		throw new TypeError("Invalid current search document v1");
+		throw new TypeError("Invalid current search document v2");
 	if ((value.unitType === "book") !== (value.book !== null))
 		throw new TypeError("Current search book applicability mismatch");
 	if ((value.unitType === "media") !== (value.media !== null))

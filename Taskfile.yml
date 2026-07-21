@@ -102,7 +102,7 @@ tasks:
     infra:search:start:
         desc: Start Sequin after migrations and the initial Meilisearch generation exist.
         cmds:
-            - docker compose up -d --wait sequin
+            - docker compose up -d --wait --force-recreate sequin
 
     infra:stop:
         desc: Stop persistent development infrastructure without removing it.
@@ -138,12 +138,18 @@ tasks:
             - task: infra:up
             - task: services-main:db:prepare
             - task: services-main:search:index
-              vars: { CLI_ARGS: "prepare --projection current --index rezics_units_v1_20260720" }
+              vars:
+                  CLI_ARGS: >-
+                      prepare --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
             - task: infra:search:start
             - task: services-main:search:index
-              vars: { CLI_ARGS: "reconcile --projection current --index rezics_units_v1_20260720" }
+              vars:
+                  CLI_ARGS: >-
+                      reconcile --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
             - task: services-main:search:index
-              vars: { CLI_ARGS: "promote --projection current --index rezics_units_v1_20260720" }
+              vars:
+                  CLI_ARGS: >-
+                      promote --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
 
     dev:
         desc: Run Aspire-managed applications against persistent Compose infrastructure.
