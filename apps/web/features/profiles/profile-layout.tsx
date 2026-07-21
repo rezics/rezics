@@ -42,12 +42,12 @@ export function useProfileContext(): ProfileContextValue {
 	return context;
 }
 
-export function ProfileLayout({ children, id }: { children: ReactNode; id: string }) {
+export function ProfileLayout({ children, profileId }: { children: ReactNode; profileId: string }) {
 	const { t, locale } = useTranslation(["profiles", "ui"]);
 	const pathname = usePathname();
 	const queryClient = useQueryClient();
 	const { data: session } = useHydratedSession();
-	const profile = useGetApiUsersById({ path: { id } });
+	const profile = useGetApiUsersById({ path: { id: profileId } });
 	const me = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
 
 	if (profile.isPending || (session && me.isPending)) return <QueryPending />;

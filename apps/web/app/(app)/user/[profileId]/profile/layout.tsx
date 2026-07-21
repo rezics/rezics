@@ -11,9 +11,9 @@ export default async function Layout({
 	params,
 }: {
 	children: ReactNode;
-	params: Promise<{ userId: string }>;
+	params: Promise<{ profileId: string }>;
 }) {
-	const { userId } = await params;
-	if (!UuidPattern.test(userId)) notFound();
-	return <ProfileLayout id={userId}>{children}</ProfileLayout>;
+	const { profileId } = await params;
+	if (!UuidPattern.test(profileId)) notFound();
+	return <ProfileLayout profileId={profileId}>{children}</ProfileLayout>;
 }
