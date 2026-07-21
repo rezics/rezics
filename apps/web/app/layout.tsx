@@ -66,7 +66,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 				/>
 				<script
 					dangerouslySetInnerHTML={{
-						__html: `(function(){try{var t=localStorage.getItem('rezics-theme');var d=t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=d?m.dataset.dark:m.dataset.light}catch(e){}})()`,
+						__html: `(function(){try{var t=localStorage.getItem('rezics-theme');var d=t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=d?m.dataset.dark:m.dataset.light}catch(e){}})()`,
 					}}
 				/>
 			</head>

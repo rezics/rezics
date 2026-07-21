@@ -20,7 +20,6 @@ import { Skeleton } from "../ui/skeleton";
 import { SkipNavContent, SkipNavLink } from "../ui/skip-nav";
 import { cn } from "../utils";
 import { Button } from "./button";
-import { ChoiceSelect } from "./choice-select";
 import { Logo } from "./logo";
 
 const DesktopSidebarPreferenceKey = "rezics-app-sidebar-state-v1";
@@ -45,13 +44,6 @@ export interface AppShellNavigationItem {
 	href: string;
 	label: string;
 	icon: AppShellIcon;
-}
-
-export interface AppShellAction {
-	href: string;
-	label: string;
-	icon?: AppShellIcon;
-	variant?: "brand" | "ghost";
 }
 
 export interface AppShellFollowingItem {
@@ -404,11 +396,8 @@ export function AppShell({
 	search,
 	sidebar,
 	skipToContentLabel,
-	locale,
-	create,
-	account,
+	headerActions,
 	following,
-	utilities,
 }: {
 	children: ReactNode;
 	brandName: string;
@@ -420,20 +409,10 @@ export function AppShell({
 	search: { href: string; label: string; placeholder: string };
 	sidebar: AppShellSidebarLabels;
 	skipToContentLabel: string;
-	locale: {
-		label: string;
-		value: string;
-		options: readonly { value: string; label: string }[];
-		onChange: (value: string) => void | Promise<void>;
-	};
-	create?: AppShellAction;
-	account: AppShellAction;
+	headerActions: ReactNode;
 	following?: AppShellFollowing;
-	utilities?: ReactNode;
 }) {
 	const Link = link;
-	const CreateIcon = create?.icon;
-	const AccountIcon = account.icon;
 	const { state: desktopSidebarState, toggle: toggleDesktopSidebar } = useDesktopSidebarState();
 	const { value: expandedFollowingGroups, update: updateFollowingGroups } =
 		useFollowingAccordionState();
@@ -515,60 +494,7 @@ export function AppShell({
 						</form>
 
 						<div className="ms-auto flex shrink-0 items-center gap-1 justify-self-end sm:gap-2 sm:justify-self-auto">
-							{create ? (
-								<Button
-									asChild
-									className="size-11 lg:h-9 lg:w-auto lg:px-3.5"
-									size="icon-xl"
-								>
-									<Link
-										aria-label={create.label}
-										href={create.href}
-										title={create.label}
-									>
-										{CreateIcon ? (
-											<CreateIcon aria-hidden data-icon="inline-start" />
-										) : null}
-										<span className="hidden lg:inline">{create.label}</span>
-									</Link>
-								</Button>
-							) : null}
-
-							<div className="hidden xl:block">
-								<ChoiceSelect
-									ariaLabel={locale.label}
-									className="h-9 min-w-28"
-									onValueChange={([nextLocale]) => {
-										if (nextLocale) void locale.onChange(nextLocale);
-									}}
-									options={locale.options}
-									placeholder={locale.label}
-									value={[locale.value]}
-								/>
-							</div>
-
-							{utilities}
-
-							<Button
-								asChild
-								className={cn(
-									"size-11",
-									account.variant === "brand" && "lg:h-9 lg:w-auto lg:px-3.5",
-								)}
-								size="icon-xl"
-								variant={account.variant ?? "ghost"}
-							>
-								<Link
-									aria-label={account.label}
-									href={account.href}
-									title={account.label}
-								>
-									{AccountIcon ? <AccountIcon aria-hidden /> : null}
-									{account.variant === "brand" ? (
-										<span className="hidden lg:inline">{account.label}</span>
-									) : null}
-								</Link>
-							</Button>
+							{headerActions}
 						</div>
 					</div>
 				</div>

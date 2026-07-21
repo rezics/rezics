@@ -8,7 +8,7 @@ import { searchEntities } from "@/features/search/search-entities";
 import { useTranslation } from "@/i18n/client";
 import { getErrorText } from "@/i18n/errors";
 
-export function TranslatedUiProvider({ children }: { children: ReactNode }) {
+export function TranslatedUiProvider({ children }: Readonly<{ children: ReactNode }>) {
 	const { t } = useTranslation([
 		"actions",
 		"betterAuthErrorCodes",

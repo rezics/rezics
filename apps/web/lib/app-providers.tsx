@@ -8,7 +8,7 @@ import type { resources } from "@rezics/i18n/resources";
 
 import { AuthPortalProvider } from "@/features/auth/auth-portal";
 import { SessionCacheBoundary } from "@/features/auth/session-cache-boundary";
-import { TranslatedUiProvider } from "@/features/application-shell/ui-provider";
+import { TranslatedUiProvider } from "@/features/application-shell/components/ui-provider";
 import { PwaLifecycle } from "@/features/pwa/pwa-lifecycle";
 import { TranslationProvider } from "@/i18n/client";
 import { RootTranslationNamespaces } from "@/i18n/namespaces";

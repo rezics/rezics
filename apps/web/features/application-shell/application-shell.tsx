@@ -1,15 +1,8 @@
 "use client";
 
-import { Bookmark, Gauge, Globe2, House, PanelsTopLeft, Plus, UserRound } from "lucide-react";
-import Link from "next/link";
+import { Bookmark, Gauge, Globe2, House, PanelsTopLeft } from "lucide-react";
 import { usePathname, useSearchParams } from "next/navigation";
-import {
-	forwardRef,
-	useEffect,
-	useRef,
-	type ComponentPropsWithoutRef,
-	type ReactNode,
-} from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import {
 	getApiUsersMePreferencesQueryKey,
 	useGetApiUsersMe,
@@ -19,16 +12,16 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { AppShell as SharedAppShell } from "@rezics/ui";
-import { isUiLocale, toContentLanguage, toStoredUiLocale, toUiLocale } from "@rezics/i18n";
+import { toContentLanguage, toStoredUiLocale, toUiLocale } from "@rezics/i18n";
 
-import { useAuthPortal } from "@/features/auth/auth-portal";
 import { followingManagementHref } from "@/features/following/routing/following-route";
-import { profileHref } from "@/features/profiles/profile-route";
 import { useSetLocale, useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
-import { sidebarFollowingHref } from "./sidebar-following";
-import { ThemeToggle } from "./theme-toggle";
+import { AppLink } from "./components/app-link";
+import { SignedInHeaderActions, SignedOutHeaderActions } from "./components/header-actions";
+import { useThemePreference } from "./hooks/use-theme-preference";
+import { sidebarFollowingHref } from "./routing/sidebar-following";
 
 const Links = [
 	{ href: "/", key: "home", icon: House },
@@ -36,42 +29,6 @@ const Links = [
 	{ href: "/me/favorites", key: "favorites", icon: Bookmark },
 	{ href: "/me/progress", key: "progress", icon: Gauge },
 ] as const;
-
-type AppLinkProps = ComponentPropsWithoutRef<typeof Link>;
-
-const AppLink = forwardRef<HTMLAnchorElement, AppLinkProps>(function AppLink(
-	{ href, onClick, ...props },
-	ref,
-) {
-	const { openAuthPortal } = useAuthPortal();
-	return (
-		<Link
-			{...props}
-			href={href}
-			onClick={(event) => {
-				onClick?.(event);
-				if (
-					event.defaultPrevented ||
-					event.button !== 0 ||
-					event.metaKey ||
-					event.ctrlKey ||
-					event.shiftKey ||
-					event.altKey ||
-					(event.currentTarget.target && event.currentTarget.target !== "_self") ||
-					typeof href !== "string"
-				)
-					return;
-				const [pathname] = href.split("?", 1);
-				if (pathname !== "/login") return;
-				event.preventDefault();
-				openAuthPortal("login", {
-					destination: href === "/login?next=/create" ? "/create" : undefined,
-				});
-			}}
-			ref={ref}
-		/>
-	);
-});
 
 export function ApplicationShell({ children }: { children: ReactNode }) {
 	const pathname = usePathname();
@@ -89,6 +46,7 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 		"ui",
 	]);
 	const { setLocale } = useSetLocale();
+	const theme = useThemePreference();
 	const localeChangedByUser = useRef(false);
 	const queryClient = useQueryClient();
 	const currentProfile = useGetApiUsersMe({ query: { enabled: Boolean(session) } });
@@ -108,6 +66,24 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 			onSuccess: (data) => queryClient.setQueryData(getApiUsersMePreferencesQueryKey(), data),
 		},
 	});
+	const localeSelection = {
+		label: t.locale.label,
+		value: locale.target,
+		options: [
+			{ value: "zh-Hant", label: t.locale.zh },
+			{ value: "en", label: t.locale.en },
+		],
+		onChange: (nextLocale: typeof locale.target) => {
+			localeChangedByUser.current = true;
+			updateInterfaceLocale.reset();
+			setLocale(nextLocale);
+			if (session)
+				updateInterfaceLocale.mutate({
+					body: { interfaceLocale: toStoredUiLocale(nextLocale) },
+				});
+		},
+		isPending: updateInterfaceLocale.isPending,
+	} as const;
 	const zoneItems = (followedZones.data?.items ?? []).flatMap((item) =>
 		item.kind === "zone"
 			? [
@@ -162,23 +138,32 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 		<>
 			<SharedAppShell
 				brandName={t.brand.name}
-				account={{
-					href: session
-						? currentProfile.data
-							? profileHref(currentProfile.data)
-							: "/settings/profile"
-						: "/login",
-					label: session ? t.ui.profile : t.actions.login,
-					icon: UserRound,
-					variant: session ? "ghost" : "brand",
-				}}
-				create={{
-					href: session ? "/create" : "/login?next=/create",
-					icon: Plus,
-					label: t.actions.create,
-				}}
 				currentPath={pathname}
 				currentSearch={searchParams.toString()}
+				headerActions={
+					session ? (
+						<SignedInHeaderActions
+							createLabel={t.actions.create}
+							fallbackName={session.user.name}
+							locale={localeSelection}
+							profile={currentProfile.data}
+							theme={{
+								preference: theme.preference,
+								onChange: theme.setPreference,
+							}}
+						/>
+					) : (
+						<SignedOutHeaderActions
+							createLabel={t.actions.create}
+							locale={localeSelection}
+							loginLabel={t.actions.login}
+							theme={{
+								preference: theme.preference,
+								onChange: theme.setPreference,
+							}}
+						/>
+					)
+				}
 				link={AppLink}
 				navigationLabel={t.nav.navigation}
 				sidebar={{
@@ -195,24 +180,6 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 					placeholder: t.search.placeholder,
 				}}
 				skipToContentLabel={t.nav.skipToContent}
-				locale={{
-					label: t.locale.label,
-					onChange: (nextLocale) => {
-						if (!isUiLocale(nextLocale)) return;
-						localeChangedByUser.current = true;
-						updateInterfaceLocale.reset();
-						setLocale(nextLocale);
-						if (session)
-							updateInterfaceLocale.mutate({
-								body: { interfaceLocale: toStoredUiLocale(nextLocale) },
-							});
-					},
-					options: [
-						{ value: "zh-Hant", label: t.locale.zh },
-						{ value: "en", label: t.locale.en },
-					],
-					value: locale.target,
-				}}
 				navigation={Links.map(({ href, key, icon }) => ({
 					href,
 					label: t.nav[key],
@@ -250,7 +217,6 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 							}
 						: undefined
 				}
-				utilities={<ThemeToggle />}
 			>
 				{children}
 			</SharedAppShell>

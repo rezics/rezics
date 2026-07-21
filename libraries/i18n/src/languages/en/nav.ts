@@ -20,6 +20,17 @@ export default {
 	skipToContent: "Skip to main content",
 	navigation: "Navigation",
 	content: "Content",
+	userMenu: {
+		label: "User menu",
+		viewProfile: "View profile",
+		myContent: "My content",
+		settings: "Settings",
+		profileSettings: "Edit profile",
+		preferenceSettings: "Preferences",
+		invitations: "Received access invitations",
+		accountSettings: "Account",
+		signOut: "Sign out",
+	},
 	sidebar: {
 		title: "Main navigation",
 		description: `Open Home, frequent destinations, and the ${zoneTerms.pluralLabel} and ${realmTerms.pluralLabel} you ${followTerms.action}.`,

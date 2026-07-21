@@ -20,6 +20,17 @@ export default {
 	skipToContent: "跳到主要內容",
 	navigation: "導覽",
 	content: "內容",
+	userMenu: {
+		label: "使用者選單",
+		viewProfile: "查看個人資料",
+		myContent: "我的內容",
+		settings: "設定",
+		profileSettings: "編輯個人資料",
+		preferenceSettings: "偏好設定",
+		invitations: "收到的存取邀請",
+		accountSettings: "帳戶",
+		signOut: "登出",
+	},
 	sidebar: {
 		title: "主要導覽",
 		description: `前往主頁、常用功能，以及你${followTerms.action}的${zoneTerms.plural}與${realmTerms.plural}。`,

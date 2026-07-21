@@ -6,7 +6,10 @@ export function isSidebarFollowingKind(value: string): value is SidebarFollowing
 	return SidebarFollowingKinds.some((kind) => kind === value);
 }
 
-export function sidebarFollowingHref(kind: SidebarFollowingKind, value: string | AddressableUnit) {
+export function sidebarFollowingHref(
+	kind: SidebarFollowingKind,
+	value: string | AddressableUnit,
+): string {
 	const unit = typeof value === "string" ? { id: value } : value;
 	switch (kind) {
 		case "zone":

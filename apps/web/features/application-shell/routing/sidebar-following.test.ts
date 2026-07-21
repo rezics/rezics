@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { isSidebarFollowingKind, sidebarFollowingHref } from "./sidebar-following";
 
-describe("sidebar following model", () => {
+describe("application shell sidebar following routes", () => {
 	it("admits only navigational Zone and Realm follows", () => {
 		expect(isSidebarFollowingKind("zone")).toBe(true);
 		expect(isSidebarFollowingKind("realm")).toBe(true);
