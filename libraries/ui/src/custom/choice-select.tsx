@@ -23,7 +23,10 @@ export type ChoiceSelectSize = NonNullable<ComponentProps<typeof SelectTrigger>[
 
 const choiceSelectAppearanceClassNames = {
 	field: "border-input bg-background shadow-sm/5",
-	quiet: quietControlVariants(),
+	quiet: cn(
+		quietControlVariants(),
+		"data-[state=open]:ring-0 data-[state=open]:focus-visible:ring-[3px]",
+	),
 } as const satisfies Record<ChoiceSelectAppearance, string>;
 
 function isChoiceValue<Value extends string>(
