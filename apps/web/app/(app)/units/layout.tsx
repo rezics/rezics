@@ -8,6 +8,7 @@ const Namespaces = [
 	"engagement",
 	"feed",
 	"governance",
+	"history",
 	"media",
 	"posts",
 	"units",

@@ -4,7 +4,7 @@ import { toContentLanguage } from "@rezics/i18n";
 import { PublicationLicenseRegistry } from "@rezics/license";
 
 import { useGetApiUnitsByTypeByUnitId } from "@rezics/openapi-tanstack-query";
-import { BookOpen, Gamepad2, PlaySquare } from "lucide-react";
+import { BookOpen, Gamepad2, LibraryBig, PlaySquare } from "lucide-react";
 import Link from "next/link";
 
 import { Card, CardContent } from "@rezics/ui";
@@ -23,7 +23,7 @@ import { UnitShelf } from "@/features/explore/unit-shelf";
 import { BookChapters } from "./reader";
 import type { UnitType } from "./unit-types";
 
-const Icons = { book: BookOpen, software: Gamepad2, media: PlaySquare };
+const Icons = { book: BookOpen, software: Gamepad2, media: PlaySquare, series: LibraryBig };
 
 function formatDate(value: string | null, language: string) {
 	if (!value) return undefined;
@@ -168,7 +168,9 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 						{item.capabilities.canManageAccess ||
 						item.capabilities.canManageAssociations ? (
 							<Button variant="outline" asChild>
-								<Link href={`/units/${type}/${item.id}/governance`}>
+								<Link
+									href={`/units/${type}/${item.id}/edit/${item.capabilities.canManageAccess ? "access" : "relationships"}`}
+								>
 									{t.governance.open}
 								</Link>
 							</Button>
@@ -360,9 +362,11 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 					)}
 				</aside>
 			</div>
-			<DetailSection title={t.feed.relatedWorks}>
-				<UnitShelf type={type} seedUnitId={item.id} />
-			</DetailSection>
+			{type !== "series" ? (
+				<DetailSection title={t.feed.relatedWorks}>
+					<UnitShelf type={type} seedUnitId={item.id} />
+				</DetailSection>
+			) : null}
 		</main>
 	);
 }

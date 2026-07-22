@@ -1,4 +1,7 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import { enTerminology } from "@rezics/i18n/terminology/en";
+
+const { forms: realmTerms } = enTerminology.realm;
 
 export default {
 	title: "Unit governance",
@@ -50,6 +53,83 @@ export default {
 		editor: "Editor",
 		publishing_editor: "Publishing editor",
 		maintainer: "Maintainer",
+		owner: "Owner",
+	},
+	access: {
+		effective: "Effective access",
+		effectiveDescription:
+			"These server-authoritative decisions include the current identity, scope, restrictions, and protections.",
+		bindings: "Role grants",
+		bindingsDescription: `Grant a role directly to a Profile, ${realmTerms.label} relation, or every authenticated user.`,
+		restrictions: "Access restrictions",
+		restrictionsDescription: `Explicitly deny one permission to a Profile or ${realmTerms.label}. Denials take precedence over role grants.`,
+		protections: "Unit protections",
+		protectionsDescription:
+			"Freeze a Unit or limit changes to owners; managing these rules requires protection permission.",
+		allowed: "Allowed",
+		denied: "Denied",
+		grant: "Add grant",
+		restrict: "Add restriction",
+		protect: "Add protection",
+		revoke: "Revoke",
+		noBindings: "There are no role grants.",
+		noRestrictions: "There are no access restrictions.",
+		noProtections: "There are no Unit protections.",
+		subjectKind: "Subject type",
+		subjectId: `Subject ${verbatimTerms.id.value}`,
+		realmRelation: `${realmTerms.label} relation`,
+		permission: "Permission",
+		mode: "Protection mode",
+		reason: "Reason",
+		expiresAt: "Expiry (optional)",
+		revoked: "Revoked",
+		subjectKinds: {
+			profile: "Profile",
+			realm: `${realmTerms.label} member`,
+			authenticated: "Every authenticated user",
+		},
+		realmRelations: {
+			member: "Member",
+			content_editor: "Content editor",
+			governor: "Governor",
+		},
+		permissions: {
+			"unit.read": "Read",
+			"unit.update": "Edit",
+			"unit.publish": "Publish",
+			"unit.history.restore": "Restore history",
+			"unit.access.manage": "Manage access",
+			"unit.association.manage": "Manage associations",
+			"unit.protection.manage": "Manage protections",
+			"unit.delete": "Delete",
+		},
+		modes: { frozen: "Fully frozen", owner_only: "Owners only" },
+		sources: {
+			public: "Public access",
+			platform: "Platform permission",
+			binding: "Role grant",
+		},
+		denialReasons: {
+			missing: "No matching grant",
+			anonymous: "Sign-in required",
+			ungranted: "The role does not include this permission",
+			restricted: "Explicitly restricted",
+			protected: "Blocked by a Unit protection",
+		},
+		reasonCodes: {
+			content_policy: "Content policy",
+			realm_rules: `${realmTerms.label} rules`,
+			spam: "Spam",
+			harassment: "Harassment",
+			unsafe_content: "Unsafe content",
+			off_topic: "Off topic",
+			duplicate: "Duplicate",
+			account_security: "Account security",
+			user_request: "User request",
+			appeal: "Appeal",
+			administrative: "Administrative",
+			other: "Other",
+		},
 	},
 	policyModes: {
 		open: "Open",

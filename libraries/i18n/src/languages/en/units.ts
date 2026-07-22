@@ -4,7 +4,75 @@ import { enTerminology } from "@rezics/i18n/terminology/en";
 const { forms: publicationLicenseTerms } = enTerminology.publicationLicense;
 
 export default {
-	types: { book: "Book", software: "Software", media: "Media" },
+	types: { book: "Book", software: "Software", media: "Media", series: "Series" },
+	workspace: {
+		title: "Manage unit",
+		description:
+			"Edit basic information, localizations, catalog relationships, access, and revision history.",
+		backToUnit: "Back to unit",
+		backToOverview: "Back to management overview",
+		navigation: "Unit management navigation",
+		overview: "All management tools",
+		sections: {
+			basic: {
+				label: "Basic information",
+				description:
+					"Manage lifecycle, visibility, rating, license, and type-specific fields.",
+			},
+			localizations: {
+				label: "Localizations",
+				description: "Edit titles, summaries, descriptions, and covers for each language.",
+			},
+			relationships: {
+				label: "Catalog relationships",
+				description:
+					"Manage credits, subjects, source links, tags, and variant relationships.",
+			},
+			contentStructure: {
+				label: "Content structure",
+				description: "Manage Book chapters in a collapsible, indented tree editor.",
+			},
+			releases: {
+				label: "Series releases",
+				description: "Manage the units, order, and release dates within this Series.",
+			},
+			access: {
+				label: "Access",
+				description:
+					"Manage roles, restrictions, protections, invitations, and effective access.",
+			},
+			history: {
+				label: "Revision history",
+				description: "Review, compare, undo, or restore content revisions.",
+			},
+		},
+	},
+	series: {
+		kind: "Series kind",
+		releases: "Series releases",
+		addRelease: "Add unit",
+		releaseUnit: `Unit ${verbatimTerms.id.value}`,
+		releasedOn: "Release date",
+		removeRelease: "Remove from Series",
+		noReleases: "There are no units in this Series yet.",
+		moveEarlier: "Move earlier",
+		moveLater: "Move later",
+	},
+	fields: {
+		isbn13: verbatimTerms.isbn13.value,
+		publicationDate: "Publication date",
+		pageCount: "Page count",
+		format: "Binding or format",
+		licensed: "Licensed",
+		versionLabel: "Version label",
+		mediaKind: "Media kind",
+		releaseDate: "Release date",
+		runtimeMinutes: "Runtime (minutes)",
+		episodeCount: "Episode count",
+		seasonCount: "Season count",
+		yes: "Yes",
+		no: "No",
+	},
 	detail: {
 		sections: "Unit sections",
 		information: "Unit information",
@@ -66,8 +134,13 @@ export default {
 		group: "Group",
 		parent: "Parent",
 		root: "Top level",
+		actions: "Content actions",
 		rename: "Rename",
 		move: "Move",
+		moveEarlier: "Move earlier",
+		moveLater: "Move later",
+		indent: "Indent under previous item",
+		outdent: "Move out one level",
 		editChapter: "Edit chapter",
 		createChapter: "Create chapter",
 		createGroup: "Create group",
@@ -75,6 +148,7 @@ export default {
 	},
 	chapter: {
 		title: "Edit chapter",
+		backToStructure: "Back to content structure",
 		language: "Chapter language",
 		useLanguage: "Switch language",
 		save: "Save chapter",

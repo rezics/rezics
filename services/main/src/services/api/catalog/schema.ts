@@ -6,7 +6,7 @@ import {
 	UnitKindValues,
 } from "../../database/schema/contract-values";
 import { FractionalPosition, ContentLanguage, LocalizationInput, Uuid } from "../schema";
-import { UnitType } from "../units/schema";
+import { CatalogUnitType, VariantUnitType } from "../units/schema";
 
 export const CreateCatalogUnitBody = t.Object(
 	{
@@ -70,17 +70,17 @@ export const AddUnitLinkBody = t.Object({
 });
 export type AddUnitLinkBody = Static<typeof AddUnitLinkBody>;
 
-export const UnitUnitParams = t.Object({ type: UnitType, unitId: Uuid });
+export const UnitUnitParams = t.Object({ type: CatalogUnitType, unitId: Uuid });
 export type UnitUnitParams = Static<typeof UnitUnitParams>;
 
 export const UnitAssociationParams = t.Object({
-	type: UnitType,
+	type: CatalogUnitType,
 	unitId: Uuid,
 	associationId: Uuid,
 });
 export type UnitAssociationParams = Static<typeof UnitAssociationParams>;
 
-export const UnitTagParams = t.Object({ type: UnitType, unitId: Uuid, tagId: Uuid });
+export const UnitTagParams = t.Object({ type: CatalogUnitType, unitId: Uuid, tagId: Uuid });
 export type UnitTagParams = Static<typeof UnitTagParams>;
 
 export const TagUnitBody = t.Object({}, { additionalProperties: false });
@@ -116,7 +116,7 @@ export const VoteBody = t.Object(
 export type VoteBody = Static<typeof VoteBody>;
 
 export const UnitVersionParams = t.Object({
-	type: UnitType,
+	type: VariantUnitType,
 	unitId: Uuid,
 	canonicalId: Uuid,
 });

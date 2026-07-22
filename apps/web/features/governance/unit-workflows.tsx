@@ -13,7 +13,6 @@ import {
 	useGetApiGovernanceUnitAccessInvitations,
 	useGetApiGovernanceUnitByUnitIdAccessInvitations,
 	useGetApiUnitByUnitIdAssociationProposals,
-	useGetApiUnitsByTypeByUnitId,
 	usePatchApiEntitiesByUnitIdAssociationPolicy,
 	usePostApiGovernanceUnitByUnitIdAccessInvitations,
 	usePostApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAccept,
@@ -39,7 +38,6 @@ import { RequireSession } from "@/features/auth/require-session";
 import { profileHref } from "@/features/profiles/profile-route";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
-import type { UnitType } from "@/features/units/unit-types";
 
 type AccessRole = "viewer" | "editor" | "publishing_editor" | "maintainer";
 type AssociationKind = "credit" | "subject";
@@ -74,7 +72,7 @@ function WorkflowFrame({ title, children }: { title: string; children: React.Rea
 	);
 }
 
-function AccessInvitationManager({ unitId }: { unitId: string }) {
+export function AccessInvitationManager({ unitId }: { unitId: string }) {
 	const { t, locale } = useTranslation(["errors", "governance", "ui"]);
 	const queryClient = useQueryClient();
 	const queryOptions = { path: { unitId }, query: { includeResolved: true } } as const;
@@ -234,7 +232,7 @@ function AccessInvitationManager({ unitId }: { unitId: string }) {
 	);
 }
 
-function ReceivedAccessInvitations() {
+export function ReceivedAccessInvitations() {
 	const { t, locale } = useTranslation(["errors", "governance", "ui"]);
 	const queryClient = useQueryClient();
 	const queryOptions = { query: { includeResolved: true } } as const;
@@ -525,6 +523,15 @@ function AssociationProposalManager({
 	);
 }
 
+export function UnitAssociationProposalManager({ unitId }: { unitId: string }) {
+	return (
+		<>
+			<AssociationProposalManager kind="credit" side="source" unitId={unitId} />
+			<AssociationProposalManager kind="subject" side="source" unitId={unitId} />
+		</>
+	);
+}
+
 function EntityAssociationPolicy({
 	unitId,
 	creditAttribution,
@@ -634,37 +641,6 @@ export function ReceivedAccessInvitationsPage() {
 	return (
 		<WorkflowFrame title={t.governance.receivedInvitations}>
 			<ReceivedAccessInvitations />
-		</WorkflowFrame>
-	);
-}
-
-export function UnitGovernancePage({ type, id }: { type: UnitType; id: string }) {
-	const { t } = useTranslation(["errors", "governance", "ui"]);
-	const unit = useGetApiUnitsByTypeByUnitId({ path: { type, unitId: id } });
-	if (unit.isPending) return <QueryPending />;
-	if (unit.isError || !unit.data)
-		return <QueryFailure error={unit.error} retry={() => void unit.refetch()} />;
-	const canOpen =
-		unit.data.capabilities.canEdit ||
-		unit.data.capabilities.canManageAccess ||
-		unit.data.capabilities.canManageAssociations;
-	if (!canOpen)
-		return (
-			<WorkflowFrame title={t.governance.title}>
-				<p className="text-destructive text-sm">{t.errors.forbidden}</p>
-			</WorkflowFrame>
-		);
-	return (
-		<WorkflowFrame title={t.governance.title}>
-			{unit.data.capabilities.canManageAccess ? (
-				<AccessInvitationManager unitId={id} />
-			) : null}
-			{unit.data.capabilities.canEdit ? (
-				<>
-					<AssociationProposalManager kind="credit" side="source" unitId={id} />
-					<AssociationProposalManager kind="subject" side="source" unitId={id} />
-				</>
-			) : null}
 		</WorkflowFrame>
 	);
 }

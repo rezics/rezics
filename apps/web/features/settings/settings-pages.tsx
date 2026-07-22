@@ -16,19 +16,18 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
-import { PageHeading } from "@rezics/ui";
 import { Alert, AlertDescription } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
 import { Checkbox, CheckboxGroup } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@rezics/ui";
 import { Input } from "@rezics/ui";
+import { ManagementWorkspaceSectionHeader } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { isContentLanguage, isStoredUiLocale, toUiLocale } from "@rezics/i18n";
 import { isPublicationLicenseId, PublicationLicenseIds } from "@rezics/license";
-import { RequireSession } from "@/features/auth/require-session";
 import { SlugAddressForm } from "@/features/slugs/slug-address-form";
 import {
 	LocalizationImageUploadField,
@@ -36,15 +35,20 @@ import {
 } from "@/features/units/localization-image-upload-field";
 import { useSetLocale, useTranslation } from "@/i18n/client";
 import { authClient } from "@/lib/auth-client";
+import { SettingsOverviewHref } from "./routing/settings-routes";
 
 function SettingsFrame({ title, children }: { title: string; children: React.ReactNode }) {
+	const { t } = useTranslation(["settings"]);
 	return (
-		<RequireSession>
-			<main className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-10 sm:px-6">
-				<PageHeading title={title} />
-				{children}
-			</main>
-		</RequireSession>
+		<section className="max-w-2xl">
+			<ManagementWorkspaceSectionHeader
+				backHref={SettingsOverviewHref}
+				backLabel={t.settings.workspace.backToOverview}
+				link={Link}
+				title={title}
+			/>
+			<div className="grid gap-8">{children}</div>
+		</section>
 	);
 }
 
@@ -121,9 +125,6 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 	}
 	return (
 		<SettingsFrame title={t.settings.profile}>
-			<Button asChild className="w-fit" variant="outline">
-				<Link href="/settings/invitations">{t.governance.receivedInvitations}</Link>
-			</Button>
 			<form onSubmit={submit}>
 				<FieldGroup>
 					<Field>

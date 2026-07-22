@@ -3798,6 +3798,7 @@ __metadata:
     "@vitejs/plugin-react": "npm:^6.0.3"
     "@vitejs/plugin-rsc": "npm:^0.5.27"
     better-auth: "npm:1.7.0-rc.1"
+    fractional-indexing: "npm:^4.0.0"
     http-status-codes: "npm:^2.3.0"
     jsdom: "npm:26.1.0"
     lucide-react: "npm:^1.24.0"

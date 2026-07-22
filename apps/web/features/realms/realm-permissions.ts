@@ -1,11 +1,30 @@
 import type { GetApiRealmsByRealmIdStatus200 } from "@rezics/openapi-tanstack-query";
 
-type RealmMembership = GetApiRealmsByRealmIdStatus200["viewerMembership"];
+import {
+	RealmSettingsSectionIds,
+	type RealmSettingsSectionId,
+} from "./model/realm-settings-section";
 
-export function canManageRealm(membership: RealmMembership) {
-	return Boolean(
-		membership?.state === "active" && ["owner", "admin", "moderator"].includes(membership.role),
-	);
+type RealmMembership = GetApiRealmsByRealmIdStatus200["viewerMembership"];
+type RealmCapabilities = GetApiRealmsByRealmIdStatus200["capabilities"];
+
+export function canOpenRealmSettings(capabilities: RealmCapabilities) {
+	return Object.values(capabilities).some(Boolean);
+}
+
+export function getRealmSettingsSectionIds(
+	capabilities: RealmCapabilities,
+): readonly RealmSettingsSectionId[] {
+	if (!canOpenRealmSettings(capabilities)) return [];
+	return RealmSettingsSectionIds.filter((sectionId) => {
+		if (sectionId === "profile") return capabilities.canUpdateSettings;
+		if (sectionId === "members") return capabilities.canReadMembers;
+		if (sectionId === "rules") return capabilities.canPublishRules;
+		if (sectionId === "pins") return capabilities.canManagePins;
+		if (sectionId === "access") return capabilities.canManageAccess;
+		if (sectionId === "moderation") return capabilities.canModerateUnits;
+		return true;
+	});
 }
 
 export function isRealmOwner(membership: RealmMembership) {

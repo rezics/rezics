@@ -15,6 +15,27 @@ export default {
 	profile: "資料設定",
 	settings: `${realmTerms.label}設定`,
 	backToRealm: `返回${realmTerms.label}`,
+	settingsWorkspace: {
+		description: `管理${realmTerms.label}資料、成員、規則、置頂內容、治理與修訂歷史。`,
+		navigation: `${realmTerms.label}設定導覽`,
+		overview: "所有設定項目",
+		backToOverview: "返回設定總覽",
+		sections: {
+			profile: {
+				label: "基本資料",
+				description: "管理名稱、摘要、圖片、生命週期、加入方式與公開網址。",
+			},
+			members: { label: "成員與角色", description: "管理成員角色、狀態與參與資格。" },
+			rules: { label: "規則", description: "編輯多語規則與需要確認規則的操作。" },
+			pins: { label: "置頂內容", description: "管理置頂與精選內容，以及顯示順序。" },
+			access: {
+				label: "權限",
+				description: "管理角色授權、邀請、限制、保護與實際生效權限。",
+			},
+			moderation: { label: "內容治理", description: "檢視待處理內容並執行治理動作。" },
+			history: { label: "修訂歷史", description: "檢視、比較、撤銷或還原設定修訂。" },
+		},
+	},
 	follow: followTerms.actionLabel,
 	unfollow: followTerms.undoActionLabel,
 	join: "加入",

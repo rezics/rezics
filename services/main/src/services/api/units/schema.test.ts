@@ -1,7 +1,12 @@
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { CreateUnitBody, UpdateUnitBody } from "./schema";
+import {
+	CatalogUnitTypeParams,
+	CreateUnitBody,
+	UpdateUnitBody,
+	VariantUnitTypeParams,
+} from "./schema";
 
 const localization = { language: "en", title: "Example" };
 
@@ -20,5 +25,16 @@ describe("Unit publication License inputs", () => {
 	it("rejects arbitrary text and external identifier casing", () => {
 		expect(Check(CreateUnitBody, { localization, license: "custom terms" })).toBe(false);
 		expect(Check(CreateUnitBody, { localization, license: "CC-BY-4.0" })).toBe(false);
+	});
+});
+
+describe("Catalog Unit route types", () => {
+	it("accepts Series on generic read and update routes", () => {
+		expect(Check(CatalogUnitTypeParams, { type: "series" })).toBe(true);
+	});
+
+	it("keeps Series out of variant-only creation routes", () => {
+		expect(Check(VariantUnitTypeParams, { type: "series" })).toBe(false);
+		expect(Check(VariantUnitTypeParams, { type: "book" })).toBe(true);
 	});
 });

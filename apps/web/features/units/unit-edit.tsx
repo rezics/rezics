@@ -10,7 +10,6 @@ import { isPublicationLicenseId, PublicationLicenseIds } from "@rezics/license";
 
 import {
 	type GetApiUnitsByTypeByUnitIdStatus200,
-	useGetApiUnitsByTypeByUnitId,
 	usePatchApiUnitsByTypeByUnitId,
 	usePostApiUnitsByTypeByUnitIdCreditAttributions,
 	usePostApiUnitsByTypeByUnitIdLinks,
@@ -21,19 +20,15 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import { EntityPicker } from "@rezics/ui";
-import { PageHeading } from "@rezics/ui";
-import { QueryFailure, QueryPending } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
-import { RequireSession } from "@/features/auth/require-session";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -44,39 +39,22 @@ import {
 	type LocalizationImageAssetOption,
 	type LocalizationImageAssetValue,
 } from "./localization-image-upload-field";
-import type { UnitType } from "./unit-types";
+import { isVariantUnitType, type UnitType } from "./unit-types";
 
-type Unit = GetApiUnitsByTypeByUnitIdStatus200;
+export type EditableUnit = GetApiUnitsByTypeByUnitIdStatus200;
+type Unit = EditableUnit;
 type SelectedEntity = { id: string; label: string };
 
-export function UnitEditWorkspace({ type, id }: { type: UnitType; id: string }) {
-	return (
-		<RequireSession>
-			<UnitEditWorkspaceContent id={id} type={type} />
-		</RequireSession>
-	);
+function readPositiveInteger(form: FormData, name: string): number | null | undefined {
+	const raw = String(form.get(name) ?? "").trim();
+	if (!raw) return null;
+	const value = Number(raw);
+	return Number.isSafeInteger(value) && value > 0 ? value : undefined;
 }
 
-function UnitEditWorkspaceContent({ type, id }: { type: UnitType; id: string }) {
-	const query = useGetApiUnitsByTypeByUnitId({ path: { type, unitId: id } });
-	const { t } = useTranslation(["cover", "errors", "ui", "units"]);
-	if (query.isPending) return <QueryPending />;
-	if (query.isError)
-		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
-	if (!query.data) return <QueryPending />;
-	if (!query.data.capabilities.canEdit)
-		return (
-			<main className="mx-auto grid min-h-64 w-full max-w-4xl place-items-center px-4 py-10">
-				<p className="text-destructive text-sm">{t.errors.forbidden}</p>
-			</main>
-		);
-	return <UnitEditForm type={type} unit={query.data} />;
-}
-
-function UnitEditForm({ type, unit }: { type: UnitType; unit: Unit }) {
+export function UnitBasicEditor({ type, unit }: { type: UnitType; unit: Unit }) {
 	const { t } = useTranslation(["cover", "errors", "licenses", "ui", "units"]);
 	const queryClient = useQueryClient();
-	const router = useRouter();
 	const update = usePatchApiUnitsByTypeByUnitId({
 		mutation: {
 			onSuccess: async () => invalidateUnitDetail(queryClient, type, unit.id, true),
@@ -123,6 +101,42 @@ function UnitEditForm({ type, unit }: { type: UnitType; unit: Unit }) {
 			submittedAiDisclosure === "machine_generated"
 				? submittedAiDisclosure
 				: "unknown";
+		const licensed = form.get("licensed") === "true";
+		const details = (() => {
+			if (unit.details.type === "book") {
+				const pageCount = readPositiveInteger(form, "pageCount");
+				if (pageCount === undefined) return undefined;
+				return {
+					isbn13: String(form.get("isbn13") ?? "").trim() || null,
+					publicationDate: releasedOn || null,
+					pageCount,
+					format: String(form.get("format") ?? "").trim() || null,
+					licensed,
+				};
+			}
+			if (unit.details.type === "software")
+				return {
+					versionLabel: String(form.get("versionLabel") ?? "").trim() || null,
+					licensed,
+				};
+			if (unit.details.type === "media") {
+				const runtimeMinutes = readPositiveInteger(form, "runtimeMinutes");
+				const episodeCount = readPositiveInteger(form, "episodeCount");
+				const seasonCount = readPositiveInteger(form, "seasonCount");
+				if (
+					runtimeMinutes === undefined ||
+					episodeCount === undefined ||
+					seasonCount === undefined
+				)
+					return undefined;
+				const kind = String(form.get("kind") ?? "").trim();
+				if (!kind) return undefined;
+				return { kind, runtimeMinutes, episodeCount, seasonCount, licensed };
+			}
+			const kind = String(form.get("kind") ?? "").trim();
+			return kind ? { kind } : undefined;
+		})();
+		if (!details) return;
 		try {
 			await update.mutateAsync({
 				path: { type, unitId: unit.id },
@@ -135,138 +149,231 @@ function UnitEditForm({ type, unit }: { type: UnitType; unit: Unit }) {
 					license: isPublicationLicenseId(submittedLicense) ? submittedLicense : null,
 					unit: {
 						...(primaryLanguage ? { primaryLanguage } : {}),
-						releasedOn: releasedOn || null,
+						...(unit.details.type === "series"
+							? {}
+							: { releasedOn: releasedOn || null }),
 					},
+					details,
 				},
 			});
-			router.push(`/units/${type}/${unit.id}`);
 		} catch {
 			// The typed mutation state supplies the visible API error.
 		}
 	}
 
 	return (
-		<main className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6">
-			<PageHeading title={t.units.editor.title} />
-			<Card>
-				<CardContent className="p-6">
-					<form onSubmit={submit}>
-						<FieldGroup>
-							<h2 className="font-heading text-xl font-bold">
-								{t.units.editor.settings}
-							</h2>
+		<Card appearance="outlined">
+			<CardContent className="p-6">
+				<form onSubmit={submit}>
+					<FieldGroup>
+						<h2 className="font-heading text-xl font-bold">
+							{t.units.editor.settings}
+						</h2>
+						<Field>
+							<FieldLabel>{t.ui.status}</FieldLabel>
+							<NativeSelect name="status" defaultValue={unit.status}>
+								<NativeSelectOption value="draft">{t.ui.draft}</NativeSelectOption>
+								<NativeSelectOption value="published">
+									{t.ui.published}
+								</NativeSelectOption>
+								<NativeSelectOption value="archived">
+									{t.ui.archived}
+								</NativeSelectOption>
+							</NativeSelect>
+						</Field>
+						<Field>
+							<FieldLabel>{t.ui.visibility}</FieldLabel>
+							<NativeSelect name="visibility" defaultValue={unit.visibility}>
+								<NativeSelectOption value="public">
+									{t.ui.public}
+								</NativeSelectOption>
+								<NativeSelectOption value="unlisted">
+									{t.ui.unlisted}
+								</NativeSelectOption>
+								<NativeSelectOption value="private">
+									{t.ui.private}
+								</NativeSelectOption>
+							</NativeSelect>
+						</Field>
+						<Field>
+							<FieldLabel>{t.ui.contentRating}</FieldLabel>
+							<NativeSelect name="contentRating" defaultValue={unit.contentRating}>
+								<NativeSelectOption value="general">
+									{t.units.rating.general}
+								</NativeSelectOption>
+								<NativeSelectOption value="r15">
+									{t.units.rating.r15}
+								</NativeSelectOption>
+								<NativeSelectOption value="r18">
+									{t.units.rating.r18}
+								</NativeSelectOption>
+								<NativeSelectOption value="r18g">
+									{t.units.rating.r18g}
+								</NativeSelectOption>
+							</NativeSelect>
+						</Field>
+						<Field>
+							<FieldLabel>{t.units.detail.aiDisclosure}</FieldLabel>
+							<NativeSelect name="aiDisclosure" defaultValue={unit.aiDisclosure}>
+								<NativeSelectOption value="unknown">
+									{t.units.aiDisclosure.unknown}
+								</NativeSelectOption>
+								<NativeSelectOption value="none">
+									{t.units.aiDisclosure.none}
+								</NativeSelectOption>
+								<NativeSelectOption value="ai_assisted">
+									{t.units.aiDisclosure.ai_assisted}
+								</NativeSelectOption>
+								<NativeSelectOption value="ai_originated">
+									{t.units.aiDisclosure.ai_originated}
+								</NativeSelectOption>
+								<NativeSelectOption value="machine_generated">
+									{t.units.aiDisclosure.machine_generated}
+								</NativeSelectOption>
+							</NativeSelect>
+						</Field>
+						<Field>
+							<FieldLabel>{t.units.detail.primaryLanguage}</FieldLabel>
+							<Input
+								defaultValue={unit.primaryLanguage ?? ""}
+								maxLength={35}
+								name="primaryLanguage"
+							/>
+						</Field>
+						{unit.details.type !== "series" && (
 							<Field>
-								<FieldLabel>{t.ui.status}</FieldLabel>
-								<NativeSelect name="status" defaultValue={unit.status}>
-									<NativeSelectOption value="draft">
-										{t.ui.draft}
-									</NativeSelectOption>
-									<NativeSelectOption value="published">
-										{t.ui.published}
-									</NativeSelectOption>
-									<NativeSelectOption value="archived">
-										{t.ui.archived}
-									</NativeSelectOption>
-								</NativeSelect>
-							</Field>
-							<Field>
-								<FieldLabel>{t.ui.visibility}</FieldLabel>
-								<NativeSelect name="visibility" defaultValue={unit.visibility}>
-									<NativeSelectOption value="public">
-										{t.ui.public}
-									</NativeSelectOption>
-									<NativeSelectOption value="unlisted">
-										{t.ui.unlisted}
-									</NativeSelectOption>
-									<NativeSelectOption value="private">
-										{t.ui.private}
-									</NativeSelectOption>
-								</NativeSelect>
-							</Field>
-							<Field>
-								<FieldLabel>{t.ui.contentRating}</FieldLabel>
-								<NativeSelect
-									name="contentRating"
-									defaultValue={unit.contentRating}
-								>
-									<NativeSelectOption value="general">
-										{t.units.rating.general}
-									</NativeSelectOption>
-									<NativeSelectOption value="r15">
-										{t.units.rating.r15}
-									</NativeSelectOption>
-									<NativeSelectOption value="r18">
-										{t.units.rating.r18}
-									</NativeSelectOption>
-									<NativeSelectOption value="r18g">
-										{t.units.rating.r18g}
-									</NativeSelectOption>
-								</NativeSelect>
-							</Field>
-							<Field>
-								<FieldLabel>{t.units.detail.aiDisclosure}</FieldLabel>
-								<NativeSelect name="aiDisclosure" defaultValue={unit.aiDisclosure}>
-									<NativeSelectOption value="unknown">
-										{t.units.aiDisclosure.unknown}
-									</NativeSelectOption>
-									<NativeSelectOption value="none">
-										{t.units.aiDisclosure.none}
-									</NativeSelectOption>
-									<NativeSelectOption value="ai_assisted">
-										{t.units.aiDisclosure.ai_assisted}
-									</NativeSelectOption>
-									<NativeSelectOption value="ai_originated">
-										{t.units.aiDisclosure.ai_originated}
-									</NativeSelectOption>
-									<NativeSelectOption value="machine_generated">
-										{t.units.aiDisclosure.machine_generated}
-									</NativeSelectOption>
-								</NativeSelect>
-							</Field>
-							<Field>
-								<FieldLabel>{t.units.detail.primaryLanguage}</FieldLabel>
-								<Input
-									defaultValue={unit.primaryLanguage ?? ""}
-									maxLength={35}
-									name="primaryLanguage"
-								/>
-							</Field>
-							<Field>
-								<FieldLabel>{t.units.detail.releasedOn}</FieldLabel>
+								<FieldLabel>
+									{unit.details.type === "book"
+										? t.units.fields.publicationDate
+										: t.units.fields.releaseDate}
+								</FieldLabel>
 								<Input
 									defaultValue={unit.releasedOn ?? ""}
 									name="releasedOn"
 									type="date"
 								/>
 							</Field>
-							<Field>
-								<FieldLabel>{t.units.detail.license}</FieldLabel>
-								<NativeSelect defaultValue={unit.license ?? ""} name="license">
-									<NativeSelectOption value="">
-										{t.licenses.unspecified}
+						)}
+						<UnitTypeSpecificFields unit={unit} />
+						<Field>
+							<FieldLabel>{t.units.detail.license}</FieldLabel>
+							<NativeSelect defaultValue={unit.license ?? ""} name="license">
+								<NativeSelectOption value="">
+									{t.licenses.unspecified}
+								</NativeSelectOption>
+								{PublicationLicenseIds.map((id) => (
+									<NativeSelectOption key={id} value={id}>
+										{t.licenses.options[id].label}
 									</NativeSelectOption>
-									{PublicationLicenseIds.map((id) => (
-										<NativeSelectOption key={id} value={id}>
-											{t.licenses.options[id].label}
-										</NativeSelectOption>
-									))}
-								</NativeSelect>
-							</Field>
-							<Button variant="solid" isLoading={update.isPending} type="submit">
-								{t.units.editor.saveSettings}
-							</Button>
-							<RequestFailure error={update.error} fallback={t.ui.retryLater} />
-						</FieldGroup>
-					</form>
-				</CardContent>
-			</Card>
-			<UnitLocalizationEditor type={type} unit={unit} />
-			<UnitRelationships type={type} unit={unit} />
-		</main>
+								))}
+							</NativeSelect>
+						</Field>
+						<Button variant="solid" isLoading={update.isPending} type="submit">
+							{t.units.editor.saveSettings}
+						</Button>
+						<RequestFailure error={update.error} fallback={t.ui.retryLater} />
+					</FieldGroup>
+				</form>
+			</CardContent>
+		</Card>
 	);
 }
 
-function UnitLocalizationEditor({ type, unit }: { type: UnitType; unit: Unit }) {
+function LicensedField({ defaultValue }: { defaultValue: boolean }) {
+	const { t } = useTranslation(["units"]);
+	return (
+		<Field>
+			<FieldLabel>{t.units.fields.licensed}</FieldLabel>
+			<NativeSelect defaultValue={String(defaultValue)} name="licensed">
+				<NativeSelectOption value="false">{t.units.fields.no}</NativeSelectOption>
+				<NativeSelectOption value="true">{t.units.fields.yes}</NativeSelectOption>
+			</NativeSelect>
+		</Field>
+	);
+}
+
+function UnitTypeSpecificFields({ unit }: { unit: Unit }) {
+	const { t } = useTranslation(["units"]);
+	const details = unit.details;
+	if (details.type === "book")
+		return (
+			<>
+				<Field>
+					<FieldLabel>{t.units.fields.isbn13}</FieldLabel>
+					<Input defaultValue={details.isbn13 ?? ""} name="isbn13" pattern="[0-9]{13}" />
+				</Field>
+				<Field>
+					<FieldLabel>{t.units.fields.pageCount}</FieldLabel>
+					<Input
+						defaultValue={details.pageCount ?? ""}
+						min={1}
+						name="pageCount"
+						type="number"
+					/>
+				</Field>
+				<Field>
+					<FieldLabel>{t.units.fields.format}</FieldLabel>
+					<Input defaultValue={details.format ?? ""} name="format" />
+				</Field>
+				<LicensedField defaultValue={details.licensed} />
+			</>
+		);
+	if (details.type === "software")
+		return (
+			<>
+				<Field>
+					<FieldLabel>{t.units.fields.versionLabel}</FieldLabel>
+					<Input defaultValue={details.versionLabel ?? ""} name="versionLabel" />
+				</Field>
+				<LicensedField defaultValue={details.licensed} />
+			</>
+		);
+	if (details.type === "media")
+		return (
+			<>
+				<Field required>
+					<FieldLabel>{t.units.fields.mediaKind}</FieldLabel>
+					<Input defaultValue={details.kind} name="kind" required />
+				</Field>
+				<Field>
+					<FieldLabel>{t.units.fields.runtimeMinutes}</FieldLabel>
+					<Input
+						defaultValue={details.runtimeMinutes ?? ""}
+						min={1}
+						name="runtimeMinutes"
+						type="number"
+					/>
+				</Field>
+				<Field>
+					<FieldLabel>{t.units.fields.episodeCount}</FieldLabel>
+					<Input
+						defaultValue={details.episodeCount ?? ""}
+						min={1}
+						name="episodeCount"
+						type="number"
+					/>
+				</Field>
+				<Field>
+					<FieldLabel>{t.units.fields.seasonCount}</FieldLabel>
+					<Input
+						defaultValue={details.seasonCount ?? ""}
+						min={1}
+						name="seasonCount"
+						type="number"
+					/>
+				</Field>
+				<LicensedField defaultValue={details.licensed} />
+			</>
+		);
+	return (
+		<Field required>
+			<FieldLabel>{t.units.series.kind}</FieldLabel>
+			<Input defaultValue={details.kind} maxLength={64} name="kind" required />
+		</Field>
+	);
+}
+
+export function UnitLocalizationEditor({ type, unit }: { type: UnitType; unit: Unit }) {
 	const { t, locale } = useTranslation(["cover", "errors", "ui", "units"]);
 	const [language, setLanguage] = useState<ContentLanguage>(toContentLanguage(locale.target));
 	const selected = unit.localizations.find((entry) => entry.language === language);
@@ -396,7 +503,7 @@ function UnitLocalizationForm({
 	);
 }
 
-function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }) {
+export function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }) {
 	const { t } = useTranslation(["cover", "errors", "ui", "units"]);
 	const queryClient = useQueryClient();
 	const invalidate = () => invalidateUnitDetail(queryClient, type, unit.id);
@@ -426,7 +533,8 @@ function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }) {
 					onSubmit={async (event) => {
 						event.preventDefault();
 						if (!creditEntity) return;
-						const form = new FormData(event.currentTarget);
+						const formElement = event.currentTarget;
+						const form = new FormData(formElement);
 						try {
 							await credit.mutateAsync({
 								path: { type, unitId: unit.id },
@@ -436,7 +544,7 @@ function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }) {
 								},
 							});
 							setCreditEntity(undefined);
-							event.currentTarget.reset();
+							formElement.reset();
 						} catch {
 							// The typed mutation state supplies the visible API error.
 						}
@@ -463,7 +571,8 @@ function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }) {
 					onSubmit={async (event) => {
 						event.preventDefault();
 						if (!subjectEntity) return;
-						const form = new FormData(event.currentTarget);
+						const formElement = event.currentTarget;
+						const form = new FormData(formElement);
 						try {
 							await subject.mutateAsync({
 								path: { type, unitId: unit.id },
@@ -473,7 +582,7 @@ function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }) {
 								},
 							});
 							setSubjectEntity(undefined);
-							event.currentTarget.reset();
+							formElement.reset();
 						} catch {
 							// The typed mutation state supplies the visible API error.
 						}
@@ -504,7 +613,8 @@ function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }) {
 					onSubmit={async (event) => {
 						event.preventDefault();
 						if (!linkSource) return;
-						const form = new FormData(event.currentTarget);
+						const formElement = event.currentTarget;
+						const form = new FormData(formElement);
 						const role = String(form.get("role") ?? "").trim();
 						const fallbackText = String(form.get("fallbackText") ?? "").trim();
 						try {
@@ -518,7 +628,7 @@ function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }) {
 								},
 							});
 							setLinkSource(undefined);
-							event.currentTarget.reset();
+							formElement.reset();
 						} catch {
 							// The typed mutation state supplies the visible API error.
 						}
@@ -577,40 +687,42 @@ function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }) {
 					<RequestFailure error={tag.error} fallback={t.ui.retryLater} />
 				</div>
 
-				<div className="grid gap-4">
-					<Field>
-						<FieldLabel>{t.units.editor.canonicalUnit}</FieldLabel>
-						<EntityPicker
-							index="units"
-							onChange={setCanonicalUnit}
-							value={canonicalUnit}
-						/>
-					</Field>
-					<Button
-						disabled={!canonicalUnit || canonicalUnit.id === unit.id}
-						isLoading={version.isPending}
-						onClick={async () => {
-							if (!canonicalUnit || canonicalUnit.id === unit.id) return;
-							try {
-								await version.mutateAsync({
-									path: {
-										type,
-										unitId: unit.id,
-										canonicalId: canonicalUnit.id,
-									},
-								});
-								setCanonicalUnit(undefined);
-							} catch {
-								// The typed mutation state supplies the visible API error.
-							}
-						}}
-						type="button"
-						variant="outline"
-					>
-						{t.units.editor.version}
-					</Button>
-					<RequestFailure error={version.error} fallback={t.ui.retryLater} />
-				</div>
+				{isVariantUnitType(type) ? (
+					<div className="grid gap-4">
+						<Field>
+							<FieldLabel>{t.units.editor.canonicalUnit}</FieldLabel>
+							<EntityPicker
+								index="units"
+								onChange={setCanonicalUnit}
+								value={canonicalUnit}
+							/>
+						</Field>
+						<Button
+							disabled={!canonicalUnit || canonicalUnit.id === unit.id}
+							isLoading={version.isPending}
+							onClick={async () => {
+								if (!canonicalUnit || canonicalUnit.id === unit.id) return;
+								try {
+									await version.mutateAsync({
+										path: {
+											type,
+											unitId: unit.id,
+											canonicalId: canonicalUnit.id,
+										},
+									});
+									setCanonicalUnit(undefined);
+								} catch {
+									// The typed mutation state supplies the visible API error.
+								}
+							}}
+							type="button"
+							variant="outline"
+						>
+							{t.units.editor.version}
+						</Button>
+						<RequestFailure error={version.error} fallback={t.ui.retryLater} />
+					</div>
+				) : null}
 			</CardContent>
 		</Card>
 	);

@@ -20,7 +20,9 @@ import {
 	UnitLocalizationParams,
 	UnitLookupParams,
 	UnitUnitIdParams,
-	UnitTypeParams,
+	VariantUnitUnitIdParams,
+	CatalogUnitTypeParams,
+	VariantUnitTypeParams,
 	UnitStatusEventListQuery,
 	UnitStatusEventListResponse,
 	UnitStatusEventParams,
@@ -134,7 +136,7 @@ export default new Elysia({ prefix: "/units" })
 			};
 		},
 		{
-			params: UnitTypeParams,
+			params: CatalogUnitTypeParams,
 			query: ListUnitsQuery,
 			response: {
 				[StatusCodes.OK]: UnitListResponse,
@@ -150,7 +152,7 @@ export default new Elysia({ prefix: "/units" })
 		},
 		{
 			access: "contribute:unit:create",
-			params: UnitTypeParams,
+			params: VariantUnitTypeParams,
 			body: CreateUnitBody,
 			response: {
 				[StatusCodes.OK]: UnitDetailResponse,
@@ -214,7 +216,7 @@ export default new Elysia({ prefix: "/units" })
 		},
 		{
 			access: "contribute:unit:update",
-			params: UnitUnitIdParams,
+			params: VariantUnitUnitIdParams,
 			body: UpdateUnitVariantContextBody,
 			response: {
 				[StatusCodes.OK]: UnitDetailResponse,
@@ -240,7 +242,7 @@ export default new Elysia({ prefix: "/units" })
 		},
 		{
 			access: "contribute:unit:update",
-			params: UnitUnitIdParams,
+			params: VariantUnitUnitIdParams,
 			body: PromoteUnitVariantBody,
 			response: {
 				[StatusCodes.OK]: UnitDetailResponse,

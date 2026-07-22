@@ -1,4 +1,4 @@
-import { and, eq, isNull, or, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
 
 import { database } from "../../database";
 import {
@@ -83,6 +83,73 @@ export class RealmAuthorization<ProfileId extends string | undefined> {
 		readonly profileId: ProfileId,
 		private readonly platform: PlatformAuthorization<ProfileId>,
 	) {}
+
+	async decideCapabilities<Capability extends RealmCapability>(
+		realmId: string,
+		capabilities: readonly [Capability, ...Capability[]],
+	): Promise<ReadonlyMap<Capability, boolean>> {
+		const denied = () => new Map(capabilities.map((capability) => [capability, false]));
+		if (!this.profileId) return denied();
+		const [realmRecord, membership, grants] = await Promise.all([
+			database
+				.select({ id: realmTable.id })
+				.from(realmTable)
+				.where(eq(realmTable.id, realmId))
+				.limit(1),
+			findRealmMembership(realmId, this.profileId),
+			database
+				.select({
+					authority: capabilityGrant.authority,
+					capability: capabilityGrant.capability,
+				})
+				.from(capabilityGrant)
+				.where(
+					and(
+						eq(capabilityGrant.profileId, this.profileId),
+						inArray(capabilityGrant.capability, capabilities),
+						isNull(capabilityGrant.revokedAt),
+						or(
+							isNull(capabilityGrant.expiresAt),
+							sql`${capabilityGrant.expiresAt} > now()`,
+						),
+						or(
+							and(
+								eq(capabilityGrant.authority, "realm"),
+								eq(capabilityGrant.realmId, realmId),
+							),
+							and(
+								eq(capabilityGrant.authority, "platform"),
+								isNull(capabilityGrant.realmId),
+							),
+						),
+					),
+				),
+		]);
+		if (!realmRecord.length) return denied();
+		const platformGrants = new Set(
+			grants
+				.filter(({ authority }) => authority === "platform")
+				.map(({ capability }) => capability),
+		);
+		const realmGrants = new Set(
+			membership?.state === "active"
+				? grants
+						.filter(({ authority }) => authority === "realm")
+						.map(({ capability }) => capability)
+				: [],
+		);
+		return new Map(
+			capabilities.map((capability) => [
+				capability,
+				Boolean(
+					(membership?.state === "active" &&
+						canRealmRolePerform(membership.role, capability)) ||
+					realmGrants.has(capability) ||
+					platformGrants.has(capability),
+				),
+			]),
+		);
+	}
 
 	async ensureMembershipCapability(
 		this: RealmAuthorization<string>,

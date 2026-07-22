@@ -141,7 +141,21 @@ export const SeriesReleaseResponse = t.Object({
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
-export const SeriesReleaseListResponse = t.Object({ items: t.Array(SeriesReleaseResponse) });
+export const SeriesReleaseListResponse = t.Object({
+	items: t.Array(
+		t.Intersect([
+			SeriesReleaseResponse,
+			t.Object({
+				release: t.Object({
+					id: Uuid,
+					type: t.Union([t.Literal("book"), t.Literal("software"), t.Literal("media")]),
+					title: t.Nullable(t.String()),
+					cover: ImageAssetResponse,
+				}),
+			}),
+		]),
+	),
+});
 
 export const SystemRequirementResponse = t.Object({
 	id: Uuid,

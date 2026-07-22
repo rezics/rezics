@@ -27,6 +27,7 @@ import {
 	entity,
 	software,
 	media,
+	series,
 	unit,
 	creditAttribution,
 	subjectAssociation,
@@ -45,7 +46,8 @@ import { getPublisherSummariesByUnitIds, transitionUnitStatus } from "./status";
 import { getUnitVariantContext } from "./variants";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
 
-export type UnitKind = "book" | "software" | "media";
+export type VariantUnitKind = "book" | "software" | "media";
+export type CatalogUnitKind = VariantUnitKind | "series";
 export type UnitDetail = Static<typeof UnitDetailResponse>;
 
 export interface CreateUnitInput {
@@ -94,7 +96,7 @@ export function presentImageAsset(assetId: string | null) {
 }
 
 export async function createUnit(
-	kind: UnitKind,
+	kind: VariantUnitKind,
 	authorization: Authorization<string>,
 	input: CreateUnitInput,
 ): Promise<UnitDetail> {
@@ -152,40 +154,56 @@ export async function createUnit(
 	return getUnit(kind, unitId, authorization);
 }
 
-async function getReleaseDate(kind: UnitKind, unitId: string) {
-	if (kind === "book")
-		return (
-			(
-				await database
-					.select({ value: book.publicationDate })
-					.from(book)
-					.where(eq(book.id, unitId))
-					.limit(1)
-			)[0]?.value ?? null
-		);
-	if (kind === "software")
-		return (
-			(
-				await database
-					.select({ value: software.releaseDate })
-					.from(software)
-					.where(eq(software.id, unitId))
-					.limit(1)
-			)[0]?.value ?? null
-		);
-	return (
-		(
-			await database
-				.select({ value: media.releaseDate })
-				.from(media)
-				.where(eq(media.id, unitId))
-				.limit(1)
-		)[0]?.value ?? null
-	);
+async function getUnitDetails(
+	kind: CatalogUnitKind,
+	unitId: string,
+): Promise<UnitDetail["details"]> {
+	if (kind === "book") {
+		const [details] = await database.select().from(book).where(eq(book.id, unitId)).limit(1);
+		if (!details) throw new UnitNotFound(kind);
+		return {
+			type: "book",
+			isbn13: details.isbn13,
+			publicationDate: details.publicationDate,
+			pageCount: details.pageCount,
+			format: details.format,
+			licensed: details.licensed,
+		};
+	}
+	if (kind === "software") {
+		const [details] = await database
+			.select()
+			.from(software)
+			.where(eq(software.id, unitId))
+			.limit(1);
+		if (!details) throw new UnitNotFound(kind);
+		return {
+			type: "software",
+			releaseDate: details.releaseDate,
+			versionLabel: details.versionLabel,
+			licensed: details.licensed,
+		};
+	}
+	if (kind === "media") {
+		const [details] = await database.select().from(media).where(eq(media.id, unitId)).limit(1);
+		if (!details) throw new UnitNotFound(kind);
+		return {
+			type: "media",
+			releaseDate: details.releaseDate,
+			kind: details.kind,
+			runtimeMinutes: details.runtimeMinutes,
+			episodeCount: details.episodeCount,
+			seasonCount: details.seasonCount,
+			licensed: details.licensed,
+		};
+	}
+	const [details] = await database.select().from(series).where(eq(series.id, unitId)).limit(1);
+	if (!details) throw new UnitNotFound(kind);
+	return { type: "series", kind: details.kind };
 }
 
 export async function getUnit(
-	kind: UnitKind,
+	kind: CatalogUnitKind,
 	unitId: string,
 	authorization: Authorization,
 ): Promise<UnitDetail> {
@@ -272,16 +290,20 @@ export async function getUnit(
 		)
 		.where(eq(unitTag.unitId, base.id))
 		.orderBy(desc(unitTag.pinned), unitTag.position, unitTag.tagId);
-	const variantContext = await getUnitVariantContext(base.id, authorization.profileId);
+	const variantContext: UnitDetail["variantContext"] =
+		kind === "series"
+			? { role: "standalone" }
+			: await getUnitVariantContext(base.id, authorization.profileId);
 	const [canEdit, accessDecision, associationDecision] = await Promise.all([
 		authorization.unit.canUpdate(base.id),
 		authorization.unit.decide(base.id, "unit.access.manage"),
 		authorization.unit.decide(base.id, "unit.association.manage"),
 	]);
 	const publishers = (await getPublisherSummariesByUnitIds([base.id])).get(base.id) ?? [];
+	const details = await getUnitDetails(kind, base.id);
 	return {
 		id: base.id,
-		type: base.kind,
+		type: kind,
 		status: base.status,
 		visibility: base.visibility,
 		language: primaryLanguage,
@@ -294,7 +316,13 @@ export async function getUnit(
 		createdAt: base.createdAt,
 		updatedAt: base.updatedAt,
 		primaryLanguage,
-		releasedOn: await getReleaseDate(kind, base.id),
+		releasedOn:
+			details.type === "book"
+				? details.publicationDate
+				: details.type === "software" || details.type === "media"
+					? details.releaseDate
+					: null,
+		details,
 		avatar: presentImageAsset(
 			localizations.find(({ avatarAssetId }) => avatarAssetId)?.avatarAssetId ?? null,
 		),
@@ -336,26 +364,28 @@ export async function getUnit(
 			voteCount: toSafeInteger(tag.voteCount ?? 0n, "tag vote count"),
 		})),
 		versions:
-			variantContext.role === "standalone"
-				? [{ id: base.id, kind: "primary", canonicalUnitId: null }]
-				: variantContext.role === "main"
-					? [
-							{ id: base.id, kind: "primary", canonicalUnitId: null },
-							...variantContext.variants.map(({ id }) => ({
-								id,
-								kind: "version",
-								canonicalUnitId: base.id,
-							})),
-						]
-					: variantContext.main.state === "available"
+			kind === "series"
+				? []
+				: variantContext.role === "standalone"
+					? [{ id: base.id, kind: "primary", canonicalUnitId: null }]
+					: variantContext.role === "main"
 						? [
-								{
-									id: base.id,
+								{ id: base.id, kind: "primary", canonicalUnitId: null },
+								...variantContext.variants.map(({ id }) => ({
+									id,
 									kind: "version",
-									canonicalUnitId: variantContext.main.unit.id,
-								},
+									canonicalUnitId: base.id,
+								})),
 							]
-						: [],
+						: variantContext.main.state === "available"
+							? [
+									{
+										id: base.id,
+										kind: "version",
+										canonicalUnitId: variantContext.main.unit.id,
+									},
+								]
+							: [],
 		variantContext,
 		capabilities: {
 			canEdit,
@@ -365,7 +395,7 @@ export async function getUnit(
 	};
 }
 
-export async function listUnits(kind: UnitKind, cursor?: [string, string], limit = 20) {
+export async function listUnits(kind: CatalogUnitKind, cursor?: [string, string], limit = 20) {
 	const rows = await database
 		.select({
 			id: unit.id,
@@ -423,7 +453,7 @@ export async function listUnits(kind: UnitKind, cursor?: [string, string], limit
 }
 
 export async function updateUnit(
-	kind: UnitKind,
+	kind: CatalogUnitKind,
 	unitId: string,
 	authorization: Authorization<string>,
 	body: UpdateUnitInput,
@@ -516,6 +546,8 @@ export async function updateUnit(
 					licensed: details.licensed,
 				})
 				.where(eq(media.id, unitId));
+		if (kind === "series" && details.kind !== undefined)
+			await tx.update(series).set({ kind: details.kind }).where(eq(series.id, unitId));
 		const revision = await recordUnitRevision(tx, {
 			unitId,
 			actorProfileId: authorization.profileId,
@@ -533,13 +565,13 @@ export async function updateUnit(
 				revisionId: revision.revisionId,
 			});
 		}
-		await ensureUnitVariantLifecycle(tx, unitId);
+		if (kind !== "series") await ensureUnitVariantLifecycle(tx, unitId);
 	});
 	return getUnit(kind, unitId, authorization);
 }
 
 export async function deleteUnit(
-	kind: UnitKind,
+	kind: CatalogUnitKind,
 	unitId: string,
 	authorization: Authorization<string>,
 ): Promise<void> {
@@ -551,7 +583,7 @@ export async function deleteUnit(
 			.where(and(eq(unit.id, unitId), eq(unit.kind, kind)))
 			.returning({ id: unit.id });
 		if (!deleted) throw new UnitNotFound(kind);
-		await ensureUnitVariantLifecycle(tx, unitId);
+		if (kind !== "series") await ensureUnitVariantLifecycle(tx, unitId);
 		await recordUnitRevision(tx, {
 			unitId,
 			actorProfileId: authorization.profileId,

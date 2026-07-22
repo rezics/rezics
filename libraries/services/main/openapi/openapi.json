@@ -42478,45 +42478,116 @@
 											"type": "array",
 											"items": {
 												"type": "object",
-												"required": [
-													"seriesId",
-													"releaseUnitId",
-													"position",
-													"releasedOn",
-													"createdAt",
-													"updatedAt"
-												],
-												"properties": {
-													"seriesId": {
-														"format": "uuid",
-														"type": "string"
+												"allOf": [
+													{
+														"type": "object",
+														"required": [
+															"seriesId",
+															"releaseUnitId",
+															"position",
+															"releasedOn",
+															"createdAt",
+															"updatedAt"
+														],
+														"properties": {
+															"seriesId": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"releaseUnitId": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"position": {
+																"format": "fractional-position",
+																"minLength": 2,
+																"maxLength": 512,
+																"type": "string"
+															},
+															"releasedOn": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string" },
+																	{ "type": "null" }
+																]
+															},
+															"createdAt": {
+																"format": "date-time",
+																"type": "string"
+															},
+															"updatedAt": {
+																"format": "date-time",
+																"type": "string"
+															}
+														}
 													},
-													"releaseUnitId": {
-														"format": "uuid",
-														"type": "string"
-													},
-													"position": {
-														"format": "fractional-position",
-														"minLength": 2,
-														"maxLength": 512,
-														"type": "string"
-													},
-													"releasedOn": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"createdAt": {
-														"format": "date-time",
-														"type": "string"
-													},
-													"updatedAt": {
-														"format": "date-time",
-														"type": "string"
+													{
+														"type": "object",
+														"required": ["release"],
+														"properties": {
+															"release": {
+																"type": "object",
+																"required": [
+																	"id",
+																	"type",
+																	"title",
+																	"cover"
+																],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"type": {
+																		"anyOf": [
+																			{
+																				"const": "book",
+																				"type": "string"
+																			},
+																			{
+																				"const": "software",
+																				"type": "string"
+																			},
+																			{
+																				"const": "media",
+																				"type": "string"
+																			}
+																		]
+																	},
+																	"title": {
+																		"nullable": true,
+																		"anyOf": [
+																			{ "type": "string" },
+																			{ "type": "null" }
+																		]
+																	},
+																	"cover": {
+																		"nullable": true,
+																		"anyOf": [
+																			{
+																				"type": "object",
+																				"required": [
+																					"id",
+																					"url"
+																				],
+																				"properties": {
+																					"id": {
+																						"format": "uuid",
+																						"type": "string"
+																					},
+																					"url": {
+																						"type": "string"
+																					}
+																				}
+																			},
+																			{ "type": "null" }
+																		]
+																	}
+																}
+															}
+														}
 													}
-												}
+												]
 											}
 										}
 									}
@@ -53229,7 +53300,18 @@
 						"name": "type",
 						"in": "path",
 						"required": true,
-						"schema": { "type": "string", "enum": ["book", "software", "media"] }
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
 					},
 					{
 						"name": "cursor",
@@ -53908,6 +53990,7 @@
 										"updatedAt",
 										"primaryLanguage",
 										"releasedOn",
+										"details",
 										"avatar",
 										"banner",
 										"cover",
@@ -53922,7 +54005,10 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
-										"type": { "type": "string" },
+										"type": {
+											"type": "string",
+											"enum": ["book", "software", "media", "series"]
+										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
 										"language": {
@@ -54049,6 +54135,210 @@
 										"releasedOn": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"details": {
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"type",
+														"isbn13",
+														"publicationDate",
+														"pageCount",
+														"format",
+														"licensed"
+													],
+													"properties": {
+														"type": {
+															"const": "book",
+															"type": "string"
+														},
+														"isbn13": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"publicationDate": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"pageCount": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"format": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"licensed": { "type": "boolean" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"type",
+														"releaseDate",
+														"versionLabel",
+														"licensed"
+													],
+													"properties": {
+														"type": {
+															"const": "software",
+															"type": "string"
+														},
+														"releaseDate": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"versionLabel": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"licensed": { "type": "boolean" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"type",
+														"releaseDate",
+														"kind",
+														"runtimeMinutes",
+														"episodeCount",
+														"seasonCount",
+														"licensed"
+													],
+													"properties": {
+														"type": {
+															"const": "media",
+															"type": "string"
+														},
+														"releaseDate": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"kind": { "type": "string" },
+														"runtimeMinutes": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"episodeCount": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"seasonCount": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"licensed": { "type": "boolean" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "kind"],
+													"properties": {
+														"type": {
+															"const": "series",
+															"type": "string"
+														},
+														"kind": { "type": "string" }
+													}
+												}
+											]
 										},
 										"avatar": {
 											"nullable": true,
@@ -55064,7 +55354,18 @@
 						"name": "type",
 						"in": "path",
 						"required": true,
-						"schema": { "type": "string", "enum": ["book", "software", "media"] }
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
 					},
 					{
 						"name": "unitId",
@@ -55096,6 +55397,7 @@
 										"updatedAt",
 										"primaryLanguage",
 										"releasedOn",
+										"details",
 										"avatar",
 										"banner",
 										"cover",
@@ -55110,7 +55412,10 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
-										"type": { "type": "string" },
+										"type": {
+											"type": "string",
+											"enum": ["book", "software", "media", "series"]
+										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
 										"language": {
@@ -55237,6 +55542,210 @@
 										"releasedOn": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"details": {
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"type",
+														"isbn13",
+														"publicationDate",
+														"pageCount",
+														"format",
+														"licensed"
+													],
+													"properties": {
+														"type": {
+															"const": "book",
+															"type": "string"
+														},
+														"isbn13": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"publicationDate": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"pageCount": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"format": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"licensed": { "type": "boolean" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"type",
+														"releaseDate",
+														"versionLabel",
+														"licensed"
+													],
+													"properties": {
+														"type": {
+															"const": "software",
+															"type": "string"
+														},
+														"releaseDate": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"versionLabel": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"licensed": { "type": "boolean" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"type",
+														"releaseDate",
+														"kind",
+														"runtimeMinutes",
+														"episodeCount",
+														"seasonCount",
+														"licensed"
+													],
+													"properties": {
+														"type": {
+															"const": "media",
+															"type": "string"
+														},
+														"releaseDate": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"kind": { "type": "string" },
+														"runtimeMinutes": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"episodeCount": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"seasonCount": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"licensed": { "type": "boolean" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "kind"],
+													"properties": {
+														"type": {
+															"const": "series",
+															"type": "string"
+														},
+														"kind": { "type": "string" }
+													}
+												}
+											]
 										},
 										"avatar": {
 											"nullable": true,
@@ -56192,7 +56701,18 @@
 						"name": "type",
 						"in": "path",
 						"required": true,
-						"schema": { "type": "string", "enum": ["book", "software", "media"] }
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
 					},
 					{
 						"name": "unitId",
@@ -56393,6 +56913,7 @@
 										"updatedAt",
 										"primaryLanguage",
 										"releasedOn",
+										"details",
 										"avatar",
 										"banner",
 										"cover",
@@ -56407,7 +56928,10 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
-										"type": { "type": "string" },
+										"type": {
+											"type": "string",
+											"enum": ["book", "software", "media", "series"]
+										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
 										"language": {
@@ -56534,6 +57058,210 @@
 										"releasedOn": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"details": {
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"type",
+														"isbn13",
+														"publicationDate",
+														"pageCount",
+														"format",
+														"licensed"
+													],
+													"properties": {
+														"type": {
+															"const": "book",
+															"type": "string"
+														},
+														"isbn13": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"publicationDate": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"pageCount": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"format": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"licensed": { "type": "boolean" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"type",
+														"releaseDate",
+														"versionLabel",
+														"licensed"
+													],
+													"properties": {
+														"type": {
+															"const": "software",
+															"type": "string"
+														},
+														"releaseDate": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"versionLabel": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"licensed": { "type": "boolean" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"type",
+														"releaseDate",
+														"kind",
+														"runtimeMinutes",
+														"episodeCount",
+														"seasonCount",
+														"licensed"
+													],
+													"properties": {
+														"type": {
+															"const": "media",
+															"type": "string"
+														},
+														"releaseDate": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"kind": { "type": "string" },
+														"runtimeMinutes": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"episodeCount": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"seasonCount": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"licensed": { "type": "boolean" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "kind"],
+													"properties": {
+														"type": {
+															"const": "series",
+															"type": "string"
+														},
+														"kind": { "type": "string" }
+													}
+												}
+											]
 										},
 										"avatar": {
 											"nullable": true,
@@ -57712,7 +58440,18 @@
 						"name": "type",
 						"in": "path",
 						"required": true,
-						"schema": { "type": "string", "enum": ["book", "software", "media"] }
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
 					},
 					{
 						"name": "unitId",
@@ -57793,6 +58532,7 @@
 										"updatedAt",
 										"primaryLanguage",
 										"releasedOn",
+										"details",
 										"avatar",
 										"banner",
 										"cover",
@@ -57807,7 +58547,10 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
-										"type": { "type": "string" },
+										"type": {
+											"type": "string",
+											"enum": ["book", "software", "media", "series"]
+										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
 										"language": {
@@ -57934,6 +58677,210 @@
 										"releasedOn": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"details": {
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"type",
+														"isbn13",
+														"publicationDate",
+														"pageCount",
+														"format",
+														"licensed"
+													],
+													"properties": {
+														"type": {
+															"const": "book",
+															"type": "string"
+														},
+														"isbn13": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"publicationDate": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"pageCount": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"format": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"licensed": { "type": "boolean" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"type",
+														"releaseDate",
+														"versionLabel",
+														"licensed"
+													],
+													"properties": {
+														"type": {
+															"const": "software",
+															"type": "string"
+														},
+														"releaseDate": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"versionLabel": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"licensed": { "type": "boolean" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"type",
+														"releaseDate",
+														"kind",
+														"runtimeMinutes",
+														"episodeCount",
+														"seasonCount",
+														"licensed"
+													],
+													"properties": {
+														"type": {
+															"const": "media",
+															"type": "string"
+														},
+														"releaseDate": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"kind": { "type": "string" },
+														"runtimeMinutes": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"episodeCount": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"seasonCount": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"licensed": { "type": "boolean" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "kind"],
+													"properties": {
+														"type": {
+															"const": "series",
+															"type": "string"
+														},
+														"kind": { "type": "string" }
+													}
+												}
+											]
 										},
 										"avatar": {
 											"nullable": true,
@@ -59031,6 +59978,7 @@
 										"updatedAt",
 										"primaryLanguage",
 										"releasedOn",
+										"details",
 										"avatar",
 										"banner",
 										"cover",
@@ -59045,7 +59993,10 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
-										"type": { "type": "string" },
+										"type": {
+											"type": "string",
+											"enum": ["book", "software", "media", "series"]
+										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
 										"language": {
@@ -59172,6 +60123,210 @@
 										"releasedOn": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"details": {
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"type",
+														"isbn13",
+														"publicationDate",
+														"pageCount",
+														"format",
+														"licensed"
+													],
+													"properties": {
+														"type": {
+															"const": "book",
+															"type": "string"
+														},
+														"isbn13": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"publicationDate": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"pageCount": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"format": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"licensed": { "type": "boolean" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"type",
+														"releaseDate",
+														"versionLabel",
+														"licensed"
+													],
+													"properties": {
+														"type": {
+															"const": "software",
+															"type": "string"
+														},
+														"releaseDate": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"versionLabel": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"licensed": { "type": "boolean" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"type",
+														"releaseDate",
+														"kind",
+														"runtimeMinutes",
+														"episodeCount",
+														"seasonCount",
+														"licensed"
+													],
+													"properties": {
+														"type": {
+															"const": "media",
+															"type": "string"
+														},
+														"releaseDate": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"kind": { "type": "string" },
+														"runtimeMinutes": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"episodeCount": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"seasonCount": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"licensed": { "type": "boolean" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "kind"],
+													"properties": {
+														"type": {
+															"const": "series",
+															"type": "string"
+														},
+														"kind": { "type": "string" }
+													}
+												}
+											]
 										},
 										"avatar": {
 											"nullable": true,
@@ -60222,7 +61377,18 @@
 						"name": "type",
 						"in": "path",
 						"required": true,
-						"schema": { "type": "string", "enum": ["book", "software", "media"] }
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
 					},
 					{
 						"name": "unitId",
@@ -60553,6 +61719,7 @@
 										"updatedAt",
 										"primaryLanguage",
 										"releasedOn",
+										"details",
 										"avatar",
 										"banner",
 										"cover",
@@ -60567,7 +61734,10 @@
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
-										"type": { "type": "string" },
+										"type": {
+											"type": "string",
+											"enum": ["book", "software", "media", "series"]
+										},
 										"status": { "type": "string" },
 										"visibility": { "type": "string" },
 										"language": {
@@ -60694,6 +61864,210 @@
 										"releasedOn": {
 											"nullable": true,
 											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										},
+										"details": {
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"type",
+														"isbn13",
+														"publicationDate",
+														"pageCount",
+														"format",
+														"licensed"
+													],
+													"properties": {
+														"type": {
+															"const": "book",
+															"type": "string"
+														},
+														"isbn13": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"publicationDate": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"pageCount": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"format": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"licensed": { "type": "boolean" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"type",
+														"releaseDate",
+														"versionLabel",
+														"licensed"
+													],
+													"properties": {
+														"type": {
+															"const": "software",
+															"type": "string"
+														},
+														"releaseDate": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"versionLabel": {
+															"nullable": true,
+															"anyOf": [
+																{ "type": "string" },
+																{ "type": "null" }
+															]
+														},
+														"licensed": { "type": "boolean" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": [
+														"type",
+														"releaseDate",
+														"kind",
+														"runtimeMinutes",
+														"episodeCount",
+														"seasonCount",
+														"licensed"
+													],
+													"properties": {
+														"type": {
+															"const": "media",
+															"type": "string"
+														},
+														"releaseDate": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"format": "date",
+																	"type": "string"
+																},
+																{ "type": "null" }
+															]
+														},
+														"kind": { "type": "string" },
+														"runtimeMinutes": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"episodeCount": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"seasonCount": {
+															"nullable": true,
+															"anyOf": [
+																{
+																	"minimum": 1,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"type": "integer"
+																		}
+																	]
+																},
+																{ "type": "null" }
+															]
+														},
+														"licensed": { "type": "boolean" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["type", "kind"],
+													"properties": {
+														"type": {
+															"const": "series",
+															"type": "string"
+														},
+														"kind": { "type": "string" }
+													}
+												}
+											]
 										},
 										"avatar": {
 											"nullable": true,
@@ -61741,114 +63115,152 @@
 							"application/json": {
 								"schema": {
 									"type": "object",
-									"required": ["items", "nextCursor"],
-									"properties": {
-										"items": {
-											"type": "array",
-											"items": {
-												"type": "object",
-												"required": [
-													"id",
-													"unitId",
-													"parentRevisionId",
-													"actorProfileId",
-													"actorName",
-													"editSummary",
-													"minor",
-													"byteSize",
-													"sizeDelta",
-													"createdAt",
-													"tags",
-													"visibility",
-													"isCurrent"
-												],
-												"properties": {
-													"id": { "format": "uuid", "type": "string" },
-													"unitId": {
-														"format": "uuid",
-														"type": "string"
-													},
-													"parentRevisionId": {
-														"nullable": true,
-														"anyOf": [
-															{ "format": "uuid", "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"actorProfileId": {
-														"nullable": true,
-														"anyOf": [
-															{ "format": "uuid", "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"actorName": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"editSummary": {
-														"nullable": true,
-														"anyOf": [
-															{ "type": "string" },
-															{ "type": "null" }
-														]
-													},
-													"minor": { "type": "boolean" },
-													"byteSize": {
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
-															},
-															{ "type": "integer" }
-														]
-													},
-													"sizeDelta": {
-														"anyOf": [
-															{
-																"format": "integer",
-																"default": 0,
-																"type": "string"
-															},
-															{ "type": "integer" }
-														]
-													},
-													"createdAt": {
-														"format": "date-time",
-														"type": "string"
-													},
-													"tags": {
-														"type": "array",
-														"items": { "type": "string" }
-													},
-													"visibility": {
+									"allOf": [
+										{
+											"type": "object",
+											"required": ["items", "nextCursor"],
+											"properties": {
+												"items": {
+													"type": "array",
+													"items": {
 														"type": "object",
 														"required": [
-															"contentHidden",
-															"summaryHidden",
-															"actorHidden",
-															"suppressed"
+															"id",
+															"unitId",
+															"parentRevisionId",
+															"actorProfileId",
+															"actorName",
+															"editSummary",
+															"minor",
+															"byteSize",
+															"sizeDelta",
+															"createdAt",
+															"tags",
+															"visibility",
+															"isCurrent"
 														],
 														"properties": {
-															"contentHidden": { "type": "boolean" },
-															"summaryHidden": { "type": "boolean" },
-															"actorHidden": { "type": "boolean" },
-															"suppressed": { "type": "boolean" }
+															"id": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"unitId": {
+																"format": "uuid",
+																"type": "string"
+															},
+															"parentRevisionId": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	{ "type": "null" }
+																]
+															},
+															"actorProfileId": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	{ "type": "null" }
+																]
+															},
+															"actorName": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string" },
+																	{ "type": "null" }
+																]
+															},
+															"editSummary": {
+																"nullable": true,
+																"anyOf": [
+																	{ "type": "string" },
+																	{ "type": "null" }
+																]
+															},
+															"minor": { "type": "boolean" },
+															"byteSize": {
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{ "type": "integer" }
+																]
+															},
+															"sizeDelta": {
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{ "type": "integer" }
+																]
+															},
+															"createdAt": {
+																"format": "date-time",
+																"type": "string"
+															},
+															"tags": {
+																"type": "array",
+																"items": { "type": "string" }
+															},
+															"visibility": {
+																"type": "object",
+																"required": [
+																	"contentHidden",
+																	"summaryHidden",
+																	"actorHidden",
+																	"suppressed"
+																],
+																"properties": {
+																	"contentHidden": {
+																		"type": "boolean"
+																	},
+																	"summaryHidden": {
+																		"type": "boolean"
+																	},
+																	"actorHidden": {
+																		"type": "boolean"
+																	},
+																	"suppressed": {
+																		"type": "boolean"
+																	}
+																}
+															},
+															"isCurrent": { "type": "boolean" }
 														}
-													},
-													"isCurrent": { "type": "boolean" }
+													}
+												},
+												"nextCursor": {
+													"nullable": true,
+													"anyOf": [
+														{ "type": "string" },
+														{ "type": "null" }
+													]
 												}
 											}
 										},
-										"nextCursor": {
-											"nullable": true,
-											"anyOf": [{ "type": "string" }, { "type": "null" }]
+										{
+											"type": "object",
+											"required": ["capabilities"],
+											"properties": {
+												"capabilities": {
+													"type": "object",
+													"required": ["canRestore"],
+													"properties": {
+														"canRestore": { "type": "boolean" }
+													}
+												}
+											}
 										}
-									}
+									]
 								}
 							}
 						}
@@ -66187,7 +67599,18 @@
 						"name": "type",
 						"in": "path",
 						"required": true,
-						"schema": { "type": "string", "enum": ["book", "software", "media"] }
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
 					},
 					{
 						"name": "unitId",
@@ -66420,7 +67843,18 @@
 						"name": "type",
 						"in": "path",
 						"required": true,
-						"schema": { "type": "string", "enum": ["book", "software", "media"] }
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
 					},
 					{
 						"name": "unitId",
@@ -66447,7 +67881,18 @@
 						"name": "type",
 						"in": "path",
 						"required": true,
-						"schema": { "type": "string", "enum": ["book", "software", "media"] }
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
 					},
 					{
 						"name": "unitId",
@@ -66681,7 +68126,18 @@
 						"name": "type",
 						"in": "path",
 						"required": true,
-						"schema": { "type": "string", "enum": ["book", "software", "media"] }
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
 					},
 					{
 						"name": "unitId",
@@ -66708,7 +68164,18 @@
 						"name": "type",
 						"in": "path",
 						"required": true,
-						"schema": { "type": "string", "enum": ["book", "software", "media"] }
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
 					},
 					{
 						"name": "unitId",
@@ -66865,7 +68332,18 @@
 						"name": "type",
 						"in": "path",
 						"required": true,
-						"schema": { "type": "string", "enum": ["book", "software", "media"] }
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
 					},
 					{
 						"name": "unitId",
@@ -67121,7 +68599,18 @@
 						"name": "type",
 						"in": "path",
 						"required": true,
-						"schema": { "type": "string", "enum": ["book", "software", "media"] }
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
 					},
 					{
 						"name": "unitId",
@@ -67148,7 +68637,18 @@
 						"name": "type",
 						"in": "path",
 						"required": true,
-						"schema": { "type": "string", "enum": ["book", "software", "media"] }
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
 					},
 					{
 						"name": "unitId",
@@ -67283,7 +68783,18 @@
 						"name": "type",
 						"in": "path",
 						"required": true,
-						"schema": { "type": "string", "enum": ["book", "software", "media"] }
+						"schema": {
+							"anyOf": [
+								{
+									"anyOf": [
+										{ "const": "book", "type": "string" },
+										{ "const": "software", "type": "string" },
+										{ "const": "media", "type": "string" }
+									]
+								},
+								{ "const": "series", "type": "string" }
+							]
+						}
 					},
 					{
 						"name": "unitId",
@@ -105939,7 +107450,8 @@
 										"banner",
 										"cover",
 										"localizations",
-										"viewerFollowing"
+										"viewerFollowing",
+										"capabilities"
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
@@ -106133,6 +107645,29 @@
 											"properties": {
 												"role": { "type": "string" },
 												"state": { "type": "string" }
+											}
+										},
+										"capabilities": {
+											"type": "object",
+											"required": [
+												"canUpdateSettings",
+												"canReadMembers",
+												"canManageMembers",
+												"canPublishRules",
+												"canManagePins",
+												"canModerateUnits",
+												"canManageAccess",
+												"canRestoreHistory"
+											],
+											"properties": {
+												"canUpdateSettings": { "type": "boolean" },
+												"canReadMembers": { "type": "boolean" },
+												"canManageMembers": { "type": "boolean" },
+												"canPublishRules": { "type": "boolean" },
+												"canManagePins": { "type": "boolean" },
+												"canModerateUnits": { "type": "boolean" },
+												"canManageAccess": { "type": "boolean" },
+												"canRestoreHistory": { "type": "boolean" }
 											}
 										}
 									}

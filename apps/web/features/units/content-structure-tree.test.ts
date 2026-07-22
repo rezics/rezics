@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	buildContentStructureTree,
+	getContentStructureDepthMove,
 	getContentStructureMoveTargets,
 	flattenContentStructureTree,
 	type ContentStructureNode,
@@ -41,7 +42,7 @@ const nodes: ContentStructureNode[] = [
 
 describe("content tree", () => {
 	it("keeps hierarchy and excludes descendants as move targets", () => {
-		const tree = buildContentStructureTree(nodes);
+		const tree = buildContentStructureTree([nodes[2]!, nodes[1]!, nodes[0]!]);
 		expect(
 			flattenContentStructureTree(tree).map(({ node, depth }) => [node.id, depth]),
 		).toEqual([
@@ -73,5 +74,18 @@ describe("content tree", () => {
 			"orphan",
 			"self",
 		]);
+	});
+
+	it("calculates keyboard-accessible indent and outdent moves", () => {
+		const indent = getContentStructureDepthMove(nodes, "appendix", "indent");
+		if (!indent) throw new Error("Expected an indent target");
+		expect(indent.parentId).toBe("part");
+		expect(indent.position > "a0").toBe(true);
+
+		const outdent = getContentStructureDepthMove(nodes, "chapter", "outdent");
+		if (!outdent) throw new Error("Expected an outdent target");
+		expect(outdent.parentId).toBeNull();
+		expect(outdent.position > "a0").toBe(true);
+		expect(outdent.position < "a1").toBe(true);
 	});
 });

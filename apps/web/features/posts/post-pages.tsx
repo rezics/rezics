@@ -14,6 +14,7 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
+import { HistoryIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
@@ -312,7 +313,16 @@ function PostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
 
 	return (
 		<main className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-10 sm:px-6">
-			<PageHeading title={t.posts.editTitle} />
+			<PageHeading
+				action={
+					<Button asChild size="icon-md" variant="outline">
+						<Link aria-label={t.posts.history} href={`/posts/${post.id}/history`}>
+							<HistoryIcon aria-hidden />
+						</Link>
+					</Button>
+				}
+				title={t.posts.editTitle}
+			/>
 			<form onSubmit={submit}>
 				<FieldGroup>
 					<Field required>
@@ -367,7 +377,16 @@ function ReplyPostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
 
 	return (
 		<main className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-10 sm:px-6">
-			<PageHeading title={t.posts.editReplyTitle} />
+			<PageHeading
+				action={
+					<Button asChild size="icon-md" variant="outline">
+						<Link aria-label={t.posts.history} href={`/posts/${post.id}/history`}>
+							<HistoryIcon aria-hidden />
+						</Link>
+					</Button>
+				}
+				title={t.posts.editReplyTitle}
+			/>
 			<form onSubmit={submit}>
 				<FieldGroup>
 					<PortableTextEditor

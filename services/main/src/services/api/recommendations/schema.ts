@@ -6,7 +6,7 @@ import {
 	RecommendationSurfaceValues,
 } from "../../database/schema/contract-values";
 import { DateTime, DisplayPosition, Uuid } from "../schema";
-import { UnitType } from "../units/schema";
+import { VariantUnitType } from "../units/schema";
 
 export const RecommendationSurfaceSchema = t.UnionEnum(RecommendationSurfaceValues);
 export type RecommendationSurface = Static<typeof RecommendationSurfaceSchema>;
@@ -70,7 +70,7 @@ export const RecommendationExclusionBody = t.Object(
 export type RecommendationExclusionBody = Static<typeof RecommendationExclusionBody>;
 
 export const UnitRecommendationQuery = t.Object({
-	type: t.Optional(UnitType),
+	type: t.Optional(VariantUnitType),
 	seedUnitId: t.Optional(Uuid),
 	personalized: t.Optional(t.Boolean()),
 	cursor: t.Optional(t.String({ maxLength: 1_024 })),
@@ -102,7 +102,7 @@ export const UnitRecommendationResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			id: Uuid,
-			type: UnitType,
+			type: VariantUnitType,
 			language: t.Nullable(t.String()),
 			contentRating: t.String(),
 			publishedAt: t.Nullable(DateTime),

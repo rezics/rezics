@@ -71,6 +71,11 @@ export const UnitHistoryResponse = t.Object({
 	nextCursor: t.Nullable(t.String()),
 });
 
+export const UnitScopedHistoryResponse = t.Intersect([
+	UnitHistoryResponse,
+	t.Object({ capabilities: t.Object({ canRestore: t.Boolean() }) }),
+]);
+
 export const RevisionSlotResponse = t.Object({
 	role: t.String({ minLength: 1, maxLength: 200 }),
 	model: t.String(),

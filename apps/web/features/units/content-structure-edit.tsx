@@ -6,58 +6,69 @@ import {
 	type GetApiUnitsBookByUnitIdContentStructureNodesStatus200,
 	type PostApiUnitsBookByUnitIdContentStructureNodesOptions,
 	useGetApiUnitsBookByUnitIdContentStructureNodes,
-	useGetApiUnitsByTypeByUnitId,
 	usePatchApiUnitsBookByUnitIdContentStructureNodesByNodeId,
 	usePostApiUnitsBookByUnitIdContentStructureNodes,
 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
+import { generateKeyBetween } from "fractional-indexing";
+import {
+	ArrowDown,
+	ArrowUp,
+	Ellipsis,
+	FileText,
+	Folder,
+	GripVertical,
+	HistoryIcon,
+	IndentDecrease,
+	IndentIncrease,
+	Move,
+	Pencil,
+} from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 
-import { PageHeading } from "@rezics/ui";
-import { QueryFailure, QueryPending } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
+import {
+	createTreeCollection,
+	TreeEditor,
+	TreeViewBranch,
+	TreeViewBranchContent,
+	TreeViewBranchItem,
+	TreeViewContent,
+	TreeViewItem,
+	TreeViewNode,
+	type TreeNodeType,
+} from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
-import { RequireSession } from "@/features/auth/require-session";
+import { QueryFailure, QueryPending } from "@rezics/ui";
+import { Menu, MenuContent, MenuItem, MenuTrigger } from "@rezics/ui";
+import { cn } from "@rezics/ui";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { writePortableText } from "@/lib/block";
 import {
 	buildContentStructureTree,
+	getContentStructureDepthMove,
 	getContentStructureMoveTargets,
 	flattenContentStructureTree,
 	type FlattenedContentStructureTreeNode,
 } from "./content-structure-tree";
 import { invalidateBookContentStructure } from "./unit-cache";
+import { UnitSectionHeader } from "./components/unit-section-header";
+import {
+	bookContentStructureHistoryHref,
+	chapterEditorHref,
+} from "./routing/unit-management-routes";
 
 type ContentStructureNode = GetApiUnitsBookByUnitIdContentStructureNodesStatus200["items"][number];
 
 export function ContentStructureEdit({ bookId }: { bookId: string }) {
-	return (
-		<RequireSession>
-			<ContentStructureEditContent bookId={bookId} />
-		</RequireSession>
-	);
-}
-
-function ContentStructureEditContent({ bookId }: { bookId: string }) {
-	const { t } = useTranslation(["create", "engagement", "errors", "ui", "units"]);
-	const book = useGetApiUnitsByTypeByUnitId({ path: { type: "book", unitId: bookId } });
-	if (book.isPending) return <QueryPending />;
-	if (book.isError) return <QueryFailure error={book.error} retry={() => void book.refetch()} />;
-	if (!book.data) return <QueryPending />;
-	if (!book.data.capabilities.canEdit)
-		return (
-			<main className="mx-auto grid min-h-64 w-full max-w-4xl place-items-center px-4 py-10">
-				<p className="text-destructive text-sm">{t.errors.forbidden}</p>
-			</main>
-		);
-	return <BookContentStructureWorkspace bookId={book.data.id} />;
+	return <BookContentStructureWorkspace bookId={bookId} />;
 }
 
 function BookContentStructureWorkspace({ bookId }: { bookId: string }) {
@@ -81,59 +92,71 @@ function BookContentStructureWorkspace({ bookId }: { bookId: string }) {
 	if (tree.isError) return <QueryFailure error={tree.error} retry={() => void tree.refetch()} />;
 	if (!tree.data?.structureId || !tree.data.latestRevisionId)
 		return (
-			<main className="mx-auto grid min-h-64 w-full max-w-4xl place-items-center px-4 py-10">
+			<div className="grid min-h-64 w-full place-items-center">
 				<p className="text-destructive text-sm">{t.ui.retryLater}</p>
-			</main>
+			</div>
 		);
 	const baseRevisionId = tree.data.latestRevisionId;
 	return (
-		<main className="mx-auto flex w-full max-w-[90rem] flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
-			<PageHeading
-				title={t.units.content.edit}
+		<section>
+			<UnitSectionHeader
 				action={
-					<Button asChild variant="outline">
-						<Link href={`/units/book/${bookId}`}>{t.ui.backToUnit}</Link>
+					<Button asChild size="icon-md" variant="outline">
+						<Link
+							aria-label={t.units.workspace.sections.history.label}
+							href={bookContentStructureHistoryHref(bookId)}
+						>
+							<HistoryIcon aria-hidden />
+						</Link>
 					</Button>
 				}
+				description={t.units.workspace.sections.contentStructure.description}
+				title={t.units.workspace.sections.contentStructure.label}
 			/>
-			<ContentCreateForm
-				baseRevisionId={baseRevisionId}
-				bookId={bookId}
-				create={create.mutateAsync}
-				error={create.error}
-				flatNodes={flattened}
-				pending={create.isPending}
-			/>
-			<Card>
-				<CardContent className="p-0">
-					{nodes.length ? (
-						<ContentStructureEditorTree
-							bookId={bookId}
-							flatNodes={flattened}
-							nodes={nodes}
-							onMove={async (nodeId, parentId) => {
-								await update.mutateAsync({
-									path: { unitId: bookId, nodeId },
-									body: { baseRevisionId, parentId },
-								});
-							}}
-							onRename={async (node, title) => {
-								await update.mutateAsync({
-									path: { unitId: bookId, nodeId: node.id },
-									body: { title },
-								});
-							}}
-							pending={update.isPending}
-						/>
-					) : (
-						<p className="p-6 text-sm text-muted-foreground">
-							{t.units.content.noContent}
-						</p>
-					)}
-					<RequestFailure error={update.error} fallback={t.ui.retryLater} />
-				</CardContent>
-			</Card>
-		</main>
+			<div className="grid gap-8">
+				<ContentCreateForm
+					baseRevisionId={baseRevisionId}
+					bookId={bookId}
+					create={create.mutateAsync}
+					error={create.error}
+					flatNodes={flattened}
+					pending={create.isPending}
+				/>
+				<Card appearance="outlined">
+					<CardContent className="p-0">
+						{nodes.length ? (
+							<ContentStructureEditorTree
+								bookId={bookId}
+								flatNodes={flattened}
+								nodes={nodes}
+								onMove={async (nodeId, parentId, position) => {
+									await update.mutateAsync({
+										path: { unitId: bookId, nodeId },
+										body: {
+											baseRevisionId,
+											parentId,
+											...(position ? { position } : {}),
+										},
+									});
+								}}
+								onRename={async (node, title) => {
+									await update.mutateAsync({
+										path: { unitId: bookId, nodeId: node.id },
+										body: { title },
+									});
+								}}
+								pending={update.isPending}
+							/>
+						) : (
+							<p className="p-6 text-sm text-muted-foreground">
+								{t.units.content.noContent}
+							</p>
+						)}
+						<RequestFailure error={update.error} fallback={t.ui.retryLater} />
+					</CardContent>
+				</Card>
+			</div>
+		</section>
 	);
 }
 
@@ -185,7 +208,7 @@ function ContentCreateForm({
 		}
 	}
 	return (
-		<Card>
+		<Card appearance="outlined">
 			<CardContent className="p-6">
 				<form onSubmit={submit}>
 					<FieldGroup>
@@ -275,167 +298,440 @@ function ContentStructureEditorTree({
 	flatNodes: readonly FlattenedContentStructureTreeNode[];
 	pending: boolean;
 	onRename: (node: ContentStructureNode, title: string) => Promise<void>;
-	onMove: (nodeId: string, parentId: string | null) => Promise<void>;
+	onMove: (nodeId: string, parentId: string | null, position?: string) => Promise<void>;
 }) {
+	const { t } = useTranslation(["create", "engagement", "errors", "ui", "units"]);
+	const [editing, setEditing] = useState<
+		{ kind: "rename"; nodeId: string } | { kind: "move"; nodeId: string } | undefined
+	>();
+	const [draggingId, setDraggingId] = useState<string>();
+	const [dropTargetId, setDropTargetId] = useState<string | null>();
+	const editorNodes = useMemo(() => toEditorTreeNodes(buildContentStructureTree(nodes)), [nodes]);
+	const rootNode: ContentStructureEditorNode = {
+		children: editorNodes,
+		id: "content-structure-root",
+		name: "",
+		node: null,
+	};
+	const collection = createTreeCollection<ContentStructureEditorNode>({ rootNode });
+	const validDropTargets = draggingId
+		? new Set(getContentStructureMoveTargets(nodes, draggingId).map((node) => node.id))
+		: new Set<string>();
+	const editingNode = editing
+		? nodes.find((candidate) => candidate.id === editing.nodeId)
+		: undefined;
+
+	async function move(nodeId: string, parentId: string | null, position?: string) {
+		try {
+			await onMove(nodeId, parentId, position);
+		} catch {
+			// The mutation state supplies the visible request failure.
+		}
+	}
+
+	async function drop(parentId: string | null) {
+		const movingId = draggingId;
+		if (!movingId || (parentId !== null && !validDropTargets.has(parentId))) return;
+		try {
+			await move(movingId, parentId);
+		} finally {
+			setDraggingId(undefined);
+			setDropTargetId(undefined);
+		}
+	}
+
+	async function reorder(nodeId: string, direction: "earlier" | "later") {
+		const node = nodes.find((candidate) => candidate.id === nodeId);
+		if (!node) return;
+		const siblings = nodes
+			.filter((candidate) => candidate.parentId === node.parentId)
+			.toSorted((left, right) =>
+				left.position < right.position ? -1 : left.position > right.position ? 1 : 0,
+			);
+		const index = siblings.findIndex((candidate) => candidate.id === nodeId);
+		if (index < 0) return;
+		const position =
+			direction === "earlier"
+				? generateKeyBetween(
+						siblings[index - 2]?.position ?? null,
+						siblings[index - 1]?.position ?? null,
+					)
+				: generateKeyBetween(
+						siblings[index + 1]?.position ?? null,
+						siblings[index + 2]?.position ?? null,
+					);
+		await move(nodeId, node.parentId, position);
+	}
+
+	async function changeDepth(nodeId: string, direction: "indent" | "outdent") {
+		const target = getContentStructureDepthMove(nodes, nodeId, direction);
+		if (target) await move(nodeId, target.parentId, target.position);
+	}
+
 	return (
-		<div>
-			{flatNodes.map(({ node, depth }) => (
-				<ContentStructureEditorRow
-					bookId={bookId}
+		<div className="grid gap-4 p-4">
+			{draggingId ? (
+				<div
+					className={cn(
+						"rounded-lg border border-dashed px-4 py-3 text-center text-sm text-muted-foreground",
+						dropTargetId === null && "border-primary bg-primary/5 text-foreground",
+					)}
+					onDragOver={(event) => {
+						event.preventDefault();
+						setDropTargetId(null);
+					}}
+					onDrop={(event) => {
+						event.preventDefault();
+						void drop(null);
+					}}
+				>
+					{t.units.content.root}
+				</div>
+			) : null}
+			<TreeEditor
+				collection={collection}
+				defaultExpandedValue={getExpandedEditorNodeIds(editorNodes)}
+				label={t.units.content.title}
+				renderNode={(node, indexPath) => (
+					<ContentStructureEditorNodeRow
+						allNodes={nodes}
+						bookId={bookId}
+						draggingId={draggingId}
+						dropTargetId={dropTargetId}
+						indexPath={indexPath}
+						key={node.id}
+						node={node}
+						onDragEnd={() => {
+							setDraggingId(undefined);
+							setDropTargetId(undefined);
+						}}
+						onDragStart={setDraggingId}
+						onDropTarget={(nodeId) => void drop(nodeId)}
+						onMoveRequest={(nodeId) => setEditing({ kind: "move", nodeId })}
+						onDepthRequest={(nodeId, direction) => void changeDepth(nodeId, direction)}
+						onRenameRequest={(nodeId) => setEditing({ kind: "rename", nodeId })}
+						onReorderRequest={(nodeId, direction) => void reorder(nodeId, direction)}
+						onTargetChange={setDropTargetId}
+						pending={pending}
+						validDropTargets={validDropTargets}
+					/>
+				)}
+			/>
+			{editing && editingNode ? (
+				<ContentStructureNodeEditor
 					flatNodes={flatNodes}
-					key={node.id}
-					node={node}
+					kind={editing.kind}
+					node={editingNode}
 					nodes={nodes}
+					onCancel={() => setEditing(undefined)}
 					onMove={onMove}
 					onRename={onRename}
 					pending={pending}
-					depth={depth}
 				/>
-			))}
+			) : null}
 		</div>
 	);
 }
 
-function ContentStructureEditorRow({
+function compareContentPosition(left: ContentStructureNode, right: ContentStructureNode) {
+	return left.position < right.position ? -1 : left.position > right.position ? 1 : 0;
+}
+
+interface ContentStructureEditorNode extends TreeNodeType {
+	children?: ContentStructureEditorNode[];
+	node: ContentStructureNode | null;
+}
+
+function toEditorTreeNodes(
+	nodes: readonly ReturnType<typeof buildContentStructureTree>[number][],
+): ContentStructureEditorNode[] {
+	return nodes.map((entry) => ({
+		...(entry.children.length ? { children: toEditorTreeNodes(entry.children) } : {}),
+		id: entry.node.id,
+		name: entry.node.title,
+		node: entry.node,
+	}));
+}
+
+function getExpandedEditorNodeIds(nodes: readonly ContentStructureEditorNode[]): string[] {
+	return nodes.flatMap((node) =>
+		node.children?.length ? [node.id, ...getExpandedEditorNodeIds(node.children)] : [],
+	);
+}
+
+function ContentStructureEditorNodeRow({
 	bookId,
+	allNodes,
+	node,
+	indexPath,
+	pending,
+	draggingId,
+	dropTargetId,
+	validDropTargets,
+	onDragStart,
+	onDragEnd,
+	onTargetChange,
+	onDropTarget,
+	onRenameRequest,
+	onMoveRequest,
+	onDepthRequest,
+	onReorderRequest,
+}: {
+	bookId: string;
+	allNodes: readonly ContentStructureNode[];
+	node: ContentStructureEditorNode;
+	indexPath: number[];
+	pending: boolean;
+	draggingId?: string;
+	dropTargetId?: string | null;
+	validDropTargets: ReadonlySet<string>;
+	onDragStart: (nodeId: string) => void;
+	onDragEnd: () => void;
+	onTargetChange: (nodeId: string) => void;
+	onDropTarget: (nodeId: string) => void;
+	onRenameRequest: (nodeId: string) => void;
+	onMoveRequest: (nodeId: string) => void;
+	onDepthRequest: (nodeId: string, direction: "indent" | "outdent") => void;
+	onReorderRequest: (nodeId: string, direction: "earlier" | "later") => void;
+}) {
+	const { t } = useTranslation(["create", "engagement", "errors", "ui", "units"]);
+	if (!node.node) return null;
+	const contentNode = node.node;
+	const canDrop = validDropTargets.has(node.id);
+	const siblings = allNodes
+		.filter((candidate) => candidate.parentId === contentNode.parentId)
+		.toSorted(compareContentPosition);
+	const siblingIndex = siblings.findIndex((candidate) => candidate.id === contentNode.id);
+	const rowClassName = cn(
+		"pe-28",
+		draggingId === node.id && "opacity-50",
+		dropTargetId === node.id && canDrop && "bg-primary/10 outline-2 outline-primary",
+	);
+	const dragProps = {
+		draggable: !pending,
+		onDragStart: (event: React.DragEvent<HTMLElement>) => {
+			event.dataTransfer.effectAllowed = "move";
+			event.dataTransfer.setData("text/plain", node.id);
+			onDragStart(node.id);
+		},
+		onDragEnd,
+		onDragOver: (event: React.DragEvent<HTMLElement>) => {
+			if (!canDrop) return;
+			event.preventDefault();
+			event.dataTransfer.dropEffect = "move";
+			onTargetChange(node.id);
+		},
+		onDrop: (event: React.DragEvent<HTMLElement>) => {
+			if (!canDrop) return;
+			event.preventDefault();
+			onDropTarget(node.id);
+		},
+	};
+	const actions = (
+		<div className="absolute end-2 top-1/2 z-2 flex -translate-y-1/2 items-center gap-1 rounded-md bg-background/90 opacity-100 backdrop-blur sm:opacity-0 sm:group-hover/editor-row:opacity-100 sm:group-focus-within/editor-row:opacity-100">
+			<GripVertical aria-hidden className="mx-1 size-4 text-muted-foreground" />
+			{contentNode.contentKind === "chapter" ? (
+				<Button asChild size="xs" variant="quiet">
+					<Link href={chapterEditorHref(bookId, contentNode.contentUnitId)}>
+						{t.units.content.editChapter}
+					</Link>
+				</Button>
+			) : null}
+			<Menu>
+				<MenuTrigger asChild>
+					<Button
+						aria-label={t.units.content.actions}
+						disabled={pending}
+						size="icon-xs"
+						type="button"
+						variant="quiet"
+					>
+						<Ellipsis aria-hidden />
+					</Button>
+				</MenuTrigger>
+				<MenuContent>
+					<MenuItem
+						disabled={siblingIndex <= 0}
+						onSelect={() => onReorderRequest(node.id, "earlier")}
+						value="earlier"
+					>
+						<ArrowUp aria-hidden />
+						{t.units.content.moveEarlier}
+					</MenuItem>
+					<MenuItem
+						disabled={siblingIndex < 0 || siblingIndex >= siblings.length - 1}
+						onSelect={() => onReorderRequest(node.id, "later")}
+						value="later"
+					>
+						<ArrowDown aria-hidden />
+						{t.units.content.moveLater}
+					</MenuItem>
+					<MenuItem
+						disabled={siblingIndex <= 0}
+						onSelect={() => onDepthRequest(node.id, "indent")}
+						value="indent"
+					>
+						<IndentIncrease aria-hidden />
+						{t.units.content.indent}
+					</MenuItem>
+					<MenuItem
+						disabled={!contentNode.parentId}
+						onSelect={() => onDepthRequest(node.id, "outdent")}
+						value="outdent"
+					>
+						<IndentDecrease aria-hidden />
+						{t.units.content.outdent}
+					</MenuItem>
+					<MenuItem onSelect={() => onRenameRequest(node.id)} value="rename">
+						<Pencil aria-hidden />
+						{t.units.content.rename}
+					</MenuItem>
+					<MenuItem onSelect={() => onMoveRequest(node.id)} value="move">
+						<Move aria-hidden />
+						{t.units.content.move}
+					</MenuItem>
+				</MenuContent>
+			</Menu>
+		</div>
+	);
+
+	return (
+		<TreeViewNode indexPath={indexPath} node={node}>
+			{node.children?.length ? (
+				<TreeViewBranch>
+					<div className="group/editor-row relative">
+						<TreeViewBranchItem
+							{...dragProps}
+							className={rowClassName}
+							expandedIcon={Folder}
+							icon={Folder}
+						>
+							{node.name}
+						</TreeViewBranchItem>
+						{actions}
+					</div>
+					<TreeViewBranchContent>
+						{node.children.map((child, index) => (
+							<ContentStructureEditorNodeRow
+								allNodes={allNodes}
+								bookId={bookId}
+								draggingId={draggingId}
+								dropTargetId={dropTargetId}
+								indexPath={[...indexPath, index]}
+								key={child.id}
+								node={child}
+								onDragEnd={onDragEnd}
+								onDragStart={onDragStart}
+								onDropTarget={onDropTarget}
+								onMoveRequest={onMoveRequest}
+								onDepthRequest={onDepthRequest}
+								onRenameRequest={onRenameRequest}
+								onReorderRequest={onReorderRequest}
+								onTargetChange={onTargetChange}
+								pending={pending}
+								validDropTargets={validDropTargets}
+							/>
+						))}
+					</TreeViewBranchContent>
+				</TreeViewBranch>
+			) : (
+				<div className="group/editor-row relative">
+					<TreeViewContent {...dragProps} className={rowClassName}>
+						<TreeViewItem
+							icon={contentNode.contentKind === "chapter" ? FileText : Folder}
+						>
+							{node.name}
+						</TreeViewItem>
+					</TreeViewContent>
+					{actions}
+				</div>
+			)}
+		</TreeViewNode>
+	);
+}
+
+function ContentStructureNodeEditor({
 	node,
 	nodes,
 	flatNodes,
-	depth,
+	kind,
 	pending,
 	onRename,
 	onMove,
+	onCancel,
 }: {
-	bookId: string;
 	node: ContentStructureNode;
 	nodes: readonly ContentStructureNode[];
 	flatNodes: readonly FlattenedContentStructureTreeNode[];
-	depth: number;
+	kind: "rename" | "move";
 	pending: boolean;
 	onRename: (node: ContentStructureNode, title: string) => Promise<void>;
-	onMove: (nodeId: string, parentId: string | null) => Promise<void>;
+	onMove: (nodeId: string, parentId: string | null, position?: string) => Promise<void>;
+	onCancel: () => void;
 }) {
-	const { t } = useTranslation(["create", "engagement", "errors", "ui", "units"]);
-	const [renaming, setRenaming] = useState(false);
-	const [moving, setMoving] = useState(false);
+	const { t } = useTranslation(["engagement", "ui", "units"]);
 	const validTargets = new Set(
 		getContentStructureMoveTargets(nodes, node.id).map((target) => target.id),
 	);
 	return (
-		<div
-			className="border-b px-4 py-3 last:border-b-0"
-			style={{ paddingInlineStart: `${1 + depth * 1.25}rem` }}
-		>
-			{renaming ? (
+		<Card appearance="outlined">
+			<CardContent className="p-4">
 				<form
-					className="flex flex-wrap items-center gap-2"
+					className="flex flex-wrap items-end gap-3"
 					onSubmit={async (event) => {
 						event.preventDefault();
-						const title = String(
-							new FormData(event.currentTarget).get("title") ?? "",
-						).trim();
-						if (!title) return;
+						const form = new FormData(event.currentTarget);
 						try {
-							await onRename(node, title);
-							setRenaming(false);
+							if (kind === "rename") {
+								const title = String(form.get("title") ?? "").trim();
+								if (!title) return;
+								await onRename(node, title);
+							} else {
+								const parentId = String(form.get("parentId") ?? "") || null;
+								await onMove(node.id, parentId);
+							}
+							onCancel();
 						} catch {
-							// The parent mutation state renders the API error.
+							// The parent mutation renders the typed request failure.
 						}
 					}}
 				>
-					<Input
-						className="min-w-0 flex-1"
-						defaultValue={node.title}
-						maxLength={500}
-						name="title"
-						required
-					/>
-					<Button variant="solid" isLoading={pending} size="sm" type="submit">
-						{t.ui.save}
-					</Button>
-					<Button
-						onClick={() => setRenaming(false)}
-						size="sm"
-						type="button"
-						variant="quiet"
-					>
-						{t.engagement.cancel}
-					</Button>
-				</form>
-			) : moving ? (
-				<form
-					className="flex flex-wrap items-center gap-2"
-					onSubmit={async (event) => {
-						event.preventDefault();
-						const parentId =
-							String(new FormData(event.currentTarget).get("parentId") ?? "") || null;
-						try {
-							await onMove(node.id, parentId);
-							setMoving(false);
-						} catch {
-							// The parent mutation state renders the API error.
-						}
-					}}
-				>
-					<NativeSelect
-						className="min-w-0 flex-1"
-						defaultValue={node.parentId ?? ""}
-						name="parentId"
-					>
-						<NativeSelectOption value="">{t.units.content.root}</NativeSelectOption>
-						{flatNodes
-							.filter(({ node: candidate }) => validTargets.has(candidate.id))
-							.map(({ node: candidate, depth: candidateDepth }) => (
-								<NativeSelectOption key={candidate.id} value={candidate.id}>
-									{"— ".repeat(candidateDepth)}
-									{candidate.title}
+					{kind === "rename" ? (
+						<Field className="min-w-52 flex-1" required>
+							<FieldLabel>{t.units.content.rename}</FieldLabel>
+							<Input
+								defaultValue={node.title}
+								maxLength={500}
+								name="title"
+								required
+							/>
+						</Field>
+					) : (
+						<Field className="min-w-52 flex-1">
+							<FieldLabel>{t.units.content.parent}</FieldLabel>
+							<NativeSelect defaultValue={node.parentId ?? ""} name="parentId">
+								<NativeSelectOption value="">
+									{t.units.content.root}
 								</NativeSelectOption>
-							))}
-					</NativeSelect>
-					<Button variant="solid" isLoading={pending} size="sm" type="submit">
+								{flatNodes
+									.filter(({ node: candidate }) => validTargets.has(candidate.id))
+									.map(({ node: candidate, depth }) => (
+										<NativeSelectOption key={candidate.id} value={candidate.id}>
+											{"— ".repeat(depth)}
+											{candidate.title}
+										</NativeSelectOption>
+									))}
+							</NativeSelect>
+						</Field>
+					)}
+					<Button isLoading={pending} size="sm" type="submit" variant="solid">
 						{t.ui.save}
 					</Button>
-					<Button
-						onClick={() => setMoving(false)}
-						size="sm"
-						type="button"
-						variant="quiet"
-					>
+					<Button onClick={onCancel} size="sm" type="button" variant="quiet">
 						{t.engagement.cancel}
 					</Button>
 				</form>
-			) : (
-				<div className="flex min-w-0 flex-wrap items-center gap-2">
-					<span className="min-w-0 flex-1 break-words font-medium">{node.title}</span>
-					<div className="flex shrink-0 flex-wrap gap-1">
-						{node.contentKind === "chapter" && (
-							<Button asChild size="xs" variant="quiet">
-								<Link
-									href={`/units/book/${bookId}/edit/chapters/${node.contentUnitId}`}
-								>
-									{t.units.content.editChapter}
-								</Link>
-							</Button>
-						)}
-						<Button
-							onClick={() => setRenaming(true)}
-							size="xs"
-							type="button"
-							variant="quiet"
-						>
-							{t.units.content.rename}
-						</Button>
-						<Button
-							onClick={() => setMoving(true)}
-							size="xs"
-							type="button"
-							variant="quiet"
-						>
-							{t.units.content.move}
-						</Button>
-					</div>
-				</div>
-			)}
-		</div>
+			</CardContent>
+		</Card>
 	);
 }

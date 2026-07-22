@@ -58,7 +58,13 @@ type RealmModerationHistoryAction =
 	GetApiRealmsByRealmIdUnitsByUnitIdHistoryStatus200["items"][number];
 type ModerationAnnotationRole = "internal_note" | "public_notice";
 
-export function RealmModeration({ realmId }: { realmId: string }) {
+export function RealmModeration({
+	realmId,
+	embedded = false,
+}: {
+	realmId: string;
+	embedded?: boolean;
+}) {
 	const { t } = useTranslation(["posts", "realms", "state"]);
 	const units = useGetApiRealmsByRealmIdUnits({
 		path: { realmId },
@@ -75,7 +81,9 @@ export function RealmModeration({ realmId }: { realmId: string }) {
 	return (
 		<section className="grid gap-3">
 			<div className="flex flex-wrap items-end justify-between gap-3">
-				<h2 className="font-heading text-xl font-bold">{t.realms.moderation}</h2>
+				{embedded ? null : (
+					<h2 className="font-heading text-xl font-bold">{t.realms.moderation}</h2>
+				)}
 				<Field className="w-full sm:w-48">
 					<FieldLabel>{t.realms.moderationFilter}</FieldLabel>
 					<NativeSelect

@@ -15,6 +15,44 @@ export default {
 	profile: "Profile settings",
 	settings: `${realmTerms.label} settings`,
 	backToRealm: `Back to ${realmTerms.inline}`,
+	settingsWorkspace: {
+		description: `Manage ${realmTerms.inline} profile, members, rules, pinned content, moderation, and revision history.`,
+		navigation: `${realmTerms.label} settings navigation`,
+		overview: "All settings",
+		backToOverview: "Back to settings overview",
+		sections: {
+			profile: {
+				label: "Basic profile",
+				description:
+					"Manage the name, summary, images, lifecycle, join policy, and public address.",
+			},
+			members: {
+				label: "Members and roles",
+				description: "Manage member roles, states, and participation eligibility.",
+			},
+			rules: {
+				label: "Rules",
+				description: "Edit localized rules and the actions that require acknowledgement.",
+			},
+			pins: {
+				label: "Pinned content",
+				description: "Manage pinned and highlighted content and display order.",
+			},
+			access: {
+				label: "Access",
+				description:
+					"Manage role grants, invitations, restrictions, protections, and effective access.",
+			},
+			moderation: {
+				label: "Content moderation",
+				description: "Review queued content and apply moderation actions.",
+			},
+			history: {
+				label: "Revision history",
+				description: "Review, compare, undo, or restore settings revisions.",
+			},
+		},
+	},
 	follow: followTerms.actionLabel,
 	unfollow: followTerms.undoActionLabel,
 	join: "Join",

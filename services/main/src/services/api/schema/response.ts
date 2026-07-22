@@ -143,9 +143,52 @@ export const UnitVariantContextResponse = t.Union([
 	),
 ]);
 
+const CatalogUnitTypeResponse = t.Union([
+	t.Literal("book"),
+	t.Literal("software"),
+	t.Literal("media"),
+	t.Literal("series"),
+]);
+
+const UnitDetailsResponse = t.Union([
+	t.Object(
+		{
+			type: t.Literal("book"),
+			isbn13: NullableText,
+			publicationDate: t.Nullable(t.String({ format: "date" })),
+			pageCount: t.Nullable(t.Integer({ minimum: 1 })),
+			format: NullableText,
+			licensed: t.Boolean(),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			type: t.Literal("software"),
+			releaseDate: t.Nullable(t.String({ format: "date" })),
+			versionLabel: NullableText,
+			licensed: t.Boolean(),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			type: t.Literal("media"),
+			releaseDate: t.Nullable(t.String({ format: "date" })),
+			kind: t.String(),
+			runtimeMinutes: t.Nullable(t.Integer({ minimum: 1 })),
+			episodeCount: t.Nullable(t.Integer({ minimum: 1 })),
+			seasonCount: t.Nullable(t.Integer({ minimum: 1 })),
+			licensed: t.Boolean(),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object({ type: t.Literal("series"), kind: t.String() }, { additionalProperties: false }),
+]);
+
 export const UnitDetailResponse = t.Object({
 	id: Uuid,
-	type: t.String(),
+	type: CatalogUnitTypeResponse,
 	status: t.String(),
 	visibility: t.String(),
 	language: NullableText,
@@ -159,6 +202,7 @@ export const UnitDetailResponse = t.Object({
 	updatedAt: DateTime,
 	primaryLanguage: NullableText,
 	releasedOn: t.Nullable(t.String()),
+	details: UnitDetailsResponse,
 	avatar: ImageAssetResponse,
 	banner: ImageAssetResponse,
 	cover: ImageAssetResponse,
@@ -581,6 +625,16 @@ export const RealmDetailResponse = t.Object({
 	localizations: t.Array(LocalizationSummary),
 	viewerFollowing: t.Boolean(),
 	viewerMembership: t.Optional(t.Object({ role: t.String(), state: t.String() })),
+	capabilities: t.Object({
+		canUpdateSettings: t.Boolean(),
+		canReadMembers: t.Boolean(),
+		canManageMembers: t.Boolean(),
+		canPublishRules: t.Boolean(),
+		canManagePins: t.Boolean(),
+		canModerateUnits: t.Boolean(),
+		canManageAccess: t.Boolean(),
+		canRestoreHistory: t.Boolean(),
+	}),
 });
 export const PostDetailResponse = t.Object({
 	id: Uuid,

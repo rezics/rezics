@@ -13,10 +13,6 @@ import {
 	getApiRealmsByRealmIdPinsQueryKey,
 	getApiRealmsByRealmIdRulesQueryKey,
 	useDeleteApiRealmsByRealmIdPinsByUnitId,
-	useGetApiRealmsByRealmId,
-	useGetApiRealmsByRealmIdMembers,
-	useGetApiRealmsByRealmIdPins,
-	useGetApiRealmsByRealmIdRules,
 	usePatchApiRealmsByRealmId,
 	usePatchApiRealmsByRealmIdMembersByProfileId,
 	usePutApiRealmsByRealmIdPinsByUnitId,
@@ -28,13 +24,10 @@ import {
 import type { PortableTextDocument } from "@rezics/block";
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { EntityPicker } from "@rezics/ui";
-import { PageHeading } from "@rezics/ui";
-import { QueryFailure, QueryPending } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
 import { Checkbox } from "@rezics/ui";
@@ -48,16 +41,12 @@ import {
 	type LocalizationImageAssetOption,
 	type LocalizationImageAssetValue,
 } from "@/features/units/localization-image-upload-field";
-import { RequireSession } from "@/features/auth/require-session";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
-import { realmHref } from "@/features/slugs/unit-route";
 import { SlugAddressForm } from "@/features/slugs/slug-address-form";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
-import { canManageRealm } from "./realm-permissions";
-import { RealmModeration } from "./realm-moderation";
 import { invalidateRealmDetails } from "./query";
 
 const MemberRoles = ["owner", "admin", "moderator", "member"] as const;
@@ -73,84 +62,13 @@ type RuleDraft = {
 type MemberRole = (typeof MemberRoles)[number];
 type MemberState = (typeof MemberStates)[number];
 
-export function RealmSettingsPage({ id }: { id: string }) {
-	return (
-		<RequireSession>
-			<RealmSettingsContent id={id} />
-		</RequireSession>
-	);
-}
-
-function RealmSettingsContent({ id }: { id: string }) {
-	const { t, locale } = useTranslation(["errors", "media", "realms", "state", "ui"]);
-	const realm = useGetApiRealmsByRealmId({
-		path: { realmId: id },
-		query: { language: toContentLanguage(locale.target) },
-	});
-	const mayManage = canManageRealm(realm.data?.viewerMembership);
-	const members = useGetApiRealmsByRealmIdMembers(
-		{ path: { realmId: id }, query: { limit: 100 } },
-		{
-			query: { enabled: mayManage },
-		},
-	);
-	const rules = useGetApiRealmsByRealmIdRules(
-		{ path: { realmId: id } },
-		{ query: { enabled: mayManage } },
-	);
-	const pins = useGetApiRealmsByRealmIdPins(
-		{ path: { realmId: id } },
-		{ query: { enabled: mayManage } },
-	);
-
-	if (realm.isError)
-		return <QueryFailure error={realm.error} retry={() => void realm.refetch()} />;
-	if (!realm.data) return <QueryPending />;
-	if (!mayManage)
-		return (
-			<main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6">
-				<p className="text-destructive text-sm">{t.errors.forbidden}</p>
-			</main>
-		);
-
-	return (
-		<main className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-10 sm:px-6">
-			<PageHeading
-				title={t.realms.settings}
-				action={
-					<Button variant="outline" asChild>
-						<Link href={realmHref(realm.data)}>{t.realms.backToRealm}</Link>
-					</Button>
-				}
-			/>
-			<RealmProfileSettings
-				key={`${realm.data.id}:${toContentLanguage(locale.target)}:${realm.data.updatedAt}`}
-				realm={realm.data}
-			/>
-			<RealmMembers
-				realmId={realm.data.id}
-				members={members.data?.items}
-				pending={members.isPending}
-				error={members.error}
-			/>
-			<RealmRules
-				realmId={realm.data.id}
-				data={rules.data}
-				pending={rules.isPending}
-				error={rules.error}
-			/>
-			<RealmPins
-				realmId={realm.data.id}
-				pins={pins.data?.items}
-				pending={pins.isPending}
-				error={pins.error}
-			/>
-			<RealmModeration realmId={realm.data.id} />
-		</main>
-	);
-}
-
-function RealmProfileSettings({ realm }: { realm: GetApiRealmsByRealmIdStatus200 }) {
+export function RealmProfileSettings({
+	realm,
+	embedded = false,
+}: {
+	realm: GetApiRealmsByRealmIdStatus200;
+	embedded?: boolean;
+}) {
 	const { t, locale } = useTranslation(["errors", "media", "realms", "state", "ui"]);
 	const router = useRouter();
 	const queryClient = useQueryClient();
@@ -229,7 +147,9 @@ function RealmProfileSettings({ realm }: { realm: GetApiRealmsByRealmIdStatus200
 
 	return (
 		<section className="grid gap-3">
-			<h2 className="font-heading text-xl font-bold">{t.realms.profile}</h2>
+			{embedded ? null : (
+				<h2 className="font-heading text-xl font-bold">{t.realms.profile}</h2>
+			)}
 			<Card>
 				<CardContent className="p-5">
 					<form onSubmit={submit}>
@@ -350,11 +270,13 @@ function RealmProfileSettings({ realm }: { realm: GetApiRealmsByRealmIdStatus200
 	);
 }
 
-function RealmMembers({
+export function RealmMembers({
 	realmId,
 	members,
 	pending,
 	error,
+	canManage = true,
+	embedded = false,
 }: {
 	realmId: string;
 	members:
@@ -362,11 +284,15 @@ function RealmMembers({
 		| undefined;
 	pending: boolean;
 	error: Parameters<typeof RequestFailure>[0]["error"];
+	canManage?: boolean;
+	embedded?: boolean;
 }) {
 	const { t } = useTranslation(["errors", "media", "realms", "state", "ui"]);
 	return (
 		<section className="grid gap-3">
-			<h2 className="font-heading text-xl font-bold">{t.realms.members}</h2>
+			{embedded ? null : (
+				<h2 className="font-heading text-xl font-bold">{t.realms.members}</h2>
+			)}
 			{pending ? (
 				<Skeleton className="h-48 rounded-xl" />
 			) : error ? (
@@ -374,7 +300,12 @@ function RealmMembers({
 			) : members?.length ? (
 				<div className="grid gap-3">
 					{members.map((member) => (
-						<RealmMember key={member.profileId} realmId={realmId} member={member} />
+						<RealmMember
+							canManage={canManage}
+							key={member.profileId}
+							member={member}
+							realmId={realmId}
+						/>
 					))}
 				</div>
 			) : (
@@ -387,9 +318,11 @@ function RealmMembers({
 function RealmMember({
 	realmId,
 	member,
+	canManage,
 }: {
 	realmId: string;
 	member: { profileId: string; name: string | null; role: string; state: string };
+	canManage: boolean;
 }) {
 	const { t } = useTranslation(["errors", "media", "realms", "state", "ui"]);
 	const queryClient = useQueryClient();
@@ -405,6 +338,7 @@ function RealmMember({
 				<Field>
 					<FieldLabel>{t.realms.memberRole}</FieldLabel>
 					<NativeSelect
+						disabled={!canManage}
 						value={role}
 						onChange={(event) => setRole(toMemberRole(event.currentTarget.value))}
 					>
@@ -418,6 +352,7 @@ function RealmMember({
 				<Field>
 					<FieldLabel>{t.realms.memberState}</FieldLabel>
 					<NativeSelect
+						disabled={!canManage}
 						value={state}
 						onChange={(event) => setState(toMemberState(event.currentTarget.value))}
 					>
@@ -428,51 +363,55 @@ function RealmMember({
 						))}
 					</NativeSelect>
 				</Field>
-				<div className="grid gap-2">
-					<Button
-						variant="solid"
-						size="sm"
-						isLoading={update.isPending}
-						onClick={() =>
-							update.mutate(
-								{
-									path: { realmId, profileId: member.profileId },
-									body: { role, state },
-								},
-								{
-									onSuccess: async () => {
-										await Promise.all([
-											queryClient.invalidateQueries({
-												queryKey: getApiRealmsByRealmIdMembersQueryKey({
-													path: { realmId },
-												}),
-											}),
-											invalidateRealmDetails(queryClient, realmId),
-										]);
+				{canManage ? (
+					<div className="grid gap-2">
+						<Button
+							variant="solid"
+							size="sm"
+							isLoading={update.isPending}
+							onClick={() =>
+								update.mutate(
+									{
+										path: { realmId, profileId: member.profileId },
+										body: { role, state },
 									},
-								},
-							)
-						}
-					>
-						{t.ui.save}
-					</Button>
-					<RequestFailure error={update.error} />
-				</div>
+									{
+										onSuccess: async () => {
+											await Promise.all([
+												queryClient.invalidateQueries({
+													queryKey: getApiRealmsByRealmIdMembersQueryKey({
+														path: { realmId },
+													}),
+												}),
+												invalidateRealmDetails(queryClient, realmId),
+											]);
+										},
+									},
+								)
+							}
+						>
+							{t.ui.save}
+						</Button>
+						<RequestFailure error={update.error} />
+					</div>
+				) : null}
 			</CardContent>
 		</Card>
 	);
 }
 
-function RealmRules({
+export function RealmRules({
 	realmId,
 	data,
 	pending,
 	error,
+	embedded = false,
 }: {
 	realmId: string;
 	data: GetApiRealmsByRealmIdRulesStatus200 | undefined;
 	pending: boolean;
 	error: Parameters<typeof RequestFailure>[0]["error"];
+	embedded?: boolean;
 }) {
 	const { t, locale } = useTranslation(["errors", "media", "realms", "state", "ui"]);
 	const queryClient = useQueryClient();
@@ -542,7 +481,7 @@ function RealmRules({
 
 	return (
 		<section className="grid gap-3">
-			<h2 className="font-heading text-xl font-bold">{t.realms.rules}</h2>
+			{embedded ? null : <h2 className="font-heading text-xl font-bold">{t.realms.rules}</h2>}
 			<Card>
 				<CardContent className="p-5">
 					<form className="grid gap-5" onSubmit={submit}>
@@ -691,16 +630,18 @@ function RuleRequirement({
 	);
 }
 
-function RealmPins({
+export function RealmPins({
 	realmId,
 	pins,
 	pending,
 	error,
+	embedded = false,
 }: {
 	realmId: string;
 	pins: readonly { unitId: string; kind: string; position: string }[] | undefined;
 	pending: boolean;
 	error: Parameters<typeof RequestFailure>[0]["error"];
+	embedded?: boolean;
 }) {
 	const { t } = useTranslation(["errors", "media", "realms", "state", "ui"]);
 	const queryClient = useQueryClient();
@@ -734,7 +675,7 @@ function RealmPins({
 
 	return (
 		<section className="grid gap-3">
-			<h2 className="font-heading text-xl font-bold">{t.realms.pins}</h2>
+			{embedded ? null : <h2 className="font-heading text-xl font-bold">{t.realms.pins}</h2>}
 			<Card>
 				<CardContent className="grid gap-4 p-5">
 					<form className="grid gap-4" onSubmit={submit}>

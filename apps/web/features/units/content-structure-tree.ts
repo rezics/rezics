@@ -1,4 +1,5 @@
 import type { GetApiUnitsBookByUnitIdContentStructureNodesStatus200 } from "@rezics/openapi-tanstack-query";
+import { generateKeyBetween } from "fractional-indexing";
 
 export type ContentStructureNode =
 	GetApiUnitsBookByUnitIdContentStructureNodesStatus200["items"][number];
@@ -11,6 +12,10 @@ export interface ContentStructureTreeNode {
 export interface FlattenedContentStructureTreeNode {
 	node: ContentStructureNode;
 	depth: number;
+}
+
+function comparePosition(left: ContentStructureNode, right: ContentStructureNode) {
+	return left.position < right.position ? -1 : left.position > right.position ? 1 : 0;
 }
 
 /**
@@ -30,6 +35,7 @@ export function buildContentStructureTree(
 				: null;
 		children.set(parentId, [...(children.get(parentId) ?? []), node]);
 	}
+	for (const siblings of children.values()) siblings.sort(comparePosition);
 
 	const seen = new Set<string>();
 	function visit(
@@ -81,4 +87,43 @@ export function getContentStructureMoveTargets(
 	}
 	visit(movingNodeId);
 	return nodes.filter((node) => !blocked.has(node.id));
+}
+
+export function getContentStructureDepthMove(
+	nodes: readonly ContentStructureNode[],
+	nodeId: string,
+	direction: "indent" | "outdent",
+): { parentId: string | null; position: string } | undefined {
+	const node = nodes.find((candidate) => candidate.id === nodeId);
+	if (!node) return undefined;
+	const siblings = nodes
+		.filter((candidate) => candidate.parentId === node.parentId)
+		.toSorted(comparePosition);
+	const index = siblings.findIndex((candidate) => candidate.id === nodeId);
+	if (direction === "indent") {
+		const parent = siblings[index - 1];
+		if (!parent) return undefined;
+		const children = nodes
+			.filter((candidate) => candidate.parentId === parent.id)
+			.toSorted(comparePosition);
+		return {
+			parentId: parent.id,
+			position: generateKeyBetween(children.at(-1)?.position ?? null, null),
+		};
+	}
+	if (!node.parentId) return undefined;
+	const parent = nodes.find((candidate) => candidate.id === node.parentId);
+	if (!parent) return undefined;
+	const destinationSiblings = nodes
+		.filter((candidate) => candidate.parentId === parent.parentId)
+		.toSorted(comparePosition);
+	const parentIndex = destinationSiblings.findIndex((candidate) => candidate.id === parent.id);
+	if (parentIndex < 0) return undefined;
+	return {
+		parentId: parent.parentId,
+		position: generateKeyBetween(
+			parent.position,
+			destinationSiblings[parentIndex + 1]?.position ?? null,
+		),
+	};
 }

@@ -6,6 +6,7 @@ import { isPublicationLicenseId, PublicationLicenseIds } from "@rezics/license";
 import {
 	getApiUnitsByType,
 	getApiUnitsByTypeQueryKey,
+	usePostApiSeries,
 	usePostApiUnitsByType,
 } from "@rezics/openapi-tanstack-query";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
@@ -23,7 +24,7 @@ import { Textarea } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
-import type { UnitType } from "./unit-types";
+import type { UnitType, VariantUnitType } from "./unit-types";
 import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetValue,
@@ -82,6 +83,86 @@ export function UnitBrowsePage({ type }: { type: UnitType }) {
 }
 
 export function UnitCreatePage({ type }: { type: UnitType }) {
+	return type === "series" ? <SeriesCreatePage /> : <VariantUnitCreatePage type={type} />;
+}
+
+function SeriesCreatePage() {
+	const { t, locale } = useTranslation(["actions", "media", "ui", "units"]);
+	const router = useRouter();
+	const queryClient = useQueryClient();
+	const [cover, setCover] = useState<LocalizationImageAssetValue | null>(null);
+	const create = usePostApiSeries({
+		mutation: {
+			onSuccess: async (created) => {
+				await queryClient.invalidateQueries({
+					queryKey: getApiUnitsByTypeQueryKey({ path: { type: "series" } }),
+				});
+				router.push(`/units/series/${created.id}`);
+			},
+		},
+	});
+	async function submit(event: FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		const form = new FormData(event.currentTarget);
+		const title = String(form.get("title") ?? "").trim();
+		const kind = String(form.get("kind") ?? "").trim();
+		const summary = String(form.get("summary") ?? "").trim();
+		if (!title || !kind) return;
+		try {
+			await create.mutateAsync({
+				body: {
+					kind,
+					localization: {
+						language: toContentLanguage(locale.target),
+						title,
+						...(summary ? { summary } : {}),
+						coverAssetId: cover?.id ?? null,
+					},
+				},
+			});
+		} catch {
+			// The typed mutation state supplies the visible API error.
+		}
+	}
+	return (
+		<RequireSession>
+			<main className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-10 sm:px-6">
+				<PageHeading title={`${t.actions.create} ${t.units.types.series}`} />
+				<form onSubmit={submit}>
+					<FieldGroup>
+						<Field required>
+							<FieldLabel>{t.ui.title}</FieldLabel>
+							<Input maxLength={500} name="title" required />
+						</Field>
+						<Field required>
+							<FieldLabel>{t.units.series.kind}</FieldLabel>
+							<Input maxLength={64} name="kind" required />
+						</Field>
+						<Field>
+							<FieldLabel>{t.ui.summary}</FieldLabel>
+							<Textarea maxLength={2000} name="summary" />
+						</Field>
+						<Field>
+							<FieldLabel>{t.media.roles.cover.title}</FieldLabel>
+							<LocalizationImageUploadField
+								onChange={setCover}
+								role="cover"
+								shape="landscape"
+								value={cover}
+							/>
+						</Field>
+						<RequestFailure error={create.error} fallback={t.ui.retryLater} />
+						<Button variant="solid" isLoading={create.isPending} type="submit">
+							{t.actions.create}
+						</Button>
+					</FieldGroup>
+				</form>
+			</main>
+		</RequireSession>
+	);
+}
+
+function VariantUnitCreatePage({ type }: { type: VariantUnitType }) {
 	const { t, locale } = useTranslation(["actions", "licenses", "media", "ui", "units"]);
 	const router = useRouter();
 	const queryClient = useQueryClient();

@@ -23751,7 +23751,7 @@ export type GetApiSeriesBySeriesIdReleasesStatus200 = {
 	/**
 	 * @type array
 	 */
-	items: {
+	items: ({
 		/**
 		 * @description
 		 * Format: `uuid`
@@ -23785,7 +23785,35 @@ export type GetApiSeriesBySeriesIdReleasesStatus200 = {
 		 * @type string
 		 */
 		updatedAt: string;
-	}[];
+	} & {
+		/**
+		 * @type object
+		 */
+		release: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			type: "book" | "software" | "media";
+			title: (string | null) | null;
+			cover:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						url: string;
+				  } | null)
+				| null;
+		};
+	})[];
 };
 
 /**
@@ -34223,23 +34251,11 @@ export type GetApiUnitsByIdByUnitIdStatusEventsResponse =
 	| GetApiUnitsByIdByUnitIdStatusEventsStatus422
 	| GetApiUnitsByIdByUnitIdStatusEventsStatus500;
 
-export const GetApiUnitsByTypeType = {
-	book: "book",
-	software: "software",
-	media: "media",
-} as const;
-
-export type GetApiUnitsByTypeType =
-	(typeof GetApiUnitsByTypeType)[keyof typeof GetApiUnitsByTypeType];
-
 /**
  * @type object
  */
 export type GetApiUnitsByTypePath = {
-	/**
-	 * @type string
-	 */
-	type: GetApiUnitsByTypeType;
+	type: ("book" | "software" | "media") | "series";
 };
 
 /**
@@ -34468,6 +34484,16 @@ export type PostApiUnitsByTypePath = {
 	type: PostApiUnitsByTypeType;
 };
 
+export const PostApiUnitsByTypeStatus200TypeEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+	series: "series",
+} as const;
+
+export type PostApiUnitsByTypeStatus200TypeEnum =
+	(typeof PostApiUnitsByTypeStatus200TypeEnum)[keyof typeof PostApiUnitsByTypeStatus200TypeEnum];
+
 export const PostApiUnitsByTypeStatus200License = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
@@ -34519,7 +34545,7 @@ export type PostApiUnitsByTypeStatus200 = {
 	/**
 	 * @type string
 	 */
-	type: string;
+	type: PostApiUnitsByTypeStatus200TypeEnum;
 	/**
 	 * @type string
 	 */
@@ -34603,6 +34629,61 @@ export type PostApiUnitsByTypeStatus200 = {
 	updatedAt: string;
 	primaryLanguage: (string | null) | null;
 	releasedOn: (string | null) | null;
+	details:
+		| {
+				/**
+				 * @type string
+				 */
+				type: "book";
+				isbn13: (string | null) | null;
+				publicationDate: (string | null) | null;
+				pageCount: ((string | number) | null) | null;
+				format: (string | null) | null;
+				/**
+				 * @type boolean
+				 */
+				licensed: boolean;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "software";
+				releaseDate: (string | null) | null;
+				versionLabel: (string | null) | null;
+				/**
+				 * @type boolean
+				 */
+				licensed: boolean;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "media";
+				releaseDate: (string | null) | null;
+				/**
+				 * @type string
+				 */
+				kind: string;
+				runtimeMinutes: ((string | number) | null) | null;
+				episodeCount: ((string | number) | null) | null;
+				seasonCount: ((string | number) | null) | null;
+				/**
+				 * @type boolean
+				 */
+				licensed: boolean;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "series";
+				/**
+				 * @type string
+				 */
+				kind: string;
+		  };
 	avatar:
 		| ({
 				/**
@@ -35484,23 +35565,11 @@ export type PostApiUnitsByTypeResponse =
 	| PostApiUnitsByTypeStatus422
 	| PostApiUnitsByTypeStatus500;
 
-export const GetApiUnitsByTypeByUnitIdType = {
-	book: "book",
-	software: "software",
-	media: "media",
-} as const;
-
-export type GetApiUnitsByTypeByUnitIdType =
-	(typeof GetApiUnitsByTypeByUnitIdType)[keyof typeof GetApiUnitsByTypeByUnitIdType];
-
 /**
  * @type object
  */
 export type GetApiUnitsByTypeByUnitIdPath = {
-	/**
-	 * @type string
-	 */
-	type: GetApiUnitsByTypeByUnitIdType;
+	type: ("book" | "software" | "media") | "series";
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -35508,6 +35577,16 @@ export type GetApiUnitsByTypeByUnitIdPath = {
 	 */
 	unitId: string;
 };
+
+export const GetApiUnitsByTypeByUnitIdStatus200TypeEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+	series: "series",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200TypeEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200TypeEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200TypeEnum];
 
 export const GetApiUnitsByTypeByUnitIdStatus200License = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
@@ -35560,7 +35639,7 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 	/**
 	 * @type string
 	 */
-	type: string;
+	type: GetApiUnitsByTypeByUnitIdStatus200TypeEnum;
 	/**
 	 * @type string
 	 */
@@ -35644,6 +35723,61 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 	updatedAt: string;
 	primaryLanguage: (string | null) | null;
 	releasedOn: (string | null) | null;
+	details:
+		| {
+				/**
+				 * @type string
+				 */
+				type: "book";
+				isbn13: (string | null) | null;
+				publicationDate: (string | null) | null;
+				pageCount: ((string | number) | null) | null;
+				format: (string | null) | null;
+				/**
+				 * @type boolean
+				 */
+				licensed: boolean;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "software";
+				releaseDate: (string | null) | null;
+				versionLabel: (string | null) | null;
+				/**
+				 * @type boolean
+				 */
+				licensed: boolean;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "media";
+				releaseDate: (string | null) | null;
+				/**
+				 * @type string
+				 */
+				kind: string;
+				runtimeMinutes: ((string | number) | null) | null;
+				episodeCount: ((string | number) | null) | null;
+				seasonCount: ((string | number) | null) | null;
+				/**
+				 * @type boolean
+				 */
+				licensed: boolean;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "series";
+				/**
+				 * @type string
+				 */
+				kind: string;
+		  };
 	avatar:
 		| ({
 				/**
@@ -36229,23 +36363,11 @@ export type GetApiUnitsByTypeByUnitIdResponse =
 	| GetApiUnitsByTypeByUnitIdStatus422
 	| GetApiUnitsByTypeByUnitIdStatus500;
 
-export const PatchApiUnitsByTypeByUnitIdType = {
-	book: "book",
-	software: "software",
-	media: "media",
-} as const;
-
-export type PatchApiUnitsByTypeByUnitIdType =
-	(typeof PatchApiUnitsByTypeByUnitIdType)[keyof typeof PatchApiUnitsByTypeByUnitIdType];
-
 /**
  * @type object
  */
 export type PatchApiUnitsByTypeByUnitIdPath = {
-	/**
-	 * @type string
-	 */
-	type: PatchApiUnitsByTypeByUnitIdType;
+	type: ("book" | "software" | "media") | "series";
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -36253,6 +36375,16 @@ export type PatchApiUnitsByTypeByUnitIdPath = {
 	 */
 	unitId: string;
 };
+
+export const PatchApiUnitsByTypeByUnitIdStatus200TypeEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+	series: "series",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200TypeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200TypeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200TypeEnum];
 
 export const PatchApiUnitsByTypeByUnitIdStatus200License = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
@@ -36305,7 +36437,7 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 	/**
 	 * @type string
 	 */
-	type: string;
+	type: PatchApiUnitsByTypeByUnitIdStatus200TypeEnum;
 	/**
 	 * @type string
 	 */
@@ -36389,6 +36521,61 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 	updatedAt: string;
 	primaryLanguage: (string | null) | null;
 	releasedOn: (string | null) | null;
+	details:
+		| {
+				/**
+				 * @type string
+				 */
+				type: "book";
+				isbn13: (string | null) | null;
+				publicationDate: (string | null) | null;
+				pageCount: ((string | number) | null) | null;
+				format: (string | null) | null;
+				/**
+				 * @type boolean
+				 */
+				licensed: boolean;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "software";
+				releaseDate: (string | null) | null;
+				versionLabel: (string | null) | null;
+				/**
+				 * @type boolean
+				 */
+				licensed: boolean;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "media";
+				releaseDate: (string | null) | null;
+				/**
+				 * @type string
+				 */
+				kind: string;
+				runtimeMinutes: ((string | number) | null) | null;
+				episodeCount: ((string | number) | null) | null;
+				seasonCount: ((string | number) | null) | null;
+				/**
+				 * @type boolean
+				 */
+				licensed: boolean;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "series";
+				/**
+				 * @type string
+				 */
+				kind: string;
+		  };
 	avatar:
 		| ({
 				/**
@@ -37233,23 +37420,11 @@ export type PatchApiUnitsByTypeByUnitIdResponse =
 	| PatchApiUnitsByTypeByUnitIdStatus422
 	| PatchApiUnitsByTypeByUnitIdStatus500;
 
-export const DeleteApiUnitsByTypeByUnitIdType = {
-	book: "book",
-	software: "software",
-	media: "media",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdType =
-	(typeof DeleteApiUnitsByTypeByUnitIdType)[keyof typeof DeleteApiUnitsByTypeByUnitIdType];
-
 /**
  * @type object
  */
 export type DeleteApiUnitsByTypeByUnitIdPath = {
-	/**
-	 * @type string
-	 */
-	type: DeleteApiUnitsByTypeByUnitIdType;
+	type: ("book" | "software" | "media") | "series";
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -37426,6 +37601,16 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextPath = {
 	unitId: string;
 };
 
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200TypeEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+	series: "series",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200TypeEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200TypeEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200TypeEnum];
+
 export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200License = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
@@ -37477,7 +37662,7 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 	/**
 	 * @type string
 	 */
-	type: string;
+	type: PatchApiUnitsByTypeByUnitIdVariantContextStatus200TypeEnum;
 	/**
 	 * @type string
 	 */
@@ -37561,6 +37746,61 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 	updatedAt: string;
 	primaryLanguage: (string | null) | null;
 	releasedOn: (string | null) | null;
+	details:
+		| {
+				/**
+				 * @type string
+				 */
+				type: "book";
+				isbn13: (string | null) | null;
+				publicationDate: (string | null) | null;
+				pageCount: ((string | number) | null) | null;
+				format: (string | null) | null;
+				/**
+				 * @type boolean
+				 */
+				licensed: boolean;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "software";
+				releaseDate: (string | null) | null;
+				versionLabel: (string | null) | null;
+				/**
+				 * @type boolean
+				 */
+				licensed: boolean;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "media";
+				releaseDate: (string | null) | null;
+				/**
+				 * @type string
+				 */
+				kind: string;
+				runtimeMinutes: ((string | number) | null) | null;
+				episodeCount: ((string | number) | null) | null;
+				seasonCount: ((string | number) | null) | null;
+				/**
+				 * @type boolean
+				 */
+				licensed: boolean;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "series";
+				/**
+				 * @type string
+				 */
+				kind: string;
+		  };
 	avatar:
 		| ({
 				/**
@@ -38291,6 +38531,16 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromotePath = {
 	unitId: string;
 };
 
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200TypeEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+	series: "series",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200TypeEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200TypeEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200TypeEnum];
+
 export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
 	"cc-by-sa-4.0": "cc-by-sa-4.0",
@@ -38344,7 +38594,7 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 	/**
 	 * @type string
 	 */
-	type: string;
+	type: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200TypeEnum;
 	/**
 	 * @type string
 	 */
@@ -38428,6 +38678,61 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 	updatedAt: string;
 	primaryLanguage: (string | null) | null;
 	releasedOn: (string | null) | null;
+	details:
+		| {
+				/**
+				 * @type string
+				 */
+				type: "book";
+				isbn13: (string | null) | null;
+				publicationDate: (string | null) | null;
+				pageCount: ((string | number) | null) | null;
+				format: (string | null) | null;
+				/**
+				 * @type boolean
+				 */
+				licensed: boolean;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "software";
+				releaseDate: (string | null) | null;
+				versionLabel: (string | null) | null;
+				/**
+				 * @type boolean
+				 */
+				licensed: boolean;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "media";
+				releaseDate: (string | null) | null;
+				/**
+				 * @type string
+				 */
+				kind: string;
+				runtimeMinutes: ((string | number) | null) | null;
+				episodeCount: ((string | number) | null) | null;
+				seasonCount: ((string | number) | null) | null;
+				/**
+				 * @type boolean
+				 */
+				licensed: boolean;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "series";
+				/**
+				 * @type string
+				 */
+				kind: string;
+		  };
 	avatar:
 		| ({
 				/**
@@ -39137,15 +39442,6 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteResponse =
 	| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus422
 	| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus500;
 
-export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageType = {
-	book: "book",
-	software: "software",
-	media: "media",
-} as const;
-
-export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageType =
-	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageType)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageType];
-
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageLanguage = {
 	zh: "zh",
 	en: "en",
@@ -39158,10 +39454,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageLanguage =
  * @type object
  */
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguagePath = {
-	/**
-	 * @type string
-	 */
-	type: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageType;
+	type: ("book" | "software" | "media") | "series";
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -39173,6 +39466,16 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguagePath = {
 	 */
 	language: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageLanguage;
 };
+
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200TypeEnum = {
+	book: "book",
+	software: "software",
+	media: "media",
+	series: "series",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200TypeEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200TypeEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200TypeEnum];
 
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License = {
 	"cc-by-nc-sa-4.0": "cc-by-nc-sa-4.0",
@@ -39227,7 +39530,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 	/**
 	 * @type string
 	 */
-	type: string;
+	type: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200TypeEnum;
 	/**
 	 * @type string
 	 */
@@ -39311,6 +39614,61 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 	updatedAt: string;
 	primaryLanguage: (string | null) | null;
 	releasedOn: (string | null) | null;
+	details:
+		| {
+				/**
+				 * @type string
+				 */
+				type: "book";
+				isbn13: (string | null) | null;
+				publicationDate: (string | null) | null;
+				pageCount: ((string | number) | null) | null;
+				format: (string | null) | null;
+				/**
+				 * @type boolean
+				 */
+				licensed: boolean;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "software";
+				releaseDate: (string | null) | null;
+				versionLabel: (string | null) | null;
+				/**
+				 * @type boolean
+				 */
+				licensed: boolean;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "media";
+				releaseDate: (string | null) | null;
+				/**
+				 * @type string
+				 */
+				kind: string;
+				runtimeMinutes: ((string | number) | null) | null;
+				episodeCount: ((string | number) | null) | null;
+				seasonCount: ((string | number) | null) | null;
+				/**
+				 * @type boolean
+				 */
+				licensed: boolean;
+		  }
+		| {
+				/**
+				 * @type string
+				 */
+				type: "series";
+				/**
+				 * @type string
+				 */
+				kind: string;
+		  };
 	avatar:
 		| ({
 				/**
@@ -40149,9 +40507,6 @@ export type GetApiHistoryUnitsByUnitIdRevisionsQuery = {
 	limit?: string | number;
 };
 
-/**
- * @type object
- */
 export type GetApiHistoryUnitsByUnitIdRevisionsStatus200 = {
 	/**
 	 * @type array
@@ -40216,6 +40571,16 @@ export type GetApiHistoryUnitsByUnitIdRevisionsStatus200 = {
 		isCurrent: boolean;
 	}[];
 	nextCursor: (string | null) | null;
+} & {
+	/**
+	 * @type object
+	 */
+	capabilities: {
+		/**
+		 * @type boolean
+		 */
+		canRestore: boolean;
+	};
 };
 
 /**
@@ -44153,23 +44518,11 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponse =
 	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
 	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500;
 
-export const PostApiUnitsByTypeByUnitIdCreditAttributionsType = {
-	book: "book",
-	software: "software",
-	media: "media",
-} as const;
-
-export type PostApiUnitsByTypeByUnitIdCreditAttributionsType =
-	(typeof PostApiUnitsByTypeByUnitIdCreditAttributionsType)[keyof typeof PostApiUnitsByTypeByUnitIdCreditAttributionsType];
-
 /**
  * @type object
  */
 export type PostApiUnitsByTypeByUnitIdCreditAttributionsPath = {
-	/**
-	 * @type string
-	 */
-	type: PostApiUnitsByTypeByUnitIdCreditAttributionsType;
+	type: ("book" | "software" | "media") | "series";
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -44366,23 +44719,11 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsResponse =
 	| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus422
 	| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus500;
 
-export const DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdType = {
-	book: "book",
-	software: "software",
-	media: "media",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdType =
-	(typeof DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdType)[keyof typeof DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdType];
-
 /**
  * @type object
  */
 export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdPath = {
-	/**
-	 * @type string
-	 */
-	type: DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdType;
+	type: ("book" | "software" | "media") | "series";
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -44516,23 +44857,11 @@ export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdRespons
 	| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422
 	| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus500;
 
-export const PostApiUnitsByTypeByUnitIdSubjectAssociationsType = {
-	book: "book",
-	software: "software",
-	media: "media",
-} as const;
-
-export type PostApiUnitsByTypeByUnitIdSubjectAssociationsType =
-	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsType)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsType];
-
 /**
  * @type object
  */
 export type PostApiUnitsByTypeByUnitIdSubjectAssociationsPath = {
-	/**
-	 * @type string
-	 */
-	type: PostApiUnitsByTypeByUnitIdSubjectAssociationsType;
+	type: ("book" | "software" | "media") | "series";
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -44729,23 +45058,11 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsResponse =
 	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
 	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500;
 
-export const DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdType = {
-	book: "book",
-	software: "software",
-	media: "media",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdType =
-	(typeof DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdType)[keyof typeof DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdType];
-
 /**
  * @type object
  */
 export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdPath = {
-	/**
-	 * @type string
-	 */
-	type: DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdType;
+	type: ("book" | "software" | "media") | "series";
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -44881,23 +45198,11 @@ export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdRespon
 	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422
 	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus500;
 
-export const PostApiUnitsByTypeByUnitIdLinksType = {
-	book: "book",
-	software: "software",
-	media: "media",
-} as const;
-
-export type PostApiUnitsByTypeByUnitIdLinksType =
-	(typeof PostApiUnitsByTypeByUnitIdLinksType)[keyof typeof PostApiUnitsByTypeByUnitIdLinksType];
-
 /**
  * @type object
  */
 export type PostApiUnitsByTypeByUnitIdLinksPath = {
-	/**
-	 * @type string
-	 */
-	type: PostApiUnitsByTypeByUnitIdLinksType;
+	type: ("book" | "software" | "media") | "series";
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -45103,23 +45408,11 @@ export type PostApiUnitsByTypeByUnitIdLinksResponse =
 	| PostApiUnitsByTypeByUnitIdLinksStatus422
 	| PostApiUnitsByTypeByUnitIdLinksStatus500;
 
-export const PutApiUnitsByTypeByUnitIdTagsByTagIdType = {
-	book: "book",
-	software: "software",
-	media: "media",
-} as const;
-
-export type PutApiUnitsByTypeByUnitIdTagsByTagIdType =
-	(typeof PutApiUnitsByTypeByUnitIdTagsByTagIdType)[keyof typeof PutApiUnitsByTypeByUnitIdTagsByTagIdType];
-
 /**
  * @type object
  */
 export type PutApiUnitsByTypeByUnitIdTagsByTagIdPath = {
-	/**
-	 * @type string
-	 */
-	type: PutApiUnitsByTypeByUnitIdTagsByTagIdType;
+	type: ("book" | "software" | "media") | "series";
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -45289,23 +45582,11 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdResponse =
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus500;
 
-export const DeleteApiUnitsByTypeByUnitIdTagsByTagIdType = {
-	book: "book",
-	software: "software",
-	media: "media",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdType =
-	(typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdType)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdType];
-
 /**
  * @type object
  */
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdPath = {
-	/**
-	 * @type string
-	 */
-	type: DeleteApiUnitsByTypeByUnitIdTagsByTagIdType;
+	type: ("book" | "software" | "media") | "series";
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -45438,23 +45719,11 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdResponse =
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500;
 
-export const PutApiUnitsByTypeByUnitIdTagsByTagIdVoteType = {
-	book: "book",
-	software: "software",
-	media: "media",
-} as const;
-
-export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteType =
-	(typeof PutApiUnitsByTypeByUnitIdTagsByTagIdVoteType)[keyof typeof PutApiUnitsByTypeByUnitIdTagsByTagIdVoteType];
-
 /**
  * @type object
  */
 export type PutApiUnitsByTypeByUnitIdTagsByTagIdVotePath = {
-	/**
-	 * @type string
-	 */
-	type: PutApiUnitsByTypeByUnitIdTagsByTagIdVoteType;
+	type: ("book" | "software" | "media") | "series";
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -45571,23 +45840,11 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteResponse =
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500;
 
-export const DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteType = {
-	book: "book",
-	software: "software",
-	media: "media",
-} as const;
-
-export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteType =
-	(typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteType)[keyof typeof DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteType];
-
 /**
  * @type object
  */
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVotePath = {
-	/**
-	 * @type string
-	 */
-	type: DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteType;
+	type: ("book" | "software" | "media") | "series";
 	/**
 	 * @description
 	 * Format: `uuid`
@@ -66116,6 +66373,43 @@ export type GetApiRealmsByRealmIdStatus200 = {
 		 * @type string
 		 */
 		state: string;
+	};
+	/**
+	 * @type object
+	 */
+	capabilities: {
+		/**
+		 * @type boolean
+		 */
+		canUpdateSettings: boolean;
+		/**
+		 * @type boolean
+		 */
+		canReadMembers: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageMembers: boolean;
+		/**
+		 * @type boolean
+		 */
+		canPublishRules: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManagePins: boolean;
+		/**
+		 * @type boolean
+		 */
+		canModerateUnits: boolean;
+		/**
+		 * @type boolean
+		 */
+		canManageAccess: boolean;
+		/**
+		 * @type boolean
+		 */
+		canRestoreHistory: boolean;
 	};
 };
 

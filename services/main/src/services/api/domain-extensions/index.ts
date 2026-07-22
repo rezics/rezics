@@ -55,6 +55,8 @@ import { getContentStructureRevision } from "../../content-structure/service";
 import { ContentStructureNotFound } from "../../content-structure/errors";
 import { insertUnit } from "../../units/create";
 import {
+	firstUnitLocalizationCoverAssetId,
+	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
 	resolveUnitLocalizationImageAssetIdFromOrdered,
 	unitLocalizationImageAssetIds,
@@ -415,18 +417,57 @@ export default new Elysia()
 			.get(
 				"/:seriesId/releases",
 				async ({ params, request }) => {
-					const authorization = (await resolveIdentity(request.headers, "unit:read"))
-						.authorization;
+					const identity = await resolveIdentity(request.headers, "unit:read");
+					const { authorization } = identity;
 					await authorization.unit.ensureCanRead(
 						params.seriesId,
 						() => new UnitNotFound("Series"),
 					);
+					const rows = await database
+						.select({
+							seriesId: seriesRelease.seriesId,
+							releaseUnitId: seriesRelease.releaseUnitId,
+							position: seriesRelease.position,
+							releasedOn: seriesRelease.releasedOn,
+							createdAt: seriesRelease.createdAt,
+							updatedAt: seriesRelease.updatedAt,
+							type: unit.kind,
+							title: unitLocalization.title,
+							coverAssetId: firstUnitLocalizationCoverAssetId(unit.id),
+						})
+						.from(seriesRelease)
+						.innerJoin(unit, eq(unit.id, seriesRelease.releaseUnitId))
+						.leftJoin(
+							unitLocalization,
+							and(
+								eq(unitLocalization.unitId, unit.id),
+								isPrimaryUnitLocalization(unit.id),
+							),
+						)
+						.where(
+							and(
+								eq(seriesRelease.seriesId, params.seriesId),
+								inArray(unit.kind, ["book", "software", "media"]),
+								getUnitReadCondition(identity.profile?.unitId),
+							),
+						)
+						.orderBy(seriesRelease.position, seriesRelease.releaseUnitId);
 					return {
-						items: await database
-							.select()
-							.from(seriesRelease)
-							.where(eq(seriesRelease.seriesId, params.seriesId))
-							.orderBy(seriesRelease.position, seriesRelease.releaseUnitId),
+						items: rows.flatMap(({ type, title, coverAssetId, ...row }) =>
+							type === "book" || type === "software" || type === "media"
+								? [
+										{
+											...row,
+											release: {
+												id: row.releaseUnitId,
+												type,
+												title,
+												cover: presentImageAsset(coverAssetId),
+											},
+										},
+									]
+								: [],
+						),
 					};
 				},
 				{
@@ -1223,6 +1264,18 @@ export default new Elysia()
 						params.releaseId,
 						() => new UnitNotFound("Release Unit"),
 					);
+					const [releaseUnit] = await database
+						.select({ id: unit.id })
+						.from(unit)
+						.where(
+							and(
+								eq(unit.id, params.releaseId),
+								inArray(unit.kind, ["book", "software", "media"]),
+								isNull(unit.deletedAt),
+							),
+						)
+						.limit(1);
+					if (!releaseUnit) throw new UnitNotFound("Release Unit");
 					const [created] = await database.transaction(async (tx) => {
 						const rows = await tx
 							.insert(seriesRelease)

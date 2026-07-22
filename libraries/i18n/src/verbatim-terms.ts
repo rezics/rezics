@@ -110,6 +110,11 @@ export const verbatimTerms = {
 		category: "identifier",
 		rationale: "Stable identifier label used in technical interfaces.",
 	},
+	isbn13: {
+		value: "ISBN-13",
+		category: "identifier",
+		rationale: "International Standard Book Number format identifier.",
+	},
 	r15: {
 		value: "R15",
 		category: "identifier",

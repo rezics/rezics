@@ -44,7 +44,7 @@ import { selectLocalization } from "@/lib/localization";
 import { useTranslation } from "@/i18n/client";
 import { readPortableText } from "@/lib/block";
 import { RequestFailure } from "@/i18n/request-failure";
-import { canManageRealm, isRealmOwner } from "./realm-permissions";
+import { canOpenRealmSettings, isRealmOwner } from "./realm-permissions";
 import { invalidateRealmDetails } from "./query";
 
 export function RealmsPage() {
@@ -266,7 +266,7 @@ export function RealmDetailPage({ id }: { id: string }) {
 		toContentLanguage(locale.target),
 		realm.language,
 	);
-	const canManage = canManageRealm(realm.viewerMembership);
+	const canManage = canOpenRealmSettings(realm.capabilities);
 	const canPost = realm.viewerMembership?.state === "active";
 	return (
 		<main className="mx-auto flex w-full max-w-[76rem] flex-col gap-7 px-4 py-6 sm:px-6 sm:py-9">

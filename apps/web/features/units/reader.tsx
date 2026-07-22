@@ -16,7 +16,7 @@ import {
 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeftIcon, ListTreeIcon, MinusIcon, PlusIcon } from "lucide-react";
+import { ArrowLeftIcon, HistoryIcon, ListTreeIcon, MinusIcon, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
@@ -52,6 +52,7 @@ import { hasErrorCode } from "@/i18n/errors";
 import { readPortableText, writePortableText } from "@/lib/block";
 import { buildContentStructureTree, type ContentStructureTreeNode } from "./content-structure-tree";
 import { invalidateChapterContent } from "./unit-cache";
+import { chapterHistoryHref, unitManagementSectionHref } from "./routing/unit-management-routes";
 
 export function BookChapters({ bookId }: { bookId: string }) {
 	const { t } = useTranslation(["actions", "errors", "state", "ui", "units"]);
@@ -428,7 +429,7 @@ function ChapterLocalizationEditorContent({
 }
 
 function ChapterLocalizationEditor({ bookId, chapterId }: { bookId: string; chapterId: string }) {
-	const { t, locale } = useTranslation(["actions", "errors", "state", "ui", "units"]);
+	const { t, locale } = useTranslation(["actions", "errors", "history", "state", "ui", "units"]);
 	const [language, setLanguage] = useState<ContentLanguage>(toContentLanguage(locale.target));
 	const query = useGetApiChaptersByChapterId({
 		path: { chapterId },
@@ -441,7 +442,32 @@ function ChapterLocalizationEditor({ bookId, chapterId }: { bookId: string; chap
 		return <QueryFailure error={query.error} retry={() => void query.refetch()} />;
 	return (
 		<main className="mx-auto flex w-full max-w-[90rem] flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
-			<PageHeading title={t.units.chapter.title} />
+			<PageHeading
+				action={
+					<div className="flex gap-2">
+						<Button asChild variant="outline">
+							<Link
+								href={unitManagementSectionHref(
+									"book",
+									bookId,
+									"content-structure",
+								)}
+							>
+								{t.units.chapter.backToStructure}
+							</Link>
+						</Button>
+						<Button asChild size="icon-md" variant="outline">
+							<Link
+								aria-label={t.history.title}
+								href={chapterHistoryHref(bookId, chapterId)}
+							>
+								<HistoryIcon aria-hidden />
+							</Link>
+						</Button>
+					</div>
+				}
+				title={t.units.chapter.title}
+			/>
 			<Card>
 				<CardContent className="grid gap-6 p-6">
 					<div className="grid gap-2">
@@ -550,7 +576,9 @@ function ChapterLocalizationForm({
 					</Button>
 					<RequestFailure error={update.error} fallback={t.ui.retryLater} />
 					<Button asChild type="button" variant="outline">
-						<Link href={`/units/book/${bookId}`}>{t.ui.backToUnit}</Link>
+						<Link href={unitManagementSectionHref("book", bookId, "content-structure")}>
+							{t.units.chapter.backToStructure}
+						</Link>
 					</Button>
 				</div>
 			</FieldGroup>

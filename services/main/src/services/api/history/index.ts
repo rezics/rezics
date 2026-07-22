@@ -40,6 +40,7 @@ import {
 	UnitHistoryParams,
 	UnitHistoryQuery,
 	UnitHistoryResponse,
+	UnitScopedHistoryResponse,
 	UnitRevisionActionParams,
 	UnitRevisionCompareQuery,
 	UnitRevisionCompareResponse,
@@ -206,7 +207,10 @@ export default new Elysia({ prefix: "/history" })
 		async ({ params, query, request }) => {
 			const { authorization } = await resolveIdentity(request.headers, "unit:read");
 			await authorization.unit.ensureCanRead(params.unitId);
-			const access = await getVisibilityAccess(authorization);
+			const [access, restoreDecision] = await Promise.all([
+				getVisibilityAccess(authorization),
+				authorization.unit.decide(params.unitId, "unit.history.restore"),
+			]);
 			const scope = `unit:${params.unitId}`;
 			const cursor = decodeCursor(query.cursor, scope);
 			const limit = query.limit ?? 30;
@@ -218,6 +222,7 @@ export default new Elysia({ prefix: "/history" })
 			const last = items.at(-1);
 			return {
 				items: items.map((row) => presentSummary(row, access)),
+				capabilities: { canRestore: restoreDecision.allowed },
 				nextCursor:
 					rows.length > limit && last
 						? encodeCursor(scope, last.createdAt, last.id)
@@ -228,7 +233,7 @@ export default new Elysia({ prefix: "/history" })
 			params: UnitHistoryParams,
 			query: UnitHistoryQuery,
 			response: {
-				[StatusCodes.OK]: UnitHistoryResponse,
+				[StatusCodes.OK]: UnitScopedHistoryResponse,
 				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["InvalidHistoryCursor"]),
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
 			},

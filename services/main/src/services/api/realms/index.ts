@@ -157,11 +157,12 @@ async function ensureRealmVisible(realmId: string, headers: Headers) {
 		.where(eq(realm.id, realmId))
 		.limit(1);
 	if (!record) throw new RealmNotFound();
-	const { profile } = await resolveIdentity(headers, "realm:read");
+	const identity = await resolveIdentity(headers, "realm:read");
+	const { profile } = identity;
 	const membership = profile ? await findRealmMembership(realmId, profile.unitId) : undefined;
 	if (!isRealmVisible(record.status, record.visibility, membership?.state))
 		throw new RealmNotFound();
-	return profile;
+	return identity;
 }
 
 async function recordAuditEvent(
@@ -350,7 +351,10 @@ export default new Elysia({ prefix: "/realms" })
 	.get(
 		"/:realmId",
 		async ({ params, query, request }) => {
-			const viewer = await ensureRealmVisible(params.realmId, request.headers);
+			const { profile: viewer, authorization } = await ensureRealmVisible(
+				params.realmId,
+				request.headers,
+			);
 			const [record] = await database
 				.select({
 					id: realm.id,
@@ -406,6 +410,18 @@ export default new Elysia({ prefix: "/realms" })
 							),
 					])
 				: [undefined, []];
+			const [realmCapabilities, accessDecision, historyDecision] = await Promise.all([
+				authorization.realm.decideCapabilities(params.realmId, [
+					"realm.settings.update",
+					"realm.members.read",
+					"realm.members.manage",
+					"realm.rules.publish",
+					"realm.pins.manage",
+					"realm.units.moderate",
+				]),
+				authorization.unit.decide(params.realmId, "unit.access.manage"),
+				authorization.unit.decide(params.realmId, "unit.history.restore"),
+			]);
 			const { avatarAssetId, bannerAssetId, coverAssetId, ...realmRecord } = record;
 			return {
 				...realmRecord,
@@ -426,6 +442,16 @@ export default new Elysia({ prefix: "/realms" })
 					? { role: viewerMembership.role, state: viewerMembership.state }
 					: undefined,
 				viewerFollowing: following.length > 0,
+				capabilities: {
+					canUpdateSettings: realmCapabilities.get("realm.settings.update") ?? false,
+					canReadMembers: realmCapabilities.get("realm.members.read") ?? false,
+					canManageMembers: realmCapabilities.get("realm.members.manage") ?? false,
+					canPublishRules: realmCapabilities.get("realm.rules.publish") ?? false,
+					canManagePins: realmCapabilities.get("realm.pins.manage") ?? false,
+					canModerateUnits: realmCapabilities.get("realm.units.moderate") ?? false,
+					canManageAccess: accessDecision.allowed,
+					canRestoreHistory: historyDecision.allowed,
+				},
 			};
 		},
 		{

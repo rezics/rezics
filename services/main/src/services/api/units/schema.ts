@@ -9,11 +9,18 @@ import {
 	Uuid,
 } from "../schema";
 
-export const UnitType = t.Union([t.Literal("book"), t.Literal("software"), t.Literal("media")]);
-export type UnitType = Static<typeof UnitType>;
+export const VariantUnitType = t.Union([
+	t.Literal("book"),
+	t.Literal("software"),
+	t.Literal("media"),
+]);
+export type VariantUnitType = Static<typeof VariantUnitType>;
 
-export const UnitTypeParams = t.Object({ type: UnitType });
-export type UnitTypeParams = Static<typeof UnitTypeParams>;
+export const CatalogUnitType = t.Union([VariantUnitType, t.Literal("series")]);
+export type CatalogUnitType = Static<typeof CatalogUnitType>;
+
+export const VariantUnitTypeParams = t.Object({ type: VariantUnitType });
+export const CatalogUnitTypeParams = t.Object({ type: CatalogUnitType });
 
 export const UnitStatusEventParams = t.Object({ unitId: Uuid });
 export const UnitStatusEventListQuery = t.Object({
@@ -113,13 +120,14 @@ export const ListUnitsQuery = t.Object({
 export type ListUnitsQuery = Static<typeof ListUnitsQuery>;
 
 export const UnitLookupParams = t.Object({
-	type: UnitType,
+	type: CatalogUnitType,
 	unitId: Uuid,
 });
 export type UnitLookupParams = Static<typeof UnitLookupParams>;
 
-export const UnitUnitIdParams = t.Object({ type: UnitType, unitId: Uuid });
+export const UnitUnitIdParams = t.Object({ type: CatalogUnitType, unitId: Uuid });
 export type UnitUnitIdParams = Static<typeof UnitUnitIdParams>;
+export const VariantUnitUnitIdParams = t.Object({ type: VariantUnitType, unitId: Uuid });
 
 export const UpdateUnitVariantContextBody = t.Object(
 	{
@@ -137,7 +145,7 @@ export const PromoteUnitVariantBody = t.Object(
 export type PromoteUnitVariantBody = Static<typeof PromoteUnitVariantBody>;
 
 export const UnitLocalizationParams = t.Object({
-	type: UnitType,
+	type: CatalogUnitType,
 	unitId: t.String({ format: "uuid" }),
 	language: ContentLanguage,
 });
