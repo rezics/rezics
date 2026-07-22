@@ -66,16 +66,14 @@ export function FeedContentSelector<Value extends string>({
 				<Button
 					aria-label={t.feed.contentFilterLabel}
 					className={cn(
-						"h-10 max-w-[min(18rem,calc(100vw-2rem))] min-w-44 justify-start gap-2 rounded-full px-3.5 font-semibold",
+						"max-w-[min(18rem,calc(100vw-2rem))] min-w-44 justify-start",
 						className,
 					)}
+					size="lg"
 				>
-					<ListFilterIcon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+					<ListFilterIcon aria-hidden data-icon="inline-start" />
 					<span className="min-w-0 truncate">{summary}</span>
-					<ChevronsUpDownIcon
-						aria-hidden
-						className="ms-auto size-4 shrink-0 text-muted-foreground"
-					/>
+					<ChevronsUpDownIcon aria-hidden className="ms-auto" data-icon="inline-end" />
 				</Button>
 			</MenuTrigger>
 			<MenuContent className="max-h-96 w-[min(22rem,calc(100vw-2rem))] p-1.5">

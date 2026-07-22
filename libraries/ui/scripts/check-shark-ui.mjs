@@ -8,8 +8,9 @@ const upstreamComponentsDirectory = path.join(
 	repositoryRoot,
 	"references/shark-ui/registry/react/components",
 );
+const upstreamManifestUrl = "https://shark.vini.one/r/ui.json";
 const SourceDirectories = [
-	path.join(repositoryRoot, "frontend"),
+	path.join(repositoryRoot, "apps/web/features"),
 	path.join(repositoryRoot, "libraries/ui/src/custom"),
 ];
 const projectOwnedOverrides = new Map([
@@ -23,6 +24,92 @@ async function getComponentNames(directory) {
 		.filter((file) => file.endsWith(".tsx"))
 		.map((file) => file.slice(0, -".tsx".length))
 		.sort();
+}
+
+async function readRegistryItem(url, label) {
+	let response;
+	try {
+		response = await fetch(url, { signal: AbortSignal.timeout(15_000) });
+	} catch (error) {
+		throw new Error(`Unable to fetch ${label} from ${url}.`, { cause: error });
+	}
+	if (!response.ok) {
+		throw new Error(`Unable to fetch ${label} from ${url}: HTTP ${response.status}.`);
+	}
+	const value = await response.json();
+	if (!value || typeof value !== "object") {
+		throw new Error(`${label} from ${url} is not a JSON object.`);
+	}
+	return value;
+}
+
+function getRegistryItemName(dependency) {
+	if (typeof dependency !== "string") {
+		throw new Error("The SharkUI manifest contains a non-string registry dependency.");
+	}
+	const file = path.posix.basename(new URL(dependency).pathname);
+	if (!file.endsWith(".json")) {
+		throw new Error(`The SharkUI registry dependency has no JSON item name: ${dependency}`);
+	}
+	return file.slice(0, -".json".length);
+}
+
+function registryItemHasComponentSource(item) {
+	return (
+		Array.isArray(item.files) &&
+		item.files.some(
+			(file) =>
+				file &&
+				typeof file === "object" &&
+				typeof file.path === "string" &&
+				file.path.endsWith(".tsx"),
+		)
+	);
+}
+
+async function getUpstreamComponents(localComponents) {
+	try {
+		return {
+			components: await getComponentNames(upstreamComponentsDirectory),
+			source: getRelativePath(upstreamComponentsDirectory),
+		};
+	} catch (error) {
+		if (!error || typeof error !== "object" || error.code !== "ENOENT") throw error;
+	}
+
+	const manifest = await readRegistryItem(upstreamManifestUrl, "SharkUI UI manifest");
+	if (!Array.isArray(manifest.registryDependencies)) {
+		throw new Error("The SharkUI UI manifest has no registryDependencies array.");
+	}
+	const dependencyByName = new Map(
+		manifest.registryDependencies.map((dependency) => [
+			getRegistryItemName(dependency),
+			dependency,
+		]),
+	);
+	const candidates = [...dependencyByName.keys()].sort();
+	const missingCandidates = getMissingItems(candidates, localComponents);
+	const componentMissingCandidates = new Set(
+		(
+			await Promise.all(
+				missingCandidates.map(async (name) => {
+					const dependency = dependencyByName.get(name);
+					if (!dependency) throw new Error(`Missing registry dependency for ${name}.`);
+					const item = await readRegistryItem(
+						dependency,
+						`SharkUI registry item ${name}`,
+					);
+					return registryItemHasComponentSource(item) ? name : undefined;
+				}),
+			)
+		).filter(Boolean),
+	);
+	return {
+		components: candidates.filter(
+			(name) => localComponents.includes(name) || componentMissingCandidates.has(name),
+		),
+		source: upstreamManifestUrl,
+	};
 }
 
 async function findSourceFiles(directory) {
@@ -55,21 +142,15 @@ function findLocations(file, source, expression) {
 	return findings;
 }
 
-const [
-	localComponents,
-	upstreamComponents,
-	indexSource,
-	packageSource,
-	registrySource,
-	...uiSources
-] = await Promise.all([
-	getComponentNames(localComponentsDirectory),
-	getComponentNames(upstreamComponentsDirectory),
+const localComponents = await getComponentNames(localComponentsDirectory);
+const upstream = await getUpstreamComponents(localComponents);
+const [indexSource, packageSource, registrySource, ...uiSources] = await Promise.all([
 	readFile(path.join(repositoryRoot, "libraries/ui/src/index.ts"), "utf8"),
 	readFile(path.join(repositoryRoot, "libraries/ui/package.json"), "utf8"),
 	readFile(path.join(repositoryRoot, "libraries/ui/components.json"), "utf8"),
 	...SourceDirectories.map(findSourceFiles),
 ]);
+const upstreamComponents = upstream.components;
 
 const failures = [];
 const missingLocalComponents = getMissingItems(upstreamComponents, localComponents);
@@ -77,7 +158,7 @@ const unexpectedLocalComponents = getMissingItems(localComponents, upstreamCompo
 if (missingLocalComponents.length || unexpectedLocalComponents.length) {
 	failures.push(
 		[
-			"SharkUI component mirror differs from the checked-in upstream registry.",
+			"SharkUI component mirror differs from the upstream registry.",
 			...(missingLocalComponents.length
 				? [`Missing locally: ${missingLocalComponents.join(", ")}`]
 				: []),
@@ -116,12 +197,17 @@ const SourcePolicies = [
 		expression: /role=["'](?:listbox|option|menu|dialog|alertdialog)["']/giu,
 	},
 	{
+		name: "feature-level control radius overrides",
+		expression:
+			/<(?:Button|ChoiceSelect|InputGroup|SelectTrigger)\b[^>]*\brounded-(?:none|sm|md|lg|xl|2xl|3xl|4xl|full)\b/gsu,
+	},
+	{
 		name: "Tailwind space-x/space-y layout utilities",
 		expression: /\bspace-[xy]-/gu,
 	},
 	{
 		name: "physical-direction Tailwind utilities",
-		expression: /\b(?:ml|mr|pl|pr|left|right)-/gu,
+		expression: /\b(?:ml|mr|pl|pr|left|right)-(?:\d|px\b|auto\b|full\b|\[)/gu,
 	},
 	{
 		name: "raw Tailwind palette utilities",
@@ -144,6 +230,6 @@ if (failures.length) {
 	process.exitCode = 1;
 } else {
 	console.log(
-		`SharkUI audit passed: ${upstreamComponents.length} upstream components mirrored and exported; ${uiSources.flat().length} application UI sources satisfy the shared component rules.`,
+		`SharkUI audit passed against ${upstream.source}: ${upstreamComponents.length} upstream components mirrored and exported; ${uiSources.flat().length} application UI sources satisfy the shared component rules.`,
 	);
 }

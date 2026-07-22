@@ -245,12 +245,13 @@ export function FeedListControls<ContentKind extends FeedContentKind>({
 			{onSortChange ? (
 				<ChoiceSelect
 					ariaLabel={t.feed.sortLabel}
-					className="min-w-0 rounded-full px-2.5"
+					className="min-w-0"
 					onValueChange={([nextSort]) => {
 						if (nextSort) onSortChange(nextSort);
 					}}
 					options={sortOptions}
 					placeholder={t.feed.sortLabel}
+					size="lg"
 					value={[sort ?? "new"]}
 				/>
 			) : null}

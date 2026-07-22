@@ -60,7 +60,7 @@ import type { ThemePreference } from "../hooks/use-theme-preference";
 import { ThemePreferenceRadioGroup, ThemePreferenceRadioList } from "./theme-preference-menu";
 
 const NestedMenuPositioning = { placement: "right-start", gutter: -2 } as const;
-const MobileMenuItemClassName = "min-h-12 w-full justify-start rounded-xl px-3 py-2.5 text-start";
+const MobileMenuItemClassName = "min-h-12 w-full justify-start px-3 py-2.5 text-start";
 
 type MobileUserMenuPage = "root" | "theme" | "locale" | "settings";
 
@@ -88,7 +88,7 @@ function UserMenuTriggerButton({
 	profile?: GetApiUsersMeStatus200;
 }) {
 	return (
-		<Button className={cn("size-11 rounded-full p-0", className)} size="icon-xl" {...props}>
+		<Button className={cn("size-11 p-0", className)} pill size="icon-xl" {...props}>
 			<Avatar size="lg">
 				{profile?.avatar ? <AvatarImage alt="" src={profile.avatar.url} /> : null}
 				<AvatarFallback>{initial ?? <UserRound aria-hidden />}</AvatarFallback>
@@ -389,7 +389,7 @@ function MobileUserMenu(model: UserMenuModel) {
 						<div className="grid gap-1">
 							<Button
 								asChild
-								className="h-auto min-w-0 justify-start gap-3 rounded-xl px-3 py-2.5 text-start"
+								className="h-auto min-w-0 justify-start gap-3 px-3 py-2.5 text-start"
 								variant="quiet"
 							>
 								<Link href={publicProfileHref} onClick={close} ref={rootFocusRef}>
@@ -495,14 +495,14 @@ function MobileUserMenu(model: UserMenuModel) {
 						>
 							<RadioGroupLabel className="sr-only">{t.locale.label}</RadioGroupLabel>
 							<RadioGroupItem
-								className="min-h-12 rounded-xl px-3 py-2 transition-colors hover:bg-accent data-[state=checked]:bg-accent"
+								className="min-h-12 rounded-lg px-3 py-2 transition-colors hover:bg-accent data-[state=checked]:bg-accent"
 								disabled={localeChangePending}
 								value="zh-Hant"
 							>
 								{t.locale.zh}
 							</RadioGroupItem>
 							<RadioGroupItem
-								className="min-h-12 rounded-xl px-3 py-2 transition-colors hover:bg-accent data-[state=checked]:bg-accent"
+								className="min-h-12 rounded-lg px-3 py-2 transition-colors hover:bg-accent data-[state=checked]:bg-accent"
 								disabled={localeChangePending}
 								value="en"
 							>

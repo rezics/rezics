@@ -27,6 +27,19 @@ Floating surfaces use shadow for elevation without an outline. Visible edges are
 Import UI components from `@rezics/ui`. The upstream `src/ui` mirror is not a public application
 entry point, so project defaults cannot be bypassed accidentally.
 
+## Shape policy
+
+SharkUI owns ordinary control geometry. Buttons, selects, and input groups inherit their radius
+from the shared `--radius` scale and use component `size` props for height and padding. Feature
+call sites may use `className` for layout constraints, but must not override the radius of a
+control whose SharkUI component already defines its surface geometry. Prefer component `size`
+props over overriding height, padding, or typography.
+
+Use SharkUI's `pill` variant only when the shape carries meaning, such as a circular icon button.
+Avatars and functional tracks may remain fully round. Project-wide visual treatments belong in a
+project-owned component or variant under `src/custom`, not in the upstream `src/ui` mirror or an
+individual feature call site.
+
 Each frontend app should import the shared theme in its global style entry point and declare the shared component sources for Tailwind scanning:
 
 ```css
@@ -52,4 +65,8 @@ Run the following command to verify the local component mirror, package-root exp
 task libraries:ui:shark-audit
 ```
 
-It requires `src/ui` to match the SharkUI registry components in this repository one-to-one. It also rejects hand-written native interactive controls, composite ARIA controls, native `option` elements, physical-direction utilities, `space-x/space-y` utilities, and non-semantic Tailwind palette classes in `frontend` and `src/custom`. Use the corresponding SharkUI components and primitives instead, such as `NativeSelectOption`.
+It requires `src/ui` to match the official SharkUI registry one-to-one. It also rejects
+hand-written native interactive controls, composite ARIA controls, feature-level control radius
+overrides, native `option` elements, physical-direction utilities, `space-x/space-y` utilities,
+and non-semantic Tailwind palette classes in application features and `src/custom`. Use the
+corresponding SharkUI components and primitives instead, such as `NativeSelectOption`.

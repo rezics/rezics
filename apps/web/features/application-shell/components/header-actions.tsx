@@ -85,12 +85,13 @@ export function SignedOutHeaderActions({
 			<div className="hidden xl:block">
 				<ChoiceSelect
 					ariaLabel={locale.label}
-					className="h-9 min-w-0 rounded-full px-2.5"
+					className="min-w-0"
 					onValueChange={([nextLocale]) => {
 						if (nextLocale) locale.onChange(nextLocale);
 					}}
 					options={locale.options}
 					placeholder={locale.label}
+					size="lg"
 					value={[locale.value]}
 				/>
 			</div>

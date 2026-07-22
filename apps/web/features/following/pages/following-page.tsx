@@ -9,6 +9,9 @@ import {
 	type GetApiUsersMeFollowingQuery,
 } from "@rezics/openapi-tanstack-query";
 import {
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
 	Button,
 	ChoiceSelect,
 	type ChoiceOption,
@@ -97,6 +100,7 @@ function FollowingContent() {
 				onValueChange={(nextKinds) => void setKind(nextKinds[0] ?? AllFollowingKinds)}
 				options={options}
 				placeholder={t.nav.following.filter}
+				size="lg"
 				value={[kind]}
 			/>
 
@@ -107,17 +111,12 @@ function FollowingContent() {
 						const destination = followingHref(item.kind, item);
 						const identity = (
 							<>
-								<span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full bg-surface-selected font-bold text-sm">
-									{imageUrl ? (
-										<img
-											alt=""
-											className="size-full object-cover"
-											src={imageUrl}
-										/>
-									) : (
-										(item.title ?? t.ui.unnamed).slice(0, 1).toUpperCase()
-									)}
-								</span>
+								<Avatar className="size-11">
+									{imageUrl ? <AvatarImage alt="" src={imageUrl} /> : null}
+									<AvatarFallback>
+										{(item.title ?? t.ui.unnamed).slice(0, 1).toUpperCase()}
+									</AvatarFallback>
+								</Avatar>
 								<span className="min-w-0">
 									<strong className="block truncate text-sm">
 										{item.title ?? t.ui.unnamed}

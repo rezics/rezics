@@ -59,21 +59,21 @@ export function ThemePreferenceRadioList({ preference, onChange }: ThemeSelectio
 		>
 			<RadioGroupLabel className="sr-only">{t.locale.displayMode}</RadioGroupLabel>
 			<RadioGroupItem
-				className="min-h-12 rounded-xl px-3 py-2 transition-colors hover:bg-accent data-[state=checked]:bg-accent"
+				className="min-h-12 rounded-lg px-3 py-2 transition-colors hover:bg-accent data-[state=checked]:bg-accent"
 				value="system"
 			>
 				<Laptop aria-hidden />
 				{t.locale.displayModes.system}
 			</RadioGroupItem>
 			<RadioGroupItem
-				className="min-h-12 rounded-xl px-3 py-2 transition-colors hover:bg-accent data-[state=checked]:bg-accent"
+				className="min-h-12 rounded-lg px-3 py-2 transition-colors hover:bg-accent data-[state=checked]:bg-accent"
 				value="light"
 			>
 				<Sun aria-hidden />
 				{t.locale.displayModes.light}
 			</RadioGroupItem>
 			<RadioGroupItem
-				className="min-h-12 rounded-xl px-3 py-2 transition-colors hover:bg-accent data-[state=checked]:bg-accent"
+				className="min-h-12 rounded-lg px-3 py-2 transition-colors hover:bg-accent data-[state=checked]:bg-accent"
 				value="dark"
 			>
 				<Moon aria-hidden />

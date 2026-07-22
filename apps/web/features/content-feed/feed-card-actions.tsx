@@ -67,11 +67,11 @@ export function FeedVoteControl({
 }) {
 	const { t } = useTranslation(["engagement", "feed"]);
 	return (
-		<ButtonGroup aria-label={t.feed.actions.voteGroup} className="rounded-full bg-muted">
+		<ButtonGroup aria-label={t.feed.actions.voteGroup} className="bg-muted">
 			<Button
 				aria-label={t.engagement.upvote}
 				aria-pressed={reaction === "upvote"}
-				className="size-11 rounded-full border-0 sm:size-8"
+				className="size-11 border-0 sm:size-8"
 				disabled={disabled}
 				onClick={() => onReactionChange(reaction === "upvote" ? null : "upvote")}
 				size="icon-md"
@@ -91,7 +91,7 @@ export function FeedVoteControl({
 			<Button
 				aria-label={t.engagement.downvote}
 				aria-pressed={reaction === "downvote"}
-				className="size-11 rounded-full border-0 sm:size-8"
+				className="size-11 border-0 sm:size-8"
 				disabled={disabled}
 				onClick={() => onReactionChange(reaction === "downvote" ? null : "downvote")}
 				size="icon-md"
@@ -182,13 +182,7 @@ export function FeedEngagementBar({
 					score={formattedScore}
 				/>
 				{policy.comments && href ? (
-					<Button
-						asChild
-						className="min-h-11 sm:min-h-8"
-						pill
-						size="sm"
-						variant="secondary"
-					>
+					<Button asChild className="min-h-11 sm:min-h-8" size="sm" variant="secondary">
 						<Link href={href} onClick={onCommentsClick}>
 							<MessageCircleIcon aria-hidden data-icon="inline-start" />
 							{t.feed.actions.comments({ count: replyCount })}
@@ -201,7 +195,6 @@ export function FeedEngagementBar({
 				{policy.primary === "follow" ? (
 					<FollowButton
 						className="min-h-11 sm:min-h-8"
-						pill
 						size="sm"
 						unitId={itemId}
 						variant="secondary"
@@ -293,7 +286,8 @@ export function FeedOverflowMenuView({
 			<MenuTrigger asChild>
 				<Button
 					aria-label={t.feed.moreActions}
-					className="ms-auto size-11 rounded-full data-[state=open]:bg-accent sm:size-8"
+					className="ms-auto size-11 data-[state=open]:bg-accent sm:size-8"
+					pill
 					size="icon-md"
 					variant="quiet"
 				>
@@ -370,7 +364,6 @@ function CollectionPicker({
 				<Button
 					className="min-h-11 sm:min-h-8"
 					onClick={requestOpen}
-					pill
 					size="sm"
 					variant={triggerVariant}
 				>
@@ -505,7 +498,6 @@ export function FeedShareSurfaceView({
 				aria-label={t.feed.actions.shareTitle}
 				className="min-h-11 sm:min-h-8"
 				onClick={() => setOpen(true)}
-				pill
 				size="sm"
 				variant="secondary"
 			>

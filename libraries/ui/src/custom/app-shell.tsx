@@ -502,7 +502,7 @@ export function AppShell({
 							className="col-span-2 row-start-2 mx-3 block min-w-0 self-center sm:mx-0 sm:min-w-40 sm:max-w-2xl sm:flex-1 xl:absolute xl:start-1/2 xl:top-1/2 xl:w-[38vw] xl:-translate-x-1/2 xl:-translate-y-1/2 2xl:w-[46vw]"
 						>
 							<InputGroup
-								className="h-10 rounded-full border-border-weak bg-surface-container shadow-none"
+								className="border-border-weak bg-surface-container shadow-none"
 								size="lg"
 							>
 								<InputGroupAddon align="inline-start">

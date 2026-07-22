@@ -1,7 +1,7 @@
 "use client";
 
 import { useListCollection } from "@ark-ui/react";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, type ComponentProps, type ReactNode } from "react";
 
 import { Select, SelectContent, SelectItem, SelectTrigger } from "../ui/select";
 import { cn } from "../utils";
@@ -19,6 +19,7 @@ export interface ChoiceOption<Value extends string> {
  * a form boundary.
  */
 export type ChoiceSelectAppearance = "field" | "quiet";
+export type ChoiceSelectSize = NonNullable<ComponentProps<typeof SelectTrigger>["size"]>;
 
 const choiceSelectAppearanceClassNames = {
 	field: "border-input bg-background shadow-sm/5",
@@ -42,6 +43,7 @@ export function ChoiceSelect<Value extends string>({
 	onValueChange,
 	options,
 	placeholder,
+	size = "md",
 	triggerIcon,
 	value,
 }: {
@@ -54,6 +56,7 @@ export function ChoiceSelect<Value extends string>({
 	onValueChange: (value: readonly Value[]) => void;
 	options: readonly ChoiceOption<Value>[];
 	placeholder: string;
+	size?: ChoiceSelectSize;
 	triggerIcon?: ReactNode;
 	value: readonly Value[];
 }) {
@@ -83,11 +86,8 @@ export function ChoiceSelect<Value extends string>({
 		>
 			<SelectTrigger
 				aria-label={ariaLabel}
-				className={cn(
-					"h-10 min-w-32 rounded-xl px-3.5 font-semibold",
-					choiceSelectAppearanceClassNames[appearance],
-					className,
-				)}
+				className={cn("min-w-32", choiceSelectAppearanceClassNames[appearance], className)}
+				size={size}
 			>
 				{triggerIcon}
 				<span

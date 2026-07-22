@@ -231,11 +231,10 @@ function FeedRealmContext({ realms }: { realms: FeedRealms }) {
 				<Button
 					aria-label={t.feed.showRealmList({ summary: realmSummary })}
 					className="max-w-full gap-1.5 px-1.5 data-[state=open]:bg-accent data-[state=open]:text-accent-foreground"
-					pill
 					size="xs"
 					variant="quiet"
 				>
-					<AvatarGroup className="-space-x-2">
+					<AvatarGroup>
 						{visibleRealms.map((realm) => (
 							<FeedAvatar
 								alt=""

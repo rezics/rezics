@@ -34,11 +34,12 @@ import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
+	Separator,
+	Spinner,
 	Tabs,
 	TabsContent,
 	TabsList,
 	TabsTrigger,
-	Spinner,
 	cn,
 } from "@rezics/ui";
 import { ChevronDown, ExternalLink, Search } from "lucide-react";
@@ -776,8 +777,8 @@ function ZoneBlock({ block }: { block: Block }) {
 		return block.style === "space" ? (
 			<div aria-hidden className="h-8" />
 		) : (
-			<hr
-				className={cn("my-8 border-border-weak", block.style === "section" && "border-t-2")}
+			<Separator
+				className={cn("my-8 bg-border-weak", block.style === "section" && "h-0.5")}
 			/>
 		);
 	if (block._type === "group")
