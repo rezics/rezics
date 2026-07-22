@@ -23,8 +23,8 @@ import {
 	GovernanceNoteRoleValues,
 	GovernanceReasonCodeValues,
 	CommunityCatalogUnitKindValues,
-	DockSurfaceValues,
-	DockSurfacesByUnitKind,
+	DockKindValues,
+	DockKindsByUnitKind,
 	EntityAssociationKindValues,
 	EntityAssociationPolicyModeValues,
 	moderationAction,
@@ -357,17 +357,17 @@ describe("database schema contracts", () => {
 		expect(unitSlugAddress.kind.getSQLType()).toBe("text");
 	});
 
-	it("keeps Dock surfaces closed and models navigation as Content Structures", () => {
-		expect(DockSurfaceValues).toEqual(["main", "wiki"]);
-		expect(DockSurfacesByUnitKind).toEqual({
+	it("keeps Dock kinds closed and gives each Dock a stable identity", () => {
+		expect(DockKindValues).toEqual(["main", "wiki"]);
+		expect(DockKindsByUnitKind).toEqual({
 			book: ["main"],
 			software: ["main"],
 			media: ["main"],
 			zone: ["main"],
 			realm: ["main", "wiki"],
 		});
-		expect(getTableConfig(unitDock).primaryKeys).toHaveLength(1);
-		expect(contentStructure.purpose.getSQLType()).toBe("text");
+		expect(unitDock.id.primary).toBe(true);
+		expect(contentStructure.kind.getSQLType()).toBe("text");
 		expect(contentStructureNode.targetKind.getSQLType()).toBe("text");
 		expect(
 			getTableConfig(contentStructureNode).foreignKeys.map((key) => key.reference().name),

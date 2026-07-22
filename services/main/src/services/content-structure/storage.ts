@@ -1,4 +1,5 @@
 import { and, asc, eq, isNull, sql } from "drizzle-orm";
+import { assertSearchConfiguration, type SearchConfiguration } from "@rezics/search";
 
 import type { DatabaseTransaction } from "../database";
 import {
@@ -7,12 +8,12 @@ import {
 	post,
 	unit,
 	zonePage,
-	type ContentStructurePurpose,
+	type ContentStructureKind,
 	type ContentStructureTargetKind,
 } from "../database/schema";
 import {
 	ContentStructureLogicalStateSchema,
-	ContentStructurePurposePolicies,
+	ContentStructureKindPolicies,
 	ContentStructureSnapshotSchema,
 	type ContentStructureSnapshot,
 	type ContentStructureTarget,
@@ -77,10 +78,10 @@ export function contentStructureTargetColumns(target: ContentStructureTarget) {
 	}
 }
 
-export async function ensureContentStructurePurposeOwner(
+export async function ensureContentStructureKindOwner(
 	tx: DatabaseTransaction,
 	ownerUnitId: string,
-	purpose: ContentStructurePurpose,
+	kind: ContentStructureKind,
 ): Promise<void> {
 	const [owner] = await tx
 		.select({ kind: unit.kind })
@@ -89,26 +90,25 @@ export async function ensureContentStructurePurposeOwner(
 		.limit(1);
 	if (
 		!owner ||
-		!(ContentStructurePurposePolicies[purpose].ownerKinds as readonly string[]).includes(
-			owner.kind,
-		)
+		!(ContentStructureKindPolicies[kind].ownerKinds as readonly string[]).includes(owner.kind)
 	)
-		throw new ContentStructureInvalid(`${purpose} is not valid for this Unit kind`);
+		throw new ContentStructureInvalid(`${kind} is not valid for this Unit kind`);
 }
 
 export async function ensureContentStructureNodeAllowed(
 	tx: DatabaseTransaction,
 	input: {
-		readonly purpose: ContentStructurePurpose;
+		readonly kind: ContentStructureKind;
 		readonly ownerUnitId: string;
 		readonly contentUnitId: string;
 		readonly target: ContentStructureTarget;
+		readonly searchConfiguration?: SearchConfiguration | null;
 	},
 ): Promise<void> {
-	const policy = ContentStructurePurposePolicies[input.purpose];
+	const policy = ContentStructureKindPolicies[input.kind];
 	if (!(policy.targets as readonly string[]).includes(input.target.kind))
 		throw new ContentStructureInvalid(
-			`${input.target.kind} targets are not valid for ${input.purpose}`,
+			`${input.target.kind} targets are not valid for ${input.kind}`,
 		);
 	const [content] = await tx
 		.select({ kind: unit.kind, postKind: post.kind })
@@ -117,7 +117,20 @@ export async function ensureContentStructureNodeAllowed(
 		.where(and(eq(unit.id, input.contentUnitId), isNull(unit.deletedAt)))
 		.limit(1);
 	if (!content || !policy.acceptsContent(content.kind, content.postKind))
-		throw new ContentStructureInvalid(`Content Unit is not valid for ${input.purpose}`);
+		throw new ContentStructureInvalid(`Content Unit is not valid for ${input.kind}`);
+	if (input.searchConfiguration !== undefined && input.searchConfiguration !== null) {
+		if (!policy.searchScope || content.kind !== "label")
+			throw new ContentStructureInvalid(
+				"Only label nodes in a searchable Content Structure can configure Search",
+			);
+		try {
+			assertSearchConfiguration(input.searchConfiguration);
+		} catch (cause) {
+			throw new ContentStructureInvalid(
+				cause instanceof Error ? cause.message : "Search configuration is invalid",
+			);
+		}
+	}
 	if (input.target.kind === "unit") {
 		const [target] = await tx
 			.select({ id: unit.id })
@@ -184,56 +197,38 @@ function orderNodesParentsFirst(snapshot: ContentStructureSnapshot) {
 	return ordered;
 }
 
-export async function restoreContentStructureStates(
+export async function restoreContentStructureState(
 	tx: DatabaseTransaction,
-	unitId: string,
-	values: readonly unknown[],
+	structureId: string,
+	value: unknown,
 ): Promise<void> {
-	const states = values.map((value) => ContentStructureLogicalStateSchema.parse(value));
+	const state = ContentStructureLogicalStateSchema.parse(value);
+	const stateStructureId = "deleted" in state ? state.structureId : state.structure.id;
+	if (stateStructureId !== structureId)
+		throw new ContentStructureInvalid("History checkpoint contains another structure");
 	await tx
 		.update(contentStructureNode)
 		.set({ deletedAt: new Date() })
-		.where(eq(contentStructureNode.ownerUnitId, unitId));
-	await tx
-		.update(contentStructure)
-		.set({ deletedAt: new Date() })
-		.where(eq(contentStructure.ownerUnitId, unitId));
-	for (const state of states) {
-		if ("deleted" in state) continue;
-		if (state.structure.ownerUnitId !== unitId)
-			throw new ContentStructureInvalid("History structure owner does not match Unit");
-		const { id: _id, ...structureState } = state.structure;
+		.where(eq(contentStructureNode.structureId, structureId));
+	if ("deleted" in state) {
 		await tx
-			.insert(contentStructure)
-			.values(state.structure)
-			.onConflictDoUpdate({ target: contentStructure.id, set: structureState });
-		for (const node of orderNodesParentsFirst(state)) {
-			const { id: _nodeId, ...nodeState } = node;
-			await tx
-				.insert(contentStructureNode)
-				.values(node)
-				.onConflictDoUpdate({ target: contentStructureNode.id, set: nodeState });
-		}
+			.update(contentStructure)
+			.set({ deletedAt: new Date() })
+			.where(eq(contentStructure.id, structureId));
+		return;
 	}
-}
-
-/** Release Zone-page foreign keys before History replaces the owner's page set. */
-export async function detachContentStructureZonePageTargets(
-	tx: DatabaseTransaction,
-	ownerUnitId: string,
-): Promise<void> {
+	const { id: _id, ...structureState } = state.structure;
 	await tx
-		.update(contentStructureNode)
-		.set({
-			targetKind: "none",
-			targetZonePageId: null,
-		})
-		.where(
-			and(
-				eq(contentStructureNode.ownerUnitId, ownerUnitId),
-				eq(contentStructureNode.targetKind, "zone_page"),
-			),
-		);
+		.insert(contentStructure)
+		.values(state.structure)
+		.onConflictDoUpdate({ target: contentStructure.id, set: structureState });
+	for (const node of orderNodesParentsFirst(state)) {
+		const { id: _nodeId, ...nodeState } = node;
+		await tx
+			.insert(contentStructureNode)
+			.values(node)
+			.onConflictDoUpdate({ target: contentStructureNode.id, set: nodeState });
+	}
 }
 
 export async function assertContentStructureParent(

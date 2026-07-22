@@ -97,6 +97,29 @@ export const SearchBlock = Type.Object(
 );
 export type SearchBlock = Static<typeof SearchBlock>;
 
+/** A continuously paged result stream driven by the same trusted Search schema. */
+export const FeedBlock = Type.Object(
+	{
+		_type: Type.Literal("feed"),
+		_key: BlockKey,
+		configuration: SearchConfiguration,
+		presentation: Type.Object(
+			{
+				results: Type.Union([
+					Type.Literal("list"),
+					Type.Literal("grid"),
+					Type.Literal("compact"),
+				]),
+				pagination: Type.Union([Type.Literal("load-more"), Type.Literal("infinite")]),
+				showResultCount: Type.Boolean(),
+			},
+			{ additionalProperties: false },
+		),
+	},
+	{ additionalProperties: false, $id: "FeedBlock" },
+);
+export type FeedBlock = Static<typeof FeedBlock>;
+
 export const NavigationTarget = Type.Union([
 	Type.Object({ kind: Type.Literal("unit"), unitId: Uuid }, { additionalProperties: false }),
 	Type.Object(
@@ -173,6 +196,7 @@ const ReferencedAtomicBlocks = [
 	UnitRefBlock,
 	UnitListBlock,
 	SearchBlock,
+	FeedBlock,
 	MenuBlock,
 	MediaBlock,
 	DividerBlock,
@@ -324,6 +348,7 @@ export const BlockTypeValues = [
 	"unit-ref",
 	"unit-list",
 	"search",
+	"feed",
 	"menu",
 	"media",
 	"divider",

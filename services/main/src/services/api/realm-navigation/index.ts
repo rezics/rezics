@@ -8,7 +8,7 @@ import {
 	collectBlockReferences,
 	parseDocument,
 } from "@rezics/block";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -26,7 +26,7 @@ import {
 	presentNavigationStructure,
 	replaceNavigationStructure,
 } from "../../content-structure/navigation";
-import { getContentStructureComponentRevision } from "../../content-structure/service";
+import { getContentStructureRevision } from "../../content-structure/service";
 import { ContentStructureNotFound } from "../../content-structure/errors";
 import {
 	RealmNavigationDocumentInvalid,
@@ -123,7 +123,7 @@ export default new Elysia({ prefix: "/realms" })
 				items: await Promise.all(
 					(await listNavigationStructures(tx, params.realmId, "realm.navigation")).map(
 						async (record) => {
-							const revisionId = await getContentStructureComponentRevision(
+							const revisionId = await getContentStructureRevision(
 								tx,
 								params.realmId,
 								record.id,
@@ -157,14 +157,14 @@ export default new Elysia({ prefix: "/realms" })
 				await ensureReferences(tx, params.realmId, body.document, profile.unitId);
 				const result = await createNavigationStructure(tx, {
 					ownerUnitId: params.realmId,
-					purpose: "realm.navigation",
+					kind: "realm.navigation",
 					document: body.document,
 					actorProfileId: profile.unitId,
 				});
 				const record = await presentNavigationStructure(tx, {
 					ownerUnitId: params.realmId,
 					structureId: result.structure.id,
-					purpose: "realm.navigation",
+					kind: "realm.navigation",
 				});
 				return present(record, result.revisionId);
 			});
@@ -197,13 +197,9 @@ export default new Elysia({ prefix: "/realms" })
 						presentNavigationStructure(tx, {
 							ownerUnitId: params.realmId,
 							structureId: params.navigationId,
-							purpose: "realm.navigation",
+							kind: "realm.navigation",
 						}),
-						getContentStructureComponentRevision(
-							tx,
-							params.realmId,
-							params.navigationId,
-						),
+						getContentStructureRevision(tx, params.realmId, params.navigationId),
 					]);
 					if (!revisionId) throw new RealmNavigationNotFound();
 					return present(record, revisionId);
@@ -242,7 +238,7 @@ export default new Elysia({ prefix: "/realms" })
 					const result = await replaceNavigationStructure(tx, {
 						ownerUnitId: params.realmId,
 						structureId: params.navigationId,
-						purpose: "realm.navigation",
+						kind: "realm.navigation",
 						document: body.document,
 						actorProfileId: profile.unitId,
 						baseRevisionId: body.baseRevisionId,
@@ -250,7 +246,7 @@ export default new Elysia({ prefix: "/realms" })
 					const record = await presentNavigationStructure(tx, {
 						ownerUnitId: params.realmId,
 						structureId: params.navigationId,
-						purpose: "realm.navigation",
+						kind: "realm.navigation",
 					});
 					return present(
 						record,
@@ -273,7 +269,7 @@ export default new Elysia({ prefix: "/realms" })
 					"UnitNotFound",
 					"RealmNavigationNotFound",
 				]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 			},
 			detail: { summary: "Replace Realm navigation", tags: ["Realms"] },
 		},
@@ -293,7 +289,9 @@ export default new Elysia({ prefix: "/realms" })
 					const docks = await tx
 						.select({ document: unitDock.document })
 						.from(unitDock)
-						.where(eq(unitDock.unitId, params.realmId));
+						.where(
+							and(eq(unitDock.unitId, params.realmId), isNull(unitDock.deletedAt)),
+						);
 					if (
 						docks.some((dock) =>
 							collectBlockReferences(
@@ -305,7 +303,7 @@ export default new Elysia({ prefix: "/realms" })
 					await deleteNavigationStructure(tx, {
 						ownerUnitId: params.realmId,
 						structureId: params.navigationId,
-						purpose: "realm.navigation",
+						kind: "realm.navigation",
 						actorProfileId: profile.unitId,
 						baseRevisionId: body.baseRevisionId,
 					});
@@ -328,7 +326,7 @@ export default new Elysia({ prefix: "/realms" })
 				]),
 				[StatusCodes.CONFLICT]: toApiErrorResponse([
 					"RealmNavigationInUse",
-					"UnitRevisionConflict",
+					"ContentStructureRevisionConflict",
 				]),
 			},
 			detail: {

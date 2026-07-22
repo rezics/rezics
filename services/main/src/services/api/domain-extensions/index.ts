@@ -51,7 +51,7 @@ import {
 	presentNavigationStructure,
 	replaceNavigationStructure,
 } from "../../content-structure/navigation";
-import { getContentStructureComponentRevision } from "../../content-structure/service";
+import { getContentStructureRevision } from "../../content-structure/service";
 import { ContentStructureNotFound } from "../../content-structure/errors";
 import { insertUnit } from "../../units/create";
 import {
@@ -524,7 +524,11 @@ export default new Elysia()
 						.select()
 						.from(unitDock)
 						.where(
-							and(eq(unitDock.unitId, params.zoneId), eq(unitDock.surface, "main")),
+							and(
+								eq(unitDock.unitId, params.zoneId),
+								eq(unitDock.kind, "main"),
+								isNull(unitDock.deletedAt),
+							),
 						)
 						.limit(1);
 					const navigations = await database.transaction(async (tx) =>
@@ -532,7 +536,7 @@ export default new Elysia()
 							(
 								await listNavigationStructures(tx, params.zoneId, "zone.navigation")
 							).map(async (record) => {
-								const revisionId = await getContentStructureComponentRevision(
+								const revisionId = await getContentStructureRevision(
 									tx,
 									params.zoneId,
 									record.id,
@@ -896,7 +900,9 @@ export default new Elysia()
 						const docks = await tx
 							.select({ document: unitDock.document })
 							.from(unitDock)
-							.where(eq(unitDock.unitId, params.zoneId));
+							.where(
+								and(eq(unitDock.unitId, params.zoneId), isNull(unitDock.deletedAt)),
+							);
 						const referencedByBlock =
 							docks.some((dock) =>
 								collectBlockReferences(
@@ -959,7 +965,7 @@ export default new Elysia()
 							(
 								await listNavigationStructures(tx, params.zoneId, "zone.navigation")
 							).map(async (record) => {
-								const revisionId = await getContentStructureComponentRevision(
+								const revisionId = await getContentStructureRevision(
 									tx,
 									params.zoneId,
 									record.id,
@@ -998,14 +1004,14 @@ export default new Elysia()
 						});
 						const result = await createNavigationStructure(tx, {
 							ownerUnitId: params.zoneId,
-							purpose: "zone.navigation",
+							kind: "zone.navigation",
 							document: body.document,
 							actorProfileId: profile.unitId,
 						});
 						const record = await presentNavigationStructure(tx, {
 							ownerUnitId: params.zoneId,
 							structureId: result.structure.id,
-							purpose: "zone.navigation",
+							kind: "zone.navigation",
 						});
 						return toZoneNavigationResponse(record, result.revisionId);
 					});
@@ -1039,13 +1045,9 @@ export default new Elysia()
 								presentNavigationStructure(tx, {
 									ownerUnitId: params.zoneId,
 									structureId: params.navigationId,
-									purpose: "zone.navigation",
+									kind: "zone.navigation",
 								}),
-								getContentStructureComponentRevision(
-									tx,
-									params.zoneId,
-									params.navigationId,
-								),
+								getContentStructureRevision(tx, params.zoneId, params.navigationId),
 							]);
 							if (!revisionId) throw new ZoneNavigationNotFound();
 							return toZoneNavigationResponse(record, revisionId);
@@ -1089,7 +1091,7 @@ export default new Elysia()
 							const result = await replaceNavigationStructure(tx, {
 								ownerUnitId: params.zoneId,
 								structureId: params.navigationId,
-								purpose: "zone.navigation",
+								kind: "zone.navigation",
 								document: body.document,
 								actorProfileId: profile.unitId,
 								baseRevisionId: body.baseRevisionId,
@@ -1097,7 +1099,7 @@ export default new Elysia()
 							const record = await presentNavigationStructure(tx, {
 								ownerUnitId: params.zoneId,
 								structureId: params.navigationId,
-								purpose: "zone.navigation",
+								kind: "zone.navigation",
 							});
 							return toZoneNavigationResponse(
 								record,
@@ -1120,7 +1122,9 @@ export default new Elysia()
 							"UnitNotFound",
 							"ZoneNavigationNotFound",
 						]),
-						[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
+						[StatusCodes.CONFLICT]: toApiErrorResponse([
+							"ContentStructureRevisionConflict",
+						]),
 					},
 					detail: { summary: "Replace Zone navigation", tags: ["Zones"] },
 				},
@@ -1151,7 +1155,12 @@ export default new Elysia()
 							const docks = await tx
 								.select({ document: unitDock.document })
 								.from(unitDock)
-								.where(eq(unitDock.unitId, params.zoneId));
+								.where(
+									and(
+										eq(unitDock.unitId, params.zoneId),
+										isNull(unitDock.deletedAt),
+									),
+								);
 							if (
 								docks.some((dock) =>
 									collectBlockReferences(
@@ -1168,7 +1177,7 @@ export default new Elysia()
 							await deleteNavigationStructure(tx, {
 								ownerUnitId: params.zoneId,
 								structureId: params.navigationId,
-								purpose: "zone.navigation",
+								kind: "zone.navigation",
 								actorProfileId: profile.unitId,
 								baseRevisionId: body.baseRevisionId,
 							});
@@ -1191,7 +1200,7 @@ export default new Elysia()
 						]),
 						[StatusCodes.CONFLICT]: toApiErrorResponse([
 							"ZoneNavigationInUse",
-							"UnitRevisionConflict",
+							"ContentStructureRevisionConflict",
 						]),
 					},
 					detail: {

@@ -1,16 +1,20 @@
 -- Create "unit_dock" table
 CREATE TABLE "unit_dock" (
+	"id" uuid NOT NULL DEFAULT uuidv7(),
   "unit_id" uuid NOT NULL,
-  "surface" text NOT NULL,
+  "kind" text NOT NULL,
   "document" jsonb NOT NULL,
+	"deleted_at" timestamptz(3) NULL,
   "created_at" timestamptz(3) NOT NULL DEFAULT now(),
   "updated_at" timestamptz(3) NOT NULL DEFAULT now(),
-  PRIMARY KEY ("unit_id", "surface"),
+	PRIMARY KEY ("id"),
+	CONSTRAINT "unit_dock_unit_kind_key" UNIQUE ("unit_id", "kind"),
   CONSTRAINT "unit_dock_unit_id_unit_id_fkey" FOREIGN KEY ("unit_id") REFERENCES "unit" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
-  CONSTRAINT "unit_dock_surface_check" CHECK (surface = ANY (ARRAY['main'::text, 'wiki'::text]))
+	CONSTRAINT "unit_dock_kind_check" CHECK (kind = ANY (ARRAY['main'::text, 'wiki'::text])),
+	CONSTRAINT "unit_dock_deleted_at_check" CHECK (deleted_at IS NULL OR deleted_at >= created_at)
 );
--- Move the former Zone root Dock into the Unit-owned main surface.
-INSERT INTO "unit_dock" ("unit_id", "surface", "document", "created_at", "updated_at")
+-- Move the former Zone root Dock into the Unit-owned main kind.
+INSERT INTO "unit_dock" ("unit_id", "kind", "document", "created_at", "updated_at")
 SELECT
   "id",
   'main',

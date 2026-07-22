@@ -24,6 +24,8 @@ export default {
 	UnitProtected: "該內容範圍受到保護，暫時無法修改。",
 	UnitChanged: "內容已變更，請重新整理後再試一次。",
 	UnitRevisionConflict: "修訂基礎已變更，請重新整理後再試一次。",
+	ContentStructureRevisionConflict: "內容結構已在其他地方變更，請重新整理後再試一次。",
+	DockRevisionConflict: `${dockTerms.label}已在其他地方變更，請重新整理後再試一次。`,
 	DockNotFound: `找不到這個${dockTerms.inline}。`,
 	DockNotSupported: `這個內容不支援該${dockTerms.inline}。`,
 	DockDocumentInvalid: `${dockTerms.label}文件無效。`,

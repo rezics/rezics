@@ -31,6 +31,7 @@ import {
 	realmUnit,
 	software,
 	softwareRequirement,
+	searchUnitProjectionSource,
 	unit,
 	unitLocalization,
 	unitTag,
@@ -105,6 +106,15 @@ function toIntegerArray(values: readonly number[]): SQL {
 	)}]::integer[]`;
 }
 
+function toBigIntArray(values: readonly number[]): SQL {
+	if (values.some((value) => !Number.isSafeInteger(value) || value < 1))
+		throw new TypeError("Search candidate revisions must be positive safe integers");
+	return sql`ARRAY[${sql.join(
+		values.map((value) => sql`${value}::bigint`),
+		sql`, `,
+	)}]::bigint[]`;
+}
+
 function addList(conditions: SQL[], column: SQL, values: string[] | undefined): void {
 	if (values?.length) conditions.push(sql`(${column})::text = ANY(${toTextArray(values)})`);
 }
@@ -124,7 +134,7 @@ function supportsSort(category: SearchCategory, attribute: string): boolean {
 function validateRequest(category: SearchCategory, request: DomainSearchRequest): void {
 	const filters = [
 		["Languages", "Languages", Boolean(request.Languages?.length)],
-		["types", "type", Boolean(request.types?.length)],
+		["kinds", "kind", Boolean(request.kinds?.length)],
 		["contentRatings", "contentRating", Boolean(request.contentRatings?.length)],
 		["aiDisclosures", "aiDisclosure", Boolean(request.aiDisclosures?.length)],
 		["licenses", "license", Boolean(request.licenses?.length)],
@@ -311,7 +321,7 @@ function compileFilter(category: SearchCategory, filter: SearchFilter): SQL {
 
 	const fieldAttribute: Partial<Record<SearchFilter["field"], string>> = {
 		language: "Languages",
-		type: "type",
+		kind: "kind",
 		"content-rating": "contentRating",
 		"ai-disclosure": "aiDisclosure",
 		license: "license",
@@ -416,7 +426,7 @@ function compileFilter(category: SearchCategory, filter: SearchFilter): SQL {
 	}
 
 	const columnByField: Partial<Record<SearchFilter["field"], SQL>> = {
-		type:
+		kind:
 			category === "entity"
 				? sql`${entity.kind}`
 				: category === "reviews"
@@ -531,14 +541,14 @@ function buildSearchConditions(category: SearchCategory, request: DomainSearchRe
 			)
 		)`);
 
-	if (request.types?.length) {
+	if (request.kinds?.length) {
 		const column =
 			category === "entity"
 				? sql`${entity.kind}`
 				: category === "reviews"
 					? sql`${subjectUnit.kind}`
 					: sql`${unit.kind}`;
-		addList(conditions, column, request.types);
+		addList(conditions, column, request.kinds);
 	}
 	const unitListFilters = [
 		[sql`${unit.contentRating}`, request.contentRatings],
@@ -596,7 +606,7 @@ function buildSearchConditions(category: SearchCategory, request: DomainSearchRe
 						and ${contentStructureNode.contentUnitId} = ${unit.id}
 						and ${contentStructureNode.deletedAt} is null
 						and ${contentStructure.deletedAt} is null
-						and ${contentStructure.purpose} in ('book.contents', 'post.contents')
+						and ${contentStructure.kind} in ('book.contents', 'post.contents')
 				))`
 				: direct,
 		);
@@ -624,7 +634,7 @@ function buildCandidateExpression(request: DomainSearchRequest): SearchExpressio
 		if (value) filters.push({ field, operator: "equals", value });
 	};
 	addValues("language", request.Languages);
-	addValues("type", request.types);
+	addValues("kind", request.kinds);
 	addValues("content-rating", request.contentRatings);
 	addValues("ai-disclosure", request.aiDisclosures);
 	addValues("license", request.licenses);
@@ -663,7 +673,7 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 				query: request.query?.trim() ?? "",
 				limit,
 				Languages: request.Languages,
-				types: request.types,
+				kinds: request.kinds,
 				contentRatings: request.contentRatings,
 				aiDisclosures: request.aiDisclosures,
 				licenses: request.licenses,
@@ -742,23 +752,28 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 			const id = candidate.id;
 			if (seen.has(id)) return [];
 			seen.add(id);
-			return [{ id, position: index + 1 }];
+			return [{ id, position: index + 1, revision: candidate.revision }];
 		});
 		const candidateIds = candidateEntries.map((candidate) => candidate.id);
 		const candidatePositions = candidateEntries.map((candidate) => candidate.position);
+		const candidateRevisions = candidateEntries.map((candidate) => candidate.revision);
 		const batchOffset = scanOffset;
 		const result = candidateIds.length
 			? await database.execute<{
 					hit: SearchHitWithoutSlugAddress;
 					ordinality: number | string;
 				}>(sql`
-		WITH search_candidate(unit_id, ordinality) AS (
-			SELECT * FROM unnest(${toUuidArray(candidateIds)}, ${toIntegerArray(candidatePositions)})
+		WITH search_candidate(unit_id, ordinality, revision) AS (
+			SELECT * FROM unnest(
+				${toUuidArray(candidateIds)},
+				${toIntegerArray(candidatePositions)},
+				${toBigIntArray(candidateRevisions)}
+			)
 		)
 		SELECT jsonb_strip_nulls(jsonb_build_object(
 			'id', ${unit.id},
-			'kind', ${category}::text,
-			'type', ${hitType},
+			'category', ${category}::text,
+			'kind', ${hitType},
 			'titles', coalesce((
 				SELECT jsonb_agg(${unitLocalization.title} ORDER BY ${unitLocalization.position}, ${unitLocalization.language})
 					FILTER (WHERE ${unitLocalization.title} IS NOT NULL)
@@ -802,6 +817,9 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 		)) AS hit,
 		search_candidate.ordinality
 		FROM search_candidate
+		JOIN ${searchUnitProjectionSource}
+			ON ${searchUnitProjectionSource.unitId} = search_candidate.unit_id
+			AND ${searchUnitProjectionSource.revision} = search_candidate.revision
 		JOIN ${unit} ON ${unit.id} = search_candidate.unit_id
 		LEFT JOIN ${profile} ON ${profile.id} = ${unit.id}
 		LEFT JOIN ${entity} ON ${entity.id} = ${unit.id}
@@ -919,7 +937,7 @@ function facetSpec(
 				and ${facetPublisherEvent.actorKind} = 'profile'
 				and ${facetPublisherEvent.actorHidden} = false`,
 		};
-	if (field === "type")
+	if (field === "kind")
 		return {
 			value:
 				category === "entity"
@@ -963,7 +981,7 @@ export async function searchDomainFacets(
 	const conditions = buildSearchConditions(category, request);
 	const generation = await getActiveSearchGeneration("current");
 	const candidateExpression = buildCandidateExpression(request);
-	const candidateIds: string[] = [];
+	const candidates = new Map<string, number>();
 	let candidateOffset = 0;
 	let exhausted = false;
 	while (!exhausted && candidateOffset < env.SEARCH_CANDIDATE_SCAN_LIMIT) {
@@ -984,16 +1002,17 @@ export async function searchDomainFacets(
 			},
 		]);
 		if (!candidateResult) throw new Error("Meilisearch omitted a facet candidate result");
-		candidateIds.push(...candidateResult.hits.map((candidate) => candidate.id));
+		for (const candidate of candidateResult.hits)
+			if (!candidates.has(candidate.id)) candidates.set(candidate.id, candidate.revision);
 		candidateOffset += candidateResult.hits.length;
 		exhausted =
 			candidateResult.hits.length < batchLimit ||
 			candidateOffset >= candidateResult.estimatedTotalHits;
 		if (candidateResult.hits.length === 0) exhausted = true;
 	}
-	const uniqueCandidateIds = [...new Set(candidateIds)];
-	if (!uniqueCandidateIds.length) return [];
-	conditions.push(sql`${unit.id} = any(${toUuidArray(uniqueCandidateIds)})`);
+	if (!candidates.size) return [];
+	const candidateIds = [...candidates.keys()];
+	const candidateRevisions = [...candidates.values()];
 	const queries = fields.flatMap((field) => {
 		const spec = facetSpec(category, field);
 		if (!spec) return [];
@@ -1001,7 +1020,11 @@ export async function searchDomainFacets(
 			sql`(
 			select ${field}::text as field, (${spec.value})::text as value,
 				count(distinct ${unit.id})::text as count
-			from ${unit}
+			from search_candidate
+			join ${searchUnitProjectionSource}
+				on ${searchUnitProjectionSource.unitId} = search_candidate.unit_id
+				and ${searchUnitProjectionSource.revision} = search_candidate.revision
+			join ${unit} on ${unit.id} = search_candidate.unit_id
 			left join ${profile} on ${profile.id} = ${unit.id}
 			left join ${entity} on ${entity.id} = ${unit.id}
 			left join ${post} on ${post.id} = ${unit.id}
@@ -1023,7 +1046,13 @@ export async function searchDomainFacets(
 	});
 	if (!queries.length) return [];
 	const result = await database.execute<{ field: string; value: string; count: string }>(
-		sql.join(queries, sql` union all `),
+		sql`with search_candidate(unit_id, revision) as (
+			select * from unnest(
+				${toUuidArray(candidateIds)},
+				${toBigIntArray(candidateRevisions)}
+			)
+		)
+		${sql.join(queries, sql` union all `)}`,
 	);
 	const byField = new Map<
 		string,

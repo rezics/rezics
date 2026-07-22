@@ -38,25 +38,25 @@ export const VariantCapableUnitKindValues = ["book", "software", "media"] as con
 export type UnitKind = (typeof UnitKindValues)[number];
 export type VariantCapableUnitKind = (typeof VariantCapableUnitKindValues)[number];
 
-export const DockSurfaceValues = ["main", "wiki"] as const;
-export type DockSurface = (typeof DockSurfaceValues)[number];
+export const DockKindValues = ["main", "wiki"] as const;
+export type DockKind = (typeof DockKindValues)[number];
 export const DockOwnerUnitKindValues = ["book", "software", "media", "zone", "realm"] as const;
 export type DockOwnerUnitKind = (typeof DockOwnerUnitKindValues)[number];
-export const DockSurfacesByUnitKind = {
+export const DockKindsByUnitKind = {
 	book: ["main"],
 	software: ["main"],
 	media: ["main"],
 	zone: ["main"],
 	realm: ["main", "wiki"],
-} as const satisfies Record<DockOwnerUnitKind, readonly DockSurface[]>;
+} as const satisfies Record<DockOwnerUnitKind, readonly DockKind[]>;
 
 export function isDockOwnerUnitKind(kind: UnitKind): kind is DockOwnerUnitKind {
 	return (DockOwnerUnitKindValues as readonly UnitKind[]).includes(kind);
 }
 
-export function isDockSurfaceSupported(kind: UnitKind, surface: DockSurface): boolean {
+export function isDockKindSupported(kind: UnitKind, dockKind: DockKind): boolean {
 	return isDockOwnerUnitKind(kind)
-		? (DockSurfacesByUnitKind[kind] as readonly DockSurface[]).includes(surface)
+		? (DockKindsByUnitKind[kind] as readonly DockKind[]).includes(dockKind)
 		: false;
 }
 
@@ -90,15 +90,15 @@ export const PostKindValues = [
 ] as const;
 export type PostKind = (typeof PostKindValues)[number];
 
-/** Persisted as text so purpose schemas can evolve without a PostgreSQL enum migration. */
-export const ContentStructurePurposeValues = [
+/** Persisted as text so kind schemas can evolve without a PostgreSQL enum migration. */
+export const ContentStructureKindValues = [
 	"book.contents",
 	"post.contents",
 	"realm.taxonomy",
 	"realm.navigation",
 	"zone.navigation",
 ] as const;
-export type ContentStructurePurpose = (typeof ContentStructurePurposeValues)[number];
+export type ContentStructureKind = (typeof ContentStructureKindValues)[number];
 
 export const ContentStructureTargetKindValues = [
 	"content",

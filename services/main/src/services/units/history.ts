@@ -1,12 +1,9 @@
-import { createHash } from "node:crypto";
-
-import { and, desc, eq, isNull, max, sql } from "drizzle-orm";
+import { and, desc, eq, max, sql } from "drizzle-orm";
 import { createSchemaFactory } from "drizzle-orm/zod";
 import { z } from "zod";
 import {
 	CollectionDefinitionDocument,
 	CollectionPresentationDocument,
-	DockDocument,
 	PollContentBlock,
 	UnitReferencedBlockDocument,
 	ZoneBoundaryDocument,
@@ -15,37 +12,18 @@ import {
 	isPortableTextDocument,
 	type PortableTextDocument as PortableTextDocumentValue,
 } from "@rezics/block";
-import type { JsonValue } from "@rezics/portable-text";
 import type { Static, TSchema } from "@sinclair/typebox";
 import { ContentLanguageValues } from "@rezics/i18n";
 import { PublicationLicenseIds } from "@rezics/license";
 
 import type { DatabaseTransaction } from "../database";
 import type { EntityAuthorization } from "../authorization/entity/authorization";
-import {
-	ContentStructureCheckpointDepth,
-	ContentStructureContentModel,
-	ContentStructureDeltaSchema,
-	ContentStructureLargeDeltaBytes,
-	ContentStructureLogicalStateSchema,
-	applyContentStructureDelta,
-	contentStructureSlotRole,
-	parseContentStructureSlotRole,
-	type ContentStructureDelta,
-	type ContentStructureLogicalState,
-} from "../content-structure/contracts";
-import {
-	detachContentStructureZonePageTargets,
-	loadContentStructureSnapshot,
-	restoreContentStructureStates,
-} from "../content-structure/storage";
 import { isPrimaryUnitLocalization } from "./localization";
 import {
 	auditEvent,
 	book,
 	collection,
 	collectionItem,
-	contentStructure,
 	entity,
 	software,
 	softwareRequirement,
@@ -65,8 +43,6 @@ import {
 	seriesRelease,
 	subjectAssociation,
 	unit,
-	unitDock,
-	DockSurfaceValues,
 	UnitKindValues,
 	VariantCapableUnitKindValues,
 	unitAlias,
@@ -74,7 +50,6 @@ import {
 	unitLink,
 	unitLocalization,
 	unitRevision,
-	unitRevisionComponentHead,
 	unitRevisionHead,
 	unitRevisionSlot,
 	UnitRevisionSlotRoleValues,
@@ -84,6 +59,13 @@ import {
 	zone,
 	zonePage,
 } from "../database/schema";
+import {
+	canonicalRevisionJson as canonicalJson,
+	findOrCreateRevisionContent,
+	materializeStoredRevisionContent,
+	normalizeRevisionJson as normalizeJson,
+	type MaterializedRevisionContent,
+} from "../history/content";
 import { isFractionalPosition } from "../ordering/position";
 import { UnitRevisionConflict } from "./errors";
 import { insertUnit } from "./create";
@@ -110,7 +92,6 @@ const CollectionPresentationDocumentSchema = createDocumentSchema(CollectionPres
 const ZoneBoundaryDocumentSchema = createDocumentSchema(ZoneBoundaryDocument);
 const ZoneThemeDocumentSchema = createDocumentSchema(ZoneThemeDocument);
 const UnitReferencedBlockDocumentSchema = createDocumentSchema(UnitReferencedBlockDocument);
-const DockDocumentSchema = createDocumentSchema(DockDocument);
 const FractionalPositionSchema = z.string().refine(isFractionalPosition);
 const RuleSnapshotSchema = z.object({
 	requireOnJoin: z.boolean(),
@@ -126,7 +107,7 @@ const RuleSnapshotSchema = z.object({
 	),
 });
 const UnitSnapshotSchema = z.object({
-	version: z.literal(3),
+	version: z.literal(4),
 	kind: z.enum(UnitKindValues),
 	unit: SnapshotRowSchema,
 	localizations: z.array(SnapshotRowSchema),
@@ -144,7 +125,6 @@ const UnitSnapshotSchema = z.object({
 		collectionItems: z.array(SnapshotRowSchema),
 		pollOptions: z.array(SnapshotRowSchema),
 		realmPins: z.array(SnapshotRowSchema),
-		docks: z.array(SnapshotRowSchema),
 		zonePages: z.array(SnapshotRowSchema),
 		realmUnit: z.array(SnapshotRowSchema),
 		realmRules: RuleSnapshotSchema.nullable(),
@@ -257,10 +237,6 @@ const pollOptionRowSchema = schemaFactory
 	);
 const realmPinRowSchema = schemaFactory.createSelectSchema(realmPin, {
 	position: FractionalPositionSchema,
-});
-const unitDockRowSchema = schemaFactory.createSelectSchema(unitDock, {
-	surface: z.enum(DockSurfaceValues),
-	document: DockDocumentSchema,
 });
 const zonePageRowSchema = schemaFactory.createSelectSchema(zonePage, {
 	document: UnitReferencedBlockDocumentSchema,
@@ -472,11 +448,6 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 						.where(eq(realmPin.realmId, unitId))
 						.orderBy(realmPin.kind, realmPin.position, realmPin.unitId)
 				: empty,
-		docks: await tx
-			.select()
-			.from(unitDock)
-			.where(eq(unitDock.unitId, unitId))
-			.orderBy(unitDock.surface),
 		zonePages:
 			record.kind === "zone"
 				? await tx
@@ -489,7 +460,7 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 		realmRules: record.kind === "realm" ? await snapshotRealmRules(tx, unitId) : null,
 	};
 	return {
-		version: 3,
+		version: 4,
 		kind: record.kind,
 		unit: unitStateSchema.parse(record),
 		localizations: localizations.map((localization) =>
@@ -695,12 +666,6 @@ export async function restoreUnitSnapshot(
 			})),
 		);
 	await restoreExtension(tx, unitId, snapshot.kind, snapshot.extension);
-	await tx.delete(unitDock).where(eq(unitDock.unitId, unitId));
-	if (snapshot.owned.docks.length)
-		await tx
-			.insert(unitDock)
-			.values(snapshot.owned.docks.map((row) => unitDockRowSchema.parse(row)));
-
 	await restoreAliases(tx, unitId, snapshot.owned.aliases);
 	if (snapshot.kind === "software")
 		await tx.delete(softwareRequirement).where(eq(softwareRequirement.softwareId, unitId));
@@ -778,70 +743,22 @@ export async function restoreUnitSnapshot(
 export const UnitRevisionChangeTags = ["mw-undo", "mw-manual-revert"] as const;
 export type UnitRevisionChangeTag = (typeof UnitRevisionChangeTags)[number];
 
-type SlotRole = string;
+type SlotRole = (typeof UnitRevisionSlotRoleValues)[number];
 type SlotDocument = { readonly model: string; readonly payload: unknown };
 export type UnitRevisionDocuments = Partial<Record<SlotRole, SlotDocument>>;
-
-export type UnitRevisionComponentChange = {
-	readonly role: string;
-	readonly model: string;
-	readonly delta: unknown;
-	readonly checkpoint: () => Promise<unknown>;
-	readonly forceCheckpoint?: boolean;
-};
-
-export type UnitRevisionExpectedComponent = {
-	readonly role: string;
-	readonly revisionId: string | null;
-};
 
 export type UnitRevisionCommitResult = {
 	readonly revisionId: string;
 	readonly revisionCreated: boolean;
 };
 
-function assertContentStructureComponentIdentity(
-	role: string,
-	value: unknown,
-): ContentStructureLogicalState {
-	const structureId = parseContentStructureSlotRole(role);
-	if (!structureId) throw new TypeError(`Invalid Content Structure component role ${role}`);
-	const state = ContentStructureLogicalStateSchema.parse(value);
-	const payloadStructureId = "deleted" in state ? state.structureId : state.structure.id;
-	if (payloadStructureId !== structureId)
-		throw new TypeError(`Content Structure component ${role} contains another structure`);
-	return state;
-}
-
-function assertContentStructureDeltaIdentity(role: string, value: unknown): ContentStructureDelta {
-	const structureId = parseContentStructureSlotRole(role);
-	if (!structureId) throw new TypeError(`Invalid Content Structure component role ${role}`);
-	const delta = ContentStructureDeltaSchema.parse(value);
-	if (delta.structureId !== structureId)
-		throw new TypeError(`Content Structure delta ${role} contains another structure`);
-	return delta;
-}
-
 const SlotModels = {
 	main: "rezics.unit.main.v1",
 	localizations: "rezics.unit.localizations.v1",
 	relations: "rezics.unit.relations.v2",
-	structure: "rezics.unit.structure.v3",
+	structure: "rezics.unit.structure.v4",
 	rules: "rezics.unit.rules.v1",
 } as const satisfies Record<(typeof UnitRevisionSlotRoleValues)[number], string>;
-
-function normalizeJson(value: unknown): unknown {
-	return JSON.parse(JSON.stringify(value)) as unknown;
-}
-
-function canonicalJson(value: unknown): string {
-	if (value === null || typeof value !== "object") return JSON.stringify(value);
-	if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
-	return `{${Object.entries(value)
-		.sort(([left], [right]) => left.localeCompare(right))
-		.map(([key, item]) => `${JSON.stringify(key)}:${canonicalJson(item)}`)
-		.join(",")}}`;
-}
 
 function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 	const documents: UnitRevisionDocuments = {
@@ -873,13 +790,12 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 		structure: {
 			model: SlotModels.structure,
 			payload: {
-				version: 3,
+				version: 4,
 				seriesReleases: snapshot.owned.seriesReleases,
 				softwareRequirements: snapshot.owned.softwareRequirements,
 				collectionItems: snapshot.owned.collectionItems,
 				pollOptions: snapshot.owned.pollOptions,
 				realmPins: snapshot.owned.realmPins,
-				docks: snapshot.owned.docks,
 				zonePages: snapshot.owned.zonePages,
 			},
 		},
@@ -905,7 +821,7 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 	const structure = asRecord(documents.structure?.payload, "structure");
 	const rules = documents.rules ? asRecord(documents.rules.payload, "rules") : null;
 	return UnitSnapshotSchema.parse({
-		version: 3,
+		version: 4,
 		kind: main.kind,
 		unit: main.unit,
 		localizations: localizations.items,
@@ -923,7 +839,6 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 			collectionItems: structure.collectionItems,
 			pollOptions: structure.pollOptions,
 			realmPins: structure.realmPins,
-			docks: structure.docks,
 			zonePages: structure.zonePages,
 			realmUnit: [],
 			realmRules: rules
@@ -937,129 +852,6 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 		},
 	});
 }
-
-async function findOrCreateContent(
-	tx: DatabaseTransaction,
-	document: SlotDocument,
-	storage: {
-		readonly encoding: "full" | "delta";
-		readonly baseContentId: string | null;
-		readonly deltaDepth: number;
-	} = { encoding: "full", baseContentId: null, deltaDepth: 0 },
-): Promise<{
-	readonly id: string;
-	readonly byteSize: number;
-	readonly encoding: "full" | "delta";
-	readonly deltaDepth: number;
-}> {
-	const payload = normalizeJson(document.payload) as JsonValue;
-	const canonical =
-		storage.encoding === "full"
-			? canonicalJson(payload)
-			: canonicalJson({
-					encoding: storage.encoding,
-					baseContentId: storage.baseContentId,
-					payload,
-				});
-	const sha256 = createHash("sha256").update(canonical).digest("hex");
-	const byteSize = Buffer.byteLength(canonicalJson(payload));
-	await tx
-		.insert(revisionContent)
-		.values({
-			model: document.model,
-			sha256,
-			byteSize,
-			encoding: storage.encoding,
-			baseContentId: storage.baseContentId,
-			deltaDepth: storage.deltaDepth,
-			payload,
-		})
-		.onConflictDoNothing({
-			target: [revisionContent.model, revisionContent.sha256],
-		});
-	const [content] = await tx
-		.select({
-			id: revisionContent.id,
-			byteSize: revisionContent.byteSize,
-			encoding: revisionContent.encoding,
-			baseContentId: revisionContent.baseContentId,
-			deltaDepth: revisionContent.deltaDepth,
-			payload: revisionContent.payload,
-		})
-		.from(revisionContent)
-		.where(and(eq(revisionContent.model, document.model), eq(revisionContent.sha256, sha256)))
-		.limit(1);
-	if (!content) throw new Error("Revision content hash collision");
-	const storedCanonical =
-		content.encoding === "full"
-			? canonicalJson(content.payload)
-			: canonicalJson({
-					encoding: content.encoding,
-					baseContentId: content.baseContentId,
-					payload: content.payload,
-				});
-	if (storedCanonical !== canonical) throw new Error("Revision content hash collision");
-	return content;
-}
-
-async function materializeRevisionContent(
-	tx: DatabaseTransaction,
-	contentId: string,
-	cache: Map<string, MaterializedRevisionContent>,
-	visiting = new Set<string>(),
-): Promise<MaterializedRevisionContent> {
-	const cached = cache.get(contentId);
-	if (cached) return cached;
-	if (visiting.has(contentId)) throw new Error(`Revision content delta cycle at ${contentId}`);
-	visiting.add(contentId);
-	const [content] = await tx
-		.select({
-			model: revisionContent.model,
-			encoding: revisionContent.encoding,
-			baseContentId: revisionContent.baseContentId,
-			deltaDepth: revisionContent.deltaDepth,
-			payload: revisionContent.payload,
-		})
-		.from(revisionContent)
-		.where(eq(revisionContent.id, contentId))
-		.limit(1);
-	if (!content) throw new Error(`Missing revision content ${contentId}`);
-	if (content.encoding === "full") {
-		const materialized = {
-			model: content.model,
-			payload: content.payload,
-			deltaDepth: content.deltaDepth,
-		};
-		cache.set(contentId, materialized);
-		visiting.delete(contentId);
-		return materialized;
-	}
-	if (
-		!content.baseContentId ||
-		content.deltaDepth < 1 ||
-		content.deltaDepth > ContentStructureCheckpointDepth
-	)
-		throw new Error(`Invalid delta chain at revision content ${contentId}`);
-	const base = await materializeRevisionContent(tx, content.baseContentId, cache, visiting);
-	if (base.model !== content.model || base.deltaDepth !== content.deltaDepth - 1)
-		throw new Error(`Invalid delta base at revision content ${contentId}`);
-	const payload =
-		content.model === ContentStructureContentModel
-			? applyContentStructureDelta(base.payload, content.payload)
-			: (() => {
-					throw new Error(`Unsupported delta content model ${content.model}`);
-				})();
-	const materialized = { model: content.model, payload, deltaDepth: content.deltaDepth };
-	cache.set(contentId, materialized);
-	visiting.delete(contentId);
-	return materialized;
-}
-
-type MaterializedRevisionContent = {
-	readonly model: string;
-	readonly payload: unknown;
-	readonly deltaDepth: number;
-};
 
 export async function getUnitRevisionDocuments(
 	tx: DatabaseTransaction,
@@ -1079,7 +871,19 @@ export async function getUnitRevisionDocuments(
 	for (const row of rows)
 		documents[row.role] = {
 			model: row.model,
-			payload: (await materializeRevisionContent(tx, row.contentId, cache)).payload,
+			payload: (
+				await materializeStoredRevisionContent(
+					tx,
+					row.contentId,
+					{
+						maxDeltaDepth: 0,
+						applyDelta: (model) => {
+							throw new Error(`Unsupported Unit revision delta model ${model}`);
+						},
+					},
+					cache,
+				)
+			).payload,
 		};
 	return documents;
 }
@@ -1095,7 +899,6 @@ export async function recordUnitRevision(
 		baseRevisionId?: string;
 		sourceRevisionId?: string;
 		tags?: readonly UnitRevisionChangeTag[];
-		componentChanges?: readonly UnitRevisionComponentChange[];
 	},
 ): Promise<UnitRevisionCommitResult> {
 	await lockUnitHistory(tx, input.unitId);
@@ -1123,49 +926,13 @@ export async function recordUnitRevision(
 					role: unitRevisionSlot.role,
 					contentId: unitRevisionSlot.contentId,
 					originRevisionId: unitRevisionSlot.originRevisionId,
-					model: revisionContent.model,
 					byteSize: revisionContent.byteSize,
-					encoding: revisionContent.encoding,
-					deltaDepth: revisionContent.deltaDepth,
 				})
 				.from(unitRevisionSlot)
 				.innerJoin(revisionContent, eq(revisionContent.id, unitRevisionSlot.contentId))
 				.where(eq(unitRevisionSlot.revisionId, head.revisionId))
 		: [];
 	const previousByRole = new Map(previousSlots.map((slot) => [slot.role, slot]));
-	const componentChanges = [...(input.componentChanges ?? [])];
-	const changedRoles = new Set<string>();
-	for (const change of componentChanges) {
-		if (changedRoles.has(change.role))
-			throw new TypeError(`Duplicate Unit revision component role ${change.role}`);
-		if (change.model !== ContentStructureContentModel)
-			throw new TypeError(`Unsupported Unit revision component model ${change.model}`);
-		if (!parseContentStructureSlotRole(change.role))
-			throw new TypeError(`Invalid Content Structure component role ${change.role}`);
-		changedRoles.add(change.role);
-	}
-	const activeStructures = await tx
-		.select({ id: contentStructure.id })
-		.from(contentStructure)
-		.where(
-			and(eq(contentStructure.ownerUnitId, input.unitId), isNull(contentStructure.deletedAt)),
-		);
-	for (const structure of activeStructures) {
-		const role = contentStructureSlotRole(structure.id);
-		if (previousByRole.has(role) || changedRoles.has(role)) continue;
-		const checkpoint = await loadContentStructureSnapshot(tx, {
-			structureId: structure.id,
-			ownerUnitId: input.unitId,
-		});
-		componentChanges.push({
-			role,
-			model: ContentStructureContentModel,
-			delta: checkpoint,
-			checkpoint: async () => checkpoint,
-			forceCheckpoint: true,
-		});
-		changedRoles.add(role);
-	}
 	const sourceSlots = input.sourceRevisionId
 		? await tx
 				.select({
@@ -1184,49 +951,14 @@ export async function recordUnitRevision(
 			{
 				id: slot.contentId,
 				byteSize: slot.byteSize,
-				encoding: slot.encoding,
-				deltaDepth: slot.deltaDepth,
 			},
 		]),
 	);
-	for (const [role, document] of Object.entries(documents)) {
+	for (const role of UnitRevisionSlotRoleValues) {
+		const document = documents[role];
 		if (!document) continue;
-		const content = await findOrCreateContent(tx, document);
+		const content = await findOrCreateRevisionContent(tx, document);
 		contentByRole.set(role, content);
-	}
-	for (const change of componentChanges) {
-		if (change.role.trim() === "" || change.role.length > 200)
-			throw new TypeError("Invalid Unit revision component role");
-		const previous = previousByRole.get(change.role);
-		if (previous && previous.model !== change.model)
-			throw new TypeError(`Unit revision component model changed for ${change.role}`);
-		const deltaBytes = Buffer.byteLength(canonicalJson(normalizeJson(change.delta)));
-		const checkpoint =
-			change.forceCheckpoint === true ||
-			!previous ||
-			previous.deltaDepth >= ContentStructureCheckpointDepth - 1 ||
-			deltaBytes >= ContentStructureLargeDeltaBytes;
-		const content = checkpoint
-			? await findOrCreateContent(tx, {
-					model: change.model,
-					payload: assertContentStructureComponentIdentity(
-						change.role,
-						await change.checkpoint(),
-					),
-				})
-			: await findOrCreateContent(
-					tx,
-					{
-						model: change.model,
-						payload: assertContentStructureDeltaIdentity(change.role, change.delta),
-					},
-					{
-						encoding: "delta",
-						baseContentId: previous.contentId,
-						deltaDepth: previous.deltaDepth + 1,
-					},
-				);
-		contentByRole.set(change.role, content);
 	}
 	const contents = [...contentByRole].map(([role, content]) => ({ role, ...content }));
 	const unchanged =
@@ -1274,18 +1006,6 @@ export async function recordUnitRevision(
 			target: unitRevisionHead.unitId,
 			set: { revisionId: revision.id },
 		});
-	for (const change of componentChanges)
-		await tx
-			.insert(unitRevisionComponentHead)
-			.values({
-				unitId: input.unitId,
-				componentKey: change.role,
-				revisionId: revision.id,
-			})
-			.onConflictDoUpdate({
-				target: [unitRevisionComponentHead.unitId, unitRevisionComponentHead.componentKey],
-				set: { revisionId: revision.id },
-			});
 	if (!head)
 		await finalizeInitialUnitStatusRevision(tx, {
 			unitId: input.unitId,
@@ -1304,55 +1024,6 @@ export async function recordUnitRevision(
 			})),
 		);
 	return { revisionId: revision.id, revisionCreated: true };
-}
-
-/**
- * Service-layer History middleware for an atomic domain mutation.
- *
- * The caller owns the surrounding database transaction. This coordinator owns
- * locking, component concurrency validation, mutation ordering, and revision
- * persistence for HTTP, worker, and bootstrap writers alike.
- */
-export async function mutateUnitWithHistory<Result extends object>(
-	tx: DatabaseTransaction,
-	input: {
-		readonly unitId: string;
-		readonly actorProfileId?: string | null;
-		readonly event: UnitRevisionEvent;
-		readonly message?: string;
-		readonly minor?: boolean;
-		readonly expectedComponents?: readonly UnitRevisionExpectedComponent[];
-	},
-	mutate: () => Promise<{
-		readonly result: Result;
-		readonly componentChanges?: readonly UnitRevisionComponentChange[];
-	}>,
-): Promise<Result & UnitRevisionCommitResult> {
-	await lockUnitHistory(tx, input.unitId);
-	for (const expected of input.expectedComponents ?? []) {
-		const [head] = await tx
-			.select({ revisionId: unitRevisionComponentHead.revisionId })
-			.from(unitRevisionComponentHead)
-			.where(
-				and(
-					eq(unitRevisionComponentHead.unitId, input.unitId),
-					eq(unitRevisionComponentHead.componentKey, expected.role),
-				),
-			)
-			.limit(1);
-		if ((head?.revisionId ?? null) !== expected.revisionId)
-			throw new UnitRevisionConflict(head?.revisionId ?? null, [`/${expected.role}`]);
-	}
-	const outcome = await mutate();
-	const revision = await recordUnitRevision(tx, {
-		unitId: input.unitId,
-		actorProfileId: input.actorProfileId,
-		event: input.event,
-		message: input.message,
-		minor: input.minor,
-		componentChanges: outcome.componentChanges,
-	});
-	return { ...outcome.result, ...revision };
 }
 
 export async function restoreUnitRevision(
@@ -1384,16 +1055,12 @@ export async function restoreUnitRevision(
 		throw new UnitRevisionConflict(head.revisionId, ["/"]);
 	const documents = await getUnitRevisionDocuments(tx, input.sourceRevisionId);
 	if (!documents.main) throw new Error("Unit revision not found");
-	const currentDocuments = await getUnitRevisionDocuments(tx, input.baseRevisionId);
-	const contentStructures = prepareContentStructureRestoration(currentDocuments, documents);
-	await detachContentStructureZonePageTargets(tx, input.unitId);
 	await restoreUnitSnapshot(
 		tx,
 		input.unitId,
 		documentsToSnapshot(documents),
 		input.entityAuthorization,
 	);
-	await restoreContentStructureStates(tx, input.unitId, contentStructures.states);
 	return recordUnitRevision(tx, {
 		unitId: input.unitId,
 		actorProfileId: input.actorProfileId,
@@ -1402,64 +1069,7 @@ export async function restoreUnitRevision(
 		minor: input.minor,
 		baseRevisionId: input.baseRevisionId,
 		sourceRevisionId: input.sourceRevisionId,
-		componentChanges: contentStructures.changes,
 	});
-}
-
-function contentStructureDocuments(
-	documents: UnitRevisionDocuments,
-): Map<string, ContentStructureLogicalState> {
-	const structures = new Map<string, ContentStructureLogicalState>();
-	for (const [role, document] of Object.entries(documents)) {
-		const structureId = parseContentStructureSlotRole(role);
-		if (!structureId) {
-			if (document?.model === ContentStructureContentModel)
-				throw new Error(`Invalid Content Structure slot role ${role}`);
-			continue;
-		}
-		if (!document || document.model !== ContentStructureContentModel)
-			throw new Error(`Invalid Content Structure model for ${role}`);
-		const state = ContentStructureLogicalStateSchema.parse(document.payload);
-		const payloadStructureId = "deleted" in state ? state.structureId : state.structure.id;
-		if (payloadStructureId !== structureId)
-			throw new Error(`Content Structure slot ${role} contains another structure`);
-		structures.set(role, state);
-	}
-	return structures;
-}
-
-function prepareContentStructureRestoration(
-	currentDocuments: UnitRevisionDocuments,
-	desiredDocuments: UnitRevisionDocuments,
-): {
-	readonly states: readonly ContentStructureLogicalState[];
-	readonly changes: readonly UnitRevisionComponentChange[];
-} {
-	const current = contentStructureDocuments(currentDocuments);
-	const desired = contentStructureDocuments(desiredDocuments);
-	for (const [role] of current) {
-		if (desired.has(role)) continue;
-		const structureId = parseContentStructureSlotRole(role);
-		if (!structureId) throw new Error(`Invalid Content Structure slot role ${role}`);
-		desired.set(role, { version: 1, deleted: true, structureId });
-	}
-	const changes: UnitRevisionComponentChange[] = [];
-	for (const [role, state] of desired) {
-		const previous = current.get(role);
-		if (
-			previous &&
-			canonicalJson(normalizeJson(previous)) === canonicalJson(normalizeJson(state))
-		)
-			continue;
-		changes.push({
-			role,
-			model: ContentStructureContentModel,
-			delta: state,
-			checkpoint: async () => state,
-			forceCheckpoint: true,
-		});
-	}
-	return { states: [...desired.values()], changes };
 }
 
 const Missing = Symbol("missing revision value");
@@ -1483,7 +1093,6 @@ const StableArrayKeys = [
 	["sourceEntityId", "role", "position"],
 	["seriesId", "releaseUnitId"],
 	["softwareId", "kind"],
-	["unitId", "surface"],
 	["zoneId", "unitId"],
 	["collectionId", "unitId"],
 	["position"],
@@ -1659,15 +1268,12 @@ export async function undoUnitRevision(
 	const result = undoRevisionDocuments(before, after, current);
 	if (result.conflictPaths.length)
 		throw new UnitRevisionConflict(head.revisionId, result.conflictPaths);
-	const contentStructures = prepareContentStructureRestoration(current, result.documents);
-	await detachContentStructureZonePageTargets(tx, input.unitId);
 	await restoreUnitSnapshot(
 		tx,
 		input.unitId,
 		documentsToSnapshot(result.documents),
 		input.entityAuthorization,
 	);
-	await restoreContentStructureStates(tx, input.unitId, contentStructures.states);
 	return recordUnitRevision(tx, {
 		unitId: input.unitId,
 		actorProfileId: input.actorProfileId,
@@ -1677,6 +1283,5 @@ export async function undoUnitRevision(
 		baseRevisionId: input.baseRevisionId,
 		sourceRevisionId: input.targetRevisionId,
 		tags: ["mw-undo"],
-		componentChanges: contentStructures.changes,
 	});
 }

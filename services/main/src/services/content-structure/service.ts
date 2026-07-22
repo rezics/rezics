@@ -4,27 +4,29 @@ import type { DatabaseTransaction } from "../database";
 import {
 	contentStructure,
 	contentStructureNode,
-	unitRevisionComponentHead,
-	type ContentStructurePurpose,
+	type ContentStructureKind,
 } from "../database/schema";
 import { fractionalPositionBetween } from "../ordering/position";
-import { mutateUnitWithHistory } from "../units/history";
+import type { SearchConfiguration } from "@rezics/search";
 import {
-	ContentStructureContentModel,
 	ContentStructureNodeStateSchema,
 	ContentStructureSnapshotSchema,
-	contentStructureSlotRole,
 	diffContentStructureSnapshots,
 	type ContentStructureNodeState,
 	type ContentStructureTarget,
 } from "./contracts";
 import { ContentStructureInvalid, ContentStructureNotFound } from "./errors";
 import {
+	createContentStructureHistory,
+	getContentStructureHeadRevision,
+	mutateContentStructureWithHistory,
+} from "./history";
+import {
 	assertContentStructureParent,
 	contentStructureTargetColumns,
 	contentStructureTargetFromRow,
 	ensureContentStructureNodeAllowed,
-	ensureContentStructurePurposeOwner,
+	ensureContentStructureKindOwner,
 	loadContentStructureSnapshot,
 } from "./storage";
 
@@ -40,46 +42,43 @@ type ExistingStructureMutation = MutationActor & {
 	readonly baseRevisionId: string;
 };
 
-const SingletonContentStructurePurposes = new Set<ContentStructurePurpose>([
+const SingletonContentStructureKinds = new Set<ContentStructureKind>([
 	"book.contents",
 	"post.contents",
 	"realm.taxonomy",
 ]);
 
-function ensureDirectContentStructureEditing(purpose: ContentStructurePurpose): void {
-	if (purpose === "realm.navigation" || purpose === "zone.navigation")
+function ensureDirectContentStructureEditing(kind: ContentStructureKind): void {
+	if (kind === "realm.navigation" || kind === "zone.navigation")
 		throw new ContentStructureInvalid(
 			"Navigation structures must be edited through the NavigationDocument adapter",
 		);
 }
 
-function componentChange(role: string, delta: unknown, checkpoint: () => Promise<unknown>) {
-	return { role, model: ContentStructureContentModel, delta, checkpoint } as const;
-}
-
-export async function getContentStructureComponentRevision(
+export async function getContentStructureRevision(
 	tx: DatabaseTransaction,
 	ownerUnitId: string,
 	structureId: string,
 ): Promise<string | null> {
-	const role = contentStructureSlotRole(structureId);
-	const [head] = await tx
-		.select({ revisionId: unitRevisionComponentHead.revisionId })
-		.from(unitRevisionComponentHead)
+	const [owned] = await tx
+		.select({ id: contentStructure.id })
+		.from(contentStructure)
 		.where(
 			and(
-				eq(unitRevisionComponentHead.unitId, ownerUnitId),
-				eq(unitRevisionComponentHead.componentKey, role),
+				eq(contentStructure.id, structureId),
+				eq(contentStructure.ownerUnitId, ownerUnitId),
+				isNull(contentStructure.deletedAt),
 			),
 		)
 		.limit(1);
-	return head?.revisionId ?? null;
+	if (!owned) return null;
+	return getContentStructureHeadRevision(tx, structureId);
 }
 
 export async function listContentStructures(
 	tx: DatabaseTransaction,
 	ownerUnitId: string,
-	purpose?: ContentStructurePurpose,
+	kind?: ContentStructureKind,
 ) {
 	return tx
 		.select()
@@ -87,12 +86,12 @@ export async function listContentStructures(
 		.where(
 			and(
 				eq(contentStructure.ownerUnitId, ownerUnitId),
-				purpose ? eq(contentStructure.purpose, purpose) : undefined,
+				kind ? eq(contentStructure.kind, kind) : undefined,
 				isNull(contentStructure.deletedAt),
 			),
 		)
 		.orderBy(
-			asc(contentStructure.purpose),
+			asc(contentStructure.kind),
 			asc(contentStructure.createdAt),
 			asc(contentStructure.id),
 		);
@@ -102,64 +101,51 @@ export async function createContentStructure(
 	tx: DatabaseTransaction,
 	input: MutationActor & {
 		readonly ownerUnitId: string;
-		readonly purpose: ContentStructurePurpose;
+		readonly kind: ContentStructureKind;
 		readonly documentKey?: string | null;
 	},
 ) {
-	return mutateUnitWithHistory(
-		tx,
-		{
-			unitId: input.ownerUnitId,
-			actorProfileId: input.actorProfileId,
-			event: "update",
-			message: input.message,
-			minor: input.minor,
-		},
-		async () => {
-			await ensureContentStructurePurposeOwner(tx, input.ownerUnitId, input.purpose);
-			ensureDirectContentStructureEditing(input.purpose);
-			if (input.documentKey != null)
-				throw new ContentStructureInvalid(
-					"Non-navigation structures cannot have a document key",
-				);
-			if (SingletonContentStructurePurposes.has(input.purpose)) {
-				const [existing] = await tx
-					.select({ id: contentStructure.id })
-					.from(contentStructure)
-					.where(
-						and(
-							eq(contentStructure.ownerUnitId, input.ownerUnitId),
-							eq(contentStructure.purpose, input.purpose),
-							isNull(contentStructure.deletedAt),
-						),
-					)
-					.limit(1);
-				if (existing)
-					throw new ContentStructureInvalid(
-						`${input.purpose} already exists for this Unit`,
-					);
-			}
-			const [created] = await tx
-				.insert(contentStructure)
-				.values({
-					ownerUnitId: input.ownerUnitId,
-					purpose: input.purpose,
-					documentKey: input.documentKey ?? null,
-				})
-				.returning();
-			if (!created) throw new Error("Content Structure insertion returned no row");
-			const snapshot = ContentStructureSnapshotSchema.parse({
-				version: 1,
-				structure: created,
-				nodes: [],
-			});
-			const role = contentStructureSlotRole(created.id);
-			return {
-				result: { structure: created },
-				componentChanges: [componentChange(role, snapshot, async () => snapshot)],
-			};
-		},
-	);
+	await ensureContentStructureKindOwner(tx, input.ownerUnitId, input.kind);
+	ensureDirectContentStructureEditing(input.kind);
+	if (input.documentKey != null)
+		throw new ContentStructureInvalid("Non-navigation structures cannot have a document key");
+	if (SingletonContentStructureKinds.has(input.kind)) {
+		const [existing] = await tx
+			.select({ id: contentStructure.id })
+			.from(contentStructure)
+			.where(
+				and(
+					eq(contentStructure.ownerUnitId, input.ownerUnitId),
+					eq(contentStructure.kind, input.kind),
+					isNull(contentStructure.deletedAt),
+				),
+			)
+			.limit(1);
+		if (existing)
+			throw new ContentStructureInvalid(`${input.kind} already exists for this Unit`);
+	}
+	const [created] = await tx
+		.insert(contentStructure)
+		.values({
+			ownerUnitId: input.ownerUnitId,
+			kind: input.kind,
+			documentKey: input.documentKey ?? null,
+		})
+		.returning();
+	if (!created) throw new Error("Content Structure insertion returned no row");
+	const snapshot = ContentStructureSnapshotSchema.parse({
+		version: 1,
+		structure: created,
+		nodes: [],
+	});
+	const revision = await createContentStructureHistory(tx, {
+		structureId: created.id,
+		actorProfileId: input.actorProfileId,
+		message: input.message,
+		minor: input.minor,
+		state: snapshot,
+	});
+	return { structure: created, ...revision };
 }
 
 async function loadStructureRecord(
@@ -201,28 +187,28 @@ export async function insertContentStructureNode(
 		readonly target?: ContentStructureTarget;
 		readonly position?: string;
 		readonly contentRating?: ContentStructureNodeState["contentRating"];
+		readonly searchConfiguration?: SearchConfiguration | null;
 	},
 ) {
-	const role = contentStructureSlotRole(input.structureId);
-	return mutateUnitWithHistory(
+	return mutateContentStructureWithHistory(
 		tx,
 		{
-			unitId: input.ownerUnitId,
+			structureId: input.structureId,
+			baseRevisionId: input.baseRevisionId,
 			actorProfileId: input.actorProfileId,
-			event: "update",
 			message: input.message,
 			minor: input.minor,
-			expectedComponents: [{ role, revisionId: input.baseRevisionId }],
 		},
 		async () => {
 			const structure = await loadStructureRecord(tx, input.ownerUnitId, input.structureId);
-			ensureDirectContentStructureEditing(structure.purpose);
+			ensureDirectContentStructureEditing(structure.kind);
 			const target = input.target ?? { kind: "content" };
 			await ensureContentStructureNodeAllowed(tx, {
-				purpose: structure.purpose,
+				kind: structure.kind,
 				ownerUnitId: structure.ownerUnitId,
 				contentUnitId: input.contentUnitId,
 				target,
+				searchConfiguration: input.searchConfiguration,
 			});
 			const parentId = input.parentId ?? null;
 			if (parentId !== null) {
@@ -266,6 +252,7 @@ export async function insertContentStructureNode(
 					...contentStructureTargetColumns(target),
 					position: input.position ?? fractionalPositionBetween(last?.position, null),
 					contentRating: input.contentRating ?? null,
+					searchConfiguration: input.searchConfiguration ?? null,
 				})
 				.returning();
 			if (!created) throw new Error("Content Structure node insertion returned no row");
@@ -285,11 +272,12 @@ export async function insertContentStructureNode(
 			} as const;
 			return {
 				result: { node: created },
-				componentChanges: [
-					componentChange(role, delta, () =>
+				change: {
+					kind: "delta",
+					delta,
+					checkpoint: () =>
 						loadContentStructureSnapshot(tx, { structureId: structure.id }),
-					),
-				],
+				},
 			};
 		},
 	);
@@ -305,22 +293,21 @@ export async function updateContentStructureNode(
 		readonly target?: ContentStructureTarget;
 		readonly position?: string;
 		readonly contentRating?: ContentStructureNodeState["contentRating"];
+		readonly searchConfiguration?: SearchConfiguration | null;
 	},
 ) {
-	const role = contentStructureSlotRole(input.structureId);
-	return mutateUnitWithHistory(
+	return mutateContentStructureWithHistory(
 		tx,
 		{
-			unitId: input.ownerUnitId,
+			structureId: input.structureId,
+			baseRevisionId: input.baseRevisionId,
 			actorProfileId: input.actorProfileId,
-			event: "update",
 			message: input.message,
 			minor: input.minor,
-			expectedComponents: [{ role, revisionId: input.baseRevisionId }],
 		},
 		async () => {
 			const structure = await loadStructureRecord(tx, input.ownerUnitId, input.structureId);
-			ensureDirectContentStructureEditing(structure.purpose);
+			ensureDirectContentStructureEditing(structure.kind);
 			const [current] = await tx
 				.select()
 				.from(contentStructureNode)
@@ -339,10 +326,14 @@ export async function updateContentStructureNode(
 			const target = input.target ?? contentStructureTargetFromRow(current);
 			const contentUnitId = input.contentUnitId ?? current.contentUnitId;
 			await ensureContentStructureNodeAllowed(tx, {
-				purpose: structure.purpose,
+				kind: structure.kind,
 				ownerUnitId: structure.ownerUnitId,
 				contentUnitId,
 				target,
+				searchConfiguration:
+					input.searchConfiguration === undefined
+						? current.searchConfiguration
+						: input.searchConfiguration,
 			});
 			const [updated] = await tx
 				.update(contentStructureNode)
@@ -353,6 +344,7 @@ export async function updateContentStructureNode(
 					...(input.target ? contentStructureTargetColumns(input.target) : {}),
 					position: input.position,
 					contentRating: input.contentRating,
+					searchConfiguration: input.searchConfiguration,
 				})
 				.where(eq(contentStructureNode.id, current.id))
 				.returning();
@@ -374,11 +366,12 @@ export async function updateContentStructureNode(
 			} as const;
 			return {
 				result: { node: updated },
-				componentChanges: [
-					componentChange(role, delta, () =>
+				change: {
+					kind: "delta",
+					delta,
+					checkpoint: () =>
 						loadContentStructureSnapshot(tx, { structureId: structure.id }),
-					),
-				],
+				},
 			};
 		},
 	);
@@ -410,23 +403,21 @@ export async function deleteContentStructureNode(
 	tx: DatabaseTransaction,
 	input: ExistingStructureMutation & { readonly nodeId: string },
 ) {
-	const role = contentStructureSlotRole(input.structureId);
-	return mutateUnitWithHistory(
+	return mutateContentStructureWithHistory(
 		tx,
 		{
-			unitId: input.ownerUnitId,
+			structureId: input.structureId,
+			baseRevisionId: input.baseRevisionId,
 			actorProfileId: input.actorProfileId,
-			event: "update",
 			message: input.message,
 			minor: input.minor,
-			expectedComponents: [{ role, revisionId: input.baseRevisionId }],
 		},
 		async () => {
 			const snapshot = await loadContentStructureSnapshot(tx, {
 				structureId: input.structureId,
 				ownerUnitId: input.ownerUnitId,
 			});
-			ensureDirectContentStructureEditing(snapshot.structure.purpose);
+			ensureDirectContentStructureEditing(snapshot.structure.kind);
 			const deleted = descendantsOf(snapshot.nodes, input.nodeId);
 			await tx
 				.update(contentStructureNode)
@@ -452,11 +443,14 @@ export async function deleteContentStructureNode(
 			};
 			return {
 				result: { deletedNodeIds: deleted.map((node) => node.id) },
-				componentChanges: [
-					componentChange(role, delta, () =>
-						loadContentStructureSnapshot(tx, { structureId: snapshot.structure.id }),
-					),
-				],
+				change: {
+					kind: "delta",
+					delta,
+					checkpoint: () =>
+						loadContentStructureSnapshot(tx, {
+							structureId: snapshot.structure.id,
+						}),
+				},
 			};
 		},
 	);
@@ -469,20 +463,19 @@ export async function deleteContentStructure(
 			| { readonly binding: "direct" }
 			| {
 					readonly binding: "navigation";
-					readonly purpose: "realm.navigation" | "zone.navigation";
+					readonly kind: "realm.navigation" | "zone.navigation";
 			  }
 		),
 ) {
-	const role = contentStructureSlotRole(input.structureId);
-	return mutateUnitWithHistory(
+	return mutateContentStructureWithHistory(
 		tx,
 		{
-			unitId: input.ownerUnitId,
+			structureId: input.structureId,
+			baseRevisionId: input.baseRevisionId,
 			actorProfileId: input.actorProfileId,
-			event: "update",
+			revisionKind: "delete",
 			message: input.message,
 			minor: input.minor,
-			expectedComponents: [{ role, revisionId: input.baseRevisionId }],
 		},
 		async () => {
 			const before = await loadContentStructureSnapshot(tx, {
@@ -490,9 +483,8 @@ export async function deleteContentStructure(
 				ownerUnitId: input.ownerUnitId,
 			});
 			if (input.binding === "direct")
-				ensureDirectContentStructureEditing(before.structure.purpose);
-			else if (before.structure.purpose !== input.purpose)
-				throw new ContentStructureNotFound();
+				ensureDirectContentStructureEditing(before.structure.kind);
+			else if (before.structure.kind !== input.kind) throw new ContentStructureNotFound();
 			const deletedAt = new Date();
 			await tx
 				.update(contentStructureNode)
@@ -506,13 +498,15 @@ export async function deleteContentStructure(
 			if (!delta) throw new Error("Content Structure deletion produced no delta");
 			return {
 				result: { deleted: true as const },
-				componentChanges: [
-					componentChange(role, delta, async () => ({
+				change: {
+					kind: "delta",
+					delta,
+					checkpoint: async () => ({
 						version: 1,
 						deleted: true,
 						structureId: input.structureId,
-					})),
-				],
+					}),
+				},
 			};
 		},
 	);

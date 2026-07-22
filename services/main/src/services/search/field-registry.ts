@@ -46,7 +46,7 @@ export const CurrentSearchFieldRegistry: Partial<Record<SearchField, SearchField
 		meilisearch: ["equality"],
 		residual: false,
 	},
-	type: {
+	kind: {
 		categories: allCategories,
 		scalar: "string",
 		operators: equality,

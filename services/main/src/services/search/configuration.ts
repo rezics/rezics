@@ -50,8 +50,8 @@ export const GlobalSearchConfiguration = {
 			optionSource: { kind: "facet" },
 		}),
 		control({
-			key: "type",
-			field: "type",
+			key: "kind",
+			field: "kind",
 			component: "multi-select",
 			operators: ["any-of", "none-of"],
 			optionSource: { kind: "facet" },
@@ -170,7 +170,7 @@ export const GlobalSearchConfiguration = {
 		pageSize: 20,
 		maxPageSize: 50,
 		maxResultWindow: 10_000,
-		facets: ["category", "language", "type", "content-rating", "tag"],
+		facets: ["category", "language", "kind", "content-rating", "tag"],
 	},
 } satisfies SearchConfiguration;
 

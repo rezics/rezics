@@ -5,7 +5,7 @@ import type { ContentLanguage } from "@rezics/i18n";
 
 import { isContentStructureNodeReadable } from "../../authorization/content-structure/policy";
 import session, { resolveIdentity } from "../../auth/session";
-import { database } from "../../database";
+import { database, type DatabaseTransaction } from "../../database";
 import { isPrimaryUnitLocalization } from "../../units/localization";
 import {
 	contentStructure,
@@ -15,13 +15,14 @@ import {
 	unit,
 	unitAccessBinding,
 	unitLocalization,
+	zonePage,
 } from "../../database/schema";
 import { recordUnitRevision } from "../../units/history";
 import {
 	createContentStructure,
 	deleteContentStructure,
 	deleteContentStructureNode,
-	getContentStructureComponentRevision,
+	getContentStructureRevision,
 	insertContentStructureNode,
 	listContentStructures,
 	updateContentStructureNode,
@@ -38,6 +39,7 @@ import {
 	ChapterNotFound,
 	ContentStructureNodeNotFound,
 } from "./errors";
+import { ContentStructureNotFound } from "../../content-structure/errors";
 import {
 	BookContentStructureParams,
 	ChapterLocalizationParams,
@@ -54,6 +56,9 @@ import {
 	GenericContentStructureNodeParams,
 	UnitContentStructuresParams,
 	UpdateGenericContentStructureNodeBody,
+	ContentStructureRevisionParams,
+	ContentStructureRevisionListQuery,
+	RestoreContentStructureRevisionBody,
 } from "./schema";
 import {
 	ChapterDetailResponse,
@@ -66,13 +71,31 @@ import {
 	ContentStructureMutationResponse,
 	ContentStructureNodeMutationResponse,
 	ContentStructureDeleteResponse,
+	ContentStructureRevisionListResponse,
 } from "../schema/response";
+import {
+	listContentStructureRevisions,
+	restoreContentStructureRevision,
+} from "../../content-structure/history";
 import { toApiErrorResponse } from "../schema/response";
 
 const UnitForbiddenResponse = toApiErrorResponse(["UnitPermissionForbidden", "UnitProtected"]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 
-function presentGenericContentStructureNode(node: typeof contentStructureNode.$inferSelect) {
+async function presentGenericContentStructureNode(node: typeof contentStructureNode.$inferSelect) {
+	const storedTarget = contentStructureTargetFromRow(node);
+	const target =
+		storedTarget.kind === "zone_page"
+			? await (async () => {
+					const [page] = await database
+						.select({ zoneId: zonePage.zoneId, slug: zonePage.slug })
+						.from(zonePage)
+						.where(eq(zonePage.id, storedTarget.zonePageId))
+						.limit(1);
+					if (!page) throw new ContentStructureNotFound();
+					return { ...storedTarget, ...page };
+				})()
+			: storedTarget;
 	return {
 		id: node.id,
 		structureId: node.structureId,
@@ -80,9 +103,10 @@ function presentGenericContentStructureNode(node: typeof contentStructureNode.$i
 		parentId: node.parentId,
 		contentUnitId: node.contentUnitId,
 		documentKey: node.documentKey,
-		target: contentStructureTargetFromRow(node),
+		target,
 		position: node.position,
 		contentRating: node.contentRating,
+		searchConfiguration: node.searchConfiguration,
 		createdAt: node.createdAt,
 		updatedAt: node.updatedAt,
 	};
@@ -95,12 +119,25 @@ function presentContentStructure(
 	return {
 		id: structure.id,
 		ownerUnitId: structure.ownerUnitId,
-		purpose: structure.purpose,
+		kind: structure.kind,
 		documentKey: structure.documentKey,
 		latestRevisionId,
 		createdAt: structure.createdAt,
 		updatedAt: structure.updatedAt,
 	};
+}
+
+async function ensureContentStructureOwner(
+	tx: DatabaseTransaction,
+	unitId: string,
+	structureId: string,
+): Promise<void> {
+	const [owned] = await tx
+		.select({ id: contentStructure.id })
+		.from(contentStructure)
+		.where(and(eq(contentStructure.id, structureId), eq(contentStructure.ownerUnitId, unitId)))
+		.limit(1);
+	if (!owned) throw new ContentStructureNotFound();
 }
 
 function toContentStructureNodeResponse(
@@ -140,11 +177,7 @@ export default new Elysia()
 						structures.map(async (structure) =>
 							presentContentStructure(
 								structure,
-								await getContentStructureComponentRevision(
-									tx,
-									params.unitId,
-									structure.id,
-								),
+								await getContentStructureRevision(tx, params.unitId, structure.id),
 							),
 						),
 					),
@@ -167,7 +200,7 @@ export default new Elysia()
 			const result = await database.transaction((tx) =>
 				createContentStructure(tx, {
 					ownerUnitId: params.unitId,
-					purpose: body.purpose,
+					kind: body.kind,
 					actorProfileId: profile.unitId,
 				}),
 			);
@@ -199,14 +232,16 @@ export default new Elysia()
 					structureId: params.structureId,
 					ownerUnitId: params.unitId,
 				});
-				const latestRevisionId = await getContentStructureComponentRevision(
+				const latestRevisionId = await getContentStructureRevision(
 					tx,
 					params.unitId,
 					params.structureId,
 				);
 				return {
 					...presentContentStructure(snapshot.structure, latestRevisionId),
-					nodes: snapshot.nodes.map(presentGenericContentStructureNode),
+					nodes: await Promise.all(
+						snapshot.nodes.map(presentGenericContentStructureNode),
+					),
 				};
 			});
 		},
@@ -220,6 +255,77 @@ export default new Elysia()
 				]),
 			},
 			detail: { summary: "Get Content Structure", tags: ["Content Structure"] },
+		},
+	)
+	.get(
+		"/units/by-id/:unitId/content-structures/:structureId/revisions",
+		async ({ params, query, request }) => {
+			const { authorization } = await resolveIdentity(request.headers, "unit:read");
+			await authorization.unit.ensureCanRead(params.unitId);
+			return database.transaction(async (tx) => {
+				await ensureContentStructureOwner(tx, params.unitId, params.structureId);
+				return {
+					items: await listContentStructureRevisions(
+						tx,
+						params.structureId,
+						query.limit ?? 50,
+					),
+				};
+			});
+		},
+		{
+			params: ContentStructureParams,
+			query: ContentStructureRevisionListQuery,
+			response: {
+				[StatusCodes.OK]: ContentStructureRevisionListResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ContentStructureNotFound",
+				]),
+			},
+			detail: { summary: "List Content Structure revisions", tags: ["Content Structure"] },
+		},
+	)
+	.post(
+		"/units/by-id/:unitId/content-structures/:structureId/revisions/:revisionId/restore",
+		async ({ params, body, profile, authorization }) => {
+			await authorization.unit.ensureCanUpdate(params.unitId, [
+				["content-structure", params.structureId],
+			]);
+			const result = await database.transaction(async (tx) => {
+				await ensureContentStructureOwner(tx, params.unitId, params.structureId);
+				return restoreContentStructureRevision(tx, {
+					structureId: params.structureId,
+					sourceRevisionId: params.revisionId,
+					baseRevisionId: body.baseRevisionId,
+					actorProfileId: profile.unitId,
+					message: body.message,
+					minor: body.minor,
+				});
+			});
+			return {
+				updated: true as const,
+				latestRevisionId: result.revisionId,
+				revisionCreated: result.revisionCreated,
+			};
+		},
+		{
+			access: "contribute:unit:update",
+			params: ContentStructureRevisionParams,
+			body: RestoreContentStructureRevisionBody,
+			response: {
+				[StatusCodes.OK]: ContentStructureDeleteResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
+				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ContentStructureNotFound",
+				]),
+			},
+			detail: {
+				summary: "Restore a Content Structure revision",
+				tags: ["Content Structure"],
+			},
 		},
 	)
 	.post(
@@ -275,10 +381,11 @@ export default new Elysia()
 					target: body.target,
 					position: body.position,
 					contentRating: body.contentRating,
+					searchConfiguration: body.searchConfiguration,
 				});
 			});
 			return {
-				node: presentGenericContentStructureNode(result.node),
+				node: await presentGenericContentStructureNode(result.node),
 				latestRevisionId: result.revisionId,
 				revisionCreated: result.revisionCreated,
 			};
@@ -289,7 +396,7 @@ export default new Elysia()
 			body: CreateGenericContentStructureNodeBody,
 			response: {
 				[StatusCodes.OK]: ContentStructureNodeMutationResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
@@ -322,10 +429,11 @@ export default new Elysia()
 					target: body.target,
 					position: body.position,
 					contentRating: body.contentRating,
+					searchConfiguration: body.searchConfiguration,
 				}),
 			);
 			return {
-				node: presentGenericContentStructureNode(result.node),
+				node: await presentGenericContentStructureNode(result.node),
 				latestRevisionId: result.revisionId,
 				revisionCreated: result.revisionCreated,
 			};
@@ -336,7 +444,7 @@ export default new Elysia()
 			body: UpdateGenericContentStructureNodeBody,
 			response: {
 				[StatusCodes.OK]: ContentStructureNodeMutationResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
@@ -374,7 +482,7 @@ export default new Elysia()
 			body: ContentStructureRevisionBody,
 			response: {
 				[StatusCodes.OK]: ContentStructureDeleteResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
@@ -414,7 +522,7 @@ export default new Elysia()
 			body: ContentStructureRevisionBody,
 			response: {
 				[StatusCodes.OK]: ContentStructureDeleteResponse,
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 				[StatusCodes.FORBIDDEN]: UnitForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
 					"UnitNotFound",
@@ -437,7 +545,7 @@ export default new Elysia()
 				.where(
 					and(
 						eq(contentStructure.ownerUnitId, params.unitId),
-						eq(contentStructure.purpose, "book.contents"),
+						eq(contentStructure.kind, "book.contents"),
 						isNull(contentStructure.deletedAt),
 					),
 				)
@@ -474,7 +582,7 @@ export default new Elysia()
 				)
 				.orderBy(asc(contentStructureNode.position), asc(contentStructureNode.id));
 			const latestRevisionId = await database.transaction((tx) =>
-				getContentStructureComponentRevision(tx, params.unitId, structure.id),
+				getContentStructureRevision(tx, params.unitId, structure.id),
 			);
 			return {
 				structureId: structure.id,
@@ -564,7 +672,7 @@ export default new Elysia()
 					.where(
 						and(
 							eq(contentStructure.ownerUnitId, params.unitId),
-							eq(contentStructure.purpose, "book.contents"),
+							eq(contentStructure.kind, "book.contents"),
 							isNull(contentStructure.deletedAt),
 						),
 					)
@@ -598,7 +706,7 @@ export default new Elysia()
 				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 				[StatusCodes.CONFLICT]: toApiErrorResponse([
 					"PostTargetingLocked",
-					"UnitRevisionConflict",
+					"ContentStructureRevisionConflict",
 				]),
 			},
 			detail: { summary: "Create book group or chapter", tags: ["Books"] },
@@ -653,11 +761,7 @@ export default new Elysia()
 				const updated = structuralResult?.node ?? current;
 				const latestRevisionId =
 					structuralResult?.revisionId ??
-					(await getContentStructureComponentRevision(
-						tx,
-						params.unitId,
-						current.structureId,
-					));
+					(await getContentStructureRevision(tx, params.unitId, current.structureId));
 				if (!latestRevisionId) throw new ContentStructureNodeNotFound();
 				return { node: updated, latestRevisionId };
 			});
@@ -701,7 +805,7 @@ export default new Elysia()
 					"UnitNotFound",
 					"ContentStructureNodeNotFound",
 				]),
-				[StatusCodes.CONFLICT]: toApiErrorResponse(["UnitRevisionConflict"]),
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["ContentStructureRevisionConflict"]),
 			},
 			detail: {
 				summary: "Move or rename Content Structure node",
@@ -729,7 +833,7 @@ export default new Elysia()
 				.where(
 					and(
 						eq(contentStructureNode.contentUnitId, params.chapterId),
-						eq(contentStructure.purpose, "book.contents"),
+						eq(contentStructure.kind, "book.contents"),
 						isNull(contentStructure.deletedAt),
 						isNull(contentStructureNode.deletedAt),
 					),
@@ -793,7 +897,7 @@ export default new Elysia()
 				.where(
 					and(
 						eq(contentStructureNode.ownerUnitId, node.bookId),
-						eq(contentStructure.purpose, "book.contents"),
+						eq(contentStructure.kind, "book.contents"),
 						isNull(contentStructure.deletedAt),
 						eq(post.kind, "chapter"),
 						isNull(contentStructureNode.deletedAt),

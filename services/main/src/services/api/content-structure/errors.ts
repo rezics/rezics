@@ -1,7 +1,15 @@
 import { StatusCodes } from "http-status-codes";
 import * as Data from "effect/Data";
-export { ContentStructureInvalid, ContentStructureNotFound } from "../../content-structure/errors";
-import { ContentStructureInvalid, ContentStructureNotFound } from "../../content-structure/errors";
+export {
+	ContentStructureInvalid,
+	ContentStructureNotFound,
+	ContentStructureRevisionConflict,
+} from "../../content-structure/errors";
+import {
+	ContentStructureInvalid,
+	ContentStructureNotFound,
+	ContentStructureRevisionConflict,
+} from "../../content-structure/errors";
 
 export class BookNotFound extends Data.TaggedError("BookNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
@@ -30,6 +38,7 @@ export class ChapterLanguageNotFound extends Data.TaggedError("ChapterLanguageNo
 export const ContentStructureErrors = [
 	ContentStructureInvalid,
 	ContentStructureNotFound,
+	ContentStructureRevisionConflict,
 	BookNotFound,
 	ContentStructureNodeNotFound,
 	ChapterNotFound,

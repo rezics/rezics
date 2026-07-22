@@ -79,15 +79,15 @@ describe("database bootstrap manifest", () => {
 		expect(OfficialZoneManifest.map((value) => value.boundaryDocument)).toEqual([
 			expect.objectContaining({
 				categories: ["units"],
-				filters: [{ field: "type", operator: "equals", value: "book" }],
+				filters: [{ field: "kind", operator: "equals", value: "book" }],
 			}),
 			expect.objectContaining({
 				categories: ["units"],
-				filters: [{ field: "type", operator: "equals", value: "media" }],
+				filters: [{ field: "kind", operator: "equals", value: "media" }],
 			}),
 			expect.objectContaining({
 				categories: ["units"],
-				filters: [{ field: "type", operator: "equals", value: "software" }],
+				filters: [{ field: "kind", operator: "equals", value: "software" }],
 			}),
 		]);
 		for (const value of OfficialZoneManifest) {

@@ -58,33 +58,4 @@ describe("revision undo merge", () => {
 			],
 		});
 	});
-
-	it("undoes one Content Structure node edit while preserving a later node", () => {
-		const role = "content-structure/019b1234-1234-7000-8000-000000000001";
-		const contentDocuments = (nodes: readonly Record<string, unknown>[]) =>
-			({
-				[role]: {
-					model: "rezics.content-structure.v1",
-					payload: { version: 1, structure: { id: "structure" }, nodes },
-				},
-			}) satisfies UnitRevisionDocuments;
-		const before = contentDocuments([{ id: "first", position: "a0" }]);
-		const after = contentDocuments([{ id: "first", position: "a1" }]);
-		const current = contentDocuments([
-			{ id: "first", position: "a1" },
-			{ id: "second", position: "a2" },
-		]);
-
-		const result = undoRevisionDocuments(before, after, current);
-
-		expect(result.conflictPaths).toEqual([]);
-		expect(result.documents[role]?.payload).toEqual({
-			version: 1,
-			structure: { id: "structure" },
-			nodes: [
-				{ id: "first", position: "a0" },
-				{ id: "second", position: "a2" },
-			],
-		});
-	});
 });

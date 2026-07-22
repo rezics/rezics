@@ -12,11 +12,8 @@ import type { Authorization } from "../authorization";
 import { createCommunityCatalogAccess } from "../authorization/unit/ownership";
 import { database } from "../database";
 import { toSafeInteger } from "../database/integer";
-import {
-	ContentStructureContentModel,
-	ContentStructureSnapshotSchema,
-	contentStructureSlotRole,
-} from "../content-structure/contracts";
+import { ContentStructureSnapshotSchema } from "../content-structure/contracts";
+import { createContentStructureHistory } from "../content-structure/history";
 import {
 	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
@@ -121,7 +118,7 @@ export async function createUnit(
 			await tx.insert(book).values({ id: created.id });
 			[bookStructure] = await tx
 				.insert(contentStructure)
-				.values({ ownerUnitId: created.id, purpose: "book.contents" })
+				.values({ ownerUnitId: created.id, kind: "book.contents" })
 				.returning();
 			if (!bookStructure) throw new Error("Book Content Structure insertion returned no row");
 		}
@@ -143,17 +140,13 @@ export async function createUnit(
 			unitId: created.id,
 			actorProfileId: ownerId,
 			event: "create",
-			componentChanges: bookStructureSnapshot
-				? [
-						{
-							role: contentStructureSlotRole(bookStructureSnapshot.structure.id),
-							model: ContentStructureContentModel,
-							delta: bookStructureSnapshot,
-							checkpoint: async () => bookStructureSnapshot,
-						},
-					]
-				: undefined,
 		});
+		if (bookStructureSnapshot)
+			await createContentStructureHistory(tx, {
+				structureId: bookStructureSnapshot.structure.id,
+				actorProfileId: ownerId,
+				state: bookStructureSnapshot,
+			});
 		return created.id;
 	});
 	return getUnit(kind, unitId, authorization);

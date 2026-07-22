@@ -162,6 +162,8 @@ function parseCandidateResult(value: unknown): CandidateResult {
 			!isRecord(hit) ||
 			typeof hit.id !== "string" ||
 			typeof hit.revision !== "number" ||
+			!Number.isSafeInteger(hit.revision) ||
+			hit.revision < 1 ||
 			typeof hit.category !== "string" ||
 			typeof hit.unitType !== "string"
 		)

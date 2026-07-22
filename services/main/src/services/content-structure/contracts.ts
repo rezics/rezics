@@ -1,10 +1,11 @@
 import { z } from "zod";
+import { assertSearchConfiguration, type SearchConfiguration } from "@rezics/search";
 
 import {
 	ContentRatingValues,
-	ContentStructurePurposeValues,
+	ContentStructureKindValues,
 	ContentStructureTargetKindValues,
-	type ContentStructurePurpose,
+	type ContentStructureKind,
 	type ContentStructureTargetKind,
 	type PostKind,
 	type UnitKind,
@@ -12,13 +13,45 @@ import {
 import { isFractionalPosition } from "../ordering/position";
 
 export const ContentStructureContentModel = "rezics.content-structure.v1" as const;
-export const ContentStructureSlotPrefix = "content-structure/" as const;
 export const ContentStructureCheckpointDepth = 32;
 export const ContentStructureLargeDeltaBytes = 64 * 1024;
+export const ContentStructureReplayBytes = 256 * 1024;
+
+export function shouldCheckpointContentStructureRevision(input: {
+	readonly currentDeltaDepth: number;
+	readonly currentReplayByteSize: number;
+	readonly checkpointByteSize: number;
+	readonly deltaByteSize: number;
+	readonly forceCheckpoint?: boolean;
+}): boolean {
+	for (const [name, value] of Object.entries(input)) {
+		if (name === "forceCheckpoint") continue;
+		if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0)
+			throw new TypeError(`Invalid Content Structure checkpoint input ${name}`);
+	}
+	const nextReplayByteSize = input.currentReplayByteSize + input.deltaByteSize;
+	if (!Number.isSafeInteger(nextReplayByteSize))
+		throw new TypeError("Content Structure replay byte size exceeds the safe integer range");
+	return (
+		input.forceCheckpoint === true ||
+		input.currentDeltaDepth + 1 >= ContentStructureCheckpointDepth ||
+		input.deltaByteSize >= ContentStructureLargeDeltaBytes ||
+		nextReplayByteSize >= ContentStructureReplayBytes ||
+		nextReplayByteSize >= input.checkpointByteSize
+	);
+}
 
 const UuidSchema = z.uuid();
 const DateSchema = z.coerce.date();
 const FractionalPositionSchema = z.string().refine(isFractionalPosition);
+const SearchConfigurationSchema = z.custom<SearchConfiguration>((value) => {
+	try {
+		assertSearchConfiguration(value);
+		return true;
+	} catch {
+		return false;
+	}
+});
 
 export const ContentStructureTargetSchema = z.discriminatedUnion("kind", [
 	z.object({ kind: z.literal("content") }),
@@ -33,7 +66,7 @@ export const ContentStructureStateSchema = z
 	.object({
 		id: UuidSchema,
 		ownerUnitId: UuidSchema,
-		purpose: z.enum(ContentStructurePurposeValues),
+		kind: z.enum(ContentStructureKindValues),
 		documentKey: z
 			.string()
 			.regex(/^[0-9a-f]{12}$/)
@@ -44,7 +77,7 @@ export const ContentStructureStateSchema = z
 	})
 	.superRefine((structure, context) => {
 		const navigation =
-			structure.purpose === "realm.navigation" || structure.purpose === "zone.navigation";
+			structure.kind === "realm.navigation" || structure.kind === "zone.navigation";
 		if (navigation !== (structure.documentKey !== null))
 			context.addIssue({
 				code: "custom",
@@ -68,6 +101,7 @@ export const ContentStructureNodeStateSchema = z
 		targetUnitId: UuidSchema.nullable(),
 		targetZonePageId: UuidSchema.nullable(),
 		targetUrl: z.string().nullable(),
+		searchConfiguration: SearchConfigurationSchema.nullable(),
 		position: FractionalPositionSchema,
 		contentRating: z.enum(ContentRatingValues).nullable(),
 		deletedAt: DateSchema.nullable(),
@@ -213,7 +247,7 @@ export const ContentStructureDeltaSchema = z.object({
 });
 export type ContentStructureDelta = z.infer<typeof ContentStructureDeltaSchema>;
 
-type PurposePolicy = {
+type KindPolicy = {
 	readonly ownerKinds: readonly UnitKind[];
 	readonly targets: readonly ContentStructureTargetKind[];
 	readonly searchScope: boolean;
@@ -224,7 +258,7 @@ type PurposePolicy = {
 const anyContent = () => true;
 const navigationTargets = ["unit", "external", "none"] as const;
 
-export const ContentStructurePurposePolicies = {
+export const ContentStructureKindPolicies = {
 	"book.contents": {
 		ownerKinds: ["book"],
 		targets: ["content"],
@@ -243,7 +277,7 @@ export const ContentStructurePurposePolicies = {
 	"realm.taxonomy": {
 		ownerKinds: ["realm"],
 		targets: ["content"],
-		searchScope: false,
+		searchScope: true,
 		progress: "none",
 		/** TODO(wiki): project wiki Post bodies as long-form taxonomy descriptions. */
 		acceptsContent: (kind, postKind) =>
@@ -263,17 +297,7 @@ export const ContentStructurePurposePolicies = {
 		progress: "none",
 		acceptsContent: anyContent,
 	},
-} as const satisfies Record<ContentStructurePurpose, PurposePolicy>;
-
-export function contentStructureSlotRole(structureId: string): string {
-	return `${ContentStructureSlotPrefix}${UuidSchema.parse(structureId)}`;
-}
-
-export function parseContentStructureSlotRole(role: string): string | null {
-	if (!role.startsWith(ContentStructureSlotPrefix)) return null;
-	const parsed = UuidSchema.safeParse(role.slice(ContentStructureSlotPrefix.length));
-	return parsed.success ? parsed.data : null;
-}
+} as const satisfies Record<ContentStructureKind, KindPolicy>;
 
 function comparable(value: unknown): string {
 	return JSON.stringify(value, (_key, item: unknown) =>

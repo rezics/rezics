@@ -72,20 +72,20 @@ export function createUnitBlockReferenceResolver(
 				return new Set(rows.map((row) => row.id));
 			}
 			if (kind === "navigation") {
-				const purpose =
+				const structureKind =
 					input.host.kind === "zone"
 						? "zone.navigation"
 						: input.host.kind === "realm"
 							? "realm.navigation"
 							: null;
-				if (!purpose) return new Set<string>();
+				if (!structureKind) return new Set<string>();
 				const rows = await tx
 					.select({ id: contentStructure.id })
 					.from(contentStructure)
 					.where(
 						and(
 							eq(contentStructure.ownerUnitId, input.host.unitId),
-							eq(contentStructure.purpose, purpose),
+							eq(contentStructure.kind, structureKind),
 							inArray(contentStructure.id, [...identifiers]),
 							isNull(contentStructure.deletedAt),
 						),

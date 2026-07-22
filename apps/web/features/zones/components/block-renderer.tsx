@@ -7,6 +7,15 @@ import {
 	type NavigationItem,
 	type NavigationTarget,
 } from "@rezics/block";
+import type {
+	SearchConfiguration,
+	SearchControl,
+	SearchExecutionRequest,
+	SearchFilter,
+	SearchMode,
+	SearchOperator,
+	SearchScalar,
+} from "@rezics/search";
 import {
 	usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute,
 	usePostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute,
@@ -16,6 +25,10 @@ import {
 	AvatarFallback,
 	AvatarImage,
 	Button,
+	ChoiceSelect,
+	Field,
+	FieldGroup,
+	FieldLabel,
 	Input,
 	PortableTextContent,
 	Popover,
@@ -50,11 +63,77 @@ type ZoneBlockSurface =
 type ZoneNavigationLayout = "horizontal" | "vertical";
 type SearchResult = {
 	readonly id: string;
+	readonly category: string;
 	readonly kind: string;
 	readonly titles: readonly string[];
 	readonly name?: string | null;
 	readonly summary?: string | null;
 };
+type SearchFacet = {
+	readonly field: string;
+	readonly options: readonly { readonly value: string }[];
+};
+
+function filterForSelection(
+	control: SearchControl,
+	operator: SearchOperator,
+	values: readonly SearchScalar[],
+): SearchFilter | undefined {
+	if (operator === "range" || values.length === 0) return undefined;
+	if (operator === "exists") return { field: control.field, operator, value: values[0] === true };
+	if (operator === "equals" || operator === "not-equals") {
+		const value = values[0];
+		return value === undefined ? undefined : { field: control.field, operator, value };
+	}
+	return { field: control.field, operator, values: [...values] };
+}
+
+function sameSearchScalar(left: SearchScalar, right: SearchScalar): boolean {
+	return typeof left === typeof right && left === right;
+}
+
+function optionIsVisible(control: SearchControl, value: SearchScalar): boolean {
+	const policy = control.optionPolicy;
+	if (!policy || policy.kind === "all") return true;
+	const listed = policy.values.some((candidate) => sameSearchScalar(candidate, value));
+	return policy.kind === "include" ? listed : !listed;
+}
+
+function selectedFilterValues(filter: SearchFilter | undefined): readonly SearchScalar[] {
+	if (!filter) return [];
+	if ("values" in filter) return filter.values;
+	if ("value" in filter) return [filter.value];
+	return [];
+}
+
+function rangeFilter(
+	field: SearchFilter["field"],
+	lower: SearchScalar | undefined,
+	upper: SearchScalar | undefined,
+): SearchFilter | undefined {
+	if (lower !== undefined)
+		return upper === undefined
+			? { field, operator: "range", lower }
+			: { field, operator: "range", lower, upper };
+	return upper === undefined ? undefined : { field, operator: "range", upper };
+}
+
+function rangeInputValue(control: SearchControl, value: SearchScalar | undefined): string {
+	if (value === undefined || typeof value === "boolean") return "";
+	if (control.component !== "date-range" || typeof value !== "string") return String(value);
+	const timestamp = Date.parse(value);
+	return Number.isFinite(timestamp) ? new Date(timestamp).toISOString().slice(0, 16) : value;
+}
+
+function parseRangeInput(control: SearchControl, value: string): SearchScalar | undefined {
+	if (!value) return undefined;
+	if (control.component !== "value-range") {
+		const timestamp = Date.parse(value);
+		return Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : value;
+	}
+	const number = Number(value);
+	return Number.isFinite(number) ? number : undefined;
+}
 
 interface ZoneBlockContextValue {
 	readonly baseHref: string;
@@ -258,36 +337,267 @@ function SearchResults({ results }: { results: readonly SearchResult[] }) {
 
 function SearchBlockForm({
 	blockKey,
+	configuration,
 	error,
+	facets,
 	onSearch,
 	pending,
 	results,
 }: {
 	blockKey: string;
+	configuration: SearchConfiguration;
 	error: boolean;
-	onSearch: (query: string) => void;
+	facets?: readonly SearchFacet[];
+	onSearch: (request: SearchExecutionRequest) => void;
 	pending: boolean;
 	results?: readonly SearchResult[];
 }) {
 	const { t } = useTranslation("zones");
-	const [query, setQuery] = useState("");
+	const context = useZoneBlocks();
+	const [mode, setMode] = useState<SearchMode>(configuration.modes.default);
+	const [query, setQuery] = useState(configuration.query.initial ?? "");
+	const [filters, setFilters] = useState<readonly SearchFilter[]>(configuration.defaults);
+	const [operators, setOperators] = useState<Readonly<Record<string, SearchOperator>>>(() =>
+		Object.fromEntries(
+			configuration.controls.map((control) => [
+				control.key,
+				configuration.defaults.find((filter) => filter.field === control.field)?.operator ??
+					control.operators[0] ??
+					"equals",
+			]),
+		),
+	);
+	const operatorLabels: Record<SearchOperator, string> = {
+		equals: t.searchOperators.equals,
+		"not-equals": t.searchOperators.notEquals,
+		"any-of": t.searchOperators.anyOf,
+		"all-of": t.searchOperators.allOf,
+		"none-of": t.searchOperators.noneOf,
+		range: t.searchOperators.range,
+		exists: t.searchOperators.exists,
+	};
+	const replaceFilter = (field: SearchFilter["field"], next?: SearchFilter) =>
+		setFilters((current) => [
+			...current.filter((filter) => filter.field !== field),
+			...(next ? [next] : []),
+		]);
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		onSearch(query);
+		const activeFilters = filters.filter((filter) =>
+			configuration.controls.some(
+				(control) => control.field === filter.field && control.modes.includes(mode),
+			),
+		);
+		onSearch(
+			mode === "basic"
+				? { mode, query, filters: [...activeFilters] }
+				: {
+						mode,
+						query,
+						expression:
+							activeFilters.length === 0
+								? undefined
+								: activeFilters.length === 1
+									? activeFilters[0]
+									: { operator: "all", clauses: [...activeFilters] },
+					},
+		);
 	}
 	return (
 		<form className="my-6 rounded-xl border border-border-weak bg-card p-4" onSubmit={submit}>
-			<label className="font-semibold text-sm" htmlFor={`zone-search-${blockKey}`}>
-				{t.searchTitle}
-			</label>
-			<div className="mt-3 flex gap-2">
-				<Input
-					id={`zone-search-${blockKey}`}
-					onChange={(event) => setQuery(event.currentTarget.value)}
-					placeholder={t.searchPlaceholder}
-					type="search"
-					value={query}
-				/>
+			{configuration.modes.available.length > 1 ? (
+				<Field className="mb-4">
+					<FieldLabel>{t.searchMode}</FieldLabel>
+					<ChoiceSelect
+						appearance="field"
+						ariaLabel={t.searchMode}
+						onValueChange={(values) => {
+							const nextMode = values[0];
+							if (nextMode === "basic" || nextMode === "advanced") setMode(nextMode);
+						}}
+						options={configuration.modes.available.map((value) => ({
+							value,
+							label: value === "basic" ? t.searchModes.basic : t.searchModes.advanced,
+						}))}
+						placeholder={t.searchMode}
+						value={[mode]}
+					/>
+				</Field>
+			) : null}
+			{configuration.query.enabled ? (
+				<>
+					<label className="font-semibold text-sm" htmlFor={`zone-search-${blockKey}`}>
+						{t.searchTitle}
+					</label>
+					<Input
+						className="mt-3"
+						id={`zone-search-${blockKey}`}
+						onChange={(event) => setQuery(event.currentTarget.value)}
+						placeholder={t.searchPlaceholder}
+						required={configuration.query.required}
+						type="search"
+						value={query}
+					/>
+				</>
+			) : null}
+			{configuration.controls.length ? (
+				<FieldGroup aria-label={t.searchFilters} className="mt-4 grid gap-3 sm:grid-cols-2">
+					{configuration.controls
+						.filter((control) => control.modes.includes(mode))
+						.map((control) => {
+							const filter = filters.find(
+								(candidate) => candidate.field === control.field,
+							);
+							const operator =
+								operators[control.key] ?? control.operators[0] ?? "equals";
+							const label = control.labelUnitId
+								? (context.units.get(control.labelUnitId)?.title ??
+									t.searchControl({ name: control.key }))
+								: t.searchControl({ name: control.key });
+							const facetOptions =
+								facets?.find((facet) => facet.field === control.field)?.options ??
+								[];
+							const candidateScalars =
+								control.optionSource?.kind === "static"
+									? control.optionSource.options.map((option) => option.value)
+									: control.component === "toggle" || operator === "exists"
+										? [true, false]
+										: facetOptions.map((option) => option.value);
+							const scalars = candidateScalars.filter((value) =>
+								optionIsVisible(control, value),
+							);
+							const scalarByKey = new Map(
+								scalars.map((value) => [JSON.stringify(value), value]),
+							);
+							const options = scalars.map((value) => {
+								const configured =
+									control.optionSource?.kind === "static"
+										? control.optionSource.options.find(
+												(option) => option.value === value,
+											)
+										: undefined;
+								return {
+									value: JSON.stringify(value),
+									label:
+										(configured?.labelUnitId
+											? context.units.get(configured.labelUnitId)?.title
+											: undefined) ??
+										(typeof value === "boolean"
+											? value
+												? t.searchBoolean.yes
+												: t.searchBoolean.no
+											: String(value)),
+								};
+							});
+							const selected = selectedFilterValues(filter).map((value) =>
+								JSON.stringify(value),
+							);
+							const lower = filter && "lower" in filter ? filter.lower : undefined;
+							const upper = filter && "upper" in filter ? filter.upper : undefined;
+							return (
+								<Field key={control.key}>
+									<FieldLabel>{label}</FieldLabel>
+									{control.operators.length > 1 ? (
+										<ChoiceSelect
+											appearance="field"
+											ariaLabel={`${label} · ${t.searchOperator}`}
+											onValueChange={(values) => {
+												const nextOperator = values[0];
+												if (!nextOperator) return;
+												setOperators((current) => ({
+													...current,
+													[control.key]: nextOperator,
+												}));
+												replaceFilter(
+													control.field,
+													filterForSelection(
+														control,
+														nextOperator,
+														selectedFilterValues(filter),
+													),
+												);
+											}}
+											options={control.operators.map((value) => ({
+												value,
+												label: operatorLabels[value],
+											}))}
+											placeholder={t.searchOperator}
+											value={[operator]}
+										/>
+									) : null}
+									{operator === "range" ? (
+										<div className="grid grid-cols-2 gap-2">
+											<Input
+												aria-label={`${label} · ${t.searchRangeLower}`}
+												onChange={(event) => {
+													const lower = event.currentTarget.value;
+													replaceFilter(
+														control.field,
+														rangeFilter(
+															control.field,
+															parseRangeInput(control, lower),
+															upper,
+														),
+													);
+												}}
+												placeholder={t.searchRangeLower}
+												type={
+													control.component === "date-range"
+														? "datetime-local"
+														: "number"
+												}
+												value={rangeInputValue(control, lower)}
+											/>
+											<Input
+												aria-label={`${label} · ${t.searchRangeUpper}`}
+												onChange={(event) =>
+													replaceFilter(
+														control.field,
+														rangeFilter(
+															control.field,
+															lower,
+															parseRangeInput(
+																control,
+																event.currentTarget.value,
+															),
+														),
+													)
+												}
+												placeholder={t.searchRangeUpper}
+												type={
+													control.component === "date-range"
+														? "datetime-local"
+														: "number"
+												}
+												value={rangeInputValue(control, upper)}
+											/>
+										</div>
+									) : (
+										<ChoiceSelect
+											appearance="field"
+											ariaLabel={label}
+											multiple={control.component === "multi-select"}
+											onValueChange={(keys) => {
+												const values = keys.flatMap((key) => {
+													const value = scalarByKey.get(key);
+													return value === undefined ? [] : [value];
+												});
+												replaceFilter(
+													control.field,
+													filterForSelection(control, operator, values),
+												);
+											}}
+											options={options}
+											placeholder={t.searchSelect}
+											value={selected}
+										/>
+									)}
+								</Field>
+							);
+						})}
+				</FieldGroup>
+			) : null}
+			<div className="mt-3 flex justify-end">
 				<Button disabled={pending} type="submit" variant="solid">
 					{pending ? <Spinner aria-hidden /> : <Search aria-hidden />}
 					{t.searchSubmit}
@@ -299,16 +609,24 @@ function SearchBlockForm({
 	);
 }
 
-function DockSearchBlock({ blockKey }: { blockKey: string }) {
+function DockSearchBlock({
+	blockKey,
+	configuration,
+}: {
+	blockKey: string;
+	configuration: SearchConfiguration;
+}) {
 	const context = useZoneBlocks();
 	const mutation = usePostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute();
 	return (
 		<SearchBlockForm
 			blockKey={blockKey}
+			configuration={configuration}
 			error={mutation.isError}
-			onSearch={(query) =>
+			facets={mutation.data?.facets}
+			onSearch={(body) =>
 				mutation.mutate({
-					body: { filters: [], mode: "basic", query },
+					body,
 					path: { blockKey, zoneId: context.projection.zone.id },
 				})
 			}
@@ -318,16 +636,26 @@ function DockSearchBlock({ blockKey }: { blockKey: string }) {
 	);
 }
 
-function PageSearchBlock({ blockKey, slug }: { blockKey: string; slug: string }) {
+function PageSearchBlock({
+	blockKey,
+	configuration,
+	slug,
+}: {
+	blockKey: string;
+	configuration: SearchConfiguration;
+	slug: string;
+}) {
 	const context = useZoneBlocks();
 	const mutation = usePostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute();
 	return (
 		<SearchBlockForm
 			blockKey={blockKey}
+			configuration={configuration}
 			error={mutation.isError}
-			onSearch={(query) =>
+			facets={mutation.data?.facets}
+			onSearch={(body) =>
 				mutation.mutate({
-					body: { filters: [], mode: "basic", query },
+					body,
 					path: { blockKey, slug, zoneId: context.projection.zone.id },
 				})
 			}
@@ -406,12 +734,16 @@ function ZoneBlock({ block }: { block: Block }) {
 			</div>
 		);
 	}
-	if (block._type === "search") {
+	if (block._type === "search" || block._type === "feed") {
 		if (!surface) return null;
 		return surface.kind === "dock" ? (
-			<DockSearchBlock blockKey={block._key} />
+			<DockSearchBlock blockKey={block._key} configuration={block.configuration} />
 		) : (
-			<PageSearchBlock blockKey={block._key} slug={surface.slug} />
+			<PageSearchBlock
+				blockKey={block._key}
+				configuration={block.configuration}
+				slug={surface.slug}
+			/>
 		);
 	}
 	if (block._type === "menu") return <ZoneNavigationMenu navigationId={block.navigationId} />;

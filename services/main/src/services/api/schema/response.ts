@@ -1,4 +1,5 @@
 import { type Static, t } from "elysia";
+import { SearchConfiguration } from "@rezics/search";
 import {
 	CollectionDefinitionDocument,
 	CollectionPresentationDocument,
@@ -17,7 +18,7 @@ import {
 } from ".";
 import {
 	ContentRatingValues,
-	ContentStructurePurposeValues,
+	ContentStructureKindValues,
 	EntityAssociationPolicyModeValues,
 } from "../../database/schema/contract-values";
 import { FeedPostKindValues, FeedUnitKindValues } from "../feed/schema";
@@ -226,8 +227,8 @@ export const UnitDetailResponse = t.Object({
 const SearchHit = t.Object({
 	id: Uuid,
 	slugAddress: NullablePublicSlugAddressResponse,
+	category: t.String(),
 	kind: t.String(),
-	type: t.String(),
 	titles: t.Array(t.String()),
 	summaries: t.Array(t.String()),
 	variantRole: t.Optional(t.UnionEnum(["standalone", "main", "variant"])),
@@ -629,7 +630,15 @@ const GenericContentStructureTargetResponse = t.Union([
 	t.Object({ kind: t.Literal("content") }, { additionalProperties: false }),
 	t.Object({ kind: t.Literal("none") }, { additionalProperties: false }),
 	t.Object({ kind: t.Literal("unit"), unitId: Uuid }, { additionalProperties: false }),
-	t.Object({ kind: t.Literal("zone_page"), zonePageId: Uuid }, { additionalProperties: false }),
+	t.Object(
+		{
+			kind: t.Literal("zone_page"),
+			zonePageId: Uuid,
+			zoneId: Uuid,
+			slug: t.String(),
+		},
+		{ additionalProperties: false },
+	),
 	t.Object({ kind: t.Literal("external"), url: t.String() }, { additionalProperties: false }),
 ]);
 export const GenericContentStructureNodeResponse = t.Object({
@@ -642,13 +651,14 @@ export const GenericContentStructureNodeResponse = t.Object({
 	target: GenericContentStructureTargetResponse,
 	position: FractionalPosition,
 	contentRating: t.Nullable(t.UnionEnum(ContentRatingValues)),
+	searchConfiguration: t.Nullable(SearchConfiguration),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
 export const ContentStructureSummaryResponse = t.Object({
 	id: Uuid,
 	ownerUnitId: Uuid,
-	purpose: t.UnionEnum(ContentStructurePurposeValues),
+	kind: t.UnionEnum(ContentStructureKindValues),
 	documentKey: t.Nullable(t.String()),
 	latestRevisionId: t.Nullable(Uuid),
 	createdAt: DateTime,
@@ -674,6 +684,22 @@ export const ContentStructureDeleteResponse = t.Object({
 	updated: t.Literal(true),
 	latestRevisionId: Uuid,
 	revisionCreated: t.Boolean(),
+});
+export const ContentStructureRevisionListResponse = t.Object({
+	items: t.Array(
+		t.Object({
+			id: Uuid,
+			parentRevisionId: t.Nullable(Uuid),
+			sourceRevisionId: t.Nullable(Uuid),
+			actorProfileId: t.Nullable(Uuid),
+			kind: t.UnionEnum(["create", "update", "delete", "restore"]),
+			editSummary: t.Nullable(t.String()),
+			minor: t.Boolean(),
+			replayByteSize: t.Integer({ minimum: 0 }),
+			checkpointByteSize: t.Integer({ minimum: 0 }),
+			createdAt: DateTime,
+		}),
+	),
 });
 export const ContentStructureNodeResponse = t.Object({
 	id: Uuid,

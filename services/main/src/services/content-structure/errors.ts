@@ -12,8 +12,22 @@ export class ContentStructureInvalid extends Data.TaggedError("ContentStructureI
 	readonly status = ContentStructureInvalid.status;
 	readonly message: string;
 
-	constructor(message = "Content Structure violates its purpose schema") {
+	constructor(message = "Content Structure violates its kind schema") {
 		super();
 		this.message = message;
+	}
+}
+
+export class ContentStructureRevisionConflict extends Data.TaggedError(
+	"ContentStructureRevisionConflict",
+) {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = ContentStructureRevisionConflict.status;
+	readonly message = "Content Structure revision has changed";
+	readonly details: { readonly latestRevisionId: string | null };
+
+	constructor(latestRevisionId: string | null) {
+		super();
+		this.details = { latestRevisionId };
 	}
 }

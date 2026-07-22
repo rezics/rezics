@@ -18,7 +18,7 @@ export const DomainSearchBody = t.Object(
 		cursor: t.Optional(t.String({ maxLength: 4096, pattern: "^s2_[A-Za-z0-9_-]+$" })),
 		limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 		Languages: t.Optional(SearchLanguageList),
-		types: t.Optional(SearchStringList),
+		kinds: t.Optional(SearchStringList),
 		contentRatings: t.Optional(SearchStringList),
 		aiDisclosures: t.Optional(SearchStringList),
 		licenses: t.Optional(SearchLicenseList),

@@ -9,24 +9,22 @@ import {
 import type { DatabaseTransaction } from "../database";
 import { contentStructure, contentStructureNode, zonePage } from "../database/schema";
 import { fractionalPositionAt } from "../ordering/position";
-import { mutateUnitWithHistory } from "../units/history";
 import {
-	ContentStructureContentModel,
-	contentStructureSlotRole,
 	diffContentStructureSnapshots,
 	type ContentStructureNodeState,
 	type ContentStructureTarget,
 } from "./contracts";
 import { ContentStructureInvalid, ContentStructureNotFound } from "./errors";
+import { createContentStructureHistory, mutateContentStructureWithHistory } from "./history";
 import { deleteContentStructure } from "./service";
 import {
 	contentStructureTargetColumns,
 	ensureContentStructureNodeAllowed,
-	ensureContentStructurePurposeOwner,
+	ensureContentStructureKindOwner,
 	loadContentStructureSnapshot,
 } from "./storage";
 
-export type NavigationPurpose = "realm.navigation" | "zone.navigation";
+export type NavigationKind = "realm.navigation" | "zone.navigation";
 
 function validateNavigationDocument(document: NavigationDocument): void {
 	try {
@@ -39,7 +37,7 @@ function validateNavigationDocument(document: NavigationDocument): void {
 async function resolveNavigationTarget(
 	tx: DatabaseTransaction,
 	ownerUnitId: string,
-	purpose: NavigationPurpose,
+	kind: NavigationKind,
 	target: NavigationTarget,
 ): Promise<ContentStructureTarget> {
 	switch (target.kind) {
@@ -48,7 +46,7 @@ async function resolveNavigationTarget(
 		case "external":
 			return { kind: "external", url: target.url };
 		case "zone-page": {
-			if (purpose !== "zone.navigation")
+			if (kind !== "zone.navigation")
 				throw new ContentStructureInvalid("Realm navigation cannot target a Zone page");
 			const [page] = await tx
 				.select({ id: zonePage.id })
@@ -72,7 +70,7 @@ type DesiredNavigationNode = {
 async function flattenNavigationDocument(
 	tx: DatabaseTransaction,
 	ownerUnitId: string,
-	purpose: NavigationPurpose,
+	kind: NavigationKind,
 	document: NavigationDocument,
 ): Promise<DesiredNavigationNode[]> {
 	const result: DesiredNavigationNode[] = [];
@@ -84,9 +82,9 @@ async function flattenNavigationDocument(
 			const target =
 				"children" in item
 					? ({ kind: "none" } as const)
-					: await resolveNavigationTarget(tx, ownerUnitId, purpose, item.target);
+					: await resolveNavigationTarget(tx, ownerUnitId, kind, item.target);
 			await ensureContentStructureNodeAllowed(tx, {
-				purpose,
+				kind,
 				ownerUnitId,
 				contentUnitId: item.labelUnitId,
 				target,
@@ -142,59 +140,43 @@ export async function createNavigationStructure(
 	input: {
 		readonly ownerUnitId: string;
 		readonly structureId?: string;
-		readonly purpose: NavigationPurpose;
+		readonly kind: NavigationKind;
 		readonly document: NavigationDocument;
 		readonly actorProfileId: string;
 	},
 ) {
-	return mutateUnitWithHistory(
+	validateNavigationDocument(input.document);
+	await ensureContentStructureKindOwner(tx, input.ownerUnitId, input.kind);
+	const desired = await flattenNavigationDocument(
 		tx,
-		{
-			unitId: input.ownerUnitId,
-			actorProfileId: input.actorProfileId,
-			event: "update",
-		},
-		async () => {
-			validateNavigationDocument(input.document);
-			await ensureContentStructurePurposeOwner(tx, input.ownerUnitId, input.purpose);
-			const desired = await flattenNavigationDocument(
-				tx,
-				input.ownerUnitId,
-				input.purpose,
-				input.document,
-			);
-			const [structure] = await tx
-				.insert(contentStructure)
-				.values({
-					id: input.structureId,
-					ownerUnitId: input.ownerUnitId,
-					purpose: input.purpose,
-					documentKey: input.document._key,
-				})
-				.returning();
-			if (!structure)
-				throw new Error("Navigation Content Structure insertion returned no row");
-			await insertNavigationNodes(tx, {
-				ownerUnitId: input.ownerUnitId,
-				structureId: structure.id,
-				desired,
-			});
-			const checkpoint = await loadContentStructureSnapshot(tx, {
-				structureId: structure.id,
-			});
-			return {
-				result: { structure },
-				componentChanges: [
-					{
-						role: contentStructureSlotRole(structure.id),
-						model: ContentStructureContentModel,
-						delta: checkpoint,
-						checkpoint: async () => checkpoint,
-					},
-				],
-			};
-		},
+		input.ownerUnitId,
+		input.kind,
+		input.document,
 	);
+	const [structure] = await tx
+		.insert(contentStructure)
+		.values({
+			id: input.structureId,
+			ownerUnitId: input.ownerUnitId,
+			kind: input.kind,
+			documentKey: input.document._key,
+		})
+		.returning();
+	if (!structure) throw new Error("Navigation Content Structure insertion returned no row");
+	await insertNavigationNodes(tx, {
+		ownerUnitId: input.ownerUnitId,
+		structureId: structure.id,
+		desired,
+	});
+	const checkpoint = await loadContentStructureSnapshot(tx, {
+		structureId: structure.id,
+	});
+	const revision = await createContentStructureHistory(tx, {
+		structureId: structure.id,
+		actorProfileId: input.actorProfileId,
+		state: checkpoint,
+	});
+	return { structure, ...revision };
 }
 
 function nodeShapeEquals(
@@ -223,20 +205,18 @@ export async function replaceNavigationStructure(
 	input: {
 		readonly ownerUnitId: string;
 		readonly structureId: string;
-		readonly purpose: NavigationPurpose;
+		readonly kind: NavigationKind;
 		readonly document: NavigationDocument;
 		readonly actorProfileId: string;
 		readonly baseRevisionId: string;
 	},
 ) {
-	const role = contentStructureSlotRole(input.structureId);
-	return mutateUnitWithHistory(
+	return mutateContentStructureWithHistory(
 		tx,
 		{
-			unitId: input.ownerUnitId,
+			structureId: input.structureId,
+			baseRevisionId: input.baseRevisionId,
 			actorProfileId: input.actorProfileId,
-			event: "update",
-			expectedComponents: [{ role, revisionId: input.baseRevisionId }],
 		},
 		async () => {
 			validateNavigationDocument(input.document);
@@ -244,11 +224,11 @@ export async function replaceNavigationStructure(
 				structureId: input.structureId,
 				ownerUnitId: input.ownerUnitId,
 			});
-			if (before.structure.purpose !== input.purpose) throw new ContentStructureNotFound();
+			if (before.structure.kind !== input.kind) throw new ContentStructureNotFound();
 			const desired = await flattenNavigationDocument(
 				tx,
 				input.ownerUnitId,
-				input.purpose,
+				input.kind,
 				input.document,
 			);
 			const currentByKey = new Map(
@@ -323,15 +303,8 @@ export async function replaceNavigationStructure(
 			const delta = diffContentStructureSnapshots(before, after);
 			return {
 				result: { structure: after.structure },
-				componentChanges: delta
-					? [
-							{
-								role,
-								model: ContentStructureContentModel,
-								delta,
-								checkpoint: async () => after,
-							},
-						]
+				change: delta
+					? { kind: "delta" as const, delta, checkpoint: async () => after }
 					: undefined,
 			};
 		},
@@ -343,7 +316,7 @@ export async function deleteNavigationStructure(
 	input: {
 		readonly ownerUnitId: string;
 		readonly structureId: string;
-		readonly purpose: NavigationPurpose;
+		readonly kind: NavigationKind;
 		readonly actorProfileId: string;
 		readonly baseRevisionId: string;
 	},
@@ -356,7 +329,7 @@ export async function presentNavigationStructure(
 	input: {
 		readonly ownerUnitId: string;
 		readonly structureId: string;
-		readonly purpose: NavigationPurpose;
+		readonly kind: NavigationKind;
 	},
 ): Promise<{
 	readonly id: string;
@@ -369,7 +342,7 @@ export async function presentNavigationStructure(
 		structureId: input.structureId,
 		ownerUnitId: input.ownerUnitId,
 	});
-	if (snapshot.structure.purpose !== input.purpose) throw new ContentStructureNotFound();
+	if (snapshot.structure.kind !== input.kind) throw new ContentStructureNotFound();
 	if (!snapshot.structure.documentKey)
 		throw new ContentStructureInvalid("Navigation structure does not match its API");
 	const zonePageIds = snapshot.nodes
@@ -450,7 +423,7 @@ export async function presentNavigationStructure(
 export async function listNavigationStructures(
 	tx: DatabaseTransaction,
 	ownerUnitId: string,
-	purpose: NavigationPurpose,
+	kind: NavigationKind,
 ) {
 	const structures = await tx
 		.select({ id: contentStructure.id })
@@ -458,14 +431,14 @@ export async function listNavigationStructures(
 		.where(
 			and(
 				eq(contentStructure.ownerUnitId, ownerUnitId),
-				eq(contentStructure.purpose, purpose),
+				eq(contentStructure.kind, kind),
 				isNull(contentStructure.deletedAt),
 			),
 		)
 		.orderBy(contentStructure.createdAt, contentStructure.id);
 	return Promise.all(
 		structures.map((structure) =>
-			presentNavigationStructure(tx, { ownerUnitId, structureId: structure.id, purpose }),
+			presentNavigationStructure(tx, { ownerUnitId, structureId: structure.id, kind }),
 		),
 	);
 }

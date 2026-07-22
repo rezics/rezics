@@ -59,7 +59,7 @@ export const SearchSort = stringEnum(SearchSortValues);
 /** Engine-independent fields that a product surface may expose. */
 export const SearchFieldValues = [
 	"category",
-	"type",
+	"kind",
 	"language",
 	"content-rating",
 	"ai-disclosure",
@@ -614,11 +614,7 @@ export function assertSearchConfiguration(value: unknown): asserts value is Sear
 		assertFilterShape(filter, `constraints[${index}]`),
 	);
 	value.defaults.forEach((filter, index) => {
-		const modes = value.controls
-			.filter((control) => control.field === filter.field)
-			.flatMap((control) => control.modes);
-		if (!modes.length) throw new TypeError(`defaults[${index}] has no rendered control`);
-		for (const mode of new Set(modes))
+		for (const mode of value.modes.available)
 			assertFilterAllowed(filter, value.controls, mode, `defaults[${index}]`);
 	});
 }

@@ -2,10 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import {
 	ContentStructureContentModel,
+	ContentStructureCheckpointDepth,
+	ContentStructureLargeDeltaBytes,
+	ContentStructureReplayBytes,
 	ContentStructureSnapshotSchema,
 	applyContentStructureDelta,
-	contentStructureSlotRole,
 	diffContentStructureSnapshots,
+	shouldCheckpointContentStructureRevision,
 	type ContentStructureNodeState,
 } from "./contracts";
 
@@ -34,6 +37,7 @@ function node(input: {
 		targetUnitId: null,
 		targetZonePageId: null,
 		targetUrl: null,
+		searchConfiguration: null,
 		position: input.position,
 		contentRating: null,
 		deletedAt: null,
@@ -48,7 +52,7 @@ function snapshot(nodes: readonly ReturnType<typeof node>[]) {
 		structure: {
 			id: StructureId,
 			ownerUnitId: OwnerId,
-			purpose: "post.contents",
+			kind: "post.contents",
 			documentKey: null,
 			deletedAt: null,
 			createdAt: CreatedAt,
@@ -81,7 +85,6 @@ describe("Content Structure History contract", () => {
 		expect(delta).not.toBeNull();
 		expect(applyContentStructureDelta(before, delta)).toEqual(after);
 		expect(ContentStructureContentModel).toBe("rezics.content-structure.v1");
-		expect(contentStructureSlotRole(StructureId)).toBe(`content-structure/${StructureId}`);
 	});
 
 	it("does not create a History component change for an exact no-op", () => {
@@ -90,6 +93,33 @@ describe("Content Structure History contract", () => {
 		]);
 
 		expect(diffContentStructureSnapshots(current, current)).toBeNull();
+	});
+
+	it("creates adaptive checkpoints at every replay bound", () => {
+		const decide = (
+			overrides: Partial<Parameters<typeof shouldCheckpointContentStructureRevision>[0]>,
+		) =>
+			shouldCheckpointContentStructureRevision({
+				currentDeltaDepth: 0,
+				currentReplayByteSize: 0,
+				checkpointByteSize: 512 * 1024,
+				deltaByteSize: 1,
+				...overrides,
+			});
+
+		expect(decide({})).toBe(false);
+		expect(decide({ currentDeltaDepth: ContentStructureCheckpointDepth - 1 })).toBe(true);
+		expect(decide({ deltaByteSize: ContentStructureLargeDeltaBytes })).toBe(true);
+		expect(
+			decide({
+				currentReplayByteSize: ContentStructureReplayBytes - 1,
+				deltaByteSize: 1,
+			}),
+		).toBe(true);
+		expect(decide({ checkpointByteSize: 10, currentReplayByteSize: 9, deltaByteSize: 1 })).toBe(
+			true,
+		);
+		expect(decide({ forceCheckpoint: true })).toBe(true);
 	});
 
 	it("uses a tombstone when a structure is deleted", () => {

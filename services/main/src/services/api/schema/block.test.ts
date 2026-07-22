@@ -45,11 +45,11 @@ const searchConfiguration = {
 	modes: { available: ["basic", "advanced"], default: "basic" },
 	query: { enabled: true },
 	constraints: [{ field: "content-rating", operator: "any-of", values: ["general"] }],
-	defaults: [{ field: "type", operator: "any-of", values: ["book"] }],
+	defaults: [{ field: "kind", operator: "any-of", values: ["book"] }],
 	controls: [
 		{
-			key: "type",
-			field: "type",
+			key: "kind",
+			field: "kind",
 			component: "multi-select",
 			modes: ["basic", "advanced"],
 			operators: ["any-of"],
@@ -61,7 +61,7 @@ const searchConfiguration = {
 		},
 	],
 	sort: { default: "relevance", options: ["relevance"] },
-	results: { pageSize: 20, maxPageSize: 50, maxResultWindow: 10_000, facets: ["type"] },
+	results: { pageSize: 20, maxPageSize: 50, maxResultWindow: 10_000, facets: ["kind"] },
 } satisfies SearchConfiguration;
 
 describe("Block document contracts", () => {
@@ -421,12 +421,12 @@ describe("Search configuration semantics", () => {
 	test("keeps fixed constraints but lets request state replace prefilled defaults", () => {
 		const compiled = compileSearchRequest(searchConfiguration, {
 			mode: "basic",
-			filters: [{ field: "type", operator: "any-of", values: ["software"] }],
+			filters: [{ field: "kind", operator: "any-of", values: ["software"] }],
 		});
 
 		expect(compiled.constraints).toEqual([
 			{ field: "content-rating", operator: "any-of", values: ["general"] },
-			{ field: "type", operator: "any-of", values: ["software"] },
+			{ field: "kind", operator: "any-of", values: ["software"] },
 		]);
 	});
 
@@ -434,7 +434,7 @@ describe("Search configuration semantics", () => {
 		expect(() =>
 			compileSearchRequest(searchConfiguration, {
 				mode: "basic",
-				filters: [{ field: "type", operator: "any-of", values: ["post"] }],
+				filters: [{ field: "kind", operator: "any-of", values: ["post"] }],
 			}),
 		).toThrow("hidden option");
 	});
@@ -445,8 +445,8 @@ describe("Search configuration semantics", () => {
 			expression: {
 				operator: "any",
 				clauses: [
-					{ field: "type", operator: "any-of", values: ["book"] },
-					{ field: "type", operator: "any-of", values: ["software"] },
+					{ field: "kind", operator: "any-of", values: ["book"] },
+					{ field: "kind", operator: "any-of", values: ["software"] },
 				],
 			},
 		});
@@ -483,13 +483,13 @@ describe("Search configuration semantics", () => {
 		} satisfies SearchConfiguration;
 
 		expect(() => compileSearchRequest(required, { mode: "basic", filters: [] })).toThrow(
-			"Required Search field type is missing",
+			"Required Search field kind is missing",
 		);
 		expect(() =>
 			compileSearchRequest(
 				{
 					...searchConfiguration,
-					results: { ...searchConfiguration.results, facets: ["type", "type"] },
+					results: { ...searchConfiguration.results, facets: ["kind", "kind"] },
 				},
 				{ mode: "basic", filters: [] },
 			),

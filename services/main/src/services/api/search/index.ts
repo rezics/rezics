@@ -10,7 +10,7 @@ import {
 } from "@rezics/block";
 import { SearchConfiguration, SearchExecutionRequest } from "@rezics/search";
 import { getActiveObservability } from "@rezics/observability";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { t } from "elysia";
 
 import { resolveIdentity } from "../../auth/session";
@@ -19,7 +19,7 @@ import { InvalidSearch, SearchUnavailable } from "../../search/errors";
 import { SearchCategories } from "../../search/schema";
 import { searchDomain, searchGrouped } from "../../search/service";
 import { database } from "../../database";
-import { unitDock, zonePage } from "../../database/schema";
+import { contentStructure, contentStructureNode, unitDock, zonePage } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import { ZonePageNotFound } from "../domain-extensions/errors";
 import { DockNotFound } from "../docks/errors";
@@ -46,6 +46,11 @@ const ZonePageSearchParams = t.Object({
 	slug: t.String({ minLength: 1, maxLength: 100, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
 	blockKey: BlockKey,
 });
+const ContentStructureNodeSearchParams = t.Object({
+	unitId: Uuid,
+	structureId: Uuid,
+	nodeId: Uuid,
+});
 
 function findSearchConfiguration(
 	document: { readonly blocks: readonly Block[] },
@@ -54,12 +59,12 @@ function findSearchConfiguration(
 	let found: SearchConfiguration | undefined;
 	walkBlockTree(document, (block) => {
 		if (block._key === blockKey) {
-			if (block._type !== "search")
-				throw new InvalidSearch("The selected Block is not a Search Block");
+			if (block._type !== "search" && block._type !== "feed")
+				throw new InvalidSearch("The selected Block does not use a Search configuration");
 			found = block.configuration;
 		}
 	});
-	if (!found) throw new InvalidSearch("Search Block does not exist in this surface");
+	if (!found) throw new InvalidSearch("Search-backed Block does not exist in this surface");
 	return found;
 }
 
@@ -107,6 +112,65 @@ export default new Elysia({ prefix: "/search" })
 		},
 	)
 	.post(
+		"/units/:unitId/content-structures/:structureId/nodes/:nodeId/execute",
+		async ({ params, body, request }) => {
+			const identity = await resolveIdentity(request.headers, "unit:read");
+			await identity.authorization.unit.ensureCanRead(params.unitId);
+			const [node] = await database
+				.select({ configuration: contentStructureNode.searchConfiguration })
+				.from(contentStructureNode)
+				.innerJoin(
+					contentStructure,
+					and(
+						eq(contentStructure.id, contentStructureNode.structureId),
+						eq(contentStructure.ownerUnitId, contentStructureNode.ownerUnitId),
+					),
+				)
+				.where(
+					and(
+						eq(contentStructure.id, params.structureId),
+						eq(contentStructure.ownerUnitId, params.unitId),
+						eq(contentStructureNode.id, params.nodeId),
+						isNull(contentStructure.deletedAt),
+						isNull(contentStructureNode.deletedAt),
+					),
+				)
+				.limit(1);
+			if (!node?.configuration)
+				throw new InvalidSearch("Content Structure node has no Search configuration");
+			try {
+				return await executeConfiguredSearch(
+					node.configuration,
+					body,
+					identity.authorization.profileId,
+				);
+			} catch (cause) {
+				if (cause instanceof InvalidSearch || cause instanceof SearchUnavailable)
+					throw cause;
+				logSearchFailure(
+					"Content Structure Search execution failed",
+					"search.content_structure.failed",
+					cause,
+				);
+				throw new SearchUnavailable(cause);
+			}
+		},
+		{
+			params: ContentStructureNodeSearchParams,
+			body: SearchExecutionRequest,
+			response: {
+				[StatusCodes.OK]: SearchResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: {
+				summary: "Execute a Content Structure node Search configuration",
+				tags: ["Search", "Content Structure"],
+			},
+		},
+	)
+	.post(
 		"/zones/:zoneId/dock/blocks/:blockKey/execute",
 		async ({ params, body, request }) => {
 			const identity = await resolveIdentity(request.headers, "unit:read");
@@ -117,7 +181,13 @@ export default new Elysia({ prefix: "/search" })
 			const [record] = await database
 				.select({ document: unitDock.document })
 				.from(unitDock)
-				.where(and(eq(unitDock.unitId, params.zoneId), eq(unitDock.surface, "main")))
+				.where(
+					and(
+						eq(unitDock.unitId, params.zoneId),
+						eq(unitDock.kind, "main"),
+						isNull(unitDock.deletedAt),
+					),
+				)
 				.limit(1);
 			if (!record) throw new DockNotFound();
 			try {

@@ -134,7 +134,7 @@ export default new Elysia({ prefix: "/progress" })
 						and(
 							eq(contentStructureNode.id, body.lastContentStructureNodeId),
 							eq(contentStructureNode.ownerUnitId, params.unitId),
-							eq(contentStructure.purpose, "book.contents"),
+							eq(contentStructure.kind, "book.contents"),
 							isNull(contentStructureNode.deletedAt),
 							isNull(contentStructure.deletedAt),
 						),
@@ -231,7 +231,7 @@ export default new Elysia({ prefix: "/progress" })
 					and(
 						eq(contentStructureNode.id, params.nodeId),
 						eq(contentStructureNode.ownerUnitId, params.unitId),
-						eq(contentStructure.purpose, "book.contents"),
+						eq(contentStructure.kind, "book.contents"),
 						isNull(contentStructureNode.deletedAt),
 						isNull(contentStructure.deletedAt),
 					),

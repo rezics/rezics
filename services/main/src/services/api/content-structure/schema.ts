@@ -1,11 +1,20 @@
 import { type Static, t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
+import { SearchConfiguration } from "@rezics/search";
 
 import { FractionalPosition, ContentLanguage, Uuid } from "../schema";
 import { ContentRatingValues } from "../../database/schema/contract-values";
 
 export const UnitContentStructuresParams = t.Object({ unitId: Uuid });
 export const ContentStructureParams = t.Object({ unitId: Uuid, structureId: Uuid });
+export const ContentStructureRevisionParams = t.Object({
+	unitId: Uuid,
+	structureId: Uuid,
+	revisionId: Uuid,
+});
+export const ContentStructureRevisionListQuery = t.Object({
+	limit: t.Optional(t.Integer({ minimum: 1, maximum: 100, default: 50 })),
+});
 export const GenericContentStructureNodeParams = t.Object({
 	unitId: Uuid,
 	structureId: Uuid,
@@ -28,7 +37,7 @@ export const ContentStructureTarget = t.Union([
 
 export const CreateContentStructureBody = t.Object(
 	{
-		purpose: t.Union([
+		kind: t.Union([
 			t.Literal("book.contents"),
 			t.Literal("post.contents"),
 			t.Literal("realm.taxonomy"),
@@ -59,6 +68,7 @@ export const CreateGenericContentStructureNodeBody = t.Object(
 		target: t.Optional(ContentStructureTarget),
 		position: t.Optional(FractionalPosition),
 		contentRating: t.Optional(t.UnionEnum(ContentRatingValues)),
+		searchConfiguration: t.Optional(SearchConfiguration),
 	},
 	{ additionalProperties: false },
 );
@@ -72,12 +82,21 @@ export const UpdateGenericContentStructureNodeBody = t.Object(
 		target: t.Optional(ContentStructureTarget),
 		position: t.Optional(FractionalPosition),
 		contentRating: t.Optional(t.Nullable(t.UnionEnum(ContentRatingValues))),
+		searchConfiguration: t.Optional(t.Nullable(SearchConfiguration)),
 	},
 	{ additionalProperties: false, minProperties: 2 },
 );
 
 export const ContentStructureRevisionBody = t.Object(
 	{ baseRevisionId: Uuid },
+	{ additionalProperties: false },
+);
+export const RestoreContentStructureRevisionBody = t.Object(
+	{
+		baseRevisionId: Uuid,
+		message: t.Optional(t.String({ maxLength: 500 })),
+		minor: t.Optional(t.Boolean()),
+	},
 	{ additionalProperties: false },
 );
 

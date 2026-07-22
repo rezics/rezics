@@ -14,7 +14,7 @@ import {
 } from "@rezics/block";
 import { defaultKeyHasher } from "@better-auth/api-key";
 import { hashPassword } from "better-auth/crypto";
-import { and, eq, notInArray } from "drizzle-orm";
+import { and, eq, isNull, notInArray } from "drizzle-orm";
 
 import { env } from "../config";
 import { Authorization } from "../authorization";
@@ -102,6 +102,9 @@ import {
 	zonePage,
 } from "../database/schema";
 import { createNavigationStructure } from "../content-structure/navigation";
+import { createContentStructureHistory } from "../content-structure/history";
+import { loadContentStructureSnapshot } from "../content-structure/storage";
+import { createDockHistory } from "../api/docks/history";
 import { RecommendationPolicyVersion } from "../recommendations/policy";
 import { fractionalPositionAt } from "../ordering/position";
 import { recordUnitRevision, restoreUnitRevision } from "../units/history";
@@ -684,7 +687,7 @@ async function seedCatalog(
 	await writeBatches(
 		realms.map((value) => ({
 			ownerUnitId: value.id,
-			purpose: "realm.taxonomy" as const,
+			kind: "realm.taxonomy" as const,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
@@ -707,7 +710,7 @@ async function seedCatalog(
 	await writeBatches(
 		zones.map((value) => ({
 			unitId: value.id,
-			surface: "main" as const,
+			kind: "main" as const,
 			document: createDockDocument(),
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
@@ -1241,7 +1244,7 @@ async function seedToaruWiki(
 	});
 	const navigation = await createNavigationStructure(tx, {
 		ownerUnitId: zoneUnit.id,
-		purpose: "zone.navigation",
+		kind: "zone.navigation",
 		document: navigationDocument,
 		actorProfileId: owner.id,
 	});
@@ -1262,7 +1265,7 @@ async function seedToaruWiki(
 			),
 			updatedAt: createdAt,
 		})
-		.where(and(eq(unitDock.unitId, zoneUnit.id), eq(unitDock.surface, "main")));
+		.where(and(eq(unitDock.unitId, zoneUnit.id), eq(unitDock.kind, "main")));
 	for (const label of labelUnits)
 		await recordUnitRevision(tx, {
 			unitId: label.id,
@@ -1425,7 +1428,7 @@ async function seedContent(
 		.values(
 			catalog.books.map((bookUnit) => ({
 				ownerUnitId: bookUnit.id,
-				purpose: "book.contents" as const,
+				kind: "book.contents" as const,
 				createdAt: bookUnit.createdAt,
 				updatedAt: bookUnit.updatedAt,
 			})),
@@ -2500,6 +2503,18 @@ async function seedHistory(
 	catalog: SeedCatalog,
 	content: SeedContent,
 ): Promise<void> {
+	const structures = await tx
+		.select({ id: contentStructure.id })
+		.from(contentStructure)
+		.where(isNull(contentStructure.deletedAt));
+	for (const structure of structures)
+		await createContentStructureHistory(tx, {
+			structureId: structure.id,
+			state: await loadContentStructureSnapshot(tx, { structureId: structure.id }),
+		});
+	const docks = await tx.select().from(unitDock).where(isNull(unitDock.deletedAt));
+	for (const dock of docks) await createDockHistory(tx, { dock });
+
 	const historyUnits = [
 		...profiles.map((value) => ({ id: value.id, actorProfileId: value.id })),
 		...[

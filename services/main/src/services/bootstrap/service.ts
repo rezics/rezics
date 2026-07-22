@@ -33,7 +33,13 @@ import {
 	replaceNavigationStructure,
 } from "../content-structure/navigation";
 import { ContentStructureNotFound } from "../content-structure/errors";
-import { getContentStructureComponentRevision } from "../content-structure/service";
+import { getContentStructureRevision } from "../content-structure/service";
+import {
+	createDockHistory,
+	getDockRevisionId,
+	lockDockHistory,
+	updateDockHistory,
+} from "../api/docks/history";
 import type { ContentLanguage } from "../database/schema/contract-values";
 import { compareFractionalPositions, fractionalPositionAt } from "../ordering/position";
 import { storage } from "../storage";
@@ -567,7 +573,7 @@ async function ensureOfficialRealm(tx: DatabaseTransaction): Promise<void> {
 		.where(
 			and(
 				eq(contentStructure.ownerUnitId, value.id),
-				eq(contentStructure.purpose, "realm.taxonomy"),
+				eq(contentStructure.kind, "realm.taxonomy"),
 				isNull(contentStructure.deletedAt),
 			),
 		)
@@ -575,7 +581,7 @@ async function ensureOfficialRealm(tx: DatabaseTransaction): Promise<void> {
 	if (!storedTaxonomy) {
 		await tx.insert(contentStructure).values({
 			ownerUnitId: value.id,
-			purpose: "realm.taxonomy",
+			kind: "realm.taxonomy",
 			createdAt,
 			updatedAt: createdAt,
 		});
@@ -749,6 +755,9 @@ async function ensureOfficialWikiPost(
 async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 	const createdAt = bootstrapEpoch();
 	for (const value of OfficialZoneManifest) {
+		await tx.execute(
+			sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${value.id}`}::text, 0))`,
+		);
 		let changed = await ensureBootstrapAddressedUnit(tx, {
 			id: value.id,
 			kind: "zone",
@@ -831,7 +840,7 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 				and(
 					eq(contentStructure.id, value.navigation.id),
 					eq(contentStructure.ownerUnitId, value.id),
-					eq(contentStructure.purpose, "zone.navigation"),
+					eq(contentStructure.kind, "zone.navigation"),
 					isNull(contentStructure.deletedAt),
 				),
 			)
@@ -840,10 +849,10 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 			const current = await presentNavigationStructure(tx, {
 				ownerUnitId: value.id,
 				structureId: value.navigation.id,
-				purpose: "zone.navigation",
+				kind: "zone.navigation",
 			});
 			if (!valuesEqual(current.document, value.navigation.document)) {
-				const revisionId = await getContentStructureComponentRevision(
+				const revisionId = await getContentStructureRevision(
 					tx,
 					value.id,
 					value.navigation.id,
@@ -853,7 +862,7 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 				await replaceNavigationStructure(tx, {
 					ownerUnitId: value.id,
 					structureId: value.navigation.id,
-					purpose: "zone.navigation",
+					kind: "zone.navigation",
 					document: value.navigation.document,
 					actorProfileId: value.ownerProfileId,
 					baseRevisionId: revisionId,
@@ -864,32 +873,65 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 			await createNavigationStructure(tx, {
 				ownerUnitId: value.id,
 				structureId: value.navigation.id,
-				purpose: "zone.navigation",
+				kind: "zone.navigation",
 				document: value.navigation.document,
 				actorProfileId: value.ownerProfileId,
 			});
 			changed = true;
 		}
 		const [storedDock] = await tx
-			.select({ document: unitDock.document })
+			.select()
 			.from(unitDock)
-			.where(and(eq(unitDock.unitId, value.id), eq(unitDock.surface, "main")))
+			.where(
+				and(
+					eq(unitDock.unitId, value.id),
+					eq(unitDock.kind, "main"),
+					isNull(unitDock.deletedAt),
+				),
+			)
 			.limit(1);
 		if (storedDock) {
 			if (!valuesEqual(storedDock.document, value.mainDockDocument)) {
-				await tx
+				await lockDockHistory(tx, storedDock.id);
+				const [updatedDock] = await tx
 					.update(unitDock)
 					.set({ document: value.mainDockDocument, updatedAt: createdAt })
-					.where(and(eq(unitDock.unitId, value.id), eq(unitDock.surface, "main")));
+					.where(eq(unitDock.id, storedDock.id))
+					.returning();
+				if (!updatedDock) throw new Error("Official Zone Dock update returned no row");
+				const revisionId = await getDockRevisionId(tx, storedDock.id);
+				if (revisionId)
+					await updateDockHistory(tx, {
+						dock: updatedDock,
+						baseRevisionId: revisionId,
+						actorProfileId: value.ownerProfileId,
+					});
+				else
+					await createDockHistory(tx, {
+						dock: updatedDock,
+						actorProfileId: value.ownerProfileId,
+					});
 				changed = true;
-			}
+			} else if (!(await getDockRevisionId(tx, storedDock.id)))
+				await createDockHistory(tx, {
+					dock: storedDock,
+					actorProfileId: value.ownerProfileId,
+				});
 		} else {
-			await tx.insert(unitDock).values({
-				unitId: value.id,
-				surface: "main",
-				document: value.mainDockDocument,
-				createdAt,
-				updatedAt: createdAt,
+			const [createdDock] = await tx
+				.insert(unitDock)
+				.values({
+					unitId: value.id,
+					kind: "main",
+					document: value.mainDockDocument,
+					createdAt,
+					updatedAt: createdAt,
+				})
+				.returning();
+			if (!createdDock) throw new Error("Official Zone Dock insertion returned no row");
+			await createDockHistory(tx, {
+				dock: createdDock,
+				actorProfileId: value.ownerProfileId,
 			});
 			changed = true;
 		}
@@ -1071,7 +1113,8 @@ export async function isBootstrapReady(): Promise<boolean> {
 			.from(unitDock)
 			.where(
 				and(
-					eq(unitDock.surface, "main"),
+					eq(unitDock.kind, "main"),
+					isNull(unitDock.deletedAt),
 					inArray(
 						unitDock.unitId,
 						OfficialZoneManifest.map((value) => value.id),
@@ -1108,7 +1151,7 @@ export async function isBootstrapReady(): Promise<boolean> {
 					const navigation = await presentNavigationStructure(tx, {
 						ownerUnitId: value.id,
 						structureId: value.navigation.id,
-						purpose: "zone.navigation",
+						kind: "zone.navigation",
 					});
 					navigations.push({
 						id: navigation.id,

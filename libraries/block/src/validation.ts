@@ -37,6 +37,7 @@ const AllBlockTypes = [
 	"unit-ref",
 	"unit-list",
 	"search",
+	"feed",
 	"menu",
 	"media",
 	"divider",
@@ -77,6 +78,7 @@ export const DockBlockHostPolicy: BlockHostPolicy = {
 		"unit-ref",
 		"unit-list",
 		"search",
+		"feed",
 		"menu",
 		"media",
 		"divider",
@@ -85,11 +87,12 @@ export const DockBlockHostPolicy: BlockHostPolicy = {
 		"callout",
 	],
 	allowedChildTypes: {
-		columns: ["unit-ref", "unit-list", "search", "menu", "media", "divider", "callout"],
+		columns: ["unit-ref", "unit-list", "search", "feed", "menu", "media", "divider", "callout"],
 		group: [
 			"unit-ref",
 			"unit-list",
 			"search",
+			"feed",
 			"menu",
 			"media",
 			"divider",
@@ -109,6 +112,7 @@ export const ZonePageBlockHostPolicy: BlockHostPolicy = {
 		"unit-ref",
 		"unit-list",
 		"search",
+		"feed",
 		"menu",
 		"media",
 		"divider",
@@ -123,6 +127,7 @@ export const ZonePageBlockHostPolicy: BlockHostPolicy = {
 			"unit-ref",
 			"unit-list",
 			"search",
+			"feed",
 			"menu",
 			"media",
 			"divider",
@@ -136,6 +141,7 @@ export const ZonePageBlockHostPolicy: BlockHostPolicy = {
 			"unit-ref",
 			"unit-list",
 			"search",
+			"feed",
 			"menu",
 			"media",
 			"divider",
@@ -150,6 +156,7 @@ export const ZonePageBlockHostPolicy: BlockHostPolicy = {
 			"unit-ref",
 			"unit-list",
 			"search",
+			"feed",
 			"menu",
 			"media",
 			"divider",
@@ -291,7 +298,8 @@ function assertBlockTree(value: BlockContainerDocument, policy: BlockHostPolicy)
 			: policy.allowedRootTypes;
 		if (!allowed.includes(block._type))
 			throw new TypeError(`Block ${block._type} is not allowed in this host`);
-		if (block._type === "search") assertSearchBlock(block.configuration);
+		if (block._type === "search" || block._type === "feed")
+			assertSearchBlock(block.configuration);
 		if (block._type === "unit-list" && block.source.kind === "search")
 			assertSearchBlock(block.source.configuration);
 		if (
@@ -421,7 +429,7 @@ export function collectBlockReferences(document: BlockContainerDocument): BlockR
 			if (block.source.kind === "collection") unitIds.add(block.source.collectionId);
 			if (block.source.kind === "search") addSearchScope(block.source.configuration);
 		}
-		if (block._type === "search") addSearchScope(block.configuration);
+		if (block._type === "search" || block._type === "feed") addSearchScope(block.configuration);
 		if (block._type === "menu") navigationIds.add(block.navigationId);
 		if (block._type === "media") {
 			assetIds.add(block.assetId);

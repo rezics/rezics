@@ -185,12 +185,16 @@ import type {
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses,
 	GetApiUnitsByIdByUnitIdDocksOptions,
 	GetApiUnitsByIdByUnitIdDocksResponses,
-	GetApiUnitsByIdByUnitIdDocksBySurfaceOptions,
-	GetApiUnitsByIdByUnitIdDocksBySurfaceResponses,
-	PutApiUnitsByIdByUnitIdDocksBySurfaceOptions,
-	PutApiUnitsByIdByUnitIdDocksBySurfaceResponses,
-	DeleteApiUnitsByIdByUnitIdDocksBySurfaceOptions,
-	DeleteApiUnitsByIdByUnitIdDocksBySurfaceResponses,
+	GetApiUnitsByIdByUnitIdDocksByKindOptions,
+	GetApiUnitsByIdByUnitIdDocksByKindResponses,
+	PutApiUnitsByIdByUnitIdDocksByKindOptions,
+	PutApiUnitsByIdByUnitIdDocksByKindResponses,
+	DeleteApiUnitsByIdByUnitIdDocksByKindOptions,
+	DeleteApiUnitsByIdByUnitIdDocksByKindResponses,
+	GetApiUnitsByIdByUnitIdDocksByKindRevisionsOptions,
+	GetApiUnitsByIdByUnitIdDocksByKindRevisionsResponses,
+	PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreOptions,
+	PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreResponses,
 	GetApiUsersMeOptions,
 	GetApiUsersMeResponses,
 	PatchApiUsersMeOptions,
@@ -325,6 +329,10 @@ import type {
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses,
+	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsOptions,
+	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsResponses,
+	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreOptions,
+	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreResponses,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesOptions,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesResponses,
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -491,6 +499,8 @@ import type {
 	GetApiSearchConfigurationResponses,
 	PostApiSearchExecuteOptions,
 	PostApiSearchExecuteResponses,
+	PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteOptions,
+	PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteResponses,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteOptions,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponses,
 	PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteOptions,
@@ -2078,50 +2088,99 @@ export function getApiUnitsByIdByUnitIdDocks<ThrowOnError extends boolean = true
 
 /**
  * @summary Get a Unit Dock
- * {@link /api/units/by-id/:unitId/docks/:surface}
+ * {@link /api/units/by-id/:unitId/docks/:kind}
  */
-export function getApiUnitsByIdByUnitIdDocksBySurface<ThrowOnError extends boolean = true>(
-	options: Options<GetApiUnitsByIdByUnitIdDocksBySurfaceOptions, ThrowOnError>,
-): Promise<RequestResult<GetApiUnitsByIdByUnitIdDocksBySurfaceResponses, ThrowOnError>> {
+export function getApiUnitsByIdByUnitIdDocksByKind<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitsByIdByUnitIdDocksByKindOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "GET",
-		url: "/api/units/by-id/{unitId}/docks/{surface}",
+		url: "/api/units/by-id/{unitId}/docks/{kind}",
 		...config,
-	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdDocksBySurfaceResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<GetApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Create or replace a Unit Dock
- * {@link /api/units/by-id/:unitId/docks/:surface}
+ * {@link /api/units/by-id/:unitId/docks/:kind}
  */
-export function putApiUnitsByIdByUnitIdDocksBySurface<ThrowOnError extends boolean = true>(
-	options: Options<PutApiUnitsByIdByUnitIdDocksBySurfaceOptions, ThrowOnError>,
-): Promise<RequestResult<PutApiUnitsByIdByUnitIdDocksBySurfaceResponses, ThrowOnError>> {
+export function putApiUnitsByIdByUnitIdDocksByKind<ThrowOnError extends boolean = true>(
+	options: Options<PutApiUnitsByIdByUnitIdDocksByKindOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "PUT",
-		url: "/api/units/by-id/{unitId}/docks/{surface}",
+		url: "/api/units/by-id/{unitId}/docks/{kind}",
 		...config,
-	}) as Promise<RequestResult<PutApiUnitsByIdByUnitIdDocksBySurfaceResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<PutApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>>;
 }
 
 /**
  * @summary Delete a Unit Dock
- * {@link /api/units/by-id/:unitId/docks/:surface}
+ * {@link /api/units/by-id/:unitId/docks/:kind}
  */
-export function deleteApiUnitsByIdByUnitIdDocksBySurface<ThrowOnError extends boolean = true>(
-	options: Options<DeleteApiUnitsByIdByUnitIdDocksBySurfaceOptions, ThrowOnError>,
-): Promise<RequestResult<DeleteApiUnitsByIdByUnitIdDocksBySurfaceResponses, ThrowOnError>> {
+export function deleteApiUnitsByIdByUnitIdDocksByKind<ThrowOnError extends boolean = true>(
+	options: Options<DeleteApiUnitsByIdByUnitIdDocksByKindOptions, ThrowOnError>,
+): Promise<RequestResult<DeleteApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "DELETE",
-		url: "/api/units/by-id/{unitId}/docks/{surface}",
+		url: "/api/units/by-id/{unitId}/docks/{kind}",
 		...config,
-	}) as Promise<RequestResult<DeleteApiUnitsByIdByUnitIdDocksBySurfaceResponses, ThrowOnError>>;
+	}) as Promise<RequestResult<DeleteApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List Dock revisions
+ * {@link /api/units/by-id/:unitId/docks/:kind/revisions}
+ */
+export function getApiUnitsByIdByUnitIdDocksByKindRevisions<ThrowOnError extends boolean = true>(
+	options: Options<GetApiUnitsByIdByUnitIdDocksByKindRevisionsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiUnitsByIdByUnitIdDocksByKindRevisionsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/units/by-id/{unitId}/docks/{kind}/revisions",
+		...config,
+	}) as Promise<
+		RequestResult<GetApiUnitsByIdByUnitIdDocksByKindRevisionsResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Restore a Dock revision
+ * {@link /api/units/by-id/:unitId/docks/:kind/revisions/:revisionId/restore}
+ */
+export function postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestore<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/units/by-id/{unitId}/docks/{kind}/revisions/{revisionId}/restore",
+		...config,
+	}) as Promise<
+		RequestResult<
+			PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreResponses,
+			ThrowOnError
+		>
+	>;
 }
 
 /**
@@ -3260,6 +3319,68 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureId<
 	}) as Promise<
 		RequestResult<
 			DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary List Content Structure revisions
+ * {@link /api/units/by-id/:unitId/content-structures/:structureId/revisions}
+ */
+export function getApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisions<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/units/by-id/{unitId}/content-structures/{structureId}/revisions",
+		...config,
+	}) as Promise<
+		RequestResult<
+			GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsResponses,
+			ThrowOnError
+		>
+	>;
+}
+
+/**
+ * @summary Restore a Content Structure revision
+ * {@link /api/units/by-id/:unitId/content-structures/:structureId/revisions/:revisionId/restore}
+ */
+export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestore<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/units/by-id/{unitId}/content-structures/{structureId}/revisions/{revisionId}/restore",
+		...config,
+	}) as Promise<
+		RequestResult<
+			PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreResponses,
 			ThrowOnError
 		>
 	>;
@@ -4579,6 +4700,37 @@ export function postApiSearchExecute<ThrowOnError extends boolean = true>(
 
 	return request({ method: "POST", url: "/api/search/execute", ...config }) as Promise<
 		RequestResult<PostApiSearchExecuteResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Execute a Content Structure node Search configuration
+ * {@link /api/search/units/:unitId/content-structures/:structureId/nodes/:nodeId/execute}
+ */
+export function postApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecute<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<
+		PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteOptions,
+		ThrowOnError
+	>,
+): Promise<
+	RequestResult<
+		PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteResponses,
+		ThrowOnError
+	>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/search/units/{unitId}/content-structures/{structureId}/nodes/{nodeId}/execute",
+		...config,
+	}) as Promise<
+		RequestResult<
+			PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteResponses,
+			ThrowOnError
+		>
 	>;
 }
 

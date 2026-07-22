@@ -10,7 +10,7 @@ export class DockNotFound extends Data.TaggedError("DockNotFound") {
 export class DockNotSupported extends Data.TaggedError("DockNotSupported") {
 	static readonly status = StatusCodes.BAD_REQUEST as const;
 	readonly status = DockNotSupported.status;
-	readonly message = "This Unit kind does not support the requested Dock surface";
+	readonly message = "This Unit kind does not support the requested Dock kind";
 }
 
 export class DockDocumentInvalid extends Data.TaggedError("DockDocumentInvalid") {
@@ -19,4 +19,23 @@ export class DockDocumentInvalid extends Data.TaggedError("DockDocumentInvalid")
 	readonly message = "Dock document is invalid";
 }
 
-export const DockErrors = [DockNotFound, DockNotSupported, DockDocumentInvalid] as const;
+export class DockRevisionConflict extends Data.TaggedError("DockRevisionConflict")<{
+	readonly latestRevisionId: string | null;
+}> {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = DockRevisionConflict.status;
+	readonly message = "Dock changed after the supplied base revision";
+	readonly details: { readonly latestRevisionId: string | null };
+
+	constructor(latestRevisionId: string | null) {
+		super({ latestRevisionId });
+		this.details = { latestRevisionId };
+	}
+}
+
+export const DockErrors = [
+	DockNotFound,
+	DockNotSupported,
+	DockDocumentInvalid,
+	DockRevisionConflict,
+] as const;

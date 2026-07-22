@@ -1,5 +1,15 @@
 import { inArray, sql } from "drizzle-orm";
-import { check, foreignKey, index, text, unique, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { type SearchConfiguration } from "@rezics/search";
+import {
+	check,
+	foreignKey,
+	index,
+	jsonb,
+	text,
+	unique,
+	uniqueIndex,
+	uuid,
+} from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import {
@@ -10,8 +20,8 @@ import {
 	fractionalIndexPosition,
 } from "./columns";
 import {
-	type ContentStructurePurpose,
-	ContentStructurePurposeValues,
+	type ContentStructureKind,
+	ContentStructureKindValues,
 	type ContentStructureTargetKind,
 	ContentStructureTargetKindValues,
 } from "./contract-values";
@@ -26,8 +36,8 @@ export const contentStructure = pgTable(
 		ownerUnitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
-		/** Runtime purpose schemas provide the stronger discriminated-union proof. */
-		purpose: text().$type<ContentStructurePurpose>().notNull(),
+		/** Runtime kind schemas provide the stronger discriminated-union proof. */
+		kind: text().$type<ContentStructureKind>().notNull(),
 		/** NavigationDocument root key; null for non-navigation structures. */
 		documentKey: text(),
 		deletedAt: createTimestampMsColumn(),
@@ -36,25 +46,22 @@ export const contentStructure = pgTable(
 	},
 	(table) => [
 		unique("content_structure_id_owner_key").on(table.id, table.ownerUnitId),
-		uniqueIndex("content_structure_singleton_purpose_key")
-			.on(table.ownerUnitId, table.purpose)
+		uniqueIndex("content_structure_singleton_kind_key")
+			.on(table.ownerUnitId, table.kind)
 			.where(
-				sql`${table.deletedAt} is null and ${table.purpose} in ('book.contents', 'post.contents', 'realm.taxonomy')`,
+				sql`${table.deletedAt} is null and ${table.kind} in ('book.contents', 'post.contents', 'realm.taxonomy')`,
 			),
-		index("content_structure_owner_purpose_idx")
-			.on(table.ownerUnitId, table.purpose, table.createdAt, table.id)
+		index("content_structure_owner_kind_idx")
+			.on(table.ownerUnitId, table.kind, table.createdAt, table.id)
 			.where(sql`${table.deletedAt} is null`),
-		check(
-			"content_structure_purpose_check",
-			inArray(table.purpose, ContentStructurePurposeValues),
-		),
+		check("content_structure_kind_check", inArray(table.kind, ContentStructureKindValues)),
 		check(
 			"content_structure_document_key_check",
 			sql`${table.documentKey} is null or ${table.documentKey} ~ '^[0-9a-f]{12}$'`,
 		),
 		check(
 			"content_structure_navigation_document_key_check",
-			sql`(${table.purpose} in ('realm.navigation', 'zone.navigation')) = (${table.documentKey} is not null)`,
+			sql`(${table.kind} in ('realm.navigation', 'zone.navigation')) = (${table.documentKey} is not null)`,
 		),
 		check(
 			"content_structure_deleted_at_check",
@@ -84,6 +91,8 @@ export const contentStructureNode = pgTable(
 		targetUnitId: uuid().references(() => unit.id, { onDelete: "restrict" }),
 		targetZonePageId: uuid().references(() => zonePage.id, { onDelete: "restrict" }),
 		targetUrl: text(),
+		/** Optional trusted query/UI schema for a label-backed dynamic branch. */
+		searchConfiguration: jsonb().$type<SearchConfiguration>(),
 		position: fractionalIndexPosition().notNull(),
 		contentRating: contentRating(),
 		deletedAt: createTimestampMsColumn(),
@@ -154,6 +163,10 @@ export const contentStructureNode = pgTable(
 				and ${table.targetUrl} ~ '^https://[^[:space:]]+$'
 				and char_length(${table.targetUrl}) <= 2000
 			)`,
+		),
+		check(
+			"content_structure_node_search_configuration_check",
+			sql`${table.searchConfiguration} is null or jsonb_typeof(${table.searchConfiguration}) = 'object'`,
 		),
 		check(
 			"content_structure_node_deleted_at_check",

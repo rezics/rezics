@@ -198,7 +198,7 @@ export const OfficialZoneManifest = [
 		ownerProfileId: OfficialProfileIds.editorial,
 		boundaryDocument: createZoneBoundaryDocument(
 			["units"],
-			[{ field: "type", operator: "equals", value: "book" }],
+			[{ field: "kind", operator: "equals", value: "book" }],
 			"b00757a70001",
 		),
 		themeDocument: createZoneThemeDocument({ accent: "#a16207" }, "b00757a70002"),
@@ -242,7 +242,7 @@ export const OfficialZoneManifest = [
 		ownerProfileId: OfficialProfileIds.editorial,
 		boundaryDocument: createZoneBoundaryDocument(
 			["units"],
-			[{ field: "type", operator: "equals", value: "media" }],
+			[{ field: "kind", operator: "equals", value: "media" }],
 			"b00757a70004",
 		),
 		themeDocument: createZoneThemeDocument({ accent: "#db2777" }, "b00757a70005"),
@@ -286,7 +286,7 @@ export const OfficialZoneManifest = [
 		ownerProfileId: OfficialProfileIds.editorial,
 		boundaryDocument: createZoneBoundaryDocument(
 			["units"],
-			[{ field: "type", operator: "equals", value: "software" }],
+			[{ field: "kind", operator: "equals", value: "software" }],
 			"b00757a70007",
 		),
 		themeDocument: createZoneThemeDocument({ accent: "#0d9488" }, "b00757a70008"),

@@ -24,6 +24,9 @@ export default {
 	UnitProtected: "This content scope is protected and cannot be changed.",
 	UnitChanged: "This content changed. Refresh and try again.",
 	UnitRevisionConflict: "The revision base changed. Refresh and try again.",
+	ContentStructureRevisionConflict:
+		"The Content Structure changed elsewhere. Refresh and try again.",
+	DockRevisionConflict: `The ${dockTerms.inline} changed elsewhere. Refresh and try again.`,
 	DockNotFound: `This ${dockTerms.inline} could not be found.`,
 	DockNotSupported: `This content does not support that ${dockTerms.inline}.`,
 	DockDocumentInvalid: `The ${dockTerms.inline} document is invalid.`,

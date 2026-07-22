@@ -93,7 +93,7 @@ describe("domain search SQL", () => {
 		await searchDomain("units", {
 			query: "ocean",
 			Languages: ["zh"],
-			types: ["book"],
+			kinds: ["book"],
 			contentRatings: ["general"],
 			aiDisclosures: ["none"],
 			licenses: ["cc-by-4.0"],
@@ -108,7 +108,7 @@ describe("domain search SQL", () => {
 			expect.objectContaining({ sort: "followerCount:desc" }),
 		]);
 
-		await searchDomain("entity", { types: ["person"] });
+		await searchDomain("entity", { kinds: ["person"] });
 		expect(lastQuery()).toContain('("entity"."kind")::text');
 
 		await searchDomain("posts", {
@@ -143,7 +143,7 @@ describe("domain search SQL", () => {
 
 		await searchDomain("reviews", {
 			targetId: "11111111-1111-1111-1111-111111111111",
-			types: ["book"],
+			kinds: ["book"],
 		});
 		expect(lastQuery()).toContain('("subject_unit"."kind")::text');
 
@@ -279,6 +279,8 @@ describe("domain search SQL", () => {
 			},
 		]);
 		expect(query).toContain("union all");
+		expect(query).toContain("with search_candidate(unit_id, revision)");
+		expect(query).toContain('"search_unit_projection_source"."revision"');
 		expect(query).toContain('"facet_unit_localization"');
 		expect(query).toContain('"facet_unit_tag"');
 		expect(query).not.toContain('"realm"."join_policy"');

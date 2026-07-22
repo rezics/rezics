@@ -20,16 +20,10 @@ ALTER TABLE "unit"
     'label', 'tag', 'series', 'zone', 'collection', 'post', 'poll', 'realm', 'realm_rule'
   ));
 
--- Component roles are open text; runtime schemas prove each registered role family.
-ALTER TABLE "unit_revision_slot" ALTER COLUMN "role" TYPE text USING "role"::text;
-ALTER TABLE "unit_revision_slot"
-  ADD CONSTRAINT "unit_revision_slot_role_check"
-  CHECK (btrim(role) <> '' AND char_length(role) <= 200);
-
 CREATE TABLE "content_structure" (
   "id" uuid NOT NULL DEFAULT uuidv7(),
   "owner_unit_id" uuid NOT NULL,
-  "purpose" text NOT NULL,
+  "kind" text NOT NULL,
   "document_key" text NULL,
   "deleted_at" timestamptz(3) NULL,
   "created_at" timestamptz(3) NOT NULL DEFAULT now(),
@@ -43,31 +37,31 @@ CREATE TABLE "content_structure" (
   CONSTRAINT "content_structure_document_key_check"
     CHECK (document_key IS NULL OR document_key ~ '^[0-9a-f]{12}$'),
   CONSTRAINT "content_structure_navigation_document_key_check"
-    CHECK ((purpose IN ('realm.navigation', 'zone.navigation')) = (document_key IS NOT NULL)),
-  CONSTRAINT "content_structure_purpose_check"
-    CHECK (purpose IN (
+    CHECK ((kind IN ('realm.navigation', 'zone.navigation')) = (document_key IS NOT NULL)),
+  CONSTRAINT "content_structure_kind_check"
+    CHECK (kind IN (
       'book.contents', 'post.contents', 'realm.taxonomy',
       'realm.navigation', 'zone.navigation'
     ))
 );
-CREATE INDEX "content_structure_owner_purpose_idx"
-  ON "content_structure" ("owner_unit_id", "purpose", "created_at", "id")
+CREATE INDEX "content_structure_owner_kind_idx"
+  ON "content_structure" ("owner_unit_id", "kind", "created_at", "id")
   WHERE deleted_at IS NULL;
-CREATE UNIQUE INDEX "content_structure_singleton_purpose_key"
-  ON "content_structure" ("owner_unit_id", "purpose")
+CREATE UNIQUE INDEX "content_structure_singleton_kind_key"
+  ON "content_structure" ("owner_unit_id", "kind")
   WHERE deleted_at IS NULL
-    AND purpose IN ('book.contents', 'post.contents', 'realm.taxonomy');
+    AND kind IN ('book.contents', 'post.contents', 'realm.taxonomy');
 
 -- Every existing Book and Realm receives its singleton structure, including empty ones.
 INSERT INTO "content_structure" (
-  "id", "owner_unit_id", "purpose", "created_at", "updated_at"
+  "id", "owner_unit_id", "kind", "created_at", "updated_at"
 )
 SELECT uuidv7(), owner.id, 'book.contents', owner.created_at, owner.updated_at
 FROM "book"
 JOIN "unit" AS owner ON owner.id = book.id;
 
 INSERT INTO "content_structure" (
-  "id", "owner_unit_id", "purpose", "created_at", "updated_at"
+  "id", "owner_unit_id", "kind", "created_at", "updated_at"
 )
 SELECT uuidv7(), owner.id, 'realm.taxonomy', owner.created_at, owner.updated_at
 FROM "realm"
@@ -82,13 +76,14 @@ ALTER TABLE "content_structure_node"
   ADD COLUMN "target_kind" text NOT NULL DEFAULT 'content',
   ADD COLUMN "target_unit_id" uuid NULL,
   ADD COLUMN "target_zone_page_id" uuid NULL,
-  ADD COLUMN "target_url" text NULL;
+  ADD COLUMN "target_url" text NULL,
+  ADD COLUMN "search_configuration" jsonb NULL;
 
 UPDATE "content_structure_node" AS node
 SET "structure_id" = structure.id
 FROM "content_structure" AS structure
 WHERE structure.owner_unit_id = node.owner_unit_id
-  AND structure.purpose = 'book.contents'
+  AND structure.kind = 'book.contents'
   AND structure.deleted_at IS NULL;
 
 ALTER TABLE "content_structure_node" ALTER COLUMN "structure_id" SET NOT NULL;
@@ -99,6 +94,8 @@ ALTER TABLE "content_structure_node"
     CHECK (document_key IS NULL OR document_key ~ '^[0-9a-f]{12}$'),
   ADD CONSTRAINT "content_structure_node_target_kind_check"
     CHECK (target_kind IN ('content', 'none', 'unit', 'zone_page', 'external')),
+  ADD CONSTRAINT "content_structure_node_search_configuration_check"
+    CHECK (search_configuration IS NULL OR jsonb_typeof(search_configuration) = 'object'),
   ADD CONSTRAINT "content_structure_node_target_shape_check" CHECK (
     (target_kind IN ('content', 'none')
       AND target_unit_id IS NULL AND target_zone_page_id IS NULL AND target_url IS NULL)
@@ -142,13 +139,13 @@ CREATE INDEX "content_structure_node_target_zone_page_idx"
 
 -- Preserve Realm and Zone NavigationDocument resources as typed Content Structures.
 INSERT INTO "content_structure" (
-  "id", "owner_unit_id", "purpose", "document_key", "created_at", "updated_at"
+  "id", "owner_unit_id", "kind", "document_key", "created_at", "updated_at"
 )
 SELECT id, realm_id, 'realm.navigation', document ->> '_key', created_at, updated_at
 FROM "realm_navigation";
 
 INSERT INTO "content_structure" (
-  "id", "owner_unit_id", "purpose", "document_key", "created_at", "updated_at"
+  "id", "owner_unit_id", "kind", "document_key", "created_at", "updated_at"
 )
 SELECT id, zone_id, 'zone.navigation', document ->> '_key', created_at, updated_at
 FROM "zone_navigation";
@@ -266,31 +263,73 @@ CREATE TABLE "label" (
     FOREIGN KEY ("id") REFERENCES "unit" ("id") ON DELETE CASCADE
 );
 
-CREATE TABLE "unit_revision_component_head" (
-  "unit_id" uuid NOT NULL,
-  "component_key" text NOT NULL,
-  "revision_id" uuid NOT NULL,
-  PRIMARY KEY ("unit_id", "component_key"),
-  CONSTRAINT "unit_revision_component_head_revision_unit_fkey"
-    FOREIGN KEY ("revision_id", "unit_id")
-    REFERENCES "unit_revision" ("id", "unit_id") ON DELETE RESTRICT,
-  CONSTRAINT "unit_revision_component_head_unit_id_unit_id_fkey"
-    FOREIGN KEY ("unit_id") REFERENCES "unit" ("id") ON DELETE CASCADE,
-  CONSTRAINT "unit_revision_component_head_key_check"
-    CHECK (btrim(component_key) <> '' AND char_length(component_key) <= 200)
+-- Content Structures are independently versioned aggregates. Their immutable revisions share
+-- revision_content storage but never occupy Unit revision slots or use Unit revision heads.
+CREATE TABLE "content_structure_revision" (
+  "id" uuid NOT NULL DEFAULT uuidv7(),
+  "structure_id" uuid NOT NULL,
+  "parent_revision_id" uuid NULL,
+  "source_revision_id" uuid NULL,
+  "content_id" uuid NOT NULL,
+  "actor_profile_id" uuid NULL,
+  "edit_summary" text NULL,
+  "kind" text NOT NULL,
+  "minor" boolean NOT NULL DEFAULT false,
+  "replay_byte_size" integer NOT NULL,
+  "checkpoint_byte_size" integer NOT NULL,
+  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
+  PRIMARY KEY ("id"),
+  CONSTRAINT "content_structure_revision_id_structure_key"
+    UNIQUE ("id", "structure_id"),
+  CONSTRAINT "content_structure_revision_structure_fkey"
+    FOREIGN KEY ("structure_id") REFERENCES "content_structure" ("id") ON DELETE RESTRICT,
+  CONSTRAINT "content_structure_revision_parent_structure_fkey"
+    FOREIGN KEY ("parent_revision_id", "structure_id")
+    REFERENCES "content_structure_revision" ("id", "structure_id") ON DELETE RESTRICT,
+  CONSTRAINT "content_structure_revision_source_structure_fkey"
+    FOREIGN KEY ("source_revision_id", "structure_id")
+    REFERENCES "content_structure_revision" ("id", "structure_id") ON DELETE RESTRICT,
+  CONSTRAINT "content_structure_revision_content_id_revision_content_id_fkey"
+    FOREIGN KEY ("content_id") REFERENCES "revision_content" ("id") ON DELETE RESTRICT,
+  CONSTRAINT "content_structure_revision_actor_profile_id_profile_id_fkey"
+    FOREIGN KEY ("actor_profile_id") REFERENCES "profile" ("id") ON DELETE RESTRICT,
+  CONSTRAINT "content_structure_revision_kind_check"
+    CHECK (kind IN ('create', 'update', 'delete', 'restore')),
+  CONSTRAINT "content_structure_revision_replay_byte_size_check"
+    CHECK (replay_byte_size >= 0),
+  CONSTRAINT "content_structure_revision_checkpoint_byte_size_check"
+    CHECK (checkpoint_byte_size >= 0),
+  CONSTRAINT "content_structure_revision_source_shape_check"
+    CHECK ((kind = 'restore') = (source_revision_id IS NOT NULL))
 );
-CREATE INDEX "unit_revision_component_head_revision_idx"
-  ON "unit_revision_component_head" ("revision_id");
+CREATE INDEX "content_structure_revision_structure_created_at_idx"
+  ON "content_structure_revision" ("structure_id", "created_at" DESC NULLS LAST, "id" DESC NULLS LAST);
+CREATE INDEX "content_structure_revision_parent_idx"
+  ON "content_structure_revision" ("parent_revision_id");
+CREATE INDEX "content_structure_revision_source_idx"
+  ON "content_structure_revision" ("source_revision_id");
+CREATE INDEX "content_structure_revision_content_idx"
+  ON "content_structure_revision" ("content_id");
+CREATE INDEX "content_structure_revision_actor_created_at_idx"
+  ON "content_structure_revision" ("actor_profile_id", "created_at" DESC NULLS LAST, "id" DESC NULLS LAST);
 
--- Attach an immutable full checkpoint to each existing owner's current revision. This makes
--- the migration boundary a real History state: reads, restores, and the first later delta all
--- have a materializable base instead of only a synthetic concurrency token.
+CREATE TABLE "content_structure_revision_head" (
+  "structure_id" uuid NOT NULL,
+  "revision_id" uuid NOT NULL,
+  PRIMARY KEY ("structure_id"),
+  CONSTRAINT "content_structure_revision_head_revision_key" UNIQUE ("revision_id"),
+  CONSTRAINT "content_structure_revision_head_structure_fkey"
+    FOREIGN KEY ("structure_id") REFERENCES "content_structure" ("id") ON DELETE CASCADE,
+  CONSTRAINT "content_structure_revision_head_revision_structure_fkey"
+    FOREIGN KEY ("revision_id", "structure_id")
+    REFERENCES "content_structure_revision" ("id", "structure_id") ON DELETE RESTRICT
+);
+
+-- Attach an immutable full checkpoint to each existing Content Structure.
 CREATE TABLE content_structure_history_checkpoint AS
 SELECT
   snapshot.structure_id,
-  snapshot.owner_unit_id,
-  head.revision_id,
-  'content-structure/' || snapshot.structure_id::text AS role,
+  uuidv7() AS revision_id,
   snapshot.payload,
   encode(sha256(convert_to(snapshot.payload::text, 'UTF8')), 'hex') AS sha256,
   octet_length(snapshot.payload::text) AS byte_size
@@ -303,7 +342,7 @@ FROM (
       'structure', jsonb_build_object(
         'id', structure.id,
         'ownerUnitId', structure.owner_unit_id,
-        'purpose', structure.purpose,
+        'kind', structure.kind,
         'documentKey', structure.document_key,
         'deletedAt', structure.deleted_at,
         'createdAt', structure.created_at,
@@ -322,6 +361,7 @@ FROM (
             'targetUnitId', node.target_unit_id,
             'targetZonePageId', node.target_zone_page_id,
             'targetUrl', node.target_url,
+            'searchConfiguration', node.search_configuration,
             'position', node.position,
             'contentRating', node.content_rating,
             'deletedAt', node.deleted_at,
@@ -337,8 +377,7 @@ FROM (
     ON node.structure_id = structure.id AND node.deleted_at IS NULL
   WHERE structure.deleted_at IS NULL
   GROUP BY structure.id
-) AS snapshot
-JOIN unit_revision_head AS head ON head.unit_id = snapshot.owner_unit_id;
+) AS snapshot;
 
 INSERT INTO revision_content (
   id, model, sha256, byte_size, encoding, base_content_id, delta_depth, payload
@@ -349,42 +388,125 @@ SELECT
 FROM content_structure_history_checkpoint AS checkpoint
 ON CONFLICT (model, sha256) DO NOTHING;
 
-INSERT INTO unit_revision_slot (
-  revision_id, unit_id, role, content_id, origin_revision_id
+INSERT INTO content_structure_revision (
+  id, structure_id, parent_revision_id, source_revision_id, content_id,
+  kind, minor, replay_byte_size, checkpoint_byte_size
 )
 SELECT
   checkpoint.revision_id,
-  checkpoint.owner_unit_id,
-  checkpoint.role,
+  checkpoint.structure_id,
+  NULL,
+  NULL,
   content.id,
-  checkpoint.revision_id
+  'create',
+  false,
+  0,
+  checkpoint.byte_size
 FROM content_structure_history_checkpoint AS checkpoint
 JOIN revision_content AS content
   ON content.model = 'rezics.content-structure.v1'
   AND content.sha256 = checkpoint.sha256;
 
--- byte_size is immutable during normal operation. Temporarily suspend only its identity guard
--- while this migration accounts for the newly attached checkpoint slots.
-ALTER TABLE unit_revision DISABLE TRIGGER unit_revision_identity_immutable;
-UPDATE unit_revision AS revision
-SET byte_size = revision.byte_size + checkpoint.byte_size
-FROM (
-  SELECT revision_id, sum(byte_size)::integer AS byte_size
-  FROM content_structure_history_checkpoint
-  GROUP BY revision_id
-) AS checkpoint
-WHERE revision.id = checkpoint.revision_id;
-ALTER TABLE unit_revision ENABLE TRIGGER unit_revision_identity_immutable;
-
-INSERT INTO "unit_revision_component_head" ("unit_id", "component_key", "revision_id")
+INSERT INTO "content_structure_revision_head" ("structure_id", "revision_id")
 SELECT
-  checkpoint.owner_unit_id,
-  checkpoint.role,
+  checkpoint.structure_id,
   checkpoint.revision_id
-FROM content_structure_history_checkpoint AS checkpoint
-ON CONFLICT ("unit_id", "component_key") DO NOTHING;
+FROM content_structure_history_checkpoint AS checkpoint;
 
 DROP TABLE content_structure_history_checkpoint;
-DROP TYPE "unit_revision_slot_role";
+
+CREATE TABLE "dock_revision" (
+  "id" uuid NOT NULL DEFAULT uuidv7(),
+  "dock_id" uuid NOT NULL,
+  "parent_revision_id" uuid NULL,
+  "source_revision_id" uuid NULL,
+  "content_id" uuid NOT NULL,
+  "actor_profile_id" uuid NULL,
+  "edit_summary" text NULL,
+  "kind" text NOT NULL,
+  "created_at" timestamptz(3) NOT NULL DEFAULT now(),
+  PRIMARY KEY ("id"),
+  CONSTRAINT "dock_revision_id_dock_key" UNIQUE ("id", "dock_id"),
+  CONSTRAINT "dock_revision_dock_id_unit_dock_id_fkey"
+    FOREIGN KEY ("dock_id") REFERENCES "unit_dock" ("id") ON DELETE RESTRICT,
+  CONSTRAINT "dock_revision_parent_dock_fkey"
+    FOREIGN KEY ("parent_revision_id", "dock_id")
+    REFERENCES "dock_revision" ("id", "dock_id") ON DELETE RESTRICT,
+  CONSTRAINT "dock_revision_source_dock_fkey"
+    FOREIGN KEY ("source_revision_id", "dock_id")
+    REFERENCES "dock_revision" ("id", "dock_id") ON DELETE RESTRICT,
+  CONSTRAINT "dock_revision_content_id_revision_content_id_fkey"
+    FOREIGN KEY ("content_id") REFERENCES "revision_content" ("id") ON DELETE RESTRICT,
+  CONSTRAINT "dock_revision_actor_profile_id_profile_id_fkey"
+    FOREIGN KEY ("actor_profile_id") REFERENCES "profile" ("id") ON DELETE RESTRICT,
+  CONSTRAINT "dock_revision_kind_check"
+    CHECK (kind IN ('create', 'update', 'delete', 'restore')),
+  CONSTRAINT "dock_revision_source_shape_check"
+    CHECK ((kind = 'restore') = (source_revision_id IS NOT NULL))
+);
+CREATE INDEX "dock_revision_dock_created_at_idx"
+  ON "dock_revision" ("dock_id", "created_at" DESC NULLS LAST, "id" DESC NULLS LAST);
+CREATE INDEX "dock_revision_content_idx" ON "dock_revision" ("content_id");
+
+CREATE TABLE "dock_revision_head" (
+  "dock_id" uuid NOT NULL,
+  "revision_id" uuid NOT NULL,
+  PRIMARY KEY ("dock_id"),
+  CONSTRAINT "dock_revision_head_revision_key" UNIQUE ("revision_id"),
+  CONSTRAINT "dock_revision_head_dock_id_unit_dock_id_fkey"
+    FOREIGN KEY ("dock_id") REFERENCES "unit_dock" ("id") ON DELETE CASCADE,
+  CONSTRAINT "dock_revision_head_revision_dock_fkey"
+    FOREIGN KEY ("revision_id", "dock_id")
+    REFERENCES "dock_revision" ("id", "dock_id") ON DELETE RESTRICT
+);
+
+CREATE TABLE dock_history_checkpoint AS
+SELECT
+  dock.id AS dock_id,
+  uuidv7() AS revision_id,
+  jsonb_build_object(
+    'version', 1,
+    'dock', jsonb_build_object(
+      'id', dock.id,
+      'unitId', dock.unit_id,
+      'kind', dock.kind,
+      'document', dock.document,
+      'deletedAt', dock.deleted_at,
+      'createdAt', dock.created_at,
+      'updatedAt', dock.updated_at
+    )
+  ) AS payload
+FROM unit_dock AS dock
+WHERE dock.deleted_at IS NULL;
+
+ALTER TABLE dock_history_checkpoint
+  ADD COLUMN sha256 text,
+  ADD COLUMN byte_size integer;
+UPDATE dock_history_checkpoint
+SET sha256 = encode(sha256(convert_to(payload::text, 'UTF8')), 'hex'),
+    byte_size = octet_length(payload::text);
+ALTER TABLE dock_history_checkpoint
+  ALTER COLUMN sha256 SET NOT NULL,
+  ALTER COLUMN byte_size SET NOT NULL;
+
+INSERT INTO revision_content (
+  id, model, sha256, byte_size, encoding, base_content_id, delta_depth, payload
+)
+SELECT uuidv7(), 'rezics.dock.v1', sha256, byte_size, 'full', NULL, 0, payload
+FROM dock_history_checkpoint
+ON CONFLICT (model, sha256) DO NOTHING;
+
+INSERT INTO dock_revision (
+  id, dock_id, parent_revision_id, source_revision_id, content_id, kind
+)
+SELECT checkpoint.revision_id, checkpoint.dock_id, NULL, NULL, content.id, 'create'
+FROM dock_history_checkpoint AS checkpoint
+JOIN revision_content AS content
+  ON content.model = 'rezics.dock.v1' AND content.sha256 = checkpoint.sha256;
+
+INSERT INTO dock_revision_head (dock_id, revision_id)
+SELECT dock_id, revision_id FROM dock_history_checkpoint;
+
+DROP TABLE dock_history_checkpoint;
 DROP TABLE "realm_navigation";
 DROP TABLE "zone_navigation";

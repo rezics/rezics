@@ -140,7 +140,7 @@ LEFT JOIN LATERAL (
 	WHERE node.content_unit_id = source.unit_id
 		AND node.deleted_at IS NULL
 		AND structure.deleted_at IS NULL
-		AND structure.purpose IN ('book.contents', 'post.contents')
+		AND structure.kind IN ('book.contents', 'post.contents')
 ) AS scope_data ON true
 LEFT JOIN LATERAL (
 	SELECT

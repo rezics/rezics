@@ -17,8 +17,8 @@ export type { SearchSort };
 export interface SearchHit {
 	id: string;
 	slugAddress: PublicSlugAddressValue | null;
+	category: string;
 	kind: string;
-	type: string;
 	titles: string[];
 	summaries: string[];
 	variantRole?: "standalone" | "main" | "variant";
@@ -43,7 +43,7 @@ export interface DomainSearchRequest {
 	cursor?: string;
 	limit?: number;
 	Languages?: ContentLanguage[];
-	types?: string[];
+	kinds?: string[];
 	contentRatings?: string[];
 	aiDisclosures?: string[];
 	licenses?: PublicationLicenseId[];
@@ -76,7 +76,7 @@ const CommonFilterableAttributes = [
 
 export const SearchCategoryRules = {
 	units: {
-		filterableAttributes: [...CommonFilterableAttributes, "type"],
+		filterableAttributes: [...CommonFilterableAttributes, "kind"],
 		sortableAttributes: [...CommonSortableAttributes, "publishedAt"],
 	},
 	users: {
@@ -84,7 +84,7 @@ export const SearchCategoryRules = {
 		sortableAttributes: [...CommonSortableAttributes, "followerCount"],
 	},
 	entity: {
-		filterableAttributes: [...CommonFilterableAttributes, "type"],
+		filterableAttributes: [...CommonFilterableAttributes, "kind"],
 		sortableAttributes: CommonSortableAttributes,
 	},
 	tags: {
@@ -110,7 +110,7 @@ export const SearchCategoryRules = {
 		sortableAttributes: CommonSortableAttributes,
 	},
 	reviews: {
-		filterableAttributes: [...CommonFilterableAttributes, "publisherId", "targetId", "type"],
+		filterableAttributes: [...CommonFilterableAttributes, "publisherId", "targetId", "kind"],
 		sortableAttributes: CommonSortableAttributes,
 	},
 	polls: {

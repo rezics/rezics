@@ -28,6 +28,10 @@ export const UnitRevisionSlotRoleValues = [
 
 export const RevisionContentEncodingValues = ["full", "delta"] as const;
 export type RevisionContentEncoding = (typeof RevisionContentEncodingValues)[number];
+export const unitRevisionSlotRole = pgEnum(
+	"unit_revision_slot_role",
+	toEnumValues(UnitRevisionSlotRoleValues),
+);
 export const unitStatusActorKind = pgEnum(
 	"unit_status_actor_kind",
 	toEnumValues(UnitStatusActorKindValues),
@@ -181,7 +185,7 @@ export const unitRevisionSlot = pgTable(
 	{
 		revisionId: uuid().notNull(),
 		unitId: uuid().notNull(),
-		role: text().notNull(),
+		role: unitRevisionSlotRole().notNull(),
 		contentId: uuid()
 			.notNull()
 			.references(() => revisionContent.id, { onDelete: "restrict" }),
@@ -201,10 +205,6 @@ export const unitRevisionSlot = pgTable(
 		}).onDelete("restrict"),
 		index("unit_revision_slot_content_idx").on(table.contentId),
 		index("unit_revision_slot_origin_idx").on(table.originRevisionId),
-		check(
-			"unit_revision_slot_role_check",
-			sql`btrim(${table.role}) <> '' and char_length(${table.role}) <= 200`,
-		),
 	],
 );
 
@@ -223,31 +223,6 @@ export const unitRevisionHead = pgTable(
 			foreignColumns: [unitRevision.id, unitRevision.unitId],
 			name: "unit_revision_head_revision_unit_fkey",
 		}).onDelete("restrict"),
-	],
-);
-
-/** Current optimistic-concurrency token for one independently edited Unit component. */
-export const unitRevisionComponentHead = pgTable(
-	"unit_revision_component_head",
-	{
-		unitId: uuid()
-			.notNull()
-			.references(() => unit.id, { onDelete: "cascade" }),
-		componentKey: text().notNull(),
-		revisionId: uuid().notNull(),
-	},
-	(table) => [
-		primaryKey({ columns: [table.unitId, table.componentKey] }),
-		foreignKey({
-			columns: [table.revisionId, table.unitId],
-			foreignColumns: [unitRevision.id, unitRevision.unitId],
-			name: "unit_revision_component_head_revision_unit_fkey",
-		}).onDelete("restrict"),
-		index("unit_revision_component_head_revision_idx").on(table.revisionId),
-		check(
-			"unit_revision_component_head_key_check",
-			sql`btrim(${table.componentKey}) <> '' and char_length(${table.componentKey}) <= 200`,
-		),
 	],
 );
 
