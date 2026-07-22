@@ -6,7 +6,7 @@ import {
 	usePostApiImageAssets,
 	usePostApiImageAssetsByIdComplete,
 } from "@rezics/openapi-tanstack-query";
-import { Eye, EyeOff, ImagePlus, RefreshCw, Trash2, UploadCloud, X } from "lucide-react";
+import { Eye, EyeOff, ImagePlus, RefreshCw, Trash2, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
 import {
@@ -255,16 +255,14 @@ export function LocalizationImageUploadField({
 				</div>
 			) : null}
 			<div className="flex flex-wrap gap-2">
-				<FileUploadTrigger asChild>
-					<Button disabled={busy} size="sm" type="button" variant="outline">
-						{displayed ? (
+				{displayed && (
+					<FileUploadTrigger asChild>
+						<Button disabled={busy} size="sm" type="button" variant="outline">
 							<RefreshCw aria-hidden className="size-3.5" />
-						) : (
-							<UploadCloud aria-hidden className="size-3.5" />
-						)}
-						{displayed ? t.media.replace : copy.upload}
-					</Button>
-				</FileUploadTrigger>
+							{t.media.replace}
+						</Button>
+					</FileUploadTrigger>
+				)}
 				{busy && (
 					<Button
 						onClick={() => xhr.current?.abort()}

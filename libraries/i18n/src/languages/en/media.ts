@@ -21,19 +21,16 @@ export default {
 	roles: {
 		avatar: {
 			title: "Avatar",
-			upload: "Upload avatar",
 			inherit: "Use the first available avatar in localization order",
 			failed: "The avatar could not be uploaded. Try again.",
 		},
 		banner: {
 			title: "Banner",
-			upload: "Upload banner",
 			inherit: "Use the first available banner in localization order",
 			failed: "The banner could not be uploaded. Try again.",
 		},
 		cover: {
 			title: "Cover",
-			upload: "Upload cover",
 			inherit: "Use the first available cover in localization order",
 			failed: "The cover could not be uploaded. Try again.",
 		},

@@ -20,19 +20,16 @@ export default {
 	roles: {
 		avatar: {
 			title: "頭像",
-			upload: "上傳頭像",
 			inherit: "依照在地化順序使用第一個可用頭像",
 			failed: "頭像上傳失敗，請重試。",
 		},
 		banner: {
 			title: "橫幅",
-			upload: "上傳橫幅",
 			inherit: "依照在地化順序使用第一個可用橫幅",
 			failed: "橫幅上傳失敗，請重試。",
 		},
 		cover: {
 			title: "封面",
-			upload: "上傳封面",
 			inherit: "依照在地化順序使用第一個可用封面",
 			failed: "封面上傳失敗，請重試。",
 		},
