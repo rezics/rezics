@@ -1,9 +1,13 @@
+import { PgDialect } from "drizzle-orm/pg-core";
+import { FontAwesomeProvider } from "@rezics/avatar";
 import { describe, expect, it } from "vitest";
 
+import { unit } from "../database/schema";
 import {
 	avatarReferenceToColumns,
 	resolveUnitLocalizationAvatarFromOrdered,
 	resolveUnitLocalizationImageAssetIdFromOrdered,
+	resolvedUnitLocalizationAvatar,
 	toUnitLocalizationStorage,
 } from "./localization";
 
@@ -49,6 +53,15 @@ describe("resolveUnitLocalizationAvatarFromOrdered", () => {
 				"zh",
 			),
 		).toEqual({ type: "image", image: { assetId: "avatar-default" } });
+	});
+});
+
+describe("resolvedUnitLocalizationAvatar", () => {
+	it("gives the bound provider value a concrete PostgreSQL type", () => {
+		const query = new PgDialect().sqlToQuery(resolvedUnitLocalizationAvatar(unit.id));
+
+		expect(query.sql).toContain("'provider', $1::text");
+		expect(query.params[0]).toBe(FontAwesomeProvider);
 	});
 });
 

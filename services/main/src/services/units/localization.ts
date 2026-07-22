@@ -214,7 +214,7 @@ export function resolvedUnitLocalizationAvatar(
 			when 'icon' then jsonb_build_object(
 				'type', 'icon',
 				'icon', jsonb_build_object(
-					'provider', ${FontAwesomeProvider},
+					'provider', ${FontAwesomeProvider}::text,
 					'prefix', ${mediaLocalization.avatarIconPrefix},
 					'name', ${mediaLocalization.avatarIconName}
 				)
