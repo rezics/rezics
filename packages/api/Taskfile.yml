@@ -1,0 +1,22 @@
+version: "3"
+
+tasks:
+    generate:
+        desc: Generate the public SDK from the REZICS OpenAPI contract.
+        cmds:
+            - yarn run generate
+
+    typecheck:
+        desc: Type-check the public SDK.
+        cmds:
+            - yarn run typecheck
+
+    test:
+        desc: Run public SDK behavior tests.
+        cmds:
+            - yarn run test
+
+    build:
+        desc: Build the publishable npm package.
+        cmds:
+            - yarn run build

@@ -35,6 +35,11 @@ export const verbatimTerms = {
 		category: "product",
 		rationale: "User-confirmed name for the REZICS authoring workspace.",
 	},
+	staffTrusted: {
+		value: "Staff Trusted",
+		category: "product",
+		rationale: "Canonical name of the elevated API token policy class.",
+	},
 	github: {
 		value: "GitHub",
 		category: "brand",
@@ -69,6 +74,16 @@ export const verbatimTerms = {
 		value: "OpenAPI",
 		category: "protocol",
 		rationale: "Specification name.",
+	},
+	envFile: {
+		value: ".env",
+		category: "identifier",
+		rationale: "Conventional environment-file name used by local development tools.",
+	},
+	apiPolicyOperationId: {
+		value: "x-rezics-policy-operation-id",
+		category: "identifier",
+		rationale: "OpenAPI extension key used to configure per-operation token policy limits.",
 	},
 	oauth: {
 		value: "OAuth",

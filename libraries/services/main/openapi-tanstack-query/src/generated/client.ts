@@ -73,6 +73,16 @@ import type {
 	PostApiApiTokensResponses,
 	PatchApiApiTokensByTokenIdOptions,
 	PatchApiApiTokensByTokenIdResponses,
+	PutApiApiTokensByTokenIdPolicyOptions,
+	PutApiApiTokensByTokenIdPolicyResponses,
+	GetCurrentApiTokenOptions,
+	GetCurrentApiTokenResponses,
+	GetApiApiTokenPoliciesOptions,
+	GetApiApiTokenPoliciesResponses,
+	PatchApiApiTokenPoliciesByPolicyKeyOptions,
+	PatchApiApiTokenPoliciesByPolicyKeyResponses,
+	PutApiApiTokenPoliciesBindingsByTokenIdOptions,
+	PutApiApiTokenPoliciesBindingsByTokenIdResponses,
 	GetApiFeedOptions,
 	GetApiFeedResponses,
 	GetApiFeedbackMeOptions,
@@ -546,6 +556,7 @@ export function getApiUnitByUnitIdAssociationProposals<ThrowOnError extends bool
 	return request({
 		method: "GET",
 		url: "/api/unit/{unitId}/association-proposals",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiUnitByUnitIdAssociationProposalsResponses, ThrowOnError>>;
 }
@@ -564,6 +575,7 @@ export function postApiUnitByUnitIdAssociationProposalsRequests<
 	return request({
 		method: "POST",
 		url: "/api/unit/{unitId}/association-proposals/requests",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<PostApiUnitByUnitIdAssociationProposalsRequestsResponses, ThrowOnError>
@@ -586,6 +598,7 @@ export function postApiUnitByUnitIdAssociationProposalsInvitations<
 	return request({
 		method: "POST",
 		url: "/api/unit/{unitId}/association-proposals/invitations",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<PostApiUnitByUnitIdAssociationProposalsInvitationsResponses, ThrowOnError>
@@ -611,6 +624,7 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdAccept<
 	return request({
 		method: "POST",
 		url: "/api/unit/{unitId}/association-proposals/{proposalId}/accept",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -639,6 +653,7 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdDecline<
 	return request({
 		method: "POST",
 		url: "/api/unit/{unitId}/association-proposals/{proposalId}/decline",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -664,6 +679,7 @@ export function deleteApiUnitByUnitIdAssociationProposalsByProposalId<
 	return request({
 		method: "DELETE",
 		url: "/api/unit/{unitId}/association-proposals/{proposalId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<DeleteApiUnitByUnitIdAssociationProposalsByProposalIdResponses, ThrowOnError>
@@ -735,9 +751,15 @@ export function getApiNotifications<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<GetApiNotificationsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/notifications", ...config }) as Promise<
-		RequestResult<GetApiNotificationsResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/notifications",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiNotificationsResponses, ThrowOnError>>;
 }
 
 /**
@@ -749,9 +771,15 @@ export function getApiNotificationsUnreadCount<ThrowOnError extends boolean = tr
 ): Promise<RequestResult<GetApiNotificationsUnreadCountResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/notifications/unread-count", ...config }) as Promise<
-		RequestResult<GetApiNotificationsUnreadCountResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/notifications/unread-count",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiNotificationsUnreadCountResponses, ThrowOnError>>;
 }
 
 /**
@@ -763,9 +791,15 @@ export function putApiNotificationsReadAll<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PutApiNotificationsReadAllResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PUT", url: "/api/notifications/read-all", ...config }) as Promise<
-		RequestResult<PutApiNotificationsReadAllResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PUT",
+		url: "/api/notifications/read-all",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiNotificationsReadAllResponses, ThrowOnError>>;
 }
 
 /**
@@ -780,6 +814,10 @@ export function putApiNotificationsByNotificationIdRead<ThrowOnError extends boo
 	return request({
 		method: "PUT",
 		url: "/api/notifications/{notificationId}/read",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PutApiNotificationsByNotificationIdReadResponses, ThrowOnError>>;
 }
@@ -793,9 +831,15 @@ export function getApiNotificationsPreferences<ThrowOnError extends boolean = tr
 ): Promise<RequestResult<GetApiNotificationsPreferencesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/notifications/preferences", ...config }) as Promise<
-		RequestResult<GetApiNotificationsPreferencesResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/notifications/preferences",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiNotificationsPreferencesResponses, ThrowOnError>>;
 }
 
 /**
@@ -807,9 +851,15 @@ export function putApiNotificationsPreferences<ThrowOnError extends boolean = tr
 ): Promise<RequestResult<PutApiNotificationsPreferencesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PUT", url: "/api/notifications/preferences", ...config }) as Promise<
-		RequestResult<PutApiNotificationsPreferencesResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PUT",
+		url: "/api/notifications/preferences",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiNotificationsPreferencesResponses, ThrowOnError>>;
 }
 
 /**
@@ -868,6 +918,10 @@ export function putApiRecommendationsExclusionsByUnitId<ThrowOnError extends boo
 	return request({
 		method: "PUT",
 		url: "/api/recommendations/exclusions/{unitId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PutApiRecommendationsExclusionsByUnitIdResponses, ThrowOnError>>;
 }
@@ -884,6 +938,10 @@ export function deleteApiRecommendationsExclusionsByUnitId<ThrowOnError extends 
 	return request({
 		method: "DELETE",
 		url: "/api/recommendations/exclusions/{unitId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<DeleteApiRecommendationsExclusionsByUnitIdResponses, ThrowOnError>>;
 }
@@ -897,9 +955,15 @@ export function getApiMessagesConversations<ThrowOnError extends boolean = true>
 ): Promise<RequestResult<GetApiMessagesConversationsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/messages/conversations", ...config }) as Promise<
-		RequestResult<GetApiMessagesConversationsResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/messages/conversations",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiMessagesConversationsResponses, ThrowOnError>>;
 }
 
 /**
@@ -911,9 +975,15 @@ export function postApiMessagesConversations<ThrowOnError extends boolean = true
 ): Promise<RequestResult<PostApiMessagesConversationsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/messages/conversations", ...config }) as Promise<
-		RequestResult<PostApiMessagesConversationsResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/messages/conversations",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiMessagesConversationsResponses, ThrowOnError>>;
 }
 
 /**
@@ -928,6 +998,10 @@ export function getApiMessagesConversationsByConversationId<ThrowOnError extends
 	return request({
 		method: "GET",
 		url: "/api/messages/conversations/{conversationId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<GetApiMessagesConversationsByConversationIdResponses, ThrowOnError>
@@ -950,6 +1024,10 @@ export function getApiMessagesConversationsByConversationIdMessages<
 	return request({
 		method: "GET",
 		url: "/api/messages/conversations/{conversationId}/messages",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<GetApiMessagesConversationsByConversationIdMessagesResponses, ThrowOnError>
@@ -972,6 +1050,10 @@ export function postApiMessagesConversationsByConversationIdMessages<
 	return request({
 		method: "POST",
 		url: "/api/messages/conversations/{conversationId}/messages",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<PostApiMessagesConversationsByConversationIdMessagesResponses, ThrowOnError>
@@ -992,6 +1074,10 @@ export function putApiMessagesConversationsByConversationIdRead<
 	return request({
 		method: "PUT",
 		url: "/api/messages/conversations/{conversationId}/read",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<PutApiMessagesConversationsByConversationIdReadResponses, ThrowOnError>
@@ -1007,9 +1093,15 @@ export function deleteApiMessagesByMessageId<ThrowOnError extends boolean = true
 ): Promise<RequestResult<DeleteApiMessagesByMessageIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "DELETE", url: "/api/messages/{messageId}", ...config }) as Promise<
-		RequestResult<DeleteApiMessagesByMessageIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "DELETE",
+		url: "/api/messages/{messageId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<DeleteApiMessagesByMessageIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -1021,9 +1113,12 @@ export function getApiApiTokens<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<GetApiApiTokensResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/api-tokens", ...config }) as Promise<
-		RequestResult<GetApiApiTokensResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/api-tokens",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiApiTokensResponses, ThrowOnError>>;
 }
 
 /**
@@ -1035,9 +1130,12 @@ export function postApiApiTokens<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PostApiApiTokensResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/api-tokens", ...config }) as Promise<
-		RequestResult<PostApiApiTokensResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/api-tokens",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PostApiApiTokensResponses, ThrowOnError>>;
 }
 
 /**
@@ -1049,9 +1147,12 @@ export function patchApiApiTokensByTokenId<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PatchApiApiTokensByTokenIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PATCH", url: "/api/api-tokens/{tokenId}", ...config }) as Promise<
-		RequestResult<PatchApiApiTokensByTokenIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PATCH",
+		url: "/api/api-tokens/{tokenId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PatchApiApiTokensByTokenIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -1063,9 +1164,97 @@ export function deleteApiApiTokensByTokenId<ThrowOnError extends boolean = true>
 ): Promise<RequestResult<DeleteApiApiTokensByTokenIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "DELETE", url: "/api/api-tokens/{tokenId}", ...config }) as Promise<
-		RequestResult<DeleteApiApiTokensByTokenIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "DELETE",
+		url: "/api/api-tokens/{tokenId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<DeleteApiApiTokensByTokenIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Replace API token policy override
+ * {@link /api/api-tokens/:tokenId/policy}
+ */
+export function putApiApiTokensByTokenIdPolicy<ThrowOnError extends boolean = true>(
+	options: Options<PutApiApiTokensByTokenIdPolicyOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiApiTokensByTokenIdPolicyResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/api-tokens/{tokenId}/policy",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PutApiApiTokensByTokenIdPolicyResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Inspect the current API token's safe capabilities
+ * {@link /api/token}
+ */
+export function getCurrentApiToken<ThrowOnError extends boolean = true>(
+	options: Options<GetCurrentApiTokenOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetCurrentApiTokenResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/token",
+		security: [{ type: "http", scheme: "bearer" }],
+		...config,
+	}) as Promise<RequestResult<GetCurrentApiTokenResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List API token policies as staff
+ * {@link /api/api-token-policies}
+ */
+export function getApiApiTokenPolicies<ThrowOnError extends boolean = true>(
+	options: Options<GetApiApiTokenPoliciesOptions, ThrowOnError> = {},
+): Promise<RequestResult<GetApiApiTokenPoliciesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/api-token-policies",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiApiTokenPoliciesResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Replace an API token policy as staff
+ * {@link /api/api-token-policies/:policyKey}
+ */
+export function patchApiApiTokenPoliciesByPolicyKey<ThrowOnError extends boolean = true>(
+	options: Options<PatchApiApiTokenPoliciesByPolicyKeyOptions, ThrowOnError>,
+): Promise<RequestResult<PatchApiApiTokenPoliciesByPolicyKeyResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PATCH",
+		url: "/api/api-token-policies/{policyKey}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PatchApiApiTokenPoliciesByPolicyKeyResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Assign an API token policy as staff
+ * {@link /api/api-token-policies/bindings/:tokenId}
+ */
+export function putApiApiTokenPoliciesBindingsByTokenId<ThrowOnError extends boolean = true>(
+	options: Options<PutApiApiTokenPoliciesBindingsByTokenIdOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiApiTokenPoliciesBindingsByTokenIdResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/api-token-policies/bindings/{tokenId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PutApiApiTokenPoliciesBindingsByTokenIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -1091,9 +1280,15 @@ export function getApiFeedbackMe<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<GetApiFeedbackMeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/feedback/me", ...config }) as Promise<
-		RequestResult<GetApiFeedbackMeResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/feedback/me",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiFeedbackMeResponses, ThrowOnError>>;
 }
 
 /**
@@ -1105,9 +1300,15 @@ export function postApiFeedback<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PostApiFeedbackResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/feedback", ...config }) as Promise<
-		RequestResult<PostApiFeedbackResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/feedback",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiFeedbackResponses, ThrowOnError>>;
 }
 
 /**
@@ -1122,6 +1323,7 @@ export function getApiGovernanceUnitByUnitIdAccessEffective<ThrowOnError extends
 	return request({
 		method: "GET",
 		url: "/api/governance/unit/{unitId}/access/effective",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<GetApiGovernanceUnitByUnitIdAccessEffectiveResponses, ThrowOnError>
@@ -1140,6 +1342,7 @@ export function putApiGovernanceUnitByUnitIdOwnership<ThrowOnError extends boole
 	return request({
 		method: "PUT",
 		url: "/api/governance/unit/{unitId}/ownership",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PutApiGovernanceUnitByUnitIdOwnershipResponses, ThrowOnError>>;
 }
@@ -1156,6 +1359,7 @@ export function postApiGovernanceUnitByUnitIdOwnershipClaim<ThrowOnError extends
 	return request({
 		method: "POST",
 		url: "/api/governance/unit/{unitId}/ownership/claim",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<PostApiGovernanceUnitByUnitIdOwnershipClaimResponses, ThrowOnError>
@@ -1174,6 +1378,7 @@ export function getApiGovernanceUnitByUnitIdAccessBindings<ThrowOnError extends 
 	return request({
 		method: "GET",
 		url: "/api/governance/unit/{unitId}/access-bindings",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiGovernanceUnitByUnitIdAccessBindingsResponses, ThrowOnError>>;
 }
@@ -1190,6 +1395,7 @@ export function postApiGovernanceUnitByUnitIdAccessBindings<ThrowOnError extends
 	return request({
 		method: "POST",
 		url: "/api/governance/unit/{unitId}/access-bindings",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<PostApiGovernanceUnitByUnitIdAccessBindingsResponses, ThrowOnError>
@@ -1212,6 +1418,7 @@ export function deleteApiGovernanceUnitByUnitIdAccessBindingsByBindingId<
 	return request({
 		method: "DELETE",
 		url: "/api/governance/unit/{unitId}/access-bindings/{bindingId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -1233,6 +1440,7 @@ export function getApiGovernanceUnitByUnitIdAccessRestrictions<ThrowOnError exte
 	return request({
 		method: "GET",
 		url: "/api/governance/unit/{unitId}/access-restrictions",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<GetApiGovernanceUnitByUnitIdAccessRestrictionsResponses, ThrowOnError>
@@ -1253,6 +1461,7 @@ export function postApiGovernanceUnitByUnitIdAccessRestrictions<
 	return request({
 		method: "POST",
 		url: "/api/governance/unit/{unitId}/access-restrictions",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<PostApiGovernanceUnitByUnitIdAccessRestrictionsResponses, ThrowOnError>
@@ -1281,6 +1490,7 @@ export function deleteApiGovernanceUnitByUnitIdAccessRestrictionsByRestrictionId
 	return request({
 		method: "DELETE",
 		url: "/api/governance/unit/{unitId}/access-restrictions/{restrictionId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -1302,6 +1512,7 @@ export function getApiGovernanceUnitByUnitIdProtections<ThrowOnError extends boo
 	return request({
 		method: "GET",
 		url: "/api/governance/unit/{unitId}/protections",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiGovernanceUnitByUnitIdProtectionsResponses, ThrowOnError>>;
 }
@@ -1318,6 +1529,7 @@ export function postApiGovernanceUnitByUnitIdProtections<ThrowOnError extends bo
 	return request({
 		method: "POST",
 		url: "/api/governance/unit/{unitId}/protections",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PostApiGovernanceUnitByUnitIdProtectionsResponses, ThrowOnError>>;
 }
@@ -1338,6 +1550,7 @@ export function deleteApiGovernanceUnitByUnitIdProtectionsByProtectionId<
 	return request({
 		method: "DELETE",
 		url: "/api/governance/unit/{unitId}/protections/{protectionId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -1359,6 +1572,7 @@ export function getApiGovernanceUnitAccessInvitations<ThrowOnError extends boole
 	return request({
 		method: "GET",
 		url: "/api/governance/unit/access-invitations",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiGovernanceUnitAccessInvitationsResponses, ThrowOnError>>;
 }
@@ -1375,6 +1589,7 @@ export function getApiGovernanceUnitByUnitIdAccessInvitations<ThrowOnError exten
 	return request({
 		method: "GET",
 		url: "/api/governance/unit/{unitId}/access-invitations",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<GetApiGovernanceUnitByUnitIdAccessInvitationsResponses, ThrowOnError>
@@ -1393,6 +1608,7 @@ export function postApiGovernanceUnitByUnitIdAccessInvitations<ThrowOnError exte
 	return request({
 		method: "POST",
 		url: "/api/governance/unit/{unitId}/access-invitations",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<PostApiGovernanceUnitByUnitIdAccessInvitationsResponses, ThrowOnError>
@@ -1421,6 +1637,7 @@ export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdAcce
 	return request({
 		method: "POST",
 		url: "/api/governance/unit/{unitId}/access-invitations/{invitationId}/accept",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -1452,6 +1669,7 @@ export function postApiGovernanceUnitByUnitIdAccessInvitationsByInvitationIdDecl
 	return request({
 		method: "POST",
 		url: "/api/governance/unit/{unitId}/access-invitations/{invitationId}/decline",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -1483,6 +1701,7 @@ export function deleteApiGovernanceUnitByUnitIdAccessInvitationsByInvitationId<
 	return request({
 		method: "DELETE",
 		url: "/api/governance/unit/{unitId}/access-invitations/{invitationId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -1501,9 +1720,12 @@ export function getApiGovernanceNotesByPostId<ThrowOnError extends boolean = tru
 ): Promise<RequestResult<GetApiGovernanceNotesByPostIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/governance/notes/{postId}", ...config }) as Promise<
-		RequestResult<GetApiGovernanceNotesByPostIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/governance/notes/{postId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiGovernanceNotesByPostIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -1518,6 +1740,10 @@ export function patchApiGovernanceNotesByPostId<ThrowOnError extends boolean = t
 	return request({
 		method: "PATCH",
 		url: "/api/governance/notes/{postId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PatchApiGovernanceNotesByPostIdResponses, ThrowOnError>>;
 }
@@ -1534,6 +1760,7 @@ export function getApiGovernanceModerationCases<ThrowOnError extends boolean = t
 	return request({
 		method: "GET",
 		url: "/api/governance/moderation/cases",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiGovernanceModerationCasesResponses, ThrowOnError>>;
 }
@@ -1550,6 +1777,7 @@ export function getApiGovernanceModerationCasesByCaseId<ThrowOnError extends boo
 	return request({
 		method: "GET",
 		url: "/api/governance/moderation/cases/{caseId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiGovernanceModerationCasesByCaseIdResponses, ThrowOnError>>;
 }
@@ -1566,6 +1794,7 @@ export function patchApiGovernanceModerationCasesByCaseId<ThrowOnError extends b
 	return request({
 		method: "PATCH",
 		url: "/api/governance/moderation/cases/{caseId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PatchApiGovernanceModerationCasesByCaseIdResponses, ThrowOnError>>;
 }
@@ -1582,6 +1811,7 @@ export function postApiGovernanceModerationActions<ThrowOnError extends boolean 
 	return request({
 		method: "POST",
 		url: "/api/governance/moderation/actions",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PostApiGovernanceModerationActionsResponses, ThrowOnError>>;
 }
@@ -1598,6 +1828,7 @@ export function patchApiGovernanceFeedbackByFeedbackIdResolve<ThrowOnError exten
 	return request({
 		method: "PATCH",
 		url: "/api/governance/feedback/{feedbackId}/resolve",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<PatchApiGovernanceFeedbackByFeedbackIdResolveResponses, ThrowOnError>
@@ -1616,6 +1847,7 @@ export function postApiGovernanceModerationEnforcements<ThrowOnError extends boo
 	return request({
 		method: "POST",
 		url: "/api/governance/moderation/enforcements",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PostApiGovernanceModerationEnforcementsResponses, ThrowOnError>>;
 }
@@ -1642,6 +1874,7 @@ export function postApiGovernanceModerationEnforcementsByEnforcementIdRevoke<
 	return request({
 		method: "POST",
 		url: "/api/governance/moderation/enforcements/{enforcementId}/revoke",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -1660,9 +1893,12 @@ export function getApiGovernanceGrants<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<GetApiGovernanceGrantsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/governance/grants", ...config }) as Promise<
-		RequestResult<GetApiGovernanceGrantsResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/governance/grants",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiGovernanceGrantsResponses, ThrowOnError>>;
 }
 
 /**
@@ -1674,9 +1910,12 @@ export function postApiGovernanceGrants<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PostApiGovernanceGrantsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/governance/grants", ...config }) as Promise<
-		RequestResult<PostApiGovernanceGrantsResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/governance/grants",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PostApiGovernanceGrantsResponses, ThrowOnError>>;
 }
 
 /**
@@ -1691,6 +1930,7 @@ export function deleteApiGovernanceGrantsByGrantId<ThrowOnError extends boolean 
 	return request({
 		method: "DELETE",
 		url: "/api/governance/grants/{grantId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<DeleteApiGovernanceGrantsByGrantIdResponses, ThrowOnError>>;
 }
@@ -1704,9 +1944,15 @@ export function postApiSeries<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PostApiSeriesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/series", ...config }) as Promise<
-		RequestResult<PostApiSeriesResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/series",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiSeriesResponses, ThrowOnError>>;
 }
 
 /**
@@ -1736,6 +1982,10 @@ export function replaceZoneSlugAddress<ThrowOnError extends boolean = true>(
 	return request({
 		method: "PUT",
 		url: "/api/zones/{zoneId}/slug-address",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<ReplaceZoneSlugAddressResponses, ThrowOnError>>;
 }
@@ -1763,9 +2013,15 @@ export function patchApiZonesByZoneId<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PatchApiZonesByZoneIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PATCH", url: "/api/zones/{zoneId}", ...config }) as Promise<
-		RequestResult<PatchApiZonesByZoneIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PATCH",
+		url: "/api/zones/{zoneId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PatchApiZonesByZoneIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -1824,6 +2080,10 @@ export function putApiZonesByZoneIdPagesBySlug<ThrowOnError extends boolean = tr
 	return request({
 		method: "PUT",
 		url: "/api/zones/{zoneId}/pages/{slug}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PutApiZonesByZoneIdPagesBySlugResponses, ThrowOnError>>;
 }
@@ -1840,6 +2100,10 @@ export function deleteApiZonesByZoneIdPagesBySlug<ThrowOnError extends boolean =
 	return request({
 		method: "DELETE",
 		url: "/api/zones/{zoneId}/pages/{slug}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<DeleteApiZonesByZoneIdPagesBySlugResponses, ThrowOnError>>;
 }
@@ -1867,9 +2131,15 @@ export function postApiZonesByZoneIdNavigation<ThrowOnError extends boolean = tr
 ): Promise<RequestResult<PostApiZonesByZoneIdNavigationResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/zones/{zoneId}/navigation", ...config }) as Promise<
-		RequestResult<PostApiZonesByZoneIdNavigationResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/zones/{zoneId}/navigation",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiZonesByZoneIdNavigationResponses, ThrowOnError>>;
 }
 
 /**
@@ -1902,6 +2172,10 @@ export function putApiZonesByZoneIdNavigationByNavigationId<ThrowOnError extends
 	return request({
 		method: "PUT",
 		url: "/api/zones/{zoneId}/navigation/{navigationId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<PutApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>
@@ -1920,6 +2194,10 @@ export function deleteApiZonesByZoneIdNavigationByNavigationId<ThrowOnError exte
 	return request({
 		method: "DELETE",
 		url: "/api/zones/{zoneId}/navigation/{navigationId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<DeleteApiZonesByZoneIdNavigationByNavigationIdResponses, ThrowOnError>
@@ -1938,6 +2216,10 @@ export function putApiSeriesBySeriesIdReleasesByReleaseId<ThrowOnError extends b
 	return request({
 		method: "PUT",
 		url: "/api/series/{seriesId}/releases/{releaseId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PutApiSeriesBySeriesIdReleasesByReleaseIdResponses, ThrowOnError>>;
 }
@@ -1954,6 +2236,10 @@ export function deleteApiSeriesBySeriesIdReleasesByReleaseId<ThrowOnError extend
 	return request({
 		method: "DELETE",
 		url: "/api/series/{seriesId}/releases/{releaseId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<DeleteApiSeriesBySeriesIdReleasesByReleaseIdResponses, ThrowOnError>
@@ -1969,9 +2255,15 @@ export function postApiZones<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PostApiZonesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/zones", ...config }) as Promise<
-		RequestResult<PostApiZonesResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/zones",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiZonesResponses, ThrowOnError>>;
 }
 
 /**
@@ -2004,6 +2296,10 @@ export function postApiSoftwareBySoftwareIdSystemRequirements<ThrowOnError exten
 	return request({
 		method: "POST",
 		url: "/api/software/{softwareId}/system-requirements",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<PostApiSoftwareBySoftwareIdSystemRequirementsResponses, ThrowOnError>
@@ -2032,6 +2328,10 @@ export function putApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<
 	return request({
 		method: "PUT",
 		url: "/api/software/{softwareId}/system-requirements/{requirementId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -2063,6 +2363,10 @@ export function deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<
 	return request({
 		method: "DELETE",
 		url: "/api/software/{softwareId}/system-requirements/{requirementId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -2114,6 +2418,10 @@ export function putApiUnitsByIdByUnitIdDocksByKind<ThrowOnError extends boolean 
 	return request({
 		method: "PUT",
 		url: "/api/units/by-id/{unitId}/docks/{kind}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PutApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>>;
 }
@@ -2130,6 +2438,10 @@ export function deleteApiUnitsByIdByUnitIdDocksByKind<ThrowOnError extends boole
 	return request({
 		method: "DELETE",
 		url: "/api/units/by-id/{unitId}/docks/{kind}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<DeleteApiUnitsByIdByUnitIdDocksByKindResponses, ThrowOnError>>;
 }
@@ -2174,6 +2486,10 @@ export function postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestore<
 	return request({
 		method: "POST",
 		url: "/api/units/by-id/{unitId}/docks/{kind}/revisions/{revisionId}/restore",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -2192,9 +2508,15 @@ export function getApiUsersMe<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<GetApiUsersMeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/users/me", ...config }) as Promise<
-		RequestResult<GetApiUsersMeResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/users/me",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiUsersMeResponses, ThrowOnError>>;
 }
 
 /**
@@ -2206,9 +2528,15 @@ export function patchApiUsersMe<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PatchApiUsersMeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PATCH", url: "/api/users/me", ...config }) as Promise<
-		RequestResult<PatchApiUsersMeResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PATCH",
+		url: "/api/users/me",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PatchApiUsersMeResponses, ThrowOnError>>;
 }
 
 /**
@@ -2220,9 +2548,15 @@ export function getApiUsersMePreferences<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<GetApiUsersMePreferencesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/users/me/preferences", ...config }) as Promise<
-		RequestResult<GetApiUsersMePreferencesResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/users/me/preferences",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiUsersMePreferencesResponses, ThrowOnError>>;
 }
 
 /**
@@ -2234,9 +2568,15 @@ export function patchApiUsersMePreferences<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PatchApiUsersMePreferencesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PATCH", url: "/api/users/me/preferences", ...config }) as Promise<
-		RequestResult<PatchApiUsersMePreferencesResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PATCH",
+		url: "/api/users/me/preferences",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PatchApiUsersMePreferencesResponses, ThrowOnError>>;
 }
 
 /**
@@ -2248,9 +2588,15 @@ export function putApiUsersMePreferences<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PutApiUsersMePreferencesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PUT", url: "/api/users/me/preferences", ...config }) as Promise<
-		RequestResult<PutApiUsersMePreferencesResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PUT",
+		url: "/api/users/me/preferences",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiUsersMePreferencesResponses, ThrowOnError>>;
 }
 
 /**
@@ -2262,9 +2608,15 @@ export function getApiUsersMeFollowing<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<GetApiUsersMeFollowingResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/users/me/following", ...config }) as Promise<
-		RequestResult<GetApiUsersMeFollowingResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/users/me/following",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiUsersMeFollowingResponses, ThrowOnError>>;
 }
 
 /**
@@ -2279,6 +2631,10 @@ export function getApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = tr
 	return request({
 		method: "GET",
 		url: "/api/users/me/following/{unitId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<GetApiUsersMeFollowingByUnitIdResponses, ThrowOnError>>;
 }
@@ -2295,6 +2651,10 @@ export function putApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = tr
 	return request({
 		method: "PUT",
 		url: "/api/users/me/following/{unitId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PutApiUsersMeFollowingByUnitIdResponses, ThrowOnError>>;
 }
@@ -2311,6 +2671,10 @@ export function deleteApiUsersMeFollowingByUnitId<ThrowOnError extends boolean =
 	return request({
 		method: "DELETE",
 		url: "/api/users/me/following/{unitId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<DeleteApiUsersMeFollowingByUnitIdResponses, ThrowOnError>>;
 }
@@ -2327,6 +2691,10 @@ export function patchApiUsersMeFollowingByUnitId<ThrowOnError extends boolean = 
 	return request({
 		method: "PATCH",
 		url: "/api/users/me/following/{unitId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PatchApiUsersMeFollowingByUnitIdResponses, ThrowOnError>>;
 }
@@ -2354,9 +2722,15 @@ export function getApiUsersMeBlocks<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<GetApiUsersMeBlocksResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/users/me/blocks", ...config }) as Promise<
-		RequestResult<GetApiUsersMeBlocksResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/users/me/blocks",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiUsersMeBlocksResponses, ThrowOnError>>;
 }
 
 /**
@@ -2368,9 +2742,15 @@ export function putApiUsersByIdBlock<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PutApiUsersByIdBlockResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PUT", url: "/api/users/{id}/block", ...config }) as Promise<
-		RequestResult<PutApiUsersByIdBlockResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PUT",
+		url: "/api/users/{id}/block",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiUsersByIdBlockResponses, ThrowOnError>>;
 }
 
 /**
@@ -2382,9 +2762,15 @@ export function deleteApiUsersByIdBlock<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<DeleteApiUsersByIdBlockResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "DELETE", url: "/api/users/{id}/block", ...config }) as Promise<
-		RequestResult<DeleteApiUsersByIdBlockResponses, ThrowOnError>
-	>;
+	return request({
+		method: "DELETE",
+		url: "/api/users/{id}/block",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<DeleteApiUsersByIdBlockResponses, ThrowOnError>>;
 }
 
 /**
@@ -2446,9 +2832,15 @@ export function replaceOwnProfileSlugAddress<ThrowOnError extends boolean = true
 ): Promise<RequestResult<ReplaceOwnProfileSlugAddressResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PUT", url: "/api/slug-addresses/profile", ...config }) as Promise<
-		RequestResult<ReplaceOwnProfileSlugAddressResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PUT",
+		url: "/api/slug-addresses/profile",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<ReplaceOwnProfileSlugAddressResponses, ThrowOnError>>;
 }
 
 /**
@@ -2464,6 +2856,7 @@ export function getUnitSlugAddressAsStaff<ThrowOnError extends boolean = true>(
 	return request({
 		method: "GET",
 		url: "/api/slug-addresses/units/{unitId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetUnitSlugAddressAsStaffResponses, ThrowOnError>>;
 }
@@ -2481,6 +2874,7 @@ export function replaceUnitSlugAddressAsStaff<ThrowOnError extends boolean = tru
 	return request({
 		method: "PUT",
 		url: "/api/slug-addresses/units/{unitId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<ReplaceUnitSlugAddressAsStaffResponses, ThrowOnError>>;
 }
@@ -2495,9 +2889,12 @@ export function createSlugNamespaceAsStaff<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<CreateSlugNamespaceAsStaffResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/slug-addresses/namespaces", ...config }) as Promise<
-		RequestResult<CreateSlugNamespaceAsStaffResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/slug-addresses/namespaces",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<CreateSlugNamespaceAsStaffResponses, ThrowOnError>>;
 }
 
 /**
@@ -2513,6 +2910,7 @@ export function releaseSlugRedirectAsStaff<ThrowOnError extends boolean = true>(
 	return request({
 		method: "DELETE",
 		url: "/api/slug-addresses/redirects/{redirectAddressId}",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<ReleaseSlugRedirectAsStaffResponses, ThrowOnError>>;
 }
@@ -2572,9 +2970,15 @@ export function postApiUnitsByType<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PostApiUnitsByTypeResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/units/{type}", ...config }) as Promise<
-		RequestResult<PostApiUnitsByTypeResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/units/{type}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiUnitsByTypeResponses, ThrowOnError>>;
 }
 
 /**
@@ -2600,9 +3004,15 @@ export function patchApiUnitsByTypeByUnitId<ThrowOnError extends boolean = true>
 ): Promise<RequestResult<PatchApiUnitsByTypeByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PATCH", url: "/api/units/{type}/{unitId}", ...config }) as Promise<
-		RequestResult<PatchApiUnitsByTypeByUnitIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PATCH",
+		url: "/api/units/{type}/{unitId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PatchApiUnitsByTypeByUnitIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -2614,9 +3024,15 @@ export function deleteApiUnitsByTypeByUnitId<ThrowOnError extends boolean = true
 ): Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "DELETE", url: "/api/units/{type}/{unitId}", ...config }) as Promise<
-		RequestResult<DeleteApiUnitsByTypeByUnitIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "DELETE",
+		url: "/api/units/{type}/{unitId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -2631,6 +3047,10 @@ export function patchApiUnitsByTypeByUnitIdVariantContext<ThrowOnError extends b
 	return request({
 		method: "PATCH",
 		url: "/api/units/{type}/{unitId}/variant-context",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PatchApiUnitsByTypeByUnitIdVariantContextResponses, ThrowOnError>>;
 }
@@ -2649,6 +3069,10 @@ export function postApiUnitsByTypeByUnitIdVariantContextPromote<
 	return request({
 		method: "POST",
 		url: "/api/units/{type}/{unitId}/variant-context/promote",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<PostApiUnitsByTypeByUnitIdVariantContextPromoteResponses, ThrowOnError>
@@ -2669,6 +3093,10 @@ export function putApiUnitsByTypeByUnitIdLocalizationsByLanguage<
 	return request({
 		method: "PUT",
 		url: "/api/units/{type}/{unitId}/localizations/{language}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<PutApiUnitsByTypeByUnitIdLocalizationsByLanguageResponses, ThrowOnError>
@@ -2739,6 +3167,10 @@ export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestore<
 	return request({
 		method: "POST",
 		url: "/api/history/units/{unitId}/revisions/{revisionId}/restore",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -2764,6 +3196,10 @@ export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndo<
 	return request({
 		method: "POST",
 		url: "/api/history/units/{unitId}/revisions/{revisionId}/undo",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoResponses, ThrowOnError>
@@ -2786,6 +3222,10 @@ export function patchApiHistoryUnitRevisionsByRevisionIdVisibility<
 	return request({
 		method: "PATCH",
 		url: "/api/history/unit-revisions/{revisionId}/visibility",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<PatchApiHistoryUnitRevisionsByRevisionIdVisibilityResponses, ThrowOnError>
@@ -2859,9 +3299,15 @@ export function postApiEntities<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PostApiEntitiesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/entities", ...config }) as Promise<
-		RequestResult<PostApiEntitiesResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/entities",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiEntitiesResponses, ThrowOnError>>;
 }
 
 /**
@@ -2890,6 +3336,10 @@ export function putApiEntitiesByUnitIdLocalizationsByLanguage<ThrowOnError exten
 	return request({
 		method: "PUT",
 		url: "/api/entities/{unitId}/localizations/{language}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<PutApiEntitiesByUnitIdLocalizationsByLanguageResponses, ThrowOnError>
@@ -2924,6 +3374,7 @@ export function patchApiEntitiesByUnitIdAssociationPolicy<ThrowOnError extends b
 	return request({
 		method: "PATCH",
 		url: "/api/entities/{unitId}/association-policy",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PatchApiEntitiesByUnitIdAssociationPolicyResponses, ThrowOnError>>;
 }
@@ -2951,9 +3402,15 @@ export function postApiTags<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PostApiTagsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/tags", ...config }) as Promise<
-		RequestResult<PostApiTagsResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/tags",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiTagsResponses, ThrowOnError>>;
 }
 
 /**
@@ -2968,6 +3425,10 @@ export function getApiUnitsByTypeByUnitIdAliases<ThrowOnError extends boolean = 
 	return request({
 		method: "GET",
 		url: "/api/units/{type}/{unitId}/aliases",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<GetApiUnitsByTypeByUnitIdAliasesResponses, ThrowOnError>>;
 }
@@ -2984,6 +3445,10 @@ export function postApiUnitsByTypeByUnitIdAliases<ThrowOnError extends boolean =
 	return request({
 		method: "POST",
 		url: "/api/units/{type}/{unitId}/aliases",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PostApiUnitsByTypeByUnitIdAliasesResponses, ThrowOnError>>;
 }
@@ -3000,6 +3465,10 @@ export function deleteApiUnitsByTypeByUnitIdAliasesByAliasId<ThrowOnError extend
 	return request({
 		method: "DELETE",
 		url: "/api/units/{type}/{unitId}/aliases/{aliasId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponses, ThrowOnError>
@@ -3018,6 +3487,10 @@ export function putApiUnitsByTypeByUnitIdAliasesByAliasIdVote<ThrowOnError exten
 	return request({
 		method: "PUT",
 		url: "/api/units/{type}/{unitId}/aliases/{aliasId}/vote",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses, ThrowOnError>
@@ -3038,6 +3511,10 @@ export function deleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote<
 	return request({
 		method: "DELETE",
 		url: "/api/units/{type}/{unitId}/aliases/{aliasId}/vote",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses, ThrowOnError>
@@ -3056,6 +3533,10 @@ export function postApiUnitsByTypeByUnitIdCreditAttributions<ThrowOnError extend
 	return request({
 		method: "POST",
 		url: "/api/units/{type}/{unitId}/credit-attributions",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<PostApiUnitsByTypeByUnitIdCreditAttributionsResponses, ThrowOnError>
@@ -3084,6 +3565,10 @@ export function deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId<
 	return request({
 		method: "DELETE",
 		url: "/api/units/{type}/{unitId}/credit-attributions/{associationId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -3105,6 +3590,10 @@ export function postApiUnitsByTypeByUnitIdSubjectAssociations<ThrowOnError exten
 	return request({
 		method: "POST",
 		url: "/api/units/{type}/{unitId}/subject-associations",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses, ThrowOnError>
@@ -3133,6 +3622,10 @@ export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationId<
 	return request({
 		method: "DELETE",
 		url: "/api/units/{type}/{unitId}/subject-associations/{associationId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -3154,6 +3647,10 @@ export function postApiUnitsByTypeByUnitIdLinks<ThrowOnError extends boolean = t
 	return request({
 		method: "POST",
 		url: "/api/units/{type}/{unitId}/links",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PostApiUnitsByTypeByUnitIdLinksResponses, ThrowOnError>>;
 }
@@ -3170,6 +3667,10 @@ export function putApiUnitsByTypeByUnitIdTagsByTagId<ThrowOnError extends boolea
 	return request({
 		method: "PUT",
 		url: "/api/units/{type}/{unitId}/tags/{tagId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PutApiUnitsByTypeByUnitIdTagsByTagIdResponses, ThrowOnError>>;
 }
@@ -3186,6 +3687,10 @@ export function deleteApiUnitsByTypeByUnitIdTagsByTagId<ThrowOnError extends boo
 	return request({
 		method: "DELETE",
 		url: "/api/units/{type}/{unitId}/tags/{tagId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<DeleteApiUnitsByTypeByUnitIdTagsByTagIdResponses, ThrowOnError>>;
 }
@@ -3202,6 +3707,10 @@ export function putApiUnitsByTypeByUnitIdTagsByTagIdVote<ThrowOnError extends bo
 	return request({
 		method: "PUT",
 		url: "/api/units/{type}/{unitId}/tags/{tagId}/vote",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PutApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses, ThrowOnError>>;
 }
@@ -3218,6 +3727,10 @@ export function deleteApiUnitsByTypeByUnitIdTagsByTagIdVote<ThrowOnError extends
 	return request({
 		method: "DELETE",
 		url: "/api/units/{type}/{unitId}/tags/{tagId}/vote",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses, ThrowOnError>
@@ -3239,6 +3752,10 @@ export function putApiUnitsByTypeByUnitIdVersionOfByCanonicalId<
 	return request({
 		method: "PUT",
 		url: "/api/units/{type}/{unitId}/version-of/{canonicalId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdResponses, ThrowOnError>
@@ -3273,6 +3790,10 @@ export function postApiUnitsByIdByUnitIdContentStructures<ThrowOnError extends b
 	return request({
 		method: "POST",
 		url: "/api/units/by-id/{unitId}/content-structures",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PostApiUnitsByIdByUnitIdContentStructuresResponses, ThrowOnError>>;
 }
@@ -3315,6 +3836,10 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureId<
 	return request({
 		method: "DELETE",
 		url: "/api/units/by-id/{unitId}/content-structures/{structureId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -3377,6 +3902,10 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsB
 	return request({
 		method: "POST",
 		url: "/api/units/by-id/{unitId}/content-structures/{structureId}/revisions/{revisionId}/restore",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -3408,6 +3937,10 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<
 	return request({
 		method: "POST",
 		url: "/api/units/by-id/{unitId}/content-structures/{structureId}/nodes",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -3439,6 +3972,10 @@ export function patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNo
 	return request({
 		method: "PATCH",
 		url: "/api/units/by-id/{unitId}/content-structures/{structureId}/nodes/{nodeId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -3470,6 +4007,10 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByN
 	return request({
 		method: "DELETE",
 		url: "/api/units/by-id/{unitId}/content-structures/{structureId}/nodes/{nodeId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -3509,6 +4050,10 @@ export function postApiUnitsBookByUnitIdContentStructureNodes<ThrowOnError exten
 	return request({
 		method: "POST",
 		url: "/api/units/book/{unitId}/content-structure/nodes",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<PostApiUnitsBookByUnitIdContentStructureNodesResponses, ThrowOnError>
@@ -3531,6 +4076,10 @@ export function patchApiUnitsBookByUnitIdContentStructureNodesByNodeId<
 	return request({
 		method: "PATCH",
 		url: "/api/units/book/{unitId}/content-structure/nodes/{nodeId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdResponses, ThrowOnError>
@@ -3567,6 +4116,10 @@ export function putApiChaptersByChapterIdLocalizationsByLanguageContent<
 	return request({
 		method: "PUT",
 		url: "/api/chapters/{chapterId}/localizations/{language}/content",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<
@@ -3585,9 +4138,15 @@ export function getApiProgress<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<GetApiProgressResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/progress", ...config }) as Promise<
-		RequestResult<GetApiProgressResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/progress",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiProgressResponses, ThrowOnError>>;
 }
 
 /**
@@ -3599,9 +4158,15 @@ export function getApiProgressByUnitId<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<GetApiProgressByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/progress/{unitId}", ...config }) as Promise<
-		RequestResult<GetApiProgressByUnitIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/progress/{unitId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiProgressByUnitIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -3613,9 +4178,15 @@ export function putApiProgressByUnitId<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PutApiProgressByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PUT", url: "/api/progress/{unitId}", ...config }) as Promise<
-		RequestResult<PutApiProgressByUnitIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PUT",
+		url: "/api/progress/{unitId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiProgressByUnitIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -3627,9 +4198,15 @@ export function deleteApiProgressByUnitId<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<DeleteApiProgressByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "DELETE", url: "/api/progress/{unitId}", ...config }) as Promise<
-		RequestResult<DeleteApiProgressByUnitIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "DELETE",
+		url: "/api/progress/{unitId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<DeleteApiProgressByUnitIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -3644,6 +4221,10 @@ export function putApiProgressByUnitIdNodesByNodeId<ThrowOnError extends boolean
 	return request({
 		method: "PUT",
 		url: "/api/progress/{unitId}/nodes/{nodeId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PutApiProgressByUnitIdNodesByNodeIdResponses, ThrowOnError>>;
 }
@@ -3660,6 +4241,10 @@ export function deleteApiProgressByUnitIdNodesByNodeId<ThrowOnError extends bool
 	return request({
 		method: "DELETE",
 		url: "/api/progress/{unitId}/nodes/{nodeId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<DeleteApiProgressByUnitIdNodesByNodeIdResponses, ThrowOnError>>;
 }
@@ -3687,9 +4272,15 @@ export function postApiCollections<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PostApiCollectionsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/collections", ...config }) as Promise<
-		RequestResult<PostApiCollectionsResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/collections",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiCollectionsResponses, ThrowOnError>>;
 }
 
 /**
@@ -3701,9 +4292,15 @@ export function getApiCollectionsFavorites<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<GetApiCollectionsFavoritesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/collections/favorites", ...config }) as Promise<
-		RequestResult<GetApiCollectionsFavoritesResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/collections/favorites",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiCollectionsFavoritesResponses, ThrowOnError>>;
 }
 
 /**
@@ -3732,6 +4329,10 @@ export function patchApiCollectionsByCollectionId<ThrowOnError extends boolean =
 	return request({
 		method: "PATCH",
 		url: "/api/collections/{collectionId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PatchApiCollectionsByCollectionIdResponses, ThrowOnError>>;
 }
@@ -3748,6 +4349,10 @@ export function deleteApiCollectionsByCollectionId<ThrowOnError extends boolean 
 	return request({
 		method: "DELETE",
 		url: "/api/collections/{collectionId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<DeleteApiCollectionsByCollectionIdResponses, ThrowOnError>>;
 }
@@ -3764,6 +4369,10 @@ export function postApiCollectionsByCollectionIdItemsBatch<ThrowOnError extends 
 	return request({
 		method: "POST",
 		url: "/api/collections/{collectionId}/items/batch",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PostApiCollectionsByCollectionIdItemsBatchResponses, ThrowOnError>>;
 }
@@ -3780,6 +4389,10 @@ export function putApiCollectionsByCollectionIdItemsByTargetId<ThrowOnError exte
 	return request({
 		method: "PUT",
 		url: "/api/collections/{collectionId}/items/{targetId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<PutApiCollectionsByCollectionIdItemsByTargetIdResponses, ThrowOnError>
@@ -3802,6 +4415,10 @@ export function deleteApiCollectionsByCollectionIdItemsByTargetId<
 	return request({
 		method: "DELETE",
 		url: "/api/collections/{collectionId}/items/{targetId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<DeleteApiCollectionsByCollectionIdItemsByTargetIdResponses, ThrowOnError>
@@ -3820,6 +4437,10 @@ export function putApiCollectionsFavoritesItemsByTargetId<ThrowOnError extends b
 	return request({
 		method: "PUT",
 		url: "/api/collections/favorites/items/{targetId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PutApiCollectionsFavoritesItemsByTargetIdResponses, ThrowOnError>>;
 }
@@ -3836,6 +4457,10 @@ export function deleteApiCollectionsFavoritesItemsByTargetId<ThrowOnError extend
 	return request({
 		method: "DELETE",
 		url: "/api/collections/favorites/items/{targetId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<DeleteApiCollectionsFavoritesItemsByTargetIdResponses, ThrowOnError>
@@ -3865,9 +4490,15 @@ export function postApiReviews<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PostApiReviewsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/reviews", ...config }) as Promise<
-		RequestResult<PostApiReviewsResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/reviews",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiReviewsResponses, ThrowOnError>>;
 }
 
 /**
@@ -3893,9 +4524,15 @@ export function patchApiReviewsByReviewId<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PatchApiReviewsByReviewIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PATCH", url: "/api/reviews/{reviewId}", ...config }) as Promise<
-		RequestResult<PatchApiReviewsByReviewIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PATCH",
+		url: "/api/reviews/{reviewId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PatchApiReviewsByReviewIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -3907,9 +4544,15 @@ export function deleteApiReviewsByReviewId<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<DeleteApiReviewsByReviewIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "DELETE", url: "/api/reviews/{reviewId}", ...config }) as Promise<
-		RequestResult<DeleteApiReviewsByReviewIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "DELETE",
+		url: "/api/reviews/{reviewId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<DeleteApiReviewsByReviewIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -3921,9 +4564,15 @@ export function putApiScoresByTargetId<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PutApiScoresByTargetIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PUT", url: "/api/scores/{targetId}", ...config }) as Promise<
-		RequestResult<PutApiScoresByTargetIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PUT",
+		url: "/api/scores/{targetId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiScoresByTargetIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -3963,9 +4612,12 @@ export function putApiScoreContext<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PutApiScoreContextResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PUT", url: "/api/score-context", ...config }) as Promise<
-		RequestResult<PutApiScoreContextResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PUT",
+		url: "/api/score-context",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<PutApiScoreContextResponses, ThrowOnError>>;
 }
 
 /**
@@ -3977,9 +4629,12 @@ export function deleteApiScoreContext<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<DeleteApiScoreContextResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "DELETE", url: "/api/score-context", ...config }) as Promise<
-		RequestResult<DeleteApiScoreContextResponses, ThrowOnError>
-	>;
+	return request({
+		method: "DELETE",
+		url: "/api/score-context",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<DeleteApiScoreContextResponses, ThrowOnError>>;
 }
 
 /**
@@ -4005,9 +4660,15 @@ export function putApiReactionsUnitsByUnitId<ThrowOnError extends boolean = true
 ): Promise<RequestResult<PutApiReactionsUnitsByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PUT", url: "/api/reactions/units/{unitId}", ...config }) as Promise<
-		RequestResult<PutApiReactionsUnitsByUnitIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PUT",
+		url: "/api/reactions/units/{unitId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiReactionsUnitsByUnitIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -4022,6 +4683,10 @@ export function deleteApiReactionsUnitsByUnitId<ThrowOnError extends boolean = t
 	return request({
 		method: "DELETE",
 		url: "/api/reactions/units/{unitId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<DeleteApiReactionsUnitsByUnitIdResponses, ThrowOnError>>;
 }
@@ -4035,9 +4700,15 @@ export function putApiReactionsSharesByUnitId<ThrowOnError extends boolean = tru
 ): Promise<RequestResult<PutApiReactionsSharesByUnitIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PUT", url: "/api/reactions/shares/{unitId}", ...config }) as Promise<
-		RequestResult<PutApiReactionsSharesByUnitIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PUT",
+		url: "/api/reactions/shares/{unitId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiReactionsSharesByUnitIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -4052,6 +4723,10 @@ export function deleteApiReactionsSharesByUnitId<ThrowOnError extends boolean = 
 	return request({
 		method: "DELETE",
 		url: "/api/reactions/shares/{unitId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<DeleteApiReactionsSharesByUnitIdResponses, ThrowOnError>>;
 }
@@ -4065,9 +4740,15 @@ export function postApiPolls<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PostApiPollsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/polls", ...config }) as Promise<
-		RequestResult<PostApiPollsResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/polls",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiPollsResponses, ThrowOnError>>;
 }
 
 /**
@@ -4093,9 +4774,15 @@ export function putApiPollsByPollIdVote<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PutApiPollsByPollIdVoteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PUT", url: "/api/polls/{pollId}/vote", ...config }) as Promise<
-		RequestResult<PutApiPollsByPollIdVoteResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PUT",
+		url: "/api/polls/{pollId}/vote",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiPollsByPollIdVoteResponses, ThrowOnError>>;
 }
 
 /**
@@ -4107,9 +4794,15 @@ export function deleteApiPollsByPollIdVote<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<DeleteApiPollsByPollIdVoteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "DELETE", url: "/api/polls/{pollId}/vote", ...config }) as Promise<
-		RequestResult<DeleteApiPollsByPollIdVoteResponses, ThrowOnError>
-	>;
+	return request({
+		method: "DELETE",
+		url: "/api/polls/{pollId}/vote",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<DeleteApiPollsByPollIdVoteResponses, ThrowOnError>>;
 }
 
 /**
@@ -4121,9 +4814,15 @@ export function postApiPollsByPollIdClose<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PostApiPollsByPollIdCloseResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/polls/{pollId}/close", ...config }) as Promise<
-		RequestResult<PostApiPollsByPollIdCloseResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/polls/{pollId}/close",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiPollsByPollIdCloseResponses, ThrowOnError>>;
 }
 
 /**
@@ -4149,9 +4848,15 @@ export function putApiPostsByPostIdScores<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PutApiPostsByPostIdScoresResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PUT", url: "/api/posts/{postId}/scores", ...config }) as Promise<
-		RequestResult<PutApiPostsByPostIdScoresResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PUT",
+		url: "/api/posts/{postId}/scores",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiPostsByPostIdScoresResponses, ThrowOnError>>;
 }
 
 /**
@@ -4177,9 +4882,15 @@ export function postApiPosts<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PostApiPostsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/posts", ...config }) as Promise<
-		RequestResult<PostApiPostsResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/posts",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiPostsResponses, ThrowOnError>>;
 }
 
 /**
@@ -4205,9 +4916,15 @@ export function patchApiPostsByPostId<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PatchApiPostsByPostIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PATCH", url: "/api/posts/{postId}", ...config }) as Promise<
-		RequestResult<PatchApiPostsByPostIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PATCH",
+		url: "/api/posts/{postId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PatchApiPostsByPostIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -4219,9 +4936,15 @@ export function deleteApiPostsByPostId<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<DeleteApiPostsByPostIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "DELETE", url: "/api/posts/{postId}", ...config }) as Promise<
-		RequestResult<DeleteApiPostsByPostIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "DELETE",
+		url: "/api/posts/{postId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<DeleteApiPostsByPostIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -4247,9 +4970,15 @@ export function postApiPostsByPostIdReplies<ThrowOnError extends boolean = true>
 ): Promise<RequestResult<PostApiPostsByPostIdRepliesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/posts/{postId}/replies", ...config }) as Promise<
-		RequestResult<PostApiPostsByPostIdRepliesResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/posts/{postId}/replies",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiPostsByPostIdRepliesResponses, ThrowOnError>>;
 }
 
 /**
@@ -4264,6 +4993,10 @@ export function patchApiPostsByPostIdRepliesByReplyPostId<ThrowOnError extends b
 	return request({
 		method: "PATCH",
 		url: "/api/posts/{postId}/replies/{replyPostId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PatchApiPostsByPostIdRepliesByReplyPostIdResponses, ThrowOnError>>;
 }
@@ -4280,6 +5013,10 @@ export function deleteApiPostsByPostIdRepliesByReplyPostId<ThrowOnError extends 
 	return request({
 		method: "DELETE",
 		url: "/api/posts/{postId}/replies/{replyPostId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<DeleteApiPostsByPostIdRepliesByReplyPostIdResponses, ThrowOnError>>;
 }
@@ -4307,9 +5044,15 @@ export function postApiRealms<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PostApiRealmsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/realms", ...config }) as Promise<
-		RequestResult<PostApiRealmsResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/realms",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiRealmsResponses, ThrowOnError>>;
 }
 
 /**
@@ -4325,6 +5068,10 @@ export function replaceRealmSlugAddress<ThrowOnError extends boolean = true>(
 	return request({
 		method: "PUT",
 		url: "/api/realms/{realmId}/slug-address",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<ReplaceRealmSlugAddressResponses, ThrowOnError>>;
 }
@@ -4352,9 +5099,15 @@ export function patchApiRealmsByRealmId<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PatchApiRealmsByRealmIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PATCH", url: "/api/realms/{realmId}", ...config }) as Promise<
-		RequestResult<PatchApiRealmsByRealmIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PATCH",
+		url: "/api/realms/{realmId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PatchApiRealmsByRealmIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -4385,6 +5138,7 @@ export function putApiRealmsByRealmIdScoreContext<ThrowOnError extends boolean =
 	return request({
 		method: "PUT",
 		url: "/api/realms/{realmId}/score-context",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<PutApiRealmsByRealmIdScoreContextResponses, ThrowOnError>>;
 }
@@ -4401,6 +5155,7 @@ export function deleteApiRealmsByRealmIdScoreContext<ThrowOnError extends boolea
 	return request({
 		method: "DELETE",
 		url: "/api/realms/{realmId}/score-context",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<DeleteApiRealmsByRealmIdScoreContextResponses, ThrowOnError>>;
 }
@@ -4417,6 +5172,10 @@ export function putApiRealmsByRealmIdMembership<ThrowOnError extends boolean = t
 	return request({
 		method: "PUT",
 		url: "/api/realms/{realmId}/membership",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PutApiRealmsByRealmIdMembershipResponses, ThrowOnError>>;
 }
@@ -4433,6 +5192,10 @@ export function deleteApiRealmsByRealmIdMembership<ThrowOnError extends boolean 
 	return request({
 		method: "DELETE",
 		url: "/api/realms/{realmId}/membership",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<DeleteApiRealmsByRealmIdMembershipResponses, ThrowOnError>>;
 }
@@ -4446,9 +5209,15 @@ export function getApiRealmsByRealmIdMembers<ThrowOnError extends boolean = true
 ): Promise<RequestResult<GetApiRealmsByRealmIdMembersResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/realms/{realmId}/members", ...config }) as Promise<
-		RequestResult<GetApiRealmsByRealmIdMembersResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/realms/{realmId}/members",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiRealmsByRealmIdMembersResponses, ThrowOnError>>;
 }
 
 /**
@@ -4463,6 +5232,10 @@ export function patchApiRealmsByRealmIdMembersByProfileId<ThrowOnError extends b
 	return request({
 		method: "PATCH",
 		url: "/api/realms/{realmId}/members/{profileId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PatchApiRealmsByRealmIdMembersByProfileIdResponses, ThrowOnError>>;
 }
@@ -4476,9 +5249,15 @@ export function putApiRealmsByRealmIdRules<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PutApiRealmsByRealmIdRulesResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "PUT", url: "/api/realms/{realmId}/rules", ...config }) as Promise<
-		RequestResult<PutApiRealmsByRealmIdRulesResponses, ThrowOnError>
-	>;
+	return request({
+		method: "PUT",
+		url: "/api/realms/{realmId}/rules",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PutApiRealmsByRealmIdRulesResponses, ThrowOnError>>;
 }
 
 /**
@@ -4521,6 +5300,10 @@ export function putApiRealmsByRealmIdPinsByUnitId<ThrowOnError extends boolean =
 	return request({
 		method: "PUT",
 		url: "/api/realms/{realmId}/pins/{unitId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PutApiRealmsByRealmIdPinsByUnitIdResponses, ThrowOnError>>;
 }
@@ -4537,6 +5320,10 @@ export function deleteApiRealmsByRealmIdPinsByUnitId<ThrowOnError extends boolea
 	return request({
 		method: "DELETE",
 		url: "/api/realms/{realmId}/pins/{unitId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<DeleteApiRealmsByRealmIdPinsByUnitIdResponses, ThrowOnError>>;
 }
@@ -4550,9 +5337,12 @@ export function getApiRealmsByRealmIdUnits<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<GetApiRealmsByRealmIdUnitsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/realms/{realmId}/units", ...config }) as Promise<
-		RequestResult<GetApiRealmsByRealmIdUnitsResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/realms/{realmId}/units",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
+		...config,
+	}) as Promise<RequestResult<GetApiRealmsByRealmIdUnitsResponses, ThrowOnError>>;
 }
 
 /**
@@ -4567,6 +5357,7 @@ export function getApiRealmsByRealmIdUnitsByUnitIdHistory<ThrowOnError extends b
 	return request({
 		method: "GET",
 		url: "/api/realms/{realmId}/units/{unitId}/history",
+		security: [{ type: "apiKey", name: "better-auth.session_token", in: "cookie" }],
 		...config,
 	}) as Promise<RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdHistoryResponses, ThrowOnError>>;
 }
@@ -4583,6 +5374,10 @@ export function patchApiRealmsByRealmIdUnitsByUnitId<ThrowOnError extends boolea
 	return request({
 		method: "PATCH",
 		url: "/api/realms/{realmId}/units/{unitId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PatchApiRealmsByRealmIdUnitsByUnitIdResponses, ThrowOnError>>;
 }
@@ -4615,6 +5410,10 @@ export function postApiRealmsByRealmIdNavigation<ThrowOnError extends boolean = 
 	return request({
 		method: "POST",
 		url: "/api/realms/{realmId}/navigation",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PostApiRealmsByRealmIdNavigationResponses, ThrowOnError>>;
 }
@@ -4649,6 +5448,10 @@ export function putApiRealmsByRealmIdNavigationByNavigationId<ThrowOnError exten
 	return request({
 		method: "PUT",
 		url: "/api/realms/{realmId}/navigation/{navigationId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<PutApiRealmsByRealmIdNavigationByNavigationIdResponses, ThrowOnError>
@@ -4669,6 +5472,10 @@ export function deleteApiRealmsByRealmIdNavigationByNavigationId<
 	return request({
 		method: "DELETE",
 		url: "/api/realms/{realmId}/navigation/{navigationId}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<
 		RequestResult<DeleteApiRealmsByRealmIdNavigationByNavigationIdResponses, ThrowOnError>
@@ -4824,9 +5631,15 @@ export function postApiImageAssets<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<PostApiImageAssetsResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "POST", url: "/api/image-assets", ...config }) as Promise<
-		RequestResult<PostApiImageAssetsResponses, ThrowOnError>
-	>;
+	return request({
+		method: "POST",
+		url: "/api/image-assets",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<PostApiImageAssetsResponses, ThrowOnError>>;
 }
 
 /**
@@ -4841,6 +5654,10 @@ export function postApiImageAssetsByIdComplete<ThrowOnError extends boolean = tr
 	return request({
 		method: "POST",
 		url: "/api/image-assets/{id}/complete",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
 		...config,
 	}) as Promise<RequestResult<PostApiImageAssetsByIdCompleteResponses, ThrowOnError>>;
 }
@@ -4854,9 +5671,15 @@ export function getApiImageAssetsById<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<GetApiImageAssetsByIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/image-assets/{id}", ...config }) as Promise<
-		RequestResult<GetApiImageAssetsByIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "GET",
+		url: "/api/image-assets/{id}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiImageAssetsByIdResponses, ThrowOnError>>;
 }
 
 /**
@@ -4868,7 +5691,13 @@ export function deleteApiImageAssetsById<ThrowOnError extends boolean = true>(
 ): Promise<RequestResult<DeleteApiImageAssetsByIdResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "DELETE", url: "/api/image-assets/{id}", ...config }) as Promise<
-		RequestResult<DeleteApiImageAssetsByIdResponses, ThrowOnError>
-	>;
+	return request({
+		method: "DELETE",
+		url: "/api/image-assets/{id}",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<DeleteApiImageAssetsByIdResponses, ThrowOnError>>;
 }

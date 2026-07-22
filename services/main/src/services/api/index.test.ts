@@ -1,4 +1,5 @@
 import { StatusCodes } from "http-status-codes";
+import { toOpenAPISchema } from "@elysiajs/openapi";
 import { z } from "zod";
 import { describe, expect, it } from "vitest";
 
@@ -72,5 +73,16 @@ describe("API root", () => {
 			code: "InteractiveSessionRequired",
 			message: "An interactive session is required",
 		});
+	});
+
+	it("derives OpenAPI credential requirements from the access guard", () => {
+		const document = toOpenAPISchema(api);
+
+		expect(document.paths["/api/units/{type}"]?.post?.security).toEqual([
+			{ ApiToken: [] },
+			{ SessionCookie: [] },
+		]);
+		expect(document.paths["/api/api-tokens"]?.get?.security).toEqual([{ SessionCookie: [] }]);
+		expect(document.paths["/api/token"]?.get?.security).toEqual([{ ApiToken: [] }]);
 	});
 });

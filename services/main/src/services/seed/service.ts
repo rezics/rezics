@@ -1772,6 +1772,7 @@ async function seedStructure(
 	const staff = itemAt(profiles, 0);
 	await tx.insert(capabilityGrant).values(
 		[
+			"platform.api_token_policy.manage",
 			"platform.grants.manage",
 			"unit.slug.manage",
 			"unit.slug.namespace.manage",

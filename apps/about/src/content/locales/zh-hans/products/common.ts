@@ -32,6 +32,7 @@ const content = {
 		progress: "进度",
 		entity: "实体",
 		"api-oauth": `${verbatimTerms.api.value} 与 ${verbatimTerms.oauth.value}`,
+		token: `${verbatimTerms.api.value} 令牌`,
 	} satisfies Record<ProductId, string>,
 	manifestationFormulas: {
 		gamebook: "书籍 + 游戏内容结构 → 游戏书",

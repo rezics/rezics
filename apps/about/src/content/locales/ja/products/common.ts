@@ -32,6 +32,7 @@ const content = {
 		progress: "進捗",
 		entity: "エンティティ",
 		"api-oauth": `${verbatimTerms.api.value} と ${verbatimTerms.oauth.value}`,
+		token: `${verbatimTerms.api.value}トークン`,
 	} satisfies Record<ProductId, string>,
 	manifestationFormulas: {
 		gamebook: "書籍 + ゲームコンテンツ構造 → ゲームブック",

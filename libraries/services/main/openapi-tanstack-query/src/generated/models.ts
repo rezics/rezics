@@ -6747,6 +6747,9 @@ export const ApiErrorCode = {
 	ImageAssetInvalidState: "ImageAssetInvalidState",
 	ImageAssetInUse: "ImageAssetInUse",
 	ApiTokenNotFound: "ApiTokenNotFound",
+	ApiTokenPolicyInvalid: "ApiTokenPolicyInvalid",
+	ApiTokenPolicyRevisionConflict: "ApiTokenPolicyRevisionConflict",
+	ApiTokenPolicyNotFound: "ApiTokenPolicyNotFound",
 	InvalidSearch: "InvalidSearch",
 	SearchUnavailable: "SearchUnavailable",
 	InvalidPaginationCursor: "InvalidPaginationCursor",
@@ -8722,6 +8725,30 @@ export type HeadApiHealthStatus422 = ValidationError;
 /**
  * @type object
  */
+export type HeadApiHealthStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type HeadApiHealthStatus500 = InternalError;
 
 /**
@@ -8740,6 +8767,7 @@ export type HeadApiHealthOptions = {
 export type HeadApiHealthResponses = {
 	"204": HeadApiHealthStatus204;
 	"422": HeadApiHealthStatus422;
+	"429": HeadApiHealthStatus429;
 	"500": HeadApiHealthStatus500;
 };
 
@@ -8747,7 +8775,10 @@ export type HeadApiHealthResponses = {
  * @description Union of all possible responses
  */
 export type HeadApiHealthResponse =
-	HeadApiHealthStatus204 | HeadApiHealthStatus422 | HeadApiHealthStatus500;
+	| HeadApiHealthStatus204
+	| HeadApiHealthStatus422
+	| HeadApiHealthStatus429
+	| HeadApiHealthStatus500;
 
 export const GetApiReadyStatus200StatusEnum = {
 	ready: "ready",
@@ -9376,6 +9407,30 @@ export type GetApiNotificationsStatus422 = ValidationError;
 /**
  * @type object
  */
+export type GetApiNotificationsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiNotificationsStatus500 = InternalError;
 
 /**
@@ -9395,6 +9450,7 @@ export type GetApiNotificationsResponses = {
 	"200": GetApiNotificationsStatus200;
 	"400": GetApiNotificationsStatus400;
 	"422": GetApiNotificationsStatus422;
+	"429": GetApiNotificationsStatus429;
 	"500": GetApiNotificationsStatus500;
 };
 
@@ -9405,6 +9461,7 @@ export type GetApiNotificationsResponse =
 	| GetApiNotificationsStatus200
 	| GetApiNotificationsStatus400
 	| GetApiNotificationsStatus422
+	| GetApiNotificationsStatus429
 	| GetApiNotificationsStatus500;
 
 /**
@@ -9412,6 +9469,30 @@ export type GetApiNotificationsResponse =
  */
 export type GetApiNotificationsUnreadCountStatus200 = {
 	count: string | number;
+};
+
+/**
+ * @type object
+ */
+export type GetApiNotificationsUnreadCountStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
 };
 
 /**
@@ -9434,6 +9515,7 @@ export type GetApiNotificationsUnreadCountOptions = {
  */
 export type GetApiNotificationsUnreadCountResponses = {
 	"200": GetApiNotificationsUnreadCountStatus200;
+	"429": GetApiNotificationsUnreadCountStatus429;
 	"500": GetApiNotificationsUnreadCountStatus500;
 };
 
@@ -9441,7 +9523,9 @@ export type GetApiNotificationsUnreadCountResponses = {
  * @description Union of all possible responses
  */
 export type GetApiNotificationsUnreadCountResponse =
-	GetApiNotificationsUnreadCountStatus200 | GetApiNotificationsUnreadCountStatus500;
+	| GetApiNotificationsUnreadCountStatus200
+	| GetApiNotificationsUnreadCountStatus429
+	| GetApiNotificationsUnreadCountStatus500;
 
 /**
  * @type object
@@ -9517,6 +9601,30 @@ export type PutApiNotificationsReadAllStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PutApiNotificationsReadAllStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiNotificationsReadAllStatus500 = InternalError;
 
 /**
@@ -9548,6 +9656,7 @@ export type PutApiNotificationsReadAllResponses = {
 	"400": PutApiNotificationsReadAllStatus400;
 	"403": PutApiNotificationsReadAllStatus403;
 	"422": PutApiNotificationsReadAllStatus422;
+	"429": PutApiNotificationsReadAllStatus429;
 	"500": PutApiNotificationsReadAllStatus500;
 };
 
@@ -9559,6 +9668,7 @@ export type PutApiNotificationsReadAllResponse =
 	| PutApiNotificationsReadAllStatus400
 	| PutApiNotificationsReadAllStatus403
 	| PutApiNotificationsReadAllStatus422
+	| PutApiNotificationsReadAllStatus429
 	| PutApiNotificationsReadAllStatus500;
 
 /**
@@ -9619,6 +9729,30 @@ export type PutApiNotificationsByNotificationIdReadStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PutApiNotificationsByNotificationIdReadStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiNotificationsByNotificationIdReadStatus500 = InternalError;
 
 /**
@@ -9638,6 +9772,7 @@ export type PutApiNotificationsByNotificationIdReadResponses = {
 	"200": PutApiNotificationsByNotificationIdReadStatus200;
 	"404": PutApiNotificationsByNotificationIdReadStatus404;
 	"422": PutApiNotificationsByNotificationIdReadStatus422;
+	"429": PutApiNotificationsByNotificationIdReadStatus429;
 	"500": PutApiNotificationsByNotificationIdReadStatus500;
 };
 
@@ -9648,6 +9783,7 @@ export type PutApiNotificationsByNotificationIdReadResponse =
 	| PutApiNotificationsByNotificationIdReadStatus200
 	| PutApiNotificationsByNotificationIdReadStatus404
 	| PutApiNotificationsByNotificationIdReadStatus422
+	| PutApiNotificationsByNotificationIdReadStatus429
 	| PutApiNotificationsByNotificationIdReadStatus500;
 
 /**
@@ -9676,6 +9812,30 @@ export type GetApiNotificationsPreferencesStatus200 = {
 /**
  * @type object
  */
+export type GetApiNotificationsPreferencesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiNotificationsPreferencesStatus500 = InternalError;
 
 /**
@@ -9693,6 +9853,7 @@ export type GetApiNotificationsPreferencesOptions = {
  */
 export type GetApiNotificationsPreferencesResponses = {
 	"200": GetApiNotificationsPreferencesStatus200;
+	"429": GetApiNotificationsPreferencesStatus429;
 	"500": GetApiNotificationsPreferencesStatus500;
 };
 
@@ -9700,7 +9861,9 @@ export type GetApiNotificationsPreferencesResponses = {
  * @description Union of all possible responses
  */
 export type GetApiNotificationsPreferencesResponse =
-	GetApiNotificationsPreferencesStatus200 | GetApiNotificationsPreferencesStatus500;
+	| GetApiNotificationsPreferencesStatus200
+	| GetApiNotificationsPreferencesStatus429
+	| GetApiNotificationsPreferencesStatus500;
 
 /**
  * @type object
@@ -9729,6 +9892,30 @@ export type PutApiNotificationsPreferencesStatus200 = {
  * @type object
  */
 export type PutApiNotificationsPreferencesStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiNotificationsPreferencesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -9786,6 +9973,7 @@ export type PutApiNotificationsPreferencesOptions = {
 export type PutApiNotificationsPreferencesResponses = {
 	"200": PutApiNotificationsPreferencesStatus200;
 	"422": PutApiNotificationsPreferencesStatus422;
+	"429": PutApiNotificationsPreferencesStatus429;
 	"500": PutApiNotificationsPreferencesStatus500;
 };
 
@@ -9795,6 +9983,7 @@ export type PutApiNotificationsPreferencesResponses = {
 export type PutApiNotificationsPreferencesResponse =
 	| PutApiNotificationsPreferencesStatus200
 	| PutApiNotificationsPreferencesStatus422
+	| PutApiNotificationsPreferencesStatus429
 	| PutApiNotificationsPreferencesStatus500;
 
 export const GetApiRecommendationsUnitsType = {
@@ -10871,6 +11060,30 @@ export type PutApiRecommendationsExclusionsByUnitIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PutApiRecommendationsExclusionsByUnitIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiRecommendationsExclusionsByUnitIdStatus500 = InternalError;
 
 export const PutApiRecommendationsExclusionsByUnitIdRequestSurfaceEnum = {
@@ -10948,6 +11161,7 @@ export type PutApiRecommendationsExclusionsByUnitIdResponses = {
 	"403": PutApiRecommendationsExclusionsByUnitIdStatus403;
 	"404": PutApiRecommendationsExclusionsByUnitIdStatus404;
 	"422": PutApiRecommendationsExclusionsByUnitIdStatus422;
+	"429": PutApiRecommendationsExclusionsByUnitIdStatus429;
 	"500": PutApiRecommendationsExclusionsByUnitIdStatus500;
 };
 
@@ -10960,6 +11174,7 @@ export type PutApiRecommendationsExclusionsByUnitIdResponse =
 	| PutApiRecommendationsExclusionsByUnitIdStatus403
 	| PutApiRecommendationsExclusionsByUnitIdStatus404
 	| PutApiRecommendationsExclusionsByUnitIdStatus422
+	| PutApiRecommendationsExclusionsByUnitIdStatus429
 	| PutApiRecommendationsExclusionsByUnitIdStatus500;
 
 /**
@@ -11057,6 +11272,30 @@ export type DeleteApiRecommendationsExclusionsByUnitIdStatus422 = ValidationErro
 /**
  * @type object
  */
+export type DeleteApiRecommendationsExclusionsByUnitIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiRecommendationsExclusionsByUnitIdStatus500 = InternalError;
 
 /**
@@ -11077,6 +11316,7 @@ export type DeleteApiRecommendationsExclusionsByUnitIdResponses = {
 	"401": DeleteApiRecommendationsExclusionsByUnitIdStatus401;
 	"403": DeleteApiRecommendationsExclusionsByUnitIdStatus403;
 	"422": DeleteApiRecommendationsExclusionsByUnitIdStatus422;
+	"429": DeleteApiRecommendationsExclusionsByUnitIdStatus429;
 	"500": DeleteApiRecommendationsExclusionsByUnitIdStatus500;
 };
 
@@ -11088,6 +11328,7 @@ export type DeleteApiRecommendationsExclusionsByUnitIdResponse =
 	| DeleteApiRecommendationsExclusionsByUnitIdStatus401
 	| DeleteApiRecommendationsExclusionsByUnitIdStatus403
 	| DeleteApiRecommendationsExclusionsByUnitIdStatus422
+	| DeleteApiRecommendationsExclusionsByUnitIdStatus429
 	| DeleteApiRecommendationsExclusionsByUnitIdStatus500;
 
 /**
@@ -11181,6 +11422,30 @@ export type GetApiMessagesConversationsStatus422 = ValidationError;
 /**
  * @type object
  */
+export type GetApiMessagesConversationsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiMessagesConversationsStatus500 = InternalError;
 
 /**
@@ -11200,6 +11465,7 @@ export type GetApiMessagesConversationsResponses = {
 	"200": GetApiMessagesConversationsStatus200;
 	"400": GetApiMessagesConversationsStatus400;
 	"422": GetApiMessagesConversationsStatus422;
+	"429": GetApiMessagesConversationsStatus429;
 	"500": GetApiMessagesConversationsStatus500;
 };
 
@@ -11210,6 +11476,7 @@ export type GetApiMessagesConversationsResponse =
 	| GetApiMessagesConversationsStatus200
 	| GetApiMessagesConversationsStatus400
 	| GetApiMessagesConversationsStatus422
+	| GetApiMessagesConversationsStatus429
 	| GetApiMessagesConversationsStatus500;
 
 /**
@@ -11316,6 +11583,30 @@ export type PostApiMessagesConversationsStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PostApiMessagesConversationsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiMessagesConversationsStatus500 = InternalError;
 
 /**
@@ -11349,6 +11640,7 @@ export type PostApiMessagesConversationsResponses = {
 	"404": PostApiMessagesConversationsStatus404;
 	"409": PostApiMessagesConversationsStatus409;
 	"422": PostApiMessagesConversationsStatus422;
+	"429": PostApiMessagesConversationsStatus429;
 	"500": PostApiMessagesConversationsStatus500;
 };
 
@@ -11361,6 +11653,7 @@ export type PostApiMessagesConversationsResponse =
 	| PostApiMessagesConversationsStatus404
 	| PostApiMessagesConversationsStatus409
 	| PostApiMessagesConversationsStatus422
+	| PostApiMessagesConversationsStatus429
 	| PostApiMessagesConversationsStatus500;
 
 /**
@@ -11445,6 +11738,30 @@ export type GetApiMessagesConversationsByConversationIdStatus422 = ValidationErr
 /**
  * @type object
  */
+export type GetApiMessagesConversationsByConversationIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiMessagesConversationsByConversationIdStatus500 = InternalError;
 
 /**
@@ -11464,6 +11781,7 @@ export type GetApiMessagesConversationsByConversationIdResponses = {
 	"200": GetApiMessagesConversationsByConversationIdStatus200;
 	"404": GetApiMessagesConversationsByConversationIdStatus404;
 	"422": GetApiMessagesConversationsByConversationIdStatus422;
+	"429": GetApiMessagesConversationsByConversationIdStatus429;
 	"500": GetApiMessagesConversationsByConversationIdStatus500;
 };
 
@@ -11474,6 +11792,7 @@ export type GetApiMessagesConversationsByConversationIdResponse =
 	| GetApiMessagesConversationsByConversationIdStatus200
 	| GetApiMessagesConversationsByConversationIdStatus404
 	| GetApiMessagesConversationsByConversationIdStatus422
+	| GetApiMessagesConversationsByConversationIdStatus429
 	| GetApiMessagesConversationsByConversationIdStatus500;
 
 /**
@@ -11611,6 +11930,30 @@ export type GetApiMessagesConversationsByConversationIdMessagesStatus422 = Valid
 /**
  * @type object
  */
+export type GetApiMessagesConversationsByConversationIdMessagesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiMessagesConversationsByConversationIdMessagesStatus500 = InternalError;
 
 /**
@@ -11631,6 +11974,7 @@ export type GetApiMessagesConversationsByConversationIdMessagesResponses = {
 	"400": GetApiMessagesConversationsByConversationIdMessagesStatus400;
 	"404": GetApiMessagesConversationsByConversationIdMessagesStatus404;
 	"422": GetApiMessagesConversationsByConversationIdMessagesStatus422;
+	"429": GetApiMessagesConversationsByConversationIdMessagesStatus429;
 	"500": GetApiMessagesConversationsByConversationIdMessagesStatus500;
 };
 
@@ -11642,6 +11986,7 @@ export type GetApiMessagesConversationsByConversationIdMessagesResponse =
 	| GetApiMessagesConversationsByConversationIdMessagesStatus400
 	| GetApiMessagesConversationsByConversationIdMessagesStatus404
 	| GetApiMessagesConversationsByConversationIdMessagesStatus422
+	| GetApiMessagesConversationsByConversationIdMessagesStatus429
 	| GetApiMessagesConversationsByConversationIdMessagesStatus500;
 
 /**
@@ -11758,6 +12103,30 @@ export type PostApiMessagesConversationsByConversationIdMessagesStatus422 = Vali
 /**
  * @type object
  */
+export type PostApiMessagesConversationsByConversationIdMessagesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiMessagesConversationsByConversationIdMessagesStatus500 = InternalError;
 
 /**
@@ -11791,6 +12160,7 @@ export type PostApiMessagesConversationsByConversationIdMessagesResponses = {
 	"403": PostApiMessagesConversationsByConversationIdMessagesStatus403;
 	"404": PostApiMessagesConversationsByConversationIdMessagesStatus404;
 	"422": PostApiMessagesConversationsByConversationIdMessagesStatus422;
+	"429": PostApiMessagesConversationsByConversationIdMessagesStatus429;
 	"500": PostApiMessagesConversationsByConversationIdMessagesStatus500;
 };
 
@@ -11802,6 +12172,7 @@ export type PostApiMessagesConversationsByConversationIdMessagesResponse =
 	| PostApiMessagesConversationsByConversationIdMessagesStatus403
 	| PostApiMessagesConversationsByConversationIdMessagesStatus404
 	| PostApiMessagesConversationsByConversationIdMessagesStatus422
+	| PostApiMessagesConversationsByConversationIdMessagesStatus429
 	| PostApiMessagesConversationsByConversationIdMessagesStatus500;
 
 /**
@@ -11884,6 +12255,30 @@ export type PutApiMessagesConversationsByConversationIdReadStatus422 = Validatio
 /**
  * @type object
  */
+export type PutApiMessagesConversationsByConversationIdReadStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiMessagesConversationsByConversationIdReadStatus500 = InternalError;
 
 /**
@@ -11915,6 +12310,7 @@ export type PutApiMessagesConversationsByConversationIdReadResponses = {
 	"200": PutApiMessagesConversationsByConversationIdReadStatus200;
 	"404": PutApiMessagesConversationsByConversationIdReadStatus404;
 	"422": PutApiMessagesConversationsByConversationIdReadStatus422;
+	"429": PutApiMessagesConversationsByConversationIdReadStatus429;
 	"500": PutApiMessagesConversationsByConversationIdReadStatus500;
 };
 
@@ -11925,6 +12321,7 @@ export type PutApiMessagesConversationsByConversationIdReadResponse =
 	| PutApiMessagesConversationsByConversationIdReadStatus200
 	| PutApiMessagesConversationsByConversationIdReadStatus404
 	| PutApiMessagesConversationsByConversationIdReadStatus422
+	| PutApiMessagesConversationsByConversationIdReadStatus429
 	| PutApiMessagesConversationsByConversationIdReadStatus500;
 
 /**
@@ -11980,6 +12377,30 @@ export type DeleteApiMessagesByMessageIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type DeleteApiMessagesByMessageIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiMessagesByMessageIdStatus500 = InternalError;
 
 /**
@@ -11999,6 +12420,7 @@ export type DeleteApiMessagesByMessageIdResponses = {
 	"204": DeleteApiMessagesByMessageIdStatus204;
 	"404": DeleteApiMessagesByMessageIdStatus404;
 	"422": DeleteApiMessagesByMessageIdStatus422;
+	"429": DeleteApiMessagesByMessageIdStatus429;
 	"500": DeleteApiMessagesByMessageIdStatus500;
 };
 
@@ -12009,6 +12431,7 @@ export type DeleteApiMessagesByMessageIdResponse =
 	| DeleteApiMessagesByMessageIdStatus204
 	| DeleteApiMessagesByMessageIdStatus404
 	| DeleteApiMessagesByMessageIdStatus422
+	| DeleteApiMessagesByMessageIdStatus429
 	| DeleteApiMessagesByMessageIdStatus500;
 
 export const GetApiApiTokensStatus200ItemsPermissionsEnum = {
@@ -12035,6 +12458,23 @@ export const GetApiApiTokensStatus200ItemsPermissionsEnum = {
 
 export type GetApiApiTokensStatus200ItemsPermissionsEnum =
 	(typeof GetApiApiTokensStatus200ItemsPermissionsEnum)[keyof typeof GetApiApiTokensStatus200ItemsPermissionsEnum];
+
+export const GetApiApiTokensStatus200ItemsPolicyKindEnum = {
+	standard: "standard",
+	staff_trusted: "staff_trusted",
+} as const;
+
+export type GetApiApiTokensStatus200ItemsPolicyKindEnum =
+	(typeof GetApiApiTokensStatus200ItemsPolicyKindEnum)[keyof typeof GetApiApiTokensStatus200ItemsPolicyKindEnum];
+
+export const GetApiApiTokensStatus200ItemsPolicySourceEnum = {
+	assigned: "assigned",
+	standard_default: "standard_default",
+	trusted_fallback: "trusted_fallback",
+} as const;
+
+export type GetApiApiTokensStatus200ItemsPolicySourceEnum =
+	(typeof GetApiApiTokensStatus200ItemsPolicySourceEnum)[keyof typeof GetApiApiTokensStatus200ItemsPolicySourceEnum];
 
 /**
  * @type object
@@ -12080,6 +12520,47 @@ export type GetApiApiTokensStatus200 = {
 		 * @type string
 		 */
 		updatedAt: string;
+		/**
+		 * @type object
+		 */
+		policy: {
+			/**
+			 * @type string
+			 */
+			key: string;
+			/**
+			 * @default 'standard'
+			 * @type string
+			 */
+			kind: GetApiApiTokensStatus200ItemsPolicyKindEnum;
+			/**
+			 * @default 'assigned'
+			 * @type string
+			 */
+			source: GetApiApiTokensStatus200ItemsPolicySourceEnum;
+			schemaVersion: string | number;
+			policyRevision: string | number;
+			bindingRevision: ((string | number) | null) | null;
+			validUntil: (string | null) | null;
+			/**
+			 * @type object
+			 */
+			limits: {
+				requestsPerMinute: string | number;
+				maxConcurrentRequests: string | number;
+				dailyCostUnits: string | number;
+			};
+			/**
+			 * @type object
+			 */
+			operations: {
+				[key: string]: {
+					requestsPerMinute?: string | number;
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+			};
+		};
 	}[];
 };
 
@@ -12198,6 +12679,23 @@ export const PostApiApiTokensStatus200PermissionsEnum = {
 export type PostApiApiTokensStatus200PermissionsEnum =
 	(typeof PostApiApiTokensStatus200PermissionsEnum)[keyof typeof PostApiApiTokensStatus200PermissionsEnum];
 
+export const PostApiApiTokensStatus200PolicyKindEnum = {
+	standard: "standard",
+	staff_trusted: "staff_trusted",
+} as const;
+
+export type PostApiApiTokensStatus200PolicyKindEnum =
+	(typeof PostApiApiTokensStatus200PolicyKindEnum)[keyof typeof PostApiApiTokensStatus200PolicyKindEnum];
+
+export const PostApiApiTokensStatus200PolicySourceEnum = {
+	assigned: "assigned",
+	standard_default: "standard_default",
+	trusted_fallback: "trusted_fallback",
+} as const;
+
+export type PostApiApiTokensStatus200PolicySourceEnum =
+	(typeof PostApiApiTokensStatus200PolicySourceEnum)[keyof typeof PostApiApiTokensStatus200PolicySourceEnum];
+
 /**
  * @type object
  */
@@ -12238,6 +12736,47 @@ export type PostApiApiTokensStatus200 = {
 	 * @type string
 	 */
 	updatedAt: string;
+	/**
+	 * @type object
+	 */
+	policy: {
+		/**
+		 * @type string
+		 */
+		key: string;
+		/**
+		 * @default 'standard'
+		 * @type string
+		 */
+		kind: PostApiApiTokensStatus200PolicyKindEnum;
+		/**
+		 * @default 'assigned'
+		 * @type string
+		 */
+		source: PostApiApiTokensStatus200PolicySourceEnum;
+		schemaVersion: string | number;
+		policyRevision: string | number;
+		bindingRevision: ((string | number) | null) | null;
+		validUntil: (string | null) | null;
+		/**
+		 * @type object
+		 */
+		limits: {
+			requestsPerMinute: string | number;
+			maxConcurrentRequests: string | number;
+			dailyCostUnits: string | number;
+		};
+		/**
+		 * @type object
+		 */
+		operations: {
+			[key: string]: {
+				requestsPerMinute?: string | number;
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+		};
+	};
 	/**
 	 * @type string
 	 */
@@ -12300,10 +12839,32 @@ export type PostApiApiTokensStatus403 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type PostApiApiTokensStatus422 = ValidationError;
+export type PostApiApiTokensStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ApiTokenPolicyInvalid'
+				 * @type string
+				 */
+				code: "ApiTokenPolicyInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
 
 /**
  * @type object
@@ -12353,6 +12914,29 @@ export type PostApiApiTokensBody = {
 	 * @default 90
 	 */
 	expiresInDays?: string | number;
+	/**
+	 * @type object | undefined
+	 */
+	policyOverride?: {
+		/**
+		 * @type object | undefined
+		 */
+		limits?: {
+			requestsPerMinute?: string | number;
+			maxConcurrentRequests?: string | number;
+			dailyCostUnits?: string | number;
+		};
+		/**
+		 * @type object | undefined
+		 */
+		operations?: {
+			[key: string]: {
+				requestsPerMinute?: string | number;
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+		};
+	};
 };
 
 /**
@@ -12423,6 +13007,23 @@ export const PatchApiApiTokensByTokenIdStatus200PermissionsEnum = {
 export type PatchApiApiTokensByTokenIdStatus200PermissionsEnum =
 	(typeof PatchApiApiTokensByTokenIdStatus200PermissionsEnum)[keyof typeof PatchApiApiTokensByTokenIdStatus200PermissionsEnum];
 
+export const PatchApiApiTokensByTokenIdStatus200PolicyKindEnum = {
+	standard: "standard",
+	staff_trusted: "staff_trusted",
+} as const;
+
+export type PatchApiApiTokensByTokenIdStatus200PolicyKindEnum =
+	(typeof PatchApiApiTokensByTokenIdStatus200PolicyKindEnum)[keyof typeof PatchApiApiTokensByTokenIdStatus200PolicyKindEnum];
+
+export const PatchApiApiTokensByTokenIdStatus200PolicySourceEnum = {
+	assigned: "assigned",
+	standard_default: "standard_default",
+	trusted_fallback: "trusted_fallback",
+} as const;
+
+export type PatchApiApiTokensByTokenIdStatus200PolicySourceEnum =
+	(typeof PatchApiApiTokensByTokenIdStatus200PolicySourceEnum)[keyof typeof PatchApiApiTokensByTokenIdStatus200PolicySourceEnum];
+
 /**
  * @type object
  */
@@ -12463,6 +13064,47 @@ export type PatchApiApiTokensByTokenIdStatus200 = {
 	 * @type string
 	 */
 	updatedAt: string;
+	/**
+	 * @type object
+	 */
+	policy: {
+		/**
+		 * @type string
+		 */
+		key: string;
+		/**
+		 * @default 'standard'
+		 * @type string
+		 */
+		kind: PatchApiApiTokensByTokenIdStatus200PolicyKindEnum;
+		/**
+		 * @default 'assigned'
+		 * @type string
+		 */
+		source: PatchApiApiTokensByTokenIdStatus200PolicySourceEnum;
+		schemaVersion: string | number;
+		policyRevision: string | number;
+		bindingRevision: ((string | number) | null) | null;
+		validUntil: (string | null) | null;
+		/**
+		 * @type object
+		 */
+		limits: {
+			requestsPerMinute: string | number;
+			maxConcurrentRequests: string | number;
+			dailyCostUnits: string | number;
+		};
+		/**
+		 * @type object
+		 */
+		operations: {
+			[key: string]: {
+				requestsPerMinute?: string | number;
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+		};
+	};
 };
 
 /**
@@ -12781,6 +13423,1302 @@ export type DeleteApiApiTokensByTokenIdResponse =
 	| DeleteApiApiTokensByTokenIdStatus404
 	| DeleteApiApiTokensByTokenIdStatus422
 	| DeleteApiApiTokensByTokenIdStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiApiTokensByTokenIdPolicyPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tokenId: string;
+};
+
+export const PutApiApiTokensByTokenIdPolicyStatus200PermissionsEnum = {
+	"unit:read": "unit:read",
+	"unit:create": "unit:create",
+	"unit:update": "unit:update",
+	"unit:delete": "unit:delete",
+	"profile:read": "profile:read",
+	"profile:update": "profile:update",
+	"interaction:read": "interaction:read",
+	"interaction:write": "interaction:write",
+	"realm:read": "realm:read",
+	"realm:manage": "realm:manage",
+	"message:read": "message:read",
+	"message:write": "message:write",
+	"notification:read": "notification:read",
+	"notification:write": "notification:write",
+	"recommendation:read": "recommendation:read",
+	"recommendation:write": "recommendation:write",
+	"upload:read": "upload:read",
+	"upload:write": "upload:write",
+	"feedback:write": "feedback:write",
+} as const;
+
+export type PutApiApiTokensByTokenIdPolicyStatus200PermissionsEnum =
+	(typeof PutApiApiTokensByTokenIdPolicyStatus200PermissionsEnum)[keyof typeof PutApiApiTokensByTokenIdPolicyStatus200PermissionsEnum];
+
+export const PutApiApiTokensByTokenIdPolicyStatus200PolicyKindEnum = {
+	standard: "standard",
+	staff_trusted: "staff_trusted",
+} as const;
+
+export type PutApiApiTokensByTokenIdPolicyStatus200PolicyKindEnum =
+	(typeof PutApiApiTokensByTokenIdPolicyStatus200PolicyKindEnum)[keyof typeof PutApiApiTokensByTokenIdPolicyStatus200PolicyKindEnum];
+
+export const PutApiApiTokensByTokenIdPolicyStatus200PolicySourceEnum = {
+	assigned: "assigned",
+	standard_default: "standard_default",
+	trusted_fallback: "trusted_fallback",
+} as const;
+
+export type PutApiApiTokensByTokenIdPolicyStatus200PolicySourceEnum =
+	(typeof PutApiApiTokensByTokenIdPolicyStatus200PolicySourceEnum)[keyof typeof PutApiApiTokensByTokenIdPolicyStatus200PolicySourceEnum];
+
+/**
+ * @type object
+ */
+export type PutApiApiTokensByTokenIdPolicyStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type string
+	 */
+	name: string;
+	/**
+	 * @type string
+	 */
+	tokenPrefix: string;
+	/**
+	 * @type array
+	 */
+	permissions: PutApiApiTokensByTokenIdPolicyStatus200PermissionsEnum[];
+	/**
+	 * @type boolean
+	 */
+	enabled: boolean;
+	expiresAt: (string | null) | null;
+	lastUsedAt: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+	/**
+	 * @type object
+	 */
+	policy: {
+		/**
+		 * @type string
+		 */
+		key: string;
+		/**
+		 * @default 'standard'
+		 * @type string
+		 */
+		kind: PutApiApiTokensByTokenIdPolicyStatus200PolicyKindEnum;
+		/**
+		 * @default 'assigned'
+		 * @type string
+		 */
+		source: PutApiApiTokensByTokenIdPolicyStatus200PolicySourceEnum;
+		schemaVersion: string | number;
+		policyRevision: string | number;
+		bindingRevision: ((string | number) | null) | null;
+		validUntil: (string | null) | null;
+		/**
+		 * @type object
+		 */
+		limits: {
+			requestsPerMinute: string | number;
+			maxConcurrentRequests: string | number;
+			dailyCostUnits: string | number;
+		};
+		/**
+		 * @type object
+		 */
+		operations: {
+			[key: string]: {
+				requestsPerMinute?: string | number;
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+		};
+	};
+};
+
+/**
+ * @type object
+ */
+export type PutApiApiTokensByTokenIdPolicyStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InteractiveSessionRequired'
+		 * @type string
+		 */
+		code: "InteractiveSessionRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiApiTokensByTokenIdPolicyStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'FreshSessionRequired'
+		 * @type string
+		 */
+		code: "FreshSessionRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiApiTokensByTokenIdPolicyStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenNotFound'
+		 * @type string
+		 */
+		code: "ApiTokenNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiApiTokensByTokenIdPolicyStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenPolicyRevisionConflict'
+		 * @type string
+		 */
+		code: "ApiTokenPolicyRevisionConflict";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiApiTokensByTokenIdPolicyStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ApiTokenPolicyInvalid'
+				 * @type string
+				 */
+				code: "ApiTokenPolicyInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiApiTokensByTokenIdPolicyStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiApiTokensByTokenIdPolicyBody = {
+	expectedRevision: string | number;
+	/**
+	 * @type object
+	 */
+	configurationOverride: {
+		/**
+		 * @type object | undefined
+		 */
+		limits?: {
+			requestsPerMinute?: string | number;
+			maxConcurrentRequests?: string | number;
+			dailyCostUnits?: string | number;
+		};
+		/**
+		 * @type object | undefined
+		 */
+		operations?: {
+			[key: string]: {
+				requestsPerMinute?: string | number;
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+		};
+	};
+};
+
+/**
+ * @type object
+ */
+export type PutApiApiTokensByTokenIdPolicyOptions = {
+	body: PutApiApiTokensByTokenIdPolicyBody;
+	path: PutApiApiTokensByTokenIdPolicyPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiApiTokensByTokenIdPolicyResponses = {
+	"200": PutApiApiTokensByTokenIdPolicyStatus200;
+	"401": PutApiApiTokensByTokenIdPolicyStatus401;
+	"403": PutApiApiTokensByTokenIdPolicyStatus403;
+	"404": PutApiApiTokensByTokenIdPolicyStatus404;
+	"409": PutApiApiTokensByTokenIdPolicyStatus409;
+	"422": PutApiApiTokensByTokenIdPolicyStatus422;
+	"500": PutApiApiTokensByTokenIdPolicyStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiApiTokensByTokenIdPolicyResponse =
+	| PutApiApiTokensByTokenIdPolicyStatus200
+	| PutApiApiTokensByTokenIdPolicyStatus401
+	| PutApiApiTokensByTokenIdPolicyStatus403
+	| PutApiApiTokensByTokenIdPolicyStatus404
+	| PutApiApiTokensByTokenIdPolicyStatus409
+	| PutApiApiTokensByTokenIdPolicyStatus422
+	| PutApiApiTokensByTokenIdPolicyStatus500;
+
+export const GetCurrentApiTokenStatus200PermissionsEnum = {
+	"unit:read": "unit:read",
+	"unit:create": "unit:create",
+	"unit:update": "unit:update",
+	"unit:delete": "unit:delete",
+	"profile:read": "profile:read",
+	"profile:update": "profile:update",
+	"interaction:read": "interaction:read",
+	"interaction:write": "interaction:write",
+	"realm:read": "realm:read",
+	"realm:manage": "realm:manage",
+	"message:read": "message:read",
+	"message:write": "message:write",
+	"notification:read": "notification:read",
+	"notification:write": "notification:write",
+	"recommendation:read": "recommendation:read",
+	"recommendation:write": "recommendation:write",
+	"upload:read": "upload:read",
+	"upload:write": "upload:write",
+	"feedback:write": "feedback:write",
+} as const;
+
+export type GetCurrentApiTokenStatus200PermissionsEnum =
+	(typeof GetCurrentApiTokenStatus200PermissionsEnum)[keyof typeof GetCurrentApiTokenStatus200PermissionsEnum];
+
+export const GetCurrentApiTokenStatus200PolicyKindEnum = {
+	standard: "standard",
+	staff_trusted: "staff_trusted",
+} as const;
+
+export type GetCurrentApiTokenStatus200PolicyKindEnum =
+	(typeof GetCurrentApiTokenStatus200PolicyKindEnum)[keyof typeof GetCurrentApiTokenStatus200PolicyKindEnum];
+
+export const GetCurrentApiTokenStatus200PolicySourceEnum = {
+	assigned: "assigned",
+	standard_default: "standard_default",
+	trusted_fallback: "trusted_fallback",
+} as const;
+
+export type GetCurrentApiTokenStatus200PolicySourceEnum =
+	(typeof GetCurrentApiTokenStatus200PolicySourceEnum)[keyof typeof GetCurrentApiTokenStatus200PolicySourceEnum];
+
+/**
+ * @type object
+ */
+export type GetCurrentApiTokenStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type string
+	 */
+	name: string;
+	/**
+	 * @type string
+	 */
+	tokenPrefix: string;
+	/**
+	 * @type array
+	 */
+	permissions: GetCurrentApiTokenStatus200PermissionsEnum[];
+	/**
+	 * @type boolean
+	 */
+	enabled: boolean;
+	expiresAt: (string | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @type object
+	 */
+	policy: {
+		/**
+		 * @type string
+		 */
+		key: string;
+		/**
+		 * @default 'standard'
+		 * @type string
+		 */
+		kind: GetCurrentApiTokenStatus200PolicyKindEnum;
+		/**
+		 * @default 'assigned'
+		 * @type string
+		 */
+		source: GetCurrentApiTokenStatus200PolicySourceEnum;
+		schemaVersion: string | number;
+		policyRevision: string | number;
+		bindingRevision: ((string | number) | null) | null;
+		validUntil: (string | null) | null;
+		/**
+		 * @type object
+		 */
+		limits: {
+			requestsPerMinute: string | number;
+			maxConcurrentRequests: string | number;
+			dailyCostUnits: string | number;
+		};
+		/**
+		 * @type object
+		 */
+		operations: {
+			[key: string]: {
+				requestsPerMinute?: string | number;
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+		};
+	};
+};
+
+/**
+ * @type object
+ */
+export type GetCurrentApiTokenStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'AuthenticationRequired'
+		 * @type string
+		 */
+		code: "AuthenticationRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetCurrentApiTokenStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenRateLimitExceeded'
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetCurrentApiTokenStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetCurrentApiTokenOptions = {
+	body?: never;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetCurrentApiTokenResponses = {
+	"200": GetCurrentApiTokenStatus200;
+	"401": GetCurrentApiTokenStatus401;
+	"429": GetCurrentApiTokenStatus429;
+	"500": GetCurrentApiTokenStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetCurrentApiTokenResponse =
+	| GetCurrentApiTokenStatus200
+	| GetCurrentApiTokenStatus401
+	| GetCurrentApiTokenStatus429
+	| GetCurrentApiTokenStatus500;
+
+export const GetApiApiTokenPoliciesStatus200ItemsKindEnum = {
+	standard: "standard",
+	staff_trusted: "staff_trusted",
+} as const;
+
+export type GetApiApiTokenPoliciesStatus200ItemsKindEnum =
+	(typeof GetApiApiTokenPoliciesStatus200ItemsKindEnum)[keyof typeof GetApiApiTokenPoliciesStatus200ItemsKindEnum];
+
+/**
+ * @type object
+ */
+export type GetApiApiTokenPoliciesStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		id: string;
+		/**
+		 * @type string
+		 */
+		key: string;
+		/**
+		 * @default 'standard'
+		 * @type string
+		 */
+		kind: GetApiApiTokenPoliciesStatus200ItemsKindEnum;
+		schemaVersion: string | number;
+		/**
+		 * @type object
+		 */
+		configuration: {
+			/**
+			 * @type object
+			 */
+			limits: {
+				requestsPerMinute: string | number;
+				maxConcurrentRequests: string | number;
+				dailyCostUnits: string | number;
+			};
+			/**
+			 * @type object
+			 */
+			operations: {
+				[key: string]: {
+					requestsPerMinute?: string | number;
+					maxConcurrentRequests?: string | number;
+					dailyCostUnits?: string | number;
+				};
+			};
+		};
+		revision: string | number;
+		/**
+		 * @type boolean
+		 */
+		enabled: boolean;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		updatedAt: string;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiApiTokenPoliciesStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InteractiveSessionRequired'
+		 * @type string
+		 */
+		code: "InteractiveSessionRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const GetApiApiTokenPoliciesStatus403ErrorCodeEnum = {
+	FreshSessionRequired: "FreshSessionRequired",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type GetApiApiTokenPoliciesStatus403ErrorCodeEnum =
+	(typeof GetApiApiTokenPoliciesStatus403ErrorCodeEnum)[keyof typeof GetApiApiTokenPoliciesStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiApiTokenPoliciesStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'FreshSessionRequired'
+		 * @type string
+		 */
+		code: GetApiApiTokenPoliciesStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiApiTokenPoliciesStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiApiTokenPoliciesOptions = {
+	body?: never;
+	path?: never;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiApiTokenPoliciesResponses = {
+	"200": GetApiApiTokenPoliciesStatus200;
+	"401": GetApiApiTokenPoliciesStatus401;
+	"403": GetApiApiTokenPoliciesStatus403;
+	"500": GetApiApiTokenPoliciesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiApiTokenPoliciesResponse =
+	| GetApiApiTokenPoliciesStatus200
+	| GetApiApiTokenPoliciesStatus401
+	| GetApiApiTokenPoliciesStatus403
+	| GetApiApiTokenPoliciesStatus500;
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokenPoliciesByPolicyKeyPath = {
+	/**
+	 * @minLength 1
+	 * @type string
+	 */
+	policyKey: string;
+};
+
+export const PatchApiApiTokenPoliciesByPolicyKeyStatus200KindEnum = {
+	standard: "standard",
+	staff_trusted: "staff_trusted",
+} as const;
+
+export type PatchApiApiTokenPoliciesByPolicyKeyStatus200KindEnum =
+	(typeof PatchApiApiTokenPoliciesByPolicyKeyStatus200KindEnum)[keyof typeof PatchApiApiTokenPoliciesByPolicyKeyStatus200KindEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokenPoliciesByPolicyKeyStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	id: string;
+	/**
+	 * @type string
+	 */
+	key: string;
+	/**
+	 * @default 'standard'
+	 * @type string
+	 */
+	kind: PatchApiApiTokenPoliciesByPolicyKeyStatus200KindEnum;
+	schemaVersion: string | number;
+	/**
+	 * @type object
+	 */
+	configuration: {
+		/**
+		 * @type object
+		 */
+		limits: {
+			requestsPerMinute: string | number;
+			maxConcurrentRequests: string | number;
+			dailyCostUnits: string | number;
+		};
+		/**
+		 * @type object
+		 */
+		operations: {
+			[key: string]: {
+				requestsPerMinute?: string | number;
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+		};
+	};
+	revision: string | number;
+	/**
+	 * @type boolean
+	 */
+	enabled: boolean;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokenPoliciesByPolicyKeyStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InteractiveSessionRequired'
+		 * @type string
+		 */
+		code: "InteractiveSessionRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PatchApiApiTokenPoliciesByPolicyKeyStatus403ErrorCodeEnum = {
+	FreshSessionRequired: "FreshSessionRequired",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type PatchApiApiTokenPoliciesByPolicyKeyStatus403ErrorCodeEnum =
+	(typeof PatchApiApiTokenPoliciesByPolicyKeyStatus403ErrorCodeEnum)[keyof typeof PatchApiApiTokenPoliciesByPolicyKeyStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokenPoliciesByPolicyKeyStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'FreshSessionRequired'
+		 * @type string
+		 */
+		code: PatchApiApiTokenPoliciesByPolicyKeyStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokenPoliciesByPolicyKeyStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenPolicyNotFound'
+		 * @type string
+		 */
+		code: "ApiTokenPolicyNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokenPoliciesByPolicyKeyStatus409 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenPolicyRevisionConflict'
+		 * @type string
+		 */
+		code: "ApiTokenPolicyRevisionConflict";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PatchApiApiTokenPoliciesByPolicyKeyStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ApiTokenPolicyInvalid'
+				 * @type string
+				 */
+				code: "ApiTokenPolicyInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokenPoliciesByPolicyKeyStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokenPoliciesByPolicyKeyBody = {
+	expectedRevision: string | number;
+	/**
+	 * @type object
+	 */
+	configuration: {
+		/**
+		 * @type object
+		 */
+		limits: {
+			requestsPerMinute: string | number;
+			maxConcurrentRequests: string | number;
+			dailyCostUnits: string | number;
+		};
+		/**
+		 * @type object
+		 */
+		operations: {
+			[key: string]: {
+				requestsPerMinute?: string | number;
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+		};
+	};
+};
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokenPoliciesByPolicyKeyOptions = {
+	body: PatchApiApiTokenPoliciesByPolicyKeyBody;
+	path: PatchApiApiTokenPoliciesByPolicyKeyPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PatchApiApiTokenPoliciesByPolicyKeyResponses = {
+	"200": PatchApiApiTokenPoliciesByPolicyKeyStatus200;
+	"401": PatchApiApiTokenPoliciesByPolicyKeyStatus401;
+	"403": PatchApiApiTokenPoliciesByPolicyKeyStatus403;
+	"404": PatchApiApiTokenPoliciesByPolicyKeyStatus404;
+	"409": PatchApiApiTokenPoliciesByPolicyKeyStatus409;
+	"422": PatchApiApiTokenPoliciesByPolicyKeyStatus422;
+	"500": PatchApiApiTokenPoliciesByPolicyKeyStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PatchApiApiTokenPoliciesByPolicyKeyResponse =
+	| PatchApiApiTokenPoliciesByPolicyKeyStatus200
+	| PatchApiApiTokenPoliciesByPolicyKeyStatus401
+	| PatchApiApiTokenPoliciesByPolicyKeyStatus403
+	| PatchApiApiTokenPoliciesByPolicyKeyStatus404
+	| PatchApiApiTokenPoliciesByPolicyKeyStatus409
+	| PatchApiApiTokenPoliciesByPolicyKeyStatus422
+	| PatchApiApiTokenPoliciesByPolicyKeyStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiApiTokenPoliciesBindingsByTokenIdPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tokenId: string;
+};
+
+export const PutApiApiTokenPoliciesBindingsByTokenIdStatus200KindEnum = {
+	standard: "standard",
+	staff_trusted: "staff_trusted",
+} as const;
+
+export type PutApiApiTokenPoliciesBindingsByTokenIdStatus200KindEnum =
+	(typeof PutApiApiTokenPoliciesBindingsByTokenIdStatus200KindEnum)[keyof typeof PutApiApiTokenPoliciesBindingsByTokenIdStatus200KindEnum];
+
+export const PutApiApiTokenPoliciesBindingsByTokenIdStatus200SourceEnum = {
+	assigned: "assigned",
+	standard_default: "standard_default",
+	trusted_fallback: "trusted_fallback",
+} as const;
+
+export type PutApiApiTokenPoliciesBindingsByTokenIdStatus200SourceEnum =
+	(typeof PutApiApiTokenPoliciesBindingsByTokenIdStatus200SourceEnum)[keyof typeof PutApiApiTokenPoliciesBindingsByTokenIdStatus200SourceEnum];
+
+/**
+ * @type object
+ */
+export type PutApiApiTokenPoliciesBindingsByTokenIdStatus200 = {
+	/**
+	 * @type string
+	 */
+	key: string;
+	/**
+	 * @default 'standard'
+	 * @type string
+	 */
+	kind: PutApiApiTokenPoliciesBindingsByTokenIdStatus200KindEnum;
+	/**
+	 * @default 'assigned'
+	 * @type string
+	 */
+	source: PutApiApiTokenPoliciesBindingsByTokenIdStatus200SourceEnum;
+	schemaVersion: string | number;
+	policyRevision: string | number;
+	bindingRevision: ((string | number) | null) | null;
+	validUntil: (string | null) | null;
+	/**
+	 * @type object
+	 */
+	limits: {
+		requestsPerMinute: string | number;
+		maxConcurrentRequests: string | number;
+		dailyCostUnits: string | number;
+	};
+	/**
+	 * @type object
+	 */
+	operations: {
+		[key: string]: {
+			requestsPerMinute?: string | number;
+			maxConcurrentRequests?: string | number;
+			dailyCostUnits?: string | number;
+		};
+	};
+};
+
+/**
+ * @type object
+ */
+export type PutApiApiTokenPoliciesBindingsByTokenIdStatus401 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'InteractiveSessionRequired'
+		 * @type string
+		 */
+		code: "InteractiveSessionRequired";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiApiTokenPoliciesBindingsByTokenIdStatus403ErrorCodeEnum = {
+	FreshSessionRequired: "FreshSessionRequired",
+	PlatformCapabilityRequired: "PlatformCapabilityRequired",
+} as const;
+
+export type PutApiApiTokenPoliciesBindingsByTokenIdStatus403ErrorCodeEnum =
+	(typeof PutApiApiTokenPoliciesBindingsByTokenIdStatus403ErrorCodeEnum)[keyof typeof PutApiApiTokenPoliciesBindingsByTokenIdStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiApiTokenPoliciesBindingsByTokenIdStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'FreshSessionRequired'
+		 * @type string
+		 */
+		code: PutApiApiTokenPoliciesBindingsByTokenIdStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiApiTokenPoliciesBindingsByTokenIdStatus404ErrorCodeEnum = {
+	ApiTokenNotFound: "ApiTokenNotFound",
+	ApiTokenPolicyNotFound: "ApiTokenPolicyNotFound",
+} as const;
+
+export type PutApiApiTokenPoliciesBindingsByTokenIdStatus404ErrorCodeEnum =
+	(typeof PutApiApiTokenPoliciesBindingsByTokenIdStatus404ErrorCodeEnum)[keyof typeof PutApiApiTokenPoliciesBindingsByTokenIdStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiApiTokenPoliciesBindingsByTokenIdStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'ApiTokenNotFound'
+		 * @type string
+		 */
+		code: PutApiApiTokenPoliciesBindingsByTokenIdStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiApiTokenPoliciesBindingsByTokenIdStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ApiTokenPolicyInvalid'
+				 * @type string
+				 */
+				code: "ApiTokenPolicyInvalid";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiApiTokenPoliciesBindingsByTokenIdStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiApiTokenPoliciesBindingsByTokenIdBody = {
+	/**
+	 * @minLength 1
+	 * @maxLength 64
+	 * @type string
+	 */
+	policyKey: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string | undefined
+	 */
+	validUntil?: string;
+	/**
+	 * @minLength 1
+	 * @maxLength 500
+	 * @type string
+	 */
+	reason: string;
+	/**
+	 * @type object | undefined
+	 */
+	configurationOverride?: {
+		/**
+		 * @type object | undefined
+		 */
+		limits?: {
+			requestsPerMinute?: string | number;
+			maxConcurrentRequests?: string | number;
+			dailyCostUnits?: string | number;
+		};
+		/**
+		 * @type object | undefined
+		 */
+		operations?: {
+			[key: string]: {
+				requestsPerMinute?: string | number;
+				maxConcurrentRequests?: string | number;
+				dailyCostUnits?: string | number;
+			};
+		};
+	};
+};
+
+/**
+ * @type object
+ */
+export type PutApiApiTokenPoliciesBindingsByTokenIdOptions = {
+	body: PutApiApiTokenPoliciesBindingsByTokenIdBody;
+	path: PutApiApiTokenPoliciesBindingsByTokenIdPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiApiTokenPoliciesBindingsByTokenIdResponses = {
+	"200": PutApiApiTokenPoliciesBindingsByTokenIdStatus200;
+	"401": PutApiApiTokenPoliciesBindingsByTokenIdStatus401;
+	"403": PutApiApiTokenPoliciesBindingsByTokenIdStatus403;
+	"404": PutApiApiTokenPoliciesBindingsByTokenIdStatus404;
+	"422": PutApiApiTokenPoliciesBindingsByTokenIdStatus422;
+	"500": PutApiApiTokenPoliciesBindingsByTokenIdStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiApiTokenPoliciesBindingsByTokenIdResponse =
+	| PutApiApiTokenPoliciesBindingsByTokenIdStatus200
+	| PutApiApiTokenPoliciesBindingsByTokenIdStatus401
+	| PutApiApiTokenPoliciesBindingsByTokenIdStatus403
+	| PutApiApiTokenPoliciesBindingsByTokenIdStatus404
+	| PutApiApiTokenPoliciesBindingsByTokenIdStatus422
+	| PutApiApiTokenPoliciesBindingsByTokenIdStatus500;
 
 export const GetApiFeedSort = {
 	best: "best",
@@ -13842,6 +15780,30 @@ export type GetApiFeedbackMeStatus422 = ValidationError;
 /**
  * @type object
  */
+export type GetApiFeedbackMeStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiFeedbackMeStatus500 = InternalError;
 
 /**
@@ -13860,6 +15822,7 @@ export type GetApiFeedbackMeOptions = {
 export type GetApiFeedbackMeResponses = {
 	"200": GetApiFeedbackMeStatus200;
 	"422": GetApiFeedbackMeStatus422;
+	"429": GetApiFeedbackMeStatus429;
 	"500": GetApiFeedbackMeStatus500;
 };
 
@@ -13867,7 +15830,10 @@ export type GetApiFeedbackMeResponses = {
  * @description Union of all possible responses
  */
 export type GetApiFeedbackMeResponse =
-	GetApiFeedbackMeStatus200 | GetApiFeedbackMeStatus422 | GetApiFeedbackMeStatus500;
+	| GetApiFeedbackMeStatus200
+	| GetApiFeedbackMeStatus422
+	| GetApiFeedbackMeStatus429
+	| GetApiFeedbackMeStatus500;
 
 export const PostApiFeedbackStatus200EvidenceLanguageEnum = {
 	zh: "zh",
@@ -14274,6 +16240,30 @@ export type PostApiFeedbackStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PostApiFeedbackStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiFeedbackStatus500 = InternalError;
 
 export const PostApiFeedbackRequestTypeEnum = {
@@ -14472,6 +16462,7 @@ export type PostApiFeedbackResponses = {
 	"400": PostApiFeedbackStatus400;
 	"404": PostApiFeedbackStatus404;
 	"422": PostApiFeedbackStatus422;
+	"429": PostApiFeedbackStatus429;
 	"500": PostApiFeedbackStatus500;
 };
 
@@ -14483,6 +16474,7 @@ export type PostApiFeedbackResponse =
 	| PostApiFeedbackStatus400
 	| PostApiFeedbackStatus404
 	| PostApiFeedbackStatus422
+	| PostApiFeedbackStatus429
 	| PostApiFeedbackStatus500;
 
 /**
@@ -19283,6 +21275,30 @@ export type PatchApiGovernanceNotesByPostIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PatchApiGovernanceNotesByPostIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PatchApiGovernanceNotesByPostIdStatus500 = InternalError;
 
 export const PatchApiGovernanceNotesByPostIdRequestLanguageEnum = {
@@ -19464,6 +21480,7 @@ export type PatchApiGovernanceNotesByPostIdResponses = {
 	"404": PatchApiGovernanceNotesByPostIdStatus404;
 	"409": PatchApiGovernanceNotesByPostIdStatus409;
 	"422": PatchApiGovernanceNotesByPostIdStatus422;
+	"429": PatchApiGovernanceNotesByPostIdStatus429;
 	"500": PatchApiGovernanceNotesByPostIdStatus500;
 };
 
@@ -19476,6 +21493,7 @@ export type PatchApiGovernanceNotesByPostIdResponse =
 	| PatchApiGovernanceNotesByPostIdStatus404
 	| PatchApiGovernanceNotesByPostIdStatus409
 	| PatchApiGovernanceNotesByPostIdStatus422
+	| PatchApiGovernanceNotesByPostIdStatus429
 	| PatchApiGovernanceNotesByPostIdStatus500;
 
 export const GetApiGovernanceModerationCasesState = {
@@ -23280,6 +25298,7 @@ export const PostApiGovernanceGrantsRequestCapabilityEnum = {
 	"unit.slug.manage": "unit.slug.manage",
 	"unit.slug.namespace.manage": "unit.slug.namespace.manage",
 	"unit.slug.redirect.release": "unit.slug.redirect.release",
+	"platform.api_token_policy.manage": "platform.api_token_policy.manage",
 	"platform.moderate": "platform.moderate",
 	"platform.suppress": "platform.suppress",
 	"platform.grants.manage": "platform.grants.manage",
@@ -23531,6 +25550,30 @@ export type PostApiSeriesStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PostApiSeriesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiSeriesStatus500 = InternalError;
 
 export const PostApiSeriesRequestLocalizationLanguageEnum = {
@@ -23720,6 +25763,7 @@ export type PostApiSeriesResponses = {
 	"200": PostApiSeriesStatus200;
 	"404": PostApiSeriesStatus404;
 	"422": PostApiSeriesStatus422;
+	"429": PostApiSeriesStatus429;
 	"500": PostApiSeriesStatus500;
 };
 
@@ -23730,6 +25774,7 @@ export type PostApiSeriesResponse =
 	| PostApiSeriesStatus200
 	| PostApiSeriesStatus404
 	| PostApiSeriesStatus422
+	| PostApiSeriesStatus429
 	| PostApiSeriesStatus500;
 
 /**
@@ -24085,6 +26130,30 @@ export type ReplaceZoneSlugAddressStatus422 =
 /**
  * @type object
  */
+export type ReplaceZoneSlugAddressStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type ReplaceZoneSlugAddressStatus500 = InternalError;
 
 /**
@@ -24120,6 +26189,7 @@ export type ReplaceZoneSlugAddressResponses = {
 	"404": ReplaceZoneSlugAddressStatus404;
 	"409": ReplaceZoneSlugAddressStatus409;
 	"422": ReplaceZoneSlugAddressStatus422;
+	"429": ReplaceZoneSlugAddressStatus429;
 	"500": ReplaceZoneSlugAddressStatus500;
 };
 
@@ -24133,6 +26203,7 @@ export type ReplaceZoneSlugAddressResponse =
 	| ReplaceZoneSlugAddressStatus404
 	| ReplaceZoneSlugAddressStatus409
 	| ReplaceZoneSlugAddressStatus422
+	| ReplaceZoneSlugAddressStatus429
 	| ReplaceZoneSlugAddressStatus500;
 
 /**
@@ -24670,6 +26741,30 @@ export type PatchApiZonesByZoneIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PatchApiZonesByZoneIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PatchApiZonesByZoneIdStatus500 = InternalError;
 
 export const PatchApiZonesByZoneIdRequestLocalizationLanguageEnum = {
@@ -24865,6 +26960,7 @@ export type PatchApiZonesByZoneIdResponses = {
 	"403": PatchApiZonesByZoneIdStatus403;
 	"404": PatchApiZonesByZoneIdStatus404;
 	"422": PatchApiZonesByZoneIdStatus422;
+	"429": PatchApiZonesByZoneIdStatus429;
 	"500": PatchApiZonesByZoneIdStatus500;
 };
 
@@ -24877,6 +26973,7 @@ export type PatchApiZonesByZoneIdResponse =
 	| PatchApiZonesByZoneIdStatus403
 	| PatchApiZonesByZoneIdStatus404
 	| PatchApiZonesByZoneIdStatus422
+	| PatchApiZonesByZoneIdStatus429
 	| PatchApiZonesByZoneIdStatus500;
 
 /**
@@ -25875,6 +27972,30 @@ export type PutApiZonesByZoneIdPagesBySlugStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PutApiZonesByZoneIdPagesBySlugStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiZonesByZoneIdPagesBySlugStatus500 = InternalError;
 
 /**
@@ -25924,6 +28045,7 @@ export type PutApiZonesByZoneIdPagesBySlugResponses = {
 	"403": PutApiZonesByZoneIdPagesBySlugStatus403;
 	"404": PutApiZonesByZoneIdPagesBySlugStatus404;
 	"422": PutApiZonesByZoneIdPagesBySlugStatus422;
+	"429": PutApiZonesByZoneIdPagesBySlugStatus429;
 	"500": PutApiZonesByZoneIdPagesBySlugStatus500;
 };
 
@@ -25936,6 +28058,7 @@ export type PutApiZonesByZoneIdPagesBySlugResponse =
 	| PutApiZonesByZoneIdPagesBySlugStatus403
 	| PutApiZonesByZoneIdPagesBySlugStatus404
 	| PutApiZonesByZoneIdPagesBySlugStatus422
+	| PutApiZonesByZoneIdPagesBySlugStatus429
 	| PutApiZonesByZoneIdPagesBySlugStatus500;
 
 /**
@@ -26070,6 +28193,30 @@ export type DeleteApiZonesByZoneIdPagesBySlugStatus422 = ValidationError;
 /**
  * @type object
  */
+export type DeleteApiZonesByZoneIdPagesBySlugStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiZonesByZoneIdPagesBySlugStatus500 = InternalError;
 
 /**
@@ -26091,6 +28238,7 @@ export type DeleteApiZonesByZoneIdPagesBySlugResponses = {
 	"404": DeleteApiZonesByZoneIdPagesBySlugStatus404;
 	"409": DeleteApiZonesByZoneIdPagesBySlugStatus409;
 	"422": DeleteApiZonesByZoneIdPagesBySlugStatus422;
+	"429": DeleteApiZonesByZoneIdPagesBySlugStatus429;
 	"500": DeleteApiZonesByZoneIdPagesBySlugStatus500;
 };
 
@@ -26103,6 +28251,7 @@ export type DeleteApiZonesByZoneIdPagesBySlugResponse =
 	| DeleteApiZonesByZoneIdPagesBySlugStatus404
 	| DeleteApiZonesByZoneIdPagesBySlugStatus409
 	| DeleteApiZonesByZoneIdPagesBySlugStatus422
+	| DeleteApiZonesByZoneIdPagesBySlugStatus429
 	| DeleteApiZonesByZoneIdPagesBySlugStatus500;
 
 /**
@@ -26381,6 +28530,30 @@ export type PostApiZonesByZoneIdNavigationStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PostApiZonesByZoneIdNavigationStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiZonesByZoneIdNavigationStatus500 = InternalError;
 
 /**
@@ -26412,6 +28585,7 @@ export type PostApiZonesByZoneIdNavigationResponses = {
 	"403": PostApiZonesByZoneIdNavigationStatus403;
 	"404": PostApiZonesByZoneIdNavigationStatus404;
 	"422": PostApiZonesByZoneIdNavigationStatus422;
+	"429": PostApiZonesByZoneIdNavigationStatus429;
 	"500": PostApiZonesByZoneIdNavigationStatus500;
 };
 
@@ -26424,6 +28598,7 @@ export type PostApiZonesByZoneIdNavigationResponse =
 	| PostApiZonesByZoneIdNavigationStatus403
 	| PostApiZonesByZoneIdNavigationStatus404
 	| PostApiZonesByZoneIdNavigationStatus422
+	| PostApiZonesByZoneIdNavigationStatus429
 	| PostApiZonesByZoneIdNavigationStatus500;
 
 /**
@@ -26753,6 +28928,30 @@ export type PutApiZonesByZoneIdNavigationByNavigationIdStatus422 = ValidationErr
 /**
  * @type object
  */
+export type PutApiZonesByZoneIdNavigationByNavigationIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiZonesByZoneIdNavigationByNavigationIdStatus500 = InternalError;
 
 /**
@@ -26791,6 +28990,7 @@ export type PutApiZonesByZoneIdNavigationByNavigationIdResponses = {
 	"404": PutApiZonesByZoneIdNavigationByNavigationIdStatus404;
 	"409": PutApiZonesByZoneIdNavigationByNavigationIdStatus409;
 	"422": PutApiZonesByZoneIdNavigationByNavigationIdStatus422;
+	"429": PutApiZonesByZoneIdNavigationByNavigationIdStatus429;
 	"500": PutApiZonesByZoneIdNavigationByNavigationIdStatus500;
 };
 
@@ -26804,6 +29004,7 @@ export type PutApiZonesByZoneIdNavigationByNavigationIdResponse =
 	| PutApiZonesByZoneIdNavigationByNavigationIdStatus404
 	| PutApiZonesByZoneIdNavigationByNavigationIdStatus409
 	| PutApiZonesByZoneIdNavigationByNavigationIdStatus422
+	| PutApiZonesByZoneIdNavigationByNavigationIdStatus429
 	| PutApiZonesByZoneIdNavigationByNavigationIdStatus500;
 
 /**
@@ -26945,6 +29146,30 @@ export type DeleteApiZonesByZoneIdNavigationByNavigationIdStatus422 = Validation
 /**
  * @type object
  */
+export type DeleteApiZonesByZoneIdNavigationByNavigationIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiZonesByZoneIdNavigationByNavigationIdStatus500 = InternalError;
 
 /**
@@ -26978,6 +29203,7 @@ export type DeleteApiZonesByZoneIdNavigationByNavigationIdResponses = {
 	"404": DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404;
 	"409": DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409;
 	"422": DeleteApiZonesByZoneIdNavigationByNavigationIdStatus422;
+	"429": DeleteApiZonesByZoneIdNavigationByNavigationIdStatus429;
 	"500": DeleteApiZonesByZoneIdNavigationByNavigationIdStatus500;
 };
 
@@ -26990,6 +29216,7 @@ export type DeleteApiZonesByZoneIdNavigationByNavigationIdResponse =
 	| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404
 	| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409
 	| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus422
+	| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus429
 	| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus500;
 
 /**
@@ -27121,6 +29348,30 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus422 = ValidationError
 /**
  * @type object
  */
+export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiSeriesBySeriesIdReleasesByReleaseIdStatus500 = InternalError;
 
 /**
@@ -27156,6 +29407,7 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdResponses = {
 	"403": PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403;
 	"404": PutApiSeriesBySeriesIdReleasesByReleaseIdStatus404;
 	"422": PutApiSeriesBySeriesIdReleasesByReleaseIdStatus422;
+	"429": PutApiSeriesBySeriesIdReleasesByReleaseIdStatus429;
 	"500": PutApiSeriesBySeriesIdReleasesByReleaseIdStatus500;
 };
 
@@ -27167,6 +29419,7 @@ export type PutApiSeriesBySeriesIdReleasesByReleaseIdResponse =
 	| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 	| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 	| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus422
+	| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus429
 	| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus500;
 
 /**
@@ -27272,6 +29525,30 @@ export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus422 = ValidationEr
 /**
  * @type object
  */
+export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus500 = InternalError;
 
 /**
@@ -27292,6 +29569,7 @@ export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdResponses = {
 	"403": DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403;
 	"404": DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus404;
 	"422": DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus422;
+	"429": DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus429;
 	"500": DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus500;
 };
 
@@ -27303,6 +29581,7 @@ export type DeleteApiSeriesBySeriesIdReleasesByReleaseIdResponse =
 	| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 	| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 	| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus422
+	| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus429
 	| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus500;
 
 /**
@@ -27377,6 +29656,30 @@ export type PostApiZonesStatus404 = {
  * @type object
  */
 export type PostApiZonesStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiZonesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -27575,6 +29878,7 @@ export type PostApiZonesResponses = {
 	"400": PostApiZonesStatus400;
 	"404": PostApiZonesStatus404;
 	"422": PostApiZonesStatus422;
+	"429": PostApiZonesStatus429;
 	"500": PostApiZonesStatus500;
 };
 
@@ -27586,6 +29890,7 @@ export type PostApiZonesResponse =
 	| PostApiZonesStatus400
 	| PostApiZonesStatus404
 	| PostApiZonesStatus422
+	| PostApiZonesStatus429
 	| PostApiZonesStatus500;
 
 /**
@@ -27872,6 +30177,30 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus422 = ValidationE
 /**
  * @type object
  */
+export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus500 = InternalError;
 
 /**
@@ -27921,6 +30250,7 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsResponses = {
 	"403": PostApiSoftwareBySoftwareIdSystemRequirementsStatus403;
 	"404": PostApiSoftwareBySoftwareIdSystemRequirementsStatus404;
 	"422": PostApiSoftwareBySoftwareIdSystemRequirementsStatus422;
+	"429": PostApiSoftwareBySoftwareIdSystemRequirementsStatus429;
 	"500": PostApiSoftwareBySoftwareIdSystemRequirementsStatus500;
 };
 
@@ -27933,6 +30263,7 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsResponse =
 	| PostApiSoftwareBySoftwareIdSystemRequirementsStatus403
 	| PostApiSoftwareBySoftwareIdSystemRequirementsStatus404
 	| PostApiSoftwareBySoftwareIdSystemRequirementsStatus422
+	| PostApiSoftwareBySoftwareIdSystemRequirementsStatus429
 	| PostApiSoftwareBySoftwareIdSystemRequirementsStatus500;
 
 /**
@@ -28101,6 +30432,30 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
 /**
  * @type object
  */
+export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500 = InternalError;
 
 /**
@@ -28150,6 +30505,7 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponses
 	"403": PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403;
 	"404": PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404;
 	"422": PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422;
+	"429": PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429;
 	"500": PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500;
 };
 
@@ -28162,6 +30518,7 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdResponse 
 	| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 	| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
 	| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+	| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429
 	| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500;
 
 /**
@@ -28270,6 +30627,30 @@ export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus
 /**
  * @type object
  */
+export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500 = InternalError;
 
 /**
@@ -28290,6 +30671,7 @@ export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdRespon
 	"403": DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403;
 	"404": DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404;
 	"422": DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422;
+	"429": DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429;
 	"500": DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500;
 };
 
@@ -28301,6 +30683,7 @@ export type DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdRespon
 	| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 	| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
 	| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+	| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429
 	| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500;
 
 /**
@@ -28862,6 +31245,30 @@ export type PutApiUnitsByIdByUnitIdDocksByKindStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PutApiUnitsByIdByUnitIdDocksByKindStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiUnitsByIdByUnitIdDocksByKindStatus500 = InternalError;
 
 /**
@@ -28900,6 +31307,7 @@ export type PutApiUnitsByIdByUnitIdDocksByKindResponses = {
 	"404": PutApiUnitsByIdByUnitIdDocksByKindStatus404;
 	"409": PutApiUnitsByIdByUnitIdDocksByKindStatus409;
 	"422": PutApiUnitsByIdByUnitIdDocksByKindStatus422;
+	"429": PutApiUnitsByIdByUnitIdDocksByKindStatus429;
 	"500": PutApiUnitsByIdByUnitIdDocksByKindStatus500;
 };
 
@@ -28913,6 +31321,7 @@ export type PutApiUnitsByIdByUnitIdDocksByKindResponse =
 	| PutApiUnitsByIdByUnitIdDocksByKindStatus404
 	| PutApiUnitsByIdByUnitIdDocksByKindStatus409
 	| PutApiUnitsByIdByUnitIdDocksByKindStatus422
+	| PutApiUnitsByIdByUnitIdDocksByKindStatus429
 	| PutApiUnitsByIdByUnitIdDocksByKindStatus500;
 
 export const DeleteApiUnitsByIdByUnitIdDocksByKindKind = {
@@ -29080,6 +31489,30 @@ export type DeleteApiUnitsByIdByUnitIdDocksByKindStatus422 = ValidationError;
 /**
  * @type object
  */
+export type DeleteApiUnitsByIdByUnitIdDocksByKindStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiUnitsByIdByUnitIdDocksByKindStatus500 = InternalError;
 
 /**
@@ -29114,6 +31547,7 @@ export type DeleteApiUnitsByIdByUnitIdDocksByKindResponses = {
 	"404": DeleteApiUnitsByIdByUnitIdDocksByKindStatus404;
 	"409": DeleteApiUnitsByIdByUnitIdDocksByKindStatus409;
 	"422": DeleteApiUnitsByIdByUnitIdDocksByKindStatus422;
+	"429": DeleteApiUnitsByIdByUnitIdDocksByKindStatus429;
 	"500": DeleteApiUnitsByIdByUnitIdDocksByKindStatus500;
 };
 
@@ -29127,6 +31561,7 @@ export type DeleteApiUnitsByIdByUnitIdDocksByKindResponse =
 	| DeleteApiUnitsByIdByUnitIdDocksByKindStatus404
 	| DeleteApiUnitsByIdByUnitIdDocksByKindStatus409
 	| DeleteApiUnitsByIdByUnitIdDocksByKindStatus422
+	| DeleteApiUnitsByIdByUnitIdDocksByKindStatus429
 	| DeleteApiUnitsByIdByUnitIdDocksByKindStatus500;
 
 export const GetApiUnitsByIdByUnitIdDocksByKindRevisionsKind = {
@@ -29504,6 +31939,30 @@ export type PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatu
 /**
  * @type object
  */
+export type PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus500 =
 	InternalError;
 
@@ -29539,6 +31998,7 @@ export type PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreRespo
 	"404": PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus404;
 	"409": PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus409;
 	"422": PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus422;
+	"429": PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus429;
 	"500": PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus500;
 };
 
@@ -29552,6 +32012,7 @@ export type PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreRespo
 	| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus404
 	| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus409
 	| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus422
+	| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus429
 	| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus500;
 
 export type GetApiUsersMeStatus200 = {
@@ -29809,6 +32270,30 @@ export type GetApiUsersMeStatus404 = {
 /**
  * @type object
  */
+export type GetApiUsersMeStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiUsersMeStatus500 = InternalError;
 
 /**
@@ -29827,6 +32312,7 @@ export type GetApiUsersMeOptions = {
 export type GetApiUsersMeResponses = {
 	"200": GetApiUsersMeStatus200;
 	"404": GetApiUsersMeStatus404;
+	"429": GetApiUsersMeStatus429;
 	"500": GetApiUsersMeStatus500;
 };
 
@@ -29834,7 +32320,10 @@ export type GetApiUsersMeResponses = {
  * @description Union of all possible responses
  */
 export type GetApiUsersMeResponse =
-	GetApiUsersMeStatus200 | GetApiUsersMeStatus404 | GetApiUsersMeStatus500;
+	| GetApiUsersMeStatus200
+	| GetApiUsersMeStatus404
+	| GetApiUsersMeStatus429
+	| GetApiUsersMeStatus500;
 
 /**
  * @type object
@@ -30150,6 +32639,30 @@ export type PatchApiUsersMeStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PatchApiUsersMeStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PatchApiUsersMeStatus500 = InternalError;
 
 /**
@@ -30323,6 +32836,7 @@ export type PatchApiUsersMeResponses = {
 	"404": PatchApiUsersMeStatus404;
 	"409": PatchApiUsersMeStatus409;
 	"422": PatchApiUsersMeStatus422;
+	"429": PatchApiUsersMeStatus429;
 	"500": PatchApiUsersMeStatus500;
 };
 
@@ -30335,6 +32849,7 @@ export type PatchApiUsersMeResponse =
 	| PatchApiUsersMeStatus404
 	| PatchApiUsersMeStatus409
 	| PatchApiUsersMeStatus422
+	| PatchApiUsersMeStatus429
 	| PatchApiUsersMeStatus500;
 
 export const GetApiUsersMePreferencesStatus200InterfaceLocaleEnum = {
@@ -30454,6 +32969,30 @@ export type GetApiUsersMePreferencesStatus404 = {
 /**
  * @type object
  */
+export type GetApiUsersMePreferencesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiUsersMePreferencesStatus500 = InternalError;
 
 /**
@@ -30472,6 +33011,7 @@ export type GetApiUsersMePreferencesOptions = {
 export type GetApiUsersMePreferencesResponses = {
 	"200": GetApiUsersMePreferencesStatus200;
 	"404": GetApiUsersMePreferencesStatus404;
+	"429": GetApiUsersMePreferencesStatus429;
 	"500": GetApiUsersMePreferencesStatus500;
 };
 
@@ -30481,6 +33021,7 @@ export type GetApiUsersMePreferencesResponses = {
 export type GetApiUsersMePreferencesResponse =
 	| GetApiUsersMePreferencesStatus200
 	| GetApiUsersMePreferencesStatus404
+	| GetApiUsersMePreferencesStatus429
 	| GetApiUsersMePreferencesStatus500;
 
 export const PatchApiUsersMePreferencesStatus200InterfaceLocaleEnum = {
@@ -30605,6 +33146,30 @@ export type PatchApiUsersMePreferencesStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PatchApiUsersMePreferencesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PatchApiUsersMePreferencesStatus500 = InternalError;
 
 export const PatchApiUsersMePreferencesRequestInterfaceLocaleEnum = {
@@ -30642,6 +33207,7 @@ export type PatchApiUsersMePreferencesResponses = {
 	"200": PatchApiUsersMePreferencesStatus200;
 	"404": PatchApiUsersMePreferencesStatus404;
 	"422": PatchApiUsersMePreferencesStatus422;
+	"429": PatchApiUsersMePreferencesStatus429;
 	"500": PatchApiUsersMePreferencesStatus500;
 };
 
@@ -30652,6 +33218,7 @@ export type PatchApiUsersMePreferencesResponse =
 	| PatchApiUsersMePreferencesStatus200
 	| PatchApiUsersMePreferencesStatus404
 	| PatchApiUsersMePreferencesStatus422
+	| PatchApiUsersMePreferencesStatus429
 	| PatchApiUsersMePreferencesStatus500;
 
 export const PutApiUsersMePreferencesStatus200InterfaceLocaleEnum = {
@@ -30804,6 +33371,30 @@ export type PutApiUsersMePreferencesStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PutApiUsersMePreferencesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiUsersMePreferencesStatus500 = InternalError;
 
 export const PutApiUsersMePreferencesRequestInterfaceLocaleEnum = {
@@ -30916,6 +33507,7 @@ export type PutApiUsersMePreferencesResponses = {
 	"403": PutApiUsersMePreferencesStatus403;
 	"404": PutApiUsersMePreferencesStatus404;
 	"422": PutApiUsersMePreferencesStatus422;
+	"429": PutApiUsersMePreferencesStatus429;
 	"500": PutApiUsersMePreferencesStatus500;
 };
 
@@ -30927,6 +33519,7 @@ export type PutApiUsersMePreferencesResponse =
 	| PutApiUsersMePreferencesStatus403
 	| PutApiUsersMePreferencesStatus404
 	| PutApiUsersMePreferencesStatus422
+	| PutApiUsersMePreferencesStatus429
 	| PutApiUsersMePreferencesStatus500;
 
 export const GetApiUsersMeFollowingKind = {
@@ -31137,6 +33730,30 @@ export type GetApiUsersMeFollowingStatus422 = ValidationError;
 /**
  * @type object
  */
+export type GetApiUsersMeFollowingStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiUsersMeFollowingStatus500 = InternalError;
 
 /**
@@ -31156,6 +33773,7 @@ export type GetApiUsersMeFollowingResponses = {
 	"200": GetApiUsersMeFollowingStatus200;
 	"400": GetApiUsersMeFollowingStatus400;
 	"422": GetApiUsersMeFollowingStatus422;
+	"429": GetApiUsersMeFollowingStatus429;
 	"500": GetApiUsersMeFollowingStatus500;
 };
 
@@ -31166,6 +33784,7 @@ export type GetApiUsersMeFollowingResponse =
 	| GetApiUsersMeFollowingStatus200
 	| GetApiUsersMeFollowingStatus400
 	| GetApiUsersMeFollowingStatus422
+	| GetApiUsersMeFollowingStatus429
 	| GetApiUsersMeFollowingStatus500;
 
 /**
@@ -31278,6 +33897,30 @@ export type GetApiUsersMeFollowingByUnitIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type GetApiUsersMeFollowingByUnitIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiUsersMeFollowingByUnitIdStatus500 = InternalError;
 
 /**
@@ -31298,6 +33941,7 @@ export type GetApiUsersMeFollowingByUnitIdResponses = {
 	"404": GetApiUsersMeFollowingByUnitIdStatus404;
 	"409": GetApiUsersMeFollowingByUnitIdStatus409;
 	"422": GetApiUsersMeFollowingByUnitIdStatus422;
+	"429": GetApiUsersMeFollowingByUnitIdStatus429;
 	"500": GetApiUsersMeFollowingByUnitIdStatus500;
 };
 
@@ -31309,6 +33953,7 @@ export type GetApiUsersMeFollowingByUnitIdResponse =
 	| GetApiUsersMeFollowingByUnitIdStatus404
 	| GetApiUsersMeFollowingByUnitIdStatus409
 	| GetApiUsersMeFollowingByUnitIdStatus422
+	| GetApiUsersMeFollowingByUnitIdStatus429
 	| GetApiUsersMeFollowingByUnitIdStatus500;
 
 /**
@@ -31406,6 +34051,30 @@ export type PutApiUsersMeFollowingByUnitIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PutApiUsersMeFollowingByUnitIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiUsersMeFollowingByUnitIdStatus500 = InternalError;
 
 /**
@@ -31426,6 +34095,7 @@ export type PutApiUsersMeFollowingByUnitIdResponses = {
 	"404": PutApiUsersMeFollowingByUnitIdStatus404;
 	"409": PutApiUsersMeFollowingByUnitIdStatus409;
 	"422": PutApiUsersMeFollowingByUnitIdStatus422;
+	"429": PutApiUsersMeFollowingByUnitIdStatus429;
 	"500": PutApiUsersMeFollowingByUnitIdStatus500;
 };
 
@@ -31437,6 +34107,7 @@ export type PutApiUsersMeFollowingByUnitIdResponse =
 	| PutApiUsersMeFollowingByUnitIdStatus404
 	| PutApiUsersMeFollowingByUnitIdStatus409
 	| PutApiUsersMeFollowingByUnitIdStatus422
+	| PutApiUsersMeFollowingByUnitIdStatus429
 	| PutApiUsersMeFollowingByUnitIdStatus500;
 
 /**
@@ -31469,6 +34140,30 @@ export type DeleteApiUsersMeFollowingByUnitIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type DeleteApiUsersMeFollowingByUnitIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiUsersMeFollowingByUnitIdStatus500 = InternalError;
 
 /**
@@ -31487,6 +34182,7 @@ export type DeleteApiUsersMeFollowingByUnitIdOptions = {
 export type DeleteApiUsersMeFollowingByUnitIdResponses = {
 	"200": DeleteApiUsersMeFollowingByUnitIdStatus200;
 	"422": DeleteApiUsersMeFollowingByUnitIdStatus422;
+	"429": DeleteApiUsersMeFollowingByUnitIdStatus429;
 	"500": DeleteApiUsersMeFollowingByUnitIdStatus500;
 };
 
@@ -31496,6 +34192,7 @@ export type DeleteApiUsersMeFollowingByUnitIdResponses = {
 export type DeleteApiUsersMeFollowingByUnitIdResponse =
 	| DeleteApiUsersMeFollowingByUnitIdStatus200
 	| DeleteApiUsersMeFollowingByUnitIdStatus422
+	| DeleteApiUsersMeFollowingByUnitIdStatus429
 	| DeleteApiUsersMeFollowingByUnitIdStatus500;
 
 /**
@@ -31576,6 +34273,30 @@ export type PatchApiUsersMeFollowingByUnitIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PatchApiUsersMeFollowingByUnitIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PatchApiUsersMeFollowingByUnitIdStatus500 = InternalError;
 
 /**
@@ -31613,6 +34334,7 @@ export type PatchApiUsersMeFollowingByUnitIdResponses = {
 	"200": PatchApiUsersMeFollowingByUnitIdStatus200;
 	"404": PatchApiUsersMeFollowingByUnitIdStatus404;
 	"422": PatchApiUsersMeFollowingByUnitIdStatus422;
+	"429": PatchApiUsersMeFollowingByUnitIdStatus429;
 	"500": PatchApiUsersMeFollowingByUnitIdStatus500;
 };
 
@@ -31623,6 +34345,7 @@ export type PatchApiUsersMeFollowingByUnitIdResponse =
 	| PatchApiUsersMeFollowingByUnitIdStatus200
 	| PatchApiUsersMeFollowingByUnitIdStatus404
 	| PatchApiUsersMeFollowingByUnitIdStatus422
+	| PatchApiUsersMeFollowingByUnitIdStatus429
 	| PatchApiUsersMeFollowingByUnitIdStatus500;
 
 /**
@@ -31945,6 +34668,30 @@ export type GetApiUsersMeBlocksStatus200 = {
 /**
  * @type object
  */
+export type GetApiUsersMeBlocksStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiUsersMeBlocksStatus500 = InternalError;
 
 /**
@@ -31962,6 +34709,7 @@ export type GetApiUsersMeBlocksOptions = {
  */
 export type GetApiUsersMeBlocksResponses = {
 	"200": GetApiUsersMeBlocksStatus200;
+	"429": GetApiUsersMeBlocksStatus429;
 	"500": GetApiUsersMeBlocksStatus500;
 };
 
@@ -31969,7 +34717,7 @@ export type GetApiUsersMeBlocksResponses = {
  * @description Union of all possible responses
  */
 export type GetApiUsersMeBlocksResponse =
-	GetApiUsersMeBlocksStatus200 | GetApiUsersMeBlocksStatus500;
+	GetApiUsersMeBlocksStatus200 | GetApiUsersMeBlocksStatus429 | GetApiUsersMeBlocksStatus500;
 
 /**
  * @type object
@@ -32057,6 +34805,30 @@ export type PutApiUsersByIdBlockStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PutApiUsersByIdBlockStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiUsersByIdBlockStatus500 = InternalError;
 
 /**
@@ -32077,6 +34849,7 @@ export type PutApiUsersByIdBlockResponses = {
 	"404": PutApiUsersByIdBlockStatus404;
 	"409": PutApiUsersByIdBlockStatus409;
 	"422": PutApiUsersByIdBlockStatus422;
+	"429": PutApiUsersByIdBlockStatus429;
 	"500": PutApiUsersByIdBlockStatus500;
 };
 
@@ -32088,6 +34861,7 @@ export type PutApiUsersByIdBlockResponse =
 	| PutApiUsersByIdBlockStatus404
 	| PutApiUsersByIdBlockStatus409
 	| PutApiUsersByIdBlockStatus422
+	| PutApiUsersByIdBlockStatus429
 	| PutApiUsersByIdBlockStatus500;
 
 /**
@@ -32120,6 +34894,30 @@ export type DeleteApiUsersByIdBlockStatus422 = ValidationError;
 /**
  * @type object
  */
+export type DeleteApiUsersByIdBlockStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiUsersByIdBlockStatus500 = InternalError;
 
 /**
@@ -32138,6 +34936,7 @@ export type DeleteApiUsersByIdBlockOptions = {
 export type DeleteApiUsersByIdBlockResponses = {
 	"200": DeleteApiUsersByIdBlockStatus200;
 	"422": DeleteApiUsersByIdBlockStatus422;
+	"429": DeleteApiUsersByIdBlockStatus429;
 	"500": DeleteApiUsersByIdBlockStatus500;
 };
 
@@ -32147,6 +34946,7 @@ export type DeleteApiUsersByIdBlockResponses = {
 export type DeleteApiUsersByIdBlockResponse =
 	| DeleteApiUsersByIdBlockStatus200
 	| DeleteApiUsersByIdBlockStatus422
+	| DeleteApiUsersByIdBlockStatus429
 	| DeleteApiUsersByIdBlockStatus500;
 
 export const ResolveUnitSlugAddressStatus200KindEnum = {
@@ -32878,6 +35678,30 @@ export type ReplaceOwnProfileSlugAddressStatus422 =
 /**
  * @type object
  */
+export type ReplaceOwnProfileSlugAddressStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type ReplaceOwnProfileSlugAddressStatus500 = InternalError;
 
 /**
@@ -32914,6 +35738,7 @@ export type ReplaceOwnProfileSlugAddressResponses = {
 	"404": ReplaceOwnProfileSlugAddressStatus404;
 	"409": ReplaceOwnProfileSlugAddressStatus409;
 	"422": ReplaceOwnProfileSlugAddressStatus422;
+	"429": ReplaceOwnProfileSlugAddressStatus429;
 	"500": ReplaceOwnProfileSlugAddressStatus500;
 };
 
@@ -32928,6 +35753,7 @@ export type ReplaceOwnProfileSlugAddressResponse =
 	| ReplaceOwnProfileSlugAddressStatus404
 	| ReplaceOwnProfileSlugAddressStatus409
 	| ReplaceOwnProfileSlugAddressStatus422
+	| ReplaceOwnProfileSlugAddressStatus429
 	| ReplaceOwnProfileSlugAddressStatus500;
 
 /**
@@ -35311,6 +38137,30 @@ export type PostApiUnitsByTypeStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PostApiUnitsByTypeStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiUnitsByTypeStatus500 = InternalError;
 
 export const PostApiUnitsByTypeRequestLocalizationLanguageEnum = {
@@ -35551,6 +38401,7 @@ export type PostApiUnitsByTypeResponses = {
 	"403": PostApiUnitsByTypeStatus403;
 	"404": PostApiUnitsByTypeStatus404;
 	"422": PostApiUnitsByTypeStatus422;
+	"429": PostApiUnitsByTypeStatus429;
 	"500": PostApiUnitsByTypeStatus500;
 };
 
@@ -35563,6 +38414,7 @@ export type PostApiUnitsByTypeResponse =
 	| PostApiUnitsByTypeStatus403
 	| PostApiUnitsByTypeStatus404
 	| PostApiUnitsByTypeStatus422
+	| PostApiUnitsByTypeStatus429
 	| PostApiUnitsByTypeStatus500;
 
 /**
@@ -37261,6 +40113,30 @@ export type PatchApiUnitsByTypeByUnitIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PatchApiUnitsByTypeByUnitIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PatchApiUnitsByTypeByUnitIdStatus500 = InternalError;
 
 export const PatchApiUnitsByTypeByUnitIdRequestStatusEnum = {
@@ -37404,6 +40280,7 @@ export type PatchApiUnitsByTypeByUnitIdResponses = {
 	"404": PatchApiUnitsByTypeByUnitIdStatus404;
 	"409": PatchApiUnitsByTypeByUnitIdStatus409;
 	"422": PatchApiUnitsByTypeByUnitIdStatus422;
+	"429": PatchApiUnitsByTypeByUnitIdStatus429;
 	"500": PatchApiUnitsByTypeByUnitIdStatus500;
 };
 
@@ -37418,6 +40295,7 @@ export type PatchApiUnitsByTypeByUnitIdResponse =
 	| PatchApiUnitsByTypeByUnitIdStatus404
 	| PatchApiUnitsByTypeByUnitIdStatus409
 	| PatchApiUnitsByTypeByUnitIdStatus422
+	| PatchApiUnitsByTypeByUnitIdStatus429
 	| PatchApiUnitsByTypeByUnitIdStatus500;
 
 /**
@@ -37541,6 +40419,30 @@ export type DeleteApiUnitsByTypeByUnitIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type DeleteApiUnitsByTypeByUnitIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiUnitsByTypeByUnitIdStatus500 = InternalError;
 
 /**
@@ -37562,6 +40464,7 @@ export type DeleteApiUnitsByTypeByUnitIdResponses = {
 	"403": DeleteApiUnitsByTypeByUnitIdStatus403;
 	"404": DeleteApiUnitsByTypeByUnitIdStatus404;
 	"422": DeleteApiUnitsByTypeByUnitIdStatus422;
+	"429": DeleteApiUnitsByTypeByUnitIdStatus429;
 	"500": DeleteApiUnitsByTypeByUnitIdStatus500;
 };
 
@@ -37574,6 +40477,7 @@ export type DeleteApiUnitsByTypeByUnitIdResponse =
 	| DeleteApiUnitsByTypeByUnitIdStatus403
 	| DeleteApiUnitsByTypeByUnitIdStatus404
 	| DeleteApiUnitsByTypeByUnitIdStatus422
+	| DeleteApiUnitsByTypeByUnitIdStatus429
 	| DeleteApiUnitsByTypeByUnitIdStatus500;
 
 export const PatchApiUnitsByTypeByUnitIdVariantContextType = {
@@ -38461,6 +41365,30 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus422 = ValidationError
 /**
  * @type object
  */
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus500 = InternalError;
 
 /**
@@ -38491,6 +41419,7 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextResponses = {
 	"404": PatchApiUnitsByTypeByUnitIdVariantContextStatus404;
 	"409": PatchApiUnitsByTypeByUnitIdVariantContextStatus409;
 	"422": PatchApiUnitsByTypeByUnitIdVariantContextStatus422;
+	"429": PatchApiUnitsByTypeByUnitIdVariantContextStatus429;
 	"500": PatchApiUnitsByTypeByUnitIdVariantContextStatus500;
 };
 
@@ -38504,6 +41433,7 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextResponse =
 	| PatchApiUnitsByTypeByUnitIdVariantContextStatus404
 	| PatchApiUnitsByTypeByUnitIdVariantContextStatus409
 	| PatchApiUnitsByTypeByUnitIdVariantContextStatus422
+	| PatchApiUnitsByTypeByUnitIdVariantContextStatus429
 	| PatchApiUnitsByTypeByUnitIdVariantContextStatus500;
 
 export const PostApiUnitsByTypeByUnitIdVariantContextPromoteType = {
@@ -39393,6 +42323,30 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus422 = Validatio
 /**
  * @type object
  */
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus500 = InternalError;
 
 /**
@@ -39427,6 +42381,7 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteResponses = {
 	"404": PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus404;
 	"409": PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus409;
 	"422": PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus422;
+	"429": PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus429;
 	"500": PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus500;
 };
 
@@ -39440,6 +42395,7 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteResponse =
 	| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus404
 	| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus409
 	| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus422
+	| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus429
 	| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus500;
 
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageLanguage = {
@@ -40298,6 +43254,30 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus422 = Validati
 /**
  * @type object
  */
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus500 = InternalError;
 
 /**
@@ -40466,6 +43446,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageResponses = {
 	"403": PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403;
 	"404": PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus404;
 	"422": PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus422;
+	"429": PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus429;
 	"500": PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus500;
 };
 
@@ -40478,6 +43459,7 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageResponse =
 	| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403
 	| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus404
 	| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus422
+	| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus429
 	| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus500;
 
 /**
@@ -41139,6 +44121,30 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus422 = V
 /**
  * @type object
  */
+export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus500 = InternalError;
 
 /**
@@ -41182,6 +44188,7 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreResponses = {
 	"404": PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus404;
 	"409": PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus409;
 	"422": PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus422;
+	"429": PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429;
 	"500": PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus500;
 };
 
@@ -41194,6 +44201,7 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreResponse =
 	| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus404
 	| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus409
 	| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus422
+	| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429
 	| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus500;
 
 /**
@@ -41345,6 +44353,30 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus422 = Vali
 /**
  * @type object
  */
+export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus500 = InternalError;
 
 /**
@@ -41388,6 +44420,7 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoResponses = {
 	"404": PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus404;
 	"409": PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus409;
 	"422": PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus422;
+	"429": PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429;
 	"500": PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus500;
 };
 
@@ -41400,6 +44433,7 @@ export type PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoResponse =
 	| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus404
 	| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus409
 	| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus422
+	| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429
 	| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus500;
 
 /**
@@ -41511,6 +44545,30 @@ export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus422 = Valida
 /**
  * @type object
  */
+export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus500 = InternalError;
 
 export const PatchApiHistoryUnitRevisionsByRevisionIdVisibilityRequestReasonCodeEnum = {
@@ -41576,6 +44634,7 @@ export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityResponses = {
 	"404": PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus404;
 	"409": PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409;
 	"422": PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus422;
+	"429": PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus429;
 	"500": PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus500;
 };
 
@@ -41588,6 +44647,7 @@ export type PatchApiHistoryUnitRevisionsByRevisionIdVisibilityResponse =
 	| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus404
 	| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409
 	| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus422
+	| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus429
 	| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus500;
 
 export const GetApiHistoryRecentChangesTag = {
@@ -42153,6 +45213,30 @@ export type PostApiEntitiesStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PostApiEntitiesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiEntitiesStatus500 = InternalError;
 
 export const PostApiEntitiesRequestLocalizationLanguageEnum = {
@@ -42342,6 +45426,7 @@ export type PostApiEntitiesResponses = {
 	"200": PostApiEntitiesStatus200;
 	"404": PostApiEntitiesStatus404;
 	"422": PostApiEntitiesStatus422;
+	"429": PostApiEntitiesStatus429;
 	"500": PostApiEntitiesStatus500;
 };
 
@@ -42352,6 +45437,7 @@ export type PostApiEntitiesResponse =
 	| PostApiEntitiesStatus200
 	| PostApiEntitiesStatus404
 	| PostApiEntitiesStatus422
+	| PostApiEntitiesStatus429
 	| PostApiEntitiesStatus500;
 
 /**
@@ -42953,6 +46039,30 @@ export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422 = ValidationE
 /**
  * @type object
  */
+export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus500 = InternalError;
 
 /**
@@ -43120,6 +46230,7 @@ export type PutApiEntitiesByUnitIdLocalizationsByLanguageResponses = {
 	"403": PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403;
 	"404": PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404;
 	"422": PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422;
+	"429": PutApiEntitiesByUnitIdLocalizationsByLanguageStatus429;
 	"500": PutApiEntitiesByUnitIdLocalizationsByLanguageStatus500;
 };
 
@@ -43131,6 +46242,7 @@ export type PutApiEntitiesByUnitIdLocalizationsByLanguageResponse =
 	| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403
 	| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404
 	| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422
+	| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus429
 	| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus500;
 
 /**
@@ -43521,6 +46633,30 @@ export type PostApiTagsStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PostApiTagsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiTagsStatus500 = InternalError;
 
 export const PostApiTagsRequestLocalizationLanguageEnum = {
@@ -43709,6 +46845,7 @@ export type PostApiTagsOptions = {
 export type PostApiTagsResponses = {
 	"200": PostApiTagsStatus200;
 	"422": PostApiTagsStatus422;
+	"429": PostApiTagsStatus429;
 	"500": PostApiTagsStatus500;
 };
 
@@ -43716,7 +46853,7 @@ export type PostApiTagsResponses = {
  * @description Union of all possible responses
  */
 export type PostApiTagsResponse =
-	PostApiTagsStatus200 | PostApiTagsStatus422 | PostApiTagsStatus500;
+	PostApiTagsStatus200 | PostApiTagsStatus422 | PostApiTagsStatus429 | PostApiTagsStatus500;
 
 export const GetApiUnitsByTypeByUnitIdAliasesType = {
 	slug_namespace: "slug_namespace",
@@ -43819,6 +46956,30 @@ export type GetApiUnitsByTypeByUnitIdAliasesStatus422 = ValidationError;
 /**
  * @type object
  */
+export type GetApiUnitsByTypeByUnitIdAliasesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiUnitsByTypeByUnitIdAliasesStatus500 = InternalError;
 
 /**
@@ -43837,6 +46998,7 @@ export type GetApiUnitsByTypeByUnitIdAliasesOptions = {
 export type GetApiUnitsByTypeByUnitIdAliasesResponses = {
 	"200": GetApiUnitsByTypeByUnitIdAliasesStatus200;
 	"422": GetApiUnitsByTypeByUnitIdAliasesStatus422;
+	"429": GetApiUnitsByTypeByUnitIdAliasesStatus429;
 	"500": GetApiUnitsByTypeByUnitIdAliasesStatus500;
 };
 
@@ -43846,6 +47008,7 @@ export type GetApiUnitsByTypeByUnitIdAliasesResponses = {
 export type GetApiUnitsByTypeByUnitIdAliasesResponse =
 	| GetApiUnitsByTypeByUnitIdAliasesStatus200
 	| GetApiUnitsByTypeByUnitIdAliasesStatus422
+	| GetApiUnitsByTypeByUnitIdAliasesStatus429
 	| GetApiUnitsByTypeByUnitIdAliasesStatus500;
 
 export const PostApiUnitsByTypeByUnitIdAliasesType = {
@@ -44008,6 +47171,30 @@ export type PostApiUnitsByTypeByUnitIdAliasesStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PostApiUnitsByTypeByUnitIdAliasesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiUnitsByTypeByUnitIdAliasesStatus500 = InternalError;
 
 export const PostApiUnitsByTypeByUnitIdAliasesRequestLanguageEnum = {
@@ -44069,6 +47256,7 @@ export type PostApiUnitsByTypeByUnitIdAliasesResponses = {
 	"403": PostApiUnitsByTypeByUnitIdAliasesStatus403;
 	"404": PostApiUnitsByTypeByUnitIdAliasesStatus404;
 	"422": PostApiUnitsByTypeByUnitIdAliasesStatus422;
+	"429": PostApiUnitsByTypeByUnitIdAliasesStatus429;
 	"500": PostApiUnitsByTypeByUnitIdAliasesStatus500;
 };
 
@@ -44080,6 +47268,7 @@ export type PostApiUnitsByTypeByUnitIdAliasesResponse =
 	| PostApiUnitsByTypeByUnitIdAliasesStatus403
 	| PostApiUnitsByTypeByUnitIdAliasesStatus404
 	| PostApiUnitsByTypeByUnitIdAliasesStatus422
+	| PostApiUnitsByTypeByUnitIdAliasesStatus429
 	| PostApiUnitsByTypeByUnitIdAliasesStatus500;
 
 export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdType = {
@@ -44211,6 +47400,30 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus422 = ValidationEr
 /**
  * @type object
  */
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500 = InternalError;
 
 /**
@@ -44231,6 +47444,7 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponses = {
 	"403": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403;
 	"404": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404;
 	"422": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus422;
+	"429": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429;
 	"500": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500;
 };
 
@@ -44242,6 +47456,7 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdResponse =
 	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403
 	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404
 	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus422
+	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429
 	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500;
 
 export const PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteType = {
@@ -44341,6 +47556,30 @@ export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422 = ValidationE
 /**
  * @type object
  */
+export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500 = InternalError;
 
 export const PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteRequestValueEnum = {
@@ -44378,6 +47617,7 @@ export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses = {
 	"200": PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200;
 	"404": PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404;
 	"422": PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422;
+	"429": PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429;
 	"500": PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500;
 };
 
@@ -44388,6 +47628,7 @@ export type PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponse =
 	| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200
 	| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 	| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
+	| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429
 	| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500;
 
 export const DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteType = {
@@ -44487,6 +47728,30 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422 = Validati
 /**
  * @type object
  */
+export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500 = InternalError;
 
 /**
@@ -44506,6 +47771,7 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponses = {
 	"200": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200;
 	"404": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404;
 	"422": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422;
+	"429": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429;
 	"500": DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500;
 };
 
@@ -44516,6 +47782,7 @@ export type DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteResponse =
 	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200
 	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
+	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429
 	| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500;
 
 /**
@@ -44660,6 +47927,30 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus422 = ValidationEr
 /**
  * @type object
  */
+export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus500 = InternalError;
 
 /**
@@ -44706,6 +47997,7 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsResponses = {
 	"403": PostApiUnitsByTypeByUnitIdCreditAttributionsStatus403;
 	"404": PostApiUnitsByTypeByUnitIdCreditAttributionsStatus404;
 	"422": PostApiUnitsByTypeByUnitIdCreditAttributionsStatus422;
+	"429": PostApiUnitsByTypeByUnitIdCreditAttributionsStatus429;
 	"500": PostApiUnitsByTypeByUnitIdCreditAttributionsStatus500;
 };
 
@@ -44717,6 +48009,7 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsResponse =
 	| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus403
 	| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus404
 	| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus422
+	| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus429
 	| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus500;
 
 /**
@@ -44824,6 +48117,30 @@ export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus4
 /**
  * @type object
  */
+export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus500 = InternalError;
 
 /**
@@ -44844,6 +48161,7 @@ export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdRespons
 	"403": DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403;
 	"404": DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus404;
 	"422": DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422;
+	"429": DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus429;
 	"500": DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus500;
 };
 
@@ -44855,6 +48173,7 @@ export type DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdRespons
 	| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403
 	| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus404
 	| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422
+	| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus429
 	| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus500;
 
 /**
@@ -44999,6 +48318,30 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422 = ValidationE
 /**
  * @type object
  */
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500 = InternalError;
 
 /**
@@ -45045,6 +48388,7 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsResponses = {
 	"403": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403;
 	"404": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404;
 	"422": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422;
+	"429": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429;
 	"500": PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500;
 };
 
@@ -45056,6 +48400,7 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsResponse =
 	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
 	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
 	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
+	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429
 	| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500;
 
 /**
@@ -45165,6 +48510,30 @@ export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus
 /**
  * @type object
  */
+export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus500 = InternalError;
 
 /**
@@ -45185,6 +48554,7 @@ export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdRespon
 	"403": DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403;
 	"404": DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus404;
 	"422": DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422;
+	"429": DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus429;
 	"500": DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus500;
 };
 
@@ -45196,6 +48566,7 @@ export type DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdRespon
 	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403
 	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus404
 	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422
+	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus429
 	| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus500;
 
 /**
@@ -45343,6 +48714,30 @@ export type PostApiUnitsByTypeByUnitIdLinksStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PostApiUnitsByTypeByUnitIdLinksStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiUnitsByTypeByUnitIdLinksStatus500 = InternalError;
 
 /**
@@ -45395,6 +48790,7 @@ export type PostApiUnitsByTypeByUnitIdLinksResponses = {
 	"403": PostApiUnitsByTypeByUnitIdLinksStatus403;
 	"404": PostApiUnitsByTypeByUnitIdLinksStatus404;
 	"422": PostApiUnitsByTypeByUnitIdLinksStatus422;
+	"429": PostApiUnitsByTypeByUnitIdLinksStatus429;
 	"500": PostApiUnitsByTypeByUnitIdLinksStatus500;
 };
 
@@ -45406,6 +48802,7 @@ export type PostApiUnitsByTypeByUnitIdLinksResponse =
 	| PostApiUnitsByTypeByUnitIdLinksStatus403
 	| PostApiUnitsByTypeByUnitIdLinksStatus404
 	| PostApiUnitsByTypeByUnitIdLinksStatus422
+	| PostApiUnitsByTypeByUnitIdLinksStatus429
 	| PostApiUnitsByTypeByUnitIdLinksStatus500;
 
 /**
@@ -45544,6 +48941,30 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiUnitsByTypeByUnitIdTagsByTagIdStatus500 = InternalError;
 
 /**
@@ -45569,6 +48990,7 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdResponses = {
 	"403": PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403;
 	"404": PutApiUnitsByTypeByUnitIdTagsByTagIdStatus404;
 	"422": PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422;
+	"429": PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429;
 	"500": PutApiUnitsByTypeByUnitIdTagsByTagIdStatus500;
 };
 
@@ -45580,6 +49002,7 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdResponse =
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422
+	| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus500;
 
 /**
@@ -45686,6 +49109,30 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500 = InternalError;
 
 /**
@@ -45706,6 +49153,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdResponses = {
 	"403": DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403;
 	"404": DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404;
 	"422": DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422;
+	"429": DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429;
 	"500": DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500;
 };
 
@@ -45717,6 +49165,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdResponse =
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422
+	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500;
 
 /**
@@ -45791,6 +49240,30 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500 = InternalError;
 
 export const PutApiUnitsByTypeByUnitIdTagsByTagIdVoteRequestValueEnum = {
@@ -45828,6 +49301,7 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses = {
 	"200": PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200;
 	"404": PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404;
 	"422": PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422;
+	"429": PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429;
 	"500": PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500;
 };
 
@@ -45838,6 +49312,7 @@ export type PutApiUnitsByTypeByUnitIdTagsByTagIdVoteResponse =
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
+	| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
 	| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500;
 
 /**
@@ -45904,6 +49379,30 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422 = ValidationErr
 /**
  * @type object
  */
+export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500 = InternalError;
 
 /**
@@ -45923,6 +49422,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteResponses = {
 	"200": DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200;
 	"404": DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404;
 	"422": DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422;
+	"429": DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429;
 	"500": DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500;
 };
 
@@ -45933,6 +49433,7 @@ export type DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteResponse =
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
+	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
 	| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500;
 
 export const PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdType = {
@@ -46115,6 +49616,30 @@ export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422 = Validatio
 /**
  * @type object
  */
+export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500 = InternalError;
 
 /**
@@ -46137,6 +49662,7 @@ export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdResponses = {
 	"404": PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404;
 	"409": PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409;
 	"422": PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422;
+	"429": PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429;
 	"500": PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500;
 };
 
@@ -46149,6 +49675,7 @@ export type PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdResponse =
 	| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404
 	| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409
 	| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422
+	| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429
 	| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500;
 
 /**
@@ -46446,6 +49973,30 @@ export type PostApiUnitsByIdByUnitIdContentStructuresStatus422 =
 /**
  * @type object
  */
+export type PostApiUnitsByIdByUnitIdContentStructuresStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiUnitsByIdByUnitIdContentStructuresStatus500 = InternalError;
 
 export const PostApiUnitsByIdByUnitIdContentStructuresRequestKindEnum = {
@@ -46485,6 +50036,7 @@ export type PostApiUnitsByIdByUnitIdContentStructuresResponses = {
 	"403": PostApiUnitsByIdByUnitIdContentStructuresStatus403;
 	"404": PostApiUnitsByIdByUnitIdContentStructuresStatus404;
 	"422": PostApiUnitsByIdByUnitIdContentStructuresStatus422;
+	"429": PostApiUnitsByIdByUnitIdContentStructuresStatus429;
 	"500": PostApiUnitsByIdByUnitIdContentStructuresStatus500;
 };
 
@@ -46496,6 +50048,7 @@ export type PostApiUnitsByIdByUnitIdContentStructuresResponse =
 	| PostApiUnitsByIdByUnitIdContentStructuresStatus403
 	| PostApiUnitsByIdByUnitIdContentStructuresStatus404
 	| PostApiUnitsByIdByUnitIdContentStructuresStatus422
+	| PostApiUnitsByIdByUnitIdContentStructuresStatus429
 	| PostApiUnitsByIdByUnitIdContentStructuresStatus500;
 
 /**
@@ -47828,6 +51381,30 @@ export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422 =
 /**
  * @type object
  */
+export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500 = InternalError;
 
 /**
@@ -47861,6 +51438,7 @@ export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdResponses = 
 	"404": DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404;
 	"409": DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409;
 	"422": DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422;
+	"429": DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus429;
 	"500": DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500;
 };
 
@@ -47873,6 +51451,7 @@ export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdResponse =
 	| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 	| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409
 	| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422
+	| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus429
 	| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500;
 
 /**
@@ -48189,6 +51768,31 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRev
 /**
  * @type object
  */
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus429 =
+	{
+		/**
+		 * @type object
+		 */
+		error: {
+			/**
+			 * @type string
+			 */
+			code: "ApiTokenRateLimitExceeded";
+			/**
+			 * @type string
+			 */
+			message: string;
+			details?: JsonValue;
+		};
+		/**
+		 * @type string
+		 */
+		requestId: string;
+	};
+
+/**
+ * @type object
+ */
 export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus500 =
 	InternalError;
 
@@ -48235,6 +51839,7 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRev
 		"404": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404;
 		"409": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409;
 		"422": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus422;
+		"429": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus429;
 		"500": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus500;
 	};
 
@@ -48247,6 +51852,7 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRev
 	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404
 	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409
 	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus422
+	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus429
 	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus500;
 
 /**
@@ -49437,6 +53043,30 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus422
 /**
  * @type object
  */
+export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus500 = InternalError;
 
 export const PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesRequestContentRatingEnum = {
@@ -50571,6 +54201,7 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesResponses
 	"404": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404;
 	"409": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409;
 	"422": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus422;
+	"429": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus429;
 	"500": PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus500;
 };
 
@@ -50583,6 +54214,7 @@ export type PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesResponse 
 	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404
 	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409
 	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus422
+	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus429
 	| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus500;
 
 /**
@@ -51781,6 +55413,30 @@ export type PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId
 /**
  * @type object
  */
+export type PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500 =
 	InternalError;
 
@@ -52796,6 +56452,7 @@ export type PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId
 	"404": PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404;
 	"409": PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409;
 	"422": PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422;
+	"429": PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429;
 	"500": PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500;
 };
 
@@ -52808,6 +56465,7 @@ export type PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeId
 	| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 	| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 	| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
+	| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 	| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500;
 
 /**
@@ -52965,6 +56623,30 @@ export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeI
 /**
  * @type object
  */
+export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500 =
 	InternalError;
 
@@ -52999,6 +56681,7 @@ export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeI
 	"404": DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404;
 	"409": DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409;
 	"422": DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422;
+	"429": DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429;
 	"500": DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500;
 };
 
@@ -53011,6 +56694,7 @@ export type DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeI
 	| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 	| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 	| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
+	| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 	| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500;
 
 /**
@@ -53359,6 +57043,30 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesStatus422 = ValidationE
 /**
  * @type object
  */
+export type PostApiUnitsBookByUnitIdContentStructureNodesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiUnitsBookByUnitIdContentStructureNodesStatus500 = InternalError;
 
 export const PostApiUnitsBookByUnitIdContentStructureNodesRequestLanguageEnum = {
@@ -53563,6 +57271,7 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesResponses = {
 	"404": PostApiUnitsBookByUnitIdContentStructureNodesStatus404;
 	"409": PostApiUnitsBookByUnitIdContentStructureNodesStatus409;
 	"422": PostApiUnitsBookByUnitIdContentStructureNodesStatus422;
+	"429": PostApiUnitsBookByUnitIdContentStructureNodesStatus429;
 	"500": PostApiUnitsBookByUnitIdContentStructureNodesStatus500;
 };
 
@@ -53575,6 +57284,7 @@ export type PostApiUnitsBookByUnitIdContentStructureNodesResponse =
 	| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
 	| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
 	| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
+	| PostApiUnitsBookByUnitIdContentStructureNodesStatus429
 	| PostApiUnitsBookByUnitIdContentStructureNodesStatus500;
 
 /**
@@ -53788,6 +57498,30 @@ export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422 = Va
 /**
  * @type object
  */
+export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500 = InternalError;
 
 export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdBody =
@@ -53842,6 +57576,7 @@ export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdResponses = {
 	"404": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404;
 	"409": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409;
 	"422": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422;
+	"429": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus429;
 	"500": PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500;
 };
 
@@ -53854,6 +57589,7 @@ export type PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdResponse =
 	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
 	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409
 	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422
+	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus429
 	| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500;
 
 /**
@@ -54254,6 +57990,30 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422 = V
 /**
  * @type object
  */
+export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus500 = InternalError;
 
 export const PutApiChaptersByChapterIdLocalizationsByLanguageContentRequestStatusEnum = {
@@ -54426,6 +58186,7 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentResponses = {
 	"403": PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403;
 	"404": PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404;
 	"422": PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422;
+	"429": PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429;
 	"500": PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus500;
 };
 
@@ -54437,6 +58198,7 @@ export type PutApiChaptersByChapterIdLocalizationsByLanguageContentResponse =
 	| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403
 	| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404
 	| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422
+	| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429
 	| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus500;
 
 export const GetApiProgressStatus = {
@@ -54517,6 +58279,30 @@ export type GetApiProgressStatus422 = ValidationError;
 /**
  * @type object
  */
+export type GetApiProgressStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiProgressStatus500 = InternalError;
 
 /**
@@ -54535,6 +58321,7 @@ export type GetApiProgressOptions = {
 export type GetApiProgressResponses = {
 	"200": GetApiProgressStatus200;
 	"422": GetApiProgressStatus422;
+	"429": GetApiProgressStatus429;
 	"500": GetApiProgressStatus500;
 };
 
@@ -54542,7 +58329,10 @@ export type GetApiProgressResponses = {
  * @description Union of all possible responses
  */
 export type GetApiProgressResponse =
-	GetApiProgressStatus200 | GetApiProgressStatus422 | GetApiProgressStatus500;
+	| GetApiProgressStatus200
+	| GetApiProgressStatus422
+	| GetApiProgressStatus429
+	| GetApiProgressStatus500;
 
 /**
  * @type object
@@ -54658,6 +58448,30 @@ export type GetApiProgressByUnitIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type GetApiProgressByUnitIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiProgressByUnitIdStatus500 = InternalError;
 
 /**
@@ -54677,6 +58491,7 @@ export type GetApiProgressByUnitIdResponses = {
 	"200": GetApiProgressByUnitIdStatus200;
 	"404": GetApiProgressByUnitIdStatus404;
 	"422": GetApiProgressByUnitIdStatus422;
+	"429": GetApiProgressByUnitIdStatus429;
 	"500": GetApiProgressByUnitIdStatus500;
 };
 
@@ -54687,6 +58502,7 @@ export type GetApiProgressByUnitIdResponse =
 	| GetApiProgressByUnitIdStatus200
 	| GetApiProgressByUnitIdStatus404
 	| GetApiProgressByUnitIdStatus422
+	| GetApiProgressByUnitIdStatus429
 	| GetApiProgressByUnitIdStatus500;
 
 /**
@@ -54803,6 +58619,30 @@ export type PutApiProgressByUnitIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PutApiProgressByUnitIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiProgressByUnitIdStatus500 = InternalError;
 
 export const PutApiProgressByUnitIdRequestStatusEnum = {
@@ -54852,6 +58692,7 @@ export type PutApiProgressByUnitIdResponses = {
 	"200": PutApiProgressByUnitIdStatus200;
 	"404": PutApiProgressByUnitIdStatus404;
 	"422": PutApiProgressByUnitIdStatus422;
+	"429": PutApiProgressByUnitIdStatus429;
 	"500": PutApiProgressByUnitIdStatus500;
 };
 
@@ -54862,6 +58703,7 @@ export type PutApiProgressByUnitIdResponse =
 	| PutApiProgressByUnitIdStatus200
 	| PutApiProgressByUnitIdStatus404
 	| PutApiProgressByUnitIdStatus422
+	| PutApiProgressByUnitIdStatus429
 	| PutApiProgressByUnitIdStatus500;
 
 /**
@@ -54889,6 +58731,30 @@ export type DeleteApiProgressByUnitIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type DeleteApiProgressByUnitIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiProgressByUnitIdStatus500 = InternalError;
 
 /**
@@ -54907,6 +58773,7 @@ export type DeleteApiProgressByUnitIdOptions = {
 export type DeleteApiProgressByUnitIdResponses = {
 	"204": DeleteApiProgressByUnitIdStatus204;
 	"422": DeleteApiProgressByUnitIdStatus422;
+	"429": DeleteApiProgressByUnitIdStatus429;
 	"500": DeleteApiProgressByUnitIdStatus500;
 };
 
@@ -54916,6 +58783,7 @@ export type DeleteApiProgressByUnitIdResponses = {
 export type DeleteApiProgressByUnitIdResponse =
 	| DeleteApiProgressByUnitIdStatus204
 	| DeleteApiProgressByUnitIdStatus422
+	| DeleteApiProgressByUnitIdStatus429
 	| DeleteApiProgressByUnitIdStatus500;
 
 /**
@@ -54990,6 +58858,30 @@ export type PutApiProgressByUnitIdNodesByNodeIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PutApiProgressByUnitIdNodesByNodeIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiProgressByUnitIdNodesByNodeIdStatus500 = InternalError;
 
 /**
@@ -55009,6 +58901,7 @@ export type PutApiProgressByUnitIdNodesByNodeIdResponses = {
 	"200": PutApiProgressByUnitIdNodesByNodeIdStatus200;
 	"404": PutApiProgressByUnitIdNodesByNodeIdStatus404;
 	"422": PutApiProgressByUnitIdNodesByNodeIdStatus422;
+	"429": PutApiProgressByUnitIdNodesByNodeIdStatus429;
 	"500": PutApiProgressByUnitIdNodesByNodeIdStatus500;
 };
 
@@ -55019,6 +58912,7 @@ export type PutApiProgressByUnitIdNodesByNodeIdResponse =
 	| PutApiProgressByUnitIdNodesByNodeIdStatus200
 	| PutApiProgressByUnitIdNodesByNodeIdStatus404
 	| PutApiProgressByUnitIdNodesByNodeIdStatus422
+	| PutApiProgressByUnitIdNodesByNodeIdStatus429
 	| PutApiProgressByUnitIdNodesByNodeIdStatus500;
 
 /**
@@ -55057,6 +58951,30 @@ export type DeleteApiProgressByUnitIdNodesByNodeIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type DeleteApiProgressByUnitIdNodesByNodeIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiProgressByUnitIdNodesByNodeIdStatus500 = InternalError;
 
 /**
@@ -55075,6 +58993,7 @@ export type DeleteApiProgressByUnitIdNodesByNodeIdOptions = {
 export type DeleteApiProgressByUnitIdNodesByNodeIdResponses = {
 	"200": DeleteApiProgressByUnitIdNodesByNodeIdStatus200;
 	"422": DeleteApiProgressByUnitIdNodesByNodeIdStatus422;
+	"429": DeleteApiProgressByUnitIdNodesByNodeIdStatus429;
 	"500": DeleteApiProgressByUnitIdNodesByNodeIdStatus500;
 };
 
@@ -55084,6 +59003,7 @@ export type DeleteApiProgressByUnitIdNodesByNodeIdResponses = {
 export type DeleteApiProgressByUnitIdNodesByNodeIdResponse =
 	| DeleteApiProgressByUnitIdNodesByNodeIdStatus200
 	| DeleteApiProgressByUnitIdNodesByNodeIdStatus422
+	| DeleteApiProgressByUnitIdNodesByNodeIdStatus429
 	| DeleteApiProgressByUnitIdNodesByNodeIdStatus500;
 
 /**
@@ -55763,6 +59683,30 @@ export type PostApiCollectionsStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PostApiCollectionsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiCollectionsStatus500 = InternalError;
 
 export const PostApiCollectionsRequestLocalizationLanguageEnum = {
@@ -56351,6 +60295,7 @@ export type PostApiCollectionsResponses = {
 	"200": PostApiCollectionsStatus200;
 	"404": PostApiCollectionsStatus404;
 	"422": PostApiCollectionsStatus422;
+	"429": PostApiCollectionsStatus429;
 	"500": PostApiCollectionsStatus500;
 };
 
@@ -56361,6 +60306,7 @@ export type PostApiCollectionsResponse =
 	| PostApiCollectionsStatus200
 	| PostApiCollectionsStatus404
 	| PostApiCollectionsStatus422
+	| PostApiCollectionsStatus429
 	| PostApiCollectionsStatus500;
 
 export const GetApiCollectionsFavoritesStatus200SourceEnum = {
@@ -56930,6 +60876,30 @@ export type GetApiCollectionsFavoritesStatus404 = {
 /**
  * @type object
  */
+export type GetApiCollectionsFavoritesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiCollectionsFavoritesStatus500 = InternalError;
 
 /**
@@ -56948,6 +60918,7 @@ export type GetApiCollectionsFavoritesOptions = {
 export type GetApiCollectionsFavoritesResponses = {
 	"200": GetApiCollectionsFavoritesStatus200;
 	"404": GetApiCollectionsFavoritesStatus404;
+	"429": GetApiCollectionsFavoritesStatus429;
 	"500": GetApiCollectionsFavoritesStatus500;
 };
 
@@ -56957,6 +60928,7 @@ export type GetApiCollectionsFavoritesResponses = {
 export type GetApiCollectionsFavoritesResponse =
 	| GetApiCollectionsFavoritesStatus200
 	| GetApiCollectionsFavoritesStatus404
+	| GetApiCollectionsFavoritesStatus429
 	| GetApiCollectionsFavoritesStatus500;
 
 /**
@@ -58222,6 +62194,30 @@ export type PatchApiCollectionsByCollectionIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PatchApiCollectionsByCollectionIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PatchApiCollectionsByCollectionIdStatus500 = InternalError;
 
 export const PatchApiCollectionsByCollectionIdRequestStatusEnum = {
@@ -58825,6 +62821,7 @@ export type PatchApiCollectionsByCollectionIdResponses = {
 	"404": PatchApiCollectionsByCollectionIdStatus404;
 	"409": PatchApiCollectionsByCollectionIdStatus409;
 	"422": PatchApiCollectionsByCollectionIdStatus422;
+	"429": PatchApiCollectionsByCollectionIdStatus429;
 	"500": PatchApiCollectionsByCollectionIdStatus500;
 };
 
@@ -58837,6 +62834,7 @@ export type PatchApiCollectionsByCollectionIdResponse =
 	| PatchApiCollectionsByCollectionIdStatus404
 	| PatchApiCollectionsByCollectionIdStatus409
 	| PatchApiCollectionsByCollectionIdStatus422
+	| PatchApiCollectionsByCollectionIdStatus429
 	| PatchApiCollectionsByCollectionIdStatus500;
 
 /**
@@ -58920,6 +62918,30 @@ export type DeleteApiCollectionsByCollectionIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type DeleteApiCollectionsByCollectionIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiCollectionsByCollectionIdStatus500 = InternalError;
 
 /**
@@ -58940,6 +62962,7 @@ export type DeleteApiCollectionsByCollectionIdResponses = {
 	"403": DeleteApiCollectionsByCollectionIdStatus403;
 	"409": DeleteApiCollectionsByCollectionIdStatus409;
 	"422": DeleteApiCollectionsByCollectionIdStatus422;
+	"429": DeleteApiCollectionsByCollectionIdStatus429;
 	"500": DeleteApiCollectionsByCollectionIdStatus500;
 };
 
@@ -58951,6 +62974,7 @@ export type DeleteApiCollectionsByCollectionIdResponse =
 	| DeleteApiCollectionsByCollectionIdStatus403
 	| DeleteApiCollectionsByCollectionIdStatus409
 	| DeleteApiCollectionsByCollectionIdStatus422
+	| DeleteApiCollectionsByCollectionIdStatus429
 	| DeleteApiCollectionsByCollectionIdStatus500;
 
 /**
@@ -59109,6 +63133,30 @@ export type PostApiCollectionsByCollectionIdItemsBatchStatus422 =
 /**
  * @type object
  */
+export type PostApiCollectionsByCollectionIdItemsBatchStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiCollectionsByCollectionIdItemsBatchStatus500 = InternalError;
 
 /**
@@ -59153,6 +63201,7 @@ export type PostApiCollectionsByCollectionIdItemsBatchResponses = {
 	"404": PostApiCollectionsByCollectionIdItemsBatchStatus404;
 	"409": PostApiCollectionsByCollectionIdItemsBatchStatus409;
 	"422": PostApiCollectionsByCollectionIdItemsBatchStatus422;
+	"429": PostApiCollectionsByCollectionIdItemsBatchStatus429;
 	"500": PostApiCollectionsByCollectionIdItemsBatchStatus500;
 };
 
@@ -59165,6 +63214,7 @@ export type PostApiCollectionsByCollectionIdItemsBatchResponse =
 	| PostApiCollectionsByCollectionIdItemsBatchStatus404
 	| PostApiCollectionsByCollectionIdItemsBatchStatus409
 	| PostApiCollectionsByCollectionIdItemsBatchStatus422
+	| PostApiCollectionsByCollectionIdItemsBatchStatus429
 	| PostApiCollectionsByCollectionIdItemsBatchStatus500;
 
 /**
@@ -59259,6 +63309,30 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus422 = Validation
 /**
  * @type object
  */
+export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus500 = InternalError;
 
 /**
@@ -59304,6 +63378,7 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdResponses = {
 	"403": PutApiCollectionsByCollectionIdItemsByTargetIdStatus403;
 	"404": PutApiCollectionsByCollectionIdItemsByTargetIdStatus404;
 	"422": PutApiCollectionsByCollectionIdItemsByTargetIdStatus422;
+	"429": PutApiCollectionsByCollectionIdItemsByTargetIdStatus429;
 	"500": PutApiCollectionsByCollectionIdItemsByTargetIdStatus500;
 };
 
@@ -59315,6 +63390,7 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdResponse =
 	| PutApiCollectionsByCollectionIdItemsByTargetIdStatus403
 	| PutApiCollectionsByCollectionIdItemsByTargetIdStatus404
 	| PutApiCollectionsByCollectionIdItemsByTargetIdStatus422
+	| PutApiCollectionsByCollectionIdItemsByTargetIdStatus429
 	| PutApiCollectionsByCollectionIdItemsByTargetIdStatus500;
 
 /**
@@ -59381,6 +63457,30 @@ export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422 = Validat
 /**
  * @type object
  */
+export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus500 = InternalError;
 
 /**
@@ -59400,6 +63500,7 @@ export type DeleteApiCollectionsByCollectionIdItemsByTargetIdResponses = {
 	"200": DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus200;
 	"403": DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403;
 	"422": DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422;
+	"429": DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429;
 	"500": DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus500;
 };
 
@@ -59410,6 +63511,7 @@ export type DeleteApiCollectionsByCollectionIdItemsByTargetIdResponse =
 	| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus200
 	| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403
 	| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422
+	| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429
 	| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus500;
 
 /**
@@ -59476,6 +63578,30 @@ export type PutApiCollectionsFavoritesItemsByTargetIdStatus422 = ValidationError
 /**
  * @type object
  */
+export type PutApiCollectionsFavoritesItemsByTargetIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiCollectionsFavoritesItemsByTargetIdStatus500 = InternalError;
 
 /**
@@ -59495,6 +63621,7 @@ export type PutApiCollectionsFavoritesItemsByTargetIdResponses = {
 	"200": PutApiCollectionsFavoritesItemsByTargetIdStatus200;
 	"404": PutApiCollectionsFavoritesItemsByTargetIdStatus404;
 	"422": PutApiCollectionsFavoritesItemsByTargetIdStatus422;
+	"429": PutApiCollectionsFavoritesItemsByTargetIdStatus429;
 	"500": PutApiCollectionsFavoritesItemsByTargetIdStatus500;
 };
 
@@ -59505,6 +63632,7 @@ export type PutApiCollectionsFavoritesItemsByTargetIdResponse =
 	| PutApiCollectionsFavoritesItemsByTargetIdStatus200
 	| PutApiCollectionsFavoritesItemsByTargetIdStatus404
 	| PutApiCollectionsFavoritesItemsByTargetIdStatus422
+	| PutApiCollectionsFavoritesItemsByTargetIdStatus429
 	| PutApiCollectionsFavoritesItemsByTargetIdStatus500;
 
 /**
@@ -59543,6 +63671,30 @@ export type DeleteApiCollectionsFavoritesItemsByTargetIdStatus422 = ValidationEr
 /**
  * @type object
  */
+export type DeleteApiCollectionsFavoritesItemsByTargetIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiCollectionsFavoritesItemsByTargetIdStatus500 = InternalError;
 
 /**
@@ -59561,6 +63713,7 @@ export type DeleteApiCollectionsFavoritesItemsByTargetIdOptions = {
 export type DeleteApiCollectionsFavoritesItemsByTargetIdResponses = {
 	"200": DeleteApiCollectionsFavoritesItemsByTargetIdStatus200;
 	"422": DeleteApiCollectionsFavoritesItemsByTargetIdStatus422;
+	"429": DeleteApiCollectionsFavoritesItemsByTargetIdStatus429;
 	"500": DeleteApiCollectionsFavoritesItemsByTargetIdStatus500;
 };
 
@@ -59570,6 +63723,7 @@ export type DeleteApiCollectionsFavoritesItemsByTargetIdResponses = {
 export type DeleteApiCollectionsFavoritesItemsByTargetIdResponse =
 	| DeleteApiCollectionsFavoritesItemsByTargetIdStatus200
 	| DeleteApiCollectionsFavoritesItemsByTargetIdStatus422
+	| DeleteApiCollectionsFavoritesItemsByTargetIdStatus429
 	| DeleteApiCollectionsFavoritesItemsByTargetIdStatus500;
 
 /**
@@ -59841,6 +63995,30 @@ export type PostApiReviewsStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PostApiReviewsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiReviewsStatus500 = InternalError;
 
 export const PostApiReviewsRequestLanguageEnum = {
@@ -60030,6 +64208,7 @@ export type PostApiReviewsResponses = {
 	"404": PostApiReviewsStatus404;
 	"409": PostApiReviewsStatus409;
 	"422": PostApiReviewsStatus422;
+	"429": PostApiReviewsStatus429;
 	"500": PostApiReviewsStatus500;
 };
 
@@ -60042,6 +64221,7 @@ export type PostApiReviewsResponse =
 	| PostApiReviewsStatus404
 	| PostApiReviewsStatus409
 	| PostApiReviewsStatus422
+	| PostApiReviewsStatus429
 	| PostApiReviewsStatus500;
 
 /**
@@ -60454,6 +64634,30 @@ export type PatchApiReviewsByReviewIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PatchApiReviewsByReviewIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PatchApiReviewsByReviewIdStatus500 = InternalError;
 
 export const PatchApiReviewsByReviewIdRequestLanguageEnum = {
@@ -60630,6 +64834,7 @@ export type PatchApiReviewsByReviewIdResponses = {
 	"403": PatchApiReviewsByReviewIdStatus403;
 	"404": PatchApiReviewsByReviewIdStatus404;
 	"422": PatchApiReviewsByReviewIdStatus422;
+	"429": PatchApiReviewsByReviewIdStatus429;
 	"500": PatchApiReviewsByReviewIdStatus500;
 };
 
@@ -60641,6 +64846,7 @@ export type PatchApiReviewsByReviewIdResponse =
 	| PatchApiReviewsByReviewIdStatus403
 	| PatchApiReviewsByReviewIdStatus404
 	| PatchApiReviewsByReviewIdStatus422
+	| PatchApiReviewsByReviewIdStatus429
 	| PatchApiReviewsByReviewIdStatus500;
 
 /**
@@ -60724,6 +64930,30 @@ export type DeleteApiReviewsByReviewIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type DeleteApiReviewsByReviewIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiReviewsByReviewIdStatus500 = InternalError;
 
 /**
@@ -60744,6 +64974,7 @@ export type DeleteApiReviewsByReviewIdResponses = {
 	"403": DeleteApiReviewsByReviewIdStatus403;
 	"404": DeleteApiReviewsByReviewIdStatus404;
 	"422": DeleteApiReviewsByReviewIdStatus422;
+	"429": DeleteApiReviewsByReviewIdStatus429;
 	"500": DeleteApiReviewsByReviewIdStatus500;
 };
 
@@ -60755,6 +64986,7 @@ export type DeleteApiReviewsByReviewIdResponse =
 	| DeleteApiReviewsByReviewIdStatus403
 	| DeleteApiReviewsByReviewIdStatus404
 	| DeleteApiReviewsByReviewIdStatus422
+	| DeleteApiReviewsByReviewIdStatus429
 	| DeleteApiReviewsByReviewIdStatus500;
 
 /**
@@ -60874,6 +65106,30 @@ export type PutApiScoresByTargetIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PutApiScoresByTargetIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiScoresByTargetIdStatus500 = InternalError;
 
 /**
@@ -60908,6 +65164,7 @@ export type PutApiScoresByTargetIdResponses = {
 	"404": PutApiScoresByTargetIdStatus404;
 	"409": PutApiScoresByTargetIdStatus409;
 	"422": PutApiScoresByTargetIdStatus422;
+	"429": PutApiScoresByTargetIdStatus429;
 	"500": PutApiScoresByTargetIdStatus500;
 };
 
@@ -60920,6 +65177,7 @@ export type PutApiScoresByTargetIdResponse =
 	| PutApiScoresByTargetIdStatus404
 	| PutApiScoresByTargetIdStatus409
 	| PutApiScoresByTargetIdStatus422
+	| PutApiScoresByTargetIdStatus429
 	| PutApiScoresByTargetIdStatus500;
 
 /**
@@ -61435,6 +65693,30 @@ export type PutApiReactionsUnitsByUnitIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PutApiReactionsUnitsByUnitIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiReactionsUnitsByUnitIdStatus500 = InternalError;
 
 export const PutApiReactionsUnitsByUnitIdRequestReactionEnum = {
@@ -61478,6 +65760,7 @@ export type PutApiReactionsUnitsByUnitIdResponses = {
 	"200": PutApiReactionsUnitsByUnitIdStatus200;
 	"404": PutApiReactionsUnitsByUnitIdStatus404;
 	"422": PutApiReactionsUnitsByUnitIdStatus422;
+	"429": PutApiReactionsUnitsByUnitIdStatus429;
 	"500": PutApiReactionsUnitsByUnitIdStatus500;
 };
 
@@ -61488,6 +65771,7 @@ export type PutApiReactionsUnitsByUnitIdResponse =
 	| PutApiReactionsUnitsByUnitIdStatus200
 	| PutApiReactionsUnitsByUnitIdStatus404
 	| PutApiReactionsUnitsByUnitIdStatus422
+	| PutApiReactionsUnitsByUnitIdStatus429
 	| PutApiReactionsUnitsByUnitIdStatus500;
 
 /**
@@ -61513,6 +65797,30 @@ export type DeleteApiReactionsUnitsByUnitIdStatus200 = {
  * @type object
  */
 export type DeleteApiReactionsUnitsByUnitIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiReactionsUnitsByUnitIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -61559,6 +65867,7 @@ export type DeleteApiReactionsUnitsByUnitIdOptions = {
 export type DeleteApiReactionsUnitsByUnitIdResponses = {
 	"200": DeleteApiReactionsUnitsByUnitIdStatus200;
 	"422": DeleteApiReactionsUnitsByUnitIdStatus422;
+	"429": DeleteApiReactionsUnitsByUnitIdStatus429;
 	"500": DeleteApiReactionsUnitsByUnitIdStatus500;
 };
 
@@ -61568,6 +65877,7 @@ export type DeleteApiReactionsUnitsByUnitIdResponses = {
 export type DeleteApiReactionsUnitsByUnitIdResponse =
 	| DeleteApiReactionsUnitsByUnitIdStatus200
 	| DeleteApiReactionsUnitsByUnitIdStatus422
+	| DeleteApiReactionsUnitsByUnitIdStatus429
 	| DeleteApiReactionsUnitsByUnitIdStatus500;
 
 /**
@@ -61628,6 +65938,30 @@ export type PutApiReactionsSharesByUnitIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PutApiReactionsSharesByUnitIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiReactionsSharesByUnitIdStatus500 = InternalError;
 
 /**
@@ -61647,6 +65981,7 @@ export type PutApiReactionsSharesByUnitIdResponses = {
 	"200": PutApiReactionsSharesByUnitIdStatus200;
 	"404": PutApiReactionsSharesByUnitIdStatus404;
 	"422": PutApiReactionsSharesByUnitIdStatus422;
+	"429": PutApiReactionsSharesByUnitIdStatus429;
 	"500": PutApiReactionsSharesByUnitIdStatus500;
 };
 
@@ -61657,6 +65992,7 @@ export type PutApiReactionsSharesByUnitIdResponse =
 	| PutApiReactionsSharesByUnitIdStatus200
 	| PutApiReactionsSharesByUnitIdStatus404
 	| PutApiReactionsSharesByUnitIdStatus422
+	| PutApiReactionsSharesByUnitIdStatus429
 	| PutApiReactionsSharesByUnitIdStatus500;
 
 /**
@@ -61689,6 +66025,30 @@ export type DeleteApiReactionsSharesByUnitIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type DeleteApiReactionsSharesByUnitIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiReactionsSharesByUnitIdStatus500 = InternalError;
 
 /**
@@ -61707,6 +66067,7 @@ export type DeleteApiReactionsSharesByUnitIdOptions = {
 export type DeleteApiReactionsSharesByUnitIdResponses = {
 	"200": DeleteApiReactionsSharesByUnitIdStatus200;
 	"422": DeleteApiReactionsSharesByUnitIdStatus422;
+	"429": DeleteApiReactionsSharesByUnitIdStatus429;
 	"500": DeleteApiReactionsSharesByUnitIdStatus500;
 };
 
@@ -61716,6 +66077,7 @@ export type DeleteApiReactionsSharesByUnitIdResponses = {
 export type DeleteApiReactionsSharesByUnitIdResponse =
 	| DeleteApiReactionsSharesByUnitIdStatus200
 	| DeleteApiReactionsSharesByUnitIdStatus422
+	| DeleteApiReactionsSharesByUnitIdStatus429
 	| DeleteApiReactionsSharesByUnitIdStatus500;
 
 /**
@@ -61790,6 +66152,30 @@ export type PostApiPollsStatus404 = {
  * @type object
  */
 export type PostApiPollsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiPollsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -61908,6 +66294,7 @@ export type PostApiPollsResponses = {
 	"400": PostApiPollsStatus400;
 	"404": PostApiPollsStatus404;
 	"422": PostApiPollsStatus422;
+	"429": PostApiPollsStatus429;
 	"500": PostApiPollsStatus500;
 };
 
@@ -61919,6 +66306,7 @@ export type PostApiPollsResponse =
 	| PostApiPollsStatus400
 	| PostApiPollsStatus404
 	| PostApiPollsStatus422
+	| PostApiPollsStatus429
 	| PostApiPollsStatus500;
 
 /**
@@ -62268,6 +66656,30 @@ export type PutApiPollsByPollIdVoteStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PutApiPollsByPollIdVoteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiPollsByPollIdVoteStatus500 = InternalError;
 
 /**
@@ -62306,6 +66718,7 @@ export type PutApiPollsByPollIdVoteResponses = {
 	"404": PutApiPollsByPollIdVoteStatus404;
 	"409": PutApiPollsByPollIdVoteStatus409;
 	"422": PutApiPollsByPollIdVoteStatus422;
+	"429": PutApiPollsByPollIdVoteStatus429;
 	"500": PutApiPollsByPollIdVoteStatus500;
 };
 
@@ -62319,6 +66732,7 @@ export type PutApiPollsByPollIdVoteResponse =
 	| PutApiPollsByPollIdVoteStatus404
 	| PutApiPollsByPollIdVoteStatus409
 	| PutApiPollsByPollIdVoteStatus422
+	| PutApiPollsByPollIdVoteStatus429
 	| PutApiPollsByPollIdVoteStatus500;
 
 /**
@@ -62415,6 +66829,30 @@ export type DeleteApiPollsByPollIdVoteStatus422 = ValidationError;
 /**
  * @type object
  */
+export type DeleteApiPollsByPollIdVoteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiPollsByPollIdVoteStatus500 = InternalError;
 
 /**
@@ -62435,6 +66873,7 @@ export type DeleteApiPollsByPollIdVoteResponses = {
 	"403": DeleteApiPollsByPollIdVoteStatus403;
 	"404": DeleteApiPollsByPollIdVoteStatus404;
 	"422": DeleteApiPollsByPollIdVoteStatus422;
+	"429": DeleteApiPollsByPollIdVoteStatus429;
 	"500": DeleteApiPollsByPollIdVoteStatus500;
 };
 
@@ -62446,6 +66885,7 @@ export type DeleteApiPollsByPollIdVoteResponse =
 	| DeleteApiPollsByPollIdVoteStatus403
 	| DeleteApiPollsByPollIdVoteStatus404
 	| DeleteApiPollsByPollIdVoteStatus422
+	| DeleteApiPollsByPollIdVoteStatus429
 	| DeleteApiPollsByPollIdVoteStatus500;
 
 /**
@@ -62572,6 +67012,30 @@ export type PostApiPollsByPollIdCloseStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PostApiPollsByPollIdCloseStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiPollsByPollIdCloseStatus500 = InternalError;
 
 /**
@@ -62593,6 +67057,7 @@ export type PostApiPollsByPollIdCloseResponses = {
 	"404": PostApiPollsByPollIdCloseStatus404;
 	"409": PostApiPollsByPollIdCloseStatus409;
 	"422": PostApiPollsByPollIdCloseStatus422;
+	"429": PostApiPollsByPollIdCloseStatus429;
 	"500": PostApiPollsByPollIdCloseStatus500;
 };
 
@@ -62605,6 +67070,7 @@ export type PostApiPollsByPollIdCloseResponse =
 	| PostApiPollsByPollIdCloseStatus404
 	| PostApiPollsByPollIdCloseStatus409
 	| PostApiPollsByPollIdCloseStatus422
+	| PostApiPollsByPollIdCloseStatus429
 	| PostApiPollsByPollIdCloseStatus500;
 
 /**
@@ -62901,6 +67367,30 @@ export type PutApiPostsByPostIdScoresStatus422 =
 /**
  * @type object
  */
+export type PutApiPostsByPostIdScoresStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiPostsByPostIdScoresStatus500 = InternalError;
 
 /**
@@ -62933,6 +67423,7 @@ export type PutApiPostsByPostIdScoresResponses = {
 	"403": PutApiPostsByPostIdScoresStatus403;
 	"404": PutApiPostsByPostIdScoresStatus404;
 	"422": PutApiPostsByPostIdScoresStatus422;
+	"429": PutApiPostsByPostIdScoresStatus429;
 	"500": PutApiPostsByPostIdScoresStatus500;
 };
 
@@ -62944,6 +67435,7 @@ export type PutApiPostsByPostIdScoresResponse =
 	| PutApiPostsByPostIdScoresStatus403
 	| PutApiPostsByPostIdScoresStatus404
 	| PutApiPostsByPostIdScoresStatus422
+	| PutApiPostsByPostIdScoresStatus429
 	| PutApiPostsByPostIdScoresStatus500;
 
 /**
@@ -63352,6 +67844,30 @@ export type PostApiPostsStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PostApiPostsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiPostsStatus500 = InternalError;
 
 export const PostApiPostsRequestLanguageEnum = {
@@ -63536,6 +68052,7 @@ export type PostApiPostsResponses = {
 	"404": PostApiPostsStatus404;
 	"409": PostApiPostsStatus409;
 	"422": PostApiPostsStatus422;
+	"429": PostApiPostsStatus429;
 	"500": PostApiPostsStatus500;
 };
 
@@ -63548,6 +68065,7 @@ export type PostApiPostsResponse =
 	| PostApiPostsStatus404
 	| PostApiPostsStatus409
 	| PostApiPostsStatus422
+	| PostApiPostsStatus429
 	| PostApiPostsStatus500;
 
 /**
@@ -64011,6 +68529,30 @@ export type PatchApiPostsByPostIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PatchApiPostsByPostIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PatchApiPostsByPostIdStatus500 = InternalError;
 
 /**
@@ -64186,6 +68728,7 @@ export type PatchApiPostsByPostIdResponses = {
 	"404": PatchApiPostsByPostIdStatus404;
 	"409": PatchApiPostsByPostIdStatus409;
 	"422": PatchApiPostsByPostIdStatus422;
+	"429": PatchApiPostsByPostIdStatus429;
 	"500": PatchApiPostsByPostIdStatus500;
 };
 
@@ -64198,6 +68741,7 @@ export type PatchApiPostsByPostIdResponse =
 	| PatchApiPostsByPostIdStatus404
 	| PatchApiPostsByPostIdStatus409
 	| PatchApiPostsByPostIdStatus422
+	| PatchApiPostsByPostIdStatus429
 	| PatchApiPostsByPostIdStatus500;
 
 /**
@@ -64289,6 +68833,30 @@ export type DeleteApiPostsByPostIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type DeleteApiPostsByPostIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiPostsByPostIdStatus500 = InternalError;
 
 /**
@@ -64309,6 +68877,7 @@ export type DeleteApiPostsByPostIdResponses = {
 	"403": DeleteApiPostsByPostIdStatus403;
 	"404": DeleteApiPostsByPostIdStatus404;
 	"422": DeleteApiPostsByPostIdStatus422;
+	"429": DeleteApiPostsByPostIdStatus429;
 	"500": DeleteApiPostsByPostIdStatus500;
 };
 
@@ -64320,6 +68889,7 @@ export type DeleteApiPostsByPostIdResponse =
 	| DeleteApiPostsByPostIdStatus403
 	| DeleteApiPostsByPostIdStatus404
 	| DeleteApiPostsByPostIdStatus422
+	| DeleteApiPostsByPostIdStatus429
 	| DeleteApiPostsByPostIdStatus500;
 
 /**
@@ -64845,6 +69415,30 @@ export type PostApiPostsByPostIdRepliesStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PostApiPostsByPostIdRepliesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiPostsByPostIdRepliesStatus500 = InternalError;
 
 export const PostApiPostsByPostIdRepliesRequestLanguageEnum = {
@@ -65023,6 +69617,7 @@ export type PostApiPostsByPostIdRepliesResponses = {
 	"404": PostApiPostsByPostIdRepliesStatus404;
 	"409": PostApiPostsByPostIdRepliesStatus409;
 	"422": PostApiPostsByPostIdRepliesStatus422;
+	"429": PostApiPostsByPostIdRepliesStatus429;
 	"500": PostApiPostsByPostIdRepliesStatus500;
 };
 
@@ -65035,6 +69630,7 @@ export type PostApiPostsByPostIdRepliesResponse =
 	| PostApiPostsByPostIdRepliesStatus404
 	| PostApiPostsByPostIdRepliesStatus409
 	| PostApiPostsByPostIdRepliesStatus422
+	| PostApiPostsByPostIdRepliesStatus429
 	| PostApiPostsByPostIdRepliesStatus500;
 
 /**
@@ -65171,6 +69767,30 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus409 = {
  * @type object
  */
 export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PatchApiPostsByPostIdRepliesByReplyPostIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -65344,6 +69964,7 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdResponses = {
 	"404": PatchApiPostsByPostIdRepliesByReplyPostIdStatus404;
 	"409": PatchApiPostsByPostIdRepliesByReplyPostIdStatus409;
 	"422": PatchApiPostsByPostIdRepliesByReplyPostIdStatus422;
+	"429": PatchApiPostsByPostIdRepliesByReplyPostIdStatus429;
 	"500": PatchApiPostsByPostIdRepliesByReplyPostIdStatus500;
 };
 
@@ -65356,6 +69977,7 @@ export type PatchApiPostsByPostIdRepliesByReplyPostIdResponse =
 	| PatchApiPostsByPostIdRepliesByReplyPostIdStatus404
 	| PatchApiPostsByPostIdRepliesByReplyPostIdStatus409
 	| PatchApiPostsByPostIdRepliesByReplyPostIdStatus422
+	| PatchApiPostsByPostIdRepliesByReplyPostIdStatus429
 	| PatchApiPostsByPostIdRepliesByReplyPostIdStatus500;
 
 /**
@@ -65453,6 +70075,30 @@ export type DeleteApiPostsByPostIdRepliesByReplyPostIdStatus422 = ValidationErro
 /**
  * @type object
  */
+export type DeleteApiPostsByPostIdRepliesByReplyPostIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiPostsByPostIdRepliesByReplyPostIdStatus500 = InternalError;
 
 /**
@@ -65473,6 +70119,7 @@ export type DeleteApiPostsByPostIdRepliesByReplyPostIdResponses = {
 	"403": DeleteApiPostsByPostIdRepliesByReplyPostIdStatus403;
 	"404": DeleteApiPostsByPostIdRepliesByReplyPostIdStatus404;
 	"422": DeleteApiPostsByPostIdRepliesByReplyPostIdStatus422;
+	"429": DeleteApiPostsByPostIdRepliesByReplyPostIdStatus429;
 	"500": DeleteApiPostsByPostIdRepliesByReplyPostIdStatus500;
 };
 
@@ -65484,6 +70131,7 @@ export type DeleteApiPostsByPostIdRepliesByReplyPostIdResponse =
 	| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus403
 	| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus404
 	| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus422
+	| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus429
 	| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus500;
 
 export const GetApiRealmsLanguage = {
@@ -65684,6 +70332,30 @@ export type PostApiRealmsStatus404 = {
  * @type object
  */
 export type PostApiRealmsStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiRealmsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -65896,6 +70568,7 @@ export type PostApiRealmsResponses = {
 	"200": PostApiRealmsStatus200;
 	"404": PostApiRealmsStatus404;
 	"422": PostApiRealmsStatus422;
+	"429": PostApiRealmsStatus429;
 	"500": PostApiRealmsStatus500;
 };
 
@@ -65906,6 +70579,7 @@ export type PostApiRealmsResponse =
 	| PostApiRealmsStatus200
 	| PostApiRealmsStatus404
 	| PostApiRealmsStatus422
+	| PostApiRealmsStatus429
 	| PostApiRealmsStatus500;
 
 /**
@@ -66118,6 +70792,30 @@ export type ReplaceRealmSlugAddressStatus422 =
 /**
  * @type object
  */
+export type ReplaceRealmSlugAddressStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type ReplaceRealmSlugAddressStatus500 = InternalError;
 
 /**
@@ -66153,6 +70851,7 @@ export type ReplaceRealmSlugAddressResponses = {
 	"404": ReplaceRealmSlugAddressStatus404;
 	"409": ReplaceRealmSlugAddressStatus409;
 	"422": ReplaceRealmSlugAddressStatus422;
+	"429": ReplaceRealmSlugAddressStatus429;
 	"500": ReplaceRealmSlugAddressStatus500;
 };
 
@@ -66166,6 +70865,7 @@ export type ReplaceRealmSlugAddressResponse =
 	| ReplaceRealmSlugAddressStatus404
 	| ReplaceRealmSlugAddressStatus409
 	| ReplaceRealmSlugAddressStatus422
+	| ReplaceRealmSlugAddressStatus429
 	| ReplaceRealmSlugAddressStatus500;
 
 /**
@@ -66584,6 +71284,30 @@ export type PatchApiRealmsByRealmIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PatchApiRealmsByRealmIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PatchApiRealmsByRealmIdStatus500 = InternalError;
 
 export const PatchApiRealmsByRealmIdRequestJoinPolicyEnum = {
@@ -66806,6 +71530,7 @@ export type PatchApiRealmsByRealmIdResponses = {
 	"403": PatchApiRealmsByRealmIdStatus403;
 	"404": PatchApiRealmsByRealmIdStatus404;
 	"422": PatchApiRealmsByRealmIdStatus422;
+	"429": PatchApiRealmsByRealmIdStatus429;
 	"500": PatchApiRealmsByRealmIdStatus500;
 };
 
@@ -66817,6 +71542,7 @@ export type PatchApiRealmsByRealmIdResponse =
 	| PatchApiRealmsByRealmIdStatus403
 	| PatchApiRealmsByRealmIdStatus404
 	| PatchApiRealmsByRealmIdStatus422
+	| PatchApiRealmsByRealmIdStatus429
 	| PatchApiRealmsByRealmIdStatus500;
 
 /**
@@ -67277,6 +72003,30 @@ export type PutApiRealmsByRealmIdMembershipStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PutApiRealmsByRealmIdMembershipStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiRealmsByRealmIdMembershipStatus500 = InternalError;
 
 export const PutApiRealmsByRealmIdMembershipRequestLanguageEnum = {
@@ -67322,6 +72072,7 @@ export type PutApiRealmsByRealmIdMembershipResponses = {
 	"404": PutApiRealmsByRealmIdMembershipStatus404;
 	"409": PutApiRealmsByRealmIdMembershipStatus409;
 	"422": PutApiRealmsByRealmIdMembershipStatus422;
+	"429": PutApiRealmsByRealmIdMembershipStatus429;
 	"500": PutApiRealmsByRealmIdMembershipStatus500;
 };
 
@@ -67334,6 +72085,7 @@ export type PutApiRealmsByRealmIdMembershipResponse =
 	| PutApiRealmsByRealmIdMembershipStatus404
 	| PutApiRealmsByRealmIdMembershipStatus409
 	| PutApiRealmsByRealmIdMembershipStatus422
+	| PutApiRealmsByRealmIdMembershipStatus429
 	| PutApiRealmsByRealmIdMembershipStatus500;
 
 /**
@@ -67445,6 +72197,30 @@ export type DeleteApiRealmsByRealmIdMembershipStatus422 = ValidationError;
 /**
  * @type object
  */
+export type DeleteApiRealmsByRealmIdMembershipStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiRealmsByRealmIdMembershipStatus500 = InternalError;
 
 /**
@@ -67466,6 +72242,7 @@ export type DeleteApiRealmsByRealmIdMembershipResponses = {
 	"404": DeleteApiRealmsByRealmIdMembershipStatus404;
 	"409": DeleteApiRealmsByRealmIdMembershipStatus409;
 	"422": DeleteApiRealmsByRealmIdMembershipStatus422;
+	"429": DeleteApiRealmsByRealmIdMembershipStatus429;
 	"500": DeleteApiRealmsByRealmIdMembershipStatus500;
 };
 
@@ -67478,6 +72255,7 @@ export type DeleteApiRealmsByRealmIdMembershipResponse =
 	| DeleteApiRealmsByRealmIdMembershipStatus404
 	| DeleteApiRealmsByRealmIdMembershipStatus409
 	| DeleteApiRealmsByRealmIdMembershipStatus422
+	| DeleteApiRealmsByRealmIdMembershipStatus429
 	| DeleteApiRealmsByRealmIdMembershipStatus500;
 
 /**
@@ -67585,6 +72363,30 @@ export type GetApiRealmsByRealmIdMembersStatus422 = ValidationError;
 /**
  * @type object
  */
+export type GetApiRealmsByRealmIdMembersStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiRealmsByRealmIdMembersStatus500 = InternalError;
 
 /**
@@ -67604,6 +72406,7 @@ export type GetApiRealmsByRealmIdMembersResponses = {
 	"200": GetApiRealmsByRealmIdMembersStatus200;
 	"403": GetApiRealmsByRealmIdMembersStatus403;
 	"422": GetApiRealmsByRealmIdMembersStatus422;
+	"429": GetApiRealmsByRealmIdMembersStatus429;
 	"500": GetApiRealmsByRealmIdMembersStatus500;
 };
 
@@ -67614,6 +72417,7 @@ export type GetApiRealmsByRealmIdMembersResponse =
 	| GetApiRealmsByRealmIdMembersStatus200
 	| GetApiRealmsByRealmIdMembersStatus403
 	| GetApiRealmsByRealmIdMembersStatus422
+	| GetApiRealmsByRealmIdMembersStatus429
 	| GetApiRealmsByRealmIdMembersStatus500;
 
 /**
@@ -67745,6 +72549,30 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdStatus422 = ValidationError
 /**
  * @type object
  */
+export type PatchApiRealmsByRealmIdMembersByProfileIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PatchApiRealmsByRealmIdMembersByProfileIdStatus500 = InternalError;
 
 export const PatchApiRealmsByRealmIdMembersByProfileIdRequestRoleEnum = {
@@ -67800,6 +72628,7 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdResponses = {
 	"403": PatchApiRealmsByRealmIdMembersByProfileIdStatus403;
 	"404": PatchApiRealmsByRealmIdMembersByProfileIdStatus404;
 	"422": PatchApiRealmsByRealmIdMembersByProfileIdStatus422;
+	"429": PatchApiRealmsByRealmIdMembersByProfileIdStatus429;
 	"500": PatchApiRealmsByRealmIdMembersByProfileIdStatus500;
 };
 
@@ -67811,6 +72640,7 @@ export type PatchApiRealmsByRealmIdMembersByProfileIdResponse =
 	| PatchApiRealmsByRealmIdMembersByProfileIdStatus403
 	| PatchApiRealmsByRealmIdMembersByProfileIdStatus404
 	| PatchApiRealmsByRealmIdMembersByProfileIdStatus422
+	| PatchApiRealmsByRealmIdMembersByProfileIdStatus429
 	| PatchApiRealmsByRealmIdMembersByProfileIdStatus500;
 
 /**
@@ -67878,6 +72708,30 @@ export type PutApiRealmsByRealmIdRulesStatus403 = {
  * @type object
  */
 export type PutApiRealmsByRealmIdRulesStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdRulesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
 
 /**
  * @type object
@@ -68069,6 +72923,7 @@ export type PutApiRealmsByRealmIdRulesResponses = {
 	"200": PutApiRealmsByRealmIdRulesStatus200;
 	"403": PutApiRealmsByRealmIdRulesStatus403;
 	"422": PutApiRealmsByRealmIdRulesStatus422;
+	"429": PutApiRealmsByRealmIdRulesStatus429;
 	"500": PutApiRealmsByRealmIdRulesStatus500;
 };
 
@@ -68079,6 +72934,7 @@ export type PutApiRealmsByRealmIdRulesResponse =
 	| PutApiRealmsByRealmIdRulesStatus200
 	| PutApiRealmsByRealmIdRulesStatus403
 	| PutApiRealmsByRealmIdRulesStatus422
+	| PutApiRealmsByRealmIdRulesStatus429
 	| PutApiRealmsByRealmIdRulesStatus500;
 
 /**
@@ -68593,6 +73449,30 @@ export type PutApiRealmsByRealmIdPinsByUnitIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PutApiRealmsByRealmIdPinsByUnitIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiRealmsByRealmIdPinsByUnitIdStatus500 = InternalError;
 
 export const PutApiRealmsByRealmIdPinsByUnitIdRequestKindEnum = {
@@ -68639,6 +73519,7 @@ export type PutApiRealmsByRealmIdPinsByUnitIdResponses = {
 	"403": PutApiRealmsByRealmIdPinsByUnitIdStatus403;
 	"404": PutApiRealmsByRealmIdPinsByUnitIdStatus404;
 	"422": PutApiRealmsByRealmIdPinsByUnitIdStatus422;
+	"429": PutApiRealmsByRealmIdPinsByUnitIdStatus429;
 	"500": PutApiRealmsByRealmIdPinsByUnitIdStatus500;
 };
 
@@ -68650,6 +73531,7 @@ export type PutApiRealmsByRealmIdPinsByUnitIdResponse =
 	| PutApiRealmsByRealmIdPinsByUnitIdStatus403
 	| PutApiRealmsByRealmIdPinsByUnitIdStatus404
 	| PutApiRealmsByRealmIdPinsByUnitIdStatus422
+	| PutApiRealmsByRealmIdPinsByUnitIdStatus429
 	| PutApiRealmsByRealmIdPinsByUnitIdStatus500;
 
 /**
@@ -68737,6 +73619,30 @@ export type DeleteApiRealmsByRealmIdPinsByUnitIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type DeleteApiRealmsByRealmIdPinsByUnitIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiRealmsByRealmIdPinsByUnitIdStatus500 = InternalError;
 
 /**
@@ -68756,6 +73662,7 @@ export type DeleteApiRealmsByRealmIdPinsByUnitIdResponses = {
 	"204": DeleteApiRealmsByRealmIdPinsByUnitIdStatus204;
 	"403": DeleteApiRealmsByRealmIdPinsByUnitIdStatus403;
 	"422": DeleteApiRealmsByRealmIdPinsByUnitIdStatus422;
+	"429": DeleteApiRealmsByRealmIdPinsByUnitIdStatus429;
 	"500": DeleteApiRealmsByRealmIdPinsByUnitIdStatus500;
 };
 
@@ -68766,6 +73673,7 @@ export type DeleteApiRealmsByRealmIdPinsByUnitIdResponse =
 	| DeleteApiRealmsByRealmIdPinsByUnitIdStatus204
 	| DeleteApiRealmsByRealmIdPinsByUnitIdStatus403
 	| DeleteApiRealmsByRealmIdPinsByUnitIdStatus422
+	| DeleteApiRealmsByRealmIdPinsByUnitIdStatus429
 	| DeleteApiRealmsByRealmIdPinsByUnitIdStatus500;
 
 /**
@@ -69568,6 +74476,30 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PatchApiRealmsByRealmIdUnitsByUnitIdStatus500 = InternalError;
 
 export const PatchApiRealmsByRealmIdUnitsByUnitIdRequestReasonCodeEnum = {
@@ -69925,6 +74857,7 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdResponses = {
 	"404": PatchApiRealmsByRealmIdUnitsByUnitIdStatus404;
 	"409": PatchApiRealmsByRealmIdUnitsByUnitIdStatus409;
 	"422": PatchApiRealmsByRealmIdUnitsByUnitIdStatus422;
+	"429": PatchApiRealmsByRealmIdUnitsByUnitIdStatus429;
 	"500": PatchApiRealmsByRealmIdUnitsByUnitIdStatus500;
 };
 
@@ -69938,6 +74871,7 @@ export type PatchApiRealmsByRealmIdUnitsByUnitIdResponse =
 	| PatchApiRealmsByRealmIdUnitsByUnitIdStatus404
 	| PatchApiRealmsByRealmIdUnitsByUnitIdStatus409
 	| PatchApiRealmsByRealmIdUnitsByUnitIdStatus422
+	| PatchApiRealmsByRealmIdUnitsByUnitIdStatus429
 	| PatchApiRealmsByRealmIdUnitsByUnitIdStatus500;
 
 /**
@@ -70216,6 +75150,30 @@ export type PostApiRealmsByRealmIdNavigationStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PostApiRealmsByRealmIdNavigationStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiRealmsByRealmIdNavigationStatus500 = InternalError;
 
 /**
@@ -70247,6 +75205,7 @@ export type PostApiRealmsByRealmIdNavigationResponses = {
 	"403": PostApiRealmsByRealmIdNavigationStatus403;
 	"404": PostApiRealmsByRealmIdNavigationStatus404;
 	"422": PostApiRealmsByRealmIdNavigationStatus422;
+	"429": PostApiRealmsByRealmIdNavigationStatus429;
 	"500": PostApiRealmsByRealmIdNavigationStatus500;
 };
 
@@ -70259,6 +75218,7 @@ export type PostApiRealmsByRealmIdNavigationResponse =
 	| PostApiRealmsByRealmIdNavigationStatus403
 	| PostApiRealmsByRealmIdNavigationStatus404
 	| PostApiRealmsByRealmIdNavigationStatus422
+	| PostApiRealmsByRealmIdNavigationStatus429
 	| PostApiRealmsByRealmIdNavigationStatus500;
 
 /**
@@ -70588,6 +75548,30 @@ export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus422 = ValidationE
 /**
  * @type object
  */
+export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PutApiRealmsByRealmIdNavigationByNavigationIdStatus500 = InternalError;
 
 /**
@@ -70626,6 +75610,7 @@ export type PutApiRealmsByRealmIdNavigationByNavigationIdResponses = {
 	"404": PutApiRealmsByRealmIdNavigationByNavigationIdStatus404;
 	"409": PutApiRealmsByRealmIdNavigationByNavigationIdStatus409;
 	"422": PutApiRealmsByRealmIdNavigationByNavigationIdStatus422;
+	"429": PutApiRealmsByRealmIdNavigationByNavigationIdStatus429;
 	"500": PutApiRealmsByRealmIdNavigationByNavigationIdStatus500;
 };
 
@@ -70639,6 +75624,7 @@ export type PutApiRealmsByRealmIdNavigationByNavigationIdResponse =
 	| PutApiRealmsByRealmIdNavigationByNavigationIdStatus404
 	| PutApiRealmsByRealmIdNavigationByNavigationIdStatus409
 	| PutApiRealmsByRealmIdNavigationByNavigationIdStatus422
+	| PutApiRealmsByRealmIdNavigationByNavigationIdStatus429
 	| PutApiRealmsByRealmIdNavigationByNavigationIdStatus500;
 
 /**
@@ -70780,6 +75766,30 @@ export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422 = Validati
 /**
  * @type object
  */
+export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500 = InternalError;
 
 /**
@@ -70813,6 +75823,7 @@ export type DeleteApiRealmsByRealmIdNavigationByNavigationIdResponses = {
 	"404": DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404;
 	"409": DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409;
 	"422": DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422;
+	"429": DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus429;
 	"500": DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500;
 };
 
@@ -70825,6 +75836,7 @@ export type DeleteApiRealmsByRealmIdNavigationByNavigationIdResponse =
 	| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
 	| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
 	| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422
+	| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus429
 	| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500;
 
 export const GetApiSearchConfigurationStatus200CategoriesEnum = {
@@ -76704,6 +81716,30 @@ export type PostApiImageAssetsStatus422 = ValidationError;
 /**
  * @type object
  */
+export type PostApiImageAssetsStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiImageAssetsStatus500 = InternalError;
 
 export const PostApiImageAssetsRequestAccessEnum = {
@@ -76749,6 +81785,7 @@ export type PostApiImageAssetsResponses = {
 	"401": PostApiImageAssetsStatus401;
 	"415": PostApiImageAssetsStatus415;
 	"422": PostApiImageAssetsStatus422;
+	"429": PostApiImageAssetsStatus429;
 	"500": PostApiImageAssetsStatus500;
 };
 
@@ -76760,6 +81797,7 @@ export type PostApiImageAssetsResponse =
 	| PostApiImageAssetsStatus401
 	| PostApiImageAssetsStatus415
 	| PostApiImageAssetsStatus422
+	| PostApiImageAssetsStatus429
 	| PostApiImageAssetsStatus500;
 
 /**
@@ -76949,6 +81987,30 @@ export type PostApiImageAssetsByIdCompleteStatus422 =
 /**
  * @type object
  */
+export type PostApiImageAssetsByIdCompleteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type PostApiImageAssetsByIdCompleteStatus500 = InternalError;
 
 /**
@@ -76970,6 +82032,7 @@ export type PostApiImageAssetsByIdCompleteResponses = {
 	"404": PostApiImageAssetsByIdCompleteStatus404;
 	"409": PostApiImageAssetsByIdCompleteStatus409;
 	"422": PostApiImageAssetsByIdCompleteStatus422;
+	"429": PostApiImageAssetsByIdCompleteStatus429;
 	"500": PostApiImageAssetsByIdCompleteStatus500;
 };
 
@@ -76982,6 +82045,7 @@ export type PostApiImageAssetsByIdCompleteResponse =
 	| PostApiImageAssetsByIdCompleteStatus404
 	| PostApiImageAssetsByIdCompleteStatus409
 	| PostApiImageAssetsByIdCompleteStatus422
+	| PostApiImageAssetsByIdCompleteStatus429
 	| PostApiImageAssetsByIdCompleteStatus500;
 
 /**
@@ -77105,6 +82169,30 @@ export type GetApiImageAssetsByIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type GetApiImageAssetsByIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type GetApiImageAssetsByIdStatus500 = InternalError;
 
 /**
@@ -77125,6 +82213,7 @@ export type GetApiImageAssetsByIdResponses = {
 	"401": GetApiImageAssetsByIdStatus401;
 	"404": GetApiImageAssetsByIdStatus404;
 	"422": GetApiImageAssetsByIdStatus422;
+	"429": GetApiImageAssetsByIdStatus429;
 	"500": GetApiImageAssetsByIdStatus500;
 };
 
@@ -77136,6 +82225,7 @@ export type GetApiImageAssetsByIdResponse =
 	| GetApiImageAssetsByIdStatus401
 	| GetApiImageAssetsByIdStatus404
 	| GetApiImageAssetsByIdStatus422
+	| GetApiImageAssetsByIdStatus429
 	| GetApiImageAssetsByIdStatus500;
 
 /**
@@ -77247,6 +82337,30 @@ export type DeleteApiImageAssetsByIdStatus422 = ValidationError;
 /**
  * @type object
  */
+export type DeleteApiImageAssetsByIdStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
 export type DeleteApiImageAssetsByIdStatus500 = InternalError;
 
 /**
@@ -77268,6 +82382,7 @@ export type DeleteApiImageAssetsByIdResponses = {
 	"404": DeleteApiImageAssetsByIdStatus404;
 	"409": DeleteApiImageAssetsByIdStatus409;
 	"422": DeleteApiImageAssetsByIdStatus422;
+	"429": DeleteApiImageAssetsByIdStatus429;
 	"500": DeleteApiImageAssetsByIdStatus500;
 };
 
@@ -77280,4 +82395,5 @@ export type DeleteApiImageAssetsByIdResponse =
 	| DeleteApiImageAssetsByIdStatus404
 	| DeleteApiImageAssetsByIdStatus409
 	| DeleteApiImageAssetsByIdStatus422
+	| DeleteApiImageAssetsByIdStatus429
 	| DeleteApiImageAssetsByIdStatus500;

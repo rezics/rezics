@@ -83,15 +83,15 @@ describe("locale handling", () => {
 });
 
 describe("product fact registry", () => {
-	test("publishes 25 unique non-protocol product pages", () => {
-		expect(PRODUCT_DEFINITIONS).toHaveLength(25);
-		expect(new Set(PRODUCT_DEFINITIONS.map(({ id }) => id)).size).toBe(25);
-		expect(new Set(PRODUCT_DEFINITIONS.map(({ slug }) => slug)).size).toBe(25);
+	test("publishes 26 unique non-protocol product pages", () => {
+		expect(PRODUCT_DEFINITIONS).toHaveLength(26);
+		expect(new Set(PRODUCT_DEFINITIONS.map(({ id }) => id)).size).toBe(26);
+		expect(new Set(PRODUCT_DEFINITIONS.map(({ slug }) => slug)).size).toBe(26);
 		expect(PRODUCT_DEFINITIONS.map(({ pageClass }) => String(pageClass))).not.toContain(
 			"protocol",
 		);
 		expect(PRODUCT_GROUPS.products).toHaveLength(20);
-		expect(PRODUCT_GROUPS.platform).toHaveLength(5);
+		expect(PRODUCT_GROUPS.platform).toHaveLength(6);
 	});
 
 	test("encodes manifestations and shared capabilities without changing parentage", () => {

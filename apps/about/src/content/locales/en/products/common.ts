@@ -33,6 +33,7 @@ const content = {
 		progress: "Progress",
 		entity: "Entity",
 		"api-oauth": `${verbatimTerms.api.value} & ${verbatimTerms.oauth.value}`,
+		token: `${verbatimTerms.api.value} Token`,
 	} satisfies Record<ProductId, string>,
 	manifestationFormulas: {
 		gamebook: `Book + ${verbatimTerms.gameContentStructure.value} → GameBook`,

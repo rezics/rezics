@@ -33,6 +33,7 @@ export const auth = betterAuth({
 	plugins: [
 		apiKey({
 			references: "user",
+			disableKeyHashing: false,
 			defaultPrefix: "rz_api_",
 			defaultKeyLength: 64,
 			requireName: true,
@@ -43,9 +44,10 @@ export const auth = betterAuth({
 				defaultExpiresIn: 60 * 60 * 24 * 90,
 				disableCustomExpiresTime: false,
 				minExpiresIn: 1,
-				maxExpiresIn: 365,
+				maxExpiresIn: 60 * 60 * 24 * 365,
 			},
-			rateLimit: { enabled: true, timeWindow: 60_000, maxRequests: 300 },
+			// Emergency platform ceiling. Product limits are enforced by the application access guard.
+			rateLimit: { enabled: true, timeWindow: 60_000, maxRequests: 5_000 },
 			enableSessionForAPIKeys: false,
 			storage: "database",
 			deferUpdates: false,

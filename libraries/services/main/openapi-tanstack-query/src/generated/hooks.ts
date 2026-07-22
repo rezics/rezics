@@ -25,12 +25,14 @@ import type {
 	DeleteApiMessagesByMessageIdStatus204,
 	DeleteApiMessagesByMessageIdStatus404,
 	DeleteApiMessagesByMessageIdStatus422,
+	DeleteApiMessagesByMessageIdStatus429,
 	DeleteApiMessagesByMessageIdStatus500,
 	DeleteApiRecommendationsExclusionsByUnitIdOptions,
 	DeleteApiRecommendationsExclusionsByUnitIdStatus200,
 	DeleteApiRecommendationsExclusionsByUnitIdStatus401,
 	DeleteApiRecommendationsExclusionsByUnitIdStatus403,
 	DeleteApiRecommendationsExclusionsByUnitIdStatus422,
+	DeleteApiRecommendationsExclusionsByUnitIdStatus429,
 	DeleteApiRecommendationsExclusionsByUnitIdStatus500,
 	DeleteApiUnitByUnitIdAssociationProposalsByProposalIdOptions,
 	DeleteApiUnitByUnitIdAssociationProposalsByProposalIdStatus204,
@@ -86,6 +88,7 @@ import type {
 	GetApiHealthStatus500,
 	HeadApiHealthStatus204,
 	HeadApiHealthStatus422,
+	HeadApiHealthStatus429,
 	HeadApiHealthStatus500,
 	GetApiReadyStatus200,
 	GetApiReadyStatus500,
@@ -94,25 +97,31 @@ import type {
 	GetApiNotificationsStatus200,
 	GetApiNotificationsStatus400,
 	GetApiNotificationsStatus422,
+	GetApiNotificationsStatus429,
 	GetApiNotificationsStatus500,
 	GetApiNotificationsUnreadCountStatus200,
+	GetApiNotificationsUnreadCountStatus429,
 	GetApiNotificationsUnreadCountStatus500,
 	PutApiNotificationsReadAllOptions,
 	PutApiNotificationsReadAllStatus200,
 	PutApiNotificationsReadAllStatus400,
 	PutApiNotificationsReadAllStatus403,
 	PutApiNotificationsReadAllStatus422,
+	PutApiNotificationsReadAllStatus429,
 	PutApiNotificationsReadAllStatus500,
 	PutApiNotificationsByNotificationIdReadOptions,
 	PutApiNotificationsByNotificationIdReadStatus200,
 	PutApiNotificationsByNotificationIdReadStatus404,
 	PutApiNotificationsByNotificationIdReadStatus422,
+	PutApiNotificationsByNotificationIdReadStatus429,
 	PutApiNotificationsByNotificationIdReadStatus500,
 	GetApiNotificationsPreferencesStatus200,
+	GetApiNotificationsPreferencesStatus429,
 	GetApiNotificationsPreferencesStatus500,
 	PutApiNotificationsPreferencesOptions,
 	PutApiNotificationsPreferencesStatus200,
 	PutApiNotificationsPreferencesStatus422,
+	PutApiNotificationsPreferencesStatus429,
 	PutApiNotificationsPreferencesStatus500,
 	GetApiRecommendationsUnitsOptions,
 	GetApiRecommendationsUnitsStatus200,
@@ -137,11 +146,13 @@ import type {
 	PutApiRecommendationsExclusionsByUnitIdStatus403,
 	PutApiRecommendationsExclusionsByUnitIdStatus404,
 	PutApiRecommendationsExclusionsByUnitIdStatus422,
+	PutApiRecommendationsExclusionsByUnitIdStatus429,
 	PutApiRecommendationsExclusionsByUnitIdStatus500,
 	GetApiMessagesConversationsOptions,
 	GetApiMessagesConversationsStatus200,
 	GetApiMessagesConversationsStatus400,
 	GetApiMessagesConversationsStatus422,
+	GetApiMessagesConversationsStatus429,
 	GetApiMessagesConversationsStatus500,
 	PostApiMessagesConversationsOptions,
 	PostApiMessagesConversationsStatus200,
@@ -149,28 +160,33 @@ import type {
 	PostApiMessagesConversationsStatus404,
 	PostApiMessagesConversationsStatus409,
 	PostApiMessagesConversationsStatus422,
+	PostApiMessagesConversationsStatus429,
 	PostApiMessagesConversationsStatus500,
 	GetApiMessagesConversationsByConversationIdOptions,
 	GetApiMessagesConversationsByConversationIdStatus200,
 	GetApiMessagesConversationsByConversationIdStatus404,
 	GetApiMessagesConversationsByConversationIdStatus422,
+	GetApiMessagesConversationsByConversationIdStatus429,
 	GetApiMessagesConversationsByConversationIdStatus500,
 	GetApiMessagesConversationsByConversationIdMessagesOptions,
 	GetApiMessagesConversationsByConversationIdMessagesStatus200,
 	GetApiMessagesConversationsByConversationIdMessagesStatus400,
 	GetApiMessagesConversationsByConversationIdMessagesStatus404,
 	GetApiMessagesConversationsByConversationIdMessagesStatus422,
+	GetApiMessagesConversationsByConversationIdMessagesStatus429,
 	GetApiMessagesConversationsByConversationIdMessagesStatus500,
 	PostApiMessagesConversationsByConversationIdMessagesOptions,
 	PostApiMessagesConversationsByConversationIdMessagesStatus200,
 	PostApiMessagesConversationsByConversationIdMessagesStatus403,
 	PostApiMessagesConversationsByConversationIdMessagesStatus404,
 	PostApiMessagesConversationsByConversationIdMessagesStatus422,
+	PostApiMessagesConversationsByConversationIdMessagesStatus429,
 	PostApiMessagesConversationsByConversationIdMessagesStatus500,
 	PutApiMessagesConversationsByConversationIdReadOptions,
 	PutApiMessagesConversationsByConversationIdReadStatus200,
 	PutApiMessagesConversationsByConversationIdReadStatus404,
 	PutApiMessagesConversationsByConversationIdReadStatus422,
+	PutApiMessagesConversationsByConversationIdReadStatus429,
 	PutApiMessagesConversationsByConversationIdReadStatus500,
 	GetApiApiTokensStatus200,
 	GetApiApiTokensStatus401,
@@ -189,6 +205,37 @@ import type {
 	PatchApiApiTokensByTokenIdStatus404,
 	PatchApiApiTokensByTokenIdStatus422,
 	PatchApiApiTokensByTokenIdStatus500,
+	PutApiApiTokensByTokenIdPolicyOptions,
+	PutApiApiTokensByTokenIdPolicyStatus200,
+	PutApiApiTokensByTokenIdPolicyStatus401,
+	PutApiApiTokensByTokenIdPolicyStatus403,
+	PutApiApiTokensByTokenIdPolicyStatus404,
+	PutApiApiTokensByTokenIdPolicyStatus409,
+	PutApiApiTokensByTokenIdPolicyStatus422,
+	PutApiApiTokensByTokenIdPolicyStatus500,
+	GetCurrentApiTokenStatus200,
+	GetCurrentApiTokenStatus401,
+	GetCurrentApiTokenStatus429,
+	GetCurrentApiTokenStatus500,
+	GetApiApiTokenPoliciesStatus200,
+	GetApiApiTokenPoliciesStatus401,
+	GetApiApiTokenPoliciesStatus403,
+	GetApiApiTokenPoliciesStatus500,
+	PatchApiApiTokenPoliciesByPolicyKeyOptions,
+	PatchApiApiTokenPoliciesByPolicyKeyStatus200,
+	PatchApiApiTokenPoliciesByPolicyKeyStatus401,
+	PatchApiApiTokenPoliciesByPolicyKeyStatus403,
+	PatchApiApiTokenPoliciesByPolicyKeyStatus404,
+	PatchApiApiTokenPoliciesByPolicyKeyStatus409,
+	PatchApiApiTokenPoliciesByPolicyKeyStatus422,
+	PatchApiApiTokenPoliciesByPolicyKeyStatus500,
+	PutApiApiTokenPoliciesBindingsByTokenIdOptions,
+	PutApiApiTokenPoliciesBindingsByTokenIdStatus200,
+	PutApiApiTokenPoliciesBindingsByTokenIdStatus401,
+	PutApiApiTokenPoliciesBindingsByTokenIdStatus403,
+	PutApiApiTokenPoliciesBindingsByTokenIdStatus404,
+	PutApiApiTokenPoliciesBindingsByTokenIdStatus422,
+	PutApiApiTokenPoliciesBindingsByTokenIdStatus500,
 	GetApiFeedOptions,
 	GetApiFeedStatus200,
 	GetApiFeedStatus400,
@@ -197,12 +244,14 @@ import type {
 	GetApiFeedbackMeOptions,
 	GetApiFeedbackMeStatus200,
 	GetApiFeedbackMeStatus422,
+	GetApiFeedbackMeStatus429,
 	GetApiFeedbackMeStatus500,
 	PostApiFeedbackOptions,
 	PostApiFeedbackStatus200,
 	PostApiFeedbackStatus400,
 	PostApiFeedbackStatus404,
 	PostApiFeedbackStatus422,
+	PostApiFeedbackStatus429,
 	PostApiFeedbackStatus500,
 	GetApiGovernanceUnitByUnitIdAccessEffectiveOptions,
 	GetApiGovernanceUnitByUnitIdAccessEffectiveStatus200,
@@ -330,6 +379,7 @@ import type {
 	PatchApiGovernanceNotesByPostIdStatus404,
 	PatchApiGovernanceNotesByPostIdStatus409,
 	PatchApiGovernanceNotesByPostIdStatus422,
+	PatchApiGovernanceNotesByPostIdStatus429,
 	PatchApiGovernanceNotesByPostIdStatus500,
 	GetApiGovernanceModerationCasesOptions,
 	GetApiGovernanceModerationCasesStatus200,
@@ -401,6 +451,7 @@ import type {
 	PostApiSeriesStatus200,
 	PostApiSeriesStatus404,
 	PostApiSeriesStatus422,
+	PostApiSeriesStatus429,
 	PostApiSeriesStatus500,
 	GetApiSeriesBySeriesIdReleasesOptions,
 	GetApiSeriesBySeriesIdReleasesStatus200,
@@ -414,6 +465,7 @@ import type {
 	ReplaceZoneSlugAddressStatus404,
 	ReplaceZoneSlugAddressStatus409,
 	ReplaceZoneSlugAddressStatus422,
+	ReplaceZoneSlugAddressStatus429,
 	ReplaceZoneSlugAddressStatus500,
 	GetApiZonesByZoneIdOptions,
 	GetApiZonesByZoneIdStatus200,
@@ -426,6 +478,7 @@ import type {
 	PatchApiZonesByZoneIdStatus403,
 	PatchApiZonesByZoneIdStatus404,
 	PatchApiZonesByZoneIdStatus422,
+	PatchApiZonesByZoneIdStatus429,
 	PatchApiZonesByZoneIdStatus500,
 	GetZoneRenderProjectionOptions,
 	GetZoneRenderProjectionStatus200,
@@ -448,6 +501,7 @@ import type {
 	PutApiZonesByZoneIdPagesBySlugStatus403,
 	PutApiZonesByZoneIdPagesBySlugStatus404,
 	PutApiZonesByZoneIdPagesBySlugStatus422,
+	PutApiZonesByZoneIdPagesBySlugStatus429,
 	PutApiZonesByZoneIdPagesBySlugStatus500,
 	DeleteApiZonesByZoneIdPagesBySlugOptions,
 	DeleteApiZonesByZoneIdPagesBySlugStatus204,
@@ -455,6 +509,7 @@ import type {
 	DeleteApiZonesByZoneIdPagesBySlugStatus404,
 	DeleteApiZonesByZoneIdPagesBySlugStatus409,
 	DeleteApiZonesByZoneIdPagesBySlugStatus422,
+	DeleteApiZonesByZoneIdPagesBySlugStatus429,
 	DeleteApiZonesByZoneIdPagesBySlugStatus500,
 	GetApiZonesByZoneIdNavigationOptions,
 	GetApiZonesByZoneIdNavigationStatus200,
@@ -467,6 +522,7 @@ import type {
 	PostApiZonesByZoneIdNavigationStatus403,
 	PostApiZonesByZoneIdNavigationStatus404,
 	PostApiZonesByZoneIdNavigationStatus422,
+	PostApiZonesByZoneIdNavigationStatus429,
 	PostApiZonesByZoneIdNavigationStatus500,
 	GetApiZonesByZoneIdNavigationByNavigationIdOptions,
 	GetApiZonesByZoneIdNavigationByNavigationIdStatus200,
@@ -480,6 +536,7 @@ import type {
 	PutApiZonesByZoneIdNavigationByNavigationIdStatus404,
 	PutApiZonesByZoneIdNavigationByNavigationIdStatus409,
 	PutApiZonesByZoneIdNavigationByNavigationIdStatus422,
+	PutApiZonesByZoneIdNavigationByNavigationIdStatus429,
 	PutApiZonesByZoneIdNavigationByNavigationIdStatus500,
 	DeleteApiZonesByZoneIdNavigationByNavigationIdOptions,
 	DeleteApiZonesByZoneIdNavigationByNavigationIdStatus204,
@@ -487,24 +544,28 @@ import type {
 	DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404,
 	DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409,
 	DeleteApiZonesByZoneIdNavigationByNavigationIdStatus422,
+	DeleteApiZonesByZoneIdNavigationByNavigationIdStatus429,
 	DeleteApiZonesByZoneIdNavigationByNavigationIdStatus500,
 	PutApiSeriesBySeriesIdReleasesByReleaseIdOptions,
 	PutApiSeriesBySeriesIdReleasesByReleaseIdStatus200,
 	PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403,
 	PutApiSeriesBySeriesIdReleasesByReleaseIdStatus404,
 	PutApiSeriesBySeriesIdReleasesByReleaseIdStatus422,
+	PutApiSeriesBySeriesIdReleasesByReleaseIdStatus429,
 	PutApiSeriesBySeriesIdReleasesByReleaseIdStatus500,
 	DeleteApiSeriesBySeriesIdReleasesByReleaseIdOptions,
 	DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus204,
 	DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403,
 	DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus404,
 	DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus422,
+	DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus429,
 	DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus500,
 	PostApiZonesOptions,
 	PostApiZonesStatus200,
 	PostApiZonesStatus400,
 	PostApiZonesStatus404,
 	PostApiZonesStatus422,
+	PostApiZonesStatus429,
 	PostApiZonesStatus500,
 	GetApiSoftwareBySoftwareIdSystemRequirementsOptions,
 	GetApiSoftwareBySoftwareIdSystemRequirementsStatus200,
@@ -517,6 +578,7 @@ import type {
 	PostApiSoftwareBySoftwareIdSystemRequirementsStatus403,
 	PostApiSoftwareBySoftwareIdSystemRequirementsStatus404,
 	PostApiSoftwareBySoftwareIdSystemRequirementsStatus422,
+	PostApiSoftwareBySoftwareIdSystemRequirementsStatus429,
 	PostApiSoftwareBySoftwareIdSystemRequirementsStatus500,
 	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
 	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus200,
@@ -524,12 +586,14 @@ import type {
 	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403,
 	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404,
 	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422,
+	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429,
 	PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500,
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus204,
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403,
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404,
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422,
+	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429,
 	DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500,
 	GetApiUnitsByIdByUnitIdDocksOptions,
 	GetApiUnitsByIdByUnitIdDocksStatus200,
@@ -550,6 +614,7 @@ import type {
 	PutApiUnitsByIdByUnitIdDocksByKindStatus404,
 	PutApiUnitsByIdByUnitIdDocksByKindStatus409,
 	PutApiUnitsByIdByUnitIdDocksByKindStatus422,
+	PutApiUnitsByIdByUnitIdDocksByKindStatus429,
 	PutApiUnitsByIdByUnitIdDocksByKindStatus500,
 	DeleteApiUnitsByIdByUnitIdDocksByKindOptions,
 	DeleteApiUnitsByIdByUnitIdDocksByKindStatus204,
@@ -558,6 +623,7 @@ import type {
 	DeleteApiUnitsByIdByUnitIdDocksByKindStatus404,
 	DeleteApiUnitsByIdByUnitIdDocksByKindStatus409,
 	DeleteApiUnitsByIdByUnitIdDocksByKindStatus422,
+	DeleteApiUnitsByIdByUnitIdDocksByKindStatus429,
 	DeleteApiUnitsByIdByUnitIdDocksByKindStatus500,
 	GetApiUnitsByIdByUnitIdDocksByKindRevisionsOptions,
 	GetApiUnitsByIdByUnitIdDocksByKindRevisionsStatus200,
@@ -572,9 +638,11 @@ import type {
 	PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus404,
 	PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus409,
 	PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus422,
+	PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus429,
 	PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus500,
 	GetApiUsersMeStatus200,
 	GetApiUsersMeStatus404,
+	GetApiUsersMeStatus429,
 	GetApiUsersMeStatus500,
 	PatchApiUsersMeOptions,
 	PatchApiUsersMeStatus200,
@@ -582,46 +650,55 @@ import type {
 	PatchApiUsersMeStatus404,
 	PatchApiUsersMeStatus409,
 	PatchApiUsersMeStatus422,
+	PatchApiUsersMeStatus429,
 	PatchApiUsersMeStatus500,
 	GetApiUsersMePreferencesStatus200,
 	GetApiUsersMePreferencesStatus404,
+	GetApiUsersMePreferencesStatus429,
 	GetApiUsersMePreferencesStatus500,
 	PatchApiUsersMePreferencesOptions,
 	PatchApiUsersMePreferencesStatus200,
 	PatchApiUsersMePreferencesStatus404,
 	PatchApiUsersMePreferencesStatus422,
+	PatchApiUsersMePreferencesStatus429,
 	PatchApiUsersMePreferencesStatus500,
 	PutApiUsersMePreferencesOptions,
 	PutApiUsersMePreferencesStatus200,
 	PutApiUsersMePreferencesStatus403,
 	PutApiUsersMePreferencesStatus404,
 	PutApiUsersMePreferencesStatus422,
+	PutApiUsersMePreferencesStatus429,
 	PutApiUsersMePreferencesStatus500,
 	GetApiUsersMeFollowingOptions,
 	GetApiUsersMeFollowingStatus200,
 	GetApiUsersMeFollowingStatus400,
 	GetApiUsersMeFollowingStatus422,
+	GetApiUsersMeFollowingStatus429,
 	GetApiUsersMeFollowingStatus500,
 	GetApiUsersMeFollowingByUnitIdOptions,
 	GetApiUsersMeFollowingByUnitIdStatus200,
 	GetApiUsersMeFollowingByUnitIdStatus404,
 	GetApiUsersMeFollowingByUnitIdStatus409,
 	GetApiUsersMeFollowingByUnitIdStatus422,
+	GetApiUsersMeFollowingByUnitIdStatus429,
 	GetApiUsersMeFollowingByUnitIdStatus500,
 	PutApiUsersMeFollowingByUnitIdOptions,
 	PutApiUsersMeFollowingByUnitIdStatus200,
 	PutApiUsersMeFollowingByUnitIdStatus404,
 	PutApiUsersMeFollowingByUnitIdStatus409,
 	PutApiUsersMeFollowingByUnitIdStatus422,
+	PutApiUsersMeFollowingByUnitIdStatus429,
 	PutApiUsersMeFollowingByUnitIdStatus500,
 	DeleteApiUsersMeFollowingByUnitIdOptions,
 	DeleteApiUsersMeFollowingByUnitIdStatus200,
 	DeleteApiUsersMeFollowingByUnitIdStatus422,
+	DeleteApiUsersMeFollowingByUnitIdStatus429,
 	DeleteApiUsersMeFollowingByUnitIdStatus500,
 	PatchApiUsersMeFollowingByUnitIdOptions,
 	PatchApiUsersMeFollowingByUnitIdStatus200,
 	PatchApiUsersMeFollowingByUnitIdStatus404,
 	PatchApiUsersMeFollowingByUnitIdStatus422,
+	PatchApiUsersMeFollowingByUnitIdStatus429,
 	PatchApiUsersMeFollowingByUnitIdStatus500,
 	GetApiUsersByIdOptions,
 	GetApiUsersByIdStatus200,
@@ -629,16 +706,19 @@ import type {
 	GetApiUsersByIdStatus422,
 	GetApiUsersByIdStatus500,
 	GetApiUsersMeBlocksStatus200,
+	GetApiUsersMeBlocksStatus429,
 	GetApiUsersMeBlocksStatus500,
 	PutApiUsersByIdBlockOptions,
 	PutApiUsersByIdBlockStatus200,
 	PutApiUsersByIdBlockStatus404,
 	PutApiUsersByIdBlockStatus409,
 	PutApiUsersByIdBlockStatus422,
+	PutApiUsersByIdBlockStatus429,
 	PutApiUsersByIdBlockStatus500,
 	DeleteApiUsersByIdBlockOptions,
 	DeleteApiUsersByIdBlockStatus200,
 	DeleteApiUsersByIdBlockStatus422,
+	DeleteApiUsersByIdBlockStatus429,
 	DeleteApiUsersByIdBlockStatus500,
 	ResolveUnitSlugAddressOptions,
 	ResolveUnitSlugAddressStatus200,
@@ -666,6 +746,7 @@ import type {
 	ReplaceOwnProfileSlugAddressStatus404,
 	ReplaceOwnProfileSlugAddressStatus409,
 	ReplaceOwnProfileSlugAddressStatus422,
+	ReplaceOwnProfileSlugAddressStatus429,
 	ReplaceOwnProfileSlugAddressStatus500,
 	GetUnitSlugAddressAsStaffOptions,
 	GetUnitSlugAddressAsStaffStatus200,
@@ -712,6 +793,7 @@ import type {
 	PostApiUnitsByTypeStatus403,
 	PostApiUnitsByTypeStatus404,
 	PostApiUnitsByTypeStatus422,
+	PostApiUnitsByTypeStatus429,
 	PostApiUnitsByTypeStatus500,
 	GetApiUnitsByTypeByUnitIdOptions,
 	GetApiUnitsByTypeByUnitIdStatus200,
@@ -726,6 +808,7 @@ import type {
 	PatchApiUnitsByTypeByUnitIdStatus404,
 	PatchApiUnitsByTypeByUnitIdStatus409,
 	PatchApiUnitsByTypeByUnitIdStatus422,
+	PatchApiUnitsByTypeByUnitIdStatus429,
 	PatchApiUnitsByTypeByUnitIdStatus500,
 	DeleteApiUnitsByTypeByUnitIdOptions,
 	DeleteApiUnitsByTypeByUnitIdStatus204,
@@ -733,6 +816,7 @@ import type {
 	DeleteApiUnitsByTypeByUnitIdStatus403,
 	DeleteApiUnitsByTypeByUnitIdStatus404,
 	DeleteApiUnitsByTypeByUnitIdStatus422,
+	DeleteApiUnitsByTypeByUnitIdStatus429,
 	DeleteApiUnitsByTypeByUnitIdStatus500,
 	PatchApiUnitsByTypeByUnitIdVariantContextOptions,
 	PatchApiUnitsByTypeByUnitIdVariantContextStatus200,
@@ -741,6 +825,7 @@ import type {
 	PatchApiUnitsByTypeByUnitIdVariantContextStatus404,
 	PatchApiUnitsByTypeByUnitIdVariantContextStatus409,
 	PatchApiUnitsByTypeByUnitIdVariantContextStatus422,
+	PatchApiUnitsByTypeByUnitIdVariantContextStatus429,
 	PatchApiUnitsByTypeByUnitIdVariantContextStatus500,
 	PostApiUnitsByTypeByUnitIdVariantContextPromoteOptions,
 	PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200,
@@ -749,6 +834,7 @@ import type {
 	PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus404,
 	PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus409,
 	PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus422,
+	PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus429,
 	PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus500,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageOptions,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200,
@@ -756,6 +842,7 @@ import type {
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus404,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus422,
+	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus429,
 	PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus500,
 	GetApiHistoryUnitsByUnitIdRevisionsOptions,
 	GetApiHistoryUnitsByUnitIdRevisionsStatus200,
@@ -779,6 +866,7 @@ import type {
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus404,
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus409,
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus422,
+	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429,
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus500,
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoOptions,
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus200,
@@ -786,6 +874,7 @@ import type {
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus404,
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus409,
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus422,
+	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429,
 	PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus500,
 	PatchApiHistoryUnitRevisionsByRevisionIdVisibilityOptions,
 	PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus204,
@@ -793,6 +882,7 @@ import type {
 	PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus404,
 	PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409,
 	PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus422,
+	PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus429,
 	PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus500,
 	GetApiHistoryRecentChangesOptions,
 	GetApiHistoryRecentChangesStatus200,
@@ -814,6 +904,7 @@ import type {
 	PostApiEntitiesStatus200,
 	PostApiEntitiesStatus404,
 	PostApiEntitiesStatus422,
+	PostApiEntitiesStatus429,
 	PostApiEntitiesStatus500,
 	GetApiEntitiesByUnitIdOptions,
 	GetApiEntitiesByUnitIdStatus200,
@@ -825,6 +916,7 @@ import type {
 	PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403,
 	PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404,
 	PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422,
+	PutApiEntitiesByUnitIdLocalizationsByLanguageStatus429,
 	PutApiEntitiesByUnitIdLocalizationsByLanguageStatus500,
 	GetApiEntitiesByUnitIdAssociationPolicyOptions,
 	GetApiEntitiesByUnitIdAssociationPolicyStatus200,
@@ -844,84 +936,99 @@ import type {
 	PostApiTagsOptions,
 	PostApiTagsStatus200,
 	PostApiTagsStatus422,
+	PostApiTagsStatus429,
 	PostApiTagsStatus500,
 	GetApiUnitsByTypeByUnitIdAliasesOptions,
 	GetApiUnitsByTypeByUnitIdAliasesStatus200,
 	GetApiUnitsByTypeByUnitIdAliasesStatus422,
+	GetApiUnitsByTypeByUnitIdAliasesStatus429,
 	GetApiUnitsByTypeByUnitIdAliasesStatus500,
 	PostApiUnitsByTypeByUnitIdAliasesOptions,
 	PostApiUnitsByTypeByUnitIdAliasesStatus200,
 	PostApiUnitsByTypeByUnitIdAliasesStatus403,
 	PostApiUnitsByTypeByUnitIdAliasesStatus404,
 	PostApiUnitsByTypeByUnitIdAliasesStatus422,
+	PostApiUnitsByTypeByUnitIdAliasesStatus429,
 	PostApiUnitsByTypeByUnitIdAliasesStatus500,
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdOptions,
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus204,
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403,
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404,
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus422,
+	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429,
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500,
 	PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions,
 	PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200,
 	PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404,
 	PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422,
+	PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429,
 	PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500,
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions,
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus200,
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404,
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422,
+	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429,
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500,
 	PostApiUnitsByTypeByUnitIdCreditAttributionsOptions,
 	PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200,
 	PostApiUnitsByTypeByUnitIdCreditAttributionsStatus403,
 	PostApiUnitsByTypeByUnitIdCreditAttributionsStatus404,
 	PostApiUnitsByTypeByUnitIdCreditAttributionsStatus422,
+	PostApiUnitsByTypeByUnitIdCreditAttributionsStatus429,
 	PostApiUnitsByTypeByUnitIdCreditAttributionsStatus500,
 	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdOptions,
 	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus204,
 	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403,
 	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus404,
 	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422,
+	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus429,
 	DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus500,
 	PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
 	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200,
 	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403,
 	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404,
 	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422,
+	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429,
 	PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdOptions,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus204,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus404,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422,
+	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus429,
 	DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus500,
 	PostApiUnitsByTypeByUnitIdLinksOptions,
 	PostApiUnitsByTypeByUnitIdLinksStatus200,
 	PostApiUnitsByTypeByUnitIdLinksStatus403,
 	PostApiUnitsByTypeByUnitIdLinksStatus404,
 	PostApiUnitsByTypeByUnitIdLinksStatus422,
+	PostApiUnitsByTypeByUnitIdLinksStatus429,
 	PostApiUnitsByTypeByUnitIdLinksStatus500,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdOptions,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdStatus200,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdStatus404,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422,
+	PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdStatus500,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdOptions,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus204,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422,
+	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422,
+	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429,
 	PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus200,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422,
+	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429,
 	DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500,
 	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdOptions,
 	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus200,
@@ -929,6 +1036,7 @@ import type {
 	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404,
 	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409,
 	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422,
+	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429,
 	PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500,
 	GetApiUnitsByIdByUnitIdContentStructuresOptions,
 	GetApiUnitsByIdByUnitIdContentStructuresStatus200,
@@ -940,6 +1048,7 @@ import type {
 	PostApiUnitsByIdByUnitIdContentStructuresStatus403,
 	PostApiUnitsByIdByUnitIdContentStructuresStatus404,
 	PostApiUnitsByIdByUnitIdContentStructuresStatus422,
+	PostApiUnitsByIdByUnitIdContentStructuresStatus429,
 	PostApiUnitsByIdByUnitIdContentStructuresStatus500,
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions,
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus200,
@@ -952,6 +1061,7 @@ import type {
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422,
+	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus429,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500,
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsOptions,
 	GetApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsStatus200,
@@ -964,6 +1074,7 @@ import type {
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus422,
+	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus429,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus500,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesOptions,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus200,
@@ -971,6 +1082,7 @@ import type {
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus422,
+	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus429,
 	PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus500,
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus200,
@@ -978,6 +1090,7 @@ import type {
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404,
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409,
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422,
+	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429,
 	PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus200,
@@ -985,6 +1098,7 @@ import type {
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422,
+	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429,
 	DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500,
 	GetApiUnitsBookByUnitIdContentStructureNodesOptions,
 	GetApiUnitsBookByUnitIdContentStructureNodesStatus200,
@@ -997,6 +1111,7 @@ import type {
 	PostApiUnitsBookByUnitIdContentStructureNodesStatus404,
 	PostApiUnitsBookByUnitIdContentStructureNodesStatus409,
 	PostApiUnitsBookByUnitIdContentStructureNodesStatus422,
+	PostApiUnitsBookByUnitIdContentStructureNodesStatus429,
 	PostApiUnitsBookByUnitIdContentStructureNodesStatus500,
 	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
 	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus200,
@@ -1004,6 +1119,7 @@ import type {
 	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404,
 	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409,
 	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422,
+	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus429,
 	PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500,
 	GetApiChaptersByChapterIdOptions,
 	GetApiChaptersByChapterIdStatus200,
@@ -1015,33 +1131,40 @@ import type {
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422,
+	PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429,
 	PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus500,
 	GetApiProgressOptions,
 	GetApiProgressStatus200,
 	GetApiProgressStatus422,
+	GetApiProgressStatus429,
 	GetApiProgressStatus500,
 	GetApiProgressByUnitIdOptions,
 	GetApiProgressByUnitIdStatus200,
 	GetApiProgressByUnitIdStatus404,
 	GetApiProgressByUnitIdStatus422,
+	GetApiProgressByUnitIdStatus429,
 	GetApiProgressByUnitIdStatus500,
 	PutApiProgressByUnitIdOptions,
 	PutApiProgressByUnitIdStatus200,
 	PutApiProgressByUnitIdStatus404,
 	PutApiProgressByUnitIdStatus422,
+	PutApiProgressByUnitIdStatus429,
 	PutApiProgressByUnitIdStatus500,
 	DeleteApiProgressByUnitIdOptions,
 	DeleteApiProgressByUnitIdStatus204,
 	DeleteApiProgressByUnitIdStatus422,
+	DeleteApiProgressByUnitIdStatus429,
 	DeleteApiProgressByUnitIdStatus500,
 	PutApiProgressByUnitIdNodesByNodeIdOptions,
 	PutApiProgressByUnitIdNodesByNodeIdStatus200,
 	PutApiProgressByUnitIdNodesByNodeIdStatus404,
 	PutApiProgressByUnitIdNodesByNodeIdStatus422,
+	PutApiProgressByUnitIdNodesByNodeIdStatus429,
 	PutApiProgressByUnitIdNodesByNodeIdStatus500,
 	DeleteApiProgressByUnitIdNodesByNodeIdOptions,
 	DeleteApiProgressByUnitIdNodesByNodeIdStatus200,
 	DeleteApiProgressByUnitIdNodesByNodeIdStatus422,
+	DeleteApiProgressByUnitIdNodesByNodeIdStatus429,
 	DeleteApiProgressByUnitIdNodesByNodeIdStatus500,
 	GetApiCollectionsOptions,
 	GetApiCollectionsStatus200,
@@ -1051,9 +1174,11 @@ import type {
 	PostApiCollectionsStatus200,
 	PostApiCollectionsStatus404,
 	PostApiCollectionsStatus422,
+	PostApiCollectionsStatus429,
 	PostApiCollectionsStatus500,
 	GetApiCollectionsFavoritesStatus200,
 	GetApiCollectionsFavoritesStatus404,
+	GetApiCollectionsFavoritesStatus429,
 	GetApiCollectionsFavoritesStatus500,
 	GetApiCollectionsByCollectionIdOptions,
 	GetApiCollectionsByCollectionIdStatus200,
@@ -1066,12 +1191,14 @@ import type {
 	PatchApiCollectionsByCollectionIdStatus404,
 	PatchApiCollectionsByCollectionIdStatus409,
 	PatchApiCollectionsByCollectionIdStatus422,
+	PatchApiCollectionsByCollectionIdStatus429,
 	PatchApiCollectionsByCollectionIdStatus500,
 	DeleteApiCollectionsByCollectionIdOptions,
 	DeleteApiCollectionsByCollectionIdStatus204,
 	DeleteApiCollectionsByCollectionIdStatus403,
 	DeleteApiCollectionsByCollectionIdStatus409,
 	DeleteApiCollectionsByCollectionIdStatus422,
+	DeleteApiCollectionsByCollectionIdStatus429,
 	DeleteApiCollectionsByCollectionIdStatus500,
 	PostApiCollectionsByCollectionIdItemsBatchOptions,
 	PostApiCollectionsByCollectionIdItemsBatchStatus200,
@@ -1079,26 +1206,31 @@ import type {
 	PostApiCollectionsByCollectionIdItemsBatchStatus404,
 	PostApiCollectionsByCollectionIdItemsBatchStatus409,
 	PostApiCollectionsByCollectionIdItemsBatchStatus422,
+	PostApiCollectionsByCollectionIdItemsBatchStatus429,
 	PostApiCollectionsByCollectionIdItemsBatchStatus500,
 	PutApiCollectionsByCollectionIdItemsByTargetIdOptions,
 	PutApiCollectionsByCollectionIdItemsByTargetIdStatus200,
 	PutApiCollectionsByCollectionIdItemsByTargetIdStatus403,
 	PutApiCollectionsByCollectionIdItemsByTargetIdStatus404,
 	PutApiCollectionsByCollectionIdItemsByTargetIdStatus422,
+	PutApiCollectionsByCollectionIdItemsByTargetIdStatus429,
 	PutApiCollectionsByCollectionIdItemsByTargetIdStatus500,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdOptions,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus200,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422,
+	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429,
 	DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus500,
 	PutApiCollectionsFavoritesItemsByTargetIdOptions,
 	PutApiCollectionsFavoritesItemsByTargetIdStatus200,
 	PutApiCollectionsFavoritesItemsByTargetIdStatus404,
 	PutApiCollectionsFavoritesItemsByTargetIdStatus422,
+	PutApiCollectionsFavoritesItemsByTargetIdStatus429,
 	PutApiCollectionsFavoritesItemsByTargetIdStatus500,
 	DeleteApiCollectionsFavoritesItemsByTargetIdOptions,
 	DeleteApiCollectionsFavoritesItemsByTargetIdStatus200,
 	DeleteApiCollectionsFavoritesItemsByTargetIdStatus422,
+	DeleteApiCollectionsFavoritesItemsByTargetIdStatus429,
 	DeleteApiCollectionsFavoritesItemsByTargetIdStatus500,
 	GetApiReviewsOptions,
 	GetApiReviewsStatus200,
@@ -1110,6 +1242,7 @@ import type {
 	PostApiReviewsStatus404,
 	PostApiReviewsStatus409,
 	PostApiReviewsStatus422,
+	PostApiReviewsStatus429,
 	PostApiReviewsStatus500,
 	GetApiReviewsByReviewIdOptions,
 	GetApiReviewsByReviewIdStatus200,
@@ -1121,12 +1254,14 @@ import type {
 	PatchApiReviewsByReviewIdStatus403,
 	PatchApiReviewsByReviewIdStatus404,
 	PatchApiReviewsByReviewIdStatus422,
+	PatchApiReviewsByReviewIdStatus429,
 	PatchApiReviewsByReviewIdStatus500,
 	DeleteApiReviewsByReviewIdOptions,
 	DeleteApiReviewsByReviewIdStatus204,
 	DeleteApiReviewsByReviewIdStatus403,
 	DeleteApiReviewsByReviewIdStatus404,
 	DeleteApiReviewsByReviewIdStatus422,
+	DeleteApiReviewsByReviewIdStatus429,
 	DeleteApiReviewsByReviewIdStatus500,
 	PutApiScoresByTargetIdOptions,
 	PutApiScoresByTargetIdStatus200,
@@ -1134,6 +1269,7 @@ import type {
 	PutApiScoresByTargetIdStatus404,
 	PutApiScoresByTargetIdStatus409,
 	PutApiScoresByTargetIdStatus422,
+	PutApiScoresByTargetIdStatus429,
 	PutApiScoresByTargetIdStatus500,
 	GetApiScoresByTargetIdOptions,
 	GetApiScoresByTargetIdStatus200,
@@ -1161,25 +1297,30 @@ import type {
 	PutApiReactionsUnitsByUnitIdStatus200,
 	PutApiReactionsUnitsByUnitIdStatus404,
 	PutApiReactionsUnitsByUnitIdStatus422,
+	PutApiReactionsUnitsByUnitIdStatus429,
 	PutApiReactionsUnitsByUnitIdStatus500,
 	DeleteApiReactionsUnitsByUnitIdOptions,
 	DeleteApiReactionsUnitsByUnitIdStatus200,
 	DeleteApiReactionsUnitsByUnitIdStatus422,
+	DeleteApiReactionsUnitsByUnitIdStatus429,
 	DeleteApiReactionsUnitsByUnitIdStatus500,
 	PutApiReactionsSharesByUnitIdOptions,
 	PutApiReactionsSharesByUnitIdStatus200,
 	PutApiReactionsSharesByUnitIdStatus404,
 	PutApiReactionsSharesByUnitIdStatus422,
+	PutApiReactionsSharesByUnitIdStatus429,
 	PutApiReactionsSharesByUnitIdStatus500,
 	DeleteApiReactionsSharesByUnitIdOptions,
 	DeleteApiReactionsSharesByUnitIdStatus200,
 	DeleteApiReactionsSharesByUnitIdStatus422,
+	DeleteApiReactionsSharesByUnitIdStatus429,
 	DeleteApiReactionsSharesByUnitIdStatus500,
 	PostApiPollsOptions,
 	PostApiPollsStatus200,
 	PostApiPollsStatus400,
 	PostApiPollsStatus404,
 	PostApiPollsStatus422,
+	PostApiPollsStatus429,
 	PostApiPollsStatus500,
 	GetApiPollsByPollIdOptions,
 	GetApiPollsByPollIdStatus200,
@@ -1193,12 +1334,14 @@ import type {
 	PutApiPollsByPollIdVoteStatus404,
 	PutApiPollsByPollIdVoteStatus409,
 	PutApiPollsByPollIdVoteStatus422,
+	PutApiPollsByPollIdVoteStatus429,
 	PutApiPollsByPollIdVoteStatus500,
 	DeleteApiPollsByPollIdVoteOptions,
 	DeleteApiPollsByPollIdVoteStatus200,
 	DeleteApiPollsByPollIdVoteStatus403,
 	DeleteApiPollsByPollIdVoteStatus404,
 	DeleteApiPollsByPollIdVoteStatus422,
+	DeleteApiPollsByPollIdVoteStatus429,
 	DeleteApiPollsByPollIdVoteStatus500,
 	PostApiPollsByPollIdCloseOptions,
 	PostApiPollsByPollIdCloseStatus200,
@@ -1206,6 +1349,7 @@ import type {
 	PostApiPollsByPollIdCloseStatus404,
 	PostApiPollsByPollIdCloseStatus409,
 	PostApiPollsByPollIdCloseStatus422,
+	PostApiPollsByPollIdCloseStatus429,
 	PostApiPollsByPollIdCloseStatus500,
 	GetApiPostsByPostIdScoresOptions,
 	GetApiPostsByPostIdScoresStatus200,
@@ -1217,6 +1361,7 @@ import type {
 	PutApiPostsByPostIdScoresStatus403,
 	PutApiPostsByPostIdScoresStatus404,
 	PutApiPostsByPostIdScoresStatus422,
+	PutApiPostsByPostIdScoresStatus429,
 	PutApiPostsByPostIdScoresStatus500,
 	GetApiPostsOptions,
 	GetApiPostsStatus200,
@@ -1228,6 +1373,7 @@ import type {
 	PostApiPostsStatus404,
 	PostApiPostsStatus409,
 	PostApiPostsStatus422,
+	PostApiPostsStatus429,
 	PostApiPostsStatus500,
 	GetApiPostsByPostIdOptions,
 	GetApiPostsByPostIdStatus200,
@@ -1240,12 +1386,14 @@ import type {
 	PatchApiPostsByPostIdStatus404,
 	PatchApiPostsByPostIdStatus409,
 	PatchApiPostsByPostIdStatus422,
+	PatchApiPostsByPostIdStatus429,
 	PatchApiPostsByPostIdStatus500,
 	DeleteApiPostsByPostIdOptions,
 	DeleteApiPostsByPostIdStatus204,
 	DeleteApiPostsByPostIdStatus403,
 	DeleteApiPostsByPostIdStatus404,
 	DeleteApiPostsByPostIdStatus422,
+	DeleteApiPostsByPostIdStatus429,
 	DeleteApiPostsByPostIdStatus500,
 	GetApiPostsByPostIdRepliesOptions,
 	GetApiPostsByPostIdRepliesStatus200,
@@ -1259,6 +1407,7 @@ import type {
 	PostApiPostsByPostIdRepliesStatus404,
 	PostApiPostsByPostIdRepliesStatus409,
 	PostApiPostsByPostIdRepliesStatus422,
+	PostApiPostsByPostIdRepliesStatus429,
 	PostApiPostsByPostIdRepliesStatus500,
 	PatchApiPostsByPostIdRepliesByReplyPostIdOptions,
 	PatchApiPostsByPostIdRepliesByReplyPostIdStatus200,
@@ -1266,12 +1415,14 @@ import type {
 	PatchApiPostsByPostIdRepliesByReplyPostIdStatus404,
 	PatchApiPostsByPostIdRepliesByReplyPostIdStatus409,
 	PatchApiPostsByPostIdRepliesByReplyPostIdStatus422,
+	PatchApiPostsByPostIdRepliesByReplyPostIdStatus429,
 	PatchApiPostsByPostIdRepliesByReplyPostIdStatus500,
 	DeleteApiPostsByPostIdRepliesByReplyPostIdOptions,
 	DeleteApiPostsByPostIdRepliesByReplyPostIdStatus204,
 	DeleteApiPostsByPostIdRepliesByReplyPostIdStatus403,
 	DeleteApiPostsByPostIdRepliesByReplyPostIdStatus404,
 	DeleteApiPostsByPostIdRepliesByReplyPostIdStatus422,
+	DeleteApiPostsByPostIdRepliesByReplyPostIdStatus429,
 	DeleteApiPostsByPostIdRepliesByReplyPostIdStatus500,
 	GetApiRealmsOptions,
 	GetApiRealmsStatus200,
@@ -1281,6 +1432,7 @@ import type {
 	PostApiRealmsStatus200,
 	PostApiRealmsStatus404,
 	PostApiRealmsStatus422,
+	PostApiRealmsStatus429,
 	PostApiRealmsStatus500,
 	ReplaceRealmSlugAddressOptions,
 	ReplaceRealmSlugAddressStatus200,
@@ -1289,6 +1441,7 @@ import type {
 	ReplaceRealmSlugAddressStatus404,
 	ReplaceRealmSlugAddressStatus409,
 	ReplaceRealmSlugAddressStatus422,
+	ReplaceRealmSlugAddressStatus429,
 	ReplaceRealmSlugAddressStatus500,
 	GetApiRealmsByRealmIdOptions,
 	GetApiRealmsByRealmIdStatus200,
@@ -1300,6 +1453,7 @@ import type {
 	PatchApiRealmsByRealmIdStatus403,
 	PatchApiRealmsByRealmIdStatus404,
 	PatchApiRealmsByRealmIdStatus422,
+	PatchApiRealmsByRealmIdStatus429,
 	PatchApiRealmsByRealmIdStatus500,
 	GetApiRealmsByRealmIdScoreContextOptions,
 	GetApiRealmsByRealmIdScoreContextStatus200,
@@ -1323,6 +1477,7 @@ import type {
 	PutApiRealmsByRealmIdMembershipStatus404,
 	PutApiRealmsByRealmIdMembershipStatus409,
 	PutApiRealmsByRealmIdMembershipStatus422,
+	PutApiRealmsByRealmIdMembershipStatus429,
 	PutApiRealmsByRealmIdMembershipStatus500,
 	DeleteApiRealmsByRealmIdMembershipOptions,
 	DeleteApiRealmsByRealmIdMembershipStatus204,
@@ -1330,22 +1485,26 @@ import type {
 	DeleteApiRealmsByRealmIdMembershipStatus404,
 	DeleteApiRealmsByRealmIdMembershipStatus409,
 	DeleteApiRealmsByRealmIdMembershipStatus422,
+	DeleteApiRealmsByRealmIdMembershipStatus429,
 	DeleteApiRealmsByRealmIdMembershipStatus500,
 	GetApiRealmsByRealmIdMembersOptions,
 	GetApiRealmsByRealmIdMembersStatus200,
 	GetApiRealmsByRealmIdMembersStatus403,
 	GetApiRealmsByRealmIdMembersStatus422,
+	GetApiRealmsByRealmIdMembersStatus429,
 	GetApiRealmsByRealmIdMembersStatus500,
 	PatchApiRealmsByRealmIdMembersByProfileIdOptions,
 	PatchApiRealmsByRealmIdMembersByProfileIdStatus200,
 	PatchApiRealmsByRealmIdMembersByProfileIdStatus403,
 	PatchApiRealmsByRealmIdMembersByProfileIdStatus404,
 	PatchApiRealmsByRealmIdMembersByProfileIdStatus422,
+	PatchApiRealmsByRealmIdMembersByProfileIdStatus429,
 	PatchApiRealmsByRealmIdMembersByProfileIdStatus500,
 	PutApiRealmsByRealmIdRulesOptions,
 	PutApiRealmsByRealmIdRulesStatus200,
 	PutApiRealmsByRealmIdRulesStatus403,
 	PutApiRealmsByRealmIdRulesStatus422,
+	PutApiRealmsByRealmIdRulesStatus429,
 	PutApiRealmsByRealmIdRulesStatus500,
 	GetApiRealmsByRealmIdRulesOptions,
 	GetApiRealmsByRealmIdRulesStatus200,
@@ -1362,11 +1521,13 @@ import type {
 	PutApiRealmsByRealmIdPinsByUnitIdStatus403,
 	PutApiRealmsByRealmIdPinsByUnitIdStatus404,
 	PutApiRealmsByRealmIdPinsByUnitIdStatus422,
+	PutApiRealmsByRealmIdPinsByUnitIdStatus429,
 	PutApiRealmsByRealmIdPinsByUnitIdStatus500,
 	DeleteApiRealmsByRealmIdPinsByUnitIdOptions,
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus204,
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus403,
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus422,
+	DeleteApiRealmsByRealmIdPinsByUnitIdStatus429,
 	DeleteApiRealmsByRealmIdPinsByUnitIdStatus500,
 	GetApiRealmsByRealmIdUnitsOptions,
 	GetApiRealmsByRealmIdUnitsStatus200,
@@ -1386,6 +1547,7 @@ import type {
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus404,
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus409,
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus422,
+	PatchApiRealmsByRealmIdUnitsByUnitIdStatus429,
 	PatchApiRealmsByRealmIdUnitsByUnitIdStatus500,
 	GetApiRealmsByRealmIdNavigationOptions,
 	GetApiRealmsByRealmIdNavigationStatus200,
@@ -1398,6 +1560,7 @@ import type {
 	PostApiRealmsByRealmIdNavigationStatus403,
 	PostApiRealmsByRealmIdNavigationStatus404,
 	PostApiRealmsByRealmIdNavigationStatus422,
+	PostApiRealmsByRealmIdNavigationStatus429,
 	PostApiRealmsByRealmIdNavigationStatus500,
 	GetApiRealmsByRealmIdNavigationByNavigationIdOptions,
 	GetApiRealmsByRealmIdNavigationByNavigationIdStatus200,
@@ -1411,6 +1574,7 @@ import type {
 	PutApiRealmsByRealmIdNavigationByNavigationIdStatus404,
 	PutApiRealmsByRealmIdNavigationByNavigationIdStatus409,
 	PutApiRealmsByRealmIdNavigationByNavigationIdStatus422,
+	PutApiRealmsByRealmIdNavigationByNavigationIdStatus429,
 	PutApiRealmsByRealmIdNavigationByNavigationIdStatus500,
 	DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
 	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus204,
@@ -1418,6 +1582,7 @@ import type {
 	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404,
 	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409,
 	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422,
+	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus429,
 	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500,
 	GetApiSearchConfigurationStatus200,
 	GetApiSearchConfigurationStatus500,
@@ -1459,6 +1624,7 @@ import type {
 	PostApiImageAssetsStatus401,
 	PostApiImageAssetsStatus415,
 	PostApiImageAssetsStatus422,
+	PostApiImageAssetsStatus429,
 	PostApiImageAssetsStatus500,
 	PostApiImageAssetsByIdCompleteOptions,
 	PostApiImageAssetsByIdCompleteStatus200,
@@ -1466,12 +1632,14 @@ import type {
 	PostApiImageAssetsByIdCompleteStatus404,
 	PostApiImageAssetsByIdCompleteStatus409,
 	PostApiImageAssetsByIdCompleteStatus422,
+	PostApiImageAssetsByIdCompleteStatus429,
 	PostApiImageAssetsByIdCompleteStatus500,
 	GetApiImageAssetsByIdOptions,
 	GetApiImageAssetsByIdStatus200,
 	GetApiImageAssetsByIdStatus401,
 	GetApiImageAssetsByIdStatus404,
 	GetApiImageAssetsByIdStatus422,
+	GetApiImageAssetsByIdStatus429,
 	GetApiImageAssetsByIdStatus500,
 	DeleteApiImageAssetsByIdOptions,
 	DeleteApiImageAssetsByIdStatus204,
@@ -1479,6 +1647,7 @@ import type {
 	DeleteApiImageAssetsByIdStatus404,
 	DeleteApiImageAssetsByIdStatus409,
 	DeleteApiImageAssetsByIdStatus422,
+	DeleteApiImageAssetsByIdStatus429,
 	DeleteApiImageAssetsByIdStatus500,
 } from "./models";
 import type {
@@ -1524,6 +1693,11 @@ import {
 	getApiApiTokens,
 	postApiApiTokens,
 	patchApiApiTokensByTokenId,
+	putApiApiTokensByTokenIdPolicy,
+	getCurrentApiToken,
+	getApiApiTokenPolicies,
+	patchApiApiTokenPoliciesByPolicyKey,
+	putApiApiTokenPoliciesBindingsByTokenId,
 	getApiFeed,
 	getApiFeedbackMe,
 	postApiFeedback,
@@ -2639,7 +2813,9 @@ export function headApiHealthQueryOptions(
 	const queryKey = headApiHealthQueryKey();
 	return queryOptions<
 		HeadApiHealthStatus204,
-		ResponseErrorConfig<HeadApiHealthStatus422 | HeadApiHealthStatus500>,
+		ResponseErrorConfig<
+			HeadApiHealthStatus422 | HeadApiHealthStatus429 | HeadApiHealthStatus500
+		>,
 		HeadApiHealthStatus204,
 		typeof queryKey
 	>({
@@ -2668,7 +2844,9 @@ export function useHeadApiHealth<
 		query?: Partial<
 			QueryObserverOptions<
 				HeadApiHealthStatus204,
-				ResponseErrorConfig<HeadApiHealthStatus422 | HeadApiHealthStatus500>,
+				ResponseErrorConfig<
+					HeadApiHealthStatus422 | HeadApiHealthStatus429 | HeadApiHealthStatus500
+				>,
 				TData,
 				TQueryData,
 				TQueryKey
@@ -2690,7 +2868,9 @@ export function useHeadApiHealth<
 		queryClient,
 	) as UseQueryResult<
 		TData,
-		ResponseErrorConfig<HeadApiHealthStatus422 | HeadApiHealthStatus500>
+		ResponseErrorConfig<
+			HeadApiHealthStatus422 | HeadApiHealthStatus429 | HeadApiHealthStatus500
+		>
 	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
@@ -2783,6 +2963,7 @@ export function getApiNotificationsQueryOptions(
 		ResponseErrorConfig<
 			| GetApiNotificationsStatus400
 			| GetApiNotificationsStatus422
+			| GetApiNotificationsStatus429
 			| GetApiNotificationsStatus500
 		>,
 		GetApiNotificationsStatus200,
@@ -2822,6 +3003,7 @@ export function useGetApiNotifications<
 				ResponseErrorConfig<
 					| GetApiNotificationsStatus400
 					| GetApiNotificationsStatus422
+					| GetApiNotificationsStatus429
 					| GetApiNotificationsStatus500
 				>,
 				TData,
@@ -2849,6 +3031,7 @@ export function useGetApiNotifications<
 		ResponseErrorConfig<
 			| GetApiNotificationsStatus400
 			| GetApiNotificationsStatus422
+			| GetApiNotificationsStatus429
 			| GetApiNotificationsStatus500
 		>
 	> & { queryKey: TQueryKey };
@@ -2871,7 +3054,9 @@ export function getApiNotificationsUnreadCountQueryOptions(
 	const queryKey = getApiNotificationsUnreadCountQueryKey();
 	return queryOptions<
 		GetApiNotificationsUnreadCountStatus200,
-		ResponseErrorConfig<GetApiNotificationsUnreadCountStatus500>,
+		ResponseErrorConfig<
+			GetApiNotificationsUnreadCountStatus429 | GetApiNotificationsUnreadCountStatus500
+		>,
 		GetApiNotificationsUnreadCountStatus200,
 		typeof queryKey
 	>({
@@ -2900,7 +3085,10 @@ export function useGetApiNotificationsUnreadCount<
 		query?: Partial<
 			QueryObserverOptions<
 				GetApiNotificationsUnreadCountStatus200,
-				ResponseErrorConfig<GetApiNotificationsUnreadCountStatus500>,
+				ResponseErrorConfig<
+					| GetApiNotificationsUnreadCountStatus429
+					| GetApiNotificationsUnreadCountStatus500
+				>,
 				TData,
 				TQueryData,
 				TQueryKey
@@ -2920,9 +3108,12 @@ export function useGetApiNotificationsUnreadCount<
 			queryKey,
 		} as unknown as QueryObserverOptions,
 		queryClient,
-	) as UseQueryResult<TData, ResponseErrorConfig<GetApiNotificationsUnreadCountStatus500>> & {
-		queryKey: TQueryKey;
-	};
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			GetApiNotificationsUnreadCountStatus429 | GetApiNotificationsUnreadCountStatus500
+		>
+	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
 
@@ -2942,6 +3133,7 @@ export function putApiNotificationsReadAllMutationOptions<TContext = unknown>(
 			| PutApiNotificationsReadAllStatus400
 			| PutApiNotificationsReadAllStatus403
 			| PutApiNotificationsReadAllStatus422
+			| PutApiNotificationsReadAllStatus429
 			| PutApiNotificationsReadAllStatus500
 		>,
 		PutApiNotificationsReadAllOptions,
@@ -2971,6 +3163,7 @@ export function usePutApiNotificationsReadAll<TContext>(
 				| PutApiNotificationsReadAllStatus400
 				| PutApiNotificationsReadAllStatus403
 				| PutApiNotificationsReadAllStatus422
+				| PutApiNotificationsReadAllStatus429
 				| PutApiNotificationsReadAllStatus500
 			>,
 			PutApiNotificationsReadAllOptions,
@@ -2989,6 +3182,7 @@ export function usePutApiNotificationsReadAll<TContext>(
 			| PutApiNotificationsReadAllStatus400
 			| PutApiNotificationsReadAllStatus403
 			| PutApiNotificationsReadAllStatus422
+			| PutApiNotificationsReadAllStatus429
 			| PutApiNotificationsReadAllStatus500
 		>,
 		PutApiNotificationsReadAllOptions,
@@ -3001,6 +3195,7 @@ export function usePutApiNotificationsReadAll<TContext>(
 			| PutApiNotificationsReadAllStatus400
 			| PutApiNotificationsReadAllStatus403
 			| PutApiNotificationsReadAllStatus422
+			| PutApiNotificationsReadAllStatus429
 			| PutApiNotificationsReadAllStatus500
 		>,
 		PutApiNotificationsReadAllOptions,
@@ -3018,6 +3213,7 @@ export function usePutApiNotificationsReadAll<TContext>(
 			| PutApiNotificationsReadAllStatus400
 			| PutApiNotificationsReadAllStatus403
 			| PutApiNotificationsReadAllStatus422
+			| PutApiNotificationsReadAllStatus429
 			| PutApiNotificationsReadAllStatus500
 		>,
 		PutApiNotificationsReadAllOptions,
@@ -3037,6 +3233,7 @@ export function putApiNotificationsByNotificationIdReadMutationOptions<TContext 
 		ResponseErrorConfig<
 			| PutApiNotificationsByNotificationIdReadStatus404
 			| PutApiNotificationsByNotificationIdReadStatus422
+			| PutApiNotificationsByNotificationIdReadStatus429
 			| PutApiNotificationsByNotificationIdReadStatus500
 		>,
 		PutApiNotificationsByNotificationIdReadOptions,
@@ -3065,6 +3262,7 @@ export function usePutApiNotificationsByNotificationIdRead<TContext>(
 			ResponseErrorConfig<
 				| PutApiNotificationsByNotificationIdReadStatus404
 				| PutApiNotificationsByNotificationIdReadStatus422
+				| PutApiNotificationsByNotificationIdReadStatus429
 				| PutApiNotificationsByNotificationIdReadStatus500
 			>,
 			PutApiNotificationsByNotificationIdReadOptions,
@@ -3085,6 +3283,7 @@ export function usePutApiNotificationsByNotificationIdRead<TContext>(
 		ResponseErrorConfig<
 			| PutApiNotificationsByNotificationIdReadStatus404
 			| PutApiNotificationsByNotificationIdReadStatus422
+			| PutApiNotificationsByNotificationIdReadStatus429
 			| PutApiNotificationsByNotificationIdReadStatus500
 		>,
 		PutApiNotificationsByNotificationIdReadOptions,
@@ -3096,6 +3295,7 @@ export function usePutApiNotificationsByNotificationIdRead<TContext>(
 		ResponseErrorConfig<
 			| PutApiNotificationsByNotificationIdReadStatus404
 			| PutApiNotificationsByNotificationIdReadStatus422
+			| PutApiNotificationsByNotificationIdReadStatus429
 			| PutApiNotificationsByNotificationIdReadStatus500
 		>,
 		PutApiNotificationsByNotificationIdReadOptions,
@@ -3112,6 +3312,7 @@ export function usePutApiNotificationsByNotificationIdRead<TContext>(
 		ResponseErrorConfig<
 			| PutApiNotificationsByNotificationIdReadStatus404
 			| PutApiNotificationsByNotificationIdReadStatus422
+			| PutApiNotificationsByNotificationIdReadStatus429
 			| PutApiNotificationsByNotificationIdReadStatus500
 		>,
 		PutApiNotificationsByNotificationIdReadOptions,
@@ -3132,7 +3333,9 @@ export function getApiNotificationsPreferencesQueryOptions(
 	const queryKey = getApiNotificationsPreferencesQueryKey();
 	return queryOptions<
 		GetApiNotificationsPreferencesStatus200,
-		ResponseErrorConfig<GetApiNotificationsPreferencesStatus500>,
+		ResponseErrorConfig<
+			GetApiNotificationsPreferencesStatus429 | GetApiNotificationsPreferencesStatus500
+		>,
 		GetApiNotificationsPreferencesStatus200,
 		typeof queryKey
 	>({
@@ -3161,7 +3364,10 @@ export function useGetApiNotificationsPreferences<
 		query?: Partial<
 			QueryObserverOptions<
 				GetApiNotificationsPreferencesStatus200,
-				ResponseErrorConfig<GetApiNotificationsPreferencesStatus500>,
+				ResponseErrorConfig<
+					| GetApiNotificationsPreferencesStatus429
+					| GetApiNotificationsPreferencesStatus500
+				>,
 				TData,
 				TQueryData,
 				TQueryKey
@@ -3181,9 +3387,12 @@ export function useGetApiNotificationsPreferences<
 			queryKey,
 		} as unknown as QueryObserverOptions,
 		queryClient,
-	) as UseQueryResult<TData, ResponseErrorConfig<GetApiNotificationsPreferencesStatus500>> & {
-		queryKey: TQueryKey;
-	};
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			GetApiNotificationsPreferencesStatus429 | GetApiNotificationsPreferencesStatus500
+		>
+	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
 
@@ -3200,7 +3409,9 @@ export function putApiNotificationsPreferencesMutationOptions<TContext = unknown
 	return mutationOptions<
 		PutApiNotificationsPreferencesStatus200,
 		ResponseErrorConfig<
-			PutApiNotificationsPreferencesStatus422 | PutApiNotificationsPreferencesStatus500
+			| PutApiNotificationsPreferencesStatus422
+			| PutApiNotificationsPreferencesStatus429
+			| PutApiNotificationsPreferencesStatus500
 		>,
 		PutApiNotificationsPreferencesOptions,
 		TContext
@@ -3226,7 +3437,9 @@ export function usePutApiNotificationsPreferences<TContext>(
 		mutation?: UseMutationOptions<
 			PutApiNotificationsPreferencesStatus200,
 			ResponseErrorConfig<
-				PutApiNotificationsPreferencesStatus422 | PutApiNotificationsPreferencesStatus500
+				| PutApiNotificationsPreferencesStatus422
+				| PutApiNotificationsPreferencesStatus429
+				| PutApiNotificationsPreferencesStatus500
 			>,
 			PutApiNotificationsPreferencesOptions,
 			TContext
@@ -3241,7 +3454,9 @@ export function usePutApiNotificationsPreferences<TContext>(
 	const baseOptions = putApiNotificationsPreferencesMutationOptions(config) as UseMutationOptions<
 		PutApiNotificationsPreferencesStatus200,
 		ResponseErrorConfig<
-			PutApiNotificationsPreferencesStatus422 | PutApiNotificationsPreferencesStatus500
+			| PutApiNotificationsPreferencesStatus422
+			| PutApiNotificationsPreferencesStatus429
+			| PutApiNotificationsPreferencesStatus500
 		>,
 		PutApiNotificationsPreferencesOptions,
 		TContext
@@ -3250,7 +3465,9 @@ export function usePutApiNotificationsPreferences<TContext>(
 	return useMutation<
 		PutApiNotificationsPreferencesStatus200,
 		ResponseErrorConfig<
-			PutApiNotificationsPreferencesStatus422 | PutApiNotificationsPreferencesStatus500
+			| PutApiNotificationsPreferencesStatus422
+			| PutApiNotificationsPreferencesStatus429
+			| PutApiNotificationsPreferencesStatus500
 		>,
 		PutApiNotificationsPreferencesOptions,
 		TContext
@@ -3264,7 +3481,9 @@ export function usePutApiNotificationsPreferences<TContext>(
 	) as UseMutationResult<
 		PutApiNotificationsPreferencesStatus200,
 		ResponseErrorConfig<
-			PutApiNotificationsPreferencesStatus422 | PutApiNotificationsPreferencesStatus500
+			| PutApiNotificationsPreferencesStatus422
+			| PutApiNotificationsPreferencesStatus429
+			| PutApiNotificationsPreferencesStatus500
 		>,
 		PutApiNotificationsPreferencesOptions,
 		TContext
@@ -3586,6 +3805,7 @@ export function putApiRecommendationsExclusionsByUnitIdMutationOptions<TContext 
 			| PutApiRecommendationsExclusionsByUnitIdStatus403
 			| PutApiRecommendationsExclusionsByUnitIdStatus404
 			| PutApiRecommendationsExclusionsByUnitIdStatus422
+			| PutApiRecommendationsExclusionsByUnitIdStatus429
 			| PutApiRecommendationsExclusionsByUnitIdStatus500
 		>,
 		PutApiRecommendationsExclusionsByUnitIdOptions,
@@ -3617,6 +3837,7 @@ export function usePutApiRecommendationsExclusionsByUnitId<TContext>(
 				| PutApiRecommendationsExclusionsByUnitIdStatus403
 				| PutApiRecommendationsExclusionsByUnitIdStatus404
 				| PutApiRecommendationsExclusionsByUnitIdStatus422
+				| PutApiRecommendationsExclusionsByUnitIdStatus429
 				| PutApiRecommendationsExclusionsByUnitIdStatus500
 			>,
 			PutApiRecommendationsExclusionsByUnitIdOptions,
@@ -3639,6 +3860,7 @@ export function usePutApiRecommendationsExclusionsByUnitId<TContext>(
 			| PutApiRecommendationsExclusionsByUnitIdStatus403
 			| PutApiRecommendationsExclusionsByUnitIdStatus404
 			| PutApiRecommendationsExclusionsByUnitIdStatus422
+			| PutApiRecommendationsExclusionsByUnitIdStatus429
 			| PutApiRecommendationsExclusionsByUnitIdStatus500
 		>,
 		PutApiRecommendationsExclusionsByUnitIdOptions,
@@ -3652,6 +3874,7 @@ export function usePutApiRecommendationsExclusionsByUnitId<TContext>(
 			| PutApiRecommendationsExclusionsByUnitIdStatus403
 			| PutApiRecommendationsExclusionsByUnitIdStatus404
 			| PutApiRecommendationsExclusionsByUnitIdStatus422
+			| PutApiRecommendationsExclusionsByUnitIdStatus429
 			| PutApiRecommendationsExclusionsByUnitIdStatus500
 		>,
 		PutApiRecommendationsExclusionsByUnitIdOptions,
@@ -3670,6 +3893,7 @@ export function usePutApiRecommendationsExclusionsByUnitId<TContext>(
 			| PutApiRecommendationsExclusionsByUnitIdStatus403
 			| PutApiRecommendationsExclusionsByUnitIdStatus404
 			| PutApiRecommendationsExclusionsByUnitIdStatus422
+			| PutApiRecommendationsExclusionsByUnitIdStatus429
 			| PutApiRecommendationsExclusionsByUnitIdStatus500
 		>,
 		PutApiRecommendationsExclusionsByUnitIdOptions,
@@ -3690,6 +3914,7 @@ export function deleteApiRecommendationsExclusionsByUnitIdMutationOptions<TConte
 			| DeleteApiRecommendationsExclusionsByUnitIdStatus401
 			| DeleteApiRecommendationsExclusionsByUnitIdStatus403
 			| DeleteApiRecommendationsExclusionsByUnitIdStatus422
+			| DeleteApiRecommendationsExclusionsByUnitIdStatus429
 			| DeleteApiRecommendationsExclusionsByUnitIdStatus500
 		>,
 		DeleteApiRecommendationsExclusionsByUnitIdOptions,
@@ -3719,6 +3944,7 @@ export function useDeleteApiRecommendationsExclusionsByUnitId<TContext>(
 				| DeleteApiRecommendationsExclusionsByUnitIdStatus401
 				| DeleteApiRecommendationsExclusionsByUnitIdStatus403
 				| DeleteApiRecommendationsExclusionsByUnitIdStatus422
+				| DeleteApiRecommendationsExclusionsByUnitIdStatus429
 				| DeleteApiRecommendationsExclusionsByUnitIdStatus500
 			>,
 			DeleteApiRecommendationsExclusionsByUnitIdOptions,
@@ -3740,6 +3966,7 @@ export function useDeleteApiRecommendationsExclusionsByUnitId<TContext>(
 			| DeleteApiRecommendationsExclusionsByUnitIdStatus401
 			| DeleteApiRecommendationsExclusionsByUnitIdStatus403
 			| DeleteApiRecommendationsExclusionsByUnitIdStatus422
+			| DeleteApiRecommendationsExclusionsByUnitIdStatus429
 			| DeleteApiRecommendationsExclusionsByUnitIdStatus500
 		>,
 		DeleteApiRecommendationsExclusionsByUnitIdOptions,
@@ -3752,6 +3979,7 @@ export function useDeleteApiRecommendationsExclusionsByUnitId<TContext>(
 			| DeleteApiRecommendationsExclusionsByUnitIdStatus401
 			| DeleteApiRecommendationsExclusionsByUnitIdStatus403
 			| DeleteApiRecommendationsExclusionsByUnitIdStatus422
+			| DeleteApiRecommendationsExclusionsByUnitIdStatus429
 			| DeleteApiRecommendationsExclusionsByUnitIdStatus500
 		>,
 		DeleteApiRecommendationsExclusionsByUnitIdOptions,
@@ -3769,6 +3997,7 @@ export function useDeleteApiRecommendationsExclusionsByUnitId<TContext>(
 			| DeleteApiRecommendationsExclusionsByUnitIdStatus401
 			| DeleteApiRecommendationsExclusionsByUnitIdStatus403
 			| DeleteApiRecommendationsExclusionsByUnitIdStatus422
+			| DeleteApiRecommendationsExclusionsByUnitIdStatus429
 			| DeleteApiRecommendationsExclusionsByUnitIdStatus500
 		>,
 		DeleteApiRecommendationsExclusionsByUnitIdOptions,
@@ -3793,6 +4022,7 @@ export function getApiMessagesConversationsQueryOptions(
 		ResponseErrorConfig<
 			| GetApiMessagesConversationsStatus400
 			| GetApiMessagesConversationsStatus422
+			| GetApiMessagesConversationsStatus429
 			| GetApiMessagesConversationsStatus500
 		>,
 		GetApiMessagesConversationsStatus200,
@@ -3834,6 +4064,7 @@ export function useGetApiMessagesConversations<
 				ResponseErrorConfig<
 					| GetApiMessagesConversationsStatus400
 					| GetApiMessagesConversationsStatus422
+					| GetApiMessagesConversationsStatus429
 					| GetApiMessagesConversationsStatus500
 				>,
 				TData,
@@ -3862,6 +4093,7 @@ export function useGetApiMessagesConversations<
 		ResponseErrorConfig<
 			| GetApiMessagesConversationsStatus400
 			| GetApiMessagesConversationsStatus422
+			| GetApiMessagesConversationsStatus429
 			| GetApiMessagesConversationsStatus500
 		>
 	> & { queryKey: TQueryKey };
@@ -3885,6 +4117,7 @@ export function postApiMessagesConversationsMutationOptions<TContext = unknown>(
 			| PostApiMessagesConversationsStatus404
 			| PostApiMessagesConversationsStatus409
 			| PostApiMessagesConversationsStatus422
+			| PostApiMessagesConversationsStatus429
 			| PostApiMessagesConversationsStatus500
 		>,
 		PostApiMessagesConversationsOptions,
@@ -3915,6 +4148,7 @@ export function usePostApiMessagesConversations<TContext>(
 				| PostApiMessagesConversationsStatus404
 				| PostApiMessagesConversationsStatus409
 				| PostApiMessagesConversationsStatus422
+				| PostApiMessagesConversationsStatus429
 				| PostApiMessagesConversationsStatus500
 			>,
 			PostApiMessagesConversationsOptions,
@@ -3934,6 +4168,7 @@ export function usePostApiMessagesConversations<TContext>(
 			| PostApiMessagesConversationsStatus404
 			| PostApiMessagesConversationsStatus409
 			| PostApiMessagesConversationsStatus422
+			| PostApiMessagesConversationsStatus429
 			| PostApiMessagesConversationsStatus500
 		>,
 		PostApiMessagesConversationsOptions,
@@ -3947,6 +4182,7 @@ export function usePostApiMessagesConversations<TContext>(
 			| PostApiMessagesConversationsStatus404
 			| PostApiMessagesConversationsStatus409
 			| PostApiMessagesConversationsStatus422
+			| PostApiMessagesConversationsStatus429
 			| PostApiMessagesConversationsStatus500
 		>,
 		PostApiMessagesConversationsOptions,
@@ -3965,6 +4201,7 @@ export function usePostApiMessagesConversations<TContext>(
 			| PostApiMessagesConversationsStatus404
 			| PostApiMessagesConversationsStatus409
 			| PostApiMessagesConversationsStatus422
+			| PostApiMessagesConversationsStatus429
 			| PostApiMessagesConversationsStatus500
 		>,
 		PostApiMessagesConversationsOptions,
@@ -3991,6 +4228,7 @@ export function getApiMessagesConversationsByConversationIdQueryOptions(
 		ResponseErrorConfig<
 			| GetApiMessagesConversationsByConversationIdStatus404
 			| GetApiMessagesConversationsByConversationIdStatus422
+			| GetApiMessagesConversationsByConversationIdStatus429
 			| GetApiMessagesConversationsByConversationIdStatus500
 		>,
 		GetApiMessagesConversationsByConversationIdStatus200,
@@ -4032,6 +4270,7 @@ export function useGetApiMessagesConversationsByConversationId<
 				ResponseErrorConfig<
 					| GetApiMessagesConversationsByConversationIdStatus404
 					| GetApiMessagesConversationsByConversationIdStatus422
+					| GetApiMessagesConversationsByConversationIdStatus429
 					| GetApiMessagesConversationsByConversationIdStatus500
 				>,
 				TData,
@@ -4061,6 +4300,7 @@ export function useGetApiMessagesConversationsByConversationId<
 		ResponseErrorConfig<
 			| GetApiMessagesConversationsByConversationIdStatus404
 			| GetApiMessagesConversationsByConversationIdStatus422
+			| GetApiMessagesConversationsByConversationIdStatus429
 			| GetApiMessagesConversationsByConversationIdStatus500
 		>
 	> & { queryKey: TQueryKey };
@@ -4094,6 +4334,7 @@ export function getApiMessagesConversationsByConversationIdMessagesQueryOptions(
 			| GetApiMessagesConversationsByConversationIdMessagesStatus400
 			| GetApiMessagesConversationsByConversationIdMessagesStatus404
 			| GetApiMessagesConversationsByConversationIdMessagesStatus422
+			| GetApiMessagesConversationsByConversationIdMessagesStatus429
 			| GetApiMessagesConversationsByConversationIdMessagesStatus500
 		>,
 		GetApiMessagesConversationsByConversationIdMessagesStatus200,
@@ -4141,6 +4382,7 @@ export function useGetApiMessagesConversationsByConversationIdMessages<
 					| GetApiMessagesConversationsByConversationIdMessagesStatus400
 					| GetApiMessagesConversationsByConversationIdMessagesStatus404
 					| GetApiMessagesConversationsByConversationIdMessagesStatus422
+					| GetApiMessagesConversationsByConversationIdMessagesStatus429
 					| GetApiMessagesConversationsByConversationIdMessagesStatus500
 				>,
 				TData,
@@ -4177,6 +4419,7 @@ export function useGetApiMessagesConversationsByConversationIdMessages<
 			| GetApiMessagesConversationsByConversationIdMessagesStatus400
 			| GetApiMessagesConversationsByConversationIdMessagesStatus404
 			| GetApiMessagesConversationsByConversationIdMessagesStatus422
+			| GetApiMessagesConversationsByConversationIdMessagesStatus429
 			| GetApiMessagesConversationsByConversationIdMessagesStatus500
 		>
 	> & { queryKey: TQueryKey };
@@ -4199,6 +4442,7 @@ export function postApiMessagesConversationsByConversationIdMessagesMutationOpti
 			| PostApiMessagesConversationsByConversationIdMessagesStatus403
 			| PostApiMessagesConversationsByConversationIdMessagesStatus404
 			| PostApiMessagesConversationsByConversationIdMessagesStatus422
+			| PostApiMessagesConversationsByConversationIdMessagesStatus429
 			| PostApiMessagesConversationsByConversationIdMessagesStatus500
 		>,
 		PostApiMessagesConversationsByConversationIdMessagesOptions,
@@ -4229,6 +4473,7 @@ export function usePostApiMessagesConversationsByConversationIdMessages<TContext
 				| PostApiMessagesConversationsByConversationIdMessagesStatus403
 				| PostApiMessagesConversationsByConversationIdMessagesStatus404
 				| PostApiMessagesConversationsByConversationIdMessagesStatus422
+				| PostApiMessagesConversationsByConversationIdMessagesStatus429
 				| PostApiMessagesConversationsByConversationIdMessagesStatus500
 			>,
 			PostApiMessagesConversationsByConversationIdMessagesOptions,
@@ -4251,6 +4496,7 @@ export function usePostApiMessagesConversationsByConversationIdMessages<TContext
 			| PostApiMessagesConversationsByConversationIdMessagesStatus403
 			| PostApiMessagesConversationsByConversationIdMessagesStatus404
 			| PostApiMessagesConversationsByConversationIdMessagesStatus422
+			| PostApiMessagesConversationsByConversationIdMessagesStatus429
 			| PostApiMessagesConversationsByConversationIdMessagesStatus500
 		>,
 		PostApiMessagesConversationsByConversationIdMessagesOptions,
@@ -4263,6 +4509,7 @@ export function usePostApiMessagesConversationsByConversationIdMessages<TContext
 			| PostApiMessagesConversationsByConversationIdMessagesStatus403
 			| PostApiMessagesConversationsByConversationIdMessagesStatus404
 			| PostApiMessagesConversationsByConversationIdMessagesStatus422
+			| PostApiMessagesConversationsByConversationIdMessagesStatus429
 			| PostApiMessagesConversationsByConversationIdMessagesStatus500
 		>,
 		PostApiMessagesConversationsByConversationIdMessagesOptions,
@@ -4280,6 +4527,7 @@ export function usePostApiMessagesConversationsByConversationIdMessages<TContext
 			| PostApiMessagesConversationsByConversationIdMessagesStatus403
 			| PostApiMessagesConversationsByConversationIdMessagesStatus404
 			| PostApiMessagesConversationsByConversationIdMessagesStatus422
+			| PostApiMessagesConversationsByConversationIdMessagesStatus429
 			| PostApiMessagesConversationsByConversationIdMessagesStatus500
 		>,
 		PostApiMessagesConversationsByConversationIdMessagesOptions,
@@ -4299,6 +4547,7 @@ export function putApiMessagesConversationsByConversationIdReadMutationOptions<T
 		ResponseErrorConfig<
 			| PutApiMessagesConversationsByConversationIdReadStatus404
 			| PutApiMessagesConversationsByConversationIdReadStatus422
+			| PutApiMessagesConversationsByConversationIdReadStatus429
 			| PutApiMessagesConversationsByConversationIdReadStatus500
 		>,
 		PutApiMessagesConversationsByConversationIdReadOptions,
@@ -4328,6 +4577,7 @@ export function usePutApiMessagesConversationsByConversationIdRead<TContext>(
 			ResponseErrorConfig<
 				| PutApiMessagesConversationsByConversationIdReadStatus404
 				| PutApiMessagesConversationsByConversationIdReadStatus422
+				| PutApiMessagesConversationsByConversationIdReadStatus429
 				| PutApiMessagesConversationsByConversationIdReadStatus500
 			>,
 			PutApiMessagesConversationsByConversationIdReadOptions,
@@ -4348,6 +4598,7 @@ export function usePutApiMessagesConversationsByConversationIdRead<TContext>(
 		ResponseErrorConfig<
 			| PutApiMessagesConversationsByConversationIdReadStatus404
 			| PutApiMessagesConversationsByConversationIdReadStatus422
+			| PutApiMessagesConversationsByConversationIdReadStatus429
 			| PutApiMessagesConversationsByConversationIdReadStatus500
 		>,
 		PutApiMessagesConversationsByConversationIdReadOptions,
@@ -4359,6 +4610,7 @@ export function usePutApiMessagesConversationsByConversationIdRead<TContext>(
 		ResponseErrorConfig<
 			| PutApiMessagesConversationsByConversationIdReadStatus404
 			| PutApiMessagesConversationsByConversationIdReadStatus422
+			| PutApiMessagesConversationsByConversationIdReadStatus429
 			| PutApiMessagesConversationsByConversationIdReadStatus500
 		>,
 		PutApiMessagesConversationsByConversationIdReadOptions,
@@ -4375,6 +4627,7 @@ export function usePutApiMessagesConversationsByConversationIdRead<TContext>(
 		ResponseErrorConfig<
 			| PutApiMessagesConversationsByConversationIdReadStatus404
 			| PutApiMessagesConversationsByConversationIdReadStatus422
+			| PutApiMessagesConversationsByConversationIdReadStatus429
 			| PutApiMessagesConversationsByConversationIdReadStatus500
 		>,
 		PutApiMessagesConversationsByConversationIdReadOptions,
@@ -4394,6 +4647,7 @@ export function deleteApiMessagesByMessageIdMutationOptions<TContext = unknown>(
 		ResponseErrorConfig<
 			| DeleteApiMessagesByMessageIdStatus404
 			| DeleteApiMessagesByMessageIdStatus422
+			| DeleteApiMessagesByMessageIdStatus429
 			| DeleteApiMessagesByMessageIdStatus500
 		>,
 		DeleteApiMessagesByMessageIdOptions,
@@ -4422,6 +4676,7 @@ export function useDeleteApiMessagesByMessageId<TContext>(
 			ResponseErrorConfig<
 				| DeleteApiMessagesByMessageIdStatus404
 				| DeleteApiMessagesByMessageIdStatus422
+				| DeleteApiMessagesByMessageIdStatus429
 				| DeleteApiMessagesByMessageIdStatus500
 			>,
 			DeleteApiMessagesByMessageIdOptions,
@@ -4439,6 +4694,7 @@ export function useDeleteApiMessagesByMessageId<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiMessagesByMessageIdStatus404
 			| DeleteApiMessagesByMessageIdStatus422
+			| DeleteApiMessagesByMessageIdStatus429
 			| DeleteApiMessagesByMessageIdStatus500
 		>,
 		DeleteApiMessagesByMessageIdOptions,
@@ -4450,6 +4706,7 @@ export function useDeleteApiMessagesByMessageId<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiMessagesByMessageIdStatus404
 			| DeleteApiMessagesByMessageIdStatus422
+			| DeleteApiMessagesByMessageIdStatus429
 			| DeleteApiMessagesByMessageIdStatus500
 		>,
 		DeleteApiMessagesByMessageIdOptions,
@@ -4466,6 +4723,7 @@ export function useDeleteApiMessagesByMessageId<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiMessagesByMessageIdStatus404
 			| DeleteApiMessagesByMessageIdStatus422
+			| DeleteApiMessagesByMessageIdStatus429
 			| DeleteApiMessagesByMessageIdStatus500
 		>,
 		DeleteApiMessagesByMessageIdOptions,
@@ -4842,6 +5100,486 @@ export function useDeleteApiApiTokensByTokenId<TContext>(
 	>;
 }
 
+export const putApiApiTokensByTokenIdPolicyMutationKey = () =>
+	[{ url: "/api/api-tokens/:tokenId/policy" }] as const;
+
+export function putApiApiTokensByTokenIdPolicyMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiApiTokensByTokenIdPolicyMutationKey();
+	return mutationOptions<
+		PutApiApiTokensByTokenIdPolicyStatus200,
+		ResponseErrorConfig<
+			| PutApiApiTokensByTokenIdPolicyStatus401
+			| PutApiApiTokensByTokenIdPolicyStatus403
+			| PutApiApiTokensByTokenIdPolicyStatus404
+			| PutApiApiTokensByTokenIdPolicyStatus409
+			| PutApiApiTokensByTokenIdPolicyStatus422
+			| PutApiApiTokensByTokenIdPolicyStatus500
+		>,
+		PutApiApiTokensByTokenIdPolicyOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiApiTokensByTokenIdPolicy({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Replace API token policy override
+ * {@link /api/api-tokens/:tokenId/policy}
+ */
+export function usePutApiApiTokensByTokenIdPolicy<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiApiTokensByTokenIdPolicyStatus200,
+			ResponseErrorConfig<
+				| PutApiApiTokensByTokenIdPolicyStatus401
+				| PutApiApiTokensByTokenIdPolicyStatus403
+				| PutApiApiTokensByTokenIdPolicyStatus404
+				| PutApiApiTokensByTokenIdPolicyStatus409
+				| PutApiApiTokensByTokenIdPolicyStatus422
+				| PutApiApiTokensByTokenIdPolicyStatus500
+			>,
+			PutApiApiTokensByTokenIdPolicyOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? putApiApiTokensByTokenIdPolicyMutationKey();
+
+	const baseOptions = putApiApiTokensByTokenIdPolicyMutationOptions(config) as UseMutationOptions<
+		PutApiApiTokensByTokenIdPolicyStatus200,
+		ResponseErrorConfig<
+			| PutApiApiTokensByTokenIdPolicyStatus401
+			| PutApiApiTokensByTokenIdPolicyStatus403
+			| PutApiApiTokensByTokenIdPolicyStatus404
+			| PutApiApiTokensByTokenIdPolicyStatus409
+			| PutApiApiTokensByTokenIdPolicyStatus422
+			| PutApiApiTokensByTokenIdPolicyStatus500
+		>,
+		PutApiApiTokensByTokenIdPolicyOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiApiTokensByTokenIdPolicyStatus200,
+		ResponseErrorConfig<
+			| PutApiApiTokensByTokenIdPolicyStatus401
+			| PutApiApiTokensByTokenIdPolicyStatus403
+			| PutApiApiTokensByTokenIdPolicyStatus404
+			| PutApiApiTokensByTokenIdPolicyStatus409
+			| PutApiApiTokensByTokenIdPolicyStatus422
+			| PutApiApiTokensByTokenIdPolicyStatus500
+		>,
+		PutApiApiTokensByTokenIdPolicyOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiApiTokensByTokenIdPolicyStatus200,
+		ResponseErrorConfig<
+			| PutApiApiTokensByTokenIdPolicyStatus401
+			| PutApiApiTokensByTokenIdPolicyStatus403
+			| PutApiApiTokensByTokenIdPolicyStatus404
+			| PutApiApiTokensByTokenIdPolicyStatus409
+			| PutApiApiTokensByTokenIdPolicyStatus422
+			| PutApiApiTokensByTokenIdPolicyStatus500
+		>,
+		PutApiApiTokensByTokenIdPolicyOptions,
+		TContext
+	>;
+}
+
+export const getCurrentApiTokenQueryKey = () => [{ url: "/api/token" }] as const;
+
+type GetCurrentApiTokenQueryKey = ReturnType<typeof getCurrentApiTokenQueryKey>;
+
+export function getCurrentApiTokenQueryOptions(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getCurrentApiTokenQueryKey();
+	return queryOptions<
+		GetCurrentApiTokenStatus200,
+		ResponseErrorConfig<
+			GetCurrentApiTokenStatus401 | GetCurrentApiTokenStatus429 | GetCurrentApiTokenStatus500
+		>,
+		GetCurrentApiTokenStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getCurrentApiToken({
+				...config,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Inspect the current API token's safe capabilities
+ * {@link /api/token}
+ */
+export function useGetCurrentApiToken<
+	TData = GetCurrentApiTokenStatus200,
+	TQueryData = GetCurrentApiTokenStatus200,
+	TQueryKey extends QueryKey = GetCurrentApiTokenQueryKey,
+>(
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetCurrentApiTokenStatus200,
+				ResponseErrorConfig<
+					| GetCurrentApiTokenStatus401
+					| GetCurrentApiTokenStatus429
+					| GetCurrentApiTokenStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const queryKey = resolvedOptions?.queryKey ?? getCurrentApiTokenQueryKey();
+
+	const queryResult = useQuery(
+		{
+			...getCurrentApiTokenQueryOptions(config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			GetCurrentApiTokenStatus401 | GetCurrentApiTokenStatus429 | GetCurrentApiTokenStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const getApiApiTokenPoliciesQueryKey = () => [{ url: "/api/api-token-policies" }] as const;
+
+type GetApiApiTokenPoliciesQueryKey = ReturnType<typeof getApiApiTokenPoliciesQueryKey>;
+
+export function getApiApiTokenPoliciesQueryOptions(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiApiTokenPoliciesQueryKey();
+	return queryOptions<
+		GetApiApiTokenPoliciesStatus200,
+		ResponseErrorConfig<
+			| GetApiApiTokenPoliciesStatus401
+			| GetApiApiTokenPoliciesStatus403
+			| GetApiApiTokenPoliciesStatus500
+		>,
+		GetApiApiTokenPoliciesStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiApiTokenPolicies({
+				...config,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List API token policies as staff
+ * {@link /api/api-token-policies}
+ */
+export function useGetApiApiTokenPolicies<
+	TData = GetApiApiTokenPoliciesStatus200,
+	TQueryData = GetApiApiTokenPoliciesStatus200,
+	TQueryKey extends QueryKey = GetApiApiTokenPoliciesQueryKey,
+>(
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiApiTokenPoliciesStatus200,
+				ResponseErrorConfig<
+					| GetApiApiTokenPoliciesStatus401
+					| GetApiApiTokenPoliciesStatus403
+					| GetApiApiTokenPoliciesStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const queryKey = resolvedOptions?.queryKey ?? getApiApiTokenPoliciesQueryKey();
+
+	const queryResult = useQuery(
+		{
+			...getApiApiTokenPoliciesQueryOptions(config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiApiTokenPoliciesStatus401
+			| GetApiApiTokenPoliciesStatus403
+			| GetApiApiTokenPoliciesStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const patchApiApiTokenPoliciesByPolicyKeyMutationKey = () =>
+	[{ url: "/api/api-token-policies/:policyKey" }] as const;
+
+export function patchApiApiTokenPoliciesByPolicyKeyMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = patchApiApiTokenPoliciesByPolicyKeyMutationKey();
+	return mutationOptions<
+		PatchApiApiTokenPoliciesByPolicyKeyStatus200,
+		ResponseErrorConfig<
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus401
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus403
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus404
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus409
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus422
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus500
+		>,
+		PatchApiApiTokenPoliciesByPolicyKeyOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await patchApiApiTokenPoliciesByPolicyKey({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Replace an API token policy as staff
+ * {@link /api/api-token-policies/:policyKey}
+ */
+export function usePatchApiApiTokenPoliciesByPolicyKey<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PatchApiApiTokenPoliciesByPolicyKeyStatus200,
+			ResponseErrorConfig<
+				| PatchApiApiTokenPoliciesByPolicyKeyStatus401
+				| PatchApiApiTokenPoliciesByPolicyKeyStatus403
+				| PatchApiApiTokenPoliciesByPolicyKeyStatus404
+				| PatchApiApiTokenPoliciesByPolicyKeyStatus409
+				| PatchApiApiTokenPoliciesByPolicyKeyStatus422
+				| PatchApiApiTokenPoliciesByPolicyKeyStatus500
+			>,
+			PatchApiApiTokenPoliciesByPolicyKeyOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? patchApiApiTokenPoliciesByPolicyKeyMutationKey();
+
+	const baseOptions = patchApiApiTokenPoliciesByPolicyKeyMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PatchApiApiTokenPoliciesByPolicyKeyStatus200,
+		ResponseErrorConfig<
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus401
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus403
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus404
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus409
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus422
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus500
+		>,
+		PatchApiApiTokenPoliciesByPolicyKeyOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PatchApiApiTokenPoliciesByPolicyKeyStatus200,
+		ResponseErrorConfig<
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus401
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus403
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus404
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus409
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus422
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus500
+		>,
+		PatchApiApiTokenPoliciesByPolicyKeyOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PatchApiApiTokenPoliciesByPolicyKeyStatus200,
+		ResponseErrorConfig<
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus401
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus403
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus404
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus409
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus422
+			| PatchApiApiTokenPoliciesByPolicyKeyStatus500
+		>,
+		PatchApiApiTokenPoliciesByPolicyKeyOptions,
+		TContext
+	>;
+}
+
+export const putApiApiTokenPoliciesBindingsByTokenIdMutationKey = () =>
+	[{ url: "/api/api-token-policies/bindings/:tokenId" }] as const;
+
+export function putApiApiTokenPoliciesBindingsByTokenIdMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiApiTokenPoliciesBindingsByTokenIdMutationKey();
+	return mutationOptions<
+		PutApiApiTokenPoliciesBindingsByTokenIdStatus200,
+		ResponseErrorConfig<
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus401
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus403
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus404
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus422
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus500
+		>,
+		PutApiApiTokenPoliciesBindingsByTokenIdOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiApiTokenPoliciesBindingsByTokenId({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Assign an API token policy as staff
+ * {@link /api/api-token-policies/bindings/:tokenId}
+ */
+export function usePutApiApiTokenPoliciesBindingsByTokenId<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiApiTokenPoliciesBindingsByTokenIdStatus200,
+			ResponseErrorConfig<
+				| PutApiApiTokenPoliciesBindingsByTokenIdStatus401
+				| PutApiApiTokenPoliciesBindingsByTokenIdStatus403
+				| PutApiApiTokenPoliciesBindingsByTokenIdStatus404
+				| PutApiApiTokenPoliciesBindingsByTokenIdStatus422
+				| PutApiApiTokenPoliciesBindingsByTokenIdStatus500
+			>,
+			PutApiApiTokenPoliciesBindingsByTokenIdOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiApiTokenPoliciesBindingsByTokenIdMutationKey();
+
+	const baseOptions = putApiApiTokenPoliciesBindingsByTokenIdMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiApiTokenPoliciesBindingsByTokenIdStatus200,
+		ResponseErrorConfig<
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus401
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus403
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus404
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus422
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus500
+		>,
+		PutApiApiTokenPoliciesBindingsByTokenIdOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiApiTokenPoliciesBindingsByTokenIdStatus200,
+		ResponseErrorConfig<
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus401
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus403
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus404
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus422
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus500
+		>,
+		PutApiApiTokenPoliciesBindingsByTokenIdOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiApiTokenPoliciesBindingsByTokenIdStatus200,
+		ResponseErrorConfig<
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus401
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus403
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus404
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus422
+			| PutApiApiTokenPoliciesBindingsByTokenIdStatus500
+		>,
+		PutApiApiTokenPoliciesBindingsByTokenIdOptions,
+		TContext
+	>;
+}
+
 export const getApiFeedQueryKey = ({ query }: Omit<GetApiFeedOptions, "headers"> = {}) =>
 	[{ url: "/api/feed" }, ...(query ? [query] : [])] as const;
 
@@ -4932,7 +5670,9 @@ export function getApiFeedbackMeQueryOptions(
 	const queryKey = getApiFeedbackMeQueryKey({ query });
 	return queryOptions<
 		GetApiFeedbackMeStatus200,
-		ResponseErrorConfig<GetApiFeedbackMeStatus422 | GetApiFeedbackMeStatus500>,
+		ResponseErrorConfig<
+			GetApiFeedbackMeStatus422 | GetApiFeedbackMeStatus429 | GetApiFeedbackMeStatus500
+		>,
 		GetApiFeedbackMeStatus200,
 		typeof queryKey
 	>({
@@ -4965,7 +5705,11 @@ export function useGetApiFeedbackMe<
 		query?: Partial<
 			QueryObserverOptions<
 				GetApiFeedbackMeStatus200,
-				ResponseErrorConfig<GetApiFeedbackMeStatus422 | GetApiFeedbackMeStatus500>,
+				ResponseErrorConfig<
+					| GetApiFeedbackMeStatus422
+					| GetApiFeedbackMeStatus429
+					| GetApiFeedbackMeStatus500
+				>,
 				TData,
 				TQueryData,
 				TQueryKey
@@ -4988,7 +5732,9 @@ export function useGetApiFeedbackMe<
 		queryClient,
 	) as UseQueryResult<
 		TData,
-		ResponseErrorConfig<GetApiFeedbackMeStatus422 | GetApiFeedbackMeStatus500>
+		ResponseErrorConfig<
+			GetApiFeedbackMeStatus422 | GetApiFeedbackMeStatus429 | GetApiFeedbackMeStatus500
+		>
 	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
@@ -5008,6 +5754,7 @@ export function postApiFeedbackMutationOptions<TContext = unknown>(
 			| PostApiFeedbackStatus400
 			| PostApiFeedbackStatus404
 			| PostApiFeedbackStatus422
+			| PostApiFeedbackStatus429
 			| PostApiFeedbackStatus500
 		>,
 		PostApiFeedbackOptions,
@@ -5033,6 +5780,7 @@ export function usePostApiFeedback<TContext>(
 				| PostApiFeedbackStatus400
 				| PostApiFeedbackStatus404
 				| PostApiFeedbackStatus422
+				| PostApiFeedbackStatus429
 				| PostApiFeedbackStatus500
 			>,
 			PostApiFeedbackOptions,
@@ -5051,6 +5799,7 @@ export function usePostApiFeedback<TContext>(
 			| PostApiFeedbackStatus400
 			| PostApiFeedbackStatus404
 			| PostApiFeedbackStatus422
+			| PostApiFeedbackStatus429
 			| PostApiFeedbackStatus500
 		>,
 		PostApiFeedbackOptions,
@@ -5063,6 +5812,7 @@ export function usePostApiFeedback<TContext>(
 			| PostApiFeedbackStatus400
 			| PostApiFeedbackStatus404
 			| PostApiFeedbackStatus422
+			| PostApiFeedbackStatus429
 			| PostApiFeedbackStatus500
 		>,
 		PostApiFeedbackOptions,
@@ -5080,6 +5830,7 @@ export function usePostApiFeedback<TContext>(
 			| PostApiFeedbackStatus400
 			| PostApiFeedbackStatus404
 			| PostApiFeedbackStatus422
+			| PostApiFeedbackStatus429
 			| PostApiFeedbackStatus500
 		>,
 		PostApiFeedbackOptions,
@@ -7079,6 +7830,7 @@ export function patchApiGovernanceNotesByPostIdMutationOptions<TContext = unknow
 			| PatchApiGovernanceNotesByPostIdStatus404
 			| PatchApiGovernanceNotesByPostIdStatus409
 			| PatchApiGovernanceNotesByPostIdStatus422
+			| PatchApiGovernanceNotesByPostIdStatus429
 			| PatchApiGovernanceNotesByPostIdStatus500
 		>,
 		PatchApiGovernanceNotesByPostIdOptions,
@@ -7110,6 +7862,7 @@ export function usePatchApiGovernanceNotesByPostId<TContext>(
 				| PatchApiGovernanceNotesByPostIdStatus404
 				| PatchApiGovernanceNotesByPostIdStatus409
 				| PatchApiGovernanceNotesByPostIdStatus422
+				| PatchApiGovernanceNotesByPostIdStatus429
 				| PatchApiGovernanceNotesByPostIdStatus500
 			>,
 			PatchApiGovernanceNotesByPostIdOptions,
@@ -7131,6 +7884,7 @@ export function usePatchApiGovernanceNotesByPostId<TContext>(
 			| PatchApiGovernanceNotesByPostIdStatus404
 			| PatchApiGovernanceNotesByPostIdStatus409
 			| PatchApiGovernanceNotesByPostIdStatus422
+			| PatchApiGovernanceNotesByPostIdStatus429
 			| PatchApiGovernanceNotesByPostIdStatus500
 		>,
 		PatchApiGovernanceNotesByPostIdOptions,
@@ -7144,6 +7898,7 @@ export function usePatchApiGovernanceNotesByPostId<TContext>(
 			| PatchApiGovernanceNotesByPostIdStatus404
 			| PatchApiGovernanceNotesByPostIdStatus409
 			| PatchApiGovernanceNotesByPostIdStatus422
+			| PatchApiGovernanceNotesByPostIdStatus429
 			| PatchApiGovernanceNotesByPostIdStatus500
 		>,
 		PatchApiGovernanceNotesByPostIdOptions,
@@ -7162,6 +7917,7 @@ export function usePatchApiGovernanceNotesByPostId<TContext>(
 			| PatchApiGovernanceNotesByPostIdStatus404
 			| PatchApiGovernanceNotesByPostIdStatus409
 			| PatchApiGovernanceNotesByPostIdStatus422
+			| PatchApiGovernanceNotesByPostIdStatus429
 			| PatchApiGovernanceNotesByPostIdStatus500
 		>,
 		PatchApiGovernanceNotesByPostIdOptions,
@@ -8197,7 +8953,10 @@ export function postApiSeriesMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiSeriesStatus200,
 		ResponseErrorConfig<
-			PostApiSeriesStatus404 | PostApiSeriesStatus422 | PostApiSeriesStatus500
+			| PostApiSeriesStatus404
+			| PostApiSeriesStatus422
+			| PostApiSeriesStatus429
+			| PostApiSeriesStatus500
 		>,
 		PostApiSeriesOptions,
 		TContext
@@ -8219,7 +8978,10 @@ export function usePostApiSeries<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiSeriesStatus200,
 			ResponseErrorConfig<
-				PostApiSeriesStatus404 | PostApiSeriesStatus422 | PostApiSeriesStatus500
+				| PostApiSeriesStatus404
+				| PostApiSeriesStatus422
+				| PostApiSeriesStatus429
+				| PostApiSeriesStatus500
 			>,
 			PostApiSeriesOptions,
 			TContext
@@ -8234,7 +8996,10 @@ export function usePostApiSeries<TContext>(
 	const baseOptions = postApiSeriesMutationOptions(config) as UseMutationOptions<
 		PostApiSeriesStatus200,
 		ResponseErrorConfig<
-			PostApiSeriesStatus404 | PostApiSeriesStatus422 | PostApiSeriesStatus500
+			| PostApiSeriesStatus404
+			| PostApiSeriesStatus422
+			| PostApiSeriesStatus429
+			| PostApiSeriesStatus500
 		>,
 		PostApiSeriesOptions,
 		TContext
@@ -8243,7 +9008,10 @@ export function usePostApiSeries<TContext>(
 	return useMutation<
 		PostApiSeriesStatus200,
 		ResponseErrorConfig<
-			PostApiSeriesStatus404 | PostApiSeriesStatus422 | PostApiSeriesStatus500
+			| PostApiSeriesStatus404
+			| PostApiSeriesStatus422
+			| PostApiSeriesStatus429
+			| PostApiSeriesStatus500
 		>,
 		PostApiSeriesOptions,
 		TContext
@@ -8257,7 +9025,10 @@ export function usePostApiSeries<TContext>(
 	) as UseMutationResult<
 		PostApiSeriesStatus200,
 		ResponseErrorConfig<
-			PostApiSeriesStatus404 | PostApiSeriesStatus422 | PostApiSeriesStatus500
+			| PostApiSeriesStatus404
+			| PostApiSeriesStatus422
+			| PostApiSeriesStatus429
+			| PostApiSeriesStatus500
 		>,
 		PostApiSeriesOptions,
 		TContext
@@ -8376,6 +9147,7 @@ export function replaceZoneSlugAddressMutationOptions<TContext = unknown>(
 			| ReplaceZoneSlugAddressStatus404
 			| ReplaceZoneSlugAddressStatus409
 			| ReplaceZoneSlugAddressStatus422
+			| ReplaceZoneSlugAddressStatus429
 			| ReplaceZoneSlugAddressStatus500
 		>,
 		ReplaceZoneSlugAddressOptions,
@@ -8409,6 +9181,7 @@ export function useReplaceZoneSlugAddress<TContext>(
 				| ReplaceZoneSlugAddressStatus404
 				| ReplaceZoneSlugAddressStatus409
 				| ReplaceZoneSlugAddressStatus422
+				| ReplaceZoneSlugAddressStatus429
 				| ReplaceZoneSlugAddressStatus500
 			>,
 			ReplaceZoneSlugAddressOptions,
@@ -8429,6 +9202,7 @@ export function useReplaceZoneSlugAddress<TContext>(
 			| ReplaceZoneSlugAddressStatus404
 			| ReplaceZoneSlugAddressStatus409
 			| ReplaceZoneSlugAddressStatus422
+			| ReplaceZoneSlugAddressStatus429
 			| ReplaceZoneSlugAddressStatus500
 		>,
 		ReplaceZoneSlugAddressOptions,
@@ -8443,6 +9217,7 @@ export function useReplaceZoneSlugAddress<TContext>(
 			| ReplaceZoneSlugAddressStatus404
 			| ReplaceZoneSlugAddressStatus409
 			| ReplaceZoneSlugAddressStatus422
+			| ReplaceZoneSlugAddressStatus429
 			| ReplaceZoneSlugAddressStatus500
 		>,
 		ReplaceZoneSlugAddressOptions,
@@ -8462,6 +9237,7 @@ export function useReplaceZoneSlugAddress<TContext>(
 			| ReplaceZoneSlugAddressStatus404
 			| ReplaceZoneSlugAddressStatus409
 			| ReplaceZoneSlugAddressStatus422
+			| ReplaceZoneSlugAddressStatus429
 			| ReplaceZoneSlugAddressStatus500
 		>,
 		ReplaceZoneSlugAddressOptions,
@@ -8581,6 +9357,7 @@ export function patchApiZonesByZoneIdMutationOptions<TContext = unknown>(
 			| PatchApiZonesByZoneIdStatus403
 			| PatchApiZonesByZoneIdStatus404
 			| PatchApiZonesByZoneIdStatus422
+			| PatchApiZonesByZoneIdStatus429
 			| PatchApiZonesByZoneIdStatus500
 		>,
 		PatchApiZonesByZoneIdOptions,
@@ -8612,6 +9389,7 @@ export function usePatchApiZonesByZoneId<TContext>(
 				| PatchApiZonesByZoneIdStatus403
 				| PatchApiZonesByZoneIdStatus404
 				| PatchApiZonesByZoneIdStatus422
+				| PatchApiZonesByZoneIdStatus429
 				| PatchApiZonesByZoneIdStatus500
 			>,
 			PatchApiZonesByZoneIdOptions,
@@ -8631,6 +9409,7 @@ export function usePatchApiZonesByZoneId<TContext>(
 			| PatchApiZonesByZoneIdStatus403
 			| PatchApiZonesByZoneIdStatus404
 			| PatchApiZonesByZoneIdStatus422
+			| PatchApiZonesByZoneIdStatus429
 			| PatchApiZonesByZoneIdStatus500
 		>,
 		PatchApiZonesByZoneIdOptions,
@@ -8644,6 +9423,7 @@ export function usePatchApiZonesByZoneId<TContext>(
 			| PatchApiZonesByZoneIdStatus403
 			| PatchApiZonesByZoneIdStatus404
 			| PatchApiZonesByZoneIdStatus422
+			| PatchApiZonesByZoneIdStatus429
 			| PatchApiZonesByZoneIdStatus500
 		>,
 		PatchApiZonesByZoneIdOptions,
@@ -8662,6 +9442,7 @@ export function usePatchApiZonesByZoneId<TContext>(
 			| PatchApiZonesByZoneIdStatus403
 			| PatchApiZonesByZoneIdStatus404
 			| PatchApiZonesByZoneIdStatus422
+			| PatchApiZonesByZoneIdStatus429
 			| PatchApiZonesByZoneIdStatus500
 		>,
 		PatchApiZonesByZoneIdOptions,
@@ -8976,6 +9757,7 @@ export function putApiZonesByZoneIdPagesBySlugMutationOptions<TContext = unknown
 			| PutApiZonesByZoneIdPagesBySlugStatus403
 			| PutApiZonesByZoneIdPagesBySlugStatus404
 			| PutApiZonesByZoneIdPagesBySlugStatus422
+			| PutApiZonesByZoneIdPagesBySlugStatus429
 			| PutApiZonesByZoneIdPagesBySlugStatus500
 		>,
 		PutApiZonesByZoneIdPagesBySlugOptions,
@@ -9007,6 +9789,7 @@ export function usePutApiZonesByZoneIdPagesBySlug<TContext>(
 				| PutApiZonesByZoneIdPagesBySlugStatus403
 				| PutApiZonesByZoneIdPagesBySlugStatus404
 				| PutApiZonesByZoneIdPagesBySlugStatus422
+				| PutApiZonesByZoneIdPagesBySlugStatus429
 				| PutApiZonesByZoneIdPagesBySlugStatus500
 			>,
 			PutApiZonesByZoneIdPagesBySlugOptions,
@@ -9026,6 +9809,7 @@ export function usePutApiZonesByZoneIdPagesBySlug<TContext>(
 			| PutApiZonesByZoneIdPagesBySlugStatus403
 			| PutApiZonesByZoneIdPagesBySlugStatus404
 			| PutApiZonesByZoneIdPagesBySlugStatus422
+			| PutApiZonesByZoneIdPagesBySlugStatus429
 			| PutApiZonesByZoneIdPagesBySlugStatus500
 		>,
 		PutApiZonesByZoneIdPagesBySlugOptions,
@@ -9039,6 +9823,7 @@ export function usePutApiZonesByZoneIdPagesBySlug<TContext>(
 			| PutApiZonesByZoneIdPagesBySlugStatus403
 			| PutApiZonesByZoneIdPagesBySlugStatus404
 			| PutApiZonesByZoneIdPagesBySlugStatus422
+			| PutApiZonesByZoneIdPagesBySlugStatus429
 			| PutApiZonesByZoneIdPagesBySlugStatus500
 		>,
 		PutApiZonesByZoneIdPagesBySlugOptions,
@@ -9057,6 +9842,7 @@ export function usePutApiZonesByZoneIdPagesBySlug<TContext>(
 			| PutApiZonesByZoneIdPagesBySlugStatus403
 			| PutApiZonesByZoneIdPagesBySlugStatus404
 			| PutApiZonesByZoneIdPagesBySlugStatus422
+			| PutApiZonesByZoneIdPagesBySlugStatus429
 			| PutApiZonesByZoneIdPagesBySlugStatus500
 		>,
 		PutApiZonesByZoneIdPagesBySlugOptions,
@@ -9078,6 +9864,7 @@ export function deleteApiZonesByZoneIdPagesBySlugMutationOptions<TContext = unkn
 			| DeleteApiZonesByZoneIdPagesBySlugStatus404
 			| DeleteApiZonesByZoneIdPagesBySlugStatus409
 			| DeleteApiZonesByZoneIdPagesBySlugStatus422
+			| DeleteApiZonesByZoneIdPagesBySlugStatus429
 			| DeleteApiZonesByZoneIdPagesBySlugStatus500
 		>,
 		DeleteApiZonesByZoneIdPagesBySlugOptions,
@@ -9108,6 +9895,7 @@ export function useDeleteApiZonesByZoneIdPagesBySlug<TContext>(
 				| DeleteApiZonesByZoneIdPagesBySlugStatus404
 				| DeleteApiZonesByZoneIdPagesBySlugStatus409
 				| DeleteApiZonesByZoneIdPagesBySlugStatus422
+				| DeleteApiZonesByZoneIdPagesBySlugStatus429
 				| DeleteApiZonesByZoneIdPagesBySlugStatus500
 			>,
 			DeleteApiZonesByZoneIdPagesBySlugOptions,
@@ -9130,6 +9918,7 @@ export function useDeleteApiZonesByZoneIdPagesBySlug<TContext>(
 			| DeleteApiZonesByZoneIdPagesBySlugStatus404
 			| DeleteApiZonesByZoneIdPagesBySlugStatus409
 			| DeleteApiZonesByZoneIdPagesBySlugStatus422
+			| DeleteApiZonesByZoneIdPagesBySlugStatus429
 			| DeleteApiZonesByZoneIdPagesBySlugStatus500
 		>,
 		DeleteApiZonesByZoneIdPagesBySlugOptions,
@@ -9143,6 +9932,7 @@ export function useDeleteApiZonesByZoneIdPagesBySlug<TContext>(
 			| DeleteApiZonesByZoneIdPagesBySlugStatus404
 			| DeleteApiZonesByZoneIdPagesBySlugStatus409
 			| DeleteApiZonesByZoneIdPagesBySlugStatus422
+			| DeleteApiZonesByZoneIdPagesBySlugStatus429
 			| DeleteApiZonesByZoneIdPagesBySlugStatus500
 		>,
 		DeleteApiZonesByZoneIdPagesBySlugOptions,
@@ -9161,6 +9951,7 @@ export function useDeleteApiZonesByZoneIdPagesBySlug<TContext>(
 			| DeleteApiZonesByZoneIdPagesBySlugStatus404
 			| DeleteApiZonesByZoneIdPagesBySlugStatus409
 			| DeleteApiZonesByZoneIdPagesBySlugStatus422
+			| DeleteApiZonesByZoneIdPagesBySlugStatus429
 			| DeleteApiZonesByZoneIdPagesBySlugStatus500
 		>,
 		DeleteApiZonesByZoneIdPagesBySlugOptions,
@@ -9279,6 +10070,7 @@ export function postApiZonesByZoneIdNavigationMutationOptions<TContext = unknown
 			| PostApiZonesByZoneIdNavigationStatus403
 			| PostApiZonesByZoneIdNavigationStatus404
 			| PostApiZonesByZoneIdNavigationStatus422
+			| PostApiZonesByZoneIdNavigationStatus429
 			| PostApiZonesByZoneIdNavigationStatus500
 		>,
 		PostApiZonesByZoneIdNavigationOptions,
@@ -9310,6 +10102,7 @@ export function usePostApiZonesByZoneIdNavigation<TContext>(
 				| PostApiZonesByZoneIdNavigationStatus403
 				| PostApiZonesByZoneIdNavigationStatus404
 				| PostApiZonesByZoneIdNavigationStatus422
+				| PostApiZonesByZoneIdNavigationStatus429
 				| PostApiZonesByZoneIdNavigationStatus500
 			>,
 			PostApiZonesByZoneIdNavigationOptions,
@@ -9329,6 +10122,7 @@ export function usePostApiZonesByZoneIdNavigation<TContext>(
 			| PostApiZonesByZoneIdNavigationStatus403
 			| PostApiZonesByZoneIdNavigationStatus404
 			| PostApiZonesByZoneIdNavigationStatus422
+			| PostApiZonesByZoneIdNavigationStatus429
 			| PostApiZonesByZoneIdNavigationStatus500
 		>,
 		PostApiZonesByZoneIdNavigationOptions,
@@ -9342,6 +10136,7 @@ export function usePostApiZonesByZoneIdNavigation<TContext>(
 			| PostApiZonesByZoneIdNavigationStatus403
 			| PostApiZonesByZoneIdNavigationStatus404
 			| PostApiZonesByZoneIdNavigationStatus422
+			| PostApiZonesByZoneIdNavigationStatus429
 			| PostApiZonesByZoneIdNavigationStatus500
 		>,
 		PostApiZonesByZoneIdNavigationOptions,
@@ -9360,6 +10155,7 @@ export function usePostApiZonesByZoneIdNavigation<TContext>(
 			| PostApiZonesByZoneIdNavigationStatus403
 			| PostApiZonesByZoneIdNavigationStatus404
 			| PostApiZonesByZoneIdNavigationStatus422
+			| PostApiZonesByZoneIdNavigationStatus429
 			| PostApiZonesByZoneIdNavigationStatus500
 		>,
 		PostApiZonesByZoneIdNavigationOptions,
@@ -9480,6 +10276,7 @@ export function putApiZonesByZoneIdNavigationByNavigationIdMutationOptions<TCont
 			| PutApiZonesByZoneIdNavigationByNavigationIdStatus404
 			| PutApiZonesByZoneIdNavigationByNavigationIdStatus409
 			| PutApiZonesByZoneIdNavigationByNavigationIdStatus422
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus429
 			| PutApiZonesByZoneIdNavigationByNavigationIdStatus500
 		>,
 		PutApiZonesByZoneIdNavigationByNavigationIdOptions,
@@ -9512,6 +10309,7 @@ export function usePutApiZonesByZoneIdNavigationByNavigationId<TContext>(
 				| PutApiZonesByZoneIdNavigationByNavigationIdStatus404
 				| PutApiZonesByZoneIdNavigationByNavigationIdStatus409
 				| PutApiZonesByZoneIdNavigationByNavigationIdStatus422
+				| PutApiZonesByZoneIdNavigationByNavigationIdStatus429
 				| PutApiZonesByZoneIdNavigationByNavigationIdStatus500
 			>,
 			PutApiZonesByZoneIdNavigationByNavigationIdOptions,
@@ -9535,6 +10333,7 @@ export function usePutApiZonesByZoneIdNavigationByNavigationId<TContext>(
 			| PutApiZonesByZoneIdNavigationByNavigationIdStatus404
 			| PutApiZonesByZoneIdNavigationByNavigationIdStatus409
 			| PutApiZonesByZoneIdNavigationByNavigationIdStatus422
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus429
 			| PutApiZonesByZoneIdNavigationByNavigationIdStatus500
 		>,
 		PutApiZonesByZoneIdNavigationByNavigationIdOptions,
@@ -9549,6 +10348,7 @@ export function usePutApiZonesByZoneIdNavigationByNavigationId<TContext>(
 			| PutApiZonesByZoneIdNavigationByNavigationIdStatus404
 			| PutApiZonesByZoneIdNavigationByNavigationIdStatus409
 			| PutApiZonesByZoneIdNavigationByNavigationIdStatus422
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus429
 			| PutApiZonesByZoneIdNavigationByNavigationIdStatus500
 		>,
 		PutApiZonesByZoneIdNavigationByNavigationIdOptions,
@@ -9568,6 +10368,7 @@ export function usePutApiZonesByZoneIdNavigationByNavigationId<TContext>(
 			| PutApiZonesByZoneIdNavigationByNavigationIdStatus404
 			| PutApiZonesByZoneIdNavigationByNavigationIdStatus409
 			| PutApiZonesByZoneIdNavigationByNavigationIdStatus422
+			| PutApiZonesByZoneIdNavigationByNavigationIdStatus429
 			| PutApiZonesByZoneIdNavigationByNavigationIdStatus500
 		>,
 		PutApiZonesByZoneIdNavigationByNavigationIdOptions,
@@ -9589,6 +10390,7 @@ export function deleteApiZonesByZoneIdNavigationByNavigationIdMutationOptions<TC
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus422
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus429
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus500
 		>,
 		DeleteApiZonesByZoneIdNavigationByNavigationIdOptions,
@@ -9620,6 +10422,7 @@ export function useDeleteApiZonesByZoneIdNavigationByNavigationId<TContext>(
 				| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404
 				| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409
 				| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus422
+				| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus429
 				| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus500
 			>,
 			DeleteApiZonesByZoneIdNavigationByNavigationIdOptions,
@@ -9642,6 +10445,7 @@ export function useDeleteApiZonesByZoneIdNavigationByNavigationId<TContext>(
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus422
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus429
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus500
 		>,
 		DeleteApiZonesByZoneIdNavigationByNavigationIdOptions,
@@ -9655,6 +10459,7 @@ export function useDeleteApiZonesByZoneIdNavigationByNavigationId<TContext>(
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus422
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus429
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus500
 		>,
 		DeleteApiZonesByZoneIdNavigationByNavigationIdOptions,
@@ -9673,6 +10478,7 @@ export function useDeleteApiZonesByZoneIdNavigationByNavigationId<TContext>(
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus404
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus409
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus422
+			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus429
 			| DeleteApiZonesByZoneIdNavigationByNavigationIdStatus500
 		>,
 		DeleteApiZonesByZoneIdNavigationByNavigationIdOptions,
@@ -9693,6 +10499,7 @@ export function putApiSeriesBySeriesIdReleasesByReleaseIdMutationOptions<TContex
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus422
+			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus429
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus500
 		>,
 		PutApiSeriesBySeriesIdReleasesByReleaseIdOptions,
@@ -9723,6 +10530,7 @@ export function usePutApiSeriesBySeriesIdReleasesByReleaseId<TContext>(
 				| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 				| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 				| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus422
+				| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus429
 				| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus500
 			>,
 			PutApiSeriesBySeriesIdReleasesByReleaseIdOptions,
@@ -9744,6 +10552,7 @@ export function usePutApiSeriesBySeriesIdReleasesByReleaseId<TContext>(
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus422
+			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus429
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus500
 		>,
 		PutApiSeriesBySeriesIdReleasesByReleaseIdOptions,
@@ -9756,6 +10565,7 @@ export function usePutApiSeriesBySeriesIdReleasesByReleaseId<TContext>(
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus422
+			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus429
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus500
 		>,
 		PutApiSeriesBySeriesIdReleasesByReleaseIdOptions,
@@ -9773,6 +10583,7 @@ export function usePutApiSeriesBySeriesIdReleasesByReleaseId<TContext>(
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus422
+			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus429
 			| PutApiSeriesBySeriesIdReleasesByReleaseIdStatus500
 		>,
 		PutApiSeriesBySeriesIdReleasesByReleaseIdOptions,
@@ -9793,6 +10604,7 @@ export function deleteApiSeriesBySeriesIdReleasesByReleaseIdMutationOptions<TCon
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus422
+			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus429
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus500
 		>,
 		DeleteApiSeriesBySeriesIdReleasesByReleaseIdOptions,
@@ -9822,6 +10634,7 @@ export function useDeleteApiSeriesBySeriesIdReleasesByReleaseId<TContext>(
 				| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 				| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 				| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus422
+				| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus429
 				| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus500
 			>,
 			DeleteApiSeriesBySeriesIdReleasesByReleaseIdOptions,
@@ -9843,6 +10656,7 @@ export function useDeleteApiSeriesBySeriesIdReleasesByReleaseId<TContext>(
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus422
+			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus429
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus500
 		>,
 		DeleteApiSeriesBySeriesIdReleasesByReleaseIdOptions,
@@ -9855,6 +10669,7 @@ export function useDeleteApiSeriesBySeriesIdReleasesByReleaseId<TContext>(
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus422
+			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus429
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus500
 		>,
 		DeleteApiSeriesBySeriesIdReleasesByReleaseIdOptions,
@@ -9872,6 +10687,7 @@ export function useDeleteApiSeriesBySeriesIdReleasesByReleaseId<TContext>(
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus403
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus404
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus422
+			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus429
 			| DeleteApiSeriesBySeriesIdReleasesByReleaseIdStatus500
 		>,
 		DeleteApiSeriesBySeriesIdReleasesByReleaseIdOptions,
@@ -9891,6 +10707,7 @@ export function postApiZonesMutationOptions<TContext = unknown>(
 			| PostApiZonesStatus400
 			| PostApiZonesStatus404
 			| PostApiZonesStatus422
+			| PostApiZonesStatus429
 			| PostApiZonesStatus500
 		>,
 		PostApiZonesOptions,
@@ -9916,6 +10733,7 @@ export function usePostApiZones<TContext>(
 				| PostApiZonesStatus400
 				| PostApiZonesStatus404
 				| PostApiZonesStatus422
+				| PostApiZonesStatus429
 				| PostApiZonesStatus500
 			>,
 			PostApiZonesOptions,
@@ -9934,6 +10752,7 @@ export function usePostApiZones<TContext>(
 			| PostApiZonesStatus400
 			| PostApiZonesStatus404
 			| PostApiZonesStatus422
+			| PostApiZonesStatus429
 			| PostApiZonesStatus500
 		>,
 		PostApiZonesOptions,
@@ -9946,6 +10765,7 @@ export function usePostApiZones<TContext>(
 			| PostApiZonesStatus400
 			| PostApiZonesStatus404
 			| PostApiZonesStatus422
+			| PostApiZonesStatus429
 			| PostApiZonesStatus500
 		>,
 		PostApiZonesOptions,
@@ -9963,6 +10783,7 @@ export function usePostApiZones<TContext>(
 			| PostApiZonesStatus400
 			| PostApiZonesStatus404
 			| PostApiZonesStatus422
+			| PostApiZonesStatus429
 			| PostApiZonesStatus500
 		>,
 		PostApiZonesOptions,
@@ -10082,6 +10903,7 @@ export function postApiSoftwareBySoftwareIdSystemRequirementsMutationOptions<TCo
 			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus403
 			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus404
 			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus422
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus429
 			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus500
 		>,
 		PostApiSoftwareBySoftwareIdSystemRequirementsOptions,
@@ -10113,6 +10935,7 @@ export function usePostApiSoftwareBySoftwareIdSystemRequirements<TContext>(
 				| PostApiSoftwareBySoftwareIdSystemRequirementsStatus403
 				| PostApiSoftwareBySoftwareIdSystemRequirementsStatus404
 				| PostApiSoftwareBySoftwareIdSystemRequirementsStatus422
+				| PostApiSoftwareBySoftwareIdSystemRequirementsStatus429
 				| PostApiSoftwareBySoftwareIdSystemRequirementsStatus500
 			>,
 			PostApiSoftwareBySoftwareIdSystemRequirementsOptions,
@@ -10135,6 +10958,7 @@ export function usePostApiSoftwareBySoftwareIdSystemRequirements<TContext>(
 			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus403
 			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus404
 			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus422
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus429
 			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus500
 		>,
 		PostApiSoftwareBySoftwareIdSystemRequirementsOptions,
@@ -10148,6 +10972,7 @@ export function usePostApiSoftwareBySoftwareIdSystemRequirements<TContext>(
 			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus403
 			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus404
 			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus422
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus429
 			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus500
 		>,
 		PostApiSoftwareBySoftwareIdSystemRequirementsOptions,
@@ -10166,6 +10991,7 @@ export function usePostApiSoftwareBySoftwareIdSystemRequirements<TContext>(
 			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus403
 			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus404
 			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus422
+			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus429
 			| PostApiSoftwareBySoftwareIdSystemRequirementsStatus500
 		>,
 		PostApiSoftwareBySoftwareIdSystemRequirementsOptions,
@@ -10187,6 +11013,7 @@ export function putApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMutat
 			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
 			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429
 			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
 		>,
 		PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
@@ -10218,6 +11045,7 @@ export function usePutApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<T
 				| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 				| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
 				| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+				| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429
 				| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
 			>,
 			PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
@@ -10241,6 +11069,7 @@ export function usePutApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<T
 			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
 			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429
 			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
 		>,
 		PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
@@ -10254,6 +11083,7 @@ export function usePutApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<T
 			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
 			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429
 			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
 		>,
 		PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
@@ -10272,6 +11102,7 @@ export function usePutApiSoftwareBySoftwareIdSystemRequirementsByRequirementId<T
 			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
 			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429
 			| PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
 		>,
 		PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
@@ -10292,6 +11123,7 @@ export function deleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdMu
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
 		>,
 		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
@@ -10321,6 +11153,7 @@ export function useDeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementI
 				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
 				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429
 				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
 			>,
 			DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
@@ -10344,6 +11177,7 @@ export function useDeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementI
 				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
 				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429
 				| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
 			>,
 			DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
@@ -10356,6 +11190,7 @@ export function useDeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementI
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
 		>,
 		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
@@ -10373,6 +11208,7 @@ export function useDeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementI
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus403
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus404
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus422
+			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus429
 			| DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus500
 		>,
 		DeleteApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdOptions,
@@ -10593,6 +11429,7 @@ export function putApiUnitsByIdByUnitIdDocksByKindMutationOptions<TContext = unk
 			| PutApiUnitsByIdByUnitIdDocksByKindStatus404
 			| PutApiUnitsByIdByUnitIdDocksByKindStatus409
 			| PutApiUnitsByIdByUnitIdDocksByKindStatus422
+			| PutApiUnitsByIdByUnitIdDocksByKindStatus429
 			| PutApiUnitsByIdByUnitIdDocksByKindStatus500
 		>,
 		PutApiUnitsByIdByUnitIdDocksByKindOptions,
@@ -10625,6 +11462,7 @@ export function usePutApiUnitsByIdByUnitIdDocksByKind<TContext>(
 				| PutApiUnitsByIdByUnitIdDocksByKindStatus404
 				| PutApiUnitsByIdByUnitIdDocksByKindStatus409
 				| PutApiUnitsByIdByUnitIdDocksByKindStatus422
+				| PutApiUnitsByIdByUnitIdDocksByKindStatus429
 				| PutApiUnitsByIdByUnitIdDocksByKindStatus500
 			>,
 			PutApiUnitsByIdByUnitIdDocksByKindOptions,
@@ -10648,6 +11486,7 @@ export function usePutApiUnitsByIdByUnitIdDocksByKind<TContext>(
 			| PutApiUnitsByIdByUnitIdDocksByKindStatus404
 			| PutApiUnitsByIdByUnitIdDocksByKindStatus409
 			| PutApiUnitsByIdByUnitIdDocksByKindStatus422
+			| PutApiUnitsByIdByUnitIdDocksByKindStatus429
 			| PutApiUnitsByIdByUnitIdDocksByKindStatus500
 		>,
 		PutApiUnitsByIdByUnitIdDocksByKindOptions,
@@ -10662,6 +11501,7 @@ export function usePutApiUnitsByIdByUnitIdDocksByKind<TContext>(
 			| PutApiUnitsByIdByUnitIdDocksByKindStatus404
 			| PutApiUnitsByIdByUnitIdDocksByKindStatus409
 			| PutApiUnitsByIdByUnitIdDocksByKindStatus422
+			| PutApiUnitsByIdByUnitIdDocksByKindStatus429
 			| PutApiUnitsByIdByUnitIdDocksByKindStatus500
 		>,
 		PutApiUnitsByIdByUnitIdDocksByKindOptions,
@@ -10681,6 +11521,7 @@ export function usePutApiUnitsByIdByUnitIdDocksByKind<TContext>(
 			| PutApiUnitsByIdByUnitIdDocksByKindStatus404
 			| PutApiUnitsByIdByUnitIdDocksByKindStatus409
 			| PutApiUnitsByIdByUnitIdDocksByKindStatus422
+			| PutApiUnitsByIdByUnitIdDocksByKindStatus429
 			| PutApiUnitsByIdByUnitIdDocksByKindStatus500
 		>,
 		PutApiUnitsByIdByUnitIdDocksByKindOptions,
@@ -10703,6 +11544,7 @@ export function deleteApiUnitsByIdByUnitIdDocksByKindMutationOptions<TContext = 
 			| DeleteApiUnitsByIdByUnitIdDocksByKindStatus404
 			| DeleteApiUnitsByIdByUnitIdDocksByKindStatus409
 			| DeleteApiUnitsByIdByUnitIdDocksByKindStatus422
+			| DeleteApiUnitsByIdByUnitIdDocksByKindStatus429
 			| DeleteApiUnitsByIdByUnitIdDocksByKindStatus500
 		>,
 		DeleteApiUnitsByIdByUnitIdDocksByKindOptions,
@@ -10735,6 +11577,7 @@ export function useDeleteApiUnitsByIdByUnitIdDocksByKind<TContext>(
 				| DeleteApiUnitsByIdByUnitIdDocksByKindStatus404
 				| DeleteApiUnitsByIdByUnitIdDocksByKindStatus409
 				| DeleteApiUnitsByIdByUnitIdDocksByKindStatus422
+				| DeleteApiUnitsByIdByUnitIdDocksByKindStatus429
 				| DeleteApiUnitsByIdByUnitIdDocksByKindStatus500
 			>,
 			DeleteApiUnitsByIdByUnitIdDocksByKindOptions,
@@ -10758,6 +11601,7 @@ export function useDeleteApiUnitsByIdByUnitIdDocksByKind<TContext>(
 			| DeleteApiUnitsByIdByUnitIdDocksByKindStatus404
 			| DeleteApiUnitsByIdByUnitIdDocksByKindStatus409
 			| DeleteApiUnitsByIdByUnitIdDocksByKindStatus422
+			| DeleteApiUnitsByIdByUnitIdDocksByKindStatus429
 			| DeleteApiUnitsByIdByUnitIdDocksByKindStatus500
 		>,
 		DeleteApiUnitsByIdByUnitIdDocksByKindOptions,
@@ -10772,6 +11616,7 @@ export function useDeleteApiUnitsByIdByUnitIdDocksByKind<TContext>(
 			| DeleteApiUnitsByIdByUnitIdDocksByKindStatus404
 			| DeleteApiUnitsByIdByUnitIdDocksByKindStatus409
 			| DeleteApiUnitsByIdByUnitIdDocksByKindStatus422
+			| DeleteApiUnitsByIdByUnitIdDocksByKindStatus429
 			| DeleteApiUnitsByIdByUnitIdDocksByKindStatus500
 		>,
 		DeleteApiUnitsByIdByUnitIdDocksByKindOptions,
@@ -10791,6 +11636,7 @@ export function useDeleteApiUnitsByIdByUnitIdDocksByKind<TContext>(
 			| DeleteApiUnitsByIdByUnitIdDocksByKindStatus404
 			| DeleteApiUnitsByIdByUnitIdDocksByKindStatus409
 			| DeleteApiUnitsByIdByUnitIdDocksByKindStatus422
+			| DeleteApiUnitsByIdByUnitIdDocksByKindStatus429
 			| DeleteApiUnitsByIdByUnitIdDocksByKindStatus500
 		>,
 		DeleteApiUnitsByIdByUnitIdDocksByKindOptions,
@@ -10927,6 +11773,7 @@ export function postApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreM
 			| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus404
 			| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus409
 			| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus422
+			| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus429
 			| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus500
 		>,
 		PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreOptions,
@@ -10959,6 +11806,7 @@ export function usePostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdResto
 				| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus404
 				| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus409
 				| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus422
+				| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus429
 				| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus500
 			>,
 			PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreOptions,
@@ -10984,6 +11832,7 @@ export function usePostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdResto
 				| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus404
 				| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus409
 				| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus422
+				| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus429
 				| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus500
 			>,
 			PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreOptions,
@@ -10998,6 +11847,7 @@ export function usePostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdResto
 			| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus404
 			| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus409
 			| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus422
+			| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus429
 			| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus500
 		>,
 		PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreOptions,
@@ -11017,6 +11867,7 @@ export function usePostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdResto
 			| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus404
 			| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus409
 			| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus422
+			| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus429
 			| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus500
 		>,
 		PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreOptions,
@@ -11034,7 +11885,9 @@ export function getApiUsersMeQueryOptions(
 	const queryKey = getApiUsersMeQueryKey();
 	return queryOptions<
 		GetApiUsersMeStatus200,
-		ResponseErrorConfig<GetApiUsersMeStatus404 | GetApiUsersMeStatus500>,
+		ResponseErrorConfig<
+			GetApiUsersMeStatus404 | GetApiUsersMeStatus429 | GetApiUsersMeStatus500
+		>,
 		GetApiUsersMeStatus200,
 		typeof queryKey
 	>({
@@ -11063,7 +11916,9 @@ export function useGetApiUsersMe<
 		query?: Partial<
 			QueryObserverOptions<
 				GetApiUsersMeStatus200,
-				ResponseErrorConfig<GetApiUsersMeStatus404 | GetApiUsersMeStatus500>,
+				ResponseErrorConfig<
+					GetApiUsersMeStatus404 | GetApiUsersMeStatus429 | GetApiUsersMeStatus500
+				>,
 				TData,
 				TQueryData,
 				TQueryKey
@@ -11085,7 +11940,9 @@ export function useGetApiUsersMe<
 		queryClient,
 	) as UseQueryResult<
 		TData,
-		ResponseErrorConfig<GetApiUsersMeStatus404 | GetApiUsersMeStatus500>
+		ResponseErrorConfig<
+			GetApiUsersMeStatus404 | GetApiUsersMeStatus429 | GetApiUsersMeStatus500
+		>
 	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
@@ -11106,6 +11963,7 @@ export function patchApiUsersMeMutationOptions<TContext = unknown>(
 			| PatchApiUsersMeStatus404
 			| PatchApiUsersMeStatus409
 			| PatchApiUsersMeStatus422
+			| PatchApiUsersMeStatus429
 			| PatchApiUsersMeStatus500
 		>,
 		PatchApiUsersMeOptions,
@@ -11132,6 +11990,7 @@ export function usePatchApiUsersMe<TContext>(
 				| PatchApiUsersMeStatus404
 				| PatchApiUsersMeStatus409
 				| PatchApiUsersMeStatus422
+				| PatchApiUsersMeStatus429
 				| PatchApiUsersMeStatus500
 			>,
 			PatchApiUsersMeOptions,
@@ -11151,6 +12010,7 @@ export function usePatchApiUsersMe<TContext>(
 			| PatchApiUsersMeStatus404
 			| PatchApiUsersMeStatus409
 			| PatchApiUsersMeStatus422
+			| PatchApiUsersMeStatus429
 			| PatchApiUsersMeStatus500
 		>,
 		PatchApiUsersMeOptions,
@@ -11164,6 +12024,7 @@ export function usePatchApiUsersMe<TContext>(
 			| PatchApiUsersMeStatus404
 			| PatchApiUsersMeStatus409
 			| PatchApiUsersMeStatus422
+			| PatchApiUsersMeStatus429
 			| PatchApiUsersMeStatus500
 		>,
 		PatchApiUsersMeOptions,
@@ -11182,6 +12043,7 @@ export function usePatchApiUsersMe<TContext>(
 			| PatchApiUsersMeStatus404
 			| PatchApiUsersMeStatus409
 			| PatchApiUsersMeStatus422
+			| PatchApiUsersMeStatus429
 			| PatchApiUsersMeStatus500
 		>,
 		PatchApiUsersMeOptions,
@@ -11200,7 +12062,11 @@ export function getApiUsersMePreferencesQueryOptions(
 	const queryKey = getApiUsersMePreferencesQueryKey();
 	return queryOptions<
 		GetApiUsersMePreferencesStatus200,
-		ResponseErrorConfig<GetApiUsersMePreferencesStatus404 | GetApiUsersMePreferencesStatus500>,
+		ResponseErrorConfig<
+			| GetApiUsersMePreferencesStatus404
+			| GetApiUsersMePreferencesStatus429
+			| GetApiUsersMePreferencesStatus500
+		>,
 		GetApiUsersMePreferencesStatus200,
 		typeof queryKey
 	>({
@@ -11230,7 +12096,9 @@ export function useGetApiUsersMePreferences<
 			QueryObserverOptions<
 				GetApiUsersMePreferencesStatus200,
 				ResponseErrorConfig<
-					GetApiUsersMePreferencesStatus404 | GetApiUsersMePreferencesStatus500
+					| GetApiUsersMePreferencesStatus404
+					| GetApiUsersMePreferencesStatus429
+					| GetApiUsersMePreferencesStatus500
 				>,
 				TData,
 				TQueryData,
@@ -11253,7 +12121,11 @@ export function useGetApiUsersMePreferences<
 		queryClient,
 	) as UseQueryResult<
 		TData,
-		ResponseErrorConfig<GetApiUsersMePreferencesStatus404 | GetApiUsersMePreferencesStatus500>
+		ResponseErrorConfig<
+			| GetApiUsersMePreferencesStatus404
+			| GetApiUsersMePreferencesStatus429
+			| GetApiUsersMePreferencesStatus500
+		>
 	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
@@ -11273,6 +12145,7 @@ export function patchApiUsersMePreferencesMutationOptions<TContext = unknown>(
 		ResponseErrorConfig<
 			| PatchApiUsersMePreferencesStatus404
 			| PatchApiUsersMePreferencesStatus422
+			| PatchApiUsersMePreferencesStatus429
 			| PatchApiUsersMePreferencesStatus500
 		>,
 		PatchApiUsersMePreferencesOptions,
@@ -11301,6 +12174,7 @@ export function usePatchApiUsersMePreferences<TContext>(
 			ResponseErrorConfig<
 				| PatchApiUsersMePreferencesStatus404
 				| PatchApiUsersMePreferencesStatus422
+				| PatchApiUsersMePreferencesStatus429
 				| PatchApiUsersMePreferencesStatus500
 			>,
 			PatchApiUsersMePreferencesOptions,
@@ -11318,6 +12192,7 @@ export function usePatchApiUsersMePreferences<TContext>(
 		ResponseErrorConfig<
 			| PatchApiUsersMePreferencesStatus404
 			| PatchApiUsersMePreferencesStatus422
+			| PatchApiUsersMePreferencesStatus429
 			| PatchApiUsersMePreferencesStatus500
 		>,
 		PatchApiUsersMePreferencesOptions,
@@ -11329,6 +12204,7 @@ export function usePatchApiUsersMePreferences<TContext>(
 		ResponseErrorConfig<
 			| PatchApiUsersMePreferencesStatus404
 			| PatchApiUsersMePreferencesStatus422
+			| PatchApiUsersMePreferencesStatus429
 			| PatchApiUsersMePreferencesStatus500
 		>,
 		PatchApiUsersMePreferencesOptions,
@@ -11345,6 +12221,7 @@ export function usePatchApiUsersMePreferences<TContext>(
 		ResponseErrorConfig<
 			| PatchApiUsersMePreferencesStatus404
 			| PatchApiUsersMePreferencesStatus422
+			| PatchApiUsersMePreferencesStatus429
 			| PatchApiUsersMePreferencesStatus500
 		>,
 		PatchApiUsersMePreferencesOptions,
@@ -11365,6 +12242,7 @@ export function putApiUsersMePreferencesMutationOptions<TContext = unknown>(
 			| PutApiUsersMePreferencesStatus403
 			| PutApiUsersMePreferencesStatus404
 			| PutApiUsersMePreferencesStatus422
+			| PutApiUsersMePreferencesStatus429
 			| PutApiUsersMePreferencesStatus500
 		>,
 		PutApiUsersMePreferencesOptions,
@@ -11394,6 +12272,7 @@ export function usePutApiUsersMePreferences<TContext>(
 				| PutApiUsersMePreferencesStatus403
 				| PutApiUsersMePreferencesStatus404
 				| PutApiUsersMePreferencesStatus422
+				| PutApiUsersMePreferencesStatus429
 				| PutApiUsersMePreferencesStatus500
 			>,
 			PutApiUsersMePreferencesOptions,
@@ -11412,6 +12291,7 @@ export function usePutApiUsersMePreferences<TContext>(
 			| PutApiUsersMePreferencesStatus403
 			| PutApiUsersMePreferencesStatus404
 			| PutApiUsersMePreferencesStatus422
+			| PutApiUsersMePreferencesStatus429
 			| PutApiUsersMePreferencesStatus500
 		>,
 		PutApiUsersMePreferencesOptions,
@@ -11424,6 +12304,7 @@ export function usePutApiUsersMePreferences<TContext>(
 			| PutApiUsersMePreferencesStatus403
 			| PutApiUsersMePreferencesStatus404
 			| PutApiUsersMePreferencesStatus422
+			| PutApiUsersMePreferencesStatus429
 			| PutApiUsersMePreferencesStatus500
 		>,
 		PutApiUsersMePreferencesOptions,
@@ -11441,6 +12322,7 @@ export function usePutApiUsersMePreferences<TContext>(
 			| PutApiUsersMePreferencesStatus403
 			| PutApiUsersMePreferencesStatus404
 			| PutApiUsersMePreferencesStatus422
+			| PutApiUsersMePreferencesStatus429
 			| PutApiUsersMePreferencesStatus500
 		>,
 		PutApiUsersMePreferencesOptions,
@@ -11465,6 +12347,7 @@ export function getApiUsersMeFollowingQueryOptions(
 		ResponseErrorConfig<
 			| GetApiUsersMeFollowingStatus400
 			| GetApiUsersMeFollowingStatus422
+			| GetApiUsersMeFollowingStatus429
 			| GetApiUsersMeFollowingStatus500
 		>,
 		GetApiUsersMeFollowingStatus200,
@@ -11505,6 +12388,7 @@ export function useGetApiUsersMeFollowing<
 				ResponseErrorConfig<
 					| GetApiUsersMeFollowingStatus400
 					| GetApiUsersMeFollowingStatus422
+					| GetApiUsersMeFollowingStatus429
 					| GetApiUsersMeFollowingStatus500
 				>,
 				TData,
@@ -11532,6 +12416,7 @@ export function useGetApiUsersMeFollowing<
 		ResponseErrorConfig<
 			| GetApiUsersMeFollowingStatus400
 			| GetApiUsersMeFollowingStatus422
+			| GetApiUsersMeFollowingStatus429
 			| GetApiUsersMeFollowingStatus500
 		>
 	> & { queryKey: TQueryKey };
@@ -11561,6 +12446,7 @@ export function getApiUsersMeFollowingByUnitIdQueryOptions(
 			| GetApiUsersMeFollowingByUnitIdStatus404
 			| GetApiUsersMeFollowingByUnitIdStatus409
 			| GetApiUsersMeFollowingByUnitIdStatus422
+			| GetApiUsersMeFollowingByUnitIdStatus429
 			| GetApiUsersMeFollowingByUnitIdStatus500
 		>,
 		GetApiUsersMeFollowingByUnitIdStatus200,
@@ -11603,6 +12489,7 @@ export function useGetApiUsersMeFollowingByUnitId<
 					| GetApiUsersMeFollowingByUnitIdStatus404
 					| GetApiUsersMeFollowingByUnitIdStatus409
 					| GetApiUsersMeFollowingByUnitIdStatus422
+					| GetApiUsersMeFollowingByUnitIdStatus429
 					| GetApiUsersMeFollowingByUnitIdStatus500
 				>,
 				TData,
@@ -11632,6 +12519,7 @@ export function useGetApiUsersMeFollowingByUnitId<
 			| GetApiUsersMeFollowingByUnitIdStatus404
 			| GetApiUsersMeFollowingByUnitIdStatus409
 			| GetApiUsersMeFollowingByUnitIdStatus422
+			| GetApiUsersMeFollowingByUnitIdStatus429
 			| GetApiUsersMeFollowingByUnitIdStatus500
 		>
 	> & { queryKey: TQueryKey };
@@ -11654,6 +12542,7 @@ export function putApiUsersMeFollowingByUnitIdMutationOptions<TContext = unknown
 			| PutApiUsersMeFollowingByUnitIdStatus404
 			| PutApiUsersMeFollowingByUnitIdStatus409
 			| PutApiUsersMeFollowingByUnitIdStatus422
+			| PutApiUsersMeFollowingByUnitIdStatus429
 			| PutApiUsersMeFollowingByUnitIdStatus500
 		>,
 		PutApiUsersMeFollowingByUnitIdOptions,
@@ -11683,6 +12572,7 @@ export function usePutApiUsersMeFollowingByUnitId<TContext>(
 				| PutApiUsersMeFollowingByUnitIdStatus404
 				| PutApiUsersMeFollowingByUnitIdStatus409
 				| PutApiUsersMeFollowingByUnitIdStatus422
+				| PutApiUsersMeFollowingByUnitIdStatus429
 				| PutApiUsersMeFollowingByUnitIdStatus500
 			>,
 			PutApiUsersMeFollowingByUnitIdOptions,
@@ -11701,6 +12591,7 @@ export function usePutApiUsersMeFollowingByUnitId<TContext>(
 			| PutApiUsersMeFollowingByUnitIdStatus404
 			| PutApiUsersMeFollowingByUnitIdStatus409
 			| PutApiUsersMeFollowingByUnitIdStatus422
+			| PutApiUsersMeFollowingByUnitIdStatus429
 			| PutApiUsersMeFollowingByUnitIdStatus500
 		>,
 		PutApiUsersMeFollowingByUnitIdOptions,
@@ -11713,6 +12604,7 @@ export function usePutApiUsersMeFollowingByUnitId<TContext>(
 			| PutApiUsersMeFollowingByUnitIdStatus404
 			| PutApiUsersMeFollowingByUnitIdStatus409
 			| PutApiUsersMeFollowingByUnitIdStatus422
+			| PutApiUsersMeFollowingByUnitIdStatus429
 			| PutApiUsersMeFollowingByUnitIdStatus500
 		>,
 		PutApiUsersMeFollowingByUnitIdOptions,
@@ -11730,6 +12622,7 @@ export function usePutApiUsersMeFollowingByUnitId<TContext>(
 			| PutApiUsersMeFollowingByUnitIdStatus404
 			| PutApiUsersMeFollowingByUnitIdStatus409
 			| PutApiUsersMeFollowingByUnitIdStatus422
+			| PutApiUsersMeFollowingByUnitIdStatus429
 			| PutApiUsersMeFollowingByUnitIdStatus500
 		>,
 		PutApiUsersMeFollowingByUnitIdOptions,
@@ -11747,7 +12640,9 @@ export function deleteApiUsersMeFollowingByUnitIdMutationOptions<TContext = unkn
 	return mutationOptions<
 		DeleteApiUsersMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
-			DeleteApiUsersMeFollowingByUnitIdStatus422 | DeleteApiUsersMeFollowingByUnitIdStatus500
+			| DeleteApiUsersMeFollowingByUnitIdStatus422
+			| DeleteApiUsersMeFollowingByUnitIdStatus429
+			| DeleteApiUsersMeFollowingByUnitIdStatus500
 		>,
 		DeleteApiUsersMeFollowingByUnitIdOptions,
 		TContext
@@ -11774,6 +12669,7 @@ export function useDeleteApiUsersMeFollowingByUnitId<TContext>(
 			DeleteApiUsersMeFollowingByUnitIdStatus200,
 			ResponseErrorConfig<
 				| DeleteApiUsersMeFollowingByUnitIdStatus422
+				| DeleteApiUsersMeFollowingByUnitIdStatus429
 				| DeleteApiUsersMeFollowingByUnitIdStatus500
 			>,
 			DeleteApiUsersMeFollowingByUnitIdOptions,
@@ -11792,7 +12688,9 @@ export function useDeleteApiUsersMeFollowingByUnitId<TContext>(
 	) as UseMutationOptions<
 		DeleteApiUsersMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
-			DeleteApiUsersMeFollowingByUnitIdStatus422 | DeleteApiUsersMeFollowingByUnitIdStatus500
+			| DeleteApiUsersMeFollowingByUnitIdStatus422
+			| DeleteApiUsersMeFollowingByUnitIdStatus429
+			| DeleteApiUsersMeFollowingByUnitIdStatus500
 		>,
 		DeleteApiUsersMeFollowingByUnitIdOptions,
 		TContext
@@ -11801,7 +12699,9 @@ export function useDeleteApiUsersMeFollowingByUnitId<TContext>(
 	return useMutation<
 		DeleteApiUsersMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
-			DeleteApiUsersMeFollowingByUnitIdStatus422 | DeleteApiUsersMeFollowingByUnitIdStatus500
+			| DeleteApiUsersMeFollowingByUnitIdStatus422
+			| DeleteApiUsersMeFollowingByUnitIdStatus429
+			| DeleteApiUsersMeFollowingByUnitIdStatus500
 		>,
 		DeleteApiUsersMeFollowingByUnitIdOptions,
 		TContext
@@ -11815,7 +12715,9 @@ export function useDeleteApiUsersMeFollowingByUnitId<TContext>(
 	) as UseMutationResult<
 		DeleteApiUsersMeFollowingByUnitIdStatus200,
 		ResponseErrorConfig<
-			DeleteApiUsersMeFollowingByUnitIdStatus422 | DeleteApiUsersMeFollowingByUnitIdStatus500
+			| DeleteApiUsersMeFollowingByUnitIdStatus422
+			| DeleteApiUsersMeFollowingByUnitIdStatus429
+			| DeleteApiUsersMeFollowingByUnitIdStatus500
 		>,
 		DeleteApiUsersMeFollowingByUnitIdOptions,
 		TContext
@@ -11834,6 +12736,7 @@ export function patchApiUsersMeFollowingByUnitIdMutationOptions<TContext = unkno
 		ResponseErrorConfig<
 			| PatchApiUsersMeFollowingByUnitIdStatus404
 			| PatchApiUsersMeFollowingByUnitIdStatus422
+			| PatchApiUsersMeFollowingByUnitIdStatus429
 			| PatchApiUsersMeFollowingByUnitIdStatus500
 		>,
 		PatchApiUsersMeFollowingByUnitIdOptions,
@@ -11863,6 +12766,7 @@ export function usePatchApiUsersMeFollowingByUnitId<TContext>(
 			ResponseErrorConfig<
 				| PatchApiUsersMeFollowingByUnitIdStatus404
 				| PatchApiUsersMeFollowingByUnitIdStatus422
+				| PatchApiUsersMeFollowingByUnitIdStatus429
 				| PatchApiUsersMeFollowingByUnitIdStatus500
 			>,
 			PatchApiUsersMeFollowingByUnitIdOptions,
@@ -11883,6 +12787,7 @@ export function usePatchApiUsersMeFollowingByUnitId<TContext>(
 		ResponseErrorConfig<
 			| PatchApiUsersMeFollowingByUnitIdStatus404
 			| PatchApiUsersMeFollowingByUnitIdStatus422
+			| PatchApiUsersMeFollowingByUnitIdStatus429
 			| PatchApiUsersMeFollowingByUnitIdStatus500
 		>,
 		PatchApiUsersMeFollowingByUnitIdOptions,
@@ -11894,6 +12799,7 @@ export function usePatchApiUsersMeFollowingByUnitId<TContext>(
 		ResponseErrorConfig<
 			| PatchApiUsersMeFollowingByUnitIdStatus404
 			| PatchApiUsersMeFollowingByUnitIdStatus422
+			| PatchApiUsersMeFollowingByUnitIdStatus429
 			| PatchApiUsersMeFollowingByUnitIdStatus500
 		>,
 		PatchApiUsersMeFollowingByUnitIdOptions,
@@ -11910,6 +12816,7 @@ export function usePatchApiUsersMeFollowingByUnitId<TContext>(
 		ResponseErrorConfig<
 			| PatchApiUsersMeFollowingByUnitIdStatus404
 			| PatchApiUsersMeFollowingByUnitIdStatus422
+			| PatchApiUsersMeFollowingByUnitIdStatus429
 			| PatchApiUsersMeFollowingByUnitIdStatus500
 		>,
 		PatchApiUsersMeFollowingByUnitIdOptions,
@@ -12007,7 +12914,7 @@ export function getApiUsersMeBlocksQueryOptions(
 	const queryKey = getApiUsersMeBlocksQueryKey();
 	return queryOptions<
 		GetApiUsersMeBlocksStatus200,
-		ResponseErrorConfig<GetApiUsersMeBlocksStatus500>,
+		ResponseErrorConfig<GetApiUsersMeBlocksStatus429 | GetApiUsersMeBlocksStatus500>,
 		GetApiUsersMeBlocksStatus200,
 		typeof queryKey
 	>({
@@ -12036,7 +12943,7 @@ export function useGetApiUsersMeBlocks<
 		query?: Partial<
 			QueryObserverOptions<
 				GetApiUsersMeBlocksStatus200,
-				ResponseErrorConfig<GetApiUsersMeBlocksStatus500>,
+				ResponseErrorConfig<GetApiUsersMeBlocksStatus429 | GetApiUsersMeBlocksStatus500>,
 				TData,
 				TQueryData,
 				TQueryKey
@@ -12056,9 +12963,10 @@ export function useGetApiUsersMeBlocks<
 			queryKey,
 		} as unknown as QueryObserverOptions,
 		queryClient,
-	) as UseQueryResult<TData, ResponseErrorConfig<GetApiUsersMeBlocksStatus500>> & {
-		queryKey: TQueryKey;
-	};
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<GetApiUsersMeBlocksStatus429 | GetApiUsersMeBlocksStatus500>
+	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
 
@@ -12077,6 +12985,7 @@ export function putApiUsersByIdBlockMutationOptions<TContext = unknown>(
 			| PutApiUsersByIdBlockStatus404
 			| PutApiUsersByIdBlockStatus409
 			| PutApiUsersByIdBlockStatus422
+			| PutApiUsersByIdBlockStatus429
 			| PutApiUsersByIdBlockStatus500
 		>,
 		PutApiUsersByIdBlockOptions,
@@ -12102,6 +13011,7 @@ export function usePutApiUsersByIdBlock<TContext>(
 				| PutApiUsersByIdBlockStatus404
 				| PutApiUsersByIdBlockStatus409
 				| PutApiUsersByIdBlockStatus422
+				| PutApiUsersByIdBlockStatus429
 				| PutApiUsersByIdBlockStatus500
 			>,
 			PutApiUsersByIdBlockOptions,
@@ -12120,6 +13030,7 @@ export function usePutApiUsersByIdBlock<TContext>(
 			| PutApiUsersByIdBlockStatus404
 			| PutApiUsersByIdBlockStatus409
 			| PutApiUsersByIdBlockStatus422
+			| PutApiUsersByIdBlockStatus429
 			| PutApiUsersByIdBlockStatus500
 		>,
 		PutApiUsersByIdBlockOptions,
@@ -12132,6 +13043,7 @@ export function usePutApiUsersByIdBlock<TContext>(
 			| PutApiUsersByIdBlockStatus404
 			| PutApiUsersByIdBlockStatus409
 			| PutApiUsersByIdBlockStatus422
+			| PutApiUsersByIdBlockStatus429
 			| PutApiUsersByIdBlockStatus500
 		>,
 		PutApiUsersByIdBlockOptions,
@@ -12149,6 +13061,7 @@ export function usePutApiUsersByIdBlock<TContext>(
 			| PutApiUsersByIdBlockStatus404
 			| PutApiUsersByIdBlockStatus409
 			| PutApiUsersByIdBlockStatus422
+			| PutApiUsersByIdBlockStatus429
 			| PutApiUsersByIdBlockStatus500
 		>,
 		PutApiUsersByIdBlockOptions,
@@ -12164,7 +13077,11 @@ export function deleteApiUsersByIdBlockMutationOptions<TContext = unknown>(
 	const mutationKey = deleteApiUsersByIdBlockMutationKey();
 	return mutationOptions<
 		DeleteApiUsersByIdBlockStatus200,
-		ResponseErrorConfig<DeleteApiUsersByIdBlockStatus422 | DeleteApiUsersByIdBlockStatus500>,
+		ResponseErrorConfig<
+			| DeleteApiUsersByIdBlockStatus422
+			| DeleteApiUsersByIdBlockStatus429
+			| DeleteApiUsersByIdBlockStatus500
+		>,
 		DeleteApiUsersByIdBlockOptions,
 		TContext
 	>({
@@ -12185,7 +13102,9 @@ export function useDeleteApiUsersByIdBlock<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiUsersByIdBlockStatus200,
 			ResponseErrorConfig<
-				DeleteApiUsersByIdBlockStatus422 | DeleteApiUsersByIdBlockStatus500
+				| DeleteApiUsersByIdBlockStatus422
+				| DeleteApiUsersByIdBlockStatus429
+				| DeleteApiUsersByIdBlockStatus500
 			>,
 			DeleteApiUsersByIdBlockOptions,
 			TContext
@@ -12199,14 +13118,22 @@ export function useDeleteApiUsersByIdBlock<TContext>(
 
 	const baseOptions = deleteApiUsersByIdBlockMutationOptions(config) as UseMutationOptions<
 		DeleteApiUsersByIdBlockStatus200,
-		ResponseErrorConfig<DeleteApiUsersByIdBlockStatus422 | DeleteApiUsersByIdBlockStatus500>,
+		ResponseErrorConfig<
+			| DeleteApiUsersByIdBlockStatus422
+			| DeleteApiUsersByIdBlockStatus429
+			| DeleteApiUsersByIdBlockStatus500
+		>,
 		DeleteApiUsersByIdBlockOptions,
 		TContext
 	>;
 
 	return useMutation<
 		DeleteApiUsersByIdBlockStatus200,
-		ResponseErrorConfig<DeleteApiUsersByIdBlockStatus422 | DeleteApiUsersByIdBlockStatus500>,
+		ResponseErrorConfig<
+			| DeleteApiUsersByIdBlockStatus422
+			| DeleteApiUsersByIdBlockStatus429
+			| DeleteApiUsersByIdBlockStatus500
+		>,
 		DeleteApiUsersByIdBlockOptions,
 		TContext
 	>(
@@ -12218,7 +13145,11 @@ export function useDeleteApiUsersByIdBlock<TContext>(
 		queryClient,
 	) as UseMutationResult<
 		DeleteApiUsersByIdBlockStatus200,
-		ResponseErrorConfig<DeleteApiUsersByIdBlockStatus422 | DeleteApiUsersByIdBlockStatus500>,
+		ResponseErrorConfig<
+			| DeleteApiUsersByIdBlockStatus422
+			| DeleteApiUsersByIdBlockStatus429
+			| DeleteApiUsersByIdBlockStatus500
+		>,
 		DeleteApiUsersByIdBlockOptions,
 		TContext
 	>;
@@ -12544,6 +13475,7 @@ export function replaceOwnProfileSlugAddressMutationOptions<TContext = unknown>(
 			| ReplaceOwnProfileSlugAddressStatus404
 			| ReplaceOwnProfileSlugAddressStatus409
 			| ReplaceOwnProfileSlugAddressStatus422
+			| ReplaceOwnProfileSlugAddressStatus429
 			| ReplaceOwnProfileSlugAddressStatus500
 		>,
 		ReplaceOwnProfileSlugAddressOptions,
@@ -12577,6 +13509,7 @@ export function useReplaceOwnProfileSlugAddress<TContext>(
 				| ReplaceOwnProfileSlugAddressStatus404
 				| ReplaceOwnProfileSlugAddressStatus409
 				| ReplaceOwnProfileSlugAddressStatus422
+				| ReplaceOwnProfileSlugAddressStatus429
 				| ReplaceOwnProfileSlugAddressStatus500
 			>,
 			ReplaceOwnProfileSlugAddressOptions,
@@ -12598,6 +13531,7 @@ export function useReplaceOwnProfileSlugAddress<TContext>(
 			| ReplaceOwnProfileSlugAddressStatus404
 			| ReplaceOwnProfileSlugAddressStatus409
 			| ReplaceOwnProfileSlugAddressStatus422
+			| ReplaceOwnProfileSlugAddressStatus429
 			| ReplaceOwnProfileSlugAddressStatus500
 		>,
 		ReplaceOwnProfileSlugAddressOptions,
@@ -12613,6 +13547,7 @@ export function useReplaceOwnProfileSlugAddress<TContext>(
 			| ReplaceOwnProfileSlugAddressStatus404
 			| ReplaceOwnProfileSlugAddressStatus409
 			| ReplaceOwnProfileSlugAddressStatus422
+			| ReplaceOwnProfileSlugAddressStatus429
 			| ReplaceOwnProfileSlugAddressStatus500
 		>,
 		ReplaceOwnProfileSlugAddressOptions,
@@ -12633,6 +13568,7 @@ export function useReplaceOwnProfileSlugAddress<TContext>(
 			| ReplaceOwnProfileSlugAddressStatus404
 			| ReplaceOwnProfileSlugAddressStatus409
 			| ReplaceOwnProfileSlugAddressStatus422
+			| ReplaceOwnProfileSlugAddressStatus429
 			| ReplaceOwnProfileSlugAddressStatus500
 		>,
 		ReplaceOwnProfileSlugAddressOptions,
@@ -13387,6 +14323,7 @@ export function postApiUnitsByTypeMutationOptions<TContext = unknown>(
 			| PostApiUnitsByTypeStatus403
 			| PostApiUnitsByTypeStatus404
 			| PostApiUnitsByTypeStatus422
+			| PostApiUnitsByTypeStatus429
 			| PostApiUnitsByTypeStatus500
 		>,
 		PostApiUnitsByTypeOptions,
@@ -13418,6 +14355,7 @@ export function usePostApiUnitsByType<TContext>(
 				| PostApiUnitsByTypeStatus403
 				| PostApiUnitsByTypeStatus404
 				| PostApiUnitsByTypeStatus422
+				| PostApiUnitsByTypeStatus429
 				| PostApiUnitsByTypeStatus500
 			>,
 			PostApiUnitsByTypeOptions,
@@ -13437,6 +14375,7 @@ export function usePostApiUnitsByType<TContext>(
 			| PostApiUnitsByTypeStatus403
 			| PostApiUnitsByTypeStatus404
 			| PostApiUnitsByTypeStatus422
+			| PostApiUnitsByTypeStatus429
 			| PostApiUnitsByTypeStatus500
 		>,
 		PostApiUnitsByTypeOptions,
@@ -13450,6 +14389,7 @@ export function usePostApiUnitsByType<TContext>(
 			| PostApiUnitsByTypeStatus403
 			| PostApiUnitsByTypeStatus404
 			| PostApiUnitsByTypeStatus422
+			| PostApiUnitsByTypeStatus429
 			| PostApiUnitsByTypeStatus500
 		>,
 		PostApiUnitsByTypeOptions,
@@ -13468,6 +14408,7 @@ export function usePostApiUnitsByType<TContext>(
 			| PostApiUnitsByTypeStatus403
 			| PostApiUnitsByTypeStatus404
 			| PostApiUnitsByTypeStatus422
+			| PostApiUnitsByTypeStatus429
 			| PostApiUnitsByTypeStatus500
 		>,
 		PostApiUnitsByTypeOptions,
@@ -13585,6 +14526,7 @@ export function patchApiUnitsByTypeByUnitIdMutationOptions<TContext = unknown>(
 			| PatchApiUnitsByTypeByUnitIdStatus404
 			| PatchApiUnitsByTypeByUnitIdStatus409
 			| PatchApiUnitsByTypeByUnitIdStatus422
+			| PatchApiUnitsByTypeByUnitIdStatus429
 			| PatchApiUnitsByTypeByUnitIdStatus500
 		>,
 		PatchApiUnitsByTypeByUnitIdOptions,
@@ -13618,6 +14560,7 @@ export function usePatchApiUnitsByTypeByUnitId<TContext>(
 				| PatchApiUnitsByTypeByUnitIdStatus404
 				| PatchApiUnitsByTypeByUnitIdStatus409
 				| PatchApiUnitsByTypeByUnitIdStatus422
+				| PatchApiUnitsByTypeByUnitIdStatus429
 				| PatchApiUnitsByTypeByUnitIdStatus500
 			>,
 			PatchApiUnitsByTypeByUnitIdOptions,
@@ -13639,6 +14582,7 @@ export function usePatchApiUnitsByTypeByUnitId<TContext>(
 			| PatchApiUnitsByTypeByUnitIdStatus404
 			| PatchApiUnitsByTypeByUnitIdStatus409
 			| PatchApiUnitsByTypeByUnitIdStatus422
+			| PatchApiUnitsByTypeByUnitIdStatus429
 			| PatchApiUnitsByTypeByUnitIdStatus500
 		>,
 		PatchApiUnitsByTypeByUnitIdOptions,
@@ -13654,6 +14598,7 @@ export function usePatchApiUnitsByTypeByUnitId<TContext>(
 			| PatchApiUnitsByTypeByUnitIdStatus404
 			| PatchApiUnitsByTypeByUnitIdStatus409
 			| PatchApiUnitsByTypeByUnitIdStatus422
+			| PatchApiUnitsByTypeByUnitIdStatus429
 			| PatchApiUnitsByTypeByUnitIdStatus500
 		>,
 		PatchApiUnitsByTypeByUnitIdOptions,
@@ -13674,6 +14619,7 @@ export function usePatchApiUnitsByTypeByUnitId<TContext>(
 			| PatchApiUnitsByTypeByUnitIdStatus404
 			| PatchApiUnitsByTypeByUnitIdStatus409
 			| PatchApiUnitsByTypeByUnitIdStatus422
+			| PatchApiUnitsByTypeByUnitIdStatus429
 			| PatchApiUnitsByTypeByUnitIdStatus500
 		>,
 		PatchApiUnitsByTypeByUnitIdOptions,
@@ -13695,6 +14641,7 @@ export function deleteApiUnitsByTypeByUnitIdMutationOptions<TContext = unknown>(
 			| DeleteApiUnitsByTypeByUnitIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdOptions,
@@ -13725,6 +14672,7 @@ export function useDeleteApiUnitsByTypeByUnitId<TContext>(
 				| DeleteApiUnitsByTypeByUnitIdStatus403
 				| DeleteApiUnitsByTypeByUnitIdStatus404
 				| DeleteApiUnitsByTypeByUnitIdStatus422
+				| DeleteApiUnitsByTypeByUnitIdStatus429
 				| DeleteApiUnitsByTypeByUnitIdStatus500
 			>,
 			DeleteApiUnitsByTypeByUnitIdOptions,
@@ -13744,6 +14692,7 @@ export function useDeleteApiUnitsByTypeByUnitId<TContext>(
 			| DeleteApiUnitsByTypeByUnitIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdOptions,
@@ -13757,6 +14706,7 @@ export function useDeleteApiUnitsByTypeByUnitId<TContext>(
 			| DeleteApiUnitsByTypeByUnitIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdOptions,
@@ -13775,6 +14725,7 @@ export function useDeleteApiUnitsByTypeByUnitId<TContext>(
 			| DeleteApiUnitsByTypeByUnitIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdOptions,
@@ -13797,6 +14748,7 @@ export function patchApiUnitsByTypeByUnitIdVariantContextMutationOptions<TContex
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus404
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus409
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus422
+			| PatchApiUnitsByTypeByUnitIdVariantContextStatus429
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus500
 		>,
 		PatchApiUnitsByTypeByUnitIdVariantContextOptions,
@@ -13829,6 +14781,7 @@ export function usePatchApiUnitsByTypeByUnitIdVariantContext<TContext>(
 				| PatchApiUnitsByTypeByUnitIdVariantContextStatus404
 				| PatchApiUnitsByTypeByUnitIdVariantContextStatus409
 				| PatchApiUnitsByTypeByUnitIdVariantContextStatus422
+				| PatchApiUnitsByTypeByUnitIdVariantContextStatus429
 				| PatchApiUnitsByTypeByUnitIdVariantContextStatus500
 			>,
 			PatchApiUnitsByTypeByUnitIdVariantContextOptions,
@@ -13852,6 +14805,7 @@ export function usePatchApiUnitsByTypeByUnitIdVariantContext<TContext>(
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus404
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus409
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus422
+			| PatchApiUnitsByTypeByUnitIdVariantContextStatus429
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus500
 		>,
 		PatchApiUnitsByTypeByUnitIdVariantContextOptions,
@@ -13866,6 +14820,7 @@ export function usePatchApiUnitsByTypeByUnitIdVariantContext<TContext>(
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus404
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus409
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus422
+			| PatchApiUnitsByTypeByUnitIdVariantContextStatus429
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus500
 		>,
 		PatchApiUnitsByTypeByUnitIdVariantContextOptions,
@@ -13885,6 +14840,7 @@ export function usePatchApiUnitsByTypeByUnitIdVariantContext<TContext>(
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus404
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus409
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus422
+			| PatchApiUnitsByTypeByUnitIdVariantContextStatus429
 			| PatchApiUnitsByTypeByUnitIdVariantContextStatus500
 		>,
 		PatchApiUnitsByTypeByUnitIdVariantContextOptions,
@@ -13907,6 +14863,7 @@ export function postApiUnitsByTypeByUnitIdVariantContextPromoteMutationOptions<T
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus404
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus409
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus422
+			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus429
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdVariantContextPromoteOptions,
@@ -13939,6 +14896,7 @@ export function usePostApiUnitsByTypeByUnitIdVariantContextPromote<TContext>(
 				| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus404
 				| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus409
 				| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus422
+				| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus429
 				| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus500
 			>,
 			PostApiUnitsByTypeByUnitIdVariantContextPromoteOptions,
@@ -13962,6 +14920,7 @@ export function usePostApiUnitsByTypeByUnitIdVariantContextPromote<TContext>(
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus404
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus409
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus422
+			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus429
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdVariantContextPromoteOptions,
@@ -13976,6 +14935,7 @@ export function usePostApiUnitsByTypeByUnitIdVariantContextPromote<TContext>(
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus404
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus409
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus422
+			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus429
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdVariantContextPromoteOptions,
@@ -13995,6 +14955,7 @@ export function usePostApiUnitsByTypeByUnitIdVariantContextPromote<TContext>(
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus404
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus409
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus422
+			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus429
 			| PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdVariantContextPromoteOptions,
@@ -14016,6 +14977,7 @@ export function putApiUnitsByTypeByUnitIdLocalizationsByLanguageMutationOptions<
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus404
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus422
+			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus429
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdLocalizationsByLanguageOptions,
@@ -14047,6 +15009,7 @@ export function usePutApiUnitsByTypeByUnitIdLocalizationsByLanguage<TContext>(
 				| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403
 				| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus404
 				| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus422
+				| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus429
 				| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus500
 			>,
 			PutApiUnitsByTypeByUnitIdLocalizationsByLanguageOptions,
@@ -14070,6 +15033,7 @@ export function usePutApiUnitsByTypeByUnitIdLocalizationsByLanguage<TContext>(
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus404
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus422
+			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus429
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdLocalizationsByLanguageOptions,
@@ -14083,6 +15047,7 @@ export function usePutApiUnitsByTypeByUnitIdLocalizationsByLanguage<TContext>(
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus404
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus422
+			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus429
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdLocalizationsByLanguageOptions,
@@ -14101,6 +15066,7 @@ export function usePutApiUnitsByTypeByUnitIdLocalizationsByLanguage<TContext>(
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus403
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus404
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus422
+			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus429
 			| PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdLocalizationsByLanguageOptions,
@@ -14440,6 +15406,7 @@ export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreMutationO
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus404
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus409
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus422
+			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus500
 		>,
 		PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreOptions,
@@ -14471,6 +15438,7 @@ export function usePostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestore<TCont
 				| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus404
 				| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus409
 				| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus422
+				| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429
 				| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus500
 			>,
 			PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreOptions,
@@ -14494,6 +15462,7 @@ export function usePostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestore<TCont
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus404
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus409
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus422
+			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus500
 		>,
 		PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreOptions,
@@ -14507,6 +15476,7 @@ export function usePostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestore<TCont
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus404
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus409
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus422
+			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus500
 		>,
 		PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreOptions,
@@ -14525,6 +15495,7 @@ export function usePostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestore<TCont
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus404
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus409
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus422
+			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus429
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreStatus500
 		>,
 		PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdRestoreOptions,
@@ -14546,6 +15517,7 @@ export function postApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoMutationOpti
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus404
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus409
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus422
+			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus500
 		>,
 		PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoOptions,
@@ -14577,6 +15549,7 @@ export function usePostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndo<TContext
 				| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus404
 				| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus409
 				| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus422
+				| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429
 				| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus500
 			>,
 			PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoOptions,
@@ -14600,6 +15573,7 @@ export function usePostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndo<TContext
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus404
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus409
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus422
+			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus500
 		>,
 		PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoOptions,
@@ -14613,6 +15587,7 @@ export function usePostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndo<TContext
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus404
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus409
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus422
+			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus500
 		>,
 		PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoOptions,
@@ -14631,6 +15606,7 @@ export function usePostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndo<TContext
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus404
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus409
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus422
+			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus429
 			| PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoStatus500
 		>,
 		PostApiHistoryUnitsByUnitIdRevisionsByRevisionIdUndoOptions,
@@ -14652,6 +15628,7 @@ export function patchApiHistoryUnitRevisionsByRevisionIdVisibilityMutationOption
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus404
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus422
+			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus429
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus500
 		>,
 		PatchApiHistoryUnitRevisionsByRevisionIdVisibilityOptions,
@@ -14683,6 +15660,7 @@ export function usePatchApiHistoryUnitRevisionsByRevisionIdVisibility<TContext>(
 				| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus404
 				| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409
 				| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus422
+				| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus429
 				| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus500
 			>,
 			PatchApiHistoryUnitRevisionsByRevisionIdVisibilityOptions,
@@ -14706,6 +15684,7 @@ export function usePatchApiHistoryUnitRevisionsByRevisionIdVisibility<TContext>(
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus404
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus422
+			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus429
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus500
 		>,
 		PatchApiHistoryUnitRevisionsByRevisionIdVisibilityOptions,
@@ -14719,6 +15698,7 @@ export function usePatchApiHistoryUnitRevisionsByRevisionIdVisibility<TContext>(
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus404
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus422
+			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus429
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus500
 		>,
 		PatchApiHistoryUnitRevisionsByRevisionIdVisibilityOptions,
@@ -14737,6 +15717,7 @@ export function usePatchApiHistoryUnitRevisionsByRevisionIdVisibility<TContext>(
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus404
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus409
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus422
+			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus429
 			| PatchApiHistoryUnitRevisionsByRevisionIdVisibilityStatus500
 		>,
 		PatchApiHistoryUnitRevisionsByRevisionIdVisibilityOptions,
@@ -15101,7 +16082,10 @@ export function postApiEntitiesMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiEntitiesStatus200,
 		ResponseErrorConfig<
-			PostApiEntitiesStatus404 | PostApiEntitiesStatus422 | PostApiEntitiesStatus500
+			| PostApiEntitiesStatus404
+			| PostApiEntitiesStatus422
+			| PostApiEntitiesStatus429
+			| PostApiEntitiesStatus500
 		>,
 		PostApiEntitiesOptions,
 		TContext
@@ -15123,7 +16107,10 @@ export function usePostApiEntities<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiEntitiesStatus200,
 			ResponseErrorConfig<
-				PostApiEntitiesStatus404 | PostApiEntitiesStatus422 | PostApiEntitiesStatus500
+				| PostApiEntitiesStatus404
+				| PostApiEntitiesStatus422
+				| PostApiEntitiesStatus429
+				| PostApiEntitiesStatus500
 			>,
 			PostApiEntitiesOptions,
 			TContext
@@ -15138,7 +16125,10 @@ export function usePostApiEntities<TContext>(
 	const baseOptions = postApiEntitiesMutationOptions(config) as UseMutationOptions<
 		PostApiEntitiesStatus200,
 		ResponseErrorConfig<
-			PostApiEntitiesStatus404 | PostApiEntitiesStatus422 | PostApiEntitiesStatus500
+			| PostApiEntitiesStatus404
+			| PostApiEntitiesStatus422
+			| PostApiEntitiesStatus429
+			| PostApiEntitiesStatus500
 		>,
 		PostApiEntitiesOptions,
 		TContext
@@ -15147,7 +16137,10 @@ export function usePostApiEntities<TContext>(
 	return useMutation<
 		PostApiEntitiesStatus200,
 		ResponseErrorConfig<
-			PostApiEntitiesStatus404 | PostApiEntitiesStatus422 | PostApiEntitiesStatus500
+			| PostApiEntitiesStatus404
+			| PostApiEntitiesStatus422
+			| PostApiEntitiesStatus429
+			| PostApiEntitiesStatus500
 		>,
 		PostApiEntitiesOptions,
 		TContext
@@ -15161,7 +16154,10 @@ export function usePostApiEntities<TContext>(
 	) as UseMutationResult<
 		PostApiEntitiesStatus200,
 		ResponseErrorConfig<
-			PostApiEntitiesStatus404 | PostApiEntitiesStatus422 | PostApiEntitiesStatus500
+			| PostApiEntitiesStatus404
+			| PostApiEntitiesStatus422
+			| PostApiEntitiesStatus429
+			| PostApiEntitiesStatus500
 		>,
 		PostApiEntitiesOptions,
 		TContext
@@ -15281,6 +16277,7 @@ export function putApiEntitiesByUnitIdLocalizationsByLanguageMutationOptions<TCo
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus429
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus500
 		>,
 		PutApiEntitiesByUnitIdLocalizationsByLanguageOptions,
@@ -15311,6 +16308,7 @@ export function usePutApiEntitiesByUnitIdLocalizationsByLanguage<TContext>(
 				| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403
 				| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404
 				| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422
+				| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus429
 				| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus500
 			>,
 			PutApiEntitiesByUnitIdLocalizationsByLanguageOptions,
@@ -15332,6 +16330,7 @@ export function usePutApiEntitiesByUnitIdLocalizationsByLanguage<TContext>(
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus429
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus500
 		>,
 		PutApiEntitiesByUnitIdLocalizationsByLanguageOptions,
@@ -15344,6 +16343,7 @@ export function usePutApiEntitiesByUnitIdLocalizationsByLanguage<TContext>(
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus429
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus500
 		>,
 		PutApiEntitiesByUnitIdLocalizationsByLanguageOptions,
@@ -15361,6 +16361,7 @@ export function usePutApiEntitiesByUnitIdLocalizationsByLanguage<TContext>(
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus403
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus404
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus422
+			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus429
 			| PutApiEntitiesByUnitIdLocalizationsByLanguageStatus500
 		>,
 		PutApiEntitiesByUnitIdLocalizationsByLanguageOptions,
@@ -15647,7 +16648,7 @@ export function postApiTagsMutationOptions<TContext = unknown>(
 	const mutationKey = postApiTagsMutationKey();
 	return mutationOptions<
 		PostApiTagsStatus200,
-		ResponseErrorConfig<PostApiTagsStatus422 | PostApiTagsStatus500>,
+		ResponseErrorConfig<PostApiTagsStatus422 | PostApiTagsStatus429 | PostApiTagsStatus500>,
 		PostApiTagsOptions,
 		TContext
 	>({
@@ -15667,7 +16668,7 @@ export function usePostApiTags<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
 			PostApiTagsStatus200,
-			ResponseErrorConfig<PostApiTagsStatus422 | PostApiTagsStatus500>,
+			ResponseErrorConfig<PostApiTagsStatus422 | PostApiTagsStatus429 | PostApiTagsStatus500>,
 			PostApiTagsOptions,
 			TContext
 		> & { client?: QueryClient };
@@ -15680,14 +16681,14 @@ export function usePostApiTags<TContext>(
 
 	const baseOptions = postApiTagsMutationOptions(config) as UseMutationOptions<
 		PostApiTagsStatus200,
-		ResponseErrorConfig<PostApiTagsStatus422 | PostApiTagsStatus500>,
+		ResponseErrorConfig<PostApiTagsStatus422 | PostApiTagsStatus429 | PostApiTagsStatus500>,
 		PostApiTagsOptions,
 		TContext
 	>;
 
 	return useMutation<
 		PostApiTagsStatus200,
-		ResponseErrorConfig<PostApiTagsStatus422 | PostApiTagsStatus500>,
+		ResponseErrorConfig<PostApiTagsStatus422 | PostApiTagsStatus429 | PostApiTagsStatus500>,
 		PostApiTagsOptions,
 		TContext
 	>(
@@ -15699,7 +16700,7 @@ export function usePostApiTags<TContext>(
 		queryClient,
 	) as UseMutationResult<
 		PostApiTagsStatus200,
-		ResponseErrorConfig<PostApiTagsStatus422 | PostApiTagsStatus500>,
+		ResponseErrorConfig<PostApiTagsStatus422 | PostApiTagsStatus429 | PostApiTagsStatus500>,
 		PostApiTagsOptions,
 		TContext
 	>;
@@ -15722,7 +16723,9 @@ export function getApiUnitsByTypeByUnitIdAliasesQueryOptions(
 	return queryOptions<
 		GetApiUnitsByTypeByUnitIdAliasesStatus200,
 		ResponseErrorConfig<
-			GetApiUnitsByTypeByUnitIdAliasesStatus422 | GetApiUnitsByTypeByUnitIdAliasesStatus500
+			| GetApiUnitsByTypeByUnitIdAliasesStatus422
+			| GetApiUnitsByTypeByUnitIdAliasesStatus429
+			| GetApiUnitsByTypeByUnitIdAliasesStatus500
 		>,
 		GetApiUnitsByTypeByUnitIdAliasesStatus200,
 		typeof queryKey
@@ -15762,6 +16765,7 @@ export function useGetApiUnitsByTypeByUnitIdAliases<
 				GetApiUnitsByTypeByUnitIdAliasesStatus200,
 				ResponseErrorConfig<
 					| GetApiUnitsByTypeByUnitIdAliasesStatus422
+					| GetApiUnitsByTypeByUnitIdAliasesStatus429
 					| GetApiUnitsByTypeByUnitIdAliasesStatus500
 				>,
 				TData,
@@ -15788,7 +16792,9 @@ export function useGetApiUnitsByTypeByUnitIdAliases<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			GetApiUnitsByTypeByUnitIdAliasesStatus422 | GetApiUnitsByTypeByUnitIdAliasesStatus500
+			| GetApiUnitsByTypeByUnitIdAliasesStatus422
+			| GetApiUnitsByTypeByUnitIdAliasesStatus429
+			| GetApiUnitsByTypeByUnitIdAliasesStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -15810,6 +16816,7 @@ export function postApiUnitsByTypeByUnitIdAliasesMutationOptions<TContext = unkn
 			| PostApiUnitsByTypeByUnitIdAliasesStatus403
 			| PostApiUnitsByTypeByUnitIdAliasesStatus404
 			| PostApiUnitsByTypeByUnitIdAliasesStatus422
+			| PostApiUnitsByTypeByUnitIdAliasesStatus429
 			| PostApiUnitsByTypeByUnitIdAliasesStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdAliasesOptions,
@@ -15840,6 +16847,7 @@ export function usePostApiUnitsByTypeByUnitIdAliases<TContext>(
 				| PostApiUnitsByTypeByUnitIdAliasesStatus403
 				| PostApiUnitsByTypeByUnitIdAliasesStatus404
 				| PostApiUnitsByTypeByUnitIdAliasesStatus422
+				| PostApiUnitsByTypeByUnitIdAliasesStatus429
 				| PostApiUnitsByTypeByUnitIdAliasesStatus500
 			>,
 			PostApiUnitsByTypeByUnitIdAliasesOptions,
@@ -15861,6 +16869,7 @@ export function usePostApiUnitsByTypeByUnitIdAliases<TContext>(
 			| PostApiUnitsByTypeByUnitIdAliasesStatus403
 			| PostApiUnitsByTypeByUnitIdAliasesStatus404
 			| PostApiUnitsByTypeByUnitIdAliasesStatus422
+			| PostApiUnitsByTypeByUnitIdAliasesStatus429
 			| PostApiUnitsByTypeByUnitIdAliasesStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdAliasesOptions,
@@ -15873,6 +16882,7 @@ export function usePostApiUnitsByTypeByUnitIdAliases<TContext>(
 			| PostApiUnitsByTypeByUnitIdAliasesStatus403
 			| PostApiUnitsByTypeByUnitIdAliasesStatus404
 			| PostApiUnitsByTypeByUnitIdAliasesStatus422
+			| PostApiUnitsByTypeByUnitIdAliasesStatus429
 			| PostApiUnitsByTypeByUnitIdAliasesStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdAliasesOptions,
@@ -15890,6 +16900,7 @@ export function usePostApiUnitsByTypeByUnitIdAliases<TContext>(
 			| PostApiUnitsByTypeByUnitIdAliasesStatus403
 			| PostApiUnitsByTypeByUnitIdAliasesStatus404
 			| PostApiUnitsByTypeByUnitIdAliasesStatus422
+			| PostApiUnitsByTypeByUnitIdAliasesStatus429
 			| PostApiUnitsByTypeByUnitIdAliasesStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdAliasesOptions,
@@ -15910,6 +16921,7 @@ export function deleteApiUnitsByTypeByUnitIdAliasesByAliasIdMutationOptions<TCon
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdOptions,
@@ -15939,6 +16951,7 @@ export function useDeleteApiUnitsByTypeByUnitIdAliasesByAliasId<TContext>(
 				| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403
 				| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404
 				| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus422
+				| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429
 				| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500
 			>,
 			DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdOptions,
@@ -15960,6 +16973,7 @@ export function useDeleteApiUnitsByTypeByUnitIdAliasesByAliasId<TContext>(
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdOptions,
@@ -15972,6 +16986,7 @@ export function useDeleteApiUnitsByTypeByUnitIdAliasesByAliasId<TContext>(
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdOptions,
@@ -15989,6 +17004,7 @@ export function useDeleteApiUnitsByTypeByUnitIdAliasesByAliasId<TContext>(
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdOptions,
@@ -16008,6 +17024,7 @@ export function putApiUnitsByTypeByUnitIdAliasesByAliasIdVoteMutationOptions<TCo
 		ResponseErrorConfig<
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
+			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions,
@@ -16037,6 +17054,7 @@ export function usePutApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 			ResponseErrorConfig<
 				| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 				| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
+				| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429
 				| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500
 			>,
 			PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions,
@@ -16057,6 +17075,7 @@ export function usePutApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 		ResponseErrorConfig<
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
+			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions,
@@ -16068,6 +17087,7 @@ export function usePutApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 		ResponseErrorConfig<
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
+			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions,
@@ -16084,6 +17104,7 @@ export function usePutApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 		ResponseErrorConfig<
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
+			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429
 			| PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions,
@@ -16103,6 +17124,7 @@ export function deleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteMutationOptions<
 		ResponseErrorConfig<
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
+			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions,
@@ -16131,6 +17153,7 @@ export function useDeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 			ResponseErrorConfig<
 				| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 				| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
+				| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429
 				| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500
 			>,
 			DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions,
@@ -16152,6 +17175,7 @@ export function useDeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
+			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions,
@@ -16163,6 +17187,7 @@ export function useDeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
+			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions,
@@ -16179,6 +17204,7 @@ export function useDeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVote<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus404
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus422
+			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus429
 			| DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteOptions,
@@ -16199,6 +17225,7 @@ export function postApiUnitsByTypeByUnitIdCreditAttributionsMutationOptions<TCon
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus403
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus404
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus422
+			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus429
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdCreditAttributionsOptions,
@@ -16229,6 +17256,7 @@ export function usePostApiUnitsByTypeByUnitIdCreditAttributions<TContext>(
 				| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus403
 				| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus404
 				| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus422
+				| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus429
 				| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus500
 			>,
 			PostApiUnitsByTypeByUnitIdCreditAttributionsOptions,
@@ -16250,6 +17278,7 @@ export function usePostApiUnitsByTypeByUnitIdCreditAttributions<TContext>(
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus403
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus404
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus422
+			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus429
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdCreditAttributionsOptions,
@@ -16262,6 +17291,7 @@ export function usePostApiUnitsByTypeByUnitIdCreditAttributions<TContext>(
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus403
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus404
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus422
+			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus429
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdCreditAttributionsOptions,
@@ -16279,6 +17309,7 @@ export function usePostApiUnitsByTypeByUnitIdCreditAttributions<TContext>(
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus403
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus404
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus422
+			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus429
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdCreditAttributionsOptions,
@@ -16299,6 +17330,7 @@ export function deleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdMut
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdOptions,
@@ -16328,6 +17360,7 @@ export function useDeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId
 				| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403
 				| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus404
 				| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422
+				| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus429
 				| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus500
 			>,
 			DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdOptions,
@@ -16351,6 +17384,7 @@ export function useDeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId
 				| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403
 				| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus404
 				| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422
+				| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus429
 				| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus500
 			>,
 			DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdOptions,
@@ -16363,6 +17397,7 @@ export function useDeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdOptions,
@@ -16380,6 +17415,7 @@ export function useDeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationId
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdCreditAttributionsByAssociationIdOptions,
@@ -16400,6 +17436,7 @@ export function postApiUnitsByTypeByUnitIdSubjectAssociationsMutationOptions<TCo
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
@@ -16430,6 +17467,7 @@ export function usePostApiUnitsByTypeByUnitIdSubjectAssociations<TContext>(
 				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
 				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
 				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
+				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429
 				| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500
 			>,
 			PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
@@ -16451,6 +17489,7 @@ export function usePostApiUnitsByTypeByUnitIdSubjectAssociations<TContext>(
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
@@ -16463,6 +17502,7 @@ export function usePostApiUnitsByTypeByUnitIdSubjectAssociations<TContext>(
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
@@ -16480,6 +17520,7 @@ export function usePostApiUnitsByTypeByUnitIdSubjectAssociations<TContext>(
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus403
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus404
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus422
+			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429
 			| PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdSubjectAssociationsOptions,
@@ -16500,6 +17541,7 @@ export function deleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdMu
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdOptions,
@@ -16529,6 +17571,7 @@ export function useDeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationI
 				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403
 				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus404
 				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422
+				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus429
 				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus500
 			>,
 			DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdOptions,
@@ -16552,6 +17595,7 @@ export function useDeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationI
 				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403
 				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus404
 				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422
+				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus429
 				| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus500
 			>,
 			DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdOptions,
@@ -16564,6 +17608,7 @@ export function useDeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationI
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdOptions,
@@ -16581,6 +17626,7 @@ export function useDeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationI
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdSubjectAssociationsByAssociationIdOptions,
@@ -16601,6 +17647,7 @@ export function postApiUnitsByTypeByUnitIdLinksMutationOptions<TContext = unknow
 			| PostApiUnitsByTypeByUnitIdLinksStatus403
 			| PostApiUnitsByTypeByUnitIdLinksStatus404
 			| PostApiUnitsByTypeByUnitIdLinksStatus422
+			| PostApiUnitsByTypeByUnitIdLinksStatus429
 			| PostApiUnitsByTypeByUnitIdLinksStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdLinksOptions,
@@ -16631,6 +17678,7 @@ export function usePostApiUnitsByTypeByUnitIdLinks<TContext>(
 				| PostApiUnitsByTypeByUnitIdLinksStatus403
 				| PostApiUnitsByTypeByUnitIdLinksStatus404
 				| PostApiUnitsByTypeByUnitIdLinksStatus422
+				| PostApiUnitsByTypeByUnitIdLinksStatus429
 				| PostApiUnitsByTypeByUnitIdLinksStatus500
 			>,
 			PostApiUnitsByTypeByUnitIdLinksOptions,
@@ -16651,6 +17699,7 @@ export function usePostApiUnitsByTypeByUnitIdLinks<TContext>(
 			| PostApiUnitsByTypeByUnitIdLinksStatus403
 			| PostApiUnitsByTypeByUnitIdLinksStatus404
 			| PostApiUnitsByTypeByUnitIdLinksStatus422
+			| PostApiUnitsByTypeByUnitIdLinksStatus429
 			| PostApiUnitsByTypeByUnitIdLinksStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdLinksOptions,
@@ -16663,6 +17712,7 @@ export function usePostApiUnitsByTypeByUnitIdLinks<TContext>(
 			| PostApiUnitsByTypeByUnitIdLinksStatus403
 			| PostApiUnitsByTypeByUnitIdLinksStatus404
 			| PostApiUnitsByTypeByUnitIdLinksStatus422
+			| PostApiUnitsByTypeByUnitIdLinksStatus429
 			| PostApiUnitsByTypeByUnitIdLinksStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdLinksOptions,
@@ -16680,6 +17730,7 @@ export function usePostApiUnitsByTypeByUnitIdLinks<TContext>(
 			| PostApiUnitsByTypeByUnitIdLinksStatus403
 			| PostApiUnitsByTypeByUnitIdLinksStatus404
 			| PostApiUnitsByTypeByUnitIdLinksStatus422
+			| PostApiUnitsByTypeByUnitIdLinksStatus429
 			| PostApiUnitsByTypeByUnitIdLinksStatus500
 		>,
 		PostApiUnitsByTypeByUnitIdLinksOptions,
@@ -16700,6 +17751,7 @@ export function putApiUnitsByTypeByUnitIdTagsByTagIdMutationOptions<TContext = u
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422
+			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdTagsByTagIdOptions,
@@ -16730,6 +17782,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 				| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 				| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 				| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422
+				| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429
 				| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus500
 			>,
 			PutApiUnitsByTypeByUnitIdTagsByTagIdOptions,
@@ -16751,6 +17804,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422
+			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdTagsByTagIdOptions,
@@ -16763,6 +17817,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422
+			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdTagsByTagIdOptions,
@@ -16780,6 +17835,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus422
+			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus429
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdTagsByTagIdOptions,
@@ -16800,6 +17856,7 @@ export function deleteApiUnitsByTypeByUnitIdTagsByTagIdMutationOptions<TContext 
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdTagsByTagIdOptions,
@@ -16829,6 +17886,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422
+				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429
 				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500
 			>,
 			DeleteApiUnitsByTypeByUnitIdTagsByTagIdOptions,
@@ -16850,6 +17908,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdTagsByTagIdOptions,
@@ -16862,6 +17921,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdTagsByTagIdOptions,
@@ -16879,6 +17939,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagId<TContext>(
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus403
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus429
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdTagsByTagIdOptions,
@@ -16898,6 +17959,7 @@ export function putApiUnitsByTypeByUnitIdTagsByTagIdVoteMutationOptions<TContext
 		ResponseErrorConfig<
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
+			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions,
@@ -16927,6 +17989,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 			ResponseErrorConfig<
 				| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 				| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
+				| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
 				| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500
 			>,
 			PutApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions,
@@ -16947,6 +18010,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 		ResponseErrorConfig<
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
+			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions,
@@ -16958,6 +18022,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 		ResponseErrorConfig<
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
+			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions,
@@ -16974,6 +18039,7 @@ export function usePutApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 		ResponseErrorConfig<
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
+			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
 			| PutApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions,
@@ -16993,6 +18059,7 @@ export function deleteApiUnitsByTypeByUnitIdTagsByTagIdVoteMutationOptions<TCont
 		ResponseErrorConfig<
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions,
@@ -17021,6 +18088,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 			ResponseErrorConfig<
 				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
+				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
 				| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500
 			>,
 			DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions,
@@ -17041,6 +18109,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions,
@@ -17052,6 +18121,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions,
@@ -17068,6 +18138,7 @@ export function useDeleteApiUnitsByTypeByUnitIdTagsByTagIdVote<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus404
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus422
+			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus429
 			| DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteStatus500
 		>,
 		DeleteApiUnitsByTypeByUnitIdTagsByTagIdVoteOptions,
@@ -17089,6 +18160,7 @@ export function putApiUnitsByTypeByUnitIdVersionOfByCanonicalIdMutationOptions<T
 			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404
 			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409
 			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422
+			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429
 			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdOptions,
@@ -17120,6 +18192,7 @@ export function usePutApiUnitsByTypeByUnitIdVersionOfByCanonicalId<TContext>(
 				| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404
 				| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409
 				| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422
+				| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429
 				| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500
 			>,
 			PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdOptions,
@@ -17142,6 +18215,7 @@ export function usePutApiUnitsByTypeByUnitIdVersionOfByCanonicalId<TContext>(
 			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404
 			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409
 			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422
+			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429
 			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdOptions,
@@ -17155,6 +18229,7 @@ export function usePutApiUnitsByTypeByUnitIdVersionOfByCanonicalId<TContext>(
 			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404
 			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409
 			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422
+			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429
 			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdOptions,
@@ -17173,6 +18248,7 @@ export function usePutApiUnitsByTypeByUnitIdVersionOfByCanonicalId<TContext>(
 			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus404
 			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus409
 			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus422
+			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus429
 			| PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdStatus500
 		>,
 		PutApiUnitsByTypeByUnitIdVersionOfByCanonicalIdOptions,
@@ -17291,6 +18367,7 @@ export function postApiUnitsByIdByUnitIdContentStructuresMutationOptions<TContex
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus403
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus422
+			| PostApiUnitsByIdByUnitIdContentStructuresStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresOptions,
@@ -17321,6 +18398,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructures<TContext>(
 				| PostApiUnitsByIdByUnitIdContentStructuresStatus403
 				| PostApiUnitsByIdByUnitIdContentStructuresStatus404
 				| PostApiUnitsByIdByUnitIdContentStructuresStatus422
+				| PostApiUnitsByIdByUnitIdContentStructuresStatus429
 				| PostApiUnitsByIdByUnitIdContentStructuresStatus500
 			>,
 			PostApiUnitsByIdByUnitIdContentStructuresOptions,
@@ -17342,6 +18420,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructures<TContext>(
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus403
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus422
+			| PostApiUnitsByIdByUnitIdContentStructuresStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresOptions,
@@ -17354,6 +18433,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructures<TContext>(
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus403
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus422
+			| PostApiUnitsByIdByUnitIdContentStructuresStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresOptions,
@@ -17371,6 +18451,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructures<TContext>(
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus403
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus422
+			| PostApiUnitsByIdByUnitIdContentStructuresStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresOptions,
@@ -17493,6 +18574,7 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdMutation
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422
+			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus429
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500
 		>,
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions,
@@ -17524,6 +18606,7 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureId<TCon
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422
+				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus429
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500
 			>,
 			DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions,
@@ -17547,6 +18630,7 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureId<TCon
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422
+			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus429
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500
 		>,
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions,
@@ -17560,6 +18644,7 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureId<TCon
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422
+			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus429
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500
 		>,
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions,
@@ -17578,6 +18663,7 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureId<TCon
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus409
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus422
+			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus429
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdStatus500
 		>,
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdOptions,
@@ -17722,6 +18808,7 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsB
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus422
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreOptions,
@@ -17753,6 +18840,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisio
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus422
+				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus429
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus500
 			>,
 			PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreOptions,
@@ -17777,6 +18865,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisio
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus422
+				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus429
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus500
 			>,
 			PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreOptions,
@@ -17790,6 +18879,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisio
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus422
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreOptions,
@@ -17808,6 +18898,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisio
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus409
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus422
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdRevisionsByRevisionIdRestoreOptions,
@@ -17829,6 +18920,7 @@ export function postApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesMutat
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus422
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesOptions,
@@ -17860,6 +18952,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<T
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus422
+				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus429
 				| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus500
 			>,
 			PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesOptions,
@@ -17883,6 +18976,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<T
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus422
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesOptions,
@@ -17896,6 +18990,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<T
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus422
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesOptions,
@@ -17914,6 +19009,7 @@ export function usePostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes<T
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus404
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus409
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus422
+			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus429
 			| PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesStatus500
 		>,
 		PostApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesOptions,
@@ -17936,6 +19032,7 @@ export function patchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNo
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
+			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500
 		>,
 		PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -17968,6 +19065,7 @@ export function usePatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesB
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
+				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500
 			>,
 			PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -17992,6 +19090,7 @@ export function usePatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesB
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
+				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 				| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500
 			>,
 			PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -18005,6 +19104,7 @@ export function usePatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesB
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
+			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500
 		>,
 		PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -18023,6 +19123,7 @@ export function usePatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesB
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
+			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 			| PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500
 		>,
 		PatchApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -18048,6 +19149,7 @@ export function deleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByN
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
+			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500
 		>,
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -18080,6 +19182,7 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
+				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500
 			>,
 			DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -18104,6 +19207,7 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
+				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 				| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500
 			>,
 			DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -18117,6 +19221,7 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
+			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500
 		>,
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -18135,6 +19240,7 @@ export function useDeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodes
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus404
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus409
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus422
+			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus429
 			| DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdStatus500
 		>,
 		DeleteApiUnitsByIdByUnitIdContentStructuresByStructureIdNodesByNodeIdOptions,
@@ -18254,6 +19360,7 @@ export function postApiUnitsBookByUnitIdContentStructureNodesMutationOptions<TCo
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus429
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus500
 		>,
 		PostApiUnitsBookByUnitIdContentStructureNodesOptions,
@@ -18285,6 +19392,7 @@ export function usePostApiUnitsBookByUnitIdContentStructureNodes<TContext>(
 				| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
 				| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
 				| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
+				| PostApiUnitsBookByUnitIdContentStructureNodesStatus429
 				| PostApiUnitsBookByUnitIdContentStructureNodesStatus500
 			>,
 			PostApiUnitsBookByUnitIdContentStructureNodesOptions,
@@ -18307,6 +19415,7 @@ export function usePostApiUnitsBookByUnitIdContentStructureNodes<TContext>(
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus429
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus500
 		>,
 		PostApiUnitsBookByUnitIdContentStructureNodesOptions,
@@ -18320,6 +19429,7 @@ export function usePostApiUnitsBookByUnitIdContentStructureNodes<TContext>(
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus429
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus500
 		>,
 		PostApiUnitsBookByUnitIdContentStructureNodesOptions,
@@ -18338,6 +19448,7 @@ export function usePostApiUnitsBookByUnitIdContentStructureNodes<TContext>(
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus404
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus409
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus422
+			| PostApiUnitsBookByUnitIdContentStructureNodesStatus429
 			| PostApiUnitsBookByUnitIdContentStructureNodesStatus500
 		>,
 		PostApiUnitsBookByUnitIdContentStructureNodesOptions,
@@ -18359,6 +19470,7 @@ export function patchApiUnitsBookByUnitIdContentStructureNodesByNodeIdMutationOp
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus429
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500
 		>,
 		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
@@ -18390,6 +19502,7 @@ export function usePatchApiUnitsBookByUnitIdContentStructureNodesByNodeId<TConte
 				| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
 				| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409
 				| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422
+				| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus429
 				| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500
 			>,
 			PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
@@ -18413,6 +19526,7 @@ export function usePatchApiUnitsBookByUnitIdContentStructureNodesByNodeId<TConte
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus429
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500
 		>,
 		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
@@ -18426,6 +19540,7 @@ export function usePatchApiUnitsBookByUnitIdContentStructureNodesByNodeId<TConte
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus429
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500
 		>,
 		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
@@ -18444,6 +19559,7 @@ export function usePatchApiUnitsBookByUnitIdContentStructureNodesByNodeId<TConte
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus404
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus409
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus422
+			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus429
 			| PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdStatus500
 		>,
 		PatchApiUnitsBookByUnitIdContentStructureNodesByNodeIdOptions,
@@ -18567,6 +19683,7 @@ export function putApiChaptersByChapterIdLocalizationsByLanguageContentMutationO
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422
+			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus500
 		>,
 		PutApiChaptersByChapterIdLocalizationsByLanguageContentOptions,
@@ -18597,6 +19714,7 @@ export function usePutApiChaptersByChapterIdLocalizationsByLanguageContent<TCont
 				| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403
 				| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404
 				| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422
+				| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429
 				| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus500
 			>,
 			PutApiChaptersByChapterIdLocalizationsByLanguageContentOptions,
@@ -18619,6 +19737,7 @@ export function usePutApiChaptersByChapterIdLocalizationsByLanguageContent<TCont
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422
+			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus500
 		>,
 		PutApiChaptersByChapterIdLocalizationsByLanguageContentOptions,
@@ -18631,6 +19750,7 @@ export function usePutApiChaptersByChapterIdLocalizationsByLanguageContent<TCont
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422
+			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus500
 		>,
 		PutApiChaptersByChapterIdLocalizationsByLanguageContentOptions,
@@ -18648,6 +19768,7 @@ export function usePutApiChaptersByChapterIdLocalizationsByLanguageContent<TCont
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus403
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus404
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus422
+			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus429
 			| PutApiChaptersByChapterIdLocalizationsByLanguageContentStatus500
 		>,
 		PutApiChaptersByChapterIdLocalizationsByLanguageContentOptions,
@@ -18667,7 +19788,9 @@ export function getApiProgressQueryOptions(
 	const queryKey = getApiProgressQueryKey({ query });
 	return queryOptions<
 		GetApiProgressStatus200,
-		ResponseErrorConfig<GetApiProgressStatus422 | GetApiProgressStatus500>,
+		ResponseErrorConfig<
+			GetApiProgressStatus422 | GetApiProgressStatus429 | GetApiProgressStatus500
+		>,
 		GetApiProgressStatus200,
 		typeof queryKey
 	>({
@@ -18700,7 +19823,9 @@ export function useGetApiProgress<
 		query?: Partial<
 			QueryObserverOptions<
 				GetApiProgressStatus200,
-				ResponseErrorConfig<GetApiProgressStatus422 | GetApiProgressStatus500>,
+				ResponseErrorConfig<
+					GetApiProgressStatus422 | GetApiProgressStatus429 | GetApiProgressStatus500
+				>,
 				TData,
 				TQueryData,
 				TQueryKey
@@ -18723,7 +19848,9 @@ export function useGetApiProgress<
 		queryClient,
 	) as UseQueryResult<
 		TData,
-		ResponseErrorConfig<GetApiProgressStatus422 | GetApiProgressStatus500>
+		ResponseErrorConfig<
+			GetApiProgressStatus422 | GetApiProgressStatus429 | GetApiProgressStatus500
+		>
 	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
@@ -18748,6 +19875,7 @@ export function getApiProgressByUnitIdQueryOptions(
 		ResponseErrorConfig<
 			| GetApiProgressByUnitIdStatus404
 			| GetApiProgressByUnitIdStatus422
+			| GetApiProgressByUnitIdStatus429
 			| GetApiProgressByUnitIdStatus500
 		>,
 		GetApiProgressByUnitIdStatus200,
@@ -18787,6 +19915,7 @@ export function useGetApiProgressByUnitId<
 				ResponseErrorConfig<
 					| GetApiProgressByUnitIdStatus404
 					| GetApiProgressByUnitIdStatus422
+					| GetApiProgressByUnitIdStatus429
 					| GetApiProgressByUnitIdStatus500
 				>,
 				TData,
@@ -18814,6 +19943,7 @@ export function useGetApiProgressByUnitId<
 		ResponseErrorConfig<
 			| GetApiProgressByUnitIdStatus404
 			| GetApiProgressByUnitIdStatus422
+			| GetApiProgressByUnitIdStatus429
 			| GetApiProgressByUnitIdStatus500
 		>
 	> & { queryKey: TQueryKey };
@@ -18834,6 +19964,7 @@ export function putApiProgressByUnitIdMutationOptions<TContext = unknown>(
 		ResponseErrorConfig<
 			| PutApiProgressByUnitIdStatus404
 			| PutApiProgressByUnitIdStatus422
+			| PutApiProgressByUnitIdStatus429
 			| PutApiProgressByUnitIdStatus500
 		>,
 		PutApiProgressByUnitIdOptions,
@@ -18863,6 +19994,7 @@ export function usePutApiProgressByUnitId<TContext>(
 			ResponseErrorConfig<
 				| PutApiProgressByUnitIdStatus404
 				| PutApiProgressByUnitIdStatus422
+				| PutApiProgressByUnitIdStatus429
 				| PutApiProgressByUnitIdStatus500
 			>,
 			PutApiProgressByUnitIdOptions,
@@ -18880,6 +20012,7 @@ export function usePutApiProgressByUnitId<TContext>(
 		ResponseErrorConfig<
 			| PutApiProgressByUnitIdStatus404
 			| PutApiProgressByUnitIdStatus422
+			| PutApiProgressByUnitIdStatus429
 			| PutApiProgressByUnitIdStatus500
 		>,
 		PutApiProgressByUnitIdOptions,
@@ -18891,6 +20024,7 @@ export function usePutApiProgressByUnitId<TContext>(
 		ResponseErrorConfig<
 			| PutApiProgressByUnitIdStatus404
 			| PutApiProgressByUnitIdStatus422
+			| PutApiProgressByUnitIdStatus429
 			| PutApiProgressByUnitIdStatus500
 		>,
 		PutApiProgressByUnitIdOptions,
@@ -18907,6 +20041,7 @@ export function usePutApiProgressByUnitId<TContext>(
 		ResponseErrorConfig<
 			| PutApiProgressByUnitIdStatus404
 			| PutApiProgressByUnitIdStatus422
+			| PutApiProgressByUnitIdStatus429
 			| PutApiProgressByUnitIdStatus500
 		>,
 		PutApiProgressByUnitIdOptions,
@@ -18924,7 +20059,9 @@ export function deleteApiProgressByUnitIdMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		DeleteApiProgressByUnitIdStatus204,
 		ResponseErrorConfig<
-			DeleteApiProgressByUnitIdStatus422 | DeleteApiProgressByUnitIdStatus500
+			| DeleteApiProgressByUnitIdStatus422
+			| DeleteApiProgressByUnitIdStatus429
+			| DeleteApiProgressByUnitIdStatus500
 		>,
 		DeleteApiProgressByUnitIdOptions,
 		TContext
@@ -18950,7 +20087,9 @@ export function useDeleteApiProgressByUnitId<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiProgressByUnitIdStatus204,
 			ResponseErrorConfig<
-				DeleteApiProgressByUnitIdStatus422 | DeleteApiProgressByUnitIdStatus500
+				| DeleteApiProgressByUnitIdStatus422
+				| DeleteApiProgressByUnitIdStatus429
+				| DeleteApiProgressByUnitIdStatus500
 			>,
 			DeleteApiProgressByUnitIdOptions,
 			TContext
@@ -18965,7 +20104,9 @@ export function useDeleteApiProgressByUnitId<TContext>(
 	const baseOptions = deleteApiProgressByUnitIdMutationOptions(config) as UseMutationOptions<
 		DeleteApiProgressByUnitIdStatus204,
 		ResponseErrorConfig<
-			DeleteApiProgressByUnitIdStatus422 | DeleteApiProgressByUnitIdStatus500
+			| DeleteApiProgressByUnitIdStatus422
+			| DeleteApiProgressByUnitIdStatus429
+			| DeleteApiProgressByUnitIdStatus500
 		>,
 		DeleteApiProgressByUnitIdOptions,
 		TContext
@@ -18974,7 +20115,9 @@ export function useDeleteApiProgressByUnitId<TContext>(
 	return useMutation<
 		DeleteApiProgressByUnitIdStatus204,
 		ResponseErrorConfig<
-			DeleteApiProgressByUnitIdStatus422 | DeleteApiProgressByUnitIdStatus500
+			| DeleteApiProgressByUnitIdStatus422
+			| DeleteApiProgressByUnitIdStatus429
+			| DeleteApiProgressByUnitIdStatus500
 		>,
 		DeleteApiProgressByUnitIdOptions,
 		TContext
@@ -18988,7 +20131,9 @@ export function useDeleteApiProgressByUnitId<TContext>(
 	) as UseMutationResult<
 		DeleteApiProgressByUnitIdStatus204,
 		ResponseErrorConfig<
-			DeleteApiProgressByUnitIdStatus422 | DeleteApiProgressByUnitIdStatus500
+			| DeleteApiProgressByUnitIdStatus422
+			| DeleteApiProgressByUnitIdStatus429
+			| DeleteApiProgressByUnitIdStatus500
 		>,
 		DeleteApiProgressByUnitIdOptions,
 		TContext
@@ -19007,6 +20152,7 @@ export function putApiProgressByUnitIdNodesByNodeIdMutationOptions<TContext = un
 		ResponseErrorConfig<
 			| PutApiProgressByUnitIdNodesByNodeIdStatus404
 			| PutApiProgressByUnitIdNodesByNodeIdStatus422
+			| PutApiProgressByUnitIdNodesByNodeIdStatus429
 			| PutApiProgressByUnitIdNodesByNodeIdStatus500
 		>,
 		PutApiProgressByUnitIdNodesByNodeIdOptions,
@@ -19035,6 +20181,7 @@ export function usePutApiProgressByUnitIdNodesByNodeId<TContext>(
 			ResponseErrorConfig<
 				| PutApiProgressByUnitIdNodesByNodeIdStatus404
 				| PutApiProgressByUnitIdNodesByNodeIdStatus422
+				| PutApiProgressByUnitIdNodesByNodeIdStatus429
 				| PutApiProgressByUnitIdNodesByNodeIdStatus500
 			>,
 			PutApiProgressByUnitIdNodesByNodeIdOptions,
@@ -19055,6 +20202,7 @@ export function usePutApiProgressByUnitIdNodesByNodeId<TContext>(
 		ResponseErrorConfig<
 			| PutApiProgressByUnitIdNodesByNodeIdStatus404
 			| PutApiProgressByUnitIdNodesByNodeIdStatus422
+			| PutApiProgressByUnitIdNodesByNodeIdStatus429
 			| PutApiProgressByUnitIdNodesByNodeIdStatus500
 		>,
 		PutApiProgressByUnitIdNodesByNodeIdOptions,
@@ -19066,6 +20214,7 @@ export function usePutApiProgressByUnitIdNodesByNodeId<TContext>(
 		ResponseErrorConfig<
 			| PutApiProgressByUnitIdNodesByNodeIdStatus404
 			| PutApiProgressByUnitIdNodesByNodeIdStatus422
+			| PutApiProgressByUnitIdNodesByNodeIdStatus429
 			| PutApiProgressByUnitIdNodesByNodeIdStatus500
 		>,
 		PutApiProgressByUnitIdNodesByNodeIdOptions,
@@ -19082,6 +20231,7 @@ export function usePutApiProgressByUnitIdNodesByNodeId<TContext>(
 		ResponseErrorConfig<
 			| PutApiProgressByUnitIdNodesByNodeIdStatus404
 			| PutApiProgressByUnitIdNodesByNodeIdStatus422
+			| PutApiProgressByUnitIdNodesByNodeIdStatus429
 			| PutApiProgressByUnitIdNodesByNodeIdStatus500
 		>,
 		PutApiProgressByUnitIdNodesByNodeIdOptions,
@@ -19100,6 +20250,7 @@ export function deleteApiProgressByUnitIdNodesByNodeIdMutationOptions<TContext =
 		DeleteApiProgressByUnitIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus422
+			| DeleteApiProgressByUnitIdNodesByNodeIdStatus429
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus500
 		>,
 		DeleteApiProgressByUnitIdNodesByNodeIdOptions,
@@ -19127,6 +20278,7 @@ export function useDeleteApiProgressByUnitIdNodesByNodeId<TContext>(
 			DeleteApiProgressByUnitIdNodesByNodeIdStatus200,
 			ResponseErrorConfig<
 				| DeleteApiProgressByUnitIdNodesByNodeIdStatus422
+				| DeleteApiProgressByUnitIdNodesByNodeIdStatus429
 				| DeleteApiProgressByUnitIdNodesByNodeIdStatus500
 			>,
 			DeleteApiProgressByUnitIdNodesByNodeIdOptions,
@@ -19146,6 +20298,7 @@ export function useDeleteApiProgressByUnitIdNodesByNodeId<TContext>(
 		DeleteApiProgressByUnitIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus422
+			| DeleteApiProgressByUnitIdNodesByNodeIdStatus429
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus500
 		>,
 		DeleteApiProgressByUnitIdNodesByNodeIdOptions,
@@ -19156,6 +20309,7 @@ export function useDeleteApiProgressByUnitIdNodesByNodeId<TContext>(
 		DeleteApiProgressByUnitIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus422
+			| DeleteApiProgressByUnitIdNodesByNodeIdStatus429
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus500
 		>,
 		DeleteApiProgressByUnitIdNodesByNodeIdOptions,
@@ -19171,6 +20325,7 @@ export function useDeleteApiProgressByUnitIdNodesByNodeId<TContext>(
 		DeleteApiProgressByUnitIdNodesByNodeIdStatus200,
 		ResponseErrorConfig<
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus422
+			| DeleteApiProgressByUnitIdNodesByNodeIdStatus429
 			| DeleteApiProgressByUnitIdNodesByNodeIdStatus500
 		>,
 		DeleteApiProgressByUnitIdNodesByNodeIdOptions,
@@ -19267,7 +20422,10 @@ export function postApiCollectionsMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiCollectionsStatus200,
 		ResponseErrorConfig<
-			PostApiCollectionsStatus404 | PostApiCollectionsStatus422 | PostApiCollectionsStatus500
+			| PostApiCollectionsStatus404
+			| PostApiCollectionsStatus422
+			| PostApiCollectionsStatus429
+			| PostApiCollectionsStatus500
 		>,
 		PostApiCollectionsOptions,
 		TContext
@@ -19291,6 +20449,7 @@ export function usePostApiCollections<TContext>(
 			ResponseErrorConfig<
 				| PostApiCollectionsStatus404
 				| PostApiCollectionsStatus422
+				| PostApiCollectionsStatus429
 				| PostApiCollectionsStatus500
 			>,
 			PostApiCollectionsOptions,
@@ -19306,7 +20465,10 @@ export function usePostApiCollections<TContext>(
 	const baseOptions = postApiCollectionsMutationOptions(config) as UseMutationOptions<
 		PostApiCollectionsStatus200,
 		ResponseErrorConfig<
-			PostApiCollectionsStatus404 | PostApiCollectionsStatus422 | PostApiCollectionsStatus500
+			| PostApiCollectionsStatus404
+			| PostApiCollectionsStatus422
+			| PostApiCollectionsStatus429
+			| PostApiCollectionsStatus500
 		>,
 		PostApiCollectionsOptions,
 		TContext
@@ -19315,7 +20477,10 @@ export function usePostApiCollections<TContext>(
 	return useMutation<
 		PostApiCollectionsStatus200,
 		ResponseErrorConfig<
-			PostApiCollectionsStatus404 | PostApiCollectionsStatus422 | PostApiCollectionsStatus500
+			| PostApiCollectionsStatus404
+			| PostApiCollectionsStatus422
+			| PostApiCollectionsStatus429
+			| PostApiCollectionsStatus500
 		>,
 		PostApiCollectionsOptions,
 		TContext
@@ -19329,7 +20494,10 @@ export function usePostApiCollections<TContext>(
 	) as UseMutationResult<
 		PostApiCollectionsStatus200,
 		ResponseErrorConfig<
-			PostApiCollectionsStatus404 | PostApiCollectionsStatus422 | PostApiCollectionsStatus500
+			| PostApiCollectionsStatus404
+			| PostApiCollectionsStatus422
+			| PostApiCollectionsStatus429
+			| PostApiCollectionsStatus500
 		>,
 		PostApiCollectionsOptions,
 		TContext
@@ -19348,7 +20516,9 @@ export function getApiCollectionsFavoritesQueryOptions(
 	return queryOptions<
 		GetApiCollectionsFavoritesStatus200,
 		ResponseErrorConfig<
-			GetApiCollectionsFavoritesStatus404 | GetApiCollectionsFavoritesStatus500
+			| GetApiCollectionsFavoritesStatus404
+			| GetApiCollectionsFavoritesStatus429
+			| GetApiCollectionsFavoritesStatus500
 		>,
 		GetApiCollectionsFavoritesStatus200,
 		typeof queryKey
@@ -19379,7 +20549,9 @@ export function useGetApiCollectionsFavorites<
 			QueryObserverOptions<
 				GetApiCollectionsFavoritesStatus200,
 				ResponseErrorConfig<
-					GetApiCollectionsFavoritesStatus404 | GetApiCollectionsFavoritesStatus500
+					| GetApiCollectionsFavoritesStatus404
+					| GetApiCollectionsFavoritesStatus429
+					| GetApiCollectionsFavoritesStatus500
 				>,
 				TData,
 				TQueryData,
@@ -19403,7 +20575,9 @@ export function useGetApiCollectionsFavorites<
 	) as UseQueryResult<
 		TData,
 		ResponseErrorConfig<
-			GetApiCollectionsFavoritesStatus404 | GetApiCollectionsFavoritesStatus500
+			| GetApiCollectionsFavoritesStatus404
+			| GetApiCollectionsFavoritesStatus429
+			| GetApiCollectionsFavoritesStatus500
 		>
 	> & { queryKey: TQueryKey };
 
@@ -19523,6 +20697,7 @@ export function patchApiCollectionsByCollectionIdMutationOptions<TContext = unkn
 			| PatchApiCollectionsByCollectionIdStatus404
 			| PatchApiCollectionsByCollectionIdStatus409
 			| PatchApiCollectionsByCollectionIdStatus422
+			| PatchApiCollectionsByCollectionIdStatus429
 			| PatchApiCollectionsByCollectionIdStatus500
 		>,
 		PatchApiCollectionsByCollectionIdOptions,
@@ -19554,6 +20729,7 @@ export function usePatchApiCollectionsByCollectionId<TContext>(
 				| PatchApiCollectionsByCollectionIdStatus404
 				| PatchApiCollectionsByCollectionIdStatus409
 				| PatchApiCollectionsByCollectionIdStatus422
+				| PatchApiCollectionsByCollectionIdStatus429
 				| PatchApiCollectionsByCollectionIdStatus500
 			>,
 			PatchApiCollectionsByCollectionIdOptions,
@@ -19576,6 +20752,7 @@ export function usePatchApiCollectionsByCollectionId<TContext>(
 			| PatchApiCollectionsByCollectionIdStatus404
 			| PatchApiCollectionsByCollectionIdStatus409
 			| PatchApiCollectionsByCollectionIdStatus422
+			| PatchApiCollectionsByCollectionIdStatus429
 			| PatchApiCollectionsByCollectionIdStatus500
 		>,
 		PatchApiCollectionsByCollectionIdOptions,
@@ -19589,6 +20766,7 @@ export function usePatchApiCollectionsByCollectionId<TContext>(
 			| PatchApiCollectionsByCollectionIdStatus404
 			| PatchApiCollectionsByCollectionIdStatus409
 			| PatchApiCollectionsByCollectionIdStatus422
+			| PatchApiCollectionsByCollectionIdStatus429
 			| PatchApiCollectionsByCollectionIdStatus500
 		>,
 		PatchApiCollectionsByCollectionIdOptions,
@@ -19607,6 +20785,7 @@ export function usePatchApiCollectionsByCollectionId<TContext>(
 			| PatchApiCollectionsByCollectionIdStatus404
 			| PatchApiCollectionsByCollectionIdStatus409
 			| PatchApiCollectionsByCollectionIdStatus422
+			| PatchApiCollectionsByCollectionIdStatus429
 			| PatchApiCollectionsByCollectionIdStatus500
 		>,
 		PatchApiCollectionsByCollectionIdOptions,
@@ -19627,6 +20806,7 @@ export function deleteApiCollectionsByCollectionIdMutationOptions<TContext = unk
 			| DeleteApiCollectionsByCollectionIdStatus403
 			| DeleteApiCollectionsByCollectionIdStatus409
 			| DeleteApiCollectionsByCollectionIdStatus422
+			| DeleteApiCollectionsByCollectionIdStatus429
 			| DeleteApiCollectionsByCollectionIdStatus500
 		>,
 		DeleteApiCollectionsByCollectionIdOptions,
@@ -19656,6 +20836,7 @@ export function useDeleteApiCollectionsByCollectionId<TContext>(
 				| DeleteApiCollectionsByCollectionIdStatus403
 				| DeleteApiCollectionsByCollectionIdStatus409
 				| DeleteApiCollectionsByCollectionIdStatus422
+				| DeleteApiCollectionsByCollectionIdStatus429
 				| DeleteApiCollectionsByCollectionIdStatus500
 			>,
 			DeleteApiCollectionsByCollectionIdOptions,
@@ -19677,6 +20858,7 @@ export function useDeleteApiCollectionsByCollectionId<TContext>(
 			| DeleteApiCollectionsByCollectionIdStatus403
 			| DeleteApiCollectionsByCollectionIdStatus409
 			| DeleteApiCollectionsByCollectionIdStatus422
+			| DeleteApiCollectionsByCollectionIdStatus429
 			| DeleteApiCollectionsByCollectionIdStatus500
 		>,
 		DeleteApiCollectionsByCollectionIdOptions,
@@ -19689,6 +20871,7 @@ export function useDeleteApiCollectionsByCollectionId<TContext>(
 			| DeleteApiCollectionsByCollectionIdStatus403
 			| DeleteApiCollectionsByCollectionIdStatus409
 			| DeleteApiCollectionsByCollectionIdStatus422
+			| DeleteApiCollectionsByCollectionIdStatus429
 			| DeleteApiCollectionsByCollectionIdStatus500
 		>,
 		DeleteApiCollectionsByCollectionIdOptions,
@@ -19706,6 +20889,7 @@ export function useDeleteApiCollectionsByCollectionId<TContext>(
 			| DeleteApiCollectionsByCollectionIdStatus403
 			| DeleteApiCollectionsByCollectionIdStatus409
 			| DeleteApiCollectionsByCollectionIdStatus422
+			| DeleteApiCollectionsByCollectionIdStatus429
 			| DeleteApiCollectionsByCollectionIdStatus500
 		>,
 		DeleteApiCollectionsByCollectionIdOptions,
@@ -19727,6 +20911,7 @@ export function postApiCollectionsByCollectionIdItemsBatchMutationOptions<TConte
 			| PostApiCollectionsByCollectionIdItemsBatchStatus404
 			| PostApiCollectionsByCollectionIdItemsBatchStatus409
 			| PostApiCollectionsByCollectionIdItemsBatchStatus422
+			| PostApiCollectionsByCollectionIdItemsBatchStatus429
 			| PostApiCollectionsByCollectionIdItemsBatchStatus500
 		>,
 		PostApiCollectionsByCollectionIdItemsBatchOptions,
@@ -19758,6 +20943,7 @@ export function usePostApiCollectionsByCollectionIdItemsBatch<TContext>(
 				| PostApiCollectionsByCollectionIdItemsBatchStatus404
 				| PostApiCollectionsByCollectionIdItemsBatchStatus409
 				| PostApiCollectionsByCollectionIdItemsBatchStatus422
+				| PostApiCollectionsByCollectionIdItemsBatchStatus429
 				| PostApiCollectionsByCollectionIdItemsBatchStatus500
 			>,
 			PostApiCollectionsByCollectionIdItemsBatchOptions,
@@ -19780,6 +20966,7 @@ export function usePostApiCollectionsByCollectionIdItemsBatch<TContext>(
 			| PostApiCollectionsByCollectionIdItemsBatchStatus404
 			| PostApiCollectionsByCollectionIdItemsBatchStatus409
 			| PostApiCollectionsByCollectionIdItemsBatchStatus422
+			| PostApiCollectionsByCollectionIdItemsBatchStatus429
 			| PostApiCollectionsByCollectionIdItemsBatchStatus500
 		>,
 		PostApiCollectionsByCollectionIdItemsBatchOptions,
@@ -19793,6 +20980,7 @@ export function usePostApiCollectionsByCollectionIdItemsBatch<TContext>(
 			| PostApiCollectionsByCollectionIdItemsBatchStatus404
 			| PostApiCollectionsByCollectionIdItemsBatchStatus409
 			| PostApiCollectionsByCollectionIdItemsBatchStatus422
+			| PostApiCollectionsByCollectionIdItemsBatchStatus429
 			| PostApiCollectionsByCollectionIdItemsBatchStatus500
 		>,
 		PostApiCollectionsByCollectionIdItemsBatchOptions,
@@ -19811,6 +20999,7 @@ export function usePostApiCollectionsByCollectionIdItemsBatch<TContext>(
 			| PostApiCollectionsByCollectionIdItemsBatchStatus404
 			| PostApiCollectionsByCollectionIdItemsBatchStatus409
 			| PostApiCollectionsByCollectionIdItemsBatchStatus422
+			| PostApiCollectionsByCollectionIdItemsBatchStatus429
 			| PostApiCollectionsByCollectionIdItemsBatchStatus500
 		>,
 		PostApiCollectionsByCollectionIdItemsBatchOptions,
@@ -19831,6 +21020,7 @@ export function putApiCollectionsByCollectionIdItemsByTargetIdMutationOptions<TC
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus403
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus404
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus422
+			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus429
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus500
 		>,
 		PutApiCollectionsByCollectionIdItemsByTargetIdOptions,
@@ -19861,6 +21051,7 @@ export function usePutApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 				| PutApiCollectionsByCollectionIdItemsByTargetIdStatus403
 				| PutApiCollectionsByCollectionIdItemsByTargetIdStatus404
 				| PutApiCollectionsByCollectionIdItemsByTargetIdStatus422
+				| PutApiCollectionsByCollectionIdItemsByTargetIdStatus429
 				| PutApiCollectionsByCollectionIdItemsByTargetIdStatus500
 			>,
 			PutApiCollectionsByCollectionIdItemsByTargetIdOptions,
@@ -19882,6 +21073,7 @@ export function usePutApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus403
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus404
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus422
+			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus429
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus500
 		>,
 		PutApiCollectionsByCollectionIdItemsByTargetIdOptions,
@@ -19894,6 +21086,7 @@ export function usePutApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus403
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus404
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus422
+			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus429
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus500
 		>,
 		PutApiCollectionsByCollectionIdItemsByTargetIdOptions,
@@ -19911,6 +21104,7 @@ export function usePutApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus403
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus404
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus422
+			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus429
 			| PutApiCollectionsByCollectionIdItemsByTargetIdStatus500
 		>,
 		PutApiCollectionsByCollectionIdItemsByTargetIdOptions,
@@ -19930,6 +21124,7 @@ export function deleteApiCollectionsByCollectionIdItemsByTargetIdMutationOptions
 		ResponseErrorConfig<
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422
+			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus500
 		>,
 		DeleteApiCollectionsByCollectionIdItemsByTargetIdOptions,
@@ -19958,6 +21153,7 @@ export function useDeleteApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 			ResponseErrorConfig<
 				| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403
 				| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422
+				| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429
 				| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus500
 			>,
 			DeleteApiCollectionsByCollectionIdItemsByTargetIdOptions,
@@ -19979,6 +21175,7 @@ export function useDeleteApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422
+			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus500
 		>,
 		DeleteApiCollectionsByCollectionIdItemsByTargetIdOptions,
@@ -19990,6 +21187,7 @@ export function useDeleteApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422
+			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus500
 		>,
 		DeleteApiCollectionsByCollectionIdItemsByTargetIdOptions,
@@ -20006,6 +21204,7 @@ export function useDeleteApiCollectionsByCollectionIdItemsByTargetId<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus403
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus422
+			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus429
 			| DeleteApiCollectionsByCollectionIdItemsByTargetIdStatus500
 		>,
 		DeleteApiCollectionsByCollectionIdItemsByTargetIdOptions,
@@ -20025,6 +21224,7 @@ export function putApiCollectionsFavoritesItemsByTargetIdMutationOptions<TContex
 		ResponseErrorConfig<
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus404
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus422
+			| PutApiCollectionsFavoritesItemsByTargetIdStatus429
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus500
 		>,
 		PutApiCollectionsFavoritesItemsByTargetIdOptions,
@@ -20053,6 +21253,7 @@ export function usePutApiCollectionsFavoritesItemsByTargetId<TContext>(
 			ResponseErrorConfig<
 				| PutApiCollectionsFavoritesItemsByTargetIdStatus404
 				| PutApiCollectionsFavoritesItemsByTargetIdStatus422
+				| PutApiCollectionsFavoritesItemsByTargetIdStatus429
 				| PutApiCollectionsFavoritesItemsByTargetIdStatus500
 			>,
 			PutApiCollectionsFavoritesItemsByTargetIdOptions,
@@ -20073,6 +21274,7 @@ export function usePutApiCollectionsFavoritesItemsByTargetId<TContext>(
 		ResponseErrorConfig<
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus404
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus422
+			| PutApiCollectionsFavoritesItemsByTargetIdStatus429
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus500
 		>,
 		PutApiCollectionsFavoritesItemsByTargetIdOptions,
@@ -20084,6 +21286,7 @@ export function usePutApiCollectionsFavoritesItemsByTargetId<TContext>(
 		ResponseErrorConfig<
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus404
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus422
+			| PutApiCollectionsFavoritesItemsByTargetIdStatus429
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus500
 		>,
 		PutApiCollectionsFavoritesItemsByTargetIdOptions,
@@ -20100,6 +21303,7 @@ export function usePutApiCollectionsFavoritesItemsByTargetId<TContext>(
 		ResponseErrorConfig<
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus404
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus422
+			| PutApiCollectionsFavoritesItemsByTargetIdStatus429
 			| PutApiCollectionsFavoritesItemsByTargetIdStatus500
 		>,
 		PutApiCollectionsFavoritesItemsByTargetIdOptions,
@@ -20118,6 +21322,7 @@ export function deleteApiCollectionsFavoritesItemsByTargetIdMutationOptions<TCon
 		DeleteApiCollectionsFavoritesItemsByTargetIdStatus200,
 		ResponseErrorConfig<
 			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus422
+			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus429
 			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus500
 		>,
 		DeleteApiCollectionsFavoritesItemsByTargetIdOptions,
@@ -20145,6 +21350,7 @@ export function useDeleteApiCollectionsFavoritesItemsByTargetId<TContext>(
 			DeleteApiCollectionsFavoritesItemsByTargetIdStatus200,
 			ResponseErrorConfig<
 				| DeleteApiCollectionsFavoritesItemsByTargetIdStatus422
+				| DeleteApiCollectionsFavoritesItemsByTargetIdStatus429
 				| DeleteApiCollectionsFavoritesItemsByTargetIdStatus500
 			>,
 			DeleteApiCollectionsFavoritesItemsByTargetIdOptions,
@@ -20164,6 +21370,7 @@ export function useDeleteApiCollectionsFavoritesItemsByTargetId<TContext>(
 		DeleteApiCollectionsFavoritesItemsByTargetIdStatus200,
 		ResponseErrorConfig<
 			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus422
+			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus429
 			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus500
 		>,
 		DeleteApiCollectionsFavoritesItemsByTargetIdOptions,
@@ -20174,6 +21381,7 @@ export function useDeleteApiCollectionsFavoritesItemsByTargetId<TContext>(
 		DeleteApiCollectionsFavoritesItemsByTargetIdStatus200,
 		ResponseErrorConfig<
 			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus422
+			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus429
 			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus500
 		>,
 		DeleteApiCollectionsFavoritesItemsByTargetIdOptions,
@@ -20189,6 +21397,7 @@ export function useDeleteApiCollectionsFavoritesItemsByTargetId<TContext>(
 		DeleteApiCollectionsFavoritesItemsByTargetIdStatus200,
 		ResponseErrorConfig<
 			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus422
+			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus429
 			| DeleteApiCollectionsFavoritesItemsByTargetIdStatus500
 		>,
 		DeleteApiCollectionsFavoritesItemsByTargetIdOptions,
@@ -20285,6 +21494,7 @@ export function postApiReviewsMutationOptions<TContext = unknown>(
 			| PostApiReviewsStatus404
 			| PostApiReviewsStatus409
 			| PostApiReviewsStatus422
+			| PostApiReviewsStatus429
 			| PostApiReviewsStatus500
 		>,
 		PostApiReviewsOptions,
@@ -20311,6 +21521,7 @@ export function usePostApiReviews<TContext>(
 				| PostApiReviewsStatus404
 				| PostApiReviewsStatus409
 				| PostApiReviewsStatus422
+				| PostApiReviewsStatus429
 				| PostApiReviewsStatus500
 			>,
 			PostApiReviewsOptions,
@@ -20330,6 +21541,7 @@ export function usePostApiReviews<TContext>(
 			| PostApiReviewsStatus404
 			| PostApiReviewsStatus409
 			| PostApiReviewsStatus422
+			| PostApiReviewsStatus429
 			| PostApiReviewsStatus500
 		>,
 		PostApiReviewsOptions,
@@ -20343,6 +21555,7 @@ export function usePostApiReviews<TContext>(
 			| PostApiReviewsStatus404
 			| PostApiReviewsStatus409
 			| PostApiReviewsStatus422
+			| PostApiReviewsStatus429
 			| PostApiReviewsStatus500
 		>,
 		PostApiReviewsOptions,
@@ -20361,6 +21574,7 @@ export function usePostApiReviews<TContext>(
 			| PostApiReviewsStatus404
 			| PostApiReviewsStatus409
 			| PostApiReviewsStatus422
+			| PostApiReviewsStatus429
 			| PostApiReviewsStatus500
 		>,
 		PostApiReviewsOptions,
@@ -20483,6 +21697,7 @@ export function patchApiReviewsByReviewIdMutationOptions<TContext = unknown>(
 			| PatchApiReviewsByReviewIdStatus403
 			| PatchApiReviewsByReviewIdStatus404
 			| PatchApiReviewsByReviewIdStatus422
+			| PatchApiReviewsByReviewIdStatus429
 			| PatchApiReviewsByReviewIdStatus500
 		>,
 		PatchApiReviewsByReviewIdOptions,
@@ -20513,6 +21728,7 @@ export function usePatchApiReviewsByReviewId<TContext>(
 				| PatchApiReviewsByReviewIdStatus403
 				| PatchApiReviewsByReviewIdStatus404
 				| PatchApiReviewsByReviewIdStatus422
+				| PatchApiReviewsByReviewIdStatus429
 				| PatchApiReviewsByReviewIdStatus500
 			>,
 			PatchApiReviewsByReviewIdOptions,
@@ -20531,6 +21747,7 @@ export function usePatchApiReviewsByReviewId<TContext>(
 			| PatchApiReviewsByReviewIdStatus403
 			| PatchApiReviewsByReviewIdStatus404
 			| PatchApiReviewsByReviewIdStatus422
+			| PatchApiReviewsByReviewIdStatus429
 			| PatchApiReviewsByReviewIdStatus500
 		>,
 		PatchApiReviewsByReviewIdOptions,
@@ -20543,6 +21760,7 @@ export function usePatchApiReviewsByReviewId<TContext>(
 			| PatchApiReviewsByReviewIdStatus403
 			| PatchApiReviewsByReviewIdStatus404
 			| PatchApiReviewsByReviewIdStatus422
+			| PatchApiReviewsByReviewIdStatus429
 			| PatchApiReviewsByReviewIdStatus500
 		>,
 		PatchApiReviewsByReviewIdOptions,
@@ -20560,6 +21778,7 @@ export function usePatchApiReviewsByReviewId<TContext>(
 			| PatchApiReviewsByReviewIdStatus403
 			| PatchApiReviewsByReviewIdStatus404
 			| PatchApiReviewsByReviewIdStatus422
+			| PatchApiReviewsByReviewIdStatus429
 			| PatchApiReviewsByReviewIdStatus500
 		>,
 		PatchApiReviewsByReviewIdOptions,
@@ -20580,6 +21799,7 @@ export function deleteApiReviewsByReviewIdMutationOptions<TContext = unknown>(
 			| DeleteApiReviewsByReviewIdStatus403
 			| DeleteApiReviewsByReviewIdStatus404
 			| DeleteApiReviewsByReviewIdStatus422
+			| DeleteApiReviewsByReviewIdStatus429
 			| DeleteApiReviewsByReviewIdStatus500
 		>,
 		DeleteApiReviewsByReviewIdOptions,
@@ -20609,6 +21829,7 @@ export function useDeleteApiReviewsByReviewId<TContext>(
 				| DeleteApiReviewsByReviewIdStatus403
 				| DeleteApiReviewsByReviewIdStatus404
 				| DeleteApiReviewsByReviewIdStatus422
+				| DeleteApiReviewsByReviewIdStatus429
 				| DeleteApiReviewsByReviewIdStatus500
 			>,
 			DeleteApiReviewsByReviewIdOptions,
@@ -20627,6 +21848,7 @@ export function useDeleteApiReviewsByReviewId<TContext>(
 			| DeleteApiReviewsByReviewIdStatus403
 			| DeleteApiReviewsByReviewIdStatus404
 			| DeleteApiReviewsByReviewIdStatus422
+			| DeleteApiReviewsByReviewIdStatus429
 			| DeleteApiReviewsByReviewIdStatus500
 		>,
 		DeleteApiReviewsByReviewIdOptions,
@@ -20639,6 +21861,7 @@ export function useDeleteApiReviewsByReviewId<TContext>(
 			| DeleteApiReviewsByReviewIdStatus403
 			| DeleteApiReviewsByReviewIdStatus404
 			| DeleteApiReviewsByReviewIdStatus422
+			| DeleteApiReviewsByReviewIdStatus429
 			| DeleteApiReviewsByReviewIdStatus500
 		>,
 		DeleteApiReviewsByReviewIdOptions,
@@ -20656,6 +21879,7 @@ export function useDeleteApiReviewsByReviewId<TContext>(
 			| DeleteApiReviewsByReviewIdStatus403
 			| DeleteApiReviewsByReviewIdStatus404
 			| DeleteApiReviewsByReviewIdStatus422
+			| DeleteApiReviewsByReviewIdStatus429
 			| DeleteApiReviewsByReviewIdStatus500
 		>,
 		DeleteApiReviewsByReviewIdOptions,
@@ -20676,6 +21900,7 @@ export function putApiScoresByTargetIdMutationOptions<TContext = unknown>(
 			| PutApiScoresByTargetIdStatus404
 			| PutApiScoresByTargetIdStatus409
 			| PutApiScoresByTargetIdStatus422
+			| PutApiScoresByTargetIdStatus429
 			| PutApiScoresByTargetIdStatus500
 		>,
 		PutApiScoresByTargetIdOptions,
@@ -20707,6 +21932,7 @@ export function usePutApiScoresByTargetId<TContext>(
 				| PutApiScoresByTargetIdStatus404
 				| PutApiScoresByTargetIdStatus409
 				| PutApiScoresByTargetIdStatus422
+				| PutApiScoresByTargetIdStatus429
 				| PutApiScoresByTargetIdStatus500
 			>,
 			PutApiScoresByTargetIdOptions,
@@ -20726,6 +21952,7 @@ export function usePutApiScoresByTargetId<TContext>(
 			| PutApiScoresByTargetIdStatus404
 			| PutApiScoresByTargetIdStatus409
 			| PutApiScoresByTargetIdStatus422
+			| PutApiScoresByTargetIdStatus429
 			| PutApiScoresByTargetIdStatus500
 		>,
 		PutApiScoresByTargetIdOptions,
@@ -20739,6 +21966,7 @@ export function usePutApiScoresByTargetId<TContext>(
 			| PutApiScoresByTargetIdStatus404
 			| PutApiScoresByTargetIdStatus409
 			| PutApiScoresByTargetIdStatus422
+			| PutApiScoresByTargetIdStatus429
 			| PutApiScoresByTargetIdStatus500
 		>,
 		PutApiScoresByTargetIdOptions,
@@ -20757,6 +21985,7 @@ export function usePutApiScoresByTargetId<TContext>(
 			| PutApiScoresByTargetIdStatus404
 			| PutApiScoresByTargetIdStatus409
 			| PutApiScoresByTargetIdStatus422
+			| PutApiScoresByTargetIdStatus429
 			| PutApiScoresByTargetIdStatus500
 		>,
 		PutApiScoresByTargetIdOptions,
@@ -21206,6 +22435,7 @@ export function putApiReactionsUnitsByUnitIdMutationOptions<TContext = unknown>(
 		ResponseErrorConfig<
 			| PutApiReactionsUnitsByUnitIdStatus404
 			| PutApiReactionsUnitsByUnitIdStatus422
+			| PutApiReactionsUnitsByUnitIdStatus429
 			| PutApiReactionsUnitsByUnitIdStatus500
 		>,
 		PutApiReactionsUnitsByUnitIdOptions,
@@ -21235,6 +22465,7 @@ export function usePutApiReactionsUnitsByUnitId<TContext>(
 			ResponseErrorConfig<
 				| PutApiReactionsUnitsByUnitIdStatus404
 				| PutApiReactionsUnitsByUnitIdStatus422
+				| PutApiReactionsUnitsByUnitIdStatus429
 				| PutApiReactionsUnitsByUnitIdStatus500
 			>,
 			PutApiReactionsUnitsByUnitIdOptions,
@@ -21252,6 +22483,7 @@ export function usePutApiReactionsUnitsByUnitId<TContext>(
 		ResponseErrorConfig<
 			| PutApiReactionsUnitsByUnitIdStatus404
 			| PutApiReactionsUnitsByUnitIdStatus422
+			| PutApiReactionsUnitsByUnitIdStatus429
 			| PutApiReactionsUnitsByUnitIdStatus500
 		>,
 		PutApiReactionsUnitsByUnitIdOptions,
@@ -21263,6 +22495,7 @@ export function usePutApiReactionsUnitsByUnitId<TContext>(
 		ResponseErrorConfig<
 			| PutApiReactionsUnitsByUnitIdStatus404
 			| PutApiReactionsUnitsByUnitIdStatus422
+			| PutApiReactionsUnitsByUnitIdStatus429
 			| PutApiReactionsUnitsByUnitIdStatus500
 		>,
 		PutApiReactionsUnitsByUnitIdOptions,
@@ -21279,6 +22512,7 @@ export function usePutApiReactionsUnitsByUnitId<TContext>(
 		ResponseErrorConfig<
 			| PutApiReactionsUnitsByUnitIdStatus404
 			| PutApiReactionsUnitsByUnitIdStatus422
+			| PutApiReactionsUnitsByUnitIdStatus429
 			| PutApiReactionsUnitsByUnitIdStatus500
 		>,
 		PutApiReactionsUnitsByUnitIdOptions,
@@ -21296,7 +22530,9 @@ export function deleteApiReactionsUnitsByUnitIdMutationOptions<TContext = unknow
 	return mutationOptions<
 		DeleteApiReactionsUnitsByUnitIdStatus200,
 		ResponseErrorConfig<
-			DeleteApiReactionsUnitsByUnitIdStatus422 | DeleteApiReactionsUnitsByUnitIdStatus500
+			| DeleteApiReactionsUnitsByUnitIdStatus422
+			| DeleteApiReactionsUnitsByUnitIdStatus429
+			| DeleteApiReactionsUnitsByUnitIdStatus500
 		>,
 		DeleteApiReactionsUnitsByUnitIdOptions,
 		TContext
@@ -21323,7 +22559,9 @@ export function useDeleteApiReactionsUnitsByUnitId<TContext>(
 		mutation?: UseMutationOptions<
 			DeleteApiReactionsUnitsByUnitIdStatus200,
 			ResponseErrorConfig<
-				DeleteApiReactionsUnitsByUnitIdStatus422 | DeleteApiReactionsUnitsByUnitIdStatus500
+				| DeleteApiReactionsUnitsByUnitIdStatus422
+				| DeleteApiReactionsUnitsByUnitIdStatus429
+				| DeleteApiReactionsUnitsByUnitIdStatus500
 			>,
 			DeleteApiReactionsUnitsByUnitIdOptions,
 			TContext
@@ -21340,7 +22578,9 @@ export function useDeleteApiReactionsUnitsByUnitId<TContext>(
 	) as UseMutationOptions<
 		DeleteApiReactionsUnitsByUnitIdStatus200,
 		ResponseErrorConfig<
-			DeleteApiReactionsUnitsByUnitIdStatus422 | DeleteApiReactionsUnitsByUnitIdStatus500
+			| DeleteApiReactionsUnitsByUnitIdStatus422
+			| DeleteApiReactionsUnitsByUnitIdStatus429
+			| DeleteApiReactionsUnitsByUnitIdStatus500
 		>,
 		DeleteApiReactionsUnitsByUnitIdOptions,
 		TContext
@@ -21349,7 +22589,9 @@ export function useDeleteApiReactionsUnitsByUnitId<TContext>(
 	return useMutation<
 		DeleteApiReactionsUnitsByUnitIdStatus200,
 		ResponseErrorConfig<
-			DeleteApiReactionsUnitsByUnitIdStatus422 | DeleteApiReactionsUnitsByUnitIdStatus500
+			| DeleteApiReactionsUnitsByUnitIdStatus422
+			| DeleteApiReactionsUnitsByUnitIdStatus429
+			| DeleteApiReactionsUnitsByUnitIdStatus500
 		>,
 		DeleteApiReactionsUnitsByUnitIdOptions,
 		TContext
@@ -21363,7 +22605,9 @@ export function useDeleteApiReactionsUnitsByUnitId<TContext>(
 	) as UseMutationResult<
 		DeleteApiReactionsUnitsByUnitIdStatus200,
 		ResponseErrorConfig<
-			DeleteApiReactionsUnitsByUnitIdStatus422 | DeleteApiReactionsUnitsByUnitIdStatus500
+			| DeleteApiReactionsUnitsByUnitIdStatus422
+			| DeleteApiReactionsUnitsByUnitIdStatus429
+			| DeleteApiReactionsUnitsByUnitIdStatus500
 		>,
 		DeleteApiReactionsUnitsByUnitIdOptions,
 		TContext
@@ -21382,6 +22626,7 @@ export function putApiReactionsSharesByUnitIdMutationOptions<TContext = unknown>
 		ResponseErrorConfig<
 			| PutApiReactionsSharesByUnitIdStatus404
 			| PutApiReactionsSharesByUnitIdStatus422
+			| PutApiReactionsSharesByUnitIdStatus429
 			| PutApiReactionsSharesByUnitIdStatus500
 		>,
 		PutApiReactionsSharesByUnitIdOptions,
@@ -21410,6 +22655,7 @@ export function usePutApiReactionsSharesByUnitId<TContext>(
 			ResponseErrorConfig<
 				| PutApiReactionsSharesByUnitIdStatus404
 				| PutApiReactionsSharesByUnitIdStatus422
+				| PutApiReactionsSharesByUnitIdStatus429
 				| PutApiReactionsSharesByUnitIdStatus500
 			>,
 			PutApiReactionsSharesByUnitIdOptions,
@@ -21427,6 +22673,7 @@ export function usePutApiReactionsSharesByUnitId<TContext>(
 		ResponseErrorConfig<
 			| PutApiReactionsSharesByUnitIdStatus404
 			| PutApiReactionsSharesByUnitIdStatus422
+			| PutApiReactionsSharesByUnitIdStatus429
 			| PutApiReactionsSharesByUnitIdStatus500
 		>,
 		PutApiReactionsSharesByUnitIdOptions,
@@ -21438,6 +22685,7 @@ export function usePutApiReactionsSharesByUnitId<TContext>(
 		ResponseErrorConfig<
 			| PutApiReactionsSharesByUnitIdStatus404
 			| PutApiReactionsSharesByUnitIdStatus422
+			| PutApiReactionsSharesByUnitIdStatus429
 			| PutApiReactionsSharesByUnitIdStatus500
 		>,
 		PutApiReactionsSharesByUnitIdOptions,
@@ -21454,6 +22702,7 @@ export function usePutApiReactionsSharesByUnitId<TContext>(
 		ResponseErrorConfig<
 			| PutApiReactionsSharesByUnitIdStatus404
 			| PutApiReactionsSharesByUnitIdStatus422
+			| PutApiReactionsSharesByUnitIdStatus429
 			| PutApiReactionsSharesByUnitIdStatus500
 		>,
 		PutApiReactionsSharesByUnitIdOptions,
@@ -21471,7 +22720,9 @@ export function deleteApiReactionsSharesByUnitIdMutationOptions<TContext = unkno
 	return mutationOptions<
 		DeleteApiReactionsSharesByUnitIdStatus200,
 		ResponseErrorConfig<
-			DeleteApiReactionsSharesByUnitIdStatus422 | DeleteApiReactionsSharesByUnitIdStatus500
+			| DeleteApiReactionsSharesByUnitIdStatus422
+			| DeleteApiReactionsSharesByUnitIdStatus429
+			| DeleteApiReactionsSharesByUnitIdStatus500
 		>,
 		DeleteApiReactionsSharesByUnitIdOptions,
 		TContext
@@ -21498,6 +22749,7 @@ export function useDeleteApiReactionsSharesByUnitId<TContext>(
 			DeleteApiReactionsSharesByUnitIdStatus200,
 			ResponseErrorConfig<
 				| DeleteApiReactionsSharesByUnitIdStatus422
+				| DeleteApiReactionsSharesByUnitIdStatus429
 				| DeleteApiReactionsSharesByUnitIdStatus500
 			>,
 			DeleteApiReactionsSharesByUnitIdOptions,
@@ -21516,7 +22768,9 @@ export function useDeleteApiReactionsSharesByUnitId<TContext>(
 	) as UseMutationOptions<
 		DeleteApiReactionsSharesByUnitIdStatus200,
 		ResponseErrorConfig<
-			DeleteApiReactionsSharesByUnitIdStatus422 | DeleteApiReactionsSharesByUnitIdStatus500
+			| DeleteApiReactionsSharesByUnitIdStatus422
+			| DeleteApiReactionsSharesByUnitIdStatus429
+			| DeleteApiReactionsSharesByUnitIdStatus500
 		>,
 		DeleteApiReactionsSharesByUnitIdOptions,
 		TContext
@@ -21525,7 +22779,9 @@ export function useDeleteApiReactionsSharesByUnitId<TContext>(
 	return useMutation<
 		DeleteApiReactionsSharesByUnitIdStatus200,
 		ResponseErrorConfig<
-			DeleteApiReactionsSharesByUnitIdStatus422 | DeleteApiReactionsSharesByUnitIdStatus500
+			| DeleteApiReactionsSharesByUnitIdStatus422
+			| DeleteApiReactionsSharesByUnitIdStatus429
+			| DeleteApiReactionsSharesByUnitIdStatus500
 		>,
 		DeleteApiReactionsSharesByUnitIdOptions,
 		TContext
@@ -21539,7 +22795,9 @@ export function useDeleteApiReactionsSharesByUnitId<TContext>(
 	) as UseMutationResult<
 		DeleteApiReactionsSharesByUnitIdStatus200,
 		ResponseErrorConfig<
-			DeleteApiReactionsSharesByUnitIdStatus422 | DeleteApiReactionsSharesByUnitIdStatus500
+			| DeleteApiReactionsSharesByUnitIdStatus422
+			| DeleteApiReactionsSharesByUnitIdStatus429
+			| DeleteApiReactionsSharesByUnitIdStatus500
 		>,
 		DeleteApiReactionsSharesByUnitIdOptions,
 		TContext
@@ -21558,6 +22816,7 @@ export function postApiPollsMutationOptions<TContext = unknown>(
 			| PostApiPollsStatus400
 			| PostApiPollsStatus404
 			| PostApiPollsStatus422
+			| PostApiPollsStatus429
 			| PostApiPollsStatus500
 		>,
 		PostApiPollsOptions,
@@ -21583,6 +22842,7 @@ export function usePostApiPolls<TContext>(
 				| PostApiPollsStatus400
 				| PostApiPollsStatus404
 				| PostApiPollsStatus422
+				| PostApiPollsStatus429
 				| PostApiPollsStatus500
 			>,
 			PostApiPollsOptions,
@@ -21601,6 +22861,7 @@ export function usePostApiPolls<TContext>(
 			| PostApiPollsStatus400
 			| PostApiPollsStatus404
 			| PostApiPollsStatus422
+			| PostApiPollsStatus429
 			| PostApiPollsStatus500
 		>,
 		PostApiPollsOptions,
@@ -21613,6 +22874,7 @@ export function usePostApiPolls<TContext>(
 			| PostApiPollsStatus400
 			| PostApiPollsStatus404
 			| PostApiPollsStatus422
+			| PostApiPollsStatus429
 			| PostApiPollsStatus500
 		>,
 		PostApiPollsOptions,
@@ -21630,6 +22892,7 @@ export function usePostApiPolls<TContext>(
 			| PostApiPollsStatus400
 			| PostApiPollsStatus404
 			| PostApiPollsStatus422
+			| PostApiPollsStatus429
 			| PostApiPollsStatus500
 		>,
 		PostApiPollsOptions,
@@ -21742,6 +23005,7 @@ export function putApiPollsByPollIdVoteMutationOptions<TContext = unknown>(
 			| PutApiPollsByPollIdVoteStatus404
 			| PutApiPollsByPollIdVoteStatus409
 			| PutApiPollsByPollIdVoteStatus422
+			| PutApiPollsByPollIdVoteStatus429
 			| PutApiPollsByPollIdVoteStatus500
 		>,
 		PutApiPollsByPollIdVoteOptions,
@@ -21774,6 +23038,7 @@ export function usePutApiPollsByPollIdVote<TContext>(
 				| PutApiPollsByPollIdVoteStatus404
 				| PutApiPollsByPollIdVoteStatus409
 				| PutApiPollsByPollIdVoteStatus422
+				| PutApiPollsByPollIdVoteStatus429
 				| PutApiPollsByPollIdVoteStatus500
 			>,
 			PutApiPollsByPollIdVoteOptions,
@@ -21794,6 +23059,7 @@ export function usePutApiPollsByPollIdVote<TContext>(
 			| PutApiPollsByPollIdVoteStatus404
 			| PutApiPollsByPollIdVoteStatus409
 			| PutApiPollsByPollIdVoteStatus422
+			| PutApiPollsByPollIdVoteStatus429
 			| PutApiPollsByPollIdVoteStatus500
 		>,
 		PutApiPollsByPollIdVoteOptions,
@@ -21808,6 +23074,7 @@ export function usePutApiPollsByPollIdVote<TContext>(
 			| PutApiPollsByPollIdVoteStatus404
 			| PutApiPollsByPollIdVoteStatus409
 			| PutApiPollsByPollIdVoteStatus422
+			| PutApiPollsByPollIdVoteStatus429
 			| PutApiPollsByPollIdVoteStatus500
 		>,
 		PutApiPollsByPollIdVoteOptions,
@@ -21827,6 +23094,7 @@ export function usePutApiPollsByPollIdVote<TContext>(
 			| PutApiPollsByPollIdVoteStatus404
 			| PutApiPollsByPollIdVoteStatus409
 			| PutApiPollsByPollIdVoteStatus422
+			| PutApiPollsByPollIdVoteStatus429
 			| PutApiPollsByPollIdVoteStatus500
 		>,
 		PutApiPollsByPollIdVoteOptions,
@@ -21847,6 +23115,7 @@ export function deleteApiPollsByPollIdVoteMutationOptions<TContext = unknown>(
 			| DeleteApiPollsByPollIdVoteStatus403
 			| DeleteApiPollsByPollIdVoteStatus404
 			| DeleteApiPollsByPollIdVoteStatus422
+			| DeleteApiPollsByPollIdVoteStatus429
 			| DeleteApiPollsByPollIdVoteStatus500
 		>,
 		DeleteApiPollsByPollIdVoteOptions,
@@ -21876,6 +23145,7 @@ export function useDeleteApiPollsByPollIdVote<TContext>(
 				| DeleteApiPollsByPollIdVoteStatus403
 				| DeleteApiPollsByPollIdVoteStatus404
 				| DeleteApiPollsByPollIdVoteStatus422
+				| DeleteApiPollsByPollIdVoteStatus429
 				| DeleteApiPollsByPollIdVoteStatus500
 			>,
 			DeleteApiPollsByPollIdVoteOptions,
@@ -21894,6 +23164,7 @@ export function useDeleteApiPollsByPollIdVote<TContext>(
 			| DeleteApiPollsByPollIdVoteStatus403
 			| DeleteApiPollsByPollIdVoteStatus404
 			| DeleteApiPollsByPollIdVoteStatus422
+			| DeleteApiPollsByPollIdVoteStatus429
 			| DeleteApiPollsByPollIdVoteStatus500
 		>,
 		DeleteApiPollsByPollIdVoteOptions,
@@ -21906,6 +23177,7 @@ export function useDeleteApiPollsByPollIdVote<TContext>(
 			| DeleteApiPollsByPollIdVoteStatus403
 			| DeleteApiPollsByPollIdVoteStatus404
 			| DeleteApiPollsByPollIdVoteStatus422
+			| DeleteApiPollsByPollIdVoteStatus429
 			| DeleteApiPollsByPollIdVoteStatus500
 		>,
 		DeleteApiPollsByPollIdVoteOptions,
@@ -21923,6 +23195,7 @@ export function useDeleteApiPollsByPollIdVote<TContext>(
 			| DeleteApiPollsByPollIdVoteStatus403
 			| DeleteApiPollsByPollIdVoteStatus404
 			| DeleteApiPollsByPollIdVoteStatus422
+			| DeleteApiPollsByPollIdVoteStatus429
 			| DeleteApiPollsByPollIdVoteStatus500
 		>,
 		DeleteApiPollsByPollIdVoteOptions,
@@ -21944,6 +23217,7 @@ export function postApiPollsByPollIdCloseMutationOptions<TContext = unknown>(
 			| PostApiPollsByPollIdCloseStatus404
 			| PostApiPollsByPollIdCloseStatus409
 			| PostApiPollsByPollIdCloseStatus422
+			| PostApiPollsByPollIdCloseStatus429
 			| PostApiPollsByPollIdCloseStatus500
 		>,
 		PostApiPollsByPollIdCloseOptions,
@@ -21974,6 +23248,7 @@ export function usePostApiPollsByPollIdClose<TContext>(
 				| PostApiPollsByPollIdCloseStatus404
 				| PostApiPollsByPollIdCloseStatus409
 				| PostApiPollsByPollIdCloseStatus422
+				| PostApiPollsByPollIdCloseStatus429
 				| PostApiPollsByPollIdCloseStatus500
 			>,
 			PostApiPollsByPollIdCloseOptions,
@@ -21993,6 +23268,7 @@ export function usePostApiPollsByPollIdClose<TContext>(
 			| PostApiPollsByPollIdCloseStatus404
 			| PostApiPollsByPollIdCloseStatus409
 			| PostApiPollsByPollIdCloseStatus422
+			| PostApiPollsByPollIdCloseStatus429
 			| PostApiPollsByPollIdCloseStatus500
 		>,
 		PostApiPollsByPollIdCloseOptions,
@@ -22006,6 +23282,7 @@ export function usePostApiPollsByPollIdClose<TContext>(
 			| PostApiPollsByPollIdCloseStatus404
 			| PostApiPollsByPollIdCloseStatus409
 			| PostApiPollsByPollIdCloseStatus422
+			| PostApiPollsByPollIdCloseStatus429
 			| PostApiPollsByPollIdCloseStatus500
 		>,
 		PostApiPollsByPollIdCloseOptions,
@@ -22024,6 +23301,7 @@ export function usePostApiPollsByPollIdClose<TContext>(
 			| PostApiPollsByPollIdCloseStatus404
 			| PostApiPollsByPollIdCloseStatus409
 			| PostApiPollsByPollIdCloseStatus422
+			| PostApiPollsByPollIdCloseStatus429
 			| PostApiPollsByPollIdCloseStatus500
 		>,
 		PostApiPollsByPollIdCloseOptions,
@@ -22138,6 +23416,7 @@ export function putApiPostsByPostIdScoresMutationOptions<TContext = unknown>(
 			| PutApiPostsByPostIdScoresStatus403
 			| PutApiPostsByPostIdScoresStatus404
 			| PutApiPostsByPostIdScoresStatus422
+			| PutApiPostsByPostIdScoresStatus429
 			| PutApiPostsByPostIdScoresStatus500
 		>,
 		PutApiPostsByPostIdScoresOptions,
@@ -22168,6 +23447,7 @@ export function usePutApiPostsByPostIdScores<TContext>(
 				| PutApiPostsByPostIdScoresStatus403
 				| PutApiPostsByPostIdScoresStatus404
 				| PutApiPostsByPostIdScoresStatus422
+				| PutApiPostsByPostIdScoresStatus429
 				| PutApiPostsByPostIdScoresStatus500
 			>,
 			PutApiPostsByPostIdScoresOptions,
@@ -22186,6 +23466,7 @@ export function usePutApiPostsByPostIdScores<TContext>(
 			| PutApiPostsByPostIdScoresStatus403
 			| PutApiPostsByPostIdScoresStatus404
 			| PutApiPostsByPostIdScoresStatus422
+			| PutApiPostsByPostIdScoresStatus429
 			| PutApiPostsByPostIdScoresStatus500
 		>,
 		PutApiPostsByPostIdScoresOptions,
@@ -22198,6 +23479,7 @@ export function usePutApiPostsByPostIdScores<TContext>(
 			| PutApiPostsByPostIdScoresStatus403
 			| PutApiPostsByPostIdScoresStatus404
 			| PutApiPostsByPostIdScoresStatus422
+			| PutApiPostsByPostIdScoresStatus429
 			| PutApiPostsByPostIdScoresStatus500
 		>,
 		PutApiPostsByPostIdScoresOptions,
@@ -22215,6 +23497,7 @@ export function usePutApiPostsByPostIdScores<TContext>(
 			| PutApiPostsByPostIdScoresStatus403
 			| PutApiPostsByPostIdScoresStatus404
 			| PutApiPostsByPostIdScoresStatus422
+			| PutApiPostsByPostIdScoresStatus429
 			| PutApiPostsByPostIdScoresStatus500
 		>,
 		PutApiPostsByPostIdScoresOptions,
@@ -22308,6 +23591,7 @@ export function postApiPostsMutationOptions<TContext = unknown>(
 			| PostApiPostsStatus404
 			| PostApiPostsStatus409
 			| PostApiPostsStatus422
+			| PostApiPostsStatus429
 			| PostApiPostsStatus500
 		>,
 		PostApiPostsOptions,
@@ -22334,6 +23618,7 @@ export function usePostApiPosts<TContext>(
 				| PostApiPostsStatus404
 				| PostApiPostsStatus409
 				| PostApiPostsStatus422
+				| PostApiPostsStatus429
 				| PostApiPostsStatus500
 			>,
 			PostApiPostsOptions,
@@ -22353,6 +23638,7 @@ export function usePostApiPosts<TContext>(
 			| PostApiPostsStatus404
 			| PostApiPostsStatus409
 			| PostApiPostsStatus422
+			| PostApiPostsStatus429
 			| PostApiPostsStatus500
 		>,
 		PostApiPostsOptions,
@@ -22366,6 +23652,7 @@ export function usePostApiPosts<TContext>(
 			| PostApiPostsStatus404
 			| PostApiPostsStatus409
 			| PostApiPostsStatus422
+			| PostApiPostsStatus429
 			| PostApiPostsStatus500
 		>,
 		PostApiPostsOptions,
@@ -22384,6 +23671,7 @@ export function usePostApiPosts<TContext>(
 			| PostApiPostsStatus404
 			| PostApiPostsStatus409
 			| PostApiPostsStatus422
+			| PostApiPostsStatus429
 			| PostApiPostsStatus500
 		>,
 		PostApiPostsOptions,
@@ -22503,6 +23791,7 @@ export function patchApiPostsByPostIdMutationOptions<TContext = unknown>(
 			| PatchApiPostsByPostIdStatus404
 			| PatchApiPostsByPostIdStatus409
 			| PatchApiPostsByPostIdStatus422
+			| PatchApiPostsByPostIdStatus429
 			| PatchApiPostsByPostIdStatus500
 		>,
 		PatchApiPostsByPostIdOptions,
@@ -22534,6 +23823,7 @@ export function usePatchApiPostsByPostId<TContext>(
 				| PatchApiPostsByPostIdStatus404
 				| PatchApiPostsByPostIdStatus409
 				| PatchApiPostsByPostIdStatus422
+				| PatchApiPostsByPostIdStatus429
 				| PatchApiPostsByPostIdStatus500
 			>,
 			PatchApiPostsByPostIdOptions,
@@ -22553,6 +23843,7 @@ export function usePatchApiPostsByPostId<TContext>(
 			| PatchApiPostsByPostIdStatus404
 			| PatchApiPostsByPostIdStatus409
 			| PatchApiPostsByPostIdStatus422
+			| PatchApiPostsByPostIdStatus429
 			| PatchApiPostsByPostIdStatus500
 		>,
 		PatchApiPostsByPostIdOptions,
@@ -22566,6 +23857,7 @@ export function usePatchApiPostsByPostId<TContext>(
 			| PatchApiPostsByPostIdStatus404
 			| PatchApiPostsByPostIdStatus409
 			| PatchApiPostsByPostIdStatus422
+			| PatchApiPostsByPostIdStatus429
 			| PatchApiPostsByPostIdStatus500
 		>,
 		PatchApiPostsByPostIdOptions,
@@ -22584,6 +23876,7 @@ export function usePatchApiPostsByPostId<TContext>(
 			| PatchApiPostsByPostIdStatus404
 			| PatchApiPostsByPostIdStatus409
 			| PatchApiPostsByPostIdStatus422
+			| PatchApiPostsByPostIdStatus429
 			| PatchApiPostsByPostIdStatus500
 		>,
 		PatchApiPostsByPostIdOptions,
@@ -22603,6 +23896,7 @@ export function deleteApiPostsByPostIdMutationOptions<TContext = unknown>(
 			| DeleteApiPostsByPostIdStatus403
 			| DeleteApiPostsByPostIdStatus404
 			| DeleteApiPostsByPostIdStatus422
+			| DeleteApiPostsByPostIdStatus429
 			| DeleteApiPostsByPostIdStatus500
 		>,
 		DeleteApiPostsByPostIdOptions,
@@ -22628,6 +23922,7 @@ export function useDeleteApiPostsByPostId<TContext>(
 				| DeleteApiPostsByPostIdStatus403
 				| DeleteApiPostsByPostIdStatus404
 				| DeleteApiPostsByPostIdStatus422
+				| DeleteApiPostsByPostIdStatus429
 				| DeleteApiPostsByPostIdStatus500
 			>,
 			DeleteApiPostsByPostIdOptions,
@@ -22646,6 +23941,7 @@ export function useDeleteApiPostsByPostId<TContext>(
 			| DeleteApiPostsByPostIdStatus403
 			| DeleteApiPostsByPostIdStatus404
 			| DeleteApiPostsByPostIdStatus422
+			| DeleteApiPostsByPostIdStatus429
 			| DeleteApiPostsByPostIdStatus500
 		>,
 		DeleteApiPostsByPostIdOptions,
@@ -22658,6 +23954,7 @@ export function useDeleteApiPostsByPostId<TContext>(
 			| DeleteApiPostsByPostIdStatus403
 			| DeleteApiPostsByPostIdStatus404
 			| DeleteApiPostsByPostIdStatus422
+			| DeleteApiPostsByPostIdStatus429
 			| DeleteApiPostsByPostIdStatus500
 		>,
 		DeleteApiPostsByPostIdOptions,
@@ -22675,6 +23972,7 @@ export function useDeleteApiPostsByPostId<TContext>(
 			| DeleteApiPostsByPostIdStatus403
 			| DeleteApiPostsByPostIdStatus404
 			| DeleteApiPostsByPostIdStatus422
+			| DeleteApiPostsByPostIdStatus429
 			| DeleteApiPostsByPostIdStatus500
 		>,
 		DeleteApiPostsByPostIdOptions,
@@ -22803,6 +24101,7 @@ export function postApiPostsByPostIdRepliesMutationOptions<TContext = unknown>(
 			| PostApiPostsByPostIdRepliesStatus404
 			| PostApiPostsByPostIdRepliesStatus409
 			| PostApiPostsByPostIdRepliesStatus422
+			| PostApiPostsByPostIdRepliesStatus429
 			| PostApiPostsByPostIdRepliesStatus500
 		>,
 		PostApiPostsByPostIdRepliesOptions,
@@ -22834,6 +24133,7 @@ export function usePostApiPostsByPostIdReplies<TContext>(
 				| PostApiPostsByPostIdRepliesStatus404
 				| PostApiPostsByPostIdRepliesStatus409
 				| PostApiPostsByPostIdRepliesStatus422
+				| PostApiPostsByPostIdRepliesStatus429
 				| PostApiPostsByPostIdRepliesStatus500
 			>,
 			PostApiPostsByPostIdRepliesOptions,
@@ -22853,6 +24153,7 @@ export function usePostApiPostsByPostIdReplies<TContext>(
 			| PostApiPostsByPostIdRepliesStatus404
 			| PostApiPostsByPostIdRepliesStatus409
 			| PostApiPostsByPostIdRepliesStatus422
+			| PostApiPostsByPostIdRepliesStatus429
 			| PostApiPostsByPostIdRepliesStatus500
 		>,
 		PostApiPostsByPostIdRepliesOptions,
@@ -22866,6 +24167,7 @@ export function usePostApiPostsByPostIdReplies<TContext>(
 			| PostApiPostsByPostIdRepliesStatus404
 			| PostApiPostsByPostIdRepliesStatus409
 			| PostApiPostsByPostIdRepliesStatus422
+			| PostApiPostsByPostIdRepliesStatus429
 			| PostApiPostsByPostIdRepliesStatus500
 		>,
 		PostApiPostsByPostIdRepliesOptions,
@@ -22884,6 +24186,7 @@ export function usePostApiPostsByPostIdReplies<TContext>(
 			| PostApiPostsByPostIdRepliesStatus404
 			| PostApiPostsByPostIdRepliesStatus409
 			| PostApiPostsByPostIdRepliesStatus422
+			| PostApiPostsByPostIdRepliesStatus429
 			| PostApiPostsByPostIdRepliesStatus500
 		>,
 		PostApiPostsByPostIdRepliesOptions,
@@ -22905,6 +24208,7 @@ export function patchApiPostsByPostIdRepliesByReplyPostIdMutationOptions<TContex
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus404
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus409
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus422
+			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus429
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus500
 		>,
 		PatchApiPostsByPostIdRepliesByReplyPostIdOptions,
@@ -22936,6 +24240,7 @@ export function usePatchApiPostsByPostIdRepliesByReplyPostId<TContext>(
 				| PatchApiPostsByPostIdRepliesByReplyPostIdStatus404
 				| PatchApiPostsByPostIdRepliesByReplyPostIdStatus409
 				| PatchApiPostsByPostIdRepliesByReplyPostIdStatus422
+				| PatchApiPostsByPostIdRepliesByReplyPostIdStatus429
 				| PatchApiPostsByPostIdRepliesByReplyPostIdStatus500
 			>,
 			PatchApiPostsByPostIdRepliesByReplyPostIdOptions,
@@ -22958,6 +24263,7 @@ export function usePatchApiPostsByPostIdRepliesByReplyPostId<TContext>(
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus404
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus409
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus422
+			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus429
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus500
 		>,
 		PatchApiPostsByPostIdRepliesByReplyPostIdOptions,
@@ -22971,6 +24277,7 @@ export function usePatchApiPostsByPostIdRepliesByReplyPostId<TContext>(
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus404
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus409
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus422
+			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus429
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus500
 		>,
 		PatchApiPostsByPostIdRepliesByReplyPostIdOptions,
@@ -22989,6 +24296,7 @@ export function usePatchApiPostsByPostIdRepliesByReplyPostId<TContext>(
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus404
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus409
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus422
+			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus429
 			| PatchApiPostsByPostIdRepliesByReplyPostIdStatus500
 		>,
 		PatchApiPostsByPostIdRepliesByReplyPostIdOptions,
@@ -23009,6 +24317,7 @@ export function deleteApiPostsByPostIdRepliesByReplyPostIdMutationOptions<TConte
 			| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus403
 			| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus404
 			| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus422
+			| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus429
 			| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus500
 		>,
 		DeleteApiPostsByPostIdRepliesByReplyPostIdOptions,
@@ -23038,6 +24347,7 @@ export function useDeleteApiPostsByPostIdRepliesByReplyPostId<TContext>(
 				| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus403
 				| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus404
 				| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus422
+				| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus429
 				| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus500
 			>,
 			DeleteApiPostsByPostIdRepliesByReplyPostIdOptions,
@@ -23059,6 +24369,7 @@ export function useDeleteApiPostsByPostIdRepliesByReplyPostId<TContext>(
 			| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus403
 			| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus404
 			| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus422
+			| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus429
 			| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus500
 		>,
 		DeleteApiPostsByPostIdRepliesByReplyPostIdOptions,
@@ -23071,6 +24382,7 @@ export function useDeleteApiPostsByPostIdRepliesByReplyPostId<TContext>(
 			| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus403
 			| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus404
 			| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus422
+			| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus429
 			| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus500
 		>,
 		DeleteApiPostsByPostIdRepliesByReplyPostIdOptions,
@@ -23088,6 +24400,7 @@ export function useDeleteApiPostsByPostIdRepliesByReplyPostId<TContext>(
 			| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus403
 			| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus404
 			| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus422
+			| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus429
 			| DeleteApiPostsByPostIdRepliesByReplyPostIdStatus500
 		>,
 		DeleteApiPostsByPostIdRepliesByReplyPostIdOptions,
@@ -23178,7 +24491,10 @@ export function postApiRealmsMutationOptions<TContext = unknown>(
 	return mutationOptions<
 		PostApiRealmsStatus200,
 		ResponseErrorConfig<
-			PostApiRealmsStatus404 | PostApiRealmsStatus422 | PostApiRealmsStatus500
+			| PostApiRealmsStatus404
+			| PostApiRealmsStatus422
+			| PostApiRealmsStatus429
+			| PostApiRealmsStatus500
 		>,
 		PostApiRealmsOptions,
 		TContext
@@ -23200,7 +24516,10 @@ export function usePostApiRealms<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiRealmsStatus200,
 			ResponseErrorConfig<
-				PostApiRealmsStatus404 | PostApiRealmsStatus422 | PostApiRealmsStatus500
+				| PostApiRealmsStatus404
+				| PostApiRealmsStatus422
+				| PostApiRealmsStatus429
+				| PostApiRealmsStatus500
 			>,
 			PostApiRealmsOptions,
 			TContext
@@ -23215,7 +24534,10 @@ export function usePostApiRealms<TContext>(
 	const baseOptions = postApiRealmsMutationOptions(config) as UseMutationOptions<
 		PostApiRealmsStatus200,
 		ResponseErrorConfig<
-			PostApiRealmsStatus404 | PostApiRealmsStatus422 | PostApiRealmsStatus500
+			| PostApiRealmsStatus404
+			| PostApiRealmsStatus422
+			| PostApiRealmsStatus429
+			| PostApiRealmsStatus500
 		>,
 		PostApiRealmsOptions,
 		TContext
@@ -23224,7 +24546,10 @@ export function usePostApiRealms<TContext>(
 	return useMutation<
 		PostApiRealmsStatus200,
 		ResponseErrorConfig<
-			PostApiRealmsStatus404 | PostApiRealmsStatus422 | PostApiRealmsStatus500
+			| PostApiRealmsStatus404
+			| PostApiRealmsStatus422
+			| PostApiRealmsStatus429
+			| PostApiRealmsStatus500
 		>,
 		PostApiRealmsOptions,
 		TContext
@@ -23238,7 +24563,10 @@ export function usePostApiRealms<TContext>(
 	) as UseMutationResult<
 		PostApiRealmsStatus200,
 		ResponseErrorConfig<
-			PostApiRealmsStatus404 | PostApiRealmsStatus422 | PostApiRealmsStatus500
+			| PostApiRealmsStatus404
+			| PostApiRealmsStatus422
+			| PostApiRealmsStatus429
+			| PostApiRealmsStatus500
 		>,
 		PostApiRealmsOptions,
 		TContext
@@ -23260,6 +24588,7 @@ export function replaceRealmSlugAddressMutationOptions<TContext = unknown>(
 			| ReplaceRealmSlugAddressStatus404
 			| ReplaceRealmSlugAddressStatus409
 			| ReplaceRealmSlugAddressStatus422
+			| ReplaceRealmSlugAddressStatus429
 			| ReplaceRealmSlugAddressStatus500
 		>,
 		ReplaceRealmSlugAddressOptions,
@@ -23293,6 +24622,7 @@ export function useReplaceRealmSlugAddress<TContext>(
 				| ReplaceRealmSlugAddressStatus404
 				| ReplaceRealmSlugAddressStatus409
 				| ReplaceRealmSlugAddressStatus422
+				| ReplaceRealmSlugAddressStatus429
 				| ReplaceRealmSlugAddressStatus500
 			>,
 			ReplaceRealmSlugAddressOptions,
@@ -23313,6 +24643,7 @@ export function useReplaceRealmSlugAddress<TContext>(
 			| ReplaceRealmSlugAddressStatus404
 			| ReplaceRealmSlugAddressStatus409
 			| ReplaceRealmSlugAddressStatus422
+			| ReplaceRealmSlugAddressStatus429
 			| ReplaceRealmSlugAddressStatus500
 		>,
 		ReplaceRealmSlugAddressOptions,
@@ -23327,6 +24658,7 @@ export function useReplaceRealmSlugAddress<TContext>(
 			| ReplaceRealmSlugAddressStatus404
 			| ReplaceRealmSlugAddressStatus409
 			| ReplaceRealmSlugAddressStatus422
+			| ReplaceRealmSlugAddressStatus429
 			| ReplaceRealmSlugAddressStatus500
 		>,
 		ReplaceRealmSlugAddressOptions,
@@ -23346,6 +24678,7 @@ export function useReplaceRealmSlugAddress<TContext>(
 			| ReplaceRealmSlugAddressStatus404
 			| ReplaceRealmSlugAddressStatus409
 			| ReplaceRealmSlugAddressStatus422
+			| ReplaceRealmSlugAddressStatus429
 			| ReplaceRealmSlugAddressStatus500
 		>,
 		ReplaceRealmSlugAddressOptions,
@@ -23465,6 +24798,7 @@ export function patchApiRealmsByRealmIdMutationOptions<TContext = unknown>(
 			| PatchApiRealmsByRealmIdStatus403
 			| PatchApiRealmsByRealmIdStatus404
 			| PatchApiRealmsByRealmIdStatus422
+			| PatchApiRealmsByRealmIdStatus429
 			| PatchApiRealmsByRealmIdStatus500
 		>,
 		PatchApiRealmsByRealmIdOptions,
@@ -23495,6 +24829,7 @@ export function usePatchApiRealmsByRealmId<TContext>(
 				| PatchApiRealmsByRealmIdStatus403
 				| PatchApiRealmsByRealmIdStatus404
 				| PatchApiRealmsByRealmIdStatus422
+				| PatchApiRealmsByRealmIdStatus429
 				| PatchApiRealmsByRealmIdStatus500
 			>,
 			PatchApiRealmsByRealmIdOptions,
@@ -23513,6 +24848,7 @@ export function usePatchApiRealmsByRealmId<TContext>(
 			| PatchApiRealmsByRealmIdStatus403
 			| PatchApiRealmsByRealmIdStatus404
 			| PatchApiRealmsByRealmIdStatus422
+			| PatchApiRealmsByRealmIdStatus429
 			| PatchApiRealmsByRealmIdStatus500
 		>,
 		PatchApiRealmsByRealmIdOptions,
@@ -23525,6 +24861,7 @@ export function usePatchApiRealmsByRealmId<TContext>(
 			| PatchApiRealmsByRealmIdStatus403
 			| PatchApiRealmsByRealmIdStatus404
 			| PatchApiRealmsByRealmIdStatus422
+			| PatchApiRealmsByRealmIdStatus429
 			| PatchApiRealmsByRealmIdStatus500
 		>,
 		PatchApiRealmsByRealmIdOptions,
@@ -23542,6 +24879,7 @@ export function usePatchApiRealmsByRealmId<TContext>(
 			| PatchApiRealmsByRealmIdStatus403
 			| PatchApiRealmsByRealmIdStatus404
 			| PatchApiRealmsByRealmIdStatus422
+			| PatchApiRealmsByRealmIdStatus429
 			| PatchApiRealmsByRealmIdStatus500
 		>,
 		PatchApiRealmsByRealmIdOptions,
@@ -23854,6 +25192,7 @@ export function putApiRealmsByRealmIdMembershipMutationOptions<TContext = unknow
 			| PutApiRealmsByRealmIdMembershipStatus404
 			| PutApiRealmsByRealmIdMembershipStatus409
 			| PutApiRealmsByRealmIdMembershipStatus422
+			| PutApiRealmsByRealmIdMembershipStatus429
 			| PutApiRealmsByRealmIdMembershipStatus500
 		>,
 		PutApiRealmsByRealmIdMembershipOptions,
@@ -23885,6 +25224,7 @@ export function usePutApiRealmsByRealmIdMembership<TContext>(
 				| PutApiRealmsByRealmIdMembershipStatus404
 				| PutApiRealmsByRealmIdMembershipStatus409
 				| PutApiRealmsByRealmIdMembershipStatus422
+				| PutApiRealmsByRealmIdMembershipStatus429
 				| PutApiRealmsByRealmIdMembershipStatus500
 			>,
 			PutApiRealmsByRealmIdMembershipOptions,
@@ -23906,6 +25246,7 @@ export function usePutApiRealmsByRealmIdMembership<TContext>(
 			| PutApiRealmsByRealmIdMembershipStatus404
 			| PutApiRealmsByRealmIdMembershipStatus409
 			| PutApiRealmsByRealmIdMembershipStatus422
+			| PutApiRealmsByRealmIdMembershipStatus429
 			| PutApiRealmsByRealmIdMembershipStatus500
 		>,
 		PutApiRealmsByRealmIdMembershipOptions,
@@ -23919,6 +25260,7 @@ export function usePutApiRealmsByRealmIdMembership<TContext>(
 			| PutApiRealmsByRealmIdMembershipStatus404
 			| PutApiRealmsByRealmIdMembershipStatus409
 			| PutApiRealmsByRealmIdMembershipStatus422
+			| PutApiRealmsByRealmIdMembershipStatus429
 			| PutApiRealmsByRealmIdMembershipStatus500
 		>,
 		PutApiRealmsByRealmIdMembershipOptions,
@@ -23937,6 +25279,7 @@ export function usePutApiRealmsByRealmIdMembership<TContext>(
 			| PutApiRealmsByRealmIdMembershipStatus404
 			| PutApiRealmsByRealmIdMembershipStatus409
 			| PutApiRealmsByRealmIdMembershipStatus422
+			| PutApiRealmsByRealmIdMembershipStatus429
 			| PutApiRealmsByRealmIdMembershipStatus500
 		>,
 		PutApiRealmsByRealmIdMembershipOptions,
@@ -23958,6 +25301,7 @@ export function deleteApiRealmsByRealmIdMembershipMutationOptions<TContext = unk
 			| DeleteApiRealmsByRealmIdMembershipStatus404
 			| DeleteApiRealmsByRealmIdMembershipStatus409
 			| DeleteApiRealmsByRealmIdMembershipStatus422
+			| DeleteApiRealmsByRealmIdMembershipStatus429
 			| DeleteApiRealmsByRealmIdMembershipStatus500
 		>,
 		DeleteApiRealmsByRealmIdMembershipOptions,
@@ -23988,6 +25332,7 @@ export function useDeleteApiRealmsByRealmIdMembership<TContext>(
 				| DeleteApiRealmsByRealmIdMembershipStatus404
 				| DeleteApiRealmsByRealmIdMembershipStatus409
 				| DeleteApiRealmsByRealmIdMembershipStatus422
+				| DeleteApiRealmsByRealmIdMembershipStatus429
 				| DeleteApiRealmsByRealmIdMembershipStatus500
 			>,
 			DeleteApiRealmsByRealmIdMembershipOptions,
@@ -24010,6 +25355,7 @@ export function useDeleteApiRealmsByRealmIdMembership<TContext>(
 			| DeleteApiRealmsByRealmIdMembershipStatus404
 			| DeleteApiRealmsByRealmIdMembershipStatus409
 			| DeleteApiRealmsByRealmIdMembershipStatus422
+			| DeleteApiRealmsByRealmIdMembershipStatus429
 			| DeleteApiRealmsByRealmIdMembershipStatus500
 		>,
 		DeleteApiRealmsByRealmIdMembershipOptions,
@@ -24023,6 +25369,7 @@ export function useDeleteApiRealmsByRealmIdMembership<TContext>(
 			| DeleteApiRealmsByRealmIdMembershipStatus404
 			| DeleteApiRealmsByRealmIdMembershipStatus409
 			| DeleteApiRealmsByRealmIdMembershipStatus422
+			| DeleteApiRealmsByRealmIdMembershipStatus429
 			| DeleteApiRealmsByRealmIdMembershipStatus500
 		>,
 		DeleteApiRealmsByRealmIdMembershipOptions,
@@ -24041,6 +25388,7 @@ export function useDeleteApiRealmsByRealmIdMembership<TContext>(
 			| DeleteApiRealmsByRealmIdMembershipStatus404
 			| DeleteApiRealmsByRealmIdMembershipStatus409
 			| DeleteApiRealmsByRealmIdMembershipStatus422
+			| DeleteApiRealmsByRealmIdMembershipStatus429
 			| DeleteApiRealmsByRealmIdMembershipStatus500
 		>,
 		DeleteApiRealmsByRealmIdMembershipOptions,
@@ -24066,6 +25414,7 @@ export function getApiRealmsByRealmIdMembersQueryOptions(
 		ResponseErrorConfig<
 			| GetApiRealmsByRealmIdMembersStatus403
 			| GetApiRealmsByRealmIdMembersStatus422
+			| GetApiRealmsByRealmIdMembersStatus429
 			| GetApiRealmsByRealmIdMembersStatus500
 		>,
 		GetApiRealmsByRealmIdMembersStatus200,
@@ -24112,6 +25461,7 @@ export function useGetApiRealmsByRealmIdMembers<
 				ResponseErrorConfig<
 					| GetApiRealmsByRealmIdMembersStatus403
 					| GetApiRealmsByRealmIdMembersStatus422
+					| GetApiRealmsByRealmIdMembersStatus429
 					| GetApiRealmsByRealmIdMembersStatus500
 				>,
 				TData,
@@ -24143,6 +25493,7 @@ export function useGetApiRealmsByRealmIdMembers<
 		ResponseErrorConfig<
 			| GetApiRealmsByRealmIdMembersStatus403
 			| GetApiRealmsByRealmIdMembersStatus422
+			| GetApiRealmsByRealmIdMembersStatus429
 			| GetApiRealmsByRealmIdMembersStatus500
 		>
 	> & { queryKey: TQueryKey };
@@ -24165,6 +25516,7 @@ export function patchApiRealmsByRealmIdMembersByProfileIdMutationOptions<TContex
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus403
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus404
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus422
+			| PatchApiRealmsByRealmIdMembersByProfileIdStatus429
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus500
 		>,
 		PatchApiRealmsByRealmIdMembersByProfileIdOptions,
@@ -24195,6 +25547,7 @@ export function usePatchApiRealmsByRealmIdMembersByProfileId<TContext>(
 				| PatchApiRealmsByRealmIdMembersByProfileIdStatus403
 				| PatchApiRealmsByRealmIdMembersByProfileIdStatus404
 				| PatchApiRealmsByRealmIdMembersByProfileIdStatus422
+				| PatchApiRealmsByRealmIdMembersByProfileIdStatus429
 				| PatchApiRealmsByRealmIdMembersByProfileIdStatus500
 			>,
 			PatchApiRealmsByRealmIdMembersByProfileIdOptions,
@@ -24216,6 +25569,7 @@ export function usePatchApiRealmsByRealmIdMembersByProfileId<TContext>(
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus403
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus404
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus422
+			| PatchApiRealmsByRealmIdMembersByProfileIdStatus429
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus500
 		>,
 		PatchApiRealmsByRealmIdMembersByProfileIdOptions,
@@ -24228,6 +25582,7 @@ export function usePatchApiRealmsByRealmIdMembersByProfileId<TContext>(
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus403
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus404
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus422
+			| PatchApiRealmsByRealmIdMembersByProfileIdStatus429
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus500
 		>,
 		PatchApiRealmsByRealmIdMembersByProfileIdOptions,
@@ -24245,6 +25600,7 @@ export function usePatchApiRealmsByRealmIdMembersByProfileId<TContext>(
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus403
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus404
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus422
+			| PatchApiRealmsByRealmIdMembersByProfileIdStatus429
 			| PatchApiRealmsByRealmIdMembersByProfileIdStatus500
 		>,
 		PatchApiRealmsByRealmIdMembersByProfileIdOptions,
@@ -24264,6 +25620,7 @@ export function putApiRealmsByRealmIdRulesMutationOptions<TContext = unknown>(
 		ResponseErrorConfig<
 			| PutApiRealmsByRealmIdRulesStatus403
 			| PutApiRealmsByRealmIdRulesStatus422
+			| PutApiRealmsByRealmIdRulesStatus429
 			| PutApiRealmsByRealmIdRulesStatus500
 		>,
 		PutApiRealmsByRealmIdRulesOptions,
@@ -24293,6 +25650,7 @@ export function usePutApiRealmsByRealmIdRules<TContext>(
 			ResponseErrorConfig<
 				| PutApiRealmsByRealmIdRulesStatus403
 				| PutApiRealmsByRealmIdRulesStatus422
+				| PutApiRealmsByRealmIdRulesStatus429
 				| PutApiRealmsByRealmIdRulesStatus500
 			>,
 			PutApiRealmsByRealmIdRulesOptions,
@@ -24310,6 +25668,7 @@ export function usePutApiRealmsByRealmIdRules<TContext>(
 		ResponseErrorConfig<
 			| PutApiRealmsByRealmIdRulesStatus403
 			| PutApiRealmsByRealmIdRulesStatus422
+			| PutApiRealmsByRealmIdRulesStatus429
 			| PutApiRealmsByRealmIdRulesStatus500
 		>,
 		PutApiRealmsByRealmIdRulesOptions,
@@ -24321,6 +25680,7 @@ export function usePutApiRealmsByRealmIdRules<TContext>(
 		ResponseErrorConfig<
 			| PutApiRealmsByRealmIdRulesStatus403
 			| PutApiRealmsByRealmIdRulesStatus422
+			| PutApiRealmsByRealmIdRulesStatus429
 			| PutApiRealmsByRealmIdRulesStatus500
 		>,
 		PutApiRealmsByRealmIdRulesOptions,
@@ -24337,6 +25697,7 @@ export function usePutApiRealmsByRealmIdRules<TContext>(
 		ResponseErrorConfig<
 			| PutApiRealmsByRealmIdRulesStatus403
 			| PutApiRealmsByRealmIdRulesStatus422
+			| PutApiRealmsByRealmIdRulesStatus429
 			| PutApiRealmsByRealmIdRulesStatus500
 		>,
 		PutApiRealmsByRealmIdRulesOptions,
@@ -24546,6 +25907,7 @@ export function putApiRealmsByRealmIdPinsByUnitIdMutationOptions<TContext = unkn
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus403
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus404
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus422
+			| PutApiRealmsByRealmIdPinsByUnitIdStatus429
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus500
 		>,
 		PutApiRealmsByRealmIdPinsByUnitIdOptions,
@@ -24576,6 +25938,7 @@ export function usePutApiRealmsByRealmIdPinsByUnitId<TContext>(
 				| PutApiRealmsByRealmIdPinsByUnitIdStatus403
 				| PutApiRealmsByRealmIdPinsByUnitIdStatus404
 				| PutApiRealmsByRealmIdPinsByUnitIdStatus422
+				| PutApiRealmsByRealmIdPinsByUnitIdStatus429
 				| PutApiRealmsByRealmIdPinsByUnitIdStatus500
 			>,
 			PutApiRealmsByRealmIdPinsByUnitIdOptions,
@@ -24597,6 +25960,7 @@ export function usePutApiRealmsByRealmIdPinsByUnitId<TContext>(
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus403
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus404
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus422
+			| PutApiRealmsByRealmIdPinsByUnitIdStatus429
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus500
 		>,
 		PutApiRealmsByRealmIdPinsByUnitIdOptions,
@@ -24609,6 +25973,7 @@ export function usePutApiRealmsByRealmIdPinsByUnitId<TContext>(
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus403
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus404
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus422
+			| PutApiRealmsByRealmIdPinsByUnitIdStatus429
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus500
 		>,
 		PutApiRealmsByRealmIdPinsByUnitIdOptions,
@@ -24626,6 +25991,7 @@ export function usePutApiRealmsByRealmIdPinsByUnitId<TContext>(
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus403
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus404
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus422
+			| PutApiRealmsByRealmIdPinsByUnitIdStatus429
 			| PutApiRealmsByRealmIdPinsByUnitIdStatus500
 		>,
 		PutApiRealmsByRealmIdPinsByUnitIdOptions,
@@ -24645,6 +26011,7 @@ export function deleteApiRealmsByRealmIdPinsByUnitIdMutationOptions<TContext = u
 		ResponseErrorConfig<
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus403
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus422
+			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus429
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus500
 		>,
 		DeleteApiRealmsByRealmIdPinsByUnitIdOptions,
@@ -24674,6 +26041,7 @@ export function useDeleteApiRealmsByRealmIdPinsByUnitId<TContext>(
 			ResponseErrorConfig<
 				| DeleteApiRealmsByRealmIdPinsByUnitIdStatus403
 				| DeleteApiRealmsByRealmIdPinsByUnitIdStatus422
+				| DeleteApiRealmsByRealmIdPinsByUnitIdStatus429
 				| DeleteApiRealmsByRealmIdPinsByUnitIdStatus500
 			>,
 			DeleteApiRealmsByRealmIdPinsByUnitIdOptions,
@@ -24694,6 +26062,7 @@ export function useDeleteApiRealmsByRealmIdPinsByUnitId<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus403
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus422
+			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus429
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus500
 		>,
 		DeleteApiRealmsByRealmIdPinsByUnitIdOptions,
@@ -24705,6 +26074,7 @@ export function useDeleteApiRealmsByRealmIdPinsByUnitId<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus403
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus422
+			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus429
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus500
 		>,
 		DeleteApiRealmsByRealmIdPinsByUnitIdOptions,
@@ -24721,6 +26091,7 @@ export function useDeleteApiRealmsByRealmIdPinsByUnitId<TContext>(
 		ResponseErrorConfig<
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus403
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus422
+			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus429
 			| DeleteApiRealmsByRealmIdPinsByUnitIdStatus500
 		>,
 		DeleteApiRealmsByRealmIdPinsByUnitIdOptions,
@@ -24960,6 +26331,7 @@ export function patchApiRealmsByRealmIdUnitsByUnitIdMutationOptions<TContext = u
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus404
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus409
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus422
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus429
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus500
 		>,
 		PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
@@ -24992,6 +26364,7 @@ export function usePatchApiRealmsByRealmIdUnitsByUnitId<TContext>(
 				| PatchApiRealmsByRealmIdUnitsByUnitIdStatus404
 				| PatchApiRealmsByRealmIdUnitsByUnitIdStatus409
 				| PatchApiRealmsByRealmIdUnitsByUnitIdStatus422
+				| PatchApiRealmsByRealmIdUnitsByUnitIdStatus429
 				| PatchApiRealmsByRealmIdUnitsByUnitIdStatus500
 			>,
 			PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
@@ -25015,6 +26388,7 @@ export function usePatchApiRealmsByRealmIdUnitsByUnitId<TContext>(
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus404
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus409
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus422
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus429
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus500
 		>,
 		PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
@@ -25029,6 +26403,7 @@ export function usePatchApiRealmsByRealmIdUnitsByUnitId<TContext>(
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus404
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus409
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus422
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus429
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus500
 		>,
 		PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
@@ -25048,6 +26423,7 @@ export function usePatchApiRealmsByRealmIdUnitsByUnitId<TContext>(
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus404
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus409
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus422
+			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus429
 			| PatchApiRealmsByRealmIdUnitsByUnitIdStatus500
 		>,
 		PatchApiRealmsByRealmIdUnitsByUnitIdOptions,
@@ -25166,6 +26542,7 @@ export function postApiRealmsByRealmIdNavigationMutationOptions<TContext = unkno
 			| PostApiRealmsByRealmIdNavigationStatus403
 			| PostApiRealmsByRealmIdNavigationStatus404
 			| PostApiRealmsByRealmIdNavigationStatus422
+			| PostApiRealmsByRealmIdNavigationStatus429
 			| PostApiRealmsByRealmIdNavigationStatus500
 		>,
 		PostApiRealmsByRealmIdNavigationOptions,
@@ -25197,6 +26574,7 @@ export function usePostApiRealmsByRealmIdNavigation<TContext>(
 				| PostApiRealmsByRealmIdNavigationStatus403
 				| PostApiRealmsByRealmIdNavigationStatus404
 				| PostApiRealmsByRealmIdNavigationStatus422
+				| PostApiRealmsByRealmIdNavigationStatus429
 				| PostApiRealmsByRealmIdNavigationStatus500
 			>,
 			PostApiRealmsByRealmIdNavigationOptions,
@@ -25219,6 +26597,7 @@ export function usePostApiRealmsByRealmIdNavigation<TContext>(
 			| PostApiRealmsByRealmIdNavigationStatus403
 			| PostApiRealmsByRealmIdNavigationStatus404
 			| PostApiRealmsByRealmIdNavigationStatus422
+			| PostApiRealmsByRealmIdNavigationStatus429
 			| PostApiRealmsByRealmIdNavigationStatus500
 		>,
 		PostApiRealmsByRealmIdNavigationOptions,
@@ -25232,6 +26611,7 @@ export function usePostApiRealmsByRealmIdNavigation<TContext>(
 			| PostApiRealmsByRealmIdNavigationStatus403
 			| PostApiRealmsByRealmIdNavigationStatus404
 			| PostApiRealmsByRealmIdNavigationStatus422
+			| PostApiRealmsByRealmIdNavigationStatus429
 			| PostApiRealmsByRealmIdNavigationStatus500
 		>,
 		PostApiRealmsByRealmIdNavigationOptions,
@@ -25250,6 +26630,7 @@ export function usePostApiRealmsByRealmIdNavigation<TContext>(
 			| PostApiRealmsByRealmIdNavigationStatus403
 			| PostApiRealmsByRealmIdNavigationStatus404
 			| PostApiRealmsByRealmIdNavigationStatus422
+			| PostApiRealmsByRealmIdNavigationStatus429
 			| PostApiRealmsByRealmIdNavigationStatus500
 		>,
 		PostApiRealmsByRealmIdNavigationOptions,
@@ -25370,6 +26751,7 @@ export function putApiRealmsByRealmIdNavigationByNavigationIdMutationOptions<TCo
 			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus404
 			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus409
 			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus422
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus429
 			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus500
 		>,
 		PutApiRealmsByRealmIdNavigationByNavigationIdOptions,
@@ -25402,6 +26784,7 @@ export function usePutApiRealmsByRealmIdNavigationByNavigationId<TContext>(
 				| PutApiRealmsByRealmIdNavigationByNavigationIdStatus404
 				| PutApiRealmsByRealmIdNavigationByNavigationIdStatus409
 				| PutApiRealmsByRealmIdNavigationByNavigationIdStatus422
+				| PutApiRealmsByRealmIdNavigationByNavigationIdStatus429
 				| PutApiRealmsByRealmIdNavigationByNavigationIdStatus500
 			>,
 			PutApiRealmsByRealmIdNavigationByNavigationIdOptions,
@@ -25425,6 +26808,7 @@ export function usePutApiRealmsByRealmIdNavigationByNavigationId<TContext>(
 			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus404
 			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus409
 			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus422
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus429
 			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus500
 		>,
 		PutApiRealmsByRealmIdNavigationByNavigationIdOptions,
@@ -25439,6 +26823,7 @@ export function usePutApiRealmsByRealmIdNavigationByNavigationId<TContext>(
 			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus404
 			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus409
 			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus422
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus429
 			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus500
 		>,
 		PutApiRealmsByRealmIdNavigationByNavigationIdOptions,
@@ -25458,6 +26843,7 @@ export function usePutApiRealmsByRealmIdNavigationByNavigationId<TContext>(
 			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus404
 			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus409
 			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus422
+			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus429
 			| PutApiRealmsByRealmIdNavigationByNavigationIdStatus500
 		>,
 		PutApiRealmsByRealmIdNavigationByNavigationIdOptions,
@@ -25479,6 +26865,7 @@ export function deleteApiRealmsByRealmIdNavigationByNavigationIdMutationOptions<
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus429
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500
 		>,
 		DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
@@ -25510,6 +26897,7 @@ export function useDeleteApiRealmsByRealmIdNavigationByNavigationId<TContext>(
 				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
 				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
 				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422
+				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus429
 				| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500
 			>,
 			DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
@@ -25533,6 +26921,7 @@ export function useDeleteApiRealmsByRealmIdNavigationByNavigationId<TContext>(
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus429
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500
 		>,
 		DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
@@ -25546,6 +26935,7 @@ export function useDeleteApiRealmsByRealmIdNavigationByNavigationId<TContext>(
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus429
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500
 		>,
 		DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
@@ -25564,6 +26954,7 @@ export function useDeleteApiRealmsByRealmIdNavigationByNavigationId<TContext>(
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus404
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus409
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422
+			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus429
 			| DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500
 		>,
 		DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
@@ -26218,6 +27609,7 @@ export function postApiImageAssetsMutationOptions<TContext = unknown>(
 			| PostApiImageAssetsStatus401
 			| PostApiImageAssetsStatus415
 			| PostApiImageAssetsStatus422
+			| PostApiImageAssetsStatus429
 			| PostApiImageAssetsStatus500
 		>,
 		PostApiImageAssetsOptions,
@@ -26243,6 +27635,7 @@ export function usePostApiImageAssets<TContext>(
 				| PostApiImageAssetsStatus401
 				| PostApiImageAssetsStatus415
 				| PostApiImageAssetsStatus422
+				| PostApiImageAssetsStatus429
 				| PostApiImageAssetsStatus500
 			>,
 			PostApiImageAssetsOptions,
@@ -26261,6 +27654,7 @@ export function usePostApiImageAssets<TContext>(
 			| PostApiImageAssetsStatus401
 			| PostApiImageAssetsStatus415
 			| PostApiImageAssetsStatus422
+			| PostApiImageAssetsStatus429
 			| PostApiImageAssetsStatus500
 		>,
 		PostApiImageAssetsOptions,
@@ -26273,6 +27667,7 @@ export function usePostApiImageAssets<TContext>(
 			| PostApiImageAssetsStatus401
 			| PostApiImageAssetsStatus415
 			| PostApiImageAssetsStatus422
+			| PostApiImageAssetsStatus429
 			| PostApiImageAssetsStatus500
 		>,
 		PostApiImageAssetsOptions,
@@ -26290,6 +27685,7 @@ export function usePostApiImageAssets<TContext>(
 			| PostApiImageAssetsStatus401
 			| PostApiImageAssetsStatus415
 			| PostApiImageAssetsStatus422
+			| PostApiImageAssetsStatus429
 			| PostApiImageAssetsStatus500
 		>,
 		PostApiImageAssetsOptions,
@@ -26311,6 +27707,7 @@ export function postApiImageAssetsByIdCompleteMutationOptions<TContext = unknown
 			| PostApiImageAssetsByIdCompleteStatus404
 			| PostApiImageAssetsByIdCompleteStatus409
 			| PostApiImageAssetsByIdCompleteStatus422
+			| PostApiImageAssetsByIdCompleteStatus429
 			| PostApiImageAssetsByIdCompleteStatus500
 		>,
 		PostApiImageAssetsByIdCompleteOptions,
@@ -26341,6 +27738,7 @@ export function usePostApiImageAssetsByIdComplete<TContext>(
 				| PostApiImageAssetsByIdCompleteStatus404
 				| PostApiImageAssetsByIdCompleteStatus409
 				| PostApiImageAssetsByIdCompleteStatus422
+				| PostApiImageAssetsByIdCompleteStatus429
 				| PostApiImageAssetsByIdCompleteStatus500
 			>,
 			PostApiImageAssetsByIdCompleteOptions,
@@ -26360,6 +27758,7 @@ export function usePostApiImageAssetsByIdComplete<TContext>(
 			| PostApiImageAssetsByIdCompleteStatus404
 			| PostApiImageAssetsByIdCompleteStatus409
 			| PostApiImageAssetsByIdCompleteStatus422
+			| PostApiImageAssetsByIdCompleteStatus429
 			| PostApiImageAssetsByIdCompleteStatus500
 		>,
 		PostApiImageAssetsByIdCompleteOptions,
@@ -26373,6 +27772,7 @@ export function usePostApiImageAssetsByIdComplete<TContext>(
 			| PostApiImageAssetsByIdCompleteStatus404
 			| PostApiImageAssetsByIdCompleteStatus409
 			| PostApiImageAssetsByIdCompleteStatus422
+			| PostApiImageAssetsByIdCompleteStatus429
 			| PostApiImageAssetsByIdCompleteStatus500
 		>,
 		PostApiImageAssetsByIdCompleteOptions,
@@ -26391,6 +27791,7 @@ export function usePostApiImageAssetsByIdComplete<TContext>(
 			| PostApiImageAssetsByIdCompleteStatus404
 			| PostApiImageAssetsByIdCompleteStatus409
 			| PostApiImageAssetsByIdCompleteStatus422
+			| PostApiImageAssetsByIdCompleteStatus429
 			| PostApiImageAssetsByIdCompleteStatus500
 		>,
 		PostApiImageAssetsByIdCompleteOptions,
@@ -26416,6 +27817,7 @@ export function getApiImageAssetsByIdQueryOptions(
 			| GetApiImageAssetsByIdStatus401
 			| GetApiImageAssetsByIdStatus404
 			| GetApiImageAssetsByIdStatus422
+			| GetApiImageAssetsByIdStatus429
 			| GetApiImageAssetsByIdStatus500
 		>,
 		GetApiImageAssetsByIdStatus200,
@@ -26456,6 +27858,7 @@ export function useGetApiImageAssetsById<
 					| GetApiImageAssetsByIdStatus401
 					| GetApiImageAssetsByIdStatus404
 					| GetApiImageAssetsByIdStatus422
+					| GetApiImageAssetsByIdStatus429
 					| GetApiImageAssetsByIdStatus500
 				>,
 				TData,
@@ -26484,6 +27887,7 @@ export function useGetApiImageAssetsById<
 			| GetApiImageAssetsByIdStatus401
 			| GetApiImageAssetsByIdStatus404
 			| GetApiImageAssetsByIdStatus422
+			| GetApiImageAssetsByIdStatus429
 			| GetApiImageAssetsByIdStatus500
 		>
 	> & { queryKey: TQueryKey };
@@ -26507,6 +27911,7 @@ export function deleteApiImageAssetsByIdMutationOptions<TContext = unknown>(
 			| DeleteApiImageAssetsByIdStatus404
 			| DeleteApiImageAssetsByIdStatus409
 			| DeleteApiImageAssetsByIdStatus422
+			| DeleteApiImageAssetsByIdStatus429
 			| DeleteApiImageAssetsByIdStatus500
 		>,
 		DeleteApiImageAssetsByIdOptions,
@@ -26537,6 +27942,7 @@ export function useDeleteApiImageAssetsById<TContext>(
 				| DeleteApiImageAssetsByIdStatus404
 				| DeleteApiImageAssetsByIdStatus409
 				| DeleteApiImageAssetsByIdStatus422
+				| DeleteApiImageAssetsByIdStatus429
 				| DeleteApiImageAssetsByIdStatus500
 			>,
 			DeleteApiImageAssetsByIdOptions,
@@ -26556,6 +27962,7 @@ export function useDeleteApiImageAssetsById<TContext>(
 			| DeleteApiImageAssetsByIdStatus404
 			| DeleteApiImageAssetsByIdStatus409
 			| DeleteApiImageAssetsByIdStatus422
+			| DeleteApiImageAssetsByIdStatus429
 			| DeleteApiImageAssetsByIdStatus500
 		>,
 		DeleteApiImageAssetsByIdOptions,
@@ -26569,6 +27976,7 @@ export function useDeleteApiImageAssetsById<TContext>(
 			| DeleteApiImageAssetsByIdStatus404
 			| DeleteApiImageAssetsByIdStatus409
 			| DeleteApiImageAssetsByIdStatus422
+			| DeleteApiImageAssetsByIdStatus429
 			| DeleteApiImageAssetsByIdStatus500
 		>,
 		DeleteApiImageAssetsByIdOptions,
@@ -26587,6 +27995,7 @@ export function useDeleteApiImageAssetsById<TContext>(
 			| DeleteApiImageAssetsByIdStatus404
 			| DeleteApiImageAssetsByIdStatus409
 			| DeleteApiImageAssetsByIdStatus422
+			| DeleteApiImageAssetsByIdStatus429
 			| DeleteApiImageAssetsByIdStatus500
 		>,
 		DeleteApiImageAssetsByIdOptions,

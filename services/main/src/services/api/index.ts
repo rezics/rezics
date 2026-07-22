@@ -30,6 +30,8 @@ import reviews from "./reviews";
 import search from "./search";
 import slugAddresses from "./slug-addresses";
 import tokens from "./tokens";
+import tokenInfo from "./token-info";
+import tokenPolicies from "./token-policies";
 import users from "./users";
 import units from "./units";
 import { auth } from "../auth";
@@ -102,6 +104,8 @@ export default new Elysia()
 				.use(recommendations)
 				.use(messages)
 				.use(tokens)
+				.use(tokenInfo)
+				.use(tokenPolicies)
 				.use(feed)
 				.use(feedback)
 				.use(governance)

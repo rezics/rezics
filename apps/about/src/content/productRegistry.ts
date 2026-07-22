@@ -452,6 +452,24 @@ export const PRODUCT_DEFINITIONS = [
 		demoKind: "generic",
 		sections: defaultSections,
 	}),
+	defineProduct({
+		id: "token",
+		slug: "token",
+		name: "API Token",
+		pageClass: "capability",
+		navGroup: "platform",
+		consumesCapabilities: ["api-oauth"],
+		relatedProductIds: ["api-oauth", "content-structure", "editor", "catalog"],
+		implementationStatus: "implemented",
+		sourceDocuments: [
+			"User-confirmed token product model",
+			"Schema · API access policy",
+			"OpenAPI · REZICS API",
+		],
+		mediaIds: ["token-stage"],
+		demoKind: "generic",
+		sections: defaultSections,
+	}),
 ] as const;
 
 export type ProductId = (typeof PRODUCT_DEFINITIONS)[number]["id"];
@@ -572,6 +590,22 @@ export const PRODUCT_CLAIMS = [
 		sourceType: "user-confirmed",
 		sourceReference:
 			"SubjectAssociation expresses character, protagonist and derivative relationships",
+		status: "confirmed",
+	},
+	{
+		id: "token-policy-layering",
+		productId: "token",
+		sourceType: "schema",
+		sourceReference:
+			"API access policy schemas define profile defaults, per-token overrides, and operation overrides",
+		status: "confirmed",
+	},
+	{
+		id: "token-ai-workspace-safety",
+		productId: "token",
+		sourceType: "user-confirmed",
+		sourceReference:
+			"AI agents request a dedicated workspace and empty .env; users enter credentials themselves",
 		status: "confirmed",
 	},
 ] as const satisfies readonly ProductClaim[];

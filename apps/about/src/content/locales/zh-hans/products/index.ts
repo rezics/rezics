@@ -26,6 +26,7 @@ import tag from "./tag";
 import progress from "./progress";
 import entity from "./entity";
 import apiOauth from "./api-oauth";
+import token from "./token";
 
 const byId = {
 	catalog: catalog,
@@ -53,6 +54,7 @@ const byId = {
 	progress: progress,
 	entity: entity,
 	"api-oauth": apiOauth,
+	token,
 } satisfies Record<ProductId, typeof book>;
 
 const content = { common, directory, byId } satisfies typeof import("../../en/products").default;

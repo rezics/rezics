@@ -1,0 +1,1 @@
+Das Token darf nicht im Gespräch übergeben werden. Der Agent kann einen eigenen Arbeitsbereich und eine leere `.env` vorbereiten; der Benutzer trägt den Wert anschließend lokal ein. Der Agent verwendet ihn nur über die Prozessumgebung und liest, zeigt, protokolliert oder überträgt ihn nicht in die Versionsverwaltung.

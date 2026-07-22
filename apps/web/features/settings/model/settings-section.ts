@@ -3,6 +3,7 @@ export const SettingsSectionIds = [
 	"preferences",
 	"account",
 	"security",
+	"tokens",
 	"invitations",
 ] as const;
 

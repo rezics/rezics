@@ -303,12 +303,16 @@ export const PlatformCapabilityValues = [
 	"unit.slug.manage",
 	"unit.slug.namespace.manage",
 	"unit.slug.redirect.release",
+	"platform.api_token_policy.manage",
 	"platform.moderate",
 	"platform.suppress",
 	"platform.grants.manage",
 	"platform.score-context.manage",
 	...RealmCapabilityValues,
 ] as const;
+
+export const ApiTokenPolicyKindValues = ["standard", "staff_trusted"] as const;
+export const ApiTokenUsageBucketKindValues = ["minute_requests", "daily_cost"] as const;
 
 export function toEnumValues<T extends string>(values: readonly [T, ...T[]]): [T, ...T[]] {
 	return [...values];

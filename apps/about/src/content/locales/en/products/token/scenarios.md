@@ -1,0 +1,3 @@
+- Give an agent only the permissions needed to complete missing book metadata or a translation.
+- Run an importer or local tool with a purpose-specific credential that can be disabled or revoked independently.
+- Grant a time-limited Staff Trusted policy when an audited workload needs more throughput, without granting additional data permissions.

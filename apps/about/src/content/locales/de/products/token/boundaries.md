@@ -1,0 +1,5 @@
+- Authentifizierung, Berechtigungsprüfung, Sicherheitsgrenzen und Verbrauchsgrenzen sind getrennte Zuständigkeiten der Middleware.
+- Wirksame Grenzen entstehen aus Richtlinienprofil, Token-Überschreibung und Vorgangsüberschreibung; unveränderliche Serverhöchstwerte gelten immer.
+- Standard und Staff Trusted besitzen verschiedene geprüfte Schemas. Ihre JSON-Konfiguration liegt in der Datenbank und wird bei jedem Lesen erneut geprüft.
+- Staff Trusted erhöht nur den Durchsatz, nicht die Berechtigungen. Die Zuweisung braucht Ablaufzeit und Prüfgrund und fällt bei Ablauf oder ungültiger Konfiguration sicher auf Standard zurück.
+- Token-Geheimnisse werden einmal angezeigt und nur als Hash gespeichert. Die Selbstauskunft liefert niemals Hashes, Geheimnisverweise oder Zugangsdaten.

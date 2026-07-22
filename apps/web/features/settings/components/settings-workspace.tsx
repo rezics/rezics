@@ -6,7 +6,7 @@ import {
 	ManagementWorkspaceHeader,
 	ManagementWorkspaceNavigation,
 } from "@rezics/ui";
-import { Bell, CircleUserRound, Settings2, ShieldCheck, UserRound } from "lucide-react";
+import { Bell, CircleUserRound, KeyRound, Settings2, ShieldCheck, UserRound } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { createContext, useContext, type ReactNode } from "react";
@@ -58,6 +58,13 @@ export function SettingsWorkspace({ children }: { children: ReactNode }) {
 			label: labels.security.label,
 			description: labels.security.description,
 			icon: ShieldCheck,
+		},
+		{
+			id: "tokens",
+			href: settingsSectionHref("tokens"),
+			label: labels.tokens.label,
+			description: labels.tokens.description,
+			icon: KeyRound,
 		},
 		{
 			id: "invitations",
