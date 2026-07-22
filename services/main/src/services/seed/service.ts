@@ -102,9 +102,12 @@ import {
 	zonePage,
 } from "../database/schema";
 import { createNavigationStructure } from "../content-structure/navigation";
-import { createContentStructureHistory } from "../content-structure/history";
+import {
+	createContentStructureHistory,
+	getContentStructureHeadRevision,
+} from "../content-structure/history";
 import { loadContentStructureSnapshot } from "../content-structure/storage";
-import { createDockHistory } from "../api/docks/history";
+import { createDockHistory, getDockRevisionId } from "../api/docks/history";
 import { RecommendationPolicyVersion } from "../recommendations/policy";
 import { fractionalPositionAt } from "../ordering/position";
 import { recordUnitRevision, restoreUnitRevision } from "../units/history";
@@ -2507,13 +2510,18 @@ async function seedHistory(
 		.select({ id: contentStructure.id })
 		.from(contentStructure)
 		.where(isNull(contentStructure.deletedAt));
-	for (const structure of structures)
+	for (const structure of structures) {
+		if (await getContentStructureHeadRevision(tx, structure.id)) continue;
 		await createContentStructureHistory(tx, {
 			structureId: structure.id,
 			state: await loadContentStructureSnapshot(tx, { structureId: structure.id }),
 		});
+	}
 	const docks = await tx.select().from(unitDock).where(isNull(unitDock.deletedAt));
-	for (const dock of docks) await createDockHistory(tx, { dock });
+	for (const dock of docks) {
+		if (await getDockRevisionId(tx, dock.id)) continue;
+		await createDockHistory(tx, { dock });
+	}
 
 	const historyUnits = [
 		...profiles.map((value) => ({ id: value.id, actorProfileId: value.id })),

@@ -436,9 +436,15 @@ export async function listNavigationStructures(
 			),
 		)
 		.orderBy(contentStructure.createdAt, contentStructure.id);
-	return Promise.all(
-		structures.map((structure) =>
-			presentNavigationStructure(tx, { ownerUnitId, structureId: structure.id, kind }),
-		),
-	);
+	const records = [];
+	for (const structure of structures) {
+		records.push(
+			await presentNavigationStructure(tx, {
+				ownerUnitId,
+				structureId: structure.id,
+				kind,
+			}),
+		);
+	}
+	return records;
 }

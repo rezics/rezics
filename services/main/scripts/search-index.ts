@@ -22,6 +22,9 @@ import {
 } from "../src/services/search/settings";
 import {
 	assertLocalLifecycleTargets,
+	isIndexAlreadyExistsFailure,
+	MeilisearchTaskFailure,
+	parseMeilisearchTask,
 	parseSearchIndexUid,
 	parseSequinBackfill,
 	parseSequinSinks,
@@ -171,14 +174,10 @@ async function meilisearchRequest(path: string, init: RequestInit = {}): Promise
 
 async function waitForMeilisearchTask(taskUid: number): Promise<void> {
 	for (let attempt = 0; attempt < 2_400; attempt += 1) {
-		const task = await meilisearchRequest(`/tasks/${taskUid}`);
-		if (!isRecord(task) || typeof task.status !== "string")
-			throw new TypeError("Invalid Meilisearch task response");
+		const task = parseMeilisearchTask(await meilisearchRequest(`/tasks/${taskUid}`));
 		if (task.status === "succeeded") return;
 		if (task.status === "failed" || task.status === "canceled")
-			throw new Error(
-				`Meilisearch task ${taskUid} ${task.status}: ${JSON.stringify(task.error)}`,
-			);
+			throw new MeilisearchTaskFailure(taskUid, task.status, task.error, task.errorCode);
 		if (attempt > 0 && attempt % 20 === 0)
 			console.info(`Waiting for Meilisearch task ${taskUid}: ${task.status}`);
 		await new Promise((resolve) => setTimeout(resolve, 250));
@@ -314,10 +313,14 @@ async function indexExists(indexUid: SearchIndexUid): Promise<boolean> {
 }
 
 async function createIndex(indexUid: SearchIndexUid): Promise<void> {
-	await meilisearchTaskRequest("/indexes", {
-		method: "POST",
-		body: JSON.stringify({ uid: indexUid, primaryKey: "id" }),
-	});
+	try {
+		await meilisearchTaskRequest("/indexes", {
+			method: "POST",
+			body: JSON.stringify({ uid: indexUid, primaryKey: "id" }),
+		});
+	} catch (cause) {
+		if (!isIndexAlreadyExistsFailure(cause)) throw cause;
+	}
 }
 
 async function ensureIndex(indexUid: SearchIndexUid): Promise<void> {

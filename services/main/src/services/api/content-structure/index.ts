@@ -172,16 +172,16 @@ export default new Elysia()
 			await authorization.unit.ensureCanRead(params.unitId);
 			return database.transaction(async (tx) => {
 				const structures = await listContentStructures(tx, params.unitId);
-				return {
-					items: await Promise.all(
-						structures.map(async (structure) =>
-							presentContentStructure(
-								structure,
-								await getContentStructureRevision(tx, params.unitId, structure.id),
-							),
+				const items = [];
+				for (const structure of structures) {
+					items.push(
+						presentContentStructure(
+							structure,
+							await getContentStructureRevision(tx, params.unitId, structure.id),
 						),
-					),
-				};
+					);
+				}
+				return { items };
 			});
 		},
 		{

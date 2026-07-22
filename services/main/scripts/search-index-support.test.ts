@@ -2,6 +2,9 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
 	assertLocalLifecycleTargets,
+	isIndexAlreadyExistsFailure,
+	MeilisearchTaskFailure,
+	parseMeilisearchTask,
 	parseSearchIndexUid,
 	parseSequinSinks,
 	ProjectionConfigurationError,
@@ -11,6 +14,20 @@ import {
 } from "./search-index-support";
 
 describe("search index lifecycle support", () => {
+	it("accepts only the index-exists task race as idempotent creation", () => {
+		const task = parseMeilisearchTask({
+			status: "failed",
+			error: { code: "index_already_exists", message: "already exists" },
+		});
+		const expectedRace = new MeilisearchTaskFailure(42, "failed", task.error, task.errorCode);
+		expect(isIndexAlreadyExistsFailure(expectedRace)).toBe(true);
+		expect(
+			isIndexAlreadyExistsFailure(
+				new MeilisearchTaskFailure(42, "failed", { code: "internal" }, "internal"),
+			),
+		).toBe(false);
+	});
+
 	it("proves versioned index UIDs before lifecycle use", () => {
 		expect(parseSearchIndexUid("current", "rezics_units_v2_20260721")).toBe(
 			"rezics_units_v2_20260721",

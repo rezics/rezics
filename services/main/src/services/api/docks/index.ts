@@ -128,17 +128,14 @@ export default new Elysia({ prefix: "/units/by-id" })
 					.from(unitDock)
 					.where(and(eq(unitDock.unitId, params.unitId), isNull(unitDock.deletedAt)))
 					.orderBy(unitDock.kind);
-				return {
-					items: await Promise.all(
-						records
-							.filter((dock) => isDockKindSupported(owner.kind, dock.kind))
-							.map(async (dock) => {
-								const revisionId = await getDockRevisionId(tx, dock.id);
-								if (!revisionId) throw new DockNotFound();
-								return presentDock(dock, revisionId);
-							}),
-					),
-				};
+				const items = [];
+				for (const dock of records) {
+					if (!isDockKindSupported(owner.kind, dock.kind)) continue;
+					const revisionId = await getDockRevisionId(tx, dock.id);
+					if (!revisionId) throw new DockNotFound();
+					items.push(presentDock(dock, revisionId));
+				}
+				return { items };
 			});
 		},
 		{

@@ -572,21 +572,24 @@ export default new Elysia()
 							),
 						)
 						.limit(1);
-					const navigations = await database.transaction(async (tx) =>
-						Promise.all(
-							(
-								await listNavigationStructures(tx, params.zoneId, "zone.navigation")
-							).map(async (record) => {
-								const revisionId = await getContentStructureRevision(
-									tx,
-									params.zoneId,
-									record.id,
-								);
-								if (!revisionId) throw new ZoneNavigationNotFound();
-								return toZoneNavigationResponse(record, revisionId);
-							}),
-						),
-					);
+					const navigations = await database.transaction(async (tx) => {
+						const records = await listNavigationStructures(
+							tx,
+							params.zoneId,
+							"zone.navigation",
+						);
+						const items = [];
+						for (const record of records) {
+							const revisionId = await getContentStructureRevision(
+								tx,
+								params.zoneId,
+								record.id,
+							);
+							if (!revisionId) throw new ZoneNavigationNotFound();
+							items.push(toZoneNavigationResponse(record, revisionId));
+						}
+						return items;
+					});
 					const page = pageRecord ? toZonePageResponse(pageRecord) : null;
 					const dock = dockRecord
 						? {
@@ -1001,21 +1004,24 @@ export default new Elysia()
 						() => new UnitNotFound("Zone"),
 					);
 					await getZone(params.zoneId);
-					return database.transaction(async (tx) => ({
-						items: await Promise.all(
-							(
-								await listNavigationStructures(tx, params.zoneId, "zone.navigation")
-							).map(async (record) => {
-								const revisionId = await getContentStructureRevision(
-									tx,
-									params.zoneId,
-									record.id,
-								);
-								if (!revisionId) throw new ZoneNavigationNotFound();
-								return toZoneNavigationResponse(record, revisionId);
-							}),
-						),
-					}));
+					return database.transaction(async (tx) => {
+						const records = await listNavigationStructures(
+							tx,
+							params.zoneId,
+							"zone.navigation",
+						);
+						const items = [];
+						for (const record of records) {
+							const revisionId = await getContentStructureRevision(
+								tx,
+								params.zoneId,
+								record.id,
+							);
+							if (!revisionId) throw new ZoneNavigationNotFound();
+							items.push(toZoneNavigationResponse(record, revisionId));
+						}
+						return { items };
+					});
 				},
 				{
 					params: ZoneParams,
@@ -1082,14 +1088,16 @@ export default new Elysia()
 					await getZone(params.zoneId);
 					return database.transaction(async (tx) => {
 						try {
-							const [record, revisionId] = await Promise.all([
-								presentNavigationStructure(tx, {
-									ownerUnitId: params.zoneId,
-									structureId: params.navigationId,
-									kind: "zone.navigation",
-								}),
-								getContentStructureRevision(tx, params.zoneId, params.navigationId),
-							]);
+							const record = await presentNavigationStructure(tx, {
+								ownerUnitId: params.zoneId,
+								structureId: params.navigationId,
+								kind: "zone.navigation",
+							});
+							const revisionId = await getContentStructureRevision(
+								tx,
+								params.zoneId,
+								params.navigationId,
+							);
 							if (!revisionId) throw new ZoneNavigationNotFound();
 							return toZoneNavigationResponse(record, revisionId);
 						} catch (cause) {

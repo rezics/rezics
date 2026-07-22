@@ -122,6 +122,19 @@ tasks:
         cmds:
             - docker compose stop --timeout 30 sequin
 
+    infra:search:state:reset:
+        desc: Remove local Sequin metadata whose PostgreSQL object identities become stale after a database reset.
+        internal: true
+        cmds:
+            - >-
+                docker compose exec -T sequin-postgres
+                psql --username sequin --dbname sequin --set ON_ERROR_STOP=1
+                --command 'drop schema if exists sequin_streams cascade;
+                drop schema if exists sequin_config cascade;
+                drop schema if exists public cascade;
+                create schema public;'
+            - docker compose exec -T sequin-redis valkey-cli FLUSHALL
+
     infra:stop:
         desc: Stop persistent development infrastructure without removing it.
         cmds:
@@ -203,11 +216,12 @@ tasks:
                       promote --projection current --index {{.MEILISEARCH_CURRENT_INDEX_UID}}
 
     local:reset:
-        desc: Coordinately reset, seed, and rebuild the local database and current search projection.
-        prompt: This deletes the local application database and fully rebuilds its search index. Continue?
+        desc: Coordinately reset, seed, and rebuild the local database and search state.
+        prompt: This deletes the local application database and Sequin state, then fully rebuilds its search index. Continue?
         cmds:
             - task: infra:start
             - task: infra:search:stop
+            - task: infra:search:state:reset
             - task: services-main:db:reset
               vars:
                   CLI_ARGS: --yes

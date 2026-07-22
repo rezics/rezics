@@ -104,16 +104,19 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 		kind: EntityAssociationKind,
 		command: EntityAssociationCommand,
 	): Promise<void> {
-		const [mode, platformOverride, targetDecision] = await Promise.all([
-			this.associationMode(tx, entityId, kind),
-			this.platform.hasCapability("entity.associations.override", tx),
-			this.unitAuthorization.decideInTransaction(
-				tx,
-				entityId,
-				"unit.association.manage",
-				entityAssociationScope(kind),
-			),
-		]);
+		// A PostgreSQL transaction is pinned to one client. Keep its queries
+		// sequential instead of relying on node-postgres' deprecated query queue.
+		const mode = await this.associationMode(tx, entityId, kind);
+		const platformOverride = await this.platform.hasCapability(
+			"entity.associations.override",
+			tx,
+		);
+		const targetDecision = await this.unitAuthorization.decideInTransaction(
+			tx,
+			entityId,
+			"unit.association.manage",
+			entityAssociationScope(kind),
+		);
 		if (
 			resolveEntityAssociationAdmission({
 				mode,

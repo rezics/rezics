@@ -119,21 +119,24 @@ export default new Elysia({ prefix: "/realms" })
 				() => new UnitNotFound("Realm"),
 			);
 			await ensureRealm(params.realmId);
-			return database.transaction(async (tx) => ({
-				items: await Promise.all(
-					(await listNavigationStructures(tx, params.realmId, "realm.navigation")).map(
-						async (record) => {
-							const revisionId = await getContentStructureRevision(
-								tx,
-								params.realmId,
-								record.id,
-							);
-							if (!revisionId) throw new RealmNavigationNotFound();
-							return present(record, revisionId);
-						},
-					),
-				),
-			}));
+			return database.transaction(async (tx) => {
+				const records = await listNavigationStructures(
+					tx,
+					params.realmId,
+					"realm.navigation",
+				);
+				const items = [];
+				for (const record of records) {
+					const revisionId = await getContentStructureRevision(
+						tx,
+						params.realmId,
+						record.id,
+					);
+					if (!revisionId) throw new RealmNavigationNotFound();
+					items.push(present(record, revisionId));
+				}
+				return { items };
+			});
 		},
 		{
 			params: RealmNavigationOwnerParams,
@@ -193,14 +196,16 @@ export default new Elysia({ prefix: "/realms" })
 			await ensureRealm(params.realmId);
 			return database.transaction(async (tx) => {
 				try {
-					const [record, revisionId] = await Promise.all([
-						presentNavigationStructure(tx, {
-							ownerUnitId: params.realmId,
-							structureId: params.navigationId,
-							kind: "realm.navigation",
-						}),
-						getContentStructureRevision(tx, params.realmId, params.navigationId),
-					]);
+					const record = await presentNavigationStructure(tx, {
+						ownerUnitId: params.realmId,
+						structureId: params.navigationId,
+						kind: "realm.navigation",
+					});
+					const revisionId = await getContentStructureRevision(
+						tx,
+						params.realmId,
+						params.navigationId,
+					);
 					if (!revisionId) throw new RealmNavigationNotFound();
 					return present(record, revisionId);
 				} catch (cause) {

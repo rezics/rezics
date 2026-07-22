@@ -14,7 +14,11 @@ if (!["127.0.0.1", "localhost", "::1"].includes(url.hostname)) {
 const client = new Client({ connectionString: adminDatabaseUrl });
 try {
 	await client.connect();
-	await client.query('drop schema if exists "public" cascade; create schema "public";');
+	await client.query(`
+		drop publication if exists "rezics_search_projection_publication";
+		drop schema if exists "public" cascade;
+		create schema "public";
+	`);
 } finally {
 	await client.end();
 }

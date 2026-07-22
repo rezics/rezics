@@ -41,8 +41,42 @@ export class ProjectionTimeoutError extends Error {
 	override readonly name = "ProjectionTimeoutError";
 }
 
+export class MeilisearchTaskFailure extends Error {
+	override readonly name = "MeilisearchTaskFailure";
+
+	constructor(
+		readonly taskUid: number,
+		readonly status: "failed" | "canceled",
+		readonly taskError: unknown,
+		readonly errorCode: string | undefined,
+	) {
+		super(`Meilisearch task ${taskUid} ${status}: ${JSON.stringify(taskError)}`);
+	}
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+export function parseMeilisearchTask(value: unknown): {
+	readonly status: string;
+	readonly error: unknown;
+	readonly errorCode?: string;
+} {
+	if (!isRecord(value) || typeof value.status !== "string")
+		throw new TypeError("Invalid Meilisearch task response");
+	const errorCode = isRecord(value.error) ? value.error.code : undefined;
+	if (errorCode !== undefined && typeof errorCode !== "string")
+		throw new TypeError("Invalid Meilisearch task error code");
+	return {
+		status: value.status,
+		error: value.error,
+		...(typeof errorCode === "string" ? { errorCode } : {}),
+	};
+}
+
+export function isIndexAlreadyExistsFailure(value: unknown): boolean {
+	return value instanceof MeilisearchTaskFailure && value.errorCode === "index_already_exists";
 }
 
 function optionalNonNegativeInteger(value: unknown): number | undefined {

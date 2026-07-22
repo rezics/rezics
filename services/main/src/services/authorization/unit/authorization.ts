@@ -169,67 +169,65 @@ export class UnitAuthorization<ProfileId extends string | undefined> {
 		if (!record || record.deletedAt) return { allowed: false, reason: "missing" };
 
 		if (this.profileId) {
-			const [platformOverride, restrictions, directOwnerBindings] = await Promise.all([
-				this.platform.hasCapability("unit.edit", executor),
-				executor
-					.select({
-						id: unitAccessRestriction.id,
-						subjectKind: unitAccessRestriction.subjectKind,
-						scope: unitAccessRestriction.scope,
-					})
-					.from(unitAccessRestriction)
-					.where(
-						and(
-							eq(unitAccessRestriction.unitId, unitId),
-							eq(unitAccessRestriction.permission, permission),
-							or(
-								and(
-									eq(unitAccessRestriction.subjectKind, "profile"),
-									eq(unitAccessRestriction.profileId, this.profileId),
-								),
-								and(
-									eq(unitAccessRestriction.subjectKind, "realm"),
-									exists(
-										executor
-											.select({ profileId: realmMember.profileId })
-											.from(realmMember)
-											.where(
-												and(
-													eq(
-														realmMember.realmId,
-														unitAccessRestriction.realmId,
-													),
-													eq(realmMember.profileId, this.profileId),
-													eq(realmMember.state, "active"),
+			const platformOverride = await this.platform.hasCapability("unit.edit", executor);
+			const restrictions = await executor
+				.select({
+					id: unitAccessRestriction.id,
+					subjectKind: unitAccessRestriction.subjectKind,
+					scope: unitAccessRestriction.scope,
+				})
+				.from(unitAccessRestriction)
+				.where(
+					and(
+						eq(unitAccessRestriction.unitId, unitId),
+						eq(unitAccessRestriction.permission, permission),
+						or(
+							and(
+								eq(unitAccessRestriction.subjectKind, "profile"),
+								eq(unitAccessRestriction.profileId, this.profileId),
+							),
+							and(
+								eq(unitAccessRestriction.subjectKind, "realm"),
+								exists(
+									executor
+										.select({ profileId: realmMember.profileId })
+										.from(realmMember)
+										.where(
+											and(
+												eq(
+													realmMember.realmId,
+													unitAccessRestriction.realmId,
 												),
+												eq(realmMember.profileId, this.profileId),
+												eq(realmMember.state, "active"),
 											),
-									),
+										),
 								),
 							),
-							isNull(unitAccessRestriction.revokedAt),
-							or(
-								isNull(unitAccessRestriction.expiresAt),
-								sql`${unitAccessRestriction.expiresAt} > now()`,
-							),
+						),
+						isNull(unitAccessRestriction.revokedAt),
+						or(
+							isNull(unitAccessRestriction.expiresAt),
+							sql`${unitAccessRestriction.expiresAt} > now()`,
 						),
 					),
-				executor
-					.select({ scope: unitAccessBinding.scope })
-					.from(unitAccessBinding)
-					.where(
-						and(
-							eq(unitAccessBinding.unitId, unitId),
-							eq(unitAccessBinding.subjectKind, "profile"),
-							eq(unitAccessBinding.profileId, this.profileId),
-							eq(unitAccessBinding.role, "owner"),
-							isNull(unitAccessBinding.revokedAt),
-							or(
-								isNull(unitAccessBinding.expiresAt),
-								sql`${unitAccessBinding.expiresAt} > now()`,
-							),
+				);
+			const directOwnerBindings = await executor
+				.select({ scope: unitAccessBinding.scope })
+				.from(unitAccessBinding)
+				.where(
+					and(
+						eq(unitAccessBinding.unitId, unitId),
+						eq(unitAccessBinding.subjectKind, "profile"),
+						eq(unitAccessBinding.profileId, this.profileId),
+						eq(unitAccessBinding.role, "owner"),
+						isNull(unitAccessBinding.revokedAt),
+						or(
+							isNull(unitAccessBinding.expiresAt),
+							sql`${unitAccessBinding.expiresAt} > now()`,
 						),
 					),
-			]);
+				);
 			const applicableRestrictions = restrictions
 				.filter((restriction) => scopeCovers(restriction.scope, scope))
 				.sort(
