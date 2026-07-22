@@ -11,7 +11,7 @@ import {
 	usePutApiApiTokensByTokenIdPolicy,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { KeyRound, Plus, ShieldAlert, Trash2 } from "lucide-react";
+import { KeyRound, Plus, ShieldAlert, Trash2, XIcon } from "lucide-react";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
@@ -42,11 +42,16 @@ import {
 	ClipboardInput,
 	ClipboardTrigger,
 	Field,
+	FieldDescription,
+	FieldError,
 	FieldGroup,
 	FieldLabel,
 	FieldLegend,
 	FieldSet,
 	Input,
+	InputGroup,
+	InputGroupAddon,
+	InputGroupInput,
 	ManagementWorkspaceSectionHeader,
 	NativeSelect,
 	NativeSelectOption,
@@ -55,6 +60,16 @@ import {
 } from "@rezics/ui";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useTranslation } from "@/i18n/client";
+import {
+	getTokenPolicyLimitRanges,
+	parseTokenPolicyLimit,
+	parseTokenPolicyLimits,
+	StandardTokenPolicyLimitRanges,
+	type TokenPolicyLimitName,
+	type TokenPolicyLimitRanges,
+	type TokenPolicyLimitValues,
+	type ValidTokenPolicyLimits,
+} from "../model/token-policy-limits";
 import { SettingsOverviewHref } from "../routing/settings-routes";
 
 type TokenRecord = GetApiApiTokensStatus200["items"][number];
@@ -166,43 +181,103 @@ function PermissionFields({
 	);
 }
 
-function GlobalLimitFields({ defaults }: { defaults?: TokenRecord["policy"]["limits"] }) {
+function LimitRangeDescription({ ranges }: { ranges: TokenPolicyLimitRanges }) {
+	const { t, locale } = useTranslation(["settings"]);
+	const format = (value: number) => value.toLocaleString(locale.current);
+	return (
+		<FieldDescription>
+			{t.settings.tokens.limitRanges({
+				requestsMinimum: format(ranges.requestsPerMinute.minimum),
+				requestsMaximum: format(ranges.requestsPerMinute.maximum),
+				concurrentMinimum: format(ranges.maxConcurrentRequests.minimum),
+				concurrentMaximum: format(ranges.maxConcurrentRequests.maximum),
+				dailyMinimum: format(ranges.dailyCostUnits.minimum),
+				dailyMaximum: format(ranges.dailyCostUnits.maximum),
+			})}
+		</FieldDescription>
+	);
+}
+
+export function PolicyLimitField({
+	label,
+	name,
+	onChange,
+	range,
+	value,
+}: {
+	label: string;
+	name: TokenPolicyLimitName;
+	onChange: (value: string) => void;
+	range: TokenPolicyLimitRanges[TokenPolicyLimitName];
+	value: string;
+}) {
+	const { t, locale } = useTranslation(["settings"]);
+	const parsed = parseTokenPolicyLimit(value, range);
+	const invalid = parsed.kind === "invalid";
+	const minimum = range.minimum.toLocaleString(locale.current);
+	const maximum = range.maximum.toLocaleString(locale.current);
+	return (
+		<Field invalid={invalid} required>
+			<FieldLabel>{label}</FieldLabel>
+			<InputGroup>
+				<InputGroupInput
+					aria-invalid={invalid || undefined}
+					max={range.maximum}
+					min={range.minimum}
+					name={name}
+					onChange={(event) => onChange(event.currentTarget.value)}
+					placeholder={t.settings.tokens.limitRangePlaceholder({ minimum, maximum })}
+					required
+					step={1}
+					type="number"
+					value={value}
+				/>
+				{invalid ? (
+					<InputGroupAddon align="inline-end" className="text-destructive">
+						<XIcon aria-hidden />
+					</InputGroupAddon>
+				) : null}
+			</InputGroup>
+			{invalid ? (
+				<FieldError>{t.settings.tokens.limitRangeError({ minimum, maximum })}</FieldError>
+			) : null}
+		</Field>
+	);
+}
+
+function PolicyLimitFields({
+	onChange,
+	ranges,
+	values,
+}: {
+	onChange: (name: TokenPolicyLimitName, value: string) => void;
+	ranges: TokenPolicyLimitRanges;
+	values: TokenPolicyLimitValues;
+}) {
 	const { t } = useTranslation(["settings"]);
 	return (
 		<div className="grid gap-4 sm:grid-cols-3">
-			<Field required>
-				<FieldLabel>{t.settings.tokens.requestsPerMinute}</FieldLabel>
-				<Input
-					defaultValue={Number(defaults?.requestsPerMinute ?? 60)}
-					max={300}
-					min={1}
-					name="requestsPerMinute"
-					required
-					type="number"
-				/>
-			</Field>
-			<Field required>
-				<FieldLabel>{t.settings.tokens.maxConcurrentRequests}</FieldLabel>
-				<Input
-					defaultValue={Number(defaults?.maxConcurrentRequests ?? 2)}
-					max={4}
-					min={1}
-					name="maxConcurrentRequests"
-					required
-					type="number"
-				/>
-			</Field>
-			<Field required>
-				<FieldLabel>{t.settings.tokens.dailyCostUnits}</FieldLabel>
-				<Input
-					defaultValue={Number(defaults?.dailyCostUnits ?? 2_000)}
-					max={10_000}
-					min={1}
-					name="dailyCostUnits"
-					required
-					type="number"
-				/>
-			</Field>
+			<PolicyLimitField
+				label={t.settings.tokens.requestsPerMinute}
+				name="requestsPerMinute"
+				onChange={(value) => onChange("requestsPerMinute", value)}
+				range={ranges.requestsPerMinute}
+				value={values.requestsPerMinute}
+			/>
+			<PolicyLimitField
+				label={t.settings.tokens.maxConcurrentRequests}
+				name="maxConcurrentRequests"
+				onChange={(value) => onChange("maxConcurrentRequests", value)}
+				range={ranges.maxConcurrentRequests}
+				value={values.maxConcurrentRequests}
+			/>
+			<PolicyLimitField
+				label={t.settings.tokens.dailyCostUnits}
+				name="dailyCostUnits"
+				onChange={(value) => onChange("dailyCostUnits", value)}
+				range={ranges.dailyCostUnits}
+				value={values.dailyCostUnits}
+			/>
 		</div>
 	);
 }
@@ -212,6 +287,11 @@ function CreateTokenCard({ refresh }: { refresh: () => Promise<unknown> }) {
 	const [permissions, setPermissions] = useState<ApiTokenPermission[]>([
 		...ContentAgentPermissions,
 	]);
+	const [limitValues, setLimitValues] = useState<TokenPolicyLimitValues>({
+		requestsPerMinute: "60",
+		maxConcurrentRequests: "2",
+		dailyCostUnits: "2000",
+	});
 	const [permissionsInvalid, setPermissionsInvalid] = useState(false);
 	const [secret, setSecret] = useState<string>();
 	const create = usePostApiApiTokens<unknown>({
@@ -226,7 +306,8 @@ function CreateTokenCard({ refresh }: { refresh: () => Promise<unknown> }) {
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setPermissionsInvalid(permissions.length === 0);
-		if (permissions.length === 0) return;
+		const limits = parseTokenPolicyLimits(limitValues, StandardTokenPolicyLimitRanges);
+		if (permissions.length === 0 || !limits.valid) return;
 		const form = new FormData(event.currentTarget);
 		await create.mutateAsync({
 			body: {
@@ -234,11 +315,7 @@ function CreateTokenCard({ refresh }: { refresh: () => Promise<unknown> }) {
 				expiresInDays: Number(form.get("expiresInDays")),
 				permissions,
 				policyOverride: {
-					limits: {
-						requestsPerMinute: Number(form.get("requestsPerMinute")),
-						maxConcurrentRequests: Number(form.get("maxConcurrentRequests")),
-						dailyCostUnits: Number(form.get("dailyCostUnits")),
-					},
+					limits: limits.values,
 				},
 			},
 		});
@@ -342,10 +419,17 @@ function CreateTokenCard({ refresh }: { refresh: () => Promise<unknown> }) {
 						</FieldSet>
 						<FieldSet>
 							<FieldLegend variant="label">{t.settings.tokens.limits}</FieldLegend>
-							<p className="text-sm text-muted-foreground">
-								{t.settings.tokens.limitsDescription}
-							</p>
-							<GlobalLimitFields />
+							<FieldDescription>
+								{t.settings.tokens.standardLimitsDescription}
+							</FieldDescription>
+							<LimitRangeDescription ranges={StandardTokenPolicyLimitRanges} />
+							<PolicyLimitFields
+								onChange={(name, value) =>
+									setLimitValues((current) => ({ ...current, [name]: value }))
+								}
+								ranges={StandardTokenPolicyLimitRanges}
+								values={limitValues}
+							/>
 						</FieldSet>
 						<RequestFailure error={create.error} fallback={t.ui.retryLater} />
 						<Button isLoading={create.isPending} type="submit" variant="solid">
@@ -408,12 +492,9 @@ function TokenAccessEditor({
 	);
 }
 
-type OperationLimitRow = {
+type OperationLimitRow = TokenPolicyLimitValues & {
 	key: string;
 	operationId: string;
-	requestsPerMinute: number;
-	maxConcurrentRequests: number;
-	dailyCostUnits: number;
 };
 
 function TokenPolicyEditor({
@@ -424,26 +505,21 @@ function TokenPolicyEditor({
 	refresh: () => Promise<unknown>;
 }) {
 	const { t } = useTranslation(["settings", "ui"]);
-	const trusted = token.policy.kind === "staff_trusted";
-	const maximums = trusted
-		? { requestsPerMinute: 5_000, maxConcurrentRequests: 64, dailyCostUnits: 1_000_000 }
-		: { requestsPerMinute: 300, maxConcurrentRequests: 4, dailyCostUnits: 10_000 };
-	const [requestsPerMinute, setRequestsPerMinute] = useState(
-		Number(token.policy.limits.requestsPerMinute),
-	);
-	const [maxConcurrentRequests, setMaxConcurrentRequests] = useState(
-		Number(token.policy.limits.maxConcurrentRequests),
-	);
-	const [dailyCostUnits, setDailyCostUnits] = useState(
-		Number(token.policy.limits.dailyCostUnits),
-	);
+	const ranges = getTokenPolicyLimitRanges(token.policy.kind);
+	const [limitValues, setLimitValues] = useState<TokenPolicyLimitValues>(() => ({
+		requestsPerMinute: String(token.policy.limits.requestsPerMinute),
+		maxConcurrentRequests: String(token.policy.limits.maxConcurrentRequests),
+		dailyCostUnits: String(token.policy.limits.dailyCostUnits),
+	}));
 	const [operations, setOperations] = useState<OperationLimitRow[]>(() =>
 		Object.entries(token.policy.operations).map(([operationId, limits], index) => ({
 			key: `stored-${index}-${operationId}`,
 			operationId,
-			requestsPerMinute: Number(limits.requestsPerMinute ?? requestsPerMinute),
-			maxConcurrentRequests: Number(limits.maxConcurrentRequests ?? maxConcurrentRequests),
-			dailyCostUnits: Number(limits.dailyCostUnits ?? dailyCostUnits),
+			requestsPerMinute: String(limits.requestsPerMinute ?? limitValues.requestsPerMinute),
+			maxConcurrentRequests: String(
+				limits.maxConcurrentRequests ?? limitValues.maxConcurrentRequests,
+			),
+			dailyCostUnits: String(limits.dailyCostUnits ?? limitValues.dailyCostUnits),
 		})),
 	);
 	const [invalid, setInvalid] = useState(false);
@@ -461,49 +537,31 @@ function TokenPolicyEditor({
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const operationIds = operations.map(({ operationId }) => operationId.trim());
-		const valid =
-			Number.isInteger(requestsPerMinute) &&
-			requestsPerMinute >= 1 &&
-			requestsPerMinute <= maximums.requestsPerMinute &&
-			Number.isInteger(maxConcurrentRequests) &&
-			maxConcurrentRequests >= 1 &&
-			maxConcurrentRequests <= maximums.maxConcurrentRequests &&
-			Number.isInteger(dailyCostUnits) &&
-			dailyCostUnits >= 1 &&
-			dailyCostUnits <= maximums.dailyCostUnits &&
-			new Set(operationIds).size === operationIds.length &&
-			operations.every(
-				(operation) =>
-					/^[A-Za-z][A-Za-z0-9_-]*$/.test(operation.operationId.trim()) &&
-					Number.isInteger(operation.requestsPerMinute) &&
-					operation.requestsPerMinute >= 1 &&
-					operation.requestsPerMinute <= maximums.requestsPerMinute &&
-					Number.isInteger(operation.maxConcurrentRequests) &&
-					operation.maxConcurrentRequests >= 1 &&
-					operation.maxConcurrentRequests <= maximums.maxConcurrentRequests &&
-					Number.isInteger(operation.dailyCostUnits) &&
-					operation.dailyCostUnits >= 1 &&
-					operation.dailyCostUnits <= maximums.dailyCostUnits,
-			);
-		setInvalid(!valid);
-		if (!valid) return;
+		const limits = parseTokenPolicyLimits(limitValues, ranges);
+		const configurationOperations: Record<string, ValidTokenPolicyLimits> = {};
+		let operationsValid = true;
+		for (const operation of operations) {
+			const operationId = operation.operationId.trim();
+			const operationLimits = parseTokenPolicyLimits(operation, ranges);
+			if (
+				!/^[A-Za-z][A-Za-z0-9_-]*$/.test(operationId) ||
+				Object.hasOwn(configurationOperations, operationId) ||
+				!operationLimits.valid
+			) {
+				operationsValid = false;
+				continue;
+			}
+			configurationOperations[operationId] = operationLimits.values;
+		}
+		setInvalid(!limits.valid || !operationsValid);
+		if (!limits.valid || !operationsValid) return;
 		await replace.mutateAsync({
 			path: { tokenId: token.id },
 			body: {
 				expectedRevision: Number(token.policy.bindingRevision ?? 1),
 				configurationOverride: {
-					limits: { requestsPerMinute, maxConcurrentRequests, dailyCostUnits },
-					operations: Object.fromEntries(
-						operations.map((operation) => [
-							operation.operationId.trim(),
-							{
-								requestsPerMinute: operation.requestsPerMinute,
-								maxConcurrentRequests: operation.maxConcurrentRequests,
-								dailyCostUnits: operation.dailyCostUnits,
-							},
-						]),
-					),
+					limits: limits.values,
+					operations: configurationOperations,
 				},
 			},
 		});
@@ -513,47 +571,15 @@ function TokenPolicyEditor({
 		<form className="grid gap-5 rounded-lg border border-border-weak p-4" onSubmit={submit}>
 			<FieldSet>
 				<FieldLegend variant="label">{t.settings.tokens.limits}</FieldLegend>
-				<div className="grid gap-4 sm:grid-cols-3">
-					<Field required>
-						<FieldLabel>{t.settings.tokens.requestsPerMinute}</FieldLabel>
-						<Input
-							max={maximums.requestsPerMinute}
-							min={1}
-							onChange={(event) =>
-								setRequestsPerMinute(event.currentTarget.valueAsNumber)
-							}
-							required
-							type="number"
-							value={requestsPerMinute}
-						/>
-					</Field>
-					<Field required>
-						<FieldLabel>{t.settings.tokens.maxConcurrentRequests}</FieldLabel>
-						<Input
-							max={maximums.maxConcurrentRequests}
-							min={1}
-							onChange={(event) =>
-								setMaxConcurrentRequests(event.currentTarget.valueAsNumber)
-							}
-							required
-							type="number"
-							value={maxConcurrentRequests}
-						/>
-					</Field>
-					<Field required>
-						<FieldLabel>{t.settings.tokens.dailyCostUnits}</FieldLabel>
-						<Input
-							max={maximums.dailyCostUnits}
-							min={1}
-							onChange={(event) =>
-								setDailyCostUnits(event.currentTarget.valueAsNumber)
-							}
-							required
-							type="number"
-							value={dailyCostUnits}
-						/>
-					</Field>
-				</div>
+				<FieldDescription>{t.settings.tokens.limitsDescription}</FieldDescription>
+				<LimitRangeDescription ranges={ranges} />
+				<PolicyLimitFields
+					onChange={(name, value) =>
+						setLimitValues((current) => ({ ...current, [name]: value }))
+					}
+					ranges={ranges}
+					values={limitValues}
+				/>
 			</FieldSet>
 			<FieldSet>
 				<FieldLegend variant="label">{t.settings.tokens.operationOverrides}</FieldLegend>
@@ -579,52 +605,33 @@ function TokenPolicyEditor({
 									value={operation.operationId}
 								/>
 							</Field>
-							<Field required>
-								<FieldLabel>{t.settings.tokens.requestsPerMinute}</FieldLabel>
-								<Input
-									max={maximums.requestsPerMinute}
-									min={1}
-									onChange={(event) =>
-										updateOperation(operation.key, {
-											requestsPerMinute: event.currentTarget.valueAsNumber,
-										})
-									}
-									required
-									type="number"
-									value={operation.requestsPerMinute}
-								/>
-							</Field>
-							<Field required>
-								<FieldLabel>{t.settings.tokens.maxConcurrentRequests}</FieldLabel>
-								<Input
-									max={maximums.maxConcurrentRequests}
-									min={1}
-									onChange={(event) =>
-										updateOperation(operation.key, {
-											maxConcurrentRequests:
-												event.currentTarget.valueAsNumber,
-										})
-									}
-									required
-									type="number"
-									value={operation.maxConcurrentRequests}
-								/>
-							</Field>
-							<Field required>
-								<FieldLabel>{t.settings.tokens.dailyCostUnits}</FieldLabel>
-								<Input
-									max={maximums.dailyCostUnits}
-									min={1}
-									onChange={(event) =>
-										updateOperation(operation.key, {
-											dailyCostUnits: event.currentTarget.valueAsNumber,
-										})
-									}
-									required
-									type="number"
-									value={operation.dailyCostUnits}
-								/>
-							</Field>
+							<PolicyLimitField
+								label={t.settings.tokens.requestsPerMinute}
+								name="requestsPerMinute"
+								onChange={(value) =>
+									updateOperation(operation.key, { requestsPerMinute: value })
+								}
+								range={ranges.requestsPerMinute}
+								value={operation.requestsPerMinute}
+							/>
+							<PolicyLimitField
+								label={t.settings.tokens.maxConcurrentRequests}
+								name="maxConcurrentRequests"
+								onChange={(value) =>
+									updateOperation(operation.key, { maxConcurrentRequests: value })
+								}
+								range={ranges.maxConcurrentRequests}
+								value={operation.maxConcurrentRequests}
+							/>
+							<PolicyLimitField
+								label={t.settings.tokens.dailyCostUnits}
+								name="dailyCostUnits"
+								onChange={(value) =>
+									updateOperation(operation.key, { dailyCostUnits: value })
+								}
+								range={ranges.dailyCostUnits}
+								value={operation.dailyCostUnits}
+							/>
 							<Button
 								aria-label={t.settings.tokens.removeOperation}
 								onClick={() =>
@@ -644,18 +651,34 @@ function TokenPolicyEditor({
 					))}
 				</div>
 				<Button
-					onClick={() =>
+					onClick={() => {
+						const requestsPerMinute = parseTokenPolicyLimit(
+							limitValues.requestsPerMinute,
+							ranges.requestsPerMinute,
+						);
+						const dailyCostUnits = parseTokenPolicyLimit(
+							limitValues.dailyCostUnits,
+							ranges.dailyCostUnits,
+						);
 						setOperations((current) => [
 							...current,
 							{
 								key: `new-${crypto.randomUUID()}`,
 								operationId: "",
-								requestsPerMinute: Math.min(requestsPerMinute, 30),
-								maxConcurrentRequests: 1,
-								dailyCostUnits: Math.min(dailyCostUnits, 1_000),
+								requestsPerMinute: String(
+									requestsPerMinute.kind === "valid"
+										? Math.min(requestsPerMinute.value, 30)
+										: 30,
+								),
+								maxConcurrentRequests: "1",
+								dailyCostUnits: String(
+									dailyCostUnits.kind === "valid"
+										? Math.min(dailyCostUnits.value, 1_000)
+										: 1_000,
+								),
 							},
-						])
-					}
+						]);
+					}}
 					size="sm"
 					type="button"
 					variant="outline"

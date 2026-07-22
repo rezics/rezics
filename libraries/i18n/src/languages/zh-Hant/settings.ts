@@ -1,3 +1,5 @@
+import { insert } from "native-i18n";
+
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 
@@ -100,7 +102,28 @@ export default {
 			feedbackWrite: "提交意見回饋",
 		},
 		limits: "用量限制",
-		limitsDescription: "全域限制永遠生效；個別操作限制會再疊加套用。",
+		standardLimitsDescription: `自行建立的權杖一律使用標準策略；你只能在下列範圍內設定用量上限。${verbatimTerms.staffTrusted.value} 只能由工作人員授予。`,
+		limitsDescription:
+			"你只能在目前策略允許的範圍內設定用量上限；全域限制與個別操作限制會同時生效。",
+		limitRanges: insert(
+			"允許範圍：每分鐘要求數 {{requestsMinimum}} 至 {{requestsMaximum}}；同時執行要求數 {{concurrentMinimum}} 至 {{concurrentMaximum}}；每日成本單位 {{dailyMinimum}} 至 {{dailyMaximum}}。",
+			{
+				requestsMinimum: String,
+				requestsMaximum: String,
+				concurrentMinimum: String,
+				concurrentMaximum: String,
+				dailyMinimum: String,
+				dailyMaximum: String,
+			},
+		),
+		limitRangePlaceholder: insert("範圍：{{minimum}}–{{maximum}}", {
+			minimum: String,
+			maximum: String,
+		}),
+		limitRangeError: insert("請輸入 {{minimum}} 至 {{maximum}} 之間的整數。", {
+			minimum: String,
+			maximum: String,
+		}),
 		requestsPerMinute: "每分鐘要求數",
 		maxConcurrentRequests: "同時執行要求數",
 		dailyCostUnits: "每日成本單位",

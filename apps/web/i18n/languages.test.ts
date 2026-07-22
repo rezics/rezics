@@ -44,5 +44,20 @@ describe("language dictionaries", () => {
 		).toBe(true);
 		expect(traditionalChinese.locale.current).toBe("zh-Hant");
 		expect(traditionalChinese.t.locale.zh).toBe("繁體中文");
+		expect(traditionalChinese.t.settings.tokens.standardLimitsDescription).toContain(
+			"一律使用標準策略",
+		);
+		expect(
+			traditionalChinese.t.settings.tokens.limitRanges({
+				requestsMinimum: "1",
+				requestsMaximum: "300",
+				concurrentMinimum: "1",
+				concurrentMaximum: "4",
+				dailyMinimum: "1",
+				dailyMaximum: "10,000",
+			}),
+		).toBe(
+			"允許範圍：每分鐘要求數 1 至 300；同時執行要求數 1 至 4；每日成本單位 1 至 10,000。",
+		);
 	});
 });

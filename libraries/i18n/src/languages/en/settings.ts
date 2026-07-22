@@ -1,3 +1,5 @@
+import { insert } from "native-i18n";
+
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { enTerminology } from "@rezics/i18n/terminology/en";
 
@@ -105,8 +107,28 @@ export default {
 			feedbackWrite: "Submit feedback",
 		},
 		limits: "Usage limits",
+		standardLimitsDescription: `Tokens you create always use the Standard policy; you can configure quotas only within the ranges below. Only staff can grant ${verbatimTerms.staffTrusted.value}.`,
 		limitsDescription:
-			"Global limits always apply; operation-specific limits apply in addition.",
+			"Quotas must remain within the current policy's allowed ranges. Global and operation-specific limits apply together.",
+		limitRanges: insert(
+			"Allowed ranges: {{requestsMinimum}} to {{requestsMaximum}} requests per minute; {{concurrentMinimum}} to {{concurrentMaximum}} concurrent requests; {{dailyMinimum}} to {{dailyMaximum}} daily cost units.",
+			{
+				requestsMinimum: String,
+				requestsMaximum: String,
+				concurrentMinimum: String,
+				concurrentMaximum: String,
+				dailyMinimum: String,
+				dailyMaximum: String,
+			},
+		),
+		limitRangePlaceholder: insert("Range: {{minimum}}–{{maximum}}", {
+			minimum: String,
+			maximum: String,
+		}),
+		limitRangeError: insert("Enter a whole number from {{minimum}} to {{maximum}}.", {
+			minimum: String,
+			maximum: String,
+		}),
 		requestsPerMinute: "Requests per minute",
 		maxConcurrentRequests: "Concurrent requests",
 		dailyCostUnits: "Daily cost units",
