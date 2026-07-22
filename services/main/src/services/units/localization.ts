@@ -1,34 +1,125 @@
 import { and, eq, sql, type SQL, type SQLWrapper } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
+import {
+	FontAwesomeProvider,
+	type AvatarReference,
+	type AvatarType,
+	type FontAwesomeIconPrefix,
+} from "@rezics/avatar";
 import type { ContentLanguage } from "@rezics/i18n";
 
 import type { DatabaseTransaction } from "../database";
 import { unitLocalization } from "../database/schema";
 import { fractionalPositionBetween } from "../ordering/position";
 
-export const UnitLocalizationImageRoles = ["avatar", "banner", "cover"] as const;
+export const UnitLocalizationImageRoles = ["banner", "cover"] as const;
 export type UnitLocalizationImageRole = (typeof UnitLocalizationImageRoles)[number];
 export interface UnitLocalizationImageAssetInput {
-	avatarAssetId?: string | null;
+	avatar?: AvatarReference | null;
 	bannerAssetId?: string | null;
 	coverAssetId?: string | null;
+}
+
+export interface UnitLocalizationAvatarColumns {
+	avatarType: AvatarType | null;
+	avatarAssetId: string | null;
+	avatarEmoji: string | null;
+	avatarIconPrefix: FontAwesomeIconPrefix | null;
+	avatarIconName: string | null;
 }
 
 export function unitLocalizationImageAssetIds(
 	input: UnitLocalizationImageAssetInput,
 ): readonly (string | null | undefined)[] {
-	return [input.avatarAssetId, input.bannerAssetId, input.coverAssetId];
+	return [
+		input.avatar?.type === "image" ? input.avatar.image.assetId : undefined,
+		input.bannerAssetId,
+		input.coverAssetId,
+	];
+}
+
+export function avatarReferenceToColumns(
+	avatar: AvatarReference | null,
+): UnitLocalizationAvatarColumns {
+	switch (avatar?.type) {
+		case undefined:
+			return {
+				avatarType: null,
+				avatarAssetId: null,
+				avatarEmoji: null,
+				avatarIconPrefix: null,
+				avatarIconName: null,
+			};
+		case "image":
+			return {
+				avatarType: "image",
+				avatarAssetId: avatar.image.assetId,
+				avatarEmoji: null,
+				avatarIconPrefix: null,
+				avatarIconName: null,
+			};
+		case "emoji":
+			return {
+				avatarType: "emoji",
+				avatarAssetId: null,
+				avatarEmoji: avatar.emoji,
+				avatarIconPrefix: null,
+				avatarIconName: null,
+			};
+		case "icon":
+			return {
+				avatarType: "icon",
+				avatarAssetId: null,
+				avatarEmoji: null,
+				avatarIconPrefix: avatar.icon.prefix,
+				avatarIconName: avatar.icon.name,
+			};
+	}
+}
+
+export function toUnitLocalizationStorage<Input extends object>(
+	input: Input & { readonly avatar?: AvatarReference | null },
+): Omit<Input, "avatar"> & Partial<UnitLocalizationAvatarColumns> {
+	const { avatar, ...stored } = input;
+	return {
+		...stored,
+		...(Object.hasOwn(input, "avatar") ? avatarReferenceToColumns(avatar ?? null) : {}),
+	};
+}
+
+export function avatarReferenceFromColumns(
+	columns: UnitLocalizationAvatarColumns,
+): AvatarReference | null {
+	switch (columns.avatarType) {
+		case null:
+			return null;
+		case "image":
+			if (!columns.avatarAssetId) throw new Error("Stored image avatar has no asset id");
+			return { type: "image", image: { assetId: columns.avatarAssetId } };
+		case "emoji":
+			if (!columns.avatarEmoji) throw new Error("Stored emoji avatar has no emoji");
+			return { type: "emoji", emoji: columns.avatarEmoji };
+		case "icon":
+			if (!columns.avatarIconPrefix || !columns.avatarIconName)
+				throw new Error("Stored icon avatar is incomplete");
+			return {
+				type: "icon",
+				icon: {
+					provider: FontAwesomeProvider,
+					prefix: columns.avatarIconPrefix,
+					name: columns.avatarIconName,
+				},
+			};
+	}
 }
 
 const mediaLocalization = alias(unitLocalization, "media_localization");
 const mediaAssetColumns = {
-	avatar: mediaLocalization.avatarAssetId,
 	banner: mediaLocalization.bannerAssetId,
 	cover: mediaLocalization.coverAssetId,
 } as const satisfies Record<UnitLocalizationImageRole, SQLWrapper>;
 
 const mediaAssetKeys = {
-	avatar: "avatarAssetId",
 	banner: "bannerAssetId",
 	cover: "coverAssetId",
 } as const satisfies Record<UnitLocalizationImageRole, keyof UnitLocalizationImageAssetInput>;
@@ -51,6 +142,21 @@ export function resolveUnitLocalizationImageAssetIdFromOrdered(
 		localizations.find((localization) => localization[assetKey])?.[assetKey] ??
 		null
 	);
+}
+
+/** Resolve a complete avatar override from rows already ordered by position and language. */
+export function resolveUnitLocalizationAvatarFromOrdered(
+	localizations: readonly (UnitLocalizationAvatarColumns & { language: string })[],
+	preferredLanguage?: string | null,
+): AvatarReference | null {
+	const preferred = preferredLanguage
+		? localizations.find(
+				(localization) =>
+					localization.language === preferredLanguage && localization.avatarType !== null,
+			)
+		: undefined;
+	const resolved = preferred ?? localizations.find(({ avatarType }) => avatarType !== null);
+	return resolved ? avatarReferenceFromColumns(resolved) : null;
 }
 
 /** Return the first position in the Unit's ordered localization sequence. */
@@ -80,6 +186,43 @@ export function resolvedUnitLocalizationImageAssetId(
 		from ${unitLocalization} as ${mediaLocalization}
 		where ${mediaLocalization.unitId} = ${unitId}
 			and ${assetColumn} is not null
+		order by
+			case when ${preferredLanguage ?? null}::text is not null
+				and ${mediaLocalization.language} = ${preferredLanguage ?? null}::text
+				then 0 else 1 end,
+			${mediaLocalization.position},
+			${mediaLocalization.language}
+		limit 1
+	)`;
+}
+
+/** Resolve a locale override, then the first complete avatar in localization order. */
+export function resolvedUnitLocalizationAvatar(
+	unitId: SQLWrapper,
+	preferredLanguage?: string | null,
+): SQL<AvatarReference | null> {
+	return sql<AvatarReference | null>`(
+		select case ${mediaLocalization.avatarType}
+			when 'image' then jsonb_build_object(
+				'type', 'image',
+				'image', jsonb_build_object('assetId', ${mediaLocalization.avatarAssetId})
+			)
+			when 'emoji' then jsonb_build_object(
+				'type', 'emoji',
+				'emoji', ${mediaLocalization.avatarEmoji}
+			)
+			when 'icon' then jsonb_build_object(
+				'type', 'icon',
+				'icon', jsonb_build_object(
+					'provider', ${FontAwesomeProvider},
+					'prefix', ${mediaLocalization.avatarIconPrefix},
+					'name', ${mediaLocalization.avatarIconName}
+				)
+			)
+		end
+		from ${unitLocalization} as ${mediaLocalization}
+		where ${mediaLocalization.unitId} = ${unitId}
+			and ${mediaLocalization.avatarType} is not null
 		order by
 			case when ${preferredLanguage ?? null}::text is not null
 				and ${mediaLocalization.language} = ${preferredLanguage ?? null}::text

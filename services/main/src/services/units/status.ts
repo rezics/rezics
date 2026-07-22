@@ -1,7 +1,7 @@
 import { and, asc, count, desc, eq, inArray, isNull, lt, max, min, or, sql } from "drizzle-orm";
+import type { PresentedAvatar } from "@rezics/avatar";
 
 import { database, type DatabaseTransaction } from "../database";
-import { imageAssetContentUrl } from "../api/image-assets/service";
 import {
 	profile,
 	unit,
@@ -14,8 +14,9 @@ import {
 import {
 	primaryUnitSummary,
 	primaryUnitTitle,
-	resolvedUnitLocalizationImageAssetId,
+	resolvedUnitLocalizationAvatar,
 } from "./localization";
+import { presentAvatar } from "./avatar";
 import { UnitChanged, UnitNotFound, UnitPermissionForbidden } from "./errors";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
 import {
@@ -43,7 +44,7 @@ export type UnitPublisherSummary = {
 	readonly slugAddress: PublicCanonicalUnitSlugAddress | null;
 	readonly name: string | null;
 	readonly summary: string | null;
-	readonly avatar: { readonly id: string; readonly url: string } | null;
+	readonly avatar: PresentedAvatar | null;
 	readonly firstPublishedAt: Date;
 	readonly lastPublishedAt: Date;
 	readonly publicationCount: number;
@@ -252,7 +253,7 @@ export async function getPublisherSummariesByUnitIds(
 			profileId: profile.id,
 			name: primaryUnitTitle(profile.id),
 			summary: primaryUnitSummary(profile.id),
-			avatarAssetId: resolvedUnitLocalizationImageAssetId(profile.id, "avatar"),
+			avatar: resolvedUnitLocalizationAvatar(profile.id),
 			firstPublishedAt: min(unitStatusEvent.createdAt),
 			lastPublishedAt: max(unitStatusEvent.createdAt),
 			publicationCount: count(unitStatusEvent.id),
@@ -279,9 +280,7 @@ export async function getPublisherSummariesByUnitIds(
 			slugAddress: slugAddresses.get(row.profileId) ?? null,
 			name: row.name,
 			summary: row.summary,
-			avatar: row.avatarAssetId
-				? { id: row.avatarAssetId, url: imageAssetContentUrl(row.avatarAssetId) }
-				: null,
+			avatar: presentAvatar(row.avatar),
 			firstPublishedAt: row.firstPublishedAt,
 			lastPublishedAt: row.lastPublishedAt,
 			publicationCount: row.publicationCount,

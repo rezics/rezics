@@ -10283,6 +10283,22 @@ export type GetApiRecommendationsPostsByPostIdQuery = {
 	limit?: string | number;
 };
 
+export const GetApiRecommendationsPostsByPostIdStatus200ItemsPublishersAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiRecommendationsPostsByPostIdStatus200ItemsPublishersAvatarIconPrefixEnum =
+	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsPublishersAvatarIconPrefixEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsPublishersAvatarIconPrefixEnum];
+
+export const GetApiRecommendationsPostsByPostIdStatus200ItemsRealmsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiRecommendationsPostsByPostIdStatus200ItemsRealmsAvatarIconPrefixEnum =
+	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsRealmsAvatarIconPrefixEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsRealmsAvatarIconPrefixEnum];
+
 export const GetApiRecommendationsPostsByPostIdStatus200ItemsRecommendationReason = {
 	followed_publisher: "followed_publisher",
 	followed_realm: "followed_realm",
@@ -10319,6 +10335,15 @@ export const GetApiRecommendationsPostsByPostIdStatus200ItemsPostKindEnum = {
 
 export type GetApiRecommendationsPostsByPostIdStatus200ItemsPostKindEnum =
 	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsPostKindEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsPostKindEnum];
+
+export const GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextPublishersAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextPublishersAvatarIconPrefixEnum =
+	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextPublishersAvatarIconPrefixEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextPublishersAvatarIconPrefixEnum];
 
 /**
  * @type object
@@ -10368,18 +10393,68 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 			name: (string | null) | null;
 			summary: (string | null) | null;
 			avatar:
-				| ({
-						/**
-						 * @description
-						 * Format: `uuid`
-						 * @type string
-						 */
-						id: string;
-						/**
-						 * @type string
-						 */
-						url: string;
-				  } | null)
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetApiRecommendationsPostsByPostIdStatus200ItemsPublishersAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
 				| null;
 			/**
 			 * @description
@@ -10430,18 +10505,68 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 			title: (string | null) | null;
 			summary: (string | null) | null;
 			avatar:
-				| ({
-						/**
-						 * @description
-						 * Format: `uuid`
-						 * @type string
-						 */
-						id: string;
-						/**
-						 * @type string
-						 */
-						url: string;
-				  } | null)
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetApiRecommendationsPostsByPostIdStatus200ItemsRealmsAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
 				| null;
 		}[];
 		title: (string | null) | null;
@@ -10700,18 +10825,68 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 						name: (string | null) | null;
 						summary: (string | null) | null;
 						avatar:
-							| ({
-									/**
-									 * @description
-									 * Format: `uuid`
-									 * @type string
-									 */
-									id: string;
-									/**
-									 * @type string
-									 */
-									url: string;
-							  } | null)
+							| (
+									| (
+											| {
+													/**
+													 * @type string
+													 */
+													type: "image";
+													/**
+													 * @type object
+													 */
+													image: {
+														/**
+														 * @description
+														 * Format: `uuid`
+														 * @type string
+														 */
+														id: string;
+														/**
+														 * @type string
+														 */
+														url: string;
+													};
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													type: "emoji";
+													/**
+													 * @maxLength 64
+													 * @type string
+													 */
+													emoji: string;
+											  }
+											| {
+													/**
+													 * @type string
+													 */
+													type: "icon";
+													/**
+													 * @type object
+													 */
+													icon: {
+														/**
+														 * @type string
+														 */
+														provider: "font-awesome";
+														/**
+														 * @type string
+														 */
+														prefix: GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextPublishersAvatarIconPrefixEnum;
+														/**
+														 * @maxLength 128
+														 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+														 * @type string
+														 */
+														name: string;
+													};
+											  }
+									  )
+									| null
+							  )
 							| null;
 						/**
 						 * @description
@@ -14880,6 +15055,22 @@ export type GetApiFeedQuery = {
 	limit?: string | number;
 };
 
+export const GetApiFeedStatus200ItemsPublishersAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiFeedStatus200ItemsPublishersAvatarIconPrefixEnum =
+	(typeof GetApiFeedStatus200ItemsPublishersAvatarIconPrefixEnum)[keyof typeof GetApiFeedStatus200ItemsPublishersAvatarIconPrefixEnum];
+
+export const GetApiFeedStatus200ItemsRealmsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiFeedStatus200ItemsRealmsAvatarIconPrefixEnum =
+	(typeof GetApiFeedStatus200ItemsRealmsAvatarIconPrefixEnum)[keyof typeof GetApiFeedStatus200ItemsRealmsAvatarIconPrefixEnum];
+
 export const GetApiFeedStatus200ItemsRecommendationReason = {
 	followed_publisher: "followed_publisher",
 	followed_realm: "followed_realm",
@@ -14935,6 +15126,14 @@ export const GetApiFeedStatus200ItemsPostKindEnum = {
 export type GetApiFeedStatus200ItemsPostKindEnum =
 	(typeof GetApiFeedStatus200ItemsPostKindEnum)[keyof typeof GetApiFeedStatus200ItemsPostKindEnum];
 
+export const GetApiFeedStatus200ItemsReplyContextPublishersAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiFeedStatus200ItemsReplyContextPublishersAvatarIconPrefixEnum =
+	(typeof GetApiFeedStatus200ItemsReplyContextPublishersAvatarIconPrefixEnum)[keyof typeof GetApiFeedStatus200ItemsReplyContextPublishersAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -14984,18 +15183,68 @@ export type GetApiFeedStatus200 = {
 					name: (string | null) | null;
 					summary: (string | null) | null;
 					avatar:
-						| ({
-								/**
-								 * @description
-								 * Format: `uuid`
-								 * @type string
-								 */
-								id: string;
-								/**
-								 * @type string
-								 */
-								url: string;
-						  } | null)
+						| (
+								| (
+										| {
+												/**
+												 * @type string
+												 */
+												type: "image";
+												/**
+												 * @type object
+												 */
+												image: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+												};
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "emoji";
+												/**
+												 * @maxLength 64
+												 * @type string
+												 */
+												emoji: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "icon";
+												/**
+												 * @type object
+												 */
+												icon: {
+													/**
+													 * @type string
+													 */
+													provider: "font-awesome";
+													/**
+													 * @type string
+													 */
+													prefix: GetApiFeedStatus200ItemsPublishersAvatarIconPrefixEnum;
+													/**
+													 * @maxLength 128
+													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+													 * @type string
+													 */
+													name: string;
+												};
+										  }
+								  )
+								| null
+						  )
 						| null;
 					/**
 					 * @description
@@ -15046,18 +15295,68 @@ export type GetApiFeedStatus200 = {
 					title: (string | null) | null;
 					summary: (string | null) | null;
 					avatar:
-						| ({
-								/**
-								 * @description
-								 * Format: `uuid`
-								 * @type string
-								 */
-								id: string;
-								/**
-								 * @type string
-								 */
-								url: string;
-						  } | null)
+						| (
+								| (
+										| {
+												/**
+												 * @type string
+												 */
+												type: "image";
+												/**
+												 * @type object
+												 */
+												image: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+												};
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "emoji";
+												/**
+												 * @maxLength 64
+												 * @type string
+												 */
+												emoji: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "icon";
+												/**
+												 * @type object
+												 */
+												icon: {
+													/**
+													 * @type string
+													 */
+													provider: "font-awesome";
+													/**
+													 * @type string
+													 */
+													prefix: GetApiFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
+													/**
+													 * @maxLength 128
+													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+													 * @type string
+													 */
+													name: string;
+												};
+										  }
+								  )
+								| null
+						  )
 						| null;
 				}[];
 				title: (string | null) | null;
@@ -15183,18 +15482,68 @@ export type GetApiFeedStatus200 = {
 					name: (string | null) | null;
 					summary: (string | null) | null;
 					avatar:
-						| ({
-								/**
-								 * @description
-								 * Format: `uuid`
-								 * @type string
-								 */
-								id: string;
-								/**
-								 * @type string
-								 */
-								url: string;
-						  } | null)
+						| (
+								| (
+										| {
+												/**
+												 * @type string
+												 */
+												type: "image";
+												/**
+												 * @type object
+												 */
+												image: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+												};
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "emoji";
+												/**
+												 * @maxLength 64
+												 * @type string
+												 */
+												emoji: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "icon";
+												/**
+												 * @type object
+												 */
+												icon: {
+													/**
+													 * @type string
+													 */
+													provider: "font-awesome";
+													/**
+													 * @type string
+													 */
+													prefix: GetApiFeedStatus200ItemsPublishersAvatarIconPrefixEnum;
+													/**
+													 * @maxLength 128
+													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+													 * @type string
+													 */
+													name: string;
+												};
+										  }
+								  )
+								| null
+						  )
 						| null;
 					/**
 					 * @description
@@ -15245,18 +15594,68 @@ export type GetApiFeedStatus200 = {
 					title: (string | null) | null;
 					summary: (string | null) | null;
 					avatar:
-						| ({
-								/**
-								 * @description
-								 * Format: `uuid`
-								 * @type string
-								 */
-								id: string;
-								/**
-								 * @type string
-								 */
-								url: string;
-						  } | null)
+						| (
+								| (
+										| {
+												/**
+												 * @type string
+												 */
+												type: "image";
+												/**
+												 * @type object
+												 */
+												image: {
+													/**
+													 * @description
+													 * Format: `uuid`
+													 * @type string
+													 */
+													id: string;
+													/**
+													 * @type string
+													 */
+													url: string;
+												};
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "emoji";
+												/**
+												 * @maxLength 64
+												 * @type string
+												 */
+												emoji: string;
+										  }
+										| {
+												/**
+												 * @type string
+												 */
+												type: "icon";
+												/**
+												 * @type object
+												 */
+												icon: {
+													/**
+													 * @type string
+													 */
+													provider: "font-awesome";
+													/**
+													 * @type string
+													 */
+													prefix: GetApiFeedStatus200ItemsRealmsAvatarIconPrefixEnum;
+													/**
+													 * @maxLength 128
+													 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+													 * @type string
+													 */
+													name: string;
+												};
+										  }
+								  )
+								| null
+						  )
 						| null;
 				}[];
 				title: (string | null) | null;
@@ -15514,18 +15913,68 @@ export type GetApiFeedStatus200 = {
 								name: (string | null) | null;
 								summary: (string | null) | null;
 								avatar:
-									| ({
-											/**
-											 * @description
-											 * Format: `uuid`
-											 * @type string
-											 */
-											id: string;
-											/**
-											 * @type string
-											 */
-											url: string;
-									  } | null)
+									| (
+											| (
+													| {
+															/**
+															 * @type string
+															 */
+															type: "image";
+															/**
+															 * @type object
+															 */
+															image: {
+																/**
+																 * @description
+																 * Format: `uuid`
+																 * @type string
+																 */
+																id: string;
+																/**
+																 * @type string
+																 */
+																url: string;
+															};
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															type: "emoji";
+															/**
+															 * @maxLength 64
+															 * @type string
+															 */
+															emoji: string;
+													  }
+													| {
+															/**
+															 * @type string
+															 */
+															type: "icon";
+															/**
+															 * @type object
+															 */
+															icon: {
+																/**
+																 * @type string
+																 */
+																provider: "font-awesome";
+																/**
+																 * @type string
+																 */
+																prefix: GetApiFeedStatus200ItemsReplyContextPublishersAvatarIconPrefixEnum;
+																/**
+																 * @maxLength 128
+																 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+																 * @type string
+																 */
+																name: string;
+															};
+													  }
+											  )
+											| null
+									  )
 									| null;
 								/**
 								 * @description
@@ -25817,6 +26266,14 @@ export const PostApiSeriesRequestLocalizationLanguageEnum = {
 export type PostApiSeriesRequestLocalizationLanguageEnum =
 	(typeof PostApiSeriesRequestLocalizationLanguageEnum)[keyof typeof PostApiSeriesRequestLocalizationLanguageEnum];
 
+export const PostApiSeriesRequestLocalizationAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiSeriesRequestLocalizationAvatarIconPrefixEnum =
+	(typeof PostApiSeriesRequestLocalizationAvatarIconPrefixEnum)[keyof typeof PostApiSeriesRequestLocalizationAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -25973,7 +26430,68 @@ export type PostApiSeriesBody = {
 				  }
 			)[];
 		};
-		avatarAssetId?: (string | null) | null;
+		avatar?:
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										assetId: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @description
+									 * Format: `single-emoji-grapheme`
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PostApiSeriesRequestLocalizationAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
 		bannerAssetId?: (string | null) | null;
 		coverAssetId?: (string | null) | null;
 	};
@@ -26469,6 +26987,14 @@ export type GetApiZonesByZoneIdQuery = {
 	language?: GetApiZonesByZoneIdLanguage;
 };
 
+export const GetApiZonesByZoneIdStatus200AvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiZonesByZoneIdStatus200AvatarIconPrefixEnum =
+	(typeof GetApiZonesByZoneIdStatus200AvatarIconPrefixEnum)[keyof typeof GetApiZonesByZoneIdStatus200AvatarIconPrefixEnum];
+
 export const GetApiZonesByZoneIdStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -26476,6 +27002,14 @@ export const GetApiZonesByZoneIdStatus200LocalizationsLanguageEnum = {
 
 export type GetApiZonesByZoneIdStatus200LocalizationsLanguageEnum =
 	(typeof GetApiZonesByZoneIdStatus200LocalizationsLanguageEnum)[keyof typeof GetApiZonesByZoneIdStatus200LocalizationsLanguageEnum];
+
+export const GetApiZonesByZoneIdStatus200LocalizationsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiZonesByZoneIdStatus200LocalizationsAvatarIconPrefixEnum =
+	(typeof GetApiZonesByZoneIdStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof GetApiZonesByZoneIdStatus200LocalizationsAvatarIconPrefixEnum];
 
 /**
  * @type object
@@ -26510,18 +27044,68 @@ export type GetApiZonesByZoneIdStatus200 = {
 		| null;
 	language: (("zh" | "en") | null) | null;
 	avatar:
-		| ({
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				id: string;
-				/**
-				 * @type string
-				 */
-				url: string;
-		  } | null)
+		| (
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "image";
+								/**
+								 * @type object
+								 */
+								image: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "emoji";
+								/**
+								 * @maxLength 64
+								 * @type string
+								 */
+								emoji: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "icon";
+								/**
+								 * @type object
+								 */
+								icon: {
+									/**
+									 * @type string
+									 */
+									provider: "font-awesome";
+									/**
+									 * @type string
+									 */
+									prefix: GetApiZonesByZoneIdStatus200AvatarIconPrefixEnum;
+									/**
+									 * @maxLength 128
+									 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+									 * @type string
+									 */
+									name: string;
+								};
+						  }
+				  )
+				| null
+		  )
 		| null;
 	banner:
 		| ({
@@ -26562,18 +27146,68 @@ export type GetApiZonesByZoneIdStatus200 = {
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetApiZonesByZoneIdStatus200LocalizationsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		banner:
 			| ({
@@ -26707,6 +27341,14 @@ export type PatchApiZonesByZoneIdPath = {
 	zoneId: string;
 };
 
+export const PatchApiZonesByZoneIdStatus200AvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PatchApiZonesByZoneIdStatus200AvatarIconPrefixEnum =
+	(typeof PatchApiZonesByZoneIdStatus200AvatarIconPrefixEnum)[keyof typeof PatchApiZonesByZoneIdStatus200AvatarIconPrefixEnum];
+
 export const PatchApiZonesByZoneIdStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -26714,6 +27356,14 @@ export const PatchApiZonesByZoneIdStatus200LocalizationsLanguageEnum = {
 
 export type PatchApiZonesByZoneIdStatus200LocalizationsLanguageEnum =
 	(typeof PatchApiZonesByZoneIdStatus200LocalizationsLanguageEnum)[keyof typeof PatchApiZonesByZoneIdStatus200LocalizationsLanguageEnum];
+
+export const PatchApiZonesByZoneIdStatus200LocalizationsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PatchApiZonesByZoneIdStatus200LocalizationsAvatarIconPrefixEnum =
+	(typeof PatchApiZonesByZoneIdStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof PatchApiZonesByZoneIdStatus200LocalizationsAvatarIconPrefixEnum];
 
 /**
  * @type object
@@ -26748,18 +27398,68 @@ export type PatchApiZonesByZoneIdStatus200 = {
 		| null;
 	language: (("zh" | "en") | null) | null;
 	avatar:
-		| ({
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				id: string;
-				/**
-				 * @type string
-				 */
-				url: string;
-		  } | null)
+		| (
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "image";
+								/**
+								 * @type object
+								 */
+								image: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "emoji";
+								/**
+								 * @maxLength 64
+								 * @type string
+								 */
+								emoji: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "icon";
+								/**
+								 * @type object
+								 */
+								icon: {
+									/**
+									 * @type string
+									 */
+									provider: "font-awesome";
+									/**
+									 * @type string
+									 */
+									prefix: PatchApiZonesByZoneIdStatus200AvatarIconPrefixEnum;
+									/**
+									 * @maxLength 128
+									 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+									 * @type string
+									 */
+									name: string;
+								};
+						  }
+				  )
+				| null
+		  )
 		| null;
 	banner:
 		| ({
@@ -26800,18 +27500,68 @@ export type PatchApiZonesByZoneIdStatus200 = {
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PatchApiZonesByZoneIdStatus200LocalizationsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		banner:
 			| ({
@@ -27008,6 +27758,14 @@ export const PatchApiZonesByZoneIdRequestLocalizationLanguageEnum = {
 export type PatchApiZonesByZoneIdRequestLocalizationLanguageEnum =
 	(typeof PatchApiZonesByZoneIdRequestLocalizationLanguageEnum)[keyof typeof PatchApiZonesByZoneIdRequestLocalizationLanguageEnum];
 
+export const PatchApiZonesByZoneIdRequestLocalizationAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PatchApiZonesByZoneIdRequestLocalizationAvatarIconPrefixEnum =
+	(typeof PatchApiZonesByZoneIdRequestLocalizationAvatarIconPrefixEnum)[keyof typeof PatchApiZonesByZoneIdRequestLocalizationAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -27158,7 +27916,68 @@ export type PatchApiZonesByZoneIdBody = {
 				  }
 			)[];
 		};
-		avatarAssetId?: (string | null) | null;
+		avatar?:
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										assetId: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @description
+									 * Format: `single-emoji-grapheme`
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PatchApiZonesByZoneIdRequestLocalizationAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
 		bannerAssetId?: (string | null) | null;
 		coverAssetId?: (string | null) | null;
 	};
@@ -27246,6 +28065,14 @@ export type GetZoneRenderProjectionQuery = {
 	page?: string;
 };
 
+export const GetZoneRenderProjectionStatus200ZoneAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetZoneRenderProjectionStatus200ZoneAvatarIconPrefixEnum =
+	(typeof GetZoneRenderProjectionStatus200ZoneAvatarIconPrefixEnum)[keyof typeof GetZoneRenderProjectionStatus200ZoneAvatarIconPrefixEnum];
+
 export const GetZoneRenderProjectionStatus200ZoneLocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -27253,6 +28080,30 @@ export const GetZoneRenderProjectionStatus200ZoneLocalizationsLanguageEnum = {
 
 export type GetZoneRenderProjectionStatus200ZoneLocalizationsLanguageEnum =
 	(typeof GetZoneRenderProjectionStatus200ZoneLocalizationsLanguageEnum)[keyof typeof GetZoneRenderProjectionStatus200ZoneLocalizationsLanguageEnum];
+
+export const GetZoneRenderProjectionStatus200ZoneLocalizationsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetZoneRenderProjectionStatus200ZoneLocalizationsAvatarIconPrefixEnum =
+	(typeof GetZoneRenderProjectionStatus200ZoneLocalizationsAvatarIconPrefixEnum)[keyof typeof GetZoneRenderProjectionStatus200ZoneLocalizationsAvatarIconPrefixEnum];
+
+export const GetZoneRenderProjectionStatus200ReferencesUnitsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetZoneRenderProjectionStatus200ReferencesUnitsAvatarIconPrefixEnum =
+	(typeof GetZoneRenderProjectionStatus200ReferencesUnitsAvatarIconPrefixEnum)[keyof typeof GetZoneRenderProjectionStatus200ReferencesUnitsAvatarIconPrefixEnum];
+
+export const GetZoneRenderProjectionStatus200ReferencesWikiPostsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetZoneRenderProjectionStatus200ReferencesWikiPostsAvatarIconPrefixEnum =
+	(typeof GetZoneRenderProjectionStatus200ReferencesWikiPostsAvatarIconPrefixEnum)[keyof typeof GetZoneRenderProjectionStatus200ReferencesWikiPostsAvatarIconPrefixEnum];
 
 /**
  * @type object
@@ -27291,18 +28142,68 @@ export type GetZoneRenderProjectionStatus200 = {
 			| null;
 		language: (("zh" | "en") | null) | null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetZoneRenderProjectionStatus200ZoneAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		banner:
 			| ({
@@ -27343,18 +28244,68 @@ export type GetZoneRenderProjectionStatus200 = {
 			title: (string | null) | null;
 			summary: (string | null) | null;
 			avatar:
-				| ({
-						/**
-						 * @description
-						 * Format: `uuid`
-						 * @type string
-						 */
-						id: string;
-						/**
-						 * @type string
-						 */
-						url: string;
-				  } | null)
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetZoneRenderProjectionStatus200ZoneLocalizationsAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
 				| null;
 			banner:
 				| ({
@@ -27541,18 +28492,68 @@ export type GetZoneRenderProjectionStatus200 = {
 			title: (string | null) | null;
 			summary: (string | null) | null;
 			avatar:
-				| ({
-						/**
-						 * @description
-						 * Format: `uuid`
-						 * @type string
-						 */
-						id: string;
-						/**
-						 * @type string
-						 */
-						url: string;
-				  } | null)
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetZoneRenderProjectionStatus200ReferencesUnitsAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
 				| null;
 			banner:
 				| ({
@@ -27601,18 +28602,68 @@ export type GetZoneRenderProjectionStatus200 = {
 			title: (string | null) | null;
 			summary: (string | null) | null;
 			avatar:
-				| ({
-						/**
-						 * @description
-						 * Format: `uuid`
-						 * @type string
-						 */
-						id: string;
-						/**
-						 * @type string
-						 */
-						url: string;
-				  } | null)
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetZoneRenderProjectionStatus200ReferencesWikiPostsAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
 				| null;
 			banner:
 				| ({
@@ -29927,6 +30978,14 @@ export const PostApiZonesRequestLocalizationLanguageEnum = {
 export type PostApiZonesRequestLocalizationLanguageEnum =
 	(typeof PostApiZonesRequestLocalizationLanguageEnum)[keyof typeof PostApiZonesRequestLocalizationLanguageEnum];
 
+export const PostApiZonesRequestLocalizationAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiZonesRequestLocalizationAvatarIconPrefixEnum =
+	(typeof PostApiZonesRequestLocalizationAvatarIconPrefixEnum)[keyof typeof PostApiZonesRequestLocalizationAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -30077,7 +31136,68 @@ export type PostApiZonesBody = {
 				  }
 			)[];
 		};
-		avatarAssetId?: (string | null) | null;
+		avatar?:
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										assetId: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @description
+									 * Format: `single-emoji-grapheme`
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PostApiZonesRequestLocalizationAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
 		bannerAssetId?: (string | null) | null;
 		coverAssetId?: (string | null) | null;
 	};
@@ -32248,6 +33368,14 @@ export type PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreRespo
 	| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus429
 	| PostApiUnitsByIdByUnitIdDocksByKindRevisionsByRevisionIdRestoreStatus500;
 
+export const GetApiUsersMeStatus200AvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiUsersMeStatus200AvatarIconPrefixEnum =
+	(typeof GetApiUsersMeStatus200AvatarIconPrefixEnum)[keyof typeof GetApiUsersMeStatus200AvatarIconPrefixEnum];
+
 export type GetApiUsersMeStatus200 = {
 	/**
 	 * @description
@@ -32287,18 +33415,68 @@ export type GetApiUsersMeStatus200 = {
 	language: (string | null) | null;
 	name: (string | null) | null;
 	avatar:
-		| ({
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				id: string;
-				/**
-				 * @type string
-				 */
-				url: string;
-		  } | null)
+		| (
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "image";
+								/**
+								 * @type object
+								 */
+								image: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "emoji";
+								/**
+								 * @maxLength 64
+								 * @type string
+								 */
+								emoji: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "icon";
+								/**
+								 * @type object
+								 */
+								icon: {
+									/**
+									 * @type string
+									 */
+									provider: "font-awesome";
+									/**
+									 * @type string
+									 */
+									prefix: GetApiUsersMeStatus200AvatarIconPrefixEnum;
+									/**
+									 * @maxLength 128
+									 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+									 * @type string
+									 */
+									name: string;
+								};
+						  }
+				  )
+				| null
+		  )
 		| null;
 	banner:
 		| ({
@@ -32558,6 +33736,14 @@ export type GetApiUsersMeResponse =
 	| GetApiUsersMeStatus429
 	| GetApiUsersMeStatus500;
 
+export const PatchApiUsersMeStatus200AvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PatchApiUsersMeStatus200AvatarIconPrefixEnum =
+	(typeof PatchApiUsersMeStatus200AvatarIconPrefixEnum)[keyof typeof PatchApiUsersMeStatus200AvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -32600,18 +33786,68 @@ export type PatchApiUsersMeStatus200 = {
 	language: (string | null) | null;
 	name: (string | null) | null;
 	avatar:
-		| ({
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				id: string;
-				/**
-				 * @type string
-				 */
-				url: string;
-		  } | null)
+		| (
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "image";
+								/**
+								 * @type object
+								 */
+								image: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "emoji";
+								/**
+								 * @maxLength 64
+								 * @type string
+								 */
+								emoji: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "icon";
+								/**
+								 * @type object
+								 */
+								icon: {
+									/**
+									 * @type string
+									 */
+									provider: "font-awesome";
+									/**
+									 * @type string
+									 */
+									prefix: PatchApiUsersMeStatus200AvatarIconPrefixEnum;
+									/**
+									 * @maxLength 128
+									 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+									 * @type string
+									 */
+									name: string;
+								};
+						  }
+				  )
+				| null
+		  )
 		| null;
 	banner:
 		| ({
@@ -32898,6 +34134,14 @@ export type PatchApiUsersMeStatus429 = {
  */
 export type PatchApiUsersMeStatus500 = InternalError;
 
+export const PatchApiUsersMeRequestAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PatchApiUsersMeRequestAvatarIconPrefixEnum =
+	(typeof PatchApiUsersMeRequestAvatarIconPrefixEnum)[keyof typeof PatchApiUsersMeRequestAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -32914,7 +34158,68 @@ export type PatchApiUsersMeBody = {
 	 * @type string | undefined
 	 */
 	name?: string;
-	avatarAssetId?: (string | null) | null;
+	avatar?:
+		| (
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "image";
+								/**
+								 * @type object
+								 */
+								image: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									assetId: string;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "emoji";
+								/**
+								 * @description
+								 * Format: `single-emoji-grapheme`
+								 * @maxLength 64
+								 * @type string
+								 */
+								emoji: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "icon";
+								/**
+								 * @type object
+								 */
+								icon: {
+									/**
+									 * @type string
+									 */
+									provider: "font-awesome";
+									/**
+									 * @type string
+									 */
+									prefix: PatchApiUsersMeRequestAvatarIconPrefixEnum;
+									/**
+									 * @maxLength 128
+									 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+									 * @type string
+									 */
+									name: string;
+								};
+						  }
+				  )
+				| null
+		  )
+		| null;
 	bannerAssetId?: (string | null) | null;
 	/**
 	 * @maxLength 500
@@ -33830,6 +35135,14 @@ export const GetApiUsersMeFollowingStatus200ItemsKindEnum = {
 export type GetApiUsersMeFollowingStatus200ItemsKindEnum =
 	(typeof GetApiUsersMeFollowingStatus200ItemsKindEnum)[keyof typeof GetApiUsersMeFollowingStatus200ItemsKindEnum];
 
+export const GetApiUsersMeFollowingStatus200ItemsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiUsersMeFollowingStatus200ItemsAvatarIconPrefixEnum =
+	(typeof GetApiUsersMeFollowingStatus200ItemsAvatarIconPrefixEnum)[keyof typeof GetApiUsersMeFollowingStatus200ItemsAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -33872,18 +35185,68 @@ export type GetApiUsersMeFollowingStatus200 = {
 		language: (("zh" | "en") | null) | null;
 		title: (string | null) | null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetApiUsersMeFollowingStatus200ItemsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		cover:
 			| ({
@@ -34593,6 +35956,14 @@ export type GetApiUsersByIdPath = {
 	id: string;
 };
 
+export const GetApiUsersByIdStatus200AvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiUsersByIdStatus200AvatarIconPrefixEnum =
+	(typeof GetApiUsersByIdStatus200AvatarIconPrefixEnum)[keyof typeof GetApiUsersByIdStatus200AvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -34635,18 +36006,68 @@ export type GetApiUsersByIdStatus200 = {
 	language: (string | null) | null;
 	name: (string | null) | null;
 	avatar:
-		| ({
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				id: string;
-				/**
-				 * @type string
-				 */
-				url: string;
-		  } | null)
+		| (
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "image";
+								/**
+								 * @type object
+								 */
+								image: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "emoji";
+								/**
+								 * @maxLength 64
+								 * @type string
+								 */
+								emoji: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "icon";
+								/**
+								 * @type object
+								 */
+								icon: {
+									/**
+									 * @type string
+									 */
+									provider: "font-awesome";
+									/**
+									 * @type string
+									 */
+									prefix: GetApiUsersByIdStatus200AvatarIconPrefixEnum;
+									/**
+									 * @maxLength 128
+									 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+									 * @type string
+									 */
+									name: string;
+								};
+						  }
+				  )
+				| null
+		  )
 		| null;
 	banner:
 		| ({
@@ -37331,6 +38752,22 @@ export type GetApiUnitsByTypeQuery = {
 	limit?: string | number;
 };
 
+export const GetApiUnitsByTypeStatus200ItemsPublishersAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiUnitsByTypeStatus200ItemsPublishersAvatarIconPrefixEnum =
+	(typeof GetApiUnitsByTypeStatus200ItemsPublishersAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeStatus200ItemsPublishersAvatarIconPrefixEnum];
+
+export const GetApiUnitsByTypeStatus200ItemsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiUnitsByTypeStatus200ItemsAvatarIconPrefixEnum =
+	(typeof GetApiUnitsByTypeStatus200ItemsAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeStatus200ItemsAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -37399,18 +38836,68 @@ export type GetApiUnitsByTypeStatus200 = {
 			name: (string | null) | null;
 			summary: (string | null) | null;
 			avatar:
-				| ({
-						/**
-						 * @description
-						 * Format: `uuid`
-						 * @type string
-						 */
-						id: string;
-						/**
-						 * @type string
-						 */
-						url: string;
-				  } | null)
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetApiUnitsByTypeStatus200ItemsPublishersAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
 				| null;
 			/**
 			 * @description
@@ -37427,18 +38914,68 @@ export type GetApiUnitsByTypeStatus200 = {
 			publicationCount: string | number;
 		}[];
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetApiUnitsByTypeStatus200ItemsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		banner:
 			| ({
@@ -37580,6 +39117,22 @@ export const PostApiUnitsByTypeStatus200License = {
 export type PostApiUnitsByTypeStatus200License =
 	(typeof PostApiUnitsByTypeStatus200License)[keyof typeof PostApiUnitsByTypeStatus200License];
 
+export const PostApiUnitsByTypeStatus200PublishersAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiUnitsByTypeStatus200PublishersAvatarIconPrefixEnum =
+	(typeof PostApiUnitsByTypeStatus200PublishersAvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeStatus200PublishersAvatarIconPrefixEnum];
+
+export const PostApiUnitsByTypeStatus200AvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiUnitsByTypeStatus200AvatarIconPrefixEnum =
+	(typeof PostApiUnitsByTypeStatus200AvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeStatus200AvatarIconPrefixEnum];
+
 export const PostApiUnitsByTypeStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -37587,6 +39140,14 @@ export const PostApiUnitsByTypeStatus200LocalizationsLanguageEnum = {
 
 export type PostApiUnitsByTypeStatus200LocalizationsLanguageEnum =
 	(typeof PostApiUnitsByTypeStatus200LocalizationsLanguageEnum)[keyof typeof PostApiUnitsByTypeStatus200LocalizationsLanguageEnum];
+
+export const PostApiUnitsByTypeStatus200LocalizationsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiUnitsByTypeStatus200LocalizationsAvatarIconPrefixEnum =
+	(typeof PostApiUnitsByTypeStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeStatus200LocalizationsAvatarIconPrefixEnum];
 
 export const PostApiUnitsByTypeStatus200VariantContextVariantsTypeEnum = {
 	book: "book",
@@ -37677,18 +39238,68 @@ export type PostApiUnitsByTypeStatus200 = {
 		name: (string | null) | null;
 		summary: (string | null) | null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PostApiUnitsByTypeStatus200PublishersAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		/**
 		 * @description
@@ -37774,18 +39385,68 @@ export type PostApiUnitsByTypeStatus200 = {
 				kind: string;
 		  };
 	avatar:
-		| ({
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				id: string;
-				/**
-				 * @type string
-				 */
-				url: string;
-		  } | null)
+		| (
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "image";
+								/**
+								 * @type object
+								 */
+								image: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "emoji";
+								/**
+								 * @maxLength 64
+								 * @type string
+								 */
+								emoji: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "icon";
+								/**
+								 * @type object
+								 */
+								icon: {
+									/**
+									 * @type string
+									 */
+									provider: "font-awesome";
+									/**
+									 * @type string
+									 */
+									prefix: PostApiUnitsByTypeStatus200AvatarIconPrefixEnum;
+									/**
+									 * @maxLength 128
+									 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+									 * @type string
+									 */
+									name: string;
+								};
+						  }
+				  )
+				| null
+		  )
 		| null;
 	banner:
 		| ({
@@ -37966,18 +39627,68 @@ export type PostApiUnitsByTypeStatus200 = {
 			  } | null)
 			| null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PostApiUnitsByTypeStatus200LocalizationsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		banner:
 			| ({
@@ -38434,6 +40145,14 @@ export const PostApiUnitsByTypeRequestLocalizationLanguageEnum = {
 export type PostApiUnitsByTypeRequestLocalizationLanguageEnum =
 	(typeof PostApiUnitsByTypeRequestLocalizationLanguageEnum)[keyof typeof PostApiUnitsByTypeRequestLocalizationLanguageEnum];
 
+export const PostApiUnitsByTypeRequestLocalizationAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiUnitsByTypeRequestLocalizationAvatarIconPrefixEnum =
+	(typeof PostApiUnitsByTypeRequestLocalizationAvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeRequestLocalizationAvatarIconPrefixEnum];
+
 export const PostApiUnitsByTypeRequestVisibilityEnum = {
 	public: "public",
 	unlisted: "unlisted",
@@ -38626,7 +40345,68 @@ export type PostApiUnitsByTypeBody = {
 				  }
 			)[];
 		};
-		avatarAssetId?: (string | null) | null;
+		avatar?:
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										assetId: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @description
+									 * Format: `single-emoji-grapheme`
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PostApiUnitsByTypeRequestLocalizationAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
 		bannerAssetId?: (string | null) | null;
 		coverAssetId?: (string | null) | null;
 	};
@@ -38715,6 +40495,22 @@ export const GetApiUnitsByTypeByUnitIdStatus200License = {
 export type GetApiUnitsByTypeByUnitIdStatus200License =
 	(typeof GetApiUnitsByTypeByUnitIdStatus200License)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200License];
 
+export const GetApiUnitsByTypeByUnitIdStatus200PublishersAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200PublishersAvatarIconPrefixEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200PublishersAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200PublishersAvatarIconPrefixEnum];
+
+export const GetApiUnitsByTypeByUnitIdStatus200AvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200AvatarIconPrefixEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200AvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200AvatarIconPrefixEnum];
+
 export const GetApiUnitsByTypeByUnitIdStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -38722,6 +40518,14 @@ export const GetApiUnitsByTypeByUnitIdStatus200LocalizationsLanguageEnum = {
 
 export type GetApiUnitsByTypeByUnitIdStatus200LocalizationsLanguageEnum =
 	(typeof GetApiUnitsByTypeByUnitIdStatus200LocalizationsLanguageEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200LocalizationsLanguageEnum];
+
+export const GetApiUnitsByTypeByUnitIdStatus200LocalizationsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200LocalizationsAvatarIconPrefixEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200LocalizationsAvatarIconPrefixEnum];
 
 export const GetApiUnitsByTypeByUnitIdStatus200VariantContextVariantsTypeEnum = {
 	book: "book",
@@ -38812,18 +40616,68 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		name: (string | null) | null;
 		summary: (string | null) | null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetApiUnitsByTypeByUnitIdStatus200PublishersAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		/**
 		 * @description
@@ -38909,18 +40763,68 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 				kind: string;
 		  };
 	avatar:
-		| ({
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				id: string;
-				/**
-				 * @type string
-				 */
-				url: string;
-		  } | null)
+		| (
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "image";
+								/**
+								 * @type object
+								 */
+								image: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "emoji";
+								/**
+								 * @maxLength 64
+								 * @type string
+								 */
+								emoji: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "icon";
+								/**
+								 * @type object
+								 */
+								icon: {
+									/**
+									 * @type string
+									 */
+									provider: "font-awesome";
+									/**
+									 * @type string
+									 */
+									prefix: GetApiUnitsByTypeByUnitIdStatus200AvatarIconPrefixEnum;
+									/**
+									 * @maxLength 128
+									 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+									 * @type string
+									 */
+									name: string;
+								};
+						  }
+				  )
+				| null
+		  )
 		| null;
 	banner:
 		| ({
@@ -39101,18 +41005,68 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 			  } | null)
 			| null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetApiUnitsByTypeByUnitIdStatus200LocalizationsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		banner:
 			| ({
@@ -39528,6 +41482,22 @@ export const PatchApiUnitsByTypeByUnitIdStatus200License = {
 export type PatchApiUnitsByTypeByUnitIdStatus200License =
 	(typeof PatchApiUnitsByTypeByUnitIdStatus200License)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200License];
 
+export const PatchApiUnitsByTypeByUnitIdStatus200PublishersAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200PublishersAvatarIconPrefixEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200PublishersAvatarIconPrefixEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200PublishersAvatarIconPrefixEnum];
+
+export const PatchApiUnitsByTypeByUnitIdStatus200AvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200AvatarIconPrefixEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200AvatarIconPrefixEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200AvatarIconPrefixEnum];
+
 export const PatchApiUnitsByTypeByUnitIdStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -39535,6 +41505,14 @@ export const PatchApiUnitsByTypeByUnitIdStatus200LocalizationsLanguageEnum = {
 
 export type PatchApiUnitsByTypeByUnitIdStatus200LocalizationsLanguageEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdStatus200LocalizationsLanguageEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200LocalizationsLanguageEnum];
+
+export const PatchApiUnitsByTypeByUnitIdStatus200LocalizationsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200LocalizationsAvatarIconPrefixEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200LocalizationsAvatarIconPrefixEnum];
 
 export const PatchApiUnitsByTypeByUnitIdStatus200VariantContextVariantsTypeEnum = {
 	book: "book",
@@ -39625,18 +41603,68 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		name: (string | null) | null;
 		summary: (string | null) | null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PatchApiUnitsByTypeByUnitIdStatus200PublishersAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		/**
 		 * @description
@@ -39722,18 +41750,68 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 				kind: string;
 		  };
 	avatar:
-		| ({
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				id: string;
-				/**
-				 * @type string
-				 */
-				url: string;
-		  } | null)
+		| (
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "image";
+								/**
+								 * @type object
+								 */
+								image: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "emoji";
+								/**
+								 * @maxLength 64
+								 * @type string
+								 */
+								emoji: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "icon";
+								/**
+								 * @type object
+								 */
+								icon: {
+									/**
+									 * @type string
+									 */
+									provider: "font-awesome";
+									/**
+									 * @type string
+									 */
+									prefix: PatchApiUnitsByTypeByUnitIdStatus200AvatarIconPrefixEnum;
+									/**
+									 * @maxLength 128
+									 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+									 * @type string
+									 */
+									name: string;
+								};
+						  }
+				  )
+				| null
+		  )
 		| null;
 	banner:
 		| ({
@@ -39914,18 +41992,68 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 			  } | null)
 			| null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PatchApiUnitsByTypeByUnitIdStatus200LocalizationsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		banner:
 			| ({
@@ -40820,6 +42948,22 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200License = {
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200License =
 	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200License)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200License];
 
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200PublishersAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200PublishersAvatarIconPrefixEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200PublishersAvatarIconPrefixEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200PublishersAvatarIconPrefixEnum];
+
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200AvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200AvatarIconPrefixEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200AvatarIconPrefixEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200AvatarIconPrefixEnum];
+
 export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -40827,6 +42971,14 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200LocalizationsLang
 
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200LocalizationsLanguageEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200LocalizationsLanguageEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200LocalizationsLanguageEnum];
+
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200LocalizationsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200LocalizationsAvatarIconPrefixEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200LocalizationsAvatarIconPrefixEnum];
 
 export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200VariantContextVariantsTypeEnum = {
 	book: "book",
@@ -40917,18 +43069,68 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		name: (string | null) | null;
 		summary: (string | null) | null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PatchApiUnitsByTypeByUnitIdVariantContextStatus200PublishersAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		/**
 		 * @description
@@ -41014,18 +43216,68 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 				kind: string;
 		  };
 	avatar:
-		| ({
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				id: string;
-				/**
-				 * @type string
-				 */
-				url: string;
-		  } | null)
+		| (
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "image";
+								/**
+								 * @type object
+								 */
+								image: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "emoji";
+								/**
+								 * @maxLength 64
+								 * @type string
+								 */
+								emoji: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "icon";
+								/**
+								 * @type object
+								 */
+								icon: {
+									/**
+									 * @type string
+									 */
+									provider: "font-awesome";
+									/**
+									 * @type string
+									 */
+									prefix: PatchApiUnitsByTypeByUnitIdVariantContextStatus200AvatarIconPrefixEnum;
+									/**
+									 * @maxLength 128
+									 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+									 * @type string
+									 */
+									name: string;
+								};
+						  }
+				  )
+				| null
+		  )
 		| null;
 	banner:
 		| ({
@@ -41206,18 +43458,68 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 			  } | null)
 			| null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PatchApiUnitsByTypeByUnitIdVariantContextStatus200LocalizationsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		banner:
 			| ({
@@ -41791,6 +44093,23 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License = {
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License =
 	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License];
 
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200PublishersAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200PublishersAvatarIconPrefixEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200PublishersAvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200PublishersAvatarIconPrefixEnum];
+
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AvatarIconPrefixEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AvatarIconPrefixEnum];
+
 export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -41798,6 +44117,15 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200Localizatio
 
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LocalizationsLanguageEnum =
 	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LocalizationsLanguageEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LocalizationsLanguageEnum];
+
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LocalizationsAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LocalizationsAvatarIconPrefixEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LocalizationsAvatarIconPrefixEnum];
 
 export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200VariantContextVariantsTypeEnum =
 	{
@@ -41890,18 +44218,68 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		name: (string | null) | null;
 		summary: (string | null) | null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200PublishersAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		/**
 		 * @description
@@ -41987,18 +44365,68 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 				kind: string;
 		  };
 	avatar:
-		| ({
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				id: string;
-				/**
-				 * @type string
-				 */
-				url: string;
-		  } | null)
+		| (
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "image";
+								/**
+								 * @type object
+								 */
+								image: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "emoji";
+								/**
+								 * @maxLength 64
+								 * @type string
+								 */
+								emoji: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "icon";
+								/**
+								 * @type object
+								 */
+								icon: {
+									/**
+									 * @type string
+									 */
+									provider: "font-awesome";
+									/**
+									 * @type string
+									 */
+									prefix: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AvatarIconPrefixEnum;
+									/**
+									 * @maxLength 128
+									 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+									 * @type string
+									 */
+									name: string;
+								};
+						  }
+				  )
+				| null
+		  )
 		| null;
 	banner:
 		| ({
@@ -42179,18 +44607,68 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 			  } | null)
 			| null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LocalizationsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		banner:
 			| ({
@@ -42768,6 +45246,23 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License = 
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License =
 	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License];
 
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200PublishersAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200PublishersAvatarIconPrefixEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200PublishersAvatarIconPrefixEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200PublishersAvatarIconPrefixEnum];
+
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AvatarIconPrefixEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AvatarIconPrefixEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AvatarIconPrefixEnum];
+
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -42775,6 +45270,15 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200Localizati
 
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LocalizationsLanguageEnum =
 	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LocalizationsLanguageEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LocalizationsLanguageEnum];
+
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LocalizationsAvatarIconPrefixEnum =
+	{
+		fas: "fas",
+		fab: "fab",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LocalizationsAvatarIconPrefixEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LocalizationsAvatarIconPrefixEnum];
 
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200VariantContextVariantsTypeEnum =
 	{
@@ -42867,18 +45371,68 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		name: (string | null) | null;
 		summary: (string | null) | null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200PublishersAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		/**
 		 * @description
@@ -42964,18 +45518,68 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 				kind: string;
 		  };
 	avatar:
-		| ({
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				id: string;
-				/**
-				 * @type string
-				 */
-				url: string;
-		  } | null)
+		| (
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "image";
+								/**
+								 * @type object
+								 */
+								image: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "emoji";
+								/**
+								 * @maxLength 64
+								 * @type string
+								 */
+								emoji: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "icon";
+								/**
+								 * @type object
+								 */
+								icon: {
+									/**
+									 * @type string
+									 */
+									provider: "font-awesome";
+									/**
+									 * @type string
+									 */
+									prefix: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AvatarIconPrefixEnum;
+									/**
+									 * @maxLength 128
+									 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+									 * @type string
+									 */
+									name: string;
+								};
+						  }
+				  )
+				| null
+		  )
 		| null;
 	banner:
 		| ({
@@ -43156,18 +45760,68 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 			  } | null)
 			| null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LocalizationsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		banner:
 			| ({
@@ -43618,6 +46272,14 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus429 = {
  */
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus500 = InternalError;
 
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageRequestAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageRequestAvatarIconPrefixEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageRequestAvatarIconPrefixEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageRequestAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -43760,7 +46422,68 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageBody = {
 			  }
 		)[];
 	};
-	avatarAssetId?: (string | null) | null;
+	avatar?:
+		| (
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "image";
+								/**
+								 * @type object
+								 */
+								image: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									assetId: string;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "emoji";
+								/**
+								 * @description
+								 * Format: `single-emoji-grapheme`
+								 * @maxLength 64
+								 * @type string
+								 */
+								emoji: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "icon";
+								/**
+								 * @type object
+								 */
+								icon: {
+									/**
+									 * @type string
+									 */
+									provider: "font-awesome";
+									/**
+									 * @type string
+									 */
+									prefix: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageRequestAvatarIconPrefixEnum;
+									/**
+									 * @maxLength 128
+									 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+									 * @type string
+									 */
+									name: string;
+								};
+						  }
+				  )
+				| null
+		  )
+		| null;
 	bannerAssetId?: (string | null) | null;
 	coverAssetId?: (string | null) | null;
 };
@@ -45399,6 +48122,14 @@ export type GetApiEntitiesQuery = {
 	limit?: string | number;
 };
 
+export const GetApiEntitiesStatus200ItemsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiEntitiesStatus200ItemsAvatarIconPrefixEnum =
+	(typeof GetApiEntitiesStatus200ItemsAvatarIconPrefixEnum)[keyof typeof GetApiEntitiesStatus200ItemsAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -45422,18 +48153,68 @@ export type GetApiEntitiesStatus200 = {
 		 */
 		verified: boolean;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetApiEntitiesStatus200ItemsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		banner:
 			| ({
@@ -45584,6 +48365,14 @@ export const PostApiEntitiesRequestLocalizationLanguageEnum = {
 
 export type PostApiEntitiesRequestLocalizationLanguageEnum =
 	(typeof PostApiEntitiesRequestLocalizationLanguageEnum)[keyof typeof PostApiEntitiesRequestLocalizationLanguageEnum];
+
+export const PostApiEntitiesRequestLocalizationAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiEntitiesRequestLocalizationAvatarIconPrefixEnum =
+	(typeof PostApiEntitiesRequestLocalizationAvatarIconPrefixEnum)[keyof typeof PostApiEntitiesRequestLocalizationAvatarIconPrefixEnum];
 
 /**
  * @type object
@@ -45741,7 +48530,68 @@ export type PostApiEntitiesBody = {
 				  }
 			)[];
 		};
-		avatarAssetId?: (string | null) | null;
+		avatar?:
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										assetId: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @description
+									 * Format: `single-emoji-grapheme`
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PostApiEntitiesRequestLocalizationAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
 		bannerAssetId?: (string | null) | null;
 		coverAssetId?: (string | null) | null;
 	};
@@ -45808,6 +48658,14 @@ export type GetApiEntitiesByUnitIdQuery = {
 	language?: GetApiEntitiesByUnitIdLanguage;
 };
 
+export const GetApiEntitiesByUnitIdStatus200AvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiEntitiesByUnitIdStatus200AvatarIconPrefixEnum =
+	(typeof GetApiEntitiesByUnitIdStatus200AvatarIconPrefixEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200AvatarIconPrefixEnum];
+
 export const GetApiEntitiesByUnitIdStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -45815,6 +48673,14 @@ export const GetApiEntitiesByUnitIdStatus200LocalizationsLanguageEnum = {
 
 export type GetApiEntitiesByUnitIdStatus200LocalizationsLanguageEnum =
 	(typeof GetApiEntitiesByUnitIdStatus200LocalizationsLanguageEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200LocalizationsLanguageEnum];
+
+export const GetApiEntitiesByUnitIdStatus200LocalizationsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiEntitiesByUnitIdStatus200LocalizationsAvatarIconPrefixEnum =
+	(typeof GetApiEntitiesByUnitIdStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200LocalizationsAvatarIconPrefixEnum];
 
 export const GetApiEntitiesByUnitIdStatus200AssociationPolicyCreditAttributionEnum = {
 	open: "open",
@@ -45855,18 +48721,68 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 	 */
 	verified: boolean;
 	avatar:
-		| ({
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				id: string;
-				/**
-				 * @type string
-				 */
-				url: string;
-		  } | null)
+		| (
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "image";
+								/**
+								 * @type object
+								 */
+								image: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "emoji";
+								/**
+								 * @maxLength 64
+								 * @type string
+								 */
+								emoji: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "icon";
+								/**
+								 * @type object
+								 */
+								icon: {
+									/**
+									 * @type string
+									 */
+									provider: "font-awesome";
+									/**
+									 * @type string
+									 */
+									prefix: GetApiEntitiesByUnitIdStatus200AvatarIconPrefixEnum;
+									/**
+									 * @maxLength 128
+									 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+									 * @type string
+									 */
+									name: string;
+								};
+						  }
+				  )
+				| null
+		  )
 		| null;
 	banner:
 		| ({
@@ -46059,18 +48975,68 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 			  } | null)
 			| null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetApiEntitiesByUnitIdStatus200LocalizationsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		banner:
 			| ({
@@ -46403,6 +49369,14 @@ export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus429 = {
  */
 export type PutApiEntitiesByUnitIdLocalizationsByLanguageStatus500 = InternalError;
 
+export const PutApiEntitiesByUnitIdLocalizationsByLanguageRequestAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PutApiEntitiesByUnitIdLocalizationsByLanguageRequestAvatarIconPrefixEnum =
+	(typeof PutApiEntitiesByUnitIdLocalizationsByLanguageRequestAvatarIconPrefixEnum)[keyof typeof PutApiEntitiesByUnitIdLocalizationsByLanguageRequestAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -46545,7 +49519,68 @@ export type PutApiEntitiesByUnitIdLocalizationsByLanguageBody = {
 			  }
 		)[];
 	};
-	avatarAssetId?: (string | null) | null;
+	avatar?:
+		| (
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "image";
+								/**
+								 * @type object
+								 */
+								image: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									assetId: string;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "emoji";
+								/**
+								 * @description
+								 * Format: `single-emoji-grapheme`
+								 * @maxLength 64
+								 * @type string
+								 */
+								emoji: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "icon";
+								/**
+								 * @type object
+								 */
+								icon: {
+									/**
+									 * @type string
+									 */
+									provider: "font-awesome";
+									/**
+									 * @type string
+									 */
+									prefix: PutApiEntitiesByUnitIdLocalizationsByLanguageRequestAvatarIconPrefixEnum;
+									/**
+									 * @maxLength 128
+									 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+									 * @type string
+									 */
+									name: string;
+								};
+						  }
+				  )
+				| null
+		  )
+		| null;
 	bannerAssetId?: (string | null) | null;
 	coverAssetId?: (string | null) | null;
 };
@@ -47005,6 +50040,14 @@ export const PostApiTagsRequestLocalizationLanguageEnum = {
 export type PostApiTagsRequestLocalizationLanguageEnum =
 	(typeof PostApiTagsRequestLocalizationLanguageEnum)[keyof typeof PostApiTagsRequestLocalizationLanguageEnum];
 
+export const PostApiTagsRequestLocalizationAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiTagsRequestLocalizationAvatarIconPrefixEnum =
+	(typeof PostApiTagsRequestLocalizationAvatarIconPrefixEnum)[keyof typeof PostApiTagsRequestLocalizationAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -47161,7 +50204,68 @@ export type PostApiTagsBody = {
 				  }
 			)[];
 		};
-		avatarAssetId?: (string | null) | null;
+		avatar?:
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										assetId: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @description
+									 * Format: `single-emoji-grapheme`
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PostApiTagsRequestLocalizationAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
 		bannerAssetId?: (string | null) | null;
 		coverAssetId?: (string | null) | null;
 	};
@@ -59476,6 +62580,14 @@ export const PostApiCollectionsStatus200LocalizationsLanguageEnum = {
 export type PostApiCollectionsStatus200LocalizationsLanguageEnum =
 	(typeof PostApiCollectionsStatus200LocalizationsLanguageEnum)[keyof typeof PostApiCollectionsStatus200LocalizationsLanguageEnum];
 
+export const PostApiCollectionsStatus200LocalizationsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiCollectionsStatus200LocalizationsAvatarIconPrefixEnum =
+	(typeof PostApiCollectionsStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof PostApiCollectionsStatus200LocalizationsAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -59904,18 +63016,68 @@ export type PostApiCollectionsStatus200 = {
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PostApiCollectionsStatus200LocalizationsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		banner:
 			| ({
@@ -60054,6 +63216,14 @@ export const PostApiCollectionsRequestLocalizationLanguageEnum = {
 
 export type PostApiCollectionsRequestLocalizationLanguageEnum =
 	(typeof PostApiCollectionsRequestLocalizationLanguageEnum)[keyof typeof PostApiCollectionsRequestLocalizationLanguageEnum];
+
+export const PostApiCollectionsRequestLocalizationAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiCollectionsRequestLocalizationAvatarIconPrefixEnum =
+	(typeof PostApiCollectionsRequestLocalizationAvatarIconPrefixEnum)[keyof typeof PostApiCollectionsRequestLocalizationAvatarIconPrefixEnum];
 
 export const PostApiCollectionsRequestVisibilityEnum = {
 	public: "public",
@@ -60232,7 +63402,68 @@ export type PostApiCollectionsBody = {
 				  }
 			)[];
 		};
-		avatarAssetId?: (string | null) | null;
+		avatar?:
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										assetId: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @description
+									 * Format: `single-emoji-grapheme`
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PostApiCollectionsRequestLocalizationAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
 		bannerAssetId?: (string | null) | null;
 		coverAssetId?: (string | null) | null;
 	};
@@ -60682,6 +63913,14 @@ export const GetApiCollectionsFavoritesStatus200LocalizationsLanguageEnum = {
 export type GetApiCollectionsFavoritesStatus200LocalizationsLanguageEnum =
 	(typeof GetApiCollectionsFavoritesStatus200LocalizationsLanguageEnum)[keyof typeof GetApiCollectionsFavoritesStatus200LocalizationsLanguageEnum];
 
+export const GetApiCollectionsFavoritesStatus200LocalizationsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiCollectionsFavoritesStatus200LocalizationsAvatarIconPrefixEnum =
+	(typeof GetApiCollectionsFavoritesStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof GetApiCollectionsFavoritesStatus200LocalizationsAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -61110,18 +64349,68 @@ export type GetApiCollectionsFavoritesStatus200 = {
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetApiCollectionsFavoritesStatus200LocalizationsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		banner:
 			| ({
@@ -61315,6 +64604,14 @@ export const GetApiCollectionsByCollectionIdStatus200LocalizationsLanguageEnum =
 
 export type GetApiCollectionsByCollectionIdStatus200LocalizationsLanguageEnum =
 	(typeof GetApiCollectionsByCollectionIdStatus200LocalizationsLanguageEnum)[keyof typeof GetApiCollectionsByCollectionIdStatus200LocalizationsLanguageEnum];
+
+export const GetApiCollectionsByCollectionIdStatus200LocalizationsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiCollectionsByCollectionIdStatus200LocalizationsAvatarIconPrefixEnum =
+	(typeof GetApiCollectionsByCollectionIdStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof GetApiCollectionsByCollectionIdStatus200LocalizationsAvatarIconPrefixEnum];
 
 /**
  * @type object
@@ -61744,18 +65041,68 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetApiCollectionsByCollectionIdStatus200LocalizationsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		banner:
 			| ({
@@ -61930,6 +65277,14 @@ export const PatchApiCollectionsByCollectionIdStatus200LocalizationsLanguageEnum
 
 export type PatchApiCollectionsByCollectionIdStatus200LocalizationsLanguageEnum =
 	(typeof PatchApiCollectionsByCollectionIdStatus200LocalizationsLanguageEnum)[keyof typeof PatchApiCollectionsByCollectionIdStatus200LocalizationsLanguageEnum];
+
+export const PatchApiCollectionsByCollectionIdStatus200LocalizationsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PatchApiCollectionsByCollectionIdStatus200LocalizationsAvatarIconPrefixEnum =
+	(typeof PatchApiCollectionsByCollectionIdStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof PatchApiCollectionsByCollectionIdStatus200LocalizationsAvatarIconPrefixEnum];
 
 /**
  * @type object
@@ -62359,18 +65714,68 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PatchApiCollectionsByCollectionIdStatus200LocalizationsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		banner:
 			| ({
@@ -62584,6 +65989,14 @@ export const PatchApiCollectionsByCollectionIdRequestLocalizationLanguageEnum = 
 export type PatchApiCollectionsByCollectionIdRequestLocalizationLanguageEnum =
 	(typeof PatchApiCollectionsByCollectionIdRequestLocalizationLanguageEnum)[keyof typeof PatchApiCollectionsByCollectionIdRequestLocalizationLanguageEnum];
 
+export const PatchApiCollectionsByCollectionIdRequestLocalizationAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PatchApiCollectionsByCollectionIdRequestLocalizationAvatarIconPrefixEnum =
+	(typeof PatchApiCollectionsByCollectionIdRequestLocalizationAvatarIconPrefixEnum)[keyof typeof PatchApiCollectionsByCollectionIdRequestLocalizationAvatarIconPrefixEnum];
+
 export const PatchApiCollectionsByCollectionIdRequestPresentationDocumentLayoutEnum = {
 	flat: "flat",
 	nested: "nested",
@@ -62760,7 +66173,68 @@ export type PatchApiCollectionsByCollectionIdBody = {
 				  }
 			)[];
 		};
-		avatarAssetId?: (string | null) | null;
+		avatar?:
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										assetId: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @description
+									 * Format: `single-emoji-grapheme`
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PatchApiCollectionsByCollectionIdRequestLocalizationAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
 		bannerAssetId?: (string | null) | null;
 		coverAssetId?: (string | null) | null;
 	};
@@ -64086,6 +67560,14 @@ export type GetApiReviewsQuery = {
 	limit?: string | number;
 };
 
+export const GetApiReviewsStatus200ItemsPublishersAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiReviewsStatus200ItemsPublishersAvatarIconPrefixEnum =
+	(typeof GetApiReviewsStatus200ItemsPublishersAvatarIconPrefixEnum)[keyof typeof GetApiReviewsStatus200ItemsPublishersAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -64134,18 +67616,68 @@ export type GetApiReviewsStatus200 = {
 			name: (string | null) | null;
 			summary: (string | null) | null;
 			avatar:
-				| ({
-						/**
-						 * @description
-						 * Format: `uuid`
-						 * @type string
-						 */
-						id: string;
-						/**
-						 * @type string
-						 */
-						url: string;
-				  } | null)
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetApiReviewsStatus200ItemsPublishersAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
 				| null;
 			/**
 			 * @description
@@ -64601,6 +68133,14 @@ export type GetApiReviewsByReviewIdQuery = {
 	realmId?: string;
 };
 
+export const GetApiReviewsByReviewIdStatus200PublishersAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiReviewsByReviewIdStatus200PublishersAvatarIconPrefixEnum =
+	(typeof GetApiReviewsByReviewIdStatus200PublishersAvatarIconPrefixEnum)[keyof typeof GetApiReviewsByReviewIdStatus200PublishersAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -64645,18 +68185,68 @@ export type GetApiReviewsByReviewIdStatus200 = {
 		name: (string | null) | null;
 		summary: (string | null) | null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetApiReviewsByReviewIdStatus200PublishersAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		/**
 		 * @description
@@ -67836,6 +71426,14 @@ export const GetApiPostsStatus200ItemsPostKindEnum = {
 export type GetApiPostsStatus200ItemsPostKindEnum =
 	(typeof GetApiPostsStatus200ItemsPostKindEnum)[keyof typeof GetApiPostsStatus200ItemsPostKindEnum];
 
+export const GetApiPostsStatus200ItemsPublishersAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiPostsStatus200ItemsPublishersAvatarIconPrefixEnum =
+	(typeof GetApiPostsStatus200ItemsPublishersAvatarIconPrefixEnum)[keyof typeof GetApiPostsStatus200ItemsPublishersAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -67888,18 +71486,68 @@ export type GetApiPostsStatus200 = {
 			name: (string | null) | null;
 			summary: (string | null) | null;
 			avatar:
-				| ({
-						/**
-						 * @description
-						 * Format: `uuid`
-						 * @type string
-						 */
-						id: string;
-						/**
-						 * @type string
-						 */
-						url: string;
-				  } | null)
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetApiPostsStatus200ItemsPublishersAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
 				| null;
 			/**
 			 * @description
@@ -68483,6 +72131,14 @@ export const GetApiPostsByPostIdStatus200PostKindEnum = {
 export type GetApiPostsByPostIdStatus200PostKindEnum =
 	(typeof GetApiPostsByPostIdStatus200PostKindEnum)[keyof typeof GetApiPostsByPostIdStatus200PostKindEnum];
 
+export const GetApiPostsByPostIdStatus200PublishersAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiPostsByPostIdStatus200PublishersAvatarIconPrefixEnum =
+	(typeof GetApiPostsByPostIdStatus200PublishersAvatarIconPrefixEnum)[keyof typeof GetApiPostsByPostIdStatus200PublishersAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -68531,18 +72187,68 @@ export type GetApiPostsByPostIdStatus200 = {
 		name: (string | null) | null;
 		summary: (string | null) | null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetApiPostsByPostIdStatus200PublishersAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		/**
 		 * @description
@@ -69329,6 +73035,14 @@ export type GetApiPostsByPostIdRepliesQuery = {
 	limit?: string | number;
 };
 
+export const GetApiPostsByPostIdRepliesStatus200ItemsPublishersAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiPostsByPostIdRepliesStatus200ItemsPublishersAvatarIconPrefixEnum =
+	(typeof GetApiPostsByPostIdRepliesStatus200ItemsPublishersAvatarIconPrefixEnum)[keyof typeof GetApiPostsByPostIdRepliesStatus200ItemsPublishersAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -69381,18 +73095,68 @@ export type GetApiPostsByPostIdRepliesStatus200 = {
 			name: (string | null) | null;
 			summary: (string | null) | null;
 			avatar:
-				| ({
-						/**
-						 * @description
-						 * Format: `uuid`
-						 * @type string
-						 */
-						id: string;
-						/**
-						 * @type string
-						 */
-						url: string;
-				  } | null)
+				| (
+						| (
+								| {
+										/**
+										 * @type string
+										 */
+										type: "image";
+										/**
+										 * @type object
+										 */
+										image: {
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+										};
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "emoji";
+										/**
+										 * @maxLength 64
+										 * @type string
+										 */
+										emoji: string;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										type: "icon";
+										/**
+										 * @type object
+										 */
+										icon: {
+											/**
+											 * @type string
+											 */
+											provider: "font-awesome";
+											/**
+											 * @type string
+											 */
+											prefix: GetApiPostsByPostIdRepliesStatus200ItemsPublishersAvatarIconPrefixEnum;
+											/**
+											 * @maxLength 128
+											 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+											 * @type string
+											 */
+											name: string;
+										};
+								  }
+						  )
+						| null
+				  )
 				| null;
 			/**
 			 * @description
@@ -70568,6 +74332,14 @@ export type GetApiRealmsQuery = {
 	limit?: string | number;
 };
 
+export const GetApiRealmsStatus200ItemsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiRealmsStatus200ItemsAvatarIconPrefixEnum =
+	(typeof GetApiRealmsStatus200ItemsAvatarIconPrefixEnum)[keyof typeof GetApiRealmsStatus200ItemsAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -70610,18 +74382,68 @@ export type GetApiRealmsStatus200 = {
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetApiRealmsStatus200ItemsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		banner:
 			| ({
@@ -70782,6 +74604,14 @@ export const PostApiRealmsRequestLocalizationLanguageEnum = {
 
 export type PostApiRealmsRequestLocalizationLanguageEnum =
 	(typeof PostApiRealmsRequestLocalizationLanguageEnum)[keyof typeof PostApiRealmsRequestLocalizationLanguageEnum];
+
+export const PostApiRealmsRequestLocalizationAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PostApiRealmsRequestLocalizationAvatarIconPrefixEnum =
+	(typeof PostApiRealmsRequestLocalizationAvatarIconPrefixEnum)[keyof typeof PostApiRealmsRequestLocalizationAvatarIconPrefixEnum];
 
 export const PostApiRealmsRequestVisibilityEnum = {
 	public: "public",
@@ -70950,7 +74780,68 @@ export type PostApiRealmsBody = {
 				  }
 			)[];
 		};
-		avatarAssetId?: (string | null) | null;
+		avatar?:
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										assetId: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @description
+									 * Format: `single-emoji-grapheme`
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PostApiRealmsRequestLocalizationAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
 		bannerAssetId?: (string | null) | null;
 		coverAssetId?: (string | null) | null;
 	};
@@ -71311,6 +75202,14 @@ export type GetApiRealmsByRealmIdQuery = {
 	language?: GetApiRealmsByRealmIdLanguage;
 };
 
+export const GetApiRealmsByRealmIdStatus200AvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiRealmsByRealmIdStatus200AvatarIconPrefixEnum =
+	(typeof GetApiRealmsByRealmIdStatus200AvatarIconPrefixEnum)[keyof typeof GetApiRealmsByRealmIdStatus200AvatarIconPrefixEnum];
+
 export const GetApiRealmsByRealmIdStatus200LocalizationsLanguageEnum = {
 	zh: "zh",
 	en: "en",
@@ -71318,6 +75217,14 @@ export const GetApiRealmsByRealmIdStatus200LocalizationsLanguageEnum = {
 
 export type GetApiRealmsByRealmIdStatus200LocalizationsLanguageEnum =
 	(typeof GetApiRealmsByRealmIdStatus200LocalizationsLanguageEnum)[keyof typeof GetApiRealmsByRealmIdStatus200LocalizationsLanguageEnum];
+
+export const GetApiRealmsByRealmIdStatus200LocalizationsAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type GetApiRealmsByRealmIdStatus200LocalizationsAvatarIconPrefixEnum =
+	(typeof GetApiRealmsByRealmIdStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof GetApiRealmsByRealmIdStatus200LocalizationsAvatarIconPrefixEnum];
 
 /**
  * @type object
@@ -71376,18 +75283,68 @@ export type GetApiRealmsByRealmIdStatus200 = {
 	 */
 	updatedAt: string;
 	avatar:
-		| ({
-				/**
-				 * @description
-				 * Format: `uuid`
-				 * @type string
-				 */
-				id: string;
-				/**
-				 * @type string
-				 */
-				url: string;
-		  } | null)
+		| (
+				| (
+						| {
+								/**
+								 * @type string
+								 */
+								type: "image";
+								/**
+								 * @type object
+								 */
+								image: {
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+								};
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "emoji";
+								/**
+								 * @maxLength 64
+								 * @type string
+								 */
+								emoji: string;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								type: "icon";
+								/**
+								 * @type object
+								 */
+								icon: {
+									/**
+									 * @type string
+									 */
+									provider: "font-awesome";
+									/**
+									 * @type string
+									 */
+									prefix: GetApiRealmsByRealmIdStatus200AvatarIconPrefixEnum;
+									/**
+									 * @maxLength 128
+									 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+									 * @type string
+									 */
+									name: string;
+								};
+						  }
+				  )
+				| null
+		  )
 		| null;
 	banner:
 		| ({
@@ -71428,18 +75385,68 @@ export type GetApiRealmsByRealmIdStatus200 = {
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		avatar:
-			| ({
-					/**
-					 * @description
-					 * Format: `uuid`
-					 * @type string
-					 */
-					id: string;
-					/**
-					 * @type string
-					 */
-					url: string;
-			  } | null)
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										id: string;
+										/**
+										 * @type string
+										 */
+										url: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: GetApiRealmsByRealmIdStatus200LocalizationsAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
 			| null;
 		banner:
 			| ({
@@ -71757,6 +75764,14 @@ export const PatchApiRealmsByRealmIdRequestLocalizationLanguageEnum = {
 export type PatchApiRealmsByRealmIdRequestLocalizationLanguageEnum =
 	(typeof PatchApiRealmsByRealmIdRequestLocalizationLanguageEnum)[keyof typeof PatchApiRealmsByRealmIdRequestLocalizationLanguageEnum];
 
+export const PatchApiRealmsByRealmIdRequestLocalizationAvatarIconPrefixEnum = {
+	fas: "fas",
+	fab: "fab",
+} as const;
+
+export type PatchApiRealmsByRealmIdRequestLocalizationAvatarIconPrefixEnum =
+	(typeof PatchApiRealmsByRealmIdRequestLocalizationAvatarIconPrefixEnum)[keyof typeof PatchApiRealmsByRealmIdRequestLocalizationAvatarIconPrefixEnum];
+
 /**
  * @type object
  */
@@ -71919,7 +75934,68 @@ export type PatchApiRealmsByRealmIdBody = {
 				  }
 			)[];
 		};
-		avatarAssetId?: (string | null) | null;
+		avatar?:
+			| (
+					| (
+							| {
+									/**
+									 * @type string
+									 */
+									type: "image";
+									/**
+									 * @type object
+									 */
+									image: {
+										/**
+										 * @description
+										 * Format: `uuid`
+										 * @type string
+										 */
+										assetId: string;
+									};
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "emoji";
+									/**
+									 * @description
+									 * Format: `single-emoji-grapheme`
+									 * @maxLength 64
+									 * @type string
+									 */
+									emoji: string;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									type: "icon";
+									/**
+									 * @type object
+									 */
+									icon: {
+										/**
+										 * @type string
+										 */
+										provider: "font-awesome";
+										/**
+										 * @type string
+										 */
+										prefix: PatchApiRealmsByRealmIdRequestLocalizationAvatarIconPrefixEnum;
+										/**
+										 * @maxLength 128
+										 * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+										 * @type string
+										 */
+										name: string;
+									};
+							  }
+					  )
+					| null
+			  )
+			| null;
 		bannerAssetId?: (string | null) | null;
 		coverAssetId?: (string | null) | null;
 	};

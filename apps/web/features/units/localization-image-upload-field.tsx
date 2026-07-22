@@ -49,6 +49,7 @@ type LocalizationImageUploadFieldProps = LocalizationImagePresentation & {
 	onChange: (value: LocalizationImageAssetValue | null) => void;
 	fallback?: LocalizationImageAssetValue | null;
 	options?: readonly LocalizationImageAssetOption[];
+	allowRemove?: boolean;
 };
 
 const AcceptedTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"];
@@ -58,6 +59,7 @@ export function LocalizationImageUploadField({
 	onChange,
 	fallback = null,
 	options = [],
+	allowRemove = true,
 	role,
 	shape,
 }: LocalizationImageUploadFieldProps) {
@@ -274,7 +276,7 @@ export function LocalizationImageUploadField({
 						{t.media.cancel}
 					</Button>
 				)}
-				{value && (
+				{value && allowRemove && (
 					<Button onClick={remove} size="sm" type="button" variant="quiet">
 						<Trash2 aria-hidden className="size-3.5" />
 						{t.media.remove}

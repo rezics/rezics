@@ -9,12 +9,10 @@ import {
 	type GetApiUsersMeFollowingQuery,
 } from "@rezics/openapi-tanstack-query";
 import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
 	Button,
 	ChoiceSelect,
 	type ChoiceOption,
+	IdentityAvatar,
 	PageHeading,
 	QueryFailure,
 	QueryPending,
@@ -107,16 +105,19 @@ function FollowingContent() {
 			{items.length ? (
 				<div className="divide-y divide-border-weak border-y border-border-weak">
 					{items.map((item) => {
-						const imageUrl = item.avatar?.url ?? item.cover?.url;
+						const avatar =
+							item.avatar ??
+							(item.cover ? { type: "image" as const, image: item.cover } : null);
 						const destination = followingHref(item.kind, item);
 						const identity = (
 							<>
-								<Avatar className="size-11">
-									{imageUrl ? <AvatarImage alt="" src={imageUrl} /> : null}
-									<AvatarFallback>
-										{(item.title ?? t.ui.unnamed).slice(0, 1).toUpperCase()}
-									</AvatarFallback>
-								</Avatar>
+								<IdentityAvatar
+									avatar={avatar}
+									className="size-11"
+									fallback={(item.title ?? t.ui.unnamed)
+										.slice(0, 1)
+										.toUpperCase()}
+								/>
 								<span className="min-w-0">
 									<strong className="block truncate text-sm">
 										{item.title ?? t.ui.unnamed}

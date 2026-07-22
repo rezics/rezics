@@ -12,6 +12,7 @@ import { fractionalPositionBetween } from "../../ordering/position";
 import {
 	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
+	toUnitLocalizationStorage,
 	unitLocalizationImageAssetIds,
 } from "../../units/localization";
 import {
@@ -137,9 +138,10 @@ export default new Elysia({ prefix: "/collections" })
 					presentationDocument:
 						body.presentationDocument ?? createCollectionPresentationDocument(),
 				});
-				await tx
-					.insert(unitLocalization)
-					.values({ unitId: created.id, ...body.localization });
+				await tx.insert(unitLocalization).values({
+					unitId: created.id,
+					...toUnitLocalizationStorage(body.localization),
+				});
 				await tx.insert(unitAccessBinding).values({
 					unitId: created.id,
 					subjectKind: "profile",
@@ -236,15 +238,16 @@ export default new Elysia({ prefix: "/collections" })
 						.where(eq(collection.id, params.collectionId));
 				}
 				if (body.localization) {
+					const storedLocalization = toUnitLocalizationStorage(body.localization);
 					await tx
 						.insert(unitLocalization)
 						.values({
 							unitId: params.collectionId,
-							...body.localization,
+							...storedLocalization,
 						})
 						.onConflictDoUpdate({
 							target: [unitLocalization.unitId, unitLocalization.language],
-							set: { ...body.localization },
+							set: storedLocalization,
 						});
 					await makePrimaryUnitLocalization(
 						tx,

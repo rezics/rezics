@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
+import type { AvatarReference } from "@rezics/avatar";
 import {
 	NavigationDocument,
 	DockDocument,
@@ -58,10 +59,14 @@ import {
 	firstUnitLocalizationCoverAssetId,
 	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
+	avatarReferenceFromColumns,
+	resolveUnitLocalizationAvatarFromOrdered,
 	resolveUnitLocalizationImageAssetIdFromOrdered,
+	toUnitLocalizationStorage,
 	unitLocalizationImageAssetIds,
 } from "../../units/localization";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
+import { presentAvatar } from "../../units/avatar";
 import { presentImageAsset } from "../../units/service";
 import { getPublicCanonicalUnitSlugAddress } from "../../units/slug-address";
 import { replaceZoneSlugAddress } from "../../units/slug-address";
@@ -139,7 +144,7 @@ async function createBaseUnit(
 			title: string;
 			summary?: string;
 			description?: PortableTextDocument;
-			avatarAssetId?: string | null;
+			avatar?: AvatarReference | null;
 			bannerAssetId?: string | null;
 			coverAssetId?: string | null;
 		};
@@ -158,7 +163,9 @@ async function createBaseUnit(
 		publishedAt: new Date(),
 		statusActor: { kind: "profile", profileId: input.ownerId },
 	});
-	await tx.insert(unitLocalization).values({ unitId: created.id, ...input.localization });
+	await tx
+		.insert(unitLocalization)
+		.values({ unitId: created.id, ...toUnitLocalizationStorage(input.localization) });
 	await tx.insert(unitAccessBinding).values({
 		unitId: created.id,
 		subjectKind: "profile",
@@ -195,18 +202,18 @@ async function toZoneResponse(
 			language: unitLocalization.language,
 			title: unitLocalization.title,
 			summary: unitLocalization.summary,
+			avatarType: unitLocalization.avatarType,
 			avatarAssetId: unitLocalization.avatarAssetId,
+			avatarEmoji: unitLocalization.avatarEmoji,
+			avatarIconPrefix: unitLocalization.avatarIconPrefix,
+			avatarIconName: unitLocalization.avatarIconName,
 			bannerAssetId: unitLocalization.bannerAssetId,
 			coverAssetId: unitLocalization.coverAssetId,
 		})
 		.from(unitLocalization)
 		.where(eq(unitLocalization.unitId, record.id))
 		.orderBy(unitLocalization.position, unitLocalization.language);
-	const avatarAssetId = resolveUnitLocalizationImageAssetIdFromOrdered(
-		localizations,
-		"avatar",
-		preferredLanguage,
-	);
+	const avatar = resolveUnitLocalizationAvatarFromOrdered(localizations, preferredLanguage);
 	const bannerAssetId = resolveUnitLocalizationImageAssetIdFromOrdered(
 		localizations,
 		"banner",
@@ -221,13 +228,30 @@ async function toZoneResponse(
 		...record,
 		slugAddress: await getPublicCanonicalUnitSlugAddress(record.id),
 		language: localizations[0]?.language ?? null,
-		avatar: presentImageAsset(avatarAssetId),
+		avatar: presentAvatar(avatar),
 		banner: presentImageAsset(bannerAssetId),
 		cover: presentImageAsset(coverAssetId),
 		localizations: localizations.map(
-			({ avatarAssetId, bannerAssetId, coverAssetId, ...localization }) => ({
+			({
+				avatarType,
+				avatarAssetId,
+				avatarEmoji,
+				avatarIconPrefix,
+				avatarIconName,
+				bannerAssetId,
+				coverAssetId,
+				...localization
+			}) => ({
 				...localization,
-				avatar: presentImageAsset(avatarAssetId),
+				avatar: presentAvatar(
+					avatarReferenceFromColumns({
+						avatarType,
+						avatarAssetId,
+						avatarEmoji,
+						avatarIconPrefix,
+						avatarIconName,
+					}),
+				),
 				banner: presentImageAsset(bannerAssetId),
 				cover: presentImageAsset(coverAssetId),
 			}),
@@ -274,7 +298,11 @@ async function getReadableRenderLocalizationRows(ids: readonly string[], profile
 			title: unitLocalization.title,
 			summary: unitLocalization.summary,
 			content: unitLocalization.content,
+			avatarType: unitLocalization.avatarType,
 			avatarAssetId: unitLocalization.avatarAssetId,
+			avatarEmoji: unitLocalization.avatarEmoji,
+			avatarIconPrefix: unitLocalization.avatarIconPrefix,
+			avatarIconName: unitLocalization.avatarIconName,
 			bannerAssetId: unitLocalization.bannerAssetId,
 			coverAssetId: unitLocalization.coverAssetId,
 		})
@@ -299,9 +327,7 @@ function presentRenderUnit(
 		language: selected.language,
 		title: selected.title,
 		summary: selected.summary,
-		avatar: presentImageAsset(
-			resolveUnitLocalizationImageAssetIdFromOrdered(rows, "avatar", preferredLanguage),
-		),
+		avatar: presentAvatar(resolveUnitLocalizationAvatarFromOrdered(rows, preferredLanguage)),
 		banner: presentImageAsset(
 			resolveUnitLocalizationImageAssetIdFromOrdered(rows, "banner", preferredLanguage),
 		),
@@ -723,6 +749,7 @@ export default new Elysia()
 							sql`select pg_advisory_xact_lock(hashtextextended(${`zone-graph:${params.zoneId}`}::text, 0))`,
 						);
 						if (body.localization) {
+							const storedLocalization = toUnitLocalizationStorage(body.localization);
 							await ensureImageAssetsAttachable(
 								tx,
 								profile.unitId,
@@ -730,10 +757,10 @@ export default new Elysia()
 							);
 							await tx
 								.insert(unitLocalization)
-								.values({ unitId: params.zoneId, ...body.localization })
+								.values({ unitId: params.zoneId, ...storedLocalization })
 								.onConflictDoUpdate({
 									target: [unitLocalization.unitId, unitLocalization.language],
-									set: { ...body.localization },
+									set: storedLocalization,
 								});
 							await makePrimaryUnitLocalization(
 								tx,

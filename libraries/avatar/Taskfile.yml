@@ -1,0 +1,12 @@
+version: "3"
+
+tasks:
+    typecheck:
+        desc: Type-check the shared avatar contract.
+        cmds:
+            - yarn exec tsc --noEmit -p tsconfig.json
+
+    test:
+        desc: Test avatar validation and provider mappings.
+        cmds:
+            - yarn exec vitest run --config vitest.config.ts

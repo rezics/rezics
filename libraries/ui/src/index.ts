@@ -97,6 +97,7 @@ export * from "./custom/card";
 export * from "./custom/choice-select";
 export * from "./custom/cover";
 export * from "./custom/entity-picker";
+export * from "./custom/identity-avatar";
 export * from "./custom/logo";
 export * from "./custom/management-workspace";
 export * from "./custom/menu";

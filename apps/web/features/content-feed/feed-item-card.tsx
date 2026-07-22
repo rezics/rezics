@@ -327,7 +327,7 @@ function toFeedProfileContexts(
 			}),
 			initials: contextInitials(name),
 			name,
-			...(publisher.avatar ? { avatarUrl: publisher.avatar.url } : {}),
+			...(publisher.avatar ? { avatar: publisher.avatar } : {}),
 			...(publisher.slugAddress ? { slug: publisher.slugAddress.slug } : {}),
 			...(publisher.summary ? { summary: publisher.summary } : {}),
 		};
@@ -342,7 +342,7 @@ function toFeedRealmContexts(realms: FeedItem["realms"], unnamedRealm: string): 
 			href: realmHref({ id: realm.id, slugAddress: realm.slugAddress }),
 			initials: contextInitials(name),
 			name,
-			...(realm.avatar ? { avatarUrl: realm.avatar.url } : {}),
+			...(realm.avatar ? { avatar: realm.avatar } : {}),
 			...(realm.slugAddress ? { slug: realm.slugAddress.slug } : {}),
 			...(realm.summary ? { summary: realm.summary } : {}),
 		};

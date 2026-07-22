@@ -91,7 +91,7 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 						id: item.id,
 						href: sidebarFollowingHref("zone", item),
 						label: item.title ?? t.ui.unnamed,
-						imageUrl: item.avatar?.url,
+						avatar: item.avatar,
 						favorite: item.favorite,
 					},
 				]
@@ -104,7 +104,9 @@ export function ApplicationShell({ children }: { children: ReactNode }) {
 						id: item.id,
 						href: sidebarFollowingHref("realm", item),
 						label: item.title ?? t.ui.unnamed,
-						imageUrl: item.avatar?.url ?? item.cover?.url,
+						avatar:
+							item.avatar ??
+							(item.cover ? { type: "image", image: item.cover } : null),
 						favorite: item.favorite,
 					},
 				]

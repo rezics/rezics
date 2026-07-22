@@ -1,5 +1,11 @@
 import { type Static, t } from "elysia";
 import { FormatRegistry } from "@sinclair/typebox";
+import {
+	FontAwesomeIconNamePatternSource,
+	FontAwesomeIconPrefixValues,
+	FontAwesomeProvider,
+	isSingleEmojiGrapheme,
+} from "@rezics/avatar";
 import { PortableTextDocument } from "@rezics/block";
 import { PublicationLicenseIds } from "@rezics/license";
 
@@ -15,6 +21,7 @@ import {
 import { isFractionalPosition } from "../../ordering/position";
 
 FormatRegistry.Set("fractional-position", isFractionalPosition);
+FormatRegistry.Set("single-emoji-grapheme", isSingleEmojiGrapheme);
 
 /** A content-language group accepted by authoring, discovery, and storage. */
 export const ContentLanguage = t.Union([
@@ -48,9 +55,41 @@ export const DateTime = t
 export const Uuid = t.String({ format: "uuid" });
 export type Uuid = Static<typeof Uuid>;
 
+export const AvatarInput = t.Union([
+	t.Object(
+		{ type: t.Literal("image"), image: t.Object({ assetId: Uuid }) },
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			type: t.Literal("emoji"),
+			emoji: t.String({ format: "single-emoji-grapheme", maxLength: 64 }),
+		},
+		{ additionalProperties: false },
+	),
+	t.Object(
+		{
+			type: t.Literal("icon"),
+			icon: t.Object(
+				{
+					provider: t.Literal(FontAwesomeProvider),
+					prefix: t.UnionEnum(FontAwesomeIconPrefixValues, { default: undefined }),
+					name: t.String({
+						pattern: FontAwesomeIconNamePatternSource,
+						maxLength: 128,
+					}),
+				},
+				{ additionalProperties: false },
+			),
+		},
+		{ additionalProperties: false },
+	),
+]);
+export type AvatarInput = Static<typeof AvatarInput>;
+
 /** Optional per-language presentation overrides. Null removes an override and inherits. */
 export const LocalizationImageInput = {
-	avatarAssetId: t.Optional(t.Nullable(Uuid)),
+	avatar: t.Optional(t.Nullable(AvatarInput)),
 	bannerAssetId: t.Optional(t.Nullable(Uuid)),
 	coverAssetId: t.Optional(t.Nullable(Uuid)),
 };

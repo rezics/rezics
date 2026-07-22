@@ -4,6 +4,7 @@ import { PortableTextDocument } from "@rezics/block";
 
 import { ContentRatingValues } from "../../database/schema/contract-values";
 import {
+	AvatarInput,
 	ContentLanguage,
 	FractionalPosition,
 	PublicationLicense,
@@ -31,7 +32,7 @@ export const UpdateProfileBody = t.Object(
 	{
 		updatedAt: t.String({ format: "date-time" }),
 		name: t.Optional(t.String({ minLength: 1, maxLength: 120 })),
-		avatarAssetId: t.Optional(t.Nullable(Uuid)),
+		avatar: t.Optional(t.Nullable(AvatarInput)),
 		bannerAssetId: t.Optional(t.Nullable(Uuid)),
 		summary: t.Optional(t.String({ maxLength: 500 })),
 		description: t.Optional(PortableTextDocument),

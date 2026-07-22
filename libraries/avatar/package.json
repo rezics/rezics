@@ -1,0 +1,13 @@
+{
+	"name": "@rezics/avatar",
+	"private": true,
+	"type": "module",
+	"sideEffects": false,
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"devDependencies": {
+		"typescript": "7",
+		"vitest": "4.1.10"
+	}
+}

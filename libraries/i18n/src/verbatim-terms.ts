@@ -45,6 +45,11 @@ export const verbatimTerms = {
 		category: "brand",
 		rationale: "External service brand spelling.",
 	},
+	fontAwesome: {
+		value: "Font Awesome",
+		category: "brand",
+		rationale: "External icon provider brand spelling.",
+	},
 	outline: {
 		value: "Outline",
 		category: "brand",
@@ -69,6 +74,11 @@ export const verbatimTerms = {
 		value: "API",
 		category: "protocol",
 		rationale: "Widely interoperable technical initialism.",
+	},
+	cdn: {
+		value: "CDN",
+		category: "protocol",
+		rationale: "Widely interoperable content-delivery-network initialism.",
 	},
 	openapi: {
 		value: "OpenAPI",

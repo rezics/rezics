@@ -10,7 +10,7 @@ import {
 
 import { getUnitReadCondition } from "../../authorization/unit/query";
 import { database } from "../../database";
-import { isPrimaryUnitLocalization } from "../../units/localization";
+import { avatarReferenceFromColumns, isPrimaryUnitLocalization } from "../../units/localization";
 import {
 	collection as collectionTable,
 	collectionItem,
@@ -24,6 +24,7 @@ import { DefaultContentLanguage } from "../../database/schema/contract-values";
 import { CollectionNotFound } from "./errors";
 import { CollectionDetailResponse } from "../schema/response";
 import { presentImageAsset } from "../../units/service";
+import { presentAvatar } from "../../units/avatar";
 
 export async function ensureFavorites(ownerId: string) {
 	const find = () =>
@@ -134,7 +135,11 @@ export async function getCollection(
 			language: unitLocalization.language,
 			title: unitLocalization.title,
 			summary: unitLocalization.summary,
+			avatarType: unitLocalization.avatarType,
 			avatarAssetId: unitLocalization.avatarAssetId,
+			avatarEmoji: unitLocalization.avatarEmoji,
+			avatarIconPrefix: unitLocalization.avatarIconPrefix,
+			avatarIconName: unitLocalization.avatarIconName,
 			bannerAssetId: unitLocalization.bannerAssetId,
 			coverAssetId: unitLocalization.coverAssetId,
 		})
@@ -165,9 +170,26 @@ export async function getCollection(
 		definitionDocument,
 		presentationDocument,
 		localizations: localizations.map(
-			({ avatarAssetId, bannerAssetId, coverAssetId, ...localization }) => ({
+			({
+				avatarType,
+				avatarAssetId,
+				avatarEmoji,
+				avatarIconPrefix,
+				avatarIconName,
+				bannerAssetId,
+				coverAssetId,
+				...localization
+			}) => ({
 				...localization,
-				avatar: presentImageAsset(avatarAssetId),
+				avatar: presentAvatar(
+					avatarReferenceFromColumns({
+						avatarType,
+						avatarAssetId,
+						avatarEmoji,
+						avatarIconPrefix,
+						avatarIconName,
+					}),
+				),
 				banner: presentImageAsset(bannerAssetId),
 				cover: presentImageAsset(coverAssetId),
 			}),

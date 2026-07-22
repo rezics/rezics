@@ -1,4 +1,9 @@
 import { type Static, t } from "elysia";
+import {
+	FontAwesomeIconNamePatternSource,
+	FontAwesomeIconPrefixValues,
+	FontAwesomeProvider,
+} from "@rezics/avatar";
 import { SearchConfiguration } from "@rezics/search";
 import {
 	CollectionDefinitionDocument,
@@ -61,8 +66,37 @@ export const ReadinessResponse = t.Object({
 });
 
 export const ImageAssetResponse = t.Nullable(t.Object({ id: Uuid, url: t.String() }));
+export const AvatarResponse = t.Nullable(
+	t.Union([
+		t.Object(
+			{ type: t.Literal("image"), image: t.Object({ id: Uuid, url: t.String() }) },
+			{ additionalProperties: false },
+		),
+		t.Object(
+			{ type: t.Literal("emoji"), emoji: t.String({ maxLength: 64 }) },
+			{ additionalProperties: false },
+		),
+		t.Object(
+			{
+				type: t.Literal("icon"),
+				icon: t.Object(
+					{
+						provider: t.Literal(FontAwesomeProvider),
+						prefix: t.UnionEnum(FontAwesomeIconPrefixValues, { default: undefined }),
+						name: t.String({
+							pattern: FontAwesomeIconNamePatternSource,
+							maxLength: 128,
+						}),
+					},
+					{ additionalProperties: false },
+				),
+			},
+			{ additionalProperties: false },
+		),
+	]),
+);
 const LocalizationImageResponse = {
-	avatar: ImageAssetResponse,
+	avatar: AvatarResponse,
 	banner: ImageAssetResponse,
 	cover: ImageAssetResponse,
 };
@@ -84,7 +118,7 @@ export const UnitPublisherSummaryResponse = t.Object({
 	slugAddress: NullablePublicSlugAddressResponse,
 	name: NullableText,
 	summary: NullableText,
-	avatar: ImageAssetResponse,
+	avatar: AvatarResponse,
 	firstPublishedAt: DateTime,
 	lastPublishedAt: DateTime,
 	publicationCount: t.Integer({ minimum: 1 }),
@@ -102,7 +136,7 @@ export const UnitListResponse = t.Object({
 			title: NullableText,
 			summary: NullableText,
 			publishers: t.Array(UnitPublisherSummaryResponse),
-			avatar: ImageAssetResponse,
+			avatar: AvatarResponse,
 			banner: ImageAssetResponse,
 			cover: ImageAssetResponse,
 		}),
@@ -205,7 +239,7 @@ export const UnitDetailResponse = t.Object({
 	primaryLanguage: NullableText,
 	releasedOn: t.Nullable(t.String()),
 	details: UnitDetailsResponse,
-	avatar: ImageAssetResponse,
+	avatar: AvatarResponse,
 	banner: ImageAssetResponse,
 	cover: ImageAssetResponse,
 	localizations: t.Array(LocalizationResponse),
@@ -329,7 +363,7 @@ export const EntityListResponse = t.Object({
 			id: Uuid,
 			kind: t.String(),
 			verified: t.Boolean(),
-			avatar: ImageAssetResponse,
+			avatar: AvatarResponse,
 			banner: ImageAssetResponse,
 			cover: ImageAssetResponse,
 			title: NullableText,
@@ -361,7 +395,7 @@ export const RealmListResponse = t.Object({
 			joinPolicy: t.String(),
 			title: NullableText,
 			summary: NullableText,
-			avatar: ImageAssetResponse,
+			avatar: AvatarResponse,
 			banner: ImageAssetResponse,
 			cover: ImageAssetResponse,
 			createdAt: DateTime,
@@ -398,7 +432,7 @@ const FeedItemBaseResponse = {
 			slugAddress: NullablePublicSlugAddressResponse,
 			title: NullableText,
 			summary: NullableText,
-			avatar: ImageAssetResponse,
+			avatar: AvatarResponse,
 		}),
 	),
 	title: NullableText,
@@ -491,7 +525,7 @@ export const PublicProfileResponse = t.Object({
 	visibility: t.String(),
 	language: NullableText,
 	name: NullableText,
-	avatar: ImageAssetResponse,
+	avatar: AvatarResponse,
 	banner: ImageAssetResponse,
 	summary: NullableText,
 	description: t.Nullable(PortableTextDocument),
@@ -586,7 +620,7 @@ export const EntityDetailResponse = t.Object({
 	id: Uuid,
 	kind: t.String(),
 	verified: t.Boolean(),
-	avatar: ImageAssetResponse,
+	avatar: AvatarResponse,
 	banner: ImageAssetResponse,
 	cover: ImageAssetResponse,
 	createdAt: DateTime,
@@ -637,7 +671,7 @@ export const RealmDetailResponse = t.Object({
 	joinPolicy: t.String(),
 	createdAt: DateTime,
 	updatedAt: DateTime,
-	avatar: ImageAssetResponse,
+	avatar: AvatarResponse,
 	banner: ImageAssetResponse,
 	cover: ImageAssetResponse,
 	localizations: t.Array(LocalizationSummary),

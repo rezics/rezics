@@ -1,4 +1,5 @@
 import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
+import { insert } from "native-i18n";
 
 const SupportedImageFormats = `${verbatimTerms.jpeg.value}, ${verbatimTerms.png.value}, ${verbatimTerms.webp.value}, or ${verbatimTerms.avif.value}`;
 
@@ -11,6 +12,28 @@ export default {
 	invalid: `Choose a ${SupportedImageFormats} image under 10 ${verbatimTerms.mib.value}.`,
 	current: "Current language override",
 	displayPreview: "Displayed area",
+	avatarPicker: {
+		typeLabel: "Avatar type",
+		tabs: { icon: "Icon", emoji: "Emoji", image: "Image" },
+		preview: "Avatar preview",
+		inherited: "Inherited avatar",
+		icon: {
+			search: "Search icons",
+			searchHint: "Enter at least two characters to search for icons",
+			style: "Icon style",
+			styles: { fas: "Solid", fab: "Brands" },
+			loading: "Searching for icons…",
+			empty: "No matching icons were found.",
+			failed: "Icons cannot be searched right now. Try again later.",
+			select: insert("Select icon: {{name}}", { name: String }),
+			unconfigured: `${verbatimTerms.fontAwesome.value} ${verbatimTerms.cdn.value} is not configured, so icon previews cannot be displayed.`,
+		},
+		emoji: {
+			search: "Search emoji",
+			loading: "Loading emoji…",
+			empty: "No matching emoji were found.",
+		},
+	},
 	bannerPreview: {
 		description:
 			"The original is preserved. Areas outside this frame are not shown. A 4:1 image is recommended.",

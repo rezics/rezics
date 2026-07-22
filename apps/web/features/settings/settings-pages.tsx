@@ -33,6 +33,11 @@ import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetValue,
 } from "@/features/units/localization-image-upload-field";
+import {
+	avatarPresentationToInput,
+	LocalizationAvatarField,
+	type LocalizationAvatarValue,
+} from "@/features/units/localization-avatar-field";
 import { useSetLocale, useTranslation } from "@/i18n/client";
 import { authClient } from "@/lib/auth-client";
 import { SettingsOverviewHref } from "./routing/settings-routes";
@@ -101,7 +106,7 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 		},
 	});
 	const [saved, setSaved] = useState(false);
-	const [avatar, setAvatar] = useState<LocalizationImageAssetValue | null>(current.avatar);
+	const [avatar, setAvatar] = useState<LocalizationAvatarValue | null>(current.avatar);
 	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(current.banner);
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -114,7 +119,7 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 					updatedAt: current.updatedAt,
 					...(name ? { name } : {}),
 					summary: String(data.get("summary") ?? "").trim(),
-					avatarAssetId: avatar?.id ?? null,
+					avatar: avatarPresentationToInput(avatar),
 					bannerAssetId: banner?.id ?? null,
 				},
 			});
@@ -129,12 +134,7 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 				<FieldGroup>
 					<Field>
 						<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
-						<LocalizationImageUploadField
-							onChange={setAvatar}
-							role="avatar"
-							shape="avatar"
-							value={avatar}
-						/>
+						<LocalizationAvatarField onChange={setAvatar} value={avatar} />
 					</Field>
 					<Field>
 						<FieldLabel>{t.media.roles.banner.title}</FieldLabel>

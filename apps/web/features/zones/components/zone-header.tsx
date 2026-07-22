@@ -1,14 +1,7 @@
 "use client";
 
-import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-	cn,
-} from "@rezics/ui";
+import type { PresentedAvatar } from "@rezics/avatar";
+import { IdentityAvatar, Popover, PopoverContent, PopoverTrigger, cn } from "@rezics/ui";
 import { ListTree } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -18,11 +11,11 @@ import type { ZoneRenderProjection } from "../model/zone-render";
 import { ZoneDocument } from "./block-renderer";
 
 export function ZoneHeader({
-	avatarUrl,
+	avatar,
 	projection,
 	title,
 }: {
-	avatarUrl?: string | null;
+	avatar?: PresentedAvatar | null;
 	projection: ZoneRenderProjection;
 	title: string;
 }) {
@@ -68,15 +61,14 @@ export function ZoneHeader({
 						</PopoverContent>
 					</Popover>
 				) : null}
-				<Avatar
+				<IdentityAvatar
+					avatar={avatar}
 					className={cn(
 						"hidden shrink-0 transition-[width,height] sm:flex",
 						compact ? "size-9" : "size-11 sm:size-14",
 					)}
-				>
-					{avatarUrl ? <AvatarImage alt="" src={avatarUrl} /> : null}
-					<AvatarFallback>{title.slice(0, 1).toUpperCase()}</AvatarFallback>
-				</Avatar>
+					fallback={title.slice(0, 1).toUpperCase()}
+				/>
 				<p
 					className={cn(
 						"min-w-0 flex-1 truncate font-bold tracking-tight transition-[font-size] sm:flex-initial",

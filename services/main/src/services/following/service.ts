@@ -9,10 +9,12 @@ import type { UnitKind } from "../database/schema/contract-values";
 import { createNotification, deliverNotificationEmail } from "../notifications/service";
 import { UnitNotFound } from "../units/errors";
 import {
+	resolvedUnitLocalizationAvatar,
 	resolvedUnitLocalizationImageAssetId,
 	resolvedUnitLocalizationLanguage,
 	resolvedUnitLocalizationTitle,
 } from "../units/localization";
+import { presentAvatar } from "../units/avatar";
 import { presentImageAsset } from "../units/service";
 import { getPublicCanonicalUnitSlugAddresses } from "../units/slug-address";
 import {
@@ -58,7 +60,7 @@ export async function listFollowing(input: ListFollowingInput) {
 			kind: unit.kind,
 			language: resolvedUnitLocalizationLanguage(unit.id, input.language),
 			title: resolvedUnitLocalizationTitle(unit.id, input.language),
-			avatarAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "avatar", input.language),
+			avatar: resolvedUnitLocalizationAvatar(unit.id, input.language),
 			coverAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "cover", input.language),
 			position: unitFollow.position,
 			favorite: unitFollow.favorite,
@@ -82,10 +84,10 @@ export async function listFollowing(input: ListFollowingInput) {
 	const last = items.at(-1);
 	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(items.map((item) => item.id));
 	return {
-		items: items.map(({ avatarAssetId, coverAssetId, ...record }) => ({
+		items: items.map(({ avatar, coverAssetId, ...record }) => ({
 			...record,
 			slugAddress: slugAddresses.get(record.id) ?? null,
-			avatar: presentImageAsset(avatarAssetId),
+			avatar: presentAvatar(avatar),
 			cover: presentImageAsset(coverAssetId),
 		})),
 		nextCursor:

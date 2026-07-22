@@ -6,7 +6,7 @@ import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import { createCommunityCatalogAccess } from "../../authorization/unit/ownership";
 import { insertUnit } from "../../units/create";
-import { unitLocalizationImageAssetIds } from "../../units/localization";
+import { toUnitLocalizationStorage, unitLocalizationImageAssetIds } from "../../units/localization";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
 import type { CreateCatalogUnitBody } from "./schema";
 
@@ -45,7 +45,9 @@ export async function createCatalogUnit(
 				},
 			]);
 		}
-		await tx.insert(unitLocalization).values({ unitId: created.id, ...body.localization });
+		await tx
+			.insert(unitLocalization)
+			.values({ unitId: created.id, ...toUnitLocalizationStorage(body.localization) });
 		await createCommunityCatalogAccess(tx, created.id, ownerId);
 		await recordUnitRevision(tx, {
 			unitId: created.id,

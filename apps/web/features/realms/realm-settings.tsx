@@ -41,6 +41,12 @@ import {
 	type LocalizationImageAssetOption,
 	type LocalizationImageAssetValue,
 } from "@/features/units/localization-image-upload-field";
+import {
+	avatarPresentationToInput,
+	LocalizationAvatarField,
+	type LocalizationAvatarOption,
+	type LocalizationAvatarValue,
+} from "@/features/units/localization-avatar-field";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
 import { useTranslation } from "@/i18n/client";
 import { SlugAddressForm } from "@/features/slugs/slug-address-form";
@@ -92,15 +98,17 @@ export function RealmProfileSettings({
 		toContentLanguage(locale.target),
 		realm.language,
 	);
-	const mediaOptions = (role: "avatar" | "banner"): LocalizationImageAssetOption[] =>
-		realm.localizations.flatMap((entry) =>
-			entry.language !== toContentLanguage(locale.target) && entry[role]
-				? [{ ...entry[role], label: entry.language }]
-				: [],
-		);
-	const avatarOptions = mediaOptions("avatar");
-	const bannerOptions = mediaOptions("banner");
-	const [avatar, setAvatar] = useState<LocalizationImageAssetValue | null>(
+	const avatarOptions: LocalizationAvatarOption[] = realm.localizations.flatMap((entry) =>
+		entry.language !== toContentLanguage(locale.target) && entry.avatar
+			? [{ ...entry.avatar, label: entry.language }]
+			: [],
+	);
+	const bannerOptions: LocalizationImageAssetOption[] = realm.localizations.flatMap((entry) =>
+		entry.language !== toContentLanguage(locale.target) && entry.banner
+			? [{ ...entry.banner, label: entry.language }]
+			: [],
+	);
+	const [avatar, setAvatar] = useState<LocalizationAvatarValue | null>(
 		localization?.avatar ?? null,
 	);
 	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(
@@ -134,7 +142,7 @@ export function RealmProfileSettings({
 						language: toContentLanguage(locale.target),
 						title,
 						...(summary ? { summary } : {}),
-						avatarAssetId: avatar?.id ?? null,
+						avatar: avatarPresentationToInput(avatar),
 						bannerAssetId: banner?.id ?? null,
 					},
 				},
@@ -177,12 +185,10 @@ export function RealmProfileSettings({
 							</Field>
 							<Field>
 								<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
-								<LocalizationImageUploadField
+								<LocalizationAvatarField
 									fallback={avatarOptions[0] ?? null}
 									onChange={setAvatar}
 									options={avatarOptions}
-									role="avatar"
-									shape="avatar"
 									value={avatar}
 								/>
 							</Field>

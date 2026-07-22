@@ -1,6 +1,9 @@
 version: "3"
 
 includes:
+    avatar:
+        taskfile: ./avatar/Taskfile.yml
+        dir: ./avatar
     observability:
         taskfile: ./observability/Taskfile.yml
         dir: ./observability
@@ -52,6 +55,7 @@ tasks:
     typecheck:
         desc: Type-check library packages.
         cmds:
+            - task: avatar:typecheck
             - task: observability:typecheck
             - task: block:typecheck
             - task: search:typecheck

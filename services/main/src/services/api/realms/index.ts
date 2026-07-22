@@ -15,10 +15,13 @@ import { ContentStructureSnapshotSchema } from "../../content-structure/contract
 import { createContentStructureHistory } from "../../content-structure/history";
 import { fractionalPositionBetween } from "../../ordering/position";
 import {
+	avatarReferenceFromColumns,
 	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
 	primaryUnitTitle,
+	resolvedUnitLocalizationAvatar,
 	resolvedUnitLocalizationImageAssetId,
+	toUnitLocalizationStorage,
 	unitLocalizationImageAssetIds,
 } from "../../units/localization";
 import {
@@ -54,6 +57,7 @@ import {
 } from "../../units/slug-address";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
 import { presentImageAsset } from "../../units/service";
+import { presentAvatar } from "../../units/avatar";
 import {
 	IdResponse,
 	MembershipResponse,
@@ -193,11 +197,7 @@ export default new Elysia({ prefix: "/realms" })
 					joinPolicy: realm.joinPolicy,
 					title: unitLocalization.title,
 					summary: unitLocalization.summary,
-					avatarAssetId: resolvedUnitLocalizationImageAssetId(
-						unit.id,
-						"avatar",
-						query.language,
-					),
+					avatar: resolvedUnitLocalizationAvatar(unit.id, query.language),
 					bannerAssetId: resolvedUnitLocalizationImageAssetId(
 						unit.id,
 						"banner",
@@ -227,10 +227,10 @@ export default new Elysia({ prefix: "/realms" })
 				items.map((item) => item.id),
 			);
 			return {
-				items: items.map(({ avatarAssetId, bannerAssetId, coverAssetId, ...item }) => ({
+				items: items.map(({ avatar, bannerAssetId, coverAssetId, ...item }) => ({
 					...item,
 					slugAddress: slugAddresses.get(item.id) ?? null,
-					avatar: presentImageAsset(avatarAssetId),
+					avatar: presentAvatar(avatar),
 					banner: presentImageAsset(bannerAssetId),
 					cover: presentImageAsset(coverAssetId),
 				})),
@@ -266,7 +266,7 @@ export default new Elysia({ prefix: "/realms" })
 				if (!taxonomy) throw new Error("Realm taxonomy insertion returned no row");
 				await tx.insert(unitLocalization).values({
 					unitId: created.id,
-					...body.localization,
+					...toUnitLocalizationStorage(body.localization),
 				});
 				await tx.insert(unitAccessBinding).values({
 					unitId: created.id,
@@ -361,11 +361,7 @@ export default new Elysia({ prefix: "/realms" })
 					status: unit.status,
 					visibility: unit.visibility,
 					joinPolicy: realm.joinPolicy,
-					avatarAssetId: resolvedUnitLocalizationImageAssetId(
-						unit.id,
-						"avatar",
-						query.language,
-					),
+					avatar: resolvedUnitLocalizationAvatar(unit.id, query.language),
 					bannerAssetId: resolvedUnitLocalizationImageAssetId(
 						unit.id,
 						"banner",
@@ -389,7 +385,11 @@ export default new Elysia({ prefix: "/realms" })
 					language: unitLocalization.language,
 					title: unitLocalization.title,
 					summary: unitLocalization.summary,
+					avatarType: unitLocalization.avatarType,
 					avatarAssetId: unitLocalization.avatarAssetId,
+					avatarEmoji: unitLocalization.avatarEmoji,
+					avatarIconPrefix: unitLocalization.avatarIconPrefix,
+					avatarIconName: unitLocalization.avatarIconName,
 					bannerAssetId: unitLocalization.bannerAssetId,
 					coverAssetId: unitLocalization.coverAssetId,
 				})
@@ -422,18 +422,35 @@ export default new Elysia({ prefix: "/realms" })
 				authorization.unit.decide(params.realmId, "unit.access.manage"),
 				authorization.unit.decide(params.realmId, "unit.history.restore"),
 			]);
-			const { avatarAssetId, bannerAssetId, coverAssetId, ...realmRecord } = record;
+			const { avatar, bannerAssetId, coverAssetId, ...realmRecord } = record;
 			return {
 				...realmRecord,
 				slugAddress: await getPublicCanonicalUnitSlugAddress(record.id),
 				language: localizations[0]?.language ?? null,
-				avatar: presentImageAsset(avatarAssetId),
+				avatar: presentAvatar(avatar),
 				banner: presentImageAsset(bannerAssetId),
 				cover: presentImageAsset(coverAssetId),
 				localizations: localizations.map(
-					({ avatarAssetId, bannerAssetId, coverAssetId, ...localization }) => ({
+					({
+						avatarType,
+						avatarAssetId,
+						avatarEmoji,
+						avatarIconPrefix,
+						avatarIconName,
+						bannerAssetId,
+						coverAssetId,
+						...localization
+					}) => ({
 						...localization,
-						avatar: presentImageAsset(avatarAssetId),
+						avatar: presentAvatar(
+							avatarReferenceFromColumns({
+								avatarType,
+								avatarAssetId,
+								avatarEmoji,
+								avatarIconPrefix,
+								avatarIconName,
+							}),
+						),
 						banner: presentImageAsset(bannerAssetId),
 						cover: presentImageAsset(coverAssetId),
 					}),
@@ -601,12 +618,13 @@ export default new Elysia({ prefix: "/realms" })
 						.set({ joinPolicy: body.joinPolicy })
 						.where(eq(realm.id, params.realmId));
 				if (body.localization) {
+					const storedLocalization = toUnitLocalizationStorage(body.localization);
 					await tx
 						.insert(unitLocalization)
-						.values({ unitId: params.realmId, ...body.localization })
+						.values({ unitId: params.realmId, ...storedLocalization })
 						.onConflictDoUpdate({
 							target: [unitLocalization.unitId, unitLocalization.language],
-							set: { ...body.localization },
+							set: storedLocalization,
 						});
 					await makePrimaryUnitLocalization(
 						tx,

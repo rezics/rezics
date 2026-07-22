@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { and, asc, desc, eq, inArray, isNull, lte, or, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
+import type { PresentedAvatar } from "@rezics/avatar";
 
 import { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
@@ -11,6 +12,7 @@ import {
 	firstUnitLocalizationCoverAssetId,
 	primaryUnitSummary,
 	primaryUnitTitle,
+	resolvedUnitLocalizationAvatar,
 	resolvedUnitLocalizationImageAssetId,
 } from "../../units/localization";
 import {
@@ -46,13 +48,13 @@ import {
 } from "../../recommendations/ranking";
 import { recommendationObjectiveExpression } from "../../recommendations/sql-ranking";
 import { createRecommendationTracking } from "../../recommendations/tracking";
+import { presentAvatar } from "../../units/avatar";
 import { presentImageAsset } from "../../units/service";
 import {
 	getPublicCanonicalUnitSlugAddresses,
 	type PublicCanonicalUnitSlugAddress,
 } from "../../units/slug-address";
 import { getPublisherSummariesByUnitIds } from "../../units/status";
-import { imageAssetContentUrl } from "../image-assets/service";
 import {
 	RecommendationPolicyVersionSchema,
 	type RecommendationReason,
@@ -89,7 +91,7 @@ interface FeedRealmContextSummary {
 	readonly slugAddress: PublicCanonicalUnitSlugAddress | null;
 	readonly title: string | null;
 	readonly summary: string | null;
-	readonly avatar: { readonly id: string; readonly url: string } | null;
+	readonly avatar: PresentedAvatar | null;
 }
 
 async function getFeedRealmContextsByUnitIds(
@@ -104,7 +106,7 @@ async function getFeedRealmContextsByUnitIds(
 			id: realmUnit.realmId,
 			title: primaryUnitTitle(feedContextRealm.id),
 			summary: primaryUnitSummary(feedContextRealm.id),
-			avatarAssetId: resolvedUnitLocalizationImageAssetId(feedContextRealm.id, "avatar"),
+			avatar: resolvedUnitLocalizationAvatar(feedContextRealm.id),
 		})
 		.from(realmUnit)
 		.innerJoin(feedContextRealm, eq(feedContextRealm.id, realmUnit.realmId))
@@ -125,9 +127,7 @@ async function getFeedRealmContextsByUnitIds(
 			slugAddress: slugAddresses.get(row.id) ?? null,
 			title: row.title,
 			summary: row.summary,
-			avatar: row.avatarAssetId
-				? { id: row.avatarAssetId, url: imageAssetContentUrl(row.avatarAssetId) }
-				: null,
+			avatar: presentAvatar(row.avatar),
 		});
 	return result;
 }

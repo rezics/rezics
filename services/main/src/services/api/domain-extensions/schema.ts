@@ -11,7 +11,7 @@ import { type Static, Type } from "@sinclair/typebox";
 import { t } from "elysia";
 
 import { DateTime, FractionalPosition, ContentLanguage, LocalizationInput, Uuid } from "../schema";
-import { ImageAssetResponse } from "../schema/response";
+import { AvatarResponse, ImageAssetResponse } from "../schema/response";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
 
 // Exact models are registered by the Zone route plugin. References keep one
@@ -175,7 +175,7 @@ export const ZoneResponse = t.Object({
 	id: Uuid,
 	slugAddress: NullablePublicSlugAddressResponse,
 	language: t.Nullable(ContentLanguage),
-	avatar: ImageAssetResponse,
+	avatar: AvatarResponse,
 	banner: ImageAssetResponse,
 	cover: ImageAssetResponse,
 	localizations: t.Array(
@@ -183,7 +183,7 @@ export const ZoneResponse = t.Object({
 			language: ContentLanguage,
 			title: t.Nullable(t.String()),
 			summary: t.Nullable(t.String()),
-			avatar: ImageAssetResponse,
+			avatar: AvatarResponse,
 			banner: ImageAssetResponse,
 			cover: ImageAssetResponse,
 		}),
@@ -223,7 +223,7 @@ export const ZoneRenderUnitResponse = t.Object({
 	language: t.Nullable(ContentLanguage),
 	title: t.Nullable(t.String()),
 	summary: t.Nullable(t.String()),
-	avatar: ImageAssetResponse,
+	avatar: AvatarResponse,
 	banner: ImageAssetResponse,
 	cover: ImageAssetResponse,
 });

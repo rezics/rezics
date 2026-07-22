@@ -1,12 +1,12 @@
 "use client";
 
 import { Dialog as ArkDialog } from "@ark-ui/react/dialog";
+import type { PresentedAvatar } from "@rezics/avatar";
 import { Portal } from "@ark-ui/react/portal";
 import { List, Menu, Star, X } from "lucide-react";
 import { useCallback, useEffect, useState, type ElementType, type ReactNode } from "react";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "../ui/input-group";
 import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
@@ -24,6 +24,7 @@ import { SkipNavContent, SkipNavLink } from "../ui/skip-nav";
 import { cn } from "../utils";
 import { Button } from "./button";
 import { Logo } from "./logo";
+import { IdentityAvatar } from "./identity-avatar";
 
 const DesktopSidebarPreferenceKey = "rezics-app-sidebar-state-v1";
 const FollowingAccordionPreferenceKey = "rezics-app-sidebar-following:v1";
@@ -53,7 +54,7 @@ export interface AppShellFollowingItem {
 	id: string;
 	href: string;
 	label: string;
-	imageUrl?: string | null;
+	avatar?: PresentedAvatar | null;
 	favorite?: boolean;
 }
 
@@ -225,12 +226,7 @@ function FollowingMark({
 	fallbackLabel: string;
 }) {
 	const fallback = (item.label || fallbackLabel).slice(0, 1).toUpperCase();
-	return (
-		<Avatar size="sm">
-			{item.imageUrl ? <AvatarImage alt="" src={item.imageUrl} /> : null}
-			<AvatarFallback>{fallback}</AvatarFallback>
-		</Avatar>
-	);
+	return <IdentityAvatar avatar={item.avatar} fallback={fallback} size="sm" />;
 }
 
 function FollowingAccordionGroup({

@@ -5,7 +5,11 @@ import { parseNullablePublicationLicenseId } from "@rezics/license";
 
 import session, { resolveIdentity } from "../../auth/session";
 import { database } from "../../database";
-import { isPrimaryUnitLocalization, unitLocalizationImageAssetIds } from "../../units/localization";
+import {
+	avatarReferenceToColumns,
+	isPrimaryUnitLocalization,
+	unitLocalizationImageAssetIds,
+} from "../../units/localization";
 import {
 	unit,
 	profile as profileTable,
@@ -141,8 +145,8 @@ export default new Elysia({ prefix: "/users" })
 						title: body.name,
 						summary: body.summary,
 						description: body.description,
-						...(Object.hasOwn(body, "avatarAssetId")
-							? { avatarAssetId: body.avatarAssetId }
+						...(Object.hasOwn(body, "avatar")
+							? avatarReferenceToColumns(body.avatar ?? null)
 							: {}),
 						...(Object.hasOwn(body, "bannerAssetId")
 							? { bannerAssetId: body.bannerAssetId }

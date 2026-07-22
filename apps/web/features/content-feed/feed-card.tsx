@@ -1,12 +1,10 @@
 "use client";
 
 import { type ComponentProps, type ReactNode, useState } from "react";
+import type { PresentedAvatar } from "@rezics/avatar";
 import { BookOpenIcon, ChevronRightIcon, StarIcon } from "lucide-react";
 
 import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
 	Button,
 	Card,
 	CardContent,
@@ -16,6 +14,7 @@ import {
 	HoverCard,
 	HoverCardContent,
 	HoverCardTrigger,
+	IdentityAvatar,
 	Item,
 	ItemContent,
 	ItemDescription,
@@ -37,7 +36,7 @@ interface FeedContextItem {
 	readonly id: string;
 	readonly name: string;
 	readonly href: string;
-	readonly avatarUrl?: string;
+	readonly avatar?: PresentedAvatar | null;
 	readonly initials: string;
 }
 
@@ -339,10 +338,5 @@ function FeedContextGroup<T extends FeedContextItem>({
 }
 
 function FeedAvatar({ item }: { item: FeedContextItem }) {
-	return (
-		<Avatar size="sm">
-			{item.avatarUrl ? <AvatarImage alt="" src={item.avatarUrl} /> : null}
-			<AvatarFallback>{item.initials}</AvatarFallback>
-		</Avatar>
-	);
+	return <IdentityAvatar avatar={item.avatar} fallback={item.initials} size="sm" />;
 }

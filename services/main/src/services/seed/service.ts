@@ -1105,6 +1105,7 @@ async function seedToaruWiki(
 			.values({
 				unitId: zoneUnit.id,
 				position: fractionalPositionAt(index),
+				avatarType: "image",
 				avatarAssetId: OfficialZoneAvatarAsset.id,
 				...localization,
 				createdAt,
@@ -1114,7 +1115,11 @@ async function seedToaruWiki(
 				target: [unitLocalization.unitId, unitLocalization.language],
 				set: {
 					position: fractionalPositionAt(index),
+					avatarType: "image",
 					avatarAssetId: OfficialZoneAvatarAsset.id,
+					avatarEmoji: null,
+					avatarIconPrefix: null,
+					avatarIconName: null,
 					title: localization.title,
 					summary: localization.summary,
 					updatedAt: createdAt,

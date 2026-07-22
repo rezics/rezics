@@ -1,10 +1,11 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui";
+import type { PresentedAvatar } from "@rezics/avatar";
+import { IdentityAvatar } from "@rezics/ui";
 
 export interface RealmInfoCardData {
 	readonly id: string;
 	readonly name: string;
 	readonly initials: string;
-	readonly avatarUrl?: string;
+	readonly avatar?: PresentedAvatar | null;
 	readonly slug?: string;
 	readonly summary?: string;
 }
@@ -13,10 +14,12 @@ export function RealmInfoCard({ realm }: { realm: RealmInfoCardData }) {
 	return (
 		<div className="grid gap-3" data-slot="realm-info-card">
 			<div className="flex min-w-0 items-center gap-3">
-				<Avatar className="size-12 text-base" size="lg">
-					{realm.avatarUrl ? <AvatarImage alt="" src={realm.avatarUrl} /> : null}
-					<AvatarFallback>{realm.initials}</AvatarFallback>
-				</Avatar>
+				<IdentityAvatar
+					avatar={realm.avatar}
+					className="size-12 text-base"
+					fallback={realm.initials}
+					size="lg"
+				/>
 				<div className="min-w-0">
 					<p className="truncate font-heading font-bold text-base">{realm.name}</p>
 					{realm.slug ? (

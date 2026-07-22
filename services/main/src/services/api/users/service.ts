@@ -1,12 +1,15 @@
 import { and, eq } from "drizzle-orm";
 import { PortableTextDocument, parseNullableDocument } from "@rezics/block";
+import type { AvatarReference } from "@rezics/avatar";
 
 import { database } from "../../database";
 import {
 	isPrimaryUnitLocalization,
+	resolvedUnitLocalizationAvatar,
 	resolvedUnitLocalizationImageAssetId,
 } from "../../units/localization";
 import { profile as profileTable, unit, unitLocalization } from "../../database/schema";
+import { presentAvatar } from "../../units/avatar";
 import { presentImageAsset } from "../../units/service";
 import { getPublicCanonicalUnitSlugAddress } from "../../units/slug-address";
 import { ProfileNotFound } from "./errors";
@@ -17,7 +20,7 @@ export const PublicProfileSelection = {
 	visibility: unit.visibility,
 	language: unitLocalization.language,
 	name: unitLocalization.title,
-	avatarAssetId: resolvedUnitLocalizationImageAssetId(profileTable.id, "avatar"),
+	avatar: resolvedUnitLocalizationAvatar(profileTable.id),
 	bannerAssetId: resolvedUnitLocalizationImageAssetId(profileTable.id, "banner"),
 	summary: unitLocalization.summary,
 	description: unitLocalization.description,
@@ -48,21 +51,21 @@ export async function getProfile(unitId: string) {
 export async function presentProfile<
 	T extends {
 		id: string;
-		avatarAssetId: string | null;
+		avatar: AvatarReference | null;
 		bannerAssetId: string | null;
 		status: string;
 		visibility: string;
 		description: unknown;
 	},
 >(profile: T) {
-	const { avatarAssetId, bannerAssetId, ...publicProfile } = profile;
+	const { avatar, bannerAssetId, ...publicProfile } = profile;
 	return {
 		...publicProfile,
 		slugAddress: await getPublicCanonicalUnitSlugAddress(profile.id),
 		status: profile.status.toLowerCase(),
 		visibility: profile.visibility.toLowerCase(),
 		description: parseNullableDocument(PortableTextDocument, profile.description),
-		avatar: presentImageAsset(avatarAssetId),
+		avatar: presentAvatar(avatar),
 		banner: presentImageAsset(bannerAssetId),
 	};
 }

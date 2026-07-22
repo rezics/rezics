@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import socialCard from "@rezics/brand/social-card.png?url&no-inline";
+import { FontAwesomeVersion, isFontAwesomeLicense, type FontAwesomeLicense } from "@rezics/avatar";
 
 import { AppProviders } from "@/lib/app-providers";
 import { RootTranslationNamespaces } from "@/i18n/namespaces";
@@ -12,6 +13,21 @@ import "@/styles/global.css";
 const frontendOrigin =
 	process.env.FRONTEND_URL ??
 	process.env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",").find((origin) => origin.trim());
+
+function fontAwesomeKitCssUrl(): URL | undefined {
+	const value = process.env.FONT_AWESOME_KIT_CSS_URL?.trim();
+	if (!value) return undefined;
+	const url = new URL(value);
+	if (url.protocol !== "https:") throw new Error("FONT_AWESOME_KIT_CSS_URL must use HTTPS");
+	return url;
+}
+
+function fontAwesomeKitLicense(): FontAwesomeLicense {
+	const value = process.env.FONT_AWESOME_KIT_LICENSE?.trim() ?? "free";
+	if (!isFontAwesomeLicense(value))
+		throw new Error("FONT_AWESOME_KIT_LICENSE must be either free or pro");
+	return value;
+}
 
 export async function generateMetadata(): Promise<Metadata> {
 	const { t } = await getTranslation(["brand"]);
@@ -54,9 +70,32 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
 	const { locale, snapshot } = await getTranslation(RootTranslationNamespaces);
+	const fontAwesomeCss = fontAwesomeKitCssUrl();
+	const fontAwesomeLicense = fontAwesomeKitLicense();
 	return (
-		<html lang={locale.current} suppressHydrationWarning>
+		<html
+			data-font-awesome={fontAwesomeCss ? "configured" : "unconfigured"}
+			data-font-awesome-license={fontAwesomeLicense}
+			data-font-awesome-version={FontAwesomeVersion}
+			lang={locale.current}
+			suppressHydrationWarning
+		>
 			<head>
+				{fontAwesomeCss ? (
+					<>
+						<link
+							crossOrigin="anonymous"
+							href={fontAwesomeCss.origin}
+							rel="preconnect"
+						/>
+						<link
+							crossOrigin="anonymous"
+							href={fontAwesomeCss.href}
+							referrerPolicy="strict-origin-when-cross-origin"
+							rel="stylesheet"
+						/>
+					</>
+				) : null}
 				<style>{appThemeCss}</style>
 				<meta
 					content={appTheme.light.background}

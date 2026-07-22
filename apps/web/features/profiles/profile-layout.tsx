@@ -6,16 +6,7 @@ import {
 	useGetApiUsersById,
 	useGetApiUsersMe,
 } from "@rezics/openapi-tanstack-query";
-import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
-	Banner,
-	Button,
-	cn,
-	QueryFailure,
-	QueryPending,
-} from "@rezics/ui";
+import { Banner, Button, cn, IdentityAvatar, QueryFailure, QueryPending } from "@rezics/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { CalendarDaysIcon, PencilIcon } from "lucide-react";
 import Link from "next/link";
@@ -81,10 +72,11 @@ export function ProfileLayout({ children, profileId }: { children: ReactNode; pr
 
 					<div className="px-2 sm:px-5">
 						<div className="-mt-10 flex items-end justify-between gap-4 sm:-mt-14">
-							<Avatar className="size-24 border-4 border-background bg-background text-3xl shadow-sm sm:size-32 sm:text-4xl">
-								{user.avatar ? <AvatarImage alt="" src={user.avatar.url} /> : null}
-								<AvatarFallback>{name.slice(0, 1).toUpperCase()}</AvatarFallback>
-							</Avatar>
+							<IdentityAvatar
+								avatar={user.avatar}
+								className="size-24 border-4 border-background bg-background text-3xl shadow-sm sm:size-32 sm:text-4xl"
+								fallback={name.slice(0, 1).toUpperCase()}
+							/>
 							<div className="mb-1 flex shrink-0 items-center gap-2">
 								{isCurrentUser ? (
 									<Button asChild variant="outline">

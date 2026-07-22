@@ -3,9 +3,6 @@
 import { isUiLocale, type UiLocale } from "@rezics/i18n";
 import type { GetApiUsersMeStatus200 } from "@rezics/openapi-tanstack-query";
 import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
 	Button,
 	type ButtonProps,
 	cn,
@@ -23,6 +20,7 @@ import {
 	RadioGroupItem,
 	RadioGroupLabel,
 	Separator,
+	IdentityAvatar,
 	Sheet,
 	SheetBody,
 	SheetClose,
@@ -87,10 +85,11 @@ function UserMenuTriggerButton({
 }) {
 	return (
 		<Button className={cn("size-11 p-0", className)} pill size="icon-xl" {...props}>
-			<Avatar size="lg">
-				{profile?.avatar ? <AvatarImage alt="" src={profile.avatar.url} /> : null}
-				<AvatarFallback>{initial ?? <UserRound aria-hidden />}</AvatarFallback>
-			</Avatar>
+			<IdentityAvatar
+				avatar={profile?.avatar}
+				fallback={initial ?? <UserRound aria-hidden />}
+				size="lg"
+			/>
 		</Button>
 	);
 }
@@ -166,12 +165,11 @@ function DesktopUserMenu({
 			<MenuContent className="w-[min(19rem,calc(100vw-1rem))] p-1.5">
 				<MenuItem asChild className="gap-3 px-3 py-2.5" value="view-profile">
 					<Link href={publicProfileHref}>
-						<Avatar size="lg">
-							{profile?.avatar ? (
-								<AvatarImage alt="" src={profile.avatar.url} />
-							) : null}
-							<AvatarFallback>{initial ?? <UserRound aria-hidden />}</AvatarFallback>
-						</Avatar>
+						<IdentityAvatar
+							avatar={profile?.avatar}
+							fallback={initial ?? <UserRound aria-hidden />}
+							size="lg"
+						/>
 						<span className="min-w-0 flex-1">
 							<span className="block truncate font-medium">{name}</span>
 							<span className="block truncate text-muted-foreground text-xs">
@@ -369,14 +367,11 @@ function MobileUserMenu(model: UserMenuModel) {
 								variant="quiet"
 							>
 								<Link href={publicProfileHref} onClick={close} ref={rootFocusRef}>
-									<Avatar size="lg">
-										{profile?.avatar ? (
-											<AvatarImage alt="" src={profile.avatar.url} />
-										) : null}
-										<AvatarFallback>
-											{initial ?? <UserRound aria-hidden />}
-										</AvatarFallback>
-									</Avatar>
+									<IdentityAvatar
+										avatar={profile?.avatar}
+										fallback={initial ?? <UserRound aria-hidden />}
+										size="lg"
+									/>
 									<span className="min-w-0 flex-1">
 										<span className="block truncate font-medium">{name}</span>
 										<span className="block truncate text-muted-foreground text-xs">

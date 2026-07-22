@@ -298,7 +298,11 @@ async function ensureLocalization(
 	const createdAt = bootstrapEpoch();
 	const desired = {
 		summary: input.summary ?? null,
+		avatarType: input.avatarAssetId ? ("image" as const) : null,
 		avatarAssetId: input.avatarAssetId ?? null,
+		avatarEmoji: null,
+		avatarIconPrefix: null,
+		avatarIconName: null,
 		content: input.content ?? null,
 		contentStatus: input.contentStatus ?? null,
 	};
@@ -307,6 +311,7 @@ async function ensureLocalization(
 			position: unitLocalization.position,
 			title: unitLocalization.title,
 			summary: unitLocalization.summary,
+			avatarType: unitLocalization.avatarType,
 			avatarAssetId: unitLocalization.avatarAssetId,
 			content: unitLocalization.content,
 			contentStatus: unitLocalization.contentStatus,
@@ -323,6 +328,7 @@ async function ensureLocalization(
 		stored?.position === input.position &&
 		stored.title === input.title &&
 		stored.summary === desired.summary &&
+		stored.avatarType === desired.avatarType &&
 		stored.avatarAssetId === desired.avatarAssetId &&
 		valuesEqual(stored.content, desired.content) &&
 		stored.contentStatus === desired.contentStatus
@@ -1009,7 +1015,11 @@ export async function isBootstrapReady(): Promise<boolean> {
 			officialZone.localizations.map((localization, index) => ({
 				unitId: officialZone.id,
 				position: fractionalPositionAt(index),
+				avatarType: officialZone.avatarAssetId ? ("image" as const) : null,
 				avatarAssetId: officialZone.avatarAssetId,
+				avatarEmoji: null,
+				avatarIconPrefix: null,
+				avatarIconName: null,
 				content: null,
 				...localization,
 			})),
@@ -1019,7 +1029,11 @@ export async function isBootstrapReady(): Promise<boolean> {
 				unitId: officialZone.wikiPost.id,
 				position: fractionalPositionAt(index),
 				summary: null,
+				avatarType: null,
 				avatarAssetId: null,
+				avatarEmoji: null,
+				avatarIconPrefix: null,
+				avatarIconName: null,
 				content: localization.body,
 				contentStatus: "published" as const,
 				language: localization.language,
@@ -1193,6 +1207,7 @@ export async function isBootstrapReady(): Promise<boolean> {
 				position: unitLocalization.position,
 				title: unitLocalization.title,
 				summary: unitLocalization.summary,
+				avatarType: unitLocalization.avatarType,
 				avatarAssetId: unitLocalization.avatarAssetId,
 				content: unitLocalization.content,
 				contentStatus: unitLocalization.contentStatus,
@@ -1323,6 +1338,7 @@ export async function isBootstrapReady(): Promise<boolean> {
 					actual.position === expected.position &&
 					actual.title === expected.title &&
 					actual.summary === expected.summary &&
+					actual.avatarType === ("avatarType" in expected ? expected.avatarType : null) &&
 					actual.avatarAssetId ===
 						("avatarAssetId" in expected ? expected.avatarAssetId : null) &&
 					valuesEqual(actual.content, "content" in expected ? expected.content : null) &&

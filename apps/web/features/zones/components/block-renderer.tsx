@@ -21,14 +21,12 @@ import {
 	usePostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute,
 } from "@rezics/openapi-tanstack-query";
 import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
 	Button,
 	ChoiceSelect,
 	Field,
 	FieldGroup,
 	FieldLabel,
+	IdentityAvatar,
 	Input,
 	PortableTextContent,
 	Popover,
@@ -180,7 +178,12 @@ function navigationHref(target: NavigationTarget, context: ZoneBlockContextValue
 
 function ReferencedUnit({ unit, appearance }: { unit: RenderUnit; appearance: string }) {
 	const href = unitHref(unit);
-	const image = appearance === "cover" ? unit.cover : unit.avatar;
+	const avatar =
+		appearance === "cover"
+			? unit.cover
+				? { type: "image" as const, image: unit.cover }
+				: null
+			: unit.avatar;
 	const content = (
 		<div
 			className={cn(
@@ -188,11 +191,12 @@ function ReferencedUnit({ unit, appearance }: { unit: RenderUnit; appearance: st
 				appearance !== "inline" && "rounded-xl border border-border-weak bg-card p-4",
 			)}
 		>
-			{image ? (
-				<Avatar className={appearance === "cover" ? "size-16 rounded-lg" : "size-10"}>
-					<AvatarImage alt="" src={image.url} />
-					<AvatarFallback>{unit.title?.slice(0, 1) ?? ""}</AvatarFallback>
-				</Avatar>
+			{avatar ? (
+				<IdentityAvatar
+					avatar={avatar}
+					className={appearance === "cover" ? "size-16 rounded-lg" : "size-10"}
+					fallback={unit.title?.slice(0, 1) ?? ""}
+				/>
 			) : null}
 			<div className="min-w-0">
 				<p className="truncate font-semibold">{unit.title}</p>

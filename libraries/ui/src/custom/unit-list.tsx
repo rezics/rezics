@@ -1,6 +1,7 @@
 "use client";
 
 import { BookOpenIcon } from "lucide-react";
+import type { PresentedAvatar } from "@rezics/avatar";
 
 import { useUiMessages } from "./ui-provider";
 import { Cover } from "./cover";
@@ -8,13 +9,14 @@ import { Alert, AlertDescription } from "../ui/alert";
 import { Item, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from "../ui/item";
 import { LinkBox, LinkOverlay } from "../ui/link-overlay";
 import { Skeleton } from "../ui/skeleton";
+import { IdentityAvatar } from "./identity-avatar";
 
 export interface UnitListItem {
 	id: string;
 	title: string | null;
 	summary?: string | null;
 	href?: string;
-	avatar?: { id: string; url: string } | null;
+	avatar?: PresentedAvatar | null;
 	cover?: { id: string; url: string } | null;
 }
 
@@ -107,19 +109,12 @@ export function UnitList({
 							role="listitem"
 						>
 							{usesAvatar ? (
-								<ItemMedia
-									className="bg-accent text-accent-foreground size-14 overflow-hidden rounded-full text-lg font-black"
-									variant="image"
-								>
-									{item.avatar ? (
-										<img
-											alt=""
-											className="size-full object-cover"
-											src={item.avatar.url}
-										/>
-									) : (
-										(item.title ?? "R").slice(0, 1)
-									)}
+								<ItemMedia variant="icon">
+									<IdentityAvatar
+										avatar={item.avatar}
+										className="size-14 text-lg font-black"
+										fallback={(item.title ?? "R").slice(0, 1)}
+									/>
 								</ItemMedia>
 							) : (
 								<Cover

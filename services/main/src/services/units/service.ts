@@ -1,4 +1,5 @@
 import { and, desc, eq, exists, isNull, lt, not, or, sql } from "drizzle-orm";
+import type { AvatarReference } from "@rezics/avatar";
 import {
 	PortableTextDocument,
 	parseNullableDocument,
@@ -15,10 +16,15 @@ import { toSafeInteger } from "../database/integer";
 import { ContentStructureSnapshotSchema } from "../content-structure/contracts";
 import { createContentStructureHistory } from "../content-structure/history";
 import {
+	avatarReferenceFromColumns,
+	avatarReferenceToColumns,
 	isPrimaryUnitLocalization,
 	makePrimaryUnitLocalization,
 	firstUnitLocalizationCoverAssetId,
 	resolvedUnitLocalizationImageAssetId,
+	resolvedUnitLocalizationAvatar,
+	resolveUnitLocalizationAvatarFromOrdered,
+	toUnitLocalizationStorage,
 	unitLocalizationImageAssetIds,
 } from "./localization";
 import {
@@ -46,6 +52,7 @@ import { insertUnit } from "./create";
 import { getPublisherSummariesByUnitIds, transitionUnitStatus } from "./status";
 import { getUnitVariantContext } from "./variants";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
+import { presentAvatar } from "./avatar";
 
 export type VariantUnitKind = "book" | "software" | "media";
 export type CatalogUnitKind = VariantUnitKind | "series";
@@ -57,7 +64,7 @@ export interface CreateUnitInput {
 		title: string;
 		summary?: string;
 		description?: PortableTextDocumentValue;
-		avatarAssetId?: string | null;
+		avatar?: AvatarReference | null;
 		bannerAssetId?: string | null;
 		coverAssetId?: string | null;
 	};
@@ -129,7 +136,7 @@ export async function createUnit(
 		if (kind === "media") await tx.insert(media).values({ id: created.id, kind: "other" });
 		await tx.insert(unitLocalization).values({
 			unitId: created.id,
-			...input.localization,
+			...toUnitLocalizationStorage(input.localization),
 		});
 		await createCommunityCatalogAccess(tx, created.id, ownerId, "publishing_editor");
 		const bookStructureSnapshot = bookStructure
@@ -333,9 +340,7 @@ export async function getUnit(
 					? details.releaseDate
 					: null,
 		details,
-		avatar: presentImageAsset(
-			localizations.find(({ avatarAssetId }) => avatarAssetId)?.avatarAssetId ?? null,
-		),
+		avatar: presentAvatar(resolveUnitLocalizationAvatarFromOrdered(localizations)),
 		banner: presentImageAsset(
 			localizations.find(({ bannerAssetId }) => bannerAssetId)?.bannerAssetId ?? null,
 		),
@@ -347,14 +352,26 @@ export async function getUnit(
 				content: _content,
 				contentStatus: _status,
 				description,
+				avatarType,
 				avatarAssetId,
+				avatarEmoji,
+				avatarIconPrefix,
+				avatarIconName,
 				bannerAssetId,
 				coverAssetId,
 				...row
 			}) => ({
 				...row,
 				description: parseNullableDocument(PortableTextDocument, description),
-				avatar: presentImageAsset(avatarAssetId),
+				avatar: presentAvatar(
+					avatarReferenceFromColumns({
+						avatarType,
+						avatarAssetId,
+						avatarEmoji,
+						avatarIconPrefix,
+						avatarIconName,
+					}),
+				),
 				banner: presentImageAsset(bannerAssetId),
 				cover: presentImageAsset(coverAssetId),
 			}),
@@ -416,7 +433,7 @@ export async function listUnits(kind: CatalogUnitKind, cursor?: [string, string]
 			updatedAt: unit.updatedAt,
 			title: unitLocalization.title,
 			summary: unitLocalization.summary,
-			avatarAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "avatar"),
+			avatar: resolvedUnitLocalizationAvatar(unit.id),
 			bannerAssetId: resolvedUnitLocalizationImageAssetId(unit.id, "banner"),
 			coverAssetId: firstUnitLocalizationCoverAssetId(unit.id),
 		})
@@ -452,10 +469,10 @@ export async function listUnits(kind: CatalogUnitKind, cursor?: [string, string]
 		.limit(limit + 1);
 	const publishers = await getPublisherSummariesByUnitIds(rows.map(({ id }) => id));
 	return Promise.all(
-		rows.map(async ({ avatarAssetId, bannerAssetId, coverAssetId, ...row }) => ({
+		rows.map(async ({ avatar, bannerAssetId, coverAssetId, ...row }) => ({
 			...row,
 			publishers: publishers.get(row.id) ?? [],
-			avatar: presentImageAsset(avatarAssetId),
+			avatar: presentAvatar(avatar),
 			banner: presentImageAsset(bannerAssetId),
 			cover: presentImageAsset(coverAssetId),
 		})),
@@ -618,7 +635,7 @@ export async function upsertLocalization(
 		title: string;
 		summary?: string;
 		description?: PortableTextDocumentValue;
-		avatarAssetId?: string | null;
+		avatar?: AvatarReference | null;
 		bannerAssetId?: string | null;
 		coverAssetId?: string | null;
 	},
@@ -632,15 +649,18 @@ export async function upsertLocalization(
 		);
 		await tx
 			.insert(unitLocalization)
-			.values({ unitId, ...input })
+			.values({
+				unitId,
+				...toUnitLocalizationStorage(input),
+			})
 			.onConflictDoUpdate({
 				target: [unitLocalization.unitId, unitLocalization.language],
 				set: {
 					title: input.title,
 					summary: input.summary,
 					description: input.description,
-					...(Object.hasOwn(input, "avatarAssetId")
-						? { avatarAssetId: input.avatarAssetId }
+					...(Object.hasOwn(input, "avatar")
+						? avatarReferenceToColumns(input.avatar ?? null)
 						: {}),
 					...(Object.hasOwn(input, "bannerAssetId")
 						? { bannerAssetId: input.bannerAssetId }

@@ -1,29 +1,96 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveUnitLocalizationImageAssetIdFromOrdered } from "./localization";
+import {
+	avatarReferenceToColumns,
+	resolveUnitLocalizationAvatarFromOrdered,
+	resolveUnitLocalizationImageAssetIdFromOrdered,
+	toUnitLocalizationStorage,
+} from "./localization";
 
 const localizations = [
 	{
 		language: "en",
+		avatarType: "image",
 		avatarAssetId: "avatar-default",
+		avatarEmoji: null,
+		avatarIconPrefix: null,
+		avatarIconName: null,
 		bannerAssetId: "banner-default",
 		coverAssetId: null,
 	},
 	{
 		language: "zh",
-		avatarAssetId: "avatar-zh",
+		avatarType: "emoji",
+		avatarAssetId: null,
+		avatarEmoji: "🦈",
+		avatarIconPrefix: null,
+		avatarIconName: null,
 		bannerAssetId: null,
 		coverAssetId: "cover-zh",
 	},
 ] as const;
 
-describe("resolveUnitLocalizationImageAssetIdFromOrdered", () => {
-	it("prefers a requested localization override", () => {
-		expect(resolveUnitLocalizationImageAssetIdFromOrdered(localizations, "avatar", "zh")).toBe(
-			"avatar-zh",
-		);
+describe("resolveUnitLocalizationAvatarFromOrdered", () => {
+	it("prefers a requested localization override as one complete union value", () => {
+		expect(resolveUnitLocalizationAvatarFromOrdered(localizations, "zh")).toEqual({
+			type: "emoji",
+			emoji: "🦈",
+		});
 	});
 
+	it("inherits the first complete avatar when the requested localization is empty", () => {
+		expect(
+			resolveUnitLocalizationAvatarFromOrdered(
+				localizations.map((localization) =>
+					localization.language === "zh"
+						? { ...localization, avatarType: null, avatarEmoji: null }
+						: localization,
+				),
+				"zh",
+			),
+		).toEqual({ type: "image", image: { assetId: "avatar-default" } });
+	});
+});
+
+describe("avatar storage", () => {
+	it("writes exactly one payload for each discriminated variant", () => {
+		expect(avatarReferenceToColumns({ type: "emoji", emoji: "🦈" })).toEqual({
+			avatarType: "emoji",
+			avatarAssetId: null,
+			avatarEmoji: "🦈",
+			avatarIconPrefix: null,
+			avatarIconName: null,
+		});
+		expect(
+			avatarReferenceToColumns({
+				type: "icon",
+				icon: { provider: "font-awesome", prefix: "fab", name: "500px" },
+			}),
+		).toEqual({
+			avatarType: "icon",
+			avatarAssetId: null,
+			avatarEmoji: null,
+			avatarIconPrefix: "fab",
+			avatarIconName: "500px",
+		});
+	});
+
+	it("distinguishes omitted avatar updates from an explicit removal", () => {
+		expect(toUnitLocalizationStorage({ title: "Unchanged" })).toEqual({
+			title: "Unchanged",
+		});
+		expect(toUnitLocalizationStorage({ title: "Removed", avatar: null })).toEqual({
+			title: "Removed",
+			avatarType: null,
+			avatarAssetId: null,
+			avatarEmoji: null,
+			avatarIconPrefix: null,
+			avatarIconName: null,
+		});
+	});
+});
+
+describe("resolveUnitLocalizationImageAssetIdFromOrdered", () => {
 	it("inherits the first available asset when the requested localization is empty", () => {
 		expect(resolveUnitLocalizationImageAssetIdFromOrdered(localizations, "banner", "zh")).toBe(
 			"banner-default",

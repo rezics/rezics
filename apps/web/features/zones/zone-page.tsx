@@ -37,7 +37,7 @@ export function ZonePage({ id, baseHref, page }: { id: string; baseHref: string;
 
 	return (
 		<ZoneBlockProvider baseHref={baseHref} projection={projection}>
-			<ZoneHeader avatarUrl={avatar?.url} projection={projection} title={title} />
+			<ZoneHeader avatar={avatar} projection={projection} title={title} />
 			<main>
 				{projection.page ? (
 					<ZoneDocument

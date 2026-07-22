@@ -21,7 +21,7 @@ import { type FormEvent, useState } from "react";
 import { Banner, PageHeading } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { UnitList } from "@rezics/ui";
-import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui";
+import { IdentityAvatar } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
@@ -34,6 +34,12 @@ import {
 	type LocalizationImageAssetOption,
 	type LocalizationImageAssetValue,
 } from "@/features/units/localization-image-upload-field";
+import {
+	avatarPresentationToInput,
+	LocalizationAvatarField,
+	type LocalizationAvatarOption,
+	type LocalizationAvatarValue,
+} from "@/features/units/localization-avatar-field";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useTranslation } from "@/i18n/client";
 import { selectLocalization } from "@/lib/localization";
@@ -128,12 +134,11 @@ export function EntityDetailPage({ id }: { id: string }) {
 			) : null}
 			<Card>
 				<CardContent className="grid gap-3 p-5 text-sm">
-					<Avatar className="size-20">
-						{avatar ? <AvatarImage alt="" src={avatar.url} /> : null}
-						<AvatarFallback>
-							{(localization?.title ?? t.ui.unnamed).slice(0, 1).toUpperCase()}
-						</AvatarFallback>
-					</Avatar>
+					<IdentityAvatar
+						avatar={avatar}
+						className="size-20"
+						fallback={(localization?.title ?? t.ui.unnamed).slice(0, 1).toUpperCase()}
+					/>
 					<p>
 						<span className="text-muted-foreground">{t.catalog.kind}</span>{" "}
 						{query.data.kind}
@@ -220,15 +225,17 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 		toContentLanguage(locale.target),
 		entity.localizations[0]?.language,
 	);
-	const mediaOptions = (role: "avatar" | "banner"): LocalizationImageAssetOption[] =>
-		entity.localizations.flatMap((entry) =>
-			entry.language !== toContentLanguage(locale.target) && entry[role]
-				? [{ ...entry[role], label: entry.language }]
-				: [],
-		);
-	const avatarOptions = mediaOptions("avatar");
-	const bannerOptions = mediaOptions("banner");
-	const [avatar, setAvatar] = useState<LocalizationImageAssetValue | null>(
+	const avatarOptions: LocalizationAvatarOption[] = entity.localizations.flatMap((entry) =>
+		entry.language !== toContentLanguage(locale.target) && entry.avatar
+			? [{ ...entry.avatar, label: entry.language }]
+			: [],
+	);
+	const bannerOptions: LocalizationImageAssetOption[] = entity.localizations.flatMap((entry) =>
+		entry.language !== toContentLanguage(locale.target) && entry.banner
+			? [{ ...entry.banner, label: entry.language }]
+			: [],
+	);
+	const [avatar, setAvatar] = useState<LocalizationAvatarValue | null>(
 		localization?.avatar ?? null,
 	);
 	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(
@@ -245,7 +252,7 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 				body: {
 					title: String(form.get("title") ?? "").trim(),
 					summary: String(form.get("summary") ?? "").trim(),
-					avatarAssetId: avatar?.id ?? null,
+					avatar: avatarPresentationToInput(avatar),
 					bannerAssetId: banner?.id ?? null,
 				},
 			});
@@ -286,12 +293,10 @@ function EntityLocalizationForm({ entity }: { entity: GetApiEntitiesByUnitIdStat
 					</Field>
 					<Field>
 						<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
-						<LocalizationImageUploadField
+						<LocalizationAvatarField
 							fallback={avatarOptions[0] ?? null}
 							onChange={setAvatar}
 							options={avatarOptions}
-							role="avatar"
-							shape="avatar"
 							value={avatar}
 						/>
 					</Field>
@@ -344,7 +349,7 @@ export function EntityCreatePage() {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const [error, setError] = useState(false);
-	const [avatar, setAvatar] = useState<LocalizationImageAssetValue | null>(null);
+	const [avatar, setAvatar] = useState<LocalizationAvatarValue | null>(null);
 	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(null);
 	const create = usePostApiEntities({
 		mutation: {
@@ -365,7 +370,7 @@ export function EntityCreatePage() {
 					localization: {
 						language: toContentLanguage(locale.target),
 						title: String(form.get("title") ?? "").trim(),
-						avatarAssetId: avatar?.id ?? null,
+						avatar: avatarPresentationToInput(avatar),
 						bannerAssetId: banner?.id ?? null,
 						...(String(form.get("summary") ?? "").trim()
 							? { summary: String(form.get("summary")).trim() }
@@ -403,12 +408,7 @@ export function EntityCreatePage() {
 					</Field>
 					<Field>
 						<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
-						<LocalizationImageUploadField
-							onChange={setAvatar}
-							role="avatar"
-							shape="avatar"
-							value={avatar}
-						/>
+						<LocalizationAvatarField onChange={setAvatar} value={avatar} />
 					</Field>
 					<Field>
 						<FieldLabel>{t.media.roles.banner.title}</FieldLabel>

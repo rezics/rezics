@@ -3697,6 +3697,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@rezics/avatar@workspace:*, @rezics/avatar@workspace:libraries/avatar":
+  version: 0.0.0-use.local
+  resolution: "@rezics/avatar@workspace:libraries/avatar"
+  dependencies:
+    typescript: "npm:7"
+    vitest: "npm:4.1.10"
+  languageName: unknown
+  linkType: soft
+
 "@rezics/backend@workspace:services/main":
   version: 0.0.0-use.local
   resolution: "@rezics/backend@workspace:services/main"
@@ -3712,6 +3721,7 @@ __metadata:
     "@elysiajs/cors": "npm:^1.4.2"
     "@elysiajs/openapi": "npm:^1.4.15"
     "@faker-js/faker": "npm:^10.5.0"
+    "@rezics/avatar": "workspace:*"
     "@rezics/block": "workspace:*"
     "@rezics/brand": "workspace:*"
     "@rezics/i18n": "workspace:*"
@@ -3794,6 +3804,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@rezics/frontend@workspace:apps/web"
   dependencies:
+    "@rezics/avatar": "workspace:*"
     "@rezics/block": "workspace:*"
     "@rezics/fixture-client": "workspace:*"
     "@rezics/fixture-data": "workspace:*"
@@ -3813,6 +3824,7 @@ __metadata:
     "@vitejs/plugin-rsc": "npm:^0.5.27"
     better-auth: "npm:1.7.0-rc.1"
     fractional-indexing: "npm:^4.0.0"
+    frimousse: "npm:0.3.0"
     http-status-codes: "npm:^2.3.0"
     jsdom: "npm:26.1.0"
     lucide-react: "npm:^1.24.0"
@@ -3954,6 +3966,7 @@ __metadata:
     "@portabletext/keyboard-shortcuts": "npm:^2.1.3"
     "@portabletext/react": "npm:^6.2.0"
     "@portabletext/toolbar": "npm:^8.0.34"
+    "@rezics/avatar": "workspace:*"
     "@rezics/brand": "workspace:*"
     "@rezics/portable-text": "workspace:*"
     "@types/react": "npm:19"
@@ -9096,6 +9109,19 @@ __metadata:
   version: 0.5.2
   resolution: "fresh@npm:0.5.2"
   checksum: 10c0/c6d27f3ed86cc5b601404822f31c900dd165ba63fff8152a3ef714e2012e7535027063bc67ded4cb5b3a49fa596495d46cacd9f47d6328459cf570f08b7d9e5a
+  languageName: node
+  linkType: hard
+
+"frimousse@npm:0.3.0":
+  version: 0.3.0
+  resolution: "frimousse@npm:0.3.0"
+  peerDependencies:
+    react: ^18 || ^19
+    typescript: ">=5.1.0"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 10c0/47803da7b50868a0df245be2ca9d39870ef4ffb083a5b854b7ea923263d1b21a68f9dd86dad89df4f9688258d3ff1b109249747382f1b9eec073d7e940186c0c
   languageName: node
   linkType: hard
 

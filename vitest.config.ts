@@ -3,6 +3,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
 	test: {
 		projects: [
+			"./libraries/avatar/vitest.config.ts",
 			"./libraries/observability/vitest.config.ts",
 			"./libraries/license/vitest.config.ts",
 			"./libraries/i18n/vitest.config.ts",

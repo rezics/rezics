@@ -10,7 +10,9 @@ import { getEntityAssociationPolicy } from "../../authorization/entity/authoriza
 import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import {
+	avatarReferenceFromColumns,
 	isPrimaryUnitLocalization,
+	resolvedUnitLocalizationAvatar,
 	resolvedUnitLocalizationImageAssetId,
 } from "../../units/localization";
 import { fractionalPositionBetween } from "../../ordering/position";
@@ -59,6 +61,7 @@ import { UnitLocalizationBody } from "../units/schema";
 import { recordUnitRevision } from "../../units/history";
 import { updateUnitVariantContext } from "../../units/variants";
 import { presentImageAsset } from "../../units/service";
+import { presentAvatar } from "../../units/avatar";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
 import { UnitIdParams } from "../schema";
 import {
@@ -164,11 +167,7 @@ export default new Elysia()
 							id: unit.id,
 							kind: entity.kind,
 							verified: entity.verified,
-							avatarAssetId: resolvedUnitLocalizationImageAssetId(
-								unit.id,
-								"avatar",
-								query.language,
-							),
+							avatar: resolvedUnitLocalizationAvatar(unit.id, query.language),
 							bannerAssetId: resolvedUnitLocalizationImageAssetId(
 								unit.id,
 								"banner",
@@ -200,15 +199,13 @@ export default new Elysia()
 						.orderBy(desc(unit.createdAt))
 						.limit(query.limit ?? 20);
 					return {
-						items: items.map(
-							({ avatarAssetId, bannerAssetId, coverAssetId, ...item }) => ({
-								...item,
-								kind: item.kind ?? "unknown",
-								avatar: presentImageAsset(avatarAssetId),
-								banner: presentImageAsset(bannerAssetId),
-								cover: presentImageAsset(coverAssetId),
-							}),
-						),
+						items: items.map(({ avatar, bannerAssetId, coverAssetId, ...item }) => ({
+							...item,
+							kind: item.kind ?? "unknown",
+							avatar: presentAvatar(avatar),
+							banner: presentImageAsset(bannerAssetId),
+							cover: presentImageAsset(coverAssetId),
+						})),
 					};
 				},
 				{
@@ -241,11 +238,7 @@ export default new Elysia()
 							id: unit.id,
 							kind: entity.kind,
 							verified: entity.verified,
-							avatarAssetId: resolvedUnitLocalizationImageAssetId(
-								unit.id,
-								"avatar",
-								query.language,
-							),
+							avatar: resolvedUnitLocalizationAvatar(unit.id, query.language),
 							bannerAssetId: resolvedUnitLocalizationImageAssetId(
 								unit.id,
 								"banner",
@@ -280,7 +273,7 @@ export default new Elysia()
 							row.description === null
 								? null
 								: toPortableTextResponse(row.description),
-						avatar: presentImageAsset(row.avatarAssetId),
+						avatar: presentAvatar(avatarReferenceFromColumns(row)),
 						banner: presentImageAsset(row.bannerAssetId),
 						cover: presentImageAsset(row.coverAssetId),
 						createdAt: row.createdAt,
@@ -330,7 +323,7 @@ export default new Elysia()
 							),
 						)
 						.limit(1);
-					const { avatarAssetId, bannerAssetId, coverAssetId, ...entityEntry } = entry;
+					const { avatar, bannerAssetId, coverAssetId, ...entityEntry } = entry;
 					const [canEdit, accessDecision, creditDecision, subjectDecision] =
 						await Promise.all([
 							identity.authorization.unit.canUpdate(params.unitId, ["localizations"]),
@@ -349,7 +342,7 @@ export default new Elysia()
 					return {
 						...entityEntry,
 						kind: entry.kind ?? "unknown",
-						avatar: presentImageAsset(avatarAssetId),
+						avatar: presentAvatar(avatar),
 						banner: presentImageAsset(bannerAssetId),
 						cover: presentImageAsset(coverAssetId),
 						localizations,

@@ -3,6 +3,7 @@ import { t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
 import { ContentLanguage, DateTime, FractionalPosition, OrdinalPosition, UnitKind, Uuid } from ".";
 import { NullablePublicSlugAddressResponse } from "../slug-addresses/schema";
+import { AvatarResponse } from "./response";
 
 const NullableUuid = t.Nullable(Uuid);
 
@@ -50,7 +51,7 @@ export const FollowingListResponse = t.Object({
 			kind: UnitKind,
 			language: t.Nullable(ContentLanguage),
 			title: t.Nullable(t.String()),
-			avatar: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
+			avatar: AvatarResponse,
 			cover: t.Nullable(t.Object({ id: Uuid, url: t.String() })),
 			position: FractionalPosition,
 			favorite: t.Boolean(),

@@ -24,7 +24,7 @@ import { QueryFailure, QueryPending } from "@rezics/ui";
 import { Button } from "@rezics/ui";
 import { Badge } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui";
-import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui";
+import { IdentityAvatar } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { NativeSelect, NativeSelectOption } from "@rezics/ui";
@@ -38,6 +38,11 @@ import {
 	LocalizationImageUploadField,
 	type LocalizationImageAssetValue,
 } from "@/features/units/localization-image-upload-field";
+import {
+	avatarPresentationToInput,
+	LocalizationAvatarField,
+	type LocalizationAvatarValue,
+} from "@/features/units/localization-avatar-field";
 import { PostList } from "@/features/posts/post-list";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { selectLocalization } from "@/lib/localization";
@@ -89,16 +94,13 @@ export function RealmsPage() {
 						<Link key={realm.id} href={realmHref(realm)}>
 							<Card className="transition-colors hover:bg-surface-hover">
 								<CardContent className="grid grid-cols-[auto_minmax(0,1fr)] gap-4 p-5">
-									<Avatar className="size-12">
-										{realm.avatar ? (
-											<AvatarImage alt="" src={realm.avatar.url} />
-										) : null}
-										<AvatarFallback>
-											{(realm.title ?? t.realms.untitled)
-												.slice(0, 1)
-												.toUpperCase()}
-										</AvatarFallback>
-									</Avatar>
+									<IdentityAvatar
+										avatar={realm.avatar}
+										className="size-12"
+										fallback={(realm.title ?? t.realms.untitled)
+											.slice(0, 1)
+											.toUpperCase()}
+									/>
 									<div className="grid min-w-0 gap-2">
 										<h2 className="font-semibold">
 											{realm.title ?? t.realms.untitled}
@@ -139,7 +141,7 @@ export function RealmCreatePage() {
 	]);
 	const router = useRouter();
 	const queryClient = useQueryClient();
-	const [avatar, setAvatar] = useState<LocalizationImageAssetValue | null>(null);
+	const [avatar, setAvatar] = useState<LocalizationAvatarValue | null>(null);
 	const [banner, setBanner] = useState<LocalizationImageAssetValue | null>(null);
 	const create = usePostApiRealms();
 
@@ -155,7 +157,7 @@ export function RealmCreatePage() {
 					localization: {
 						language: toContentLanguage(locale.target),
 						title,
-						avatarAssetId: avatar?.id ?? null,
+						avatar: avatarPresentationToInput(avatar),
 						bannerAssetId: banner?.id ?? null,
 						...(summary ? { summary } : {}),
 					},
@@ -188,12 +190,7 @@ export function RealmCreatePage() {
 						</Field>
 						<Field>
 							<FieldLabel>{t.media.roles.avatar.title}</FieldLabel>
-							<LocalizationImageUploadField
-								onChange={setAvatar}
-								role="avatar"
-								shape="avatar"
-								value={avatar}
-							/>
+							<LocalizationAvatarField onChange={setAvatar} value={avatar} />
 						</Field>
 						<Field>
 							<FieldLabel>{t.media.roles.banner.title}</FieldLabel>
@@ -281,14 +278,13 @@ export function RealmDetailPage({ id }: { id: string }) {
 				) : null}
 				<div className="min-w-0">
 					<div className="mb-4 flex items-center gap-4">
-						<Avatar className="size-16 ring-4 ring-background sm:size-20">
-							{realm.avatar ? <AvatarImage alt="" src={realm.avatar.url} /> : null}
-							<AvatarFallback>
-								{(localization?.title ?? t.realms.untitled)
-									.slice(0, 1)
-									.toUpperCase()}
-							</AvatarFallback>
-						</Avatar>
+						<IdentityAvatar
+							avatar={realm.avatar}
+							className="size-16 ring-4 ring-background sm:size-20"
+							fallback={(localization?.title ?? t.realms.untitled)
+								.slice(0, 1)
+								.toUpperCase()}
+						/>
 						<div className="flex flex-wrap items-center gap-2">
 							<Badge variant="secondary">{t.ui.realm}</Badge>
 							<Badge variant="outline">

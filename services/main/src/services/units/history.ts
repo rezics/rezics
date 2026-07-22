@@ -1,6 +1,7 @@
 import { and, desc, eq, max, sql } from "drizzle-orm";
 import { createSchemaFactory } from "drizzle-orm/zod";
 import { z } from "zod";
+import { AvatarTypeValues, FontAwesomeIconPrefixValues } from "@rezics/avatar";
 import {
 	CollectionDefinitionDocument,
 	CollectionPresentationDocument,
@@ -151,6 +152,8 @@ const unitLocalizationStateSchema = schemaFactory
 	.createSelectSchema(unitLocalization, {
 		language: z.enum(ContentLanguageValues),
 		position: FractionalPositionSchema,
+		avatarType: z.enum(AvatarTypeValues).nullable(),
+		avatarIconPrefix: z.enum(FontAwesomeIconPrefixValues).nullable(),
 		description: PortableTextDocumentSchema.nullable(),
 		content: UnitLocalizationContentSchema.nullable(),
 	})
