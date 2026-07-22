@@ -81531,6 +81531,10 @@ export type PostApiSearchByIndexBody = {
 	 */
 	licenses?: PostApiSearchByIndexRequestLicensesEnum[];
 	/**
+	 * @type boolean | undefined
+	 */
+	contentLicensed?: boolean;
+	/**
 	 * @minLength 1
 	 * @type string | undefined
 	 */

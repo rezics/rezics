@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, date, index, integer, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { check, date, index, integer, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUpdatedAtColumn } from "./columns";
@@ -15,7 +15,6 @@ export const book = pgTable(
 		publicationDate: date(),
 		pageCount: integer(),
 		format: text(),
-		licensed: boolean().default(false).notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},

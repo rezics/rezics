@@ -23,6 +23,7 @@ import {
 } from "./localization";
 import {
 	book,
+	catalogUnitContentLicense,
 	contentStructure,
 	entity,
 	software,
@@ -158,6 +159,15 @@ async function getUnitDetails(
 	kind: CatalogUnitKind,
 	unitId: string,
 ): Promise<UnitDetail["details"]> {
+	const contentLicensed =
+		kind !== "series" &&
+		(
+			await database
+				.select({ unitId: catalogUnitContentLicense.unitId })
+				.from(catalogUnitContentLicense)
+				.where(eq(catalogUnitContentLicense.unitId, unitId))
+				.limit(1)
+		)[0] !== undefined;
 	if (kind === "book") {
 		const [details] = await database.select().from(book).where(eq(book.id, unitId)).limit(1);
 		if (!details) throw new UnitNotFound(kind);
@@ -167,7 +177,7 @@ async function getUnitDetails(
 			publicationDate: details.publicationDate,
 			pageCount: details.pageCount,
 			format: details.format,
-			licensed: details.licensed,
+			licensed: contentLicensed,
 		};
 	}
 	if (kind === "software") {
@@ -181,7 +191,7 @@ async function getUnitDetails(
 			type: "software",
 			releaseDate: details.releaseDate,
 			versionLabel: details.versionLabel,
-			licensed: details.licensed,
+			licensed: contentLicensed,
 		};
 	}
 	if (kind === "media") {
@@ -194,7 +204,7 @@ async function getUnitDetails(
 			runtimeMinutes: details.runtimeMinutes,
 			episodeCount: details.episodeCount,
 			seasonCount: details.seasonCount,
-			licensed: details.licensed,
+			licensed: contentLicensed,
 		};
 	}
 	const [details] = await database.select().from(series).where(eq(series.id, unitId)).limit(1);
@@ -522,7 +532,6 @@ export async function updateUnit(
 							: details.publicationDate,
 					pageCount: details.pageCount,
 					format: details.format,
-					licensed: details.licensed,
 				})
 				.where(eq(book.id, unitId));
 		if (kind === "software")
@@ -531,7 +540,6 @@ export async function updateUnit(
 				.set({
 					releaseDate: releasedOn,
 					versionLabel: details.versionLabel,
-					licensed: details.licensed,
 				})
 				.where(eq(software.id, unitId));
 		if (kind === "media")
@@ -543,9 +551,19 @@ export async function updateUnit(
 					runtimeMinutes: details.runtimeMinutes,
 					episodeCount: details.episodeCount,
 					seasonCount: details.seasonCount,
-					licensed: details.licensed,
 				})
 				.where(eq(media.id, unitId));
+		if (kind !== "series" && details.licensed !== undefined) {
+			if (details.licensed)
+				await tx
+					.insert(catalogUnitContentLicense)
+					.values({ unitId, unitKind: kind })
+					.onConflictDoNothing();
+			else
+				await tx
+					.delete(catalogUnitContentLicense)
+					.where(eq(catalogUnitContentLicense.unitId, unitId));
+		}
 		if (kind === "series" && details.kind !== undefined)
 			await tx.update(series).set({ kind: details.kind }).where(eq(series.id, unitId));
 		const revision = await recordUnitRevision(tx, {

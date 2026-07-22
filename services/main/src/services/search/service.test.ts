@@ -1,17 +1,28 @@
 import { type SQL } from "drizzle-orm";
-import { PgDialect } from "drizzle-orm/pg-core";
+import { PgDialect, type SelectedFields } from "drizzle-orm/pg-core";
 import { parseSearchCursor } from "@rezics/search";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const execute = vi.hoisted(() => vi.fn());
-const select = vi.hoisted(() =>
-	vi.fn(() => ({
-		from: () => ({ innerJoin: () => ({ where: () => Promise.resolve([]) }) }),
-	})),
-);
+const select = vi.hoisted(() => vi.fn());
 const searchCandidates = vi.hoisted(() => vi.fn());
 
-vi.mock("../database", () => ({ database: { execute, select } }));
+vi.mock("../database", async () => {
+	const { QueryBuilder } = await import("drizzle-orm/pg-core");
+    select.mockImplementation((fields: SelectedFields | undefined) => {
+		if (fields && Object.keys(fields).length === 1 && "unitId" in fields)
+			return new QueryBuilder().select(fields);
+		const rows = Promise.resolve([]);
+		const query = {
+			from: () => query,
+			innerJoin: () => query,
+			where: () => query,
+			then: rows.then.bind(rows),
+		};
+		return query;
+	});
+	return { database: { execute, select } };
+});
 vi.mock("./generation", () => ({
 	getActiveSearchGeneration: vi.fn().mockResolvedValue({
 		id: "019f7eed-5d42-7102-8387-cc1d13b176d2",
@@ -168,6 +179,9 @@ describe("domain search SQL", () => {
 		await expect(searchDomain("tags", { multiple: true })).rejects.toBeInstanceOf(
 			InvalidSearch,
 		);
+		await expect(searchDomain("posts", { contentLicensed: true })).rejects.toBeInstanceOf(
+			InvalidSearch,
+		);
 		await expect(searchDomain("posts", { joinPolicies: ["open"] })).rejects.toBeInstanceOf(
 			InvalidSearch,
 		);
@@ -175,6 +189,12 @@ describe("domain search SQL", () => {
 	});
 
 	it("keeps catalog applicability and correlated requirements authoritative in PostgreSQL", async () => {
+		await searchDomain("units", { contentLicensed: true });
+		expect(lastQuery()).toContain('from "catalog_unit_content_license"');
+
+		await searchDomain("units", { contentLicensed: false });
+		expect(lastQuery()).toContain("not (exists");
+
 		await searchDomain("units", {
 			expression: {
 				operator: "all",

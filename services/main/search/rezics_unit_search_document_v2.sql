@@ -42,7 +42,7 @@ SELECT
 			'realmIds', coalesce(access_data.realm_ids, '[]'::jsonb)
 		),
 		'catalog', jsonb_build_object(
-			'licensed', coalesce(book_row.licensed, media_row.licensed, software_row.licensed, false),
+			'licensed', catalog_license_row.unit_id IS NOT NULL,
 			'releaseAt', CASE WHEN coalesce(media_row.release_date, software_row.release_date) IS NULL THEN NULL ELSE extract(epoch FROM coalesce(media_row.release_date, software_row.release_date)::timestamptz)::bigint END
 		),
 		'book', CASE WHEN unit_row.kind = 'book' THEN jsonb_build_object(
@@ -89,6 +89,7 @@ LEFT JOIN public.realm AS realm_row ON realm_row.id = source.unit_id
 LEFT JOIN public.collection AS collection_row ON collection_row.id = source.unit_id
 LEFT JOIN public.poll AS poll_row ON poll_row.id = source.unit_id
 LEFT JOIN public.book AS book_row ON book_row.id = source.unit_id
+LEFT JOIN public.catalog_unit_content_license AS catalog_license_row ON catalog_license_row.unit_id = source.unit_id
 LEFT JOIN public.media AS media_row ON media_row.id = source.unit_id
 LEFT JOIN public.software AS software_row ON software_row.id = source.unit_id
 LEFT JOIN public.unit_variant AS variant_row ON variant_row.variant_unit_id = source.unit_id

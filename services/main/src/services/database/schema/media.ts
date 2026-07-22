@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, date, index, integer, text, uuid } from "drizzle-orm/pg-core";
+import { check, date, index, integer, text, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import { createCreatedAtColumn, createUpdatedAtColumn } from "./columns";
@@ -16,7 +16,6 @@ export const media = pgTable(
 		runtimeMinutes: integer(),
 		episodeCount: integer(),
 		seasonCount: integer(),
-		licensed: boolean().default(false).notNull(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
 	},

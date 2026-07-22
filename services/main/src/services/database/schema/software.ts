@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, date, index, text, unique, uuid } from "drizzle-orm/pg-core";
+import { check, date, index, text, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import { unitLink } from "./catalog";
@@ -19,7 +19,6 @@ export const software = pgTable("software", {
 		.references(() => unit.id, { onDelete: "cascade" }),
 	releaseDate: date(),
 	versionLabel: text(),
-	licensed: boolean().default(false).notNull(),
 	createdAt: createCreatedAtColumn(),
 	updatedAt: createUpdatedAtColumn(),
 });

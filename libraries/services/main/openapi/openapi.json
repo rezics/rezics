@@ -135252,6 +135252,7 @@
 											]
 										}
 									},
+									"contentLicensed": { "type": "boolean" },
 									"publisherId": { "minLength": 1, "type": "string" },
 									"realmId": { "minLength": 1, "type": "string" },
 									"subjectId": { "minLength": 1, "type": "string" },

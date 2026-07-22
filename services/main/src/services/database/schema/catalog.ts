@@ -32,6 +32,31 @@ import { entity } from "./entity";
 
 export const aliasKind = pgEnum("alias_kind", toEnumValues(AliasKindValues));
 
+/**
+ * Marks a Catalog Unit whose content Rezics may host under the same platform
+ * content terms used for ordinary Posts. The Unit's public reuse License remains
+ * independently described by unit.license.
+ */
+export const catalogUnitContentLicense = pgTable(
+	"catalog_unit_content_license",
+	{
+		unitId: uuid().primaryKey(),
+		unitKind: text().$type<VariantCapableUnitKind>().notNull(),
+		createdAt: createCreatedAtColumn(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.unitId, table.unitKind],
+			foreignColumns: [unit.id, unit.kind],
+			name: "catalog_unit_content_license_unit_kind_fkey",
+		}).onDelete("cascade"),
+		check(
+			"catalog_unit_content_license_kind_check",
+			inArray(table.unitKind, VariantCapableUnitKindValues),
+		),
+	],
+);
+
 export const unitAlias = pgTable(
 	"unit_alias",
 	{

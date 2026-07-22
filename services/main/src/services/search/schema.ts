@@ -47,6 +47,7 @@ export interface DomainSearchRequest {
 	contentRatings?: string[];
 	aiDisclosures?: string[];
 	licenses?: PublicationLicenseId[];
+	contentLicensed?: boolean;
 	publisherId?: string;
 	realmId?: string;
 	subjectId?: string;
@@ -76,7 +77,7 @@ const CommonFilterableAttributes = [
 
 export const SearchCategoryRules = {
 	units: {
-		filterableAttributes: [...CommonFilterableAttributes, "kind"],
+		filterableAttributes: [...CommonFilterableAttributes, "kind", "contentLicensed"],
 		sortableAttributes: [...CommonSortableAttributes, "publishedAt"],
 	},
 	users: {

@@ -37,6 +37,7 @@ import {
 	apikeys,
 	auditEvent,
 	book,
+	catalogUnitContentLicense,
 	capabilityGrant,
 	collection,
 	collectionItem,
@@ -638,7 +639,6 @@ async function seedCatalog(
 			publicationDate: dateOnly(data.pastDate(7_300)),
 			pageCount: 80 + ((index * 37) % 900),
 			format: itemAt(["paperback", "hardcover", "ebook"], index),
-			licensed: index % 3 === 0,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
@@ -649,7 +649,6 @@ async function seedCatalog(
 			id: value.id,
 			releaseDate: dateOnly(data.pastDate(5_000)),
 			versionLabel: `${1 + (index % 5)}.${index % 10}`,
-			licensed: index % 4 === 0,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
@@ -663,11 +662,36 @@ async function seedCatalog(
 			runtimeMinutes: 20 + ((index * 17) % 180),
 			episodeCount: index % 3 === 0 ? 1 + (index % 48) : null,
 			seasonCount: index % 3 === 0 ? 1 + (index % 8) : null,
-			licensed: index % 5 === 0,
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		})),
 		(batch) => tx.insert(media).values(batch),
+	);
+	await writeBatches(
+		[
+			...books
+				.filter((_, index) => index % 3 === 0)
+				.map((value) => ({
+					unitId: value.id,
+					unitKind: "book" as const,
+					createdAt: value.createdAt,
+				})),
+			...softwareUnits
+				.filter((_, index) => index % 4 === 0)
+				.map((value) => ({
+					unitId: value.id,
+					unitKind: "software" as const,
+					createdAt: value.createdAt,
+				})),
+			...mediaItems
+				.filter((_, index) => index % 5 === 0)
+				.map((value) => ({
+					unitId: value.id,
+					unitKind: "media" as const,
+					createdAt: value.createdAt,
+				})),
+		],
+		(batch) => tx.insert(catalogUnitContentLicense).values(batch),
 	);
 	await writeBatches(
 		seriesItems.map((value, index) => ({

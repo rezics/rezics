@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import { sql, type SQL } from "drizzle-orm";
+import { and, eq, exists, inArray, not, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import {
 	createSearchCursor,
@@ -16,6 +16,7 @@ import { getUnitReadCondition } from "../authorization/unit/query";
 import { database } from "../database";
 import {
 	book,
+	catalogUnitContentLicense,
 	collection,
 	contentStructure,
 	contentStructureNode,
@@ -37,6 +38,7 @@ import {
 	unitTag,
 	unitStatusEvent,
 	unitVariant,
+	VariantCapableUnitKindValues,
 } from "../database/schema";
 import { env } from "../config";
 import { firstUnitLocalizationCoverAssetId, primaryUnitTitle } from "../units/localization";
@@ -138,6 +140,7 @@ function validateRequest(category: SearchCategory, request: DomainSearchRequest)
 		["contentRatings", "contentRating", Boolean(request.contentRatings?.length)],
 		["aiDisclosures", "aiDisclosure", Boolean(request.aiDisclosures?.length)],
 		["licenses", "license", Boolean(request.licenses?.length)],
+		["contentLicensed", "contentLicensed", request.contentLicensed !== undefined],
 		["publisherId", "publisherId", Boolean(request.publisherId)],
 		["realmId", "realmId", Boolean(request.realmId)],
 		["subjectId", "subjectId", Boolean(request.subjectId)],
@@ -267,11 +270,22 @@ function compileFilter(category: SearchCategory, filter: SearchFilter): SQL {
 			return sql`${!matches}`;
 		return sql`${matches}`;
 	}
-	if (filter.field === "catalog-licensed")
-		return sql`${unit.kind} in ('book', 'media', 'software') and ${booleanColumnCondition(
-			sql`coalesce(${book.licensed}, ${media.licensed}, ${software.licensed}, false)`,
-			filter,
-		)}`;
+	if (filter.field === "catalog-licensed") {
+		const condition = and(
+			inArray(unit.kind, VariantCapableUnitKindValues),
+			booleanColumnCondition(
+				exists(
+					database
+						.select({ unitId: catalogUnitContentLicense.unitId })
+						.from(catalogUnitContentLicense)
+						.where(eq(catalogUnitContentLicense.unitId, unit.id)),
+				),
+				filter,
+			),
+		);
+		if (!condition) throw new Error("Catalog License filter produced no SQL condition");
+		return condition;
+	}
 	if (filter.field === "catalog-release-date")
 		return sql`${unit.kind} in ('media', 'software') and ${scalarColumnCondition(
 			sql`coalesce(${media.releaseDate}, ${software.releaseDate})`,
@@ -560,6 +574,15 @@ function buildSearchConditions(category: SearchCategory, request: DomainSearchRe
 		if (!values?.length) continue;
 		addList(conditions, column, values);
 	}
+	if (request.contentLicensed !== undefined) {
+		const markerExists = exists(
+			database
+				.select({ unitId: catalogUnitContentLicense.unitId })
+				.from(catalogUnitContentLicense)
+				.where(eq(catalogUnitContentLicense.unitId, unit.id)),
+		);
+		conditions.push(request.contentLicensed ? markerExists : not(markerExists));
+	}
 
 	if (request.joinPolicies?.length) {
 		addList(conditions, sql`${realm.joinPolicy}`, request.joinPolicies);
@@ -638,6 +661,12 @@ function buildCandidateExpression(request: DomainSearchRequest): SearchExpressio
 	addValues("content-rating", request.contentRatings);
 	addValues("ai-disclosure", request.aiDisclosures);
 	addValues("license", request.licenses);
+	if (request.contentLicensed !== undefined)
+		filters.push({
+			field: "catalog-licensed",
+			operator: "equals",
+			value: request.contentLicensed,
+		});
 	addValue("publisher", request.publisherId);
 	addValue("realm", request.realmId);
 	addValue("subject", request.subjectId);
@@ -677,6 +706,7 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 				contentRatings: request.contentRatings,
 				aiDisclosures: request.aiDisclosures,
 				licenses: request.licenses,
+				contentLicensed: request.contentLicensed,
 				publisherId: request.publisherId,
 				realmId: request.realmId,
 				subjectId: request.subjectId,

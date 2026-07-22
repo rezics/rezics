@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import {
 	auditEvent,
+	catalogUnitContentLicense,
 	contentStructure,
 	contentStructureNode,
 	entityAssociationProposal,
@@ -78,6 +79,17 @@ describe("database schema contracts", () => {
 				"search_index_generation_active_projection_key",
 				"search_index_generation_index_uid_key",
 			]),
+		);
+	});
+
+	it("limits Catalog content License markers to supported Catalog Unit kinds", () => {
+		const marker = getTableConfig(catalogUnitContentLicense);
+		expect(getTableName(catalogUnitContentLicense)).toBe("catalog_unit_content_license");
+		expect(marker.foreignKeys.map((key) => key.getName())).toContain(
+			"catalog_unit_content_license_unit_kind_fkey",
+		);
+		expect(marker.checks.map((constraint) => constraint.name)).toContain(
+			"catalog_unit_content_license_kind_check",
 		);
 	});
 
