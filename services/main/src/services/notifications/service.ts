@@ -67,6 +67,25 @@ export type NotificationInput = NotificationBase &
 		  }
 	);
 
+export type NotificationTranslationKey = NotificationInput["kind"] | "unit_access_invitation";
+
+export function notificationTranslationKey(
+	kind: NotificationInput["kind"],
+	payload: unknown,
+): NotificationTranslationKey {
+	if (
+		kind === "system" &&
+		typeof payload === "object" &&
+		payload !== null &&
+		"type" in payload &&
+		payload.type === "system_event" &&
+		"event" in payload &&
+		payload.event === "unit_access_invitation"
+	)
+		return "unit_access_invitation";
+	return kind;
+}
+
 export async function createNotification(tx: DatabaseTransaction, input: NotificationInput) {
 	if (input.actorProfileId && input.actorProfileId === input.recipientProfileId) return undefined;
 	const [preferences] = await tx
@@ -112,6 +131,7 @@ export async function deliverNotificationEmail(notificationId: string | undefine
 		const [row] = await tx
 			.select({
 				kind: notification.kind,
+				payload: notification.payload,
 				email: users.email,
 				interfaceLocale: profilePreference.interfaceLocale,
 			})
@@ -128,7 +148,7 @@ export async function deliverNotificationEmail(notificationId: string | undefine
 			const { t } = await getTranslation("notifications", [
 				toUiLocale(row.interfaceLocale ?? DefaultStoredUiLocale),
 			]);
-			const copy = t[row.kind];
+			const copy = t[notificationTranslationKey(row.kind, row.payload)];
 			await sendMail({ to: row.email, subject: copy.title, text: copy.body });
 			await tx
 				.update(notification)

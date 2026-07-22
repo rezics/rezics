@@ -37,16 +37,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
 	ArrowLeft,
 	ChevronRight,
-	CircleUserRound,
 	FileText,
 	Languages,
 	LogOut,
 	Mail,
 	Palette,
 	Settings,
-	SlidersHorizontal,
 	UserRound,
-	UserRoundPen,
 	X,
 } from "lucide-react";
 import Link from "next/link";
@@ -54,6 +51,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { profileHref } from "@/features/profiles/profile-route";
+import { AccessInvitationsHref } from "@/features/notifications/routing/notification-routes";
 import { useTranslation } from "@/i18n/client";
 import { authClient } from "@/lib/auth-client";
 import type { ThemePreference } from "../hooks/use-theme-preference";
@@ -62,7 +60,7 @@ import { ThemePreferenceRadioGroup, ThemePreferenceRadioList } from "./theme-pre
 const NestedMenuPositioning = { placement: "right-start", gutter: -2 } as const;
 const MobileMenuItemClassName = "min-h-12 w-full justify-start px-3 py-2.5 text-start";
 
-type MobileUserMenuPage = "root" | "theme" | "locale" | "settings";
+type MobileUserMenuPage = "root" | "theme" | "locale";
 
 interface UserMenuProps {
 	profile?: GetApiUsersMeStatus200;
@@ -247,38 +245,18 @@ function DesktopUserMenu({
 					</MenuSubContent>
 				</MenuSub>
 
-				<MenuSub positioning={NestedMenuPositioning}>
-					<MenuSubTrigger>
+				<MenuItem asChild value="settings">
+					<Link href="/settings">
 						<Settings aria-hidden />
-						<span>{t.nav.userMenu.settings}</span>
-					</MenuSubTrigger>
-					<MenuSubContent className="w-60">
-						<MenuItem asChild value="profile-settings">
-							<Link href="/settings/profile">
-								<UserRoundPen aria-hidden />
-								{t.nav.userMenu.profileSettings}
-							</Link>
-						</MenuItem>
-						<MenuItem asChild value="preference-settings">
-							<Link href="/settings/preferences">
-								<SlidersHorizontal aria-hidden />
-								{t.nav.userMenu.preferenceSettings}
-							</Link>
-						</MenuItem>
-						<MenuItem asChild value="invitations">
-							<Link href="/settings/invitations">
-								<Mail aria-hidden />
-								{t.nav.userMenu.invitations}
-							</Link>
-						</MenuItem>
-						<MenuItem asChild value="account-settings">
-							<Link href="/settings/account">
-								<CircleUserRound aria-hidden />
-								{t.nav.userMenu.accountSettings}
-							</Link>
-						</MenuItem>
-					</MenuSubContent>
-				</MenuSub>
+						{t.nav.userMenu.settings}
+					</Link>
+				</MenuItem>
+				<MenuItem asChild value="invitations">
+					<Link href={AccessInvitationsHref}>
+						<Mail aria-hidden />
+						{t.nav.userMenu.invitations}
+					</Link>
+				</MenuItem>
 
 				<MenuSeparator />
 
@@ -327,8 +305,6 @@ function MobileUserMenu(model: UserMenuModel) {
 				return t.locale.displayMode;
 			case "locale":
 				return t.locale.label;
-			case "settings":
-				return t.nav.userMenu.settings;
 		}
 	})();
 
@@ -452,14 +428,17 @@ function MobileUserMenu(model: UserMenuModel) {
 								<TrailingValue>{currentLocaleLabel}</TrailingValue>
 								<ChevronRight aria-hidden className="ms-1 rtl:rotate-180" />
 							</Button>
-							<Button
-								className={MobileMenuItemClassName}
-								onClick={() => setPage("settings")}
-								variant="quiet"
-							>
-								<Settings aria-hidden />
-								<span>{t.nav.userMenu.settings}</span>
-								<ChevronRight aria-hidden className="ms-auto rtl:rotate-180" />
+							<Button asChild className={MobileMenuItemClassName} variant="quiet">
+								<Link href="/settings" onClick={close}>
+									<Settings aria-hidden />
+									{t.nav.userMenu.settings}
+								</Link>
+							</Button>
+							<Button asChild className={MobileMenuItemClassName} variant="quiet">
+								<Link href={AccessInvitationsHref} onClick={close}>
+									<Mail aria-hidden />
+									{t.nav.userMenu.invitations}
+								</Link>
 							</Button>
 
 							<Separator className="my-1" />
@@ -509,35 +488,6 @@ function MobileUserMenu(model: UserMenuModel) {
 								{t.locale.en}
 							</RadioGroupItem>
 						</RadioGroup>
-					) : null}
-
-					{page === "settings" ? (
-						<div className="grid gap-1">
-							<Button asChild className={MobileMenuItemClassName} variant="quiet">
-								<Link href="/settings/profile" onClick={close}>
-									<UserRoundPen aria-hidden />
-									{t.nav.userMenu.profileSettings}
-								</Link>
-							</Button>
-							<Button asChild className={MobileMenuItemClassName} variant="quiet">
-								<Link href="/settings/preferences" onClick={close}>
-									<SlidersHorizontal aria-hidden />
-									{t.nav.userMenu.preferenceSettings}
-								</Link>
-							</Button>
-							<Button asChild className={MobileMenuItemClassName} variant="quiet">
-								<Link href="/settings/invitations" onClick={close}>
-									<Mail aria-hidden />
-									{t.nav.userMenu.invitations}
-								</Link>
-							</Button>
-							<Button asChild className={MobileMenuItemClassName} variant="quiet">
-								<Link href="/settings/account" onClick={close}>
-									<CircleUserRound aria-hidden />
-									{t.nav.userMenu.accountSettings}
-								</Link>
-							</Button>
-						</div>
 					) : null}
 				</SheetBody>
 			</SheetContent>

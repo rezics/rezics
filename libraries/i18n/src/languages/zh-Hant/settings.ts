@@ -8,7 +8,7 @@ const { forms: publicationLicenseTerms } = zhHantTerminology.publicationLicense;
 export default {
 	workspace: {
 		title: "設定",
-		description: `管理個人資料、使用偏好、帳戶安全、${verbatimTerms.api.value} 權杖與邀請。`,
+		description: `管理個人資料、使用偏好、帳戶安全與 ${verbatimTerms.api.value} 權杖。`,
 		backToApplication: "返回應用程式",
 		backToOverview: "返回設定",
 		navigation: "設定導覽",
@@ -33,10 +33,6 @@ export default {
 			tokens: {
 				label: `${verbatimTerms.api.value} 權杖`,
 				description: "建立、限制、停用及撤銷供自動化工具使用的存取權杖。",
-			},
-			invitations: {
-				label: "邀請",
-				description: "檢視並回應收到的條目存取邀請。",
 			},
 		},
 	},

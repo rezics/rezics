@@ -1,0 +1,21 @@
+import { describe, expect, it } from "vitest";
+
+import { normalizeUnreadCount } from "./unread-count";
+
+describe("notification unread count", () => {
+	it.each([
+		[6, 6],
+		["12", 12],
+		[0, 0],
+		[-1, 0],
+		["not-a-count", 0],
+		[undefined, 0],
+	] as const)("normalizes %s", (value, expected) => {
+		expect(normalizeUnreadCount(value)).toBe(expected);
+	});
+
+	it("rejects fractional and unsafe integers", () => {
+		expect(normalizeUnreadCount(1.5)).toBe(0);
+		expect(normalizeUnreadCount(Number.MAX_SAFE_INTEGER + 1)).toBe(0);
+	});
+});

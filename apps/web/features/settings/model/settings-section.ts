@@ -4,7 +4,6 @@ export const SettingsSectionIds = [
 	"account",
 	"security",
 	"tokens",
-	"invitations",
 ] as const;
 
 export type SettingsSectionId = (typeof SettingsSectionIds)[number];

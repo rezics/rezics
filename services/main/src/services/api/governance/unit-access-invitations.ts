@@ -12,6 +12,7 @@ import {
 } from "../../authorization/unit/invitations";
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
+import { deliverNotificationEmail } from "../../notifications/service";
 import { UnitAccessExpiryInvalid } from "./errors";
 import {
 	CreateUnitAccessInvitationBody,
@@ -80,15 +81,18 @@ export default new Elysia({ prefix: "/unit" })
 	)
 	.post(
 		"/:unitId/access-invitations",
-		async ({ authorization, profile, params, body }) =>
-			createUnitAccessInvitation(authorization.unit, profile.unitId, {
+		async ({ authorization, profile, params, body }) => {
+			const result = await createUnitAccessInvitation(authorization.unit, profile.unitId, {
 				unitId: params.unitId,
 				invitedProfileId: body.invitedProfileId,
 				role: body.role,
 				scope: body.scope,
 				expiresAt: futureDate(body.invitationExpiresAt),
 				accessExpiresAt: body.accessExpiresAt ? futureDate(body.accessExpiresAt) : null,
-			}),
+			});
+			await deliverNotificationEmail(result.notificationId);
+			return result.invitation;
+		},
 		{
 			access: "session-only",
 			params: UnitGovernanceParams,

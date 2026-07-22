@@ -6,7 +6,7 @@ import {
 	ManagementWorkspaceHeader,
 	ManagementWorkspaceNavigation,
 } from "@rezics/ui";
-import { Bell, CircleUserRound, KeyRound, Settings2, ShieldCheck, UserRound } from "lucide-react";
+import { CircleUserRound, KeyRound, Settings2, ShieldCheck, UserRound } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { createContext, useContext, type ReactNode } from "react";
@@ -65,13 +65,6 @@ export function SettingsWorkspace({ children }: { children: ReactNode }) {
 			label: labels.tokens.label,
 			description: labels.tokens.description,
 			icon: KeyRound,
-		},
-		{
-			id: "invitations",
-			href: settingsSectionHref("invitations"),
-			label: labels.invitations.label,
-			description: labels.invitations.description,
-			icon: Bell,
 		},
 	] as const satisfies readonly ManagementWorkspaceSection<SettingsSectionId>[];
 

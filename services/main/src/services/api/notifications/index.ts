@@ -17,6 +17,7 @@ import {
 import i18n from "../../i18n";
 import { DefaultStoredUiLocale } from "../../database/schema/contract-values";
 import { parseJsonCursor } from "../../pagination";
+import { notificationTranslationKey } from "../../notifications/service";
 import { toApiErrorResponse } from "../schema/response";
 import { InvalidNotificationCursor, NotificationNotFound } from "./errors";
 import {
@@ -169,11 +170,14 @@ export default new Elysia({ prefix: "/notifications" })
 					direction === "after" ? asc(notification.id) : desc(notification.id),
 				)
 				.limit(limit + 1);
-			const items = candidates.slice(0, limit).map((item) => ({
-				...item,
-				...presentNotificationPayload(item.kind, item.payload),
-				...t[item.kind],
-			}));
+			const items = candidates.slice(0, limit).map((item) => {
+				const presented = presentNotificationPayload(item.kind, item.payload);
+				return {
+					...item,
+					...presented,
+					...t[notificationTranslationKey(presented.kind, presented.payload)],
+				};
+			});
 			const [unread] = await database
 				.select({ value: count() })
 				.from(notification)

@@ -2,9 +2,13 @@
 
 import type { UiLocale } from "@rezics/i18n";
 import type { GetApiUsersMeStatus200 } from "@rezics/openapi-tanstack-query";
+import { useGetApiNotificationsUnreadCount } from "@rezics/openapi-tanstack-query";
 import { Button, ChoiceSelect } from "@rezics/ui";
-import { Plus, UserRound } from "lucide-react";
+import { Bell, Plus, UserRound } from "lucide-react";
 
+import { normalizeUnreadCount } from "@/features/notifications/model/unread-count";
+import { NotificationsHref } from "@/features/notifications/routing/notification-routes";
+import { useTranslation } from "@/i18n/client";
 import { AppLink } from "./app-link";
 import type { ThemePreference } from "../hooks/use-theme-preference";
 import { ThemePreferenceMenu } from "./theme-preference-menu";
@@ -39,6 +43,34 @@ function CreateAction({ href, label }: { href: string; label: string }) {
 	);
 }
 
+function NotificationAction() {
+	const { t } = useTranslation(["notifications"]);
+	const unread = useGetApiNotificationsUnreadCount({
+		query: { refetchInterval: 60_000 },
+	});
+	const count = normalizeUnreadCount(unread.data?.count);
+	const badge = count > 99 ? "99+" : String(count);
+	const label = count
+		? t.notifications.center.headerUnreadLabel({ count })
+		: t.notifications.center.headerLabel;
+
+	return (
+		<Button asChild className="relative size-11 p-0" size="icon-xl" variant="quiet">
+			<AppLink aria-label={label} href={NotificationsHref} title={label}>
+				<Bell aria-hidden />
+				{count ? (
+					<span
+						aria-hidden
+						className="absolute -end-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-background bg-destructive px-1 font-semibold text-[10px] text-destructive-foreground leading-none"
+					>
+						{badge}
+					</span>
+				) : null}
+			</AppLink>
+		</Button>
+	);
+}
+
 export function SignedInHeaderActions({
 	createLabel,
 	profile,
@@ -55,6 +87,7 @@ export function SignedInHeaderActions({
 	return (
 		<>
 			<CreateAction href="/create" label={createLabel} />
+			<NotificationAction />
 			<UserMenu
 				fallbackName={fallbackName}
 				locale={locale.value}

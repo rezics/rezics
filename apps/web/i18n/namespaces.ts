@@ -12,4 +12,4 @@ export const RootTranslationNamespaces = [
 	"ui",
 ] as const;
 
-export const AppShellTranslationNamespaces = ["locale", "nav"] as const;
+export const AppShellTranslationNamespaces = ["locale", "nav", "notifications"] as const;

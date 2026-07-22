@@ -8,7 +8,7 @@ const { forms: publicationLicenseTerms } = enTerminology.publicationLicense;
 export default {
 	workspace: {
 		title: "Settings",
-		description: `Manage your profile, preferences, account security, ${verbatimTerms.api.value} tokens, and invitations.`,
+		description: `Manage your profile, preferences, account security, and ${verbatimTerms.api.value} tokens.`,
 		backToApplication: "Back to the application",
 		backToOverview: "Back to settings",
 		navigation: "Settings navigation",
@@ -35,10 +35,6 @@ export default {
 				label: `${verbatimTerms.api.value} tokens`,
 				description:
 					"Create, limit, disable, and revoke access tokens for automation tools.",
-			},
-			invitations: {
-				label: "Invitations",
-				description: "Review and respond to Unit access invitations you received.",
 			},
 		},
 	},

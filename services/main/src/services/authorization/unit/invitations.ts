@@ -19,6 +19,7 @@ import {
 import { ProfileNotFound } from "../../api/users/errors";
 import type { UnitAuthorization } from "./authorization";
 import type { UnitScope } from "./scope";
+import { createNotification } from "../../notifications/service";
 
 export type UnitDelegableAccessRole = (typeof UnitDelegableAccessRoleValues)[number];
 export type UnitAccessInvitationState =
@@ -171,7 +172,19 @@ export async function createUnitAccessInvitation(
 				scope: input.scope,
 			},
 		});
-		return presentUnitAccessInvitation(created);
+		const notificationId = await createNotification(tx, {
+			recipientProfileId: input.invitedProfileId,
+			actorProfileId,
+			subjectUnitId: input.unitId,
+			kind: "system",
+			payload: {
+				type: "system_event",
+				event: "unit_access_invitation",
+				references: { invitationId: created.id },
+			},
+			dedupeKey: `unit-access-invitation:${created.id}`,
+		});
+		return { invitation: presentUnitAccessInvitation(created), notificationId };
 	});
 }
 

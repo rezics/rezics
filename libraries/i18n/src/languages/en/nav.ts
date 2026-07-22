@@ -29,10 +29,7 @@ export default {
 		viewProfile: "View profile",
 		myContent: "My content",
 		settings: "Settings",
-		profileSettings: "Edit profile",
-		preferenceSettings: "Preferences",
 		invitations: "Received access invitations",
-		accountSettings: "Account",
 		signOut: "Sign out",
 	},
 	sidebar: {
