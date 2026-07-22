@@ -21,11 +21,31 @@ describe("content feed fixture data", () => {
 			referenceTime: traditionalChinese.referenceTime,
 			createdAt: traditionalChinese.createdAt,
 			recommendationReason: traditionalChinese.recommendationReason,
-			realms: [{ id: traditionalChinese.realms[0].id }],
 			metrics: traditionalChinese.metrics,
 		});
+		expect(english.publishers.map(({ id, href }) => ({ id, href }))).toEqual(
+			traditionalChinese.publishers.map(({ id, href }) => ({ id, href })),
+		);
+		expect(english.realms.map(({ id, href }) => ({ id, href }))).toEqual(
+			traditionalChinese.realms.map(({ id, href }) => ({ id, href })),
+		);
 		expect(english.post.mediaAsset).toBe(traditionalChinese.post.mediaAsset);
 		expect(english.collection.coverAsset).toBe(traditionalChinese.collection.coverAsset);
+	});
+
+	it("always exercises multiple ordered publishers and realm contexts", () => {
+		for (const language of FixtureContentLanguages) {
+			const fixture = getFeedFixtureData(language);
+
+			expect(fixture.publishers.length).toBeGreaterThan(1);
+			expect(fixture.realms.length).toBeGreaterThan(1);
+			expect(new Set(fixture.publishers.map((publisher) => publisher.id)).size).toBe(
+				fixture.publishers.length,
+			);
+			expect(new Set(fixture.realms.map((realm) => realm.id)).size).toBe(
+				fixture.realms.length,
+			);
+		}
 	});
 
 	it("uses a reference time after the fixture content creation time", () => {

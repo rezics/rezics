@@ -41,8 +41,13 @@ describe("FeedVoteControl", () => {
 			</TranslationProvider>,
 		);
 
+		const voteGroup = screen.getByRole("group", { name: "內容評價" });
 		const upvote = screen.getByRole("button", { name: "贊成" });
+		const downvote = screen.getByRole("button", { name: "不贊成" });
+		expect(voteGroup.classList.contains("bg-secondary")).toBe(true);
+		expect(voteGroup.classList.contains("rounded-lg")).toBe(true);
 		expect(upvote.getAttribute("aria-pressed")).toBe("false");
+		expect(downvote.getAttribute("aria-pressed")).toBe("false");
 		fireEvent.click(upvote);
 		expect(onReactionChange).toHaveBeenLastCalledWith("upvote");
 
@@ -55,8 +60,24 @@ describe("FeedVoteControl", () => {
 				/>
 			</TranslationProvider>,
 		);
-		fireEvent.click(screen.getByRole("button", { name: "贊成" }));
+		const selectedUpvote = screen.getByRole("button", { name: "贊成" });
+		expect(selectedUpvote.classList.contains("text-primary")).toBe(true);
+		expect(screen.getByText("228").classList.contains("text-primary")).toBe(true);
+		fireEvent.click(selectedUpvote);
 		expect(onReactionChange).toHaveBeenLastCalledWith(null);
+
+		rerender(
+			<TranslationProvider initial={translation.snapshot}>
+				<FeedVoteControl
+					onReactionChange={onReactionChange}
+					reaction="downvote"
+					score="226"
+				/>
+			</TranslationProvider>,
+		);
+		const selectedDownvote = screen.getByRole("button", { name: "不贊成" });
+		expect(selectedDownvote.classList.contains("text-info")).toBe(true);
+		expect(screen.getByText("226").classList.contains("text-info")).toBe(true);
 	});
 
 	it("opens the share surface and confirms a copied link", async () => {

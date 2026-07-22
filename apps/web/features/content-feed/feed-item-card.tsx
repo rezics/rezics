@@ -8,12 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { Avatar, AvatarFallback, CardContent, cn, Cover, PortableTextContent } from "@rezics/ui";
-import {
-	firstPublisher,
-	PublisherLinks,
-	type PublisherSummary,
-} from "@/features/posts/publisher-list";
+import { Badge, CardContent, cn, Cover, PortableTextContent } from "@rezics/ui";
 import { postHref } from "@/features/posts/url";
 import { profileHref } from "@/features/profiles/profile-route";
 import { realmHref, zoneHref } from "@/features/slugs/unit-route";
@@ -23,7 +18,14 @@ import { useRecommendationTracking } from "@/features/recommendations/tracking";
 import { useTranslation } from "@/i18n/client";
 import { readPortableText } from "@/lib/block";
 import { getFeedActionPolicy } from "./feed-action-policy";
-import { FeedCard } from "./feed-card";
+import {
+	FeedCard,
+	FeedCardContent,
+	FeedCardHeader,
+	FeedCardTarget,
+	type FeedProfileContext,
+	type FeedRealmContext,
+} from "./feed-card";
 import { FeedEngagementBar, FeedOverflowMenu } from "./feed-card-actions";
 import { parseFeedReaction } from "./feed-reaction";
 import { formatRelativeTime } from "./format-relative-time";
@@ -66,78 +68,84 @@ export function FeedPostCard({
 	canExclude?: boolean;
 	onHiddenChange?: (hidden: boolean) => void;
 }) {
-	const { t, locale } = useTranslation(["actions", "brand", "feed", "posts", "state", "ui"]);
-	const primaryPublisher = firstPublisher(post.publishers);
-	const initial = (primaryPublisher?.name ?? t.brand.name).slice(0, 1).toUpperCase();
+	const { t, locale } = useTranslation(["actions", "feed", "posts", "state", "ui"]);
 	const { elementRef, trackOpen } = useRecommendationTracking(post.id, post.tracking);
 	const reason = recommendationReasonLabel(post.recommendationReason, t.feed);
 	const realmId = requestedRealmId ?? post.realmId ?? undefined;
 	const href = feedPostHref(post, realmId);
 	const subjectHref = post.subject ? unitHref(post.subject.type, post.subject.id) : undefined;
 	const title = post.postKind === "reply" ? t.posts.replyPost : (post.title ?? t.posts.untitled);
+	const publishers = toFeedProfileContexts(post.publishers, t.posts.unknownPublisher);
+	const realms = toFeedRealmContexts(post.realms, t.ui.unnamed);
 
 	return (
 		<FeedCard aria-labelledby={`feed-item-${post.id}`} ref={elementRef}>
-			<CardContent className="grid gap-4 px-4 py-5 sm:px-5">
-				<div className="min-w-0 flex-1">
-					<FeedItemMeta
+			<FeedCardHeader
+				menu={
+					<FeedItemOverflowMenu
 						canExclude={canExclude}
-						initial={initial}
 						item={post}
 						onHiddenChange={onHiddenChange}
-						publisher={primaryPublisher}
-						timestamp={formatRelativeTime(post.createdAt, locale.target)}
 					/>
-					{reason ? (
-						<p className="mt-1 text-muted-foreground text-xs font-medium">{reason}</p>
+				}
+				publishers={publishers}
+				realms={realms}
+				recommendation={reason}
+				timestamp={formatRelativeTime(post.createdAt, locale.target)}
+			/>
+			<FeedCardContent>
+				<Badge className="w-fit" size="sm" variant="outline">
+					{t.feed.content.kinds[`post:${post.postKind}`]}
+				</Badge>
+				{post.replyContext ? (
+					<Link
+						className="flex min-h-6 items-center truncate border-s-2 ps-2 text-muted-foreground text-xs hover:text-foreground"
+						href={postHref(post.replyContext.rootPostId, realmId)}
+					>
+						{t.feed.replyingIn} {post.replyContext.title ?? t.posts.untitled}
+					</Link>
+				) : null}
+				<FeedItemMain href={href} onOpen={trackOpen}>
+					<h2
+						className="font-heading font-black text-[1.05rem] leading-snug"
+						id={`feed-item-${post.id}`}
+					>
+						{title}
+					</h2>
+					{post.body ? (
+						<div className="prose prose-sm mt-2 max-w-none text-muted-foreground leading-6">
+							<PortableTextContent
+								value={readPortableText(post.body)}
+								variant="preview"
+							/>
+						</div>
+					) : post.summary ? (
+						<p className="mt-2 text-muted-foreground text-sm leading-6">
+							{post.summary}
+						</p>
 					) : null}
-					{post.replyContext ? (
-						<Link
-							className="mt-2 flex min-h-6 items-center truncate border-s-2 ps-2 text-muted-foreground text-xs hover:text-foreground"
-							href={postHref(post.replyContext.rootPostId, realmId)}
-						>
-							{t.feed.replyingIn} {post.replyContext.title ?? t.posts.untitled}
-						</Link>
-					) : null}
-					<FeedItemMain href={href} onOpen={trackOpen}>
-						<h2
-							className="mt-2 font-heading font-black text-[1.05rem] leading-snug"
-							id={`feed-item-${post.id}`}
-						>
-							{title}
-						</h2>
-						{post.body ? (
-							<div className="prose prose-sm mt-2 max-w-none text-muted-foreground leading-6">
-								<PortableTextContent
-									value={readPortableText(post.body)}
-									variant="preview"
-								/>
-							</div>
-						) : post.summary ? (
-							<p className="mt-2 text-muted-foreground text-sm leading-6">
-								{post.summary}
-							</p>
-						) : null}
-					</FeedItemMain>
-					{post.subject && subjectHref ? (
-						<Link
-							className="mt-3 flex w-fit max-w-full items-center gap-2 text-muted-foreground text-xs hover:text-foreground hover:underline"
-							href={subjectHref}
-						>
-							{post.subject.cover ? (
-								<Cover
-									alt=""
-									className="aspect-[3/4] w-8 rounded"
-									src={post.subject.cover.url}
-								/>
-							) : null}
-							<span className="truncate">
-								{t.feed.relatedWork}: {post.subject.title ?? t.actions.view}
-							</span>
-						</Link>
-					) : null}
-					<FeedItemActions href={href} item={post} onOpen={trackOpen} />
-				</div>
+				</FeedItemMain>
+			</FeedCardContent>
+			{post.subject && subjectHref ? (
+				<FeedCardTarget
+					{...(post.subject.summary ? { description: post.subject.summary } : {})}
+					{...(post.subject.cover ? { imageUrl: post.subject.cover.url } : {})}
+					{...(post.subject.score
+						? {
+								score: {
+									totalCount: Number(post.subject.score.totalCount),
+									totalScore: Number(post.subject.score.totalScore),
+								},
+							}
+						: {})}
+					href={subjectHref}
+					imageAlt={post.subject.title ?? t.actions.view}
+					label={t.feed.relatedWork}
+					title={post.subject.title ?? t.actions.view}
+				/>
+			) : null}
+			<CardContent className="px-4 pb-4 sm:px-5">
+				<FeedItemActions href={href} item={post} onOpen={trackOpen} />
 			</CardContent>
 		</FeedCard>
 	);
@@ -152,19 +160,32 @@ function FeedUnitCard({
 	canExclude: boolean;
 	onHiddenChange?: (hidden: boolean) => void;
 }) {
-	const { t, locale } = useTranslation(["brand", "feed", "posts", "ui"]);
-	const primaryPublisher = firstPublisher(unit.publishers);
-	const initial = (primaryPublisher?.name ?? t.brand.name).slice(0, 1).toUpperCase();
+	const { t, locale } = useTranslation(["feed", "posts", "ui"]);
 	const { elementRef, trackOpen } = useRecommendationTracking(unit.id, unit.tracking);
 	const reason = recommendationReasonLabel(unit.recommendationReason, t.feed);
 	const href = unitHref(unit.unitKind, unit.id);
 	const title = unit.title ?? t.ui.unnamed;
+	const publishers = toFeedProfileContexts(unit.publishers, t.posts.unknownPublisher);
+	const realms = toFeedRealmContexts(unit.realms, t.ui.unnamed);
 
 	return (
 		<FeedCard aria-labelledby={`feed-item-${unit.id}`} ref={elementRef}>
+			<FeedCardHeader
+				menu={
+					<FeedItemOverflowMenu
+						canExclude={canExclude}
+						item={unit}
+						onHiddenChange={onHiddenChange}
+					/>
+				}
+				publishers={publishers}
+				realms={realms}
+				recommendation={reason}
+				timestamp={formatRelativeTime(unit.createdAt, locale.target)}
+			/>
 			<CardContent
 				className={cn(
-					"grid gap-4 px-4 py-5 sm:px-5",
+					"grid gap-4 px-4 pb-4 pt-3 sm:px-5",
 					unit.cover &&
 						"grid-cols-[5rem_minmax(0,1fr)] sm:grid-cols-[7.5rem_minmax(0,1fr)]",
 				)}
@@ -180,20 +201,9 @@ function FeedUnitCard({
 					</FeedItemMain>
 				) : null}
 				<div className="min-w-0">
-					<FeedItemMeta
-						canExclude={canExclude}
-						initial={initial}
-						item={unit}
-						onHiddenChange={onHiddenChange}
-						publisher={primaryPublisher}
-						timestamp={formatRelativeTime(unit.createdAt, locale.target)}
-					/>
-					<p className="mt-2 font-semibold text-brand text-xs">
+					<p className="font-semibold text-brand text-xs">
 						{t.feed.content.kinds[`unit:${unit.unitKind}`]}
 					</p>
-					{reason ? (
-						<p className="mt-1 text-muted-foreground text-xs font-medium">{reason}</p>
-					) : null}
 					<FeedItemMain href={href} onOpen={trackOpen}>
 						<h2
 							className="mt-1 font-heading font-black text-[1.05rem] leading-snug"
@@ -214,22 +224,15 @@ function FeedUnitCard({
 	);
 }
 
-function FeedItemMeta({
+function FeedItemOverflowMenu({
 	canExclude,
-	initial,
 	item,
 	onHiddenChange,
-	publisher,
-	timestamp,
 }: {
 	canExclude: boolean;
-	initial: string;
 	item: FeedItem;
 	onHiddenChange?: (hidden: boolean) => void;
-	publisher?: PublisherSummary;
-	timestamp: string;
 }) {
-	const { t } = useTranslation(["feed", "posts"]);
 	const queryClient = useQueryClient();
 	const exclude = usePutApiRecommendationsExclusionsByUnitId({
 		mutation: {
@@ -254,41 +257,11 @@ function FeedItemMeta({
 	};
 
 	return (
-		<div className="flex min-h-8 flex-wrap items-center gap-x-1.5 text-muted-foreground text-xs">
-			{publisher ? (
-				<Link
-					className="me-1 grid size-7 shrink-0 place-items-center"
-					href={profileHref({
-						id: publisher.profileId,
-						slugAddress: publisher.slugAddress,
-					})}
-				>
-					<Avatar className="size-7">
-						<AvatarFallback className="bg-accent text-accent-foreground text-[0.625rem]">
-							{initial}
-						</AvatarFallback>
-					</Avatar>
-				</Link>
-			) : null}
-			<PublisherLinks
-				className="inline-flex min-h-6 items-center font-semibold text-foreground hover:underline"
-				emptyLabel={t.posts.unknownPublisher}
-				publishers={item.publishers}
-			/>
-			{item.itemType === "post" ? (
-				<>
-					<span>·</span>
-					<span>{t.feed.content.kinds[`post:${item.postKind}`]}</span>
-				</>
-			) : null}
-			<span>·</span>
-			<span>{timestamp}</span>
-			<FeedOverflowMenu
-				canExclude={canExclude && !exclude.isPending}
-				itemId={item.id}
-				onNotInterested={markNotInterested}
-			/>
-		</div>
+		<FeedOverflowMenu
+			canExclude={canExclude && !exclude.isPending}
+			itemId={item.id}
+			onNotInterested={markNotInterested}
+		/>
 	);
 }
 
@@ -338,6 +311,46 @@ function FeedItemActions({
 			score={Number(item.reactions.upvote) - Number(item.reactions.downvote)}
 		/>
 	);
+}
+
+function toFeedProfileContexts(
+	publishers: FeedItem["publishers"],
+	unknownPublisher: string,
+): FeedProfileContext[] {
+	return publishers.map((publisher) => {
+		const name = publisher.name ?? unknownPublisher;
+		return {
+			id: publisher.profileId,
+			href: profileHref({
+				id: publisher.profileId,
+				slugAddress: publisher.slugAddress,
+			}),
+			initials: contextInitials(name),
+			name,
+			...(publisher.avatar ? { avatarUrl: publisher.avatar.url } : {}),
+			...(publisher.slugAddress ? { slug: publisher.slugAddress.slug } : {}),
+			...(publisher.summary ? { summary: publisher.summary } : {}),
+		};
+	});
+}
+
+function toFeedRealmContexts(realms: FeedItem["realms"], unnamedRealm: string): FeedRealmContext[] {
+	return realms.map((realm) => {
+		const name = realm.title ?? unnamedRealm;
+		return {
+			id: realm.id,
+			href: realmHref({ id: realm.id, slugAddress: realm.slugAddress }),
+			initials: contextInitials(name),
+			name,
+			...(realm.avatar ? { avatarUrl: realm.avatar.url } : {}),
+			...(realm.slugAddress ? { slug: realm.slugAddress.slug } : {}),
+			...(realm.summary ? { summary: realm.summary } : {}),
+		};
+	});
+}
+
+function contextInitials(name: string): string {
+	return Array.from(name.trim())[0]?.toLocaleUpperCase() ?? name;
 }
 
 function feedPostHref(post: FeedPost, realmId?: string): string | undefined {

@@ -88,12 +88,22 @@ export default {
 	viewAll: "檢視全部",
 	relatedWork: "討論關聯作品",
 	myRealms: `我的${realmTerms.pluralLabel}`,
-	realmContext: insert("位於 {{realm}}", { realm: String }),
-	realmContextWithMore: insert(`位於 {{realm}} 及其他 {{count}} 個${realmTerms.plural}`, {
-		realm: String,
+	contextSeparator: "在",
+	publisherList: insert("{{count}} 位發布者", { count: Number }),
+	realmList: insert(`{{count}} 個${realmTerms.pluralLabel}`, { count: Number }),
+	showPublisherList: insert("{{publisher}} 及其他 {{count}} 位發布者；顯示發布者清單", {
+		publisher: String,
 		count: Number,
 	}),
-	showRealmList: insert(`{{summary}}。顯示${realmTerms.inline}清單`, { summary: String }),
-	publishedInOneRealm: insert(`發布於 {{count}} 個${realmTerms.inline}`, { count: Number }),
-	publishedInRealms: insert(`發布於 {{count}} 個${realmTerms.plural}`, { count: Number }),
+	showRealmList: insert(
+		`{{realm}} 及其他 {{count}} 個${realmTerms.plural}；顯示${realmTerms.inline}清單`,
+		{
+			realm: String,
+			count: Number,
+		},
+	),
+	targetScore: insert("{{score}}／10 · {{count}} 人評分", {
+		score: String,
+		count: Number,
+	}),
 };

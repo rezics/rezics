@@ -43,6 +43,7 @@ import {
 	MenuContent,
 	MenuItem,
 	MenuTrigger,
+	cn,
 } from "@rezics/ui";
 import { useAuthPortal } from "@/features/auth/auth-portal";
 import { FollowButton } from "@/features/following/components/follow-button";
@@ -67,15 +68,21 @@ export function FeedVoteControl({
 }) {
 	const { t } = useTranslation(["engagement", "feed"]);
 	return (
-		<ButtonGroup aria-label={t.feed.actions.voteGroup} className="bg-muted">
+		<ButtonGroup
+			aria-label={t.feed.actions.voteGroup}
+			className="rounded-lg bg-secondary text-secondary-foreground"
+		>
 			<Button
 				aria-label={t.engagement.upvote}
 				aria-pressed={reaction === "upvote"}
-				className="size-11 border-0 sm:size-8"
+				className={cn(
+					"size-11 border-0 sm:size-8",
+					reaction === "upvote" && "text-primary hover:text-primary",
+				)}
 				disabled={disabled}
 				onClick={() => onReactionChange(reaction === "upvote" ? null : "upvote")}
 				size="icon-md"
-				variant={reaction === "upvote" ? "brand" : "quiet"}
+				variant="quiet"
 			>
 				<ArrowBigUpIcon
 					aria-hidden
@@ -84,18 +91,25 @@ export function FeedVoteControl({
 			</Button>
 			<ButtonGroupText
 				aria-live="polite"
-				className="min-w-9 justify-center border-0 bg-transparent px-1 text-xs shadow-none"
+				className={cn(
+					"min-w-9 justify-center border-0 bg-transparent px-1 text-xs shadow-none",
+					reaction === "upvote" && "text-primary",
+					reaction === "downvote" && "text-info",
+				)}
 			>
 				{score}
 			</ButtonGroupText>
 			<Button
 				aria-label={t.engagement.downvote}
 				aria-pressed={reaction === "downvote"}
-				className="size-11 border-0 sm:size-8"
+				className={cn(
+					"size-11 border-0 sm:size-8",
+					reaction === "downvote" && "text-info hover:text-info",
+				)}
 				disabled={disabled}
 				onClick={() => onReactionChange(reaction === "downvote" ? null : "downvote")}
 				size="icon-md"
-				variant={reaction === "downvote" ? "brand" : "quiet"}
+				variant="quiet"
 			>
 				<ArrowBigDownIcon
 					aria-hidden

@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, desc, eq, inArray, isNull, lte, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, lte, or, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import Elysia, { t } from "elysia";
 
@@ -9,12 +9,15 @@ import { toSafeInteger } from "../../database/integer";
 import {
 	isPrimaryUnitLocalization,
 	firstUnitLocalizationCoverAssetId,
+	primaryUnitSummary,
+	primaryUnitTitle,
 	resolvedUnitLocalizationImageAssetId,
 } from "../../units/localization";
 import {
 	post,
 	postReply,
 	postReplyStat,
+	scoreStat,
 	unitFollow,
 	realmUnit,
 	recommendationProfileInterest,
@@ -44,7 +47,12 @@ import {
 import { recommendationObjectiveExpression } from "../../recommendations/sql-ranking";
 import { createRecommendationTracking } from "../../recommendations/tracking";
 import { presentImageAsset } from "../../units/service";
+import {
+	getPublicCanonicalUnitSlugAddresses,
+	type PublicCanonicalUnitSlugAddress,
+} from "../../units/slug-address";
 import { getPublisherSummariesByUnitIds } from "../../units/status";
+import { imageAssetContentUrl } from "../image-assets/service";
 import {
 	RecommendationPolicyVersionSchema,
 	type RecommendationReason,
@@ -74,6 +82,66 @@ import {
 
 const preferredLocalization = alias(unitLocalization, "preferred_localization");
 const preferredRealmFollow = alias(unitFollow, "preferred_realm_follow");
+const feedContextRealm = alias(unit, "feed_context_realm");
+
+interface FeedRealmContextSummary {
+	readonly id: string;
+	readonly slugAddress: PublicCanonicalUnitSlugAddress | null;
+	readonly title: string | null;
+	readonly summary: string | null;
+	readonly avatar: { readonly id: string; readonly url: string } | null;
+}
+
+async function getFeedRealmContextsByUnitIds(
+	unitIds: readonly string[],
+): Promise<Map<string, FeedRealmContextSummary[]>> {
+	const result = new Map<string, FeedRealmContextSummary[]>();
+	for (const unitId of unitIds) result.set(unitId, []);
+	if (!unitIds.length) return result;
+	const rows = await database
+		.select({
+			unitId: realmUnit.unitId,
+			id: realmUnit.realmId,
+			title: primaryUnitTitle(feedContextRealm.id),
+			summary: primaryUnitSummary(feedContextRealm.id),
+			avatarAssetId: resolvedUnitLocalizationImageAssetId(feedContextRealm.id, "avatar"),
+		})
+		.from(realmUnit)
+		.innerJoin(feedContextRealm, eq(feedContextRealm.id, realmUnit.realmId))
+		.where(
+			and(
+				inArray(realmUnit.unitId, [...unitIds]),
+				eq(realmUnit.status, "visible"),
+				eq(feedContextRealm.status, "published"),
+				eq(feedContextRealm.visibility, "public"),
+				isNull(feedContextRealm.deletedAt),
+			),
+		)
+		.orderBy(asc(realmUnit.createdAt), asc(realmUnit.realmId));
+	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(rows.map((row) => row.id));
+	for (const row of rows)
+		result.get(row.unitId)?.push({
+			id: row.id,
+			slugAddress: slugAddresses.get(row.id) ?? null,
+			title: row.title,
+			summary: row.summary,
+			avatar: row.avatarAssetId
+				? { id: row.avatarAssetId, url: imageAssetContentUrl(row.avatarAssetId) }
+				: null,
+		});
+	return result;
+}
+
+export function prioritizeFeedRealmContexts<T extends { readonly id: string }>(
+	realms: readonly T[],
+	primaryRealmId: string | null,
+): T[] {
+	if (!primaryRealmId) return [...realms];
+	const primary = realms.find((realm) => realm.id === primaryRealmId);
+	return primary
+		? [primary, ...realms.filter((realm) => realm.id !== primaryRealmId)]
+		: [...realms];
+}
 
 type FeedContentDefinition =
 	| { readonly itemType: "unit"; readonly unitKind: FeedUnitKind }
@@ -634,109 +702,131 @@ export async function hydrateFeedItems(
 	const subjectIds = [
 		...new Set(rows.flatMap(({ subjectId }) => (subjectId ? [subjectId] : []))),
 	];
+	const subjectRealmIds = [...new Set(page.flatMap(({ realmId }) => (realmId ? [realmId] : [])))];
 	const rootIds = [
 		...new Set(rows.flatMap(({ rootPostId }) => (rootPostId ? [rootPostId] : []))),
 	];
-	const [rootReplyCounts, childReplyCounts, reactions, viewerReactions, subjectRows, rootRows] =
-		await Promise.all([
-			postIds.length
-				? database
-						.select({
-							id: postReplyStat.postId,
-							count: postReplyStat.visibleDescendantCount,
-						})
-						.from(postReplyStat)
-						.where(inArray(postReplyStat.postId, postIds))
-				: [],
-			replyIds.length
-				? database
-						.select({
-							id: postReplyStat.postId,
-							count: postReplyStat.visibleDirectCount,
-						})
-						.from(postReplyStat)
-						.where(inArray(postReplyStat.postId, replyIds))
-				: [],
-			database
-				.select({
-					unitId: unitReactionGlobalStat.unitId,
-					reaction: unitReactionGlobalStat.reaction,
-					count: unitReactionGlobalStat.reactionCount,
-				})
-				.from(unitReactionGlobalStat)
-				.where(inArray(unitReactionGlobalStat.unitId, validIds)),
-			viewer.profileId
-				? database
-						.select({
-							unitId: unitReaction.unitId,
-							realmId: unitReaction.realmId,
-							reaction: unitReaction.reaction,
-						})
-						.from(unitReaction)
-						.where(
-							and(
-								eq(unitReaction.profileId, viewer.profileId),
-								inArray(unitReaction.unitId, validIds),
-							),
-						)
-				: [],
-			subjectIds.length
-				? database
-						.select({
-							id: unit.id,
-							type: unit.kind,
-							title: unitLocalization.title,
-							coverAssetId: firstUnitLocalizationCoverAssetId(unit.id),
-						})
-						.from(unit)
-						.leftJoin(
-							unitLocalization,
-							and(
-								eq(unitLocalization.unitId, unit.id),
-								isPrimaryUnitLocalization(unitLocalization.unitId),
-							),
-						)
-						.where(
-							and(
-								inArray(unit.id, subjectIds),
-								eq(unit.status, "published"),
-								eq(unit.visibility, "public"),
-								eq(unit.moderationStatus, "approved"),
-								isNull(unit.deletedAt),
-							),
-						)
-				: [],
-			rootIds.length
-				? database
-						.select({
-							rootPostId: post.id,
-							title: unitLocalization.title,
-							subjectId: post.subjectUnitId,
-						})
-						.from(post)
-						.innerJoin(unit, eq(unit.id, post.id))
-						.leftJoin(
-							unitLocalization,
-							and(
-								eq(unitLocalization.unitId, post.id),
-								isPrimaryUnitLocalization(unitLocalization.unitId),
-							),
-						)
-						.where(
-							and(
-								inArray(post.id, rootIds),
-								getFeedEligibilityCondition(
-									viewer,
-									{ content: ["post:post"] },
-									asOf,
-								),
-							),
-						)
-				: [],
-		]);
-	const [publishers, rootPublishers] = await Promise.all([
+	const [
+		rootReplyCounts,
+		childReplyCounts,
+		reactions,
+		viewerReactions,
+		subjectRows,
+		subjectScores,
+		rootRows,
+	] = await Promise.all([
+		postIds.length
+			? database
+					.select({
+						id: postReplyStat.postId,
+						count: postReplyStat.visibleDescendantCount,
+					})
+					.from(postReplyStat)
+					.where(inArray(postReplyStat.postId, postIds))
+			: [],
+		replyIds.length
+			? database
+					.select({
+						id: postReplyStat.postId,
+						count: postReplyStat.visibleDirectCount,
+					})
+					.from(postReplyStat)
+					.where(inArray(postReplyStat.postId, replyIds))
+			: [],
+		database
+			.select({
+				unitId: unitReactionGlobalStat.unitId,
+				reaction: unitReactionGlobalStat.reaction,
+				count: unitReactionGlobalStat.reactionCount,
+			})
+			.from(unitReactionGlobalStat)
+			.where(inArray(unitReactionGlobalStat.unitId, validIds)),
+		viewer.profileId
+			? database
+					.select({
+						unitId: unitReaction.unitId,
+						realmId: unitReaction.realmId,
+						reaction: unitReaction.reaction,
+					})
+					.from(unitReaction)
+					.where(
+						and(
+							eq(unitReaction.profileId, viewer.profileId),
+							inArray(unitReaction.unitId, validIds),
+						),
+					)
+			: [],
+		subjectIds.length
+			? database
+					.select({
+						id: unit.id,
+						type: unit.kind,
+						title: unitLocalization.title,
+						summary: unitLocalization.summary,
+						coverAssetId: firstUnitLocalizationCoverAssetId(unit.id),
+					})
+					.from(unit)
+					.leftJoin(
+						unitLocalization,
+						and(
+							eq(unitLocalization.unitId, unit.id),
+							isPrimaryUnitLocalization(unitLocalization.unitId),
+						),
+					)
+					.where(
+						and(
+							inArray(unit.id, subjectIds),
+							eq(unit.status, "published"),
+							eq(unit.visibility, "public"),
+							eq(unit.moderationStatus, "approved"),
+							isNull(unit.deletedAt),
+						),
+					)
+			: [],
+		subjectIds.length && subjectRealmIds.length
+			? database
+					.select({
+						unitId: scoreStat.unitId,
+						realmId: scoreStat.realmId,
+						totalScore: scoreStat.totalScore,
+						totalCount: scoreStat.totalCount,
+					})
+					.from(scoreStat)
+					.where(
+						and(
+							inArray(scoreStat.unitId, subjectIds),
+							inArray(scoreStat.realmId, subjectRealmIds),
+						),
+					)
+			: [],
+		rootIds.length
+			? database
+					.select({
+						rootPostId: post.id,
+						title: unitLocalization.title,
+						subjectId: post.subjectUnitId,
+					})
+					.from(post)
+					.innerJoin(unit, eq(unit.id, post.id))
+					.leftJoin(
+						unitLocalization,
+						and(
+							eq(unitLocalization.unitId, post.id),
+							isPrimaryUnitLocalization(unitLocalization.unitId),
+						),
+					)
+					.where(
+						and(
+							inArray(post.id, rootIds),
+							getFeedEligibilityCondition(viewer, { content: ["post:post"] }, asOf),
+						),
+					)
+			: [],
+	]);
+	const [publishers, rootPublishers, realmContexts] = await Promise.all([
 		getPublisherSummariesByUnitIds(validIds),
 		getPublisherSummariesByUnitIds(rootIds),
+		getFeedRealmContextsByUnitIds(validIds),
 	]);
 	const subjects = new Map(
 		await Promise.all(
@@ -775,6 +865,22 @@ export async function hydrateFeedItems(
 	const ownReaction = new Map(
 		viewerReactions.map((row) => [`${row.unitId}:${row.realmId ?? ""}`, row.reaction]),
 	);
+	const subjectScore = new Map(
+		subjectScores.flatMap((row) => {
+			const totalCount = toSafeInteger(row.totalCount, "subject score count");
+			return totalCount > 0
+				? [
+						[
+							`${row.unitId}:${row.realmId}`,
+							{
+								totalScore: toSafeInteger(row.totalScore, "subject total score"),
+								totalCount,
+							},
+						] as const,
+					]
+				: [];
+		}),
+	);
 	return pageIds.flatMap((id, index): FeedItemResponseValue[] => {
 		const row = rowMap.get(id);
 		const ranked = pageMap.get(id);
@@ -783,6 +889,7 @@ export async function hydrateFeedItems(
 			id: row.id,
 			publishers: publishers.get(row.id) ?? [],
 			realmId: ranked.realmId,
+			realms: prioritizeFeedRealmContexts(realmContexts.get(row.id) ?? [], ranked.realmId),
 			title: row.title,
 			createdAt: row.createdAt,
 			updatedAt: row.updatedAt,
@@ -830,7 +937,19 @@ export async function hydrateFeedItems(
 				title: row.title,
 				latestRevisionId: row.latestRevisionId,
 				replyContext: row.rootPostId ? (rootContext.get(row.rootPostId) ?? null) : null,
-				subject: row.subjectId ? (subjects.get(row.subjectId) ?? null) : null,
+				subject: row.subjectId
+					? (() => {
+							const subject = subjects.get(row.subjectId);
+							if (!subject) return null;
+							return {
+								...subject,
+								score: ranked.realmId
+									? (subjectScore.get(`${row.subjectId}:${ranked.realmId}`) ??
+										null)
+									: null,
+							};
+						})()
+					: null,
 			},
 		];
 	});

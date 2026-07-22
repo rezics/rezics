@@ -10366,6 +10366,21 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 				  } | null)
 				| null;
 			name: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						url: string;
+				  } | null)
+				| null;
 			/**
 			 * @description
 			 * Format: `date-time`
@@ -10381,6 +10396,54 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 			publicationCount: string | number;
 		}[];
 		realmId: (string | null) | null;
+		/**
+		 * @type array
+		 */
+		realms: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			id: string;
+			slugAddress:
+				| ({
+						/**
+						 * @minLength 1
+						 * @maxLength 63
+						 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+						 * @type string
+						 */
+						slug: string;
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						scopeUnitId: string;
+						/**
+						 * @type array
+						 */
+						canonicalPath: string[];
+				  } | null)
+				| null;
+			title: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						url: string;
+				  } | null)
+				| null;
+		}[];
 		title: (string | null) | null;
 		/**
 		 * @description
@@ -10635,6 +10698,21 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 							  } | null)
 							| null;
 						name: (string | null) | null;
+						summary: (string | null) | null;
+						avatar:
+							| ({
+									/**
+									 * @description
+									 * Format: `uuid`
+									 * @type string
+									 */
+									id: string;
+									/**
+									 * @type string
+									 */
+									url: string;
+							  } | null)
+							| null;
 						/**
 						 * @description
 						 * Format: `date-time`
@@ -10665,6 +10743,7 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 					 */
 					type: string;
 					title: (string | null) | null;
+					summary: (string | null) | null;
 					cover:
 						| ({
 								/**
@@ -10677,6 +10756,12 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 								 * @type string
 								 */
 								url: string;
+						  } | null)
+						| null;
+					score:
+						| ({
+								totalScore: string | number;
+								totalCount: string | number;
 						  } | null)
 						| null;
 			  } | null)
@@ -14897,6 +14982,21 @@ export type GetApiFeedStatus200 = {
 						  } | null)
 						| null;
 					name: (string | null) | null;
+					summary: (string | null) | null;
+					avatar:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @type string
+								 */
+								url: string;
+						  } | null)
+						| null;
 					/**
 					 * @description
 					 * Format: `date-time`
@@ -14912,6 +15012,54 @@ export type GetApiFeedStatus200 = {
 					publicationCount: string | number;
 				}[];
 				realmId: (string | null) | null;
+				/**
+				 * @type array
+				 */
+				realms: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					slugAddress:
+						| ({
+								/**
+								 * @minLength 1
+								 * @maxLength 63
+								 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+								 * @type string
+								 */
+								slug: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								scopeUnitId: string;
+								/**
+								 * @type array
+								 */
+								canonicalPath: string[];
+						  } | null)
+						| null;
+					title: (string | null) | null;
+					summary: (string | null) | null;
+					avatar:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @type string
+								 */
+								url: string;
+						  } | null)
+						| null;
+				}[];
 				title: (string | null) | null;
 				/**
 				 * @description
@@ -15033,6 +15181,21 @@ export type GetApiFeedStatus200 = {
 						  } | null)
 						| null;
 					name: (string | null) | null;
+					summary: (string | null) | null;
+					avatar:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @type string
+								 */
+								url: string;
+						  } | null)
+						| null;
 					/**
 					 * @description
 					 * Format: `date-time`
@@ -15048,6 +15211,54 @@ export type GetApiFeedStatus200 = {
 					publicationCount: string | number;
 				}[];
 				realmId: (string | null) | null;
+				/**
+				 * @type array
+				 */
+				realms: {
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					slugAddress:
+						| ({
+								/**
+								 * @minLength 1
+								 * @maxLength 63
+								 * @pattern ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$
+								 * @type string
+								 */
+								slug: string;
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								scopeUnitId: string;
+								/**
+								 * @type array
+								 */
+								canonicalPath: string[];
+						  } | null)
+						| null;
+					title: (string | null) | null;
+					summary: (string | null) | null;
+					avatar:
+						| ({
+								/**
+								 * @description
+								 * Format: `uuid`
+								 * @type string
+								 */
+								id: string;
+								/**
+								 * @type string
+								 */
+								url: string;
+						  } | null)
+						| null;
+				}[];
 				title: (string | null) | null;
 				/**
 				 * @description
@@ -15301,6 +15512,21 @@ export type GetApiFeedStatus200 = {
 									  } | null)
 									| null;
 								name: (string | null) | null;
+								summary: (string | null) | null;
+								avatar:
+									| ({
+											/**
+											 * @description
+											 * Format: `uuid`
+											 * @type string
+											 */
+											id: string;
+											/**
+											 * @type string
+											 */
+											url: string;
+									  } | null)
+									| null;
 								/**
 								 * @description
 								 * Format: `date-time`
@@ -15331,6 +15557,7 @@ export type GetApiFeedStatus200 = {
 							 */
 							type: string;
 							title: (string | null) | null;
+							summary: (string | null) | null;
 							cover:
 								| ({
 										/**
@@ -15343,6 +15570,12 @@ export type GetApiFeedStatus200 = {
 										 * @type string
 										 */
 										url: string;
+								  } | null)
+								| null;
+							score:
+								| ({
+										totalScore: string | number;
+										totalCount: string | number;
 								  } | null)
 								| null;
 					  } | null)
@@ -37164,6 +37397,21 @@ export type GetApiUnitsByTypeStatus200 = {
 				  } | null)
 				| null;
 			name: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						url: string;
+				  } | null)
+				| null;
 			/**
 			 * @description
 			 * Format: `date-time`
@@ -37427,6 +37675,21 @@ export type PostApiUnitsByTypeStatus200 = {
 			  } | null)
 			| null;
 		name: (string | null) | null;
+		summary: (string | null) | null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -38547,6 +38810,21 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 			  } | null)
 			| null;
 		name: (string | null) | null;
+		summary: (string | null) | null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -39345,6 +39623,21 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 			  } | null)
 			| null;
 		name: (string | null) | null;
+		summary: (string | null) | null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -40622,6 +40915,21 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 			  } | null)
 			| null;
 		name: (string | null) | null;
+		summary: (string | null) | null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -41580,6 +41888,21 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 			  } | null)
 			| null;
 		name: (string | null) | null;
+		summary: (string | null) | null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -42542,6 +42865,21 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 			  } | null)
 			| null;
 		name: (string | null) | null;
+		summary: (string | null) | null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -63794,6 +64132,21 @@ export type GetApiReviewsStatus200 = {
 				  } | null)
 				| null;
 			name: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						url: string;
+				  } | null)
+				| null;
 			/**
 			 * @description
 			 * Format: `date-time`
@@ -64290,6 +64643,21 @@ export type GetApiReviewsByReviewIdStatus200 = {
 			  } | null)
 			| null;
 		name: (string | null) | null;
+		summary: (string | null) | null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -67518,6 +67886,21 @@ export type GetApiPostsStatus200 = {
 				  } | null)
 				| null;
 			name: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						url: string;
+				  } | null)
+				| null;
 			/**
 			 * @description
 			 * Format: `date-time`
@@ -68146,6 +68529,21 @@ export type GetApiPostsByPostIdStatus200 = {
 			  } | null)
 			| null;
 		name: (string | null) | null;
+		summary: (string | null) | null;
+		avatar:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -68981,6 +69379,21 @@ export type GetApiPostsByPostIdRepliesStatus200 = {
 				  } | null)
 				| null;
 			name: (string | null) | null;
+			summary: (string | null) | null;
+			avatar:
+				| ({
+						/**
+						 * @description
+						 * Format: `uuid`
+						 * @type string
+						 */
+						id: string;
+						/**
+						 * @type string
+						 */
+						url: string;
+				  } | null)
+				| null;
 			/**
 			 * @description
 			 * Format: `date-time`

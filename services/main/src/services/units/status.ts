@@ -1,6 +1,7 @@
 import { and, asc, count, desc, eq, inArray, isNull, lt, max, min, or, sql } from "drizzle-orm";
 
 import { database, type DatabaseTransaction } from "../database";
+import { imageAssetContentUrl } from "../api/image-assets/service";
 import {
 	profile,
 	unit,
@@ -10,7 +11,11 @@ import {
 	UnitStatusActorKindValues,
 	UnitStatusValues,
 } from "../database/schema";
-import { primaryUnitTitle } from "./localization";
+import {
+	primaryUnitSummary,
+	primaryUnitTitle,
+	resolvedUnitLocalizationImageAssetId,
+} from "./localization";
 import { UnitChanged, UnitNotFound, UnitPermissionForbidden } from "./errors";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
 import {
@@ -37,6 +42,8 @@ export type UnitPublisherSummary = {
 	readonly profileId: string;
 	readonly slugAddress: PublicCanonicalUnitSlugAddress | null;
 	readonly name: string | null;
+	readonly summary: string | null;
+	readonly avatar: { readonly id: string; readonly url: string } | null;
 	readonly firstPublishedAt: Date;
 	readonly lastPublishedAt: Date;
 	readonly publicationCount: number;
@@ -244,6 +251,8 @@ export async function getPublisherSummariesByUnitIds(
 			unitId: unitStatusEvent.unitId,
 			profileId: profile.id,
 			name: primaryUnitTitle(profile.id),
+			summary: primaryUnitSummary(profile.id),
+			avatarAssetId: resolvedUnitLocalizationImageAssetId(profile.id, "avatar"),
 			firstPublishedAt: min(unitStatusEvent.createdAt),
 			lastPublishedAt: max(unitStatusEvent.createdAt),
 			publicationCount: count(unitStatusEvent.id),
@@ -269,6 +278,10 @@ export async function getPublisherSummariesByUnitIds(
 			profileId: row.profileId,
 			slugAddress: slugAddresses.get(row.profileId) ?? null,
 			name: row.name,
+			summary: row.summary,
+			avatar: row.avatarAssetId
+				? { id: row.avatarAssetId, url: imageAssetContentUrl(row.avatarAssetId) }
+				: null,
 			firstPublishedAt: row.firstPublishedAt,
 			lastPublishedAt: row.lastPublishedAt,
 			publicationCount: row.publicationCount,

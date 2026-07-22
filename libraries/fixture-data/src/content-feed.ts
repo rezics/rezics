@@ -10,29 +10,21 @@ export type FixtureContentLanguage = ContentLanguage;
 export const FeedFixtureAssetIds = ["book-cover", "post-media"] as const;
 export type FeedFixtureAssetId = (typeof FeedFixtureAssetIds)[number];
 
+interface FeedFixtureContext {
+	readonly id: string;
+	readonly name: string;
+	readonly initials: string;
+	readonly href: string;
+	readonly slug: string;
+	readonly summary: string;
+}
+
 export interface FeedFixtureData {
 	readonly referenceTime: string;
 	readonly createdAt: string;
 	readonly recommendationReason: "followed_publisher";
-	readonly publisher: {
-		readonly name: string;
-		readonly initials: string;
-		readonly href: string;
-	};
-	readonly realms: readonly [
-		{
-			readonly id: string;
-			readonly name: string;
-			readonly initials: string;
-			readonly href: string;
-		},
-		...{
-			readonly id: string;
-			readonly name: string;
-			readonly initials: string;
-			readonly href: string;
-		}[],
-	];
+	readonly publishers: readonly [FeedFixtureContext, FeedFixtureContext, ...FeedFixtureContext[]];
+	readonly realms: readonly [FeedFixtureContext, FeedFixtureContext, ...FeedFixtureContext[]];
 	readonly post: {
 		readonly title: string;
 		readonly body: string;
@@ -45,6 +37,10 @@ export interface FeedFixtureData {
 		readonly coverAlt: string;
 		readonly coverAsset: "book-cover";
 		readonly href: string;
+		readonly score: {
+			readonly totalScore: number;
+			readonly totalCount: number;
+		};
 	};
 	readonly metrics: {
 		readonly post: { readonly replies: number; readonly score: number };
@@ -62,16 +58,19 @@ function createFeedFixtureData(content: FeedFixtureLocalizedContent): FeedFixtur
 		referenceTime: ReferenceTime,
 		createdAt: CreatedAt,
 		recommendationReason: "followed_publisher",
-		publisher: {
-			...content.publisher,
-			href: "#fixture-publisher",
-		},
+		publishers: [
+			createFixtureContext("publisher", content.publishers[0], 0),
+			createFixtureContext("publisher", content.publishers[1], 1),
+			...content.publishers
+				.slice(2)
+				.map((publisher, index) => createFixtureContext("publisher", publisher, index + 2)),
+		],
 		realms: [
-			{
-				id: "019bff67-b3df-7482-a0af-8e4c7ee00a22",
-				...content.realm,
-				href: "#fixture-realm",
-			},
+			createFixtureContext("realm", content.realms[0], 0),
+			createFixtureContext("realm", content.realms[1], 1),
+			...content.realms
+				.slice(2)
+				.map((realm, index) => createFixtureContext("realm", realm, index + 2)),
 		],
 		post: {
 			...content.post,
@@ -81,6 +80,7 @@ function createFeedFixtureData(content: FeedFixtureLocalizedContent): FeedFixtur
 			...content.collection,
 			coverAsset: "book-cover",
 			href: "#fixture-related-work",
+			score: { totalScore: 184, totalCount: 40 },
 		},
 		metrics: {
 			post: { replies: 36, score: 2_100 },
@@ -88,6 +88,19 @@ function createFeedFixtureData(content: FeedFixtureLocalizedContent): FeedFixtur
 			book: { score: 42 },
 			collection: { score: 128 },
 		},
+	};
+}
+
+function createFixtureContext(
+	kind: "publisher" | "realm",
+	content: FeedFixtureLocalizedContent["publishers"][number],
+	index: number,
+): FeedFixtureContext {
+	return {
+		id: `fixture-${kind}-${index + 1}`,
+		...content,
+		href: `#fixture-${kind}-${index + 1}`,
+		slug: `fixture-${kind}-${index + 1}`,
 	};
 }
 

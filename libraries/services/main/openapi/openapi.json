@@ -24882,6 +24882,7 @@
 													"id",
 													"publishers",
 													"realmId",
+													"realms",
 													"title",
 													"createdAt",
 													"updatedAt",
@@ -24913,6 +24914,8 @@
 																"profileId",
 																"slugAddress",
 																"name",
+																"summary",
+																"avatar",
 																"firstPublishedAt",
 																"lastPublishedAt",
 																"publicationCount"
@@ -24967,6 +24970,35 @@
 																		{ "type": "null" }
 																	]
 																},
+																"summary": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"avatar": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"type": "object",
+																			"required": [
+																				"id",
+																				"url"
+																			],
+																			"properties": {
+																				"id": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"url": {
+																					"type": "string"
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
+																},
 																"firstPublishedAt": {
 																	"format": "date-time",
 																	"type": "string"
@@ -24998,6 +25030,99 @@
 															{ "format": "uuid", "type": "string" },
 															{ "type": "null" }
 														]
+													},
+													"realms": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"required": [
+																"id",
+																"slugAddress",
+																"title",
+																"summary",
+																"avatar"
+															],
+															"properties": {
+																"id": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"slugAddress": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": [
+																				"slug",
+																				"scopeUnitId",
+																				"canonicalPath"
+																			],
+																			"properties": {
+																				"slug": {
+																					"minLength": 1,
+																					"maxLength": 63,
+																					"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																					"type": "string"
+																				},
+																				"scopeUnitId": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"canonicalPath": {
+																					"minItems": 2,
+																					"maxItems": 3,
+																					"type": "array",
+																					"items": {
+																						"minLength": 1,
+																						"maxLength": 63,
+																						"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																						"type": "string"
+																					}
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
+																},
+																"title": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"summary": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"avatar": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"type": "object",
+																			"required": [
+																				"id",
+																				"url"
+																			],
+																			"properties": {
+																				"id": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"url": {
+																					"type": "string"
+																				}
+																			}
+																		},
+																		{ "type": "null" }
+																	]
+																}
+															}
+														}
 													},
 													"title": {
 														"nullable": true,
@@ -25540,6 +25665,8 @@
 																				"profileId",
 																				"slugAddress",
 																				"name",
+																				"summary",
+																				"avatar",
 																				"firstPublishedAt",
 																				"lastPublishedAt",
 																				"publicationCount"
@@ -25600,6 +25727,41 @@
 																						}
 																					]
 																				},
+																				"summary": {
+																					"nullable": true,
+																					"anyOf": [
+																						{
+																							"type": "string"
+																						},
+																						{
+																							"type": "null"
+																						}
+																					]
+																				},
+																				"avatar": {
+																					"nullable": true,
+																					"anyOf": [
+																						{
+																							"type": "object",
+																							"required": [
+																								"id",
+																								"url"
+																							],
+																							"properties": {
+																								"id": {
+																									"format": "uuid",
+																									"type": "string"
+																								},
+																								"url": {
+																									"type": "string"
+																								}
+																							}
+																						},
+																						{
+																							"type": "null"
+																						}
+																					]
+																				},
 																				"firstPublishedAt": {
 																					"format": "date-time",
 																					"type": "string"
@@ -25649,7 +25811,9 @@
 																	"id",
 																	"type",
 																	"title",
-																	"cover"
+																	"summary",
+																	"cover",
+																	"score"
 																],
 																"properties": {
 																	"id": {
@@ -25658,6 +25822,13 @@
 																	},
 																	"type": { "type": "string" },
 																	"title": {
+																		"nullable": true,
+																		"anyOf": [
+																			{ "type": "string" },
+																			{ "type": "null" }
+																		]
+																	},
+																	"summary": {
 																		"nullable": true,
 																		"anyOf": [
 																			{ "type": "string" },
@@ -25680,6 +25851,49 @@
 																					},
 																					"url": {
 																						"type": "string"
+																					}
+																				}
+																			},
+																			{ "type": "null" }
+																		]
+																	},
+																	"score": {
+																		"nullable": true,
+																		"anyOf": [
+																			{
+																				"type": "object",
+																				"required": [
+																					"totalScore",
+																					"totalCount"
+																				],
+																				"properties": {
+																					"totalScore": {
+																						"minimum": 1,
+																						"anyOf": [
+																							{
+																								"format": "integer",
+																								"default": 0,
+																								"type": "string"
+																							},
+																							{
+																								"minimum": 1,
+																								"type": "integer"
+																							}
+																						]
+																					},
+																					"totalCount": {
+																						"minimum": 1,
+																						"anyOf": [
+																							{
+																								"format": "integer",
+																								"default": 0,
+																								"type": "string"
+																							},
+																							{
+																								"minimum": 1,
+																								"type": "integer"
+																							}
+																						]
 																					}
 																				}
 																			},
@@ -31185,6 +31399,7 @@
 															"id",
 															"publishers",
 															"realmId",
+															"realms",
 															"title",
 															"createdAt",
 															"updatedAt",
@@ -31211,6 +31426,8 @@
 																		"profileId",
 																		"slugAddress",
 																		"name",
+																		"summary",
+																		"avatar",
 																		"firstPublishedAt",
 																		"lastPublishedAt",
 																		"publicationCount"
@@ -31267,6 +31484,37 @@
 																				{ "type": "null" }
 																			]
 																		},
+																		"summary": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"type": "string"
+																				},
+																				{ "type": "null" }
+																			]
+																		},
+																		"avatar": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"type": "object",
+																					"required": [
+																						"id",
+																						"url"
+																					],
+																					"properties": {
+																						"id": {
+																							"format": "uuid",
+																							"type": "string"
+																						},
+																						"url": {
+																							"type": "string"
+																						}
+																					}
+																				},
+																				{ "type": "null" }
+																			]
+																		},
 																		"firstPublishedAt": {
 																			"format": "date-time",
 																			"type": "string"
@@ -31301,6 +31549,103 @@
 																	},
 																	{ "type": "null" }
 																]
+															},
+															"realms": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"required": [
+																		"id",
+																		"slugAddress",
+																		"title",
+																		"summary",
+																		"avatar"
+																	],
+																	"properties": {
+																		"id": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"slugAddress": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"slug",
+																						"scopeUnitId",
+																						"canonicalPath"
+																					],
+																					"properties": {
+																						"slug": {
+																							"minLength": 1,
+																							"maxLength": 63,
+																							"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																							"type": "string"
+																						},
+																						"scopeUnitId": {
+																							"format": "uuid",
+																							"type": "string"
+																						},
+																						"canonicalPath": {
+																							"minItems": 2,
+																							"maxItems": 3,
+																							"type": "array",
+																							"items": {
+																								"minLength": 1,
+																								"maxLength": 63,
+																								"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																								"type": "string"
+																							}
+																						}
+																					}
+																				},
+																				{ "type": "null" }
+																			]
+																		},
+																		"title": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"type": "string"
+																				},
+																				{ "type": "null" }
+																			]
+																		},
+																		"summary": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"type": "string"
+																				},
+																				{ "type": "null" }
+																			]
+																		},
+																		"avatar": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"type": "object",
+																					"required": [
+																						"id",
+																						"url"
+																					],
+																					"properties": {
+																						"id": {
+																							"format": "uuid",
+																							"type": "string"
+																						},
+																						"url": {
+																							"type": "string"
+																						}
+																					}
+																				},
+																				{ "type": "null" }
+																			]
+																		}
+																	}
+																}
 															},
 															"title": {
 																"nullable": true,
@@ -31482,6 +31827,7 @@
 															"id",
 															"publishers",
 															"realmId",
+															"realms",
 															"title",
 															"createdAt",
 															"updatedAt",
@@ -31516,6 +31862,8 @@
 																		"profileId",
 																		"slugAddress",
 																		"name",
+																		"summary",
+																		"avatar",
 																		"firstPublishedAt",
 																		"lastPublishedAt",
 																		"publicationCount"
@@ -31572,6 +31920,37 @@
 																				{ "type": "null" }
 																			]
 																		},
+																		"summary": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"type": "string"
+																				},
+																				{ "type": "null" }
+																			]
+																		},
+																		"avatar": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"type": "object",
+																					"required": [
+																						"id",
+																						"url"
+																					],
+																					"properties": {
+																						"id": {
+																							"format": "uuid",
+																							"type": "string"
+																						},
+																						"url": {
+																							"type": "string"
+																						}
+																					}
+																				},
+																				{ "type": "null" }
+																			]
+																		},
 																		"firstPublishedAt": {
 																			"format": "date-time",
 																			"type": "string"
@@ -31606,6 +31985,103 @@
 																	},
 																	{ "type": "null" }
 																]
+															},
+															"realms": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"required": [
+																		"id",
+																		"slugAddress",
+																		"title",
+																		"summary",
+																		"avatar"
+																	],
+																	"properties": {
+																		"id": {
+																			"format": "uuid",
+																			"type": "string"
+																		},
+																		"slugAddress": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"slug",
+																						"scopeUnitId",
+																						"canonicalPath"
+																					],
+																					"properties": {
+																						"slug": {
+																							"minLength": 1,
+																							"maxLength": 63,
+																							"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																							"type": "string"
+																						},
+																						"scopeUnitId": {
+																							"format": "uuid",
+																							"type": "string"
+																						},
+																						"canonicalPath": {
+																							"minItems": 2,
+																							"maxItems": 3,
+																							"type": "array",
+																							"items": {
+																								"minLength": 1,
+																								"maxLength": 63,
+																								"pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+																								"type": "string"
+																							}
+																						}
+																					}
+																				},
+																				{ "type": "null" }
+																			]
+																		},
+																		"title": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"type": "string"
+																				},
+																				{ "type": "null" }
+																			]
+																		},
+																		"summary": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"type": "string"
+																				},
+																				{ "type": "null" }
+																			]
+																		},
+																		"avatar": {
+																			"nullable": true,
+																			"anyOf": [
+																				{
+																					"type": "object",
+																					"required": [
+																						"id",
+																						"url"
+																					],
+																					"properties": {
+																						"id": {
+																							"format": "uuid",
+																							"type": "string"
+																						},
+																						"url": {
+																							"type": "string"
+																						}
+																					}
+																				},
+																				{ "type": "null" }
+																			]
+																		}
+																	}
+																}
 															},
 															"title": {
 																"nullable": true,
@@ -32166,6 +32642,8 @@
 																						"profileId",
 																						"slugAddress",
 																						"name",
+																						"summary",
+																						"avatar",
 																						"firstPublishedAt",
 																						"lastPublishedAt",
 																						"publicationCount"
@@ -32226,6 +32704,41 @@
 																								}
 																							]
 																						},
+																						"summary": {
+																							"nullable": true,
+																							"anyOf": [
+																								{
+																									"type": "string"
+																								},
+																								{
+																									"type": "null"
+																								}
+																							]
+																						},
+																						"avatar": {
+																							"nullable": true,
+																							"anyOf": [
+																								{
+																									"type": "object",
+																									"required": [
+																										"id",
+																										"url"
+																									],
+																									"properties": {
+																										"id": {
+																											"format": "uuid",
+																											"type": "string"
+																										},
+																										"url": {
+																											"type": "string"
+																										}
+																									}
+																								},
+																								{
+																									"type": "null"
+																								}
+																							]
+																						},
 																						"firstPublishedAt": {
 																							"format": "date-time",
 																							"type": "string"
@@ -32277,7 +32790,9 @@
 																			"id",
 																			"type",
 																			"title",
-																			"cover"
+																			"summary",
+																			"cover",
+																			"score"
 																		],
 																		"properties": {
 																			"id": {
@@ -32288,6 +32803,17 @@
 																				"type": "string"
 																			},
 																			"title": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"type": "string"
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			},
+																			"summary": {
 																				"nullable": true,
 																				"anyOf": [
 																					{
@@ -32314,6 +32840,51 @@
 																							},
 																							"url": {
 																								"type": "string"
+																							}
+																						}
+																					},
+																					{
+																						"type": "null"
+																					}
+																				]
+																			},
+																			"score": {
+																				"nullable": true,
+																				"anyOf": [
+																					{
+																						"type": "object",
+																						"required": [
+																							"totalScore",
+																							"totalCount"
+																						],
+																						"properties": {
+																							"totalScore": {
+																								"minimum": 1,
+																								"anyOf": [
+																									{
+																										"format": "integer",
+																										"default": 0,
+																										"type": "string"
+																									},
+																									{
+																										"minimum": 1,
+																										"type": "integer"
+																									}
+																								]
+																							},
+																							"totalCount": {
+																								"minimum": 1,
+																								"anyOf": [
+																									{
+																										"format": "integer",
+																										"default": 0,
+																										"type": "string"
+																									},
+																									{
+																										"minimum": 1,
+																										"type": "integer"
+																									}
+																								]
 																							}
 																						}
 																					},
@@ -58254,6 +58825,8 @@
 																"profileId",
 																"slugAddress",
 																"name",
+																"summary",
+																"avatar",
 																"firstPublishedAt",
 																"lastPublishedAt",
 																"publicationCount"
@@ -58305,6 +58878,35 @@
 																	"nullable": true,
 																	"anyOf": [
 																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"summary": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"avatar": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"type": "object",
+																			"required": [
+																				"id",
+																				"url"
+																			],
+																			"properties": {
+																				"id": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"url": {
+																					"type": "string"
+																				}
+																			}
+																		},
 																		{ "type": "null" }
 																	]
 																},
@@ -58895,6 +59497,8 @@
 													"profileId",
 													"slugAddress",
 													"name",
+													"summary",
+													"avatar",
 													"firstPublishedAt",
 													"lastPublishedAt",
 													"publicationCount"
@@ -58946,6 +59550,30 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
 															{ "type": "null" }
 														]
 													},
@@ -60337,6 +60965,8 @@
 													"profileId",
 													"slugAddress",
 													"name",
+													"summary",
+													"avatar",
 													"firstPublishedAt",
 													"lastPublishedAt",
 													"publicationCount"
@@ -60388,6 +61018,30 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
 															{ "type": "null" }
 														]
 													},
@@ -61855,6 +62509,8 @@
 													"profileId",
 													"slugAddress",
 													"name",
+													"summary",
+													"avatar",
 													"firstPublishedAt",
 													"lastPublishedAt",
 													"publicationCount"
@@ -61906,6 +62562,30 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
 															{ "type": "null" }
 														]
 													},
@@ -63546,6 +64226,8 @@
 													"profileId",
 													"slugAddress",
 													"name",
+													"summary",
+													"avatar",
 													"firstPublishedAt",
 													"lastPublishedAt",
 													"publicationCount"
@@ -63597,6 +64279,30 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
 															{ "type": "null" }
 														]
 													},
@@ -65028,6 +65734,8 @@
 													"profileId",
 													"slugAddress",
 													"name",
+													"summary",
+													"avatar",
 													"firstPublishedAt",
 													"lastPublishedAt",
 													"publicationCount"
@@ -65079,6 +65787,30 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
 															{ "type": "null" }
 														]
 													},
@@ -66805,6 +67537,8 @@
 													"profileId",
 													"slugAddress",
 													"name",
+													"summary",
+													"avatar",
 													"firstPublishedAt",
 													"lastPublishedAt",
 													"publicationCount"
@@ -66856,6 +67590,30 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
 															{ "type": "null" }
 														]
 													},
@@ -106343,6 +107101,8 @@
 																"profileId",
 																"slugAddress",
 																"name",
+																"summary",
+																"avatar",
 																"firstPublishedAt",
 																"lastPublishedAt",
 																"publicationCount"
@@ -106394,6 +107154,35 @@
 																	"nullable": true,
 																	"anyOf": [
 																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"summary": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"avatar": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"type": "object",
+																			"required": [
+																				"id",
+																				"url"
+																			],
+																			"properties": {
+																				"id": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"url": {
+																					"type": "string"
+																				}
+																			}
+																		},
 																		{ "type": "null" }
 																	]
 																},
@@ -106964,6 +107753,8 @@
 													"profileId",
 													"slugAddress",
 													"name",
+													"summary",
+													"avatar",
 													"firstPublishedAt",
 													"lastPublishedAt",
 													"publicationCount"
@@ -107015,6 +107806,30 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
 															{ "type": "null" }
 														]
 													},
@@ -110406,6 +111221,8 @@
 																"profileId",
 																"slugAddress",
 																"name",
+																"summary",
+																"avatar",
 																"firstPublishedAt",
 																"lastPublishedAt",
 																"publicationCount"
@@ -110457,6 +111274,35 @@
 																	"nullable": true,
 																	"anyOf": [
 																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"summary": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"avatar": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"type": "object",
+																			"required": [
+																				"id",
+																				"url"
+																			],
+																			"properties": {
+																				"id": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"url": {
+																					"type": "string"
+																				}
+																			}
+																		},
 																		{ "type": "null" }
 																	]
 																},
@@ -111351,6 +112197,8 @@
 													"profileId",
 													"slugAddress",
 													"name",
+													"summary",
+													"avatar",
 													"firstPublishedAt",
 													"lastPublishedAt",
 													"publicationCount"
@@ -111402,6 +112250,30 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"summary": {
+														"nullable": true,
+														"anyOf": [
+															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"avatar": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
 															{ "type": "null" }
 														]
 													},
@@ -112454,6 +113326,8 @@
 																"profileId",
 																"slugAddress",
 																"name",
+																"summary",
+																"avatar",
 																"firstPublishedAt",
 																"lastPublishedAt",
 																"publicationCount"
@@ -112505,6 +113379,35 @@
 																	"nullable": true,
 																	"anyOf": [
 																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"summary": {
+																	"nullable": true,
+																	"anyOf": [
+																		{ "type": "string" },
+																		{ "type": "null" }
+																	]
+																},
+																"avatar": {
+																	"nullable": true,
+																	"anyOf": [
+																		{
+																			"type": "object",
+																			"required": [
+																				"id",
+																				"url"
+																			],
+																			"properties": {
+																				"id": {
+																					"format": "uuid",
+																					"type": "string"
+																				},
+																				"url": {
+																					"type": "string"
+																				}
+																			}
+																		},
 																		{ "type": "null" }
 																	]
 																},

@@ -83,6 +83,8 @@ export const UnitPublisherSummaryResponse = t.Object({
 	profileId: Uuid,
 	slugAddress: NullablePublicSlugAddressResponse,
 	name: NullableText,
+	summary: NullableText,
+	avatar: ImageAssetResponse,
 	firstPublishedAt: DateTime,
 	lastPublishedAt: DateTime,
 	publicationCount: t.Integer({ minimum: 1 }),
@@ -390,6 +392,15 @@ const FeedItemBaseResponse = {
 	id: Uuid,
 	publishers: t.Array(UnitPublisherSummaryResponse),
 	realmId: t.Nullable(Uuid),
+	realms: t.Array(
+		t.Object({
+			id: Uuid,
+			slugAddress: NullablePublicSlugAddressResponse,
+			title: NullableText,
+			summary: NullableText,
+			avatar: ImageAssetResponse,
+		}),
+	),
 	title: NullableText,
 	createdAt: DateTime,
 	updatedAt: DateTime,
@@ -434,7 +445,14 @@ export const FeedPostItemResponse = t.Object({
 			id: Uuid,
 			type: t.String(),
 			title: NullableText,
+			summary: NullableText,
 			cover: ImageAssetResponse,
+			score: t.Nullable(
+				t.Object({
+					totalScore: t.Integer({ minimum: 1 }),
+					totalCount: t.Integer({ minimum: 1 }),
+				}),
+			),
 		}),
 	),
 });

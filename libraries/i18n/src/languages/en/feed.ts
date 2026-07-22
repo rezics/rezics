@@ -88,12 +88,19 @@ export default {
 	viewAll: "View all",
 	relatedWork: "Related work",
 	myRealms: `My ${realmTerms.pluralLabel}`,
-	realmContext: insert("in {{realm}}", { realm: String }),
-	realmContextWithMore: insert("in {{realm}} and {{count}} more", {
+	contextSeparator: "in",
+	publisherList: insert("{{count}} publishers", { count: Number }),
+	realmList: insert(`{{count}} ${realmTerms.pluralLabel}`, { count: Number }),
+	showPublisherList: insert("{{publisher}} and {{count}} more publishers; show publisher list", {
+		publisher: String,
+		count: Number,
+	}),
+	showRealmList: insert(`{{realm}} and {{count}} more; show ${realmTerms.inline} list`, {
 		realm: String,
 		count: Number,
 	}),
-	showRealmList: insert(`{{summary}}. Show ${realmTerms.inline} list`, { summary: String }),
-	publishedInOneRealm: insert(`Published in {{count}} ${realmTerms.inline}`, { count: Number }),
-	publishedInRealms: insert(`Published in {{count}} ${realmTerms.plural}`, { count: Number }),
+	targetScore: insert("{{score}}/10 · {{count}} ratings", {
+		score: String,
+		count: Number,
+	}),
 } satisfies typeof import("../zh-Hant/feed").default;

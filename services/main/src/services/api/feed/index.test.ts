@@ -1,7 +1,11 @@
 import { PgDialect } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 
-import { getFeedEligibilityCondition, resolveFeedContentSelection } from "./index";
+import {
+	getFeedEligibilityCondition,
+	prioritizeFeedRealmContexts,
+	resolveFeedContentSelection,
+} from "./index";
 
 const dialect = new PgDialect();
 
@@ -65,5 +69,25 @@ describe("feed eligibility SQL", () => {
 		expect(query.sql).toContain('"post"."kind" in');
 		expect(query.params).toEqual(expect.arrayContaining(["post", "general"]));
 		expect(query.params).not.toContain("reply");
+	});
+});
+
+describe("feed realm context ordering", () => {
+	it("places the ranked realm first and preserves the remaining order", () => {
+		const realms = [{ id: "first" }, { id: "ranked" }, { id: "third" }] as const;
+
+		expect(prioritizeFeedRealmContexts(realms, "ranked")).toEqual([
+			realms[1],
+			realms[0],
+			realms[2],
+		]);
+	});
+
+	it("returns a copy without dropping contexts when the ranked realm is unavailable", () => {
+		const realms = [{ id: "first" }, { id: "second" }] as const;
+		const prioritized = prioritizeFeedRealmContexts(realms, "missing");
+
+		expect(prioritized).toEqual(realms);
+		expect(prioritized).not.toBe(realms);
 	});
 });

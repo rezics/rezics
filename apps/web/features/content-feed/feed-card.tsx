@@ -1,12 +1,11 @@
 "use client";
 
-import { type ComponentProps, type ReactNode } from "react";
-import { BookOpenIcon, ChevronRightIcon } from "lucide-react";
+import { type ComponentProps, type ReactNode, useState } from "react";
+import { BookOpenIcon, ChevronRightIcon, StarIcon } from "lucide-react";
 
 import {
 	Avatar,
 	AvatarFallback,
-	AvatarGroup,
 	AvatarImage,
 	Button,
 	Card,
@@ -14,34 +13,41 @@ import {
 	CardFooter,
 	CardHeader,
 	Cover,
+	HoverCard,
+	HoverCardContent,
+	HoverCardTrigger,
 	Item,
 	ItemContent,
 	ItemDescription,
-	ItemMedia,
 	ItemTitle,
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
 	cn,
 } from "@rezics/ui";
+import {
+	ProfileInfoCard,
+	type ProfileInfoCardData,
+} from "@/features/profiles/components/profile-info-card";
+import {
+	RealmInfoCard,
+	type RealmInfoCardData,
+} from "@/features/realms/components/realm-info-card";
 import { useTranslation } from "@/i18n/client";
+import { useFineHover } from "./use-fine-hover";
 
-export interface FeedActor {
-	name: string;
-	href: string;
-	avatarUrl?: string;
-	initials: string;
+interface FeedContextItem {
+	readonly id: string;
+	readonly name: string;
+	readonly href: string;
+	readonly avatarUrl?: string;
+	readonly initials: string;
 }
 
-export interface FeedRealm {
-	id: string;
-	name: string;
-	href: string;
-	avatarUrl?: string;
-	initials: string;
-}
+export type FeedProfileContext = FeedContextItem & ProfileInfoCardData;
+export type FeedRealmContext = FeedContextItem & RealmInfoCardData;
 
-export type FeedRealms = readonly [FeedRealm, ...FeedRealm[]];
+export interface FeedTargetScore {
+	readonly totalScore: number;
+	readonly totalCount: number;
+}
 
 export function FeedCard({ className, ...props }: ComponentProps<"article">) {
 	return (
@@ -50,6 +56,8 @@ export function FeedCard({ className, ...props }: ComponentProps<"article">) {
 			className={cn(
 				"group/feed-card gap-0 rounded-none py-0 sm:rounded-2xl",
 				"transition-colors hover:bg-surface-hover focus-within:bg-surface-hover",
+				"has-[[data-slot=feed-card-target-link]:hover]:bg-transparent",
+				"has-[[data-slot=feed-card-target-link]:focus-visible]:bg-transparent",
 				className,
 			)}
 		>
@@ -59,34 +67,54 @@ export function FeedCard({ className, ...props }: ComponentProps<"article">) {
 }
 
 export function FeedCardHeader({
-	actor,
+	publishers,
 	realms,
 	timestamp,
 	recommendation,
 	menu,
 }: {
-	actor: FeedActor;
-	realms: FeedRealms;
+	publishers: readonly FeedProfileContext[];
+	realms: readonly FeedRealmContext[];
 	timestamp: string;
 	recommendation?: ReactNode;
 	menu?: ReactNode;
 }) {
+	const { t } = useTranslation(["feed", "posts"]);
 	return (
-		<CardHeader className="flex flex-wrap items-center gap-x-1.5 gap-y-1 px-4 pt-4 sm:px-5">
-			<FeedActorContext actor={actor} />
-			<span aria-hidden className="text-muted-foreground text-xs">
-				·
-			</span>
-			<FeedRealmContext realms={realms} />
-			<span aria-hidden className="text-muted-foreground text-xs">
-				·
-			</span>
-			<time className="text-muted-foreground text-xs">{timestamp}</time>
-			{menu ? <div className="ms-auto">{menu}</div> : null}
+		<CardHeader className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-2 gap-y-1 px-4 pt-4 sm:px-5">
+			<div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1">
+				<FeedContextGroup
+					emptyLabel={t.posts.unknownPublisher}
+					items={publishers}
+					listLabel={t.feed.publisherList({ count: publishers.length })}
+					renderInfoCard={(publisher) => <ProfileInfoCard profile={publisher} />}
+					showListLabel={(primary, count) =>
+						t.feed.showPublisherList({ publisher: primary.name, count })
+					}
+				/>
+				{realms.length > 0 ? (
+					<>
+						<span className="text-muted-foreground text-xs">
+							{t.feed.contextSeparator}
+						</span>
+						<FeedContextGroup
+							items={realms}
+							listLabel={t.feed.realmList({ count: realms.length })}
+							renderInfoCard={(realm) => <RealmInfoCard realm={realm} />}
+							showListLabel={(primary, count) =>
+								t.feed.showRealmList({ realm: primary.name, count })
+							}
+						/>
+					</>
+				) : null}
+				<span aria-hidden className="text-muted-foreground text-xs">
+					·
+				</span>
+				<time className="text-muted-foreground text-xs">{timestamp}</time>
+			</div>
+			{menu ? <div className="row-span-2">{menu}</div> : null}
 			{recommendation ? (
-				<div className="basis-full ps-8 text-muted-foreground text-xs">
-					{recommendation}
-				</div>
+				<div className="col-start-1 text-muted-foreground text-xs">{recommendation}</div>
 			) : null}
 		</CardHeader>
 	);
@@ -154,6 +182,7 @@ export function FeedCardTarget({
 	description,
 	imageUrl,
 	imageAlt = "",
+	score,
 }: {
 	href: string;
 	label: string;
@@ -161,19 +190,21 @@ export function FeedCardTarget({
 	description?: string;
 	imageUrl?: string;
 	imageAlt?: string;
+	score?: FeedTargetScore;
 }) {
+	const { locale, t } = useTranslation(["feed"]);
+	const averageScore = score && score.totalCount > 0 ? score.totalScore / score.totalCount : null;
 	return (
 		<CardContent className="px-4 pt-3 sm:px-5" data-slot="feed-card-target">
-			<Item asChild variant="muted">
-				<a href={href}>
-					<ItemMedia className="aspect-[3/4] w-9 rounded-md" variant="image">
-						<Cover
-							alt={imageAlt || title}
-							className="size-full rounded-md"
-							fallback={<BookOpenIcon aria-hidden />}
-							src={imageUrl}
-						/>
-					</ItemMedia>
+			<div className="mb-3 border-border-weak border-t" />
+			<Item asChild className="p-2.5 hover:bg-surface-hover" variant="muted">
+				<a data-slot="feed-card-target-link" href={href}>
+					<Cover
+						alt={imageAlt || title}
+						className="w-12 rounded-md"
+						fallback={<BookOpenIcon aria-hidden />}
+						src={imageUrl}
+					/>
 					<ItemContent className="min-w-0">
 						<ItemDescription className="text-xs">{label}</ItemDescription>
 						<ItemTitle>{title}</ItemTitle>
@@ -181,6 +212,18 @@ export function FeedCardTarget({
 							<ItemDescription className="line-clamp-1 text-xs">
 								{description}
 							</ItemDescription>
+						) : null}
+						{score && averageScore !== null ? (
+							<p className="mt-0.5 flex items-center gap-1 text-muted-foreground text-xs">
+								<StarIcon aria-hidden className="size-3 fill-current" />
+								{t.feed.targetScore({
+									score: new Intl.NumberFormat(locale.target, {
+										maximumFractionDigits: 1,
+										minimumFractionDigits: 1,
+									}).format(averageScore),
+									count: score.totalCount,
+								})}
+							</p>
 						) : null}
 					</ItemContent>
 					<ChevronRightIcon aria-hidden className="text-muted-foreground" />
@@ -203,79 +246,103 @@ export function FeedCardActionBar({ className, ...props }: ComponentProps<typeof
 	);
 }
 
-function FeedActorContext({ actor }: { actor: FeedActor }) {
+function FeedContextGroup<T extends FeedContextItem>({
+	items,
+	emptyLabel,
+	listLabel,
+	renderInfoCard,
+	showListLabel,
+}: {
+	items: readonly T[];
+	emptyLabel?: string;
+	listLabel: string;
+	renderInfoCard: (item: T) => ReactNode;
+	showListLabel: (primary: T, count: number) => string;
+}) {
+	const supportsFineHover = useFineHover();
+	const [listOpen, setListOpen] = useState(false);
+	const primary = items[0];
+	if (!primary) return emptyLabel ? <span className="text-xs">{emptyLabel}</span> : null;
+	if (items.length === 1)
+		return (
+			<HoverCard
+				closeDelay={160}
+				disabled={!supportsFineHover}
+				openDelay={320}
+				positioning={{ placement: "bottom-start" }}
+			>
+				<HoverCardTrigger asChild>
+					<a
+						className="inline-flex min-w-0 items-center gap-2 rounded-md font-semibold text-xs outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/32"
+						href={primary.href}
+					>
+						<FeedAvatar item={primary} />
+						<span className="max-w-40 truncate sm:max-w-56">{primary.name}</span>
+					</a>
+				</HoverCardTrigger>
+				<HoverCardContent className="w-72">{renderInfoCard(primary)}</HoverCardContent>
+			</HoverCard>
+		);
+	const additionalCount = items.length - 1;
 	return (
-		<a
-			className="inline-flex min-w-0 items-center gap-2 rounded-md font-semibold text-xs outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/32"
-			href={actor.href}
+		<HoverCard
+			closeDelay={180}
+			onOpenChange={({ open }) => setListOpen(open)}
+			open={listOpen}
+			openDelay={220}
+			positioning={{ placement: "bottom-start" }}
 		>
-			<FeedAvatar alt={actor.name} fallback={actor.initials} src={actor.avatarUrl} />
-			<span className="truncate">{actor.name}</span>
-		</a>
-	);
-}
-
-function FeedRealmContext({ realms }: { realms: FeedRealms }) {
-	const { t } = useTranslation(["feed"]);
-	const [primaryRealm, ...additionalRealms] = realms;
-	const visibleRealms = [primaryRealm, ...additionalRealms.slice(0, 2)];
-	const moreCount = additionalRealms.length;
-	const realmSummary =
-		moreCount > 0
-			? t.feed.realmContextWithMore({ realm: primaryRealm.name, count: moreCount })
-			: t.feed.realmContext({ realm: primaryRealm.name });
-
-	return (
-		<Popover positioning={{ placement: "bottom-start" }}>
-			<PopoverTrigger asChild>
+			<HoverCardTrigger asChild>
 				<Button
-					aria-label={t.feed.showRealmList({ summary: realmSummary })}
-					className="max-w-full gap-1.5 px-1.5 data-[state=open]:bg-accent data-[state=open]:text-accent-foreground"
+					aria-expanded={listOpen}
+					aria-haspopup="dialog"
+					aria-label={showListLabel(primary, additionalCount)}
+					className="h-auto max-w-full gap-2 px-0 py-0 font-semibold hover:bg-transparent hover:underline"
+					onClick={() => setListOpen(true)}
 					size="xs"
 					variant="quiet"
 				>
-					<AvatarGroup>
-						{visibleRealms.map((realm) => (
-							<FeedAvatar
-								alt=""
-								fallback={realm.initials}
-								key={realm.id}
-								src={realm.avatarUrl}
-							/>
-						))}
-					</AvatarGroup>
-					<span className="truncate text-muted-foreground">{realmSummary}</span>
+					<FeedAvatar item={primary} />
+					<span className="max-w-36 truncate sm:max-w-52">{primary.name}</span>
+					<span className="shrink-0 text-muted-foreground">+{additionalCount}</span>
 				</Button>
-			</PopoverTrigger>
-			<PopoverContent className="w-72 p-3">
-				<p className="mb-2 font-medium text-sm">
-					{realms.length === 1
-						? t.feed.publishedInOneRealm({ count: realms.length })
-						: t.feed.publishedInRealms({ count: realms.length })}
-				</p>
-				<div className="flex flex-col gap-1" role="list">
-					{realms.map((realm) => (
-						<a
-							className="flex items-center gap-2 rounded-lg p-2 text-sm outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/32"
-							href={realm.href}
-							key={realm.id}
-							role="listitem"
-						>
-							<FeedAvatar alt="" fallback={realm.initials} src={realm.avatarUrl} />
-							<span className="truncate">{realm.name}</span>
-						</a>
+			</HoverCardTrigger>
+			<HoverCardContent className="w-72 p-2">
+				<div aria-label={listLabel} className="grid gap-0.5" role="list">
+					{items.map((item) => (
+						<div key={item.id} role="listitem">
+							<HoverCard
+								closeDelay={160}
+								disabled={!supportsFineHover}
+								openDelay={260}
+								positioning={{ placement: "right-start" }}
+							>
+								<HoverCardTrigger asChild>
+									<a
+										className="flex min-h-11 items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/32"
+										href={item.href}
+									>
+										<FeedAvatar item={item} />
+										<span className="truncate">{item.name}</span>
+									</a>
+								</HoverCardTrigger>
+								<HoverCardContent className="w-72">
+									{renderInfoCard(item)}
+								</HoverCardContent>
+							</HoverCard>
+						</div>
 					))}
 				</div>
-			</PopoverContent>
-		</Popover>
+			</HoverCardContent>
+		</HoverCard>
 	);
 }
 
-function FeedAvatar({ src, alt, fallback }: { src?: string; alt: string; fallback: string }) {
+function FeedAvatar({ item }: { item: FeedContextItem }) {
 	return (
 		<Avatar size="sm">
-			{src ? <AvatarImage alt={alt} src={src} /> : null}
-			<AvatarFallback>{fallback}</AvatarFallback>
+			{item.avatarUrl ? <AvatarImage alt="" src={item.avatarUrl} /> : null}
+			<AvatarFallback>{item.initials}</AvatarFallback>
 		</Avatar>
 	);
 }

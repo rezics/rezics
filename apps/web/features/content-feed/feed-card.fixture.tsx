@@ -5,7 +5,7 @@ import type { FeedFixtureAssetId } from "@rezics/fixture-data";
 import { useState, type ReactNode } from "react";
 import { LibraryIcon, MessageCircleIcon } from "lucide-react";
 
-import { Badge, Button } from "@rezics/ui";
+import { Badge, Button, Cover } from "@rezics/ui";
 import {
 	FeedCard,
 	FeedCardActionBar,
@@ -79,13 +79,13 @@ function FixtureActionBar({ comments, initialScore }: { comments: number; initia
 	);
 }
 
-function PostFeedCard() {
+export function PostFeedCard() {
 	const { feed, fixture, recommendation, timestamp } = useFixtureCardContext();
 	return (
 		<FeedCard aria-labelledby="post-feed-title">
 			<FeedCardHeader
-				actor={fixture.publisher}
 				menu={<FixtureMenu />}
+				publishers={fixture.publishers}
 				realms={fixture.realms}
 				recommendation={recommendation}
 				timestamp={timestamp}
@@ -102,10 +102,12 @@ function PostFeedCard() {
 				/>
 			</FeedCardContent>
 			<FeedCardTarget
+				description={fixture.collection.body}
 				href={fixture.collection.href}
 				imageAlt={fixture.collection.coverAlt}
 				imageUrl={FeedFixtureAssetUrls[fixture.collection.coverAsset]}
 				label={feed.relatedWork}
+				score={fixture.collection.score}
 				title={fixture.collection.title}
 			/>
 			<FixtureActionBar
@@ -116,13 +118,13 @@ function PostFeedCard() {
 	);
 }
 
-function ReviewFeedCard() {
+export function ReviewFeedCard() {
 	const { feed, fixture, timestamp } = useFixtureCardContext();
 	return (
 		<FeedCard aria-labelledby="review-feed-title">
 			<FeedCardHeader
-				actor={fixture.publisher}
 				menu={<FixtureMenu />}
+				publishers={fixture.publishers}
 				realms={fixture.realms}
 				timestamp={timestamp}
 			/>
@@ -141,20 +143,20 @@ function ReviewFeedCard() {
 	);
 }
 
-function BookFeedCard() {
+export function BookFeedCard() {
 	const { feed, fixture, timestamp } = useFixtureCardContext();
 	return (
 		<FeedCard aria-labelledby="book-feed-title">
 			<FeedCardHeader
-				actor={fixture.publisher}
 				menu={<FixtureMenu />}
+				publishers={fixture.publishers}
 				realms={fixture.realms}
 				timestamp={timestamp}
 			/>
 			<FeedCardContent className="flex-row gap-4">
-				<img
+				<Cover
 					alt={fixture.collection.coverAlt}
-					className="aspect-[2/3] w-24 shrink-0 rounded-lg object-cover sm:w-28"
+					className="w-24 shrink-0 rounded-lg sm:w-28"
 					src={FeedFixtureAssetUrls[fixture.collection.coverAsset]}
 				/>
 				<div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -180,15 +182,15 @@ function BookFeedCard() {
 	);
 }
 
-function CollectionFeedCard() {
+export function CollectionFeedCard() {
 	const { feed, fixture, timestamp } = useFixtureCardContext();
 	const { t } = useTranslation(["ui"]);
 	const [following, setFollowing] = useState(false);
 	return (
 		<FeedCard aria-labelledby="collection-feed-title">
 			<FeedCardHeader
-				actor={fixture.publisher}
 				menu={<FixtureMenu />}
+				publishers={fixture.publishers}
 				realms={fixture.realms}
 				timestamp={timestamp}
 			/>

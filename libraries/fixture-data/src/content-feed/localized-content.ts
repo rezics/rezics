@@ -1,12 +1,38 @@
 export interface FeedFixtureLocalizedContent {
-	readonly publisher: {
-		readonly name: string;
-		readonly initials: string;
-	};
-	readonly realm: {
-		readonly name: string;
-		readonly initials: string;
-	};
+	readonly publishers: readonly [
+		{
+			readonly name: string;
+			readonly initials: string;
+			readonly summary: string;
+		},
+		{
+			readonly name: string;
+			readonly initials: string;
+			readonly summary: string;
+		},
+		...{
+			readonly name: string;
+			readonly initials: string;
+			readonly summary: string;
+		}[],
+	];
+	readonly realms: readonly [
+		{
+			readonly name: string;
+			readonly initials: string;
+			readonly summary: string;
+		},
+		{
+			readonly name: string;
+			readonly initials: string;
+			readonly summary: string;
+		},
+		...{
+			readonly name: string;
+			readonly initials: string;
+			readonly summary: string;
+		}[],
+	];
 	readonly post: {
 		readonly title: string;
 		readonly body: string;

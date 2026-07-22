@@ -137,6 +137,17 @@ export function primaryUnitTitle(unitId: SQLWrapper): SQL<string | null> {
 	)`;
 }
 
+/** Select the primary display summary without joining a second localization role. */
+export function primaryUnitSummary(unitId: SQLWrapper): SQL<string | null> {
+	return sql<string | null>`(
+		select ${unitLocalization.summary}
+		from ${unitLocalization}
+		where ${unitLocalization.unitId} = ${unitId}
+		order by ${unitLocalization.position}, ${unitLocalization.language}
+		limit 1
+	)`;
+}
+
 /** Resolve the requested localization, then fall back to the primary localization. */
 export function resolvedUnitLocalizationLanguage(
 	unitId: SQLWrapper,

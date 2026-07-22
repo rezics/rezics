@@ -1,18 +1,14 @@
 "use client";
 
-import { useFeedFixtureData } from "@rezics/fixture-client";
 import type { GetApiFeedSort } from "@rezics/openapi-tanstack-query";
 import { useState, type ReactNode } from "react";
 
-import { Badge } from "@rezics/ui";
 import {
-	FeedCard,
-	FeedCardBody,
-	FeedCardContent,
-	FeedCardHeader,
-	FeedCardTitle,
-} from "@/features/content-feed/feed-card";
-import { formatRelativeTime } from "@/features/content-feed/format-relative-time";
+	BookFeedCard,
+	CollectionFeedCard,
+	PostFeedCard,
+	ReviewFeedCard,
+} from "@/features/content-feed/feed-card.fixture";
 import { FeedListControls, FeedListItems } from "@/features/content-feed/feed-list";
 import {
 	DefaultFeedContentKinds,
@@ -29,7 +25,7 @@ function FullFeedListFixture() {
 	const [contentKinds, setContentKinds] =
 		useState<readonly FeedContentKind[]>(DefaultFeedContentKinds);
 	return (
-		<div className="grid gap-0">
+		<div className="grid gap-3 sm:gap-4">
 			<FeedListControls
 				contentKinds={contentKinds}
 				contentOptions={FeedContentKinds}
@@ -38,7 +34,7 @@ function FullFeedListFixture() {
 				showBulkActions
 				sort={sort}
 			/>
-			<MockFeedItems />
+			<FixtureFeedItems />
 		</div>
 	);
 }
@@ -49,7 +45,7 @@ function PostListFixture() {
 		DefaultPostListContentKinds,
 	);
 	return (
-		<div className="grid gap-0">
+		<div className="grid gap-3 sm:gap-4">
 			<FeedListControls
 				contentKinds={contentKinds}
 				contentOptions={PostListContentKinds}
@@ -58,45 +54,19 @@ function PostListFixture() {
 				showBulkActions={false}
 				sort={sort}
 			/>
-			<MockFeedItems />
+			<FixtureFeedItems />
 		</div>
 	);
 }
 
-function MockFeedItems() {
-	const fixture = useFeedFixtureData();
-	const { locale, t } = useTranslation(["feed"]);
-	const timestamp = formatRelativeTime(fixture.createdAt, locale.target, fixture.referenceTime);
+function FixtureFeedItems() {
+	const { t } = useTranslation(["feed"]);
 	return (
 		<FeedListItems aria-label={t.feed.title}>
-			<FeedCard aria-labelledby="fixture-feed-post">
-				<FeedCardHeader
-					actor={fixture.publisher}
-					realms={fixture.realms}
-					timestamp={timestamp}
-				/>
-				<FeedCardContent>
-					<Badge className="w-fit" size="sm" variant="outline">
-						{t.feed.content.kinds["post:post"]}
-					</Badge>
-					<FeedCardTitle id="fixture-feed-post">{fixture.post.title}</FeedCardTitle>
-					<FeedCardBody>{fixture.post.body}</FeedCardBody>
-				</FeedCardContent>
-			</FeedCard>
-			<FeedCard aria-labelledby="fixture-feed-book">
-				<FeedCardHeader
-					actor={fixture.publisher}
-					realms={fixture.realms}
-					timestamp={timestamp}
-				/>
-				<FeedCardContent>
-					<Badge className="w-fit" size="sm" variant="info">
-						{t.feed.content.kinds["unit:book"]}
-					</Badge>
-					<FeedCardTitle id="fixture-feed-book">{fixture.collection.title}</FeedCardTitle>
-					<FeedCardBody>{fixture.collection.body}</FeedCardBody>
-				</FeedCardContent>
-			</FeedCard>
+			<PostFeedCard />
+			<ReviewFeedCard />
+			<BookFeedCard />
+			<CollectionFeedCard />
 		</FeedListItems>
 	);
 }

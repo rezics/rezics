@@ -6,7 +6,7 @@ import {
 	type GetApiFeedSort,
 } from "@rezics/openapi-tanstack-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Children, Fragment, useEffect, useRef, useState, type ComponentProps } from "react";
+import { useEffect, useRef, useState, type ComponentProps } from "react";
 
 import {
 	Alert,
@@ -15,7 +15,6 @@ import {
 	Button,
 	CardContent,
 	ChoiceSelect,
-	Separator,
 	Skeleton,
 	cn,
 } from "@rezics/ui";
@@ -152,7 +151,10 @@ export function FeedList<ContentKind extends FeedContentKind>({
 			) : !items?.length ? (
 				<FeedEmptyState />
 			) : (
-				<FeedListItems aria-label={t.feed.title}>
+				<FeedListItems
+					aria-label={t.feed.title}
+					className={showControls ? "mt-3 sm:mt-4" : undefined}
+				>
 					{items.map((item) => (
 						<FeedItemCard
 							canExclude={Boolean(session)}
@@ -268,20 +270,14 @@ export function FeedListControls<ContentKind extends FeedContentKind>({
 }
 
 export function FeedListItems({ children, className, ...props }: ComponentProps<"div">) {
-	const items = Children.toArray(children);
 	return (
 		<div
-			className={cn("w-full overflow-hidden bg-background", className)}
+			className={cn("grid w-full gap-3 bg-transparent sm:gap-4", className)}
 			data-slot="feed-list-items"
 			role="feed"
 			{...props}
 		>
-			{items.map((item, index) => (
-				<Fragment key={index}>
-					{item}
-					{index < items.length - 1 ? <Separator className="bg-border-weak" /> : null}
-				</Fragment>
-			))}
+			{children}
 		</div>
 	);
 }
