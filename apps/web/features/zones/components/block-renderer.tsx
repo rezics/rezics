@@ -28,10 +28,14 @@ import {
 	FieldLabel,
 	IdentityAvatar,
 	Input,
+	Menu,
+	MenuContent,
+	MenuItem,
+	MenuSub,
+	MenuSubContent,
+	MenuSubTrigger,
+	MenuTrigger,
 	PortableTextContent,
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
 	Separator,
 	Spinner,
 	Tabs,
@@ -44,7 +48,9 @@ import { ChevronDown, ExternalLink, Search } from "lucide-react";
 import {
 	createContext,
 	useContext,
+	useEffect,
 	useMemo,
+	useRef,
 	useState,
 	type CSSProperties,
 	type FormEvent,
@@ -60,6 +66,8 @@ type RenderAsset = ZoneRenderProjection["references"]["assets"][number];
 type ZoneBlockSurface =
 	{ readonly kind: "dock" } | { readonly kind: "page"; readonly slug: string };
 type ZoneNavigationLayout = "horizontal" | "vertical";
+type NavigationLeafItem = Extract<NavigationItem, { target: unknown }>;
+type NavigationGroupItem = Extract<NavigationItem, { children: unknown }>;
 type SearchResult = {
 	readonly id: string;
 	readonly category: string;
@@ -211,17 +219,25 @@ function ReferencedUnit({ unit, appearance }: { unit: RenderUnit; appearance: st
 	return href ? <AppLink href={href}>{content}</AppLink> : content;
 }
 
-function NavigationLeaf({ item }: { item: Extract<NavigationItem, { target: unknown }> }) {
+const RootMenuPositioning = { placement: "bottom-start", gutter: 4 } as const;
+const NestedMenuPositioning = { placement: "right-start", gutter: -2 } as const;
+const MenuHoverCloseDelay = 180;
+
+function navigationLabel(item: NavigationItem, context: ZoneBlockContextValue): string | null {
+	return context.units.get(item.labelUnitId)?.title ?? null;
+}
+
+function NavigationLeaf({ item }: { item: NavigationLeafItem }) {
 	const context = useZoneBlocks();
 	const layout = useContext(ZoneNavigationLayoutContext);
-	const label = context.units.get(item.labelUnitId)?.title;
+	const label = navigationLabel(item, context);
 	const href = navigationHref(item.target, context);
 	if (!label || !href) return null;
 	const external = item.target.kind === "external";
 	return (
 		<AppLink
 			className={cn(
-				"inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 font-medium text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
+				"inline-flex min-h-10 items-center gap-1.5 whitespace-nowrap rounded-lg px-3 font-medium text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
 				layout === "vertical" && "w-full",
 			)}
 			href={href}
@@ -234,31 +250,123 @@ function NavigationLeaf({ item }: { item: Extract<NavigationItem, { target: unkn
 	);
 }
 
-function NavigationNode({ item }: { item: NavigationItem }) {
+interface NavigationHoverBoundary {
+	onPointerEnter: () => void;
+	onPointerLeave: () => void;
+}
+
+function NavigationMenuLeaf({ item }: { item: NavigationLeafItem }) {
+	const context = useZoneBlocks();
+	const label = navigationLabel(item, context);
+	const href = navigationHref(item.target, context);
+	if (!label || !href) return null;
+	const external = item.target.kind === "external";
+	return (
+		<MenuItem asChild value={item._key}>
+			<AppLink
+				href={href}
+				rel={external ? "noopener noreferrer" : undefined}
+				target={external ? "_blank" : undefined}
+			>
+				{label}
+				{external ? <ExternalLink aria-hidden className="ms-auto size-3.5" /> : null}
+			</AppLink>
+		</MenuItem>
+	);
+}
+
+function NavigationSubmenu({
+	hoverBoundary,
+	item,
+}: {
+	hoverBoundary: NavigationHoverBoundary;
+	item: NavigationGroupItem;
+}) {
+	const context = useZoneBlocks();
+	const label = navigationLabel(item, context);
+	if (!label) return null;
+	return (
+		<MenuSub positioning={NestedMenuPositioning}>
+			<MenuSubTrigger>{label}</MenuSubTrigger>
+			<MenuSubContent
+				className="min-w-52"
+				onPointerEnter={hoverBoundary.onPointerEnter}
+				onPointerLeave={hoverBoundary.onPointerLeave}
+			>
+				{item.children.map((child) => (
+					<NavigationMenuNode
+						hoverBoundary={hoverBoundary}
+						item={child}
+						key={child._key}
+					/>
+				))}
+			</MenuSubContent>
+		</MenuSub>
+	);
+}
+
+function NavigationMenuNode({
+	hoverBoundary,
+	item,
+}: {
+	hoverBoundary: NavigationHoverBoundary;
+	item: NavigationItem;
+}) {
+	return "target" in item ? (
+		<NavigationMenuLeaf item={item} />
+	) : (
+		<NavigationSubmenu hoverBoundary={hoverBoundary} item={item} />
+	);
+}
+
+function NavigationDropdown({
+	hoverBoundary,
+	item,
+	onOpenChange,
+	open,
+}: {
+	hoverBoundary: NavigationHoverBoundary;
+	item: NavigationGroupItem;
+	onOpenChange: (open: boolean) => void;
+	open: boolean;
+}) {
 	const { t } = useTranslation("zones");
 	const context = useZoneBlocks();
 	const layout = useContext(ZoneNavigationLayoutContext);
-	if ("target" in item) return <NavigationLeaf item={item} />;
-	const label = context.units.get(item.labelUnitId)?.title;
+	const label = navigationLabel(item, context);
 	if (!label) return null;
 	return (
-		<Popover modal={false} positioning={{ placement: "bottom-start", gutter: 4 }}>
-			<PopoverTrigger
+		<Menu
+			onOpenChange={({ open: nextOpen }) => onOpenChange(nextOpen)}
+			open={open}
+			positioning={RootMenuPositioning}
+		>
+			<MenuTrigger
 				aria-label={t.openMenu({ label })}
 				className={cn(
-					"flex min-h-10 cursor-pointer items-center gap-1 rounded-lg px-3 font-medium text-sm hover:bg-accent",
+					"flex min-h-10 cursor-pointer items-center gap-1 whitespace-nowrap rounded-lg px-3 font-medium text-sm hover:bg-accent data-[state=open]:bg-accent",
 					layout === "vertical" && "w-full justify-between",
 				)}
+				onPointerEnter={hoverBoundary.onPointerEnter}
+				onPointerLeave={hoverBoundary.onPointerLeave}
 			>
 				{label}
 				<ChevronDown aria-hidden className="size-3.5" />
-			</PopoverTrigger>
-			<PopoverContent className="grid min-w-52 gap-1 p-2">
+			</MenuTrigger>
+			<MenuContent
+				className="min-w-52"
+				onPointerEnter={hoverBoundary.onPointerEnter}
+				onPointerLeave={hoverBoundary.onPointerLeave}
+			>
 				{item.children.map((child) => (
-					<NavigationNode item={child} key={child._key} />
+					<NavigationMenuNode
+						hoverBoundary={hoverBoundary}
+						item={child}
+						key={child._key}
+					/>
 				))}
-			</PopoverContent>
-		</Popover>
+			</MenuContent>
+		</Menu>
 	);
 }
 
@@ -266,16 +374,64 @@ export function ZoneNavigationMenu({ navigationId }: { navigationId: string }) {
 	const { t } = useTranslation("zones");
 	const context = useZoneBlocks();
 	const layout = useContext(ZoneNavigationLayoutContext);
+	const [openGroupKey, setOpenGroupKey] = useState<string | null>(null);
+	const closeTimeoutRef = useRef<number | null>(null);
 	const navigation = context.navigations.get(navigationId);
+
+	const cancelScheduledClose = () => {
+		if (closeTimeoutRef.current === null) return;
+		window.clearTimeout(closeTimeoutRef.current);
+		closeTimeoutRef.current = null;
+	};
+	const openGroup = (key: string) => {
+		cancelScheduledClose();
+		setOpenGroupKey(key);
+	};
+	const scheduleClose = () => {
+		cancelScheduledClose();
+		closeTimeoutRef.current = window.setTimeout(() => {
+			setOpenGroupKey(null);
+			closeTimeoutRef.current = null;
+		}, MenuHoverCloseDelay);
+	};
+
+	useEffect(
+		() => () => {
+			if (closeTimeoutRef.current !== null) window.clearTimeout(closeTimeoutRef.current);
+		},
+		[],
+	);
+
 	if (!navigation) return null;
 	return (
 		<nav
 			aria-label={t.navigation}
-			className={cn("min-w-0 gap-1", layout === "horizontal" ? "flex items-center" : "grid")}
+			className={cn(
+				"min-w-0 gap-1",
+				layout === "horizontal" ? "flex shrink-0 items-center" : "grid",
+			)}
 		>
-			{navigation.document.items.map((item) => (
-				<NavigationNode item={item} key={item._key} />
-			))}
+			{navigation.document.items.map((item) => {
+				if ("target" in item) return <NavigationLeaf item={item} key={item._key} />;
+				const hoverBoundary = {
+					onPointerEnter: () => openGroup(item._key),
+					onPointerLeave: scheduleClose,
+				};
+				return (
+					<NavigationDropdown
+						hoverBoundary={hoverBoundary}
+						item={item}
+						key={item._key}
+						onOpenChange={(open) => {
+							cancelScheduledClose();
+							setOpenGroupKey((current) =>
+								open ? item._key : current === item._key ? null : current,
+							);
+						}}
+						open={openGroupKey === item._key}
+					/>
+				);
+			})}
 		</nav>
 	);
 }

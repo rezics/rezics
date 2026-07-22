@@ -21,6 +21,12 @@ export function ZoneHeader({
 }) {
 	const { t } = useTranslation("zones");
 	const [compact, setCompact] = useState(false);
+	const navigationIds = new Set(projection.navigations.map((navigation) => navigation.id));
+	const menuBlocks = projection.dock?.document.blocks.filter(
+		(block) => block._type === "menu" && navigationIds.has(block.navigationId),
+	);
+	const hasMenu = Boolean(menuBlocks?.length);
+	const expanded = hasMenu && !compact;
 
 	useEffect(() => {
 		const update = () => setCompact(window.scrollY >= 64);
@@ -33,28 +39,29 @@ export function ZoneHeader({
 		<header
 			aria-label={t.navigation}
 			className={cn(
-				"sticky top-28 z-30 border-b bg-background/96 backdrop-blur-xl transition-[min-height] duration-200 sm:top-14 motion-reduce:transition-none",
-				compact ? "min-h-14" : "min-h-14 sm:min-h-24",
+				"sticky top-28 z-30 bg-background/96 backdrop-blur-xl transition-[min-height] duration-200 sm:top-14 motion-reduce:transition-none",
+				expanded ? "min-h-14 sm:min-h-24" : "min-h-14 sm:min-h-16",
 			)}
-			style={{ borderBottomColor: projection.zone.themeDocument.accent }}
 		>
 			<div
 				className={cn(
-					"mx-auto flex w-full max-w-screen-2xl items-center gap-3 px-3 transition-[padding] duration-200 sm:px-5 motion-reduce:transition-none",
-					compact ? "py-2" : "py-2 sm:py-4",
+					"mx-auto grid w-full max-w-6xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 px-4 py-2 transition-[padding] duration-200 sm:px-6 motion-reduce:transition-none",
+					expanded
+						? "sm:grid-cols-[3.5rem_minmax(0,1fr)_auto] sm:grid-rows-[auto_auto] sm:gap-y-0 sm:py-3"
+						: "sm:grid-cols-[auto_auto_minmax(0,1fr)_auto] sm:grid-rows-1",
 				)}
 			>
-				{projection.dock ? (
+				{hasMenu ? (
 					<Popover modal={false} positioning={{ placement: "bottom-start", gutter: 6 }}>
 						<PopoverTrigger
 							aria-label={t.openNavigation}
-							className="flex size-10 shrink-0 items-center justify-center rounded-lg hover:bg-accent sm:hidden"
+							className="col-start-1 row-start-1 flex size-10 shrink-0 items-center justify-center rounded-lg hover:bg-accent sm:hidden"
 						>
 							<ListTree aria-hidden className="size-5" />
 						</PopoverTrigger>
 						<PopoverContent className="w-[min(20rem,calc(100vw-1.5rem))] p-2 sm:hidden">
 							<ZoneDocument
-								blocks={projection.dock.document.blocks}
+								blocks={menuBlocks ?? []}
 								navigationLayout="vertical"
 								surface={{ kind: "dock" }}
 							/>
@@ -64,31 +71,42 @@ export function ZoneHeader({
 				<IdentityAvatar
 					avatar={avatar}
 					className={cn(
-						"hidden shrink-0 transition-[width,height] sm:flex",
-						compact ? "size-9" : "size-11 sm:size-14",
+						"hidden shrink-0 transition-[width,height] sm:col-start-1 sm:row-start-1 sm:flex",
+						expanded ? "size-14 sm:row-span-2" : compact ? "size-9" : "size-10",
 					)}
 					fallback={title.slice(0, 1).toUpperCase()}
 				/>
 				<p
 					className={cn(
-						"min-w-0 flex-1 truncate font-bold tracking-tight transition-[font-size] sm:flex-initial",
+						"col-start-2 row-start-1 min-w-0 truncate font-bold tracking-tight transition-[font-size]",
 						compact
-							? "max-w-48 text-sm sm:max-w-64 sm:text-base"
-							: "max-w-64 text-base sm:max-w-sm sm:text-xl",
+							? "text-sm sm:text-base"
+							: expanded
+								? "text-base sm:text-xl"
+								: "text-base sm:text-lg",
 					)}
 				>
 					{title}
 				</p>
-				<div className="hidden min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] sm:block [&::-webkit-scrollbar]:hidden">
-					{projection.dock ? (
-						<ZoneDocument
-							blocks={projection.dock.document.blocks}
-							surface={{ kind: "dock" }}
-						/>
+				<div
+					className={cn(
+						"hidden min-w-0 items-center overflow-x-auto [scrollbar-width:none] sm:flex [&::-webkit-scrollbar]:hidden",
+						expanded
+							? "sm:col-start-2 sm:row-start-2"
+							: "sm:col-start-3 sm:row-start-1",
+					)}
+				>
+					{hasMenu ? (
+						<ZoneDocument blocks={menuBlocks ?? []} surface={{ kind: "dock" }} />
 					) : null}
 				</div>
 				<FollowButton
-					className="shrink-0"
+					className={cn(
+						"col-start-3 row-start-1 shrink-0",
+						expanded
+							? "sm:col-start-3 sm:row-span-2 sm:row-start-1"
+							: "sm:col-start-4 sm:row-start-1",
+					)}
 					size={compact ? "sm" : "md"}
 					unitId={projection.zone.id}
 				/>
