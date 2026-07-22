@@ -3,27 +3,27 @@ import Elysia, { t } from "elysia";
 
 import session from "../../auth/session";
 import {
-	createEntityAssociationInvitation,
-	createEntityAssociationRequest,
-	listEntityAssociationProposals,
-	resolveEntityAssociationProposal,
-} from "../../entities/association-proposals";
-import { EntityAssociationProposalExpiryInvalid } from "../../entities/errors";
+	createAssociationInvitation,
+	createAssociationRequest,
+	listAssociationProposals,
+	resolveAssociationProposal,
+} from "../../units/association-proposals";
+import { AssociationProposalExpiryInvalid } from "../../units/errors";
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
 import {
-	CreateEntityAssociationInvitationBody,
-	CreateEntityAssociationRequestBody,
-	EntityAssociationProposalListResponse,
-	EntityAssociationProposalResponse,
-	ListEntityAssociationProposalsQuery,
+	CreateAssociationInvitationBody,
+	CreateAssociationRequestBody,
+	AssociationProposalListResponse,
+	AssociationProposalResponse,
+	ListAssociationProposalsQuery,
 	UnitAssociationProposalActionParams,
 	UnitAssociationProposalParams,
 } from "./schema";
 
 function futureDate(value: string): Date {
 	const date = new Date(value);
-	if (date <= new Date()) throw new EntityAssociationProposalExpiryInvalid();
+	if (date <= new Date()) throw new AssociationProposalExpiryInvalid();
 	return date;
 }
 
@@ -36,11 +36,11 @@ const ProposalForbiddenResponse = toApiErrorResponse([
 const ProposalNotFoundResponse = toApiErrorResponse([
 	"UnitNotFound",
 	"EntityEntryNotFound",
-	"EntityAssociationProposalNotFound",
+	"AssociationProposalNotFound",
 ]);
 const ProposalConflictResponse = toApiErrorResponse([
-	"EntityAssociationProposalConflict",
-	"EntityAssociationProposalExpired",
+	"AssociationProposalConflict",
+	"AssociationProposalExpired",
 ]);
 
 export default new Elysia({ prefix: "/unit" })
@@ -48,7 +48,7 @@ export default new Elysia({ prefix: "/unit" })
 	.get(
 		"/:unitId/association-proposals",
 		async ({ authorization, params, query }) => ({
-			items: await listEntityAssociationProposals(authorization, {
+			items: await listAssociationProposals(authorization, {
 				unitId: params.unitId,
 				side: query.side,
 				kind: query.kind,
@@ -58,21 +58,21 @@ export default new Elysia({ prefix: "/unit" })
 		{
 			access: "session-only",
 			params: UnitAssociationProposalParams,
-			query: ListEntityAssociationProposalsQuery,
+			query: ListAssociationProposalsQuery,
 			response: {
-				[StatusCodes.OK]: EntityAssociationProposalListResponse,
+				[StatusCodes.OK]: AssociationProposalListResponse,
 				[StatusCodes.FORBIDDEN]: ProposalForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: ProposalNotFoundResponse,
 			},
-			detail: { summary: "List Unit association proposals", tags: ["Entity"] },
+			detail: { summary: "List Unit association proposals", tags: ["Unit"] },
 		},
 	)
 	.post(
 		"/:unitId/association-proposals/requests",
 		async ({ authorization, profile, params, body }) =>
-			createEntityAssociationRequest(authorization, profile.unitId, {
+			createAssociationRequest(authorization, profile.unitId, {
 				sourceUnitId: params.unitId,
-				targetEntityId: body.targetEntityId,
+				targetUnitId: body.targetUnitId,
 				kind: body.kind,
 				role: body.role,
 				expiresAt: futureDate(body.expiresAt),
@@ -80,25 +80,23 @@ export default new Elysia({ prefix: "/unit" })
 		{
 			access: "session-only",
 			params: UnitAssociationProposalParams,
-			body: CreateEntityAssociationRequestBody,
+			body: CreateAssociationRequestBody,
 			response: {
-				[StatusCodes.OK]: EntityAssociationProposalResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"EntityAssociationProposalExpiryInvalid",
-				]),
+				[StatusCodes.OK]: AssociationProposalResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["AssociationProposalExpiryInvalid"]),
 				[StatusCodes.FORBIDDEN]: ProposalForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: ProposalNotFoundResponse,
 				[StatusCodes.CONFLICT]: ProposalConflictResponse,
 			},
-			detail: { summary: "Request Entity association", tags: ["Entity"] },
+			detail: { summary: "Request Unit association", tags: ["Unit"] },
 		},
 	)
 	.post(
 		"/:unitId/association-proposals/invitations",
 		async ({ authorization, profile, params, body }) =>
-			createEntityAssociationInvitation(authorization, profile.unitId, {
+			createAssociationInvitation(authorization, profile.unitId, {
 				sourceUnitId: body.sourceUnitId,
-				targetEntityId: params.unitId,
+				targetUnitId: params.unitId,
 				kind: body.kind,
 				role: body.role,
 				expiresAt: futureDate(body.expiresAt),
@@ -106,23 +104,21 @@ export default new Elysia({ prefix: "/unit" })
 		{
 			access: "session-only",
 			params: UnitAssociationProposalParams,
-			body: CreateEntityAssociationInvitationBody,
+			body: CreateAssociationInvitationBody,
 			response: {
-				[StatusCodes.OK]: EntityAssociationProposalResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
-					"EntityAssociationProposalExpiryInvalid",
-				]),
+				[StatusCodes.OK]: AssociationProposalResponse,
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["AssociationProposalExpiryInvalid"]),
 				[StatusCodes.FORBIDDEN]: ProposalForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: ProposalNotFoundResponse,
 				[StatusCodes.CONFLICT]: ProposalConflictResponse,
 			},
-			detail: { summary: "Invite Unit to Entity association", tags: ["Entity"] },
+			detail: { summary: "Invite Unit to association", tags: ["Unit"] },
 		},
 	)
 	.post(
 		"/:unitId/association-proposals/:proposalId/accept",
 		async ({ authorization, profile, params }) =>
-			resolveEntityAssociationProposal(authorization, profile.unitId, {
+			resolveAssociationProposal(authorization, profile.unitId, {
 				actingUnitId: params.unitId,
 				proposalId: params.proposalId,
 				action: "accept",
@@ -132,18 +128,18 @@ export default new Elysia({ prefix: "/unit" })
 			params: UnitAssociationProposalActionParams,
 			body: t.Optional(t.Object({}, { additionalProperties: false })),
 			response: {
-				[StatusCodes.OK]: EntityAssociationProposalResponse,
+				[StatusCodes.OK]: AssociationProposalResponse,
 				[StatusCodes.FORBIDDEN]: ProposalForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: ProposalNotFoundResponse,
 				[StatusCodes.CONFLICT]: ProposalConflictResponse,
 			},
-			detail: { summary: "Accept Entity association proposal", tags: ["Entity"] },
+			detail: { summary: "Accept Unit association proposal", tags: ["Unit"] },
 		},
 	)
 	.post(
 		"/:unitId/association-proposals/:proposalId/decline",
 		async ({ authorization, profile, params }) =>
-			resolveEntityAssociationProposal(authorization, profile.unitId, {
+			resolveAssociationProposal(authorization, profile.unitId, {
 				actingUnitId: params.unitId,
 				proposalId: params.proposalId,
 				action: "decline",
@@ -153,18 +149,18 @@ export default new Elysia({ prefix: "/unit" })
 			params: UnitAssociationProposalActionParams,
 			body: t.Optional(t.Object({}, { additionalProperties: false })),
 			response: {
-				[StatusCodes.OK]: EntityAssociationProposalResponse,
+				[StatusCodes.OK]: AssociationProposalResponse,
 				[StatusCodes.FORBIDDEN]: ProposalForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: ProposalNotFoundResponse,
 				[StatusCodes.CONFLICT]: ProposalConflictResponse,
 			},
-			detail: { summary: "Decline Entity association proposal", tags: ["Entity"] },
+			detail: { summary: "Decline Unit association proposal", tags: ["Unit"] },
 		},
 	)
 	.delete(
 		"/:unitId/association-proposals/:proposalId",
 		async ({ authorization, profile, params }) => {
-			await resolveEntityAssociationProposal(authorization, profile.unitId, {
+			await resolveAssociationProposal(authorization, profile.unitId, {
 				actingUnitId: params.unitId,
 				proposalId: params.proposalId,
 				action: "cancel",
@@ -181,8 +177,8 @@ export default new Elysia({ prefix: "/unit" })
 				[StatusCodes.CONFLICT]: ProposalConflictResponse,
 			},
 			detail: {
-				summary: "Cancel Entity association proposal",
-				tags: ["Entity"],
+				summary: "Cancel Unit association proposal",
+				tags: ["Unit"],
 				responses: NoContentResponse,
 			},
 		},

@@ -1,5 +1,4 @@
-import { and, asc, count, desc, eq, inArray, isNull, lt, max, min, or, sql } from "drizzle-orm";
-import type { PresentedAvatar } from "@rezics/avatar";
+import { and, desc, eq, isNull, lt, or, sql } from "drizzle-orm";
 
 import { database, type DatabaseTransaction } from "../database";
 import {
@@ -11,18 +10,9 @@ import {
 	UnitStatusActorKindValues,
 	UnitStatusValues,
 } from "../database/schema";
-import {
-	primaryUnitSummary,
-	primaryUnitTitle,
-	resolvedUnitLocalizationAvatar,
-} from "./localization";
-import { presentAvatar } from "./avatar";
+import { primaryUnitTitle } from "./localization";
 import { UnitChanged, UnitNotFound, UnitPermissionForbidden } from "./errors";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
-import {
-	getPublicCanonicalUnitSlugAddresses,
-	type PublicCanonicalUnitSlugAddress,
-} from "./slug-address";
 
 export type UnitStatus = (typeof UnitStatusValues)[number];
 export type UnitStatusActorKind = (typeof UnitStatusActorKindValues)[number];
@@ -38,17 +28,6 @@ export type UnitStatusTransitionAuthorization =
 export function crossesPublishedBoundary(fromStatus: UnitStatus, toStatus: UnitStatus): boolean {
 	return fromStatus !== toStatus && (fromStatus === "published" || toStatus === "published");
 }
-
-export type UnitPublisherSummary = {
-	readonly profileId: string;
-	readonly slugAddress: PublicCanonicalUnitSlugAddress | null;
-	readonly name: string | null;
-	readonly summary: string | null;
-	readonly avatar: PresentedAvatar | null;
-	readonly firstPublishedAt: Date;
-	readonly lastPublishedAt: Date;
-	readonly publicationCount: number;
-};
 
 export type UnitStatusEventView = {
 	readonly id: string;
@@ -239,54 +218,6 @@ export async function transitionUnitStatus(
 		toStatus: input.toStatus,
 		publishedAt,
 	};
-}
-
-export async function getPublisherSummariesByUnitIds(
-	unitIds: readonly string[],
-): Promise<Map<string, UnitPublisherSummary[]>> {
-	const result = new Map<string, UnitPublisherSummary[]>();
-	for (const unitId of unitIds) result.set(unitId, []);
-	if (!unitIds.length) return result;
-	const rows = await database
-		.select({
-			unitId: unitStatusEvent.unitId,
-			profileId: profile.id,
-			name: primaryUnitTitle(profile.id),
-			summary: primaryUnitSummary(profile.id),
-			avatar: resolvedUnitLocalizationAvatar(profile.id),
-			firstPublishedAt: min(unitStatusEvent.createdAt),
-			lastPublishedAt: max(unitStatusEvent.createdAt),
-			publicationCount: count(unitStatusEvent.id),
-		})
-		.from(unitStatusEvent)
-		.innerJoin(profile, eq(profile.id, unitStatusEvent.changedByProfileId))
-		.where(
-			and(
-				inArray(unitStatusEvent.unitId, [...unitIds]),
-				eq(unitStatusEvent.toStatus, "published"),
-				eq(unitStatusEvent.actorKind, "profile"),
-				eq(unitStatusEvent.actorHidden, false),
-			),
-		)
-		.groupBy(unitStatusEvent.unitId, profile.id)
-		.orderBy(asc(min(unitStatusEvent.createdAt)), asc(profile.id));
-	const slugAddresses = await getPublicCanonicalUnitSlugAddresses(
-		rows.map((row) => row.profileId),
-	);
-	for (const row of rows) {
-		if (!row.firstPublishedAt || !row.lastPublishedAt) continue;
-		result.get(row.unitId)?.push({
-			profileId: row.profileId,
-			slugAddress: slugAddresses.get(row.profileId) ?? null,
-			name: row.name,
-			summary: row.summary,
-			avatar: presentAvatar(row.avatar),
-			firstPublishedAt: row.firstPublishedAt,
-			lastPublishedAt: row.lastPublishedAt,
-			publicationCount: row.publicationCount,
-		});
-	}
-	return result;
 }
 
 export async function listUnitStatusEvents(input: {

@@ -36,7 +36,6 @@ import {
 	media,
 	series,
 	unit,
-	creditAttribution,
 	subjectAssociation,
 	unitLink,
 	unitLocalization,
@@ -49,7 +48,8 @@ import { UnitDetailResponse } from "../api/schema/response";
 import { UnitChanged, UnitNotFound, UnitPrimaryLanguageMissing } from "./errors";
 import { recordUnitRevision } from "./history";
 import { insertUnit } from "./create";
-import { getPublisherSummariesByUnitIds, transitionUnitStatus } from "./status";
+import { transitionUnitStatus } from "./status";
+import { getAttributionSummariesByUnitIds } from "./attribution";
 import { getUnitVariantContext } from "./variants";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
 import { presentAvatar } from "./avatar";
@@ -238,25 +238,7 @@ export async function getUnit(
 		.where(eq(unitLocalization.unitId, base.id))
 		.orderBy(unitLocalization.position, unitLocalization.language);
 	const primaryLanguage = localizations[0]?.language ?? null;
-	const credits = await database
-		.select({
-			id: creditAttribution.id,
-			entityEntryId: creditAttribution.entityId,
-			role: creditAttribution.role,
-			position: creditAttribution.position,
-			title: unitLocalization.title,
-		})
-		.from(creditAttribution)
-		.innerJoin(entity, eq(entity.id, creditAttribution.entityId))
-		.leftJoin(
-			unitLocalization,
-			and(
-				eq(unitLocalization.unitId, entity.id),
-				primaryLanguage ? eq(unitLocalization.language, primaryLanguage) : sql`false`,
-			),
-		)
-		.where(eq(creditAttribution.unitId, base.id))
-		.orderBy(creditAttribution.position, creditAttribution.id);
+	const attributions = (await getAttributionSummariesByUnitIds([base.id])).get(base.id) ?? [];
 	const subjectAssociations = await database
 		.select({
 			id: subjectAssociation.id,
@@ -316,7 +298,6 @@ export async function getUnit(
 		authorization.unit.decide(base.id, "unit.access.manage"),
 		authorization.unit.decide(base.id, "unit.association.manage"),
 	]);
-	const publishers = (await getPublisherSummariesByUnitIds([base.id])).get(base.id) ?? [];
 	const details = await getUnitDetails(kind, base.id);
 	return {
 		id: base.id,
@@ -329,7 +310,7 @@ export async function getUnit(
 		license: parseNullablePublicationLicenseId(base.license),
 		postTargetingLocked: base.postTargetingLocked,
 		publishedAt: base.publishedAt,
-		publishers,
+		attributions,
 		createdAt: base.createdAt,
 		updatedAt: base.updatedAt,
 		primaryLanguage,
@@ -376,7 +357,6 @@ export async function getUnit(
 				cover: presentImageAsset(coverAssetId),
 			}),
 		),
-		credits: credits.map((credit) => ({ ...credit, evidenceUrl: null, note: null })),
 		subjectAssociations,
 		links: links.map((link) => ({
 			...link,
@@ -467,11 +447,11 @@ export async function listUnits(kind: CatalogUnitKind, cursor?: [string, string]
 		)
 		.orderBy(desc(unit.createdAt), desc(unit.id))
 		.limit(limit + 1);
-	const publishers = await getPublisherSummariesByUnitIds(rows.map(({ id }) => id));
+	const attributions = await getAttributionSummariesByUnitIds(rows.map(({ id }) => id));
 	return Promise.all(
 		rows.map(async ({ avatar, bannerAssetId, coverAssetId, ...row }) => ({
 			...row,
-			publishers: publishers.get(row.id) ?? [],
+			attributions: attributions.get(row.id) ?? [],
 			avatar: presentAvatar(avatar),
 			banner: presentImageAsset(bannerAssetId),
 			cover: presentImageAsset(coverAssetId),

@@ -35,7 +35,7 @@ function isFixtureDevelopmentSurface(path: URL): boolean {
 
 function FixtureProbe() {
 	const fixture = useFixtureClient();
-	return <span data-language={fixture.contentLanguage}>{fixture.feed.publishers[0].name}</span>;
+	return <span data-language={fixture.contentLanguage}>{fixture.feed.attributions[0].name}</span>;
 }
 
 describe("fixture package boundaries", () => {

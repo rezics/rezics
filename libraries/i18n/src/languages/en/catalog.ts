@@ -3,6 +3,7 @@ export default {
 	tags: "Tags",
 	kind: "Kind",
 	verification: "Verification",
+	owner: "Owner",
 	verified: "Verified",
 	unverified: "Unverified",
 	newEntity: "New catalog entry",

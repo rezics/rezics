@@ -22,7 +22,10 @@ import {
 	ensurePostMountTargetingAllowed,
 	ensureSubjectPostTargetingAllowed,
 } from "../../posts/targeting";
-import { getPublisherSummariesByUnitIds } from "../../units/status";
+import {
+	createProfilePublisherAttribution,
+	getAttributionSummariesByUnitIds,
+} from "../../units/attribution";
 import {
 	IdResponse,
 	NoContentResponse,
@@ -96,7 +99,7 @@ export default new Elysia()
 						)
 						.orderBy(desc(unit.createdAt), desc(unit.id))
 						.limit(query.limit ?? 20);
-					const publishers = await getPublisherSummariesByUnitIds(
+					const attributions = await getAttributionSummariesByUnitIds(
 						items.map(({ id }) => id),
 					);
 					return {
@@ -107,7 +110,7 @@ export default new Elysia()
 											...item,
 											realmId: query.realmId ?? null,
 											targetId: item.targetId,
-											publishers: publishers.get(item.id) ?? [],
+											attributions: attributions.get(item.id) ?? [],
 										},
 									]
 								: [],
@@ -162,6 +165,10 @@ export default new Elysia()
 							role: "owner",
 							scope: [],
 							grantedByProfileId: profile.unitId,
+						});
+						await createProfilePublisherAttribution(tx, {
+							sourceUnitId: created.id,
+							profileId: profile.unitId,
 						});
 						if (body.realmId) {
 							await ensurePostMountTargetingAllowed(tx, {
@@ -242,12 +249,12 @@ export default new Elysia()
 						)
 						.limit(1);
 					if (!review?.targetId) throw new ReviewNotFound();
-					const publishers =
-						(await getPublisherSummariesByUnitIds([review.id])).get(review.id) ?? [];
+					const attributions =
+						(await getAttributionSummariesByUnitIds([review.id])).get(review.id) ?? [];
 					return {
 						...review,
 						realmId: query.realmId ?? null,
-						publishers,
+						attributions,
 						targetId: review.targetId,
 						body: review.body === null ? null : toPortableTextResponse(review.body),
 						capabilities: {

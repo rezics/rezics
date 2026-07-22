@@ -335,7 +335,7 @@ export default new Elysia({ prefix: "/history" })
 					actorProfileId: profile.unitId,
 					message: body.editSummary,
 					minor: body.minor,
-					entityAuthorization: authorization.entity,
+					authorization,
 				}),
 			);
 			return { unitId: params.unitId, ...result };
@@ -382,7 +382,7 @@ export default new Elysia({ prefix: "/history" })
 					actorProfileId: profile.unitId,
 					message: body.editSummary,
 					minor: body.minor,
-					entityAuthorization: authorization.entity,
+					authorization,
 				}),
 			);
 			return { unitId: params.unitId, ...result };

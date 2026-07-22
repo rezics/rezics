@@ -22,25 +22,27 @@ import {
 	cn,
 } from "@rezics/ui";
 import {
-	ProfileInfoCard,
-	type ProfileInfoCardData,
-} from "@/features/profiles/components/profile-info-card";
-import {
 	RealmInfoCard,
 	type RealmInfoCardData,
 } from "@/features/realms/components/realm-info-card";
+import { isKnownAttributionRole } from "@/features/units/attribution-role";
 import { useTranslation } from "@/i18n/client";
 import { useFineHover } from "./use-fine-hover";
 
 interface FeedContextItem {
 	readonly id: string;
 	readonly name: string;
-	readonly href: string;
+	readonly href?: string;
 	readonly avatar?: PresentedAvatar | null;
 	readonly initials: string;
 }
 
-export type FeedProfileContext = FeedContextItem & ProfileInfoCardData;
+export type FeedAttributionContext = FeedContextItem & {
+	readonly kind: string;
+	readonly role: string;
+	readonly slug?: string;
+	readonly summary?: string;
+};
 export type FeedRealmContext = FeedContextItem & RealmInfoCardData;
 
 export interface FeedTargetScore {
@@ -66,29 +68,38 @@ export function FeedCard({ className, ...props }: ComponentProps<"article">) {
 }
 
 export function FeedCardHeader({
-	publishers,
+	attributions,
 	realms,
 	timestamp,
 	recommendation,
 	menu,
 }: {
-	publishers: readonly FeedProfileContext[];
+	attributions: readonly FeedAttributionContext[];
 	realms: readonly FeedRealmContext[];
 	timestamp: string;
 	recommendation?: ReactNode;
 	menu?: ReactNode;
 }) {
-	const { t } = useTranslation(["feed", "posts"]);
+	const { t } = useTranslation(["feed", "posts", "units"]);
 	return (
 		<CardHeader className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-2 gap-y-1 px-4 pt-4 sm:px-5">
 			<div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1">
 				<FeedContextGroup
-					emptyLabel={t.posts.unknownPublisher}
-					items={publishers}
-					listLabel={t.feed.publisherList({ count: publishers.length })}
-					renderInfoCard={(publisher) => <ProfileInfoCard profile={publisher} />}
+					emptyLabel={t.posts.unknownAttribution}
+					items={attributions}
+					listLabel={t.feed.attributionList({ count: attributions.length })}
+					renderInfoCard={(attribution) => (
+						<FeedAttributionInfoCard
+							attribution={attribution}
+							roleLabel={
+								isKnownAttributionRole(attribution.role)
+									? t.units.attributionRoles[attribution.role]
+									: attribution.role
+							}
+						/>
+					)}
 					showListLabel={(primary, count) =>
-						t.feed.showPublisherList({ publisher: primary.name, count })
+						t.feed.showAttributionList({ attribution: primary.name, count })
 					}
 				/>
 				{realms.length > 0 ? (
@@ -271,13 +282,20 @@ function FeedContextGroup<T extends FeedContextItem>({
 				positioning={{ placement: "bottom-start" }}
 			>
 				<HoverCardTrigger asChild>
-					<a
-						className="inline-flex min-w-0 items-center gap-2 rounded-md font-semibold text-xs outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/32"
-						href={primary.href}
-					>
-						<FeedAvatar item={primary} />
-						<span className="max-w-40 truncate sm:max-w-56">{primary.name}</span>
-					</a>
+					{primary.href ? (
+						<a
+							className="inline-flex min-w-0 items-center gap-2 rounded-md font-semibold text-xs outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/32"
+							href={primary.href}
+						>
+							<FeedAvatar item={primary} />
+							<span className="max-w-40 truncate sm:max-w-56">{primary.name}</span>
+						</a>
+					) : (
+						<span className="inline-flex min-w-0 items-center gap-2 font-semibold text-xs">
+							<FeedAvatar item={primary} />
+							<span className="max-w-40 truncate sm:max-w-56">{primary.name}</span>
+						</span>
+					)}
 				</HoverCardTrigger>
 				<HoverCardContent className="w-72">{renderInfoCard(primary)}</HoverCardContent>
 			</HoverCard>
@@ -317,13 +335,20 @@ function FeedContextGroup<T extends FeedContextItem>({
 								positioning={{ placement: "right-start" }}
 							>
 								<HoverCardTrigger asChild>
-									<a
-										className="flex min-h-11 items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/32"
-										href={item.href}
-									>
-										<FeedAvatar item={item} />
-										<span className="truncate">{item.name}</span>
-									</a>
+									{item.href ? (
+										<a
+											className="flex min-h-11 items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/32"
+											href={item.href}
+										>
+											<FeedAvatar item={item} />
+											<span className="truncate">{item.name}</span>
+										</a>
+									) : (
+										<span className="flex min-h-11 items-center gap-2 px-2 py-1.5 text-sm">
+											<FeedAvatar item={item} />
+											<span className="truncate">{item.name}</span>
+										</span>
+									)}
 								</HoverCardTrigger>
 								<HoverCardContent className="w-72">
 									{renderInfoCard(item)}
@@ -339,4 +364,39 @@ function FeedContextGroup<T extends FeedContextItem>({
 
 function FeedAvatar({ item }: { item: FeedContextItem }) {
 	return <IdentityAvatar avatar={item.avatar} fallback={item.initials} size="sm" />;
+}
+
+function FeedAttributionInfoCard({
+	attribution,
+	roleLabel,
+}: {
+	attribution: FeedAttributionContext;
+	roleLabel: string;
+}) {
+	return (
+		<div className="grid gap-3" data-slot="attribution-info-card">
+			<div className="flex min-w-0 items-center gap-3">
+				<IdentityAvatar
+					avatar={attribution.avatar}
+					className="size-12 text-base"
+					fallback={attribution.initials}
+					size="lg"
+				/>
+				<div className="min-w-0">
+					<p className="truncate font-heading font-bold text-base">{attribution.name}</p>
+					<p className="truncate text-muted-foreground text-xs">
+						{roleLabel}
+						{attribution.kind === "profile" && attribution.slug
+							? ` · @${attribution.slug}`
+							: null}
+					</p>
+				</div>
+			</div>
+			{attribution.summary ? (
+				<p className="line-clamp-3 text-muted-foreground text-sm leading-5">
+					{attribution.summary}
+				</p>
+			) : null}
+		</div>
+	);
 }

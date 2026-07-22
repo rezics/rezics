@@ -10,7 +10,7 @@ export default {
 	editTitle: `Edit ${postTerms.inline}`,
 	publish: "Publish",
 	untitled: `Untitled ${postTerms.inline}`,
-	unknownPublisher: "Published by system",
+	unknownAttribution: "No attribution",
 	replies: `Reply ${postTerms.plural}`,
 	replyPost: `Reply ${postTerms.inline}`,
 	signInToReply: "Sign in to reply",
@@ -45,6 +45,6 @@ export default {
 	subject: "Subject",
 	clearRealm: `Remove ${realmTerms.inline}`,
 	clearSubject: "Remove subject",
-	publishers: "Publishers",
+	attributions: "Credits",
 	viewRealm: `View ${realmTerms.inline}`,
 } satisfies typeof import("../zh-Hant/posts").default;

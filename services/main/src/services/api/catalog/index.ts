@@ -60,6 +60,11 @@ import { upsertLocalization } from "../../units/service";
 import { UnitLocalizationBody } from "../units/schema";
 import { recordUnitRevision } from "../../units/history";
 import { updateUnitVariantContext } from "../../units/variants";
+import {
+	getAttributionSummariesByUnitIds,
+	getPublicUnitSummariesByIds,
+} from "../../units/attribution";
+import { ensureDirectCreditAttributionAllowed } from "../../units/attribution-authorization";
 import { presentImageAsset } from "../../units/service";
 import { presentAvatar } from "../../units/avatar";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
@@ -282,14 +287,14 @@ export default new Elysia()
 					const creditAttributions = await database
 						.select({
 							id: creditAttribution.id,
-							unitId: creditAttribution.unitId,
+							sourceUnitId: creditAttribution.sourceUnitId,
 							role: creditAttribution.role,
 						})
 						.from(creditAttribution)
-						.innerJoin(unit, eq(unit.id, creditAttribution.unitId))
+						.innerJoin(unit, eq(unit.id, creditAttribution.sourceUnitId))
 						.where(
 							and(
-								eq(creditAttribution.entityId, params.unitId),
+								eq(creditAttribution.creditedUnitId, params.unitId),
 								publiclyReadableUnitCondition(),
 							),
 						);
@@ -324,6 +329,11 @@ export default new Elysia()
 						)
 						.limit(1);
 					const { avatar, bannerAssetId, coverAssetId, ...entityEntry } = entry;
+					const ownerSummary = owner?.profileId
+						? ((await getPublicUnitSummariesByIds([owner.profileId])).get(
+								owner.profileId,
+							) ?? null)
+						: null;
 					const [canEdit, accessDecision, creditDecision, subjectDecision] =
 						await Promise.all([
 							identity.authorization.unit.canUpdate(params.unitId, ["localizations"]),
@@ -347,7 +357,7 @@ export default new Elysia()
 						cover: presentImageAsset(coverAssetId),
 						localizations,
 						associationPolicy: await getEntityAssociationPolicy(params.unitId),
-						ownerProfileId: owner?.profileId ?? null,
+						owner: ownerSummary,
 						capabilities: {
 							canEdit,
 							canManageAccess: accessDecision.allowed,
@@ -747,10 +757,10 @@ export default new Elysia()
 						"credit-attributions",
 					]);
 					const credit = await database.transaction(async (tx) => {
-						await authorization.entity.ensureAssociationAllowed(
+						await ensureDirectCreditAttributionAllowed(
+							authorization,
 							tx,
-							body.entityId,
-							"credit",
+							body.creditedUnitId,
 						);
 						await tx.execute(
 							sql`select pg_advisory_xact_lock(hashtextextended(${params.unitId}::text, 0))`,
@@ -758,13 +768,13 @@ export default new Elysia()
 						const [last] = await tx
 							.select({ position: creditAttribution.position })
 							.from(creditAttribution)
-							.where(eq(creditAttribution.unitId, params.unitId))
+							.where(eq(creditAttribution.sourceUnitId, params.unitId))
 							.orderBy(desc(creditAttribution.position), desc(creditAttribution.id))
 							.limit(1);
 						const [created] = await tx
 							.insert(creditAttribution)
 							.values({
-								unitId: params.unitId,
+								sourceUnitId: params.unitId,
 								...body,
 								position:
 									body.position ??
@@ -779,7 +789,14 @@ export default new Elysia()
 						return created;
 					});
 					if (!credit) throw new Error("Credit insertion did not return a row");
-					return credit;
+					const attributions =
+						(await getAttributionSummariesByUnitIds([params.unitId])).get(
+							params.unitId,
+						) ?? [];
+					const created = attributions.find(({ id }) => id === credit.id);
+					if (!created)
+						throw new Error("Created credit attribution could not be resolved");
+					return created;
 				},
 				{
 					access: "contribute:unit:update",
@@ -813,7 +830,7 @@ export default new Elysia()
 							.where(
 								and(
 									eq(creditAttribution.id, params.associationId),
-									eq(creditAttribution.unitId, params.unitId),
+									eq(creditAttribution.sourceUnitId, params.unitId),
 								),
 							)
 							.returning({ id: creditAttribution.id });

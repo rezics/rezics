@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { CurrentSearchProjectionVersion } from "./contracts";
 
-const generationDate = "20260721";
+const generationDate = "20260722";
 const currentIndexUid = `rezics_units_v${CurrentSearchProjectionVersion}_${generationDate}`;
 const currentSinkName = currentIndexUid.replaceAll("_", "-");
 

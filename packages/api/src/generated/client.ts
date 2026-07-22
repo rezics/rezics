@@ -562,7 +562,7 @@ export function getApiUnitByUnitIdAssociationProposals<ThrowOnError extends bool
 }
 
 /**
- * @summary Request Entity association
+ * @summary Request Unit association
  * {@link /api/unit/:unitId/association-proposals/requests}
  */
 export function postApiUnitByUnitIdAssociationProposalsRequests<
@@ -583,7 +583,7 @@ export function postApiUnitByUnitIdAssociationProposalsRequests<
 }
 
 /**
- * @summary Invite Unit to Entity association
+ * @summary Invite Unit to association
  * {@link /api/unit/:unitId/association-proposals/invitations}
  */
 export function postApiUnitByUnitIdAssociationProposalsInvitations<
@@ -606,7 +606,7 @@ export function postApiUnitByUnitIdAssociationProposalsInvitations<
 }
 
 /**
- * @summary Accept Entity association proposal
+ * @summary Accept Unit association proposal
  * {@link /api/unit/:unitId/association-proposals/:proposalId/accept}
  */
 export function postApiUnitByUnitIdAssociationProposalsByProposalIdAccept<
@@ -635,7 +635,7 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdAccept<
 }
 
 /**
- * @summary Decline Entity association proposal
+ * @summary Decline Unit association proposal
  * {@link /api/unit/:unitId/association-proposals/:proposalId/decline}
  */
 export function postApiUnitByUnitIdAssociationProposalsByProposalIdDecline<
@@ -664,7 +664,7 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdDecline<
 }
 
 /**
- * @summary Cancel Entity association proposal
+ * @summary Cancel Unit association proposal
  * {@link /api/unit/:unitId/association-proposals/:proposalId}
  */
 export function deleteApiUnitByUnitIdAssociationProposalsByProposalId<

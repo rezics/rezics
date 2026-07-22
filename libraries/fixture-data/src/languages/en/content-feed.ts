@@ -1,7 +1,7 @@
 import type { FeedFixtureLocalizedContent } from "../../content-feed/localized-content";
 
 export default {
-	publishers: [
+	attributions: [
 		{
 			name: "Dolphin Reading Club",
 			initials: "D",

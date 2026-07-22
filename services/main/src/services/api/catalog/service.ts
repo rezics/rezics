@@ -4,7 +4,10 @@ import { database } from "../../database";
 import { entity, entityAssociationPolicy, unit, unitLocalization } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
-import { createCommunityCatalogAccess } from "../../authorization/unit/ownership";
+import {
+	createCommunityCatalogAccess,
+	createProfileOwnedUnitAccess,
+} from "../../authorization/unit/ownership";
 import { insertUnit } from "../../units/create";
 import { toUnitLocalizationStorage, unitLocalizationImageAssetIds } from "../../units/localization";
 import { ensureImageAssetsAttachable } from "../image-assets/service";
@@ -34,7 +37,7 @@ export async function createCatalogUnit(
 				{
 					entityId: created.id,
 					kind: "credit",
-					mode: "open",
+					mode: "approval",
 					updatedByProfileId: ownerId,
 				},
 				{
@@ -48,7 +51,8 @@ export async function createCatalogUnit(
 		await tx
 			.insert(unitLocalization)
 			.values({ unitId: created.id, ...toUnitLocalizationStorage(body.localization) });
-		await createCommunityCatalogAccess(tx, created.id, ownerId);
+		if (type === "entity") await createProfileOwnedUnitAccess(tx, created.id, ownerId);
+		else await createCommunityCatalogAccess(tx, created.id, ownerId);
 		await recordUnitRevision(tx, {
 			unitId: created.id,
 			actorProfileId: ownerId,

@@ -21,7 +21,7 @@ export interface RecommendationStats {
 export interface RecommendationCandidate {
 	id: string;
 	createdAt: Date;
-	publisherIds?: readonly string[];
+	creditedUnitIds?: readonly string[];
 	realmId?: string | null;
 	subjectId?: string | null;
 	personalizedRelevance: number;
@@ -126,7 +126,7 @@ function freshness(candidate: RecommendationCandidate, asOf: Date) {
 function similarity(left: RecommendationCandidate, right: RecommendationCandidate) {
 	if (left.id === right.id) return 1;
 	if (left.subjectId && left.subjectId === right.subjectId) return 0.7;
-	if (left.publisherIds?.some((profileId) => right.publisherIds?.includes(profileId))) return 0.5;
+	if (left.creditedUnitIds?.some((unitId) => right.creditedUnitIds?.includes(unitId))) return 0.5;
 	if (left.realmId && left.realmId === right.realmId) return 0.3;
 	return 0;
 }
@@ -141,11 +141,10 @@ function exceedsDiversityCap(
 		const value = candidate[key];
 		return value ? selected.filter((item) => item[key] === value).length >= cap : false;
 	};
-	const publisherCapped = candidate.publisherIds?.some(
-		(profileId) =>
-			selected.filter((item) => item.publisherIds?.includes(profileId)).length >= cap,
+	const attributionCapped = candidate.creditedUnitIds?.some(
+		(unitId) => selected.filter((item) => item.creditedUnitIds?.includes(unitId)).length >= cap,
 	);
-	return publisherCapped || (!scopedRealmId && matches("realmId")) || matches("subjectId");
+	return attributionCapped || (!scopedRealmId && matches("realmId")) || matches("subjectId");
 }
 
 function applyExploration<T extends RecommendationCandidate>(

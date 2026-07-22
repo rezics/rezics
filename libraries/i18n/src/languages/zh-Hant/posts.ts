@@ -10,7 +10,7 @@ export default {
 	editTitle: `編輯${postTerms.label}`,
 	publish: "發布",
 	untitled: `未命名${postTerms.label}`,
-	unknownPublisher: "系統發布",
+	unknownAttribution: "未提供署名",
 	replies: `回覆${postTerms.pluralLabel}`,
 	replyPost: `回覆${postTerms.label}`,
 	signInToReply: "登入後回覆",
@@ -45,6 +45,6 @@ export default {
 	subject: "討論對象",
 	clearRealm: `移除${realmTerms.label}`,
 	clearSubject: "移除對象",
-	publishers: "發布者",
+	attributions: "署名",
 	viewRealm: `檢視${realmTerms.label}`,
 };

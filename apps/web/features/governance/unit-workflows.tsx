@@ -371,7 +371,7 @@ function AssociationProposalManager({
 					path: { unitId },
 					body: {
 						...common,
-						targetEntityId: String(form.get("relatedUnitId") ?? "").trim(),
+						targetUnitId: String(form.get("relatedUnitId") ?? "").trim(),
 					},
 				});
 			else
@@ -402,7 +402,9 @@ function AssociationProposalManager({
 						<Field required>
 							<FieldLabel>
 								{side === "source"
-									? t.governance.targetEntity
+									? kind === "credit"
+										? t.governance.targetUnit
+										: t.governance.targetEntity
 									: t.governance.sourceUnit}
 							</FieldLabel>
 							<Input name="relatedUnitId" required />
@@ -451,7 +453,7 @@ function AssociationProposalManager({
 										<span className="text-muted-foreground">
 											{t.governance.direction[proposal.direction]} ·{" "}
 											{side === "source"
-												? proposal.targetEntityId
+												? proposal.targetUnitId
 												: proposal.sourceUnitId}{" "}
 											· {formatDate(proposal.expiresAt, locale.current)}
 										</span>
@@ -526,10 +528,18 @@ function AssociationProposalManager({
 export function UnitAssociationProposalManager({ unitId }: { unitId: string }) {
 	return (
 		<>
-			<AssociationProposalManager kind="credit" side="source" unitId={unitId} />
+			<UnitAttributionProposalManager unitId={unitId} />
 			<AssociationProposalManager kind="subject" side="source" unitId={unitId} />
 		</>
 	);
+}
+
+export function UnitAttributionProposalManager({ unitId }: { unitId: string }) {
+	return <AssociationProposalManager kind="credit" side="source" unitId={unitId} />;
+}
+
+export function ProfileAttributionProposalManager({ profileId }: { profileId: string }) {
+	return <AssociationProposalManager kind="credit" side="target" unitId={profileId} />;
 }
 
 function EntityAssociationPolicy({

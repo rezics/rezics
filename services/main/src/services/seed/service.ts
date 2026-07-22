@@ -329,9 +329,16 @@ async function insertUnitDetails(
 			createdAt: value.createdAt,
 			updatedAt: value.updatedAt,
 		};
-		if (communityCatalogKinds.has(value.kind)) {
-			const contributorRole =
-				value.kind === "entity" || value.kind === "tag" ? "editor" : "publishing_editor";
+		if (value.kind === "entity") {
+			accessRows.push({
+				...common,
+				subjectKind: "profile",
+				profileId: value.ownerProfileId,
+				role: "owner",
+				grantedByProfileId: value.ownerProfileId,
+			});
+		} else if (communityCatalogKinds.has(value.kind)) {
+			const contributorRole = value.kind === "tag" ? "editor" : "publishing_editor";
 			accessRows.push(
 				{
 					...common,
@@ -824,8 +831,8 @@ async function seedCatalog(
 
 	await writeBatches(
 		Array.from({ length: SeedPlan.credits }, (_, index) => ({
-			unitId: itemAt(works, Math.floor(index / 2)).id,
-			entityId: itemAt(entities, index * 7).id,
+			sourceUnitId: itemAt(works, Math.floor(index / 2)).id,
+			creditedUnitId: itemAt(entities, index * 7).id,
 			role: itemAt(["author", "developer", "director", "publisher"], index),
 			position: fractionalPositionAt(index),
 		})),
@@ -1230,6 +1237,13 @@ async function seedToaruWiki(
 		createdAt: wikiPost.createdAt,
 		updatedAt: wikiPost.updatedAt,
 	});
+	await tx.insert(creditAttribution).values({
+		sourceUnitId: wikiPost.id,
+		creditedUnitId: owner.id,
+		role: "publisher",
+		createdAt: wikiPost.createdAt,
+		updatedAt: wikiPost.updatedAt,
+	});
 	await tx.insert(realmUnit).values({
 		realmId: OfficialRealmManifest.id,
 		unitId: wikiPost.id,
@@ -1378,6 +1392,14 @@ async function seedContent(
 	);
 	const allPosts = [...rootPosts, ...replies, ...reviews, ...chapters, ...chapterGroups];
 	await insertUnitDetails(tx, data, allPosts);
+	await writeBatches(
+		allPosts.map((value) => ({
+			sourceUnitId: value.id,
+			creditedUnitId: value.ownerProfileId,
+			role: "publisher",
+		})),
+		(batch) => tx.insert(creditAttribution).values(batch),
+	);
 
 	await writeBatches(
 		rootPosts.map((value, index) => ({
@@ -2618,7 +2640,7 @@ async function seedHistory(
 			baseRevisionId,
 			actorProfileId: value.ownerProfileId,
 			message: "Seeded revision restore",
-			entityAuthorization: new Authorization(value.ownerProfileId).entity,
+			authorization: new Authorization(value.ownerProfileId),
 		});
 	}
 }

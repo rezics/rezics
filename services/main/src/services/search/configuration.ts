@@ -99,7 +99,7 @@ export const GlobalSearchConfiguration = {
 			optionSource: { kind: "facet" },
 			modes: ["advanced"],
 		}),
-		...(["publisher", "realm", "subject", "target", "root", "parent", "owner"] as const).map(
+		...(["credit", "realm", "subject", "target", "root", "parent", "owner"] as const).map(
 			(field) =>
 				control({
 					key: field,

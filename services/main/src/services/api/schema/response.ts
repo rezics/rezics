@@ -25,6 +25,7 @@ import {
 	ContentRatingValues,
 	ContentStructureKindValues,
 	EntityAssociationPolicyModeValues,
+	UnitKindValues,
 } from "../../database/schema/contract-values";
 import { FeedPostKindValues, FeedUnitKindValues } from "../feed/schema";
 import {
@@ -113,15 +114,20 @@ const LocalizationResponse = t.Object({
 	updatedAt: DateTime,
 });
 
-export const UnitPublisherSummaryResponse = t.Object({
-	profileId: Uuid,
+export const UnitSummaryResponse = t.Object({
+	id: Uuid,
+	kind: t.UnionEnum(UnitKindValues),
 	slugAddress: NullablePublicSlugAddressResponse,
-	name: NullableText,
+	title: NullableText,
 	summary: NullableText,
 	avatar: AvatarResponse,
-	firstPublishedAt: DateTime,
-	lastPublishedAt: DateTime,
-	publicationCount: t.Integer({ minimum: 1 }),
+});
+
+export const UnitAttributionSummaryResponse = t.Object({
+	id: Uuid,
+	role: t.String(),
+	position: FractionalPosition,
+	creditedUnit: UnitSummaryResponse,
 });
 
 export const UnitListResponse = t.Object({
@@ -135,7 +141,7 @@ export const UnitListResponse = t.Object({
 			updatedAt: DateTime,
 			title: NullableText,
 			summary: NullableText,
-			publishers: t.Array(UnitPublisherSummaryResponse),
+			attributions: t.Array(UnitAttributionSummaryResponse),
 			avatar: AvatarResponse,
 			banner: ImageAssetResponse,
 			cover: ImageAssetResponse,
@@ -233,7 +239,7 @@ export const UnitDetailResponse = t.Object({
 	license: t.Nullable(PublicationLicense),
 	postTargetingLocked: t.Boolean(),
 	publishedAt: t.Nullable(DateTime),
-	publishers: t.Array(UnitPublisherSummaryResponse),
+	attributions: t.Array(UnitAttributionSummaryResponse),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 	primaryLanguage: NullableText,
@@ -243,17 +249,6 @@ export const UnitDetailResponse = t.Object({
 	banner: ImageAssetResponse,
 	cover: ImageAssetResponse,
 	localizations: t.Array(LocalizationResponse),
-	credits: t.Array(
-		t.Object({
-			id: Uuid,
-			entityEntryId: Uuid,
-			role: t.String(),
-			position: FractionalPosition,
-			evidenceUrl: NullableText,
-			note: NullableText,
-			title: NullableText,
-		}),
-	),
 	subjectAssociations: t.Array(
 		t.Object({
 			id: Uuid,
@@ -408,7 +403,7 @@ export const PostListResponse = t.Object({
 		t.Object({
 			id: Uuid,
 			postKind: OrdinaryPostKindResponse,
-			publishers: t.Array(UnitPublisherSummaryResponse),
+			attributions: t.Array(UnitAttributionSummaryResponse),
 			realmId: t.Nullable(Uuid),
 			subjectId: t.Nullable(Uuid),
 			rootPostId: t.Nullable(Uuid),
@@ -424,7 +419,7 @@ export const PostListResponse = t.Object({
 });
 const FeedItemBaseResponse = {
 	id: Uuid,
-	publishers: t.Array(UnitPublisherSummaryResponse),
+	attributions: t.Array(UnitAttributionSummaryResponse),
 	realmId: t.Nullable(Uuid),
 	realms: t.Array(
 		t.Object({
@@ -470,7 +465,7 @@ export const FeedPostItemResponse = t.Object({
 		t.Object({
 			rootPostId: Uuid,
 			title: NullableText,
-			publishers: t.Array(UnitPublisherSummaryResponse),
+			attributions: t.Array(UnitAttributionSummaryResponse),
 			subjectId: t.Nullable(Uuid),
 		}),
 	),
@@ -507,7 +502,7 @@ export const ReviewListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			id: Uuid,
-			publishers: t.Array(UnitPublisherSummaryResponse),
+			attributions: t.Array(UnitAttributionSummaryResponse),
 			targetId: Uuid,
 			realmId: t.Nullable(Uuid),
 			title: NullableText,
@@ -627,14 +622,14 @@ export const EntityDetailResponse = t.Object({
 	updatedAt: DateTime,
 	localizations: t.Array(LocalizationResponse),
 	associationPolicy: EntityAssociationPolicyResponse,
-	ownerProfileId: t.Nullable(Uuid),
+	owner: t.Nullable(UnitSummaryResponse),
 	capabilities: t.Object({
 		canEdit: t.Boolean(),
 		canManageAccess: t.Boolean(),
 		canManageCreditAssociations: t.Boolean(),
 		canManageSubjectAssociations: t.Boolean(),
 	}),
-	creditAttributions: t.Array(t.Object({ id: Uuid, unitId: Uuid, role: t.String() })),
+	creditAttributions: t.Array(t.Object({ id: Uuid, sourceUnitId: Uuid, role: t.String() })),
 	subjectAssociations: t.Array(t.Object({ id: Uuid, unitId: Uuid, role: t.String() })),
 });
 export const CollectionDetailResponse = t.Object({
@@ -691,7 +686,7 @@ export const RealmDetailResponse = t.Object({
 export const PostDetailResponse = t.Object({
 	id: Uuid,
 	postKind: OrdinaryPostKindResponse,
-	publishers: t.Array(UnitPublisherSummaryResponse),
+	attributions: t.Array(UnitAttributionSummaryResponse),
 	realmId: t.Nullable(Uuid),
 	subjectId: t.Nullable(Uuid),
 	rootPostId: t.Nullable(Uuid),
@@ -706,7 +701,7 @@ export const PostDetailResponse = t.Object({
 });
 export const ReviewDetailResponse = t.Object({
 	id: Uuid,
-	publishers: t.Array(UnitPublisherSummaryResponse),
+	attributions: t.Array(UnitAttributionSummaryResponse),
 	targetId: Uuid,
 	realmId: t.Nullable(Uuid),
 	title: NullableText,
@@ -839,7 +834,7 @@ export const ReplyListResponse = t.Object({
 		t.Object({
 			id: Uuid,
 			postKind: t.Literal("reply"),
-			publishers: t.Array(UnitPublisherSummaryResponse),
+			attributions: t.Array(UnitAttributionSummaryResponse),
 			rootPostId: Uuid,
 			parentPostId: t.Nullable(Uuid),
 			depth: t.Integer(),
@@ -856,15 +851,7 @@ export const ReplyListResponse = t.Object({
 	nextCursor: NullableText,
 });
 
-export const CreditAttributionResponse = t.Object({
-	id: Uuid,
-	unitId: Uuid,
-	entityId: Uuid,
-	role: t.String(),
-	position: FractionalPosition,
-	createdAt: DateTime,
-	updatedAt: DateTime,
-});
+export const CreditAttributionResponse = UnitAttributionSummaryResponse;
 export const SubjectAssociationResponse = t.Object({
 	id: Uuid,
 	unitId: Uuid,

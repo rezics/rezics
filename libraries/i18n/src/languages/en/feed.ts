@@ -52,7 +52,7 @@ export default {
 	emptyTitle: "It is quiet here",
 	emptyBody: "Be the first to share a work or an idea.",
 	reason: {
-		followedPublisher: `Because you ${followTerms.action} a publisher`,
+		followedUnit: `Because you ${followTerms.action} this item or a credited contributor`,
 		followedRealm: `Because you ${followTerms.action} the ${realmTerms.inline}`,
 		basedOnActivity: "Based on your recent activity",
 		relatedSubject: "Related to what you are viewing",
@@ -89,10 +89,10 @@ export default {
 	relatedWork: "Related work",
 	myRealms: `My ${realmTerms.pluralLabel}`,
 	contextSeparator: "in",
-	publisherList: insert("{{count}} publishers", { count: Number }),
+	attributionList: insert("{{count}} credited contributors", { count: Number }),
 	realmList: insert(`{{count}} ${realmTerms.pluralLabel}`, { count: Number }),
-	showPublisherList: insert("{{publisher}} and {{count}} more publishers; show publisher list", {
-		publisher: String,
+	showAttributionList: insert("{{attribution}} and {{count}} more; show credits", {
+		attribution: String,
 		count: Number,
 	}),
 	showRealmList: insert(`{{realm}} and {{count}} more; show ${realmTerms.inline} list`, {

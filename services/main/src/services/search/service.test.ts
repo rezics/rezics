@@ -9,7 +9,7 @@ const searchCandidates = vi.hoisted(() => vi.fn());
 
 vi.mock("../database", async () => {
 	const { QueryBuilder } = await import("drizzle-orm/pg-core");
-    select.mockImplementation((fields: SelectedFields | undefined) => {
+	select.mockImplementation((fields: SelectedFields | undefined) => {
 		if (fields && Object.keys(fields).length === 1 && "unitId" in fields)
 			return new QueryBuilder().select(fields);
 		const rows = Promise.resolve([]);
@@ -27,8 +27,8 @@ vi.mock("./generation", () => ({
 	getActiveSearchGeneration: vi.fn().mockResolvedValue({
 		id: "019f7eed-5d42-7102-8387-cc1d13b176d2",
 		kind: "current",
-		indexUid: "rezics_units_v2_20260721",
-		projectionVersion: 2,
+		indexUid: "rezics_units_v3_20260722",
+		projectionVersion: 3,
 		settingsFingerprint: "a".repeat(64),
 	}),
 }));
@@ -123,7 +123,7 @@ describe("domain search SQL", () => {
 		expect(lastQuery()).toContain('("entity"."kind")::text');
 
 		await searchDomain("posts", {
-			publisherId: "11111111-1111-1111-1111-111111111111",
+			creditedUnitId: "11111111-1111-1111-1111-111111111111",
 			realmId: "22222222-2222-2222-2222-222222222222",
 			subjectId: "33333333-3333-3333-3333-333333333333",
 			rootId: "44444444-4444-4444-4444-444444444444",
@@ -131,7 +131,7 @@ describe("domain search SQL", () => {
 			sort: "replyCount:asc",
 		});
 		const postsQuery = lastQuery();
-		expect(postsQuery).toContain('"unit_status_event"');
+		expect(postsQuery).toContain('"credit_attribution"');
 		expect(postsQuery).toContain('FROM "realm_unit"');
 		expect(postsQuery).toContain('"post_reply"."root_post_id"');
 		expect(postsQuery).toContain('"post_reply"."parent_post_id"');
@@ -150,7 +150,7 @@ describe("domain search SQL", () => {
 		await searchDomain("collections", {
 			ownerId: "11111111-1111-1111-1111-111111111111",
 		});
-		expect(lastQuery()).toContain('"collection"."owner_profile_id"');
+		expect(lastQuery()).toContain('"unit_access_binding"."role" = \'owner\'');
 
 		await searchDomain("reviews", {
 			targetId: "11111111-1111-1111-1111-111111111111",

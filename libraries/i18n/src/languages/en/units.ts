@@ -5,6 +5,13 @@ const { forms: publicationLicenseTerms } = enTerminology.publicationLicense;
 
 export default {
 	types: { book: "Book", software: "Software", media: "Media", series: "Series" },
+	attributionRoles: {
+		publisher: "Publisher",
+		author: "Author",
+		editor: "Editor",
+		developer: "Developer",
+		director: "Director",
+	},
 	workspace: {
 		title: "Manage unit",
 		description:

@@ -10,16 +10,19 @@ function createReplyPost(id: string, parentPostId: string | null = null): ApiRep
 	return {
 		id,
 		postKind: "reply",
-		publishers: [
+		attributions: [
 			{
-				avatar: null,
-				profileId: "019b1234-1234-7000-8000-000000000001",
-				slugAddress: null,
-				name: "Publisher",
-				summary: null,
-				firstPublishedAt: "2026-01-01T00:00:00.000Z",
-				lastPublishedAt: "2026-01-01T00:00:00.000Z",
-				publicationCount: 1,
+				id: "019b1234-1234-7000-8000-000000000002",
+				role: "publisher",
+				position: "a0",
+				creditedUnit: {
+					avatar: null,
+					id: "019b1234-1234-7000-8000-000000000001",
+					kind: "profile",
+					slugAddress: null,
+					title: "Publisher",
+					summary: null,
+				},
 			},
 		],
 		rootPostId: "post",

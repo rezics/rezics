@@ -69,6 +69,5 @@ export default {
 	cancel: "Cancel",
 	delete: "Delete",
 	select: "Select",
-	unknownPublisher: "Unknown publisher",
 	items: "items",
 } satisfies typeof import("../zh-Hant/engagement").default;

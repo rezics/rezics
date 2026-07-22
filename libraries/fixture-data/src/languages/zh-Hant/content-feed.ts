@@ -1,7 +1,7 @@
 import type { FeedFixtureLocalizedContent } from "../../content-feed/localized-content";
 
 export default {
-	publishers: [
+	attributions: [
 		{
 			name: "海豚號讀書會",
 			initials: "海",

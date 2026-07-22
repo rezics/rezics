@@ -40,26 +40,30 @@ vi.stubGlobal("matchMedia", (query: string) => ({
 	dispatchEvent: vi.fn(),
 }));
 
-const translation = await create(resources).getTranslation(["feed", "posts"], ["zh-Hant"]);
+const translation = await create(resources).getTranslation(["feed", "posts", "units"], ["zh-Hant"]);
 
 afterEach(cleanup);
 
-const publishers = [
+const attributions = [
 	{
-		id: "publisher-1",
+		id: "attribution-1",
+		kind: "profile",
+		role: "publisher",
 		name: "第一發布者",
 		initials: "一",
-		href: "/profiles/publisher-1",
-		slug: "publisher-1",
+		href: "/profiles/attribution-1",
+		slug: "attribution-1",
 		summary: "第一位發布者的簡介。",
 	},
 	{
-		id: "publisher-2",
-		name: "第二發布者",
+		id: "attribution-2",
+		kind: "entity",
+		role: "author",
+		name: "共同作者",
 		initials: "二",
-		href: "/profiles/publisher-2",
-		slug: "publisher-2",
-		summary: "第二位發布者的簡介。",
+		href: "/entities/attribution-2",
+		slug: "attribution-2",
+		summary: "共同作者的簡介。",
 	},
 ] as const;
 
@@ -83,10 +87,10 @@ const realms = [
 ] as const;
 
 describe("FeedCardHeader", () => {
-	it("shows the first publisher and realm with counts, then opens each complete list", async () => {
+	it("shows the first attribution and Realm with counts, then opens each complete list", async () => {
 		render(
 			<TranslationProvider initial={translation.snapshot}>
-				<FeedCardHeader publishers={publishers} realms={realms} timestamp="2 小時前" />
+				<FeedCardHeader attributions={attributions} realms={realms} timestamp="2 小時前" />
 			</TranslationProvider>,
 		);
 
@@ -95,11 +99,12 @@ describe("FeedCardHeader", () => {
 
 		fireEvent.click(
 			screen.getByRole("button", {
-				name: "第一發布者 及其他 1 位發布者；顯示發布者清單",
+				name: "第一發布者 及其他 1 位；顯示署名清單",
 			}),
 		);
-		const publisherList = await screen.findByRole("list", { name: "2 位發布者" });
-		expect(publisherList.querySelectorAll('a[href^="/profiles/"]')).toHaveLength(2);
+		const attributionList = await screen.findByRole("list", { name: "2 位署名創作者" });
+		expect(attributionList.querySelectorAll('a[href^="/profiles/"]')).toHaveLength(1);
+		expect(attributionList.querySelectorAll('a[href^="/entities/"]')).toHaveLength(1);
 
 		fireEvent.click(
 			screen.getByRole("button", {
@@ -114,7 +119,7 @@ describe("FeedCardHeader", () => {
 		render(
 			<TranslationProvider initial={translation.snapshot}>
 				<FeedCardHeader
-					publishers={[publishers[0]]}
+					attributions={[attributions[0]]}
 					realms={[realms[0]]}
 					timestamp="2 小時前"
 				/>
@@ -122,7 +127,7 @@ describe("FeedCardHeader", () => {
 		);
 
 		expect(screen.getByRole("link", { name: /第一發布者/ }).getAttribute("href")).toBe(
-			"/profiles/publisher-1",
+			"/profiles/attribution-1",
 		);
 		expect(screen.getByRole("link", { name: /第一領域/ }).getAttribute("href")).toBe(
 			"/realms/realm-1",

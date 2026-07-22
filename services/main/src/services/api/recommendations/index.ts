@@ -24,7 +24,7 @@ import { recommendRelatedPosts } from "../../recommendations/related-posts";
 import { verifyRecommendationTracking } from "../../recommendations/tracking";
 import { UnitNotFound } from "../../units/errors";
 import { resolveMainUnitId } from "../../units/variants";
-import { getPublisherSummariesByUnitIds } from "../../units/status";
+import { getAttributionSummariesByUnitIds } from "../../units/attribution";
 import { ValidationError } from "../errors";
 import { PostFeedResponse, toApiErrorResponse } from "../schema/response";
 import {
@@ -263,11 +263,11 @@ export default new Elysia({ prefix: "/recommendations" })
 				)
 				.limit(1);
 			if (!seedBase) throw new UnitNotFound();
-			const publisherMap = await getPublisherSummariesByUnitIds([seedBase.id]);
+			const attributionMap = await getAttributionSummariesByUnitIds([seedBase.id]);
 			const seed = {
 				...seedBase,
-				publisherIds: (publisherMap.get(seedBase.id) ?? []).map(
-					({ profileId }) => profileId,
+				creditedUnitIds: (attributionMap.get(seedBase.id) ?? []).map(
+					({ creditedUnit }) => creditedUnit.id,
 				),
 			};
 			const snapshot = await resolvePageSnapshot(cursor);

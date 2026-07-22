@@ -7,7 +7,8 @@ import {
 	catalogUnitContentLicense,
 	contentStructure,
 	contentStructureNode,
-	entityAssociationProposal,
+	creditAttribution,
+	unitAssociationProposal,
 	entityAssociationPolicy,
 	subjectAssociation,
 	feedback,
@@ -26,7 +27,7 @@ import {
 	CommunityCatalogUnitKindValues,
 	DockKindValues,
 	DockKindsByUnitKind,
-	EntityAssociationKindValues,
+	AssociationKindValues,
 	EntityAssociationPolicyModeValues,
 	moderationAction,
 	moderationCase,
@@ -163,7 +164,7 @@ describe("database schema contracts", () => {
 	});
 
 	it("separates Entity credit consent from subject association consent", () => {
-		expect(entityAssociationPolicy.kind.enumValues).toEqual(EntityAssociationKindValues);
+		expect(entityAssociationPolicy.kind.enumValues).toEqual(AssociationKindValues);
 		expect(entityAssociationPolicy.mode.enumValues).toEqual(EntityAssociationPolicyModeValues);
 		const policy = getTableConfig(entityAssociationPolicy);
 		expect(policy.primaryKeys[0]?.columns.map((column) => column.name)).toEqual([
@@ -177,18 +178,43 @@ describe("database schema contracts", () => {
 		expect(
 			getTableConfig(subjectAssociation).columns.map((column) => column.name),
 		).not.toContain("subject_entity_id");
-		const proposal = getTableConfig(entityAssociationProposal);
+		const proposal = getTableConfig(unitAssociationProposal);
+		expect(getTableName(unitAssociationProposal)).toBe("unit_association_proposal");
+		expect(proposal.columns.map((column) => column.name)).toContain("target_unit_id");
+		expect(proposal.columns.map((column) => column.name)).not.toContain("target_entity_id");
+		expect(proposal.foreignKeys.map((key) => key.getName())).toContain(
+			"unit_association_proposal_target_unit_id_unit_id_fk",
+		);
 		expect(proposal.checks.map((constraint) => constraint.name)).toEqual(
 			expect.arrayContaining([
-				"entity_association_proposal_not_self_check",
-				"entity_association_proposal_resolution_shape_check",
+				"unit_association_proposal_not_self_check",
+				"unit_association_proposal_resolution_shape_check",
 			]),
 		);
 		expect(proposal.indexes.map((index) => index.config.name)).toEqual(
 			expect.arrayContaining([
-				"entity_association_proposal_source_unresolved_idx",
-				"entity_association_proposal_target_unresolved_idx",
+				"unit_association_proposal_source_unresolved_idx",
+				"unit_association_proposal_target_unresolved_idx",
 			]),
+		);
+	});
+
+	it("stores public credit relationships as Unit-to-Unit attribution", () => {
+		const attribution = getTableConfig(creditAttribution);
+		expect(attribution.columns.map((column) => column.name)).toEqual(
+			expect.arrayContaining(["source_unit_id", "credited_unit_id", "role", "position"]),
+		);
+		expect(attribution.columns.map((column) => column.name)).not.toEqual(
+			expect.arrayContaining(["unit_id", "entity_id", "kind"]),
+		);
+		expect(attribution.foreignKeys.map((key) => key.getName())).toEqual(
+			expect.arrayContaining([
+				"credit_attribution_source_unit_id_unit_id_fk",
+				"credit_attribution_credited_unit_id_unit_id_fk",
+			]),
+		);
+		expect(attribution.uniqueConstraints.map((constraint) => constraint.name)).toContain(
+			"credit_attribution_source_credited_role_key",
 		);
 	});
 
@@ -353,7 +379,6 @@ describe("database schema contracts", () => {
 			"software",
 			"media",
 			"series",
-			"entity",
 			"tag",
 		]);
 		expect(PlatformCapabilityValues).toEqual(

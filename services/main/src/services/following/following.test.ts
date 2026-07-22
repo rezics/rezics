@@ -11,7 +11,7 @@ import {
 
 describe("following policy", () => {
 	it("explicitly classifies every Unit kind", () => {
-		expect(FollowableUnitKindValues).toEqual(["profile", "zone", "realm"]);
+		expect(FollowableUnitKindValues).toEqual(["profile", "entity", "zone", "realm"]);
 		expect(new Set([...FollowableUnitKindValues, ...NonFollowableUnitKindValues])).toEqual(
 			new Set(UnitKindValues),
 		);

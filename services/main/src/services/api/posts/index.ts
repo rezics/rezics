@@ -7,17 +7,18 @@ import { database } from "../../database";
 import { toSafeInteger } from "../../database/integer";
 import { isPrimaryUnitLocalization } from "../../units/localization";
 import {
+	creditAttribution,
 	post,
 	postReply,
 	postReplyStat,
 	postScore,
+	profile as profileTable,
 	realmUnit,
 	score,
 	unit,
 	unitAccessBinding,
 	unitLocalization,
 	unitRevisionHead,
-	unitStatusEvent,
 } from "../../database/schema";
 import { createNotification, deliverNotificationEmail } from "../../notifications/service";
 import { fractionalPositionAt } from "../../ordering/position";
@@ -31,7 +32,11 @@ import {
 	findPostTargetingLock,
 	getPostTargetingLockedUnitIds,
 } from "../../posts/targeting";
-import { getPublisherSummariesByUnitIds, type UnitPublisherSummary } from "../../units/status";
+import {
+	createProfilePublisherAttribution,
+	getAttributionSummariesByUnitIds,
+	type UnitAttributionSummary,
+} from "../../units/attribution";
 import { IdResponse, NoContentResponse } from "../schema/action-response";
 import {
 	ReplyListResponse,
@@ -88,12 +93,12 @@ function toReplyResponse<
 		createdAt: Date;
 		updatedAt: Date;
 	},
->(row: T, publishers: readonly UnitPublisherSummary[]) {
+>(row: T, attributions: readonly UnitAttributionSummary[]) {
 	const body = toPortableTextResponse(row.body);
 	return {
 		id: row.id,
 		postKind: "reply" as const,
-		publishers: [...publishers],
+		attributions: [...attributions],
 		rootPostId: row.rootPostId,
 		parentPostId: row.parentPostId,
 		depth: row.depth,
@@ -260,14 +265,14 @@ export default new Elysia()
 						)
 						.orderBy(desc(unit.createdAt), desc(unit.id))
 						.limit(query.limit ?? 20);
-					const publishers = await getPublisherSummariesByUnitIds(
+					const attributions = await getAttributionSummariesByUnitIds(
 						rows.map(({ id }) => id),
 					);
 					return {
 						items: rows.map((item) => ({
 							...item,
 							realmId: query.realmId ?? null,
-							publishers: publishers.get(item.id) ?? [],
+							attributions: attributions.get(item.id) ?? [],
 							replyCount: toSafeInteger(item.replyCount, "reply count"),
 							body: toPortableTextResponse(item.body),
 						})),
@@ -322,6 +327,10 @@ export default new Elysia()
 							role: "owner",
 							scope: [],
 							grantedByProfileId: profile.unitId,
+						});
+						await createProfilePublisherAttribution(tx, {
+							sourceUnitId: created.id,
+							profileId: profile.unitId,
 						});
 						if (body.realmId) {
 							await ensurePostMountTargetingAllowed(tx, {
@@ -408,12 +417,12 @@ export default new Elysia()
 						)
 						.limit(1);
 					if (!row) throw new PostNotFound();
-					const publishers =
-						(await getPublisherSummariesByUnitIds([row.id])).get(row.id) ?? [];
+					const attributions =
+						(await getAttributionSummariesByUnitIds([row.id])).get(row.id) ?? [];
 					return {
 						...row,
 						realmId: query.realmId ?? null,
-						publishers,
+						attributions,
 						replyCount: toSafeInteger(row.replyCount, "reply count"),
 						body: toPortableTextResponse(row.body),
 						capabilities: {
@@ -575,7 +584,7 @@ export default new Elysia()
 								selection.items.map(({ postId }) => postId),
 							),
 						);
-					const publishers = await getPublisherSummariesByUnitIds(
+					const attributions = await getAttributionSummariesByUnitIds(
 						rows.map(({ id }) => id),
 					);
 					const lockedTargetIds = await getPostTargetingLockedUnitIds(database, {
@@ -592,7 +601,7 @@ export default new Elysia()
 										`Selected reply ${selected.postId} was not hydrated`,
 									);
 								return {
-									...toReplyResponse(row, publishers.get(row.id) ?? []),
+									...toReplyResponse(row, attributions.get(row.id) ?? []),
 									hasMoreChildren: selected.hasMoreChildren,
 									childEndCursor: selected.childEndCursor,
 									capabilities: {
@@ -701,6 +710,10 @@ export default new Elysia()
 							scope: [],
 							grantedByProfileId: profile.unitId,
 						});
+						await createProfilePublisherAttribution(tx, {
+							sourceUnitId: created.id,
+							profileId: profile.unitId,
+						});
 						if (body.realmId) {
 							await ensurePostMountTargetingAllowed(tx, {
 								postId: created.id,
@@ -717,16 +730,13 @@ export default new Elysia()
 							event: "create",
 						});
 						const recipients = await tx
-							.selectDistinct({ profileId: unitStatusEvent.changedByProfileId })
-							.from(unitStatusEvent)
-							.where(
-								and(
-									eq(unitStatusEvent.unitId, recipientUnitId),
-									eq(unitStatusEvent.toStatus, "published"),
-									eq(unitStatusEvent.actorKind, "profile"),
-									eq(unitStatusEvent.actorHidden, false),
-								),
-							);
+							.selectDistinct({ profileId: profileTable.id })
+							.from(creditAttribution)
+							.innerJoin(
+								profileTable,
+								eq(profileTable.id, creditAttribution.creditedUnitId),
+							)
+							.where(eq(creditAttribution.sourceUnitId, recipientUnitId));
 						const notificationIds: string[] = [];
 						for (const recipient of recipients) {
 							if (!recipient.profileId || recipient.profileId === profile.unitId)

@@ -85,7 +85,7 @@ export function PostFeedCard() {
 		<FeedCard aria-labelledby="post-feed-title">
 			<FeedCardHeader
 				menu={<FixtureMenu />}
-				publishers={fixture.publishers}
+				attributions={fixture.attributions}
 				realms={fixture.realms}
 				recommendation={recommendation}
 				timestamp={timestamp}
@@ -124,7 +124,7 @@ export function ReviewFeedCard() {
 		<FeedCard aria-labelledby="review-feed-title">
 			<FeedCardHeader
 				menu={<FixtureMenu />}
-				publishers={fixture.publishers}
+				attributions={fixture.attributions}
 				realms={fixture.realms}
 				timestamp={timestamp}
 			/>
@@ -149,7 +149,7 @@ export function BookFeedCard() {
 		<FeedCard aria-labelledby="book-feed-title">
 			<FeedCardHeader
 				menu={<FixtureMenu />}
-				publishers={fixture.publishers}
+				attributions={fixture.attributions}
 				realms={fixture.realms}
 				timestamp={timestamp}
 			/>
@@ -190,7 +190,7 @@ export function CollectionFeedCard() {
 		<FeedCard aria-labelledby="collection-feed-title">
 			<FeedCardHeader
 				menu={<FixtureMenu />}
-				publishers={fixture.publishers}
+				attributions={fixture.attributions}
 				realms={fixture.realms}
 				timestamp={timestamp}
 			/>

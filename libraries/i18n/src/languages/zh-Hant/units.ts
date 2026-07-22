@@ -5,6 +5,13 @@ const { forms: publicationLicenseTerms } = zhHantTerminology.publicationLicense;
 
 export default {
 	types: { book: "書籍", software: "軟體", media: "媒體", series: "系列" },
+	attributionRoles: {
+		publisher: "發布者",
+		author: "作者",
+		editor: "編輯",
+		developer: "開發者",
+		director: "導演",
+	},
 	workspace: {
 		title: "管理作品",
 		description: "編輯基本資訊、在地化內容、目錄關係、存取權限與修訂記錄。",

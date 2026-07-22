@@ -1,14 +1,14 @@
 import {
-	EntityAssociationKindValues,
+	type AssociationKind,
 	EntityAssociationPolicyModeValues,
 } from "../../database/schema/contract-values";
 
-export type EntityAssociationKind = (typeof EntityAssociationKindValues)[number];
+export type { AssociationKind };
 export type EntityAssociationPolicyMode = (typeof EntityAssociationPolicyModeValues)[number];
 export type EntityAssociationCommand = "direct" | "request" | "invitation";
 
 export const DefaultEntityAssociationPolicy = {
-	creditAttribution: "open",
+	creditAttribution: "approval",
 	subjectAssociation: "open",
 } as const satisfies EntityAssociationPolicy;
 
@@ -17,13 +17,13 @@ export type EntityAssociationPolicy = {
 	readonly subjectAssociation: EntityAssociationPolicyMode;
 };
 
-export function policyFieldFor(kind: EntityAssociationKind): keyof EntityAssociationPolicy {
+export function policyFieldFor(kind: AssociationKind): keyof EntityAssociationPolicy {
 	return kind === "credit" ? "creditAttribution" : "subjectAssociation";
 }
 
 export function resolveEntityAssociationPolicy(
 	rows: ReadonlyArray<{
-		readonly kind: EntityAssociationKind;
+		readonly kind: AssociationKind;
 		readonly mode: EntityAssociationPolicyMode;
 	}>,
 ): EntityAssociationPolicy {

@@ -4,7 +4,7 @@ SELECT
 	(unit_row.id IS NOT NULL AND category.value IS NOT NULL) AS indexable,
 	CASE WHEN unit_row.id IS NULL OR category.value IS NULL THEN NULL ELSE jsonb_build_object(
 		'id', source.unit_id,
-		'projectionVersion', 2,
+		'projectionVersion', 3,
 		'revision', source.revision,
 		'category', category.value,
 		'unitType', unit_row.kind,
@@ -24,11 +24,11 @@ SELECT
 			'license', unit_row.license,
 			'tagIds', coalesce(tag_data.tag_ids, '[]'::jsonb),
 			'realmIds', coalesce(realm_data.realm_ids, '[]'::jsonb),
-			'publisherIds', coalesce(publisher_data.publisher_ids, '[]'::jsonb),
+			'creditedUnitIds', coalesce(attribution_data.credited_unit_ids, '[]'::jsonb),
 			'subjectId', post_row.subject_unit_id,
 			'rootId', reply_row.root_post_id,
 			'parentId', reply_row.parent_post_id,
-			'ownerId', collection_row.owner_profile_id,
+			'ownerProfileIds', coalesce(owner_data.profile_ids, '[]'::jsonb),
 			'joinPolicy', realm_row.join_policy,
 			'pollMode', poll_row.mode,
 			'resultsVisibility', poll_row.result_visibility,
@@ -86,7 +86,6 @@ LEFT JOIN public.post AS post_row ON post_row.id = source.unit_id
 LEFT JOIN public.post_reply AS reply_row ON reply_row.post_id = source.unit_id
 LEFT JOIN public.post_reply_stat AS reply_stat ON reply_stat.post_id = source.unit_id
 LEFT JOIN public.realm AS realm_row ON realm_row.id = source.unit_id
-LEFT JOIN public.collection AS collection_row ON collection_row.id = source.unit_id
 LEFT JOIN public.poll AS poll_row ON poll_row.id = source.unit_id
 LEFT JOIN public.book AS book_row ON book_row.id = source.unit_id
 LEFT JOIN public.catalog_unit_content_license AS catalog_license_row ON catalog_license_row.unit_id = source.unit_id
@@ -130,10 +129,10 @@ LEFT JOIN LATERAL (
 LEFT JOIN LATERAL (SELECT jsonb_agg(tag_id ORDER BY tag_id) AS tag_ids FROM public.unit_tag WHERE unit_id = source.unit_id) AS tag_data ON true
 LEFT JOIN LATERAL (SELECT jsonb_agg(realm_id ORDER BY realm_id) AS realm_ids FROM public.realm_unit WHERE unit_id = source.unit_id AND status = 'visible') AS realm_data ON true
 LEFT JOIN LATERAL (
-	SELECT jsonb_agg(DISTINCT changed_by_profile_id ORDER BY changed_by_profile_id) AS publisher_ids
-	FROM public.unit_status_event
-	WHERE unit_id = source.unit_id AND to_status = 'published' AND actor_kind = 'profile' AND NOT actor_hidden
-) AS publisher_data ON true
+	SELECT jsonb_agg(DISTINCT credited_unit_id ORDER BY credited_unit_id) AS credited_unit_ids
+	FROM public.credit_attribution
+	WHERE source_unit_id = source.unit_id
+) AS attribution_data ON true
 LEFT JOIN LATERAL (
 	SELECT jsonb_agg(DISTINCT node.owner_unit_id ORDER BY node.owner_unit_id) AS owner_ids
 	FROM public.content_structure_node AS node
@@ -150,6 +149,16 @@ LEFT JOIN LATERAL (
 		jsonb_agg(DISTINCT realm_id ORDER BY realm_id) FILTER (WHERE realm_id IS NOT NULL AND revoked_at IS NULL AND (expires_at IS NULL OR expires_at > now())) AS realm_ids
 	FROM public.unit_access_binding WHERE unit_id = source.unit_id
 ) AS access_data ON true
+LEFT JOIN LATERAL (
+	SELECT jsonb_agg(DISTINCT profile_id ORDER BY profile_id) AS profile_ids
+	FROM public.unit_access_binding
+	WHERE unit_id = source.unit_id
+		AND subject_kind = 'profile'
+		AND role = 'owner'
+		AND profile_id IS NOT NULL
+		AND revoked_at IS NULL
+		AND (expires_at IS NULL OR expires_at > now())
+) AS owner_data ON true
 LEFT JOIN LATERAL (
 	SELECT jsonb_agg(DISTINCT platform_entity_id ORDER BY platform_entity_id) FILTER (WHERE platform_entity_id IS NOT NULL) AS platform_ids,
 		jsonb_agg(DISTINCT tier ORDER BY tier) AS tiers

@@ -38,7 +38,7 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
 import { buildReplyPostTree, type ReplyPostTreeNode } from "./reply-tree";
 import { invalidatePostQueries } from "./query";
-import { PublisherLinks } from "./publisher-list";
+import { AttributionLinks } from "./attribution-list";
 import { postHref } from "./url";
 
 export function ReplyPostThread({
@@ -205,10 +205,10 @@ function ReplyPostNode({
 		>
 			<div className="flex flex-col gap-3 py-4">
 				<div className="flex flex-wrap items-center gap-3 text-sm">
-					<PublisherLinks
+					<AttributionLinks
+						attributions={reply.attributions}
 						className="font-medium hover:underline"
-						emptyLabel={t.posts.unknownPublisher}
-						publishers={reply.publishers}
+						emptyLabel={t.posts.unknownAttribution}
 					/>
 					<Link
 						className="text-muted-foreground text-xs"

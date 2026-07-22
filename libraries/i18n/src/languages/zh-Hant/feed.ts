@@ -52,7 +52,7 @@ export default {
 	emptyTitle: "廣場還很安靜",
 	emptyBody: "成為第一個分享作品與見解的人。",
 	reason: {
-		followedPublisher: `因為你${followTerms.followed}了發布者`,
+		followedUnit: `因為你${followTerms.followed}了這個項目或其中一位署名創作者`,
 		followedRealm: `因為你${followTerms.followed}了${realmTerms.inline}`,
 		basedOnActivity: "根據你的近期活動",
 		relatedSubject: "與正在瀏覽的內容相關",
@@ -89,10 +89,10 @@ export default {
 	relatedWork: "討論關聯作品",
 	myRealms: `我的${realmTerms.pluralLabel}`,
 	contextSeparator: "在",
-	publisherList: insert("{{count}} 位發布者", { count: Number }),
+	attributionList: insert("{{count}} 位署名創作者", { count: Number }),
 	realmList: insert(`{{count}} 個${realmTerms.pluralLabel}`, { count: Number }),
-	showPublisherList: insert("{{publisher}} 及其他 {{count}} 位發布者；顯示發布者清單", {
-		publisher: String,
+	showAttributionList: insert("{{attribution}} 及其他 {{count}} 位；顯示署名清單", {
+		attribution: String,
 		count: Number,
 	}),
 	showRealmList: insert(

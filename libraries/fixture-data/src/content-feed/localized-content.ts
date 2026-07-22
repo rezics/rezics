@@ -1,5 +1,5 @@
 export interface FeedFixtureLocalizedContent {
-	readonly publishers: readonly [
+	readonly attributions: readonly [
 		{
 			readonly name: string;
 			readonly initials: string;

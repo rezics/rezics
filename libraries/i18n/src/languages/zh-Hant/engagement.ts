@@ -68,6 +68,5 @@ export default {
 	cancel: "取消",
 	delete: "刪除",
 	select: "選擇",
-	unknownPublisher: "未知發布者",
 	items: "個條目",
 };

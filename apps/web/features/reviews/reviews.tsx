@@ -50,11 +50,12 @@ import { Input } from "@rezics/ui";
 import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import { UnitAttributionProposalManager } from "@/features/governance/unit-workflows";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
-import { PublisherLinks } from "@/features/posts/publisher-list";
+import { AttributionLinks } from "@/features/posts/attribution-list";
 
 async function invalidateReviews(
 	queryClient: ReturnType<typeof useQueryClient>,
@@ -98,9 +99,9 @@ export function ReviewsPage() {
 									title={review.title ?? t.ui.unnamed}
 								/>
 								<CardContent className="text-muted-foreground text-sm">
-									<PublisherLinks
-										emptyLabel={t.posts.unknownPublisher}
-										publishers={review.publishers}
+									<AttributionLinks
+										attributions={review.attributions}
+										emptyLabel={t.posts.unknownAttribution}
 									/>
 								</CardContent>
 							</Card>
@@ -416,6 +417,7 @@ function ReviewEditForm({
 						{t.ui.save}
 					</Button>
 				</form>
+				<UnitAttributionProposalManager unitId={reviewId} />
 			</main>
 		</RequireSession>
 	);

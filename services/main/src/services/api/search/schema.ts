@@ -23,7 +23,7 @@ export const DomainSearchBody = t.Object(
 		aiDisclosures: t.Optional(SearchStringList),
 		licenses: t.Optional(SearchLicenseList),
 		contentLicensed: t.Optional(t.Boolean()),
-		publisherId: t.Optional(t.String({ minLength: 1 })),
+		creditedUnitId: t.Optional(t.String({ minLength: 1 })),
 		realmId: t.Optional(t.String({ minLength: 1 })),
 		subjectId: t.Optional(t.String({ minLength: 1 })),
 		targetId: t.Optional(t.String({ minLength: 1 })),

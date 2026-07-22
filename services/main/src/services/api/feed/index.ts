@@ -30,7 +30,6 @@ import {
 	unitReaction,
 	unitReactionGlobalStat,
 	unitRevisionHead,
-	unitStatusEvent,
 } from "../../database/schema";
 import { parseJsonCursor } from "../../pagination";
 import {
@@ -54,7 +53,7 @@ import {
 	getPublicCanonicalUnitSlugAddresses,
 	type PublicCanonicalUnitSlugAddress,
 } from "../../units/slug-address";
-import { getPublisherSummariesByUnitIds } from "../../units/status";
+import { getAttributionSummariesByUnitIds } from "../../units/attribution";
 import {
 	RecommendationPolicyVersionSchema,
 	type RecommendationReason,
@@ -258,18 +257,6 @@ export function getFeedEligibilityCondition(
 		eq(unit.moderationStatus, "approved"),
 		isNull(unit.deletedAt),
 		lte(unit.createdAt, asOf),
-		sql`exists (
-			select 1 from unit_status_event publisher_event
-			join unit publisher_unit on publisher_unit.id = publisher_event.changed_by_profile_id
-			where publisher_event.unit_id = ${unit.id}
-				and publisher_event.to_status = 'published'
-				and publisher_event.actor_kind = 'profile'
-				and publisher_event.actor_hidden = false
-				and publisher_unit.status = 'published'
-				and publisher_unit.visibility = 'public'
-				and publisher_unit.moderation_status = 'approved'
-				and publisher_unit.deleted_at is null
-		)`,
 		sql`(${unit.kind} <> 'post' or ${post.kind} <> 'reply'::post_kind or exists (
 			select 1 from post_reply readable_reply
 			join unit readable_root on readable_root.id = readable_reply.root_post_id
@@ -293,14 +280,11 @@ export function getFeedEligibilityCondition(
 			: undefined,
 		viewer.profileId
 			? sql`not exists (
-				select 1 from unit_status_event publisher_event
+				select 1 from credit_attribution attribution
 				join profile_block blocked on
-					(blocked.blocker_profile_id = ${viewer.profileId}::uuid and blocked.blocked_profile_id = publisher_event.changed_by_profile_id)
-					or (blocked.blocker_profile_id = publisher_event.changed_by_profile_id and blocked.blocked_profile_id = ${viewer.profileId}::uuid)
-				where publisher_event.unit_id = ${unit.id}
-					and publisher_event.to_status = 'published'
-					and publisher_event.actor_kind = 'profile'
-					and publisher_event.actor_hidden = false
+					(blocked.blocker_profile_id = ${viewer.profileId}::uuid and blocked.blocked_profile_id = attribution.credited_unit_id)
+					or (blocked.blocker_profile_id = attribution.credited_unit_id and blocked.blocked_profile_id = ${viewer.profileId}::uuid)
+				where attribution.source_unit_id = ${unit.id}
 			)`
 			: undefined,
 		viewer.profileId
@@ -404,19 +388,17 @@ async function getCandidateSources(input: {
 					.from(unit)
 					.leftJoin(post, eq(post.id, unit.id))
 					.innerJoin(
-						unitStatusEvent,
-						and(
-							eq(unitStatusEvent.unitId, unit.id),
-							eq(unitStatusEvent.toStatus, "published"),
-							eq(unitStatusEvent.actorKind, "profile"),
-							eq(unitStatusEvent.actorHidden, false),
-						),
-					)
-					.innerJoin(
 						unitFollow,
 						and(
 							eq(unitFollow.followerProfileId, input.viewer.profileId),
-							eq(unitFollow.unitId, unitStatusEvent.changedByProfileId),
+							or(
+								eq(unitFollow.unitId, unit.id),
+								sql`exists (
+									select 1 from credit_attribution followed_attribution
+									where followed_attribution.source_unit_id = ${unit.id}
+										and followed_attribution.credited_unit_id = ${unitFollow.unitId}
+								)`,
+							),
 						),
 					)
 					.where(condition)
@@ -457,14 +439,14 @@ async function getCandidateSources(input: {
 	const addRanked = (
 		rows: readonly { id: string }[],
 		weight: number,
-		nextReason: "followed_publisher" | "followed_realm" | "based_on_activity",
+		nextReason: "followed_unit" | "followed_realm" | "based_on_activity",
 	) => {
 		rows.forEach(({ id }, index) => {
 			relevance.set(id, (relevance.get(id) ?? 0) + weight / (60 + index + 1));
 			if (!reason.has(id)) reason.set(id, nextReason);
 		});
 	};
-	addRanked(followedRows, 4, "followed_publisher");
+	addRanked(followedRows, 4, "followed_unit");
 	addRanked(realmRows, 4, "followed_realm");
 	addRanked(graphRows, 4, "based_on_activity");
 	for (const row of objectiveRows) {
@@ -503,7 +485,7 @@ async function getCandidateSources(input: {
 export interface FeedRankingCandidate extends RecommendationCandidate {
 	unitKind: FeedUnitKind | "post";
 	postKind: FeedPostKind | null;
-	publisherIds: readonly string[];
+	creditedUnitIds: readonly string[];
 	realmId: string | null;
 	subjectId: string | null;
 	rootPostId: string | null;
@@ -566,14 +548,11 @@ export async function getFeedRankingCandidates(input: {
 			id: unit.id,
 			unitKind: unit.kind,
 			postKind: post.kind,
-			publisherIds: sql<string[]>`array(
-				select distinct publisher_event.changed_by_profile_id::text
-				from unit_status_event publisher_event
-				where publisher_event.unit_id = ${unit.id}
-					and publisher_event.to_status = 'published'
-					and publisher_event.actor_kind = 'profile'
-					and publisher_event.actor_hidden = false
-				order by publisher_event.changed_by_profile_id::text
+			creditedUnitIds: sql<string[]>`array(
+				select distinct attribution.credited_unit_id::text
+				from credit_attribution attribution
+				where attribution.source_unit_id = ${unit.id}
+				order by attribution.credited_unit_id::text
 			)`,
 			realmId: selectedRealmId,
 			subjectId: post.subjectUnitId,
@@ -637,7 +616,7 @@ export async function getFeedRankingCandidates(input: {
 			{
 				id: row.id,
 				...kind,
-				publisherIds: row.publisherIds,
+				creditedUnitIds: row.creditedUnitIds,
 				realmId: row.realmId,
 				subjectId: row.subjectId,
 				rootPostId: row.rootPostId,
@@ -823,9 +802,9 @@ export async function hydrateFeedItems(
 					)
 			: [],
 	]);
-	const [publishers, rootPublishers, realmContexts] = await Promise.all([
-		getPublisherSummariesByUnitIds(validIds),
-		getPublisherSummariesByUnitIds(rootIds),
+	const [attributions, rootAttributions, realmContexts] = await Promise.all([
+		getAttributionSummariesByUnitIds(validIds),
+		getAttributionSummariesByUnitIds(rootIds),
 		getFeedRealmContextsByUnitIds(validIds),
 	]);
 	const subjects = new Map(
@@ -847,7 +826,7 @@ export async function hydrateFeedItems(
 	const rootContext = new Map(
 		rootRows.map((row) => [
 			row.rootPostId,
-			{ ...row, publishers: rootPublishers.get(row.rootPostId) ?? [] },
+			{ ...row, attributions: rootAttributions.get(row.rootPostId) ?? [] },
 		]),
 	);
 	const rootCount = new Map(
@@ -887,7 +866,7 @@ export async function hydrateFeedItems(
 		if (!row || !ranked) return [];
 		const common = {
 			id: row.id,
-			publishers: publishers.get(row.id) ?? [],
+			attributions: attributions.get(row.id) ?? [],
 			realmId: ranked.realmId,
 			realms: prioritizeFeedRealmContexts(realmContexts.get(row.id) ?? [], ranked.realmId),
 			title: row.title,

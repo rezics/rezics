@@ -9,7 +9,7 @@ import { UnitRelationships } from "../unit-edit";
 export function UnitRelationshipsPage() {
 	const { t } = useTranslation(["errors", "units"]);
 	const { type, unit } = useUnitManagement();
-	if (!unit.capabilities.canEdit && !unit.capabilities.canManageAssociations)
+	if (!unit.capabilities.canEdit)
 		return <p className="text-sm text-destructive">{t.errors.forbidden}</p>;
 	return (
 		<section>
@@ -17,12 +17,10 @@ export function UnitRelationshipsPage() {
 				description={t.units.workspace.sections.relationships.description}
 				title={t.units.workspace.sections.relationships.label}
 			/>
-			{unit.capabilities.canEdit ? <UnitRelationships type={type} unit={unit} /> : null}
-			{unit.capabilities.canManageAssociations ? (
-				<div className="mt-6 grid gap-6">
-					<UnitAssociationProposalManager unitId={unit.id} />
-				</div>
-			) : null}
+			<UnitRelationships type={type} unit={unit} />
+			<div className="mt-6 grid gap-6">
+				<UnitAssociationProposalManager unitId={unit.id} />
+			</div>
 		</section>
 	);
 }

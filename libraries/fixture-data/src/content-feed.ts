@@ -19,12 +19,27 @@ interface FeedFixtureContext {
 	readonly summary: string;
 }
 
+type FeedFixtureAttributionContext = FeedFixtureContext & {
+	readonly kind: "profile" | "entity";
+	readonly role: string;
+};
+
+type FeedFixtureRealmContext = FeedFixtureContext & { readonly kind: "realm" };
+
 export interface FeedFixtureData {
 	readonly referenceTime: string;
 	readonly createdAt: string;
-	readonly recommendationReason: "followed_publisher";
-	readonly publishers: readonly [FeedFixtureContext, FeedFixtureContext, ...FeedFixtureContext[]];
-	readonly realms: readonly [FeedFixtureContext, FeedFixtureContext, ...FeedFixtureContext[]];
+	readonly recommendationReason: "followed_unit";
+	readonly attributions: readonly [
+		FeedFixtureAttributionContext,
+		FeedFixtureAttributionContext,
+		...FeedFixtureAttributionContext[],
+	];
+	readonly realms: readonly [
+		FeedFixtureRealmContext,
+		FeedFixtureRealmContext,
+		...FeedFixtureRealmContext[],
+	];
 	readonly post: {
 		readonly title: string;
 		readonly body: string;
@@ -57,13 +72,13 @@ function createFeedFixtureData(content: FeedFixtureLocalizedContent): FeedFixtur
 	return {
 		referenceTime: ReferenceTime,
 		createdAt: CreatedAt,
-		recommendationReason: "followed_publisher",
-		publishers: [
-			createFixtureContext("publisher", content.publishers[0], 0),
-			createFixtureContext("publisher", content.publishers[1], 1),
-			...content.publishers
+		recommendationReason: "followed_unit",
+		attributions: [
+			createAttributionContext(content.attributions[0], 0),
+			createAttributionContext(content.attributions[1], 1),
+			...content.attributions
 				.slice(2)
-				.map((publisher, index) => createFixtureContext("publisher", publisher, index + 2)),
+				.map((attribution, index) => createAttributionContext(attribution, index + 2)),
 		],
 		realms: [
 			createFixtureContext("realm", content.realms[0], 0),
@@ -92,15 +107,31 @@ function createFeedFixtureData(content: FeedFixtureLocalizedContent): FeedFixtur
 }
 
 function createFixtureContext(
-	kind: "publisher" | "realm",
-	content: FeedFixtureLocalizedContent["publishers"][number],
+	kind: "realm",
+	content: FeedFixtureLocalizedContent["realms"][number],
 	index: number,
-): FeedFixtureContext {
+): FeedFixtureRealmContext {
 	return {
 		id: `fixture-${kind}-${index + 1}`,
 		...content,
+		kind,
 		href: `#fixture-${kind}-${index + 1}`,
 		slug: `fixture-${kind}-${index + 1}`,
+	};
+}
+
+function createAttributionContext(
+	content: FeedFixtureLocalizedContent["attributions"][number],
+	index: number,
+): FeedFixtureAttributionContext {
+	const kind = index === 0 ? "profile" : "entity";
+	return {
+		id: `fixture-attribution-${index + 1}`,
+		...content,
+		kind,
+		role: index === 0 ? "publisher" : index === 1 ? "author" : "editor",
+		href: `#fixture-attribution-${index + 1}`,
+		slug: `fixture-attribution-${index + 1}`,
 	};
 }
 

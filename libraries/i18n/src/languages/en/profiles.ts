@@ -15,9 +15,10 @@ export default {
 	aboutTitle: "About",
 	aboutEmpty: "This user has not added a detailed introduction yet.",
 	contentTitle: "Published content",
-	contentDescription: `${postTerms.pluralLabel}, reviews, and collections published publicly by this user.`,
+	contentDescription: `Public ${postTerms.pluralLabel} and reviews credited to this user, plus collections and catalog entries they own.`,
 	contentEmpty: "There is no public content here yet.",
 	contentTypes: {
+		entity: "Owned catalog entries",
 		posts: postTerms.pluralLabel,
 		reviews: "Reviews",
 		collections: "Collections",

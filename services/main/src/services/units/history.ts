@@ -18,7 +18,7 @@ import { ContentLanguageValues } from "@rezics/i18n";
 import { PublicationLicenseIds } from "@rezics/license";
 
 import type { DatabaseTransaction } from "../database";
-import type { EntityAuthorization } from "../authorization/entity/authorization";
+import type { Authorization } from "../authorization";
 import { isPrimaryUnitLocalization } from "./localization";
 import {
 	auditEvent,
@@ -72,6 +72,7 @@ import { UnitRevisionConflict } from "./errors";
 import { insertUnit } from "./create";
 import { finalizeInitialUnitStatusRevision } from "./status";
 import { ensureUnitVariantLifecycle } from "./variant-policy";
+import { ensureDirectCreditAttributionAllowed } from "./attribution-authorization";
 import { ensureSubjectPostTargetingAllowed } from "../posts/targeting";
 
 export type UnitRevisionEvent = "create" | "update" | "delete" | "restore";
@@ -380,7 +381,7 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 	const credits = await tx
 		.select()
 		.from(creditAttribution)
-		.where(eq(creditAttribution.unitId, unitId))
+		.where(eq(creditAttribution.sourceUnitId, unitId))
 		.orderBy(creditAttribution.id);
 	const subjectAssociations = await tx
 		.select()
@@ -614,7 +615,7 @@ export async function restoreUnitSnapshot(
 	tx: DatabaseTransaction,
 	unitId: string,
 	value: unknown,
-	entityAuthorization: EntityAuthorization<string>,
+	authorization: Authorization<string>,
 ) {
 	const result = UnitSnapshotSchema.safeParse(value);
 	if (!result.success) throw new Error("Unsupported Unit snapshot", { cause: result.error });
@@ -623,22 +624,18 @@ export async function restoreUnitSnapshot(
 	const subjectAssociations = snapshot.owned.subjectAssociations.map((row) =>
 		subjectAssociationRowSchema.parse(row),
 	);
-	const associationTargets = [
-		...credits.map((row) => ({ entityId: row.entityId, kind: "credit" as const })),
-		...subjectAssociations.map((row) => ({
-			entityId: row.entityId,
-			kind: "subject" as const,
-		})),
-	].sort(
-		(left, right) =>
-			left.entityId.localeCompare(right.entityId) || left.kind.localeCompare(right.kind),
-	);
-	for (const target of associationTargets)
-		await entityAuthorization.ensureAssociationAllowed(tx, target.entityId, target.kind);
+	for (const targetUnitId of credits
+		.map(({ creditedUnitId }) => creditedUnitId)
+		.sort((left, right) => left.localeCompare(right)))
+		await ensureDirectCreditAttributionAllowed(authorization, tx, targetUnitId);
+	for (const targetEntityId of subjectAssociations
+		.map(({ entityId }) => entityId)
+		.sort((left, right) => left.localeCompare(right)))
+		await authorization.entity.ensureAssociationAllowed(tx, targetEntityId, "subject");
 	if (snapshot.kind === "post" && snapshot.extension) {
 		const postState = postStateSchema.parse(snapshot.extension);
 		if (postState.subjectUnitId)
-			await entityAuthorization.ensureSubjectAssociationAllowedIfEntity(
+			await authorization.entity.ensureSubjectAssociationAllowedIfEntity(
 				tx,
 				postState.subjectUnitId,
 			);
@@ -672,7 +669,7 @@ export async function restoreUnitSnapshot(
 	await restoreAliases(tx, unitId, snapshot.owned.aliases);
 	if (snapshot.kind === "software")
 		await tx.delete(softwareRequirement).where(eq(softwareRequirement.softwareId, unitId));
-	await tx.delete(creditAttribution).where(eq(creditAttribution.unitId, unitId));
+	await tx.delete(creditAttribution).where(eq(creditAttribution.sourceUnitId, unitId));
 	await tx.delete(subjectAssociation).where(eq(subjectAssociation.unitId, unitId));
 	await tx.delete(unitLink).where(eq(unitLink.unitId, unitId));
 	await tx.delete(unitTag).where(eq(unitTag.unitId, unitId));
@@ -726,12 +723,7 @@ export async function restoreUnitSnapshot(
 			await tx
 				.insert(realmPin)
 				.values(snapshot.owned.realmPins.map((row) => realmPinRowSchema.parse(row)));
-		await restoreRealmRules(
-			tx,
-			unitId,
-			snapshot.owned.realmRules,
-			entityAuthorization.profileId,
-		);
+		await restoreRealmRules(tx, unitId, snapshot.owned.realmRules, authorization.profileId);
 	}
 	if (snapshot.kind === "zone") {
 		await tx.delete(zonePage).where(eq(zonePage.zoneId, unitId));
@@ -1038,7 +1030,7 @@ export async function restoreUnitRevision(
 		actorProfileId: string;
 		message?: string;
 		minor?: boolean;
-		entityAuthorization: EntityAuthorization<string>;
+		authorization: Authorization<string>;
 	},
 ) {
 	await lockUnitHistory(tx, input.unitId);
@@ -1062,7 +1054,7 @@ export async function restoreUnitRevision(
 		tx,
 		input.unitId,
 		documentsToSnapshot(documents),
-		input.entityAuthorization,
+		input.authorization,
 	);
 	return recordUnitRevision(tx, {
 		unitId: input.unitId,
@@ -1247,7 +1239,7 @@ export async function undoUnitRevision(
 		actorProfileId: string;
 		message?: string;
 		minor?: boolean;
-		entityAuthorization: EntityAuthorization<string>;
+		authorization: Authorization<string>;
 	},
 ) {
 	await lockUnitHistory(tx, input.unitId);
@@ -1275,7 +1267,7 @@ export async function undoUnitRevision(
 		tx,
 		input.unitId,
 		documentsToSnapshot(result.documents),
-		input.entityAuthorization,
+		input.authorization,
 	);
 	return recordUnitRevision(tx, {
 		unitId: input.unitId,

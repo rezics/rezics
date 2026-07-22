@@ -31,6 +31,7 @@ export default {
 	associationProposalDescription:
 		"The real association is created only after the other side accepts the proposal.",
 	targetEntity: `Target Entity ${verbatimTerms.id.value}`,
+	targetUnit: `Credited Unit ${verbatimTerms.id.value}`,
 	sourceUnit: `Source Unit ${verbatimTerms.id.value}`,
 	associationRole: "Association role",
 	proposalExpiry: "Proposal expiry",

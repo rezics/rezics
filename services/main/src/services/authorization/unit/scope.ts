@@ -1,3 +1,5 @@
+import type { AssociationKind } from "../../database/schema/contract-values";
+
 const SegmentPattern = /^[a-z0-9][a-z0-9-]*$/;
 
 export type UnitScope = readonly string[];
@@ -19,3 +21,5 @@ export function scopeCovers(granted: readonly string[], requested: readonly stri
 export function scopeKey(scope: readonly string[]): string {
 	return scope.join("/");
 }
+
+export const associationTargetScope = (kind: AssociationKind) => unitScope("associations", kind);

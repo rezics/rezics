@@ -2,6 +2,7 @@ import { type UnitKind, UnitKindValues } from "../database/schema/contract-value
 
 export const FollowableUnitKindValues = [
 	"profile",
+	"entity",
 	"zone",
 	"realm",
 ] as const satisfies readonly UnitKind[];

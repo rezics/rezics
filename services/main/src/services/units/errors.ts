@@ -173,6 +173,32 @@ export class UnitSlugAddressNotFound extends Data.TaggedError("UnitSlugAddressNo
 	readonly message = "Unit has no canonical slug address";
 }
 
+export class AssociationProposalNotFound extends Data.TaggedError("AssociationProposalNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = AssociationProposalNotFound.status;
+	readonly message = "Association proposal not found";
+}
+
+export class AssociationProposalConflict extends Data.TaggedError("AssociationProposalConflict") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = AssociationProposalConflict.status;
+	readonly message = "Association proposal conflicts with the current relationship state";
+}
+
+export class AssociationProposalExpired extends Data.TaggedError("AssociationProposalExpired") {
+	static readonly status = StatusCodes.CONFLICT as const;
+	readonly status = AssociationProposalExpired.status;
+	readonly message = "Association proposal has expired";
+}
+
+export class AssociationProposalExpiryInvalid extends Data.TaggedError(
+	"AssociationProposalExpiryInvalid",
+) {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = AssociationProposalExpiryInvalid.status;
+	readonly message = "Association proposal expiry must be in the future";
+}
+
 export const UnitErrors = [
 	UnitNotFound,
 	UnitPermissionForbidden,
@@ -195,4 +221,8 @@ export const UnitErrors = [
 	UnitAddressMutationForbidden,
 	SlugRedirectNotFound,
 	UnitSlugAddressNotFound,
+	AssociationProposalNotFound,
+	AssociationProposalConflict,
+	AssociationProposalExpired,
+	AssociationProposalExpiryInvalid,
 ] as const;

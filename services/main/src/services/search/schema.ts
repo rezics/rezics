@@ -48,7 +48,7 @@ export interface DomainSearchRequest {
 	aiDisclosures?: string[];
 	licenses?: PublicationLicenseId[];
 	contentLicensed?: boolean;
-	publisherId?: string;
+	creditedUnitId?: string;
 	realmId?: string;
 	subjectId?: string;
 	targetId?: string;
@@ -85,7 +85,7 @@ export const SearchCategoryRules = {
 		sortableAttributes: [...CommonSortableAttributes, "followerCount"],
 	},
 	entity: {
-		filterableAttributes: [...CommonFilterableAttributes, "kind"],
+		filterableAttributes: [...CommonFilterableAttributes, "kind", "ownerId"],
 		sortableAttributes: CommonSortableAttributes,
 	},
 	tags: {
@@ -94,7 +94,7 @@ export const SearchCategoryRules = {
 	},
 	posts: {
 		filterableAttributes: [
-			"publisherId",
+			"creditedUnitId",
 			...CommonFilterableAttributes,
 			"subjectId",
 			"rootId",
@@ -111,7 +111,7 @@ export const SearchCategoryRules = {
 		sortableAttributes: CommonSortableAttributes,
 	},
 	reviews: {
-		filterableAttributes: [...CommonFilterableAttributes, "publisherId", "targetId", "kind"],
+		filterableAttributes: [...CommonFilterableAttributes, "creditedUnitId", "targetId", "kind"],
 		sortableAttributes: CommonSortableAttributes,
 	},
 	polls: {

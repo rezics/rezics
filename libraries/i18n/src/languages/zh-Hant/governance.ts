@@ -29,6 +29,7 @@ export default {
 	associationProposals: "關聯提案",
 	associationProposalDescription: "提案經另一方接受後才會建立實際關聯。",
 	targetEntity: `目標目錄實體 ${verbatimTerms.id.value}`,
+	targetUnit: `署名對象 ${verbatimTerms.id.value}`,
 	sourceUnit: `來源條目 ${verbatimTerms.id.value}`,
 	associationRole: "關聯角色",
 	proposalExpiry: "提案有效期限",

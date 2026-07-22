@@ -36,7 +36,7 @@ export const ListTagsQuery = t.Object({
 export type ListTagsQuery = Static<typeof ListTagsQuery>;
 
 export const AddUnitCreditBody = t.Object({
-	entityId: Uuid,
+	creditedUnitId: Uuid,
 	role: t.String({ minLength: 1, maxLength: 64 }),
 	position: t.Optional(FractionalPosition),
 });

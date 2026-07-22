@@ -4,7 +4,7 @@ import type { ContentLanguage } from "@rezics/i18n";
 import type { UnitAuthorization } from "../authorization/unit/authorization";
 import { getUnitReadCondition } from "../authorization/unit/query";
 import { database } from "../database";
-import { profile, profileBlock, realm, unit, unitFollow, zone } from "../database/schema";
+import { entity, profile, profileBlock, realm, unit, unitFollow, zone } from "../database/schema";
 import type { UnitKind } from "../database/schema/contract-values";
 import { createNotification, deliverNotificationEmail } from "../notifications/service";
 import { UnitNotFound } from "../units/errors";
@@ -111,11 +111,13 @@ async function resolveFollowTarget(
 			id: unit.id,
 			kind: unit.kind,
 			profileId: profile.id,
+			entityId: entity.id,
 			zoneId: zone.id,
 			realmId: realm.id,
 		})
 		.from(unit)
 		.leftJoin(profile, eq(profile.id, unit.id))
+		.leftJoin(entity, eq(entity.id, unit.id))
 		.leftJoin(zone, eq(zone.id, unit.id))
 		.leftJoin(realm, eq(realm.id, unit.id))
 		.where(eq(unit.id, unitId))
@@ -126,9 +128,11 @@ async function resolveFollowTarget(
 	const extensionId =
 		target.kind === "profile"
 			? target.profileId
-			: target.kind === "zone"
-				? target.zoneId
-				: target.realmId;
+			: target.kind === "entity"
+				? target.entityId
+				: target.kind === "zone"
+					? target.zoneId
+					: target.realmId;
 	if (!extensionId) throw new UnitNotFound();
 	return { id: target.id, kind: target.kind };
 }

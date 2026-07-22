@@ -80,14 +80,14 @@ describe("recommendation ranking", () => {
 		expect(ranked[0]?.id).toBe("a-new");
 	});
 
-	it("diversifies repeated publishers before relaxing the soft cap", () => {
+	it("diversifies repeated credited Units before relaxing the soft cap", () => {
 		const items = Array.from({ length: 5 }, (_, index) =>
 			candidate(`same-${index}`, {
-				publisherIds: ["same-publisher"],
+				creditedUnitIds: ["same-credit"],
 				personalizedRelevance: 10 - index,
 			}),
 		);
-		items.push(candidate("different", { publisherIds: ["different-publisher"] }));
+		items.push(candidate("different", { creditedUnitIds: ["different-credit"] }));
 		const ranked = rankRecommendations(items, {
 			sort: "best",
 			personalized: true,
@@ -101,14 +101,14 @@ describe("recommendation ranking", () => {
 	it("resets the diversity cap at each page boundary", () => {
 		const items = Array.from({ length: 6 }, (_, index) =>
 			candidate(`same-${index}`, {
-				publisherIds: ["same-publisher"],
+				creditedUnitIds: ["same-credit"],
 				personalizedRelevance: 20 - index,
 			}),
 		);
 		items.push(
 			...Array.from({ length: 3 }, (_, index) =>
 				candidate(`different-${index}`, {
-					publisherIds: [`different-publisher-${index}`],
+					creditedUnitIds: [`different-credit-${index}`],
 					personalizedRelevance: 1,
 				}),
 			),
@@ -122,9 +122,9 @@ describe("recommendation ranking", () => {
 		expect(
 			ranked
 				.slice(0, 4)
-				.filter(({ publisherIds }) => publisherIds?.includes("same-publisher")),
+				.filter(({ creditedUnitIds }) => creditedUnitIds?.includes("same-credit")),
 		).toHaveLength(3);
-		expect(ranked[4]?.publisherIds).toContain("same-publisher");
+		expect(ranked[4]?.creditedUnitIds).toContain("same-credit");
 	});
 
 	it("reserves first-page capacity for fresh low-exposure candidates", () => {

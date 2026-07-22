@@ -39,6 +39,7 @@ import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { RequireSession } from "@/features/auth/require-session";
 import { PortableTextEditor } from "@/features/editor/portable-text-editor";
+import { UnitAttributionProposalManager } from "@/features/governance/unit-workflows";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
@@ -46,7 +47,7 @@ import { selectLocalization } from "@/lib/localization";
 import { ReplyPostThread } from "./reply-thread";
 import { PostList, RelatedPostRecommendations } from "./post-list";
 import { invalidatePostQueries } from "./query";
-import { PublisherLinks } from "./publisher-list";
+import { AttributionLinks } from "./attribution-list";
 import { realmHref } from "@/features/slugs/unit-route";
 import { postHref } from "./url";
 
@@ -207,11 +208,11 @@ export function PostDetailPage({ id, realmId }: { id: string; realmId?: string }
 				<CardHeader>
 					<CardDescription className="flex flex-wrap gap-x-4 gap-y-2">
 						<span className="inline-flex gap-1">
-							<span>{t.posts.publishers}:</span>
-							<PublisherLinks
+							<span>{t.posts.attributions}:</span>
+							<AttributionLinks
+								attributions={post.attributions}
 								className="text-link hover:text-link-hover"
-								emptyLabel={t.posts.unknownPublisher}
-								publishers={post.publishers}
+								emptyLabel={t.posts.unknownAttribution}
 							/>
 						</span>
 						{post.realmId && (
@@ -343,6 +344,7 @@ function PostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
 					/>
 				</FieldGroup>
 			</form>
+			<UnitAttributionProposalManager unitId={post.id} />
 		</main>
 	);
 }
@@ -407,6 +409,7 @@ function ReplyPostEditForm({ post }: { post: GetApiPostsByPostIdStatus200 }) {
 					</Button>
 				</FieldGroup>
 			</form>
+			<UnitAttributionProposalManager unitId={post.id} />
 		</main>
 	);
 }

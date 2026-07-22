@@ -1,57 +1,57 @@
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 
-import type { Authorization } from "../authorization";
-import {
-	entityAssociationScope,
-	lockEntityAssociationState,
-} from "../authorization/entity/authorization";
-import type { EntityAssociationKind } from "../authorization/entity/policy";
+import { Authorization } from "../authorization";
+import { associationTargetScope } from "../authorization/unit/scope";
 import { database, type DatabaseTransaction } from "../database";
+import type { AssociationKind } from "../database/schema/contract-values";
 import {
 	auditEvent,
 	creditAttribution,
 	entity,
-	entityAssociationProposal,
+	unitAssociationProposal,
 	subjectAssociation,
 	unit,
 } from "../database/schema";
 import { fractionalPositionBetween } from "../ordering/position";
-import { recordUnitRevision } from "../units/history";
-import { UnitNotFound } from "../units/errors";
+import { EntityEntryNotFound } from "../entities/errors";
+import { recordUnitRevision } from "./history";
 import {
-	EntityAssociationProposalConflict,
-	EntityAssociationProposalExpired,
-	EntityAssociationProposalNotFound,
-	EntityEntryNotFound,
+	ensureCreditAttributionInvitationAllowed,
+	ensureCreditAttributionRequestAllowed,
+} from "./attribution-authorization";
+import {
+	AssociationProposalConflict,
+	AssociationProposalExpired,
+	AssociationProposalNotFound,
+	UnitNotFound,
 } from "./errors";
 
-export type EntityAssociationProposalState =
+export type AssociationProposalState =
 	"pending" | "expired" | "accepted" | "declined" | "cancelled";
 
-type ProposalRecord = typeof entityAssociationProposal.$inferSelect;
+type ProposalRecord = typeof unitAssociationProposal.$inferSelect;
 
-export const sourceAssociationScope = (kind: EntityAssociationKind) =>
+export const sourceAssociationScope = (kind: AssociationKind) =>
 	[kind === "credit" ? "credit-attributions" : "subject-associations"] as const;
 
-export function entityAssociationProposalState(
+export function associationProposalState(
 	record: Pick<ProposalRecord, "resolution" | "expiresAt">,
 	now = new Date(),
-): EntityAssociationProposalState {
+): AssociationProposalState {
 	return record.resolution ?? (record.expiresAt <= now ? "expired" : "pending");
 }
 
-export function presentEntityAssociationProposal(record: ProposalRecord, now = new Date()) {
-	return { ...record, state: entityAssociationProposalState(record, now) };
+export function presentAssociationProposal(record: ProposalRecord, now = new Date()) {
+	return { ...record, state: associationProposalState(record, now) };
 }
 
 async function lockAssociationWorkflow(
 	tx: DatabaseTransaction,
 	sourceUnitId: string,
-	targetEntityId: string,
+	targetUnitId: string,
 ) {
-	await lockEntityAssociationState(tx, targetEntityId);
 	await tx.execute(
-		sql`select pg_advisory_xact_lock(hashtextextended(${`unit-associations:${sourceUnitId}`}::text, 0))`,
+		sql`select pg_advisory_xact_lock(hashtextextended(${`unit-associations:${sourceUnitId}:${targetUnitId}`}::text, 0))`,
 	);
 }
 
@@ -68,7 +68,7 @@ async function recordProposalAudit(
 		actorProfileId: input.actorProfileId,
 		action: input.action,
 		decisionCode: "allowed",
-		subjectKind: "entity_association_proposal",
+		subjectKind: "unit_association_proposal",
 		subjectId: input.proposalId,
 		metadata: input.metadata,
 	});
@@ -87,93 +87,108 @@ async function ensureNoRelationshipOrProposal(
 	tx: DatabaseTransaction,
 	input: {
 		readonly sourceUnitId: string;
-		readonly targetEntityId: string;
-		readonly kind: EntityAssociationKind;
+		readonly targetUnitId: string;
+		readonly kind: AssociationKind;
 		readonly role: string;
 	},
 ) {
-	const associationTable = input.kind === "credit" ? creditAttribution : subjectAssociation;
-	const [relationship] = await tx
-		.select({ id: associationTable.id })
-		.from(associationTable)
-		.where(
-			and(
-				eq(associationTable.unitId, input.sourceUnitId),
-				eq(associationTable.entityId, input.targetEntityId),
-				eq(associationTable.role, input.role),
-			),
-		)
-		.limit(1);
-	if (relationship) throw new EntityAssociationProposalConflict();
+	const [relationship] =
+		input.kind === "credit"
+			? await tx
+					.select({ id: creditAttribution.id })
+					.from(creditAttribution)
+					.where(
+						and(
+							eq(creditAttribution.sourceUnitId, input.sourceUnitId),
+							eq(creditAttribution.creditedUnitId, input.targetUnitId),
+							eq(creditAttribution.role, input.role),
+						),
+					)
+					.limit(1)
+			: await tx
+					.select({ id: subjectAssociation.id })
+					.from(subjectAssociation)
+					.where(
+						and(
+							eq(subjectAssociation.unitId, input.sourceUnitId),
+							eq(subjectAssociation.entityId, input.targetUnitId),
+							eq(subjectAssociation.role, input.role),
+						),
+					)
+					.limit(1);
+	if (relationship) throw new AssociationProposalConflict();
 	const [proposal] = await tx
-		.select({ id: entityAssociationProposal.id })
-		.from(entityAssociationProposal)
+		.select({ id: unitAssociationProposal.id })
+		.from(unitAssociationProposal)
 		.where(
 			and(
-				eq(entityAssociationProposal.sourceUnitId, input.sourceUnitId),
-				eq(entityAssociationProposal.targetEntityId, input.targetEntityId),
-				eq(entityAssociationProposal.kind, input.kind),
-				eq(entityAssociationProposal.role, input.role),
-				isNull(entityAssociationProposal.resolution),
-				sql`${entityAssociationProposal.expiresAt} > now()`,
+				eq(unitAssociationProposal.sourceUnitId, input.sourceUnitId),
+				eq(unitAssociationProposal.targetUnitId, input.targetUnitId),
+				eq(unitAssociationProposal.kind, input.kind),
+				eq(unitAssociationProposal.role, input.role),
+				isNull(unitAssociationProposal.resolution),
+				sql`${unitAssociationProposal.expiresAt} > now()`,
 			),
 		)
 		.limit(1);
-	if (proposal) throw new EntityAssociationProposalConflict();
+	if (proposal) throw new AssociationProposalConflict();
 }
 
 async function insertProposal(
 	tx: DatabaseTransaction,
 	input: {
 		readonly sourceUnitId: string;
-		readonly targetEntityId: string;
-		readonly kind: EntityAssociationKind;
+		readonly targetUnitId: string;
+		readonly kind: AssociationKind;
 		readonly role: string;
 		readonly direction: "request" | "invitation";
 		readonly createdByProfileId: string;
 		readonly expiresAt: Date;
 	},
 ) {
-	const [created] = await tx.insert(entityAssociationProposal).values(input).returning();
-	if (!created) throw new Error("Entity association proposal insertion returned no row");
+	const [created] = await tx.insert(unitAssociationProposal).values(input).returning();
+	if (!created) throw new Error("Association proposal insertion returned no row");
 	await recordProposalAudit(tx, {
 		actorProfileId: input.createdByProfileId,
-		action: `entity.association_proposal.${input.direction}.create`,
+		action: `unit.association_proposal.${input.direction}.create`,
 		proposalId: created.id,
 		metadata: {
 			sourceUnitId: input.sourceUnitId,
-			targetEntityId: input.targetEntityId,
+			targetUnitId: input.targetUnitId,
 			kind: input.kind,
 			role: input.role,
 		},
 	});
-	return presentEntityAssociationProposal(created);
+	return presentAssociationProposal(created);
 }
 
-export async function createEntityAssociationRequest(
+export async function createAssociationRequest(
 	authorization: Authorization<string>,
 	actorProfileId: string,
 	input: {
 		readonly sourceUnitId: string;
-		readonly targetEntityId: string;
-		readonly kind: EntityAssociationKind;
+		readonly targetUnitId: string;
+		readonly kind: AssociationKind;
 		readonly role: string;
 		readonly expiresAt: Date;
 	},
 ) {
 	return database.transaction(async (tx) => {
-		await lockAssociationWorkflow(tx, input.sourceUnitId, input.targetEntityId);
+		await lockAssociationWorkflow(tx, input.sourceUnitId, input.targetUnitId);
 		await authorization.unit.ensureInTransaction(
 			tx,
 			input.sourceUnitId,
 			"unit.update",
 			sourceAssociationScope(input.kind),
 		);
-		await authorization.entity.ensureAssociationRequestAllowed(
-			tx,
-			input.targetEntityId,
-			input.kind,
-		);
+		if (input.kind === "credit")
+			await ensureCreditAttributionRequestAllowed(authorization, tx, input.targetUnitId);
+		else
+			await authorization.entity.ensureAssociationRequestAllowed(
+				tx,
+				input.targetUnitId,
+				input.kind,
+			);
 		await ensureNoRelationshipOrProposal(tx, input);
 		return insertProposal(tx, {
 			...input,
@@ -183,25 +198,28 @@ export async function createEntityAssociationRequest(
 	});
 }
 
-export async function createEntityAssociationInvitation(
+export async function createAssociationInvitation(
 	authorization: Authorization<string>,
 	actorProfileId: string,
 	input: {
 		readonly sourceUnitId: string;
-		readonly targetEntityId: string;
-		readonly kind: EntityAssociationKind;
+		readonly targetUnitId: string;
+		readonly kind: AssociationKind;
 		readonly role: string;
 		readonly expiresAt: Date;
 	},
 ) {
-	if (input.sourceUnitId === input.targetEntityId) throw new EntityAssociationProposalConflict();
+	if (input.sourceUnitId === input.targetUnitId) throw new AssociationProposalConflict();
 	return database.transaction(async (tx) => {
-		await lockAssociationWorkflow(tx, input.sourceUnitId, input.targetEntityId);
-		await authorization.entity.ensureAssociationInvitationAllowed(
-			tx,
-			input.targetEntityId,
-			input.kind,
-		);
+		await lockAssociationWorkflow(tx, input.sourceUnitId, input.targetUnitId);
+		if (input.kind === "credit")
+			await ensureCreditAttributionInvitationAllowed(authorization, tx, input.targetUnitId);
+		else
+			await authorization.entity.ensureAssociationInvitationAllowed(
+				tx,
+				input.targetUnitId,
+				input.kind,
+			);
 		await ensureSourceUnitExists(tx, input.sourceUnitId);
 		await ensureNoRelationshipOrProposal(tx, input);
 		return insertProposal(tx, {
@@ -212,12 +230,12 @@ export async function createEntityAssociationInvitation(
 	});
 }
 
-export async function listEntityAssociationProposals(
+export async function listAssociationProposals(
 	authorization: Authorization<string>,
 	input: {
 		readonly unitId: string;
 		readonly side: "source" | "target";
-		readonly kind: EntityAssociationKind;
+		readonly kind: AssociationKind;
 		readonly includeResolved: boolean;
 	},
 ) {
@@ -228,35 +246,37 @@ export async function listEntityAssociationProposals(
 			sourceAssociationScope(input.kind),
 		);
 	else {
-		const [target] = await database
-			.select({ id: entity.id })
-			.from(entity)
-			.where(eq(entity.id, input.unitId))
-			.limit(1);
-		if (!target) throw new EntityEntryNotFound();
+		if (input.kind === "subject") {
+			const [target] = await database
+				.select({ id: entity.id })
+				.from(entity)
+				.where(eq(entity.id, input.unitId))
+				.limit(1);
+			if (!target) throw new EntityEntryNotFound();
+		}
 		await authorization.unit.ensure(
 			input.unitId,
 			"unit.association.manage",
-			entityAssociationScope(input.kind),
+			associationTargetScope(input.kind),
 		);
 	}
 	const sideCondition =
 		input.side === "source"
-			? eq(entityAssociationProposal.sourceUnitId, input.unitId)
-			: eq(entityAssociationProposal.targetEntityId, input.unitId);
+			? eq(unitAssociationProposal.sourceUnitId, input.unitId)
+			: eq(unitAssociationProposal.targetUnitId, input.unitId);
 	const rows = await database
 		.select()
-		.from(entityAssociationProposal)
+		.from(unitAssociationProposal)
 		.where(
 			and(
 				sideCondition,
-				eq(entityAssociationProposal.kind, input.kind),
-				input.includeResolved ? undefined : isNull(entityAssociationProposal.resolution),
+				eq(unitAssociationProposal.kind, input.kind),
+				input.includeResolved ? undefined : isNull(unitAssociationProposal.resolution),
 			),
 		)
-		.orderBy(desc(entityAssociationProposal.createdAt), desc(entityAssociationProposal.id));
+		.orderBy(desc(unitAssociationProposal.createdAt), desc(unitAssociationProposal.id));
 	const now = new Date();
-	return rows.map((row) => presentEntityAssociationProposal(row, now));
+	return rows.map((row) => presentAssociationProposal(row, now));
 }
 
 async function loadUnresolvedProposal(
@@ -265,16 +285,16 @@ async function loadUnresolvedProposal(
 ): Promise<ProposalRecord> {
 	const [proposal] = await tx
 		.select()
-		.from(entityAssociationProposal)
+		.from(unitAssociationProposal)
 		.where(
 			and(
-				eq(entityAssociationProposal.id, proposalId),
-				isNull(entityAssociationProposal.resolution),
+				eq(unitAssociationProposal.id, proposalId),
+				isNull(unitAssociationProposal.resolution),
 			),
 		)
 		.limit(1);
-	if (!proposal) throw new EntityAssociationProposalNotFound();
-	if (proposal.expiresAt <= new Date()) throw new EntityAssociationProposalExpired();
+	if (!proposal) throw new AssociationProposalNotFound();
+	if (proposal.expiresAt <= new Date()) throw new AssociationProposalExpired();
 	return proposal;
 }
 
@@ -289,8 +309,8 @@ async function ensureResolutionAuthorized(
 		action === "cancel"
 			? proposal.direction === "request"
 			: proposal.direction === "invitation";
-	const expectedUnitId = actsForSource ? proposal.sourceUnitId : proposal.targetEntityId;
-	if (actingUnitId !== expectedUnitId) throw new EntityAssociationProposalNotFound();
+	const expectedUnitId = actsForSource ? proposal.sourceUnitId : proposal.targetUnitId;
+	if (actingUnitId !== expectedUnitId) throw new AssociationProposalNotFound();
 	if (actsForSource)
 		await authorization.unit.ensureInTransaction(
 			tx,
@@ -301,9 +321,9 @@ async function ensureResolutionAuthorized(
 	else
 		await authorization.unit.ensureInTransaction(
 			tx,
-			proposal.targetEntityId,
+			proposal.targetUnitId,
 			"unit.association.manage",
-			entityAssociationScope(proposal.kind),
+			associationTargetScope(proposal.kind),
 		);
 }
 
@@ -312,18 +332,38 @@ async function materializeProposal(
 	proposal: ProposalRecord,
 	acceptingProfileId: string,
 ) {
+	const proposerAuthorization = new Authorization(proposal.createdByProfileId);
+	if (proposal.direction === "request")
+		await proposerAuthorization.unit.ensureInTransaction(
+			tx,
+			proposal.sourceUnitId,
+			"unit.update",
+			sourceAssociationScope(proposal.kind),
+		);
+	else if (proposal.kind === "credit")
+		await ensureCreditAttributionInvitationAllowed(
+			proposerAuthorization,
+			tx,
+			proposal.targetUnitId,
+		);
+	else
+		await proposerAuthorization.entity.ensureAssociationInvitationAllowed(
+			tx,
+			proposal.targetUnitId,
+			proposal.kind,
+		);
 	await ensureNoRelationshipOrProposalForAcceptance(tx, proposal);
 	if (proposal.kind === "credit") {
 		const [last] = await tx
 			.select({ position: creditAttribution.position })
 			.from(creditAttribution)
-			.where(eq(creditAttribution.unitId, proposal.sourceUnitId))
+			.where(eq(creditAttribution.sourceUnitId, proposal.sourceUnitId))
 			.orderBy(desc(creditAttribution.position), desc(creditAttribution.id))
 			.limit(1);
 		await tx.insert(creditAttribution).values({
 			id: proposal.id,
-			unitId: proposal.sourceUnitId,
-			entityId: proposal.targetEntityId,
+			sourceUnitId: proposal.sourceUnitId,
+			creditedUnitId: proposal.targetUnitId,
 			role: proposal.role,
 			position: fractionalPositionBetween(last?.position, null),
 		});
@@ -337,7 +377,7 @@ async function materializeProposal(
 		await tx.insert(subjectAssociation).values({
 			id: proposal.id,
 			unitId: proposal.sourceUnitId,
-			entityId: proposal.targetEntityId,
+			entityId: proposal.targetUnitId,
 			role: proposal.role,
 			position: fractionalPositionBetween(last?.position, null),
 		});
@@ -354,22 +394,34 @@ async function ensureNoRelationshipOrProposalForAcceptance(
 	tx: DatabaseTransaction,
 	proposal: ProposalRecord,
 ) {
-	const associationTable = proposal.kind === "credit" ? creditAttribution : subjectAssociation;
-	const [relationship] = await tx
-		.select({ id: associationTable.id })
-		.from(associationTable)
-		.where(
-			and(
-				eq(associationTable.unitId, proposal.sourceUnitId),
-				eq(associationTable.entityId, proposal.targetEntityId),
-				eq(associationTable.role, proposal.role),
-			),
-		)
-		.limit(1);
-	if (relationship) throw new EntityAssociationProposalConflict();
+	const [relationship] =
+		proposal.kind === "credit"
+			? await tx
+					.select({ id: creditAttribution.id })
+					.from(creditAttribution)
+					.where(
+						and(
+							eq(creditAttribution.sourceUnitId, proposal.sourceUnitId),
+							eq(creditAttribution.creditedUnitId, proposal.targetUnitId),
+							eq(creditAttribution.role, proposal.role),
+						),
+					)
+					.limit(1)
+			: await tx
+					.select({ id: subjectAssociation.id })
+					.from(subjectAssociation)
+					.where(
+						and(
+							eq(subjectAssociation.unitId, proposal.sourceUnitId),
+							eq(subjectAssociation.entityId, proposal.targetUnitId),
+							eq(subjectAssociation.role, proposal.role),
+						),
+					)
+					.limit(1);
+	if (relationship) throw new AssociationProposalConflict();
 }
 
-export async function resolveEntityAssociationProposal(
+export async function resolveAssociationProposal(
 	authorization: Authorization<string>,
 	actorProfileId: string,
 	input: {
@@ -383,7 +435,7 @@ export async function resolveEntityAssociationProposal(
 		await lockAssociationWorkflow(
 			tx,
 			proposalBeforeLock.sourceUnitId,
-			proposalBeforeLock.targetEntityId,
+			proposalBeforeLock.targetUnitId,
 		);
 		const proposal = await loadUnresolvedProposal(tx, input.proposalId);
 		await ensureResolutionAuthorized(
@@ -401,22 +453,22 @@ export async function resolveEntityAssociationProposal(
 					? "declined"
 					: "cancelled";
 		const [resolved] = await tx
-			.update(entityAssociationProposal)
+			.update(unitAssociationProposal)
 			.set({ resolution, resolvedAt: new Date(), resolvedByProfileId: actorProfileId })
 			.where(
 				and(
-					eq(entityAssociationProposal.id, proposal.id),
-					isNull(entityAssociationProposal.resolution),
+					eq(unitAssociationProposal.id, proposal.id),
+					isNull(unitAssociationProposal.resolution),
 				),
 			)
 			.returning();
-		if (!resolved) throw new EntityAssociationProposalConflict();
+		if (!resolved) throw new AssociationProposalConflict();
 		await recordProposalAudit(tx, {
 			actorProfileId,
-			action: `entity.association_proposal.${input.action}`,
+			action: `unit.association_proposal.${input.action}`,
 			proposalId: proposal.id,
 			metadata: { actingUnitId: input.actingUnitId },
 		});
-		return presentEntityAssociationProposal(resolved);
+		return presentAssociationProposal(resolved);
 	});
 }

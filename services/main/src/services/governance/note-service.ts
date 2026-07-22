@@ -18,6 +18,7 @@ import {
 } from "../database/schema";
 import { recordUnitRevision } from "../units/history";
 import { insertUnit } from "../units/create";
+import { createProfilePublisherAttribution } from "../units/attribution";
 import { isPrimaryUnitLocalization } from "../units/localization";
 import { ensureSubjectPostTargetingAllowed } from "../posts/targeting";
 
@@ -82,6 +83,10 @@ export async function createGovernanceNotePost(
 		role: "owner",
 		scope: [],
 		grantedByProfileId: input.actorProfileId,
+	});
+	await createProfilePublisherAttribution(tx, {
+		sourceUnitId: created.id,
+		profileId: input.actorProfileId,
 	});
 	const viewerIds = new Set(input.viewerProfileIds ?? []);
 	if (input.note.role === "public_notice")

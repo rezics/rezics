@@ -15,6 +15,8 @@ import { PortableTextContent } from "@rezics/ui";
 import { DataList, DataListItem, DataListItemLabel, DataListItemValue } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
 import { useTranslation } from "@/i18n/client";
+import { isKnownAttributionRole } from "./attribution-role";
+import { publicUnitHref } from "./routing/public-unit-route";
 import { readPortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
 import { FavoriteToggle } from "@/features/collections/collections";
@@ -273,19 +275,31 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 						</DetailSection>
 					)}
 
-					{item.credits.length > 0 && (
+					{item.attributions.length > 0 && (
 						<DetailSection title={t.units.detail.credits}>
 							<Card>
 								<CardContent className="grid gap-2 p-5 text-sm">
-									{item.credits.map((credit) => (
-										<Link
-											key={credit.id}
-											className="min-w-0 break-words text-link hover:text-link-hover hover:underline"
-											href={`/entities/${credit.entityEntryId}`}
-										>
-											{credit.title ?? t.ui.unnamed} · {credit.role}
-										</Link>
-									))}
+									{item.attributions.map((attribution) => {
+										const href = publicUnitHref(
+											attribution.creditedUnit.kind,
+											attribution.creditedUnit,
+										);
+										const role = isKnownAttributionRole(attribution.role)
+											? t.units.attributionRoles[attribution.role]
+											: attribution.role;
+										const label = `${attribution.creditedUnit.title ?? t.ui.unnamed} · ${role}`;
+										return href ? (
+											<Link
+												key={attribution.id}
+												className="min-w-0 break-words text-link hover:text-link-hover hover:underline"
+												href={href}
+											>
+												{label}
+											</Link>
+										) : (
+											<span key={attribution.id}>{label}</span>
+										);
+									})}
 								</CardContent>
 							</Card>
 						</DetailSection>

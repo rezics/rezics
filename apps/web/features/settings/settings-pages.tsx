@@ -41,6 +41,7 @@ import {
 import { useSetLocale, useTranslation } from "@/i18n/client";
 import { authClient } from "@/lib/auth-client";
 import { SettingsOverviewHref } from "./routing/settings-routes";
+import { ProfileAttributionProposalManager } from "@/features/governance/unit-workflows";
 
 function SettingsFrame({ title, children }: { title: string; children: React.ReactNode }) {
 	const { t } = useTranslation(["settings"]);
@@ -169,6 +170,7 @@ function ProfileSettingsForm({ current }: { current: GetApiUsersMeStatus200 }) {
 					/>
 				</CardContent>
 			</Card>
+			<ProfileAttributionProposalManager profileId={current.id} />
 		</SettingsFrame>
 	);
 }

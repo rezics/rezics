@@ -43,6 +43,7 @@ import {
 import { RequestFailure } from "@/i18n/request-failure";
 import { useTranslation } from "@/i18n/client";
 import { selectLocalization } from "@/lib/localization";
+import { profileHref } from "@/features/profiles/profile-route";
 
 function CatalogFrame({
 	title,
@@ -147,6 +148,20 @@ export function EntityDetailPage({ id }: { id: string }) {
 						<span className="text-muted-foreground">{t.catalog.verification}</span>{" "}
 						{query.data.verified ? t.catalog.verified : t.catalog.unverified}
 					</p>
+					{query.data.owner ? (
+						<p>
+							<span className="text-muted-foreground">{t.catalog.owner}</span>{" "}
+							<Link
+								className="underline underline-offset-4"
+								href={profileHref({
+									id: query.data.owner.id,
+									slugAddress: query.data.owner.slugAddress,
+								})}
+							>
+								{query.data.owner.title ?? t.ui.unnamed}
+							</Link>
+						</p>
+					) : null}
 					{localization?.summary && <p>{localization.summary}</p>}
 					{query.data.capabilities.canEdit ? (
 						<Button variant="solid" asChild className="w-fit">

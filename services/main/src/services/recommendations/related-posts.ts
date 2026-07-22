@@ -12,7 +12,7 @@ import {
 	recommendationProfileInterest,
 	recommendationUnitEdge,
 	unit,
-	unitStatusEvent,
+	creditAttribution,
 } from "../database/schema";
 import type { RecommendationReason } from "../api/recommendations/schema";
 import type { FeedQuery } from "../api/feed/schema";
@@ -27,7 +27,7 @@ const RelatedPostFeedQuery = {
 export async function recommendRelatedPosts(input: {
 	viewer: RecommendationViewer;
 	snapshot: RecommendationSnapshotContext | null;
-	seed: { id: string; subjectId: string | null; publisherIds: readonly string[] };
+	seed: { id: string; subjectId: string | null; creditedUnitIds: readonly string[] };
 	asOf: Date;
 	pageSize: number;
 	afterId?: string;
@@ -103,18 +103,16 @@ export async function recommendRelatedPosts(input: {
 				eligible,
 				or(
 					input.seed.subjectId ? eq(post.subjectUnitId, input.seed.subjectId) : undefined,
-					input.seed.publisherIds.length
+					input.seed.creditedUnitIds.length
 						? exists(
 								database
-									.select({ id: unitStatusEvent.id })
-									.from(unitStatusEvent)
+									.select({ id: creditAttribution.id })
+									.from(creditAttribution)
 									.where(
 										and(
-											eq(unitStatusEvent.unitId, post.id),
-											eq(unitStatusEvent.toStatus, "published"),
-											eq(unitStatusEvent.actorKind, "profile"),
-											inArray(unitStatusEvent.changedByProfileId, [
-												...input.seed.publisherIds,
+											eq(creditAttribution.sourceUnitId, post.id),
+											inArray(creditAttribution.creditedUnitId, [
+												...input.seed.creditedUnitIds,
 											]),
 										),
 									),

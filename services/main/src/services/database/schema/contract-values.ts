@@ -29,7 +29,6 @@ export const CommunityCatalogUnitKindValues = [
 	"software",
 	"media",
 	"series",
-	"entity",
 	"tag",
 ] as const;
 
@@ -254,7 +253,7 @@ export const RecommendationEventTypeValues = [
 	"not_interested",
 ] as const;
 export const RecommendationReasonValues = [
-	"followed_publisher",
+	"followed_unit",
 	"followed_realm",
 	"based_on_activity",
 	"related_subject",
@@ -283,19 +282,16 @@ export const RealmCapabilityValues = [
 	"realm.pins.manage",
 	"realm.units.moderate",
 ] as const;
-export const EntityAssociationKindValues = ["credit", "subject"] as const;
+export const AssociationKindValues = ["credit", "subject"] as const;
+export type AssociationKind = (typeof AssociationKindValues)[number];
 export const EntityAssociationPolicyModeValues = [
 	"open",
 	"approval",
 	"invite_only",
 	"closed",
 ] as const;
-export const EntityAssociationProposalDirectionValues = ["request", "invitation"] as const;
-export const EntityAssociationProposalResolutionValues = [
-	"accepted",
-	"declined",
-	"cancelled",
-] as const;
+export const AssociationProposalDirectionValues = ["request", "invitation"] as const;
+export const AssociationProposalResolutionValues = ["accepted", "declined", "cancelled"] as const;
 export const PlatformCapabilityValues = [
 	"entity.associations.override",
 	"unit.edit",

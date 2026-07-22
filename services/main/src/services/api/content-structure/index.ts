@@ -18,6 +18,7 @@ import {
 	zonePage,
 } from "../../database/schema";
 import { recordUnitRevision } from "../../units/history";
+import { createProfilePublisherAttribution } from "../../units/attribution";
 import {
 	createContentStructure,
 	deleteContentStructure,
@@ -660,6 +661,10 @@ export default new Elysia()
 					role: "owner",
 					scope: [],
 					grantedByProfileId: profile.unitId,
+				});
+				await createProfilePublisherAttribution(tx, {
+					sourceUnitId: contentUnit.id,
+					profileId: profile.unitId,
 				});
 				await recordUnitRevision(tx, {
 					unitId: contentUnit.id,

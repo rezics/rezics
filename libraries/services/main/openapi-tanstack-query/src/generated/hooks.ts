@@ -2163,7 +2163,7 @@ export function postApiUnitByUnitIdAssociationProposalsRequestsMutationOptions<T
 }
 
 /**
- * @summary Request Entity association
+ * @summary Request Unit association
  * {@link /api/unit/:unitId/association-proposals/requests}
  */
 export function usePostApiUnitByUnitIdAssociationProposalsRequests<TContext>(
@@ -2273,7 +2273,7 @@ export function postApiUnitByUnitIdAssociationProposalsInvitationsMutationOption
 }
 
 /**
- * @summary Invite Unit to Entity association
+ * @summary Invite Unit to association
  * {@link /api/unit/:unitId/association-proposals/invitations}
  */
 export function usePostApiUnitByUnitIdAssociationProposalsInvitations<TContext>(
@@ -2383,7 +2383,7 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdAcceptMutatio
 }
 
 /**
- * @summary Accept Entity association proposal
+ * @summary Accept Unit association proposal
  * {@link /api/unit/:unitId/association-proposals/:proposalId/accept}
  */
 export function usePostApiUnitByUnitIdAssociationProposalsByProposalIdAccept<TContext>(
@@ -2489,7 +2489,7 @@ export function postApiUnitByUnitIdAssociationProposalsByProposalIdDeclineMutati
 }
 
 /**
- * @summary Decline Entity association proposal
+ * @summary Decline Unit association proposal
  * {@link /api/unit/:unitId/association-proposals/:proposalId/decline}
  */
 export function usePostApiUnitByUnitIdAssociationProposalsByProposalIdDecline<TContext>(
@@ -2594,7 +2594,7 @@ export function deleteApiUnitByUnitIdAssociationProposalsByProposalIdMutationOpt
 }
 
 /**
- * @summary Cancel Entity association proposal
+ * @summary Cancel Unit association proposal
  * {@link /api/unit/:unitId/association-proposals/:proposalId}
  */
 export function useDeleteApiUnitByUnitIdAssociationProposalsByProposalId<TContext>(

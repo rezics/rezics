@@ -23,8 +23,8 @@ describe("content feed fixture data", () => {
 			recommendationReason: traditionalChinese.recommendationReason,
 			metrics: traditionalChinese.metrics,
 		});
-		expect(english.publishers.map(({ id, href }) => ({ id, href }))).toEqual(
-			traditionalChinese.publishers.map(({ id, href }) => ({ id, href })),
+		expect(english.attributions.map(({ id, href }) => ({ id, href }))).toEqual(
+			traditionalChinese.attributions.map(({ id, href }) => ({ id, href })),
 		);
 		expect(english.realms.map(({ id, href }) => ({ id, href }))).toEqual(
 			traditionalChinese.realms.map(({ id, href }) => ({ id, href })),
@@ -33,14 +33,17 @@ describe("content feed fixture data", () => {
 		expect(english.collection.coverAsset).toBe(traditionalChinese.collection.coverAsset);
 	});
 
-	it("always exercises multiple ordered publishers and realm contexts", () => {
+	it("always exercises mixed ordered attributions and multiple Realm contexts", () => {
 		for (const language of FixtureContentLanguages) {
 			const fixture = getFeedFixtureData(language);
 
-			expect(fixture.publishers.length).toBeGreaterThan(1);
+			expect(fixture.attributions.length).toBeGreaterThan(1);
 			expect(fixture.realms.length).toBeGreaterThan(1);
-			expect(new Set(fixture.publishers.map((publisher) => publisher.id)).size).toBe(
-				fixture.publishers.length,
+			expect(new Set(fixture.attributions.map((attribution) => attribution.id)).size).toBe(
+				fixture.attributions.length,
+			);
+			expect(new Set(fixture.attributions.map(({ kind }) => kind))).toEqual(
+				new Set(["profile", "entity"]),
 			);
 			expect(new Set(fixture.realms.map((realm) => realm.id)).size).toBe(
 				fixture.realms.length,

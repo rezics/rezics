@@ -7,10 +7,10 @@ import {
 } from "./policy";
 
 describe("Entity association policy", () => {
-	it("defaults credit and subject relationships independently to open", () => {
+	it("defaults credit to approval and subject relationships to open independently", () => {
 		expect(resolveEntityAssociationPolicy([])).toEqual(DefaultEntityAssociationPolicy);
 		expect(resolveEntityAssociationPolicy([{ kind: "subject", mode: "closed" }])).toEqual({
-			creditAttribution: "open",
+			creditAttribution: "approval",
 			subjectAssociation: "closed",
 		});
 	});

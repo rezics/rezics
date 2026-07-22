@@ -12,7 +12,7 @@ import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { useProfileContext } from "./profile-layout";
 
-const ProfileContentCategories = ["posts", "reviews", "collections"] as const;
+const ProfileContentCategories = ["entity", "posts", "reviews", "collections"] as const;
 const ProfileContentPageSize = 10;
 
 type ProfileContentCategory = (typeof ProfileContentCategories)[number];
@@ -33,13 +33,15 @@ function profileContentRequest(
 		sort: "updatedAt:desc" as const,
 		...(cursor ? { cursor } : {}),
 	};
-	return category === "collections"
+	return category === "collections" || category === "entity"
 		? { ...common, ownerId: profileId }
-		: { ...common, publisherId: profileId };
+		: { ...common, creditedUnitId: profileId };
 }
 
 function profileContentHref(category: ProfileContentCategory, hit: ProfileContentHit): string {
 	switch (category) {
+		case "entity":
+			return `/entities/${hit.id}`;
 		case "posts":
 			return `/posts/${hit.id}`;
 		case "reviews":

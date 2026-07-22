@@ -65,7 +65,7 @@ export const SearchFieldValues = [
 	"ai-disclosure",
 	"license",
 	"tag",
-	"publisher",
+	"credit",
 	"realm",
 	"zone",
 	"subject",

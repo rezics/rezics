@@ -10,8 +10,8 @@ import type { ReactNode } from "react";
 
 import { Badge, CardContent, cn, Cover, PortableTextContent } from "@rezics/ui";
 import { postHref } from "@/features/posts/url";
-import { profileHref } from "@/features/profiles/profile-route";
-import { realmHref, zoneHref } from "@/features/slugs/unit-route";
+import { realmHref } from "@/features/slugs/unit-route";
+import { publicUnitHref } from "@/features/units/routing/public-unit-route";
 import { invalidateRecommendationQueries } from "@/features/recommendations/query";
 import { recommendationReasonLabel } from "@/features/recommendations/reason";
 import { useRecommendationTracking } from "@/features/recommendations/tracking";
@@ -23,7 +23,7 @@ import {
 	FeedCardContent,
 	FeedCardHeader,
 	FeedCardTarget,
-	type FeedProfileContext,
+	type FeedAttributionContext,
 	type FeedRealmContext,
 } from "./feed-card";
 import { FeedEngagementBar, FeedOverflowMenu } from "./feed-card-actions";
@@ -75,7 +75,7 @@ export function FeedPostCard({
 	const href = feedPostHref(post, realmId);
 	const subjectHref = post.subject ? unitHref(post.subject.type, post.subject.id) : undefined;
 	const title = post.postKind === "reply" ? t.posts.replyPost : (post.title ?? t.posts.untitled);
-	const publishers = toFeedProfileContexts(post.publishers, t.posts.unknownPublisher);
+	const attributions = toFeedAttributionContexts(post.attributions, t.posts.unknownAttribution);
 	const realms = toFeedRealmContexts(post.realms, t.ui.unnamed);
 
 	return (
@@ -88,7 +88,7 @@ export function FeedPostCard({
 						onHiddenChange={onHiddenChange}
 					/>
 				}
-				publishers={publishers}
+				attributions={attributions}
 				realms={realms}
 				recommendation={reason}
 				timestamp={formatRelativeTime(post.createdAt, locale.target)}
@@ -165,7 +165,7 @@ function FeedUnitCard({
 	const reason = recommendationReasonLabel(unit.recommendationReason, t.feed);
 	const href = unitHref(unit.unitKind, unit.id);
 	const title = unit.title ?? t.ui.unnamed;
-	const publishers = toFeedProfileContexts(unit.publishers, t.posts.unknownPublisher);
+	const attributions = toFeedAttributionContexts(unit.attributions, t.posts.unknownAttribution);
 	const realms = toFeedRealmContexts(unit.realms, t.ui.unnamed);
 
 	return (
@@ -178,7 +178,7 @@ function FeedUnitCard({
 						onHiddenChange={onHiddenChange}
 					/>
 				}
-				publishers={publishers}
+				attributions={attributions}
 				realms={realms}
 				recommendation={reason}
 				timestamp={formatRelativeTime(unit.createdAt, locale.target)}
@@ -313,23 +313,24 @@ function FeedItemActions({
 	);
 }
 
-function toFeedProfileContexts(
-	publishers: FeedItem["publishers"],
-	unknownPublisher: string,
-): FeedProfileContext[] {
-	return publishers.map((publisher) => {
-		const name = publisher.name ?? unknownPublisher;
+function toFeedAttributionContexts(
+	attributions: FeedItem["attributions"],
+	unknownAttribution: string,
+): FeedAttributionContext[] {
+	return attributions.map((attribution) => {
+		const creditedUnit = attribution.creditedUnit;
+		const name = creditedUnit.title ?? unknownAttribution;
+		const href = publicUnitHref(creditedUnit.kind, creditedUnit);
 		return {
-			id: publisher.profileId,
-			href: profileHref({
-				id: publisher.profileId,
-				slugAddress: publisher.slugAddress,
-			}),
+			id: attribution.id,
+			kind: creditedUnit.kind,
+			role: attribution.role,
+			...(href ? { href } : {}),
 			initials: contextInitials(name),
 			name,
-			...(publisher.avatar ? { avatar: publisher.avatar } : {}),
-			...(publisher.slugAddress ? { slug: publisher.slugAddress.slug } : {}),
-			...(publisher.summary ? { summary: publisher.summary } : {}),
+			...(creditedUnit.avatar ? { avatar: creditedUnit.avatar } : {}),
+			...(creditedUnit.slugAddress ? { slug: creditedUnit.slugAddress.slug } : {}),
+			...(creditedUnit.summary ? { summary: creditedUnit.summary } : {}),
 		};
 	});
 }
@@ -360,24 +361,5 @@ function feedPostHref(post: FeedPost, realmId?: string): string | undefined {
 }
 
 function unitHref(kind: string, id: string): string | undefined {
-	switch (kind) {
-		case "profile":
-			return profileHref(id);
-		case "book":
-		case "software":
-		case "media":
-			return `/units/${kind}/${id}`;
-		case "entity":
-			return `/entities/${id}`;
-		case "zone":
-			return zoneHref({ id });
-		case "collection":
-			return `/collections/${id}`;
-		case "poll":
-			return `/polls/${id}`;
-		case "realm":
-			return realmHref({ id });
-		default:
-			return undefined;
-	}
+	return publicUnitHref(kind, { id });
 }

@@ -18,6 +18,7 @@ import {
 	book,
 	catalogUnitContentLicense,
 	collection,
+	creditAttribution,
 	contentStructure,
 	contentStructureNode,
 	entity,
@@ -34,9 +35,9 @@ import {
 	softwareRequirement,
 	searchUnitProjectionSource,
 	unit,
+	unitAccessBinding,
 	unitLocalization,
 	unitTag,
-	unitStatusEvent,
 	unitVariant,
 	VariantCapableUnitKindValues,
 } from "../database/schema";
@@ -60,7 +61,8 @@ const searchMainUnit = alias(unit, "search_main_unit");
 const facetLocalization = alias(unitLocalization, "facet_unit_localization");
 const facetUnitTag = alias(unitTag, "facet_unit_tag");
 const facetRealmUnit = alias(realmUnit, "facet_realm_unit");
-const facetPublisherEvent = alias(unitStatusEvent, "facet_publisher_event");
+const facetCreditAttribution = alias(creditAttribution, "facet_credit_attribution");
+const facetOwnerBinding = alias(unitAccessBinding, "facet_owner_binding");
 const { metrics } = getActiveObservability();
 type SearchHitWithoutSlugAddress = Omit<SearchHit, "slugAddress">;
 
@@ -141,7 +143,7 @@ function validateRequest(category: SearchCategory, request: DomainSearchRequest)
 		["aiDisclosures", "aiDisclosure", Boolean(request.aiDisclosures?.length)],
 		["licenses", "license", Boolean(request.licenses?.length)],
 		["contentLicensed", "contentLicensed", request.contentLicensed !== undefined],
-		["publisherId", "publisherId", Boolean(request.publisherId)],
+		["creditedUnitId", "creditedUnitId", Boolean(request.creditedUnitId)],
 		["realmId", "realmId", Boolean(request.realmId)],
 		["subjectId", "subjectId", Boolean(request.subjectId)],
 		["targetId", "targetId", Boolean(request.targetId)],
@@ -340,7 +342,7 @@ function compileFilter(category: SearchCategory, filter: SearchFilter): SQL {
 		"ai-disclosure": "aiDisclosure",
 		license: "license",
 		tag: "tagId",
-		publisher: "publisherId",
+		credit: "creditedUnitId",
 		realm: "realmId",
 		subject: "subjectId",
 		target: "targetId",
@@ -379,22 +381,42 @@ function compileFilter(category: SearchCategory, filter: SearchFilter): SQL {
 			? sql`not (${match})`
 			: match;
 	}
-	if (filter.field === "publisher") {
-		const actors = sql`array(
-			select distinct ${unitStatusEvent.changedByProfileId}
-			from ${unitStatusEvent}
-			where ${unitStatusEvent.unitId} = ${unit.id}
-				and ${unitStatusEvent.toStatus} = 'published'
-				and ${unitStatusEvent.actorKind} = 'profile'
-				and ${unitStatusEvent.actorHidden} = false
+	if (filter.field === "credit") {
+		const creditedUnits = sql`array(
+			select distinct ${creditAttribution.creditedUnitId}
+			from ${creditAttribution}
+			where ${creditAttribution.sourceUnitId} = ${unit.id}
 		)`;
 		if (filter.operator === "exists")
-			return filter.value ? sql`cardinality(${actors}) > 0` : sql`cardinality(${actors}) = 0`;
+			return filter.value
+				? sql`cardinality(${creditedUnits}) > 0`
+				: sql`cardinality(${creditedUnits}) = 0`;
 		const values = scalarStrings(filterValues(filter), filter.field);
 		const match =
 			filter.operator === "all-of"
-				? sql`${actors} @> ${toUuidArray(values)}`
-				: sql`${actors} && ${toUuidArray(values)}`;
+				? sql`${creditedUnits} @> ${toUuidArray(values)}`
+				: sql`${creditedUnits} && ${toUuidArray(values)}`;
+		return filter.operator === "not-equals" || filter.operator === "none-of"
+			? sql`not (${match})`
+			: match;
+	}
+	if (filter.field === "owner") {
+		const owners = sql`array(
+			select distinct ${unitAccessBinding.profileId}
+			from ${unitAccessBinding}
+			where ${unitAccessBinding.unitId} = ${unit.id}
+				and ${unitAccessBinding.subjectKind} = 'profile'
+				and ${unitAccessBinding.role} = 'owner'
+				and ${unitAccessBinding.revokedAt} is null
+				and (${unitAccessBinding.expiresAt} is null or ${unitAccessBinding.expiresAt} > now())
+		)`;
+		if (filter.operator === "exists")
+			return filter.value ? sql`cardinality(${owners}) > 0` : sql`cardinality(${owners}) = 0`;
+		const values = scalarStrings(filterValues(filter), filter.field);
+		const match =
+			filter.operator === "all-of"
+				? sql`${owners} @> ${toUuidArray(values)}`
+				: sql`${owners} && ${toUuidArray(values)}`;
 		return filter.operator === "not-equals" || filter.operator === "none-of"
 			? sql`not (${match})`
 			: match;
@@ -453,7 +475,6 @@ function compileFilter(category: SearchCategory, filter: SearchFilter): SQL {
 		target: sql`${post.subjectUnitId}`,
 		root: sql`${postReply.rootPostId}`,
 		parent: sql`${postReply.parentPostId}`,
-		owner: sql`${collection.ownerProfileId}`,
 		"join-policy": sql`${realm.joinPolicy}`,
 		"results-visibility": sql`${poll.resultVisibility}`,
 		"created-at": sql`${unit.createdAt}`,
@@ -588,26 +609,32 @@ function buildSearchConditions(category: SearchCategory, request: DomainSearchRe
 		addList(conditions, sql`${realm.joinPolicy}`, request.joinPolicies);
 	}
 
-	if (request.publisherId)
+	if (request.creditedUnitId)
 		conditions.push(sql`exists (
-			select 1 from ${unitStatusEvent}
-			where ${unitStatusEvent.unitId} = ${unit.id}
-				and ${unitStatusEvent.toStatus} = 'published'
-				and ${unitStatusEvent.actorKind} = 'profile'
-				and ${unitStatusEvent.actorHidden} = false
-				and ${unitStatusEvent.changedByProfileId} = ${request.publisherId}::uuid
+			select 1 from ${creditAttribution}
+			where ${creditAttribution.sourceUnitId} = ${unit.id}
+				and ${creditAttribution.creditedUnitId} = ${request.creditedUnitId}::uuid
 		)`);
 	const scalarFilters = [
 		[sql`${post.subjectUnitId}`, request.subjectId],
 		[sql`${post.subjectUnitId}`, request.targetId],
 		[sql`${postReply.rootPostId}`, request.rootId],
 		[sql`${postReply.parentPostId}`, request.parentId],
-		[sql`${collection.ownerProfileId}`, request.ownerId],
 	] as const;
 	for (const [column, value] of scalarFilters) {
 		if (!value) continue;
 		conditions.push(sql`${column} = ${value}::uuid`);
 	}
+	if (request.ownerId)
+		conditions.push(sql`exists (
+			select 1 from ${unitAccessBinding}
+			where ${unitAccessBinding.unitId} = ${unit.id}
+				and ${unitAccessBinding.subjectKind} = 'profile'
+				and ${unitAccessBinding.profileId} = ${request.ownerId}::uuid
+				and ${unitAccessBinding.role} = 'owner'
+				and ${unitAccessBinding.revokedAt} is null
+				and (${unitAccessBinding.expiresAt} is null or ${unitAccessBinding.expiresAt} > now())
+		)`);
 	if (request.realmId) {
 		conditions.push(sql`EXISTS (
 			SELECT 1 FROM ${realmUnit}
@@ -667,7 +694,7 @@ function buildCandidateExpression(request: DomainSearchRequest): SearchExpressio
 			operator: "equals",
 			value: request.contentLicensed,
 		});
-	addValue("publisher", request.publisherId);
+	addValue("credit", request.creditedUnitId);
 	addValue("realm", request.realmId);
 	addValue("subject", request.subjectId);
 	addValue("target", request.targetId);
@@ -707,7 +734,7 @@ export async function searchDomain(category: SearchCategory, request: DomainSear
 				aiDisclosures: request.aiDisclosures,
 				licenses: request.licenses,
 				contentLicensed: request.contentLicensed,
-				publisherId: request.publisherId,
+				creditedUnitId: request.creditedUnitId,
 				realmId: request.realmId,
 				subjectId: request.subjectId,
 				targetId: request.targetId,
@@ -959,13 +986,19 @@ function facetSpec(
 			value: sql`${facetRealmUnit.realmId}`,
 			join: sql`join ${facetRealmUnit} on ${facetRealmUnit.unitId} = ${unit.id} and ${facetRealmUnit.status} = 'visible'`,
 		};
-	if (field === "publisher")
+	if (field === "credit")
 		return {
-			value: sql`${facetPublisherEvent.changedByProfileId}`,
-			join: sql`join ${facetPublisherEvent} on ${facetPublisherEvent.unitId} = ${unit.id}
-				and ${facetPublisherEvent.toStatus} = 'published'
-				and ${facetPublisherEvent.actorKind} = 'profile'
-				and ${facetPublisherEvent.actorHidden} = false`,
+			value: sql`${facetCreditAttribution.creditedUnitId}`,
+			join: sql`join ${facetCreditAttribution} on ${facetCreditAttribution.sourceUnitId} = ${unit.id}`,
+		};
+	if (field === "owner")
+		return {
+			value: sql`${facetOwnerBinding.profileId}`,
+			join: sql`join ${facetOwnerBinding} on ${facetOwnerBinding.unitId} = ${unit.id}
+				and ${facetOwnerBinding.subjectKind} = 'profile'
+				and ${facetOwnerBinding.role} = 'owner'
+				and ${facetOwnerBinding.revokedAt} is null
+				and (${facetOwnerBinding.expiresAt} is null or ${facetOwnerBinding.expiresAt} > now())`,
 		};
 	if (field === "kind")
 		return {
@@ -983,7 +1016,6 @@ function facetSpec(
 		"content-rating": { attribute: "contentRating", value: sql`${unit.contentRating}` },
 		"ai-disclosure": { attribute: "aiDisclosure", value: sql`${unit.aiDisclosure}` },
 		license: { attribute: "license", value: sql`${unit.license}` },
-		owner: { attribute: "ownerId", value: sql`${collection.ownerProfileId}` },
 		"join-policy": { attribute: "joinPolicy", value: sql`${realm.joinPolicy}` },
 		multiple: { attribute: "multiple", value: sql`${poll.mode} = 'multiple'` },
 		"results-visibility": {

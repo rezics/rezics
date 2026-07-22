@@ -539,7 +539,7 @@ export function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }
 							await credit.mutateAsync({
 								path: { type, unitId: unit.id },
 								body: {
-									entityId: creditEntity.id,
+									creditedUnitId: creditEntity.id,
 									role: String(form.get("role") ?? "").trim(),
 								},
 							});

@@ -5,16 +5,14 @@ import { entity, entityAssociationPolicy, unit } from "../../database/schema";
 import { EntityAssociationRestricted, EntityEntryNotFound } from "../../entities/errors";
 import type { PlatformAuthorization } from "../platform/authorization";
 import type { UnitAuthorization } from "../unit/authorization";
+import { associationTargetScope } from "../unit/scope";
 import {
 	resolveEntityAssociationPolicy,
 	resolveEntityAssociationAdmission,
 	type EntityAssociationCommand,
-	type EntityAssociationKind,
+	type AssociationKind,
 	type EntityAssociationPolicyMode,
 } from "./policy";
-
-export const entityAssociationScope = (kind: EntityAssociationKind) =>
-	["associations", kind] as const;
 
 export async function lockEntityAssociationState(
 	tx: DatabaseTransaction,
@@ -66,7 +64,7 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 		this: EntityAuthorization<string>,
 		tx: DatabaseTransaction,
 		entityId: string,
-		kinds: readonly EntityAssociationKind[],
+		kinds: readonly AssociationKind[],
 	): Promise<void> {
 		await lockEntityAssociationState(tx, entityId);
 		if (!(await entityExists(tx, entityId))) throw new EntityEntryNotFound();
@@ -75,14 +73,14 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 				tx,
 				entityId,
 				"unit.association.manage",
-				entityAssociationScope(kind),
+				associationTargetScope(kind),
 			);
 	}
 
 	private async associationMode(
 		tx: DatabaseTransaction,
 		entityId: string,
-		kind: EntityAssociationKind,
+		kind: AssociationKind,
 	): Promise<EntityAssociationPolicyMode> {
 		const [row] = await tx
 			.select({ mode: entityAssociationPolicy.mode })
@@ -101,7 +99,7 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 		this: EntityAuthorization<string>,
 		tx: DatabaseTransaction,
 		entityId: string,
-		kind: EntityAssociationKind,
+		kind: AssociationKind,
 		command: EntityAssociationCommand,
 	): Promise<void> {
 		// A PostgreSQL transaction is pinned to one client. Keep its queries
@@ -115,7 +113,7 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 			tx,
 			entityId,
 			"unit.association.manage",
-			entityAssociationScope(kind),
+			associationTargetScope(kind),
 		);
 		if (
 			resolveEntityAssociationAdmission({
@@ -132,7 +130,7 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 		this: EntityAuthorization<string>,
 		tx: DatabaseTransaction,
 		entityId: string,
-		kind: EntityAssociationKind,
+		kind: AssociationKind,
 	): Promise<void> {
 		await lockEntityAssociationState(tx, entityId);
 		if (!(await entityExists(tx, entityId))) throw new EntityEntryNotFound();
@@ -143,7 +141,7 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 		this: EntityAuthorization<string>,
 		tx: DatabaseTransaction,
 		entityId: string,
-		kind: EntityAssociationKind,
+		kind: AssociationKind,
 	): Promise<void> {
 		await lockEntityAssociationState(tx, entityId);
 		if (!(await entityExists(tx, entityId))) throw new EntityEntryNotFound();
@@ -154,7 +152,7 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 		this: EntityAuthorization<string>,
 		tx: DatabaseTransaction,
 		entityId: string,
-		kind: EntityAssociationKind,
+		kind: AssociationKind,
 	): Promise<void> {
 		await lockEntityAssociationState(tx, entityId);
 		if (!(await entityExists(tx, entityId))) throw new EntityEntryNotFound();
@@ -167,7 +165,7 @@ export class EntityAuthorization<ProfileId extends string | undefined> {
 				tx,
 				entityId,
 				"unit.association.manage",
-				entityAssociationScope(kind),
+				associationTargetScope(kind),
 			);
 		await this.ensureAssociationCommandAllowedForExistingEntity(
 			tx,
