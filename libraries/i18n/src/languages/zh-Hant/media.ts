@@ -27,7 +27,7 @@ export default {
 		inherited: "繼承的頭像",
 		icon: {
 			search: "搜尋圖示",
-			searchHint: "輸入至少兩個字元來搜尋圖示",
+			featured: "常用圖示",
 			style: "圖示樣式",
 			styles: { fas: "實心", fab: "品牌" },
 			loading: "正在搜尋圖示……",

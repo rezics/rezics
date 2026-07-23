@@ -27,7 +27,7 @@ export default {
 		inherited: "Inherited avatar",
 		icon: {
 			search: "Search icons",
-			searchHint: "Enter at least two characters to search for icons",
+			featured: "Common icons",
 			style: "Icon style",
 			styles: { fas: "Solid", fab: "Brands" },
 			loading: "Searching for icons…",

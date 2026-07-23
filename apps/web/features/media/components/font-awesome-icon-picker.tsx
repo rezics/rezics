@@ -18,6 +18,61 @@ import { useDeferredValue, useEffect, useState } from "react";
 
 import { useTranslation } from "@/i18n/client";
 
+const FeaturedIconNamesByPrefix = {
+	fas: [
+		"user",
+		"users",
+		"house",
+		"book-open",
+		"graduation-cap",
+		"school",
+		"globe",
+		"heart",
+		"star",
+		"bookmark",
+		"lightbulb",
+		"compass",
+		"map",
+		"calendar-days",
+		"clock",
+		"bell",
+		"comment",
+		"envelope",
+		"camera",
+		"music",
+		"gamepad",
+		"trophy",
+		"leaf",
+		"paw",
+	],
+	fab: [
+		"github",
+		"gitlab",
+		"discord",
+		"slack",
+		"x-twitter",
+		"facebook",
+		"instagram",
+		"youtube",
+		"tiktok",
+		"twitch",
+		"reddit",
+		"linkedin",
+		"apple",
+		"android",
+		"windows",
+		"linux",
+		"chrome",
+		"firefox-browser",
+		"safari",
+		"cloudflare",
+		"react",
+		"vuejs",
+		"node-js",
+		"python",
+	],
+} as const satisfies Readonly<Record<FontAwesomeIconPrefix, readonly string[]>>;
+
 interface FontAwesomeSearchResult {
 	readonly id: string;
 	readonly prefixesByLicense: Readonly<
@@ -120,13 +175,13 @@ export function FontAwesomeIconPicker({
 		icon.prefixesByLicense[license].includes(prefix),
 	);
 	return (
-		<div className="grid gap-3">
+		<div className="isolate flex h-80 min-w-0 flex-col overflow-hidden rounded-xl border bg-background">
 			{!configured ? (
-				<p className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm">
+				<p className="border-warning/40 border-b bg-warning/10 px-3 py-2 text-sm">
 					{t.media.avatarPicker.icon.unconfigured}
 				</p>
 			) : null}
-			<div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_9rem]">
+			<div className="grid gap-2 p-2 sm:grid-cols-[minmax(0,1fr)_9rem]">
 				<Input
 					aria-label={t.media.avatarPicker.icon.search}
 					onChange={(event) => setQuery(event.currentTarget.value)}
@@ -149,17 +204,51 @@ export function FontAwesomeIconPicker({
 				</NativeSelect>
 			</div>
 			{normalizedQuery.length < 2 ? (
-				<p className="text-muted-foreground text-sm">
-					{t.media.avatarPicker.icon.searchHint}
-				</p>
+				<div className="min-h-0 flex-1 overflow-y-auto border-t p-2">
+					<p className="px-1 pb-2 font-medium text-muted-foreground text-xs">
+						{t.media.avatarPicker.icon.featured}
+					</p>
+					<div className="grid grid-cols-6 gap-1">
+						{FeaturedIconNamesByPrefix[prefix].map((name) => {
+							const reference = {
+								provider: FontAwesomeProvider,
+								prefix,
+								name,
+							} as const;
+							return (
+								<Button
+									aria-label={t.media.avatarPicker.icon.select({ name })}
+									className="aspect-square h-auto min-w-0 p-0 text-lg"
+									disabled={!configured}
+									key={`${prefix}:${name}`}
+									onClick={() => onSelect(reference)}
+									title={name}
+									type="button"
+									variant="quiet"
+								>
+									<i
+										aria-hidden
+										className={fontAwesomeIconClassNames(reference).join(" ")}
+									/>
+								</Button>
+							);
+						})}
+					</div>
+				</div>
 			) : search.isPending ? (
-				<p className="text-muted-foreground text-sm">{t.media.avatarPicker.icon.loading}</p>
+				<p className="grid min-h-0 flex-1 place-items-center border-t text-muted-foreground text-sm">
+					{t.media.avatarPicker.icon.loading}
+				</p>
 			) : search.isError ? (
-				<p className="text-destructive text-sm">{t.media.avatarPicker.icon.failed}</p>
+				<p className="grid min-h-0 flex-1 place-items-center border-t px-4 text-center text-destructive text-sm">
+					{t.media.avatarPicker.icon.failed}
+				</p>
 			) : results.length === 0 ? (
-				<p className="text-muted-foreground text-sm">{t.media.avatarPicker.icon.empty}</p>
+				<p className="grid min-h-0 flex-1 place-items-center border-t px-4 text-center text-muted-foreground text-sm">
+					{t.media.avatarPicker.icon.empty}
+				</p>
 			) : (
-				<div className="grid max-h-72 grid-cols-4 gap-2 overflow-y-auto p-0.5 sm:grid-cols-6">
+				<div className="grid min-h-0 flex-1 grid-cols-6 content-start gap-1 overflow-y-auto border-t p-2">
 					{results.map((icon) => {
 						const reference = {
 							provider: FontAwesomeProvider,
@@ -169,19 +258,18 @@ export function FontAwesomeIconPicker({
 						return (
 							<Button
 								aria-label={t.media.avatarPicker.icon.select({ name: icon.id })}
-								className="h-16 min-w-0 flex-col gap-1 px-1"
+								className="aspect-square h-auto min-w-0 p-0 text-lg"
 								disabled={!configured}
 								key={`${prefix}:${icon.id}`}
 								onClick={() => onSelect(reference)}
 								title={icon.id}
 								type="button"
-								variant="outline"
+								variant="quiet"
 							>
 								<i
 									aria-hidden
 									className={fontAwesomeIconClassNames(reference).join(" ")}
 								/>
-								<span className="w-full truncate text-[0.625rem]">{icon.id}</span>
 							</Button>
 						);
 					})}
