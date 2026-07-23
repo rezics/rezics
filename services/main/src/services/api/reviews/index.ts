@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 
 import session, { resolveIdentity } from "../../auth/session";
@@ -8,8 +8,10 @@ import { toSafeInteger } from "../../database/integer";
 import { isPrimaryUnitLocalization, makePrimaryUnitLocalization } from "../../units/localization";
 import {
 	post,
+	postScore,
 	globalScoreContext,
 	realmUnit,
+	score,
 	scoreStat,
 	unit,
 	unitAccessBinding,
@@ -18,6 +20,7 @@ import {
 import { UnitNotFound } from "../../units/errors";
 import { recordUnitRevision } from "../../units/history";
 import { insertUnit } from "../../units/create";
+import { fractionalPositionAt } from "../../ordering/position";
 import {
 	ensurePostMountTargetingAllowed,
 	ensureSubjectPostTargetingAllowed,
@@ -102,12 +105,45 @@ export default new Elysia()
 					const attributions = await getAttributionSummariesByUnitIds(
 						items.map(({ id }) => id),
 					);
+					const scoreRows = items.length
+						? await database
+								.select({
+									postId: postScore.postId,
+									scoreId: score.id,
+									realmId: score.realmId,
+									value: score.value,
+									position: postScore.position,
+								})
+								.from(postScore)
+								.innerJoin(score, eq(score.id, postScore.scoreId))
+								.where(
+									inArray(
+										postScore.postId,
+										items.map(({ id }) => id),
+									),
+								)
+								.orderBy(
+									asc(postScore.postId),
+									asc(postScore.position),
+									asc(score.id),
+								)
+						: [];
+					const scoresByPostId = new Map<
+						string,
+						{ scoreId: string; realmId: string; value: number }[]
+					>();
+					for (const { postId, position: _position, ...scoreRow } of scoreRows) {
+						const current = scoresByPostId.get(postId) ?? [];
+						current.push(scoreRow);
+						scoresByPostId.set(postId, current);
+					}
 					return {
 						items: items.flatMap((item) =>
 							item.targetId
 								? [
 										{
 											...item,
+											scores: scoresByPostId.get(item.id) ?? [],
 											realmId: query.realmId ?? null,
 											targetId: item.targetId,
 											attributions: attributions.get(item.id) ?? [],
@@ -127,7 +163,10 @@ export default new Elysia()
 				"",
 				async ({ profile, authorization, body }) => {
 					await authorization.unit.ensureCanRead(body.targetId);
-					await authorization.realm.ensureParticipation(body.realmId);
+					await Promise.all([
+						authorization.realm.ensureParticipation(body.realmId),
+						authorization.realm.ensureParticipation(body.score?.realmId),
+					]);
 					const id = await database.transaction(async (tx) => {
 						await authorization.entity.ensureSubjectAssociationAllowedIfEntity(
 							tx,
@@ -170,6 +209,20 @@ export default new Elysia()
 							sourceUnitId: created.id,
 							profileId: profile.unitId,
 						});
+						if (body.score) {
+							const scoreId = await upsertScore(
+								tx,
+								profile.unitId,
+								body.targetId,
+								body.score.realmId,
+								body.score.value,
+							);
+							await tx.insert(postScore).values({
+								postId: created.id,
+								scoreId,
+								position: fractionalPositionAt(0),
+							});
+						}
 						if (body.realmId) {
 							await ensurePostMountTargetingAllowed(tx, {
 								postId: created.id,

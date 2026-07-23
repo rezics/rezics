@@ -103,4 +103,5 @@ export default {
 		score: String,
 		count: Number,
 	}),
+	collectionDirectItems: insert("{{count}} direct items", { count: Number }),
 } satisfies typeof import("../zh-Hant/feed").default;

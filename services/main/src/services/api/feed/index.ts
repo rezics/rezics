@@ -20,6 +20,7 @@ import {
 	postReply,
 	postReplyStat,
 	scoreStat,
+	collectionItem,
 	unitFollow,
 	realmUnit,
 	recommendationProfileInterest,
@@ -678,6 +679,9 @@ export async function hydrateFeedItems(
 	const validIds = rows.map(({ id }) => id);
 	const postIds = rows.filter(({ postKind }) => postKind === "post").map(({ id }) => id);
 	const replyIds = rows.filter(({ postKind }) => postKind === "reply").map(({ id }) => id);
+	const collectionIds = rows
+		.filter(({ unitKind }) => unitKind === "collection")
+		.map(({ id }) => id);
 	const subjectIds = [
 		...new Set(rows.flatMap(({ subjectId }) => (subjectId ? [subjectId] : []))),
 	];
@@ -693,6 +697,7 @@ export async function hydrateFeedItems(
 		subjectRows,
 		subjectScores,
 		rootRows,
+		collectionCounts,
 	] = await Promise.all([
 		postIds.length
 			? database
@@ -801,6 +806,16 @@ export async function hydrateFeedItems(
 						),
 					)
 			: [],
+		collectionIds.length
+			? database
+					.select({
+						collectionId: collectionItem.collectionId,
+						count: sql<number>`count(*)::int`,
+					})
+					.from(collectionItem)
+					.where(inArray(collectionItem.collectionId, collectionIds))
+					.groupBy(collectionItem.collectionId)
+			: [],
 	]);
 	const [attributions, rootAttributions, realmContexts] = await Promise.all([
 		getAttributionSummariesByUnitIds(validIds),
@@ -834,6 +849,9 @@ export async function hydrateFeedItems(
 	);
 	const childCount = new Map(
 		childReplyCounts.map((row) => [row.id, toSafeInteger(row.count, "reply count")]),
+	);
+	const collectionDirectItemCount = new Map(
+		collectionCounts.map((row) => [row.collectionId, row.count]),
 	);
 	const reactionCount = new Map(
 		reactions.map((row) => [
@@ -894,6 +912,12 @@ export async function hydrateFeedItems(
 					postKind: null,
 					summary: row.summary,
 					cover: presentImageAsset(row.coverAssetId),
+					collection:
+						row.unitKind === "collection"
+							? {
+									directItemCount: collectionDirectItemCount.get(row.id) ?? 0,
+								}
+							: null,
 				},
 			];
 		if (row.unitKind !== "post" || !isFeedPostKind(row.postKind)) return [];

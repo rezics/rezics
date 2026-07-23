@@ -77,6 +77,9 @@ export default new Elysia({ prefix: "/collections" })
 					id: collection.id,
 					ownerId: collection.ownerProfileId,
 					itemCount: sql<number>`(select count(*) from ${collectionItem} where ${collectionItem.collectionId} = ${collection.id})::int`,
+					containsTarget: query.targetId
+						? sql<boolean>`exists(select 1 from ${collectionItem} selected_item where selected_item.collection_id = ${collection.id} and selected_item.unit_id = ${query.targetId})`
+						: sql<boolean>`false`,
 					title: unitLocalization.title,
 					summary: unitLocalization.summary,
 					coverAssetId: unitLocalization.coverAssetId,
@@ -417,6 +420,8 @@ export default new Elysia({ prefix: "/collections" })
 		"/:collectionId/items/:targetId",
 		async ({ params, profile, authorization, body }) => {
 			await authorization.collection.ensureOwner(params.collectionId);
+			if (params.targetId === params.collectionId)
+				throw new ValidationError({ targetId: "a Collection cannot contain itself" });
 			await authorization.unit.ensureCanRead(params.targetId);
 			await database.transaction(async (tx) => {
 				await tx.execute(
@@ -459,6 +464,7 @@ export default new Elysia({ prefix: "/collections" })
 			body: SaveCollectionItemBody,
 			response: {
 				[StatusCodes.OK]: SavedResponse,
+				[StatusCodes.UNPROCESSABLE_ENTITY]: toApiErrorResponse(["ValidationError"]),
 				[StatusCodes.FORBIDDEN]: CollectionOwnershipResponse,
 				[StatusCodes.NOT_FOUND]: UnitNotFoundResponse,
 			},

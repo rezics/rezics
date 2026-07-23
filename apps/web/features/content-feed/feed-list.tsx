@@ -43,6 +43,7 @@ export interface FeedListProps<ContentKind extends FeedContentKind = FeedContent
 	realmId?: string;
 	showBulkActions?: boolean;
 	sort?: GetApiFeedSort;
+	subjectId?: string;
 }
 
 export function FeedList<ContentKind extends FeedContentKind>({
@@ -55,6 +56,7 @@ export function FeedList<ContentKind extends FeedContentKind>({
 	realmId,
 	showBulkActions = false,
 	sort = "new",
+	subjectId,
 }: FeedListProps<ContentKind>) {
 	const { t } = useTranslation(["actions", "feed", "state"]);
 	const { data: session } = useHydratedSession();
@@ -65,6 +67,7 @@ export function FeedList<ContentKind extends FeedContentKind>({
 		limit: 20,
 		sort,
 		...(realmId ? { realmId } : {}),
+		...(subjectId ? { subjectId } : {}),
 		...(personalized === undefined ? {} : { personalized }),
 	};
 	const query = useInfiniteQuery({

@@ -16,9 +16,7 @@ import {
 	useGetApiPostsByPostIdScores,
 	useGetApiScoresByTargetId,
 	usePatchApiReviewsByReviewId,
-	usePostApiReviews,
 	usePutApiReactionsUnitsByUnitId,
-	usePutApiPostsByPostIdScores,
 	usePutApiScoresByTargetId,
 } from "@rezics/openapi-tanstack-query";
 import type { PortableTextValue } from "@rezics/portable-text";
@@ -27,7 +25,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
-import { EntityPicker } from "@rezics/ui";
 import { PageHeading } from "@rezics/ui";
 import { PortableTextContent } from "@rezics/ui";
 import { QueryFailure, QueryPending } from "@rezics/ui";
@@ -56,6 +53,7 @@ import { RequestFailure } from "@/i18n/request-failure";
 import { readPortableText, writePortableText } from "@/lib/block";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { AttributionLinks } from "@/features/posts/attribution-list";
+import { ReviewComposer } from "./components/review-composer";
 
 async function invalidateReviews(
 	queryClient: ReturnType<typeof useQueryClient>,
@@ -116,106 +114,13 @@ export function ReviewsPage() {
 }
 
 export function ReviewCreate() {
-	const create = usePostApiReviews();
-	const setScore = usePutApiScoresByTargetId();
-	const bindScores = usePutApiPostsByPostIdScores();
 	const router = useRouter();
-	const queryClient = useQueryClient();
-	const { locale, t } = useTranslation(["actions", "engagement", "errors", "posts", "ui"]);
-	const [target, setTarget] = useState<{ id: string; label: string }>();
-	const [realm, setRealm] = useState<{ id: string; label: string }>();
-	const [body, setBody] = useState<PortableTextValue>([]);
-	const [invalid, setInvalid] = useState(false);
-	async function submit(event: FormEvent<HTMLFormElement>) {
-		event.preventDefault();
-		if (!target || !body.length) {
-			setInvalid(true);
-			return;
-		}
-		const form = new FormData(event.currentTarget);
-		const scoreValue = String(form.get("score") ?? "").trim();
-		if (scoreValue && !realm) {
-			setInvalid(true);
-			return;
-		}
-		setInvalid(false);
-		try {
-			const scoreResult =
-				scoreValue && realm
-					? await setScore.mutateAsync({
-							path: { targetId: target.id },
-							body: { realmId: realm.id, score: Number(scoreValue) },
-						})
-					: undefined;
-			const result = await create.mutateAsync({
-				body: {
-					targetId: target.id,
-					...(realm ? { realmId: realm.id } : {}),
-					language: toContentLanguage(locale.target),
-					title: String(form.get("title") ?? "").trim(),
-					...(String(form.get("summary") ?? "").trim()
-						? { summary: String(form.get("summary") ?? "").trim() }
-						: {}),
-					body: writePortableText(body),
-				},
-			});
-			if (scoreResult)
-				await bindScores.mutateAsync({
-					path: { postId: result.id },
-					body: [{ scoreId: scoreResult.scoreId }],
-				});
-			await invalidateReviews(queryClient, result.id);
-			router.push(`/reviews/${result.id}`);
-		} catch {
-			// The typed mutation state supplies the visible API error.
-		}
-	}
+	const { t } = useTranslation(["engagement"]);
 	return (
 		<RequireSession>
 			<main className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-10 sm:px-6">
 				<PageHeading title={t.engagement.newReview} />
-				<form className="flex flex-col gap-6" onSubmit={(event) => void submit(event)}>
-					<FieldGroup>
-						<Field required>
-							<FieldLabel>{t.engagement.reviewTarget}</FieldLabel>
-							<EntityPicker index="units" onChange={setTarget} value={target} />
-						</Field>
-						<Field>
-							<FieldLabel>{t.engagement.reviewRealm}</FieldLabel>
-							<EntityPicker index="realms" onChange={setRealm} value={realm} />
-						</Field>
-						<Field required>
-							<FieldLabel>{t.ui.title}</FieldLabel>
-							<Input maxLength={500} name="title" required />
-						</Field>
-						<Field>
-							<FieldLabel>{t.ui.summary}</FieldLabel>
-							<Input maxLength={2000} name="summary" />
-						</Field>
-						<Field>
-							<FieldLabel>{t.engagement.reviewScore}</FieldLabel>
-							<Input max={10} min={1} name="score" type="number" />
-						</Field>
-						<PortableTextEditor
-							label={t.ui.body}
-							onChange={setBody}
-							required
-							value={body}
-						/>
-					</FieldGroup>
-					{invalid && <p className="text-destructive text-sm">{t.errors.invalid}</p>}
-					<RequestFailure error={create.error} fallback={t.ui.retryLater} />
-					<RequestFailure error={setScore.error} fallback={t.ui.retryLater} />
-					<RequestFailure error={bindScores.error} fallback={t.ui.retryLater} />
-					<Button
-						variant="solid"
-						disabled={!target || !body.length}
-						isLoading={create.isPending || setScore.isPending || bindScores.isPending}
-						type="submit"
-					>
-						{t.ui.create}
-					</Button>
-				</form>
+				<ReviewComposer onCreated={(reviewId) => router.push(`/reviews/${reviewId}`)} />
 			</main>
 		</RequireSession>
 	);

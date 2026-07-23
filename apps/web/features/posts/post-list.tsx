@@ -26,6 +26,7 @@ export function PostList({
 	postKinds: controlledPostKinds,
 	realmId,
 	sort: controlledSort,
+	subjectId,
 }: {
 	infinite?: boolean;
 	onPostKindsChange?: (postKinds: readonly PostListContentKind[]) => void;
@@ -34,6 +35,7 @@ export function PostList({
 	postKinds?: readonly PostListContentKind[];
 	realmId?: string;
 	sort?: GetApiFeedSort;
+	subjectId?: string;
 }) {
 	const [postKinds, setPostKinds] = useState<readonly PostListContentKind[]>(
 		DefaultPostListContentKinds,
@@ -59,6 +61,7 @@ export function PostList({
 			realmId={realmId}
 			showBulkActions={false}
 			sort={selectedSort}
+			subjectId={subjectId}
 		/>
 	);
 }

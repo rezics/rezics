@@ -10206,6 +10206,11 @@ export type GetApiFeedStatus200 = {
 							url: string;
 					  } | null)
 					| null;
+				collection:
+					| ({
+							directItemCount: string | number;
+					  } | null)
+					| null;
 		  }
 		| {
 				/**
@@ -26478,9 +26483,19 @@ export type GetApiSoftwareBySoftwareIdSystemRequirementsStatus200 = {
 		tier: string;
 		sourceLinkId: (string | null) | null;
 		/**
-		 * @type void
+		 * @type object
 		 */
-		hardware: void;
+		hardware: {
+			[key: string]:
+				| null
+				| boolean
+				| number
+				| string
+				| JsonValue[]
+				| {
+						[key: string]: JsonValue;
+				  };
+		};
 		/**
 		 * @description
 		 * Format: `date-time`
@@ -26598,9 +26613,19 @@ export type PostApiSoftwareBySoftwareIdSystemRequirementsStatus200 = {
 	tier: string;
 	sourceLinkId: (string | null) | null;
 	/**
-	 * @type void
+	 * @type object
 	 */
-	hardware: void;
+	hardware: {
+		[key: string]:
+			| null
+			| boolean
+			| number
+			| string
+			| JsonValue[]
+			| {
+					[key: string]: JsonValue;
+			  };
+	};
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -26853,9 +26878,19 @@ export type PutApiSoftwareBySoftwareIdSystemRequirementsByRequirementIdStatus200
 	tier: string;
 	sourceLinkId: (string | null) | null;
 	/**
-	 * @type void
+	 * @type object
 	 */
-	hardware: void;
+	hardware: {
+		[key: string]:
+			| null
+			| boolean
+			| number
+			| string
+			| JsonValue[]
+			| {
+					[key: string]: JsonValue;
+			  };
+	};
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -53076,6 +53111,134 @@ export type DeleteApiProgressByUnitIdResponse =
 /**
  * @type object
  */
+export type GetApiProgressByUnitIdNodesPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiProgressByUnitIdNodesStatus200 = {
+	/**
+	 * @type array
+	 */
+	items: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		nodeId: string;
+		/**
+		 * @description
+		 * Format: `date-time`
+		 * @type string
+		 */
+		completedAt: string;
+	}[];
+};
+
+/**
+ * @type object
+ */
+export type GetApiProgressByUnitIdNodesStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiProgressByUnitIdNodesStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiProgressByUnitIdNodesStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiProgressByUnitIdNodesStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiProgressByUnitIdNodesOptions = {
+	body?: never;
+	path: GetApiProgressByUnitIdNodesPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiProgressByUnitIdNodesResponses = {
+	"200": GetApiProgressByUnitIdNodesStatus200;
+	"404": GetApiProgressByUnitIdNodesStatus404;
+	"422": GetApiProgressByUnitIdNodesStatus422;
+	"429": GetApiProgressByUnitIdNodesStatus429;
+	"500": GetApiProgressByUnitIdNodesStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiProgressByUnitIdNodesResponse =
+	| GetApiProgressByUnitIdNodesStatus200
+	| GetApiProgressByUnitIdNodesStatus404
+	| GetApiProgressByUnitIdNodesStatus422
+	| GetApiProgressByUnitIdNodesStatus429
+	| GetApiProgressByUnitIdNodesStatus500;
+
+/**
+ * @type object
+ */
 export type PutApiProgressByUnitIdNodesByNodeIdPath = {
 	/**
 	 * @description
@@ -53304,6 +53467,12 @@ export type GetApiCollectionsQuery = {
 	 */
 	ownerId?: string;
 	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string | undefined
+	 */
+	targetId?: string;
+	/**
 	 * @default 20
 	 */
 	limit?: string | number;
@@ -53330,6 +53499,10 @@ export type GetApiCollectionsStatus200 = {
 		 */
 		ownerId: string;
 		itemCount: string | number;
+		/**
+		 * @type boolean
+		 */
+		containsTarget: boolean;
 		title: (string | null) | null;
 		summary: (string | null) | null;
 		cover:
@@ -53987,6 +54160,21 @@ export type PostApiCollectionsStatus200 = {
 		 */
 		type: string;
 		title: (string | null) | null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		directItemCount: ((string | number) | null) | null;
 	}[];
 };
 
@@ -55332,6 +55520,21 @@ export type GetApiCollectionsFavoritesStatus200 = {
 		 */
 		type: string;
 		title: (string | null) | null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		directItemCount: ((string | number) | null) | null;
 	}[];
 };
 
@@ -56030,6 +56233,21 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 		 */
 		type: string;
 		title: (string | null) | null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		directItemCount: ((string | number) | null) | null;
 	}[];
 };
 
@@ -56709,6 +56927,21 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 		 */
 		type: string;
 		title: (string | null) | null;
+		cover:
+			| ({
+					/**
+					 * @description
+					 * Format: `uuid`
+					 * @type string
+					 */
+					id: string;
+					/**
+					 * @type string
+					 */
+					url: string;
+			  } | null)
+			| null;
+		directItemCount: ((string | number) | null) | null;
 	}[];
 };
 
@@ -57994,10 +58227,32 @@ export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus404 = {
 	requestId: string;
 };
 
-/**
- * @type object
- */
-export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus422 = ValidationError;
+export type PutApiCollectionsByCollectionIdItemsByTargetIdStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'ValidationError'
+				 * @type string
+				 */
+				code: "ValidationError";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
 
 /**
  * @type object
@@ -58613,6 +58868,24 @@ export type GetApiReviewsStatus200 = {
 			};
 		}[];
 		/**
+		 * @type array
+		 */
+		scores: {
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			scoreId: string;
+			/**
+			 * @description
+			 * Format: `uuid`
+			 * @type string
+			 */
+			realmId: string;
+			value: string | number;
+		}[];
+		/**
 		 * @description
 		 * Format: `uuid`
 		 * @type string
@@ -58849,6 +59122,18 @@ export type PostApiReviewsBody = {
 	 * @type string | undefined
 	 */
 	realmId?: string;
+	/**
+	 * @type object | undefined
+	 */
+	score?: {
+		/**
+		 * @description
+		 * Format: `uuid`
+		 * @type string
+		 */
+		realmId: string;
+		value: string | number;
+	};
 	/**
 	 * @type string
 	 */

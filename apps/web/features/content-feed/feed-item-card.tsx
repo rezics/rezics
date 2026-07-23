@@ -16,6 +16,7 @@ import { invalidateRecommendationQueries } from "@/features/recommendations/quer
 import { recommendationReasonLabel } from "@/features/recommendations/reason";
 import { useRecommendationTracking } from "@/features/recommendations/tracking";
 import { useTranslation } from "@/i18n/client";
+import { toNonNegativeApiInteger } from "@/lib/api-number";
 import { readPortableText } from "@/lib/block";
 import { getFeedActionPolicy } from "./feed-action-policy";
 import {
@@ -214,6 +215,13 @@ function FeedUnitCard({
 						{unit.summary ? (
 							<p className="mt-2 line-clamp-3 text-muted-foreground text-sm leading-6">
 								{unit.summary}
+							</p>
+						) : null}
+						{unit.collection ? (
+							<p className="mt-2 text-xs font-medium text-muted-foreground">
+								{t.feed.collectionDirectItems({
+									count: toNonNegativeApiInteger(unit.collection.directItemCount),
+								})}
 							</p>
 						) : null}
 					</FeedItemMain>

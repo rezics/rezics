@@ -106,4 +106,5 @@ export default {
 		score: String,
 		count: Number,
 	}),
+	collectionDirectItems: insert("{{count}} 個直接條目", { count: Number }),
 };

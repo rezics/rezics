@@ -1156,6 +1156,12 @@ import type {
 	DeleteApiProgressByUnitIdStatus422,
 	DeleteApiProgressByUnitIdStatus429,
 	DeleteApiProgressByUnitIdStatus500,
+	GetApiProgressByUnitIdNodesOptions,
+	GetApiProgressByUnitIdNodesStatus200,
+	GetApiProgressByUnitIdNodesStatus404,
+	GetApiProgressByUnitIdNodesStatus422,
+	GetApiProgressByUnitIdNodesStatus429,
+	GetApiProgressByUnitIdNodesStatus500,
 	PutApiProgressByUnitIdNodesByNodeIdOptions,
 	PutApiProgressByUnitIdNodesByNodeIdStatus200,
 	PutApiProgressByUnitIdNodesByNodeIdStatus404,
@@ -1869,6 +1875,7 @@ import {
 	getApiProgressByUnitId,
 	putApiProgressByUnitId,
 	deleteApiProgressByUnitId,
+	getApiProgressByUnitIdNodes,
 	putApiProgressByUnitIdNodesByNodeId,
 	deleteApiProgressByUnitIdNodesByNodeId,
 	getApiCollections,
@@ -20177,6 +20184,104 @@ export function useDeleteApiProgressByUnitId<TContext>(
 		DeleteApiProgressByUnitIdOptions,
 		TContext
 	>;
+}
+
+export const getApiProgressByUnitIdNodesQueryKey = ({
+	path,
+}: Omit<GetApiProgressByUnitIdNodesOptions, "headers">) =>
+	[{ url: "/api/progress/:unitId/nodes", params: path }] as const;
+
+type GetApiProgressByUnitIdNodesQueryKey = ReturnType<typeof getApiProgressByUnitIdNodesQueryKey>;
+
+export function getApiProgressByUnitIdNodesQueryOptions(
+	{ path }: GetApiProgressByUnitIdNodesOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiProgressByUnitIdNodesQueryKey({ path });
+	return queryOptions<
+		GetApiProgressByUnitIdNodesStatus200,
+		ResponseErrorConfig<
+			| GetApiProgressByUnitIdNodesStatus404
+			| GetApiProgressByUnitIdNodesStatus422
+			| GetApiProgressByUnitIdNodesStatus429
+			| GetApiProgressByUnitIdNodesStatus500
+		>,
+		GetApiProgressByUnitIdNodesStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiProgressByUnitIdNodes({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List completed Content Structure nodes
+ * {@link /api/progress/:unitId/nodes}
+ */
+export function useGetApiProgressByUnitIdNodes<
+	TData = GetApiProgressByUnitIdNodesStatus200,
+	TQueryData = GetApiProgressByUnitIdNodesStatus200,
+	TQueryKey extends QueryKey = GetApiProgressByUnitIdNodesQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiProgressByUnitIdNodesOptions["path"]
+			| (() => GetApiProgressByUnitIdNodesOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiProgressByUnitIdNodesStatus200,
+				ResponseErrorConfig<
+					| GetApiProgressByUnitIdNodesStatus404
+					| GetApiProgressByUnitIdNodesStatus422
+					| GetApiProgressByUnitIdNodesStatus429
+					| GetApiProgressByUnitIdNodesStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiProgressByUnitIdNodesQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiProgressByUnitIdNodesQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiProgressByUnitIdNodesStatus404
+			| GetApiProgressByUnitIdNodesStatus422
+			| GetApiProgressByUnitIdNodesStatus429
+			| GetApiProgressByUnitIdNodesStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
 }
 
 export const putApiProgressByUnitIdNodesByNodeIdMutationKey = () =>

@@ -3,6 +3,11 @@ import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import Elysia, { t } from "elysia";
 import type { AvatarReference } from "@rezics/avatar";
 import {
+	JsonValue as JsonValueSchema,
+	type JsonValue as JsonValueType,
+} from "@rezics/portable-text";
+import { Check } from "@sinclair/typebox/value";
+import {
 	NavigationDocument,
 	DockDocument,
 	UnresolvedBlockReferenceError,
@@ -133,6 +138,19 @@ const UnitMutationForbiddenResponse = toApiErrorResponse([
 	"UnitProtected",
 ]);
 const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
+
+function presentSystemRequirement<Requirement extends { hardware: Record<string, unknown> }>(
+	requirement: Requirement,
+): Omit<Requirement, "hardware"> & {
+	hardware: Record<string, JsonValueType>;
+} {
+	if (!Object.values(requirement.hardware).every((value) => Check(JsonValueSchema, value)))
+		throw new Error("Stored Software system requirement hardware is not valid JSON");
+	return {
+		...requirement,
+		hardware: requirement.hardware as Record<string, JsonValueType>,
+	};
+}
 const ImageAssetNotFoundResponse = toApiErrorResponse(["ImageAssetNotFound"]);
 const UnitMutationNotFoundResponse = toApiErrorResponse(["UnitNotFound", "ImageAssetNotFound"]);
 
@@ -1464,16 +1482,17 @@ export default new Elysia()
 						params.softwareId,
 						() => new UnitNotFound("Software"),
 					);
+					const items = await database
+						.select()
+						.from(softwareRequirement)
+						.where(eq(softwareRequirement.softwareId, params.softwareId))
+						.orderBy(
+							softwareRequirement.platformEntityId,
+							softwareRequirement.tier,
+							softwareRequirement.id,
+						);
 					return {
-						items: await database
-							.select()
-							.from(softwareRequirement)
-							.where(eq(softwareRequirement.softwareId, params.softwareId))
-							.orderBy(
-								softwareRequirement.platformEntityId,
-								softwareRequirement.tier,
-								softwareRequirement.id,
-							),
+						items: items.map(presentSystemRequirement),
 					};
 				},
 				{
@@ -1518,7 +1537,7 @@ export default new Elysia()
 					});
 					if (!created)
 						throw new Error("System requirement insertion did not return a row");
-					return created;
+					return presentSystemRequirement(created);
 				},
 				{
 					access: "contribute:unit:update",
@@ -1568,7 +1587,7 @@ export default new Elysia()
 							actorProfileId: profile.unitId,
 							event: "update",
 						});
-						return updated;
+						return presentSystemRequirement(updated);
 					});
 				},
 				{

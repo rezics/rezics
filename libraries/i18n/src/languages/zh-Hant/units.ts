@@ -2,6 +2,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { zhHantTerminology } from "@rezics/i18n/terminology/zh-Hant";
 
 const { forms: publicationLicenseTerms } = zhHantTerminology.publicationLicense;
+const { forms: postTerms } = zhHantTerminology.post;
 
 export default {
 	types: { book: "書籍", software: "軟體", media: "媒體", series: "系列" },
@@ -69,6 +70,50 @@ export default {
 	},
 	detail: {
 		sections: "條目章節",
+		tabs: {
+			book: {
+				overview: "書籍資料",
+				contents: "目錄",
+				reviews: "讀者書評",
+				discussion: "閱讀討論",
+				editions: "版本",
+			},
+			media: {
+				overview: "媒體資料",
+				reviews: "觀眾評論",
+				discussion: "觀影討論",
+				versions: "其他版本",
+			},
+			software: {
+				overview: "軟體資訊",
+				requirements: "系統需求",
+				reviews: "使用者評論",
+				discussion: "使用討論",
+				versions: "軟體版本",
+			},
+		},
+		sectionDescriptions: {
+			book: {
+				overview: "書籍說明、出版資訊與閱讀狀態。",
+				contents: "瀏覽章節結構並繼續閱讀。",
+				reviews: "查看或撰寫以評分為選填內容的讀者書評。",
+				discussion: `瀏覽以這本書為討論對象的${postTerms.label}。`,
+				editions: "查看這本書的主版本與其他版本。",
+			},
+			media: {
+				overview: "媒體說明、發行資訊與觀影狀態。",
+				reviews: "查看或撰寫觀眾評論。",
+				discussion: `瀏覽以這部作品為討論對象的${postTerms.label}。`,
+				versions: "查看這部作品的主版本與其他版本。",
+			},
+			software: {
+				overview: "軟體說明、版本資訊與使用狀態。",
+				requirements: "查看各平台與級別的系統需求。",
+				reviews: "查看或撰寫軟體使用者評論。",
+				discussion: `瀏覽以這套軟體為討論對象的${postTerms.label}。`,
+				versions: "查看這套軟體的主版本與其他版本。",
+			},
+		},
 		information: "條目資訊",
 		localizations: "在地化內容",
 		credits: "署名",
@@ -85,6 +130,12 @@ export default {
 		updatedAt: "最後更新",
 		primary: "主版本",
 		version: "變體",
+		noVersions: "目前沒有其他版本。",
+		noRequirements: "目前沒有系統需求資料。",
+		requirementTier: "需求級別",
+		requirementPlatform: "平台識別碼",
+		requirementSource: "來源連結識別碼",
+		requirementNotSpecified: "未指定",
 	},
 	rating: {
 		general: "全年齡",
@@ -151,5 +202,7 @@ export default {
 		decreaseFontSize: "縮小字級",
 		fontSize: "字級",
 		increaseFontSize: "放大字級",
+		markChapterComplete: "標記章節已完成",
+		markChapterIncomplete: "取消章節完成標記",
 	},
 };

@@ -367,6 +367,8 @@ import type {
 	PutApiProgressByUnitIdResponses,
 	DeleteApiProgressByUnitIdOptions,
 	DeleteApiProgressByUnitIdResponses,
+	GetApiProgressByUnitIdNodesOptions,
+	GetApiProgressByUnitIdNodesResponses,
 	PutApiProgressByUnitIdNodesByNodeIdOptions,
 	PutApiProgressByUnitIdNodesByNodeIdResponses,
 	DeleteApiProgressByUnitIdNodesByNodeIdOptions,
@@ -4215,6 +4217,26 @@ export function deleteApiProgressByUnitId<ThrowOnError extends boolean = true>(
 		],
 		...config,
 	}) as Promise<RequestResult<DeleteApiProgressByUnitIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List completed Content Structure nodes
+ * {@link /api/progress/:unitId/nodes}
+ */
+export function getApiProgressByUnitIdNodes<ThrowOnError extends boolean = true>(
+	options: Options<GetApiProgressByUnitIdNodesOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiProgressByUnitIdNodesResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/progress/{unitId}/nodes",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<RequestResult<GetApiProgressByUnitIdNodesResponses, ThrowOnError>>;
 }
 
 /**

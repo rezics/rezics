@@ -13,6 +13,15 @@ export type ListReviewsQuery = Static<typeof ListReviewsQuery>;
 export const CreateReviewBody = t.Object({
 	targetId: Uuid,
 	realmId: t.Optional(Uuid),
+	score: t.Optional(
+		t.Object(
+			{
+				realmId: Uuid,
+				value: t.Integer({ minimum: 1, maximum: 10 }),
+			},
+			{ additionalProperties: false },
+		),
+	),
 	language: ContentLanguage,
 	title: t.String({ minLength: 1, maxLength: 500 }),
 	summary: t.Optional(t.String({ maxLength: 2_000 })),

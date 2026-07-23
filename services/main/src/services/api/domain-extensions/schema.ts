@@ -1,4 +1,4 @@
-import { JsonValue } from "@rezics/portable-text";
+import { JsonValue, type JsonValue as JsonValueType } from "@rezics/portable-text";
 import {
 	DockDocument,
 	NavigationDocument,
@@ -68,6 +68,10 @@ export const SystemRequirementBody = t.Object(
 		hardware: t.Record(t.String(), JsonValue),
 	},
 	{ additionalProperties: false },
+);
+
+const SystemRequirementHardwareResponse = Type.Unsafe<Record<string, JsonValueType>>(
+	t.Record(t.String(), JsonValue),
 );
 
 export const CreateZoneBody = t.Object(
@@ -177,7 +181,7 @@ export const SystemRequirementResponse = t.Object({
 	platformEntityId: t.Nullable(Uuid),
 	tier: t.String(),
 	sourceLinkId: t.Nullable(Uuid),
-	hardware: t.Unknown(),
+	hardware: SystemRequirementHardwareResponse,
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });

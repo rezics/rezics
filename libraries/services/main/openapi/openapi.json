@@ -12641,7 +12641,8 @@
 															"unitKind",
 															"postKind",
 															"summary",
-															"cover"
+															"cover",
+															"collection"
 														],
 														"properties": {
 															"id": {
@@ -13228,6 +13229,34 @@
 																			},
 																			"url": {
 																				"type": "string"
+																			}
+																		}
+																	},
+																	{ "type": "null" }
+																]
+															},
+															"collection": {
+																"nullable": true,
+																"anyOf": [
+																	{
+																		"type": "object",
+																		"required": [
+																			"directItemCount"
+																		],
+																		"properties": {
+																			"directItemCount": {
+																				"minimum": 0,
+																				"anyOf": [
+																					{
+																						"format": "integer",
+																						"default": 0,
+																						"type": "string"
+																					},
+																					{
+																						"minimum": 0,
+																						"type": "integer"
+																					}
+																				]
 																			}
 																		}
 																	},
@@ -34114,7 +34143,34 @@
 															{ "type": "null" }
 														]
 													},
-													"hardware": {},
+													"hardware": {
+														"type": "object",
+														"patternProperties": {
+															"^(.*)$": {
+																"$id": "#/components/schemas/JsonValue",
+																"anyOf": [
+																	{ "type": "null" },
+																	{ "type": "boolean" },
+																	{ "type": "number" },
+																	{ "type": "string" },
+																	{
+																		"type": "array",
+																		"items": {
+																			"$ref": "#/components/schemas/JsonValue"
+																		}
+																	},
+																	{
+																		"type": "object",
+																		"patternProperties": {
+																			"^(.*)$": {
+																				"$ref": "#/components/schemas/JsonValue"
+																			}
+																		}
+																	}
+																]
+															}
+														}
+													},
 													"createdAt": {
 														"format": "date-time",
 														"type": "string"
@@ -34282,7 +34338,34 @@
 												{ "type": "null" }
 											]
 										},
-										"hardware": {},
+										"hardware": {
+											"type": "object",
+											"patternProperties": {
+												"^(.*)$": {
+													"$id": "#/components/schemas/JsonValue",
+													"anyOf": [
+														{ "type": "null" },
+														{ "type": "boolean" },
+														{ "type": "number" },
+														{ "type": "string" },
+														{
+															"type": "array",
+															"items": {
+																"$ref": "#/components/schemas/JsonValue"
+															}
+														},
+														{
+															"type": "object",
+															"patternProperties": {
+																"^(.*)$": {
+																	"$ref": "#/components/schemas/JsonValue"
+																}
+															}
+														}
+													]
+												}
+											}
+										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" }
 									}
@@ -34542,7 +34625,34 @@
 												{ "type": "null" }
 											]
 										},
-										"hardware": {},
+										"hardware": {
+											"type": "object",
+											"patternProperties": {
+												"^(.*)$": {
+													"$id": "#/components/schemas/JsonValue",
+													"anyOf": [
+														{ "type": "null" },
+														{ "type": "boolean" },
+														{ "type": "number" },
+														{ "type": "string" },
+														{
+															"type": "array",
+															"items": {
+																"$ref": "#/components/schemas/JsonValue"
+															}
+														},
+														{
+															"type": "object",
+															"patternProperties": {
+																"^(.*)$": {
+																	"$ref": "#/components/schemas/JsonValue"
+																}
+															}
+														}
+													]
+												}
+											}
+										},
 										"createdAt": { "format": "date-time", "type": "string" },
 										"updatedAt": { "format": "date-time", "type": "string" }
 									}
@@ -66018,6 +66128,132 @@
 				"x-rezics-policy-operation-id": "deleteApiProgressByUnitId"
 			}
 		},
+		"/api/progress/{unitId}/nodes": {
+			"get": {
+				"summary": "List completed Content Structure nodes",
+				"tags": ["Progress"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["items"],
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"required": ["nodeId", "completedAt"],
+												"properties": {
+													"nodeId": {
+														"format": "uuid",
+														"type": "string"
+													},
+													"completedAt": {
+														"format": "date-time",
+														"type": "string"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiProgressByUnitIdNodes",
+				"x-rezics-policy-operation-id": "getApiProgressByUnitIdNodes"
+			}
+		},
 		"/api/progress/{unitId}/nodes/{nodeId}": {
 			"put": {
 				"summary": "Complete Content Structure node",
@@ -66232,6 +66468,12 @@
 						"schema": { "format": "uuid", "type": "string" }
 					},
 					{
+						"name": "targetId",
+						"in": "query",
+						"required": false,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
 						"name": "limit",
 						"in": "query",
 						"required": false,
@@ -66263,6 +66505,7 @@
 													"id",
 													"ownerId",
 													"itemCount",
+													"containsTarget",
 													"title",
 													"summary",
 													"cover",
@@ -66284,6 +66527,7 @@
 															{ "type": "integer" }
 														]
 													},
+													"containsTarget": { "type": "boolean" },
 													"title": {
 														"nullable": true,
 														"anyOf": [
@@ -69662,7 +69906,9 @@
 													"parentTargetId",
 													"position",
 													"type",
-													"title"
+													"title",
+													"cover",
+													"directItemCount"
 												],
 												"properties": {
 													"targetId": {
@@ -69688,6 +69934,43 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"directItemCount": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
 															{ "type": "null" }
 														]
 													}
@@ -71359,7 +71642,9 @@
 													"parentTargetId",
 													"position",
 													"type",
-													"title"
+													"title",
+													"cover",
+													"directItemCount"
 												],
 												"properties": {
 													"targetId": {
@@ -71385,6 +71670,43 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"directItemCount": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
 															{ "type": "null" }
 														]
 													}
@@ -73052,7 +73374,9 @@
 													"parentTargetId",
 													"position",
 													"type",
-													"title"
+													"title",
+													"cover",
+													"directItemCount"
 												],
 												"properties": {
 													"targetId": {
@@ -73078,6 +73402,43 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"directItemCount": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
 															{ "type": "null" }
 														]
 													}
@@ -76462,7 +76823,9 @@
 													"parentTargetId",
 													"position",
 													"type",
-													"title"
+													"title",
+													"cover",
+													"directItemCount"
 												],
 												"properties": {
 													"targetId": {
@@ -76488,6 +76851,43 @@
 														"nullable": true,
 														"anyOf": [
 															{ "type": "string" },
+															{ "type": "null" }
+														]
+													},
+													"cover": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"type": "object",
+																"required": ["id", "url"],
+																"properties": {
+																	"id": {
+																		"format": "uuid",
+																		"type": "string"
+																	},
+																	"url": { "type": "string" }
+																}
+															},
+															{ "type": "null" }
+														]
+													},
+													"directItemCount": {
+														"nullable": true,
+														"anyOf": [
+															{
+																"minimum": 0,
+																"anyOf": [
+																	{
+																		"format": "integer",
+																		"default": 0,
+																		"type": "string"
+																	},
+																	{
+																		"minimum": 0,
+																		"type": "integer"
+																	}
+																]
+															},
 															{ "type": "null" }
 														]
 													}
@@ -77115,10 +77515,34 @@
 						}
 					},
 					"422": {
-						"description": "Request validation failed",
+						"description": "Response for status 422",
 						"content": {
 							"application/json": {
-								"schema": { "$ref": "#/components/schemas/ValidationError" }
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "ValidationError",
+															"type": "string",
+															"enum": ["ValidationError"]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
 							}
 						}
 					},
@@ -77522,6 +77946,7 @@
 												"required": [
 													"id",
 													"attributions",
+													"scores",
 													"targetId",
 													"realmId",
 													"title",
@@ -77751,6 +78176,43 @@
 															}
 														}
 													},
+													"scores": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"required": [
+																"scoreId",
+																"realmId",
+																"value"
+															],
+															"properties": {
+																"scoreId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"realmId": {
+																	"format": "uuid",
+																	"type": "string"
+																},
+																"value": {
+																	"minimum": 1,
+																	"maximum": 10,
+																	"anyOf": [
+																		{
+																			"format": "integer",
+																			"default": 0,
+																			"type": "string"
+																		},
+																		{
+																			"minimum": 1,
+																			"maximum": 10,
+																			"type": "integer"
+																		}
+																	]
+																}
+															}
+														}
+													},
 													"targetId": {
 														"format": "uuid",
 														"type": "string"
@@ -77825,6 +78287,30 @@
 								"properties": {
 									"targetId": { "format": "uuid", "type": "string" },
 									"realmId": { "format": "uuid", "type": "string" },
+									"score": {
+										"additionalProperties": false,
+										"type": "object",
+										"required": ["realmId", "value"],
+										"properties": {
+											"realmId": { "format": "uuid", "type": "string" },
+											"value": {
+												"minimum": 1,
+												"maximum": 10,
+												"anyOf": [
+													{
+														"format": "integer",
+														"default": 0,
+														"type": "string"
+													},
+													{
+														"minimum": 1,
+														"maximum": 10,
+														"type": "integer"
+													}
+												]
+											}
+										}
+									},
 									"language": { "type": "string", "enum": ["zh", "en"] },
 									"title": { "minLength": 1, "maxLength": 500, "type": "string" },
 									"summary": { "maxLength": 2000, "type": "string" },

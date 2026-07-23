@@ -19,8 +19,7 @@ import { isKnownAttributionRole } from "./attribution-role";
 import { publicUnitHref } from "./routing/public-unit-route";
 import { readPortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
-import { FavoriteToggle } from "@/features/collections/collections";
-import { ProgressRecordForm } from "@/features/progress/progress";
+import { FavoriteButton } from "@/features/collections/components/favorite-button";
 import { UnitShelf } from "@/features/explore/unit-shelf";
 import { BookChapters } from "./reader";
 import type { UnitType } from "./unit-types";
@@ -156,7 +155,7 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 						</p>
 					)}
 					<div className="flex flex-wrap gap-2">
-						<FavoriteToggle targetId={item.id} />
+						<FavoriteButton targetId={item.id} />
 						{item.capabilities.canEdit && (
 							<>
 								<Button variant="solid" asChild>
@@ -234,7 +233,6 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 					</DetailSection>
 
 					{type === "book" && <BookChapters bookId={item.id} />}
-					<ProgressRecordForm unitId={item.id} />
 				</div>
 
 				<aside className="flex min-w-0 flex-col gap-6">

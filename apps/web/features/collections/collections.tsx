@@ -8,7 +8,6 @@ import {
 	getApiCollectionsQueryKey,
 	useDeleteApiCollectionsByCollectionId,
 	useDeleteApiCollectionsByCollectionIdItemsByTargetId,
-	useDeleteApiCollectionsFavoritesItemsByTargetId,
 	useGetApiCollections,
 	useGetApiCollectionsByCollectionId,
 	useGetApiCollectionsFavorites,
@@ -16,7 +15,6 @@ import {
 	usePatchApiCollectionsByCollectionId,
 	usePostApiCollections,
 	usePutApiCollectionsByCollectionIdItemsByTargetId,
-	usePutApiCollectionsFavoritesItemsByTargetId,
 } from "@rezics/openapi-tanstack-query";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -43,7 +41,6 @@ import { Card, CardAction, CardContent, CardHeader } from "@rezics/ui";
 import { Field, FieldGroup, FieldLabel } from "@rezics/ui";
 import { Input } from "@rezics/ui";
 import { Textarea } from "@rezics/ui";
-import { SignInButton } from "@/features/auth/auth-portal";
 import { RequireSession } from "@/features/auth/require-session";
 import { realmHref } from "@/features/slugs/unit-route";
 import {
@@ -54,6 +51,8 @@ import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
 import { selectLocalization } from "@/lib/localization";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
+import { FavoriteButton } from "./components/favorite-button";
+import { CollectionItemCard } from "./components/collection-item-card";
 
 const CollectionStatuses = ["draft", "published", "archived"] as const;
 const CollectionVisibilities = ["public", "unlisted", "private"] as const;
@@ -397,36 +396,14 @@ export function CollectionDetail({ id }: { id: string }) {
 			{collection.items.length ? (
 				<div className="grid gap-3">
 					{collection.items.map((item) => {
-						const href = getItemHref(item.type, item.targetId);
 						return (
-							<Card key={item.targetId}>
-								<CardHeader
-									description={item.type}
-									title={item.title ?? t.ui.unnamed}
-								>
-									<CardAction>
-										<div className="flex gap-2">
-											{href && (
-												<Button asChild size="sm" variant="outline">
-													<Link href={href}>{t.engagement.select}</Link>
-												</Button>
-											)}
-											{canManage && (
-												<Button
-													isLoading={removeItem.isPending}
-													size="sm"
-													variant="quiet"
-													onClick={() =>
-														void removeCollectionItem(item.targetId)
-													}
-												>
-													{t.engagement.removeItem}
-												</Button>
-											)}
-										</div>
-									</CardAction>
-								</CardHeader>
-							</Card>
+							<CollectionItemCard
+								canManage={canManage}
+								item={item}
+								key={item.targetId}
+								onRemove={() => void removeCollectionItem(item.targetId)}
+								removePending={removeItem.isPending}
+							/>
 						);
 					})}
 				</div>
@@ -559,7 +536,7 @@ function FavoritesList() {
 													<Link href={href}>{t.engagement.select}</Link>
 												</Button>
 											)}
-											<FavoriteToggle isFavorited targetId={item.targetId} />
+											<FavoriteButton targetId={item.targetId} />
 										</div>
 									</CardAction>
 								</CardHeader>
@@ -571,51 +548,5 @@ function FavoritesList() {
 				<p className="text-muted-foreground text-sm">{t.ui.emptyFavorites}</p>
 			)}
 		</main>
-	);
-}
-
-export function FavoriteToggle({
-	targetId,
-	isFavorited = false,
-}: {
-	targetId: string;
-	isFavorited?: boolean;
-}) {
-	const { data: session } = useHydratedSession();
-	const addFavorite = usePutApiCollectionsFavoritesItemsByTargetId();
-	const removeFavorite = useDeleteApiCollectionsFavoritesItemsByTargetId();
-	const queryClient = useQueryClient();
-	const { t } = useTranslation(["actions", "cover", "engagement", "errors", "ui"]);
-	const [favorited, setFavorited] = useState(isFavorited);
-	useEffect(() => setFavorited(isFavorited), [isFavorited]);
-	if (!session)
-		return (
-			<SignInButton size="sm" variant="outline">
-				{t.actions.login}
-			</SignInButton>
-		);
-	async function toggle() {
-		try {
-			if (favorited) await removeFavorite.mutateAsync({ path: { targetId } });
-			else await addFavorite.mutateAsync({ path: { targetId } });
-			setFavorited((value) => !value);
-			await invalidateCollections(queryClient);
-		} catch {
-			// The typed mutation state supplies the visible API error.
-		}
-	}
-	const mutation = favorited ? removeFavorite : addFavorite;
-	return (
-		<div className="flex flex-col items-end gap-1">
-			<Button
-				isLoading={mutation.isPending}
-				onClick={() => void toggle()}
-				size="sm"
-				variant={favorited ? "secondary" : "outline"}
-			>
-				{favorited ? t.engagement.unfavorite : t.engagement.favorite}
-			</Button>
-			<RequestFailure error={mutation.error} fallback={t.ui.retryLater} />
-		</div>
 	);
 }

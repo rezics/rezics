@@ -376,6 +376,7 @@ export const CollectionListResponse = t.Object({
 			id: Uuid,
 			ownerId: Uuid,
 			itemCount: t.Integer(),
+			containsTarget: t.Boolean(),
 			title: NullableText,
 			summary: NullableText,
 			cover: ImageAssetResponse,
@@ -447,6 +448,11 @@ export const FeedUnitItemResponse = t.Object({
 	postKind: t.Null(),
 	summary: NullableText,
 	cover: ImageAssetResponse,
+	collection: t.Nullable(
+		t.Object({
+			directItemCount: t.Integer({ minimum: 0 }),
+		}),
+	),
 });
 
 export const FeedPostItemResponse = t.Object({
@@ -504,6 +510,13 @@ export const ReviewListResponse = t.Object({
 		t.Object({
 			id: Uuid,
 			attributions: t.Array(UnitAttributionSummaryResponse),
+			scores: t.Array(
+				t.Object({
+					scoreId: Uuid,
+					realmId: Uuid,
+					value: t.Integer({ minimum: 1, maximum: 10 }),
+				}),
+			),
 			targetId: Uuid,
 			realmId: t.Nullable(Uuid),
 			title: NullableText,
@@ -574,6 +587,14 @@ export const ProgressResponse = t.Object({
 	lastReadAnchor: t.Nullable(t.Unknown()),
 	createdAt: DateTime,
 	updatedAt: DateTime,
+});
+export const ProgressNodeListResponse = t.Object({
+	items: t.Array(
+		t.Object({
+			nodeId: Uuid,
+			completedAt: DateTime,
+		}),
+	),
 });
 export const PollDetailResponse = t.Object({
 	id: Uuid,
@@ -655,6 +676,8 @@ export const CollectionDetailResponse = t.Object({
 			position: FractionalPosition,
 			type: t.String(),
 			title: NullableText,
+			cover: ImageAssetResponse,
+			directItemCount: t.Nullable(t.Integer({ minimum: 0 })),
 		}),
 	),
 });

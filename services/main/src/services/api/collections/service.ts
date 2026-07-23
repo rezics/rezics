@@ -153,6 +153,10 @@ export async function getCollection(
 			position: collectionItem.position,
 			type: unit.kind,
 			title: unitLocalization.title,
+			coverAssetId: unitLocalization.coverAssetId,
+			directItemCount: sql<
+				number | null
+			>`case when ${unit.kind} = 'collection' then (select count(*)::int from collection_item nested_item where nested_item.collection_id = ${collectionItem.unitId}) else null end`,
 		})
 		.from(collectionItem)
 		.innerJoin(unit, eq(unit.id, collectionItem.unitId))
@@ -194,6 +198,10 @@ export async function getCollection(
 				cover: presentImageAsset(coverAssetId),
 			}),
 		),
-		items: items.map((item) => ({ ...item, parentTargetId: null })),
+		items: items.map(({ coverAssetId, ...item }) => ({
+			...item,
+			cover: presentImageAsset(coverAssetId),
+			parentTargetId: null,
+		})),
 	};
 }

@@ -25,6 +25,7 @@ import {
 import {
 	CompletionStateResponse,
 	ProgressListResponse,
+	ProgressNodeListResponse,
 	ProgressResponse,
 } from "../schema/response";
 import { NoContentResponse } from "../schema/action-response";
@@ -116,6 +117,46 @@ export default new Elysia({ prefix: "/progress" })
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ProgressNotFound"]),
 			},
 			detail: { summary: "Get progress", tags: ["Progress"] },
+		},
+	)
+	.get(
+		"/:unitId/nodes",
+		async ({ profile, authorization, params }) => {
+			await authorization.unit.ensureCanRead(params.unitId);
+			const items = await database
+				.select({
+					nodeId: contentStructureNodeProgress.nodeId,
+					completedAt: contentStructureNodeProgress.completedAt,
+				})
+				.from(contentStructureNodeProgress)
+				.innerJoin(
+					contentStructureNode,
+					eq(contentStructureNode.id, contentStructureNodeProgress.nodeId),
+				)
+				.innerJoin(
+					contentStructure,
+					eq(contentStructure.id, contentStructureNode.structureId),
+				)
+				.where(
+					and(
+						eq(contentStructureNodeProgress.profileId, profile.unitId),
+						eq(contentStructureNode.ownerUnitId, params.unitId),
+						eq(contentStructure.kind, "book.contents"),
+						isNull(contentStructureNode.deletedAt),
+						isNull(contentStructure.deletedAt),
+					),
+				)
+				.orderBy(desc(contentStructureNodeProgress.completedAt));
+			return { items };
+		},
+		{
+			access: "interaction:read",
+			params: ProgressUnitParams,
+			response: {
+				[StatusCodes.OK]: ProgressNodeListResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: { summary: "List completed Content Structure nodes", tags: ["Progress"] },
 		},
 	)
 	.put(

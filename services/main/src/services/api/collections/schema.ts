@@ -4,6 +4,7 @@ import { FractionalPosition, LifecycleInput, LocalizationInput, Uuid } from "../
 
 export const ListCollectionsQuery = t.Object({
 	ownerId: t.Optional(Uuid),
+	targetId: t.Optional(Uuid),
 	limit: t.Optional(t.Integer({ minimum: 1, maximum: 50, default: 20 })),
 });
 export type ListCollectionsQuery = Static<typeof ListCollectionsQuery>;

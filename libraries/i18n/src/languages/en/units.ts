@@ -2,6 +2,7 @@ import { verbatimTerms } from "@rezics/i18n/verbatim-terms";
 import { enTerminology } from "@rezics/i18n/terminology/en";
 
 const { forms: publicationLicenseTerms } = enTerminology.publicationLicense;
+const { forms: postTerms } = enTerminology.post;
 
 export default {
 	types: { book: "Book", software: "Software", media: "Media", series: "Series" },
@@ -82,6 +83,50 @@ export default {
 	},
 	detail: {
 		sections: "Unit sections",
+		tabs: {
+			book: {
+				overview: "Book details",
+				contents: "Contents",
+				reviews: "Reader reviews",
+				discussion: "Reading discussion",
+				editions: "Editions",
+			},
+			media: {
+				overview: "Media details",
+				reviews: "Audience reviews",
+				discussion: "Viewing discussion",
+				versions: "Other versions",
+			},
+			software: {
+				overview: "Software information",
+				requirements: "System requirements",
+				reviews: "User reviews",
+				discussion: "Usage discussion",
+				versions: "Software versions",
+			},
+		},
+		sectionDescriptions: {
+			book: {
+				overview: "Book description, publication information, and reading state.",
+				contents: "Browse the chapter structure and continue reading.",
+				reviews: "Read or write reader reviews with an optional Score.",
+				discussion: `Browse ${postTerms.pluralLabel} that use this Book as their subject.`,
+				editions: "See the primary and other editions of this Book.",
+			},
+			media: {
+				overview: "Media description, release information, and viewing state.",
+				reviews: "Read or write audience reviews.",
+				discussion: `Browse ${postTerms.pluralLabel} that use this work as their subject.`,
+				versions: "See the primary and other versions of this work.",
+			},
+			software: {
+				overview: "Software description, version information, and usage state.",
+				requirements: "See system requirements by platform and tier.",
+				reviews: "Read or write Software user reviews.",
+				discussion: `Browse ${postTerms.pluralLabel} that use this Software as their subject.`,
+				versions: "See the primary and other versions of this Software.",
+			},
+		},
 		information: "Unit information",
 		localizations: "Localizations",
 		credits: "Credits",
@@ -98,6 +143,12 @@ export default {
 		updatedAt: "Last updated",
 		primary: "Primary",
 		version: "Variant",
+		noVersions: "No other versions are available.",
+		noRequirements: "No system requirements are available.",
+		requirementTier: "Requirement tier",
+		requirementPlatform: "Platform identifier",
+		requirementSource: "Source link identifier",
+		requirementNotSpecified: "Not specified",
 	},
 	rating: {
 		general: "General",
@@ -164,5 +215,7 @@ export default {
 		decreaseFontSize: "Decrease font size",
 		fontSize: "Font size",
 		increaseFontSize: "Increase font size",
+		markChapterComplete: "Mark chapter complete",
+		markChapterIncomplete: "Mark chapter incomplete",
 	},
 } satisfies typeof import("../zh-Hant/units").default;

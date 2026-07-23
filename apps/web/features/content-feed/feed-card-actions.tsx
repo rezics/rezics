@@ -2,14 +2,10 @@
 
 import {
 	getApiCollectionsFavoritesQueryKey,
-	getApiCollectionsQueryKey,
 	getApiReactionsUnitsByUnitIdQueryKey,
 	useDeleteApiCollectionsFavoritesItemsByTargetId,
 	useDeleteApiReactionsUnitsByUnitId,
-	useGetApiCollections,
 	useGetApiCollectionsFavorites,
-	useGetApiUsersMe,
-	usePutApiCollectionsByCollectionIdItemsByTargetId,
 	usePutApiCollectionsFavoritesItemsByTargetId,
 	usePutApiReactionsSharesByUnitId,
 	usePutApiReactionsUnitsByUnitId,
@@ -46,6 +42,7 @@ import {
 	cn,
 } from "@rezics/ui";
 import { useAuthPortal } from "@/features/auth/auth-portal";
+import { CollectionPickerButton } from "@/features/collections/components/collection-picker-button";
 import { FollowButton } from "@/features/following/components/follow-button";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
@@ -204,7 +201,7 @@ export function FeedEngagementBar({
 					</Button>
 				) : null}
 				{policy.primary === "collect" ? (
-					<CollectionPicker itemId={itemId} triggerVariant="secondary" />
+					<CollectionPickerButton targetId={itemId} triggerVariant="secondary" />
 				) : null}
 				{policy.primary === "follow" ? (
 					<FollowButton
@@ -270,8 +267,8 @@ export function FeedOverflowMenu({
 				savePending={addFavorite.isPending || removeFavorite.isPending}
 				saved={saved}
 			/>
-			<CollectionPicker
-				itemId={itemId}
+			<CollectionPickerButton
+				targetId={itemId}
 				onOpenChange={setCollectionOpen}
 				open={collectionOpen}
 			/>
@@ -325,109 +322,6 @@ export function FeedOverflowMenuView({
 				) : null}
 			</MenuContent>
 		</Menu>
-	);
-}
-
-function CollectionPicker({
-	itemId,
-	onOpenChange,
-	open: controlledOpen,
-	triggerVariant,
-}: {
-	itemId: string;
-	onOpenChange?: (open: boolean) => void;
-	open?: boolean;
-	triggerVariant?: "secondary";
-}) {
-	const { t } = useTranslation(["engagement", "feed", "ui"]);
-	const { data: session } = useHydratedSession();
-	const { openAuthPortal } = useAuthPortal();
-	const queryClient = useQueryClient();
-	const [internalOpen, setInternalOpen] = useState(false);
-	const open = controlledOpen ?? internalOpen;
-	const setOpen = onOpenChange ?? setInternalOpen;
-	const me = useGetApiUsersMe({ query: { enabled: open && Boolean(session) } });
-	const collections = useGetApiCollections(
-		{ query: { ...(me.data?.id ? { ownerId: me.data.id } : {}), limit: 50 } },
-		{ query: { enabled: open && Boolean(me.data?.id) } },
-	);
-	const add = usePutApiCollectionsByCollectionIdItemsByTargetId();
-	const [addedCollectionId, setAddedCollectionId] = useState<string>();
-
-	function requestOpen() {
-		if (!session) openAuthPortal("login");
-		else setOpen(true);
-	}
-
-	async function addToCollection(collectionId: string) {
-		try {
-			await add.mutateAsync({
-				path: { collectionId, targetId: itemId },
-				body: { kind: "item" },
-			});
-			setAddedCollectionId(collectionId);
-			await queryClient.invalidateQueries({ queryKey: getApiCollectionsQueryKey() });
-		} catch {
-			// The mutation error is rendered in the dialog.
-		}
-	}
-
-	return (
-		<Dialog onOpenChange={({ open: nextOpen }) => setOpen(nextOpen)} open={open}>
-			{triggerVariant ? (
-				<Button
-					className="min-h-11 sm:min-h-8"
-					onClick={requestOpen}
-					size="sm"
-					variant={triggerVariant}
-				>
-					<LibraryIcon aria-hidden data-icon="inline-start" />
-					{t.feed.actions.addToCollection}
-				</Button>
-			) : null}
-			<DialogContent showCloseButton={false} size="sm">
-				<DialogHeader
-					description={t.feed.actions.collectionPickerDescription}
-					title={t.feed.actions.collectionPickerTitle}
-				/>
-				<DialogBody className="grid gap-2">
-					{collections.isPending || me.isPending ? (
-						<p className="text-muted-foreground text-sm">{t.ui.loading}</p>
-					) : collections.data?.items.length ? (
-						collections.data.items.map((collection) => (
-							<Button
-								className="h-auto min-h-11 justify-between whitespace-normal py-2 text-start"
-								disabled={add.isPending || addedCollectionId === collection.id}
-								key={collection.id}
-								onClick={() => void addToCollection(collection.id)}
-								variant="outline"
-							>
-								<span>{collection.title ?? t.ui.unnamed}</span>
-								{addedCollectionId === collection.id ? (
-									<CheckIcon aria-hidden />
-								) : null}
-							</Button>
-						))
-					) : (
-						<p className="text-muted-foreground text-sm">
-							{t.feed.actions.noOwnedCollections}
-						</p>
-					)}
-					<RequestFailure
-						error={me.error ?? collections.error ?? add.error}
-						fallback={t.ui.retryLater}
-					/>
-				</DialogBody>
-				<DialogFooter className="justify-between border-t">
-					<Button asChild variant="quiet">
-						<Link href="/collections">{t.feed.actions.manageCollections}</Link>
-					</Button>
-					<Button onClick={() => setOpen(false)} variant="secondary">
-						{t.engagement.cancel}
-					</Button>
-				</DialogFooter>
-			</DialogContent>
-		</Dialog>
 	);
 }
 
