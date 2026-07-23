@@ -186,6 +186,8 @@ export default {
 	PostScoreDuplicate: `A ${postTerms.label} cannot display the same Score more than once.`,
 	PostScoreNotFound: "A selected Score could not be found.",
 	RealmScoreContextPostNotMounted: `The Score context ${postTerms.label} must be mounted in the ${realmTerms.label}.`,
+	RealmTagContextNotFound: `This ${realmTerms.label} Tag voting context could not be found.`,
+	RealmTagContextPostNotMounted: `The Tag voting context ${postTerms.label} must be visible in the ${realmTerms.label}.`,
 	SearchDocumentRevisionConflict: "The search configuration changed. Reload it before saving.",
 	ZoneSearchFeatureNotFound: `This ${zoneTerms.inline} has no enabled search feature.`,
 	SharedSearchQueryNotFound: "This shared search query could not be found.",

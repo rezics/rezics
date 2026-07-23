@@ -153,6 +153,38 @@ export type RemoveRealmPinQuery = Static<typeof RemoveRealmPinQuery>;
 export const RealmUnitParams = t.Object({ realmId: Uuid, unitId: Uuid });
 export type RealmUnitParams = Static<typeof RealmUnitParams>;
 
+export const RealmTagParams = t.Object({
+	realmId: Uuid,
+	unitId: Uuid,
+	tagId: Uuid,
+});
+export type RealmTagParams = Static<typeof RealmTagParams>;
+
+export const PutRealmTagContextBody = t.Object(
+	{ contextPostId: Uuid },
+	{ additionalProperties: false },
+);
+export type PutRealmTagContextBody = Static<typeof PutRealmTagContextBody>;
+
+export const RealmTagVoteBody = t.Object(
+	{ value: t.Union([t.Literal(-1), t.Literal(1)]) },
+	{ additionalProperties: false },
+);
+export type RealmTagVoteBody = Static<typeof RealmTagVoteBody>;
+
+export const RealmTagContextResponse = t.Object({
+	realmId: Uuid,
+	unitId: Uuid,
+	tagId: Uuid,
+	contextPostId: Uuid,
+	createdByProfileId: t.Nullable(Uuid),
+	value: t.Nullable(t.Union([t.Literal(-1), t.Literal(1)])),
+	score: t.Integer(),
+	voteCount: t.Integer(),
+	createdAt: DateTime,
+	updatedAt: DateTime,
+});
+
 export const ListRealmUnitsQuery = t.Object(
 	{
 		status: t.Optional(RealmUnitStatus),

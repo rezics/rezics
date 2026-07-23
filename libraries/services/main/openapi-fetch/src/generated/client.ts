@@ -505,6 +505,14 @@ import type {
 	PutApiRealmsByRealmIdPinsByUnitIdResponses,
 	DeleteApiRealmsByRealmIdPinsByUnitIdOptions,
 	DeleteApiRealmsByRealmIdPinsByUnitIdResponses,
+	GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions,
+	GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextResponses,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextResponses,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteOptions,
+	PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponses,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteOptions,
+	DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponses,
 	GetApiRealmsByRealmIdUnitsOptions,
 	GetApiRealmsByRealmIdUnitsResponses,
 	GetApiRealmsByRealmIdUnitsByUnitIdHistoryOptions,
@@ -5505,6 +5513,106 @@ export function deleteApiRealmsByRealmIdPinsByUnitId<ThrowOnError extends boolea
 		],
 		...config,
 	}) as Promise<RequestResult<DeleteApiRealmsByRealmIdPinsByUnitIdResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get Realm-scoped Tag voting context
+ * {@link /api/realms/:realmId/units/:unitId/tags/:tagId/context}
+ */
+export function getApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions, ThrowOnError>,
+): Promise<
+	RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/realms/{realmId}/units/{unitId}/tags/{tagId}/context",
+		...config,
+	}) as Promise<
+		RequestResult<GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Set Realm-scoped Tag voting context
+ * {@link /api/realms/:realmId/units/:unitId/tags/:tagId/context}
+ */
+export function putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/realms/{realmId}/units/{unitId}/tags/{tagId}/context",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Vote on a Realm-scoped Unit Tag
+ * {@link /api/realms/:realmId/units/:unitId/tags/:tagId/vote}
+ */
+export function putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteOptions, ThrowOnError>,
+): Promise<
+	RequestResult<PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/realms/{realmId}/units/{unitId}/tags/{tagId}/vote",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponses, ThrowOnError>
+	>;
+}
+
+/**
+ * @summary Remove a Realm-scoped Unit Tag vote
+ * {@link /api/realms/:realmId/units/:unitId/tags/:tagId/vote}
+ */
+export function deleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote<
+	ThrowOnError extends boolean = true,
+>(
+	options: Options<DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteOptions, ThrowOnError>,
+): Promise<
+	RequestResult<DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponses, ThrowOnError>
+> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "DELETE",
+		url: "/api/realms/{realmId}/units/{unitId}/tags/{tagId}/vote",
+		security: [
+			{ type: "http", scheme: "bearer" },
+			{ type: "apiKey", name: "better-auth.session_token", in: "cookie" },
+		],
+		...config,
+	}) as Promise<
+		RequestResult<DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponses, ThrowOnError>
+	>;
 }
 
 /**

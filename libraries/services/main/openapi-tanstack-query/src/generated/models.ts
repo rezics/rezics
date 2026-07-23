@@ -1269,6 +1269,72 @@ export type ZoneBoundaryDocument = {
 				 */
 				value: boolean;
 		  }
+		| {
+				/**
+				 * @type string
+				 */
+				field: "realm-tag-vote";
+				/**
+				 * @type string
+				 */
+				operator: "matches";
+				/**
+				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+				 * @type string
+				 */
+				realmId: string;
+				/**
+				 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+				 * @type string
+				 */
+				tagId: string;
+				score?:
+					| {
+							/**
+							 * @type integer
+							 */
+							lower: number;
+							/**
+							 * @type integer | undefined
+							 */
+							upper?: number;
+					  }
+					| {
+							/**
+							 * @type integer | undefined
+							 */
+							lower?: number;
+							/**
+							 * @type integer
+							 */
+							upper: number;
+					  };
+				voteCount?:
+					| {
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							lower: number;
+							/**
+							 * @minLength 0
+							 * @type integer | undefined
+							 */
+							upper?: number;
+					  }
+					| {
+							/**
+							 * @minLength 0
+							 * @type integer | undefined
+							 */
+							lower?: number;
+							/**
+							 * @minLength 0
+							 * @type integer
+							 */
+							upper: number;
+					  };
+		  }
 	)[];
 };
 
@@ -1483,6 +1549,8 @@ export const ApiErrorCode = {
 	RealmMemberNotFound: "RealmMemberNotFound",
 	RealmUnitNotFound: "RealmUnitNotFound",
 	RealmScoreContextPostNotMounted: "RealmScoreContextPostNotMounted",
+	RealmTagContextNotFound: "RealmTagContextNotFound",
+	RealmTagContextPostNotMounted: "RealmTagContextPostNotMounted",
 	RealmNavigationNotFound: "RealmNavigationNotFound",
 	RealmNavigationInUse: "RealmNavigationInUse",
 	RealmNavigationDocumentInvalid: "RealmNavigationDocumentInvalid",
@@ -54880,6 +54948,72 @@ export type PostApiCollectionsStatus200 = {
 							 */
 							value: boolean;
 					  }
+					| {
+							/**
+							 * @type string
+							 */
+							field: "realm-tag-vote";
+							/**
+							 * @type string
+							 */
+							operator: "matches";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							realmId: string;
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							tagId: string;
+							score?:
+								| {
+										/**
+										 * @type integer
+										 */
+										lower: number;
+										/**
+										 * @type integer | undefined
+										 */
+										upper?: number;
+								  }
+								| {
+										/**
+										 * @type integer | undefined
+										 */
+										lower?: number;
+										/**
+										 * @type integer
+										 */
+										upper: number;
+								  };
+							voteCount?:
+								| {
+										/**
+										 * @minLength 0
+										 * @type integer
+										 */
+										lower: number;
+										/**
+										 * @minLength 0
+										 * @type integer | undefined
+										 */
+										upper?: number;
+								  }
+								| {
+										/**
+										 * @minLength 0
+										 * @type integer | undefined
+										 */
+										lower?: number;
+										/**
+										 * @minLength 0
+										 * @type integer
+										 */
+										upper: number;
+								  };
+					  }
 				)[];
 		  }
 		| {
@@ -55760,6 +55894,72 @@ export type PostApiCollectionsBody = {
 							 */
 							value: boolean;
 					  }
+					| {
+							/**
+							 * @type string
+							 */
+							field: "realm-tag-vote";
+							/**
+							 * @type string
+							 */
+							operator: "matches";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							realmId: string;
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							tagId: string;
+							score?:
+								| {
+										/**
+										 * @type integer
+										 */
+										lower: number;
+										/**
+										 * @type integer | undefined
+										 */
+										upper?: number;
+								  }
+								| {
+										/**
+										 * @type integer | undefined
+										 */
+										lower?: number;
+										/**
+										 * @type integer
+										 */
+										upper: number;
+								  };
+							voteCount?:
+								| {
+										/**
+										 * @minLength 0
+										 * @type integer
+										 */
+										lower: number;
+										/**
+										 * @minLength 0
+										 * @type integer | undefined
+										 */
+										upper?: number;
+								  }
+								| {
+										/**
+										 * @minLength 0
+										 * @type integer | undefined
+										 */
+										lower?: number;
+										/**
+										 * @minLength 0
+										 * @type integer
+										 */
+										upper: number;
+								  };
+					  }
 				)[];
 		  }
 		| {
@@ -56239,6 +56439,72 @@ export type GetApiCollectionsFavoritesStatus200 = {
 							 * @type boolean
 							 */
 							value: boolean;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							field: "realm-tag-vote";
+							/**
+							 * @type string
+							 */
+							operator: "matches";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							realmId: string;
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							tagId: string;
+							score?:
+								| {
+										/**
+										 * @type integer
+										 */
+										lower: number;
+										/**
+										 * @type integer | undefined
+										 */
+										upper?: number;
+								  }
+								| {
+										/**
+										 * @type integer | undefined
+										 */
+										lower?: number;
+										/**
+										 * @type integer
+										 */
+										upper: number;
+								  };
+							voteCount?:
+								| {
+										/**
+										 * @minLength 0
+										 * @type integer
+										 */
+										lower: number;
+										/**
+										 * @minLength 0
+										 * @type integer | undefined
+										 */
+										upper?: number;
+								  }
+								| {
+										/**
+										 * @minLength 0
+										 * @type integer | undefined
+										 */
+										lower?: number;
+										/**
+										 * @minLength 0
+										 * @type integer
+										 */
+										upper: number;
+								  };
 					  }
 				)[];
 		  }
@@ -56953,6 +57219,72 @@ export type GetApiCollectionsByCollectionIdStatus200 = {
 							 */
 							value: boolean;
 					  }
+					| {
+							/**
+							 * @type string
+							 */
+							field: "realm-tag-vote";
+							/**
+							 * @type string
+							 */
+							operator: "matches";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							realmId: string;
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							tagId: string;
+							score?:
+								| {
+										/**
+										 * @type integer
+										 */
+										lower: number;
+										/**
+										 * @type integer | undefined
+										 */
+										upper?: number;
+								  }
+								| {
+										/**
+										 * @type integer | undefined
+										 */
+										lower?: number;
+										/**
+										 * @type integer
+										 */
+										upper: number;
+								  };
+							voteCount?:
+								| {
+										/**
+										 * @minLength 0
+										 * @type integer
+										 */
+										lower: number;
+										/**
+										 * @minLength 0
+										 * @type integer | undefined
+										 */
+										upper?: number;
+								  }
+								| {
+										/**
+										 * @minLength 0
+										 * @type integer | undefined
+										 */
+										lower?: number;
+										/**
+										 * @minLength 0
+										 * @type integer
+										 */
+										upper: number;
+								  };
+					  }
 				)[];
 		  }
 		| {
@@ -57646,6 +57978,72 @@ export type PatchApiCollectionsByCollectionIdStatus200 = {
 							 * @type boolean
 							 */
 							value: boolean;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							field: "realm-tag-vote";
+							/**
+							 * @type string
+							 */
+							operator: "matches";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							realmId: string;
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							tagId: string;
+							score?:
+								| {
+										/**
+										 * @type integer
+										 */
+										lower: number;
+										/**
+										 * @type integer | undefined
+										 */
+										upper?: number;
+								  }
+								| {
+										/**
+										 * @type integer | undefined
+										 */
+										lower?: number;
+										/**
+										 * @type integer
+										 */
+										upper: number;
+								  };
+							voteCount?:
+								| {
+										/**
+										 * @minLength 0
+										 * @type integer
+										 */
+										lower: number;
+										/**
+										 * @minLength 0
+										 * @type integer | undefined
+										 */
+										upper?: number;
+								  }
+								| {
+										/**
+										 * @minLength 0
+										 * @type integer | undefined
+										 */
+										lower?: number;
+										/**
+										 * @minLength 0
+										 * @type integer
+										 */
+										upper: number;
+								  };
 					  }
 				)[];
 		  }
@@ -58595,6 +58993,72 @@ export type PatchApiCollectionsByCollectionIdBody = {
 							 * @type boolean
 							 */
 							value: boolean;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							field: "realm-tag-vote";
+							/**
+							 * @type string
+							 */
+							operator: "matches";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							realmId: string;
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							tagId: string;
+							score?:
+								| {
+										/**
+										 * @type integer
+										 */
+										lower: number;
+										/**
+										 * @type integer | undefined
+										 */
+										upper?: number;
+								  }
+								| {
+										/**
+										 * @type integer | undefined
+										 */
+										lower?: number;
+										/**
+										 * @type integer
+										 */
+										upper: number;
+								  };
+							voteCount?:
+								| {
+										/**
+										 * @minLength 0
+										 * @type integer
+										 */
+										lower: number;
+										/**
+										 * @minLength 0
+										 * @type integer | undefined
+										 */
+										upper?: number;
+								  }
+								| {
+										/**
+										 * @minLength 0
+										 * @type integer | undefined
+										 */
+										lower?: number;
+										/**
+										 * @minLength 0
+										 * @type integer
+										 */
+										upper: number;
+								  };
 					  }
 				)[];
 		  }
@@ -70871,6 +71335,835 @@ export type DeleteApiRealmsByRealmIdPinsByUnitIdResponse =
 /**
  * @type object
  */
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tagId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tagId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	contextPostId: string;
+	createdByProfileId: (string | null) | null;
+	value: ((-1 | 1) | null) | null;
+	score: string | number;
+	voteCount: string | number;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export const GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404ErrorCodeEnum = {
+	RealmNotFound: "RealmNotFound",
+	UnitNotFound: "UnitNotFound",
+	PostNotFound: "PostNotFound",
+	RealmTagContextNotFound: "RealmTagContextNotFound",
+} as const;
+
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404ErrorCodeEnum =
+	(typeof GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404ErrorCodeEnum)[keyof typeof GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmNotFound'
+		 * @type string
+		 */
+		code: GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions = {
+	body?: never;
+	path: GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextResponses = {
+	"200": GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200;
+	"404": GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404;
+	"422": GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422;
+	"500": GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextResponse =
+	| GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200
+	| GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404
+	| GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422
+	| GetApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextPath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tagId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tagId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	contextPostId: string;
+	createdByProfileId: (string | null) | null;
+	value: ((-1 | 1) | null) | null;
+	score: string | number;
+	voteCount: string | number;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export const PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403ErrorCodeEnum = {
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	PostNotFound: "PostNotFound",
+} as const;
+
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422 =
+	| {
+			/**
+			 * @type object
+			 */
+			error: {
+				/**
+				 * @default 'RealmTagContextPostNotMounted'
+				 * @type string
+				 */
+				code: "RealmTagContextPostNotMounted";
+				/**
+				 * @type string
+				 */
+				message: string;
+				/**
+				 * @type void | undefined
+				 */
+				details?: void;
+			};
+			/**
+			 * @type string
+			 */
+			requestId: string;
+	  }
+	| ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextBody = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	contextPostId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextOptions = {
+	body: PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextBody;
+	path: PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextPath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextResponses = {
+	"200": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200;
+	"403": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403;
+	"404": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404;
+	"422": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422;
+	"429": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus429;
+	"500": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextResponse =
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus200
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus403
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus404
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus422
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus429
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContextStatus500;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVotePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tagId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tagId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	contextPostId: string;
+	createdByProfileId: (string | null) | null;
+	value: ((-1 | 1) | null) | null;
+	score: string | number;
+	voteCount: string | number;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export const PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum = {
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	RealmTagContextNotFound: "RealmTagContextNotFound",
+} as const;
+
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404ErrorCodeEnum =
+	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404ErrorCodeEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus500 = InternalError;
+
+export const PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteRequestValueEnum = {
+	"-1": -1,
+	"1": 1,
+} as const;
+
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteRequestValueEnum =
+	(typeof PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteRequestValueEnum)[keyof typeof PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteRequestValueEnum];
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteBody = {
+	/**
+	 * @type string
+	 */
+	value: PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteRequestValueEnum;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteOptions = {
+	body: PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteBody;
+	path: PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVotePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponses = {
+	"200": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus200;
+	"403": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403;
+	"404": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404;
+	"422": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422;
+	"429": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429;
+	"500": PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponse =
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus200
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429
+	| PutApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus500;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVotePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tagId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	realmId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	tagId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	contextPostId: string;
+	createdByProfileId: (string | null) | null;
+	value: ((-1 | 1) | null) | null;
+	score: string | number;
+	voteCount: string | number;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+export const DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum = {
+	RealmCapabilityRequired: "RealmCapabilityRequired",
+	UnitAccessRestricted: "UnitAccessRestricted",
+	UnitPermissionForbidden: "UnitPermissionForbidden",
+} as const;
+
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum =
+	(typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'RealmCapabilityRequired'
+		 * @type string
+		 */
+		code: DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+export const DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404ErrorCodeEnum = {
+	UnitNotFound: "UnitNotFound",
+	RealmTagContextNotFound: "RealmTagContextNotFound",
+} as const;
+
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404ErrorCodeEnum =
+	(typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404ErrorCodeEnum)[keyof typeof DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404ErrorCodeEnum];
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404ErrorCodeEnum;
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteOptions = {
+	body?: never;
+	path: DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVotePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponses = {
+	"200": DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus200;
+	"403": DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403;
+	"404": DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404;
+	"422": DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422;
+	"429": DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429;
+	"500": DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteResponse =
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus200
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus403
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus404
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus422
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus429
+	| DeleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVoteStatus500;
+
+/**
+ * @type object
+ */
 export type GetApiRealmsByRealmIdUnitsPath = {
 	/**
 	 * @description
@@ -73132,6 +74425,7 @@ export const GetApiSearchFeaturesByTemplateStatus200DocumentControlsFieldEnum = 
 	"software-version-label": "software-version-label",
 	"software-platform": "software-platform",
 	"software-requirement-tier": "software-requirement-tier",
+	"realm-tag-vote": "realm-tag-vote",
 } as const;
 
 export type GetApiSearchFeaturesByTemplateStatus200DocumentControlsFieldEnum =
@@ -73239,6 +74533,7 @@ export const GetApiSearchFeaturesByTemplateStatus200ControlsFieldEnum = {
 	"software-version-label": "software-version-label",
 	"software-platform": "software-platform",
 	"software-requirement-tier": "software-requirement-tier",
+	"realm-tag-vote": "realm-tag-vote",
 } as const;
 
 export type GetApiSearchFeaturesByTemplateStatus200ControlsFieldEnum =
@@ -73250,6 +74545,7 @@ export const GetApiSearchFeaturesByTemplateStatus200ControlsComponentEnum = {
 	toggle: "toggle",
 	"date-range": "date-range",
 	"value-range": "value-range",
+	"realm-tag-vote": "realm-tag-vote",
 } as const;
 
 export type GetApiSearchFeaturesByTemplateStatus200ControlsComponentEnum =
@@ -73271,6 +74567,7 @@ export const GetApiSearchFeaturesByTemplateStatus200ControlsOperatorsEnum = {
 	"none-of": "none-of",
 	range: "range",
 	exists: "exists",
+	matches: "matches",
 } as const;
 
 export type GetApiSearchFeaturesByTemplateStatus200ControlsOperatorsEnum =
@@ -73638,6 +74935,72 @@ export type GetApiSearchFeaturesByTemplateStatus200 = {
 					 */
 					value: boolean;
 			  }
+			| {
+					/**
+					 * @type string
+					 */
+					field: "realm-tag-vote";
+					/**
+					 * @type string
+					 */
+					operator: "matches";
+					/**
+					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+					 * @type string
+					 */
+					realmId: string;
+					/**
+					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+					 * @type string
+					 */
+					tagId: string;
+					score?:
+						| {
+								/**
+								 * @type integer
+								 */
+								lower: number;
+								/**
+								 * @type integer | undefined
+								 */
+								upper?: number;
+						  }
+						| {
+								/**
+								 * @type integer | undefined
+								 */
+								lower?: number;
+								/**
+								 * @type integer
+								 */
+								upper: number;
+						  };
+					voteCount?:
+						| {
+								/**
+								 * @minLength 0
+								 * @type integer
+								 */
+								lower: number;
+								/**
+								 * @minLength 0
+								 * @type integer | undefined
+								 */
+								upper?: number;
+						  }
+						| {
+								/**
+								 * @minLength 0
+								 * @type integer | undefined
+								 */
+								lower?: number;
+								/**
+								 * @minLength 0
+								 * @type integer
+								 */
+								upper: number;
+						  };
+			  }
 		)[];
 		/**
 		 * @type array
@@ -73939,6 +75302,72 @@ export type GetApiSearchFeaturesByTemplateStatus200 = {
 						 * @type boolean
 						 */
 						value: boolean;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						field: "realm-tag-vote";
+						/**
+						 * @type string
+						 */
+						operator: "matches";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						realmId: string;
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						tagId: string;
+						score?:
+							| {
+									/**
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @type integer
+									 */
+									upper: number;
+							  };
+						voteCount?:
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									upper: number;
+							  };
 				  };
 		}[];
 		/**
@@ -74934,6 +76363,72 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 						 * @type boolean
 						 */
 						value: boolean;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						field: "realm-tag-vote";
+						/**
+						 * @type string
+						 */
+						operator: "matches";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						realmId: string;
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						tagId: string;
+						score?:
+							| {
+									/**
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @type integer
+									 */
+									upper: number;
+							  };
+						voteCount?:
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									upper: number;
+							  };
 				  };
 		};
 		/**
@@ -75279,6 +76774,72 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 								 * @type boolean
 								 */
 								value: boolean;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								field: "realm-tag-vote";
+								/**
+								 * @type string
+								 */
+								operator: "matches";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								realmId: string;
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								tagId: string;
+								score?:
+									| {
+											/**
+											 * @type integer
+											 */
+											lower: number;
+											/**
+											 * @type integer | undefined
+											 */
+											upper?: number;
+									  }
+									| {
+											/**
+											 * @type integer | undefined
+											 */
+											lower?: number;
+											/**
+											 * @type integer
+											 */
+											upper: number;
+									  };
+								voteCount?:
+									| {
+											/**
+											 * @minLength 0
+											 * @type integer
+											 */
+											lower: number;
+											/**
+											 * @minLength 0
+											 * @type integer | undefined
+											 */
+											upper?: number;
+									  }
+									| {
+											/**
+											 * @minLength 0
+											 * @type integer | undefined
+											 */
+											lower?: number;
+											/**
+											 * @minLength 0
+											 * @type integer
+											 */
+											upper: number;
+									  };
 						  };
 				}[];
 		  }
@@ -75616,6 +77177,72 @@ export type PostApiSearchFeaturesByTemplateExecuteBody = {
 										 * @type boolean
 										 */
 										value: boolean;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										field: "realm-tag-vote";
+										/**
+										 * @type string
+										 */
+										operator: "matches";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										realmId: string;
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										tagId: string;
+										score?:
+											| {
+													/**
+													 * @type integer
+													 */
+													lower: number;
+													/**
+													 * @type integer | undefined
+													 */
+													upper?: number;
+											  }
+											| {
+													/**
+													 * @type integer | undefined
+													 */
+													lower?: number;
+													/**
+													 * @type integer
+													 */
+													upper: number;
+											  };
+										voteCount?:
+											| {
+													/**
+													 * @minLength 0
+													 * @type integer
+													 */
+													lower: number;
+													/**
+													 * @minLength 0
+													 * @type integer | undefined
+													 */
+													upper?: number;
+											  }
+											| {
+													/**
+													 * @minLength 0
+													 * @type integer | undefined
+													 */
+													lower?: number;
+													/**
+													 * @minLength 0
+													 * @type integer
+													 */
+													upper: number;
+											  };
 								  };
 					  }
 					| {
@@ -75760,6 +77387,7 @@ export const GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControls
 	"software-version-label": "software-version-label",
 	"software-platform": "software-platform",
 	"software-requirement-tier": "software-requirement-tier",
+	"realm-tag-vote": "realm-tag-vote",
 } as const;
 
 export type GetApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsFieldEnum =
@@ -75867,6 +77495,7 @@ export const GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsFieldEnu
 	"software-version-label": "software-version-label",
 	"software-platform": "software-platform",
 	"software-requirement-tier": "software-requirement-tier",
+	"realm-tag-vote": "realm-tag-vote",
 } as const;
 
 export type GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsFieldEnum =
@@ -75878,6 +77507,7 @@ export const GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsComponen
 	toggle: "toggle",
 	"date-range": "date-range",
 	"value-range": "value-range",
+	"realm-tag-vote": "realm-tag-vote",
 } as const;
 
 export type GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsComponentEnum =
@@ -75899,6 +77529,7 @@ export const GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsOperator
 	"none-of": "none-of",
 	range: "range",
 	exists: "exists",
+	matches: "matches",
 } as const;
 
 export type GetApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsOperatorsEnum =
@@ -76286,6 +77917,72 @@ export type GetApiSearchZonesByZoneIdFeatureStatus200 = {
 						 */
 						value: boolean;
 				  }
+				| {
+						/**
+						 * @type string
+						 */
+						field: "realm-tag-vote";
+						/**
+						 * @type string
+						 */
+						operator: "matches";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						realmId: string;
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						tagId: string;
+						score?:
+							| {
+									/**
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @type integer
+									 */
+									upper: number;
+							  };
+						voteCount?:
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									upper: number;
+							  };
+				  }
 			)[];
 			/**
 			 * @type array
@@ -76587,6 +78284,72 @@ export type GetApiSearchZonesByZoneIdFeatureStatus200 = {
 							 * @type boolean
 							 */
 							value: boolean;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							field: "realm-tag-vote";
+							/**
+							 * @type string
+							 */
+							operator: "matches";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							realmId: string;
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							tagId: string;
+							score?:
+								| {
+										/**
+										 * @type integer
+										 */
+										lower: number;
+										/**
+										 * @type integer | undefined
+										 */
+										upper?: number;
+								  }
+								| {
+										/**
+										 * @type integer | undefined
+										 */
+										lower?: number;
+										/**
+										 * @type integer
+										 */
+										upper: number;
+								  };
+							voteCount?:
+								| {
+										/**
+										 * @minLength 0
+										 * @type integer
+										 */
+										lower: number;
+										/**
+										 * @minLength 0
+										 * @type integer | undefined
+										 */
+										upper?: number;
+								  }
+								| {
+										/**
+										 * @minLength 0
+										 * @type integer | undefined
+										 */
+										lower?: number;
+										/**
+										 * @minLength 0
+										 * @type integer
+										 */
+										upper: number;
+								  };
 					  };
 			}[];
 			/**
@@ -77047,6 +78810,7 @@ export const PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControls
 	"software-version-label": "software-version-label",
 	"software-platform": "software-platform",
 	"software-requirement-tier": "software-requirement-tier",
+	"realm-tag-vote": "realm-tag-vote",
 } as const;
 
 export type PutApiSearchZonesByZoneIdFeatureStatus200DefinitionDocumentControlsFieldEnum =
@@ -77154,6 +78918,7 @@ export const PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsFieldEnu
 	"software-version-label": "software-version-label",
 	"software-platform": "software-platform",
 	"software-requirement-tier": "software-requirement-tier",
+	"realm-tag-vote": "realm-tag-vote",
 } as const;
 
 export type PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsFieldEnum =
@@ -77165,6 +78930,7 @@ export const PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsComponen
 	toggle: "toggle",
 	"date-range": "date-range",
 	"value-range": "value-range",
+	"realm-tag-vote": "realm-tag-vote",
 } as const;
 
 export type PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsComponentEnum =
@@ -77186,6 +78952,7 @@ export const PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsOperator
 	"none-of": "none-of",
 	range: "range",
 	exists: "exists",
+	matches: "matches",
 } as const;
 
 export type PutApiSearchZonesByZoneIdFeatureStatus200DefinitionControlsOperatorsEnum =
@@ -77573,6 +79340,72 @@ export type PutApiSearchZonesByZoneIdFeatureStatus200 = {
 						 */
 						value: boolean;
 				  }
+				| {
+						/**
+						 * @type string
+						 */
+						field: "realm-tag-vote";
+						/**
+						 * @type string
+						 */
+						operator: "matches";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						realmId: string;
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						tagId: string;
+						score?:
+							| {
+									/**
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @type integer
+									 */
+									upper: number;
+							  };
+						voteCount?:
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									upper: number;
+							  };
+				  }
 			)[];
 			/**
 			 * @type array
@@ -77874,6 +79707,72 @@ export type PutApiSearchZonesByZoneIdFeatureStatus200 = {
 							 * @type boolean
 							 */
 							value: boolean;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							field: "realm-tag-vote";
+							/**
+							 * @type string
+							 */
+							operator: "matches";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							realmId: string;
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							tagId: string;
+							score?:
+								| {
+										/**
+										 * @type integer
+										 */
+										lower: number;
+										/**
+										 * @type integer | undefined
+										 */
+										upper?: number;
+								  }
+								| {
+										/**
+										 * @type integer | undefined
+										 */
+										lower?: number;
+										/**
+										 * @type integer
+										 */
+										upper: number;
+								  };
+							voteCount?:
+								| {
+										/**
+										 * @minLength 0
+										 * @type integer
+										 */
+										lower: number;
+										/**
+										 * @minLength 0
+										 * @type integer | undefined
+										 */
+										upper?: number;
+								  }
+								| {
+										/**
+										 * @minLength 0
+										 * @type integer | undefined
+										 */
+										lower?: number;
+										/**
+										 * @minLength 0
+										 * @type integer
+										 */
+										upper: number;
+								  };
 					  };
 			}[];
 			/**
@@ -78333,6 +80232,7 @@ export const PutApiSearchZonesByZoneIdFeatureRequestDocumentControlsFieldEnum = 
 	"software-version-label": "software-version-label",
 	"software-platform": "software-platform",
 	"software-requirement-tier": "software-requirement-tier",
+	"realm-tag-vote": "realm-tag-vote",
 } as const;
 
 export type PutApiSearchZonesByZoneIdFeatureRequestDocumentControlsFieldEnum =
@@ -78758,6 +80658,72 @@ export type PutApiSearchZonesByZoneIdFeatureBody = {
 					 */
 					value: boolean;
 			  }
+			| {
+					/**
+					 * @type string
+					 */
+					field: "realm-tag-vote";
+					/**
+					 * @type string
+					 */
+					operator: "matches";
+					/**
+					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+					 * @type string
+					 */
+					realmId: string;
+					/**
+					 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+					 * @type string
+					 */
+					tagId: string;
+					score?:
+						| {
+								/**
+								 * @type integer
+								 */
+								lower: number;
+								/**
+								 * @type integer | undefined
+								 */
+								upper?: number;
+						  }
+						| {
+								/**
+								 * @type integer | undefined
+								 */
+								lower?: number;
+								/**
+								 * @type integer
+								 */
+								upper: number;
+						  };
+					voteCount?:
+						| {
+								/**
+								 * @minLength 0
+								 * @type integer
+								 */
+								lower: number;
+								/**
+								 * @minLength 0
+								 * @type integer | undefined
+								 */
+								upper?: number;
+						  }
+						| {
+								/**
+								 * @minLength 0
+								 * @type integer | undefined
+								 */
+								lower?: number;
+								/**
+								 * @minLength 0
+								 * @type integer
+								 */
+								upper: number;
+						  };
+			  }
 		)[];
 		/**
 		 * @type array
@@ -79059,6 +81025,72 @@ export type PutApiSearchZonesByZoneIdFeatureBody = {
 						 * @type boolean
 						 */
 						value: boolean;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						field: "realm-tag-vote";
+						/**
+						 * @type string
+						 */
+						operator: "matches";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						realmId: string;
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						tagId: string;
+						score?:
+							| {
+									/**
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @type integer
+									 */
+									upper: number;
+							  };
+						voteCount?:
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									upper: number;
+							  };
 				  };
 		}[];
 		/**
@@ -79946,6 +81978,72 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 						 * @type boolean
 						 */
 						value: boolean;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						field: "realm-tag-vote";
+						/**
+						 * @type string
+						 */
+						operator: "matches";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						realmId: string;
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						tagId: string;
+						score?:
+							| {
+									/**
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @type integer
+									 */
+									upper: number;
+							  };
+						voteCount?:
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									upper: number;
+							  };
 				  };
 		};
 		/**
@@ -80291,6 +82389,72 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 								 * @type boolean
 								 */
 								value: boolean;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								field: "realm-tag-vote";
+								/**
+								 * @type string
+								 */
+								operator: "matches";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								realmId: string;
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								tagId: string;
+								score?:
+									| {
+											/**
+											 * @type integer
+											 */
+											lower: number;
+											/**
+											 * @type integer | undefined
+											 */
+											upper?: number;
+									  }
+									| {
+											/**
+											 * @type integer | undefined
+											 */
+											lower?: number;
+											/**
+											 * @type integer
+											 */
+											upper: number;
+									  };
+								voteCount?:
+									| {
+											/**
+											 * @minLength 0
+											 * @type integer
+											 */
+											lower: number;
+											/**
+											 * @minLength 0
+											 * @type integer | undefined
+											 */
+											upper?: number;
+									  }
+									| {
+											/**
+											 * @minLength 0
+											 * @type integer | undefined
+											 */
+											lower?: number;
+											/**
+											 * @minLength 0
+											 * @type integer
+											 */
+											upper: number;
+									  };
 						  };
 				}[];
 		  }
@@ -80628,6 +82792,72 @@ export type PostApiSearchZonesByZoneIdFeatureExecuteBody = {
 										 * @type boolean
 										 */
 										value: boolean;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										field: "realm-tag-vote";
+										/**
+										 * @type string
+										 */
+										operator: "matches";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										realmId: string;
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										tagId: string;
+										score?:
+											| {
+													/**
+													 * @type integer
+													 */
+													lower: number;
+													/**
+													 * @type integer | undefined
+													 */
+													upper?: number;
+											  }
+											| {
+													/**
+													 * @type integer | undefined
+													 */
+													lower?: number;
+													/**
+													 * @type integer
+													 */
+													upper: number;
+											  };
+										voteCount?:
+											| {
+													/**
+													 * @minLength 0
+													 * @type integer
+													 */
+													lower: number;
+													/**
+													 * @minLength 0
+													 * @type integer | undefined
+													 */
+													upper?: number;
+											  }
+											| {
+													/**
+													 * @minLength 0
+													 * @type integer | undefined
+													 */
+													lower?: number;
+													/**
+													 * @minLength 0
+													 * @type integer
+													 */
+													upper: number;
+											  };
 								  };
 					  }
 					| {
@@ -80943,6 +83173,7 @@ export const PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocument
 		"software-version-label": "software-version-label",
 		"software-platform": "software-platform",
 		"software-requirement-tier": "software-requirement-tier",
+		"realm-tag-vote": "realm-tag-vote",
 	} as const;
 
 export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionDocumentControlsFieldEnum =
@@ -81053,6 +83284,7 @@ export const PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControls
 	"software-version-label": "software-version-label",
 	"software-platform": "software-platform",
 	"software-requirement-tier": "software-requirement-tier",
+	"realm-tag-vote": "realm-tag-vote",
 } as const;
 
 export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsFieldEnum =
@@ -81064,6 +83296,7 @@ export const PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControls
 	toggle: "toggle",
 	"date-range": "date-range",
 	"value-range": "value-range",
+	"realm-tag-vote": "realm-tag-vote",
 } as const;
 
 export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsComponentEnum =
@@ -81085,6 +83318,7 @@ export const PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControls
 	"none-of": "none-of",
 	range: "range",
 	exists: "exists",
+	matches: "matches",
 } as const;
 
 export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200DefinitionControlsOperatorsEnum =
@@ -81472,6 +83706,72 @@ export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200 = {
 						 */
 						value: boolean;
 				  }
+				| {
+						/**
+						 * @type string
+						 */
+						field: "realm-tag-vote";
+						/**
+						 * @type string
+						 */
+						operator: "matches";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						realmId: string;
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						tagId: string;
+						score?:
+							| {
+									/**
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @type integer
+									 */
+									upper: number;
+							  };
+						voteCount?:
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									upper: number;
+							  };
+				  }
 			)[];
 			/**
 			 * @type array
@@ -81773,6 +84073,72 @@ export type PostApiSearchZonesByZoneIdFeatureRestoreStatus200 = {
 							 * @type boolean
 							 */
 							value: boolean;
+					  }
+					| {
+							/**
+							 * @type string
+							 */
+							field: "realm-tag-vote";
+							/**
+							 * @type string
+							 */
+							operator: "matches";
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							realmId: string;
+							/**
+							 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+							 * @type string
+							 */
+							tagId: string;
+							score?:
+								| {
+										/**
+										 * @type integer
+										 */
+										lower: number;
+										/**
+										 * @type integer | undefined
+										 */
+										upper?: number;
+								  }
+								| {
+										/**
+										 * @type integer | undefined
+										 */
+										lower?: number;
+										/**
+										 * @type integer
+										 */
+										upper: number;
+								  };
+							voteCount?:
+								| {
+										/**
+										 * @minLength 0
+										 * @type integer
+										 */
+										lower: number;
+										/**
+										 * @minLength 0
+										 * @type integer | undefined
+										 */
+										upper?: number;
+								  }
+								| {
+										/**
+										 * @minLength 0
+										 * @type integer | undefined
+										 */
+										lower?: number;
+										/**
+										 * @minLength 0
+										 * @type integer
+										 */
+										upper: number;
+								  };
 					  };
 			}[];
 			/**
@@ -82934,6 +85300,72 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 						 * @type boolean
 						 */
 						value: boolean;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						field: "realm-tag-vote";
+						/**
+						 * @type string
+						 */
+						operator: "matches";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						realmId: string;
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						tagId: string;
+						score?:
+							| {
+									/**
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @type integer
+									 */
+									upper: number;
+							  };
+						voteCount?:
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									upper: number;
+							  };
 				  };
 		};
 		/**
@@ -83279,6 +85711,72 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 								 * @type boolean
 								 */
 								value: boolean;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								field: "realm-tag-vote";
+								/**
+								 * @type string
+								 */
+								operator: "matches";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								realmId: string;
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								tagId: string;
+								score?:
+									| {
+											/**
+											 * @type integer
+											 */
+											lower: number;
+											/**
+											 * @type integer | undefined
+											 */
+											upper?: number;
+									  }
+									| {
+											/**
+											 * @type integer | undefined
+											 */
+											lower?: number;
+											/**
+											 * @type integer
+											 */
+											upper: number;
+									  };
+								voteCount?:
+									| {
+											/**
+											 * @minLength 0
+											 * @type integer
+											 */
+											lower: number;
+											/**
+											 * @minLength 0
+											 * @type integer | undefined
+											 */
+											upper?: number;
+									  }
+									| {
+											/**
+											 * @minLength 0
+											 * @type integer | undefined
+											 */
+											lower?: number;
+											/**
+											 * @minLength 0
+											 * @type integer
+											 */
+											upper: number;
+									  };
 						  };
 				}[];
 		  }
@@ -83616,6 +86114,72 @@ export type PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteBody = {
 										 * @type boolean
 										 */
 										value: boolean;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										field: "realm-tag-vote";
+										/**
+										 * @type string
+										 */
+										operator: "matches";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										realmId: string;
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										tagId: string;
+										score?:
+											| {
+													/**
+													 * @type integer
+													 */
+													lower: number;
+													/**
+													 * @type integer | undefined
+													 */
+													upper?: number;
+											  }
+											| {
+													/**
+													 * @type integer | undefined
+													 */
+													lower?: number;
+													/**
+													 * @type integer
+													 */
+													upper: number;
+											  };
+										voteCount?:
+											| {
+													/**
+													 * @minLength 0
+													 * @type integer
+													 */
+													lower: number;
+													/**
+													 * @minLength 0
+													 * @type integer | undefined
+													 */
+													upper?: number;
+											  }
+											| {
+													/**
+													 * @minLength 0
+													 * @type integer | undefined
+													 */
+													lower?: number;
+													/**
+													 * @minLength 0
+													 * @type integer
+													 */
+													upper: number;
+											  };
 								  };
 					  }
 					| {
@@ -84396,6 +86960,72 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody = {
 						 * @type boolean
 						 */
 						value: boolean;
+				  }
+				| {
+						/**
+						 * @type string
+						 */
+						field: "realm-tag-vote";
+						/**
+						 * @type string
+						 */
+						operator: "matches";
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						realmId: string;
+						/**
+						 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+						 * @type string
+						 */
+						tagId: string;
+						score?:
+							| {
+									/**
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @type integer
+									 */
+									upper: number;
+							  };
+						voteCount?:
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									lower: number;
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									upper?: number;
+							  }
+							| {
+									/**
+									 * @minLength 0
+									 * @type integer | undefined
+									 */
+									lower?: number;
+									/**
+									 * @minLength 0
+									 * @type integer
+									 */
+									upper: number;
+							  };
 				  };
 		};
 		/**
@@ -84741,6 +87371,72 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody = {
 								 * @type boolean
 								 */
 								value: boolean;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								field: "realm-tag-vote";
+								/**
+								 * @type string
+								 */
+								operator: "matches";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								realmId: string;
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								tagId: string;
+								score?:
+									| {
+											/**
+											 * @type integer
+											 */
+											lower: number;
+											/**
+											 * @type integer | undefined
+											 */
+											upper?: number;
+									  }
+									| {
+											/**
+											 * @type integer | undefined
+											 */
+											lower?: number;
+											/**
+											 * @type integer
+											 */
+											upper: number;
+									  };
+								voteCount?:
+									| {
+											/**
+											 * @minLength 0
+											 * @type integer
+											 */
+											lower: number;
+											/**
+											 * @minLength 0
+											 * @type integer | undefined
+											 */
+											upper?: number;
+									  }
+									| {
+											/**
+											 * @minLength 0
+											 * @type integer | undefined
+											 */
+											lower?: number;
+											/**
+											 * @minLength 0
+											 * @type integer
+											 */
+											upper: number;
+									  };
 						  };
 				}[];
 		  }
@@ -85078,6 +87774,72 @@ export type PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteBody = {
 										 * @type boolean
 										 */
 										value: boolean;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										field: "realm-tag-vote";
+										/**
+										 * @type string
+										 */
+										operator: "matches";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										realmId: string;
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										tagId: string;
+										score?:
+											| {
+													/**
+													 * @type integer
+													 */
+													lower: number;
+													/**
+													 * @type integer | undefined
+													 */
+													upper?: number;
+											  }
+											| {
+													/**
+													 * @type integer | undefined
+													 */
+													lower?: number;
+													/**
+													 * @type integer
+													 */
+													upper: number;
+											  };
+										voteCount?:
+											| {
+													/**
+													 * @minLength 0
+													 * @type integer
+													 */
+													lower: number;
+													/**
+													 * @minLength 0
+													 * @type integer | undefined
+													 */
+													upper?: number;
+											  }
+											| {
+													/**
+													 * @minLength 0
+													 * @type integer | undefined
+													 */
+													lower?: number;
+													/**
+													 * @minLength 0
+													 * @type integer
+													 */
+													upper: number;
+											  };
 								  };
 					  }
 					| {
@@ -85596,6 +88358,7 @@ export const PostApiSearchSharedQueriesStatus201DocumentSelectionsFieldEnum = {
 	"software-version-label": "software-version-label",
 	"software-platform": "software-platform",
 	"software-requirement-tier": "software-requirement-tier",
+	"realm-tag-vote": "realm-tag-vote",
 } as const;
 
 export type PostApiSearchSharedQueriesStatus201DocumentSelectionsFieldEnum =
@@ -85954,6 +88717,72 @@ export type PostApiSearchSharedQueriesStatus201 = {
 									 * @type boolean
 									 */
 									value: boolean;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									field: "realm-tag-vote";
+									/**
+									 * @type string
+									 */
+									operator: "matches";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									realmId: string;
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									tagId: string;
+									score?:
+										| {
+												/**
+												 * @type integer
+												 */
+												lower: number;
+												/**
+												 * @type integer | undefined
+												 */
+												upper?: number;
+										  }
+										| {
+												/**
+												 * @type integer | undefined
+												 */
+												lower?: number;
+												/**
+												 * @type integer
+												 */
+												upper: number;
+										  };
+									voteCount?:
+										| {
+												/**
+												 * @minLength 0
+												 * @type integer
+												 */
+												lower: number;
+												/**
+												 * @minLength 0
+												 * @type integer | undefined
+												 */
+												upper?: number;
+										  }
+										| {
+												/**
+												 * @minLength 0
+												 * @type integer | undefined
+												 */
+												lower?: number;
+												/**
+												 * @minLength 0
+												 * @type integer
+												 */
+												upper: number;
+										  };
 							  };
 					}[];
 			  }
@@ -86285,6 +89114,72 @@ export type PostApiSearchSharedQueriesStatus201 = {
 											 * @type boolean
 											 */
 											value: boolean;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											field: "realm-tag-vote";
+											/**
+											 * @type string
+											 */
+											operator: "matches";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											realmId: string;
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											tagId: string;
+											score?:
+												| {
+														/**
+														 * @type integer
+														 */
+														lower: number;
+														/**
+														 * @type integer | undefined
+														 */
+														upper?: number;
+												  }
+												| {
+														/**
+														 * @type integer | undefined
+														 */
+														lower?: number;
+														/**
+														 * @type integer
+														 */
+														upper: number;
+												  };
+											voteCount?:
+												| {
+														/**
+														 * @minLength 0
+														 * @type integer
+														 */
+														lower: number;
+														/**
+														 * @minLength 0
+														 * @type integer | undefined
+														 */
+														upper?: number;
+												  }
+												| {
+														/**
+														 * @minLength 0
+														 * @type integer | undefined
+														 */
+														lower?: number;
+														/**
+														 * @minLength 0
+														 * @type integer
+														 */
+														upper: number;
+												  };
 									  };
 						  }
 						| {
@@ -86475,6 +89370,7 @@ export const PostApiSearchSharedQueriesRequestSelectionsFieldEnum = {
 	"software-version-label": "software-version-label",
 	"software-platform": "software-platform",
 	"software-requirement-tier": "software-requirement-tier",
+	"realm-tag-vote": "realm-tag-vote",
 } as const;
 
 export type PostApiSearchSharedQueriesRequestSelectionsFieldEnum =
@@ -86823,6 +89719,72 @@ export type PostApiSearchSharedQueriesBody = {
 								 * @type boolean
 								 */
 								value: boolean;
+						  }
+						| {
+								/**
+								 * @type string
+								 */
+								field: "realm-tag-vote";
+								/**
+								 * @type string
+								 */
+								operator: "matches";
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								realmId: string;
+								/**
+								 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+								 * @type string
+								 */
+								tagId: string;
+								score?:
+									| {
+											/**
+											 * @type integer
+											 */
+											lower: number;
+											/**
+											 * @type integer | undefined
+											 */
+											upper?: number;
+									  }
+									| {
+											/**
+											 * @type integer | undefined
+											 */
+											lower?: number;
+											/**
+											 * @type integer
+											 */
+											upper: number;
+									  };
+								voteCount?:
+									| {
+											/**
+											 * @minLength 0
+											 * @type integer
+											 */
+											lower: number;
+											/**
+											 * @minLength 0
+											 * @type integer | undefined
+											 */
+											upper?: number;
+									  }
+									| {
+											/**
+											 * @minLength 0
+											 * @type integer | undefined
+											 */
+											lower?: number;
+											/**
+											 * @minLength 0
+											 * @type integer
+											 */
+											upper: number;
+									  };
 						  };
 				}[];
 		  }
@@ -87154,6 +90116,72 @@ export type PostApiSearchSharedQueriesBody = {
 										 * @type boolean
 										 */
 										value: boolean;
+								  }
+								| {
+										/**
+										 * @type string
+										 */
+										field: "realm-tag-vote";
+										/**
+										 * @type string
+										 */
+										operator: "matches";
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										realmId: string;
+										/**
+										 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+										 * @type string
+										 */
+										tagId: string;
+										score?:
+											| {
+													/**
+													 * @type integer
+													 */
+													lower: number;
+													/**
+													 * @type integer | undefined
+													 */
+													upper?: number;
+											  }
+											| {
+													/**
+													 * @type integer | undefined
+													 */
+													lower?: number;
+													/**
+													 * @type integer
+													 */
+													upper: number;
+											  };
+										voteCount?:
+											| {
+													/**
+													 * @minLength 0
+													 * @type integer
+													 */
+													lower: number;
+													/**
+													 * @minLength 0
+													 * @type integer | undefined
+													 */
+													upper?: number;
+											  }
+											| {
+													/**
+													 * @minLength 0
+													 * @type integer | undefined
+													 */
+													lower?: number;
+													/**
+													 * @minLength 0
+													 * @type integer
+													 */
+													upper: number;
+											  };
 								  };
 					  }
 					| {
@@ -87296,6 +90324,7 @@ export const GetApiSearchSharedQueriesByIdStatus200DocumentSelectionsFieldEnum =
 	"software-version-label": "software-version-label",
 	"software-platform": "software-platform",
 	"software-requirement-tier": "software-requirement-tier",
+	"realm-tag-vote": "realm-tag-vote",
 } as const;
 
 export type GetApiSearchSharedQueriesByIdStatus200DocumentSelectionsFieldEnum =
@@ -87654,6 +90683,72 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 									 * @type boolean
 									 */
 									value: boolean;
+							  }
+							| {
+									/**
+									 * @type string
+									 */
+									field: "realm-tag-vote";
+									/**
+									 * @type string
+									 */
+									operator: "matches";
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									realmId: string;
+									/**
+									 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+									 * @type string
+									 */
+									tagId: string;
+									score?:
+										| {
+												/**
+												 * @type integer
+												 */
+												lower: number;
+												/**
+												 * @type integer | undefined
+												 */
+												upper?: number;
+										  }
+										| {
+												/**
+												 * @type integer | undefined
+												 */
+												lower?: number;
+												/**
+												 * @type integer
+												 */
+												upper: number;
+										  };
+									voteCount?:
+										| {
+												/**
+												 * @minLength 0
+												 * @type integer
+												 */
+												lower: number;
+												/**
+												 * @minLength 0
+												 * @type integer | undefined
+												 */
+												upper?: number;
+										  }
+										| {
+												/**
+												 * @minLength 0
+												 * @type integer | undefined
+												 */
+												lower?: number;
+												/**
+												 * @minLength 0
+												 * @type integer
+												 */
+												upper: number;
+										  };
 							  };
 					}[];
 			  }
@@ -87985,6 +91080,72 @@ export type GetApiSearchSharedQueriesByIdStatus200 = {
 											 * @type boolean
 											 */
 											value: boolean;
+									  }
+									| {
+											/**
+											 * @type string
+											 */
+											field: "realm-tag-vote";
+											/**
+											 * @type string
+											 */
+											operator: "matches";
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											realmId: string;
+											/**
+											 * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+											 * @type string
+											 */
+											tagId: string;
+											score?:
+												| {
+														/**
+														 * @type integer
+														 */
+														lower: number;
+														/**
+														 * @type integer | undefined
+														 */
+														upper?: number;
+												  }
+												| {
+														/**
+														 * @type integer | undefined
+														 */
+														lower?: number;
+														/**
+														 * @type integer
+														 */
+														upper: number;
+												  };
+											voteCount?:
+												| {
+														/**
+														 * @minLength 0
+														 * @type integer
+														 */
+														lower: number;
+														/**
+														 * @minLength 0
+														 * @type integer | undefined
+														 */
+														upper?: number;
+												  }
+												| {
+														/**
+														 * @minLength 0
+														 * @type integer | undefined
+														 */
+														lower?: number;
+														/**
+														 * @minLength 0
+														 * @type integer
+														 */
+														upper: number;
+												  };
 									  };
 						  }
 						| {

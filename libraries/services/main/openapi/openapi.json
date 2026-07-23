@@ -2195,6 +2195,74 @@
 										"operator": { "const": "exists", "type": "string" },
 										"value": { "type": "boolean" }
 									}
+								},
+								{
+									"additionalProperties": false,
+									"$id": "SearchRealmTagVoteFilter",
+									"type": "object",
+									"required": ["field", "operator", "realmId", "tagId"],
+									"properties": {
+										"field": { "const": "realm-tag-vote", "type": "string" },
+										"operator": { "const": "matches", "type": "string" },
+										"realmId": {
+											"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+											"type": "string"
+										},
+										"tagId": {
+											"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+											"type": "string"
+										},
+										"score": {
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["lower"],
+													"properties": {
+														"lower": { "type": "integer" },
+														"upper": { "type": "integer" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["upper"],
+													"properties": {
+														"lower": { "type": "integer" },
+														"upper": { "type": "integer" }
+													}
+												}
+											]
+										},
+										"voteCount": {
+											"anyOf": [
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["lower"],
+													"properties": {
+														"lower": {
+															"minimum": 0,
+															"type": "integer"
+														},
+														"upper": { "minimum": 0, "type": "integer" }
+													}
+												},
+												{
+													"additionalProperties": false,
+													"type": "object",
+													"required": ["upper"],
+													"properties": {
+														"lower": {
+															"minimum": 0,
+															"type": "integer"
+														},
+														"upper": { "minimum": 0, "type": "integer" }
+													}
+												}
+											]
+										}
+									}
 								}
 							]
 						}
@@ -2382,6 +2450,8 @@
 					"RealmMemberNotFound",
 					"RealmUnitNotFound",
 					"RealmScoreContextPostNotMounted",
+					"RealmTagContextNotFound",
+					"RealmTagContextPostNotMounted",
 					"RealmNavigationNotFound",
 					"RealmNavigationInUse",
 					"RealmNavigationDocumentInvalid",
@@ -69304,6 +69374,107 @@
 																			"type": "boolean"
 																		}
 																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"$id": "SearchRealmTagVoteFilter",
+																	"type": "object",
+																	"required": [
+																		"field",
+																		"operator",
+																		"realmId",
+																		"tagId"
+																	],
+																	"properties": {
+																		"field": {
+																			"const": "realm-tag-vote",
+																			"type": "string"
+																		},
+																		"operator": {
+																			"const": "matches",
+																			"type": "string"
+																		},
+																		"realmId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"tagId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"score": {
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"lower"
+																					],
+																					"properties": {
+																						"lower": {
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"type": "integer"
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"upper"
+																					],
+																					"properties": {
+																						"lower": {
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"type": "integer"
+																						}
+																					}
+																				}
+																			]
+																		},
+																		"voteCount": {
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"lower"
+																					],
+																					"properties": {
+																						"lower": {
+																							"minimum": 0,
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"minimum": 0,
+																							"type": "integer"
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"upper"
+																					],
+																					"properties": {
+																						"lower": {
+																							"minimum": 0,
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"minimum": 0,
+																							"type": "integer"
+																						}
+																					}
+																				}
+																			]
+																		}
+																	}
 																}
 															]
 														}
@@ -70688,6 +70859,107 @@
 																			},
 																			"value": {
 																				"type": "boolean"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"$id": "SearchRealmTagVoteFilter",
+																		"type": "object",
+																		"required": [
+																			"field",
+																			"operator",
+																			"realmId",
+																			"tagId"
+																		],
+																		"properties": {
+																			"field": {
+																				"const": "realm-tag-vote",
+																				"type": "string"
+																			},
+																			"operator": {
+																				"const": "matches",
+																				"type": "string"
+																			},
+																			"realmId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"tagId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"score": {
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"lower"
+																						],
+																						"properties": {
+																							"lower": {
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"type": "integer"
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"upper"
+																						],
+																						"properties": {
+																							"lower": {
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"type": "integer"
+																							}
+																						}
+																					}
+																				]
+																			},
+																			"voteCount": {
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"lower"
+																						],
+																						"properties": {
+																							"lower": {
+																								"minimum": 0,
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"upper"
+																						],
+																						"properties": {
+																							"lower": {
+																								"minimum": 0,
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						}
+																					}
+																				]
 																			}
 																		}
 																	}
@@ -72426,6 +72698,107 @@
 																				"type": "boolean"
 																			}
 																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"$id": "SearchRealmTagVoteFilter",
+																		"type": "object",
+																		"required": [
+																			"field",
+																			"operator",
+																			"realmId",
+																			"tagId"
+																		],
+																		"properties": {
+																			"field": {
+																				"const": "realm-tag-vote",
+																				"type": "string"
+																			},
+																			"operator": {
+																				"const": "matches",
+																				"type": "string"
+																			},
+																			"realmId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"tagId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"score": {
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"lower"
+																						],
+																						"properties": {
+																							"lower": {
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"type": "integer"
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"upper"
+																						],
+																						"properties": {
+																							"lower": {
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"type": "integer"
+																							}
+																						}
+																					}
+																				]
+																			},
+																			"voteCount": {
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"lower"
+																						],
+																						"properties": {
+																							"lower": {
+																								"minimum": 0,
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"upper"
+																						],
+																						"properties": {
+																							"lower": {
+																								"minimum": 0,
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						}
+																					}
+																				]
+																			}
+																		}
 																	}
 																]
 															}
@@ -74156,6 +74529,107 @@
 																			},
 																			"value": {
 																				"type": "boolean"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"$id": "SearchRealmTagVoteFilter",
+																		"type": "object",
+																		"required": [
+																			"field",
+																			"operator",
+																			"realmId",
+																			"tagId"
+																		],
+																		"properties": {
+																			"field": {
+																				"const": "realm-tag-vote",
+																				"type": "string"
+																			},
+																			"operator": {
+																				"const": "matches",
+																				"type": "string"
+																			},
+																			"realmId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"tagId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"score": {
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"lower"
+																						],
+																						"properties": {
+																							"lower": {
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"type": "integer"
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"upper"
+																						],
+																						"properties": {
+																							"lower": {
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"type": "integer"
+																							}
+																						}
+																					}
+																				]
+																			},
+																			"voteCount": {
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"lower"
+																						],
+																						"properties": {
+																							"lower": {
+																								"minimum": 0,
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"upper"
+																						],
+																						"properties": {
+																							"lower": {
+																								"minimum": 0,
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						}
+																					}
+																				]
 																			}
 																		}
 																	}
@@ -76221,6 +76695,107 @@
 																			"type": "boolean"
 																		}
 																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"$id": "SearchRealmTagVoteFilter",
+																	"type": "object",
+																	"required": [
+																		"field",
+																		"operator",
+																		"realmId",
+																		"tagId"
+																	],
+																	"properties": {
+																		"field": {
+																			"const": "realm-tag-vote",
+																			"type": "string"
+																		},
+																		"operator": {
+																			"const": "matches",
+																			"type": "string"
+																		},
+																		"realmId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"tagId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"score": {
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"lower"
+																					],
+																					"properties": {
+																						"lower": {
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"type": "integer"
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"upper"
+																					],
+																					"properties": {
+																						"lower": {
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"type": "integer"
+																						}
+																					}
+																				}
+																			]
+																		},
+																		"voteCount": {
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"lower"
+																					],
+																					"properties": {
+																						"lower": {
+																							"minimum": 0,
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"minimum": 0,
+																							"type": "integer"
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"upper"
+																					],
+																					"properties": {
+																						"lower": {
+																							"minimum": 0,
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"minimum": 0,
+																							"type": "integer"
+																						}
+																					}
+																				}
+																			]
+																		}
+																	}
 																}
 															]
 														}
@@ -77605,6 +78180,107 @@
 																			},
 																			"value": {
 																				"type": "boolean"
+																			}
+																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"$id": "SearchRealmTagVoteFilter",
+																		"type": "object",
+																		"required": [
+																			"field",
+																			"operator",
+																			"realmId",
+																			"tagId"
+																		],
+																		"properties": {
+																			"field": {
+																				"const": "realm-tag-vote",
+																				"type": "string"
+																			},
+																			"operator": {
+																				"const": "matches",
+																				"type": "string"
+																			},
+																			"realmId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"tagId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"score": {
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"lower"
+																						],
+																						"properties": {
+																							"lower": {
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"type": "integer"
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"upper"
+																						],
+																						"properties": {
+																							"lower": {
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"type": "integer"
+																							}
+																						}
+																					}
+																				]
+																			},
+																			"voteCount": {
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"lower"
+																						],
+																						"properties": {
+																							"lower": {
+																								"minimum": 0,
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"upper"
+																						],
+																						"properties": {
+																							"lower": {
+																								"minimum": 0,
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						}
+																					}
+																				]
 																			}
 																		}
 																	}
@@ -92111,6 +92787,833 @@
 				"x-rezics-policy-operation-id": "deleteApiRealmsByRealmIdPinsByUnitId"
 			}
 		},
+		"/api/realms/{realmId}/units/{unitId}/tags/{tagId}/context": {
+			"get": {
+				"summary": "Get Realm-scoped Tag voting context",
+				"tags": ["Realms"],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "tagId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"realmId",
+										"unitId",
+										"tagId",
+										"contextPostId",
+										"createdByProfileId",
+										"value",
+										"score",
+										"voteCount",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"realmId": { "format": "uuid", "type": "string" },
+										"unitId": { "format": "uuid", "type": "string" },
+										"tagId": { "format": "uuid", "type": "string" },
+										"contextPostId": { "format": "uuid", "type": "string" },
+										"createdByProfileId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"value": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"score": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
+										"voteCount": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmNotFound",
+													"type": "string",
+													"enum": [
+														"RealmNotFound",
+														"UnitNotFound",
+														"PostNotFound",
+														"RealmTagContextNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "getApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext",
+				"x-rezics-policy-operation-id": "getApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext"
+			},
+			"put": {
+				"summary": "Set Realm-scoped Tag voting context",
+				"tags": ["Realms"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "tagId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["contextPostId"],
+								"properties": {
+									"contextPostId": { "format": "uuid", "type": "string" }
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"realmId",
+										"unitId",
+										"tagId",
+										"contextPostId",
+										"createdByProfileId",
+										"value",
+										"score",
+										"voteCount",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"realmId": { "format": "uuid", "type": "string" },
+										"unitId": { "format": "uuid", "type": "string" },
+										"tagId": { "format": "uuid", "type": "string" },
+										"contextPostId": { "format": "uuid", "type": "string" },
+										"createdByProfileId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"value": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"score": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
+										"voteCount": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"RealmCapabilityRequired",
+														"UnitAccessRestricted",
+														"UnitPermissionForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": ["UnitNotFound", "PostNotFound"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Response for status 422",
+						"content": {
+							"application/json": {
+								"schema": {
+									"oneOf": [
+										{
+											"type": "object",
+											"required": ["error", "requestId"],
+											"properties": {
+												"error": {
+													"type": "object",
+													"required": ["code", "message"],
+													"properties": {
+														"code": {
+															"default": "RealmTagContextPostNotMounted",
+															"type": "string",
+															"enum": [
+																"RealmTagContextPostNotMounted"
+															]
+														},
+														"message": { "type": "string" },
+														"details": {}
+													}
+												},
+												"requestId": { "type": "string" }
+											}
+										},
+										{ "$ref": "#/components/schemas/ValidationError" }
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext",
+				"x-rezics-policy-operation-id": "putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdContext"
+			}
+		},
+		"/api/realms/{realmId}/units/{unitId}/tags/{tagId}/vote": {
+			"put": {
+				"summary": "Vote on a Realm-scoped Unit Tag",
+				"tags": ["Realms"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "tagId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"additionalProperties": false,
+								"type": "object",
+								"required": ["value"],
+								"properties": { "value": { "type": "string", "enum": [-1, 1] } }
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"realmId",
+										"unitId",
+										"tagId",
+										"contextPostId",
+										"createdByProfileId",
+										"value",
+										"score",
+										"voteCount",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"realmId": { "format": "uuid", "type": "string" },
+										"unitId": { "format": "uuid", "type": "string" },
+										"tagId": { "format": "uuid", "type": "string" },
+										"contextPostId": { "format": "uuid", "type": "string" },
+										"createdByProfileId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"value": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"score": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
+										"voteCount": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"RealmCapabilityRequired",
+														"UnitAccessRestricted",
+														"UnitPermissionForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"RealmTagContextNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote",
+				"x-rezics-policy-operation-id": "putApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote"
+			},
+			"delete": {
+				"summary": "Remove a Realm-scoped Unit Tag vote",
+				"tags": ["Realms"],
+				"security": [{ "ApiToken": [] }, { "SessionCookie": [] }],
+				"parameters": [
+					{
+						"name": "realmId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "unitId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					},
+					{
+						"name": "tagId",
+						"in": "path",
+						"required": true,
+						"schema": { "format": "uuid", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Response for status 200",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": [
+										"realmId",
+										"unitId",
+										"tagId",
+										"contextPostId",
+										"createdByProfileId",
+										"value",
+										"score",
+										"voteCount",
+										"createdAt",
+										"updatedAt"
+									],
+									"properties": {
+										"realmId": { "format": "uuid", "type": "string" },
+										"unitId": { "format": "uuid", "type": "string" },
+										"tagId": { "format": "uuid", "type": "string" },
+										"contextPostId": { "format": "uuid", "type": "string" },
+										"createdByProfileId": {
+											"nullable": true,
+											"anyOf": [
+												{ "format": "uuid", "type": "string" },
+												{ "type": "null" }
+											]
+										},
+										"value": {
+											"nullable": true,
+											"anyOf": [
+												{
+													"anyOf": [
+														{ "const": -1, "type": "number" },
+														{ "const": 1, "type": "number" }
+													]
+												},
+												{ "type": "null" }
+											]
+										},
+										"score": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
+										"voteCount": {
+											"anyOf": [
+												{
+													"format": "integer",
+													"default": 0,
+													"type": "string"
+												},
+												{ "type": "integer" }
+											]
+										},
+										"createdAt": { "format": "date-time", "type": "string" },
+										"updatedAt": { "format": "date-time", "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Response for status 403",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "RealmCapabilityRequired",
+													"type": "string",
+													"enum": [
+														"RealmCapabilityRequired",
+														"UnitAccessRestricted",
+														"UnitPermissionForbidden"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Response for status 404",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "UnitNotFound",
+													"type": "string",
+													"enum": [
+														"UnitNotFound",
+														"RealmTagContextNotFound"
+													]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Request validation failed",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ValidationError" }
+							}
+						}
+					},
+					"429": {
+						"description": "API token resource limit exceeded",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds until the limiting window or concurrency lease can be retried",
+								"schema": { "type": "integer", "minimum": 1 }
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"type": "string",
+													"enum": ["ApiTokenRateLimitExceeded"]
+												},
+												"message": { "type": "string" },
+												"details": {
+													"$ref": "#/components/schemas/JsonValue"
+												}
+											}
+										},
+										"requestId": { "type": "string" }
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected internal failure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/InternalError" }
+							}
+						}
+					}
+				},
+				"operationId": "deleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote",
+				"x-rezics-policy-operation-id": "deleteApiRealmsByRealmIdUnitsByUnitIdTagsByTagIdVote"
+			}
+		},
 		"/api/realms/{realmId}/units": {
 			"get": {
 				"summary": "List Realm Units for moderation",
@@ -95960,6 +97463,107 @@
 																	},
 																	"value": { "type": "boolean" }
 																}
+															},
+															{
+																"additionalProperties": false,
+																"$id": "SearchRealmTagVoteFilter",
+																"type": "object",
+																"required": [
+																	"field",
+																	"operator",
+																	"realmId",
+																	"tagId"
+																],
+																"properties": {
+																	"field": {
+																		"const": "realm-tag-vote",
+																		"type": "string"
+																	},
+																	"operator": {
+																		"const": "matches",
+																		"type": "string"
+																	},
+																	"realmId": {
+																		"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																		"type": "string"
+																	},
+																	"tagId": {
+																		"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																		"type": "string"
+																	},
+																	"score": {
+																		"anyOf": [
+																			{
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"lower"
+																				],
+																				"properties": {
+																					"lower": {
+																						"type": "integer"
+																					},
+																					"upper": {
+																						"type": "integer"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"upper"
+																				],
+																				"properties": {
+																					"lower": {
+																						"type": "integer"
+																					},
+																					"upper": {
+																						"type": "integer"
+																					}
+																				}
+																			}
+																		]
+																	},
+																	"voteCount": {
+																		"anyOf": [
+																			{
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"lower"
+																				],
+																				"properties": {
+																					"lower": {
+																						"minimum": 0,
+																						"type": "integer"
+																					},
+																					"upper": {
+																						"minimum": 0,
+																						"type": "integer"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"type": "object",
+																				"required": [
+																					"upper"
+																				],
+																				"properties": {
+																					"lower": {
+																						"minimum": 0,
+																						"type": "integer"
+																					},
+																					"upper": {
+																						"minimum": 0,
+																						"type": "integer"
+																					}
+																				}
+																			}
+																		]
+																	}
+																}
 															}
 														]
 													}
@@ -97160,6 +98764,107 @@
 																				"type": "boolean"
 																			}
 																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"$id": "SearchRealmTagVoteFilter",
+																		"type": "object",
+																		"required": [
+																			"field",
+																			"operator",
+																			"realmId",
+																			"tagId"
+																		],
+																		"properties": {
+																			"field": {
+																				"const": "realm-tag-vote",
+																				"type": "string"
+																			},
+																			"operator": {
+																				"const": "matches",
+																				"type": "string"
+																			},
+																			"realmId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"tagId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"score": {
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"lower"
+																						],
+																						"properties": {
+																							"lower": {
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"type": "integer"
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"upper"
+																						],
+																						"properties": {
+																							"lower": {
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"type": "integer"
+																							}
+																						}
+																					}
+																				]
+																			},
+																			"voteCount": {
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"lower"
+																						],
+																						"properties": {
+																							"lower": {
+																								"minimum": 0,
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"upper"
+																						],
+																						"properties": {
+																							"lower": {
+																								"minimum": 0,
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						}
+																					}
+																				]
+																			}
+																		}
 																	}
 																]
 															}
@@ -97228,7 +98933,8 @@
 																	"software-release-date",
 																	"software-version-label",
 																	"software-platform",
-																	"software-requirement-tier"
+																	"software-requirement-tier",
+																	"realm-tag-vote"
 																]
 															},
 															"enabled": { "type": "boolean" },
@@ -97530,7 +99236,8 @@
 															"software-release-date",
 															"software-version-label",
 															"software-platform",
-															"software-requirement-tier"
+															"software-requirement-tier",
+															"realm-tag-vote"
 														]
 													},
 													"component": {
@@ -97540,7 +99247,8 @@
 															"multi-select",
 															"toggle",
 															"date-range",
-															"value-range"
+															"value-range",
+															"realm-tag-vote"
 														]
 													},
 													"modes": {
@@ -97554,7 +99262,7 @@
 													},
 													"operators": {
 														"minItems": 1,
-														"maxItems": 7,
+														"maxItems": 8,
 														"type": "array",
 														"items": {
 															"type": "string",
@@ -97565,7 +99273,8 @@
 																"all-of",
 																"none-of",
 																"range",
-																"exists"
+																"exists",
+																"matches"
 															]
 														}
 													},
@@ -99041,6 +100750,107 @@
 																			"type": "boolean"
 																		}
 																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"$id": "SearchRealmTagVoteFilter",
+																	"type": "object",
+																	"required": [
+																		"field",
+																		"operator",
+																		"realmId",
+																		"tagId"
+																	],
+																	"properties": {
+																		"field": {
+																			"const": "realm-tag-vote",
+																			"type": "string"
+																		},
+																		"operator": {
+																			"const": "matches",
+																			"type": "string"
+																		},
+																		"realmId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"tagId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"score": {
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"lower"
+																					],
+																					"properties": {
+																						"lower": {
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"type": "integer"
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"upper"
+																					],
+																					"properties": {
+																						"lower": {
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"type": "integer"
+																						}
+																					}
+																				}
+																			]
+																		},
+																		"voteCount": {
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"lower"
+																					],
+																					"properties": {
+																						"lower": {
+																							"minimum": 0,
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"minimum": 0,
+																							"type": "integer"
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"upper"
+																					],
+																					"properties": {
+																						"lower": {
+																							"minimum": 0,
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"minimum": 0,
+																							"type": "integer"
+																						}
+																					}
+																				}
+																			]
+																		}
+																	}
 																}
 															]
 														}
@@ -100320,6 +102130,107 @@
 																				},
 																				"value": {
 																					"type": "boolean"
+																				}
+																			}
+																		},
+																		{
+																			"additionalProperties": false,
+																			"$id": "SearchRealmTagVoteFilter",
+																			"type": "object",
+																			"required": [
+																				"field",
+																				"operator",
+																				"realmId",
+																				"tagId"
+																			],
+																			"properties": {
+																				"field": {
+																					"const": "realm-tag-vote",
+																					"type": "string"
+																				},
+																				"operator": {
+																					"const": "matches",
+																					"type": "string"
+																				},
+																				"realmId": {
+																					"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																					"type": "string"
+																				},
+																				"tagId": {
+																					"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																					"type": "string"
+																				},
+																				"score": {
+																					"anyOf": [
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"lower"
+																							],
+																							"properties": {
+																								"lower": {
+																									"type": "integer"
+																								},
+																								"upper": {
+																									"type": "integer"
+																								}
+																							}
+																						},
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"upper"
+																							],
+																							"properties": {
+																								"lower": {
+																									"type": "integer"
+																								},
+																								"upper": {
+																									"type": "integer"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"voteCount": {
+																					"anyOf": [
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"lower"
+																							],
+																							"properties": {
+																								"lower": {
+																									"minimum": 0,
+																									"type": "integer"
+																								},
+																								"upper": {
+																									"minimum": 0,
+																									"type": "integer"
+																								}
+																							}
+																						},
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"upper"
+																							],
+																							"properties": {
+																								"lower": {
+																									"minimum": 0,
+																									"type": "integer"
+																								},
+																								"upper": {
+																									"minimum": 0,
+																									"type": "integer"
+																								}
+																							}
+																						}
+																					]
 																				}
 																			}
 																		}
@@ -101603,6 +103514,107 @@
 																					},
 																					"value": {
 																						"type": "boolean"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"$id": "SearchRealmTagVoteFilter",
+																				"type": "object",
+																				"required": [
+																					"field",
+																					"operator",
+																					"realmId",
+																					"tagId"
+																				],
+																				"properties": {
+																					"field": {
+																						"const": "realm-tag-vote",
+																						"type": "string"
+																					},
+																					"operator": {
+																						"const": "matches",
+																						"type": "string"
+																					},
+																					"realmId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"tagId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"score": {
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"lower"
+																								],
+																								"properties": {
+																									"lower": {
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"type": "integer"
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"upper"
+																								],
+																								"properties": {
+																									"lower": {
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"type": "integer"
+																									}
+																								}
+																							}
+																						]
+																					},
+																					"voteCount": {
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"lower"
+																								],
+																								"properties": {
+																									"lower": {
+																										"minimum": 0,
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"minimum": 0,
+																										"type": "integer"
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"upper"
+																								],
+																								"properties": {
+																									"lower": {
+																										"minimum": 0,
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"minimum": 0,
+																										"type": "integer"
+																									}
+																								}
+																							}
+																						]
 																					}
 																				}
 																			}
@@ -103455,6 +105467,107 @@
 																				"type": "boolean"
 																			}
 																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"$id": "SearchRealmTagVoteFilter",
+																		"type": "object",
+																		"required": [
+																			"field",
+																			"operator",
+																			"realmId",
+																			"tagId"
+																		],
+																		"properties": {
+																			"field": {
+																				"const": "realm-tag-vote",
+																				"type": "string"
+																			},
+																			"operator": {
+																				"const": "matches",
+																				"type": "string"
+																			},
+																			"realmId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"tagId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"score": {
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"lower"
+																						],
+																						"properties": {
+																							"lower": {
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"type": "integer"
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"upper"
+																						],
+																						"properties": {
+																							"lower": {
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"type": "integer"
+																							}
+																						}
+																					}
+																				]
+																			},
+																			"voteCount": {
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"lower"
+																						],
+																						"properties": {
+																							"lower": {
+																								"minimum": 0,
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"upper"
+																						],
+																						"properties": {
+																							"lower": {
+																								"minimum": 0,
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						}
+																					}
+																				]
+																			}
+																		}
 																	}
 																]
 															}
@@ -104658,6 +106771,107 @@
 																						"type": "boolean"
 																					}
 																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"$id": "SearchRealmTagVoteFilter",
+																				"type": "object",
+																				"required": [
+																					"field",
+																					"operator",
+																					"realmId",
+																					"tagId"
+																				],
+																				"properties": {
+																					"field": {
+																						"const": "realm-tag-vote",
+																						"type": "string"
+																					},
+																					"operator": {
+																						"const": "matches",
+																						"type": "string"
+																					},
+																					"realmId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"tagId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"score": {
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"lower"
+																								],
+																								"properties": {
+																									"lower": {
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"type": "integer"
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"upper"
+																								],
+																								"properties": {
+																									"lower": {
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"type": "integer"
+																									}
+																								}
+																							}
+																						]
+																					},
+																					"voteCount": {
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"lower"
+																								],
+																								"properties": {
+																									"lower": {
+																										"minimum": 0,
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"minimum": 0,
+																										"type": "integer"
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"upper"
+																								],
+																								"properties": {
+																									"lower": {
+																										"minimum": 0,
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"minimum": 0,
+																										"type": "integer"
+																									}
+																								}
+																							}
+																						]
+																					}
+																				}
 																			}
 																		]
 																	}
@@ -104726,7 +106940,8 @@
 																			"software-release-date",
 																			"software-version-label",
 																			"software-platform",
-																			"software-requirement-tier"
+																			"software-requirement-tier",
+																			"realm-tag-vote"
 																		]
 																	},
 																	"enabled": {
@@ -105041,7 +107256,8 @@
 																	"software-release-date",
 																	"software-version-label",
 																	"software-platform",
-																	"software-requirement-tier"
+																	"software-requirement-tier",
+																	"realm-tag-vote"
 																]
 															},
 															"component": {
@@ -105051,7 +107267,8 @@
 																	"multi-select",
 																	"toggle",
 																	"date-range",
-																	"value-range"
+																	"value-range",
+																	"realm-tag-vote"
 																]
 															},
 															"modes": {
@@ -105065,7 +107282,7 @@
 															},
 															"operators": {
 																"minItems": 1,
-																"maxItems": 7,
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "string",
@@ -105076,7 +107293,8 @@
 																		"all-of",
 																		"none-of",
 																		"range",
-																		"exists"
+																		"exists",
+																		"matches"
 																	]
 																}
 															},
@@ -106617,6 +108835,99 @@
 																},
 																"value": { "type": "boolean" }
 															}
+														},
+														{
+															"additionalProperties": false,
+															"$id": "SearchRealmTagVoteFilter",
+															"type": "object",
+															"required": [
+																"field",
+																"operator",
+																"realmId",
+																"tagId"
+															],
+															"properties": {
+																"field": {
+																	"const": "realm-tag-vote",
+																	"type": "string"
+																},
+																"operator": {
+																	"const": "matches",
+																	"type": "string"
+																},
+																"realmId": {
+																	"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																	"type": "string"
+																},
+																"tagId": {
+																	"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																	"type": "string"
+																},
+																"score": {
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": ["lower"],
+																			"properties": {
+																				"lower": {
+																					"type": "integer"
+																				},
+																				"upper": {
+																					"type": "integer"
+																				}
+																			}
+																		},
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": ["upper"],
+																			"properties": {
+																				"lower": {
+																					"type": "integer"
+																				},
+																				"upper": {
+																					"type": "integer"
+																				}
+																			}
+																		}
+																	]
+																},
+																"voteCount": {
+																	"anyOf": [
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": ["lower"],
+																			"properties": {
+																				"lower": {
+																					"minimum": 0,
+																					"type": "integer"
+																				},
+																				"upper": {
+																					"minimum": 0,
+																					"type": "integer"
+																				}
+																			}
+																		},
+																		{
+																			"additionalProperties": false,
+																			"type": "object",
+																			"required": ["upper"],
+																			"properties": {
+																				"lower": {
+																					"minimum": 0,
+																					"type": "integer"
+																				},
+																				"upper": {
+																					"minimum": 0,
+																					"type": "integer"
+																				}
+																			}
+																		}
+																	]
+																}
+															}
 														}
 													]
 												}
@@ -107817,6 +110128,107 @@
 																			"type": "boolean"
 																		}
 																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"$id": "SearchRealmTagVoteFilter",
+																	"type": "object",
+																	"required": [
+																		"field",
+																		"operator",
+																		"realmId",
+																		"tagId"
+																	],
+																	"properties": {
+																		"field": {
+																			"const": "realm-tag-vote",
+																			"type": "string"
+																		},
+																		"operator": {
+																			"const": "matches",
+																			"type": "string"
+																		},
+																		"realmId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"tagId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"score": {
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"lower"
+																					],
+																					"properties": {
+																						"lower": {
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"type": "integer"
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"upper"
+																					],
+																					"properties": {
+																						"lower": {
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"type": "integer"
+																						}
+																					}
+																				}
+																			]
+																		},
+																		"voteCount": {
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"lower"
+																					],
+																					"properties": {
+																						"lower": {
+																							"minimum": 0,
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"minimum": 0,
+																							"type": "integer"
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"upper"
+																					],
+																					"properties": {
+																						"lower": {
+																							"minimum": 0,
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"minimum": 0,
+																							"type": "integer"
+																						}
+																					}
+																				}
+																			]
+																		}
+																	}
 																}
 															]
 														}
@@ -107885,7 +110297,8 @@
 																"software-release-date",
 																"software-version-label",
 																"software-platform",
-																"software-requirement-tier"
+																"software-requirement-tier",
+																"realm-tag-vote"
 															]
 														},
 														"enabled": { "type": "boolean" },
@@ -109429,6 +111842,107 @@
 																				"type": "boolean"
 																			}
 																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"$id": "SearchRealmTagVoteFilter",
+																		"type": "object",
+																		"required": [
+																			"field",
+																			"operator",
+																			"realmId",
+																			"tagId"
+																		],
+																		"properties": {
+																			"field": {
+																				"const": "realm-tag-vote",
+																				"type": "string"
+																			},
+																			"operator": {
+																				"const": "matches",
+																				"type": "string"
+																			},
+																			"realmId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"tagId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"score": {
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"lower"
+																						],
+																						"properties": {
+																							"lower": {
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"type": "integer"
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"upper"
+																						],
+																						"properties": {
+																							"lower": {
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"type": "integer"
+																							}
+																						}
+																					}
+																				]
+																			},
+																			"voteCount": {
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"lower"
+																						],
+																						"properties": {
+																							"lower": {
+																								"minimum": 0,
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"upper"
+																						],
+																						"properties": {
+																							"lower": {
+																								"minimum": 0,
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						}
+																					}
+																				]
+																			}
+																		}
 																	}
 																]
 															}
@@ -110632,6 +113146,107 @@
 																						"type": "boolean"
 																					}
 																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"$id": "SearchRealmTagVoteFilter",
+																				"type": "object",
+																				"required": [
+																					"field",
+																					"operator",
+																					"realmId",
+																					"tagId"
+																				],
+																				"properties": {
+																					"field": {
+																						"const": "realm-tag-vote",
+																						"type": "string"
+																					},
+																					"operator": {
+																						"const": "matches",
+																						"type": "string"
+																					},
+																					"realmId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"tagId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"score": {
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"lower"
+																								],
+																								"properties": {
+																									"lower": {
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"type": "integer"
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"upper"
+																								],
+																								"properties": {
+																									"lower": {
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"type": "integer"
+																									}
+																								}
+																							}
+																						]
+																					},
+																					"voteCount": {
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"lower"
+																								],
+																								"properties": {
+																									"lower": {
+																										"minimum": 0,
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"minimum": 0,
+																										"type": "integer"
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"upper"
+																								],
+																								"properties": {
+																									"lower": {
+																										"minimum": 0,
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"minimum": 0,
+																										"type": "integer"
+																									}
+																								}
+																							}
+																						]
+																					}
+																				}
 																			}
 																		]
 																	}
@@ -110700,7 +113315,8 @@
 																			"software-release-date",
 																			"software-version-label",
 																			"software-platform",
-																			"software-requirement-tier"
+																			"software-requirement-tier",
+																			"realm-tag-vote"
 																		]
 																	},
 																	"enabled": {
@@ -111015,7 +113631,8 @@
 																	"software-release-date",
 																	"software-version-label",
 																	"software-platform",
-																	"software-requirement-tier"
+																	"software-requirement-tier",
+																	"realm-tag-vote"
 																]
 															},
 															"component": {
@@ -111025,7 +113642,8 @@
 																	"multi-select",
 																	"toggle",
 																	"date-range",
-																	"value-range"
+																	"value-range",
+																	"realm-tag-vote"
 																]
 															},
 															"modes": {
@@ -111039,7 +113657,7 @@
 															},
 															"operators": {
 																"minItems": 1,
-																"maxItems": 7,
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "string",
@@ -111050,7 +113668,8 @@
 																		"all-of",
 																		"none-of",
 																		"range",
-																		"exists"
+																		"exists",
+																		"matches"
 																	]
 																}
 															},
@@ -112585,6 +115204,107 @@
 																			"type": "boolean"
 																		}
 																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"$id": "SearchRealmTagVoteFilter",
+																	"type": "object",
+																	"required": [
+																		"field",
+																		"operator",
+																		"realmId",
+																		"tagId"
+																	],
+																	"properties": {
+																		"field": {
+																			"const": "realm-tag-vote",
+																			"type": "string"
+																		},
+																		"operator": {
+																			"const": "matches",
+																			"type": "string"
+																		},
+																		"realmId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"tagId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"score": {
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"lower"
+																					],
+																					"properties": {
+																						"lower": {
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"type": "integer"
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"upper"
+																					],
+																					"properties": {
+																						"lower": {
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"type": "integer"
+																						}
+																					}
+																				}
+																			]
+																		},
+																		"voteCount": {
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"lower"
+																					],
+																					"properties": {
+																						"lower": {
+																							"minimum": 0,
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"minimum": 0,
+																							"type": "integer"
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"upper"
+																					],
+																					"properties": {
+																						"lower": {
+																							"minimum": 0,
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"minimum": 0,
+																							"type": "integer"
+																						}
+																					}
+																				}
+																			]
+																		}
+																	}
 																}
 															]
 														}
@@ -113864,6 +116584,107 @@
 																				},
 																				"value": {
 																					"type": "boolean"
+																				}
+																			}
+																		},
+																		{
+																			"additionalProperties": false,
+																			"$id": "SearchRealmTagVoteFilter",
+																			"type": "object",
+																			"required": [
+																				"field",
+																				"operator",
+																				"realmId",
+																				"tagId"
+																			],
+																			"properties": {
+																				"field": {
+																					"const": "realm-tag-vote",
+																					"type": "string"
+																				},
+																				"operator": {
+																					"const": "matches",
+																					"type": "string"
+																				},
+																				"realmId": {
+																					"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																					"type": "string"
+																				},
+																				"tagId": {
+																					"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																					"type": "string"
+																				},
+																				"score": {
+																					"anyOf": [
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"lower"
+																							],
+																							"properties": {
+																								"lower": {
+																									"type": "integer"
+																								},
+																								"upper": {
+																									"type": "integer"
+																								}
+																							}
+																						},
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"upper"
+																							],
+																							"properties": {
+																								"lower": {
+																									"type": "integer"
+																								},
+																								"upper": {
+																									"type": "integer"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"voteCount": {
+																					"anyOf": [
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"lower"
+																							],
+																							"properties": {
+																								"lower": {
+																									"minimum": 0,
+																									"type": "integer"
+																								},
+																								"upper": {
+																									"minimum": 0,
+																									"type": "integer"
+																								}
+																							}
+																						},
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"upper"
+																							],
+																							"properties": {
+																								"lower": {
+																									"minimum": 0,
+																									"type": "integer"
+																								},
+																								"upper": {
+																									"minimum": 0,
+																									"type": "integer"
+																								}
+																							}
+																						}
+																					]
 																				}
 																			}
 																		}
@@ -115147,6 +117968,107 @@
 																					},
 																					"value": {
 																						"type": "boolean"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"$id": "SearchRealmTagVoteFilter",
+																				"type": "object",
+																				"required": [
+																					"field",
+																					"operator",
+																					"realmId",
+																					"tagId"
+																				],
+																				"properties": {
+																					"field": {
+																						"const": "realm-tag-vote",
+																						"type": "string"
+																					},
+																					"operator": {
+																						"const": "matches",
+																						"type": "string"
+																					},
+																					"realmId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"tagId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"score": {
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"lower"
+																								],
+																								"properties": {
+																									"lower": {
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"type": "integer"
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"upper"
+																								],
+																								"properties": {
+																									"lower": {
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"type": "integer"
+																									}
+																								}
+																							}
+																						]
+																					},
+																					"voteCount": {
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"lower"
+																								],
+																								"properties": {
+																									"lower": {
+																										"minimum": 0,
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"minimum": 0,
+																										"type": "integer"
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"upper"
+																								],
+																								"properties": {
+																									"lower": {
+																										"minimum": 0,
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"minimum": 0,
+																										"type": "integer"
+																									}
+																								}
+																							}
+																						]
 																					}
 																				}
 																			}
@@ -117213,6 +120135,107 @@
 																				"type": "boolean"
 																			}
 																		}
+																	},
+																	{
+																		"additionalProperties": false,
+																		"$id": "SearchRealmTagVoteFilter",
+																		"type": "object",
+																		"required": [
+																			"field",
+																			"operator",
+																			"realmId",
+																			"tagId"
+																		],
+																		"properties": {
+																			"field": {
+																				"const": "realm-tag-vote",
+																				"type": "string"
+																			},
+																			"operator": {
+																				"const": "matches",
+																				"type": "string"
+																			},
+																			"realmId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"tagId": {
+																				"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																				"type": "string"
+																			},
+																			"score": {
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"lower"
+																						],
+																						"properties": {
+																							"lower": {
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"type": "integer"
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"upper"
+																						],
+																						"properties": {
+																							"lower": {
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"type": "integer"
+																							}
+																						}
+																					}
+																				]
+																			},
+																			"voteCount": {
+																				"anyOf": [
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"lower"
+																						],
+																						"properties": {
+																							"lower": {
+																								"minimum": 0,
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"type": "object",
+																						"required": [
+																							"upper"
+																						],
+																						"properties": {
+																							"lower": {
+																								"minimum": 0,
+																								"type": "integer"
+																							},
+																							"upper": {
+																								"minimum": 0,
+																								"type": "integer"
+																							}
+																						}
+																					}
+																				]
+																			}
+																		}
 																	}
 																]
 															}
@@ -118416,6 +121439,107 @@
 																						"type": "boolean"
 																					}
 																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"$id": "SearchRealmTagVoteFilter",
+																				"type": "object",
+																				"required": [
+																					"field",
+																					"operator",
+																					"realmId",
+																					"tagId"
+																				],
+																				"properties": {
+																					"field": {
+																						"const": "realm-tag-vote",
+																						"type": "string"
+																					},
+																					"operator": {
+																						"const": "matches",
+																						"type": "string"
+																					},
+																					"realmId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"tagId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"score": {
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"lower"
+																								],
+																								"properties": {
+																									"lower": {
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"type": "integer"
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"upper"
+																								],
+																								"properties": {
+																									"lower": {
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"type": "integer"
+																									}
+																								}
+																							}
+																						]
+																					},
+																					"voteCount": {
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"lower"
+																								],
+																								"properties": {
+																									"lower": {
+																										"minimum": 0,
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"minimum": 0,
+																										"type": "integer"
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"upper"
+																								],
+																								"properties": {
+																									"lower": {
+																										"minimum": 0,
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"minimum": 0,
+																										"type": "integer"
+																									}
+																								}
+																							}
+																						]
+																					}
+																				}
 																			}
 																		]
 																	}
@@ -118484,7 +121608,8 @@
 																			"software-release-date",
 																			"software-version-label",
 																			"software-platform",
-																			"software-requirement-tier"
+																			"software-requirement-tier",
+																			"realm-tag-vote"
 																		]
 																	},
 																	"enabled": {
@@ -118799,7 +121924,8 @@
 																	"software-release-date",
 																	"software-version-label",
 																	"software-platform",
-																	"software-requirement-tier"
+																	"software-requirement-tier",
+																	"realm-tag-vote"
 																]
 															},
 															"component": {
@@ -118809,7 +121935,8 @@
 																	"multi-select",
 																	"toggle",
 																	"date-range",
-																	"value-range"
+																	"value-range",
+																	"realm-tag-vote"
 																]
 															},
 															"modes": {
@@ -118823,7 +121950,7 @@
 															},
 															"operators": {
 																"minItems": 1,
-																"maxItems": 7,
+																"maxItems": 8,
 																"type": "array",
 																"items": {
 																	"type": "string",
@@ -118834,7 +121961,8 @@
 																		"all-of",
 																		"none-of",
 																		"range",
-																		"exists"
+																		"exists",
+																		"matches"
 																	]
 																}
 															},
@@ -120382,6 +123510,107 @@
 																			"type": "boolean"
 																		}
 																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"$id": "SearchRealmTagVoteFilter",
+																	"type": "object",
+																	"required": [
+																		"field",
+																		"operator",
+																		"realmId",
+																		"tagId"
+																	],
+																	"properties": {
+																		"field": {
+																			"const": "realm-tag-vote",
+																			"type": "string"
+																		},
+																		"operator": {
+																			"const": "matches",
+																			"type": "string"
+																		},
+																		"realmId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"tagId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"score": {
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"lower"
+																					],
+																					"properties": {
+																						"lower": {
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"type": "integer"
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"upper"
+																					],
+																					"properties": {
+																						"lower": {
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"type": "integer"
+																						}
+																					}
+																				}
+																			]
+																		},
+																		"voteCount": {
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"lower"
+																					],
+																					"properties": {
+																						"lower": {
+																							"minimum": 0,
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"minimum": 0,
+																							"type": "integer"
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"upper"
+																					],
+																					"properties": {
+																						"lower": {
+																							"minimum": 0,
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"minimum": 0,
+																							"type": "integer"
+																						}
+																					}
+																				}
+																			]
+																		}
+																	}
 																}
 															]
 														}
@@ -121661,6 +124890,107 @@
 																				},
 																				"value": {
 																					"type": "boolean"
+																				}
+																			}
+																		},
+																		{
+																			"additionalProperties": false,
+																			"$id": "SearchRealmTagVoteFilter",
+																			"type": "object",
+																			"required": [
+																				"field",
+																				"operator",
+																				"realmId",
+																				"tagId"
+																			],
+																			"properties": {
+																				"field": {
+																					"const": "realm-tag-vote",
+																					"type": "string"
+																				},
+																				"operator": {
+																					"const": "matches",
+																					"type": "string"
+																				},
+																				"realmId": {
+																					"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																					"type": "string"
+																				},
+																				"tagId": {
+																					"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																					"type": "string"
+																				},
+																				"score": {
+																					"anyOf": [
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"lower"
+																							],
+																							"properties": {
+																								"lower": {
+																									"type": "integer"
+																								},
+																								"upper": {
+																									"type": "integer"
+																								}
+																							}
+																						},
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"upper"
+																							],
+																							"properties": {
+																								"lower": {
+																									"type": "integer"
+																								},
+																								"upper": {
+																									"type": "integer"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"voteCount": {
+																					"anyOf": [
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"lower"
+																							],
+																							"properties": {
+																								"lower": {
+																									"minimum": 0,
+																									"type": "integer"
+																								},
+																								"upper": {
+																									"minimum": 0,
+																									"type": "integer"
+																								}
+																							}
+																						},
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"upper"
+																							],
+																							"properties": {
+																								"lower": {
+																									"minimum": 0,
+																									"type": "integer"
+																								},
+																								"upper": {
+																									"minimum": 0,
+																									"type": "integer"
+																								}
+																							}
+																						}
+																					]
 																				}
 																			}
 																		}
@@ -122944,6 +126274,107 @@
 																					},
 																					"value": {
 																						"type": "boolean"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"$id": "SearchRealmTagVoteFilter",
+																				"type": "object",
+																				"required": [
+																					"field",
+																					"operator",
+																					"realmId",
+																					"tagId"
+																				],
+																				"properties": {
+																					"field": {
+																						"const": "realm-tag-vote",
+																						"type": "string"
+																					},
+																					"operator": {
+																						"const": "matches",
+																						"type": "string"
+																					},
+																					"realmId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"tagId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"score": {
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"lower"
+																								],
+																								"properties": {
+																									"lower": {
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"type": "integer"
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"upper"
+																								],
+																								"properties": {
+																									"lower": {
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"type": "integer"
+																									}
+																								}
+																							}
+																						]
+																					},
+																					"voteCount": {
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"lower"
+																								],
+																								"properties": {
+																									"lower": {
+																										"minimum": 0,
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"minimum": 0,
+																										"type": "integer"
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"upper"
+																								],
+																								"properties": {
+																									"lower": {
+																										"minimum": 0,
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"minimum": 0,
+																										"type": "integer"
+																									}
+																								}
+																							}
+																						]
 																					}
 																				}
 																			}
@@ -124755,6 +128186,107 @@
 																			"type": "boolean"
 																		}
 																	}
+																},
+																{
+																	"additionalProperties": false,
+																	"$id": "SearchRealmTagVoteFilter",
+																	"type": "object",
+																	"required": [
+																		"field",
+																		"operator",
+																		"realmId",
+																		"tagId"
+																	],
+																	"properties": {
+																		"field": {
+																			"const": "realm-tag-vote",
+																			"type": "string"
+																		},
+																		"operator": {
+																			"const": "matches",
+																			"type": "string"
+																		},
+																		"realmId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"tagId": {
+																			"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																			"type": "string"
+																		},
+																		"score": {
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"lower"
+																					],
+																					"properties": {
+																						"lower": {
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"type": "integer"
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"upper"
+																					],
+																					"properties": {
+																						"lower": {
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"type": "integer"
+																						}
+																					}
+																				}
+																			]
+																		},
+																		"voteCount": {
+																			"anyOf": [
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"lower"
+																					],
+																					"properties": {
+																						"lower": {
+																							"minimum": 0,
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"minimum": 0,
+																							"type": "integer"
+																						}
+																					}
+																				},
+																				{
+																					"additionalProperties": false,
+																					"type": "object",
+																					"required": [
+																						"upper"
+																					],
+																					"properties": {
+																						"lower": {
+																							"minimum": 0,
+																							"type": "integer"
+																						},
+																						"upper": {
+																							"minimum": 0,
+																							"type": "integer"
+																						}
+																					}
+																				}
+																			]
+																		}
+																	}
 																}
 															]
 														}
@@ -126034,6 +129566,107 @@
 																				},
 																				"value": {
 																					"type": "boolean"
+																				}
+																			}
+																		},
+																		{
+																			"additionalProperties": false,
+																			"$id": "SearchRealmTagVoteFilter",
+																			"type": "object",
+																			"required": [
+																				"field",
+																				"operator",
+																				"realmId",
+																				"tagId"
+																			],
+																			"properties": {
+																				"field": {
+																					"const": "realm-tag-vote",
+																					"type": "string"
+																				},
+																				"operator": {
+																					"const": "matches",
+																					"type": "string"
+																				},
+																				"realmId": {
+																					"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																					"type": "string"
+																				},
+																				"tagId": {
+																					"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																					"type": "string"
+																				},
+																				"score": {
+																					"anyOf": [
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"lower"
+																							],
+																							"properties": {
+																								"lower": {
+																									"type": "integer"
+																								},
+																								"upper": {
+																									"type": "integer"
+																								}
+																							}
+																						},
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"upper"
+																							],
+																							"properties": {
+																								"lower": {
+																									"type": "integer"
+																								},
+																								"upper": {
+																									"type": "integer"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"voteCount": {
+																					"anyOf": [
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"lower"
+																							],
+																							"properties": {
+																								"lower": {
+																									"minimum": 0,
+																									"type": "integer"
+																								},
+																								"upper": {
+																									"minimum": 0,
+																									"type": "integer"
+																								}
+																							}
+																						},
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"upper"
+																							],
+																							"properties": {
+																								"lower": {
+																									"minimum": 0,
+																									"type": "integer"
+																								},
+																								"upper": {
+																									"minimum": 0,
+																									"type": "integer"
+																								}
+																							}
+																						}
+																					]
 																				}
 																			}
 																		}
@@ -127317,6 +130950,107 @@
 																					},
 																					"value": {
 																						"type": "boolean"
+																					}
+																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"$id": "SearchRealmTagVoteFilter",
+																				"type": "object",
+																				"required": [
+																					"field",
+																					"operator",
+																					"realmId",
+																					"tagId"
+																				],
+																				"properties": {
+																					"field": {
+																						"const": "realm-tag-vote",
+																						"type": "string"
+																					},
+																					"operator": {
+																						"const": "matches",
+																						"type": "string"
+																					},
+																					"realmId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"tagId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"score": {
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"lower"
+																								],
+																								"properties": {
+																									"lower": {
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"type": "integer"
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"upper"
+																								],
+																								"properties": {
+																									"lower": {
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"type": "integer"
+																									}
+																								}
+																							}
+																						]
+																					},
+																					"voteCount": {
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"lower"
+																								],
+																								"properties": {
+																									"lower": {
+																										"minimum": 0,
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"minimum": 0,
+																										"type": "integer"
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"upper"
+																								],
+																								"properties": {
+																									"lower": {
+																										"minimum": 0,
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"minimum": 0,
+																										"type": "integer"
+																									}
+																								}
+																							}
+																						]
 																					}
 																				}
 																			}
@@ -129695,6 +133429,107 @@
 																					"type": "boolean"
 																				}
 																			}
+																		},
+																		{
+																			"additionalProperties": false,
+																			"$id": "SearchRealmTagVoteFilter",
+																			"type": "object",
+																			"required": [
+																				"field",
+																				"operator",
+																				"realmId",
+																				"tagId"
+																			],
+																			"properties": {
+																				"field": {
+																					"const": "realm-tag-vote",
+																					"type": "string"
+																				},
+																				"operator": {
+																					"const": "matches",
+																					"type": "string"
+																				},
+																				"realmId": {
+																					"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																					"type": "string"
+																				},
+																				"tagId": {
+																					"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																					"type": "string"
+																				},
+																				"score": {
+																					"anyOf": [
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"lower"
+																							],
+																							"properties": {
+																								"lower": {
+																									"type": "integer"
+																								},
+																								"upper": {
+																									"type": "integer"
+																								}
+																							}
+																						},
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"upper"
+																							],
+																							"properties": {
+																								"lower": {
+																									"type": "integer"
+																								},
+																								"upper": {
+																									"type": "integer"
+																								}
+																							}
+																						}
+																					]
+																				},
+																				"voteCount": {
+																					"anyOf": [
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"lower"
+																							],
+																							"properties": {
+																								"lower": {
+																									"minimum": 0,
+																									"type": "integer"
+																								},
+																								"upper": {
+																									"minimum": 0,
+																									"type": "integer"
+																								}
+																							}
+																						},
+																						{
+																							"additionalProperties": false,
+																							"type": "object",
+																							"required": [
+																								"upper"
+																							],
+																							"properties": {
+																								"lower": {
+																									"minimum": 0,
+																									"type": "integer"
+																								},
+																								"upper": {
+																									"minimum": 0,
+																									"type": "integer"
+																								}
+																							}
+																						}
+																					]
+																				}
+																			}
 																		}
 																	]
 																}
@@ -130973,6 +134808,107 @@
 																						"type": "boolean"
 																					}
 																				}
+																			},
+																			{
+																				"additionalProperties": false,
+																				"$id": "SearchRealmTagVoteFilter",
+																				"type": "object",
+																				"required": [
+																					"field",
+																					"operator",
+																					"realmId",
+																					"tagId"
+																				],
+																				"properties": {
+																					"field": {
+																						"const": "realm-tag-vote",
+																						"type": "string"
+																					},
+																					"operator": {
+																						"const": "matches",
+																						"type": "string"
+																					},
+																					"realmId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"tagId": {
+																						"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																						"type": "string"
+																					},
+																					"score": {
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"lower"
+																								],
+																								"properties": {
+																									"lower": {
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"type": "integer"
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"upper"
+																								],
+																								"properties": {
+																									"lower": {
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"type": "integer"
+																									}
+																								}
+																							}
+																						]
+																					},
+																					"voteCount": {
+																						"anyOf": [
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"lower"
+																								],
+																								"properties": {
+																									"lower": {
+																										"minimum": 0,
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"minimum": 0,
+																										"type": "integer"
+																									}
+																								}
+																							},
+																							{
+																								"additionalProperties": false,
+																								"type": "object",
+																								"required": [
+																									"upper"
+																								],
+																								"properties": {
+																									"lower": {
+																										"minimum": 0,
+																										"type": "integer"
+																									},
+																									"upper": {
+																										"minimum": 0,
+																										"type": "integer"
+																									}
+																								}
+																							}
+																						]
+																					}
+																				}
 																			}
 																		]
 																	}
@@ -131075,7 +135011,8 @@
 														"software-release-date",
 														"software-version-label",
 														"software-platform",
-														"software-requirement-tier"
+														"software-requirement-tier",
+														"realm-tag-vote"
 													]
 												},
 												"value": {
@@ -132404,6 +136341,107 @@
 																								"type": "boolean"
 																							}
 																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"$id": "SearchRealmTagVoteFilter",
+																						"type": "object",
+																						"required": [
+																							"field",
+																							"operator",
+																							"realmId",
+																							"tagId"
+																						],
+																						"properties": {
+																							"field": {
+																								"const": "realm-tag-vote",
+																								"type": "string"
+																							},
+																							"operator": {
+																								"const": "matches",
+																								"type": "string"
+																							},
+																							"realmId": {
+																								"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																								"type": "string"
+																							},
+																							"tagId": {
+																								"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																								"type": "string"
+																							},
+																							"score": {
+																								"anyOf": [
+																									{
+																										"additionalProperties": false,
+																										"type": "object",
+																										"required": [
+																											"lower"
+																										],
+																										"properties": {
+																											"lower": {
+																												"type": "integer"
+																											},
+																											"upper": {
+																												"type": "integer"
+																											}
+																										}
+																									},
+																									{
+																										"additionalProperties": false,
+																										"type": "object",
+																										"required": [
+																											"upper"
+																										],
+																										"properties": {
+																											"lower": {
+																												"type": "integer"
+																											},
+																											"upper": {
+																												"type": "integer"
+																											}
+																										}
+																									}
+																								]
+																							},
+																							"voteCount": {
+																								"anyOf": [
+																									{
+																										"additionalProperties": false,
+																										"type": "object",
+																										"required": [
+																											"lower"
+																										],
+																										"properties": {
+																											"lower": {
+																												"minimum": 0,
+																												"type": "integer"
+																											},
+																											"upper": {
+																												"minimum": 0,
+																												"type": "integer"
+																											}
+																										}
+																									},
+																									{
+																										"additionalProperties": false,
+																										"type": "object",
+																										"required": [
+																											"upper"
+																										],
+																										"properties": {
+																											"lower": {
+																												"minimum": 0,
+																												"type": "integer"
+																											},
+																											"upper": {
+																												"minimum": 0,
+																												"type": "integer"
+																											}
+																										}
+																									}
+																								]
+																							}
+																						}
 																					}
 																				]
 																			}
@@ -133685,6 +137723,107 @@
 																									"type": "boolean"
 																								}
 																							}
+																						},
+																						{
+																							"additionalProperties": false,
+																							"$id": "SearchRealmTagVoteFilter",
+																							"type": "object",
+																							"required": [
+																								"field",
+																								"operator",
+																								"realmId",
+																								"tagId"
+																							],
+																							"properties": {
+																								"field": {
+																									"const": "realm-tag-vote",
+																									"type": "string"
+																								},
+																								"operator": {
+																									"const": "matches",
+																									"type": "string"
+																								},
+																								"realmId": {
+																									"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																									"type": "string"
+																								},
+																								"tagId": {
+																									"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																									"type": "string"
+																								},
+																								"score": {
+																									"anyOf": [
+																										{
+																											"additionalProperties": false,
+																											"type": "object",
+																											"required": [
+																												"lower"
+																											],
+																											"properties": {
+																												"lower": {
+																													"type": "integer"
+																												},
+																												"upper": {
+																													"type": "integer"
+																												}
+																											}
+																										},
+																										{
+																											"additionalProperties": false,
+																											"type": "object",
+																											"required": [
+																												"upper"
+																											],
+																											"properties": {
+																												"lower": {
+																													"type": "integer"
+																												},
+																												"upper": {
+																													"type": "integer"
+																												}
+																											}
+																										}
+																									]
+																								},
+																								"voteCount": {
+																									"anyOf": [
+																										{
+																											"additionalProperties": false,
+																											"type": "object",
+																											"required": [
+																												"lower"
+																											],
+																											"properties": {
+																												"lower": {
+																													"minimum": 0,
+																													"type": "integer"
+																												},
+																												"upper": {
+																													"minimum": 0,
+																													"type": "integer"
+																												}
+																											}
+																										},
+																										{
+																											"additionalProperties": false,
+																											"type": "object",
+																											"required": [
+																												"upper"
+																											],
+																											"properties": {
+																												"lower": {
+																													"minimum": 0,
+																													"type": "integer"
+																												},
+																												"upper": {
+																													"minimum": 0,
+																													"type": "integer"
+																												}
+																											}
+																										}
+																									]
+																								}
+																							}
 																						}
 																					]
 																				}
@@ -133798,7 +137937,8 @@
 																	"software-release-date",
 																	"software-version-label",
 																	"software-platform",
-																	"software-requirement-tier"
+																	"software-requirement-tier",
+																	"realm-tag-vote"
 																]
 															},
 															"value": {
@@ -135248,6 +139388,107 @@
 																								"type": "boolean"
 																							}
 																						}
+																					},
+																					{
+																						"additionalProperties": false,
+																						"$id": "SearchRealmTagVoteFilter",
+																						"type": "object",
+																						"required": [
+																							"field",
+																							"operator",
+																							"realmId",
+																							"tagId"
+																						],
+																						"properties": {
+																							"field": {
+																								"const": "realm-tag-vote",
+																								"type": "string"
+																							},
+																							"operator": {
+																								"const": "matches",
+																								"type": "string"
+																							},
+																							"realmId": {
+																								"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																								"type": "string"
+																							},
+																							"tagId": {
+																								"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																								"type": "string"
+																							},
+																							"score": {
+																								"anyOf": [
+																									{
+																										"additionalProperties": false,
+																										"type": "object",
+																										"required": [
+																											"lower"
+																										],
+																										"properties": {
+																											"lower": {
+																												"type": "integer"
+																											},
+																											"upper": {
+																												"type": "integer"
+																											}
+																										}
+																									},
+																									{
+																										"additionalProperties": false,
+																										"type": "object",
+																										"required": [
+																											"upper"
+																										],
+																										"properties": {
+																											"lower": {
+																												"type": "integer"
+																											},
+																											"upper": {
+																												"type": "integer"
+																											}
+																										}
+																									}
+																								]
+																							},
+																							"voteCount": {
+																								"anyOf": [
+																									{
+																										"additionalProperties": false,
+																										"type": "object",
+																										"required": [
+																											"lower"
+																										],
+																										"properties": {
+																											"lower": {
+																												"minimum": 0,
+																												"type": "integer"
+																											},
+																											"upper": {
+																												"minimum": 0,
+																												"type": "integer"
+																											}
+																										}
+																									},
+																									{
+																										"additionalProperties": false,
+																										"type": "object",
+																										"required": [
+																											"upper"
+																										],
+																										"properties": {
+																											"lower": {
+																												"minimum": 0,
+																												"type": "integer"
+																											},
+																											"upper": {
+																												"minimum": 0,
+																												"type": "integer"
+																											}
+																										}
+																									}
+																								]
+																							}
+																						}
 																					}
 																				]
 																			}
@@ -136529,6 +140770,107 @@
 																									"type": "boolean"
 																								}
 																							}
+																						},
+																						{
+																							"additionalProperties": false,
+																							"$id": "SearchRealmTagVoteFilter",
+																							"type": "object",
+																							"required": [
+																								"field",
+																								"operator",
+																								"realmId",
+																								"tagId"
+																							],
+																							"properties": {
+																								"field": {
+																									"const": "realm-tag-vote",
+																									"type": "string"
+																								},
+																								"operator": {
+																									"const": "matches",
+																									"type": "string"
+																								},
+																								"realmId": {
+																									"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																									"type": "string"
+																								},
+																								"tagId": {
+																									"pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+																									"type": "string"
+																								},
+																								"score": {
+																									"anyOf": [
+																										{
+																											"additionalProperties": false,
+																											"type": "object",
+																											"required": [
+																												"lower"
+																											],
+																											"properties": {
+																												"lower": {
+																													"type": "integer"
+																												},
+																												"upper": {
+																													"type": "integer"
+																												}
+																											}
+																										},
+																										{
+																											"additionalProperties": false,
+																											"type": "object",
+																											"required": [
+																												"upper"
+																											],
+																											"properties": {
+																												"lower": {
+																													"type": "integer"
+																												},
+																												"upper": {
+																													"type": "integer"
+																												}
+																											}
+																										}
+																									]
+																								},
+																								"voteCount": {
+																									"anyOf": [
+																										{
+																											"additionalProperties": false,
+																											"type": "object",
+																											"required": [
+																												"lower"
+																											],
+																											"properties": {
+																												"lower": {
+																													"minimum": 0,
+																													"type": "integer"
+																												},
+																												"upper": {
+																													"minimum": 0,
+																													"type": "integer"
+																												}
+																											}
+																										},
+																										{
+																											"additionalProperties": false,
+																											"type": "object",
+																											"required": [
+																												"upper"
+																											],
+																											"properties": {
+																												"lower": {
+																													"minimum": 0,
+																													"type": "integer"
+																												},
+																												"upper": {
+																													"minimum": 0,
+																													"type": "integer"
+																												}
+																											}
+																										}
+																									]
+																								}
+																							}
 																						}
 																					]
 																				}
@@ -136642,7 +140984,8 @@
 																	"software-release-date",
 																	"software-version-label",
 																	"software-platform",
-																	"software-requirement-tier"
+																	"software-requirement-tier",
+																	"realm-tag-vote"
 																]
 															},
 															"value": {

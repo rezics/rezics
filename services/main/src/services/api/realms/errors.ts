@@ -44,6 +44,20 @@ export class RealmScoreContextPostNotMounted extends Data.TaggedError(
 	readonly message = "The score context Post must be mounted in the Realm";
 }
 
+export class RealmTagContextNotFound extends Data.TaggedError("RealmTagContextNotFound") {
+	static readonly status = StatusCodes.NOT_FOUND as const;
+	readonly status = RealmTagContextNotFound.status;
+	readonly message = "Realm Tag voting context not found";
+}
+
+export class RealmTagContextPostNotMounted extends Data.TaggedError(
+	"RealmTagContextPostNotMounted",
+) {
+	static readonly status = StatusCodes.UNPROCESSABLE_ENTITY as const;
+	readonly status = RealmTagContextPostNotMounted.status;
+	readonly message = "The Realm Tag voting context Post must be visible in the Realm";
+}
+
 export class RealmNavigationNotFound extends Data.TaggedError("RealmNavigationNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
 	readonly status = RealmNavigationNotFound.status;
@@ -71,6 +85,8 @@ export const RealmErrors = [
 	RealmMemberNotFound,
 	RealmUnitNotFound,
 	RealmScoreContextPostNotMounted,
+	RealmTagContextNotFound,
+	RealmTagContextPostNotMounted,
 	RealmNavigationNotFound,
 	RealmNavigationInUse,
 	RealmNavigationDocumentInvalid,
