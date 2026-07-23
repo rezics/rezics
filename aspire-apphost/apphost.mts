@@ -242,6 +242,11 @@ const web = await builder
 			: { env: "PORT", name: "http", port: requirePort("FRONTEND_PORT") },
 	)
 	.withEnvironment("BROWSER", "none")
+	.withEnvironment("FONT_AWESOME_KIT_CSS_URL", process.env.FONT_AWESOME_KIT_CSS_URL?.trim() ?? "")
+	.withEnvironment(
+		"FONT_AWESOME_KIT_LICENSE",
+		process.env.FONT_AWESOME_KIT_LICENSE?.trim() || "free",
+	)
 	.withEnvironment("REZICS_API_ORIGIN", apiEndpoint)
 	.withReference(api)
 	.waitFor(api);
