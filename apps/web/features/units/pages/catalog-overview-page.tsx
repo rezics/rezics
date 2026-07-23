@@ -16,7 +16,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { UnitShelf } from "@/features/explore/unit-shelf";
-import { UnitProgressPanel } from "@/features/progress/components/unit-progress-panel";
+import { UnitProgressSummaryCard } from "@/features/progress/components/unit-progress-summary-card";
 import { UnitTagSummary } from "@/features/tags/components/unit-tag-summary";
 import { useTranslation } from "@/i18n/client";
 import { readPortableText } from "@/lib/block";
@@ -141,14 +141,14 @@ export function CatalogOverviewPage() {
 					</DetailSection>
 				) : null}
 
-				<UnitProgressPanel domain={{ type, unitId: unit.id }} />
-
 				<DetailSection title={t.feed.relatedWorks}>
 					<UnitShelf seedUnitId={unit.id} type={type} />
 				</DetailSection>
 			</div>
 
 			<aside className="grid min-w-0 content-start gap-6">
+				<UnitProgressSummaryCard />
+
 				<DetailSection title={t.units.detail.information}>
 					<Card>
 						<CardContent className="p-5">

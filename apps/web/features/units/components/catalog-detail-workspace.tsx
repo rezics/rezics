@@ -14,6 +14,9 @@ import { createContext, useContext, type ReactNode } from "react";
 
 import { CollectionPickerButton } from "@/features/collections/components/collection-picker-button";
 import { FavoriteButton } from "@/features/collections/components/favorite-button";
+import { UnitProgressAction } from "@/features/progress/components/unit-progress-action";
+import { UnitProgressDialog } from "@/features/progress/components/unit-progress-dialog";
+import { UnitProgressProvider } from "@/features/progress/components/unit-progress-provider";
 import { useTranslation } from "@/i18n/client";
 import { selectLocalization } from "@/lib/localization";
 import {
@@ -85,9 +88,11 @@ function CatalogDetailWorkspaceContent<Type extends CatalogDetailUnitType>({
 	const value = { type, unit: query.data } as CatalogDetailContextValue;
 	return (
 		<CatalogDetailContext.Provider value={value}>
-			<CatalogDetailShell type={type} unit={query.data}>
-				{children}
-			</CatalogDetailShell>
+			<UnitProgressProvider domain={{ type, unitId: query.data.id }}>
+				<CatalogDetailShell type={type} unit={query.data}>
+					{children}
+				</CatalogDetailShell>
+			</UnitProgressProvider>
 		</CatalogDetailContext.Provider>
 	);
 }
@@ -144,6 +149,7 @@ function CatalogDetailShell<Type extends CatalogDetailUnitType>({
 					<div className="flex flex-wrap items-start gap-2">
 						<FavoriteButton targetId={unit.id} />
 						<CollectionPickerButton targetId={unit.id} triggerVariant="outline" />
+						<UnitProgressAction />
 						{unit.capabilities.canEdit ? (
 							<Button asChild variant="solid">
 								<Link href={`/units/${type}/${unit.id}/edit`}>{t.ui.edit}</Link>
@@ -184,6 +190,7 @@ function CatalogDetailShell<Type extends CatalogDetailUnitType>({
 			</nav>
 
 			{children}
+			<UnitProgressDialog />
 		</main>
 	);
 }

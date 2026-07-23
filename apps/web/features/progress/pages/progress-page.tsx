@@ -93,6 +93,9 @@ function ProgressList() {
 													})
 												: type === "book"
 													? t.engagement.progressByType.book.listSummary({
+															count: toNonNegativeApiInteger(
+																item.completedCount,
+															),
 															percent: Math.round(
 																item.progress * 100,
 															),

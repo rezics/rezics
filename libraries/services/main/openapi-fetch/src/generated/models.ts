@@ -55028,6 +55028,17 @@ export type GetApiProgressQuery = {
 	limit?: string | number;
 };
 
+export const GetApiProgressStatus200ItemsStatusEnum = {
+	backlog: "backlog",
+	active: "active",
+	paused: "paused",
+	completed: "completed",
+	dropped: "dropped",
+} as const;
+
+export type GetApiProgressStatus200ItemsStatusEnum =
+	(typeof GetApiProgressStatus200ItemsStatusEnum)[keyof typeof GetApiProgressStatus200ItemsStatusEnum];
+
 /**
  * @type object
  */
@@ -55043,9 +55054,10 @@ export type GetApiProgressStatus200 = {
 		 */
 		unitId: string;
 		/**
+		 * @default 'backlog'
 		 * @type string
 		 */
-		status: string;
+		status: GetApiProgressStatus200ItemsStatusEnum;
 		/**
 		 * @type number
 		 */
@@ -55149,6 +55161,17 @@ export type GetApiProgressByUnitIdPath = {
 	unitId: string;
 };
 
+export const GetApiProgressByUnitIdStatus200StatusEnum = {
+	backlog: "backlog",
+	active: "active",
+	paused: "paused",
+	completed: "completed",
+	dropped: "dropped",
+} as const;
+
+export type GetApiProgressByUnitIdStatus200StatusEnum =
+	(typeof GetApiProgressByUnitIdStatus200StatusEnum)[keyof typeof GetApiProgressByUnitIdStatus200StatusEnum];
+
 /**
  * @type object
  */
@@ -55166,9 +55189,10 @@ export type GetApiProgressByUnitIdStatus200 = {
 	 */
 	unitId: string;
 	/**
+	 * @default 'backlog'
 	 * @type string
 	 */
-	status: string;
+	status: GetApiProgressByUnitIdStatus200StatusEnum;
 	/**
 	 * @type number
 	 */
@@ -55320,6 +55344,17 @@ export type PutApiProgressByUnitIdPath = {
 	unitId: string;
 };
 
+export const PutApiProgressByUnitIdStatus200StatusEnum = {
+	backlog: "backlog",
+	active: "active",
+	paused: "paused",
+	completed: "completed",
+	dropped: "dropped",
+} as const;
+
+export type PutApiProgressByUnitIdStatus200StatusEnum =
+	(typeof PutApiProgressByUnitIdStatus200StatusEnum)[keyof typeof PutApiProgressByUnitIdStatus200StatusEnum];
+
 /**
  * @type object
  */
@@ -55337,9 +55372,10 @@ export type PutApiProgressByUnitIdStatus200 = {
 	 */
 	unitId: string;
 	/**
+	 * @default 'backlog'
 	 * @type string
 	 */
-	status: string;
+	status: PutApiProgressByUnitIdStatus200StatusEnum;
 	/**
 	 * @type number
 	 */
@@ -55473,7 +55509,6 @@ export type PutApiProgressByUnitIdBody = {
 	 * @type number | undefined
 	 */
 	progress?: number;
-	completedCount?: string | number;
 	totalTimeMs?: string | number;
 	lastContentStructureNodeId?: (string | null) | null;
 };
@@ -55716,6 +55751,188 @@ export type GetApiProgressByUnitIdNodesResponse =
 	| GetApiProgressByUnitIdNodesStatus422
 	| GetApiProgressByUnitIdNodesStatus429
 	| GetApiProgressByUnitIdNodesStatus500;
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdCompletePath = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+};
+
+export const PostApiProgressByUnitIdCompleteStatus200StatusEnum = {
+	backlog: "backlog",
+	active: "active",
+	paused: "paused",
+	completed: "completed",
+	dropped: "dropped",
+} as const;
+
+export type PostApiProgressByUnitIdCompleteStatus200StatusEnum =
+	(typeof PostApiProgressByUnitIdCompleteStatus200StatusEnum)[keyof typeof PostApiProgressByUnitIdCompleteStatus200StatusEnum];
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdCompleteStatus200 = {
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	profileId: string;
+	/**
+	 * @description
+	 * Format: `uuid`
+	 * @type string
+	 */
+	unitId: string;
+	/**
+	 * @default 'backlog'
+	 * @type string
+	 */
+	status: PostApiProgressByUnitIdCompleteStatus200StatusEnum;
+	/**
+	 * @type number
+	 */
+	progress: number;
+	/**
+	 * @type boolean
+	 */
+	isDeleted: boolean;
+	completedCount: string | number;
+	totalTimeMs: string | number;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	firstSeenAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	lastSeenAt: string;
+	lastContentStructureNodeId: (string | null) | null;
+	lastReadAnchor: (void | null) | null;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	createdAt: string;
+	/**
+	 * @description
+	 * Format: `date-time`
+	 * @type string
+	 */
+	updatedAt: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdCompleteStatus404 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'UnitNotFound'
+		 * @type string
+		 */
+		code: "UnitNotFound";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdCompleteStatus422 = ValidationError;
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdCompleteStatus429 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @type string
+		 */
+		code: "ApiTokenRateLimitExceeded";
+		/**
+		 * @type string
+		 */
+		message: string;
+		details?: JsonValue;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdCompleteStatus500 = InternalError;
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdCompleteBody = {
+	totalTimeMs?: string | number;
+};
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdCompleteOptions = {
+	body: PostApiProgressByUnitIdCompleteBody;
+	path: PostApiProgressByUnitIdCompletePath;
+	query?: never;
+	headers?: never;
+};
+
+/**
+ * @type object
+ */
+export type PostApiProgressByUnitIdCompleteResponses = {
+	"200": PostApiProgressByUnitIdCompleteStatus200;
+	"404": PostApiProgressByUnitIdCompleteStatus404;
+	"422": PostApiProgressByUnitIdCompleteStatus422;
+	"429": PostApiProgressByUnitIdCompleteStatus429;
+	"500": PostApiProgressByUnitIdCompleteStatus500;
+};
+
+/**
+ * @description Union of all possible responses
+ */
+export type PostApiProgressByUnitIdCompleteResponse =
+	| PostApiProgressByUnitIdCompleteStatus200
+	| PostApiProgressByUnitIdCompleteStatus404
+	| PostApiProgressByUnitIdCompleteStatus422
+	| PostApiProgressByUnitIdCompleteStatus429
+	| PostApiProgressByUnitIdCompleteStatus500;
 
 /**
  * @type object

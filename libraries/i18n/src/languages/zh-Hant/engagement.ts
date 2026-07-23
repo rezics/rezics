@@ -66,11 +66,25 @@ export default {
 	progressByType: {
 		book: {
 			title: "閱讀進度",
-			listSummary: insert("已閱讀 {{percent}}%", { percent: Number }),
+			summaryTitle: "我的閱讀",
+			dialogDescription: "記錄閱讀狀態與目前位置；完成本次閱讀時，已讀次數會增加一次。",
+			listSummary: insert("已閱讀 {{percent}}% · 已讀 {{count}} 次", {
+				percent: Number,
+				count: Number,
+			}),
 			status: "閱讀狀態",
 			progress: "閱讀完成度",
+			completedCount: "已讀次數",
 			lastChapter: "目前章節",
 			noChapter: "尚未選擇章節",
+			recordAction: "記錄閱讀",
+			startAction: "開始閱讀",
+			updateAction: "更新進度",
+			resumeAction: "繼續閱讀",
+			startAgainAction: "再讀一次",
+			restartAction: "重新開始",
+			completeAction: "完成本次閱讀",
+			completedFeedback: insert("已完成第 {{count}} 次閱讀", { count: Number }),
 			statuses: {
 				backlog: "想讀",
 				active: "閱讀中",
@@ -81,6 +95,8 @@ export default {
 		},
 		media: {
 			title: "觀影進度",
+			summaryTitle: "我的觀看",
+			dialogDescription: "記錄觀看狀態與播放位置；完成本次觀看時，完整觀看次數會增加一次。",
 			listSummary: insert("已觀看 {{percent}}% · 完整觀看 {{count}} 次", {
 				percent: Number,
 				count: Number,
@@ -89,6 +105,14 @@ export default {
 			progress: "播放進度",
 			completedCount: "完整觀看次數",
 			totalMinutes: "累計觀看分鐘",
+			recordAction: "記錄觀看",
+			startAction: "開始觀看",
+			updateAction: "更新進度",
+			resumeAction: "繼續觀看",
+			startAgainAction: "再看一次",
+			restartAction: "重新開始",
+			completeAction: "完成本次觀看",
+			completedFeedback: insert("已完成第 {{count}} 次觀看", { count: Number }),
 			statuses: {
 				backlog: "想看",
 				active: "觀看中",
@@ -99,6 +123,8 @@ export default {
 		},
 		software: {
 			title: "使用紀錄",
+			summaryTitle: "我的使用",
+			dialogDescription: "記錄使用狀態與累計時間；完成本次使用時，完成次數會增加一次。",
 			listSummary: insert("完成 {{count}} 次 · 累計 {{minutes}} 分鐘", {
 				count: Number,
 				minutes: Number,
@@ -106,6 +132,14 @@ export default {
 			status: "使用狀態",
 			completedCount: "完成次數",
 			totalMinutes: "累計使用分鐘",
+			recordAction: "記錄使用",
+			startAction: "開始使用",
+			updateAction: "更新紀錄",
+			resumeAction: "繼續使用",
+			startAgainAction: "再次使用",
+			restartAction: "重新開始",
+			completeAction: "完成本次使用",
+			completedFeedback: insert("已記錄第 {{count}} 次完成", { count: Number }),
 			statuses: {
 				backlog: "想使用",
 				active: "使用中",
@@ -115,6 +149,11 @@ export default {
 			},
 		},
 	},
+	progressNotRecorded: "尚未記錄",
+	completionCountChange: insert("完成次數將由 {{current}} 增加為 {{next}}。", {
+		current: Number,
+		next: Number,
+	}),
 	updateProgress: "更新進度",
 	removeProgress: "刪除進度",
 	removeProgressPrompt: "這個條目的狀態、進度、完成與時間記錄將不再保留。",

@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import Elysia from "elysia";
 
 import { getUnitReadCondition } from "../../authorization/unit/query";
@@ -17,6 +17,7 @@ import {
 import { ContentStructureNodeNotFound } from "../content-structure/errors";
 import { ProgressNotFound } from "./errors";
 import {
+	CompleteProgressBody,
 	ListProgressQuery,
 	ProgressNodeParams,
 	ProgressUnitParams,
@@ -192,7 +193,6 @@ export default new Elysia({ prefix: "/progress" })
 						unitId: params.unitId,
 						status: body.status,
 						progress: body.progress,
-						completedCount: body.completedCount,
 						totalTimeMs:
 							body.totalTimeMs === undefined ? undefined : BigInt(body.totalTimeMs),
 						lastContentStructureNodeId: body.lastContentStructureNodeId,
@@ -203,13 +203,19 @@ export default new Elysia({ prefix: "/progress" })
 						target: [unitProgress.profileId, unitProgress.unitId],
 						set: {
 							status: body.status,
-							progress: body.progress,
-							completedCount: body.completedCount,
+							progress:
+								body.progress ??
+								sql`case when ${unitProgress.deletedAt} is null then ${unitProgress.progress} else 0 end`,
+							completedCount: sql`case when ${unitProgress.deletedAt} is null then ${unitProgress.completedCount} else 0 end`,
 							totalTimeMs:
 								body.totalTimeMs === undefined
-									? undefined
+									? sql`case when ${unitProgress.deletedAt} is null then ${unitProgress.totalTimeMs} else 0 end`
 									: BigInt(body.totalTimeMs),
-							lastContentStructureNodeId: body.lastContentStructureNodeId,
+							firstSeenAt: sql`case when ${unitProgress.deletedAt} is null then ${unitProgress.firstSeenAt} else ${now} end`,
+							lastContentStructureNodeId:
+								body.lastContentStructureNodeId === undefined
+									? sql`case when ${unitProgress.deletedAt} is null then ${unitProgress.lastContentStructureNodeId} else null end`
+									: body.lastContentStructureNodeId,
 							deletedAt: null,
 							lastSeenAt: now,
 						},
@@ -231,6 +237,57 @@ export default new Elysia({ prefix: "/progress" })
 				]),
 			},
 			detail: { summary: "Create or replace progress", tags: ["Progress"] },
+		},
+	)
+	.post(
+		"/:unitId/complete",
+		async ({ profile, authorization, params, body }) => {
+			await authorization.unit.ensureCanRead(params.unitId);
+			const now = new Date();
+			const progress = (
+				await database
+					.insert(unitProgress)
+					.values({
+						profileId: profile.unitId,
+						unitId: params.unitId,
+						status: "completed",
+						progress: 1,
+						completedCount: 1,
+						totalTimeMs:
+							body.totalTimeMs === undefined ? undefined : BigInt(body.totalTimeMs),
+						lastContentStructureNodeId: null,
+						lastSeenAt: now,
+					})
+					.onConflictDoUpdate({
+						target: [unitProgress.profileId, unitProgress.unitId],
+						set: {
+							status: "completed",
+							progress: 1,
+							completedCount: sql`case when ${unitProgress.deletedAt} is null then ${unitProgress.completedCount} + 1 else 1 end`,
+							totalTimeMs:
+								body.totalTimeMs === undefined
+									? sql`case when ${unitProgress.deletedAt} is null then ${unitProgress.totalTimeMs} else 0 end`
+									: BigInt(body.totalTimeMs),
+							firstSeenAt: sql`case when ${unitProgress.deletedAt} is null then ${unitProgress.firstSeenAt} else ${now} end`,
+							lastContentStructureNodeId: null,
+							deletedAt: null,
+							lastSeenAt: now,
+						},
+					})
+					.returning()
+			)[0];
+			if (!progress) throw new Error("Progress completion did not return a row");
+			return toProgressResponse(progress);
+		},
+		{
+			access: "write:interaction:write",
+			params: ProgressUnitParams,
+			body: CompleteProgressBody,
+			response: {
+				[StatusCodes.OK]: ProgressResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+			},
+			detail: { summary: "Complete current progress", tags: ["Progress"] },
 		},
 	)
 	.delete(

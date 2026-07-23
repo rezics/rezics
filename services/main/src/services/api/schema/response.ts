@@ -26,6 +26,7 @@ import {
 	CreditAttributionRoleValues,
 	EntityAssociationPolicyModeValues,
 	PlatformCapabilityValues,
+	ProgressStatusValues,
 	SubjectAssociationRoleValues,
 	UnitKindValues,
 } from "../../database/schema/contract-values";
@@ -568,11 +569,12 @@ export const PreferencesResponse = t.Object({
 	contentRatings: t.Array(t.String()),
 	preferredLanguages: t.Array(ContentLanguage),
 });
+const ProgressStatusResponse = t.UnionEnum(ProgressStatusValues);
 export const ProgressListResponse = t.Object({
 	items: t.Array(
 		t.Object({
 			unitId: Uuid,
-			status: t.String(),
+			status: ProgressStatusResponse,
 			progress: t.Number(),
 			completedCount: t.Integer(),
 			totalTimeMs: t.Integer(),
@@ -588,7 +590,7 @@ export const ProgressListResponse = t.Object({
 export const ProgressResponse = t.Object({
 	profileId: Uuid,
 	unitId: Uuid,
-	status: t.String(),
+	status: ProgressStatusResponse,
 	progress: t.Number(),
 	isDeleted: t.Boolean(),
 	completedCount: t.Integer(),

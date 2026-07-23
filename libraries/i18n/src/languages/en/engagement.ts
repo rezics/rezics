@@ -67,11 +67,26 @@ export default {
 	progressByType: {
 		book: {
 			title: "Reading progress",
-			listSummary: insert("{{percent}}% read", { percent: Number }),
+			summaryTitle: "My reading",
+			dialogDescription:
+				"Record your reading status and current position. Completing this read adds one to your completed reads.",
+			listSummary: insert("{{percent}}% read · {{count}} completed reads", {
+				percent: Number,
+				count: Number,
+			}),
 			status: "Reading status",
 			progress: "Reading completion",
+			completedCount: "Completed reads",
 			lastChapter: "Current chapter",
 			noChapter: "No chapter selected",
+			recordAction: "Record reading",
+			startAction: "Start reading",
+			updateAction: "Update progress",
+			resumeAction: "Resume reading",
+			startAgainAction: "Read again",
+			restartAction: "Start over",
+			completeAction: "Complete this read",
+			completedFeedback: insert("Completed read {{count}}", { count: Number }),
 			statuses: {
 				backlog: "Want to read",
 				active: "Reading",
@@ -82,6 +97,9 @@ export default {
 		},
 		media: {
 			title: "Viewing progress",
+			summaryTitle: "My viewing",
+			dialogDescription:
+				"Record your viewing status and playback position. Completing this view adds one to your complete views.",
 			listSummary: insert("{{percent}}% viewed · {{count}} complete views", {
 				percent: Number,
 				count: Number,
@@ -90,6 +108,14 @@ export default {
 			progress: "Playback progress",
 			completedCount: "Complete views",
 			totalMinutes: "Total viewing minutes",
+			recordAction: "Record viewing",
+			startAction: "Start watching",
+			updateAction: "Update progress",
+			resumeAction: "Resume watching",
+			startAgainAction: "Watch again",
+			restartAction: "Start over",
+			completeAction: "Complete this view",
+			completedFeedback: insert("Completed view {{count}}", { count: Number }),
 			statuses: {
 				backlog: "Want to watch",
 				active: "Watching",
@@ -100,6 +126,9 @@ export default {
 		},
 		software: {
 			title: "Usage record",
+			summaryTitle: "My usage",
+			dialogDescription:
+				"Record your usage status and total time. Completing this use adds one to your completions.",
 			listSummary: insert("{{count}} completions · {{minutes}} minutes", {
 				count: Number,
 				minutes: Number,
@@ -107,6 +136,14 @@ export default {
 			status: "Usage status",
 			completedCount: "Completions",
 			totalMinutes: "Total usage minutes",
+			recordAction: "Record usage",
+			startAction: "Start using",
+			updateAction: "Update record",
+			resumeAction: "Resume using",
+			startAgainAction: "Use again",
+			restartAction: "Start over",
+			completeAction: "Complete this use",
+			completedFeedback: insert("Completion {{count}} recorded", { count: Number }),
 			statuses: {
 				backlog: "Want to use",
 				active: "Using",
@@ -116,6 +153,11 @@ export default {
 			},
 		},
 	},
+	progressNotRecorded: "Not recorded",
+	completionCountChange: insert("Completion count will increase from {{current}} to {{next}}.", {
+		current: Number,
+		next: Number,
+	}),
 	updateProgress: "Update progress",
 	removeProgress: "Delete progress",
 	removeProgressPrompt:

@@ -1212,6 +1212,12 @@ import type {
 	GetApiProgressByUnitIdNodesStatus422,
 	GetApiProgressByUnitIdNodesStatus429,
 	GetApiProgressByUnitIdNodesStatus500,
+	PostApiProgressByUnitIdCompleteOptions,
+	PostApiProgressByUnitIdCompleteStatus200,
+	PostApiProgressByUnitIdCompleteStatus404,
+	PostApiProgressByUnitIdCompleteStatus422,
+	PostApiProgressByUnitIdCompleteStatus429,
+	PostApiProgressByUnitIdCompleteStatus500,
 	PutApiProgressByUnitIdNodesByNodeIdOptions,
 	PutApiProgressByUnitIdNodesByNodeIdStatus200,
 	PutApiProgressByUnitIdNodesByNodeIdStatus404,
@@ -1985,6 +1991,7 @@ import {
 	putApiProgressByUnitId,
 	deleteApiProgressByUnitId,
 	getApiProgressByUnitIdNodes,
+	postApiProgressByUnitIdComplete,
 	putApiProgressByUnitIdNodesByNodeId,
 	deleteApiProgressByUnitIdNodesByNodeId,
 	getApiCollections,
@@ -21245,6 +21252,105 @@ export function useGetApiProgressByUnitIdNodes<
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
+}
+
+export const postApiProgressByUnitIdCompleteMutationKey = () =>
+	[{ url: "/api/progress/:unitId/complete" }] as const;
+
+export function postApiProgressByUnitIdCompleteMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiProgressByUnitIdCompleteMutationKey();
+	return mutationOptions<
+		PostApiProgressByUnitIdCompleteStatus200,
+		ResponseErrorConfig<
+			| PostApiProgressByUnitIdCompleteStatus404
+			| PostApiProgressByUnitIdCompleteStatus422
+			| PostApiProgressByUnitIdCompleteStatus429
+			| PostApiProgressByUnitIdCompleteStatus500
+		>,
+		PostApiProgressByUnitIdCompleteOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiProgressByUnitIdComplete({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Complete current progress
+ * {@link /api/progress/:unitId/complete}
+ */
+export function usePostApiProgressByUnitIdComplete<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiProgressByUnitIdCompleteStatus200,
+			ResponseErrorConfig<
+				| PostApiProgressByUnitIdCompleteStatus404
+				| PostApiProgressByUnitIdCompleteStatus422
+				| PostApiProgressByUnitIdCompleteStatus429
+				| PostApiProgressByUnitIdCompleteStatus500
+			>,
+			PostApiProgressByUnitIdCompleteOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey = mutationOptions.mutationKey ?? postApiProgressByUnitIdCompleteMutationKey();
+
+	const baseOptions = postApiProgressByUnitIdCompleteMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiProgressByUnitIdCompleteStatus200,
+		ResponseErrorConfig<
+			| PostApiProgressByUnitIdCompleteStatus404
+			| PostApiProgressByUnitIdCompleteStatus422
+			| PostApiProgressByUnitIdCompleteStatus429
+			| PostApiProgressByUnitIdCompleteStatus500
+		>,
+		PostApiProgressByUnitIdCompleteOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiProgressByUnitIdCompleteStatus200,
+		ResponseErrorConfig<
+			| PostApiProgressByUnitIdCompleteStatus404
+			| PostApiProgressByUnitIdCompleteStatus422
+			| PostApiProgressByUnitIdCompleteStatus429
+			| PostApiProgressByUnitIdCompleteStatus500
+		>,
+		PostApiProgressByUnitIdCompleteOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiProgressByUnitIdCompleteStatus200,
+		ResponseErrorConfig<
+			| PostApiProgressByUnitIdCompleteStatus404
+			| PostApiProgressByUnitIdCompleteStatus422
+			| PostApiProgressByUnitIdCompleteStatus429
+			| PostApiProgressByUnitIdCompleteStatus500
+		>,
+		PostApiProgressByUnitIdCompleteOptions,
+		TContext
+	>;
 }
 
 export const putApiProgressByUnitIdNodesByNodeIdMutationKey = () =>
