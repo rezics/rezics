@@ -1,4 +1,4 @@
-h1:o5FH8mSdPIrBSkRmSrPdsj6bUfg7FGMwlNfbZOywIS8=
+h1:9Ue7hmP7ppCdMLpbGlgMSLECjzsjUvHHIWGjwp+A9Ow=
 20260718070400_current_baseline.sql h1:u9QkCNmNKf+J8LE4/Lz03NbMrJf4RTid39bT22xn5ew=
 20260718070401_history_invariants.sql h1:ZtbZeYtN6E3/SM2hzpdVuXS7pICASEq93v29wpj7dDs=
 20260718154924_unit_realm_restrictions.sql h1:87+KV38BAlkYD150B4fAMEe19exDPGV12bR3dfNuHjA=
@@ -45,3 +45,4 @@ h1:o5FH8mSdPIrBSkRmSrPdsj6bUfg7FGMwlNfbZOywIS8=
 20260723160001_shared_search_queries.sql h1:c9qNf5umM1cyxw5bdsGDpXh9TXiyV4R/fHG41QxsXTw=
 20260723170000_realm_tag_search_projection.sql h1:s872d0617RmBI6hQT3t/jPaE2WIqFWHgKIsBENuKglk=
 20260723170001_profile_realm_tag_sources.sql h1:/DFiaaVRSoVUrpXSffqfHh6LCMhMLQ0TB+DQMP7UNHg=
+20260723170002_attribution_role_registries.sql h1:0N0JN/E3m68u68utxxhxgSHSTXSFtpCBivPvzespAS4=

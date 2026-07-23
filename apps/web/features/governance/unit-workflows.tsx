@@ -38,6 +38,12 @@ import { RequireSession } from "@/features/auth/require-session";
 import { profileHref } from "@/features/profiles/profile-route";
 import { useTranslation } from "@/i18n/client";
 import { RequestFailure } from "@/i18n/request-failure";
+import {
+	CreditAttributionRoles,
+	isKnownAttributionRole,
+	isSubjectAssociationRole,
+	SubjectAssociationRoles,
+} from "@/features/units/attribution-role";
 
 type AccessRole = "viewer" | "editor" | "publishing_editor" | "maintainer";
 type AssociationKind = "credit" | "subject";
@@ -329,7 +335,7 @@ function AssociationProposalManager({
 	side: AssociationSide;
 	kind: AssociationKind;
 }) {
-	const { t, locale } = useTranslation(["errors", "governance", "ui"]);
+	const { t, locale } = useTranslation(["errors", "governance", "ui", "units"]);
 	const queryClient = useQueryClient();
 	const queryOptions = {
 		path: { unitId },
@@ -360,28 +366,55 @@ function AssociationProposalManager({
 		event.preventDefault();
 		const formElement = event.currentTarget;
 		const form = new FormData(formElement);
-		const common = {
-			kind,
-			role: String(form.get("role") ?? "").trim(),
-			expiresAt: toIsoDate(form.get("expiresAt")),
-		};
+		const role = String(form.get("role") ?? "");
+		const expiresAt = toIsoDate(form.get("expiresAt"));
+		const relatedUnitId = String(form.get("relatedUnitId") ?? "").trim();
 		try {
-			if (side === "source")
-				await request.mutateAsync({
-					path: { unitId },
-					body: {
-						...common,
-						targetUnitId: String(form.get("relatedUnitId") ?? "").trim(),
-					},
-				});
-			else
-				await invite.mutateAsync({
-					path: { unitId },
-					body: {
-						...common,
-						sourceUnitId: String(form.get("relatedUnitId") ?? "").trim(),
-					},
-				});
+			if (kind === "credit") {
+				if (!isKnownAttributionRole(role)) return;
+				if (side === "source")
+					await request.mutateAsync({
+						path: { unitId },
+						body: {
+							kind,
+							role,
+							expiresAt,
+							targetUnitId: relatedUnitId,
+						},
+					});
+				else
+					await invite.mutateAsync({
+						path: { unitId },
+						body: {
+							kind,
+							role,
+							expiresAt,
+							sourceUnitId: relatedUnitId,
+						},
+					});
+			} else {
+				if (!isSubjectAssociationRole(role)) return;
+				if (side === "source")
+					await request.mutateAsync({
+						path: { unitId },
+						body: {
+							kind,
+							role,
+							expiresAt,
+							targetUnitId: relatedUnitId,
+						},
+					});
+				else
+					await invite.mutateAsync({
+						path: { unitId },
+						body: {
+							kind,
+							role,
+							expiresAt,
+							sourceUnitId: relatedUnitId,
+						},
+					});
+			}
 			formElement.reset();
 		} catch {
 			// The typed mutation state supplies the visible API error.
@@ -412,7 +445,22 @@ function AssociationProposalManager({
 						<div className="grid gap-4 sm:grid-cols-2">
 							<Field required>
 								<FieldLabel>{t.governance.associationRole}</FieldLabel>
-								<Input maxLength={64} name="role" required />
+								<NativeSelect name="role" required>
+									{(kind === "credit"
+										? CreditAttributionRoles
+										: SubjectAssociationRoles
+									).map((role) => (
+										<NativeSelectOption key={role} value={role}>
+											{kind === "credit"
+												? isKnownAttributionRole(role)
+													? t.units.attributionRoles[role]
+													: role
+												: isSubjectAssociationRole(role)
+													? t.units.subjectAssociationRoles[role]
+													: role}
+										</NativeSelectOption>
+									))}
+								</NativeSelect>
 							</Field>
 							<Field required>
 								<FieldLabel>{t.governance.proposalExpiry}</FieldLabel>
@@ -449,7 +497,15 @@ function AssociationProposalManager({
 							<div className="rounded-lg border p-4 text-sm" key={proposal.id}>
 								<div className="flex flex-wrap items-start justify-between gap-3">
 									<div className="grid gap-1">
-										<span className="font-medium">{proposal.role}</span>
+										<span className="font-medium">
+											{proposal.kind === "credit" &&
+											isKnownAttributionRole(proposal.role)
+												? t.units.attributionRoles[proposal.role]
+												: proposal.kind === "subject" &&
+													  isSubjectAssociationRole(proposal.role)
+													? t.units.subjectAssociationRoles[proposal.role]
+													: proposal.role}
+										</span>
 										<span className="text-muted-foreground">
 											{t.governance.direction[proposal.direction]} ·{" "}
 											{side === "source"

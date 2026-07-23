@@ -4,7 +4,6 @@ import { toContentLanguage } from "@rezics/i18n";
 import type { Translation } from "@rezics/i18n";
 import { PublicationLicenseRegistry } from "@rezics/license";
 import {
-	Badge,
 	Card,
 	CardContent,
 	DataList,
@@ -22,9 +21,14 @@ import { UnitTagSummary } from "@/features/tags/components/unit-tag-summary";
 import { useTranslation } from "@/i18n/client";
 import { readPortableText } from "@/lib/block";
 import { selectLocalization } from "@/lib/localization";
-import { isKnownAttributionRole } from "../attribution-role";
+import { findPrimaryBookAuthor } from "../attribution-role";
+import {
+	CompactCreditAttributionGroups,
+	PrimaryBookAuthorSection,
+} from "../components/catalog-attribution-sections";
+import { CatalogSubjectGroups } from "../components/catalog-subject-groups";
 import { useCatalogDetail } from "../components/catalog-detail-workspace";
-import { publicUnitHref } from "../routing/public-unit-route";
+import { catalogCreditsHref } from "../routing/catalog-detail-routes";
 
 function formatDate(value: string | null, language: string): string | undefined {
 	if (!value) return undefined;
@@ -90,6 +94,8 @@ export function CatalogOverviewPage() {
 		[t.units.detail.updatedAt, formatDate(unit.updatedAt, locale.current)],
 	] as const;
 	const domainFacts = getDomainFacts(detail, locale.current, t);
+	const primaryAuthor = type === "book" ? findPrimaryBookAuthor(unit.attributions) : undefined;
+	const creditsHref = catalogCreditsHref(type, unit.id);
 
 	return (
 		<div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_19rem]">
@@ -111,6 +117,8 @@ export function CatalogOverviewPage() {
 					</Card>
 				</DetailSection>
 
+				{primaryAuthor ? <PrimaryBookAuthorSection attribution={primaryAuthor} /> : null}
+
 				<DetailSection title={t.units.detail.tags}>
 					<UnitTagSummary type={type} unitId={unit.id} />
 				</DetailSection>
@@ -119,20 +127,9 @@ export function CatalogOverviewPage() {
 					<DetailSection title={t.units.detail.subjectAssociations}>
 						<Card>
 							<CardContent className="grid gap-4 p-5 sm:p-6">
-								<div className="flex flex-wrap gap-2">
-									{unit.subjectAssociations.slice(0, 8).map((association) => (
-										<Link
-											className="inline-flex"
-											href={`/entities/${association.entityEntryId}`}
-											key={association.id}
-										>
-											<Badge variant="outline">
-												{association.title ?? t.ui.unnamed} ·{" "}
-												{association.role}
-											</Badge>
-										</Link>
-									))}
-								</div>
+								<CatalogSubjectGroups
+									associations={unit.subjectAssociations.slice(0, 8)}
+								/>
 								<Link
 									className="w-fit text-sm font-medium text-link hover:text-link-hover hover:underline"
 									href={`/units/${type}/${unit.id}/associations`}
@@ -174,28 +171,14 @@ export function CatalogOverviewPage() {
 				{unit.attributions.length ? (
 					<DetailSection title={t.units.detail.credits}>
 						<Card>
-							<CardContent className="grid gap-2 p-5 text-sm">
-								{unit.attributions.map((attribution) => {
-									const href = publicUnitHref(
-										attribution.creditedUnit.kind,
-										attribution.creditedUnit,
-									);
-									const role = isKnownAttributionRole(attribution.role)
-										? t.units.attributionRoles[attribution.role]
-										: attribution.role;
-									const label = `${attribution.creditedUnit.title ?? t.ui.unnamed} · ${role}`;
-									return href ? (
-										<Link
-											className="min-w-0 break-words text-link hover:text-link-hover hover:underline"
-											href={href}
-											key={attribution.id}
-										>
-											{label}
-										</Link>
-									) : (
-										<span key={attribution.id}>{label}</span>
-									);
-								})}
+							<CardContent className="grid gap-4 p-5">
+								<CompactCreditAttributionGroups attributions={unit.attributions} />
+								<Link
+									className="w-fit text-sm font-medium text-link hover:text-link-hover hover:underline"
+									href={creditsHref}
+								>
+									{t.units.detail.viewAllCredits}
+								</Link>
 							</CardContent>
 						</Card>
 					</DetailSection>

@@ -2,7 +2,9 @@ import { type Static, t } from "elysia";
 
 import {
 	AliasKindValues,
+	CreditAttributionRoleValues,
 	EntityAssociationPolicyModeValues,
+	SubjectAssociationRoleValues,
 	UnitKindValues,
 } from "../../database/schema/contract-values";
 import { FractionalPosition, ContentLanguage, LocalizationInput, Uuid } from "../schema";
@@ -37,7 +39,7 @@ export type ListTagsQuery = Static<typeof ListTagsQuery>;
 
 export const AddUnitCreditBody = t.Object({
 	creditedUnitId: Uuid,
-	role: t.String({ minLength: 1, maxLength: 64 }),
+	role: t.UnionEnum(CreditAttributionRoleValues),
 	position: t.Optional(FractionalPosition),
 });
 export type AddUnitCreditBody = Static<typeof AddUnitCreditBody>;
@@ -45,7 +47,7 @@ export type AddUnitCreditBody = Static<typeof AddUnitCreditBody>;
 export const AddUnitSubjectAssociationBody = t.Object(
 	{
 		entityId: Uuid,
-		role: t.String({ minLength: 1, maxLength: 64 }),
+		role: t.UnionEnum(SubjectAssociationRoleValues),
 		position: t.Optional(FractionalPosition),
 	},
 	{ additionalProperties: false },

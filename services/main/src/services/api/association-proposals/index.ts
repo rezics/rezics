@@ -3,12 +3,19 @@ import Elysia, { t } from "elysia";
 
 import session from "../../auth/session";
 import {
+	isCreditAttributionRole,
+	isSubjectAssociationRole,
+} from "../../database/schema/contract-values";
+import {
 	createAssociationInvitation,
 	createAssociationRequest,
 	listAssociationProposals,
 	resolveAssociationProposal,
 } from "../../units/association-proposals";
-import { AssociationProposalExpiryInvalid } from "../../units/errors";
+import {
+	AssociationProposalExpiryInvalid,
+	AssociationProposalRoleInvalid,
+} from "../../units/errors";
 import { NoContentResponse } from "../schema/action-response";
 import { toApiErrorResponse } from "../schema/response";
 import {
@@ -69,21 +76,37 @@ export default new Elysia({ prefix: "/unit" })
 	)
 	.post(
 		"/:unitId/association-proposals/requests",
-		async ({ authorization, profile, params, body }) =>
-			createAssociationRequest(authorization, profile.unitId, {
+		async ({ authorization, profile, params, body }) => {
+			const common = {
 				sourceUnitId: params.unitId,
 				targetUnitId: body.targetUnitId,
+				expiresAt: futureDate(body.expiresAt),
+			};
+			if (body.kind === "credit") {
+				if (!isCreditAttributionRole(body.role)) throw new AssociationProposalRoleInvalid();
+				return createAssociationRequest(authorization, profile.unitId, {
+					...common,
+					kind: body.kind,
+					role: body.role,
+				});
+			}
+			if (!isSubjectAssociationRole(body.role)) throw new AssociationProposalRoleInvalid();
+			return createAssociationRequest(authorization, profile.unitId, {
+				...common,
 				kind: body.kind,
 				role: body.role,
-				expiresAt: futureDate(body.expiresAt),
-			}),
+			});
+		},
 		{
 			access: "session-only",
 			params: UnitAssociationProposalParams,
 			body: CreateAssociationRequestBody,
 			response: {
 				[StatusCodes.OK]: AssociationProposalResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["AssociationProposalExpiryInvalid"]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"AssociationProposalExpiryInvalid",
+					"AssociationProposalRoleInvalid",
+				]),
 				[StatusCodes.FORBIDDEN]: ProposalForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: ProposalNotFoundResponse,
 				[StatusCodes.CONFLICT]: ProposalConflictResponse,
@@ -93,21 +116,37 @@ export default new Elysia({ prefix: "/unit" })
 	)
 	.post(
 		"/:unitId/association-proposals/invitations",
-		async ({ authorization, profile, params, body }) =>
-			createAssociationInvitation(authorization, profile.unitId, {
+		async ({ authorization, profile, params, body }) => {
+			const common = {
 				sourceUnitId: body.sourceUnitId,
 				targetUnitId: params.unitId,
+				expiresAt: futureDate(body.expiresAt),
+			};
+			if (body.kind === "credit") {
+				if (!isCreditAttributionRole(body.role)) throw new AssociationProposalRoleInvalid();
+				return createAssociationInvitation(authorization, profile.unitId, {
+					...common,
+					kind: body.kind,
+					role: body.role,
+				});
+			}
+			if (!isSubjectAssociationRole(body.role)) throw new AssociationProposalRoleInvalid();
+			return createAssociationInvitation(authorization, profile.unitId, {
+				...common,
 				kind: body.kind,
 				role: body.role,
-				expiresAt: futureDate(body.expiresAt),
-			}),
+			});
+		},
 		{
 			access: "session-only",
 			params: UnitAssociationProposalParams,
 			body: CreateAssociationInvitationBody,
 			response: {
 				[StatusCodes.OK]: AssociationProposalResponse,
-				[StatusCodes.BAD_REQUEST]: toApiErrorResponse(["AssociationProposalExpiryInvalid"]),
+				[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+					"AssociationProposalExpiryInvalid",
+					"AssociationProposalRoleInvalid",
+				]),
 				[StatusCodes.FORBIDDEN]: ProposalForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: ProposalNotFoundResponse,
 				[StatusCodes.CONFLICT]: ProposalConflictResponse,

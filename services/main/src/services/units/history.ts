@@ -54,6 +54,8 @@ import {
 	unitRevisionHead,
 	unitRevisionSlot,
 	UnitRevisionSlotRoleValues,
+	CreditAttributionRoleValues,
+	SubjectAssociationRoleValues,
 	unitRevisionTag,
 	unitTag,
 	unitVariant,
@@ -217,9 +219,11 @@ const unitAliasRowSchema = schemaFactory.createSelectSchema(unitAlias, {
 });
 const creditAttributionRowSchema = schemaFactory.createSelectSchema(creditAttribution, {
 	position: FractionalPositionSchema,
+	role: z.enum(CreditAttributionRoleValues),
 });
 const subjectAssociationRowSchema = schemaFactory.createSelectSchema(subjectAssociation, {
 	position: FractionalPositionSchema,
+	role: z.enum(SubjectAssociationRoleValues),
 });
 const unitLinkRowSchema = schemaFactory.createSelectSchema(unitLink, {
 	position: FractionalPositionSchema,

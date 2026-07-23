@@ -25,6 +25,8 @@ import {
 	GovernanceNoteRoleValues,
 	GovernanceReasonCodeValues,
 	CommunityCatalogUnitKindValues,
+	CreditAttributionRoleValues,
+	isCreditAttributionRoleForUnitKind,
 	DockKindValues,
 	DockKindsByUnitKind,
 	AssociationKindValues,
@@ -33,6 +35,7 @@ import {
 	moderationCase,
 	ModerationActionKindValues,
 	PostKindValues,
+	SubjectAssociationRoleValues,
 	profileRealmTagSubscription,
 	realmUnitStatus,
 	realmUnitStatusEvent,
@@ -217,8 +220,18 @@ describe("database schema contracts", () => {
 		expect(proposal.checks.map((constraint) => constraint.name)).toEqual(
 			expect.arrayContaining([
 				"unit_association_proposal_not_self_check",
+				"unit_association_proposal_role_check",
 				"unit_association_proposal_resolution_shape_check",
 			]),
+		);
+		expect(CreditAttributionRoleValues).toContain("author");
+		expect(CreditAttributionRoleValues).toContain("translator");
+		expect(isCreditAttributionRoleForUnitKind("book", "author")).toBe(true);
+		expect(isCreditAttributionRoleForUnitKind("media", "author")).toBe(false);
+		expect(SubjectAssociationRoleValues).toContain("primary_character");
+		expect(SubjectAssociationRoleValues).toContain("source_work");
+		expect(getTableConfig(subjectAssociation).checks.map(({ name }) => name)).toContain(
+			"subject_association_role_check",
 		);
 		expect(proposal.indexes.map((index) => index.config.name)).toEqual(
 			expect.arrayContaining([
@@ -244,6 +257,9 @@ describe("database schema contracts", () => {
 		);
 		expect(attribution.uniqueConstraints.map((constraint) => constraint.name)).toContain(
 			"credit_attribution_source_credited_role_key",
+		);
+		expect(attribution.checks.map(({ name }) => name)).toContain(
+			"credit_attribution_role_check",
 		);
 	});
 

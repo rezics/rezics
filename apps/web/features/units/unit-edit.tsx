@@ -40,6 +40,12 @@ import {
 	type LocalizationImageAssetValue,
 } from "@/features/media/components/localization-image-upload-field";
 import { isVariantUnitType, type UnitType } from "./unit-types";
+import {
+	CreditAttributionRolesByUnitType,
+	isCreditAttributionRoleForUnitType,
+	isSubjectAssociationRole,
+	SubjectAssociationRoles,
+} from "./attribution-role";
 
 export type EditableUnit = GetApiUnitsByTypeByUnitIdStatus200;
 type Unit = EditableUnit;
@@ -535,12 +541,14 @@ export function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }
 						if (!creditEntity) return;
 						const formElement = event.currentTarget;
 						const form = new FormData(formElement);
+						const role = String(form.get("role") ?? "");
+						if (!isCreditAttributionRoleForUnitType(type, role)) return;
 						try {
 							await credit.mutateAsync({
 								path: { type, unitId: unit.id },
 								body: {
 									creditedUnitId: creditEntity.id,
-									role: String(form.get("role") ?? "").trim(),
+									role,
 								},
 							});
 							setCreditEntity(undefined);
@@ -553,7 +561,13 @@ export function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }
 					<EntityPicker index="entity" onChange={setCreditEntity} value={creditEntity} />
 					<Field required>
 						<FieldLabel>{t.units.editor.creditRole}</FieldLabel>
-						<Input maxLength={64} name="role" required />
+						<NativeSelect name="role" required>
+							{CreditAttributionRolesByUnitType[type].map((role) => (
+								<NativeSelectOption key={role} value={role}>
+									{t.units.attributionRoles[role]}
+								</NativeSelectOption>
+							))}
+						</NativeSelect>
 					</Field>
 					<Button
 						disabled={!creditEntity}
@@ -573,12 +587,14 @@ export function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }
 						if (!subjectEntity) return;
 						const formElement = event.currentTarget;
 						const form = new FormData(formElement);
+						const role = String(form.get("role") ?? "");
+						if (!isSubjectAssociationRole(role)) return;
 						try {
 							await subject.mutateAsync({
 								path: { type, unitId: unit.id },
 								body: {
 									entityId: subjectEntity.id,
-									role: String(form.get("role") ?? "").trim(),
+									role,
 								},
 							});
 							setSubjectEntity(undefined);
@@ -595,7 +611,13 @@ export function UnitRelationships({ type, unit }: { type: UnitType; unit: Unit }
 					/>
 					<Field required>
 						<FieldLabel>{t.units.editor.subjectRole}</FieldLabel>
-						<Input maxLength={64} name="role" required />
+						<NativeSelect name="role" required>
+							{SubjectAssociationRoles.map((role) => (
+								<NativeSelectOption key={role} value={role}>
+									{t.units.subjectAssociationRoles[role]}
+								</NativeSelectOption>
+							))}
+						</NativeSelect>
 					</Field>
 					<Button
 						disabled={!subjectEntity}

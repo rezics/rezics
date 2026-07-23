@@ -2,7 +2,7 @@ import { and, asc, eq, inArray, isNull, ne } from "drizzle-orm";
 
 import { database, type DatabaseExecutor } from "../database";
 import { creditAttribution, unit } from "../database/schema";
-import type { UnitKind } from "../database/schema/contract-values";
+import type { CreditAttributionRole, UnitKind } from "../database/schema/contract-values";
 import {
 	primaryUnitSummary,
 	primaryUnitTitle,
@@ -19,7 +19,7 @@ export const PublisherAttributionRole = "publisher" as const;
 
 export type UnitAttributionSummary = {
 	readonly id: string;
-	readonly role: string;
+	readonly role: CreditAttributionRole;
 	readonly position: string;
 	readonly creditedUnit: {
 		readonly id: string;

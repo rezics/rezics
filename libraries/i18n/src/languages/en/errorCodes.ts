@@ -135,7 +135,10 @@ export default {
 	AssociationProposalConflict: "This association proposal is no longer actionable.",
 	AssociationProposalExpired: "This association proposal has expired.",
 	AssociationProposalExpiryInvalid: "The association proposal expiry must be in the future.",
+	AssociationProposalRoleInvalid:
+		"The selected association role does not match the association type.",
 	CreditAttributionNotFound: "This credit attribution could not be found.",
+	CreditAttributionRoleInvalid: "The selected credit role does not apply to this type of Unit.",
 	SubjectAssociationNotFound: "This subject association could not be found.",
 	AliasNotFound: "This alias could not be found.",
 	TagApplicationNotFound: "This tag application could not be found.",

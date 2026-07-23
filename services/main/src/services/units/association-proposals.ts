@@ -3,7 +3,13 @@ import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { Authorization } from "../authorization";
 import { associationTargetScope } from "../authorization/unit/scope";
 import { database, type DatabaseTransaction } from "../database";
-import type { AssociationKind } from "../database/schema/contract-values";
+import {
+	type AssociationKind,
+	type CreditAttributionRole,
+	isCreditAttributionRole,
+	isSubjectAssociationRole,
+	type SubjectAssociationRole,
+} from "../database/schema/contract-values";
 import {
 	auditEvent,
 	creditAttribution,
@@ -30,6 +36,16 @@ export type AssociationProposalState =
 	"pending" | "expired" | "accepted" | "declined" | "cancelled";
 
 type ProposalRecord = typeof unitAssociationProposal.$inferSelect;
+type AssociationRoleInput =
+	| { readonly kind: "credit"; readonly role: CreditAttributionRole }
+	| { readonly kind: "subject"; readonly role: SubjectAssociationRole };
+type AssociationTargetInput = {
+	readonly sourceUnitId: string;
+	readonly targetUnitId: string;
+} & AssociationRoleInput;
+type CreateAssociationProposalInput = AssociationTargetInput & {
+	readonly expiresAt: Date;
+};
 
 export const sourceAssociationScope = (kind: AssociationKind) =>
 	[kind === "credit" ? "credit-attributions" : "subject-associations"] as const;
@@ -42,7 +58,12 @@ export function associationProposalState(
 }
 
 export function presentAssociationProposal(record: ProposalRecord, now = new Date()) {
-	return { ...record, state: associationProposalState(record, now) };
+	const state = associationProposalState(record, now);
+	if (record.kind === "credit" && isCreditAttributionRole(record.role))
+		return { ...record, kind: record.kind, role: record.role, state };
+	if (record.kind === "subject" && isSubjectAssociationRole(record.role))
+		return { ...record, kind: record.kind, role: record.role, state };
+	throw new TypeError("Stored association proposal role does not match its kind");
 }
 
 async function lockAssociationWorkflow(
@@ -85,12 +106,7 @@ async function ensureSourceUnitExists(tx: DatabaseTransaction, sourceUnitId: str
 
 async function ensureNoRelationshipOrProposal(
 	tx: DatabaseTransaction,
-	input: {
-		readonly sourceUnitId: string;
-		readonly targetUnitId: string;
-		readonly kind: AssociationKind;
-		readonly role: string;
-	},
+	input: AssociationTargetInput,
 ) {
 	const [relationship] =
 		input.kind === "credit"
@@ -136,11 +152,7 @@ async function ensureNoRelationshipOrProposal(
 
 async function insertProposal(
 	tx: DatabaseTransaction,
-	input: {
-		readonly sourceUnitId: string;
-		readonly targetUnitId: string;
-		readonly kind: AssociationKind;
-		readonly role: string;
+	input: AssociationTargetInput & {
 		readonly direction: "request" | "invitation";
 		readonly createdByProfileId: string;
 		readonly expiresAt: Date;
@@ -165,13 +177,7 @@ async function insertProposal(
 export async function createAssociationRequest(
 	authorization: Authorization<string>,
 	actorProfileId: string,
-	input: {
-		readonly sourceUnitId: string;
-		readonly targetUnitId: string;
-		readonly kind: AssociationKind;
-		readonly role: string;
-		readonly expiresAt: Date;
-	},
+	input: CreateAssociationProposalInput,
 ) {
 	return database.transaction(async (tx) => {
 		await lockAssociationWorkflow(tx, input.sourceUnitId, input.targetUnitId);
@@ -201,13 +207,7 @@ export async function createAssociationRequest(
 export async function createAssociationInvitation(
 	authorization: Authorization<string>,
 	actorProfileId: string,
-	input: {
-		readonly sourceUnitId: string;
-		readonly targetUnitId: string;
-		readonly kind: AssociationKind;
-		readonly role: string;
-		readonly expiresAt: Date;
-	},
+	input: CreateAssociationProposalInput,
 ) {
 	if (input.sourceUnitId === input.targetUnitId) throw new AssociationProposalConflict();
 	return database.transaction(async (tx) => {
@@ -354,6 +354,8 @@ async function materializeProposal(
 		);
 	await ensureNoRelationshipOrProposalForAcceptance(tx, proposal);
 	if (proposal.kind === "credit") {
+		if (!isCreditAttributionRole(proposal.role))
+			throw new TypeError("Stored credit proposal has an invalid role");
 		const [last] = await tx
 			.select({ position: creditAttribution.position })
 			.from(creditAttribution)
@@ -368,6 +370,8 @@ async function materializeProposal(
 			position: fractionalPositionBetween(last?.position, null),
 		});
 	} else {
+		if (!isSubjectAssociationRole(proposal.role))
+			throw new TypeError("Stored subject proposal has an invalid role");
 		const [last] = await tx
 			.select({ position: subjectAssociation.position })
 			.from(subjectAssociation)
@@ -396,28 +400,36 @@ async function ensureNoRelationshipOrProposalForAcceptance(
 ) {
 	const [relationship] =
 		proposal.kind === "credit"
-			? await tx
-					.select({ id: creditAttribution.id })
-					.from(creditAttribution)
-					.where(
-						and(
-							eq(creditAttribution.sourceUnitId, proposal.sourceUnitId),
-							eq(creditAttribution.creditedUnitId, proposal.targetUnitId),
-							eq(creditAttribution.role, proposal.role),
-						),
-					)
-					.limit(1)
-			: await tx
-					.select({ id: subjectAssociation.id })
-					.from(subjectAssociation)
-					.where(
-						and(
-							eq(subjectAssociation.unitId, proposal.sourceUnitId),
-							eq(subjectAssociation.entityId, proposal.targetUnitId),
-							eq(subjectAssociation.role, proposal.role),
-						),
-					)
-					.limit(1);
+			? isCreditAttributionRole(proposal.role)
+				? await tx
+						.select({ id: creditAttribution.id })
+						.from(creditAttribution)
+						.where(
+							and(
+								eq(creditAttribution.sourceUnitId, proposal.sourceUnitId),
+								eq(creditAttribution.creditedUnitId, proposal.targetUnitId),
+								eq(creditAttribution.role, proposal.role),
+							),
+						)
+						.limit(1)
+				: (() => {
+						throw new TypeError("Stored credit proposal has an invalid role");
+					})()
+			: isSubjectAssociationRole(proposal.role)
+				? await tx
+						.select({ id: subjectAssociation.id })
+						.from(subjectAssociation)
+						.where(
+							and(
+								eq(subjectAssociation.unitId, proposal.sourceUnitId),
+								eq(subjectAssociation.entityId, proposal.targetUnitId),
+								eq(subjectAssociation.role, proposal.role),
+							),
+						)
+						.limit(1)
+				: (() => {
+						throw new TypeError("Stored subject proposal has an invalid role");
+					})();
 	if (relationship) throw new AssociationProposalConflict();
 }
 

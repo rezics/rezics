@@ -35,6 +35,7 @@ import {
 	unitLocalization,
 	unitVariant,
 } from "../../database/schema";
+import { isCreditAttributionRoleForUnitKind } from "../../database/schema/contract-values";
 import { AliasSearchScoreThreshold } from "../../database/schema/contract-values";
 import {
 	AddUnitAliasBody,
@@ -90,6 +91,7 @@ import { AliasNotFound, TagApplicationNotFound, UnitVersionNotFound } from "./er
 import { TagNotFound } from "../tags/errors";
 import {
 	CreditAttributionNotFound,
+	CreditAttributionRoleInvalid,
 	EntityEntryNotFound,
 	SubjectAssociationNotFound,
 } from "../../entities/errors";
@@ -759,6 +761,8 @@ export default new Elysia()
 				"/credit-attributions",
 				async ({ params, authorization, body }) => {
 					await checkUnitType(params.unitId, params.type);
+					if (!isCreditAttributionRoleForUnitKind(params.type, body.role))
+						throw new CreditAttributionRoleInvalid(params.type, body.role);
 					await ensureUnitMutationAuthorized(authorization.unit, params.unitId, [
 						"credit-attributions",
 					]);
@@ -810,6 +814,9 @@ export default new Elysia()
 					body: AddUnitCreditBody,
 					response: {
 						[StatusCodes.OK]: CreditAttributionResponse,
+						[StatusCodes.BAD_REQUEST]: toApiErrorResponse([
+							"CreditAttributionRoleInvalid",
+						]),
 						[StatusCodes.FORBIDDEN]: toApiErrorResponse([
 							"UnitPermissionForbidden",
 							"UnitProtected",

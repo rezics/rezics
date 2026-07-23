@@ -14,6 +14,10 @@ export function catalogDetailHref<Type extends CatalogDetailUnitType>(
 	return sectionId === "overview" ? base : `${base}/${sectionId}`;
 }
 
+export function catalogCreditsHref(type: CatalogDetailUnitType, unitId: string): string {
+	return `/units/${type}/${unitId}/credits`;
+}
+
 export function parseCatalogDetailSection<Type extends CatalogDetailUnitType>(
 	pathname: string,
 	type: Type,

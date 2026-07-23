@@ -1424,9 +1424,11 @@ export const ApiErrorCode = {
 	AssociationProposalConflict: "AssociationProposalConflict",
 	AssociationProposalExpired: "AssociationProposalExpired",
 	AssociationProposalExpiryInvalid: "AssociationProposalExpiryInvalid",
+	AssociationProposalRoleInvalid: "AssociationProposalRoleInvalid",
 	EntityEntryNotFound: "EntityEntryNotFound",
 	EntityAssociationRestricted: "EntityAssociationRestricted",
 	CreditAttributionNotFound: "CreditAttributionNotFound",
+	CreditAttributionRoleInvalid: "CreditAttributionRoleInvalid",
 	SubjectAssociationNotFound: "SubjectAssociationNotFound",
 	UnitNotFollowable: "UnitNotFollowable",
 	UserSelfFollowForbidden: "UserSelfFollowForbidden",
@@ -1741,14 +1743,6 @@ export type GetApiUnitByUnitIdAssociationProposalsQuery = {
 	includeResolved?: boolean;
 };
 
-export const GetApiUnitByUnitIdAssociationProposalsStatus200ItemsKindEnum = {
-	credit: "credit",
-	subject: "subject",
-} as const;
-
-export type GetApiUnitByUnitIdAssociationProposalsStatus200ItemsKindEnum =
-	(typeof GetApiUnitByUnitIdAssociationProposalsStatus200ItemsKindEnum)[keyof typeof GetApiUnitByUnitIdAssociationProposalsStatus200ItemsKindEnum];
-
 export const GetApiUnitByUnitIdAssociationProposalsStatus200ItemsDirectionEnum = {
 	request: "request",
 	invitation: "invitation",
@@ -1767,6 +1761,46 @@ export const GetApiUnitByUnitIdAssociationProposalsStatus200ItemsStateEnum = {
 
 export type GetApiUnitByUnitIdAssociationProposalsStatus200ItemsStateEnum =
 	(typeof GetApiUnitByUnitIdAssociationProposalsStatus200ItemsStateEnum)[keyof typeof GetApiUnitByUnitIdAssociationProposalsStatus200ItemsStateEnum];
+
+export const GetApiUnitByUnitIdAssociationProposalsStatus200ItemsKindEnum = {
+	credit: "credit",
+	subject: "subject",
+} as const;
+
+export type GetApiUnitByUnitIdAssociationProposalsStatus200ItemsKindEnum =
+	(typeof GetApiUnitByUnitIdAssociationProposalsStatus200ItemsKindEnum)[keyof typeof GetApiUnitByUnitIdAssociationProposalsStatus200ItemsKindEnum];
+
+export const GetApiUnitByUnitIdAssociationProposalsStatus200ItemsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+	primary_character: "primary_character",
+	featured_character: "featured_character",
+	appears: "appears",
+	about: "about",
+	setting: "setting",
+	source_work: "source_work",
+	canonical_wiki_page: "canonical_wiki_page",
+	related_subject: "related_subject",
+} as const;
+
+export type GetApiUnitByUnitIdAssociationProposalsStatus200ItemsRoleEnum =
+	(typeof GetApiUnitByUnitIdAssociationProposalsStatus200ItemsRoleEnum)[keyof typeof GetApiUnitByUnitIdAssociationProposalsStatus200ItemsRoleEnum];
 
 /**
  * @type object
@@ -1794,15 +1828,6 @@ export type GetApiUnitByUnitIdAssociationProposalsStatus200 = {
 		 * @type string
 		 */
 		targetUnitId: string;
-		/**
-		 * @default 'credit'
-		 * @type string
-		 */
-		kind: GetApiUnitByUnitIdAssociationProposalsStatus200ItemsKindEnum;
-		/**
-		 * @type string
-		 */
-		role: string;
 		/**
 		 * @type string
 		 */
@@ -1838,6 +1863,16 @@ export type GetApiUnitByUnitIdAssociationProposalsStatus200 = {
 		 * @type string
 		 */
 		updatedAt: string;
+		/**
+		 * @default 'credit'
+		 * @type string
+		 */
+		kind: GetApiUnitByUnitIdAssociationProposalsStatus200ItemsKindEnum;
+		/**
+		 * @default 'author'
+		 * @type string
+		 */
+		role: GetApiUnitByUnitIdAssociationProposalsStatus200ItemsRoleEnum;
 	}[];
 };
 
@@ -1969,14 +2004,6 @@ export type PostApiUnitByUnitIdAssociationProposalsRequestsPath = {
 	unitId: string;
 };
 
-export const PostApiUnitByUnitIdAssociationProposalsRequestsStatus200KindEnum = {
-	credit: "credit",
-	subject: "subject",
-} as const;
-
-export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus200KindEnum =
-	(typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus200KindEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus200KindEnum];
-
 export const PostApiUnitByUnitIdAssociationProposalsRequestsStatus200DirectionEnum = {
 	request: "request",
 	invitation: "invitation",
@@ -1995,6 +2022,46 @@ export const PostApiUnitByUnitIdAssociationProposalsRequestsStatus200StateEnum =
 
 export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus200StateEnum =
 	(typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus200StateEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus200StateEnum];
+
+export const PostApiUnitByUnitIdAssociationProposalsRequestsStatus200KindEnum = {
+	credit: "credit",
+	subject: "subject",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus200KindEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus200KindEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus200KindEnum];
+
+export const PostApiUnitByUnitIdAssociationProposalsRequestsStatus200RoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+	primary_character: "primary_character",
+	featured_character: "featured_character",
+	appears: "appears",
+	about: "about",
+	setting: "setting",
+	source_work: "source_work",
+	canonical_wiki_page: "canonical_wiki_page",
+	related_subject: "related_subject",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus200RoleEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus200RoleEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus200RoleEnum];
 
 /**
  * @type object
@@ -2018,15 +2085,6 @@ export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus200 = {
 	 * @type string
 	 */
 	targetUnitId: string;
-	/**
-	 * @default 'credit'
-	 * @type string
-	 */
-	kind: PostApiUnitByUnitIdAssociationProposalsRequestsStatus200KindEnum;
-	/**
-	 * @type string
-	 */
-	role: string;
 	/**
 	 * @type string
 	 */
@@ -2062,7 +2120,25 @@ export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus200 = {
 	 * @type string
 	 */
 	updatedAt: string;
+	/**
+	 * @default 'credit'
+	 * @type string
+	 */
+	kind: PostApiUnitByUnitIdAssociationProposalsRequestsStatus200KindEnum;
+	/**
+	 * @default 'author'
+	 * @type string
+	 */
+	role: PostApiUnitByUnitIdAssociationProposalsRequestsStatus200RoleEnum;
 };
+
+export const PostApiUnitByUnitIdAssociationProposalsRequestsStatus400ErrorCodeEnum = {
+	AssociationProposalExpiryInvalid: "AssociationProposalExpiryInvalid",
+	AssociationProposalRoleInvalid: "AssociationProposalRoleInvalid",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus400ErrorCodeEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus400ErrorCodeEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsRequestsStatus400ErrorCodeEnum];
 
 /**
  * @type object
@@ -2076,7 +2152,7 @@ export type PostApiUnitByUnitIdAssociationProposalsRequestsStatus400 = {
 		 * @default 'AssociationProposalExpiryInvalid'
 		 * @type string
 		 */
-		code: "AssociationProposalExpiryInvalid";
+		code: PostApiUnitByUnitIdAssociationProposalsRequestsStatus400ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -2221,6 +2297,38 @@ export const PostApiUnitByUnitIdAssociationProposalsRequestsRequestKindEnum = {
 export type PostApiUnitByUnitIdAssociationProposalsRequestsRequestKindEnum =
 	(typeof PostApiUnitByUnitIdAssociationProposalsRequestsRequestKindEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsRequestsRequestKindEnum];
 
+export const PostApiUnitByUnitIdAssociationProposalsRequestsRequestRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+	primary_character: "primary_character",
+	featured_character: "featured_character",
+	appears: "appears",
+	about: "about",
+	setting: "setting",
+	source_work: "source_work",
+	canonical_wiki_page: "canonical_wiki_page",
+	related_subject: "related_subject",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsRequestsRequestRoleEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsRequestsRequestRoleEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsRequestsRequestRoleEnum];
+
 /**
  * @type object
  */
@@ -2237,11 +2345,10 @@ export type PostApiUnitByUnitIdAssociationProposalsRequestsBody = {
 	 */
 	kind: PostApiUnitByUnitIdAssociationProposalsRequestsRequestKindEnum;
 	/**
-	 * @minLength 1
-	 * @maxLength 64
+	 * @default 'author'
 	 * @type string
 	 */
-	role: string;
+	role: PostApiUnitByUnitIdAssociationProposalsRequestsRequestRoleEnum;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -2297,14 +2404,6 @@ export type PostApiUnitByUnitIdAssociationProposalsInvitationsPath = {
 	unitId: string;
 };
 
-export const PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200KindEnum = {
-	credit: "credit",
-	subject: "subject",
-} as const;
-
-export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200KindEnum =
-	(typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200KindEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200KindEnum];
-
 export const PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200DirectionEnum = {
 	request: "request",
 	invitation: "invitation",
@@ -2323,6 +2422,46 @@ export const PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200StateEnu
 
 export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200StateEnum =
 	(typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200StateEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200StateEnum];
+
+export const PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200KindEnum = {
+	credit: "credit",
+	subject: "subject",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200KindEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200KindEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200KindEnum];
+
+export const PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200RoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+	primary_character: "primary_character",
+	featured_character: "featured_character",
+	appears: "appears",
+	about: "about",
+	setting: "setting",
+	source_work: "source_work",
+	canonical_wiki_page: "canonical_wiki_page",
+	related_subject: "related_subject",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200RoleEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200RoleEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200RoleEnum];
 
 /**
  * @type object
@@ -2346,15 +2485,6 @@ export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200 = {
 	 * @type string
 	 */
 	targetUnitId: string;
-	/**
-	 * @default 'credit'
-	 * @type string
-	 */
-	kind: PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200KindEnum;
-	/**
-	 * @type string
-	 */
-	role: string;
 	/**
 	 * @type string
 	 */
@@ -2390,7 +2520,25 @@ export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200 = {
 	 * @type string
 	 */
 	updatedAt: string;
+	/**
+	 * @default 'credit'
+	 * @type string
+	 */
+	kind: PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200KindEnum;
+	/**
+	 * @default 'author'
+	 * @type string
+	 */
+	role: PostApiUnitByUnitIdAssociationProposalsInvitationsStatus200RoleEnum;
 };
+
+export const PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400ErrorCodeEnum = {
+	AssociationProposalExpiryInvalid: "AssociationProposalExpiryInvalid",
+	AssociationProposalRoleInvalid: "AssociationProposalRoleInvalid",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400ErrorCodeEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400ErrorCodeEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400ErrorCodeEnum];
 
 /**
  * @type object
@@ -2404,7 +2552,7 @@ export type PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400 = {
 		 * @default 'AssociationProposalExpiryInvalid'
 		 * @type string
 		 */
-		code: "AssociationProposalExpiryInvalid";
+		code: PostApiUnitByUnitIdAssociationProposalsInvitationsStatus400ErrorCodeEnum;
 		/**
 		 * @type string
 		 */
@@ -2549,6 +2697,38 @@ export const PostApiUnitByUnitIdAssociationProposalsInvitationsRequestKindEnum =
 export type PostApiUnitByUnitIdAssociationProposalsInvitationsRequestKindEnum =
 	(typeof PostApiUnitByUnitIdAssociationProposalsInvitationsRequestKindEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsInvitationsRequestKindEnum];
 
+export const PostApiUnitByUnitIdAssociationProposalsInvitationsRequestRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+	primary_character: "primary_character",
+	featured_character: "featured_character",
+	appears: "appears",
+	about: "about",
+	setting: "setting",
+	source_work: "source_work",
+	canonical_wiki_page: "canonical_wiki_page",
+	related_subject: "related_subject",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsInvitationsRequestRoleEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsInvitationsRequestRoleEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsInvitationsRequestRoleEnum];
+
 /**
  * @type object
  */
@@ -2565,11 +2745,10 @@ export type PostApiUnitByUnitIdAssociationProposalsInvitationsBody = {
 	 */
 	kind: PostApiUnitByUnitIdAssociationProposalsInvitationsRequestKindEnum;
 	/**
-	 * @minLength 1
-	 * @maxLength 64
+	 * @default 'author'
 	 * @type string
 	 */
-	role: string;
+	role: PostApiUnitByUnitIdAssociationProposalsInvitationsRequestRoleEnum;
 	/**
 	 * @description
 	 * Format: `date-time`
@@ -2631,14 +2810,6 @@ export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptPath = {
 	proposalId: string;
 };
 
-export const PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200KindEnum = {
-	credit: "credit",
-	subject: "subject",
-} as const;
-
-export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200KindEnum =
-	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200KindEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200KindEnum];
-
 export const PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200DirectionEnum = {
 	request: "request",
 	invitation: "invitation",
@@ -2657,6 +2828,46 @@ export const PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200S
 
 export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200StateEnum =
 	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200StateEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200StateEnum];
+
+export const PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200KindEnum = {
+	credit: "credit",
+	subject: "subject",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200KindEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200KindEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200KindEnum];
+
+export const PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200RoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+	primary_character: "primary_character",
+	featured_character: "featured_character",
+	appears: "appears",
+	about: "about",
+	setting: "setting",
+	source_work: "source_work",
+	canonical_wiki_page: "canonical_wiki_page",
+	related_subject: "related_subject",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200RoleEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200RoleEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200RoleEnum];
 
 /**
  * @type object
@@ -2680,15 +2891,6 @@ export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200 =
 	 * @type string
 	 */
 	targetUnitId: string;
-	/**
-	 * @default 'credit'
-	 * @type string
-	 */
-	kind: PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200KindEnum;
-	/**
-	 * @type string
-	 */
-	role: string;
 	/**
 	 * @type string
 	 */
@@ -2724,6 +2926,16 @@ export type PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200 =
 	 * @type string
 	 */
 	updatedAt: string;
+	/**
+	 * @default 'credit'
+	 * @type string
+	 */
+	kind: PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200KindEnum;
+	/**
+	 * @default 'author'
+	 * @type string
+	 */
+	role: PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus200RoleEnum;
 };
 
 export const PostApiUnitByUnitIdAssociationProposalsByProposalIdAcceptStatus403ErrorCodeEnum = {
@@ -2903,14 +3115,6 @@ export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclinePath = {
 	proposalId: string;
 };
 
-export const PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200KindEnum = {
-	credit: "credit",
-	subject: "subject",
-} as const;
-
-export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200KindEnum =
-	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200KindEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200KindEnum];
-
 export const PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200DirectionEnum = {
 	request: "request",
 	invitation: "invitation",
@@ -2929,6 +3133,46 @@ export const PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200
 
 export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200StateEnum =
 	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200StateEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200StateEnum];
+
+export const PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200KindEnum = {
+	credit: "credit",
+	subject: "subject",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200KindEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200KindEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200KindEnum];
+
+export const PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200RoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+	primary_character: "primary_character",
+	featured_character: "featured_character",
+	appears: "appears",
+	about: "about",
+	setting: "setting",
+	source_work: "source_work",
+	canonical_wiki_page: "canonical_wiki_page",
+	related_subject: "related_subject",
+} as const;
+
+export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200RoleEnum =
+	(typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200RoleEnum)[keyof typeof PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200RoleEnum];
 
 /**
  * @type object
@@ -2952,15 +3196,6 @@ export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200 
 	 * @type string
 	 */
 	targetUnitId: string;
-	/**
-	 * @default 'credit'
-	 * @type string
-	 */
-	kind: PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200KindEnum;
-	/**
-	 * @type string
-	 */
-	role: string;
 	/**
 	 * @type string
 	 */
@@ -2996,6 +3231,16 @@ export type PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200 
 	 * @type string
 	 */
 	updatedAt: string;
+	/**
+	 * @default 'credit'
+	 * @type string
+	 */
+	kind: PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200KindEnum;
+	/**
+	 * @default 'author'
+	 * @type string
+	 */
+	role: PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus200RoleEnum;
 };
 
 export const PostApiUnitByUnitIdAssociationProposalsByProposalIdDeclineStatus403ErrorCodeEnum = {
@@ -5021,6 +5266,30 @@ export type GetApiRecommendationsPostsByPostIdQuery = {
 	limit?: string | number;
 };
 
+export const GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsRoleEnum =
+	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsRoleEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsRoleEnum];
+
 export const GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -5098,6 +5367,30 @@ export const GetApiRecommendationsPostsByPostIdStatus200ItemsPostKindEnum = {
 export type GetApiRecommendationsPostsByPostIdStatus200ItemsPostKindEnum =
 	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsPostKindEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsPostKindEnum];
 
+export const GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsRoleEnum =
+	(typeof GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsRoleEnum)[keyof typeof GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsRoleEnum];
+
 export const GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum =
 	{
 		slug_namespace: "slug_namespace",
@@ -5156,9 +5449,10 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 			 */
 			id: string;
 			/**
+			 * @default 'author'
 			 * @type string
 			 */
-			role: string;
+			role: GetApiRecommendationsPostsByPostIdStatus200ItemsAttributionsRoleEnum;
 			/**
 			 * @description
 			 * Format: `fractional-position`
@@ -5603,9 +5897,10 @@ export type GetApiRecommendationsPostsByPostIdStatus200 = {
 						 */
 						id: string;
 						/**
+						 * @default 'author'
 						 * @type string
 						 */
-						role: string;
+						role: GetApiRecommendationsPostsByPostIdStatus200ItemsReplyContextAttributionsRoleEnum;
 						/**
 						 * @description
 						 * Format: `fractional-position`
@@ -9871,6 +10166,30 @@ export type GetApiFeedQuery = {
 	limit?: string | number;
 };
 
+export const GetApiFeedStatus200ItemsAttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type GetApiFeedStatus200ItemsAttributionsRoleEnum =
+	(typeof GetApiFeedStatus200ItemsAttributionsRoleEnum)[keyof typeof GetApiFeedStatus200ItemsAttributionsRoleEnum];
+
 export const GetApiFeedStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -9965,6 +10284,30 @@ export const GetApiFeedStatus200ItemsPostKindEnum = {
 export type GetApiFeedStatus200ItemsPostKindEnum =
 	(typeof GetApiFeedStatus200ItemsPostKindEnum)[keyof typeof GetApiFeedStatus200ItemsPostKindEnum];
 
+export const GetApiFeedStatus200ItemsReplyContextAttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type GetApiFeedStatus200ItemsReplyContextAttributionsRoleEnum =
+	(typeof GetApiFeedStatus200ItemsReplyContextAttributionsRoleEnum)[keyof typeof GetApiFeedStatus200ItemsReplyContextAttributionsRoleEnum];
+
 export const GetApiFeedStatus200ItemsReplyContextAttributionsCreditedUnitKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -10022,9 +10365,10 @@ export type GetApiFeedStatus200 = {
 					 */
 					id: string;
 					/**
+					 * @default 'author'
 					 * @type string
 					 */
-					role: string;
+					role: GetApiFeedStatus200ItemsAttributionsRoleEnum;
 					/**
 					 * @description
 					 * Format: `fractional-position`
@@ -10341,9 +10685,10 @@ export type GetApiFeedStatus200 = {
 					 */
 					id: string;
 					/**
+					 * @default 'author'
 					 * @type string
 					 */
-					role: string;
+					role: GetApiFeedStatus200ItemsAttributionsRoleEnum;
 					/**
 					 * @description
 					 * Format: `fractional-position`
@@ -10787,9 +11132,10 @@ export type GetApiFeedStatus200 = {
 								 */
 								id: string;
 								/**
+								 * @default 'author'
 								 * @type string
 								 */
-								role: string;
+								role: GetApiFeedStatus200ItemsReplyContextAttributionsRoleEnum;
 								/**
 								 * @description
 								 * Format: `fractional-position`
@@ -35607,6 +35953,30 @@ export type GetApiUnitsByTypeQuery = {
 	limit?: string | number;
 };
 
+export const GetApiUnitsByTypeStatus200ItemsAttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type GetApiUnitsByTypeStatus200ItemsAttributionsRoleEnum =
+	(typeof GetApiUnitsByTypeStatus200ItemsAttributionsRoleEnum)[keyof typeof GetApiUnitsByTypeStatus200ItemsAttributionsRoleEnum];
+
 export const GetApiUnitsByTypeStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -35691,9 +36061,10 @@ export type GetApiUnitsByTypeStatus200 = {
 			 */
 			id: string;
 			/**
+			 * @default 'author'
 			 * @type string
 			 */
-			role: string;
+			role: GetApiUnitsByTypeStatus200ItemsAttributionsRoleEnum;
 			/**
 			 * @description
 			 * Format: `fractional-position`
@@ -36010,6 +36381,30 @@ export const PostApiUnitsByTypeStatus200License = {
 export type PostApiUnitsByTypeStatus200License =
 	(typeof PostApiUnitsByTypeStatus200License)[keyof typeof PostApiUnitsByTypeStatus200License];
 
+export const PostApiUnitsByTypeStatus200AttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type PostApiUnitsByTypeStatus200AttributionsRoleEnum =
+	(typeof PostApiUnitsByTypeStatus200AttributionsRoleEnum)[keyof typeof PostApiUnitsByTypeStatus200AttributionsRoleEnum];
+
 export const PostApiUnitsByTypeStatus200AttributionsCreditedUnitKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -36064,6 +36459,20 @@ export const PostApiUnitsByTypeStatus200LocalizationsAvatarIconPrefixEnum = {
 
 export type PostApiUnitsByTypeStatus200LocalizationsAvatarIconPrefixEnum =
 	(typeof PostApiUnitsByTypeStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeStatus200LocalizationsAvatarIconPrefixEnum];
+
+export const PostApiUnitsByTypeStatus200SubjectAssociationsRoleEnum = {
+	primary_character: "primary_character",
+	featured_character: "featured_character",
+	appears: "appears",
+	about: "about",
+	setting: "setting",
+	source_work: "source_work",
+	canonical_wiki_page: "canonical_wiki_page",
+	related_subject: "related_subject",
+} as const;
+
+export type PostApiUnitsByTypeStatus200SubjectAssociationsRoleEnum =
+	(typeof PostApiUnitsByTypeStatus200SubjectAssociationsRoleEnum)[keyof typeof PostApiUnitsByTypeStatus200SubjectAssociationsRoleEnum];
 
 export const PostApiUnitsByTypeStatus200VariantContextVariantsTypeEnum = {
 	book: "book",
@@ -36131,9 +36540,10 @@ export type PostApiUnitsByTypeStatus200 = {
 		 */
 		id: string;
 		/**
+		 * @default 'author'
 		 * @type string
 		 */
-		role: string;
+		role: PostApiUnitsByTypeStatus200AttributionsRoleEnum;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -36680,9 +37090,10 @@ export type PostApiUnitsByTypeStatus200 = {
 		 */
 		entityEntryId: string;
 		/**
+		 * @default 'primary_character'
 		 * @type string
 		 */
-		role: string;
+		role: PostApiUnitsByTypeStatus200SubjectAssociationsRoleEnum;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -37395,6 +37806,30 @@ export const GetApiUnitsByTypeByUnitIdStatus200License = {
 export type GetApiUnitsByTypeByUnitIdStatus200License =
 	(typeof GetApiUnitsByTypeByUnitIdStatus200License)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200License];
 
+export const GetApiUnitsByTypeByUnitIdStatus200AttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200AttributionsRoleEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200AttributionsRoleEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200AttributionsRoleEnum];
+
 export const GetApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -37449,6 +37884,20 @@ export const GetApiUnitsByTypeByUnitIdStatus200LocalizationsAvatarIconPrefixEnum
 
 export type GetApiUnitsByTypeByUnitIdStatus200LocalizationsAvatarIconPrefixEnum =
 	(typeof GetApiUnitsByTypeByUnitIdStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200LocalizationsAvatarIconPrefixEnum];
+
+export const GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsRoleEnum = {
+	primary_character: "primary_character",
+	featured_character: "featured_character",
+	appears: "appears",
+	about: "about",
+	setting: "setting",
+	source_work: "source_work",
+	canonical_wiki_page: "canonical_wiki_page",
+	related_subject: "related_subject",
+} as const;
+
+export type GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsRoleEnum =
+	(typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsRoleEnum)[keyof typeof GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsRoleEnum];
 
 export const GetApiUnitsByTypeByUnitIdStatus200VariantContextVariantsTypeEnum = {
 	book: "book",
@@ -37516,9 +37965,10 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		 */
 		id: string;
 		/**
+		 * @default 'author'
 		 * @type string
 		 */
-		role: string;
+		role: GetApiUnitsByTypeByUnitIdStatus200AttributionsRoleEnum;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -38065,9 +38515,10 @@ export type GetApiUnitsByTypeByUnitIdStatus200 = {
 		 */
 		entityEntryId: string;
 		/**
+		 * @default 'primary_character'
 		 * @type string
 		 */
-		role: string;
+		role: GetApiUnitsByTypeByUnitIdStatus200SubjectAssociationsRoleEnum;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -38389,6 +38840,30 @@ export const PatchApiUnitsByTypeByUnitIdStatus200License = {
 export type PatchApiUnitsByTypeByUnitIdStatus200License =
 	(typeof PatchApiUnitsByTypeByUnitIdStatus200License)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200License];
 
+export const PatchApiUnitsByTypeByUnitIdStatus200AttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200AttributionsRoleEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200AttributionsRoleEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200AttributionsRoleEnum];
+
 export const PatchApiUnitsByTypeByUnitIdStatus200AttributionsCreditedUnitKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -38443,6 +38918,20 @@ export const PatchApiUnitsByTypeByUnitIdStatus200LocalizationsAvatarIconPrefixEn
 
 export type PatchApiUnitsByTypeByUnitIdStatus200LocalizationsAvatarIconPrefixEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200LocalizationsAvatarIconPrefixEnum];
+
+export const PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsRoleEnum = {
+	primary_character: "primary_character",
+	featured_character: "featured_character",
+	appears: "appears",
+	about: "about",
+	setting: "setting",
+	source_work: "source_work",
+	canonical_wiki_page: "canonical_wiki_page",
+	related_subject: "related_subject",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsRoleEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsRoleEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsRoleEnum];
 
 export const PatchApiUnitsByTypeByUnitIdStatus200VariantContextVariantsTypeEnum = {
 	book: "book",
@@ -38510,9 +38999,10 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		 */
 		id: string;
 		/**
+		 * @default 'author'
 		 * @type string
 		 */
-		role: string;
+		role: PatchApiUnitsByTypeByUnitIdStatus200AttributionsRoleEnum;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -39059,9 +39549,10 @@ export type PatchApiUnitsByTypeByUnitIdStatus200 = {
 		 */
 		entityEntryId: string;
 		/**
+		 * @default 'primary_character'
 		 * @type string
 		 */
-		role: string;
+		role: PatchApiUnitsByTypeByUnitIdStatus200SubjectAssociationsRoleEnum;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -39863,6 +40354,30 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200License = {
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200License =
 	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200License)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200License];
 
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsRoleEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsRoleEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsRoleEnum];
+
 export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsCreditedUnitKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -39918,6 +40433,20 @@ export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200LocalizationsAvat
 
 export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200LocalizationsAvatarIconPrefixEnum =
 	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200LocalizationsAvatarIconPrefixEnum];
+
+export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsRoleEnum = {
+	primary_character: "primary_character",
+	featured_character: "featured_character",
+	appears: "appears",
+	about: "about",
+	setting: "setting",
+	source_work: "source_work",
+	canonical_wiki_page: "canonical_wiki_page",
+	related_subject: "related_subject",
+} as const;
+
+export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsRoleEnum =
+	(typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsRoleEnum)[keyof typeof PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsRoleEnum];
 
 export const PatchApiUnitsByTypeByUnitIdVariantContextStatus200VariantContextVariantsTypeEnum = {
 	book: "book",
@@ -39985,9 +40514,10 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		 */
 		id: string;
 		/**
+		 * @default 'author'
 		 * @type string
 		 */
-		role: string;
+		role: PatchApiUnitsByTypeByUnitIdVariantContextStatus200AttributionsRoleEnum;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -40534,9 +41064,10 @@ export type PatchApiUnitsByTypeByUnitIdVariantContextStatus200 = {
 		 */
 		entityEntryId: string;
 		/**
+		 * @default 'primary_character'
 		 * @type string
 		 */
-		role: string;
+		role: PatchApiUnitsByTypeByUnitIdVariantContextStatus200SubjectAssociationsRoleEnum;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -41016,6 +41547,30 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License = {
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License =
 	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200License];
 
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsRoleEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsRoleEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsRoleEnum];
+
 export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsCreditedUnitKindEnum =
 	{
 		slug_namespace: "slug_namespace",
@@ -41073,6 +41628,20 @@ export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200Localizatio
 
 export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LocalizationsAvatarIconPrefixEnum =
 	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200LocalizationsAvatarIconPrefixEnum];
+
+export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsRoleEnum = {
+	primary_character: "primary_character",
+	featured_character: "featured_character",
+	appears: "appears",
+	about: "about",
+	setting: "setting",
+	source_work: "source_work",
+	canonical_wiki_page: "canonical_wiki_page",
+	related_subject: "related_subject",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsRoleEnum =
+	(typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsRoleEnum)[keyof typeof PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsRoleEnum];
 
 export const PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200VariantContextVariantsTypeEnum =
 	{
@@ -41142,9 +41711,10 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		 */
 		id: string;
 		/**
+		 * @default 'author'
 		 * @type string
 		 */
-		role: string;
+		role: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200AttributionsRoleEnum;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -41691,9 +42261,10 @@ export type PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200 = {
 		 */
 		entityEntryId: string;
 		/**
+		 * @default 'primary_character'
 		 * @type string
 		 */
-		role: string;
+		role: PostApiUnitsByTypeByUnitIdVariantContextPromoteStatus200SubjectAssociationsRoleEnum;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -42177,6 +42748,30 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License = 
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License =
 	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200License];
 
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsRoleEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsRoleEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsRoleEnum];
+
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsCreditedUnitKindEnum =
 	{
 		slug_namespace: "slug_namespace",
@@ -42234,6 +42829,21 @@ export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200Localizati
 
 export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LocalizationsAvatarIconPrefixEnum =
 	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LocalizationsAvatarIconPrefixEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200LocalizationsAvatarIconPrefixEnum];
+
+export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsRoleEnum =
+	{
+		primary_character: "primary_character",
+		featured_character: "featured_character",
+		appears: "appears",
+		about: "about",
+		setting: "setting",
+		source_work: "source_work",
+		canonical_wiki_page: "canonical_wiki_page",
+		related_subject: "related_subject",
+	} as const;
+
+export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsRoleEnum =
+	(typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsRoleEnum)[keyof typeof PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsRoleEnum];
 
 export const PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200VariantContextVariantsTypeEnum =
 	{
@@ -42303,9 +42913,10 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 */
 		id: string;
 		/**
+		 * @default 'author'
 		 * @type string
 		 */
-		role: string;
+		role: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200AttributionsRoleEnum;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -42852,9 +43463,10 @@ export type PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200 = {
 		 */
 		entityEntryId: string;
 		/**
+		 * @default 'primary_character'
 		 * @type string
 		 */
-		role: string;
+		role: PutApiUnitsByTypeByUnitIdLocalizationsByLanguageStatus200SubjectAssociationsRoleEnum;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -45687,6 +46299,44 @@ export const GetApiEntitiesByUnitIdStatus200OwnerAvatarIconPrefixEnum = {
 export type GetApiEntitiesByUnitIdStatus200OwnerAvatarIconPrefixEnum =
 	(typeof GetApiEntitiesByUnitIdStatus200OwnerAvatarIconPrefixEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200OwnerAvatarIconPrefixEnum];
 
+export const GetApiEntitiesByUnitIdStatus200CreditAttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type GetApiEntitiesByUnitIdStatus200CreditAttributionsRoleEnum =
+	(typeof GetApiEntitiesByUnitIdStatus200CreditAttributionsRoleEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200CreditAttributionsRoleEnum];
+
+export const GetApiEntitiesByUnitIdStatus200SubjectAssociationsRoleEnum = {
+	primary_character: "primary_character",
+	featured_character: "featured_character",
+	appears: "appears",
+	about: "about",
+	setting: "setting",
+	source_work: "source_work",
+	canonical_wiki_page: "canonical_wiki_page",
+	related_subject: "related_subject",
+} as const;
+
+export type GetApiEntitiesByUnitIdStatus200SubjectAssociationsRoleEnum =
+	(typeof GetApiEntitiesByUnitIdStatus200SubjectAssociationsRoleEnum)[keyof typeof GetApiEntitiesByUnitIdStatus200SubjectAssociationsRoleEnum];
+
 /**
  * @type object
  */
@@ -46219,9 +46869,10 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 		 */
 		sourceUnitId: string;
 		/**
+		 * @default 'author'
 		 * @type string
 		 */
-		role: string;
+		role: GetApiEntitiesByUnitIdStatus200CreditAttributionsRoleEnum;
 	}[];
 	/**
 	 * @type array
@@ -46240,9 +46891,10 @@ export type GetApiEntitiesByUnitIdStatus200 = {
 		 */
 		unitId: string;
 		/**
+		 * @default 'primary_character'
 		 * @type string
 		 */
-		role: string;
+		role: GetApiEntitiesByUnitIdStatus200SubjectAssociationsRoleEnum;
 	}[];
 };
 
@@ -48331,6 +48983,30 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsPath = {
 	unitId: string;
 };
 
+export const PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200RoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200RoleEnum =
+	(typeof PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200RoleEnum)[keyof typeof PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200RoleEnum];
+
 export const PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200CreditedUnitKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -48374,9 +49050,10 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200 = {
 	 */
 	id: string;
 	/**
+	 * @default 'author'
 	 * @type string
 	 */
-	role: string;
+	role: PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200RoleEnum;
 	/**
 	 * @description
 	 * Format: `fractional-position`
@@ -48490,6 +49167,34 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200 = {
 	};
 };
 
+/**
+ * @type object
+ */
+export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus400 = {
+	/**
+	 * @type object
+	 */
+	error: {
+		/**
+		 * @default 'CreditAttributionRoleInvalid'
+		 * @type string
+		 */
+		code: "CreditAttributionRoleInvalid";
+		/**
+		 * @type string
+		 */
+		message: string;
+		/**
+		 * @type void | undefined
+		 */
+		details?: void;
+	};
+	/**
+	 * @type string
+	 */
+	requestId: string;
+};
+
 export const PostApiUnitsByTypeByUnitIdCreditAttributionsStatus403ErrorCodeEnum = {
 	UnitPermissionForbidden: "UnitPermissionForbidden",
 	UnitProtected: "UnitProtected",
@@ -48597,6 +49302,30 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus429 = {
  */
 export type PostApiUnitsByTypeByUnitIdCreditAttributionsStatus500 = InternalError;
 
+export const PostApiUnitsByTypeByUnitIdCreditAttributionsRequestRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdCreditAttributionsRequestRoleEnum =
+	(typeof PostApiUnitsByTypeByUnitIdCreditAttributionsRequestRoleEnum)[keyof typeof PostApiUnitsByTypeByUnitIdCreditAttributionsRequestRoleEnum];
+
 /**
  * @type object
  */
@@ -48608,11 +49337,10 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsBody = {
 	 */
 	creditedUnitId: string;
 	/**
-	 * @minLength 1
-	 * @maxLength 64
+	 * @default 'author'
 	 * @type string
 	 */
-	role: string;
+	role: PostApiUnitsByTypeByUnitIdCreditAttributionsRequestRoleEnum;
 	/**
 	 * @description
 	 * Format: `fractional-position`
@@ -48638,6 +49366,7 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsOptions = {
  */
 export type PostApiUnitsByTypeByUnitIdCreditAttributionsResponses = {
 	"200": PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200;
+	"400": PostApiUnitsByTypeByUnitIdCreditAttributionsStatus400;
 	"403": PostApiUnitsByTypeByUnitIdCreditAttributionsStatus403;
 	"404": PostApiUnitsByTypeByUnitIdCreditAttributionsStatus404;
 	"422": PostApiUnitsByTypeByUnitIdCreditAttributionsStatus422;
@@ -48650,6 +49379,7 @@ export type PostApiUnitsByTypeByUnitIdCreditAttributionsResponses = {
  */
 export type PostApiUnitsByTypeByUnitIdCreditAttributionsResponse =
 	| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200
+	| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus400
 	| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus403
 	| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus404
 	| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus422
@@ -48833,6 +49563,20 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsPath = {
 	unitId: string;
 };
 
+export const PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200RoleEnum = {
+	primary_character: "primary_character",
+	featured_character: "featured_character",
+	appears: "appears",
+	about: "about",
+	setting: "setting",
+	source_work: "source_work",
+	canonical_wiki_page: "canonical_wiki_page",
+	related_subject: "related_subject",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200RoleEnum =
+	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200RoleEnum)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200RoleEnum];
+
 /**
  * @type object
  */
@@ -48856,9 +49600,10 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200 = {
 	 */
 	entityId: string;
 	/**
+	 * @default 'primary_character'
 	 * @type string
 	 */
-	role: string;
+	role: PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus200RoleEnum;
 	/**
 	 * @description
 	 * Format: `fractional-position`
@@ -48988,6 +49733,20 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus429 = {
  */
 export type PostApiUnitsByTypeByUnitIdSubjectAssociationsStatus500 = InternalError;
 
+export const PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRoleEnum = {
+	primary_character: "primary_character",
+	featured_character: "featured_character",
+	appears: "appears",
+	about: "about",
+	setting: "setting",
+	source_work: "source_work",
+	canonical_wiki_page: "canonical_wiki_page",
+	related_subject: "related_subject",
+} as const;
+
+export type PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRoleEnum =
+	(typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRoleEnum)[keyof typeof PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRoleEnum];
+
 /**
  * @type object
  */
@@ -48999,11 +49758,10 @@ export type PostApiUnitsByTypeByUnitIdSubjectAssociationsBody = {
 	 */
 	entityId: string;
 	/**
-	 * @minLength 1
-	 * @maxLength 64
+	 * @default 'primary_character'
 	 * @type string
 	 */
-	role: string;
+	role: PostApiUnitsByTypeByUnitIdSubjectAssociationsRequestRoleEnum;
 	/**
 	 * @description
 	 * Format: `fractional-position`
@@ -60815,6 +61573,30 @@ export type GetApiReviewsQuery = {
 	limit?: string | number;
 };
 
+export const GetApiReviewsStatus200ItemsAttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type GetApiReviewsStatus200ItemsAttributionsRoleEnum =
+	(typeof GetApiReviewsStatus200ItemsAttributionsRoleEnum)[keyof typeof GetApiReviewsStatus200ItemsAttributionsRoleEnum];
+
 export const GetApiReviewsStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -60871,9 +61653,10 @@ export type GetApiReviewsStatus200 = {
 			 */
 			id: string;
 			/**
+			 * @default 'author'
 			 * @type string
 			 */
-			role: string;
+			role: GetApiReviewsStatus200ItemsAttributionsRoleEnum;
 			/**
 			 * @description
 			 * Format: `fractional-position`
@@ -61456,6 +62239,30 @@ export type GetApiReviewsByReviewIdQuery = {
 	realmId?: string;
 };
 
+export const GetApiReviewsByReviewIdStatus200AttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type GetApiReviewsByReviewIdStatus200AttributionsRoleEnum =
+	(typeof GetApiReviewsByReviewIdStatus200AttributionsRoleEnum)[keyof typeof GetApiReviewsByReviewIdStatus200AttributionsRoleEnum];
+
 export const GetApiReviewsByReviewIdStatus200AttributionsCreditedUnitKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -61508,9 +62315,10 @@ export type GetApiReviewsByReviewIdStatus200 = {
 		 */
 		id: string;
 		/**
+		 * @default 'author'
 		 * @type string
 		 */
-		role: string;
+		role: GetApiReviewsByReviewIdStatus200AttributionsRoleEnum;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -64787,6 +65595,30 @@ export const GetApiPostsStatus200ItemsPostKindEnum = {
 export type GetApiPostsStatus200ItemsPostKindEnum =
 	(typeof GetApiPostsStatus200ItemsPostKindEnum)[keyof typeof GetApiPostsStatus200ItemsPostKindEnum];
 
+export const GetApiPostsStatus200ItemsAttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type GetApiPostsStatus200ItemsAttributionsRoleEnum =
+	(typeof GetApiPostsStatus200ItemsAttributionsRoleEnum)[keyof typeof GetApiPostsStatus200ItemsAttributionsRoleEnum];
+
 export const GetApiPostsStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -64847,9 +65679,10 @@ export type GetApiPostsStatus200 = {
 			 */
 			id: string;
 			/**
+			 * @default 'author'
 			 * @type string
 			 */
-			role: string;
+			role: GetApiPostsStatus200ItemsAttributionsRoleEnum;
 			/**
 			 * @description
 			 * Format: `fractional-position`
@@ -65530,6 +66363,30 @@ export const GetApiPostsByPostIdStatus200PostKindEnum = {
 export type GetApiPostsByPostIdStatus200PostKindEnum =
 	(typeof GetApiPostsByPostIdStatus200PostKindEnum)[keyof typeof GetApiPostsByPostIdStatus200PostKindEnum];
 
+export const GetApiPostsByPostIdStatus200AttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type GetApiPostsByPostIdStatus200AttributionsRoleEnum =
+	(typeof GetApiPostsByPostIdStatus200AttributionsRoleEnum)[keyof typeof GetApiPostsByPostIdStatus200AttributionsRoleEnum];
+
 export const GetApiPostsByPostIdStatus200AttributionsCreditedUnitKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -65586,9 +66443,10 @@ export type GetApiPostsByPostIdStatus200 = {
 		 */
 		id: string;
 		/**
+		 * @default 'author'
 		 * @type string
 		 */
-		role: string;
+		role: GetApiPostsByPostIdStatus200AttributionsRoleEnum;
 		/**
 		 * @description
 		 * Format: `fractional-position`
@@ -66472,6 +67330,30 @@ export type GetApiPostsByPostIdRepliesQuery = {
 	limit?: string | number;
 };
 
+export const GetApiPostsByPostIdRepliesStatus200ItemsAttributionsRoleEnum = {
+	author: "author",
+	"co-author": "co-author",
+	translator: "translator",
+	illustrator: "illustrator",
+	editor: "editor",
+	publisher: "publisher",
+	letterer: "letterer",
+	colorist: "colorist",
+	developer: "developer",
+	composer: "composer",
+	designer: "designer",
+	director: "director",
+	producer: "producer",
+	writer: "writer",
+	actor: "actor",
+	narrator: "narrator",
+	studio: "studio",
+	distributor: "distributor",
+} as const;
+
+export type GetApiPostsByPostIdRepliesStatus200ItemsAttributionsRoleEnum =
+	(typeof GetApiPostsByPostIdRepliesStatus200ItemsAttributionsRoleEnum)[keyof typeof GetApiPostsByPostIdRepliesStatus200ItemsAttributionsRoleEnum];
+
 export const GetApiPostsByPostIdRepliesStatus200ItemsAttributionsCreditedUnitKindEnum = {
 	slug_namespace: "slug_namespace",
 	profile: "profile",
@@ -66533,9 +67415,10 @@ export type GetApiPostsByPostIdRepliesStatus200 = {
 			 */
 			id: string;
 			/**
+			 * @default 'author'
 			 * @type string
 			 */
-			role: string;
+			role: GetApiPostsByPostIdRepliesStatus200ItemsAttributionsRoleEnum;
 			/**
 			 * @description
 			 * Format: `fractional-position`

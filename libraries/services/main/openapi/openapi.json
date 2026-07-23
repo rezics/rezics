@@ -2325,9 +2325,11 @@
 					"AssociationProposalConflict",
 					"AssociationProposalExpired",
 					"AssociationProposalExpiryInvalid",
+					"AssociationProposalRoleInvalid",
 					"EntityEntryNotFound",
 					"EntityAssociationRestricted",
 					"CreditAttributionNotFound",
+					"CreditAttributionRoleInvalid",
 					"SubjectAssociationNotFound",
 					"UnitNotFollowable",
 					"UserSelfFollowForbidden",
@@ -2627,8 +2629,6 @@
 													"id",
 													"sourceUnitId",
 													"targetUnitId",
-													"kind",
-													"role",
 													"direction",
 													"createdByProfileId",
 													"expiresAt",
@@ -2637,7 +2637,9 @@
 													"resolvedAt",
 													"resolvedByProfileId",
 													"createdAt",
-													"updatedAt"
+													"updatedAt",
+													"kind",
+													"role"
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
@@ -2649,12 +2651,6 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"kind": {
-														"default": "credit",
-														"type": "string",
-														"enum": ["credit", "subject"]
-													},
-													"role": { "type": "string" },
 													"direction": {
 														"type": "string",
 														"enum": ["request", "invitation"]
@@ -2723,6 +2719,43 @@
 													"updatedAt": {
 														"format": "date-time",
 														"type": "string"
+													},
+													"kind": {
+														"default": "credit",
+														"type": "string",
+														"enum": ["credit", "subject"]
+													},
+													"role": {
+														"default": "author",
+														"type": "string",
+														"enum": [
+															"author",
+															"co-author",
+															"translator",
+															"illustrator",
+															"editor",
+															"publisher",
+															"letterer",
+															"colorist",
+															"developer",
+															"composer",
+															"designer",
+															"director",
+															"producer",
+															"writer",
+															"actor",
+															"narrator",
+															"studio",
+															"distributor",
+															"primary_character",
+															"featured_character",
+															"appears",
+															"about",
+															"setting",
+															"source_work",
+															"canonical_wiki_page",
+															"related_subject"
+														]
 													}
 												}
 											}
@@ -2843,7 +2876,38 @@
 										"type": "string",
 										"enum": ["credit", "subject"]
 									},
-									"role": { "minLength": 1, "maxLength": 64, "type": "string" },
+									"role": {
+										"default": "author",
+										"type": "string",
+										"enum": [
+											"author",
+											"co-author",
+											"translator",
+											"illustrator",
+											"editor",
+											"publisher",
+											"letterer",
+											"colorist",
+											"developer",
+											"composer",
+											"designer",
+											"director",
+											"producer",
+											"writer",
+											"actor",
+											"narrator",
+											"studio",
+											"distributor",
+											"primary_character",
+											"featured_character",
+											"appears",
+											"about",
+											"setting",
+											"source_work",
+											"canonical_wiki_page",
+											"related_subject"
+										]
+									},
 									"expiresAt": { "format": "date-time", "type": "string" }
 								}
 							}
@@ -2862,8 +2926,6 @@
 										"id",
 										"sourceUnitId",
 										"targetUnitId",
-										"kind",
-										"role",
 										"direction",
 										"createdByProfileId",
 										"expiresAt",
@@ -2872,18 +2934,14 @@
 										"resolvedAt",
 										"resolvedByProfileId",
 										"createdAt",
-										"updatedAt"
+										"updatedAt",
+										"kind",
+										"role"
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
 										"sourceUnitId": { "format": "uuid", "type": "string" },
 										"targetUnitId": { "format": "uuid", "type": "string" },
-										"kind": {
-											"default": "credit",
-											"type": "string",
-											"enum": ["credit", "subject"]
-										},
-										"role": { "type": "string" },
 										"direction": {
 											"type": "string",
 											"enum": ["request", "invitation"]
@@ -2931,7 +2989,44 @@
 											]
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
-										"updatedAt": { "format": "date-time", "type": "string" }
+										"updatedAt": { "format": "date-time", "type": "string" },
+										"kind": {
+											"default": "credit",
+											"type": "string",
+											"enum": ["credit", "subject"]
+										},
+										"role": {
+											"default": "author",
+											"type": "string",
+											"enum": [
+												"author",
+												"co-author",
+												"translator",
+												"illustrator",
+												"editor",
+												"publisher",
+												"letterer",
+												"colorist",
+												"developer",
+												"composer",
+												"designer",
+												"director",
+												"producer",
+												"writer",
+												"actor",
+												"narrator",
+												"studio",
+												"distributor",
+												"primary_character",
+												"featured_character",
+												"appears",
+												"about",
+												"setting",
+												"source_work",
+												"canonical_wiki_page",
+												"related_subject"
+											]
+										}
 									}
 								}
 							}
@@ -2952,7 +3047,10 @@
 												"code": {
 													"default": "AssociationProposalExpiryInvalid",
 													"type": "string",
-													"enum": ["AssociationProposalExpiryInvalid"]
+													"enum": [
+														"AssociationProposalExpiryInvalid",
+														"AssociationProposalRoleInvalid"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -3105,7 +3203,38 @@
 										"type": "string",
 										"enum": ["credit", "subject"]
 									},
-									"role": { "minLength": 1, "maxLength": 64, "type": "string" },
+									"role": {
+										"default": "author",
+										"type": "string",
+										"enum": [
+											"author",
+											"co-author",
+											"translator",
+											"illustrator",
+											"editor",
+											"publisher",
+											"letterer",
+											"colorist",
+											"developer",
+											"composer",
+											"designer",
+											"director",
+											"producer",
+											"writer",
+											"actor",
+											"narrator",
+											"studio",
+											"distributor",
+											"primary_character",
+											"featured_character",
+											"appears",
+											"about",
+											"setting",
+											"source_work",
+											"canonical_wiki_page",
+											"related_subject"
+										]
+									},
 									"expiresAt": { "format": "date-time", "type": "string" }
 								}
 							}
@@ -3124,8 +3253,6 @@
 										"id",
 										"sourceUnitId",
 										"targetUnitId",
-										"kind",
-										"role",
 										"direction",
 										"createdByProfileId",
 										"expiresAt",
@@ -3134,18 +3261,14 @@
 										"resolvedAt",
 										"resolvedByProfileId",
 										"createdAt",
-										"updatedAt"
+										"updatedAt",
+										"kind",
+										"role"
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
 										"sourceUnitId": { "format": "uuid", "type": "string" },
 										"targetUnitId": { "format": "uuid", "type": "string" },
-										"kind": {
-											"default": "credit",
-											"type": "string",
-											"enum": ["credit", "subject"]
-										},
-										"role": { "type": "string" },
 										"direction": {
 											"type": "string",
 											"enum": ["request", "invitation"]
@@ -3193,7 +3316,44 @@
 											]
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
-										"updatedAt": { "format": "date-time", "type": "string" }
+										"updatedAt": { "format": "date-time", "type": "string" },
+										"kind": {
+											"default": "credit",
+											"type": "string",
+											"enum": ["credit", "subject"]
+										},
+										"role": {
+											"default": "author",
+											"type": "string",
+											"enum": [
+												"author",
+												"co-author",
+												"translator",
+												"illustrator",
+												"editor",
+												"publisher",
+												"letterer",
+												"colorist",
+												"developer",
+												"composer",
+												"designer",
+												"director",
+												"producer",
+												"writer",
+												"actor",
+												"narrator",
+												"studio",
+												"distributor",
+												"primary_character",
+												"featured_character",
+												"appears",
+												"about",
+												"setting",
+												"source_work",
+												"canonical_wiki_page",
+												"related_subject"
+											]
+										}
 									}
 								}
 							}
@@ -3214,7 +3374,10 @@
 												"code": {
 													"default": "AssociationProposalExpiryInvalid",
 													"type": "string",
-													"enum": ["AssociationProposalExpiryInvalid"]
+													"enum": [
+														"AssociationProposalExpiryInvalid",
+														"AssociationProposalRoleInvalid"
+													]
 												},
 												"message": { "type": "string" },
 												"details": {}
@@ -3382,8 +3545,6 @@
 										"id",
 										"sourceUnitId",
 										"targetUnitId",
-										"kind",
-										"role",
 										"direction",
 										"createdByProfileId",
 										"expiresAt",
@@ -3392,18 +3553,14 @@
 										"resolvedAt",
 										"resolvedByProfileId",
 										"createdAt",
-										"updatedAt"
+										"updatedAt",
+										"kind",
+										"role"
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
 										"sourceUnitId": { "format": "uuid", "type": "string" },
 										"targetUnitId": { "format": "uuid", "type": "string" },
-										"kind": {
-											"default": "credit",
-											"type": "string",
-											"enum": ["credit", "subject"]
-										},
-										"role": { "type": "string" },
 										"direction": {
 											"type": "string",
 											"enum": ["request", "invitation"]
@@ -3451,7 +3608,44 @@
 											]
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
-										"updatedAt": { "format": "date-time", "type": "string" }
+										"updatedAt": { "format": "date-time", "type": "string" },
+										"kind": {
+											"default": "credit",
+											"type": "string",
+											"enum": ["credit", "subject"]
+										},
+										"role": {
+											"default": "author",
+											"type": "string",
+											"enum": [
+												"author",
+												"co-author",
+												"translator",
+												"illustrator",
+												"editor",
+												"publisher",
+												"letterer",
+												"colorist",
+												"developer",
+												"composer",
+												"designer",
+												"director",
+												"producer",
+												"writer",
+												"actor",
+												"narrator",
+												"studio",
+												"distributor",
+												"primary_character",
+												"featured_character",
+												"appears",
+												"about",
+												"setting",
+												"source_work",
+												"canonical_wiki_page",
+												"related_subject"
+											]
+										}
 									}
 								}
 							}
@@ -3613,8 +3807,6 @@
 										"id",
 										"sourceUnitId",
 										"targetUnitId",
-										"kind",
-										"role",
 										"direction",
 										"createdByProfileId",
 										"expiresAt",
@@ -3623,18 +3815,14 @@
 										"resolvedAt",
 										"resolvedByProfileId",
 										"createdAt",
-										"updatedAt"
+										"updatedAt",
+										"kind",
+										"role"
 									],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
 										"sourceUnitId": { "format": "uuid", "type": "string" },
 										"targetUnitId": { "format": "uuid", "type": "string" },
-										"kind": {
-											"default": "credit",
-											"type": "string",
-											"enum": ["credit", "subject"]
-										},
-										"role": { "type": "string" },
 										"direction": {
 											"type": "string",
 											"enum": ["request", "invitation"]
@@ -3682,7 +3870,44 @@
 											]
 										},
 										"createdAt": { "format": "date-time", "type": "string" },
-										"updatedAt": { "format": "date-time", "type": "string" }
+										"updatedAt": { "format": "date-time", "type": "string" },
+										"kind": {
+											"default": "credit",
+											"type": "string",
+											"enum": ["credit", "subject"]
+										},
+										"role": {
+											"default": "author",
+											"type": "string",
+											"enum": [
+												"author",
+												"co-author",
+												"translator",
+												"illustrator",
+												"editor",
+												"publisher",
+												"letterer",
+												"colorist",
+												"developer",
+												"composer",
+												"designer",
+												"director",
+												"producer",
+												"writer",
+												"actor",
+												"narrator",
+												"studio",
+												"distributor",
+												"primary_character",
+												"featured_character",
+												"appears",
+												"about",
+												"setting",
+												"source_work",
+												"canonical_wiki_page",
+												"related_subject"
+											]
+										}
 									}
 								}
 							}
@@ -6007,7 +6232,30 @@
 																	"format": "uuid",
 																	"type": "string"
 																},
-																"role": { "type": "string" },
+																"role": {
+																	"default": "author",
+																	"type": "string",
+																	"enum": [
+																		"author",
+																		"co-author",
+																		"translator",
+																		"illustrator",
+																		"editor",
+																		"publisher",
+																		"letterer",
+																		"colorist",
+																		"developer",
+																		"composer",
+																		"designer",
+																		"director",
+																		"producer",
+																		"writer",
+																		"actor",
+																		"narrator",
+																		"studio",
+																		"distributor"
+																	]
+																},
 																"position": {
 																	"format": "fractional-position",
 																	"minLength": 2,
@@ -6938,7 +7186,28 @@
 																					"type": "string"
 																				},
 																				"role": {
-																					"type": "string"
+																					"default": "author",
+																					"type": "string",
+																					"enum": [
+																						"author",
+																						"co-author",
+																						"translator",
+																						"illustrator",
+																						"editor",
+																						"publisher",
+																						"letterer",
+																						"colorist",
+																						"developer",
+																						"composer",
+																						"designer",
+																						"director",
+																						"producer",
+																						"writer",
+																						"actor",
+																						"narrator",
+																						"studio",
+																						"distributor"
+																					]
 																				},
 																				"position": {
 																					"format": "fractional-position",
@@ -12800,7 +13069,28 @@
 																			"type": "string"
 																		},
 																		"role": {
-																			"type": "string"
+																			"default": "author",
+																			"type": "string",
+																			"enum": [
+																				"author",
+																				"co-author",
+																				"translator",
+																				"illustrator",
+																				"editor",
+																				"publisher",
+																				"letterer",
+																				"colorist",
+																				"developer",
+																				"composer",
+																				"designer",
+																				"director",
+																				"producer",
+																				"writer",
+																				"actor",
+																				"narrator",
+																				"studio",
+																				"distributor"
+																			]
 																		},
 																		"position": {
 																			"format": "fractional-position",
@@ -13449,7 +13739,28 @@
 																			"type": "string"
 																		},
 																		"role": {
-																			"type": "string"
+																			"default": "author",
+																			"type": "string",
+																			"enum": [
+																				"author",
+																				"co-author",
+																				"translator",
+																				"illustrator",
+																				"editor",
+																				"publisher",
+																				"letterer",
+																				"colorist",
+																				"developer",
+																				"composer",
+																				"designer",
+																				"director",
+																				"producer",
+																				"writer",
+																				"actor",
+																				"narrator",
+																				"studio",
+																				"distributor"
+																			]
 																		},
 																		"position": {
 																			"format": "fractional-position",
@@ -14414,7 +14725,28 @@
 																							"type": "string"
 																						},
 																						"role": {
-																							"type": "string"
+																							"default": "author",
+																							"type": "string",
+																							"enum": [
+																								"author",
+																								"co-author",
+																								"translator",
+																								"illustrator",
+																								"editor",
+																								"publisher",
+																								"letterer",
+																								"colorist",
+																								"developer",
+																								"composer",
+																								"designer",
+																								"director",
+																								"producer",
+																								"writer",
+																								"actor",
+																								"narrator",
+																								"studio",
+																								"distributor"
+																							]
 																						},
 																						"position": {
 																							"format": "fractional-position",
@@ -44052,7 +44384,30 @@
 																	"format": "uuid",
 																	"type": "string"
 																},
-																"role": { "type": "string" },
+																"role": {
+																	"default": "author",
+																	"type": "string",
+																	"enum": [
+																		"author",
+																		"co-author",
+																		"translator",
+																		"illustrator",
+																		"editor",
+																		"publisher",
+																		"letterer",
+																		"colorist",
+																		"developer",
+																		"composer",
+																		"designer",
+																		"director",
+																		"producer",
+																		"writer",
+																		"actor",
+																		"narrator",
+																		"studio",
+																		"distributor"
+																	]
+																},
 																"position": {
 																	"format": "fractional-position",
 																	"minLength": 2,
@@ -44982,7 +45337,30 @@
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
-													"role": { "type": "string" },
+													"role": {
+														"default": "author",
+														"type": "string",
+														"enum": [
+															"author",
+															"co-author",
+															"translator",
+															"illustrator",
+															"editor",
+															"publisher",
+															"letterer",
+															"colorist",
+															"developer",
+															"composer",
+															"designer",
+															"director",
+															"producer",
+															"writer",
+															"actor",
+															"narrator",
+															"studio",
+															"distributor"
+														]
+													},
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -46045,7 +46423,20 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"role": { "type": "string" },
+													"role": {
+														"default": "primary_character",
+														"type": "string",
+														"enum": [
+															"primary_character",
+															"featured_character",
+															"appears",
+															"about",
+															"setting",
+															"source_work",
+															"canonical_wiki_page",
+															"related_subject"
+														]
+													},
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -46670,7 +47061,30 @@
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
-													"role": { "type": "string" },
+													"role": {
+														"default": "author",
+														"type": "string",
+														"enum": [
+															"author",
+															"co-author",
+															"translator",
+															"illustrator",
+															"editor",
+															"publisher",
+															"letterer",
+															"colorist",
+															"developer",
+															"composer",
+															"designer",
+															"director",
+															"producer",
+															"writer",
+															"actor",
+															"narrator",
+															"studio",
+															"distributor"
+														]
+													},
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -47733,7 +48147,20 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"role": { "type": "string" },
+													"role": {
+														"default": "primary_character",
+														"type": "string",
+														"enum": [
+															"primary_character",
+															"featured_character",
+															"appears",
+															"about",
+															"setting",
+															"source_work",
+															"canonical_wiki_page",
+															"related_subject"
+														]
+													},
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -48451,7 +48878,30 @@
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
-													"role": { "type": "string" },
+													"role": {
+														"default": "author",
+														"type": "string",
+														"enum": [
+															"author",
+															"co-author",
+															"translator",
+															"illustrator",
+															"editor",
+															"publisher",
+															"letterer",
+															"colorist",
+															"developer",
+															"composer",
+															"designer",
+															"director",
+															"producer",
+															"writer",
+															"actor",
+															"narrator",
+															"studio",
+															"distributor"
+														]
+													},
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -49514,7 +49964,20 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"role": { "type": "string" },
+													"role": {
+														"default": "primary_character",
+														"type": "string",
+														"enum": [
+															"primary_character",
+															"featured_character",
+															"appears",
+															"about",
+															"setting",
+															"source_work",
+															"canonical_wiki_page",
+															"related_subject"
+														]
+													},
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -50388,7 +50851,30 @@
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
-													"role": { "type": "string" },
+													"role": {
+														"default": "author",
+														"type": "string",
+														"enum": [
+															"author",
+															"co-author",
+															"translator",
+															"illustrator",
+															"editor",
+															"publisher",
+															"letterer",
+															"colorist",
+															"developer",
+															"composer",
+															"designer",
+															"director",
+															"producer",
+															"writer",
+															"actor",
+															"narrator",
+															"studio",
+															"distributor"
+														]
+													},
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -51451,7 +51937,20 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"role": { "type": "string" },
+													"role": {
+														"default": "primary_character",
+														"type": "string",
+														"enum": [
+															"primary_character",
+															"featured_character",
+															"appears",
+															"about",
+															"setting",
+															"source_work",
+															"canonical_wiki_page",
+															"related_subject"
+														]
+													},
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -52116,7 +52615,30 @@
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
-													"role": { "type": "string" },
+													"role": {
+														"default": "author",
+														"type": "string",
+														"enum": [
+															"author",
+															"co-author",
+															"translator",
+															"illustrator",
+															"editor",
+															"publisher",
+															"letterer",
+															"colorist",
+															"developer",
+															"composer",
+															"designer",
+															"director",
+															"producer",
+															"writer",
+															"actor",
+															"narrator",
+															"studio",
+															"distributor"
+														]
+													},
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -53179,7 +53701,20 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"role": { "type": "string" },
+													"role": {
+														"default": "primary_character",
+														"type": "string",
+														"enum": [
+															"primary_character",
+															"featured_character",
+															"appears",
+															"about",
+															"setting",
+															"source_work",
+															"canonical_wiki_page",
+															"related_subject"
+														]
+													},
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -54214,7 +54749,30 @@
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
-													"role": { "type": "string" },
+													"role": {
+														"default": "author",
+														"type": "string",
+														"enum": [
+															"author",
+															"co-author",
+															"translator",
+															"illustrator",
+															"editor",
+															"publisher",
+															"letterer",
+															"colorist",
+															"developer",
+															"composer",
+															"designer",
+															"director",
+															"producer",
+															"writer",
+															"actor",
+															"narrator",
+															"studio",
+															"distributor"
+														]
+													},
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -55277,7 +55835,20 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"role": { "type": "string" },
+													"role": {
+														"default": "primary_character",
+														"type": "string",
+														"enum": [
+															"primary_character",
+															"featured_character",
+															"appears",
+															"about",
+															"setting",
+															"source_work",
+															"canonical_wiki_page",
+															"related_subject"
+														]
+													},
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -59115,7 +59686,30 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"role": { "type": "string" }
+													"role": {
+														"default": "author",
+														"type": "string",
+														"enum": [
+															"author",
+															"co-author",
+															"translator",
+															"illustrator",
+															"editor",
+															"publisher",
+															"letterer",
+															"colorist",
+															"developer",
+															"composer",
+															"designer",
+															"director",
+															"producer",
+															"writer",
+															"actor",
+															"narrator",
+															"studio",
+															"distributor"
+														]
+													}
 												}
 											}
 										},
@@ -59130,7 +59724,20 @@
 														"format": "uuid",
 														"type": "string"
 													},
-													"role": { "type": "string" }
+													"role": {
+														"default": "primary_character",
+														"type": "string",
+														"enum": [
+															"primary_character",
+															"featured_character",
+															"appears",
+															"about",
+															"setting",
+															"source_work",
+															"canonical_wiki_page",
+															"related_subject"
+														]
+													}
 												}
 											}
 										}
@@ -61466,7 +62073,30 @@
 								"required": ["creditedUnitId", "role"],
 								"properties": {
 									"creditedUnitId": { "format": "uuid", "type": "string" },
-									"role": { "minLength": 1, "maxLength": 64, "type": "string" },
+									"role": {
+										"default": "author",
+										"type": "string",
+										"enum": [
+											"author",
+											"co-author",
+											"translator",
+											"illustrator",
+											"editor",
+											"publisher",
+											"letterer",
+											"colorist",
+											"developer",
+											"composer",
+											"designer",
+											"director",
+											"producer",
+											"writer",
+											"actor",
+											"narrator",
+											"studio",
+											"distributor"
+										]
+									},
 									"position": {
 										"format": "fractional-position",
 										"minLength": 2,
@@ -61489,7 +62119,30 @@
 									"required": ["id", "role", "position", "creditedUnit"],
 									"properties": {
 										"id": { "format": "uuid", "type": "string" },
-										"role": { "type": "string" },
+										"role": {
+											"default": "author",
+											"type": "string",
+											"enum": [
+												"author",
+												"co-author",
+												"translator",
+												"illustrator",
+												"editor",
+												"publisher",
+												"letterer",
+												"colorist",
+												"developer",
+												"composer",
+												"designer",
+												"director",
+												"producer",
+												"writer",
+												"actor",
+												"narrator",
+												"studio",
+												"distributor"
+											]
+										},
 										"position": {
 											"format": "fractional-position",
 											"minLength": 2,
@@ -61675,6 +62328,33 @@
 												}
 											}
 										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Response for status 400",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"required": ["error", "requestId"],
+									"properties": {
+										"error": {
+											"type": "object",
+											"required": ["code", "message"],
+											"properties": {
+												"code": {
+													"default": "CreditAttributionRoleInvalid",
+													"type": "string",
+													"enum": ["CreditAttributionRoleInvalid"]
+												},
+												"message": { "type": "string" },
+												"details": {}
+											}
+										},
+										"requestId": { "type": "string" }
 									}
 								}
 							}
@@ -61988,7 +62668,20 @@
 								"required": ["entityId", "role"],
 								"properties": {
 									"entityId": { "format": "uuid", "type": "string" },
-									"role": { "minLength": 1, "maxLength": 64, "type": "string" },
+									"role": {
+										"default": "primary_character",
+										"type": "string",
+										"enum": [
+											"primary_character",
+											"featured_character",
+											"appears",
+											"about",
+											"setting",
+											"source_work",
+											"canonical_wiki_page",
+											"related_subject"
+										]
+									},
 									"position": {
 										"format": "fractional-position",
 										"minLength": 2,
@@ -62021,7 +62714,20 @@
 										"id": { "format": "uuid", "type": "string" },
 										"unitId": { "format": "uuid", "type": "string" },
 										"entityId": { "format": "uuid", "type": "string" },
-										"role": { "type": "string" },
+										"role": {
+											"default": "primary_character",
+											"type": "string",
+											"enum": [
+												"primary_character",
+												"featured_character",
+												"appears",
+												"about",
+												"setting",
+												"source_work",
+												"canonical_wiki_page",
+												"related_subject"
+											]
+										},
 										"position": {
 											"format": "fractional-position",
 											"minLength": 2,
@@ -80562,7 +81268,30 @@
 																	"format": "uuid",
 																	"type": "string"
 																},
-																"role": { "type": "string" },
+																"role": {
+																	"default": "author",
+																	"type": "string",
+																	"enum": [
+																		"author",
+																		"co-author",
+																		"translator",
+																		"illustrator",
+																		"editor",
+																		"publisher",
+																		"letterer",
+																		"colorist",
+																		"developer",
+																		"composer",
+																		"designer",
+																		"director",
+																		"producer",
+																		"writer",
+																		"actor",
+																		"narrator",
+																		"studio",
+																		"distributor"
+																	]
+																},
 																"position": {
 																	"format": "fractional-position",
 																	"minLength": 2,
@@ -81374,7 +82103,30 @@
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
-													"role": { "type": "string" },
+													"role": {
+														"default": "author",
+														"type": "string",
+														"enum": [
+															"author",
+															"co-author",
+															"translator",
+															"illustrator",
+															"editor",
+															"publisher",
+															"letterer",
+															"colorist",
+															"developer",
+															"composer",
+															"designer",
+															"director",
+															"producer",
+															"writer",
+															"actor",
+															"narrator",
+															"studio",
+															"distributor"
+														]
+													},
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -84948,7 +85700,30 @@
 																	"format": "uuid",
 																	"type": "string"
 																},
-																"role": { "type": "string" },
+																"role": {
+																	"default": "author",
+																	"type": "string",
+																	"enum": [
+																		"author",
+																		"co-author",
+																		"translator",
+																		"illustrator",
+																		"editor",
+																		"publisher",
+																		"letterer",
+																		"colorist",
+																		"developer",
+																		"composer",
+																		"designer",
+																		"director",
+																		"producer",
+																		"writer",
+																		"actor",
+																		"narrator",
+																		"studio",
+																		"distributor"
+																	]
+																},
 																"position": {
 																	"format": "fractional-position",
 																	"minLength": 2,
@@ -86023,7 +86798,30 @@
 												],
 												"properties": {
 													"id": { "format": "uuid", "type": "string" },
-													"role": { "type": "string" },
+													"role": {
+														"default": "author",
+														"type": "string",
+														"enum": [
+															"author",
+															"co-author",
+															"translator",
+															"illustrator",
+															"editor",
+															"publisher",
+															"letterer",
+															"colorist",
+															"developer",
+															"composer",
+															"designer",
+															"director",
+															"producer",
+															"writer",
+															"actor",
+															"narrator",
+															"studio",
+															"distributor"
+														]
+													},
 													"position": {
 														"format": "fractional-position",
 														"minLength": 2,
@@ -87258,7 +88056,30 @@
 																	"format": "uuid",
 																	"type": "string"
 																},
-																"role": { "type": "string" },
+																"role": {
+																	"default": "author",
+																	"type": "string",
+																	"enum": [
+																		"author",
+																		"co-author",
+																		"translator",
+																		"illustrator",
+																		"editor",
+																		"publisher",
+																		"letterer",
+																		"colorist",
+																		"developer",
+																		"composer",
+																		"designer",
+																		"director",
+																		"producer",
+																		"writer",
+																		"actor",
+																		"narrator",
+																		"studio",
+																		"distributor"
+																	]
+																},
 																"position": {
 																	"format": "fractional-position",
 																	"minLength": 2,

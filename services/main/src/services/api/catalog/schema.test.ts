@@ -1,7 +1,13 @@
 import { Check } from "@sinclair/typebox/value";
 import { describe, expect, it } from "vitest";
 
-import { UpdateEntityAssociationPolicyBody } from "./schema";
+import {
+	AddUnitCreditBody,
+	AddUnitSubjectAssociationBody,
+	UpdateEntityAssociationPolicyBody,
+} from "./schema";
+
+const UnitId = "019b76da-a800-7300-8000-000000000001";
 
 describe("Entity association API contracts", () => {
 	it("updates credit and subject association policies independently", () => {
@@ -22,5 +28,32 @@ describe("Entity association API contracts", () => {
 		expect(Check(UpdateEntityAssociationPolicyBody, { subjectAttribution: "closed" })).toBe(
 			false,
 		);
+	});
+
+	it("accepts only registered credit and subject roles", () => {
+		expect(
+			Check(AddUnitCreditBody, {
+				creditedUnitId: UnitId,
+				role: "author",
+			}),
+		).toBe(true);
+		expect(
+			Check(AddUnitCreditBody, {
+				creditedUnitId: UnitId,
+				role: "arbitrary-credit",
+			}),
+		).toBe(false);
+		expect(
+			Check(AddUnitSubjectAssociationBody, {
+				entityId: UnitId,
+				role: "primary_character",
+			}),
+		).toBe(true);
+		expect(
+			Check(AddUnitSubjectAssociationBody, {
+				entityId: UnitId,
+				role: "arbitrary-subject",
+			}),
+		).toBe(false);
 	});
 });

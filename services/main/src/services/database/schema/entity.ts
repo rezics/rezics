@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import { boolean, check, index, pgEnum, primaryKey, text, unique, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
@@ -14,7 +14,12 @@ import {
 	AssociationKindValues,
 	AssociationProposalDirectionValues,
 	AssociationProposalResolutionValues,
+	type AssociationRole,
+	CreditAttributionRoleValues,
+	type CreditAttributionRole,
 	EntityAssociationPolicyModeValues,
+	SubjectAssociationRoleValues,
+	type SubjectAssociationRole,
 	toEnumValues,
 } from "./contract-values";
 
@@ -85,7 +90,7 @@ export const unitAssociationProposal = pgTable(
 			.notNull()
 			.references(() => unit.id, { onDelete: "cascade" }),
 		kind: associationKind().notNull(),
-		role: text().notNull(),
+		role: text().$type<AssociationRole>().notNull(),
 		direction: associationProposalDirection().notNull(),
 		createdByProfileId: uuid()
 			.notNull()
@@ -107,6 +112,17 @@ export const unitAssociationProposal = pgTable(
 		index("unit_association_proposal_created_by_idx").on(table.createdByProfileId),
 		index("unit_association_proposal_resolved_by_idx").on(table.resolvedByProfileId),
 		check("unit_association_proposal_role_not_blank", sql`btrim(${table.role}) <> ''`),
+		/**
+		 * Perhaps in the future we’ll be able to associate `unitId` with a `role` rather than `text`, which would allow us to support any role.
+		 */
+		check(
+			"unit_association_proposal_role_check",
+			sql`(
+				${table.kind} = 'credit' and ${inArray(table.role, CreditAttributionRoleValues)}
+			) or (
+				${table.kind} = 'subject' and ${inArray(table.role, SubjectAssociationRoleValues)}
+			)`,
+		),
 		check(
 			"unit_association_proposal_not_self_check",
 			sql`${table.sourceUnitId} <> ${table.targetUnitId}`,
@@ -137,7 +153,7 @@ export const creditAttribution = pgTable(
 		creditedUnitId: uuid()
 			.notNull()
 			.references(() => unit.id, { onDelete: "restrict" }),
-		role: text().notNull(),
+		role: text().$type<CreditAttributionRole>().notNull(),
 		position: fractionalIndexPosition()
 			.default(sql`'a0'::text`)
 			.notNull(),
@@ -156,7 +172,7 @@ export const creditAttribution = pgTable(
 			table.position,
 			table.id,
 		),
-		check("credit_attribution_role_not_blank", sql`btrim(${table.role}) <> ''`),
+		check("credit_attribution_role_check", inArray(table.role, CreditAttributionRoleValues)),
 		check(
 			"credit_attribution_not_self_check",
 			sql`${table.sourceUnitId} <> ${table.creditedUnitId}`,
@@ -178,7 +194,7 @@ export const subjectAssociation = pgTable(
 		entityId: uuid()
 			.notNull()
 			.references(() => entity.id, { onDelete: "restrict" }),
-		role: text().notNull(),
+		role: text().$type<SubjectAssociationRole>().notNull(),
 		position: fractionalIndexPosition()
 			.default(sql`'a0'::text`)
 			.notNull(),
@@ -193,7 +209,7 @@ export const subjectAssociation = pgTable(
 		),
 		index("subject_association_entity_role_idx").on(table.entityId, table.role),
 		index("subject_association_unit_position_idx").on(table.unitId, table.position, table.id),
-		check("subject_association_role_not_blank", sql`btrim(${table.role}) <> ''`),
+		check("subject_association_role_check", inArray(table.role, SubjectAssociationRoleValues)),
 		check("subject_association_not_self_check", sql`${table.unitId} <> ${table.entityId}`),
 	],
 );

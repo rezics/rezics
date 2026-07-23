@@ -1,6 +1,10 @@
 import { t } from "elysia";
 
-import { AssociationKindValues } from "../../database/schema/contract-values";
+import {
+	AssociationKindValues,
+	CreditAttributionRoleValues,
+	SubjectAssociationRoleValues,
+} from "../../database/schema/contract-values";
 import { DateTime, Uuid } from "../schema";
 
 const AssociationKind = t.UnionEnum(AssociationKindValues);
@@ -15,11 +19,16 @@ export const ListAssociationProposalsQuery = t.Object(
 	},
 	{ additionalProperties: false },
 );
+const AssociationRole = t.UnionEnum([
+	...CreditAttributionRoleValues,
+	...SubjectAssociationRoleValues,
+]);
+
 export const CreateAssociationRequestBody = t.Object(
 	{
 		targetUnitId: Uuid,
 		kind: AssociationKind,
-		role: t.String({ minLength: 1, maxLength: 64 }),
+		role: AssociationRole,
 		expiresAt: t.String({ format: "date-time" }),
 	},
 	{ additionalProperties: false },
@@ -28,18 +37,16 @@ export const CreateAssociationInvitationBody = t.Object(
 	{
 		sourceUnitId: Uuid,
 		kind: AssociationKind,
-		role: t.String({ minLength: 1, maxLength: 64 }),
+		role: AssociationRole,
 		expiresAt: t.String({ format: "date-time" }),
 	},
 	{ additionalProperties: false },
 );
 
-export const AssociationProposalResponse = t.Object({
+const AssociationProposalResponseFields = {
 	id: Uuid,
 	sourceUnitId: Uuid,
 	targetUnitId: Uuid,
-	kind: AssociationKind,
-	role: t.String(),
 	direction: t.Union([t.Literal("request"), t.Literal("invitation")]),
 	createdByProfileId: Uuid,
 	expiresAt: DateTime,
@@ -57,6 +64,11 @@ export const AssociationProposalResponse = t.Object({
 	resolvedByProfileId: t.Nullable(Uuid),
 	createdAt: DateTime,
 	updatedAt: DateTime,
+} as const;
+export const AssociationProposalResponse = t.Object({
+	...AssociationProposalResponseFields,
+	kind: AssociationKind,
+	role: AssociationRole,
 });
 export const AssociationProposalListResponse = t.Object({
 	items: t.Array(AssociationProposalResponse),

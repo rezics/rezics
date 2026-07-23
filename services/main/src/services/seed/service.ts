@@ -834,7 +834,7 @@ async function seedCatalog(
 		Array.from({ length: SeedPlan.credits }, (_, index) => ({
 			sourceUnitId: itemAt(works, Math.floor(index / 2)).id,
 			creditedUnitId: itemAt(entities, index * 7).id,
-			role: itemAt(["author", "developer", "director", "publisher"], index),
+			role: itemAt(["author", "developer", "director", "publisher"] as const, index),
 			position: fractionalPositionAt(index),
 		})),
 		(batch) => tx.insert(creditAttribution).values(batch),
@@ -1448,7 +1448,7 @@ async function seedContent(
 		allPosts.map((value) => ({
 			sourceUnitId: value.id,
 			creditedUnitId: value.ownerProfileId,
-			role: "publisher",
+			role: "publisher" as const,
 		})),
 		(batch) => tx.insert(creditAttribution).values(batch),
 	);

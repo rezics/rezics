@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { CatalogDetailSections } from "../model/catalog-detail-section";
 import {
+	catalogCreditsHref,
 	catalogDetailHref,
 	getCatalogDetailHrefs,
 	parseCatalogDetailSection,
@@ -49,5 +50,13 @@ describe("catalog detail routes", () => {
 		expect(
 			parseCatalogDetailSection(`/units/media/${UnitId}/versions`, "media", UnitId),
 		).toBeUndefined();
+	});
+
+	it("keeps the credits page outside the tab section registry", () => {
+		expect(catalogCreditsHref("book", UnitId)).toBe(`/units/book/${UnitId}/credits`);
+		expect(parseCatalogDetailSection(catalogCreditsHref("book", UnitId), "book", UnitId)).toBe(
+			undefined,
+		);
+		expect(CatalogDetailSections.book).not.toContain("credits");
 	});
 });

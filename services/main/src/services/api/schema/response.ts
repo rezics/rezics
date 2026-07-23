@@ -23,8 +23,10 @@ import {
 import {
 	ContentRatingValues,
 	ContentStructureKindValues,
+	CreditAttributionRoleValues,
 	EntityAssociationPolicyModeValues,
 	PlatformCapabilityValues,
+	SubjectAssociationRoleValues,
 	UnitKindValues,
 } from "../../database/schema/contract-values";
 import { FeedPostKindValues, FeedUnitKindValues } from "../feed/schema";
@@ -126,7 +128,7 @@ export const UnitSummaryResponse = t.Object({
 
 export const UnitAttributionSummaryResponse = t.Object({
 	id: Uuid,
-	role: t.String(),
+	role: t.UnionEnum(CreditAttributionRoleValues),
 	position: FractionalPosition,
 	creditedUnit: UnitSummaryResponse,
 });
@@ -255,7 +257,7 @@ export const UnitDetailResponse = t.Object({
 		t.Object({
 			id: Uuid,
 			entityEntryId: Uuid,
-			role: t.String(),
+			role: t.UnionEnum(SubjectAssociationRoleValues),
 			position: FractionalPosition,
 			title: NullableText,
 		}),
@@ -661,8 +663,20 @@ export const EntityDetailResponse = t.Object({
 		canManageCreditAssociations: t.Boolean(),
 		canManageSubjectAssociations: t.Boolean(),
 	}),
-	creditAttributions: t.Array(t.Object({ id: Uuid, sourceUnitId: Uuid, role: t.String() })),
-	subjectAssociations: t.Array(t.Object({ id: Uuid, unitId: Uuid, role: t.String() })),
+	creditAttributions: t.Array(
+		t.Object({
+			id: Uuid,
+			sourceUnitId: Uuid,
+			role: t.UnionEnum(CreditAttributionRoleValues),
+		}),
+	),
+	subjectAssociations: t.Array(
+		t.Object({
+			id: Uuid,
+			unitId: Uuid,
+			role: t.UnionEnum(SubjectAssociationRoleValues),
+		}),
+	),
 });
 export const CollectionDetailResponse = t.Object({
 	id: Uuid,
@@ -880,7 +894,7 @@ export const SubjectAssociationResponse = t.Object({
 	id: Uuid,
 	unitId: Uuid,
 	entityId: Uuid,
-	role: t.String(),
+	role: t.UnionEnum(SubjectAssociationRoleValues),
 	position: FractionalPosition,
 	createdAt: DateTime,
 	updatedAt: DateTime,

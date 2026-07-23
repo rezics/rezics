@@ -199,6 +199,14 @@ export class AssociationProposalExpiryInvalid extends Data.TaggedError(
 	readonly message = "Association proposal expiry must be in the future";
 }
 
+export class AssociationProposalRoleInvalid extends Data.TaggedError(
+	"AssociationProposalRoleInvalid",
+) {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = AssociationProposalRoleInvalid.status;
+	readonly message = "Association proposal role does not match its kind";
+}
+
 export const UnitErrors = [
 	UnitNotFound,
 	UnitPermissionForbidden,
@@ -225,4 +233,5 @@ export const UnitErrors = [
 	AssociationProposalConflict,
 	AssociationProposalExpired,
 	AssociationProposalExpiryInvalid,
+	AssociationProposalRoleInvalid,
 ] as const;

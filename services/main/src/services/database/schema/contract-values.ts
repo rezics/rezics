@@ -38,6 +38,87 @@ export const VariantCapableUnitKindValues = ["book", "software", "media"] as con
 export type UnitKind = (typeof UnitKindValues)[number];
 export type VariantCapableUnitKind = (typeof VariantCapableUnitKindValues)[number];
 
+export const CreditAttributionRoleValues = [
+	"author",
+	"co-author",
+	"translator",
+	"illustrator",
+	"editor",
+	"publisher",
+	"letterer",
+	"colorist",
+	"developer",
+	"composer",
+	"designer",
+	"director",
+	"producer",
+	"writer",
+	"actor",
+	"narrator",
+	"studio",
+	"distributor",
+] as const;
+export type CreditAttributionRole = (typeof CreditAttributionRoleValues)[number];
+
+export const CreditAttributionRolesByUnitKind = {
+	book: [
+		"author",
+		"co-author",
+		"translator",
+		"illustrator",
+		"editor",
+		"publisher",
+		"letterer",
+		"colorist",
+	],
+	software: ["developer", "publisher", "composer", "designer", "director", "producer", "writer"],
+	media: [
+		"director",
+		"producer",
+		"writer",
+		"composer",
+		"actor",
+		"narrator",
+		"studio",
+		"distributor",
+	],
+	series: ["author", "editor", "publisher"],
+} as const satisfies Record<
+	"book" | "software" | "media" | "series",
+	readonly CreditAttributionRole[]
+>;
+export type CreditAttributionUnitKind = keyof typeof CreditAttributionRolesByUnitKind;
+
+export const SubjectAssociationRoleValues = [
+	"primary_character",
+	"featured_character",
+	"appears",
+	"about",
+	"setting",
+	"source_work",
+	"canonical_wiki_page",
+	"related_subject",
+] as const;
+export type SubjectAssociationRole = (typeof SubjectAssociationRoleValues)[number];
+export type AssociationRole = CreditAttributionRole | SubjectAssociationRole;
+
+export function isCreditAttributionRole(value: string): value is CreditAttributionRole {
+	return (CreditAttributionRoleValues as readonly string[]).includes(value);
+}
+
+export function isCreditAttributionRoleForUnitKind(
+	kind: CreditAttributionUnitKind,
+	role: CreditAttributionRole,
+): boolean {
+	return (CreditAttributionRolesByUnitKind[kind] as readonly CreditAttributionRole[]).includes(
+		role,
+	);
+}
+
+export function isSubjectAssociationRole(value: string): value is SubjectAssociationRole {
+	return (SubjectAssociationRoleValues as readonly string[]).includes(value);
+}
+
 export const DockKindValues = ["main", "wiki"] as const;
 export type DockKind = (typeof DockKindValues)[number];
 export const DockOwnerUnitKindValues = ["book", "software", "media", "zone", "realm"] as const;

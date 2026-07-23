@@ -1019,6 +1019,7 @@ import type {
 	DeleteApiUnitsByTypeByUnitIdAliasesByAliasIdVoteStatus500,
 	PostApiUnitsByTypeByUnitIdCreditAttributionsOptions,
 	PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200,
+	PostApiUnitsByTypeByUnitIdCreditAttributionsStatus400,
 	PostApiUnitsByTypeByUnitIdCreditAttributionsStatus403,
 	PostApiUnitsByTypeByUnitIdCreditAttributionsStatus404,
 	PostApiUnitsByTypeByUnitIdCreditAttributionsStatus422,
@@ -18215,6 +18216,7 @@ export function postApiUnitsByTypeByUnitIdCreditAttributionsMutationOptions<TCon
 	return mutationOptions<
 		PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus400
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus403
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus404
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus422
@@ -18246,6 +18248,7 @@ export function usePostApiUnitsByTypeByUnitIdCreditAttributions<TContext>(
 		mutation?: UseMutationOptions<
 			PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200,
 			ResponseErrorConfig<
+				| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus400
 				| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus403
 				| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus404
 				| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus422
@@ -18268,6 +18271,7 @@ export function usePostApiUnitsByTypeByUnitIdCreditAttributions<TContext>(
 	) as UseMutationOptions<
 		PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus400
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus403
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus404
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus422
@@ -18281,6 +18285,7 @@ export function usePostApiUnitsByTypeByUnitIdCreditAttributions<TContext>(
 	return useMutation<
 		PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus400
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus403
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus404
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus422
@@ -18299,6 +18304,7 @@ export function usePostApiUnitsByTypeByUnitIdCreditAttributions<TContext>(
 	) as UseMutationResult<
 		PostApiUnitsByTypeByUnitIdCreditAttributionsStatus200,
 		ResponseErrorConfig<
+			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus400
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus403
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus404
 			| PostApiUnitsByTypeByUnitIdCreditAttributionsStatus422

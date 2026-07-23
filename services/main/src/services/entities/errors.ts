@@ -28,6 +28,18 @@ export class CreditAttributionNotFound extends Data.TaggedError("CreditAttributi
 	readonly message = "Credit attribution not found";
 }
 
+export class CreditAttributionRoleInvalid extends Data.TaggedError("CreditAttributionRoleInvalid") {
+	static readonly status = StatusCodes.BAD_REQUEST as const;
+	readonly status = CreditAttributionRoleInvalid.status;
+	readonly message = "Credit attribution role does not apply to this Unit type";
+	readonly details: JsonValue;
+
+	constructor(type: string, role: string) {
+		super();
+		this.details = { type, role };
+	}
+}
+
 export class SubjectAssociationNotFound extends Data.TaggedError("SubjectAssociationNotFound") {
 	static readonly status = StatusCodes.NOT_FOUND as const;
 	readonly status = SubjectAssociationNotFound.status;
@@ -38,5 +50,6 @@ export const EntityErrors = [
 	EntityEntryNotFound,
 	EntityAssociationRestricted,
 	CreditAttributionNotFound,
+	CreditAttributionRoleInvalid,
 	SubjectAssociationNotFound,
 ] as const;
