@@ -505,12 +505,20 @@ import type {
 	PutApiRealmsByRealmIdNavigationByNavigationIdResponses,
 	DeleteApiRealmsByRealmIdNavigationByNavigationIdOptions,
 	DeleteApiRealmsByRealmIdNavigationByNavigationIdResponses,
-	GetApiSearchConfigurationOptions,
-	GetApiSearchConfigurationResponses,
-	PostApiSearchExecuteOptions,
-	PostApiSearchExecuteResponses,
-	PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteOptions,
-	PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteResponses,
+	GetApiSearchFeaturesByTemplateOptions,
+	GetApiSearchFeaturesByTemplateResponses,
+	PostApiSearchFeaturesByTemplateExecuteOptions,
+	PostApiSearchFeaturesByTemplateExecuteResponses,
+	GetApiSearchZonesByZoneIdFeatureOptions,
+	GetApiSearchZonesByZoneIdFeatureResponses,
+	PutApiSearchZonesByZoneIdFeatureOptions,
+	PutApiSearchZonesByZoneIdFeatureResponses,
+	PostApiSearchZonesByZoneIdFeatureExecuteOptions,
+	PostApiSearchZonesByZoneIdFeatureExecuteResponses,
+	GetApiSearchZonesByZoneIdFeatureRevisionsOptions,
+	GetApiSearchZonesByZoneIdFeatureRevisionsResponses,
+	PostApiSearchZonesByZoneIdFeatureRestoreOptions,
+	PostApiSearchZonesByZoneIdFeatureRestoreResponses,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteOptions,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteResponses,
 	PostApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecuteOptions,
@@ -5483,62 +5491,113 @@ export function deleteApiRealmsByRealmIdNavigationByNavigationId<
 }
 
 /**
- * @summary Get global Search feature configuration
- * {@link /api/search/configuration}
+ * @summary Get a system Search Feature template
+ * {@link /api/search/features/:template}
  */
-export function getApiSearchConfiguration<ThrowOnError extends boolean = true>(
-	options: Options<GetApiSearchConfigurationOptions, ThrowOnError> = {},
-): Promise<RequestResult<GetApiSearchConfigurationResponses, ThrowOnError>> {
+export function getApiSearchFeaturesByTemplate<ThrowOnError extends boolean = true>(
+	options: Options<GetApiSearchFeaturesByTemplateOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiSearchFeaturesByTemplateResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
-	return request({ method: "GET", url: "/api/search/configuration", ...config }) as Promise<
-		RequestResult<GetApiSearchConfigurationResponses, ThrowOnError>
+	return request({ method: "GET", url: "/api/search/features/{template}", ...config }) as Promise<
+		RequestResult<GetApiSearchFeaturesByTemplateResponses, ThrowOnError>
 	>;
 }
 
 /**
- * @summary Execute configured global Search
- * {@link /api/search/execute}
+ * @summary Execute a system Search Feature template
+ * {@link /api/search/features/:template/execute}
  */
-export function postApiSearchExecute<ThrowOnError extends boolean = true>(
-	options: Options<PostApiSearchExecuteOptions, ThrowOnError>,
-): Promise<RequestResult<PostApiSearchExecuteResponses, ThrowOnError>> {
-	const { client: request = client, ...config } = options;
-
-	return request({ method: "POST", url: "/api/search/execute", ...config }) as Promise<
-		RequestResult<PostApiSearchExecuteResponses, ThrowOnError>
-	>;
-}
-
-/**
- * @summary Execute a Content Structure node Search configuration
- * {@link /api/search/units/:unitId/content-structures/:structureId/nodes/:nodeId/execute}
- */
-export function postApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecute<
-	ThrowOnError extends boolean = true,
->(
-	options: Options<
-		PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteOptions,
-		ThrowOnError
-	>,
-): Promise<
-	RequestResult<
-		PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteResponses,
-		ThrowOnError
-	>
-> {
+export function postApiSearchFeaturesByTemplateExecute<ThrowOnError extends boolean = true>(
+	options: Options<PostApiSearchFeaturesByTemplateExecuteOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiSearchFeaturesByTemplateExecuteResponses, ThrowOnError>> {
 	const { client: request = client, ...config } = options;
 
 	return request({
 		method: "POST",
-		url: "/api/search/units/{unitId}/content-structures/{structureId}/nodes/{nodeId}/execute",
+		url: "/api/search/features/{template}/execute",
 		...config,
-	}) as Promise<
-		RequestResult<
-			PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteResponses,
-			ThrowOnError
-		>
-	>;
+	}) as Promise<RequestResult<PostApiSearchFeaturesByTemplateExecuteResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Get a Zone Search Feature
+ * {@link /api/search/zones/:zoneId/feature}
+ */
+export function getApiSearchZonesByZoneIdFeature<ThrowOnError extends boolean = true>(
+	options: Options<GetApiSearchZonesByZoneIdFeatureOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiSearchZonesByZoneIdFeatureResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/search/zones/{zoneId}/feature",
+		...config,
+	}) as Promise<RequestResult<GetApiSearchZonesByZoneIdFeatureResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Configure a Zone Search Feature
+ * {@link /api/search/zones/:zoneId/feature}
+ */
+export function putApiSearchZonesByZoneIdFeature<ThrowOnError extends boolean = true>(
+	options: Options<PutApiSearchZonesByZoneIdFeatureOptions, ThrowOnError>,
+): Promise<RequestResult<PutApiSearchZonesByZoneIdFeatureResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "PUT",
+		url: "/api/search/zones/{zoneId}/feature",
+		...config,
+	}) as Promise<RequestResult<PutApiSearchZonesByZoneIdFeatureResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Execute a Zone Search Feature
+ * {@link /api/search/zones/:zoneId/feature/execute}
+ */
+export function postApiSearchZonesByZoneIdFeatureExecute<ThrowOnError extends boolean = true>(
+	options: Options<PostApiSearchZonesByZoneIdFeatureExecuteOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiSearchZonesByZoneIdFeatureExecuteResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/search/zones/{zoneId}/feature/execute",
+		...config,
+	}) as Promise<RequestResult<PostApiSearchZonesByZoneIdFeatureExecuteResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary List Zone Search Feature revisions
+ * {@link /api/search/zones/:zoneId/feature/revisions}
+ */
+export function getApiSearchZonesByZoneIdFeatureRevisions<ThrowOnError extends boolean = true>(
+	options: Options<GetApiSearchZonesByZoneIdFeatureRevisionsOptions, ThrowOnError>,
+): Promise<RequestResult<GetApiSearchZonesByZoneIdFeatureRevisionsResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "GET",
+		url: "/api/search/zones/{zoneId}/feature/revisions",
+		...config,
+	}) as Promise<RequestResult<GetApiSearchZonesByZoneIdFeatureRevisionsResponses, ThrowOnError>>;
+}
+
+/**
+ * @summary Restore a Zone Search Feature revision
+ * {@link /api/search/zones/:zoneId/feature/restore}
+ */
+export function postApiSearchZonesByZoneIdFeatureRestore<ThrowOnError extends boolean = true>(
+	options: Options<PostApiSearchZonesByZoneIdFeatureRestoreOptions, ThrowOnError>,
+): Promise<RequestResult<PostApiSearchZonesByZoneIdFeatureRestoreResponses, ThrowOnError>> {
+	const { client: request = client, ...config } = options;
+
+	return request({
+		method: "POST",
+		url: "/api/search/zones/{zoneId}/feature/restore",
+		...config,
+	}) as Promise<RequestResult<PostApiSearchZonesByZoneIdFeatureRestoreResponses, ThrowOnError>>;
 }
 
 /**

@@ -15,7 +15,6 @@ import {
 	unit,
 	unitAccessBinding,
 	unitLocalization,
-	zonePage,
 } from "../../database/schema";
 import { recordUnitRevision } from "../../units/history";
 import { createProfilePublisherAttribution } from "../../units/attribution";
@@ -85,18 +84,6 @@ const UnitNotFoundResponse = toApiErrorResponse(["UnitNotFound"]);
 
 async function presentGenericContentStructureNode(node: typeof contentStructureNode.$inferSelect) {
 	const storedTarget = contentStructureTargetFromRow(node);
-	const target =
-		storedTarget.kind === "zone_page"
-			? await (async () => {
-					const [page] = await database
-						.select({ zoneId: zonePage.zoneId, slug: zonePage.slug })
-						.from(zonePage)
-						.where(eq(zonePage.id, storedTarget.zonePageId))
-						.limit(1);
-					if (!page) throw new ContentStructureNotFound();
-					return { ...storedTarget, ...page };
-				})()
-			: storedTarget;
 	return {
 		id: node.id,
 		structureId: node.structureId,
@@ -104,10 +91,9 @@ async function presentGenericContentStructureNode(node: typeof contentStructureN
 		parentId: node.parentId,
 		contentUnitId: node.contentUnitId,
 		documentKey: node.documentKey,
-		target,
+		target: storedTarget,
 		position: node.position,
 		contentRating: node.contentRating,
-		searchConfiguration: node.searchConfiguration,
 		createdAt: node.createdAt,
 		updatedAt: node.updatedAt,
 	};
@@ -382,7 +368,6 @@ export default new Elysia()
 					target: body.target,
 					position: body.position,
 					contentRating: body.contentRating,
-					searchConfiguration: body.searchConfiguration,
 				});
 			});
 			return {
@@ -430,7 +415,6 @@ export default new Elysia()
 					target: body.target,
 					position: body.position,
 					contentRating: body.contentRating,
-					searchConfiguration: body.searchConfiguration,
 				}),
 			);
 			return {

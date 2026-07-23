@@ -4,7 +4,6 @@ import {
 	FontAwesomeIconPrefixValues,
 	FontAwesomeProvider,
 } from "@rezics/avatar";
-import { SearchConfiguration } from "@rezics/search";
 import {
 	CollectionDefinitionDocument,
 	CollectionPresentationDocument,
@@ -199,6 +198,7 @@ const UnitDetailsResponse = t.Union([
 			isbn13: NullableText,
 			publicationDate: t.Nullable(t.String({ format: "date" })),
 			pageCount: t.Nullable(t.Integer({ minimum: 1 })),
+			wordCount: t.Nullable(t.Integer({ minimum: 0 })),
 			format: NullableText,
 			licensed: t.Boolean(),
 		},
@@ -329,6 +329,7 @@ export const SearchResponse = t.Object({
 	facets: t.Optional(
 		t.Array(
 			t.Object({
+				controlKey: t.Optional(t.String()),
 				field: t.String(),
 				options: t.Array(t.Object({ value: t.String(), count: SearchExactness })),
 			}),
@@ -731,15 +732,6 @@ const GenericContentStructureTargetResponse = t.Union([
 	t.Object({ kind: t.Literal("content") }, { additionalProperties: false }),
 	t.Object({ kind: t.Literal("none") }, { additionalProperties: false }),
 	t.Object({ kind: t.Literal("unit"), unitId: Uuid }, { additionalProperties: false }),
-	t.Object(
-		{
-			kind: t.Literal("zone_page"),
-			zonePageId: Uuid,
-			zoneId: Uuid,
-			slug: t.String(),
-		},
-		{ additionalProperties: false },
-	),
 	t.Object({ kind: t.Literal("external"), url: t.String() }, { additionalProperties: false }),
 ]);
 export const GenericContentStructureNodeResponse = t.Object({
@@ -752,7 +744,6 @@ export const GenericContentStructureNodeResponse = t.Object({
 	target: GenericContentStructureTargetResponse,
 	position: FractionalPosition,
 	contentRating: t.Nullable(t.UnionEnum(ContentRatingValues)),
-	searchConfiguration: t.Nullable(SearchConfiguration),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });

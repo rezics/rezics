@@ -52,6 +52,7 @@ export function followingHref(
 		case "tag":
 		case "series":
 		case "realm_rule":
+		case "zone_page":
 			return undefined;
 	}
 }

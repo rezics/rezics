@@ -177,4 +177,6 @@ export default {
 	PostScoreDuplicate: `一篇${postTerms.inline}不能重複顯示同一個評分。`,
 	PostScoreNotFound: "找不到所選的評分。",
 	RealmScoreContextPostNotMounted: `評分規則說明${postTerms.inline}必須掛載至該${realmTerms.inline}。`,
+	SearchDocumentRevisionConflict: "搜尋設定已變更，請重新載入後再儲存。",
+	ZoneSearchFeatureNotFound: `此${zoneTerms.inline}尚未啟用搜尋功能。`,
 };

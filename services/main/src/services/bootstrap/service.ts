@@ -3,12 +3,12 @@ import { and, count, eq, inArray, isNull, sql } from "drizzle-orm";
 import { isDeepStrictEqual } from "node:util";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import type { PortableTextDocument } from "@rezics/block";
 
 import { database, type DatabaseTransaction } from "../database";
 import {
 	accounts,
 	contentStructure,
+	contentStructureNode,
 	imageAsset,
 	imageObject,
 	post,
@@ -25,7 +25,6 @@ import {
 	unitSlugAddress,
 	users,
 	zone,
-	zonePage,
 } from "../database/schema";
 import {
 	createNavigationStructure,
@@ -33,7 +32,11 @@ import {
 	replaceNavigationStructure,
 } from "../content-structure/navigation";
 import { ContentStructureNotFound } from "../content-structure/errors";
-import { getContentStructureRevision } from "../content-structure/service";
+import {
+	createContentStructure,
+	getContentStructureRevision,
+	insertContentStructureNode,
+} from "../content-structure/service";
 import {
 	createDockHistory,
 	getDockRevisionId,
@@ -45,6 +48,8 @@ import { compareFractionalPositions, fractionalPositionAt } from "../ordering/po
 import { storage } from "../storage";
 import { insertUnit, insertUnitIfMissing } from "../units/create";
 import { recordUnitRevision } from "../units/history";
+import { replaceZonePageSlugAddress } from "../units/slug-address";
+import { listZonePageUnits } from "../zones/pages";
 import { type BootstrapCredentialMode, generateBootstrapPassword } from "./credentials";
 import { ensureOfficialZoneFollows } from "./official-zone-follows";
 import {
@@ -291,7 +296,7 @@ async function ensureLocalization(
 		readonly title: string;
 		readonly summary?: string;
 		readonly avatarAssetId?: string | null;
-		readonly content?: PortableTextDocument | null;
+		readonly content?: unknown;
 		readonly contentStatus?: "published" | null;
 	},
 ): Promise<boolean> {
@@ -758,6 +763,118 @@ async function ensureOfficialWikiPost(
 	return changed;
 }
 
+async function ensureOfficialZonePage(
+	tx: DatabaseTransaction,
+	value: (typeof OfficialZoneManifest)[number],
+): Promise<boolean> {
+	const createdAt = bootstrapEpoch();
+	const created = await insertUnitIfMissing(tx, {
+		id: value.homePage.id,
+		kind: "zone_page",
+		status: "published",
+		visibility: "public",
+		publishedAt: createdAt,
+		createdAt,
+		updatedAt: createdAt,
+		statusActor: { kind: "system" },
+	});
+	let changed = Boolean(created);
+	for (const [index, localization] of value.wikiPost.localizations.entries()) {
+		changed =
+			(await ensureLocalization(tx, {
+				unitId: value.homePage.id,
+				language: localization.language,
+				position: fractionalPositionAt(index),
+				title: localization.title,
+				content: value.homePage.document,
+				contentStatus: "published",
+			})) || changed;
+	}
+	changed = (await ensureOwnerBinding(tx, value.homePage.id, value.ownerProfileId)) || changed;
+	const [address] = await tx
+		.select({ slug: unitSlugAddress.slug, scopeUnitId: unitSlugAddress.scopeUnitId })
+		.from(unitSlugAddress)
+		.where(
+			and(
+				eq(unitSlugAddress.targetUnitId, value.homePage.id),
+				eq(unitSlugAddress.kind, "canonical"),
+			),
+		)
+		.limit(1);
+	if (address?.scopeUnitId !== value.id || address.slug !== value.homePage.slug) {
+		await replaceZonePageSlugAddress(tx, {
+			zoneId: value.id,
+			pageUnitId: value.homePage.id,
+			slug: value.homePage.slug,
+		});
+		changed = true;
+	}
+
+	const [storedStructure] = await tx
+		.select({ id: contentStructure.id })
+		.from(contentStructure)
+		.where(
+			and(
+				eq(contentStructure.ownerUnitId, value.id),
+				eq(contentStructure.kind, "zone.pages"),
+				isNull(contentStructure.deletedAt),
+			),
+		)
+		.limit(1);
+	let structureId = storedStructure?.id;
+	let revisionId: string;
+	if (structureId) {
+		if (structureId !== value.homePage.structureId)
+			throw new Error(`Bootstrap Zone ${value.id} has an unexpected pages structure`);
+		const currentRevisionId = await getContentStructureRevision(tx, value.id, structureId);
+		if (!currentRevisionId) throw new Error("Official Zone pages tree has no revision");
+		revisionId = currentRevisionId;
+	} else {
+		const createdStructure = await createContentStructure(tx, {
+			structureId: value.homePage.structureId,
+			ownerUnitId: value.id,
+			kind: "zone.pages",
+			actorProfileId: value.ownerProfileId,
+			message: "Bootstrap official Zone pages tree",
+		});
+		structureId = createdStructure.structure.id;
+		revisionId = createdStructure.revisionId;
+		changed = true;
+	}
+	const [storedNode] = await tx
+		.select({ id: contentStructureNode.id })
+		.from(contentStructureNode)
+		.where(
+			and(
+				eq(contentStructureNode.structureId, structureId),
+				eq(contentStructureNode.contentUnitId, value.homePage.id),
+				isNull(contentStructureNode.deletedAt),
+			),
+		)
+		.limit(1);
+	if (!storedNode) {
+		await insertContentStructureNode(tx, {
+			ownerUnitId: value.id,
+			structureId,
+			baseRevisionId: revisionId,
+			actorProfileId: value.ownerProfileId,
+			contentUnitId: value.homePage.id,
+			parentId: null,
+			position: fractionalPositionAt(0),
+			message: "Bootstrap official Zone home page",
+		});
+		changed = true;
+	}
+	if (changed)
+		await recordUnitRevision(tx, {
+			unitId: value.homePage.id,
+			actorProfileId: value.ownerProfileId,
+			event: "create",
+			message: "Bootstrap official Zone Page Unit",
+		});
+	return changed;
+}
+
 async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 	const createdAt = bootstrapEpoch();
 	for (const value of OfficialZoneManifest) {
@@ -804,41 +921,7 @@ async function ensureOfficialZones(tx: DatabaseTransaction): Promise<void> {
 			changed = true;
 		}
 		changed = (await ensureOfficialWikiPost(tx, value)) || changed;
-		const homePageValue = {
-			id: value.homePage.id,
-			zoneId: value.id,
-			slug: value.homePage.slug,
-			titleUnitId: value.homePage.titleUnitId,
-			document: value.homePage.document,
-			position: fractionalPositionAt(0),
-			home: true,
-		};
-		const { id: _homePageId, ...homePageSet } = homePageValue;
-		const [storedPage] = await tx
-			.select({
-				id: zonePage.id,
-				zoneId: zonePage.zoneId,
-				slug: zonePage.slug,
-				titleUnitId: zonePage.titleUnitId,
-				document: zonePage.document,
-				position: zonePage.position,
-				home: zonePage.home,
-			})
-			.from(zonePage)
-			.where(eq(zonePage.id, value.homePage.id))
-			.limit(1);
-		if (storedPage) {
-			if (!valuesEqual(storedPage, homePageValue)) {
-				await tx
-					.update(zonePage)
-					.set({ ...homePageSet, updatedAt: createdAt })
-					.where(eq(zonePage.id, value.homePage.id));
-				changed = true;
-			}
-		} else {
-			await tx.insert(zonePage).values({ ...homePageValue, createdAt, updatedAt: createdAt });
-			changed = true;
-		}
+		changed = (await ensureOfficialZonePage(tx, value)) || changed;
 		const [storedNavigation] = await tx
 			.select({ id: contentStructure.id })
 			.from(contentStructure)
@@ -996,6 +1079,11 @@ export async function isBootstrapReady(): Promise<boolean> {
 			scopeUnitId: TopLevelSlugNamespaceUnitIds.zones,
 			slug: officialZone.slug,
 		})),
+		...OfficialZoneManifest.map((officialZone) => ({
+			targetUnitId: officialZone.homePage.id,
+			scopeUnitId: officialZone.id,
+			slug: officialZone.homePage.slug,
+		})),
 	];
 	const expectedLocalizations = [
 		...OfficialProfileManifest.flatMap((officialProfile) =>
@@ -1035,6 +1123,22 @@ export async function isBootstrapReady(): Promise<boolean> {
 				avatarIconPrefix: null,
 				avatarIconName: null,
 				content: localization.body,
+				contentStatus: "published" as const,
+				language: localization.language,
+				title: localization.title,
+			})),
+		),
+		...OfficialZoneManifest.flatMap((officialZone) =>
+			officialZone.wikiPost.localizations.map((localization, index) => ({
+				unitId: officialZone.homePage.id,
+				position: fractionalPositionAt(index),
+				summary: null,
+				avatarType: null,
+				avatarAssetId: null,
+				avatarEmoji: null,
+				avatarIconPrefix: null,
+				avatarIconName: null,
+				content: officialZone.homePage.document,
 				contentStatus: "published" as const,
 				language: localization.language,
 				title: localization.title,
@@ -1144,20 +1248,12 @@ export async function isBootstrapReady(): Promise<boolean> {
 					OfficialZoneManifest.map((value) => value.wikiPost.id),
 				),
 			),
-		database
-			.select({
-				id: zonePage.id,
-				zoneId: zonePage.zoneId,
-				document: zonePage.document,
-				home: zonePage.home,
-			})
-			.from(zonePage)
-			.where(
-				inArray(
-					zonePage.id,
-					OfficialZoneManifest.map((value) => value.homePage.id),
-				),
-			),
+		database.transaction(async (tx) => {
+			const pages = [];
+			for (const value of OfficialZoneManifest)
+				pages.push(...(await listZonePageUnits(tx, value.id)));
+			return pages;
+		}),
 		database.transaction(async (tx) => {
 			const navigations = [];
 			for (const value of OfficialZoneManifest) {
@@ -1219,6 +1315,7 @@ export async function isBootstrapReady(): Promise<boolean> {
 					OfficialRealmManifest.id,
 					...OfficialZoneManifest.map((officialZone) => officialZone.id),
 					...OfficialZoneManifest.map((officialZone) => officialZone.wikiPost.id),
+					...OfficialZoneManifest.map((officialZone) => officialZone.homePage.id),
 				]),
 			),
 	]);
@@ -1269,6 +1366,7 @@ export async function isBootstrapReady(): Promise<boolean> {
 				(actual) =>
 					actual.id === expected.homePage.id &&
 					actual.zoneId === expected.id &&
+					actual.structureId === expected.homePage.structureId &&
 					actual.home &&
 					valuesEqual(actual.document, expected.homePage.document),
 			),

@@ -33,6 +33,12 @@ function formatDate(value: string | null, language: string) {
 	return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat(language).format(date);
 }
 
+function tagSearchHref(type: UnitType, tagId: string, label: string): string {
+	const template = type === "book" || type === "media" || type === "software" ? type : "global";
+	const query = new URLSearchParams({ template, tag: tagId, tagLabel: label });
+	return `/search?${query.toString()}`;
+}
+
 function DetailSection({ title, children }: { title: string; children: React.ReactNode }) {
 	return (
 		<section className="flex flex-col gap-3">
@@ -346,11 +352,17 @@ export function UnitDetail({ type, unit }: { type: UnitType; unit: string }) {
 					{item.tags.length > 0 && (
 						<DetailSection title={t.units.detail.tags}>
 							<div className="flex flex-wrap gap-2">
-								{item.tags.map((tag) => (
-									<Badge key={tag.id} variant="outline">
-										{tag.title ?? tag.tagId}
-									</Badge>
-								))}
+								{item.tags.map((tag) => {
+									const label = tag.title ?? tag.tagId;
+									return (
+										<Link
+											href={tagSearchHref(type, tag.tagId, label)}
+											key={tag.id}
+										>
+											<Badge variant="outline">{label}</Badge>
+										</Link>
+									);
+								})}
 							</div>
 						</DetailSection>
 					)}

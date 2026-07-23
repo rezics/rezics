@@ -89,6 +89,7 @@ export interface UpdateUnitInput {
 		isbn13?: string | null;
 		publicationDate?: string | null;
 		pageCount?: number | null;
+		wordCount?: number | null;
 		format?: string | null;
 		licensed?: boolean;
 		versionLabel?: string | null;
@@ -183,6 +184,7 @@ async function getUnitDetails(
 			isbn13: details.isbn13,
 			publicationDate: details.publicationDate,
 			pageCount: details.pageCount,
+			wordCount: details.wordCount,
 			format: details.format,
 			licensed: contentLicensed,
 		};
@@ -528,6 +530,7 @@ export async function updateUnit(
 							? releasedOn
 							: details.publicationDate,
 					pageCount: details.pageCount,
+					wordCount: details.wordCount,
 					format: details.format,
 				})
 				.where(eq(book.id, unitId));

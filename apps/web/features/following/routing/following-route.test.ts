@@ -30,6 +30,7 @@ describe("following routes", () => {
 			"tag",
 			"series",
 			"realm_rule",
+			"zone_page",
 		] as const)
 			expect(followingHref(kind, "unit-id")).toBeUndefined();
 	});
@@ -47,6 +48,7 @@ describe("following routes", () => {
 			"tag",
 			"series",
 			"zone",
+			"zone_page",
 			"collection",
 			"post",
 			"poll",

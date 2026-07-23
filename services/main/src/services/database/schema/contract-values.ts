@@ -18,6 +18,7 @@ export const UnitKindValues = [
 	"tag",
 	"series",
 	"zone",
+	"zone_page",
 	"collection",
 	"post",
 	"poll",
@@ -96,16 +97,11 @@ export const ContentStructureKindValues = [
 	"realm.taxonomy",
 	"realm.navigation",
 	"zone.navigation",
+	"zone.pages",
 ] as const;
 export type ContentStructureKind = (typeof ContentStructureKindValues)[number];
 
-export const ContentStructureTargetKindValues = [
-	"content",
-	"none",
-	"unit",
-	"zone_page",
-	"external",
-] as const;
+export const ContentStructureTargetKindValues = ["content", "none", "unit", "external"] as const;
 export type ContentStructureTargetKind = (typeof ContentStructureTargetKindValues)[number];
 export const ProgressStatusValues = [
 	"backlog",

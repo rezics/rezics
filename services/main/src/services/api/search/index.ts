@@ -1,29 +1,46 @@
 import { StatusCodes } from "http-status-codes";
 import Elysia from "elysia";
 import {
-	BlockDocument,
 	BlockKey,
 	DockDocument,
 	parseDocument,
 	type Block,
+	type SearchFeatureSource,
 	walkBlockTree,
 } from "@rezics/block";
-import { SearchConfiguration, SearchExecutionRequest } from "@rezics/search";
+import {
+	SearchFeatureDefinition,
+	SearchFeatureInput,
+	SearchDocument,
+	SearchTemplateId,
+} from "@rezics/search";
 import { getActiveObservability } from "@rezics/observability";
 import { and, eq, isNull } from "drizzle-orm";
 import { t } from "elysia";
 
 import { resolveIdentity } from "../../auth/session";
-import { executeConfiguredSearch, GlobalSearchConfiguration } from "../../search/configuration";
-import { InvalidSearch, SearchUnavailable } from "../../search/errors";
+import { InvalidSearch, SearchUnavailable, ZoneSearchFeatureNotFound } from "../../search/errors";
 import { SearchCategories } from "../../search/schema";
 import { searchDomain, searchGrouped } from "../../search/service";
+import {
+	createDefaultSearchDocument,
+	executeSearchFeatureInput,
+	resolveSearchDocument,
+} from "../../search/templates";
 import { database } from "../../database";
-import { contentStructure, contentStructureNode, unitDock, zonePage } from "../../database/schema";
+import { unitDock } from "../../database/schema";
 import { UnitNotFound } from "../../units/errors";
+import { getZonePageUnitBySlug } from "../../zones/pages";
+import {
+	getZoneSearchFeature,
+	listZoneSearchFeatureRevisions,
+	putZoneSearchFeature,
+	restoreZoneSearchFeature,
+	type ZoneSearchFeatureProjection,
+} from "../../search/documents";
 import { ZonePageNotFound } from "../domain-extensions/errors";
 import { DockNotFound } from "../docks/errors";
-import { Uuid } from "../schema";
+import { DateTime, Uuid } from "../schema";
 import { DomainSearchBody, DomainSearchParams, GroupedSearchBody } from "./schema";
 import { toApiErrorResponse, DomainSearchResponse, SearchResponse } from "../schema/response";
 
@@ -39,6 +56,10 @@ function logSearchFailure(message: string, eventName: string, error: unknown): v
 
 const SearchUnavailableResponse = toApiErrorResponse(["SearchUnavailable"]);
 const InvalidSearchResponse = toApiErrorResponse(["InvalidSearch"]);
+const UnitMutationForbiddenResponse = toApiErrorResponse([
+	"UnitPermissionForbidden",
+	"UnitProtected",
+]);
 
 const ZoneDockSearchParams = t.Object({ zoneId: Uuid, blockKey: BlockKey });
 const ZonePageSearchParams = t.Object({
@@ -46,22 +67,72 @@ const ZonePageSearchParams = t.Object({
 	slug: t.String({ minLength: 1, maxLength: 100, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }),
 	blockKey: BlockKey,
 });
-const ContentStructureNodeSearchParams = t.Object({
-	unitId: Uuid,
-	structureId: Uuid,
-	nodeId: Uuid,
+const SearchFeatureTemplateParams = t.Object({ template: SearchTemplateId });
+const SearchFeatureExecutionBody = t.Omit(SearchFeatureInput, ["document"]);
+const ZoneSearchFeatureParams = t.Object({ zoneId: Uuid });
+const ZoneSearchFeatureExecutionBody = t.Pick(SearchFeatureInput, ["injections", "state"]);
+const ZoneSearchFeatureResponse = t.Object({
+	zoneId: Uuid,
+	searchDocumentId: Uuid,
+	enabled: t.Boolean(),
+	definition: SearchFeatureDefinition,
+	latestRevisionId: Uuid,
+	createdAt: DateTime,
+	updatedAt: DateTime,
+});
+const ZoneSearchFeaturePutBody = t.Object(
+	{
+		enabled: t.Boolean(),
+		document: SearchDocument,
+		baseRevisionId: t.Optional(Uuid),
+		message: t.Optional(t.String({ maxLength: 500 })),
+	},
+	{ additionalProperties: false },
+);
+const ZoneSearchFeatureRestoreBody = t.Object(
+	{
+		sourceRevisionId: Uuid,
+		baseRevisionId: Uuid,
+		message: t.Optional(t.String({ maxLength: 500 })),
+	},
+	{ additionalProperties: false },
+);
+const ZoneSearchFeatureRevisionListResponse = t.Object({
+	items: t.Array(
+		t.Object({
+			id: Uuid,
+			parentRevisionId: t.Nullable(Uuid),
+			sourceRevisionId: t.Nullable(Uuid),
+			actorProfileId: t.Nullable(Uuid),
+			kind: t.UnionEnum(["create", "update", "delete", "restore"]),
+			editSummary: t.Nullable(t.String()),
+			createdAt: DateTime,
+		}),
+	),
 });
 
-function findSearchConfiguration(
+function presentZoneSearchFeature(record: ZoneSearchFeatureProjection) {
+	return {
+		zoneId: record.zoneId,
+		searchDocumentId: record.searchDocumentId,
+		enabled: record.enabled,
+		definition: resolveSearchDocument(record.document),
+		latestRevisionId: record.latestRevisionId,
+		createdAt: record.createdAt,
+		updatedAt: record.updatedAt,
+	} satisfies typeof ZoneSearchFeatureResponse.static;
+}
+
+function findSearchFeatureSource(
 	document: { readonly blocks: readonly Block[] },
 	blockKey: string,
 ) {
-	let found: SearchConfiguration | undefined;
+	let found: SearchFeatureSource | undefined;
 	walkBlockTree(document, (block) => {
 		if (block._key === blockKey) {
 			if (block._type !== "search" && block._type !== "feed")
-				throw new InvalidSearch("The selected Block does not use a Search configuration");
-			found = block.configuration;
+				throw new InvalidSearch("The selected Block does not use Search Feature");
+			found = block.feature;
 		}
 	});
 	if (!found) throw new InvalidSearch("Search-backed Block does not exist in this surface");
@@ -75,98 +146,219 @@ async function executeZoneBlock(input: {
 	body: unknown;
 	profileId?: string;
 }) {
-	const configuration = findSearchConfiguration(input.document, input.blockKey);
-	return executeConfiguredSearch(configuration, input.body, input.profileId, input.zoneId);
+	const source = findSearchFeatureSource(input.document, input.blockKey);
+	const document =
+		source.kind === "template"
+			? createDefaultSearchDocument(source.template)
+			: await database.transaction(async (tx) => {
+					const feature = await getZoneSearchFeature(tx, input.zoneId);
+					if (!feature || !feature.enabled) throw new ZoneSearchFeatureNotFound();
+					return feature.document;
+				});
+	const request = input.body as typeof ZoneSearchFeatureExecutionBody.static;
+	return executeSearchFeatureInput(
+		{
+			document,
+			contexts: [{ kind: "zone", zoneId: input.zoneId }],
+			injections: request.injections,
+			state: request.state,
+		},
+		input.profileId,
+	);
 }
 
 export default new Elysia({ prefix: "/search" })
-	.get("/configuration", () => GlobalSearchConfiguration, {
-		response: { [StatusCodes.OK]: SearchConfiguration },
-		detail: { summary: "Get global Search feature configuration", tags: ["Search"] },
-	})
-	.post(
-		"/execute",
-		async ({ body, request }) => {
-			try {
-				const identity = await resolveIdentity(request.headers, "unit:read");
-				return await executeConfiguredSearch(
-					GlobalSearchConfiguration,
-					body,
-					identity.authorization.profileId,
-				);
-			} catch (cause) {
-				if (cause instanceof InvalidSearch || cause instanceof SearchUnavailable)
-					throw cause;
-				logSearchFailure("Configured search failed", "search.configured.failed", cause);
-				throw new SearchUnavailable(cause);
-			}
-		},
+	.get(
+		"/features/:template",
+		({ params }) => resolveSearchDocument(createDefaultSearchDocument(params.template)),
 		{
-			body: SearchExecutionRequest,
-			response: {
-				[StatusCodes.OK]: SearchResponse,
-				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
-				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
-			},
-			detail: { summary: "Execute configured global Search", tags: ["Search"] },
+			params: SearchFeatureTemplateParams,
+			response: { [StatusCodes.OK]: SearchFeatureDefinition },
+			detail: { summary: "Get a system Search Feature template", tags: ["Search"] },
 		},
 	)
 	.post(
-		"/units/:unitId/content-structures/:structureId/nodes/:nodeId/execute",
+		"/features/:template/execute",
 		async ({ params, body, request }) => {
-			const identity = await resolveIdentity(request.headers, "unit:read");
-			await identity.authorization.unit.ensureCanRead(params.unitId);
-			const [node] = await database
-				.select({ configuration: contentStructureNode.searchConfiguration })
-				.from(contentStructureNode)
-				.innerJoin(
-					contentStructure,
-					and(
-						eq(contentStructure.id, contentStructureNode.structureId),
-						eq(contentStructure.ownerUnitId, contentStructureNode.ownerUnitId),
-					),
-				)
-				.where(
-					and(
-						eq(contentStructure.id, params.structureId),
-						eq(contentStructure.ownerUnitId, params.unitId),
-						eq(contentStructureNode.id, params.nodeId),
-						isNull(contentStructure.deletedAt),
-						isNull(contentStructureNode.deletedAt),
-					),
-				)
-				.limit(1);
-			if (!node?.configuration)
-				throw new InvalidSearch("Content Structure node has no Search configuration");
 			try {
-				return await executeConfiguredSearch(
-					node.configuration,
-					body,
+				const identity = await resolveIdentity(request.headers, "unit:read");
+				return await executeSearchFeatureInput(
+					{
+						document: createDefaultSearchDocument(params.template),
+						...body,
+					},
 					identity.authorization.profileId,
 				);
 			} catch (cause) {
 				if (cause instanceof InvalidSearch || cause instanceof SearchUnavailable)
 					throw cause;
-				logSearchFailure(
-					"Content Structure Search execution failed",
-					"search.content_structure.failed",
-					cause,
-				);
+				logSearchFailure("Search Feature execution failed", "search.feature.failed", cause);
 				throw new SearchUnavailable(cause);
 			}
 		},
 		{
-			params: ContentStructureNodeSearchParams,
-			body: SearchExecutionRequest,
+			params: SearchFeatureTemplateParams,
+			body: SearchFeatureExecutionBody,
 			response: {
 				[StatusCodes.OK]: SearchResponse,
 				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
+			},
+			detail: { summary: "Execute a system Search Feature template", tags: ["Search"] },
+		},
+	)
+	.get(
+		"/zones/:zoneId/feature",
+		async ({ params, request }) => {
+			const identity = await resolveIdentity(request.headers, "unit:read");
+			await identity.authorization.unit.ensureCanRead(
+				params.zoneId,
+				() => new UnitNotFound("Zone"),
+			);
+			const feature = await database.transaction((tx) =>
+				getZoneSearchFeature(tx, params.zoneId),
+			);
+			if (!feature) throw new ZoneSearchFeatureNotFound();
+			return presentZoneSearchFeature(feature);
+		},
+		{
+			params: ZoneSearchFeatureParams,
+			response: {
+				[StatusCodes.OK]: ZoneSearchFeatureResponse,
+				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ZoneSearchFeatureNotFound",
+				]),
+			},
+			detail: { summary: "Get a Zone Search Feature", tags: ["Search", "Zones"] },
+		},
+	)
+	.put(
+		"/zones/:zoneId/feature",
+		async ({ params, body, request }) => {
+			const identity = await resolveIdentity(request.headers, "unit:update");
+			await identity.authorization.unit.ensureCanUpdate(params.zoneId, [["zone", "search"]]);
+			const actorProfileId = identity.authorization.profileId;
+			if (!actorProfileId) throw new UnitNotFound("Profile");
+			return presentZoneSearchFeature(
+				await putZoneSearchFeature({
+					zoneId: params.zoneId,
+					enabled: body.enabled,
+					document: body.document,
+					baseRevisionId: body.baseRevisionId,
+					actorProfileId,
+					message: body.message,
+				}),
+			);
+		},
+		{
+			params: ZoneSearchFeatureParams,
+			body: ZoneSearchFeaturePutBody,
+			response: {
+				[StatusCodes.OK]: ZoneSearchFeatureResponse,
+				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
 				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound"]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["SearchDocumentRevisionConflict"]),
+			},
+			detail: { summary: "Configure a Zone Search Feature", tags: ["Search", "Zones"] },
+		},
+	)
+	.post(
+		"/zones/:zoneId/feature/execute",
+		async ({ params, body, request }) => {
+			const identity = await resolveIdentity(request.headers, "unit:read");
+			await identity.authorization.unit.ensureCanRead(
+				params.zoneId,
+				() => new UnitNotFound("Zone"),
+			);
+			const feature = await database.transaction((tx) =>
+				getZoneSearchFeature(tx, params.zoneId),
+			);
+			if (!feature || !feature.enabled) throw new ZoneSearchFeatureNotFound();
+			return executeSearchFeatureInput(
+				{
+					document: feature.document,
+					contexts: [{ kind: "zone", zoneId: params.zoneId }],
+					injections: body.injections,
+					state: body.state,
+				},
+				identity.authorization.profileId,
+			);
+		},
+		{
+			params: ZoneSearchFeatureParams,
+			body: ZoneSearchFeatureExecutionBody,
+			response: {
+				[StatusCodes.OK]: SearchResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ZoneSearchFeatureNotFound",
+				]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
+			},
+			detail: { summary: "Execute a Zone Search Feature", tags: ["Search", "Zones"] },
+		},
+	)
+	.get(
+		"/zones/:zoneId/feature/revisions",
+		async ({ params, request }) => {
+			const identity = await resolveIdentity(request.headers, "unit:update");
+			await identity.authorization.unit.ensureCanUpdate(params.zoneId, [["zone", "search"]]);
+			const revisions = await database.transaction((tx) =>
+				listZoneSearchFeatureRevisions(tx, params.zoneId),
+			);
+			if (!revisions) throw new ZoneSearchFeatureNotFound();
+			return { items: revisions.items };
+		},
+		{
+			params: ZoneSearchFeatureParams,
+			response: {
+				[StatusCodes.OK]: ZoneSearchFeatureRevisionListResponse,
+				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ZoneSearchFeatureNotFound",
+				]),
+			},
+			detail: { summary: "List Zone Search Feature revisions", tags: ["Search", "Zones"] },
+		},
+	)
+	.post(
+		"/zones/:zoneId/feature/restore",
+		async ({ params, body, request }) => {
+			const identity = await resolveIdentity(request.headers, "unit:update");
+			await identity.authorization.unit.ensureCanUpdate(params.zoneId, [["zone", "search"]]);
+			const actorProfileId = identity.authorization.profileId;
+			if (!actorProfileId) throw new UnitNotFound("Profile");
+			return presentZoneSearchFeature(
+				await restoreZoneSearchFeature({
+					zoneId: params.zoneId,
+					sourceRevisionId: body.sourceRevisionId,
+					baseRevisionId: body.baseRevisionId,
+					actorProfileId,
+					message: body.message,
+				}),
+			);
+		},
+		{
+			params: ZoneSearchFeatureParams,
+			body: ZoneSearchFeatureRestoreBody,
+			response: {
+				[StatusCodes.OK]: ZoneSearchFeatureResponse,
+				[StatusCodes.FORBIDDEN]: UnitMutationForbiddenResponse,
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ZoneSearchFeatureNotFound",
+				]),
+				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
+				[StatusCodes.CONFLICT]: toApiErrorResponse(["SearchDocumentRevisionConflict"]),
 			},
 			detail: {
-				summary: "Execute a Content Structure node Search configuration",
-				tags: ["Search", "Content Structure"],
+				summary: "Restore a Zone Search Feature revision",
+				tags: ["Search", "Zones"],
 			},
 		},
 	)
@@ -202,7 +394,8 @@ export default new Elysia({ prefix: "/search" })
 					cause instanceof InvalidSearch ||
 					cause instanceof SearchUnavailable ||
 					cause instanceof UnitNotFound ||
-					cause instanceof DockNotFound
+					cause instanceof DockNotFound ||
+					cause instanceof ZoneSearchFeatureNotFound
 				)
 					throw cause;
 				logSearchFailure(
@@ -215,10 +408,14 @@ export default new Elysia({ prefix: "/search" })
 		},
 		{
 			params: ZoneDockSearchParams,
-			body: SearchExecutionRequest,
+			body: ZoneSearchFeatureExecutionBody,
 			response: {
 				[StatusCodes.OK]: SearchResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "DockNotFound"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"DockNotFound",
+					"ZoneSearchFeatureNotFound",
+				]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
 			},
@@ -233,16 +430,14 @@ export default new Elysia({ prefix: "/search" })
 				params.zoneId,
 				() => new UnitNotFound("Zone"),
 			);
-			const [record] = await database
-				.select({ document: zonePage.document })
-				.from(zonePage)
-				.where(and(eq(zonePage.zoneId, params.zoneId), eq(zonePage.slug, params.slug)))
-				.limit(1);
+			const record = await database.transaction((tx) =>
+				getZonePageUnitBySlug(tx, params.zoneId, params.slug),
+			);
 			if (!record) throw new ZonePageNotFound();
 			try {
 				return await executeZoneBlock({
 					...params,
-					document: parseDocument(BlockDocument, record.document),
+					document: record.document,
 					body,
 					profileId: identity.authorization.profileId,
 				});
@@ -251,7 +446,8 @@ export default new Elysia({ prefix: "/search" })
 					cause instanceof InvalidSearch ||
 					cause instanceof SearchUnavailable ||
 					cause instanceof UnitNotFound ||
-					cause instanceof ZonePageNotFound
+					cause instanceof ZonePageNotFound ||
+					cause instanceof ZoneSearchFeatureNotFound
 				)
 					throw cause;
 				logSearchFailure(
@@ -264,10 +460,14 @@ export default new Elysia({ prefix: "/search" })
 		},
 		{
 			params: ZonePageSearchParams,
-			body: SearchExecutionRequest,
+			body: ZoneSearchFeatureExecutionBody,
 			response: {
 				[StatusCodes.OK]: SearchResponse,
-				[StatusCodes.NOT_FOUND]: toApiErrorResponse(["UnitNotFound", "ZonePageNotFound"]),
+				[StatusCodes.NOT_FOUND]: toApiErrorResponse([
+					"UnitNotFound",
+					"ZonePageNotFound",
+					"ZoneSearchFeatureNotFound",
+				]),
 				[StatusCodes.UNPROCESSABLE_ENTITY]: InvalidSearchResponse,
 				[StatusCodes.SERVICE_UNAVAILABLE]: SearchUnavailableResponse,
 			},

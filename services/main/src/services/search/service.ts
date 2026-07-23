@@ -314,6 +314,7 @@ function compileFilter(category: SearchCategory, filter: SearchFilter): SQL {
 		Record<SearchFilter["field"], { readonly kind: string; readonly column: SQL }>
 	> = {
 		"book-page-count": { kind: "book", column: sql`${book.pageCount}` },
+		"book-word-count": { kind: "book", column: sql`${book.wordCount}` },
 		"media-runtime-minutes": { kind: "media", column: sql`${media.runtimeMinutes}` },
 		"media-episode-count": { kind: "media", column: sql`${media.episodeCount}` },
 		"media-season-count": { kind: "media", column: sql`${media.seasonCount}` },

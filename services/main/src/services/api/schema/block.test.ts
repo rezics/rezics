@@ -283,7 +283,7 @@ describe("Block document contracts", () => {
 		).toThrow("Duplicate Block key");
 	});
 
-	test("stores a trusted Search feature configuration instead of engine DSL", () => {
+	test("stores a stable Search Feature source instead of an embedded query schema", () => {
 		const document = {
 			_type: "block-document",
 			_key: "000000000010",
@@ -291,16 +291,14 @@ describe("Block document contracts", () => {
 				{
 					_type: "search",
 					_key: "000000000011",
-					configuration: searchConfiguration,
+					feature: { kind: "template", template: "global" },
 					presentation: { results: "list", showResultCount: true },
 				},
 			],
 		} satisfies BlockDocumentValue;
 
 		expect(() => assertBlockDocument(document)).not.toThrow();
-		expect("queryDsl" in (document.blocks[0]!.configuration as Record<string, unknown>)).toBe(
-			false,
-		);
+		expect(document.blocks[0]!.feature).toEqual({ kind: "template", template: "global" });
 	});
 
 	test("separates reusable navigation content from Menu presentation", () => {
@@ -311,7 +309,10 @@ describe("Block document contracts", () => {
 				{
 					_key: "000000000021",
 					labelUnitId: "019b0000-0000-7000-8000-000000000001",
-					target: { kind: "zone-page", slug: "search" },
+					target: {
+						kind: "unit",
+						unitId: "019b0000-0000-7000-8000-000000000002",
+					},
 				},
 			],
 		} satisfies typeof NavigationDocument.static;
@@ -330,7 +331,10 @@ describe("Block document contracts", () => {
 		} satisfies BlockDocumentValue;
 
 		expect(() => assertNavigationDocument(navigation)).not.toThrow();
-		expect([...collectNavigationReferences(navigation).zonePageSlugs]).toEqual(["search"]);
+		expect([...collectNavigationReferences(navigation).unitIds]).toEqual([
+			"019b0000-0000-7000-8000-000000000001",
+			"019b0000-0000-7000-8000-000000000002",
+		]);
 		expect(() => assertBlockDocument(document)).not.toThrow();
 		expect([...collectBlockReferences(document).navigationIds]).toEqual([
 			"019b0000-0000-7000-8000-000000000002",
@@ -407,13 +411,16 @@ describe("Block document contracts", () => {
 						{
 							_key: "000000000043",
 							labelUnitId: unitId,
-							target: { kind: "zone-page", slug: "missing" },
+							target: {
+								kind: "unit",
+								unitId: "019b0000-0000-7000-8000-000000000002",
+							},
 						},
 					],
 				},
 				resolver,
 			),
-		).rejects.toThrow("Unresolved zone-page Block reference");
+		).rejects.toThrow("Unresolved unit Block reference");
 	});
 });
 

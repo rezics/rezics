@@ -197,6 +197,8 @@ async function replaceCanonicalAddress(
 		readonly unitId: string;
 		readonly scopeUnitId: string | null;
 		readonly slug: SlugLabel;
+		/** Direct scoped lookup remains valid when the parent has no public canonical path. */
+		readonly allowUnaddressedScope?: boolean;
 	},
 ): Promise<CanonicalAddressMutation> {
 	await lockSlugTree(tx);
@@ -222,7 +224,27 @@ async function replaceCanonicalAddress(
 	if (input.scopeUnitId === null && target.kind !== "slug_namespace")
 		throw new UnitAddressMutationForbidden();
 
-	const scopeDepth = await loadScopeDepth(tx, input.scopeUnitId, target.id);
+	let scopeDepth: number;
+	try {
+		scopeDepth = await loadScopeDepth(tx, input.scopeUnitId, target.id);
+	} catch (cause) {
+		if (
+			!(cause instanceof SlugScopeNotFound) ||
+			!input.allowUnaddressedScope ||
+			!input.scopeUnitId
+		)
+			throw cause;
+		const [scope] = await tx
+			.select({ deletedAt: unit.deletedAt })
+			.from(unit)
+			.where(eq(unit.id, input.scopeUnitId))
+			.limit(1);
+		if (!scope) throw cause;
+		if (scope.deletedAt) throw new SlugScopeUnavailable();
+		// The direct scope is still one address level even though no complete
+		// public canonical path can be projected for it yet.
+		scopeDepth = 1;
+	}
 	if (scopeDepth + 1 > SlugAddressMaximumDepth) throw new SlugDepthExceeded();
 
 	const after: UnitSlugAddressValue = {
@@ -778,6 +800,55 @@ export async function replaceZoneSlugAddress(
 		kind: "zone",
 		slug: input.slug,
 	});
+}
+
+/**
+ * Assigns or renames a Zone Page Unit inside its owning Zone scope.
+ *
+ * The caller must already hold the Zone graph lock and prove Zone update
+ * authority. Keeping this transaction-bound lets page identity, localization,
+ * Content Structure membership, address, and their histories commit together.
+ */
+export async function replaceZonePageSlugAddress(
+	tx: DatabaseTransaction,
+	input: {
+		readonly zoneId: string;
+		readonly pageUnitId: string;
+		readonly slug: string;
+	},
+): Promise<CanonicalUnitSlugAddress> {
+	const slug = parseSlugLabel(input.slug);
+	const [target] = await tx
+		.select({ kind: unit.kind, deletedAt: unit.deletedAt })
+		.from(unit)
+		.where(eq(unit.id, input.pageUnitId))
+		.limit(1);
+	const [scope] = await tx
+		.select({ kind: unit.kind, deletedAt: unit.deletedAt })
+		.from(unit)
+		.where(eq(unit.id, input.zoneId))
+		.limit(1);
+	if (
+		!target ||
+		target.kind !== "zone_page" ||
+		target.deletedAt ||
+		!scope ||
+		scope.kind !== "zone" ||
+		scope.deletedAt
+	)
+		throw new UnitNotFound();
+	const mutation = await replaceCanonicalAddress(tx, {
+		unitId: input.pageUnitId,
+		scopeUnitId: input.zoneId,
+		slug,
+		allowUnaddressedScope: true,
+	});
+	return {
+		addressId: mutation.addressId,
+		unitId: input.pageUnitId,
+		scopeUnitId: input.zoneId,
+		slug,
+	};
 }
 
 /**

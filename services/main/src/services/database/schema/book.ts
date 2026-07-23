@@ -14,6 +14,8 @@ export const book = pgTable(
 		isbn13: text(),
 		publicationDate: date(),
 		pageCount: integer(),
+		/** Authoritative editorial metadata used by the Book Search template. */
+		wordCount: integer(),
 		format: text(),
 		createdAt: createCreatedAtColumn(),
 		updatedAt: createUpdatedAtColumn(),
@@ -25,5 +27,6 @@ export const book = pgTable(
 		index("book_publication_date_idx").on(table.publicationDate),
 		check("book_isbn13_check", sql`${table.isbn13} is null or ${table.isbn13} ~ '^[0-9]{13}$'`),
 		check("book_page_count_check", sql`${table.pageCount} is null or ${table.pageCount} > 0`),
+		check("book_word_count_check", sql`${table.wordCount} is null or ${table.wordCount} >= 0`),
 	],
 );

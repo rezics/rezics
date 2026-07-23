@@ -109,6 +109,7 @@ export const OfficialZoneAvatarAsset = {
 function createOfficialZoneContent(input: {
 	readonly postId: string;
 	readonly pageId: string;
+	readonly pagesStructureId: string;
 	readonly navigationId: string;
 	readonly keys: readonly [string, string, string, string, string, string, string, string];
 	readonly zh: { readonly title: string; readonly body: string };
@@ -143,6 +144,7 @@ function createOfficialZoneContent(input: {
 		},
 		homePage: {
 			id: input.pageId,
+			structureId: input.pagesStructureId,
 			slug: "home",
 			titleUnitId: input.postId,
 			document: createUnitReferencedBlockDocument(
@@ -159,7 +161,7 @@ function createOfficialZoneContent(input: {
 					{
 						_key: `1${menuKey.slice(1)}`,
 						labelUnitId: input.postId,
-						target: { kind: "zone-page" as const, slug: "home" },
+						target: { kind: "unit" as const, unitId: input.pageId },
 					},
 				],
 			},
@@ -206,6 +208,7 @@ export const OfficialZoneManifest = [
 		...createOfficialZoneContent({
 			postId: "019b76da-a800-7500-8000-000000000001",
 			pageId: "019b76da-a800-7600-8000-000000000001",
+			pagesStructureId: "019b76da-a800-7650-8000-000000000001",
 			navigationId: "019b76da-a800-7700-8000-000000000001",
 			keys: [
 				"b00757010001",
@@ -250,6 +253,7 @@ export const OfficialZoneManifest = [
 		...createOfficialZoneContent({
 			postId: "019b76da-a800-7500-8000-000000000002",
 			pageId: "019b76da-a800-7600-8000-000000000002",
+			pagesStructureId: "019b76da-a800-7650-8000-000000000002",
 			navigationId: "019b76da-a800-7700-8000-000000000002",
 			keys: [
 				"b00757020001",
@@ -294,6 +298,7 @@ export const OfficialZoneManifest = [
 		...createOfficialZoneContent({
 			postId: "019b76da-a800-7500-8000-000000000003",
 			pageId: "019b76da-a800-7600-8000-000000000003",
+			pagesStructureId: "019b76da-a800-7650-8000-000000000003",
 			navigationId: "019b76da-a800-7700-8000-000000000003",
 			keys: [
 				"b00757030001",
@@ -320,6 +325,7 @@ export const BootstrapUnitIds = [
 	OfficialRealmManifest.id,
 	...OfficialZoneManifest.map((zone) => zone.id),
 	...OfficialZoneManifest.map((zone) => zone.wikiPost.id),
+	...OfficialZoneManifest.map((zone) => zone.homePage.id),
 ] as const;
 
 export const BootstrapAuthUserIds = OfficialProfileManifest.map((profile) => profile.authUserId);
@@ -329,7 +335,7 @@ export const ReservedBootstrapUuidv7s = [
 	...BootstrapUnitIds,
 	...BootstrapAuthUserIds,
 	...BootstrapAccountIds,
-	...OfficialZoneManifest.map((zone) => zone.homePage.id),
+	...OfficialZoneManifest.map((zone) => zone.homePage.structureId),
 	...OfficialZoneManifest.map((zone) => zone.navigation.id),
 	OfficialZoneAvatarAsset.id,
 	OfficialZoneAvatarAsset.objectId,

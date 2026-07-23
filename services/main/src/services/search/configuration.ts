@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import {
 	compileSearchRequest,
 	createSearchCursor,
@@ -236,6 +238,16 @@ export async function executeConfiguredSearch(
 	} catch (cause) {
 		throw new InvalidSearch(cause instanceof Error ? cause.message : "Invalid Search input");
 	}
+	return executeCompiledSearch(compiled, profileId, enforcedZoneId);
+}
+
+/** Executes an already proven, engine-independent Search request. */
+export async function executeCompiledSearch(
+	compiled: CompiledSearchRequest,
+	profileId?: string,
+	enforcedZoneId?: string,
+	inputIdentity?: string,
+) {
 	const configuredScope = await resolveScope(compiled);
 	const hostScope = enforcedZoneId
 		? await resolveScope({
@@ -263,8 +275,10 @@ export async function executeConfiguredSearch(
 				categories: scope.categories,
 				query: compiled.query.trim(),
 				sort: compiled.sort,
+				maxResultWindow: compiled.maxResultWindow,
 				expression,
 				facets: compiled.facets,
+				inputIdentity,
 			}),
 		)
 		.digest("hex");
@@ -284,6 +298,13 @@ export async function executeConfiguredSearch(
 			cursor.pageSize !== compiled.pageSize)
 	)
 		throw new InvalidSearch("Search cursor does not match this generation or request");
+	if (
+		cursor &&
+		Object.values(cursor.categories).some(
+			(category) => category.offset >= compiled.maxResultWindow,
+		)
+	)
+		throw new InvalidSearch("Search cursor exceeds the configured result window");
 	const results = (
 		await Promise.all(
 			scope.categories.map(async (category) => {
@@ -355,7 +376,9 @@ export async function executeConfiguredSearch(
 			},
 		];
 	});
-	const hasNext = groups.some((group) => !group.exhausted);
+	const hasNext =
+		groups.some((group) => !group.exhausted) &&
+		groups.every((group) => group.exhausted || group.nextOffset < compiled.maxResultWindow);
 	const categories = Object.fromEntries(
 		groups.map((group) => [
 			group.index,
@@ -377,4 +400,3 @@ export async function executeConfiguredSearch(
 			: undefined,
 	};
 }
-import { createHash } from "node:crypto";

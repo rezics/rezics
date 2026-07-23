@@ -1,68 +1,34 @@
 "use client";
 
-import { ContentLanguageValues, type ContentLanguage } from "@rezics/i18n";
 import {
-	postApiSearchByIndex,
-	type PostApiSearchByIndexIndex as SearchCategory,
-	type PostApiSearchByIndexStatus200,
+	parseSearchFeatureDefinition,
+	type ResolvedSearchControl,
+	type SearchFeatureContext,
+	type SearchFeatureState,
+	type SearchInjection,
+	type SearchScalar,
+	type SearchTemplateId,
+} from "@rezics/search";
+import {
+	type PostApiSearchFeaturesByTemplateExecuteStatus200,
+	useGetApiSearchFeaturesByTemplate,
+	usePostApiSearchFeaturesByTemplateExecute,
 } from "@rezics/openapi-tanstack-query";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Button, PageHeading, QueryFailure, QueryPending, UnitList } from "@rezics/ui";
 import { useQueryStates } from "nuqs";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useState } from "react";
 
-import {
-	Badge,
-	buttonVariants,
-	Button,
-	Checkbox,
-	CheckboxGroup,
-	Combobox,
-	ComboboxContent,
-	ComboboxEmpty,
-	ComboboxGroup,
-	ComboboxInput,
-	ComboboxItem,
-	ComboboxList,
-	Collapsible,
-	CollapsibleContent,
-	CollapsibleIndicator,
-	CollapsibleTrigger,
-	createListCollection,
-	Field,
-	FieldGroup,
-	FieldLabel,
-	FieldLegend,
-	FieldSet,
-	InputGroup,
-	InputGroupAddon,
-	InputGroupInput,
-	PageHeading,
-	Spinner,
-	UnitList,
-} from "@rezics/ui";
-import { useTranslation } from "@/i18n/client";
-import { RequestFailure } from "@/i18n/request-failure";
 import { profileHref } from "@/features/profiles/profile-route";
 import { realmHref } from "@/features/slugs/unit-route";
-import { searchParamsParsers, SearchScopes } from "@/lib/search-params";
+import { useTranslation } from "@/i18n/client";
+import { RequestFailure } from "@/i18n/request-failure";
+import { searchParamsParsers } from "@/lib/search-params";
+import { SearchFeature, type SearchFeatureRequest } from "./search-feature";
 
-type SearchHit = PostApiSearchByIndexStatus200["hits"][number];
+type SearchHit = PostApiSearchFeaturesByTemplateExecuteStatus200["groups"][number]["hits"][number];
 
-const SearchCategories = SearchScopes;
-const SearchPageSize = 8;
-const AllLanguagesValue = "all";
-
-type SearchLanguage = ContentLanguage | "";
-type ComboboxOption = { label: string; value: string };
-type SearchPageParam = { category: SearchCategory; cursor?: string };
-
-function readSearchLanguage(value: string | null): SearchLanguage {
-	return ContentLanguageValues.find((language) => language === value) ?? "";
-}
-
-function searchHitHref(index: string, hit: SearchHit) {
-	switch (index) {
+function searchHitHref(hit: SearchHit) {
+	switch (hit.category) {
 		case "users":
 			return profileHref(hit);
 		case "realms":
@@ -86,313 +52,174 @@ function searchHitHref(index: string, hit: SearchHit) {
 	}
 }
 
-export function SearchPage() {
-	const { t } = useTranslation([
-		"actions",
-		"catalog",
-		"engagement",
-		"locale",
-		"nav",
-		"posts",
-		"realms",
-		"search",
-		"state",
-		"ui",
-	]);
-	const [route, setRoute] = useQueryStates(searchParamsParsers);
-	const routeQuery = route.q.trim();
-	const routeCategories = route.scope;
-	const routeLanguage = route.language ?? "";
-	const hasSearch =
-		Boolean(routeQuery) ||
-		routeCategories.length < SearchCategories.length ||
-		Boolean(routeLanguage);
-	const [input, setInput] = useState(routeQuery);
-	const [filtersOpen, setFiltersOpen] = useState(
-		routeCategories.length < SearchCategories.length || Boolean(routeLanguage),
-	);
-	const loadMoreRef = useRef<HTMLDivElement>(null);
-	const languageOptions = useMemo<ComboboxOption[]>(
-		() => [
-			{ label: t.search.allLanguages, value: AllLanguagesValue },
-			{ label: t.locale.zh, value: "zh" },
-			{ label: t.locale.en, value: "en" },
-		],
-		[t.locale.en, t.locale.zh, t.search.allLanguages],
-	);
-	const languageCollection = useMemo(
-		() =>
-			createListCollection<ComboboxOption>({
-				items: languageOptions,
-				itemToString: (item) => item.label,
-				itemToValue: (item) => item.value,
-			}),
-		[languageOptions],
-	);
-	useEffect(() => {
-		setInput(routeQuery);
-	}, [routeQuery]);
-	const search = useInfiniteQuery({
-		queryKey: ["search", routeQuery, routeCategories, routeLanguage],
-		queryFn: async ({ pageParam, signal }) => {
-			const groups = await Promise.all(
-				pageParam.map(async ({ category, cursor }) => {
-					const { data } = await postApiSearchByIndex({
-						path: { index: category },
-						body: {
-							query: routeQuery,
-							...(cursor ? { cursor } : {}),
-							limit: SearchPageSize,
-							...(routeLanguage ? { Languages: [routeLanguage] } : {}),
-						},
-						signal,
-					});
-					return {
-						index: category,
-						hits: data.hits,
-						nextCursor: data.nextCursor,
-					};
-				}),
-			);
-			return { groups };
-		},
-		initialPageParam: routeCategories.map((category): SearchPageParam => ({ category })),
-		getNextPageParam: (page) => {
-			const nextPage: SearchPageParam[] = page.groups.flatMap(({ index, nextCursor }) =>
-				nextCursor === undefined ? [] : [{ category: index, cursor: nextCursor }],
-			);
-			return nextPage.length ? nextPage : undefined;
-		},
-		enabled: hasSearch,
-	});
-	useEffect(() => {
-		const element = loadMoreRef.current;
-		if (
-			!element ||
-			!search.hasNextPage ||
-			search.isFetchingNextPage ||
-			search.isFetchNextPageError ||
-			typeof IntersectionObserver === "undefined"
-		)
-			return;
-		const observer = new IntersectionObserver(
-			([entry]) => {
-				if (entry?.isIntersecting) void search.fetchNextPage();
-			},
-			{ rootMargin: "320px 0px" },
+export function SearchSurface({
+	id,
+	template,
+	contexts = [],
+	injections = [],
+	initialQuery,
+	onInjectionsChange,
+	onQueryChange,
+	resolveOptionLabel,
+}: {
+	readonly id: string;
+	readonly template: SearchTemplateId;
+	readonly contexts?: readonly SearchFeatureContext[];
+	readonly injections?: readonly SearchInjection[];
+	readonly initialQuery?: string;
+	readonly onInjectionsChange?: (injections: readonly SearchInjection[]) => void;
+	readonly onQueryChange?: (query: string) => void;
+	readonly resolveOptionLabel?: (
+		control: ResolvedSearchControl,
+		value: SearchScalar,
+	) => string | undefined;
+}) {
+	const { t } = useTranslation(["actions", "search", "state"]);
+	const definitionQuery = useGetApiSearchFeaturesByTemplate({ path: { template } });
+	const execute = usePostApiSearchFeaturesByTemplateExecute();
+	const [hits, setHits] = useState<readonly SearchHit[]>([]);
+	const [facets, setFacets] =
+		useState<PostApiSearchFeaturesByTemplateExecuteStatus200["facets"]>();
+	const [nextCursor, setNextCursor] = useState<string>();
+	const [lastRequest, setLastRequest] = useState<SearchFeatureRequest>();
+
+	if (definitionQuery.isPending) return <QueryPending />;
+	if (definitionQuery.isError)
+		return (
+			<QueryFailure
+				error={definitionQuery.error}
+				retry={() => void definitionQuery.refetch()}
+			/>
 		);
-		observer.observe(element);
-		return () => observer.disconnect();
-	}, [
-		search.fetchNextPage,
-		search.hasNextPage,
-		search.isFetchingNextPage,
-		search.isFetchNextPageError,
-	]);
-	const categoryLabels: Record<SearchCategory, string> = {
-		units: t.nav.units,
-		users: t.ui.profile,
-		entity: t.catalog.entities,
-		tags: t.catalog.tags,
-		posts: t.posts.title,
-		realms: t.realms.title,
-		collections: t.engagement.collections,
-		reviews: t.engagement.reviews,
-		polls: t.engagement.polls,
-	};
-	const activeFilterCount =
-		Number(routeCategories.length < SearchCategories.length) + Number(Boolean(routeLanguage));
-	const resultItems = search.data?.pages.flatMap((page) =>
-		page.groups.flatMap((group) =>
-			group.hits.map((hit) => ({
-				id: hit.id,
-				title: hit.titles[0] ?? null,
-				summary: hit.summaries[0],
-				href: searchHitHref(group.index, hit),
-			})),
-		),
+	const definition = parseSearchFeatureDefinition(definitionQuery.data);
+
+	async function run(request: SearchFeatureRequest, append = false) {
+		if (!append) {
+			setLastRequest(request);
+			onQueryChange?.(request.state.query?.trim() ?? "");
+		}
+		try {
+			const response = await execute.mutateAsync({
+				path: { template },
+				body: {
+					contexts: [...contexts],
+					injections: request.injections,
+					state: request.state,
+				},
+			});
+			const nextHits = response.groups.flatMap((group) => group.hits);
+			setHits((current) => (append ? [...current, ...nextHits] : nextHits));
+			setFacets(response.facets);
+			setNextCursor(response.nextCursor);
+		} catch {
+			// The mutation state supplies the localized visible failure.
+		}
+	}
+
+	return (
+		<>
+			<SearchFeature
+				definition={definition}
+				error={execute.isError}
+				facets={facets}
+				id={id}
+				initialQuery={initialQuery}
+				injections={injections}
+				onExecute={(request) => void run(request)}
+				onInjectionsChange={onInjectionsChange}
+				pending={execute.isPending}
+				resolveOptionLabel={resolveOptionLabel}
+			/>
+			{execute.isError ? <RequestFailure error={execute.error} /> : null}
+			{hits.length ? (
+				<UnitList
+					error={false}
+					items={hits.map((hit) => ({
+						id: hit.id,
+						title: hit.titles[0] ?? null,
+						summary: hit.summaries[0],
+						href: searchHitHref(hit),
+					}))}
+					pending={false}
+				/>
+			) : execute.isSuccess ? (
+				<p className="text-sm text-muted-foreground">{t.search.empty}</p>
+			) : null}
+			{nextCursor && lastRequest ? (
+				<div className="flex justify-center">
+					<Button
+						isLoading={execute.isPending}
+						onClick={() =>
+							void run(
+								{
+									...lastRequest,
+									state: {
+										...lastRequest.state,
+										cursor: nextCursor,
+									} as SearchFeatureState,
+								},
+								true,
+							)
+						}
+						variant="outline"
+					>
+						{t.actions.loadMore}
+					</Button>
+				</div>
+			) : null}
+		</>
 	);
+}
+
+function injectedTagIds(injections: readonly SearchInjection[]): string[] {
+	return injections.flatMap((injection) => {
+		if (injection.source !== "tag" || injection.value.filter.field !== "tag") return [];
+		const filter = injection.value.filter;
+		if ("value" in filter && typeof filter.value === "string") return [filter.value];
+		if ("values" in filter)
+			return filter.values.filter((value): value is string => typeof value === "string");
+		return [];
+	});
+}
+
+export function SearchPage() {
+	const { t } = useTranslation("search");
+	const [route, setRoute] = useQueryStates(searchParamsParsers);
+	const labels = new Map(
+		route.tag.map((tagId, index) => [tagId, route.tagLabel[index]] as const),
+	);
+	const injections: SearchInjection[] = route.tag.map((tagId) => ({
+		source: "tag",
+		removable: true,
+		value: {
+			controlKey: "tag",
+			filter: { field: "tag", operator: "equals", value: tagId },
+		},
+	}));
 	return (
 		<main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6">
-			<PageHeading title={t.search.title} />
-			<form
-				className="flex flex-col gap-3"
-				onSubmit={(event) => {
-					event.preventDefault();
-					void setRoute({ q: input.trim() }, { history: "push" });
+			<PageHeading title={t.title} />
+			<SearchSurface
+				contexts={[]}
+				id={`${route.template}-search`}
+				initialQuery={route.q}
+				injections={injections}
+				key={`${route.template}:${route.tag.join(",")}`}
+				onInjectionsChange={(next) => {
+					const tag = injectedTagIds(next);
+					void setRoute({
+						tag,
+						tagLabel: tag.map((tagId) => labels.get(tagId) ?? tagId),
+					});
 				}}
-			>
-				<FieldGroup>
-					<Field>
-						<FieldLabel className="sr-only">{t.search.placeholder}</FieldLabel>
-						<div className="flex flex-col gap-3 sm:flex-row">
-							<InputGroup className="h-14 min-w-0 sm:flex-1" size="lg">
-								<InputGroupAddon align="inline-start">
-									<Search aria-hidden />
-								</InputGroupAddon>
-								<InputGroupInput
-									aria-label={t.search.placeholder}
-									className="h-full"
-									maxLength={500}
-									value={input}
-									onChange={(event) => setInput(event.currentTarget.value)}
-									placeholder={t.search.placeholder}
-									type="search"
-								/>
-							</InputGroup>
-							<Button
-								variant="solid"
-								className="h-14"
-								type="submit"
-								isLoading={search.isFetching && !search.isFetchingNextPage}
-								size="xl"
-							>
-								{t.actions.search}
-							</Button>
-						</div>
-					</Field>
-					<Collapsible
-						onOpenChange={({ open }) => setFiltersOpen(open)}
-						open={filtersOpen}
-					>
-						<CollapsibleTrigger
-							className={buttonVariants({ size: "sm" })}
-							type="button"
-						>
-							<SlidersHorizontal data-icon="inline-start" />
-							{t.search.advancedFilters}
-							{activeFilterCount > 0 && (
-								<Badge pill size="sm" variant="secondary">
-									{activeFilterCount}
-								</Badge>
-							)}
-							<CollapsibleIndicator />
-						</CollapsibleTrigger>
-						<CollapsibleContent className="pt-3">
-							<FieldGroup className="rounded-xl border bg-card p-4 sm:p-5">
-								<FieldSet>
-									<FieldLegend variant="label">{t.search.scope}</FieldLegend>
-									<CheckboxGroup className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-										{SearchCategories.map((category) => {
-											const checked = routeCategories.includes(category);
-											const disabled =
-												checked && routeCategories.length === 1;
-											return (
-												<Field
-													disabled={disabled}
-													key={category}
-													orientation="horizontal"
-												>
-													<Checkbox
-														checked={checked}
-														disabled={disabled}
-														onCheckedChange={({
-															checked: nextChecked,
-														}) => {
-															const scope = nextChecked
-																? SearchCategories.filter(
-																		(candidate) =>
-																			candidate ===
-																				category ||
-																			routeCategories.includes(
-																				candidate,
-																			),
-																	)
-																: routeCategories.filter(
-																		(candidate) =>
-																			candidate !== category,
-																	);
-															void setRoute({ scope });
-														}}
-													/>
-													<FieldLabel className="font-normal">
-														{categoryLabels[category]}
-													</FieldLabel>
-												</Field>
-											);
-										})}
-									</CheckboxGroup>
-								</FieldSet>
-								<Field className="max-w-md">
-									<FieldLabel>{t.search.language}</FieldLabel>
-									<Combobox
-										collection={languageCollection}
-										onValueChange={({ value }) => {
-											const language = readSearchLanguage(value[0] ?? null);
-											void setRoute({ language: language || null });
-										}}
-										value={[routeLanguage || AllLanguagesValue]}
-									>
-										<ComboboxInput aria-label={t.search.language} />
-										<ComboboxContent>
-											<ComboboxEmpty>{t.search.empty}</ComboboxEmpty>
-											<ComboboxList>
-												<ComboboxGroup>
-													{languageOptions.map((option) => (
-														<ComboboxItem
-															item={option}
-															key={option.value}
-														>
-															{option.label}
-														</ComboboxItem>
-													))}
-												</ComboboxGroup>
-											</ComboboxList>
-										</ComboboxContent>
-									</Combobox>
-								</Field>
-								<div className="flex justify-end">
-									<Button
-										onClick={() => {
-											void setRoute({
-												language: null,
-												scope: [...SearchCategories],
-											});
-										}}
-										size="sm"
-										type="button"
-										variant="quiet"
-									>
-										{t.search.resetFilters}
-									</Button>
-								</div>
-							</FieldGroup>
-						</CollapsibleContent>
-					</Collapsible>
-				</FieldGroup>
-			</form>
-			{search.isError && !search.data ? (
-				<RequestFailure error={search.error} />
-			) : hasSearch ? (
-				<>
-					{search.data && resultItems?.length === 0 && !search.isFetching ? (
-						<p className="text-muted-foreground text-sm">{t.search.empty}</p>
-					) : (
-						<UnitList items={resultItems} pending={search.isPending} error={false} />
-					)}
-					{search.hasNextPage && !search.isFetchNextPageError && (
-						<div
-							aria-live="polite"
-							className="grid min-h-10 place-items-center"
-							ref={loadMoreRef}
-						>
-							{search.isFetchingNextPage && <Spinner aria-label={t.state.loading} />}
-						</div>
-					)}
-					{search.isFetchNextPageError && (
-						<div className="flex flex-col items-start gap-3">
-							<RequestFailure error={search.error} />
-							<Button
-								onClick={() => void search.fetchNextPage()}
-								size="sm"
-								variant="outline"
-							>
-								{t.actions.retry}
-							</Button>
-						</div>
-					)}
-				</>
-			) : null}
+				onQueryChange={(query) => void setRoute({ q: query || null }, { history: "push" })}
+				resolveOptionLabel={(control, value) =>
+					control.field === "tag" && typeof value === "string"
+						? labels.get(value)
+						: undefined
+				}
+				template={route.template}
+			/>
 		</main>
 	);
 }

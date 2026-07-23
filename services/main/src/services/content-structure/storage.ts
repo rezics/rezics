@@ -1,5 +1,4 @@
 import { and, asc, eq, isNull, sql } from "drizzle-orm";
-import { assertSearchConfiguration, type SearchConfiguration } from "@rezics/search";
 
 import type { DatabaseTransaction } from "../database";
 import {
@@ -7,7 +6,7 @@ import {
 	contentStructureNode,
 	post,
 	unit,
-	zonePage,
+	unitSlugAddress,
 	type ContentStructureKind,
 	type ContentStructureTargetKind,
 } from "../database/schema";
@@ -23,7 +22,6 @@ import { ContentStructureInvalid, ContentStructureNotFound } from "./errors";
 export function contentStructureTargetFromRow(row: {
 	readonly targetKind: ContentStructureTargetKind;
 	readonly targetUnitId: string | null;
-	readonly targetZonePageId: string | null;
 	readonly targetUrl: string | null;
 }): ContentStructureTarget {
 	switch (row.targetKind) {
@@ -34,10 +32,6 @@ export function contentStructureTargetFromRow(row: {
 		case "unit":
 			if (!row.targetUnitId) throw new ContentStructureInvalid("Missing Unit target");
 			return { kind: "unit", unitId: row.targetUnitId };
-		case "zone_page":
-			if (!row.targetZonePageId)
-				throw new ContentStructureInvalid("Missing Zone page target");
-			return { kind: "zone_page", zonePageId: row.targetZonePageId };
 		case "external":
 			if (!row.targetUrl) throw new ContentStructureInvalid("Missing external target URL");
 			return { kind: "external", url: row.targetUrl };
@@ -51,28 +45,18 @@ export function contentStructureTargetColumns(target: ContentStructureTarget) {
 			return {
 				targetKind: target.kind,
 				targetUnitId: null,
-				targetZonePageId: null,
 				targetUrl: null,
 			} as const;
 		case "unit":
 			return {
 				targetKind: target.kind,
 				targetUnitId: target.unitId,
-				targetZonePageId: null,
-				targetUrl: null,
-			} as const;
-		case "zone_page":
-			return {
-				targetKind: target.kind,
-				targetUnitId: null,
-				targetZonePageId: target.zonePageId,
 				targetUrl: null,
 			} as const;
 		case "external":
 			return {
 				targetKind: target.kind,
 				targetUnitId: null,
-				targetZonePageId: null,
 				targetUrl: target.url,
 			} as const;
 	}
@@ -99,10 +83,11 @@ export async function ensureContentStructureNodeAllowed(
 	tx: DatabaseTransaction,
 	input: {
 		readonly kind: ContentStructureKind;
+		readonly structureId?: string;
+		readonly nodeId?: string;
 		readonly ownerUnitId: string;
 		readonly contentUnitId: string;
 		readonly target: ContentStructureTarget;
-		readonly searchConfiguration?: SearchConfiguration | null;
 	},
 ): Promise<void> {
 	const policy = ContentStructureKindPolicies[input.kind];
@@ -118,19 +103,6 @@ export async function ensureContentStructureNodeAllowed(
 		.limit(1);
 	if (!content || !policy.acceptsContent(content.kind, content.postKind))
 		throw new ContentStructureInvalid(`Content Unit is not valid for ${input.kind}`);
-	if (input.searchConfiguration !== undefined && input.searchConfiguration !== null) {
-		if (!policy.searchScope || content.kind !== "label")
-			throw new ContentStructureInvalid(
-				"Only label nodes in a searchable Content Structure can configure Search",
-			);
-		try {
-			assertSearchConfiguration(input.searchConfiguration);
-		} catch (cause) {
-			throw new ContentStructureInvalid(
-				cause instanceof Error ? cause.message : "Search configuration is invalid",
-			);
-		}
-	}
 	if (input.target.kind === "unit") {
 		const [target] = await tx
 			.select({ id: unit.id })
@@ -139,14 +111,36 @@ export async function ensureContentStructureNodeAllowed(
 			.limit(1);
 		if (!target) throw new ContentStructureInvalid("Target Unit does not exist");
 	}
-	if (input.target.kind === "zone_page") {
-		const [target] = await tx
-			.select({ zoneId: zonePage.zoneId })
-			.from(zonePage)
-			.where(eq(zonePage.id, input.target.zonePageId))
+	if (input.kind === "zone.pages") {
+		const [address] = await tx
+			.select({ scopeUnitId: unitSlugAddress.scopeUnitId })
+			.from(unitSlugAddress)
+			.where(
+				and(
+					eq(unitSlugAddress.kind, "canonical"),
+					eq(unitSlugAddress.targetUnitId, input.contentUnitId),
+				),
+			)
 			.limit(1);
-		if (!target || target.zoneId !== input.ownerUnitId)
-			throw new ContentStructureInvalid("Target Zone page is outside the owner Zone");
+		if (!address || address.scopeUnitId !== input.ownerUnitId)
+			throw new ContentStructureInvalid("Zone Page Unit address is outside its owner Zone");
+		const [membership] = await tx
+			.select({ id: contentStructureNode.id, structureId: contentStructureNode.structureId })
+			.from(contentStructureNode)
+			.innerJoin(contentStructure, eq(contentStructure.id, contentStructureNode.structureId))
+			.where(
+				and(
+					eq(contentStructure.kind, "zone.pages"),
+					eq(contentStructureNode.contentUnitId, input.contentUnitId),
+					isNull(contentStructure.deletedAt),
+					isNull(contentStructureNode.deletedAt),
+				),
+			)
+			.limit(1);
+		if (membership && membership.id !== input.nodeId)
+			throw new ContentStructureInvalid(
+				"Zone Page Unit already belongs to a Zone pages tree",
+			);
 	}
 }
 

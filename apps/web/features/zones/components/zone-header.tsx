@@ -1,8 +1,9 @@
 "use client";
 
 import type { PresentedAvatar } from "@rezics/avatar";
-import { IdentityAvatar, Popover, PopoverContent, PopoverTrigger, cn } from "@rezics/ui";
-import { ListTree } from "lucide-react";
+import { Button, IdentityAvatar, Popover, PopoverContent, PopoverTrigger, cn } from "@rezics/ui";
+import { ListTree, Settings } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { FollowButton } from "@/features/following/components/follow-button";
@@ -100,16 +101,24 @@ export function ZoneHeader({
 						<ZoneDocument blocks={menuBlocks ?? []} surface={{ kind: "dock" }} />
 					) : null}
 				</div>
-				<FollowButton
+				<div
 					className={cn(
-						"col-start-3 row-start-1 shrink-0",
+						"col-start-3 row-start-1 flex shrink-0 items-center gap-2",
 						expanded
 							? "sm:col-start-3 sm:row-span-2 sm:row-start-1"
 							: "sm:col-start-4 sm:row-start-1",
 					)}
-					size={compact ? "sm" : "md"}
-					unitId={projection.zone.id}
-				/>
+				>
+					{projection.zone.capabilities.canManage ? (
+						<Button asChild size={compact ? "sm" : "md"} variant="outline">
+							<Link href={`/zone/${projection.zone.id}/manage`}>
+								<Settings aria-hidden />
+								<span className="hidden lg:inline">{t.management.title}</span>
+							</Link>
+						</Button>
+					) : null}
+					<FollowButton size={compact ? "sm" : "md"} unitId={projection.zone.id} />
+				</div>
 			</div>
 		</header>
 	);

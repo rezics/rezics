@@ -1,4 +1,3 @@
-import { assertSearchConfiguration, type SearchConfiguration } from "@rezics/search";
 import { type Static, type TSchema } from "@sinclair/typebox";
 import { Check } from "@sinclair/typebox/value";
 
@@ -298,10 +297,6 @@ function assertBlockTree(value: BlockContainerDocument, policy: BlockHostPolicy)
 			: policy.allowedRootTypes;
 		if (!allowed.includes(block._type))
 			throw new TypeError(`Block ${block._type} is not allowed in this host`);
-		if (block._type === "search" || block._type === "feed")
-			assertSearchBlock(block.configuration);
-		if (block._type === "unit-list" && block.source.kind === "search")
-			assertSearchBlock(block.source.configuration);
 		if (
 			block._type === "unit-list" &&
 			block.source.kind === "units" &&
@@ -315,10 +310,6 @@ function assertBlockTree(value: BlockContainerDocument, policy: BlockHostPolicy)
 			keys.add(group.containerKey);
 		}
 	});
-}
-
-function assertSearchBlock(configuration: SearchConfiguration): void {
-	assertSearchConfiguration(configuration);
 }
 
 /** Structural TypeBox validation plus host, identity, complexity, and Search semantics. */
@@ -359,7 +350,6 @@ export interface BlockReferences {
 	readonly wikiPostIds: ReadonlySet<string>;
 	readonly assetIds: ReadonlySet<string>;
 	readonly navigationIds: ReadonlySet<string>;
-	readonly zonePageSlugs: ReadonlySet<string>;
 	readonly externalUrls: ReadonlySet<string>;
 }
 
@@ -369,57 +359,7 @@ export function collectBlockReferences(document: BlockContainerDocument): BlockR
 	const wikiPostIds = new Set<string>();
 	const assetIds = new Set<string>();
 	const navigationIds = new Set<string>();
-	const zonePageSlugs = new Set<string>();
 	const externalUrls = new Set<string>();
-	const unitReferenceFields = new Set([
-		"tag",
-		"author",
-		"realm",
-		"zone",
-		"subject",
-		"target",
-		"root",
-		"parent",
-		"owner",
-	]);
-	const addUnitScalar = (field: string, value: unknown) => {
-		if (
-			unitReferenceFields.has(field) &&
-			typeof value === "string" &&
-			/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(
-				value,
-			)
-		)
-			unitIds.add(value);
-	};
-	const addSearchScope = (configuration: SearchConfiguration) => {
-		if (configuration.scope.kind === "unit") unitIds.add(configuration.scope.unitId);
-		if (configuration.scope.kind === "realm") unitIds.add(configuration.scope.realmId);
-		if (configuration.scope.kind === "zone") unitIds.add(configuration.scope.zoneId);
-		for (const control of configuration.controls)
-			if (control.labelUnitId) unitIds.add(control.labelUnitId);
-		for (const control of configuration.controls)
-			if (control.optionSource?.kind === "static")
-				for (const option of control.optionSource.options)
-					if (option.labelUnitId) unitIds.add(option.labelUnitId);
-		for (const control of configuration.controls) {
-			if (control.optionSource?.kind === "static")
-				for (const option of control.optionSource.options)
-					addUnitScalar(control.field, option.value);
-			if (control.optionPolicy?.kind !== undefined && control.optionPolicy.kind !== "all")
-				for (const value of control.optionPolicy.values)
-					addUnitScalar(control.field, value);
-		}
-		for (const filter of [...configuration.constraints, ...configuration.defaults]) {
-			if ("values" in filter)
-				filter.values.forEach((value) => addUnitScalar(filter.field, value));
-			else if ("value" in filter) addUnitScalar(filter.field, filter.value);
-			else {
-				addUnitScalar(filter.field, filter.lower);
-				addUnitScalar(filter.field, filter.upper);
-			}
-		}
-	};
 	walkBlockTree(document, (block) => {
 		if (block._type === "post-full-view") wikiPostIds.add(block.postId);
 		if (block._type === "unit-ref") unitIds.add(block.unitId);
@@ -427,31 +367,27 @@ export function collectBlockReferences(document: BlockContainerDocument): BlockR
 			if (block.source.kind === "units")
 				block.source.unitIds.forEach((id) => unitIds.add(id));
 			if (block.source.kind === "collection") unitIds.add(block.source.collectionId);
-			if (block.source.kind === "search") addSearchScope(block.source.configuration);
 		}
-		if (block._type === "search" || block._type === "feed") addSearchScope(block.configuration);
 		if (block._type === "menu") navigationIds.add(block.navigationId);
 		if (block._type === "media") {
 			assetIds.add(block.assetId);
 			unitIds.add(block.altUnitId);
 			if (block.captionUnitId) unitIds.add(block.captionUnitId);
 			if (block.target?.kind === "unit") unitIds.add(block.target.unitId);
-			if (block.target?.kind === "zone-page") zonePageSlugs.add(block.target.slug);
 			if (block.target?.kind === "external") externalUrls.add(block.target.url);
 		}
 		if (block._type === "callout" && block.labelUnitId) unitIds.add(block.labelUnitId);
 		if (block._type === "tabs") for (const tab of block.tabs) unitIds.add(tab.labelUnitId);
 	});
-	return { unitIds, wikiPostIds, assetIds, navigationIds, zonePageSlugs, externalUrls };
+	return { unitIds, wikiPostIds, assetIds, navigationIds, externalUrls };
 }
 
 export interface NavigationReferences {
 	readonly unitIds: ReadonlySet<string>;
-	readonly zonePageSlugs: ReadonlySet<string>;
 	readonly externalUrls: ReadonlySet<string>;
 }
 
-export type BlockReferenceKind = "unit" | "wiki-post" | "asset" | "navigation" | "zone-page";
+export type BlockReferenceKind = "unit" | "wiki-post" | "asset" | "navigation";
 
 export interface BlockReferenceResolver {
 	/** Return only identifiers that are valid and readable in the current host context. */
@@ -490,7 +426,6 @@ export async function assertResolvedBlockReferences(
 		assertReferenceSet("wiki-post", references.wikiPostIds, resolver),
 		assertReferenceSet("asset", references.assetIds, resolver),
 		assertReferenceSet("navigation", references.navigationIds, resolver),
-		assertReferenceSet("zone-page", references.zonePageSlugs, resolver),
 	]);
 }
 
@@ -518,19 +453,17 @@ export function collectNavigationReferences(
 	document: NavigationDocumentValue,
 ): NavigationReferences {
 	const unitIds = new Set<string>();
-	const zonePageSlugs = new Set<string>();
 	const externalUrls = new Set<string>();
 	const visit = (item: NavigationItem): void => {
 		unitIds.add(item.labelUnitId);
 		if ("target" in item) {
 			if (item.target.kind === "unit") unitIds.add(item.target.unitId);
-			if (item.target.kind === "zone-page") zonePageSlugs.add(item.target.slug);
 			if (item.target.kind === "external") externalUrls.add(item.target.url);
 		}
 		if ("children" in item) item.children.forEach(visit);
 	};
 	document.items.forEach(visit);
-	return { unitIds, zonePageSlugs, externalUrls };
+	return { unitIds, externalUrls };
 }
 
 export async function assertResolvedNavigationReferences(
@@ -538,8 +471,5 @@ export async function assertResolvedNavigationReferences(
 	resolver: BlockReferenceResolver,
 ): Promise<void> {
 	const references = collectNavigationReferences(document);
-	await Promise.all([
-		assertReferenceSet("unit", references.unitIds, resolver),
-		assertReferenceSet("zone-page", references.zonePageSlugs, resolver),
-	]);
+	await Promise.all([assertReferenceSet("unit", references.unitIds, resolver)]);
 }

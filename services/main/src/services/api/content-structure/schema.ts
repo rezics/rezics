@@ -1,6 +1,5 @@
 import { type Static, t } from "elysia";
 import { PortableTextDocument } from "@rezics/block";
-import { SearchConfiguration } from "@rezics/search";
 
 import { FractionalPosition, ContentLanguage, Uuid } from "../schema";
 import { ContentRatingValues } from "../../database/schema/contract-values";
@@ -25,7 +24,6 @@ export const ContentStructureTarget = t.Union([
 	t.Object({ kind: t.Literal("content") }, { additionalProperties: false }),
 	t.Object({ kind: t.Literal("none") }, { additionalProperties: false }),
 	t.Object({ kind: t.Literal("unit"), unitId: Uuid }, { additionalProperties: false }),
-	t.Object({ kind: t.Literal("zone_page"), zonePageId: Uuid }, { additionalProperties: false }),
 	t.Object(
 		{
 			kind: t.Literal("external"),
@@ -68,7 +66,6 @@ export const CreateGenericContentStructureNodeBody = t.Object(
 		target: t.Optional(ContentStructureTarget),
 		position: t.Optional(FractionalPosition),
 		contentRating: t.Optional(t.UnionEnum(ContentRatingValues)),
-		searchConfiguration: t.Optional(SearchConfiguration),
 	},
 	{ additionalProperties: false },
 );
@@ -82,7 +79,6 @@ export const UpdateGenericContentStructureNodeBody = t.Object(
 		target: t.Optional(ContentStructureTarget),
 		position: t.Optional(FractionalPosition),
 		contentRating: t.Optional(t.Nullable(t.UnionEnum(ContentRatingValues))),
-		searchConfiguration: t.Optional(t.Nullable(SearchConfiguration)),
 	},
 	{ additionalProperties: false, minProperties: 2 },
 );

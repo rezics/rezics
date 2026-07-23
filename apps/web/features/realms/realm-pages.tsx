@@ -44,6 +44,7 @@ import {
 	type LocalizationAvatarValue,
 } from "@/features/units/localization-avatar-field";
 import { PostList } from "@/features/posts/post-list";
+import { SearchSurface } from "@/features/search/search-page";
 import { useHydratedSession } from "@/lib/use-hydrated-session";
 import { selectLocalization } from "@/lib/localization";
 import { useTranslation } from "@/i18n/client";
@@ -317,6 +318,20 @@ export function RealmDetailPage({ id }: { id: string }) {
 					ruleRevisionId={rules.data?.revisionId ?? undefined}
 				/>
 			</header>
+
+			<section className="grid gap-4">
+				<div>
+					<h2 className="font-serif font-semibold text-2xl">{t.realms.searchTitle}</h2>
+					<p className="mt-1 text-muted-foreground text-sm">
+						{t.realms.searchDescription}
+					</p>
+				</div>
+				<SearchSurface
+					contexts={[{ kind: "realm", realmId: realm.id }]}
+					id={`realm-${realm.id}-search`}
+					template="global"
+				/>
+			</section>
 
 			<div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
 				<Card className="min-w-0 gap-0 overflow-hidden py-0">

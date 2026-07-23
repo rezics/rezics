@@ -1,262 +1,39 @@
 import { type Static, Type } from "@sinclair/typebox";
 import { Check } from "@sinclair/typebox/value";
+import {
+	SearchCategory as SearchCategorySchema,
+	SearchCategoryValues,
+	SearchControl as SearchControlSchema,
+	SearchField as SearchFieldSchema,
+	SearchFilter as SearchFilterSchema,
+	SearchMode as SearchModeSchema,
+	SearchScope as SearchScopeSchema,
+	SearchSort as SearchSortSchema,
+	type SearchCategory as SearchCategoryValue,
+	type SearchControl as SearchControlValue,
+	type SearchField as SearchFieldValue,
+	type SearchFilter as SearchFilterValue,
+	type SearchMode as SearchModeValue,
+	type SearchScalar as SearchScalarValue,
+	type SearchScope as SearchScopeValue,
+	type SearchSort as SearchSortValue,
+} from "./primitives";
 
-const Uuid = Type.String({
-	pattern:
-		"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
-});
+export * from "./primitives";
 
-const SearchControlKey = Type.String({
-	minLength: 1,
-	maxLength: 64,
-	pattern: "^[a-z][a-z0-9-]*$",
-});
-
-function stringEnum<const Values extends readonly [string, ...string[]]>(values: Values) {
-	return Type.Enum(
-		Object.fromEntries(values.map((value) => [value, value])) as {
-			[Value in Values[number]]: Value;
-		},
-	);
-}
-
-export const SearchCategoryValues = [
-	"units",
-	"users",
-	"entity",
-	"tags",
-	"posts",
-	"realms",
-	"collections",
-	"reviews",
-	"polls",
-] as const;
-export type SearchCategory = (typeof SearchCategoryValues)[number];
-export const SearchCategory = stringEnum(SearchCategoryValues);
-
-export const SearchModeValues = ["basic", "advanced"] as const;
-export type SearchMode = (typeof SearchModeValues)[number];
-export const SearchMode = stringEnum(SearchModeValues);
-
-export const SearchSortValues = [
-	"relevance",
-	"createdAt:asc",
-	"createdAt:desc",
-	"updatedAt:asc",
-	"updatedAt:desc",
-	"publishedAt:asc",
-	"publishedAt:desc",
-	"followerCount:asc",
-	"followerCount:desc",
-	"replyCount:asc",
-	"replyCount:desc",
-	"closesAt:asc",
-	"closesAt:desc",
-] as const;
-export type SearchSort = (typeof SearchSortValues)[number];
-export const SearchSort = stringEnum(SearchSortValues);
-
-/** Engine-independent fields that a product surface may expose. */
-export const SearchFieldValues = [
-	"category",
-	"kind",
-	"language",
-	"content-rating",
-	"ai-disclosure",
-	"license",
-	"tag",
-	"credit",
-	"realm",
-	"zone",
-	"subject",
-	"target",
-	"root",
-	"parent",
-	"owner",
-	"join-policy",
-	"multiple",
-	"results-visibility",
-	"closed",
-	"created-at",
-	"updated-at",
-	"published-at",
-	"closes-at",
-	"catalog-licensed",
-	"catalog-release-date",
-	"book-isbn13",
-	"book-publication-date",
-	"book-page-count",
-	"book-format",
-	"media-kind",
-	"media-release-date",
-	"media-runtime-minutes",
-	"media-episode-count",
-	"media-season-count",
-	"software-release-date",
-	"software-version-label",
-	"software-platform",
-	"software-requirement-tier",
-] as const;
-export type SearchField = (typeof SearchFieldValues)[number];
-export const SearchField = stringEnum(SearchFieldValues);
-
-export const SearchOperatorValues = [
-	"equals",
-	"not-equals",
-	"any-of",
-	"all-of",
-	"none-of",
-	"range",
-	"exists",
-] as const;
-export type SearchOperator = (typeof SearchOperatorValues)[number];
-export const SearchOperator = stringEnum(SearchOperatorValues);
-
-const SearchScalar = Type.Union([
-	Type.String({ minLength: 1, maxLength: 500 }),
-	Type.Number(),
-	Type.Boolean(),
-]);
-export type SearchScalar = Static<typeof SearchScalar>;
-
-export const SearchFilter = Type.Union(
-	[
-		Type.Object(
-			{ field: SearchField, operator: Type.Literal("equals"), value: SearchScalar },
-			{ additionalProperties: false },
-		),
-		Type.Object(
-			{ field: SearchField, operator: Type.Literal("not-equals"), value: SearchScalar },
-			{ additionalProperties: false },
-		),
-		Type.Object(
-			{
-				field: SearchField,
-				operator: Type.Union([
-					Type.Literal("any-of"),
-					Type.Literal("all-of"),
-					Type.Literal("none-of"),
-				]),
-				values: Type.Array(SearchScalar, { minItems: 1, maxItems: 50 }),
-			},
-			{ additionalProperties: false },
-		),
-		Type.Union([
-			Type.Object(
-				{
-					field: SearchField,
-					operator: Type.Literal("range"),
-					lower: SearchScalar,
-					upper: Type.Optional(SearchScalar),
-				},
-				{ additionalProperties: false },
-			),
-			Type.Object(
-				{
-					field: SearchField,
-					operator: Type.Literal("range"),
-					lower: Type.Optional(SearchScalar),
-					upper: SearchScalar,
-				},
-				{ additionalProperties: false },
-			),
-		]),
-		Type.Object(
-			{ field: SearchField, operator: Type.Literal("exists"), value: Type.Boolean() },
-			{ additionalProperties: false },
-		),
-	],
-	{ $id: "SearchFilter" },
-);
-export type SearchFilter = Static<typeof SearchFilter>;
-
-export const SearchScope = Type.Union(
-	[
-		Type.Object({ kind: Type.Literal("global") }, { additionalProperties: false }),
-		Type.Object(
-			{
-				kind: Type.Literal("unit"),
-				unitId: Uuid,
-				includeDescendants: Type.Boolean({ default: false }),
-			},
-			{ additionalProperties: false },
-		),
-		Type.Object(
-			{ kind: Type.Literal("realm"), realmId: Uuid },
-			{ additionalProperties: false },
-		),
-		Type.Object({ kind: Type.Literal("zone"), zoneId: Uuid }, { additionalProperties: false }),
-	],
-	{ $id: "SearchScope" },
-);
-export type SearchScope = Static<typeof SearchScope>;
-
-const SearchStaticOption = Type.Object(
-	{
-		value: SearchScalar,
-		/** Localized option copy belongs to a Unit, never to this configuration. */
-		labelUnitId: Type.Optional(Uuid),
-	},
-	{ additionalProperties: false },
-);
-
-export const SearchOptionSource = Type.Union([
-	Type.Object({ kind: Type.Literal("facet") }, { additionalProperties: false }),
-	Type.Object(
-		{
-			kind: Type.Literal("static"),
-			options: Type.Array(SearchStaticOption, { minItems: 1, maxItems: 100 }),
-		},
-		{ additionalProperties: false },
-	),
-]);
-export type SearchOptionSource = Static<typeof SearchOptionSource>;
-
-export const SearchOptionPolicy = Type.Union([
-	Type.Object({ kind: Type.Literal("all") }, { additionalProperties: false }),
-	Type.Object(
-		{
-			kind: Type.Literal("include"),
-			values: Type.Array(SearchScalar, { minItems: 1, maxItems: 100 }),
-		},
-		{ additionalProperties: false },
-	),
-	Type.Object(
-		{
-			kind: Type.Literal("exclude"),
-			values: Type.Array(SearchScalar, { minItems: 1, maxItems: 100 }),
-		},
-		{ additionalProperties: false },
-	),
-]);
-export type SearchOptionPolicy = Static<typeof SearchOptionPolicy>;
-
-export const SearchControl = Type.Object(
-	{
-		key: SearchControlKey,
-		field: SearchField,
-		component: Type.Union([
-			Type.Literal("select"),
-			Type.Literal("multi-select"),
-			Type.Literal("toggle"),
-			Type.Literal("date-range"),
-			Type.Literal("value-range"),
-		]),
-		modes: Type.Array(SearchMode, { minItems: 1, maxItems: 2 }),
-		operators: Type.Array(SearchOperator, { minItems: 1, maxItems: 7 }),
-		optionSource: Type.Optional(SearchOptionSource),
-		optionPolicy: Type.Optional(SearchOptionPolicy),
-		labelUnitId: Type.Optional(Uuid),
-		required: Type.Optional(Type.Boolean({ default: false })),
-	},
-	{ additionalProperties: false, $id: "SearchControl" },
-);
-export type SearchControl = Static<typeof SearchControl>;
+type SearchCategory = SearchCategoryValue;
+type SearchControl = SearchControlValue;
+type SearchField = SearchFieldValue;
+type SearchFilter = SearchFilterValue;
+type SearchMode = SearchModeValue;
+type SearchScalar = SearchScalarValue;
+type SearchScope = SearchScopeValue;
+type SearchSort = SearchSortValue;
 
 export const SearchExpression = Type.Recursive(
 	(This) =>
 		Type.Union([
-			SearchFilter,
+			SearchFilterSchema,
 			Type.Object(
 				{
 					operator: Type.Union([Type.Literal("all"), Type.Literal("any")]),
@@ -275,12 +52,12 @@ export type SearchExpression = Static<typeof SearchExpression>;
 
 export const SearchConfiguration = Type.Object(
 	{
-		scope: SearchScope,
-		categories: Type.Array(SearchCategory, { minItems: 1, maxItems: 9 }),
+		scope: SearchScopeSchema,
+		categories: Type.Array(SearchCategorySchema, { minItems: 1, maxItems: 9 }),
 		modes: Type.Object(
 			{
-				available: Type.Array(SearchMode, { minItems: 1, maxItems: 2 }),
-				default: SearchMode,
+				available: Type.Array(SearchModeSchema, { minItems: 1, maxItems: 2 }),
+				default: SearchModeSchema,
 			},
 			{ additionalProperties: false },
 		),
@@ -293,15 +70,15 @@ export const SearchConfiguration = Type.Object(
 			{ additionalProperties: false },
 		),
 		/** Invisible server-enforced predicates. User input can never replace these. */
-		constraints: Type.Array(SearchFilter, { maxItems: 50 }),
+		constraints: Type.Array(SearchFilterSchema, { maxItems: 50 }),
 		/** Initial, user-changeable predicates. Each one must have a matching control. */
-		defaults: Type.Array(SearchFilter, { maxItems: 50 }),
+		defaults: Type.Array(SearchFilterSchema, { maxItems: 50 }),
 		/** Controls are the complete render allow-list; omitted controls stay hidden. */
-		controls: Type.Array(SearchControl, { maxItems: 50 }),
+		controls: Type.Array(SearchControlSchema, { maxItems: 50 }),
 		sort: Type.Object(
 			{
-				default: SearchSort,
-				options: Type.Array(SearchSort, { minItems: 1, maxItems: 13 }),
+				default: SearchSortSchema,
+				options: Type.Array(SearchSortSchema, { minItems: 1, maxItems: 13 }),
 			},
 			{ additionalProperties: false },
 		),
@@ -310,7 +87,7 @@ export const SearchConfiguration = Type.Object(
 				pageSize: Type.Integer({ minimum: 1, maximum: 50 }),
 				maxPageSize: Type.Integer({ minimum: 1, maximum: 100 }),
 				maxResultWindow: Type.Integer({ minimum: 1, maximum: 100_000 }),
-				facets: Type.Array(SearchField, { maxItems: 20 }),
+				facets: Type.Array(SearchFieldSchema, { maxItems: 20 }),
 			},
 			{ additionalProperties: false },
 		),
@@ -321,7 +98,7 @@ export type SearchConfiguration = Static<typeof SearchConfiguration>;
 
 const SearchRequestBase = {
 	query: Type.Optional(Type.String({ maxLength: 500 })),
-	sort: Type.Optional(SearchSort),
+	sort: Type.Optional(SearchSortSchema),
 	pageSize: Type.Optional(Type.Integer({ minimum: 1, maximum: 100 })),
 	cursor: Type.Optional(Type.String({ maxLength: 4096, pattern: "^s2_[A-Za-z0-9_-]+$" })),
 };
@@ -332,7 +109,7 @@ export const SearchExecutionRequest = Type.Union(
 			{
 				...SearchRequestBase,
 				mode: Type.Literal("basic"),
-				filters: Type.Array(SearchFilter, { maxItems: 50 }),
+				filters: Type.Array(SearchFilterSchema, { maxItems: 50 }),
 			},
 			{ additionalProperties: false },
 		),
@@ -358,6 +135,7 @@ export interface CompiledSearchRequest {
 	readonly expression?: SearchExpression;
 	readonly sort: SearchSort;
 	readonly pageSize: number;
+	readonly maxResultWindow: number;
 	readonly cursor?: string;
 	readonly facets: readonly SearchField[];
 }
@@ -684,7 +462,10 @@ export function compileSearchRequest(
 		expression: request.mode === "advanced" ? request.expression : undefined,
 		sort: request.sort ?? configuration.sort.default,
 		pageSize: request.pageSize ?? configuration.results.pageSize,
+		maxResultWindow: configuration.results.maxResultWindow,
 		cursor: request.cursor,
 		facets: configuration.results.facets,
 	};
 }
+
+export * from "./feature";

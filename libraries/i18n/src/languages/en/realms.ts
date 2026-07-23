@@ -60,6 +60,8 @@ export default {
 	signInToJoin: "Sign in to join",
 	membershipPending: "Membership request pending",
 	feed: "Feed",
+	searchTitle: `Search this ${realmTerms.inline}`,
+	searchDescription: `Search only content associated with this ${realmTerms.inline}; the ${realmTerms.inline} context stays fixed while other filters remain interactive.`,
 	rules: "Rules",
 	pins: "Pinned content",
 	pinnedContent: "Pinned content",

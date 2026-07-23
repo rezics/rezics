@@ -1,5 +1,5 @@
 import { PortableText, type PortableTextValue } from "@rezics/portable-text";
-import { SearchConfiguration } from "@rezics/search";
+import { SearchTemplateId } from "@rezics/search";
 import { type Static, type TSchema, Type } from "@sinclair/typebox";
 
 import { BlockKey, createBlockKey } from "./identity";
@@ -45,6 +45,15 @@ export const PostFullViewBlock = Type.Object(
 );
 export type PostFullViewBlock = Static<typeof PostFullViewBlock>;
 
+export const SearchFeatureSource = Type.Union([
+	Type.Object(
+		{ kind: Type.Literal("template"), template: SearchTemplateId },
+		{ additionalProperties: false },
+	),
+	Type.Object({ kind: Type.Literal("zone") }, { additionalProperties: false }),
+]);
+export type SearchFeatureSource = Static<typeof SearchFeatureSource>;
+
 const UnitListSource = Type.Union([
 	Type.Object(
 		{
@@ -58,7 +67,7 @@ const UnitListSource = Type.Union([
 		{ additionalProperties: false },
 	),
 	Type.Object(
-		{ kind: Type.Literal("search"), configuration: SearchConfiguration },
+		{ kind: Type.Literal("search"), feature: SearchFeatureSource },
 		{ additionalProperties: false },
 	),
 ]);
@@ -79,8 +88,8 @@ export const SearchBlock = Type.Object(
 	{
 		_type: Type.Literal("search"),
 		_key: BlockKey,
-		/** Trusted Search feature configuration, never an engine query. */
-		configuration: SearchConfiguration,
+		/** A system template or the owning Zone's versioned SearchDocument. */
+		feature: SearchFeatureSource,
 		presentation: Type.Object(
 			{
 				results: Type.Union([
@@ -102,7 +111,7 @@ export const FeedBlock = Type.Object(
 	{
 		_type: Type.Literal("feed"),
 		_key: BlockKey,
-		configuration: SearchConfiguration,
+		feature: SearchFeatureSource,
 		presentation: Type.Object(
 			{
 				results: Type.Union([
@@ -122,17 +131,6 @@ export type FeedBlock = Static<typeof FeedBlock>;
 
 export const NavigationTarget = Type.Union([
 	Type.Object({ kind: Type.Literal("unit"), unitId: Uuid }, { additionalProperties: false }),
-	Type.Object(
-		{
-			kind: Type.Literal("zone-page"),
-			slug: Type.String({
-				minLength: 1,
-				maxLength: 100,
-				pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-			}),
-		},
-		{ additionalProperties: false },
-	),
 	Type.Object(
 		{
 			kind: Type.Literal("external"),

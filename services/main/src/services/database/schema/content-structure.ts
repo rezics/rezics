@@ -1,15 +1,5 @@
 import { inArray, sql } from "drizzle-orm";
-import { type SearchConfiguration } from "@rezics/search";
-import {
-	check,
-	foreignKey,
-	index,
-	jsonb,
-	text,
-	unique,
-	uniqueIndex,
-	uuid,
-} from "drizzle-orm/pg-core";
+import { check, foreignKey, index, text, unique, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
 import { pgTable } from "./base";
 import {
@@ -26,7 +16,6 @@ import {
 	ContentStructureTargetKindValues,
 } from "./contract-values";
 import { contentRating, unit } from "./core";
-import { zonePage } from "./zone";
 
 /** A stable Unit-owned ordered-tree resource. */
 export const contentStructure = pgTable(
@@ -49,7 +38,7 @@ export const contentStructure = pgTable(
 		uniqueIndex("content_structure_singleton_kind_key")
 			.on(table.ownerUnitId, table.kind)
 			.where(
-				sql`${table.deletedAt} is null and ${table.kind} in ('book.contents', 'post.contents', 'realm.taxonomy')`,
+				sql`${table.deletedAt} is null and ${table.kind} in ('book.contents', 'post.contents', 'realm.taxonomy', 'zone.pages')`,
 			),
 		index("content_structure_owner_kind_idx")
 			.on(table.ownerUnitId, table.kind, table.createdAt, table.id)
@@ -89,10 +78,7 @@ export const contentStructureNode = pgTable(
 		documentKey: text(),
 		targetKind: text().$type<ContentStructureTargetKind>().default("content").notNull(),
 		targetUnitId: uuid().references(() => unit.id, { onDelete: "restrict" }),
-		targetZonePageId: uuid().references(() => zonePage.id, { onDelete: "restrict" }),
 		targetUrl: text(),
-		/** Optional trusted query/UI schema for a label-backed dynamic branch. */
-		searchConfiguration: jsonb().$type<SearchConfiguration>(),
 		position: fractionalIndexPosition().notNull(),
 		contentRating: contentRating(),
 		deletedAt: createTimestampMsColumn(),
@@ -126,7 +112,6 @@ export const contentStructureNode = pgTable(
 			.on(table.contentUnitId, table.structureId)
 			.where(sql`${table.deletedAt} is null`),
 		index("content_structure_node_target_unit_idx").on(table.targetUnitId),
-		index("content_structure_node_target_zone_page_idx").on(table.targetZonePageId),
 		check(
 			"content_structure_node_not_self_parent",
 			sql`${table.parentId} is null or ${table.parentId} <> ${table.id}`,
@@ -144,29 +129,17 @@ export const contentStructureNode = pgTable(
 			sql`(
 				${table.targetKind} in ('content', 'none')
 				and ${table.targetUnitId} is null
-				and ${table.targetZonePageId} is null
 				and ${table.targetUrl} is null
 			) or (
 				${table.targetKind} = 'unit'
 				and ${table.targetUnitId} is not null
-				and ${table.targetZonePageId} is null
-				and ${table.targetUrl} is null
-			) or (
-				${table.targetKind} = 'zone_page'
-				and ${table.targetUnitId} is null
-				and ${table.targetZonePageId} is not null
 				and ${table.targetUrl} is null
 			) or (
 				${table.targetKind} = 'external'
 				and ${table.targetUnitId} is null
-				and ${table.targetZonePageId} is null
 				and ${table.targetUrl} ~ '^https://[^[:space:]]+$'
 				and char_length(${table.targetUrl}) <= 2000
 			)`,
-		),
-		check(
-			"content_structure_node_search_configuration_check",
-			sql`${table.searchConfiguration} is null or jsonb_typeof(${table.searchConfiguration}) = 'object'`,
 		),
 		check(
 			"content_structure_node_deleted_at_check",

@@ -100,9 +100,9 @@ import {
 	unitVariant,
 	users,
 	zone,
-	zonePage,
 } from "../database/schema";
 import { createNavigationStructure } from "../content-structure/navigation";
+import { createContentStructure, insertContentStructureNode } from "../content-structure/service";
 import {
 	createContentStructureHistory,
 	getContentStructureHeadRevision,
@@ -112,6 +112,7 @@ import { createDockHistory, getDockRevisionId } from "../api/docks/history";
 import { RecommendationPolicyVersion } from "../recommendations/policy";
 import { fractionalPositionAt } from "../ordering/position";
 import { recordUnitRevision, restoreUnitRevision } from "../units/history";
+import { replaceZonePageSlugAddress } from "../units/slug-address";
 import { ensureOfficialZoneFollows } from "../bootstrap/official-zone-follows";
 import {
 	assertLocalDatabaseUrl,
@@ -1253,6 +1254,64 @@ async function seedToaruWiki(
 		updatedAt: wikiPost.updatedAt,
 	});
 
+	const pageDocument = createUnitReferencedBlockDocument(
+		[{ _type: "post-full-view", _key: "a40000000002", postId: wikiPost.id }],
+		"a40000000001",
+	);
+	const [pageUnit] = await insertUnits(tx, [
+		createDescriptor(data, {
+			kind: "zone_page",
+			seedKey: "toaru-zone-home-page",
+			ownerProfileId: owner.id,
+			localizationKind: "title",
+			stateIndex: 8_101,
+			forcePublished: true,
+			notBefore: [createdAt],
+		}),
+	]);
+	if (!pageUnit) throw new Error("Toaru Zone Page Unit insertion failed");
+	await tx.insert(unitLocalization).values(
+		(["zh", "en"] as const).map((language, index) => ({
+			unitId: pageUnit.id,
+			language,
+			position: fractionalPositionAt(index),
+			title: language === "zh" ? "魔法禁書目錄中文維基" : "A Certain Magical Index Wiki",
+			content: pageDocument,
+			contentStatus: "published" as const,
+			createdAt: pageUnit.createdAt,
+			updatedAt: pageUnit.updatedAt,
+		})),
+	);
+	await tx.insert(unitAccessBinding).values({
+		unitId: pageUnit.id,
+		subjectKind: "profile",
+		profileId: owner.id,
+		role: "owner",
+		scope: [],
+		grantedByProfileId: owner.id,
+		createdAt: pageUnit.createdAt,
+		updatedAt: pageUnit.updatedAt,
+	});
+	await replaceZonePageSlugAddress(tx, {
+		zoneId: zoneUnit.id,
+		pageUnitId: pageUnit.id,
+		slug: "home",
+	});
+	const pagesTree = await createContentStructure(tx, {
+		ownerUnitId: zoneUnit.id,
+		kind: "zone.pages",
+		actorProfileId: owner.id,
+	});
+	await insertContentStructureNode(tx, {
+		ownerUnitId: zoneUnit.id,
+		structureId: pagesTree.structure.id,
+		baseRevisionId: pagesTree.revisionId,
+		actorProfileId: owner.id,
+		contentUnitId: pageUnit.id,
+		parentId: null,
+		position: fractionalPositionAt(0),
+	});
+
 	const navigationDocument = {
 		_type: "navigation-document" as const,
 		_key: "a20000000001",
@@ -1268,26 +1327,13 @@ async function seedToaruWiki(
 							{
 								_key: `a2${String(index + 20).padStart(10, "0")}`,
 								labelUnitId: label.id,
-								target: { kind: "zone-page" as const, slug: "home" },
+								target: { kind: "unit" as const, unitId: pageUnit.id },
 							},
 						],
 					}
-				: { ...common, target: { kind: "zone-page" as const, slug: "home" } };
+				: { ...common, target: { kind: "unit" as const, unitId: pageUnit.id } };
 		}),
 	};
-	await tx.insert(zonePage).values({
-		zoneId: zoneUnit.id,
-		slug: "home",
-		titleUnitId: wikiPost.id,
-		document: createUnitReferencedBlockDocument(
-			[{ _type: "post-full-view", _key: "a40000000002", postId: wikiPost.id }],
-			"a40000000001",
-		),
-		position: fractionalPositionAt(0),
-		home: true,
-		createdAt,
-		updatedAt: createdAt,
-	});
 	const navigation = await createNavigationStructure(tx, {
 		ownerUnitId: zoneUnit.id,
 		kind: "zone.navigation",
@@ -1324,6 +1370,12 @@ async function seedToaruWiki(
 		actorProfileId: owner.id,
 		event: "create",
 		message: "Seed Toaru Wiki Post",
+	});
+	await recordUnitRevision(tx, {
+		unitId: pageUnit.id,
+		actorProfileId: owner.id,
+		event: "create",
+		message: "Seed Toaru Zone Page Unit",
 	});
 	await recordUnitRevision(tx, {
 		unitId: zoneUnit.id,

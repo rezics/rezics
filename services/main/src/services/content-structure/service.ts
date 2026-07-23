@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import type { DatabaseTransaction } from "../database";
 import {
@@ -7,7 +7,6 @@ import {
 	type ContentStructureKind,
 } from "../database/schema";
 import { fractionalPositionBetween } from "../ordering/position";
-import type { SearchConfiguration } from "@rezics/search";
 import {
 	ContentStructureNodeStateSchema,
 	ContentStructureSnapshotSchema,
@@ -46,6 +45,7 @@ const SingletonContentStructureKinds = new Set<ContentStructureKind>([
 	"book.contents",
 	"post.contents",
 	"realm.taxonomy",
+	"zone.pages",
 ]);
 
 function ensureDirectContentStructureEditing(kind: ContentStructureKind): void {
@@ -100,6 +100,7 @@ export async function listContentStructures(
 export async function createContentStructure(
 	tx: DatabaseTransaction,
 	input: MutationActor & {
+		readonly structureId?: string;
 		readonly ownerUnitId: string;
 		readonly kind: ContentStructureKind;
 		readonly documentKey?: string | null;
@@ -127,6 +128,7 @@ export async function createContentStructure(
 	const [created] = await tx
 		.insert(contentStructure)
 		.values({
+			id: input.structureId,
 			ownerUnitId: input.ownerUnitId,
 			kind: input.kind,
 			documentKey: input.documentKey ?? null,
@@ -187,7 +189,6 @@ export async function insertContentStructureNode(
 		readonly target?: ContentStructureTarget;
 		readonly position?: string;
 		readonly contentRating?: ContentStructureNodeState["contentRating"];
-		readonly searchConfiguration?: SearchConfiguration | null;
 	},
 ) {
 	return mutateContentStructureWithHistory(
@@ -205,10 +206,10 @@ export async function insertContentStructureNode(
 			const target = input.target ?? { kind: "content" };
 			await ensureContentStructureNodeAllowed(tx, {
 				kind: structure.kind,
+				structureId: structure.id,
 				ownerUnitId: structure.ownerUnitId,
 				contentUnitId: input.contentUnitId,
 				target,
-				searchConfiguration: input.searchConfiguration,
 			});
 			const parentId = input.parentId ?? null;
 			if (parentId !== null) {
@@ -252,7 +253,6 @@ export async function insertContentStructureNode(
 					...contentStructureTargetColumns(target),
 					position: input.position ?? fractionalPositionBetween(last?.position, null),
 					contentRating: input.contentRating ?? null,
-					searchConfiguration: input.searchConfiguration ?? null,
 				})
 				.returning();
 			if (!created) throw new Error("Content Structure node insertion returned no row");
@@ -293,7 +293,6 @@ export async function updateContentStructureNode(
 		readonly target?: ContentStructureTarget;
 		readonly position?: string;
 		readonly contentRating?: ContentStructureNodeState["contentRating"];
-		readonly searchConfiguration?: SearchConfiguration | null;
 	},
 ) {
 	return mutateContentStructureWithHistory(
@@ -327,13 +326,11 @@ export async function updateContentStructureNode(
 			const contentUnitId = input.contentUnitId ?? current.contentUnitId;
 			await ensureContentStructureNodeAllowed(tx, {
 				kind: structure.kind,
+				structureId: structure.id,
+				nodeId: current.id,
 				ownerUnitId: structure.ownerUnitId,
 				contentUnitId,
 				target,
-				searchConfiguration:
-					input.searchConfiguration === undefined
-						? current.searchConfiguration
-						: input.searchConfiguration,
 			});
 			const [updated] = await tx
 				.update(contentStructureNode)
@@ -344,7 +341,6 @@ export async function updateContentStructureNode(
 					...(input.target ? contentStructureTargetColumns(input.target) : {}),
 					position: input.position,
 					contentRating: input.contentRating,
-					searchConfiguration: input.searchConfiguration,
 				})
 				.where(eq(contentStructureNode.id, current.id))
 				.returning();
@@ -371,6 +367,128 @@ export async function updateContentStructureNode(
 					delta,
 					checkpoint: () =>
 						loadContentStructureSnapshot(tx, { structureId: structure.id }),
+				},
+			};
+		},
+	);
+}
+
+/**
+ * Re-roots a tree without exposing a two-root or cyclic intermediate revision.
+ *
+ * This operation is intentionally restricted to `zone.pages`: its root is the
+ * Zone home page, so promoting a descendant must also attach the former root
+ * below the promoted node as one atomic history change.
+ */
+export async function rerootZonePagesContentStructure(
+	tx: DatabaseTransaction,
+	input: ExistingStructureMutation & {
+		readonly nodeId: string;
+		readonly position?: string;
+	},
+) {
+	return mutateContentStructureWithHistory(
+		tx,
+		{
+			structureId: input.structureId,
+			baseRevisionId: input.baseRevisionId,
+			actorProfileId: input.actorProfileId,
+			message: input.message,
+			minor: input.minor,
+		},
+		async () => {
+			const snapshot = await loadContentStructureSnapshot(tx, {
+				structureId: input.structureId,
+				ownerUnitId: input.ownerUnitId,
+			});
+			if (snapshot.structure.kind !== "zone.pages")
+				throw new ContentStructureInvalid("Only zone.pages supports re-rooting");
+			const promoted = snapshot.nodes.find((node) => node.id === input.nodeId);
+			if (!promoted) throw new ContentStructureNotFound();
+			const formerRoot = snapshot.nodes.find((node) => node.parentId === null);
+			if (!formerRoot) throw new ContentStructureInvalid("Zone pages tree has no root page");
+			if (formerRoot.id === promoted.id) {
+				if (input.position === undefined) return { result: { node: promoted } };
+				const [updated] = await tx
+					.update(contentStructureNode)
+					.set({ position: input.position })
+					.where(eq(contentStructureNode.id, promoted.id))
+					.returning();
+				if (!updated) throw new Error("Zone pages root update returned no row");
+				const updatedStructure = await touchStructure(tx, snapshot.structure.id);
+				return {
+					result: { node: updated },
+					change: {
+						kind: "delta" as const,
+						delta: {
+							version: 1 as const,
+							structureId: snapshot.structure.id,
+							operations: [
+								{
+									kind: "node.update" as const,
+									before: promoted,
+									after: ContentStructureNodeStateSchema.parse(updated),
+								},
+								{
+									kind: "structure.update" as const,
+									before: snapshot.structure,
+									after: updatedStructure,
+								},
+							],
+						},
+						checkpoint: () =>
+							loadContentStructureSnapshot(tx, {
+								structureId: snapshot.structure.id,
+							}),
+					},
+				};
+			}
+
+			// The database invariant is deferred only inside this transaction. Both
+			// rows are changed before the single valid history delta is committed.
+			await tx.execute(sql`set constraints zone_pages_node_invariants deferred`);
+			const [updatedPromoted] = await tx
+				.update(contentStructureNode)
+				.set({ parentId: null, position: input.position })
+				.where(eq(contentStructureNode.id, promoted.id))
+				.returning();
+			const [updatedFormerRoot] = await tx
+				.update(contentStructureNode)
+				.set({ parentId: promoted.id })
+				.where(eq(contentStructureNode.id, formerRoot.id))
+				.returning();
+			if (!updatedPromoted || !updatedFormerRoot)
+				throw new Error("Zone pages re-root update returned no row");
+			const updatedStructure = await touchStructure(tx, snapshot.structure.id);
+			return {
+				result: { node: updatedPromoted },
+				change: {
+					kind: "delta" as const,
+					delta: {
+						version: 1 as const,
+						structureId: snapshot.structure.id,
+						operations: [
+							{
+								kind: "node.update" as const,
+								before: promoted,
+								after: ContentStructureNodeStateSchema.parse(updatedPromoted),
+							},
+							{
+								kind: "node.update" as const,
+								before: formerRoot,
+								after: ContentStructureNodeStateSchema.parse(updatedFormerRoot),
+							},
+							{
+								kind: "structure.update" as const,
+								before: snapshot.structure,
+								after: updatedStructure,
+							},
+						],
+					},
+					checkpoint: () =>
+						loadContentStructureSnapshot(tx, {
+							structureId: snapshot.structure.id,
+						}),
 				},
 			};
 		},

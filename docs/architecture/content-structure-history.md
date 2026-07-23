@@ -14,12 +14,11 @@ make one resource part of another resource's revision:
 - Unit restore and undo never restore Content Structures or Docks. A cross-resource workflow may
   correlate revisions, but it cannot reuse another aggregate's concurrency token.
 
-A stable UUID is required for durable references, but it does not by itself make an entity an
-aggregate root. Zone Pages keep stable UUIDv7 identities while participating in the Zone page-set
-invariants for the single home page, route namespace, ordering, and cross-page reference checks.
-They therefore remain Zone-owned page-set entities. If page editing later needs independent
-concurrency or restore, that lifecycle boundary should move to a Zone Page or Zone Page Set revision
-stream instead of adding a special Unit-history slot.
+A Zone Page is a `zone_page` Unit, not a separate aggregate. Its localized title and Block document
+use the ordinary Unit localization and Unit revision stream. Zone membership, hierarchy, ordering,
+and the single home/root invariant belong to the Zone's singleton `zone.pages` Content Structure and
+its independent revision head. A page mutation may update both aggregates in one database
+transaction, but each optimistic-concurrency token and history stream retains its own meaning.
 
 Content Structure and Dock still reference an owner Unit for authorization, discovery, and deletion
 policy. Their immutable history payloads share the content-addressed `revision_content` store; they
@@ -31,26 +30,27 @@ Behavior-selecting discriminants are named `kind`. Content Structure uses `kind`
 and Search exposes a result `category` plus its domain `kind`. Portable Text and Block `_type`
 remain unchanged because `_type` is their serialized wire contract, not a database discriminator.
 
-Content Structure, node, Dock, and Zone Page identities are UUIDv7. A Zone Page navigation target is
-stored by UUID and projected through the API with its current Zone ID and slug, so changing a slug
-does not invalidate the reference while the client can still navigate to the current route.
+Content Structure, node, Dock, and Unit identities are UUIDv7. Navigation references a Zone Page
+through the generic Unit target. The render projection adds its current Zone-scoped slug, so changing
+the human-facing address does not invalidate the reference.
 
 ## Content Structure kinds
 
-| Kind               | Owner | Content                       | Targets                           | Search labels | Progress        |
-| ------------------ | ----- | ----------------------------- | --------------------------------- | ------------- | --------------- |
-| `book.contents`    | Book  | chapter or chapter-group Post | content                           | no            | node completion |
-| `post.contents`    | Post  | readable Unit                 | content                           | yes           | none            |
-| `realm.taxonomy`   | Realm | Label, Tag, or wiki Post      | content                           | yes           | none            |
-| `realm.navigation` | Realm | readable Unit                 | Unit, HTTPS URL, group            | no            | none            |
-| `zone.navigation`  | Zone  | readable Unit                 | Unit, Zone Page, HTTPS URL, group | no            | none            |
+| Kind               | Owner | Content                       | Targets                | Progress        |
+| ------------------ | ----- | ----------------------------- | ---------------------- | --------------- |
+| `book.contents`    | Book  | chapter or chapter-group Post | content                | node completion |
+| `post.contents`    | Post  | readable Unit                 | content                | none            |
+| `realm.taxonomy`   | Realm | Label, Tag, or wiki Post      | content                | none            |
+| `realm.navigation` | Realm | readable Unit                 | Unit, HTTPS URL, group | none            |
+| `zone.navigation`  | Zone  | readable Unit                 | Unit, HTTPS URL, group | none            |
+| `zone.pages`       | Zone  | `zone_page` Unit              | content                | none            |
 
 Kinds are PostgreSQL `text` with a closed database check and a matching runtime discriminated
 union. Adding a kind requires a policy, runtime schema, migration, and tests.
 
-A Label is a localized display Unit. A searchable Label node may contain a trusted
-`SearchConfiguration`; ordinary content nodes and navigation nodes may not. Tags remain independent
-Units and relations. Putting a Tag in a taxonomy does not assign it to other Units.
+A Label is a localized display Unit. Content Structure nodes do not embed search configuration.
+Tags remain independent Units and relations; putting a Tag in a taxonomy does not assign it to
+other Units.
 
 ## Content Structure history
 
@@ -86,26 +86,24 @@ revalidates cross-resource Block references before publishing the historical doc
 PostgreSQL advisory locks are transaction scoped and released automatically at transaction end:
 [PostgreSQL advisory locks](https://www.postgresql.org/docs/current/explicit-locking.html#ADVISORY-LOCKS).
 
-## Search configuration
+## Search Feature
 
-`@rezics/search` is the engine-independent contract shared by Search Blocks, Feed Blocks, and
-searchable Content Structure Label nodes. It separates four concerns:
+`@rezics/search` defines the engine-independent Search Feature input: one versioned SearchDocument,
+server-established contexts, provenance-bearing injections, and untrusted interaction state. The
+server owns four v1 templates—global, Book, Media, and Software—and the field registry. A document
+may disable or arrange template capabilities and repeat Tag controls, but cannot introduce or widen
+fields, operators, sorts, facets, page sizes, or result windows.
 
-1. trusted scope, categories, invisible constraints, defaults, sorts, facets, and result limits;
-2. a complete UI-control allow-list with component, mode, operator, option source, option policy,
-   and optional localized Label Unit;
-3. untrusted execution state from the browser;
-4. a compiler that rejects fields, operators, modes, values, and sizes not permitted by the trusted
-   configuration.
+Only Zone management persists a custom SearchDocument in v1. Other surfaces use a system template
+plus allowed contexts and injections. Realm search is the global template with a fixed hidden Realm
+context; Tag links inject refinements into the same input boundary. Contexts, document constraints,
+injections, defaults, and user state remain distinct by provenance and are composed by the compiler,
+so browser state cannot replace a fixed context or injected predicate.
 
-Tag filters support `any-of`, `all-of`, and `none-of`. `constraints` are server authority and cannot
-be replaced by browser input. `defaults` are initial user-changeable values. `optionPolicy` only
-controls which choices the UI may submit; it is not a result predicate.
-
-The web Block renderer reads this schema directly. It renders the configured text input, selection,
-multi-selection, boolean, date range, value range, operators, static options, and returned facets.
-Search and Feed Blocks use the same execution endpoints and compiler; their presentation and
-pagination policy remain Block concerns.
+Normal and advanced modes and hidden-filter disclosure are renderer concerns over the same query
+engine. Controls retain stable `controlKey` identity, including repeated Tag controls, through UI
+state, compilation, facet results, and canonical input hashing. Search and Feed Blocks store only a
+stable template-or-Zone Search Feature source; Content Structure nodes never embed a query schema.
 
 ## Meilisearch plus PostgreSQL
 

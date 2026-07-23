@@ -63,6 +63,10 @@ const reviewedExemptions = [
 			"Machine diagnostic: raw snapshot failure detail for operators, never display copy.",
 	},
 	{
+		file: "src/services/database/schema/search.ts",
+		rationale: "Authored point-in-time edit summary, never interface copy.",
+	},
+	{
 		file: "src/services/database/schema/zone.ts",
 		rationale: "Structured contract: search boundary contains only categories and filters.",
 	},

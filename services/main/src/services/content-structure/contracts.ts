@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { assertSearchConfiguration, type SearchConfiguration } from "@rezics/search";
 
 import {
 	ContentRatingValues,
@@ -44,20 +43,11 @@ export function shouldCheckpointContentStructureRevision(input: {
 const UuidSchema = z.uuid();
 const DateSchema = z.coerce.date();
 const FractionalPositionSchema = z.string().refine(isFractionalPosition);
-const SearchConfigurationSchema = z.custom<SearchConfiguration>((value) => {
-	try {
-		assertSearchConfiguration(value);
-		return true;
-	} catch {
-		return false;
-	}
-});
 
 export const ContentStructureTargetSchema = z.discriminatedUnion("kind", [
 	z.object({ kind: z.literal("content") }),
 	z.object({ kind: z.literal("none") }),
 	z.object({ kind: z.literal("unit"), unitId: UuidSchema }),
-	z.object({ kind: z.literal("zone_page"), zonePageId: UuidSchema }),
 	z.object({ kind: z.literal("external"), url: z.url().startsWith("https://").max(2_000) }),
 ]);
 export type ContentStructureTarget = z.infer<typeof ContentStructureTargetSchema>;
@@ -99,9 +89,7 @@ export const ContentStructureNodeStateSchema = z
 			.nullable(),
 		targetKind: z.enum(ContentStructureTargetKindValues),
 		targetUnitId: UuidSchema.nullable(),
-		targetZonePageId: UuidSchema.nullable(),
 		targetUrl: z.string().nullable(),
-		searchConfiguration: SearchConfigurationSchema.nullable(),
 		position: FractionalPositionSchema,
 		contentRating: z.enum(ContentRatingValues).nullable(),
 		deletedAt: DateSchema.nullable(),
@@ -111,15 +99,12 @@ export const ContentStructureNodeStateSchema = z
 	.superRefine((node, context) => {
 		const expected =
 			node.targetKind === "unit"
-				? { unit: true, zonePage: false, url: false }
-				: node.targetKind === "zone_page"
-					? { unit: false, zonePage: true, url: false }
-					: node.targetKind === "external"
-						? { unit: false, zonePage: false, url: true }
-						: { unit: false, zonePage: false, url: false };
+				? { unit: true, url: false }
+				: node.targetKind === "external"
+					? { unit: false, url: true }
+					: { unit: false, url: false };
 		if (
 			(node.targetUnitId !== null) !== expected.unit ||
-			(node.targetZonePageId !== null) !== expected.zonePage ||
 			(node.targetUrl !== null) !== expected.url
 		)
 			context.addIssue({ code: "custom", message: "Invalid Content Structure target shape" });
@@ -250,7 +235,6 @@ export type ContentStructureDelta = z.infer<typeof ContentStructureDeltaSchema>;
 type KindPolicy = {
 	readonly ownerKinds: readonly UnitKind[];
 	readonly targets: readonly ContentStructureTargetKind[];
-	readonly searchScope: boolean;
 	readonly progress: "none" | "node_completion";
 	readonly acceptsContent: (kind: UnitKind, postKind: PostKind | null) => boolean;
 };
@@ -262,7 +246,6 @@ export const ContentStructureKindPolicies = {
 	"book.contents": {
 		ownerKinds: ["book"],
 		targets: ["content"],
-		searchScope: true,
 		progress: "node_completion",
 		acceptsContent: (kind, postKind) =>
 			kind === "post" && (postKind === "chapter" || postKind === "chapter_group"),
@@ -270,14 +253,12 @@ export const ContentStructureKindPolicies = {
 	"post.contents": {
 		ownerKinds: ["post"],
 		targets: ["content"],
-		searchScope: true,
 		progress: "none",
 		acceptsContent: anyContent,
 	},
 	"realm.taxonomy": {
 		ownerKinds: ["realm"],
 		targets: ["content"],
-		searchScope: true,
 		progress: "none",
 		/** TODO(wiki): project wiki Post bodies as long-form taxonomy descriptions. */
 		acceptsContent: (kind, postKind) =>
@@ -286,16 +267,20 @@ export const ContentStructureKindPolicies = {
 	"realm.navigation": {
 		ownerKinds: ["realm"],
 		targets: navigationTargets,
-		searchScope: false,
 		progress: "none",
 		acceptsContent: anyContent,
 	},
 	"zone.navigation": {
 		ownerKinds: ["zone"],
-		targets: [...navigationTargets, "zone_page"],
-		searchScope: false,
+		targets: navigationTargets,
 		progress: "none",
 		acceptsContent: anyContent,
+	},
+	"zone.pages": {
+		ownerKinds: ["zone"],
+		targets: ["content"],
+		progress: "none",
+		acceptsContent: (kind) => kind === "zone_page",
 	},
 } as const satisfies Record<ContentStructureKind, KindPolicy>;
 

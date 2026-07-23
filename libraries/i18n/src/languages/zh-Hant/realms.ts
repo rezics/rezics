@@ -43,6 +43,8 @@ export default {
 	signInToJoin: "登入後加入",
 	membershipPending: "加入申請待處理",
 	feed: "動態",
+	searchTitle: `搜尋此${realmTerms.label}`,
+	searchDescription: `只搜尋與此${realmTerms.label}相關的內容；${realmTerms.label}範圍固定套用，其他篩選條件仍可調整。`,
 	rules: "規則",
 	pins: "置頂內容",
 	pinnedContent: "置頂內容",

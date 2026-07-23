@@ -108,11 +108,25 @@ export const UpdateZoneBody = t.Object(
 );
 export const ZonePageBody = t.Object(
 	{
-		titleUnitId: Uuid,
-		document: UnitReferencedBlockInputDocument,
-		position: FractionalPosition,
+		pageId: t.Optional(Uuid),
+		localization: t.Object(
+			{
+				language: ContentLanguage,
+				title: t.String({ minLength: 1, maxLength: 500 }),
+				document: UnitReferencedBlockInputDocument,
+			},
+			{ additionalProperties: false },
+		),
+		position: t.Optional(FractionalPosition),
+		parentPageId: t.Optional(t.Nullable(Uuid)),
 		home: t.Boolean(),
+		baseStructureRevisionId: t.Optional(Uuid),
+		baseUnitRevisionId: t.Optional(Uuid),
 	},
+	{ additionalProperties: false },
+);
+export const ZonePageDeleteBody = t.Object(
+	{ baseStructureRevisionId: Uuid },
 	{ additionalProperties: false },
 );
 export const ZoneNavigationBody = t.Object(
@@ -192,6 +206,7 @@ export const ZoneResponse = t.Object({
 	themeDocument: ZoneThemeResponseDocument,
 	startsAt: t.Nullable(DateTime),
 	endsAt: t.Nullable(DateTime),
+	capabilities: t.Object({ canManage: t.Boolean() }),
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
@@ -199,10 +214,24 @@ export const ZonePageResponse = t.Object({
 	id: Uuid,
 	zoneId: Uuid,
 	slug: t.String(),
-	titleUnitId: Uuid,
+	structureId: Uuid,
+	nodeId: Uuid,
+	parentPageId: t.Nullable(Uuid),
 	document: UnitReferencedBlockResponseDocument,
 	position: FractionalPosition,
 	home: t.Boolean(),
+	language: ContentLanguage,
+	title: t.String(),
+	localizations: t.Array(
+		t.Object({
+			language: ContentLanguage,
+			title: t.String(),
+			document: UnitReferencedBlockResponseDocument,
+			contentStatus: t.UnionEnum(["draft", "published", "archived"]),
+		}),
+	),
+	latestUnitRevisionId: Uuid,
+	latestStructureRevisionId: Uuid,
 	createdAt: DateTime,
 	updatedAt: DateTime,
 });
@@ -220,6 +249,7 @@ export const ZoneNavigationListResponse = t.Object({ items: t.Array(ZoneNavigati
 export const ZoneRenderUnitResponse = t.Object({
 	id: Uuid,
 	kind: t.String(),
+	zonePageSlug: t.Nullable(t.String()),
 	language: t.Nullable(ContentLanguage),
 	title: t.Nullable(t.String()),
 	summary: t.Nullable(t.String()),

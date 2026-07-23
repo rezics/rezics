@@ -83,6 +83,7 @@ const UnitDetailsInput = t.Object(
 		isbn13: t.Optional(t.Nullable(t.String({ pattern: "^[0-9]{13}$" }))),
 		publicationDate: t.Optional(t.Nullable(t.String({ format: "date" }))),
 		pageCount: t.Optional(t.Nullable(t.Integer({ minimum: 1 }))),
+		wordCount: t.Optional(t.Nullable(t.Integer({ minimum: 0 }))),
 		format: t.Optional(t.Nullable(t.String())),
 		licensed: t.Optional(t.Boolean()),
 		versionLabel: t.Optional(t.Nullable(t.String())),

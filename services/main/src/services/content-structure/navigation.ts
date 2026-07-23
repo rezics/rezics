@@ -7,7 +7,7 @@ import {
 } from "@rezics/block";
 
 import type { DatabaseTransaction } from "../database";
-import { contentStructure, contentStructureNode, zonePage } from "../database/schema";
+import { contentStructure, contentStructureNode } from "../database/schema";
 import { fractionalPositionAt } from "../ordering/position";
 import {
 	diffContentStructureSnapshots,
@@ -35,9 +35,9 @@ function validateNavigationDocument(document: NavigationDocument): void {
 }
 
 async function resolveNavigationTarget(
-	tx: DatabaseTransaction,
-	ownerUnitId: string,
-	kind: NavigationKind,
+	_tx: DatabaseTransaction,
+	_ownerUnitId: string,
+	_kind: NavigationKind,
 	target: NavigationTarget,
 ): Promise<ContentStructureTarget> {
 	switch (target.kind) {
@@ -45,17 +45,6 @@ async function resolveNavigationTarget(
 			return { kind: "unit", unitId: target.unitId };
 		case "external":
 			return { kind: "external", url: target.url };
-		case "zone-page": {
-			if (kind !== "zone.navigation")
-				throw new ContentStructureInvalid("Realm navigation cannot target a Zone page");
-			const [page] = await tx
-				.select({ id: zonePage.id })
-				.from(zonePage)
-				.where(and(eq(zonePage.zoneId, ownerUnitId), eq(zonePage.slug, target.slug)))
-				.limit(1);
-			if (!page) throw new ContentStructureInvalid("Navigation Zone page does not exist");
-			return { kind: "zone_page", zonePageId: page.id };
-		}
 	}
 }
 
@@ -195,7 +184,6 @@ function nodeShapeEquals(
 		current.position === desired.position &&
 		current.targetKind === columns.targetKind &&
 		current.targetUnitId === columns.targetUnitId &&
-		current.targetZonePageId === columns.targetZonePageId &&
 		current.targetUrl === columns.targetUrl
 	);
 }
@@ -345,19 +333,6 @@ export async function presentNavigationStructure(
 	if (snapshot.structure.kind !== input.kind) throw new ContentStructureNotFound();
 	if (!snapshot.structure.documentKey)
 		throw new ContentStructureInvalid("Navigation structure does not match its API");
-	const zonePageIds = snapshot.nodes
-		.map((node) => node.targetZonePageId)
-		.filter((id): id is string => id !== null);
-	const zonePageSlugs = zonePageIds.length
-		? new Map(
-				(
-					await tx
-						.select({ id: zonePage.id, slug: zonePage.slug })
-						.from(zonePage)
-						.where(inArray(zonePage.id, zonePageIds))
-				).map((page) => [page.id, page.slug]),
-			)
-		: new Map<string, string>();
 	const children = new Map<string | null, ContentStructureNodeState[]>();
 	for (const node of snapshot.nodes) {
 		const siblings = children.get(node.parentId) ?? [];
@@ -372,13 +347,6 @@ export async function presentNavigationStructure(
 			case "external":
 				if (!node.targetUrl) throw new ContentStructureInvalid("Missing URL target");
 				return { kind: "external", url: node.targetUrl };
-			case "zone_page": {
-				const slug = node.targetZonePageId
-					? zonePageSlugs.get(node.targetZonePageId)
-					: undefined;
-				if (!slug) throw new ContentStructureInvalid("Missing Zone page target");
-				return { kind: "zone-page", slug };
-			}
 			case "content":
 				return { kind: "unit", unitId: node.contentUnitId };
 			case "none":

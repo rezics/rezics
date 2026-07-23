@@ -68,6 +68,7 @@ export default {
 			tag: "Tag",
 			series: "Series",
 			zone: zoneTerms.label,
+			zone_page: `${zoneTerms.label} page`,
 			collection: "Collection",
 			post: postTerms.label,
 			poll: "Poll",

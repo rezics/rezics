@@ -68,6 +68,7 @@ export default {
 			tag: "標籤",
 			series: "系列",
 			zone: zoneTerms.label,
+			zone_page: `${zoneTerms.label}頁面`,
 			collection: "收藏集",
 			post: postTerms.label,
 			poll: "投票",

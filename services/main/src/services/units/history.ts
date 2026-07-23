@@ -58,7 +58,6 @@ import {
 	unitTag,
 	unitVariant,
 	zone,
-	zonePage,
 } from "../database/schema";
 import {
 	canonicalRevisionJson as canonicalJson,
@@ -88,12 +87,16 @@ function createDocumentSchema<TSchemaValue extends TSchema>(schema: TSchemaValue
 }
 const PortableTextDocumentSchema = z.custom<PortableTextDocumentValue>(isPortableTextDocument);
 const PollContentBlockSchema = createDocumentSchema(PollContentBlock);
-const UnitLocalizationContentSchema = z.union([PortableTextDocumentSchema, PollContentBlockSchema]);
+const UnitReferencedBlockDocumentSchema = createDocumentSchema(UnitReferencedBlockDocument);
+const UnitLocalizationContentSchema = z.union([
+	PortableTextDocumentSchema,
+	PollContentBlockSchema,
+	UnitReferencedBlockDocumentSchema,
+]);
 const CollectionDefinitionDocumentSchema = createDocumentSchema(CollectionDefinitionDocument);
 const CollectionPresentationDocumentSchema = createDocumentSchema(CollectionPresentationDocument);
 const ZoneBoundaryDocumentSchema = createDocumentSchema(ZoneBoundaryDocument);
 const ZoneThemeDocumentSchema = createDocumentSchema(ZoneThemeDocument);
-const UnitReferencedBlockDocumentSchema = createDocumentSchema(UnitReferencedBlockDocument);
 const FractionalPositionSchema = z.string().refine(isFractionalPosition);
 const RuleSnapshotSchema = z.object({
 	requireOnJoin: z.boolean(),
@@ -109,7 +112,7 @@ const RuleSnapshotSchema = z.object({
 	),
 });
 const UnitSnapshotSchema = z.object({
-	version: z.literal(4),
+	version: z.literal(5),
 	kind: z.enum(UnitKindValues),
 	unit: SnapshotRowSchema,
 	localizations: z.array(SnapshotRowSchema),
@@ -127,7 +130,6 @@ const UnitSnapshotSchema = z.object({
 		collectionItems: z.array(SnapshotRowSchema),
 		pollOptions: z.array(SnapshotRowSchema),
 		realmPins: z.array(SnapshotRowSchema),
-		zonePages: z.array(SnapshotRowSchema),
 		realmUnit: z.array(SnapshotRowSchema),
 		realmRules: RuleSnapshotSchema.nullable(),
 	}),
@@ -242,11 +244,6 @@ const pollOptionRowSchema = schemaFactory
 const realmPinRowSchema = schemaFactory.createSelectSchema(realmPin, {
 	position: FractionalPositionSchema,
 });
-const zonePageRowSchema = schemaFactory.createSelectSchema(zonePage, {
-	document: UnitReferencedBlockDocumentSchema,
-	position: FractionalPositionSchema,
-});
-
 function parseSnapshotState(
 	schema: { parse(value: unknown): SnapshotRow },
 	row: SnapshotRow | undefined,
@@ -328,6 +325,7 @@ async function snapshotExtension(
 		case "label":
 		case "realm_rule":
 		case "slug_namespace":
+		case "zone_page":
 			return null;
 	}
 }
@@ -452,19 +450,11 @@ async function snapshotUnit(tx: DatabaseTransaction, unitId: string) {
 						.where(eq(realmPin.realmId, unitId))
 						.orderBy(realmPin.kind, realmPin.position, realmPin.unitId)
 				: empty,
-		zonePages:
-			record.kind === "zone"
-				? await tx
-						.select()
-						.from(zonePage)
-						.where(eq(zonePage.zoneId, unitId))
-						.orderBy(zonePage.position, zonePage.id)
-				: empty,
 		realmUnit: empty,
 		realmRules: record.kind === "realm" ? await snapshotRealmRules(tx, unitId) : null,
 	};
 	return {
-		version: 4,
+		version: 5,
 		kind: record.kind,
 		unit: unitStateSchema.parse(record),
 		localizations: localizations.map((localization) =>
@@ -482,7 +472,13 @@ async function restoreExtension(
 	kind: UnitSnapshot["kind"],
 	value: SnapshotRow | null,
 ) {
-	if (kind === "tag" || kind === "label" || kind === "realm_rule" || kind === "slug_namespace")
+	if (
+		kind === "tag" ||
+		kind === "label" ||
+		kind === "realm_rule" ||
+		kind === "slug_namespace" ||
+		kind === "zone_page"
+	)
 		return;
 	if (!value) throw new Error(`Missing ${kind} extension in Unit snapshot`);
 	switch (kind) {
@@ -725,13 +721,6 @@ export async function restoreUnitSnapshot(
 				.values(snapshot.owned.realmPins.map((row) => realmPinRowSchema.parse(row)));
 		await restoreRealmRules(tx, unitId, snapshot.owned.realmRules, authorization.profileId);
 	}
-	if (snapshot.kind === "zone") {
-		await tx.delete(zonePage).where(eq(zonePage.zoneId, unitId));
-		if (snapshot.owned.zonePages.length)
-			await tx
-				.insert(zonePage)
-				.values(snapshot.owned.zonePages.map((row) => zonePageRowSchema.parse(row)));
-	}
 	await ensureUnitVariantLifecycle(tx, unitId);
 }
 
@@ -751,7 +740,7 @@ const SlotModels = {
 	main: "rezics.unit.main.v1",
 	localizations: "rezics.unit.localizations.v1",
 	relations: "rezics.unit.relations.v2",
-	structure: "rezics.unit.structure.v4",
+	structure: "rezics.unit.structure.v5",
 	rules: "rezics.unit.rules.v1",
 } as const satisfies Record<(typeof UnitRevisionSlotRoleValues)[number], string>;
 
@@ -785,13 +774,12 @@ function snapshotToDocuments(snapshot: UnitSnapshot): UnitRevisionDocuments {
 		structure: {
 			model: SlotModels.structure,
 			payload: {
-				version: 4,
+				version: 5,
 				seriesReleases: snapshot.owned.seriesReleases,
 				softwareRequirements: snapshot.owned.softwareRequirements,
 				collectionItems: snapshot.owned.collectionItems,
 				pollOptions: snapshot.owned.pollOptions,
 				realmPins: snapshot.owned.realmPins,
-				zonePages: snapshot.owned.zonePages,
 			},
 		},
 	};
@@ -816,7 +804,7 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 	const structure = asRecord(documents.structure?.payload, "structure");
 	const rules = documents.rules ? asRecord(documents.rules.payload, "rules") : null;
 	return UnitSnapshotSchema.parse({
-		version: 4,
+		version: 5,
 		kind: main.kind,
 		unit: main.unit,
 		localizations: localizations.items,
@@ -834,7 +822,6 @@ function documentsToSnapshot(documents: UnitRevisionDocuments): UnitSnapshot {
 			collectionItems: structure.collectionItems,
 			pollOptions: structure.pollOptions,
 			realmPins: structure.realmPins,
-			zonePages: structure.zonePages,
 			realmUnit: [],
 			realmRules: rules
 				? {

@@ -500,6 +500,7 @@ import type {
 	PutApiZonesByZoneIdPagesBySlugStatus400,
 	PutApiZonesByZoneIdPagesBySlugStatus403,
 	PutApiZonesByZoneIdPagesBySlugStatus404,
+	PutApiZonesByZoneIdPagesBySlugStatus409,
 	PutApiZonesByZoneIdPagesBySlugStatus422,
 	PutApiZonesByZoneIdPagesBySlugStatus429,
 	PutApiZonesByZoneIdPagesBySlugStatus500,
@@ -1584,19 +1585,47 @@ import type {
 	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus422,
 	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus429,
 	DeleteApiRealmsByRealmIdNavigationByNavigationIdStatus500,
-	GetApiSearchConfigurationStatus200,
-	GetApiSearchConfigurationStatus500,
-	PostApiSearchExecuteOptions,
-	PostApiSearchExecuteStatus200,
-	PostApiSearchExecuteStatus422,
-	PostApiSearchExecuteStatus500,
-	PostApiSearchExecuteStatus503,
-	PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteOptions,
-	PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus200,
-	PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus404,
-	PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus422,
-	PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus500,
-	PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus503,
+	GetApiSearchFeaturesByTemplateOptions,
+	GetApiSearchFeaturesByTemplateStatus200,
+	GetApiSearchFeaturesByTemplateStatus422,
+	GetApiSearchFeaturesByTemplateStatus500,
+	PostApiSearchFeaturesByTemplateExecuteOptions,
+	PostApiSearchFeaturesByTemplateExecuteStatus200,
+	PostApiSearchFeaturesByTemplateExecuteStatus422,
+	PostApiSearchFeaturesByTemplateExecuteStatus500,
+	PostApiSearchFeaturesByTemplateExecuteStatus503,
+	GetApiSearchZonesByZoneIdFeatureOptions,
+	GetApiSearchZonesByZoneIdFeatureStatus200,
+	GetApiSearchZonesByZoneIdFeatureStatus403,
+	GetApiSearchZonesByZoneIdFeatureStatus404,
+	GetApiSearchZonesByZoneIdFeatureStatus422,
+	GetApiSearchZonesByZoneIdFeatureStatus500,
+	PutApiSearchZonesByZoneIdFeatureOptions,
+	PutApiSearchZonesByZoneIdFeatureStatus200,
+	PutApiSearchZonesByZoneIdFeatureStatus403,
+	PutApiSearchZonesByZoneIdFeatureStatus404,
+	PutApiSearchZonesByZoneIdFeatureStatus409,
+	PutApiSearchZonesByZoneIdFeatureStatus422,
+	PutApiSearchZonesByZoneIdFeatureStatus500,
+	PostApiSearchZonesByZoneIdFeatureExecuteOptions,
+	PostApiSearchZonesByZoneIdFeatureExecuteStatus200,
+	PostApiSearchZonesByZoneIdFeatureExecuteStatus404,
+	PostApiSearchZonesByZoneIdFeatureExecuteStatus422,
+	PostApiSearchZonesByZoneIdFeatureExecuteStatus500,
+	PostApiSearchZonesByZoneIdFeatureExecuteStatus503,
+	GetApiSearchZonesByZoneIdFeatureRevisionsOptions,
+	GetApiSearchZonesByZoneIdFeatureRevisionsStatus200,
+	GetApiSearchZonesByZoneIdFeatureRevisionsStatus403,
+	GetApiSearchZonesByZoneIdFeatureRevisionsStatus404,
+	GetApiSearchZonesByZoneIdFeatureRevisionsStatus422,
+	GetApiSearchZonesByZoneIdFeatureRevisionsStatus500,
+	PostApiSearchZonesByZoneIdFeatureRestoreOptions,
+	PostApiSearchZonesByZoneIdFeatureRestoreStatus200,
+	PostApiSearchZonesByZoneIdFeatureRestoreStatus403,
+	PostApiSearchZonesByZoneIdFeatureRestoreStatus404,
+	PostApiSearchZonesByZoneIdFeatureRestoreStatus409,
+	PostApiSearchZonesByZoneIdFeatureRestoreStatus422,
+	PostApiSearchZonesByZoneIdFeatureRestoreStatus500,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteOptions,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus200,
 	PostApiSearchZonesByZoneIdDockBlocksByBlockKeyExecuteStatus404,
@@ -1909,9 +1938,13 @@ import {
 	getApiRealmsByRealmIdNavigationByNavigationId,
 	putApiRealmsByRealmIdNavigationByNavigationId,
 	deleteApiRealmsByRealmIdNavigationByNavigationId,
-	getApiSearchConfiguration,
-	postApiSearchExecute,
-	postApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecute,
+	getApiSearchFeaturesByTemplate,
+	postApiSearchFeaturesByTemplateExecute,
+	getApiSearchZonesByZoneIdFeature,
+	putApiSearchZonesByZoneIdFeature,
+	postApiSearchZonesByZoneIdFeatureExecute,
+	getApiSearchZonesByZoneIdFeatureRevisions,
+	postApiSearchZonesByZoneIdFeatureRestore,
 	postApiSearchZonesByZoneIdDockBlocksByBlockKeyExecute,
 	postApiSearchZonesByZoneIdPagesBySlugBlocksByBlockKeyExecute,
 	postApiSearch,
@@ -9756,6 +9789,7 @@ export function putApiZonesByZoneIdPagesBySlugMutationOptions<TContext = unknown
 			| PutApiZonesByZoneIdPagesBySlugStatus400
 			| PutApiZonesByZoneIdPagesBySlugStatus403
 			| PutApiZonesByZoneIdPagesBySlugStatus404
+			| PutApiZonesByZoneIdPagesBySlugStatus409
 			| PutApiZonesByZoneIdPagesBySlugStatus422
 			| PutApiZonesByZoneIdPagesBySlugStatus429
 			| PutApiZonesByZoneIdPagesBySlugStatus500
@@ -9788,6 +9822,7 @@ export function usePutApiZonesByZoneIdPagesBySlug<TContext>(
 				| PutApiZonesByZoneIdPagesBySlugStatus400
 				| PutApiZonesByZoneIdPagesBySlugStatus403
 				| PutApiZonesByZoneIdPagesBySlugStatus404
+				| PutApiZonesByZoneIdPagesBySlugStatus409
 				| PutApiZonesByZoneIdPagesBySlugStatus422
 				| PutApiZonesByZoneIdPagesBySlugStatus429
 				| PutApiZonesByZoneIdPagesBySlugStatus500
@@ -9808,6 +9843,7 @@ export function usePutApiZonesByZoneIdPagesBySlug<TContext>(
 			| PutApiZonesByZoneIdPagesBySlugStatus400
 			| PutApiZonesByZoneIdPagesBySlugStatus403
 			| PutApiZonesByZoneIdPagesBySlugStatus404
+			| PutApiZonesByZoneIdPagesBySlugStatus409
 			| PutApiZonesByZoneIdPagesBySlugStatus422
 			| PutApiZonesByZoneIdPagesBySlugStatus429
 			| PutApiZonesByZoneIdPagesBySlugStatus500
@@ -9822,6 +9858,7 @@ export function usePutApiZonesByZoneIdPagesBySlug<TContext>(
 			| PutApiZonesByZoneIdPagesBySlugStatus400
 			| PutApiZonesByZoneIdPagesBySlugStatus403
 			| PutApiZonesByZoneIdPagesBySlugStatus404
+			| PutApiZonesByZoneIdPagesBySlugStatus409
 			| PutApiZonesByZoneIdPagesBySlugStatus422
 			| PutApiZonesByZoneIdPagesBySlugStatus429
 			| PutApiZonesByZoneIdPagesBySlugStatus500
@@ -9841,6 +9878,7 @@ export function usePutApiZonesByZoneIdPagesBySlug<TContext>(
 			| PutApiZonesByZoneIdPagesBySlugStatus400
 			| PutApiZonesByZoneIdPagesBySlugStatus403
 			| PutApiZonesByZoneIdPagesBySlugStatus404
+			| PutApiZonesByZoneIdPagesBySlugStatus409
 			| PutApiZonesByZoneIdPagesBySlugStatus422
 			| PutApiZonesByZoneIdPagesBySlugStatus429
 			| PutApiZonesByZoneIdPagesBySlugStatus500
@@ -9871,10 +9909,11 @@ export function deleteApiZonesByZoneIdPagesBySlugMutationOptions<TContext = unkn
 		TContext
 	>({
 		mutationKey,
-		mutationFn: async ({ path }) => {
+		mutationFn: async ({ path, body }) => {
 			const { data } = await deleteApiZonesByZoneIdPagesBySlug({
 				...config,
 				path,
+				body,
 				throwOnError: true,
 			});
 			return data;
@@ -26962,25 +27001,33 @@ export function useDeleteApiRealmsByRealmIdNavigationByNavigationId<TContext>(
 	>;
 }
 
-export const getApiSearchConfigurationQueryKey = () =>
-	[{ url: "/api/search/configuration" }] as const;
+export const getApiSearchFeaturesByTemplateQueryKey = ({
+	path,
+}: Omit<GetApiSearchFeaturesByTemplateOptions, "headers">) =>
+	[{ url: "/api/search/features/:template", params: path }] as const;
 
-type GetApiSearchConfigurationQueryKey = ReturnType<typeof getApiSearchConfigurationQueryKey>;
+type GetApiSearchFeaturesByTemplateQueryKey = ReturnType<
+	typeof getApiSearchFeaturesByTemplateQueryKey
+>;
 
-export function getApiSearchConfigurationQueryOptions(
+export function getApiSearchFeaturesByTemplateQueryOptions(
+	{ path }: GetApiSearchFeaturesByTemplateOptions,
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const queryKey = getApiSearchConfigurationQueryKey();
+	const queryKey = getApiSearchFeaturesByTemplateQueryKey({ path });
 	return queryOptions<
-		GetApiSearchConfigurationStatus200,
-		ResponseErrorConfig<GetApiSearchConfigurationStatus500>,
-		GetApiSearchConfigurationStatus200,
+		GetApiSearchFeaturesByTemplateStatus200,
+		ResponseErrorConfig<
+			GetApiSearchFeaturesByTemplateStatus422 | GetApiSearchFeaturesByTemplateStatus500
+		>,
+		GetApiSearchFeaturesByTemplateStatus200,
 		typeof queryKey
 	>({
 		queryKey,
 		queryFn: async ({ signal }) => {
-			const { data } = await getApiSearchConfiguration({
+			const { data } = await getApiSearchFeaturesByTemplate({
 				...config,
+				path,
 				signal: config.signal ?? signal,
 				throwOnError: true,
 			});
@@ -26990,19 +27037,29 @@ export function getApiSearchConfigurationQueryOptions(
 }
 
 /**
- * @summary Get global Search feature configuration
- * {@link /api/search/configuration}
+ * @summary Get a system Search Feature template
+ * {@link /api/search/features/:template}
  */
-export function useGetApiSearchConfiguration<
-	TData = GetApiSearchConfigurationStatus200,
-	TQueryData = GetApiSearchConfigurationStatus200,
-	TQueryKey extends QueryKey = GetApiSearchConfigurationQueryKey,
+export function useGetApiSearchFeaturesByTemplate<
+	TData = GetApiSearchFeaturesByTemplateStatus200,
+	TQueryData = GetApiSearchFeaturesByTemplateStatus200,
+	TQueryKey extends QueryKey = GetApiSearchFeaturesByTemplateQueryKey,
 >(
+	{
+		path,
+	}: {
+		path:
+			| GetApiSearchFeaturesByTemplateOptions["path"]
+			| (() => GetApiSearchFeaturesByTemplateOptions["path"]);
+	},
 	options: {
 		query?: Partial<
 			QueryObserverOptions<
-				GetApiSearchConfigurationStatus200,
-				ResponseErrorConfig<GetApiSearchConfigurationStatus500>,
+				GetApiSearchFeaturesByTemplateStatus200,
+				ResponseErrorConfig<
+					| GetApiSearchFeaturesByTemplateStatus422
+					| GetApiSearchFeaturesByTemplateStatus500
+				>,
 				TData,
 				TQueryData,
 				TQueryKey
@@ -27013,165 +27070,73 @@ export function useGetApiSearchConfiguration<
 ) {
 	const { query: queryConfig = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...resolvedOptions } = queryConfig;
-	const queryKey = resolvedOptions?.queryKey ?? getApiSearchConfigurationQueryKey();
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiSearchFeaturesByTemplateQueryKey(resolvedParams);
 
 	const queryResult = useQuery(
 		{
-			...getApiSearchConfigurationQueryOptions(config),
+			...getApiSearchFeaturesByTemplateQueryOptions(resolvedParams, config),
 			...resolvedOptions,
 			queryKey,
 		} as unknown as QueryObserverOptions,
 		queryClient,
-	) as UseQueryResult<TData, ResponseErrorConfig<GetApiSearchConfigurationStatus500>> & {
-		queryKey: TQueryKey;
-	};
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			GetApiSearchFeaturesByTemplateStatus422 | GetApiSearchFeaturesByTemplateStatus500
+		>
+	> & { queryKey: TQueryKey };
 
 	queryResult.queryKey = queryKey as TQueryKey;
 
 	return queryResult;
 }
 
-export const postApiSearchExecuteMutationKey = () => [{ url: "/api/search/execute" }] as const;
+export const postApiSearchFeaturesByTemplateExecuteMutationKey = () =>
+	[{ url: "/api/search/features/:template/execute" }] as const;
 
-export function postApiSearchExecuteMutationOptions<TContext = unknown>(
+export function postApiSearchFeaturesByTemplateExecuteMutationOptions<TContext = unknown>(
 	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
 ) {
-	const mutationKey = postApiSearchExecuteMutationKey();
+	const mutationKey = postApiSearchFeaturesByTemplateExecuteMutationKey();
 	return mutationOptions<
-		PostApiSearchExecuteStatus200,
+		PostApiSearchFeaturesByTemplateExecuteStatus200,
 		ResponseErrorConfig<
-			| PostApiSearchExecuteStatus422
-			| PostApiSearchExecuteStatus500
-			| PostApiSearchExecuteStatus503
+			| PostApiSearchFeaturesByTemplateExecuteStatus422
+			| PostApiSearchFeaturesByTemplateExecuteStatus500
+			| PostApiSearchFeaturesByTemplateExecuteStatus503
 		>,
-		PostApiSearchExecuteOptions,
-		TContext
-	>({
-		mutationKey,
-		mutationFn: async ({ body }) => {
-			const { data } = await postApiSearchExecute({ ...config, body, throwOnError: true });
-			return data;
-		},
-	});
-}
-
-/**
- * @summary Execute configured global Search
- * {@link /api/search/execute}
- */
-export function usePostApiSearchExecute<TContext>(
-	options: {
-		mutation?: UseMutationOptions<
-			PostApiSearchExecuteStatus200,
-			ResponseErrorConfig<
-				| PostApiSearchExecuteStatus422
-				| PostApiSearchExecuteStatus500
-				| PostApiSearchExecuteStatus503
-			>,
-			PostApiSearchExecuteOptions,
-			TContext
-		> & { client?: QueryClient };
-		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
-	} = {},
-) {
-	const { mutation = {}, client: config = {} } = options ?? {};
-	const { client: queryClient, ...mutationOptions } = mutation;
-	const mutationKey = mutationOptions.mutationKey ?? postApiSearchExecuteMutationKey();
-
-	const baseOptions = postApiSearchExecuteMutationOptions(config) as UseMutationOptions<
-		PostApiSearchExecuteStatus200,
-		ResponseErrorConfig<
-			| PostApiSearchExecuteStatus422
-			| PostApiSearchExecuteStatus500
-			| PostApiSearchExecuteStatus503
-		>,
-		PostApiSearchExecuteOptions,
-		TContext
-	>;
-
-	return useMutation<
-		PostApiSearchExecuteStatus200,
-		ResponseErrorConfig<
-			| PostApiSearchExecuteStatus422
-			| PostApiSearchExecuteStatus500
-			| PostApiSearchExecuteStatus503
-		>,
-		PostApiSearchExecuteOptions,
-		TContext
-	>(
-		{
-			...baseOptions,
-			mutationKey,
-			...mutationOptions,
-		},
-		queryClient,
-	) as UseMutationResult<
-		PostApiSearchExecuteStatus200,
-		ResponseErrorConfig<
-			| PostApiSearchExecuteStatus422
-			| PostApiSearchExecuteStatus500
-			| PostApiSearchExecuteStatus503
-		>,
-		PostApiSearchExecuteOptions,
-		TContext
-	>;
-}
-
-export const postApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteMutationKey =
-	() =>
-		[
-			{
-				url: "/api/search/units/:unitId/content-structures/:structureId/nodes/:nodeId/execute",
-			},
-		] as const;
-
-export function postApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteMutationOptions<
-	TContext = unknown,
->(config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {}) {
-	const mutationKey =
-		postApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteMutationKey();
-	return mutationOptions<
-		PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus200,
-		ResponseErrorConfig<
-			| PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus404
-			| PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus422
-			| PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus500
-			| PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus503
-		>,
-		PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteOptions,
+		PostApiSearchFeaturesByTemplateExecuteOptions,
 		TContext
 	>({
 		mutationKey,
 		mutationFn: async ({ path, body }) => {
-			const { data } =
-				await postApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecute({
-					...config,
-					path,
-					body,
-					throwOnError: true,
-				});
+			const { data } = await postApiSearchFeaturesByTemplateExecute({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
 			return data;
 		},
 	});
 }
 
 /**
- * @summary Execute a Content Structure node Search configuration
- * {@link /api/search/units/:unitId/content-structures/:structureId/nodes/:nodeId/execute}
+ * @summary Execute a system Search Feature template
+ * {@link /api/search/features/:template/execute}
  */
-export function usePostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecute<
-	TContext,
->(
+export function usePostApiSearchFeaturesByTemplateExecute<TContext>(
 	options: {
 		mutation?: UseMutationOptions<
-			PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus200,
+			PostApiSearchFeaturesByTemplateExecuteStatus200,
 			ResponseErrorConfig<
-				| PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus404
-				| PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus422
-				| PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus500
-				| PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus503
+				| PostApiSearchFeaturesByTemplateExecuteStatus422
+				| PostApiSearchFeaturesByTemplateExecuteStatus500
+				| PostApiSearchFeaturesByTemplateExecuteStatus503
 			>,
-			PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteOptions,
+			PostApiSearchFeaturesByTemplateExecuteOptions,
 			TContext
 		> & { client?: QueryClient };
 		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
@@ -27180,33 +27145,29 @@ export function usePostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodes
 	const { mutation = {}, client: config = {} } = options ?? {};
 	const { client: queryClient, ...mutationOptions } = mutation;
 	const mutationKey =
-		mutationOptions.mutationKey ??
-		postApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteMutationKey();
+		mutationOptions.mutationKey ?? postApiSearchFeaturesByTemplateExecuteMutationKey();
 
-	const baseOptions =
-		postApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteMutationOptions(
-			config,
-		) as UseMutationOptions<
-			PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus200,
-			ResponseErrorConfig<
-				| PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus404
-				| PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus422
-				| PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus500
-				| PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus503
-			>,
-			PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteOptions,
-			TContext
-		>;
+	const baseOptions = postApiSearchFeaturesByTemplateExecuteMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiSearchFeaturesByTemplateExecuteStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchFeaturesByTemplateExecuteStatus422
+			| PostApiSearchFeaturesByTemplateExecuteStatus500
+			| PostApiSearchFeaturesByTemplateExecuteStatus503
+		>,
+		PostApiSearchFeaturesByTemplateExecuteOptions,
+		TContext
+	>;
 
 	return useMutation<
-		PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus200,
+		PostApiSearchFeaturesByTemplateExecuteStatus200,
 		ResponseErrorConfig<
-			| PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus404
-			| PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus422
-			| PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus500
-			| PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus503
+			| PostApiSearchFeaturesByTemplateExecuteStatus422
+			| PostApiSearchFeaturesByTemplateExecuteStatus500
+			| PostApiSearchFeaturesByTemplateExecuteStatus503
 		>,
-		PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteOptions,
+		PostApiSearchFeaturesByTemplateExecuteOptions,
 		TContext
 	>(
 		{
@@ -27216,14 +27177,524 @@ export function usePostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodes
 		},
 		queryClient,
 	) as UseMutationResult<
-		PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus200,
+		PostApiSearchFeaturesByTemplateExecuteStatus200,
 		ResponseErrorConfig<
-			| PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus404
-			| PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus422
-			| PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus500
-			| PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteStatus503
+			| PostApiSearchFeaturesByTemplateExecuteStatus422
+			| PostApiSearchFeaturesByTemplateExecuteStatus500
+			| PostApiSearchFeaturesByTemplateExecuteStatus503
 		>,
-		PostApiSearchUnitsByUnitIdContentStructuresByStructureIdNodesByNodeIdExecuteOptions,
+		PostApiSearchFeaturesByTemplateExecuteOptions,
+		TContext
+	>;
+}
+
+export const getApiSearchZonesByZoneIdFeatureQueryKey = ({
+	path,
+}: Omit<GetApiSearchZonesByZoneIdFeatureOptions, "headers">) =>
+	[{ url: "/api/search/zones/:zoneId/feature", params: path }] as const;
+
+type GetApiSearchZonesByZoneIdFeatureQueryKey = ReturnType<
+	typeof getApiSearchZonesByZoneIdFeatureQueryKey
+>;
+
+export function getApiSearchZonesByZoneIdFeatureQueryOptions(
+	{ path }: GetApiSearchZonesByZoneIdFeatureOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiSearchZonesByZoneIdFeatureQueryKey({ path });
+	return queryOptions<
+		GetApiSearchZonesByZoneIdFeatureStatus200,
+		ResponseErrorConfig<
+			| GetApiSearchZonesByZoneIdFeatureStatus403
+			| GetApiSearchZonesByZoneIdFeatureStatus404
+			| GetApiSearchZonesByZoneIdFeatureStatus422
+			| GetApiSearchZonesByZoneIdFeatureStatus500
+		>,
+		GetApiSearchZonesByZoneIdFeatureStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiSearchZonesByZoneIdFeature({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Get a Zone Search Feature
+ * {@link /api/search/zones/:zoneId/feature}
+ */
+export function useGetApiSearchZonesByZoneIdFeature<
+	TData = GetApiSearchZonesByZoneIdFeatureStatus200,
+	TQueryData = GetApiSearchZonesByZoneIdFeatureStatus200,
+	TQueryKey extends QueryKey = GetApiSearchZonesByZoneIdFeatureQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiSearchZonesByZoneIdFeatureOptions["path"]
+			| (() => GetApiSearchZonesByZoneIdFeatureOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiSearchZonesByZoneIdFeatureStatus200,
+				ResponseErrorConfig<
+					| GetApiSearchZonesByZoneIdFeatureStatus403
+					| GetApiSearchZonesByZoneIdFeatureStatus404
+					| GetApiSearchZonesByZoneIdFeatureStatus422
+					| GetApiSearchZonesByZoneIdFeatureStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ?? getApiSearchZonesByZoneIdFeatureQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiSearchZonesByZoneIdFeatureQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiSearchZonesByZoneIdFeatureStatus403
+			| GetApiSearchZonesByZoneIdFeatureStatus404
+			| GetApiSearchZonesByZoneIdFeatureStatus422
+			| GetApiSearchZonesByZoneIdFeatureStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const putApiSearchZonesByZoneIdFeatureMutationKey = () =>
+	[{ url: "/api/search/zones/:zoneId/feature" }] as const;
+
+export function putApiSearchZonesByZoneIdFeatureMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = putApiSearchZonesByZoneIdFeatureMutationKey();
+	return mutationOptions<
+		PutApiSearchZonesByZoneIdFeatureStatus200,
+		ResponseErrorConfig<
+			| PutApiSearchZonesByZoneIdFeatureStatus403
+			| PutApiSearchZonesByZoneIdFeatureStatus404
+			| PutApiSearchZonesByZoneIdFeatureStatus409
+			| PutApiSearchZonesByZoneIdFeatureStatus422
+			| PutApiSearchZonesByZoneIdFeatureStatus500
+		>,
+		PutApiSearchZonesByZoneIdFeatureOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await putApiSearchZonesByZoneIdFeature({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Configure a Zone Search Feature
+ * {@link /api/search/zones/:zoneId/feature}
+ */
+export function usePutApiSearchZonesByZoneIdFeature<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PutApiSearchZonesByZoneIdFeatureStatus200,
+			ResponseErrorConfig<
+				| PutApiSearchZonesByZoneIdFeatureStatus403
+				| PutApiSearchZonesByZoneIdFeatureStatus404
+				| PutApiSearchZonesByZoneIdFeatureStatus409
+				| PutApiSearchZonesByZoneIdFeatureStatus422
+				| PutApiSearchZonesByZoneIdFeatureStatus500
+			>,
+			PutApiSearchZonesByZoneIdFeatureOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? putApiSearchZonesByZoneIdFeatureMutationKey();
+
+	const baseOptions = putApiSearchZonesByZoneIdFeatureMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PutApiSearchZonesByZoneIdFeatureStatus200,
+		ResponseErrorConfig<
+			| PutApiSearchZonesByZoneIdFeatureStatus403
+			| PutApiSearchZonesByZoneIdFeatureStatus404
+			| PutApiSearchZonesByZoneIdFeatureStatus409
+			| PutApiSearchZonesByZoneIdFeatureStatus422
+			| PutApiSearchZonesByZoneIdFeatureStatus500
+		>,
+		PutApiSearchZonesByZoneIdFeatureOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PutApiSearchZonesByZoneIdFeatureStatus200,
+		ResponseErrorConfig<
+			| PutApiSearchZonesByZoneIdFeatureStatus403
+			| PutApiSearchZonesByZoneIdFeatureStatus404
+			| PutApiSearchZonesByZoneIdFeatureStatus409
+			| PutApiSearchZonesByZoneIdFeatureStatus422
+			| PutApiSearchZonesByZoneIdFeatureStatus500
+		>,
+		PutApiSearchZonesByZoneIdFeatureOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PutApiSearchZonesByZoneIdFeatureStatus200,
+		ResponseErrorConfig<
+			| PutApiSearchZonesByZoneIdFeatureStatus403
+			| PutApiSearchZonesByZoneIdFeatureStatus404
+			| PutApiSearchZonesByZoneIdFeatureStatus409
+			| PutApiSearchZonesByZoneIdFeatureStatus422
+			| PutApiSearchZonesByZoneIdFeatureStatus500
+		>,
+		PutApiSearchZonesByZoneIdFeatureOptions,
+		TContext
+	>;
+}
+
+export const postApiSearchZonesByZoneIdFeatureExecuteMutationKey = () =>
+	[{ url: "/api/search/zones/:zoneId/feature/execute" }] as const;
+
+export function postApiSearchZonesByZoneIdFeatureExecuteMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiSearchZonesByZoneIdFeatureExecuteMutationKey();
+	return mutationOptions<
+		PostApiSearchZonesByZoneIdFeatureExecuteStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus503
+		>,
+		PostApiSearchZonesByZoneIdFeatureExecuteOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiSearchZonesByZoneIdFeatureExecute({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Execute a Zone Search Feature
+ * {@link /api/search/zones/:zoneId/feature/execute}
+ */
+export function usePostApiSearchZonesByZoneIdFeatureExecute<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiSearchZonesByZoneIdFeatureExecuteStatus200,
+			ResponseErrorConfig<
+				| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
+				| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
+				| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
+				| PostApiSearchZonesByZoneIdFeatureExecuteStatus503
+			>,
+			PostApiSearchZonesByZoneIdFeatureExecuteOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiSearchZonesByZoneIdFeatureExecuteMutationKey();
+
+	const baseOptions = postApiSearchZonesByZoneIdFeatureExecuteMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiSearchZonesByZoneIdFeatureExecuteStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus503
+		>,
+		PostApiSearchZonesByZoneIdFeatureExecuteOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiSearchZonesByZoneIdFeatureExecuteStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus503
+		>,
+		PostApiSearchZonesByZoneIdFeatureExecuteOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiSearchZonesByZoneIdFeatureExecuteStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus404
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus422
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus500
+			| PostApiSearchZonesByZoneIdFeatureExecuteStatus503
+		>,
+		PostApiSearchZonesByZoneIdFeatureExecuteOptions,
+		TContext
+	>;
+}
+
+export const getApiSearchZonesByZoneIdFeatureRevisionsQueryKey = ({
+	path,
+}: Omit<GetApiSearchZonesByZoneIdFeatureRevisionsOptions, "headers">) =>
+	[{ url: "/api/search/zones/:zoneId/feature/revisions", params: path }] as const;
+
+type GetApiSearchZonesByZoneIdFeatureRevisionsQueryKey = ReturnType<
+	typeof getApiSearchZonesByZoneIdFeatureRevisionsQueryKey
+>;
+
+export function getApiSearchZonesByZoneIdFeatureRevisionsQueryOptions(
+	{ path }: GetApiSearchZonesByZoneIdFeatureRevisionsOptions,
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const queryKey = getApiSearchZonesByZoneIdFeatureRevisionsQueryKey({ path });
+	return queryOptions<
+		GetApiSearchZonesByZoneIdFeatureRevisionsStatus200,
+		ResponseErrorConfig<
+			| GetApiSearchZonesByZoneIdFeatureRevisionsStatus403
+			| GetApiSearchZonesByZoneIdFeatureRevisionsStatus404
+			| GetApiSearchZonesByZoneIdFeatureRevisionsStatus422
+			| GetApiSearchZonesByZoneIdFeatureRevisionsStatus500
+		>,
+		GetApiSearchZonesByZoneIdFeatureRevisionsStatus200,
+		typeof queryKey
+	>({
+		queryKey,
+		queryFn: async ({ signal }) => {
+			const { data } = await getApiSearchZonesByZoneIdFeatureRevisions({
+				...config,
+				path,
+				signal: config.signal ?? signal,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary List Zone Search Feature revisions
+ * {@link /api/search/zones/:zoneId/feature/revisions}
+ */
+export function useGetApiSearchZonesByZoneIdFeatureRevisions<
+	TData = GetApiSearchZonesByZoneIdFeatureRevisionsStatus200,
+	TQueryData = GetApiSearchZonesByZoneIdFeatureRevisionsStatus200,
+	TQueryKey extends QueryKey = GetApiSearchZonesByZoneIdFeatureRevisionsQueryKey,
+>(
+	{
+		path,
+	}: {
+		path:
+			| GetApiSearchZonesByZoneIdFeatureRevisionsOptions["path"]
+			| (() => GetApiSearchZonesByZoneIdFeatureRevisionsOptions["path"]);
+	},
+	options: {
+		query?: Partial<
+			QueryObserverOptions<
+				GetApiSearchZonesByZoneIdFeatureRevisionsStatus200,
+				ResponseErrorConfig<
+					| GetApiSearchZonesByZoneIdFeatureRevisionsStatus403
+					| GetApiSearchZonesByZoneIdFeatureRevisionsStatus404
+					| GetApiSearchZonesByZoneIdFeatureRevisionsStatus422
+					| GetApiSearchZonesByZoneIdFeatureRevisionsStatus500
+				>,
+				TData,
+				TQueryData,
+				TQueryKey
+			>
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { query: queryConfig = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...resolvedOptions } = queryConfig;
+	const resolvedParams = { path: typeof path === "function" ? path() : path };
+	const queryKey =
+		resolvedOptions?.queryKey ??
+		getApiSearchZonesByZoneIdFeatureRevisionsQueryKey(resolvedParams);
+
+	const queryResult = useQuery(
+		{
+			...getApiSearchZonesByZoneIdFeatureRevisionsQueryOptions(resolvedParams, config),
+			...resolvedOptions,
+			queryKey,
+		} as unknown as QueryObserverOptions,
+		queryClient,
+	) as UseQueryResult<
+		TData,
+		ResponseErrorConfig<
+			| GetApiSearchZonesByZoneIdFeatureRevisionsStatus403
+			| GetApiSearchZonesByZoneIdFeatureRevisionsStatus404
+			| GetApiSearchZonesByZoneIdFeatureRevisionsStatus422
+			| GetApiSearchZonesByZoneIdFeatureRevisionsStatus500
+		>
+	> & { queryKey: TQueryKey };
+
+	queryResult.queryKey = queryKey as TQueryKey;
+
+	return queryResult;
+}
+
+export const postApiSearchZonesByZoneIdFeatureRestoreMutationKey = () =>
+	[{ url: "/api/search/zones/:zoneId/feature/restore" }] as const;
+
+export function postApiSearchZonesByZoneIdFeatureRestoreMutationOptions<TContext = unknown>(
+	config: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">> = {},
+) {
+	const mutationKey = postApiSearchZonesByZoneIdFeatureRestoreMutationKey();
+	return mutationOptions<
+		PostApiSearchZonesByZoneIdFeatureRestoreStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus403
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus404
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus409
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus422
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus500
+		>,
+		PostApiSearchZonesByZoneIdFeatureRestoreOptions,
+		TContext
+	>({
+		mutationKey,
+		mutationFn: async ({ path, body }) => {
+			const { data } = await postApiSearchZonesByZoneIdFeatureRestore({
+				...config,
+				path,
+				body,
+				throwOnError: true,
+			});
+			return data;
+		},
+	});
+}
+
+/**
+ * @summary Restore a Zone Search Feature revision
+ * {@link /api/search/zones/:zoneId/feature/restore}
+ */
+export function usePostApiSearchZonesByZoneIdFeatureRestore<TContext>(
+	options: {
+		mutation?: UseMutationOptions<
+			PostApiSearchZonesByZoneIdFeatureRestoreStatus200,
+			ResponseErrorConfig<
+				| PostApiSearchZonesByZoneIdFeatureRestoreStatus403
+				| PostApiSearchZonesByZoneIdFeatureRestoreStatus404
+				| PostApiSearchZonesByZoneIdFeatureRestoreStatus409
+				| PostApiSearchZonesByZoneIdFeatureRestoreStatus422
+				| PostApiSearchZonesByZoneIdFeatureRestoreStatus500
+			>,
+			PostApiSearchZonesByZoneIdFeatureRestoreOptions,
+			TContext
+		> & { client?: QueryClient };
+		client?: Partial<Omit<RequestConfig, "path" | "query" | "body" | "headers" | "url">>;
+	} = {},
+) {
+	const { mutation = {}, client: config = {} } = options ?? {};
+	const { client: queryClient, ...mutationOptions } = mutation;
+	const mutationKey =
+		mutationOptions.mutationKey ?? postApiSearchZonesByZoneIdFeatureRestoreMutationKey();
+
+	const baseOptions = postApiSearchZonesByZoneIdFeatureRestoreMutationOptions(
+		config,
+	) as UseMutationOptions<
+		PostApiSearchZonesByZoneIdFeatureRestoreStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus403
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus404
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus409
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus422
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus500
+		>,
+		PostApiSearchZonesByZoneIdFeatureRestoreOptions,
+		TContext
+	>;
+
+	return useMutation<
+		PostApiSearchZonesByZoneIdFeatureRestoreStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus403
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus404
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus409
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus422
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus500
+		>,
+		PostApiSearchZonesByZoneIdFeatureRestoreOptions,
+		TContext
+	>(
+		{
+			...baseOptions,
+			mutationKey,
+			...mutationOptions,
+		},
+		queryClient,
+	) as UseMutationResult<
+		PostApiSearchZonesByZoneIdFeatureRestoreStatus200,
+		ResponseErrorConfig<
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus403
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus404
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus409
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus422
+			| PostApiSearchZonesByZoneIdFeatureRestoreStatus500
+		>,
+		PostApiSearchZonesByZoneIdFeatureRestoreOptions,
 		TContext
 	>;
 }

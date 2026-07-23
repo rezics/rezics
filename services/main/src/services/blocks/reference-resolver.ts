@@ -3,14 +3,7 @@ import type { BlockReferenceResolver } from "@rezics/block";
 
 import { getUnitReadCondition } from "../authorization/unit/query";
 import type { DatabaseTransaction } from "../database";
-import {
-	imageAsset,
-	post,
-	contentStructure,
-	unit,
-	type UnitKind,
-	zonePage,
-} from "../database/schema";
+import { imageAsset, post, contentStructure, unit, type UnitKind } from "../database/schema";
 
 export interface UnitBlockReferenceHost {
 	readonly unitId: string;
@@ -22,7 +15,6 @@ export function createUnitBlockReferenceResolver(
 	input: {
 		readonly host: UnitBlockReferenceHost;
 		readonly profileId: string;
-		readonly additionalZonePageSlugs?: readonly string[];
 	},
 ): BlockReferenceResolver {
 	return {
@@ -92,20 +84,7 @@ export function createUnitBlockReferenceResolver(
 					);
 				return new Set(rows.map((row) => row.id));
 			}
-			if (input.host.kind !== "zone") return new Set<string>();
-			const rows = await tx
-				.select({ slug: zonePage.slug })
-				.from(zonePage)
-				.where(
-					and(
-						eq(zonePage.zoneId, input.host.unitId),
-						inArray(zonePage.slug, [...identifiers]),
-					),
-				);
-			return new Set([
-				...rows.map((row) => row.slug),
-				...(input.additionalZonePageSlugs ?? []),
-			]);
+			return new Set<string>();
 		},
 	};
 }
